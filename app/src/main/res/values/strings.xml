@@ -72,12 +72,12 @@
 
     <string name="primary_destination_feed_label">Feed</string>
     <string name="primary_destination_reads_label">Reads</string>
-    <string name="primary_destination_explore_label">Explore</string>
     <string name="primary_destination_wallet_label">Wallet</string>
-    <string name="primary_destination_messages_label">Messages</string>
     <string name="primary_destination_notifications_label">Notifications</string>
+    <string name="primary_destination_explore_label">Explore</string>
 
     <string name="drawer_destination_profile">Profile</string>
+    <string name="drawer_destination_messages">Messages</string>
     <string name="drawer_destination_bookmarks">Bookmarks</string>
     <string name="drawer_destination_settings">Settings</string>
     <string name="drawer_destination_sign_out">Sign Out</string>

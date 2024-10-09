@@ -13,17 +13,20 @@ import kotlinx.coroutines.launch
 import net.primal.android.theme.active.ActiveThemeStore
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.subscriptions.SubscriptionsManager
 
 @HiltViewModel
 class PrimalDrawerViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val activeThemeStore: ActiveThemeStore,
+    private val subscriptionsManager: SubscriptionsManager,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
         PrimalDrawerContract.UiState(
             menuItems = listOf(
                 DrawerScreenDestination.Profile,
+                DrawerScreenDestination.Messages,
                 DrawerScreenDestination.Bookmarks(userId = activeAccountStore.activeUserId()),
                 DrawerScreenDestination.Settings,
                 DrawerScreenDestination.SignOut,
@@ -43,6 +46,7 @@ class PrimalDrawerViewModel @Inject constructor(
     init {
         subscribeToEvents()
         observeActiveAccount()
+        subscribeToBadgesUpdates()
     }
 
     private fun subscribeToEvents() =
@@ -59,6 +63,15 @@ class PrimalDrawerViewModel @Inject constructor(
             activeAccountStore.activeUserAccount.collect {
                 setState {
                     copy(activeUserAccount = it)
+                }
+            }
+        }
+
+    private fun subscribeToBadgesUpdates() =
+        viewModelScope.launch {
+            subscriptionsManager.badges.collect {
+                setState {
+                    copy(badges = it)
                 }
             }
         }

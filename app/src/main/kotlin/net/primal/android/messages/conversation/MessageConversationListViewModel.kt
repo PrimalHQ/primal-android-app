@@ -32,7 +32,7 @@ import timber.log.Timber
 
 @HiltViewModel
 class MessageConversationListViewModel @Inject constructor(
-    private val activeAccountStore: ActiveAccountStore,
+    activeAccountStore: ActiveAccountStore,
     private val subscriptionsManager: SubscriptionsManager,
     private val messageRepository: MessageRepository,
 ) : ViewModel() {
@@ -55,8 +55,6 @@ class MessageConversationListViewModel @Inject constructor(
 
     init {
         observeEvents()
-        subscribeToActiveAccount()
-        subscribeToBadgesUpdates()
         subscribeToTotalUnreadCountChanges()
         fetchConversations()
     }
@@ -68,24 +66,6 @@ class MessageConversationListViewModel @Inject constructor(
                     is UiEvent.ChangeRelation -> changeRelation(relation = it.relation)
                     UiEvent.MarkAllConversationsAsRead -> markAllConversationAsRead()
                     UiEvent.ConversationsSeen -> fetchConversations()
-                }
-            }
-        }
-
-    private fun subscribeToActiveAccount() =
-        viewModelScope.launch {
-            activeAccountStore.activeUserAccount.collect {
-                setState {
-                    copy(activeAccountAvatarCdnImage = it.avatarCdnImage)
-                }
-            }
-        }
-
-    private fun subscribeToBadgesUpdates() =
-        viewModelScope.launch {
-            subscriptionsManager.badges.collect {
-                setState {
-                    copy(badges = it)
                 }
             }
         }

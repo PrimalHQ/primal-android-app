@@ -146,24 +146,23 @@ fun NavController.navigateToWallet() =
         navOptions = topLevelNavOptions,
     )
 
-private fun NavController.navigateToMessages() =
-    navigate(
-        route = "messages",
-        navOptions = topLevelNavOptions,
-    )
-
-private fun NavController.navigateToChat(profileId: String) =
-    navigate(
-        route = "messages/$profileId",
-    )
-
-private fun NavController.navigateToNewMessage() = navigate(route = "messages/new")
-
 private fun NavController.navigateToNotifications() =
     navigate(
         route = "notifications",
         navOptions = topLevelNavOptions,
     )
+
+fun NavController.navigateToExplore() =
+    navigate(
+        route = "explore",
+        navOptions = topLevelNavOptions,
+    )
+
+private fun NavController.navigateToMessages() = navigate(route = "messages")
+
+private fun NavController.navigateToChat(profileId: String) = navigate(route = "messages/$profileId")
+
+private fun NavController.navigateToNewMessage() = navigate(route = "messages/new")
 
 fun NavController.navigateToProfile(profileId: String? = null) =
     when {
@@ -205,8 +204,6 @@ fun NavController.navigateToMediaGallery(
         "?$MEDIA_URL=$mediaUrl" +
         "&$MEDIA_POSITION_MS=$mediaPositionMs",
 )
-
-fun NavController.navigateToExplore() = navigate(route = "explore")
 
 fun NavController.navigateToExploreFeed(
     feedSpec: String,
@@ -258,14 +255,15 @@ fun PrimalAppNavigation() {
             PrimalTopLevelDestination.Home -> navController.popBackStack()
             PrimalTopLevelDestination.Reads -> navController.navigateToReads()
             PrimalTopLevelDestination.Wallet -> navController.navigateToWallet()
-            PrimalTopLevelDestination.Messages -> navController.navigateToMessages()
             PrimalTopLevelDestination.Notifications -> navController.navigateToNotifications()
+            PrimalTopLevelDestination.Explore -> navController.navigateToExplore()
         }
     }
 
     val drawerDestinationHandler: (DrawerScreenDestination) -> Unit = {
         when (it) {
             DrawerScreenDestination.Profile -> navController.navigateToProfile()
+            DrawerScreenDestination.Messages -> navController.navigateToMessages()
             is DrawerScreenDestination.Bookmarks -> navController.navigateToBookmarks()
             DrawerScreenDestination.Settings -> navController.navigateToSettings()
             DrawerScreenDestination.SignOut -> navController.navigateToLogout()
@@ -335,6 +333,8 @@ fun PrimalAppNavigation() {
         explore(
             route = "explore",
             navController = navController,
+            onTopLevelDestinationChanged = topLevelDestinationHandler,
+            onDrawerScreenClick = drawerDestinationHandler,
         )
 
         bookmarks(
@@ -370,8 +370,6 @@ fun PrimalAppNavigation() {
         messages(
             route = "messages",
             navController = navController,
-            onTopLevelDestinationChanged = topLevelDestinationHandler,
-            onDrawerScreenClick = drawerDestinationHandler,
         )
 
         chat(
@@ -651,7 +649,7 @@ private fun NavGraphBuilder.home(
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
         noteCallbacks = noteCallbacksHandler(navController),
         onGoToWallet = { navController.navigateToWallet() },
-        onSearchClick = { navController.navigateToExplore() },
+        onSearchClick = { navController.navigateToSearch() },
         onNewPostClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent?.asNoteEditorArgs()) },
     )
 }
@@ -691,7 +689,7 @@ private fun NavGraphBuilder.reads(
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
-        onSearchClick = { navController.navigateToExplore() },
+        onSearchClick = { navController.navigateToSearch() },
         onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr) },
     )
 }
@@ -717,31 +715,53 @@ private fun NavGraphBuilder.noteEditor(
     )
 }
 
-private fun NavGraphBuilder.explore(route: String, navController: NavController) =
-    composable(
-        route = route,
-        enterTransition = { primalSlideInHorizontallyFromEnd },
-        exitTransition = { primalScaleOut },
-        popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontallyToEnd },
-    ) {
-        val viewModel = hiltViewModel<ExploreHomeViewModel>(it)
-        ApplyEdgeToEdge()
-        LockToOrientationPortrait()
-        ExploreHomeScreen(
-            viewModel = viewModel,
-            onHashtagClick = { hashtag ->
-                navController.navigateToExploreFeed(
-                    feedSpec = buildAdvancedSearchNotesFeedSpec(query = hashtag),
-                )
-            },
-            onNoteClick = { noteId -> navController.navigateToThread(noteId) },
-            onSearchClick = { navController.navigateToSearch() },
-            onTuneClick = { navController.navigateToAdvancedSearch() },
-            onClose = { navController.navigateUp() },
-            onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
-        )
-    }
+private fun NavGraphBuilder.explore(
+    route: String,
+    navController: NavController,
+    onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
+    onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
+) = composable(
+    route = route,
+    enterTransition = { null },
+    exitTransition = {
+        when {
+            targetState.destination.route.isMainScreenRoute() -> null
+            else -> primalScaleOut
+        }
+    },
+    popEnterTransition = {
+        when {
+            initialState.destination.route.isMainScreenRoute() -> null
+            else -> primalScaleIn
+        }
+    },
+    popExitTransition = {
+        when {
+            targetState.destination.route.isMainScreenRoute() -> null
+            else -> primalScaleOut
+        }
+    },
+) {
+    val viewModel = hiltViewModel<ExploreHomeViewModel>(it)
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
+    ExploreHomeScreen(
+        viewModel = viewModel,
+        onTopLevelDestinationChanged = onTopLevelDestinationChanged,
+        onDrawerScreenClick = onDrawerScreenClick,
+        onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
+        onHashtagClick = { hashtag ->
+            navController.navigateToExploreFeed(
+                feedSpec = buildAdvancedSearchNotesFeedSpec(query = hashtag),
+            )
+        },
+        onNoteClick = { noteId -> navController.navigateToThread(noteId) },
+        onSearchClick = { navController.navigateToSearch() },
+        onTuneClick = { navController.navigateToAdvancedSearch() },
+        onClose = { navController.navigateUp() },
+        onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
+    )
+}
 
 private fun NavGraphBuilder.exploreFeed(
     route: String,
@@ -812,47 +832,25 @@ private fun NavGraphBuilder.advancedSearch(route: String, navController: NavCont
         )
     }
 
-private fun NavGraphBuilder.messages(
-    route: String,
-    navController: NavController,
-    onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
-    onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
-) = composable(
-    route = route,
-    enterTransition = { null },
-    exitTransition = {
-        when {
-            targetState.destination.route.isMainScreenRoute() -> null
-            else -> primalScaleOut
-        }
-    },
-    popEnterTransition = {
-        when {
-            initialState.destination.route.isMainScreenRoute() -> null
-            else -> primalScaleIn
-        }
-    },
-    popExitTransition = {
-        when {
-            targetState.destination.route.isMainScreenRoute() -> null
-            else -> primalScaleOut
-        }
-    },
-) { navBackEntry ->
-    val viewModel = hiltViewModel<MessageConversationListViewModel>(navBackEntry)
-    ApplyEdgeToEdge()
-    LockToOrientationPortrait()
-    MessageListScreen(
-        viewModel = viewModel,
-        onSearchClick = { navController.navigateToExplore() },
-        onTopLevelDestinationChanged = onTopLevelDestinationChanged,
-        onDrawerScreenClick = onDrawerScreenClick,
-        onConversationClick = { profileId -> navController.navigateToChat(profileId) },
-        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
-        onNewMessageClick = { navController.navigateToNewMessage() },
-        onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
-    )
-}
+private fun NavGraphBuilder.messages(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) { navBackEntry ->
+        val viewModel = hiltViewModel<MessageConversationListViewModel>(navBackEntry)
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+        MessageListScreen(
+            viewModel = viewModel,
+            onConversationClick = { profileId -> navController.navigateToChat(profileId) },
+            onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+            onNewMessageClick = { navController.navigateToNewMessage() },
+            onClose = { navController.navigateUp() },
+        )
+    }
 
 private fun NavGraphBuilder.bookmarks(route: String, navController: NavController) =
     composable(
@@ -947,7 +945,7 @@ private fun NavGraphBuilder.notifications(
     LockToOrientationPortrait()
     NotificationsScreen(
         viewModel = viewModel,
-        onSearchClick = { navController.navigateToExplore() },
+        onSearchClick = { navController.navigateToSearch() },
         onGoToWallet = { navController.navigateToWallet() },
         noteCallbacks = noteCallbacksHandler(navController),
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,

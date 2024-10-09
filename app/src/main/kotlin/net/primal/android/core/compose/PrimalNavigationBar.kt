@@ -40,12 +40,11 @@ import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.foundation.ClickDebounce
 import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.Explore
 import net.primal.android.core.compose.icons.primaliconpack.Home
 import net.primal.android.core.compose.icons.primaliconpack.HomeFilled
 import net.primal.android.core.compose.icons.primaliconpack.LongRead
 import net.primal.android.core.compose.icons.primaliconpack.LongReadFilled
-import net.primal.android.core.compose.icons.primaliconpack.Messages
-import net.primal.android.core.compose.icons.primaliconpack.MessagesFilled
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBolt
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
 import net.primal.android.core.compose.icons.primaliconpack.Notifications
@@ -82,7 +81,6 @@ fun PrimalNavigationBar(
         containerColor = AppTheme.colorScheme.surface,
     ) {
         val badgesMap = mapOf(
-            Pair(PrimalTopLevelDestination.Messages, badges.unreadMessagesCount),
             Pair(PrimalTopLevelDestination.Notifications, badges.unreadNotificationsCount),
         )
         PrimalTopLevelDestination.entries.forEach {
@@ -112,7 +110,6 @@ fun PrimalNavigationBarLightningBolt(
 ) {
     val clickDebounce by remember(onTopLevelDestinationChanged) { mutableStateOf(ClickDebounce()) }
     val badgesMap = mapOf(
-        Pair(PrimalTopLevelDestination.Messages, badges.unreadMessagesCount),
         Pair(PrimalTopLevelDestination.Notifications, badges.unreadNotificationsCount),
     )
 
@@ -171,7 +168,7 @@ fun PrimalNavigationBarLightningBolt(
                         )
 
                         NavItemDestination(
-                            destination = PrimalTopLevelDestination.Messages,
+                            destination = PrimalTopLevelDestination.Explore,
                             activeDestination = activeDestination,
                             onTopLevelDestinationChanged = onTopLevelDestinationChanged,
                             onActiveDestinationClick = onActiveDestinationClick,
@@ -310,7 +307,7 @@ enum class PrimalTopLevelDestination {
     Reads,
     Wallet,
     Notifications,
-    Messages,
+    Explore,
 }
 
 private fun PrimalTopLevelDestination.imageVector(): ImageVector {
@@ -318,8 +315,8 @@ private fun PrimalTopLevelDestination.imageVector(): ImageVector {
         PrimalTopLevelDestination.Home -> PrimalIcons.Home
         PrimalTopLevelDestination.Reads -> PrimalIcons.LongRead
         PrimalTopLevelDestination.Wallet -> PrimalIcons.NavWalletBolt
-        PrimalTopLevelDestination.Messages -> PrimalIcons.Messages
         PrimalTopLevelDestination.Notifications -> PrimalIcons.Notifications
+        PrimalTopLevelDestination.Explore -> PrimalIcons.Explore
     }
 }
 
@@ -328,8 +325,8 @@ private fun PrimalTopLevelDestination.imageVectorSelected(): ImageVector {
         PrimalTopLevelDestination.Home -> PrimalIcons.HomeFilled
         PrimalTopLevelDestination.Reads -> PrimalIcons.LongReadFilled
         PrimalTopLevelDestination.Wallet -> PrimalIcons.NavWalletBoltFilled
-        PrimalTopLevelDestination.Messages -> PrimalIcons.MessagesFilled
         PrimalTopLevelDestination.Notifications -> PrimalIcons.NotificationsFilled
+        PrimalTopLevelDestination.Explore -> PrimalIcons.Explore
     }
 }
 
@@ -339,8 +336,8 @@ private fun PrimalTopLevelDestination.label(): String {
         PrimalTopLevelDestination.Home -> stringResource(id = R.string.primary_destination_feed_label)
         PrimalTopLevelDestination.Reads -> stringResource(id = R.string.primary_destination_reads_label)
         PrimalTopLevelDestination.Wallet -> stringResource(id = R.string.primary_destination_wallet_label)
-        PrimalTopLevelDestination.Messages -> stringResource(id = R.string.primary_destination_messages_label)
         PrimalTopLevelDestination.Notifications -> stringResource(id = R.string.primary_destination_notifications_label)
+        PrimalTopLevelDestination.Explore -> stringResource(id = R.string.primary_destination_explore_label)
     }
 }
 
