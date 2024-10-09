@@ -1,5 +1,6 @@
 package net.primal.android.drawer
 
+import net.primal.android.user.domain.Badges
 import net.primal.android.user.domain.UserAccount
 
 interface PrimalDrawerContract {
@@ -8,6 +9,7 @@ interface PrimalDrawerContract {
         val menuItems: List<DrawerScreenDestination>,
         val loading: Boolean = false,
         val activeUserAccount: UserAccount? = null,
+        val badges: Badges = Badges(),
     )
 
     sealed class UiEvent {

@@ -31,7 +31,7 @@ fun String?.isMainScreenRoute(): Boolean {
         "reads",
         "walletDashboard",
         "notifications",
-        "messages",
+        "explore",
         -> true
 
         else -> false

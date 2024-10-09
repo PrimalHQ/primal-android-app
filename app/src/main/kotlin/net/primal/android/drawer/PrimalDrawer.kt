@@ -9,11 +9,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,6 +53,7 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.android.user.domain.Badges
 import net.primal.android.user.domain.UserAccount
 
 @Composable
@@ -109,6 +115,7 @@ fun PrimalDrawer(
                     .weight(1.0f)
                     .padding(vertical = 32.dp),
                 menuItems = state.menuItems,
+                badges = state.badges,
                 onDrawerDestinationClick = onDrawerDestinationClick,
             )
 
@@ -234,6 +241,7 @@ private fun DrawerHeader(userAccount: UserAccount?, onQrCodeClick: () -> Unit) {
 private fun DrawerMenu(
     modifier: Modifier,
     menuItems: List<DrawerScreenDestination>,
+    badges: Badges,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
 ) {
     LazyColumn(
@@ -243,20 +251,33 @@ private fun DrawerMenu(
         items(
             items = menuItems,
             key = { it.toString() },
-        ) {
+        ) { item ->
             ListItem(
                 modifier = Modifier.clickable {
-                    onDrawerDestinationClick(it)
+                    onDrawerDestinationClick(item)
                 },
                 headlineContent = {
-                    Text(
-                        text = it.label().uppercase(),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 8.dp),
-                        style = AppTheme.typography.titleLarge,
-                        color = AppTheme.colorScheme.onSurfaceVariant,
-                    )
+                    BadgedBox(
+                        badge = {
+                            if (item is DrawerScreenDestination.Messages && badges.unreadMessagesCount > 0) {
+                                Badge(
+                                    modifier = Modifier
+                                        .size(size = 10.dp)
+                                        .offset(x = 8.dp),
+                                    containerColor = AppTheme.colorScheme.primary,
+                                )
+                            }
+                        },
+                    ) {
+                        Text(
+                            text = item.label().uppercase(),
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .padding(horizontal = 8.dp, vertical = 8.dp),
+                            style = AppTheme.typography.titleLarge,
+                            color = AppTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 },
             )
         }
@@ -283,6 +304,7 @@ private fun DrawerFooter(onThemeSwitch: () -> Unit) {
 
 sealed class DrawerScreenDestination {
     data object Profile : DrawerScreenDestination()
+    data object Messages : DrawerScreenDestination()
     data class Bookmarks(val userId: String) : DrawerScreenDestination()
     data object Settings : DrawerScreenDestination()
     data object SignOut : DrawerScreenDestination()
@@ -292,6 +314,7 @@ sealed class DrawerScreenDestination {
 private fun DrawerScreenDestination.label(): String {
     return when (this) {
         DrawerScreenDestination.Profile -> stringResource(R.string.drawer_destination_profile)
+        DrawerScreenDestination.Messages -> stringResource(R.string.drawer_destination_messages)
         is DrawerScreenDestination.Bookmarks -> stringResource(R.string.drawer_destination_bookmarks)
         DrawerScreenDestination.Settings -> stringResource(R.string.drawer_destination_settings)
         DrawerScreenDestination.SignOut -> stringResource(R.string.drawer_destination_sign_out)
@@ -306,6 +329,7 @@ fun PrimalDrawerPreview() {
             state = PrimalDrawerContract.UiState(
                 menuItems = listOf(
                     DrawerScreenDestination.Profile,
+                    DrawerScreenDestination.Messages,
                     DrawerScreenDestination.Bookmarks(userId = "none"),
                     DrawerScreenDestination.Settings,
                     DrawerScreenDestination.SignOut,
