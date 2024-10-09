@@ -83,6 +83,7 @@ fun PrimalTopAppBar(
                 } else if (navigationIcon != null) {
                     AppBarIcon(
                         icon = navigationIcon,
+                        iconSize = 22.dp,
                         onClick = {
                             if (onNavigationIconClick != null) {
                                 if (autoCloseKeyboardOnNavigationIconClick) {
