@@ -291,6 +291,7 @@ private fun RowScope.PrimalNavigationBarItem(
                 },
             ) {
                 Icon(
+                    modifier = Modifier.size(22.dp),
                     imageVector = if (selected) {
                         primaryDestination.imageVectorSelected()
                     } else {
