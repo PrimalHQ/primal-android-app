@@ -1,4 +1,2 @@
 ## Changes
-Implemented binary compression;
-Implemented saving/removing profile feeds;
-Fixed crashes;
+New app shell & UX polish;
