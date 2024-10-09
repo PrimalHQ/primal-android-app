@@ -15,7 +15,7 @@ import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun NoteStatsRow(eventStats: EventStatsUi, modifier: Modifier = Modifier) {
+fun ThreadNoteStatsRow(eventStats: EventStatsUi, modifier: Modifier = Modifier) {
     Row(modifier = modifier) {
         if (eventStats.repliesCount > 0) {
             SingleNoteStat(

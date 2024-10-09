@@ -477,10 +477,12 @@ private fun FeedNote(
             FeedNoteActionsRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = if (showNoteStatCounts) 8.dp else 16.dp)
-                    .padding(vertical = if (showNoteStatCounts) 8.dp else 12.dp),
+                    .padding(horizontal = if (showNoteStatCounts) 12.dp else 16.dp)
+                    .padding(vertical = if (showNoteStatCounts) 8.dp else 12.dp)
+                    .padding(top = if (showNoteStatCounts) 4.dp else 0.dp),
                 eventStats = data.stats,
                 showCounts = showNoteStatCounts,
+                highlightedNote = !showNoteStatCounts,
                 isBookmarked = data.isBookmarked,
                 onPostAction = onPostAction,
                 onPostLongPressAction = onPostLongClickAction,
