@@ -102,10 +102,12 @@ private fun SettingsListItem(
         colors = ListItemDefaults.colors(
             containerColor = AppTheme.colorScheme.surfaceVariant,
         ),
-        leadingContent = {
-            if (leadingIcon != null) {
+        leadingContent = if (leadingIcon != null) {
+            {
                 Icon(imageVector = leadingIcon, contentDescription = null)
             }
+        } else {
+            null
         },
         headlineContent = {
             Text(
@@ -144,7 +146,6 @@ private fun VersionListItem(versionName: String) {
                 style = AppTheme.typography.titleLarge,
             )
         },
-        leadingContent = { },
     )
 }
 
