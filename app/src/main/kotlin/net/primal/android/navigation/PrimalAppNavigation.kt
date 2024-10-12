@@ -760,6 +760,7 @@ private fun NavGraphBuilder.explore(
         onTuneClick = { navController.navigateToAdvancedSearch() },
         onClose = { navController.navigateUp() },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
+        noteCallbacks = noteCallbacksHandler(navController),
     )
 }
 

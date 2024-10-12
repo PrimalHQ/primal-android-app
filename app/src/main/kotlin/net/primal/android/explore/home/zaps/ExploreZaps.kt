@@ -41,6 +41,9 @@ import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
 import net.primal.android.explore.api.model.ExploreZapData
+import net.primal.android.notes.feed.model.NoteContentUi
+import net.primal.android.notes.feed.note.ui.NoteContent
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -49,6 +52,7 @@ fun ExploreZaps(
     paddingValues: PaddingValues,
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
+    noteCallbacks: NoteCallbacks,
 ) {
     val viewModel: ExploreZapsViewModel = hiltViewModel()
     val uiState = viewModel.state.collectAsState()
@@ -60,6 +64,7 @@ fun ExploreZaps(
         onProfileClick = onProfileClick,
         state = uiState.value,
         eventPublisher = viewModel::setEvent,
+        noteCallbacks = noteCallbacks,
     )
 }
 
@@ -71,6 +76,7 @@ private fun ExploreZaps(
     onNoteClick: (String) -> Unit,
     state: ExploreZapsContract.UiState,
     eventPublisher: (ExploreZapsContract.UiEvent) -> Unit,
+    noteCallbacks: NoteCallbacks,
 ) {
     when {
         state.loading && state.zaps.isEmpty() -> {
@@ -95,12 +101,13 @@ private fun ExploreZaps(
                 item { Spacer(modifier = Modifier.height(4.dp)) }
                 items(
                     items = state.zaps,
-                    key = { "${it.noteId}:${it.sender?.pubkey}:${it.createdAt.toEpochMilli()}" },
+                    key = { "${it.noteContentUi.noteId}:${it.sender?.pubkey}:${it.createdAt.toEpochMilli()}" },
                 ) { item ->
                     ZapListItem(
                         zapData = item,
                         onProfileClick = onProfileClick,
                         onNoteClick = onNoteClick,
+                        noteCallbacks = noteCallbacks,
                     )
                 }
                 item { Spacer(modifier = Modifier.height(4.dp)) }
@@ -115,11 +122,16 @@ fun ZapListItem(
     zapData: ExploreZapData,
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
+    noteCallbacks: NoteCallbacks,
 ) {
     Column(
         modifier = modifier
             .clip(AppTheme.shapes.extraLarge)
-            .clickable { onNoteClick(zapData.noteId) }
+            .clickable(
+                interactionSource = null,
+                indication = null,
+                onClick = { onNoteClick(zapData.noteContentUi.noteId) },
+            )
             .background(AppTheme.extraColorScheme.surfaceVariantAlt3)
             .padding(all = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -135,8 +147,10 @@ fun ZapListItem(
         )
         NoteSummary(
             receiverDisplayName = zapData.receiver?.authorDisplayName,
-            noteContent = zapData.noteContent,
+            noteContent = zapData.noteContentUi,
             noteTimestamp = zapData.createdAt,
+            noteCallbacks = noteCallbacks,
+            onNoteClick = onNoteClick,
         )
     }
 }
@@ -144,8 +158,10 @@ fun ZapListItem(
 @Composable
 private fun NoteSummary(
     receiverDisplayName: String?,
-    noteContent: String?,
+    noteContent: NoteContentUi,
     noteTimestamp: Instant,
+    noteCallbacks: NoteCallbacks,
+    onNoteClick: (String) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -176,15 +192,15 @@ private fun NoteSummary(
                 )
             }
         }
-        noteContent?.let {
-            Text(
-                text = noteContent.split("\n").filter { it.isNotBlank() }.joinToString(separator = " "),
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                style = AppTheme.typography.bodyMedium,
-            )
-        }
+        NoteContent(
+            expanded = false,
+            noteCallbacks = noteCallbacks,
+            data = noteContent,
+            contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            onClick = { onNoteClick(noteContent.noteId) },
+        )
     }
 }
 

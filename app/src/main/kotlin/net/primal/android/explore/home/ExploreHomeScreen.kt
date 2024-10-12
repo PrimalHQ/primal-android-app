@@ -69,6 +69,7 @@ import net.primal.android.explore.home.ui.ZAPS_INDEX
 import net.primal.android.explore.home.zaps.ExploreZaps
 import net.primal.android.feeds.domain.buildExploreMediaFeedSpec
 import net.primal.android.notes.feed.MediaFeedGrid
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -84,6 +85,7 @@ fun ExploreHomeScreen(
     onSearchClick: () -> Unit,
     onTuneClick: () -> Unit,
     onClose: () -> Unit,
+    noteCallbacks: NoteCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -98,6 +100,7 @@ fun ExploreHomeScreen(
         onTuneClick = onTuneClick,
         onClose = onClose,
         onProfileClick = onProfileClick,
+        noteCallbacks = noteCallbacks,
     )
 }
 
@@ -114,6 +117,7 @@ private fun ExploreHomeScreen(
     onProfileClick: (String) -> Unit,
     onTuneClick: () -> Unit,
     onClose: () -> Unit,
+    noteCallbacks: NoteCallbacks,
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
@@ -172,6 +176,7 @@ private fun ExploreHomeScreen(
                             paddingValues = paddingValues,
                             onProfileClick = onProfileClick,
                             onNoteClick = onNoteClick,
+                            noteCallbacks = noteCallbacks,
                         )
                     }
                     MEDIA_INDEX -> {

@@ -20,12 +20,15 @@ import net.primal.android.explore.api.model.UsersResponse
 import net.primal.android.explore.db.TrendingTopic
 import net.primal.android.explore.domain.UserProfileSearchItem
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
+import net.primal.android.nostr.ext.flatMapPostsAsNoteNostrUriPO
 import net.primal.android.nostr.ext.mapAsEventZapDO
 import net.primal.android.nostr.ext.mapAsPostDataPO
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowStats
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
 import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
+import net.primal.android.notes.feed.model.NoteContentUi
+import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.profile.db.ProfileStats
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 
@@ -47,6 +50,11 @@ class ExploreRepository @Inject constructor(
             val eventZaps = response.nostrZapEvents.mapAsEventZapDO(profilesMap = profilesMap)
 
             val notes = response.noteEvents.mapAsPostDataPO(referencedPosts = emptyList())
+            val nostrUriMap = notes.flatMapPostsAsNoteNostrUriPO(
+                postIdToPostDataMap = emptyMap(),
+                articleIdToArticle = emptyMap(),
+                profileIdToProfileDataMap = profilesMap,
+            )
 
             database.withTransaction {
                 database.profiles().upsertAll(data = profiles)
@@ -55,15 +63,20 @@ class ExploreRepository @Inject constructor(
 
             val notesMap = notes.associateBy { it.postId }
 
-            eventZaps.map {
+            eventZaps.map { zapEvent ->
                 ExploreZapData(
-                    sender = profilesMap[it.zapSenderId]?.asProfileDetailsUi(),
-                    receiver = profilesMap[it.zapReceiverId]?.asProfileDetailsUi(),
-                    amountSats = it.amountInBtc.toBigDecimal().toSats(),
-                    zapMessage = it.message,
-                    noteId = it.eventId,
-                    noteContent = notesMap[it.eventId]?.content,
-                    createdAt = Instant.ofEpochSecond(it.zapReceiptAt),
+                    sender = profilesMap[zapEvent.zapSenderId]?.asProfileDetailsUi(),
+                    receiver = profilesMap[zapEvent.zapReceiverId]?.asProfileDetailsUi(),
+                    amountSats = zapEvent.amountInBtc.toBigDecimal().toSats(),
+                    zapMessage = zapEvent.message,
+                    createdAt = Instant.ofEpochSecond(zapEvent.zapReceiptAt),
+                    noteContentUi = NoteContentUi(
+                        noteId = zapEvent.eventId,
+                        content = notesMap[zapEvent.eventId]?.content ?: "",
+                        nostrUris = nostrUriMap.map { it.asNoteNostrUriUi() },
+                        hashtags = notesMap[zapEvent.eventId]?.hashtags ?: emptyList(),
+                        invoices = emptyList(),
+                    )
                 )
             }
         }
