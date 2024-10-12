@@ -76,7 +76,7 @@ class ExploreRepository @Inject constructor(
                         nostrUris = nostrUriMap.map { it.asNoteNostrUriUi() },
                         hashtags = notesMap[zapEvent.eventId]?.hashtags ?: emptyList(),
                         invoices = emptyList(),
-                    )
+                    ),
                 )
             }
         }
