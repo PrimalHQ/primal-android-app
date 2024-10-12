@@ -26,6 +26,7 @@ fun DvmFeedMarketplace(
     dvmFeeds: List<DvmFeed>,
     modifier: Modifier = Modifier,
     onFeedClick: (dvmFeed: DvmFeed) -> Unit,
+    onGoToWallet: (() -> Unit)? = null,
     onClose: () -> Unit,
 ) {
     Column(modifier = modifier) {
@@ -51,7 +52,11 @@ fun DvmFeedMarketplace(
                 key = { it.dvmId },
             ) {
                 Column {
-                    DvmFeedListItem(data = it, onFeedClick = onFeedClick)
+                    DvmFeedListItem(
+                        data = it,
+                        onFeedClick = onFeedClick,
+                        onGoToWallet = onGoToWallet,
+                    )
                     PrimalDivider()
                 }
             }

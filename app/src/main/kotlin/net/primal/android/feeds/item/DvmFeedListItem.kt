@@ -14,6 +14,12 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,9 +50,14 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedLikes
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikesFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
+import net.primal.android.core.errors.UiError
 import net.primal.android.feeds.domain.DvmFeed
+import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.ui.SingleEventStat
+import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
+import net.primal.android.notes.feed.zaps.ZapBottomSheet
 import net.primal.android.theme.AppTheme
+import net.primal.android.wallet.zaps.canZap
 
 private val PaidBackground = Color(0xFFFC6337)
 
@@ -55,24 +66,34 @@ fun DvmFeedListItem(
     modifier: Modifier = Modifier,
     data: DvmFeed,
     onFeedClick: ((dvmFeed: DvmFeed) -> Unit)? = null,
+    onGoToWallet: (() -> Unit)? = null,
     listItemContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt2,
     avatarSize: Dp = 48.dp,
     extended: Boolean = false,
     showFollowsActionsAvatarRow: Boolean = false,
     clipShape: Shape? = AppTheme.shapes.small,
+    onUiError: ((UiError) -> Unit)? = null,
 ) {
     val viewModel = hiltViewModel<DvmFeedListItemViewModel>()
+    val uiState = viewModel.state.collectAsState()
+
+    LaunchedEffect(viewModel, uiState.value.error, onUiError) {
+        uiState.value.error?.let { onUiError?.invoke(it) }
+        viewModel.setEvent(DvmFeedListItemContract.UiEvent.DismissError)
+    }
 
     DvmFeedListItem(
         modifier = modifier,
         onFeedClick = onFeedClick,
         eventPublisher = viewModel::setEvent,
+        state = uiState.value,
         listItemContainerColor = listItemContainerColor,
         avatarSize = avatarSize,
         extended = extended,
         showFollowsActionsAvatarRow = showFollowsActionsAvatarRow,
         dvmFeed = data,
         clipShape = clipShape,
+        onGoToWallet = onGoToWallet,
     )
 }
 
@@ -80,7 +101,9 @@ fun DvmFeedListItem(
 private fun DvmFeedListItem(
     modifier: Modifier = Modifier,
     dvmFeed: DvmFeed,
+    state: DvmFeedListItemContract.UiState,
     onFeedClick: ((dvmFeed: DvmFeed) -> Unit)? = null,
+    onGoToWallet: (() -> Unit)? = null,
     eventPublisher: (DvmFeedListItemContract.UiEvent) -> Unit,
     listItemContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt2,
     clipShape: Shape? = AppTheme.shapes.small,
@@ -88,6 +111,37 @@ private fun DvmFeedListItem(
     extended: Boolean = false,
     showFollowsActionsAvatarRow: Boolean = false,
 ) {
+    var showCantZapWarning by remember { mutableStateOf(false) }
+    if (showCantZapWarning) {
+        UnableToZapBottomSheet(
+            zappingState = state.zappingState,
+            onDismissRequest = { showCantZapWarning = false },
+            onGoToWallet = { onGoToWallet?.invoke() },
+        )
+    }
+
+    var showZapOptions by remember { mutableStateOf(false) }
+    if (showZapOptions) {
+        ZapBottomSheet(
+            onDismissRequest = { showZapOptions = false },
+            receiverName = dvmFeed.title,
+            zappingState = state.zappingState,
+            onZap = { zapAmount, zapDescription ->
+                if (state.zappingState.canZap(zapAmount)) {
+                    eventPublisher(
+                        DvmFeedListItemContract.UiEvent.OnZapClick(
+                            dvmFeed = dvmFeed,
+                            zapDescription = zapDescription,
+                            zapAmount = zapAmount.toULong(),
+                        )
+                    )
+                } else {
+                    showCantZapWarning = true
+                }
+
+            }
+        )
+    }
     Column(
         modifier = Modifier
             .run {
@@ -173,9 +227,11 @@ private fun DvmFeedListItem(
                                 )
                             },
                             onZapClick = {
-                                eventPublisher(
-                                    DvmFeedListItemContract.UiEvent.OnZapClick(dvmFeed = dvmFeed),
-                                )
+                                if (state.zappingState.walletConnected) {
+                                    showZapOptions = true
+                                } else {
+                                    showCantZapWarning = true
+                                }
                             },
                         )
                         if (showFollowsActionsAvatarRow) {

@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import net.primal.android.articles.feed.ArticleFeedList
+import net.primal.android.core.errors.UiError
 import net.primal.android.feeds.domain.DvmFeed
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.domain.buildSpec
@@ -18,8 +19,10 @@ fun DvmHeaderAndFeedList(
     dvmFeed: DvmFeed,
     modifier: Modifier = Modifier,
     extended: Boolean = false,
+    onGoToWallet: (() -> Unit)? = null,
     showFollowsActionsAvatarRow: Boolean = false,
     clipShape: Shape? = AppTheme.shapes.small,
+    onUiError: ((UiError) -> Unit)? = null,
 ) {
     Column(modifier = modifier) {
         when (dvmFeed.kind) {
@@ -34,6 +37,8 @@ fun DvmHeaderAndFeedList(
                             extended = extended,
                             showFollowsActionsAvatarRow = showFollowsActionsAvatarRow,
                             clipShape = clipShape,
+                            onGoToWallet = onGoToWallet,
+                            onUiError = onUiError,
                         )
                     },
                     onArticleClick = {},
@@ -54,6 +59,7 @@ fun DvmHeaderAndFeedList(
                             extended = extended,
                             showFollowsActionsAvatarRow = showFollowsActionsAvatarRow,
                             clipShape = clipShape,
+                            onGoToWallet = onGoToWallet,
                         )
                     },
                     onGoToWallet = {},

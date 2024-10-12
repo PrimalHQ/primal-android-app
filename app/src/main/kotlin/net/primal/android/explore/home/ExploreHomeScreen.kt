@@ -76,6 +76,7 @@ fun ExploreHomeScreen(
     onSearchClick: () -> Unit,
     onTuneClick: () -> Unit,
     onClose: () -> Unit,
+    onGoToWallet: (() -> Unit)? = null,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -87,6 +88,7 @@ fun ExploreHomeScreen(
         onTuneClick = onTuneClick,
         onClose = onClose,
         onProfileClick = onProfileClick,
+        onGoToWallet = onGoToWallet,
     )
 }
 
@@ -97,6 +99,7 @@ private fun ExploreHomeScreen(
     onHashtagClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onSearchClick: () -> Unit,
+    onGoToWallet: (() -> Unit)? = null,
     onProfileClick: (String) -> Unit,
     onTuneClick: () -> Unit,
     onClose: () -> Unit,
@@ -129,6 +132,15 @@ private fun ExploreHomeScreen(
                     FEEDS_INDEX -> {
                         ExploreFeeds(
                             paddingValues = paddingValues,
+                            onGoToWallet = onGoToWallet,
+                            onUiError = { uiError ->
+                                uiScope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = uiError.resolveUiErrorMessage(context),
+                                        duration = SnackbarDuration.Short,
+                                    )
+                                }
+                            },
                         )
                     }
                     PEOPLE_INDEX -> {

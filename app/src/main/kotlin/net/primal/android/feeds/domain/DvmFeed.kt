@@ -3,8 +3,10 @@ package net.primal.android.feeds.domain
 import net.primal.android.profile.db.ProfileData
 
 data class DvmFeed(
+    val eventId: String,
     val dvmPubkey: String,
     val dvmId: String,
+    val lnUrlDecoded: String?,
     val title: String,
     val description: String? = null,
     val avatarUrl: String? = null,
@@ -22,3 +24,4 @@ data class DvmFeed(
 
 fun DvmFeed.buildSpec(specKind: FeedSpecKind): String =
     "{\"dvm_id\":\"$dvmId\",\"dvm_pubkey\":\"$dvmPubkey\",\"kind\":\"${specKind.id}\"}"
+

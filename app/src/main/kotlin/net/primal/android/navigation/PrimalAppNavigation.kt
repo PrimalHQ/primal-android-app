@@ -740,6 +740,7 @@ private fun NavGraphBuilder.explore(route: String, navController: NavController)
             onTuneClick = { navController.navigateToAdvancedSearch() },
             onClose = { navController.navigateUp() },
             onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
+            onGoToWallet = { navController.navigateToWallet() },
         )
     }
 

@@ -17,6 +17,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -29,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -40,6 +43,8 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.errors.UiError
+import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.feeds.domain.DvmFeed
 import net.primal.android.feeds.domain.buildSpec
 import net.primal.android.feeds.item.DvmFeedListItem
@@ -47,7 +52,12 @@ import net.primal.android.feeds.ui.DvmHeaderAndFeedList
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun ExploreFeeds(modifier: Modifier = Modifier, paddingValues: PaddingValues = PaddingValues(all = 0.dp)) {
+fun ExploreFeeds(
+    modifier: Modifier = Modifier,
+    paddingValues: PaddingValues = PaddingValues(all = 0.dp),
+    onGoToWallet: (() -> Unit)? = null,
+    onUiError: ((UiError) -> Unit)? = null,
+) {
     val viewModel: ExploreFeedsViewModel = hiltViewModel<ExploreFeedsViewModel>()
     val uiState = viewModel.state.collectAsState()
 
@@ -56,6 +66,8 @@ fun ExploreFeeds(modifier: Modifier = Modifier, paddingValues: PaddingValues = P
         state = uiState.value,
         paddingValues = paddingValues,
         eventPublisher = viewModel::setEvent,
+        onGoToWallet = onGoToWallet,
+        onUiError = onUiError,
     )
 }
 
@@ -65,6 +77,8 @@ fun ExploreFeeds(
     state: ExploreFeedsContract.UiState,
     paddingValues: PaddingValues = PaddingValues(all = 0.dp),
     eventPublisher: (ExploreFeedsContract.UiEvent) -> Unit,
+    onGoToWallet: (() -> Unit)? = null,
+    onUiError: ((UiError) -> Unit)? = null,
 ) {
     var dvmFeedToShow by remember { mutableStateOf<DvmFeed?>(null) }
 
@@ -81,6 +95,8 @@ fun ExploreFeeds(
             addedToFeed = addedToFeed,
             addToUserFeeds = { eventPublisher(ExploreFeedsContract.UiEvent.AddToUserFeeds(it)) },
             removeFromUserFeeds = { eventPublisher(ExploreFeedsContract.UiEvent.RemoveFromUserFeeds(it)) },
+            onGoToWallet = onGoToWallet,
+            onUiError = onUiError,
         )
     }
 
@@ -111,6 +127,8 @@ fun ExploreFeeds(
                     listItemContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt3,
                     onFeedClick = { dvmFeedToShow = it },
                     showFollowsActionsAvatarRow = true,
+                    onGoToWallet = onGoToWallet,
+                    onUiError = onUiError,
                 )
             }
 
@@ -125,6 +143,8 @@ private fun DvmFeedDetailsBottomSheet(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
     dvmFeed: DvmFeed,
+    onGoToWallet: (() -> Unit)? = null,
+    onUiError: ((UiError) -> Unit)? = null,
     addedToFeed: Boolean,
     addToUserFeeds: (DvmFeed) -> Unit,
     removeFromUserFeeds: (DvmFeed) -> Unit,
@@ -183,9 +203,11 @@ private fun DvmFeedDetailsBottomSheet(
             DvmHeaderAndFeedList(
                 modifier = Modifier.padding(paddingValues),
                 dvmFeed = dvmFeed,
+                onGoToWallet = onGoToWallet,
                 extended = true,
                 showFollowsActionsAvatarRow = true,
                 clipShape = null,
+                onUiError = onUiError,
             )
         }
     }
