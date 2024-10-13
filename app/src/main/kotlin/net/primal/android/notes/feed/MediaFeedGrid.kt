@@ -23,6 +23,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import net.primal.android.R
+import net.primal.android.core.compose.GridLoadingPlaceholder
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.isEmpty
@@ -114,13 +115,15 @@ private fun MediaFeedGrid(
 @Composable
 private fun EmptyItemsContent(
     pagingItems: LazyPagingItems<FeedPostUi>,
+    paddingValues: PaddingValues = PaddingValues(0.dp),
     noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
 ) {
     when (val refreshLoadState = pagingItems.loadState.refresh) {
         LoadState.Loading -> {
-            ListLoading(
+            GridLoadingPlaceholder(
                 modifier = Modifier.fillMaxSize(),
+                contentPaddingValues = paddingValues,
             )
         }
 

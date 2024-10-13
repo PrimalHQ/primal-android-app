@@ -1,11 +1,14 @@
 package net.primal.android.explore.home.feeds
 
 import androidx.activity.compose.BackHandler
+import androidx.annotation.RawRes
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -29,15 +32,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
+import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
+import net.primal.android.core.compose.HeightAdjustableLoadingListPlaceholder
+import net.primal.android.core.compose.InfiniteLottieAnimation
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
-import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.feeds.domain.DvmFeed
@@ -84,8 +94,13 @@ fun ExploreFeeds(
         )
     }
 
-    if (state.loading && state.feeds.isEmpty()) {
-        PrimalLoadingSpinner()
+    if (state.loading && state.feeds.isEmpty() || true) {
+        HeightAdjustableLoadingListPlaceholder(
+            modifier = Modifier.fillMaxSize(),
+            contentPaddingValues = paddingValues,
+            clipShape = AppTheme.shapes.small,
+            height = 100.dp,
+        )
     } else if (state.feeds.isEmpty()) {
         ListNoContent(
             modifier = Modifier.fillMaxSize(),
