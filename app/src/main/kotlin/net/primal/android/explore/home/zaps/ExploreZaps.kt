@@ -40,7 +40,7 @@ import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
-import net.primal.android.explore.api.model.ExploreZapData
+import net.primal.android.explore.home.zaps.ui.ExploreZapNoteUi
 import net.primal.android.notes.feed.model.NoteContentUi
 import net.primal.android.notes.feed.note.ui.NoteContent
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
@@ -111,7 +111,7 @@ private fun ExploreZaps(
 @Composable
 fun ZapListItem(
     modifier: Modifier = Modifier,
-    zapData: ExploreZapData,
+    zapData: ExploreZapNoteUi,
     noteCallbacks: NoteCallbacks,
 ) {
     Column(

@@ -13,11 +13,11 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.explore.api.ExploreApi
 import net.primal.android.explore.api.model.ExplorePeopleData
 import net.primal.android.explore.api.model.ExploreRequestBody
-import net.primal.android.explore.api.model.ExploreZapData
 import net.primal.android.explore.api.model.SearchUsersRequestBody
 import net.primal.android.explore.api.model.TopicScore
 import net.primal.android.explore.api.model.UsersResponse
 import net.primal.android.explore.db.TrendingTopic
+import net.primal.android.explore.domain.ExploreZapNoteData
 import net.primal.android.explore.domain.UserProfileSearchItem
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.flatMapPostsAsNoteNostrUriPO
@@ -27,8 +27,6 @@ import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowStats
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
 import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
-import net.primal.android.notes.feed.model.NoteContentUi
-import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.profile.db.ProfileStats
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 
@@ -38,7 +36,7 @@ class ExploreRepository @Inject constructor(
     private val database: PrimalDatabase,
 ) {
 
-    suspend fun fetchTrendingZaps(userId: String): List<ExploreZapData> =
+    suspend fun fetchTrendingZaps(userId: String): List<ExploreZapNoteData> =
         withContext(dispatchers.io()) {
             val response = exploreApi.getTrendingZaps(body = ExploreRequestBody(userPubKey = userId, limit = 100))
 
@@ -65,19 +63,14 @@ class ExploreRepository @Inject constructor(
 
             eventZaps.mapNotNull { zapEvent ->
                 notesMap[zapEvent.eventId]?.let { noteData ->
-                    ExploreZapData(
-                        sender = profilesMap[zapEvent.zapSenderId]?.asProfileDetailsUi(),
-                        receiver = profilesMap[zapEvent.zapReceiverId]?.asProfileDetailsUi(),
+                    ExploreZapNoteData(
+                        sender = profilesMap[zapEvent.zapSenderId],
+                        receiver = profilesMap[zapEvent.zapReceiverId],
+                        noteData = noteData,
                         amountSats = zapEvent.amountInBtc.toBigDecimal().toSats(),
                         zapMessage = zapEvent.message,
                         createdAt = Instant.ofEpochSecond(zapEvent.zapReceiptAt),
-                        noteContentUi = NoteContentUi(
-                            noteId = zapEvent.eventId,
-                            content = noteData.content,
-                            nostrUris = nostrUris.map { it.asNoteNostrUriUi() },
-                            hashtags = noteData.hashtags,
-                            invoices = emptyList(),
-                        ),
+                        noteNostrUris = nostrUris,
                     )
                 }
             }
