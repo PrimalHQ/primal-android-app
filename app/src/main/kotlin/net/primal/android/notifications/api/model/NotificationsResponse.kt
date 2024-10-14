@@ -13,4 +13,5 @@ data class NotificationsResponse(
     val cdnResources: List<PrimalEvent>,
     val primalLinkPreviews: List<PrimalEvent>,
     val primalRelayHints: List<PrimalEvent>,
+    val primalUserNames: List<PrimalEvent>,
 )

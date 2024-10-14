@@ -43,6 +43,7 @@ class MessagesApiImpl @Inject constructor(
             messages = response.filterNostrEvents(NostrEventKind.EncryptedDirectMessages),
             profileMetadata = response.filterNostrEvents(NostrEventKind.Metadata),
             cdnResources = response.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
+            primalUserNames = response.filterPrimalEvents(NostrEventKind.PrimalUserName),
         )
     }
 
@@ -61,6 +62,7 @@ class MessagesApiImpl @Inject constructor(
             messages = response.filterNostrEvents(NostrEventKind.EncryptedDirectMessages),
             profileMetadata = response.filterNostrEvents(NostrEventKind.Metadata),
             cdnResources = response.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
+            primalUserNames = response.filterPrimalEvents(NostrEventKind.PrimalUserName),
         )
     }
 

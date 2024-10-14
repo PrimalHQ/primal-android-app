@@ -11,4 +11,5 @@ data class TrendingPeopleResponse(
     val usersFollowStats: PrimalEvent?,
     val usersScores: PrimalEvent?,
     val usersFollowCount: PrimalEvent?,
+    val primalUserNames: List<PrimalEvent> = emptyList(),
 )

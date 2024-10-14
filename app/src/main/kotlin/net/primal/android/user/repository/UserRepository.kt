@@ -135,7 +135,10 @@ class UserRepository @Inject constructor(
             userId = userId,
             contentMetadata = contentMetadata,
         )
-        val profileData = profileMetadataNostrEvent.asProfileDataPO(cdnResources = emptyMap())
+        val profileData = profileMetadataNostrEvent.asProfileDataPO(
+            cdnResources = emptyMap(),
+            primalUserNames = emptyMap(),
+        )
         database.profiles().upsertAll(data = listOf(profileData))
 
         accountsStore.getAndUpdateAccount(userId = userId) {

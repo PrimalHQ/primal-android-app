@@ -14,12 +14,15 @@ import net.primal.android.profile.db.ProfileData
 import net.primal.android.wallet.api.decodeLNUrlOrNull
 import net.primal.android.wallet.api.parseAsLNUrlOrNull
 
-fun List<NostrEvent>.mapAsProfileDataPO(cdnResources: Map<String, CdnResource>) =
+fun List<NostrEvent>.mapAsProfileDataPO(cdnResources: Map<String, CdnResource>, primalUserNames: Map<String, String>) =
     map {
-        it.asProfileDataPO(cdnResources = cdnResources)
+        it.asProfileDataPO(cdnResources = cdnResources, primalUserNames = primalUserNames)
     }
 
-fun NostrEvent.asProfileDataPO(cdnResources: Map<String, CdnResource>): ProfileData {
+fun NostrEvent.asProfileDataPO(
+    cdnResources: Map<String, CdnResource>,
+    primalUserNames: Map<String, String>,
+): ProfileData {
     val metadata = NostrJson.decodeFromStringOrNull<ContentMetadata>(this.content)
 
     return ProfileData(
@@ -48,5 +51,6 @@ fun NostrEvent.asProfileDataPO(cdnResources: Map<String, CdnResource>): ProfileD
             )
         },
         website = metadata?.website,
+        primalName = primalUserNames[this.pubKey],
     )
 }
