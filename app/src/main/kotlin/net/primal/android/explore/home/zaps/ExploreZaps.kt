@@ -158,12 +158,12 @@ private fun NoteSummary(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 4.dp, end = 8.dp, bottom = 12.dp),
+            .padding(start = 2.dp, end = 8.dp, bottom = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         AvatarThumbnail(
             avatarCdnImage = receiverCdnResource,
-            avatarSize = 32.dp,
+            avatarSize = 38.dp,
             onClick = onReceiverAvatarClick,
         )
         Column(
@@ -197,13 +197,13 @@ fun ProfileSummary(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = 4.dp, end = 8.dp),
+            .padding(start = 2.dp, end = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AvatarThumbnail(
             avatarCdnImage = receiverCdnResource,
-            avatarSize = 32.dp,
+            avatarSize = 38.dp,
             onClick = onReceiverAvatarClick,
         )
         receiverDisplayName?.let {
@@ -251,13 +251,13 @@ private fun ZapHeader(
             .clip(RoundedCornerShape(percent = 100))
             .background(AppTheme.colorScheme.background)
             .padding(end = 16.dp)
-            .padding(4.dp),
+            .padding(2.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AvatarThumbnail(
             avatarCdnImage = senderCdnImage,
-            avatarSize = 32.dp,
+            avatarSize = 38.dp,
             onClick = onSenderAvatarClick,
         )
         val numberFormat = NumberFormat.getNumberInstance()
@@ -284,6 +284,7 @@ private fun ZapHeader(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 style = AppTheme.typography.bodyMedium,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
             )
         }
     }
