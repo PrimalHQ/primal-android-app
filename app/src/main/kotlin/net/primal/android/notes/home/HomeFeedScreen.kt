@@ -159,6 +159,7 @@ fun HomeFeedScreen(
                     uiScope.launch { pagerState.scrollToPage(page = pageIndex) }
                 },
                 scrollBehavior = scrollBehavior,
+                onGoToWallet = onGoToWallet,
             )
         },
         content = { paddingValues ->
@@ -226,6 +227,7 @@ private fun NoteFeedTopAppBar(
     activeFeed: FeedUi?,
     onFeedChanged: (FeedUi) -> Unit,
     scrollBehavior: TopAppBarScrollBehavior? = null,
+    onGoToWallet: (() -> Unit)? = null,
 ) {
     var feedPickerVisible by rememberSaveable { mutableStateOf(false) }
 
@@ -239,6 +241,7 @@ private fun NoteFeedTopAppBar(
             },
             onDismissRequest = { feedPickerVisible = false },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            onGoToWallet = onGoToWallet,
         )
     }
 

@@ -133,7 +133,7 @@ class NoteViewModel @Inject constructor(
                     userId = activeAccountStore.activeUserId(),
                     comment = zapAction.zapDescription,
                     amountInSats = zapAction.zapAmount,
-                    target = ZapTarget.Note(
+                    target = ZapTarget.Event(
                         zapAction.postId,
                         zapAction.postAuthorId,
                         postAuthorProfileData.lnUrlDecoded,

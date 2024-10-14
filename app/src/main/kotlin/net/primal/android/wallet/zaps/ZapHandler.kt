@@ -102,7 +102,7 @@ class ZapHandler @Inject constructor(
 
     private fun ZapTarget.buildPostStatsUpdaterIfApplicable(userId: String) =
         when (this) {
-            is ZapTarget.Note -> EventStatsUpdater(
+            is ZapTarget.Event -> EventStatsUpdater(
                 userId = userId,
                 eventId = this.id,
                 eventAuthorId = this.authorPubkey,

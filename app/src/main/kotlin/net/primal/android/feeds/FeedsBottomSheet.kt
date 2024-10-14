@@ -39,6 +39,7 @@ fun FeedsBottomSheet(
     activeFeed: FeedUi,
     feedSpecKind: FeedSpecKind,
     onFeedClick: (FeedUi) -> Unit,
+    onGoToWallet: (() -> Unit)? = null,
     onDismissRequest: () -> Unit,
     sheetState: SheetState = rememberModalBottomSheetState(),
 ) {
@@ -54,6 +55,7 @@ fun FeedsBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
         eventPublisher = viewModel::setEvent,
+        onGoToWallet = onGoToWallet,
     )
 }
 
@@ -65,6 +67,7 @@ private fun FeedsBottomSheet(
     onDismissRequest: () -> Unit,
     sheetState: SheetState = rememberModalBottomSheetState(),
     eventPublisher: (FeedsContract.UiEvent) -> Unit,
+    onGoToWallet: (() -> Unit)? = null,
 ) {
     ModalBottomSheet(
         modifier = Modifier.statusBarsPadding(),
@@ -144,6 +147,7 @@ private fun FeedsBottomSheet(
                         dvmFeeds = state.dvmFeeds,
                         onFeedClick = { eventPublisher(FeedsContract.UiEvent.ShowFeedDetails(dvmFeed = it)) },
                         onClose = { eventPublisher(FeedsContract.UiEvent.CloseFeedMarketplace) },
+                        onGoToWallet = onGoToWallet,
                     )
                 }
 
@@ -156,6 +160,7 @@ private fun FeedsBottomSheet(
                         modifier = Modifier.fillMaxSize(),
                         dvmFeed = state.selectedDvmFeed,
                         addedToFeeds = addedToFeeds,
+                        onGoToWallet = onGoToWallet,
                         onClose = { eventPublisher(FeedsContract.UiEvent.CloseFeedDetails) },
                         onAddOrRemoveFeed = {
                             if (state.selectedDvmFeed != null) {

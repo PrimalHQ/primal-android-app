@@ -25,6 +25,7 @@ import net.primal.android.theme.AppTheme
 fun DvmFeedDetails(
     dvmFeed: DvmFeed?,
     onClose: () -> Unit,
+    onGoToWallet: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     addedToFeeds: Boolean = false,
     onAddOrRemoveFeed: (() -> Unit)? = null,
@@ -52,6 +53,7 @@ fun DvmFeedDetails(
                 DvmHeaderAndFeedList(
                     modifier = Modifier.padding(paddingValues),
                     dvmFeed = dvmFeed,
+                    onGoToWallet = onGoToWallet,
                 )
             }
         },
