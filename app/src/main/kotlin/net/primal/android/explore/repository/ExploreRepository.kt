@@ -50,7 +50,7 @@ class ExploreRepository @Inject constructor(
             val eventZaps = response.nostrZapEvents.mapAsEventZapDO(profilesMap = profilesMap)
 
             val notes = response.noteEvents.mapAsPostDataPO(referencedPosts = emptyList())
-            val nostrUriMap = notes.flatMapPostsAsNoteNostrUriPO(
+            val nostrUris = notes.flatMapPostsAsNoteNostrUriPO(
                 postIdToPostDataMap = emptyMap(),
                 articleIdToArticle = emptyMap(),
                 profileIdToProfileDataMap = profilesMap,
@@ -63,21 +63,23 @@ class ExploreRepository @Inject constructor(
 
             val notesMap = notes.associateBy { it.postId }
 
-            eventZaps.map { zapEvent ->
-                ExploreZapData(
-                    sender = profilesMap[zapEvent.zapSenderId]?.asProfileDetailsUi(),
-                    receiver = profilesMap[zapEvent.zapReceiverId]?.asProfileDetailsUi(),
-                    amountSats = zapEvent.amountInBtc.toBigDecimal().toSats(),
-                    zapMessage = zapEvent.message,
-                    createdAt = Instant.ofEpochSecond(zapEvent.zapReceiptAt),
-                    noteContentUi = NoteContentUi(
-                        noteId = zapEvent.eventId,
-                        content = notesMap[zapEvent.eventId]?.content ?: "",
-                        nostrUris = nostrUriMap.map { it.asNoteNostrUriUi() },
-                        hashtags = notesMap[zapEvent.eventId]?.hashtags ?: emptyList(),
-                        invoices = emptyList(),
-                    ),
-                )
+            eventZaps.mapNotNull { zapEvent ->
+                notesMap[zapEvent.eventId]?.let { noteData ->
+                    ExploreZapData(
+                        sender = profilesMap[zapEvent.zapSenderId]?.asProfileDetailsUi(),
+                        receiver = profilesMap[zapEvent.zapReceiverId]?.asProfileDetailsUi(),
+                        amountSats = zapEvent.amountInBtc.toBigDecimal().toSats(),
+                        zapMessage = zapEvent.message,
+                        createdAt = Instant.ofEpochSecond(zapEvent.zapReceiptAt),
+                        noteContentUi = NoteContentUi(
+                            noteId = zapEvent.eventId,
+                            content = noteData.content,
+                            nostrUris = nostrUris.map { it.asNoteNostrUriUi() },
+                            hashtags = noteData.hashtags,
+                            invoices = emptyList(),
+                        ),
+                    )
+                }
             }
         }
 
