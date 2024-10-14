@@ -36,7 +36,11 @@ fun PrimalEvent.takeContentAsPrimalUserScoresOrNull(): Map<String, Float> {
 }
 
 fun List<PrimalEvent>.parseAndMapPrimalUserNames() =
-    this.map { it.takeContentAsPrimalUserNameOrNull() }.fold(emptyMap<String, String>()) { acc, item -> acc + item }
+    this.map {
+        runCatching {
+            it.takeContentAsPrimalUserNameOrNull()
+        }.getOrNull()
+    }.filterNotNull().fold(emptyMap<String, String>()) { acc, item -> acc + item }
 
 fun PrimalEvent?.parseAndMapPrimalUserName() =
     listOf(this).filterNotNull().parseAndMapPrimalUserNames()
