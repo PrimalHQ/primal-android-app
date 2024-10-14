@@ -750,16 +750,9 @@ private fun NavGraphBuilder.explore(
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
-        onHashtagClick = { hashtag ->
-            navController.navigateToExploreFeed(
-                feedSpec = buildAdvancedSearchNotesFeedSpec(query = hashtag),
-            )
-        },
-        onNoteClick = { noteId -> navController.navigateToThread(noteId) },
         onSearchClick = { navController.navigateToSearch() },
-        onTuneClick = { navController.navigateToAdvancedSearch() },
+        onAdvancedSearchClick = { navController.navigateToAdvancedSearch() },
         onClose = { navController.navigateUp() },
-        onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
         noteCallbacks = noteCallbacksHandler(navController),
     )
 }

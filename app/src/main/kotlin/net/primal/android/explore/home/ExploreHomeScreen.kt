@@ -79,11 +79,8 @@ fun ExploreHomeScreen(
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onNoteClick: (String) -> Unit,
-    onProfileClick: (String) -> Unit,
     onSearchClick: () -> Unit,
-    onTuneClick: () -> Unit,
+    onAdvancedSearchClick: () -> Unit,
     onClose: () -> Unit,
     noteCallbacks: NoteCallbacks,
 ) {
@@ -94,12 +91,9 @@ fun ExploreHomeScreen(
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
         onDrawerQrCodeClick = onDrawerQrCodeClick,
-        onHashtagClick = onHashtagClick,
-        onNoteClick = onNoteClick,
         onSearchClick = onSearchClick,
-        onTuneClick = onTuneClick,
+        onAdvancedSearchClick = onAdvancedSearchClick,
         onClose = onClose,
-        onProfileClick = onProfileClick,
         noteCallbacks = noteCallbacks,
     )
 }
@@ -111,11 +105,8 @@ private fun ExploreHomeScreen(
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onNoteClick: (String) -> Unit,
     onSearchClick: () -> Unit,
-    onProfileClick: (String) -> Unit,
-    onTuneClick: () -> Unit,
+    onAdvancedSearchClick: () -> Unit,
     onClose: () -> Unit,
     noteCallbacks: NoteCallbacks,
 ) {
@@ -141,7 +132,7 @@ private fun ExploreHomeScreen(
             ExploreTopAppBar(
                 onClose = onClose,
                 onSearchClick = onSearchClick,
-                onActionIconClick = onTuneClick,
+                onActionIconClick = onAdvancedSearchClick,
                 actionIcon = PrimalIcons.AdvancedSearch,
                 pagerState = pagerState,
                 scrollBehavior = topAppBarScrollBehavior,
@@ -160,7 +151,7 @@ private fun ExploreHomeScreen(
                     PEOPLE_INDEX -> {
                         ExplorePeople(
                             paddingValues = paddingValues,
-                            onProfileClick = onProfileClick,
+                            onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
                             onUiError = { uiError: UiError ->
                                 uiScope.launch {
                                     snackbarHostState.showSnackbar(
@@ -174,8 +165,6 @@ private fun ExploreHomeScreen(
                     ZAPS_INDEX -> {
                         ExploreZaps(
                             paddingValues = paddingValues,
-                            onProfileClick = onProfileClick,
-                            onNoteClick = onNoteClick,
                             noteCallbacks = noteCallbacks,
                         )
                     }
@@ -183,13 +172,13 @@ private fun ExploreHomeScreen(
                         MediaFeedGrid(
                             feedSpec = buildExploreMediaFeedSpec(),
                             contentPadding = paddingValues,
-                            onNoteClick = onNoteClick,
+                            onNoteClick = { noteCallbacks.onNoteClick?.invoke(it) },
                         )
                     }
                     TOPICS_INDEX -> {
                         ExploreTopics(
                             paddingValues = paddingValues,
-                            onHashtagClick = onHashtagClick,
+                            onHashtagClick = { noteCallbacks.onHashtagClick?.invoke(it) },
                         )
                     }
                 }

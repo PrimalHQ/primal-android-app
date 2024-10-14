@@ -50,8 +50,6 @@ import net.primal.android.theme.AppTheme
 fun ExploreZaps(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
-    onProfileClick: (String) -> Unit,
-    onNoteClick: (String) -> Unit,
     noteCallbacks: NoteCallbacks,
 ) {
     val viewModel: ExploreZapsViewModel = hiltViewModel()
@@ -59,12 +57,10 @@ fun ExploreZaps(
 
     ExploreZaps(
         modifier = modifier,
-        paddingValues = paddingValues,
-        onNoteClick = onNoteClick,
-        onProfileClick = onProfileClick,
         state = uiState.value,
-        eventPublisher = viewModel::setEvent,
+        paddingValues = paddingValues,
         noteCallbacks = noteCallbacks,
+        eventPublisher = viewModel::setEvent,
     )
 }
 
@@ -72,11 +68,9 @@ fun ExploreZaps(
 private fun ExploreZaps(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
-    onProfileClick: (String) -> Unit,
-    onNoteClick: (String) -> Unit,
+    noteCallbacks: NoteCallbacks,
     state: ExploreZapsContract.UiState,
     eventPublisher: (ExploreZapsContract.UiEvent) -> Unit,
-    noteCallbacks: NoteCallbacks,
 ) {
     when {
         state.loading && state.zaps.isEmpty() -> {
@@ -105,8 +99,6 @@ private fun ExploreZaps(
                 ) { item ->
                     ZapListItem(
                         zapData = item,
-                        onProfileClick = onProfileClick,
-                        onNoteClick = onNoteClick,
                         noteCallbacks = noteCallbacks,
                     )
                 }
@@ -120,8 +112,6 @@ private fun ExploreZaps(
 fun ZapListItem(
     modifier: Modifier = Modifier,
     zapData: ExploreZapData,
-    onProfileClick: (String) -> Unit,
-    onNoteClick: (String) -> Unit,
     noteCallbacks: NoteCallbacks,
 ) {
     Column(
@@ -130,7 +120,7 @@ fun ZapListItem(
             .clickable(
                 interactionSource = null,
                 indication = null,
-                onClick = { onNoteClick(zapData.noteContentUi.noteId) },
+                onClick = { noteCallbacks.onNoteClick?.invoke(zapData.noteContentUi.noteId) },
             )
             .background(AppTheme.extraColorScheme.surfaceVariantAlt3)
             .padding(all = 8.dp),
@@ -138,7 +128,7 @@ fun ZapListItem(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         ZapHeader(
-            onSenderAvatarClick = { zapData.sender?.pubkey?.let { onProfileClick(it) } },
+            onSenderAvatarClick = { zapData.sender?.pubkey?.let { noteCallbacks.onProfileClick?.invoke(it) } },
             senderCdnImage = zapData.sender?.avatarCdnImage,
             amountSats = zapData.amountSats,
             message = zapData.zapMessage,
@@ -147,10 +137,10 @@ fun ZapListItem(
             noteContent = zapData.noteContentUi,
             noteTimestamp = zapData.createdAt,
             noteCallbacks = noteCallbacks,
-            onNoteClick = onNoteClick,
+            onNoteClick = { noteCallbacks.onNoteClick?.invoke(it) },
             receiverCdnResource = zapData.receiver?.avatarCdnImage,
             receiverDisplayName = zapData.receiver?.authorDisplayName,
-            onReceiverAvatarClick = { zapData.receiver?.pubkey?.let { onProfileClick(it) } },
+            onReceiverAvatarClick = { zapData.receiver?.pubkey?.let { noteCallbacks.onProfileClick?.invoke(it) } },
         )
     }
 }
