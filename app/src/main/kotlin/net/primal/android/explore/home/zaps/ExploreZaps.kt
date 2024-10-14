@@ -138,19 +138,19 @@ fun ZapListItem(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         ZapHeader(
-            onReceiverAvatarClick = { zapData.receiver?.pubkey?.let { onProfileClick(it) } },
             onSenderAvatarClick = { zapData.sender?.pubkey?.let { onProfileClick(it) } },
-            receiverCdnImage = zapData.receiver?.avatarCdnImage,
             senderCdnImage = zapData.sender?.avatarCdnImage,
             amountSats = zapData.amountSats,
             message = zapData.zapMessage,
         )
         NoteSummary(
-            receiverDisplayName = zapData.receiver?.authorDisplayName,
             noteContent = zapData.noteContentUi,
             noteTimestamp = zapData.createdAt,
             noteCallbacks = noteCallbacks,
             onNoteClick = onNoteClick,
+            receiverCdnResource = zapData.receiver?.avatarCdnImage,
+            receiverDisplayName = zapData.receiver?.authorDisplayName,
+            onReceiverAvatarClick = { zapData.receiver?.pubkey?.let { onProfileClick(it) } },
         )
     }
 }
@@ -159,56 +159,64 @@ fun ZapListItem(
 private fun NoteSummary(
     receiverDisplayName: String?,
     noteContent: NoteContentUi,
+    receiverCdnResource: CdnImage?,
     noteTimestamp: Instant,
     noteCallbacks: NoteCallbacks,
+    onReceiverAvatarClick: () -> Unit,
     onNoteClick: (String) -> Unit,
 ) {
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 12.dp, bottom = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalAlignment = Alignment.Start,
+            .padding(start = 2.dp, end = 8.dp, bottom = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        receiverDisplayName?.let {
-            Row {
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(
-                            style = SpanStyle(
-                                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                                fontWeight = FontWeight.Bold,
-                            ),
-                        ) {
-                            append(receiverDisplayName)
-                        }
-                        withStyle(style = SpanStyle(color = AppTheme.extraColorScheme.onSurfaceVariantAlt3)) {
-                            append(" • ")
-                            append(noteTimestamp.asBeforeNowFormat())
-                        }
-                    },
-                    maxLines = 1,
-                    style = AppTheme.typography.bodyMedium,
-                )
-            }
-        }
-        NoteContent(
-            expanded = false,
-            noteCallbacks = noteCallbacks,
-            data = noteContent,
-            contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            onClick = { onNoteClick(noteContent.noteId) },
+        AvatarThumbnail(
+            avatarCdnImage = receiverCdnResource,
+            avatarSize = 38.dp,
+            onClick = onReceiverAvatarClick,
         )
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            receiverDisplayName?.let {
+                Row {
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(
+                                style = SpanStyle(
+                                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                                    fontWeight = FontWeight.Bold,
+                                ),
+                            ) {
+                                append(receiverDisplayName)
+                            }
+                            withStyle(style = SpanStyle(color = AppTheme.extraColorScheme.onSurfaceVariantAlt3)) {
+                                append(" • ")
+                                append(noteTimestamp.asBeforeNowFormat())
+                            }
+                        },
+                        maxLines = 1,
+                        style = AppTheme.typography.bodyMedium,
+                    )
+                }
+            }
+            NoteContent(
+                expanded = false,
+                noteCallbacks = noteCallbacks,
+                data = noteContent,
+                contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                onClick = { onNoteClick(noteContent.noteId) },
+            )
+        }
     }
 }
 
 @Composable
 private fun ZapHeader(
-    onReceiverAvatarClick: () -> Unit,
     onSenderAvatarClick: () -> Unit,
-    receiverCdnImage: CdnImage?,
     senderCdnImage: CdnImage?,
     amountSats: ULong,
     message: String?,
@@ -218,52 +226,42 @@ private fun ZapHeader(
             .fillMaxWidth()
             .clip(RoundedCornerShape(percent = 100))
             .background(AppTheme.colorScheme.background)
-            .padding(4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .padding(end = 16.dp)
+            .padding(2.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AvatarThumbnail(
             avatarCdnImage = senderCdnImage,
-            avatarSize = 42.dp,
+            avatarSize = 38.dp,
             onClick = onSenderAvatarClick,
         )
-
-        Column(
-            modifier = Modifier.padding(vertical = 4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
+        val numberFormat = NumberFormat.getNumberInstance()
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            val numberFormat = NumberFormat.getNumberInstance()
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
-            ) {
-                Icon(
-                    imageVector = PrimalIcons.LightningBoltFilled,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = AppTheme.colorScheme.onPrimary,
-                )
-                Text(
-                    text = numberFormat.format(amountSats.toLong()),
-                    fontWeight = FontWeight.ExtraBold,
-                    style = AppTheme.typography.bodyMedium,
-                )
-            }
-            if (!message.isNullOrEmpty()) {
-                Text(
-                    text = message,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = AppTheme.typography.bodySmall,
-                )
-            }
+            Icon(
+                imageVector = PrimalIcons.LightningBoltFilled,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = AppTheme.colorScheme.onPrimary,
+            )
+            Text(
+                text = numberFormat.format(amountSats.toLong()),
+                fontWeight = FontWeight.ExtraBold,
+                style = AppTheme.typography.bodyMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
-
-        AvatarThumbnail(
-            avatarCdnImage = receiverCdnImage,
-            avatarSize = 42.dp,
-            onClick = onReceiverAvatarClick,
-        )
+        if (!message.isNullOrEmpty()) {
+            Text(
+                text = message,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            )
+        }
     }
 }
