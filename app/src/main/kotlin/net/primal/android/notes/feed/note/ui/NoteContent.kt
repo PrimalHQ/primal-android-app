@@ -13,6 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.primal.android.LocalContentDisplaySettings
@@ -128,6 +129,9 @@ fun NoteContent(
     modifier: Modifier = Modifier,
     data: NoteContentUi,
     expanded: Boolean,
+    noteCallbacks: NoteCallbacks,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
     enableTweetsMode: Boolean = false,
     textSelectable: Boolean = false,
     highlightColor: Color = AppTheme.colorScheme.secondary,
@@ -135,7 +139,6 @@ fun NoteContent(
     referencedEventsContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onClick: ((offset: Offset) -> Unit)? = null,
     onUrlClick: ((url: String) -> Unit)? = null,
-    noteCallbacks: NoteCallbacks,
 ) {
     val displaySettings = LocalContentDisplaySettings.current
     val seeMoreText = stringResource(id = R.string.feed_see_more)
@@ -170,6 +173,8 @@ fun NoteContent(
                     },
                 ),
                 text = contentText,
+                maxLines = maxLines,
+                overflow = overflow,
                 textSelectable = textSelectable,
                 onClick = { position, offset ->
                     val annotation = contentText.getStringAnnotations(

@@ -23,8 +23,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import java.text.NumberFormat
@@ -37,25 +40,26 @@ import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
-import net.primal.android.explore.api.model.ExploreZapData
+import net.primal.android.explore.home.zaps.ui.ExploreZapNoteUi
+import net.primal.android.notes.feed.model.NoteContentUi
+import net.primal.android.notes.feed.note.ui.NoteContent
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 
 @Composable
 fun ExploreZaps(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
-    onProfileClick: (String) -> Unit,
-    onNoteClick: (String) -> Unit,
+    noteCallbacks: NoteCallbacks,
 ) {
     val viewModel: ExploreZapsViewModel = hiltViewModel()
     val uiState = viewModel.state.collectAsState()
 
     ExploreZaps(
         modifier = modifier,
-        paddingValues = paddingValues,
-        onNoteClick = onNoteClick,
-        onProfileClick = onProfileClick,
         state = uiState.value,
+        paddingValues = paddingValues,
+        noteCallbacks = noteCallbacks,
         eventPublisher = viewModel::setEvent,
     )
 }
@@ -64,8 +68,7 @@ fun ExploreZaps(
 private fun ExploreZaps(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
-    onProfileClick: (String) -> Unit,
-    onNoteClick: (String) -> Unit,
+    noteCallbacks: NoteCallbacks,
     state: ExploreZapsContract.UiState,
     eventPublisher: (ExploreZapsContract.UiEvent) -> Unit,
 ) {
@@ -92,12 +95,11 @@ private fun ExploreZaps(
                 item { Spacer(modifier = Modifier.height(4.dp)) }
                 items(
                     items = state.zaps,
-                    key = { "${it.noteId}:${it.sender?.pubkey}:${it.createdAt.toEpochMilli()}" },
+                    key = { "${it.noteContentUi.noteId}:${it.sender?.pubkey}:${it.createdAt.toEpochMilli()}" },
                 ) { item ->
                     ZapListItem(
                         zapData = item,
-                        onProfileClick = onProfileClick,
-                        onNoteClick = onNoteClick,
+                        noteCallbacks = noteCallbacks,
                     )
                 }
                 item { Spacer(modifier = Modifier.height(4.dp)) }
@@ -109,51 +111,49 @@ private fun ExploreZaps(
 @Composable
 fun ZapListItem(
     modifier: Modifier = Modifier,
-    zapData: ExploreZapData,
-    onProfileClick: (String) -> Unit,
-    onNoteClick: (String) -> Unit,
+    zapData: ExploreZapNoteUi,
+    noteCallbacks: NoteCallbacks,
 ) {
     Column(
         modifier = modifier
             .clip(AppTheme.shapes.extraLarge)
-            .clickable { onNoteClick(zapData.noteId) }
+            .clickable(
+                interactionSource = null,
+                indication = null,
+                onClick = { noteCallbacks.onNoteClick?.invoke(zapData.noteContentUi.noteId) },
+            )
             .background(AppTheme.extraColorScheme.surfaceVariantAlt3)
             .padding(all = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         ZapHeader(
-            onSenderAvatarClick = { zapData.sender?.pubkey?.let { onProfileClick(it) } },
+            onSenderAvatarClick = { zapData.sender?.pubkey?.let { noteCallbacks.onProfileClick?.invoke(it) } },
             senderCdnImage = zapData.sender?.avatarCdnImage,
             amountSats = zapData.amountSats,
             message = zapData.zapMessage,
         )
-        if (zapData.noteContent == null) {
-            ProfileSummary(
-                receiverDisplayName = zapData.receiver?.authorDisplayName,
-                noteTimestamp = zapData.createdAt,
-                receiverCdnResource = zapData.receiver?.avatarCdnImage,
-                onReceiverAvatarClick = { zapData.receiver?.pubkey?.let { onProfileClick(it) } },
-            )
-        } else {
-            NoteSummary(
-                receiverDisplayName = zapData.receiver?.authorDisplayName,
-                noteContent = zapData.noteContent,
-                noteTimestamp = zapData.createdAt,
-                receiverCdnResource = zapData.receiver?.avatarCdnImage,
-                onReceiverAvatarClick = { zapData.receiver?.pubkey?.let { onProfileClick(it) } },
-            )
-        }
+        NoteSummary(
+            noteContent = zapData.noteContentUi,
+            noteTimestamp = zapData.createdAt,
+            noteCallbacks = noteCallbacks,
+            onNoteClick = { noteCallbacks.onNoteClick?.invoke(it) },
+            receiverCdnResource = zapData.receiver?.avatarCdnImage,
+            receiverDisplayName = zapData.receiver?.authorDisplayName,
+            onReceiverAvatarClick = { zapData.receiver?.pubkey?.let { noteCallbacks.onProfileClick?.invoke(it) } },
+        )
     }
 }
 
 @Composable
 private fun NoteSummary(
     receiverDisplayName: String?,
+    noteContent: NoteContentUi,
     receiverCdnResource: CdnImage?,
-    onReceiverAvatarClick: () -> Unit,
-    noteContent: String,
     noteTimestamp: Instant,
+    noteCallbacks: NoteCallbacks,
+    onReceiverAvatarClick: () -> Unit,
+    onNoteClick: (String) -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -170,71 +170,37 @@ private fun NoteSummary(
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             receiverDisplayName?.let {
-                ReceiverHeading(
-                    receiverDisplayName = receiverDisplayName,
-                    noteTimestamp = noteTimestamp,
-                )
+                Row {
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(
+                                style = SpanStyle(
+                                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                                    fontWeight = FontWeight.Bold,
+                                ),
+                            ) {
+                                append(receiverDisplayName)
+                            }
+                            withStyle(style = SpanStyle(color = AppTheme.extraColorScheme.onSurfaceVariantAlt3)) {
+                                append(" • ")
+                                append(noteTimestamp.asBeforeNowFormat())
+                            }
+                        },
+                        maxLines = 1,
+                        style = AppTheme.typography.bodyMedium,
+                    )
+                }
             }
-            Text(
-                text = noteContent.split("\n").filter { it.isNotBlank() }.joinToString(separator = " "),
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+            NoteContent(
+                expanded = false,
+                noteCallbacks = noteCallbacks,
+                data = noteContent,
+                contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                style = AppTheme.typography.bodyMedium,
+                onClick = { onNoteClick(noteContent.noteId) },
             )
         }
-    }
-}
-
-@Composable
-fun ProfileSummary(
-    modifier: Modifier = Modifier,
-    receiverDisplayName: String?,
-    receiverCdnResource: CdnImage?,
-    onReceiverAvatarClick: () -> Unit,
-    noteTimestamp: Instant,
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(start = 2.dp, end = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        AvatarThumbnail(
-            avatarCdnImage = receiverCdnResource,
-            avatarSize = 38.dp,
-            onClick = onReceiverAvatarClick,
-        )
-        receiverDisplayName?.let {
-            ReceiverHeading(
-                receiverDisplayName = receiverDisplayName,
-                noteTimestamp = noteTimestamp,
-            )
-        }
-    }
-}
-
-@Composable
-fun ReceiverHeading(receiverDisplayName: String, noteTimestamp: Instant) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(end = 16.dp),
-    ) {
-        Text(
-            modifier = Modifier.weight(weight = 1f, fill = false),
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-            fontWeight = FontWeight.Bold,
-            text = receiverDisplayName,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            style = AppTheme.typography.bodyMedium,
-        )
-        Text(
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-            text = " • ${noteTimestamp.asBeforeNowFormat()}",
-            style = AppTheme.typography.bodyMedium,
-        )
     }
 }
 
