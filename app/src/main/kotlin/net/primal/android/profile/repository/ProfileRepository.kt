@@ -155,7 +155,10 @@ class ProfileRepository @Inject constructor(
             val response = apiBlock()
             val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
             val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-            val profiles = response.contactsMetadata.mapAsProfileDataPO(cdnResources = cdnResources, primalUserNames = primalUserNames)
+            val profiles = response.contactsMetadata.mapAsProfileDataPO(
+                cdnResources = cdnResources,
+                primalUserNames = primalUserNames,
+            )
             val followersCountsMap = response.followerCounts?.takeContentAsPrimalUserFollowersCountsOrNull()
 
             database.profiles().upsertAll(data = profiles)

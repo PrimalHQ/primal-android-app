@@ -42,8 +42,7 @@ fun List<PrimalEvent>.parseAndMapPrimalUserNames() =
         }.getOrNull()
     }.filterNotNull().fold(emptyMap<String, String>()) { acc, item -> acc + item }
 
-fun PrimalEvent?.parseAndMapPrimalUserName() =
-    listOf(this).filterNotNull().parseAndMapPrimalUserNames()
+fun PrimalEvent?.parseAndMapPrimalUserName() = listOf(this).filterNotNull().parseAndMapPrimalUserNames()
 
 fun PrimalEvent.takeContentAsPrimalUserNameOrNull(): Map<String, String> {
     return NostrJson.decodeFromString(this.content)

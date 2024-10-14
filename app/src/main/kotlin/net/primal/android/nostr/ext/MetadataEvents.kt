@@ -14,10 +14,7 @@ import net.primal.android.profile.db.ProfileData
 import net.primal.android.wallet.api.decodeLNUrlOrNull
 import net.primal.android.wallet.api.parseAsLNUrlOrNull
 
-fun List<NostrEvent>.mapAsProfileDataPO(
-    cdnResources: Map<String, CdnResource>,
-    primalUserNames: Map<String, String>,
-) =
+fun List<NostrEvent>.mapAsProfileDataPO(cdnResources: Map<String, CdnResource>, primalUserNames: Map<String, String>) =
     map {
         it.asProfileDataPO(cdnResources = cdnResources, primalUserNames = primalUserNames)
     }
