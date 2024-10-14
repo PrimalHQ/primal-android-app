@@ -72,12 +72,12 @@
 
     <string name="primary_destination_feed_label">Feed</string>
     <string name="primary_destination_reads_label">Reads</string>
-    <string name="primary_destination_explore_label">Explore</string>
     <string name="primary_destination_wallet_label">Wallet</string>
-    <string name="primary_destination_messages_label">Messages</string>
     <string name="primary_destination_notifications_label">Notifications</string>
+    <string name="primary_destination_explore_label">Explore</string>
 
     <string name="drawer_destination_profile">Profile</string>
+    <string name="drawer_destination_messages">Messages</string>
     <string name="drawer_destination_bookmarks">Bookmarks</string>
     <string name="drawer_destination_settings">Settings</string>
     <string name="drawer_destination_sign_out">Sign Out</string>
@@ -505,6 +505,8 @@
     <string name="profile_user_is_muted">%1$s is muted.</string>
     <string name="profile_follows_you">Follows you</string>
     <string name="profile_followed_by">Followed by</string>
+    <string name="profile_save_user_feed_title">%1$s\'s Latest</string>
+    <string name="profile_save_user_feed_description">Latest notes by %1$s\'s follows</string>
 
     <string name="profile_follow">Follow</string>
     <string name="profile_unfollow">Unfollow</string>

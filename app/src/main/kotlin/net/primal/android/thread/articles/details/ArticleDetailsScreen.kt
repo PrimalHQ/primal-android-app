@@ -84,8 +84,8 @@ import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.notes.feed.note.ui.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.notes.feed.note.ui.FeedNoteActionsRow
-import net.primal.android.notes.feed.note.ui.NoteStatsRow
 import net.primal.android.notes.feed.note.ui.ReferencedNoteCard
+import net.primal.android.notes.feed.note.ui.ThreadNoteStatsRow
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
@@ -591,7 +591,7 @@ private fun ArticleContentWithComments(
                     }
 
                     if (state.article.eventStatsUi.hasAnyCount()) {
-                        NoteStatsRow(
+                        ThreadNoteStatsRow(
                             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
                             eventStats = state.article.eventStatsUi,
                         )
@@ -602,12 +602,13 @@ private fun ArticleContentWithComments(
                     FeedNoteActionsRow(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp)
+                            .padding(horizontal = 12.dp)
                             .padding(bottom = 16.dp),
                         eventStats = state.article.eventStatsUi,
                         isBookmarked = state.article.isBookmarked,
                         showCounts = false,
                         showBookmark = true,
+                        highlightedNote = true,
                         onPostAction = onPostAction,
                         onPostLongPressAction = onPostLongPressAction,
                     )

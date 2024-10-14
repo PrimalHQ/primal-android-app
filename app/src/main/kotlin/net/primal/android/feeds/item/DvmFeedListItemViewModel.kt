@@ -65,7 +65,7 @@ class DvmFeedListItemViewModel @Inject constructor(
                             zapDefault = it.appSettings?.zapDefault ?: this.zappingState.zapDefault,
                             zapsConfig = it.appSettings?.zapsConfig ?: this.zappingState.zapsConfig,
                             walletBalanceInBtc = it.primalWalletState.balanceInBtc,
-                        )
+                        ),
                     )
                 }
             }
@@ -91,7 +91,7 @@ class DvmFeedListItemViewModel @Inject constructor(
     private fun onZapClick(zapAction: UiEvent.OnZapClick) =
         viewModelScope.launch {
             if (zapAction.dvmFeed.lnUrlDecoded == null) {
-                setState { copy(error = UiError.MissingLightningAddress(RuntimeException()))}
+                setState { copy(error = UiError.MissingLightningAddress(RuntimeException())) }
                 return@launch
             }
 
@@ -104,7 +104,7 @@ class DvmFeedListItemViewModel @Inject constructor(
                         id = zapAction.dvmFeed.eventId,
                         authorPubkey = zapAction.dvmFeed.dvmPubkey,
                         authorLnUrlDecoded = zapAction.dvmFeed.lnUrlDecoded,
-                    )
+                    ),
                 )
             } catch (error: ZapFailureException) {
                 setState { copy(error = UiError.FailedToPublishZapEvent(error)) }

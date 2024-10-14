@@ -2,34 +2,22 @@ package net.primal.android.notes.feed.note.ui
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.InlineTextContent
-import androidx.compose.foundation.text.appendInlineContent
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.Placeholder
-import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
 import net.primal.android.R
+import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedBookmark
 import net.primal.android.core.compose.icons.primaliconpack.FeedBookmarkFilled
@@ -56,7 +44,7 @@ fun FeedNoteActionsRow(
     onPostAction: ((FeedPostAction) -> Unit)? = null,
     onPostLongPressAction: ((FeedPostAction) -> Unit)? = null,
 ) {
-    val iconSize = if (highlightedNote) 26.sp else 22.sp
+    val iconSize = if (highlightedNote) 26.sp else 17.sp
     val numberFormat = remember { NumberFormat.getNumberInstance() }
     Row(
         modifier = modifier,
@@ -82,7 +70,8 @@ fun FeedNoteActionsRow(
             textCount = if (showCounts) eventStats.satsZapped.toPostStatString(numberFormat) else "",
             highlighted = eventStats.userZapped,
             iconVector = PrimalIcons.FeedNewZap,
-            iconSize = iconSize,
+            // Zaps icons are tiny when below 18.sp so we have to increase it by 20% to fit in
+            iconSize = if (!highlightedNote) iconSize.times(1.2f) else iconSize,
             iconVectorHighlight = PrimalIcons.FeedNewZapFilled,
             colorHighlight = AppTheme.extraColorScheme.zapped,
             onClick = onPostAction?.let {
@@ -153,59 +142,36 @@ fun FeedNoteActionsRow(
 fun SingleEventStat(
     textCount: String,
     highlighted: Boolean,
+    iconSize: TextUnit,
     iconVector: ImageVector,
     iconVectorHighlight: ImageVector,
     colorHighlight: Color,
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
     iconContentDescription: String? = null,
-    iconSize: TextUnit = 24.sp,
-    textStyle: TextStyle = AppTheme.typography.bodyMedium,
+    textStyle: TextStyle = AppTheme.typography.bodySmall,
 ) {
-    val titleText = buildAnnotatedString {
-        appendInlineContent("icon", "[icon]")
-        append(' ')
-        append(textCount)
-    }
-
-    val inlineContent = mapOf(
-        "icon" to InlineTextContent(
-            placeholder = Placeholder(
-                iconSize, iconSize, PlaceholderVerticalAlign.TextCenter,
-            ),
-        ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Image(
-                    imageVector = if (!highlighted) iconVector else iconVectorHighlight,
-                    contentDescription = iconContentDescription,
-                    colorFilter = if (!highlighted) {
-                        ColorFilter.tint(color = AppTheme.extraColorScheme.onSurfaceVariantAlt4)
-                    } else {
-                        null
-                    },
-                )
-            }
-        },
-    )
-
-    Text(
+    IconText(
         modifier = Modifier
-            .clip(CircleShape)
             .animateContentSize()
             .combinedClickable(
                 enabled = onClick != null || onLongClick != null,
                 onClick = { onClick?.invoke() },
                 onLongClick = onLongClick,
             ),
-        text = titleText,
+        leadingIcon = if (!highlighted) iconVector else iconVectorHighlight,
+        leadingIconContentDescription = iconContentDescription,
+        leadingIconTintColor = if (!highlighted) {
+            AppTheme.extraColorScheme.onSurfaceVariantAlt4
+        } else {
+            null
+        },
+        iconSize = iconSize,
+        text = textCount,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         style = textStyle,
         color = if (!highlighted) AppTheme.extraColorScheme.onSurfaceVariantAlt4 else colorHighlight,
-        inlineContent = inlineContent,
     )
 }
 

@@ -87,6 +87,8 @@ fun String.isReadsBookmarkFeedSpec(): Boolean {
     )
 }
 
+fun buildLatestNotesUserFeedSpec(userId: String) = """{"id":"feed","kind":"notes","pubkey":"$userId"}"""
+
 fun String.resolveFeedSpecKind(): FeedSpecKind? {
     return when {
         this.isNotesFeedSpec() -> FeedSpecKind.Notes
@@ -140,15 +142,15 @@ fun String.resolveDefaultDescription(): String =
         }
     }.getOrDefault(defaultValue = "")
 
-fun String.isNotesFeedSpec(): Boolean = this.contains("\"kind\":\"notes\"") || this.contains("kind:1")
+fun String.isNotesFeedSpec() = this.contains("\"kind\":\"notes\"") || this.contains("kind:1")
 
-fun String.isReadsFeedSpec(): Boolean = this.contains("\"kind\":\"reads\"") || this.contains("kind:30023")
+fun String.isReadsFeedSpec() = this.contains("\"kind\":\"reads\"") || this.contains("kind:30023")
 
-fun buildAdvancedSearchNotesFeedSpec(query: String): String = """{"id":"advsearch","query":"kind:1 $query"}"""
+fun buildAdvancedSearchNotesFeedSpec(query: String) = """{"id":"advsearch","query":"kind:1 $query"}"""
 
-fun buildSimpleSearchNotesFeedSpec(query: String): String = """{"id":"search","kind":"notes","query":"$query"}"""
+fun buildSimpleSearchNotesFeedSpec(query: String) = """{"id":"search","kind":"notes","query":"$query"}"""
 
-fun buildAdvancedSearchArticlesFeedSpec(query: String): String = """{"id":"advsearch","query":"kind:30023 $query"}"""
+fun buildReadsTopicFeedSpec(hashtag: String) = """{"kind":"reads","topic":"${hashtag.substring(startIndex = 1)}"}"""
 
 fun buildExploreMediaFeedSpec() = """{"id":"explore-media"}"""
 

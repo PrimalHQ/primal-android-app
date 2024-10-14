@@ -4,12 +4,14 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
@@ -133,13 +135,12 @@ private fun DvmFeedListItem(
                             dvmFeed = dvmFeed,
                             zapDescription = zapDescription,
                             zapAmount = zapAmount.toULong(),
-                        )
+                        ),
                     )
                 } else {
                     showCantZapWarning = true
                 }
-
-            }
+            },
         )
     }
     Column(
@@ -168,9 +169,11 @@ private fun DvmFeedListItem(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    AvatarThumbnail(
+                    DvmFeedThumbnail(
                         avatarCdnImage = dvmFeed.avatarUrl?.let { CdnImage(sourceUrl = it) },
                         avatarSize = avatarSize,
+                        isPrimal = dvmFeed.isPrimal,
+                        outlineColor = listItemContainerColor,
                     )
                     when {
                         dvmFeed.primalSubscriptionRequired == true -> SubBadge(width = avatarSize)
@@ -260,6 +263,42 @@ private fun DvmFeedListItem(
                 }
             },
         )
+    }
+}
+
+@Composable
+fun DvmFeedThumbnail(
+    avatarCdnImage: CdnImage?,
+    avatarSize: Dp,
+    isPrimal: Boolean?,
+    outlineColor: Color,
+) {
+    Box(
+        modifier = Modifier.size(avatarSize),
+        contentAlignment = Alignment.BottomEnd,
+    ) {
+        AvatarThumbnail(
+            avatarCdnImage = avatarCdnImage,
+            avatarSize = avatarSize,
+        )
+        if (isPrimal == true) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(outlineColor)
+                    .size(20.dp),
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.primal_wave_logo_summer),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(AppTheme.colorScheme.background)
+                        .size(17.dp),
+                )
+            }
+        }
     }
 }
 

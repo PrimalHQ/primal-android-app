@@ -24,4 +24,3 @@ data class DvmFeed(
 
 fun DvmFeed.buildSpec(specKind: FeedSpecKind): String =
     "{\"dvm_id\":\"$dvmId\",\"dvm_pubkey\":\"$dvmPubkey\",\"kind\":\"${specKind.id}\"}"
-

@@ -40,31 +40,31 @@ object Nip19TLV {
         return result
     }
 
-    fun parseAsNaddr(naddr: String): Naddr? {
-        val tlv = runCatching { parse(naddr) }.getOrNull() ?: return null
-        val identifier = tlv[Type.SPECIAL.id]?.first()?.let {
-            String(bytes = it, charset = Charsets.US_ASCII)
-        }
-        val relays = tlv[Type.RELAY.id]?.first()?.let {
-            String(bytes = it, charset = Charsets.US_ASCII)
-        }
-        val profileId = tlv[Type.AUTHOR.id]?.first()?.toHex()
+    fun parseAsNaddr(naddr: String): Naddr? =
+        runCatching {
+            val tlv = parse(naddr)
+            val identifier = tlv[Type.SPECIAL.id]?.first()?.let {
+                String(bytes = it, charset = Charsets.US_ASCII)
+            }
+            val relays = tlv[Type.RELAY.id]?.first()?.let {
+                String(bytes = it, charset = Charsets.US_ASCII)
+            }
+            val profileId = tlv[Type.AUTHOR.id]?.first()?.toHex()
 
-        val kind = tlv[Type.KIND.id]?.first()?.let {
-            toInt32(it)
-        }
-
-        return if (identifier != null && profileId != null && kind != null) {
-            Naddr(
-                identifier = identifier,
-                relays = relays?.split(",") ?: emptyList(),
-                userId = profileId,
-                kind = kind,
-            )
-        } else {
-            null
-        }
-    }
+            val kind = tlv[Type.KIND.id]?.first()?.let {
+                toInt32(it)
+            }
+            if (identifier != null && profileId != null && kind != null) {
+                Naddr(
+                    identifier = identifier,
+                    relays = relays?.split(",") ?: emptyList(),
+                    userId = profileId,
+                    kind = kind,
+                )
+            } else {
+                null
+            }
+        }.getOrNull()
 
     fun Naddr.toNaddrString(): String {
         val tlv = mutableListOf<Byte>()

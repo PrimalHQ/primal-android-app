@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -57,7 +56,6 @@ data class CoverValues(
 @Composable
 fun ProfileTopCoverBar(
     state: ProfileDetailsContract.UiState,
-    snackbarHostState: SnackbarHostState,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     onClose: () -> Unit,
     titleVisible: Boolean,
@@ -98,7 +96,6 @@ fun ProfileTopCoverBar(
             state = state,
             onClose = onClose,
             titleVisible = titleVisible,
-            snackbarHostState = snackbarHostState,
             eventPublisher = eventPublisher,
             paddingValues = paddingValues,
         )
@@ -131,7 +128,6 @@ fun ProfileTopCoverBar(
 private fun ProfileTopAppBar(
     state: ProfileDetailsContract.UiState,
     titleVisible: Boolean,
-    snackbarHostState: SnackbarHostState,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     onClose: () -> Unit,
     paddingValues: PaddingValues,
@@ -175,7 +171,6 @@ private fun ProfileTopAppBar(
                     isActiveUser = state.isActiveUser,
                     isProfileMuted = state.isProfileMuted,
                     isProfileFeedInActiveUserFeeds = state.isProfileFeedInActiveUserFeeds,
-                    snackbarHostState = snackbarHostState,
                     profileName = state.profileDetails?.authorDisplayName ?: "",
                     eventPublisher = eventPublisher,
                 )

@@ -23,23 +23,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.DrawerState
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,29 +58,22 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import kotlinx.coroutines.launch
-import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
-import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
-import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
+import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.NewDM
-import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.utils.parseHashtags
-import net.primal.android.drawer.DrawerScreenDestination
-import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent
 import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent.ChangeRelation
 import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent.MarkAllConversationsAsRead
@@ -96,13 +86,10 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun MessageListScreen(
     viewModel: MessageConversationListViewModel,
-    onSearchClick: () -> Unit,
-    onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
-    onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
-    onDrawerQrCodeClick: () -> Unit,
     onConversationClick: (String) -> Unit,
     onNewMessageClick: () -> Unit,
     onProfileClick: (profileId: String) -> Unit,
+    onClose: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -118,14 +105,11 @@ fun MessageListScreen(
 
     MessageListScreen(
         state = uiState.value,
-        onSearchClick = onSearchClick,
-        onPrimaryDestinationChanged = onTopLevelDestinationChanged,
-        onDrawerDestinationClick = onDrawerScreenClick,
-        onDrawerQrCodeClick = onDrawerQrCodeClick,
         eventPublisher = { viewModel.setEvent(it) },
         onConversationClick = onConversationClick,
         onNewMessageClick = onNewMessageClick,
         onProfileClick = onProfileClick,
+        onClose = onClose,
     )
 }
 
@@ -133,18 +117,12 @@ fun MessageListScreen(
 @Composable
 fun MessageListScreen(
     state: MessageConversationListContract.UiState,
-    onSearchClick: () -> Unit,
-    onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
-    onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
-    onDrawerQrCodeClick: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
     onConversationClick: (String) -> Unit,
     onNewMessageClick: () -> Unit,
     onProfileClick: (profileId: String) -> Unit,
+    onClose: () -> Unit,
 ) {
-    val uiScope = rememberCoroutineScope()
-    val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
-
     val conversations = state.conversations.collectAsLazyPagingItems()
     val listState = conversations.rememberLazyListStatePagingWorkaround()
 
@@ -155,24 +133,12 @@ fun MessageListScreen(
         }
     }
 
-    PrimalDrawerScaffold(
-        drawerState = drawerState,
-        activeDestination = PrimalTopLevelDestination.Messages,
-        onActiveDestinationClick = { uiScope.launch { listState.animateScrollToItem(0) } },
-        onPrimaryDestinationChanged = onPrimaryDestinationChanged,
-        onDrawerDestinationClick = onDrawerDestinationClick,
-        onDrawerQrCodeClick = onDrawerQrCodeClick,
-        badges = state.badges,
-        focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled && conversations.isNotEmpty(),
-        topAppBar = {
+    Scaffold(
+        topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.messages_title),
-                avatarCdnImage = state.activeAccountAvatarCdnImage,
-                navigationIcon = PrimalIcons.AvatarDefault,
-                onNavigationIconClick = {
-                    uiScope.launch { drawerState.open() }
-                },
-                scrollBehavior = it,
+                navigationIcon = PrimalIcons.ArrowBack,
+                onNavigationIconClick = onClose,
                 footer = {
                     MessagesTabs(
                         relation = state.activeRelation,
@@ -185,13 +151,6 @@ fun MessageListScreen(
                         onMarkAllRead = {
                             eventPublisher(MarkAllConversationsAsRead)
                         },
-                    )
-                },
-                actions = {
-                    AppBarIcon(
-                        icon = PrimalIcons.Search,
-                        onClick = onSearchClick,
-                        appBarIconContentDescription = stringResource(id = R.string.accessibility_search),
                     )
                 },
             )

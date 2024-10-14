@@ -223,7 +223,13 @@ fun List<String>.mapAsNoteNostrUriPO(
     val refNote = postIdToPostDataMap[refNoteId]
     val refPostAuthor = profileIdToProfileDataMap[refNote?.authorId]
 
-    val refNaddr = Nip19TLV.parseAsNaddr(link.removePrefix("nostr:"))
+    val refNaddr = Nip19TLV.parseAsNaddr(
+        naddr = if (link.startsWith("nostr:")) {
+            link.removePrefix("nostr:")
+        } else {
+            link
+        },
+    )
     val refArticle = articleIdToArticle[refNaddr?.identifier]
     val refArticleAuthor = profileIdToProfileDataMap[refNaddr?.userId]
 

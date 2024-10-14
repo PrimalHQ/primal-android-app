@@ -99,19 +99,30 @@ fun ProfileDetailsScreen(
         }
     }
 
+    val uiScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
     val pullToRefreshState = rememberPullToRefreshState()
     val pullToRefreshing = remember { mutableStateOf(false) }
+    val addedToUserFeedsMessage = stringResource(id = R.string.app_added_to_user_feeds)
+    val removedFromUserFeedsMessage = stringResource(id = R.string.app_removed_from_user_feeds)
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect {
             when (it) {
                 ProfileDetailsContract.SideEffect.ProfileUpdateFinished -> pullToRefreshing.value = false
+                ProfileDetailsContract.SideEffect.ProfileFeedAdded -> uiScope.launch {
+                    snackbarHostState.showSnackbar(message = addedToUserFeedsMessage)
+                }
+                ProfileDetailsContract.SideEffect.ProfileFeedRemoved -> uiScope.launch {
+                    snackbarHostState.showSnackbar(message = removedFromUserFeedsMessage)
+                }
             }
         }
     }
 
     ProfileDetailsScreen(
         state = uiState.value,
+        snackbarHostState = snackbarHostState,
         onClose = onClose,
         noteCallbacks = noteCallbacks,
         onEditProfileClick = onEditProfileClick,
@@ -137,6 +148,7 @@ internal const val MEDIA_TAB_INDEX = 3
 @Composable
 fun ProfileDetailsScreen(
     state: ProfileDetailsContract.UiState,
+    snackbarHostState: SnackbarHostState,
     onClose: () -> Unit,
     noteCallbacks: NoteCallbacks,
     onEditProfileClick: () -> Unit,
@@ -173,7 +185,6 @@ fun ProfileDetailsScreen(
 
     val listState = rememberLazyListState()
 
-    val snackbarHostState = remember { SnackbarHostState() }
     val uiScope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -268,7 +279,6 @@ fun ProfileDetailsScreen(
                     stickyHeader {
                         ProfileTopCoverBar(
                             state = state,
-                            snackbarHostState = snackbarHostState,
                             titleVisible = topBarTitleVisible.value,
                             coverValues = CoverValues(
                                 coverHeight = with(density) { coverHeightPx.floatValue.toDp() },
@@ -499,6 +509,7 @@ private fun PreviewProfileScreen() {
                 isActiveUser = true,
                 isProfileFeedInActiveUserFeeds = false,
             ),
+            snackbarHostState = SnackbarHostState(),
             onClose = {},
             noteCallbacks = NoteCallbacks(),
             onEditProfileClick = {},

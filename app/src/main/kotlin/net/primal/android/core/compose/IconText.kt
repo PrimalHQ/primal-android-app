@@ -40,6 +40,8 @@ fun IconText(
     color: Color = LocalContentColor.current,
     leadingIconTintColor: Color? = color,
     trailingIconTintColor: Color? = color,
+    leadingIconContentDescription: String? = null,
+    trailingIconContentDescription: String? = null,
     fontSize: TextUnit = TextUnit.Unspecified,
     fontStyle: FontStyle? = null,
     fontWeight: FontWeight? = null,
@@ -68,11 +70,21 @@ fun IconText(
 
     val inlineContent = mutableMapOf<String, InlineTextContent>().apply {
         if (leadingIcon != null) {
-            this["leadingIcon"] = buildIconInlineTextContent(iconSize, leadingIcon, leadingIconTintColor)
+            this["leadingIcon"] = buildIconInlineTextContent(
+                iconSize = iconSize,
+                icon = leadingIcon,
+                iconTintColor = leadingIconTintColor,
+                iconContentDescription = leadingIconContentDescription,
+            )
         }
 
         if (trailingIcon != null) {
-            this["trailingIcon"] = buildIconInlineTextContent(iconSize, trailingIcon, trailingIconTintColor)
+            this["trailingIcon"] = buildIconInlineTextContent(
+                iconSize = iconSize,
+                icon = trailingIcon,
+                iconTintColor = trailingIconTintColor,
+                iconContentDescription = trailingIconContentDescription,
+            )
         }
     }
 
@@ -102,6 +114,7 @@ private fun buildIconInlineTextContent(
     iconSize: TextUnit,
     icon: ImageVector,
     iconTintColor: Color?,
+    iconContentDescription: String? = null,
 ) = InlineTextContent(
     placeholder = Placeholder(
         iconSize,
@@ -115,7 +128,7 @@ private fun buildIconInlineTextContent(
     ) {
         Image(
             imageVector = icon,
-            contentDescription = null,
+            contentDescription = iconContentDescription,
             colorFilter = if (iconTintColor != null) {
                 ColorFilter.tint(color = iconTintColor)
             } else {

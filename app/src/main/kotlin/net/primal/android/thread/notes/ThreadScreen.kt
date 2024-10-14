@@ -97,7 +97,7 @@ import net.primal.android.editor.ui.NoteTagUserLazyColumn
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
-import net.primal.android.notes.feed.note.ui.NoteStatsRow
+import net.primal.android.notes.feed.note.ui.ThreadNoteStatsRow
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -420,7 +420,7 @@ private fun ThreadLazyColumn(
                                 )
 
                                 if (item.stats.hasAnyCount()) {
-                                    NoteStatsRow(
+                                    ThreadNoteStatsRow(
                                         modifier = Modifier.padding(top = 10.dp),
                                         eventStats = item.stats,
                                     )

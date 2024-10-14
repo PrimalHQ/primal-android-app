@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.group
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -21,35 +22,37 @@ val PrimalIcons.FeedNewZap: ImageVector
         }
         _FeedNewZap = ImageVector.Builder(
             name = "FeedNewZap",
-            defaultWidth = 18.dp,
-            defaultHeight = 22.dp,
-            viewportWidth = 18f,
-            viewportHeight = 22f
+            defaultWidth = 20.dp,
+            defaultHeight = 20.dp,
+            viewportWidth = 20f,
+            viewportHeight = 20f
         ).apply {
-            path(
-                fill = SolidColor(Color(0xFF666666)),
-                pathFillType = PathFillType.EvenOdd
-            ) {
-                moveTo(17.147f, 8.424f)
-                curveTo(17.406f, 8.074f, 17.147f, 7.587f, 16.7f, 7.587f)
-                horizontalLineTo(11.177f)
-                lineTo(12.463f, 1.267f)
-                curveTo(12.687f, 0.166f, 11.214f, -0.47f, 10.51f, 0.423f)
-                lineTo(0.863f, 12.666f)
-                curveTo(0.588f, 13.015f, 0.846f, 13.516f, 1.3f, 13.516f)
-                horizontalLineTo(6.784f)
-                lineTo(5.443f, 20.751f)
-                curveTo(5.237f, 21.862f, 6.738f, 22.471f, 7.418f, 21.552f)
-                lineTo(17.147f, 8.424f)
-                close()
-                moveTo(9.893f, 4.269f)
-                lineTo(8.841f, 9.44f)
-                horizontalLineTo(14.032f)
-                lineTo(7.978f, 17.61f)
-                lineTo(9.079f, 11.663f)
-                horizontalLineTo(4.067f)
-                lineTo(9.893f, 4.269f)
-                close()
+            group {
+                path(
+                    fill = SolidColor(Color(0xFF666666)),
+                    pathFillType = PathFillType.EvenOdd
+                ) {
+                    moveTo(15.915f, 6.893f)
+                    curveTo(16.128f, 6.606f, 15.915f, 6.208f, 15.55f, 6.208f)
+                    horizontalLineTo(11.031f)
+                    lineTo(12.083f, 1.036f)
+                    curveTo(12.266f, 0.136f, 11.061f, -0.385f, 10.486f, 0.346f)
+                    lineTo(2.592f, 10.363f)
+                    curveTo(2.368f, 10.649f, 2.579f, 11.059f, 2.95f, 11.059f)
+                    horizontalLineTo(7.437f)
+                    lineTo(6.34f, 16.978f)
+                    curveTo(6.171f, 17.887f, 7.399f, 18.385f, 7.956f, 17.634f)
+                    lineTo(15.915f, 6.893f)
+                    close()
+                    moveTo(9.981f, 3.493f)
+                    lineTo(9.12f, 7.724f)
+                    horizontalLineTo(13.367f)
+                    lineTo(8.413f, 14.408f)
+                    lineTo(9.315f, 9.543f)
+                    horizontalLineTo(5.214f)
+                    lineTo(9.981f, 3.493f)
+                    close()
+                }
             }
         }.build()
 
@@ -58,6 +61,7 @@ val PrimalIcons.FeedNewZap: ImageVector
 
 @Suppress("ObjectPropertyName")
 private var _FeedNewZap: ImageVector? = null
+
 
 @Preview(showBackground = true)
 @Composable

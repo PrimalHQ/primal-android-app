@@ -19,6 +19,9 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileStatsUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.feeds.domain.FEED_KIND_USER
+import net.primal.android.feeds.domain.FeedSpecKind
+import net.primal.android.feeds.domain.buildLatestNotesUserFeedSpec
 import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.navigation.profileId
 import net.primal.android.networking.relays.errors.MissingRelaysException
@@ -94,8 +97,8 @@ class ProfileDetailsViewModel @Inject constructor(
                 when (it) {
                     is UiEvent.FollowAction -> follow(it)
                     is UiEvent.UnfollowAction -> unfollow(it)
-                    is UiEvent.AddUserFeedAction -> addUserFeed(it)
-                    is UiEvent.RemoveUserFeedAction -> removeUserFeed(it)
+                    is UiEvent.AddProfileFeedAction -> addProfileFeed(it)
+                    is UiEvent.RemoveProfileFeedAction -> removeProfileFeed(it)
                     is UiEvent.MuteAction -> mute(it)
                     is UiEvent.UnmuteAction -> unmute(it)
                     UiEvent.RequestProfileUpdate -> requestProfileUpdate()
@@ -140,9 +143,8 @@ class ProfileDetailsViewModel @Inject constructor(
 
     private fun observeContainsFeed() =
         viewModelScope.launch {
-            // TODO Update profile feed spec once api is implemented
-            val profileFeedSpec = profileId
-            feedsRepository.observeContainsFeedSpec(feedSpec = profileFeedSpec).collect {
+            val feedSpec = buildLatestNotesUserFeedSpec(userId = profileId)
+            feedsRepository.observeContainsFeedSpec(feedSpec = feedSpec).collect {
                 setState { copy(isProfileFeedInActiveUserFeeds = it) }
             }
         }
@@ -300,37 +302,36 @@ class ProfileDetailsViewModel @Inject constructor(
             }
         }
 
-    private fun addUserFeed(action: UiEvent.AddUserFeedAction) {
-        setErrorState(error = ProfileError.FailedToRemoveFeed(RuntimeException("Api not implemented")))
-        // TODO Implement adding user feed in ProfileDetails
-//        viewModelScope.launch {
-//            try {
-//                settingsRepository.addAndPersistUserFeed(
-//                    userId = activeAccountStore.activeUserId(),
-//                    name = action.name,
-//                    directive = action.directive,
-//                )
-//            } catch (error: WssException) {
-//                Timber.w(error)
-//                setErrorState(error = ProfileError.FailedToAddToFeed(error))
-//            }
-//        }
+    private fun addProfileFeed(action: UiEvent.AddProfileFeedAction) {
+        viewModelScope.launch {
+            try {
+                feedsRepository.addFeedLocally(
+                    feedSpec = buildLatestNotesUserFeedSpec(userId = action.profileId),
+                    title = action.feedTitle,
+                    description = action.feedDescription,
+                    feedSpecKind = FeedSpecKind.Notes,
+                    feedKind = FEED_KIND_USER,
+                )
+                feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
+                setEffect(ProfileDetailsContract.SideEffect.ProfileFeedAdded)
+            } catch (error: WssException) {
+                Timber.w(error)
+                setErrorState(error = ProfileError.FailedToAddToFeed(error))
+            }
+        }
     }
 
-    private fun removeUserFeed(action: UiEvent.RemoveUserFeedAction) {
-        setErrorState(error = ProfileError.FailedToRemoveFeed(RuntimeException("Api not implemented")))
-        // TODO Implement removing user feed in ProfileDetails
-//        viewModelScope.launch {
-//            try {
-//                settingsRepository.removeAndPersistUserFeed(
-//                    userId = activeAccountStore.activeUserId(),
-//                    directive = action.directive,
-//                )
-//            } catch (error: WssException) {
-//                Timber.w(error)
-//                setErrorState(error = ProfileError.FailedToRemoveFeed(error))
-//            }
-//        }
+    private fun removeProfileFeed(action: UiEvent.RemoveProfileFeedAction) {
+        viewModelScope.launch {
+            try {
+                feedsRepository.removeFeedLocally(buildLatestNotesUserFeedSpec(userId = action.profileId))
+                feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
+                setEffect(ProfileDetailsContract.SideEffect.ProfileFeedRemoved)
+            } catch (error: WssException) {
+                Timber.w(error)
+                setErrorState(error = ProfileError.FailedToRemoveFeed(error))
+            }
+        }
     }
 
     private fun mute(action: UiEvent.MuteAction) =
