@@ -6,7 +6,7 @@ sealed class ZapTarget {
         val lnUrlDecoded: String,
     ) : ZapTarget()
 
-    data class Note(
+    data class Event(
         val id: String,
         val authorPubkey: String,
         val authorLnUrlDecoded: String,
@@ -22,7 +22,7 @@ sealed class ZapTarget {
 
 fun ZapTarget.userId(): String {
     return when (this) {
-        is ZapTarget.Note -> this.authorPubkey
+        is ZapTarget.Event -> this.authorPubkey
         is ZapTarget.Profile -> this.pubkey
         is ZapTarget.Article -> this.eventAuthorId
     }
@@ -30,7 +30,7 @@ fun ZapTarget.userId(): String {
 
 fun ZapTarget.lnUrlDecoded(): String {
     return when (this) {
-        is ZapTarget.Note -> this.authorLnUrlDecoded
+        is ZapTarget.Event -> this.authorLnUrlDecoded
         is ZapTarget.Profile -> this.lnUrlDecoded
         is ZapTarget.Article -> this.eventAuthorLnUrlDecoded
     }

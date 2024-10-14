@@ -754,6 +754,7 @@ private fun NavGraphBuilder.explore(
         onAdvancedSearchClick = { navController.navigateToAdvancedSearch() },
         onClose = { navController.navigateUp() },
         noteCallbacks = noteCallbacksHandler(navController),
+        onGoToWallet = { navController.navigateToWallet() },
     )
 }
 

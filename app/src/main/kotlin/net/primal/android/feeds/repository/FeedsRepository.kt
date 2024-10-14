@@ -27,6 +27,7 @@ import net.primal.android.nostr.model.primal.content.ContentDvmFeedMetadata
 import net.primal.android.nostr.model.primal.content.ContentPrimalDvmFeedMetadata
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventUserStats
+import net.primal.android.wallet.api.parseAsLNUrlOrNull
 
 class FeedsRepository @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
@@ -175,8 +176,10 @@ class FeedsRepository @Inject constructor(
 
                 if (dvmMetadata != null && dvmId != null && dvmTitle != null) {
                     DvmFeed(
+                        eventId = nostrEvent.id,
                         dvmId = dvmId,
                         dvmPubkey = nostrEvent.pubKey,
+                        dvmLnUrlDecoded = dvmMetadata.lud16?.parseAsLNUrlOrNull(),
                         avatarUrl = dvmMetadata.picture,
                         title = dvmTitle,
                         description = dvmMetadata.about,

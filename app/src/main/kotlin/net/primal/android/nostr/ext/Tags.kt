@@ -211,7 +211,7 @@ fun ZapTarget.toTags(): List<JsonArray> {
     when (this) {
         is ZapTarget.Profile -> tags.add(pubkey.asPubkeyTag())
 
-        is ZapTarget.Note -> {
+        is ZapTarget.Event -> {
             tags.add(id.asEventIdTag())
             tags.add(authorPubkey.asPubkeyTag())
         }

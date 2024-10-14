@@ -3,8 +3,10 @@ package net.primal.android.feeds.domain
 import net.primal.android.profile.db.ProfileData
 
 data class DvmFeed(
+    val eventId: String,
     val dvmPubkey: String,
     val dvmId: String,
+    val dvmLnUrlDecoded: String?,
     val title: String,
     val description: String? = null,
     val avatarUrl: String? = null,
