@@ -11,6 +11,7 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
+import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.settings.api.SettingsApi
 import net.primal.android.settings.muted.db.MutedUserData
@@ -72,8 +73,14 @@ class MutedUserRepository @Inject constructor(
     private suspend fun fetchMuteListAndPersistProfiles(userId: String): Set<MutedUserData> {
         val response = settingsApi.getMuteList(userId = userId)
         val muteList = response.muteList?.tags?.mapToPubkeySet() ?: emptySet()
+        val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
         val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-        val profileData = response.metadataEvents.map { it.asProfileDataPO(cdnResources = cdnResources) }
+        val profileData = response.metadataEvents.map {
+            it.asProfileDataPO(
+                cdnResources = cdnResources,
+                primalUserNames = primalUserNames,
+            )
+        }
 
         database.profiles().upsertAll(data = profileData)
         return muteList

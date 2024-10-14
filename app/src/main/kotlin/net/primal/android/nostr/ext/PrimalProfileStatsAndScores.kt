@@ -35,6 +35,16 @@ fun PrimalEvent.takeContentAsPrimalUserScoresOrNull(): Map<String, Float> {
     return NostrJson.decodeFromString(this.content)
 }
 
+fun List<PrimalEvent>.parseAndMapPrimalUserNames() =
+    this.map { it.takeContentAsPrimalUserNameOrNull() }.fold(emptyMap<String, String>()) { acc, item -> acc + item }
+
+fun PrimalEvent?.parseAndMapPrimalUserName() =
+    listOf(this).filterNotNull().parseAndMapPrimalUserNames()
+
+fun PrimalEvent.takeContentAsPrimalUserNameOrNull(): Map<String, String> {
+    return NostrJson.decodeFromString(this.content)
+}
+
 fun PrimalEvent.takeContentAsPrimalUserFollowersCountsOrNull(): Map<String, Int> {
     return NostrJson.decodeFromString(this.content)
 }

@@ -10,4 +10,5 @@ data class EventZapsResponse(
     val profiles: List<NostrEvent>,
     val userScores: PrimalEvent?,
     val cdnResources: List<PrimalEvent>,
+    val primalUserNames: List<PrimalEvent>,
 )

@@ -24,6 +24,7 @@ import net.primal.android.nostr.ext.flatMapPostsAsNoteNostrUriPO
 import net.primal.android.nostr.ext.mapAsEventZapDO
 import net.primal.android.nostr.ext.mapAsPostDataPO
 import net.primal.android.nostr.ext.mapAsProfileDataPO
+import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowStats
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
 import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
@@ -40,8 +41,12 @@ class ExploreRepository @Inject constructor(
         withContext(dispatchers.io()) {
             val response = exploreApi.getTrendingZaps(body = ExploreRequestBody(userPubKey = userId, limit = 100))
 
+            val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
             val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-            val profiles = response.metadata.mapAsProfileDataPO(cdnResources = cdnResources)
+            val profiles = response.metadata.mapAsProfileDataPO(
+                cdnResources = cdnResources,
+                primalUserNames = primalUserNames,
+            )
 
             val profilesMap = profiles.associateBy { it.ownerId }
 
@@ -80,8 +85,12 @@ class ExploreRepository @Inject constructor(
         withContext(dispatchers.io()) {
             val response = exploreApi.getTrendingPeople(body = ExploreRequestBody(userPubKey = userId, limit = 100))
 
+            val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
             val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-            val profiles = response.metadata.mapAsProfileDataPO(cdnResources = cdnResources)
+            val profiles = response.metadata.mapAsProfileDataPO(
+                cdnResources = cdnResources,
+                primalUserNames = primalUserNames,
+            )
             val userScoresMap = response.usersScores?.takeContentAsPrimalUserScoresOrNull()
             val usersFollowStats = response.usersFollowStats?.takeContentAsPrimalUserFollowStats()
             val userFollowCount = response.usersFollowCount?.takeContentAsPrimalUserFollowersCountsOrNull()
@@ -123,8 +132,12 @@ class ExploreRepository @Inject constructor(
     private suspend fun queryRemoteUsers(apiBlock: suspend () -> UsersResponse): List<UserProfileSearchItem> =
         withContext(dispatchers.io()) {
             val response = apiBlock()
+            val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
             val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-            val profiles = response.contactsMetadata.mapAsProfileDataPO(cdnResources = cdnResources)
+            val profiles = response.contactsMetadata.mapAsProfileDataPO(
+                cdnResources = cdnResources,
+                primalUserNames = primalUserNames,
+            )
             val userScoresMap = response.userScores?.takeContentAsPrimalUserScoresOrNull()
             val result = profiles.map {
                 val score = userScoresMap?.get(it.ownerId)

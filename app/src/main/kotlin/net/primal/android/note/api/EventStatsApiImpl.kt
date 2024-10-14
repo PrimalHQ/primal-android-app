@@ -34,6 +34,7 @@ class EventStatsApiImpl @Inject constructor(
             zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
             userScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
+            primalUserNames = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserName),
         )
     }
 
