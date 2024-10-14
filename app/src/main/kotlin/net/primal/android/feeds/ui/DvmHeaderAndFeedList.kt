@@ -19,9 +19,9 @@ fun DvmHeaderAndFeedList(
     dvmFeed: DvmFeed,
     modifier: Modifier = Modifier,
     extended: Boolean = false,
-    onGoToWallet: (() -> Unit)? = null,
     showFollowsActionsAvatarRow: Boolean = false,
     clipShape: Shape? = AppTheme.shapes.small,
+    onGoToWallet: (() -> Unit)? = null,
     onUiError: ((UiError) -> Unit)? = null,
 ) {
     Column(modifier = modifier) {

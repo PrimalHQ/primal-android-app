@@ -54,7 +54,6 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
 import net.primal.android.core.errors.UiError
 import net.primal.android.feeds.domain.DvmFeed
-import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.ui.SingleEventStat
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
@@ -67,13 +66,13 @@ private val PaidBackground = Color(0xFFFC6337)
 fun DvmFeedListItem(
     modifier: Modifier = Modifier,
     data: DvmFeed,
-    onFeedClick: ((dvmFeed: DvmFeed) -> Unit)? = null,
-    onGoToWallet: (() -> Unit)? = null,
     listItemContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt2,
     avatarSize: Dp = 48.dp,
     extended: Boolean = false,
     showFollowsActionsAvatarRow: Boolean = false,
     clipShape: Shape? = AppTheme.shapes.small,
+    onFeedClick: ((dvmFeed: DvmFeed) -> Unit)? = null,
+    onGoToWallet: (() -> Unit)? = null,
     onUiError: ((UiError) -> Unit)? = null,
 ) {
     val viewModel = hiltViewModel<DvmFeedListItemViewModel>()

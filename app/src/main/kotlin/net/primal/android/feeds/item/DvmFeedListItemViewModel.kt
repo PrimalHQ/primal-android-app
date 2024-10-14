@@ -90,7 +90,7 @@ class DvmFeedListItemViewModel @Inject constructor(
 
     private fun onZapClick(zapAction: UiEvent.OnZapClick) =
         viewModelScope.launch {
-            if (zapAction.dvmFeed.lnUrlDecoded == null) {
+            if (zapAction.dvmFeed.dvmLnUrlDecoded == null) {
                 setState { copy(error = UiError.MissingLightningAddress(RuntimeException())) }
                 return@launch
             }
@@ -103,7 +103,7 @@ class DvmFeedListItemViewModel @Inject constructor(
                     target = ZapTarget.Event(
                         id = zapAction.dvmFeed.eventId,
                         authorPubkey = zapAction.dvmFeed.dvmPubkey,
-                        authorLnUrlDecoded = zapAction.dvmFeed.lnUrlDecoded,
+                        authorLnUrlDecoded = zapAction.dvmFeed.dvmLnUrlDecoded,
                     ),
                 )
             } catch (error: ZapFailureException) {

@@ -179,7 +179,7 @@ class FeedsRepository @Inject constructor(
                         eventId = nostrEvent.id,
                         dvmId = dvmId,
                         dvmPubkey = nostrEvent.pubKey,
-                        lnUrlDecoded = dvmMetadata.lud16?.parseAsLNUrlOrNull(),
+                        dvmLnUrlDecoded = dvmMetadata.lud16?.parseAsLNUrlOrNull(),
                         avatarUrl = dvmMetadata.picture,
                         title = dvmTitle,
                         description = dvmMetadata.about,
