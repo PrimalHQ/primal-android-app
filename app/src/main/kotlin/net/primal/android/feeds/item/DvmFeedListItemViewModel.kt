@@ -15,6 +15,7 @@ import net.primal.android.feeds.item.DvmFeedListItemContract.UiEvent
 import net.primal.android.feeds.item.DvmFeedListItemContract.UiState
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.note.repository.NoteRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.domain.ZapTarget
@@ -100,10 +101,12 @@ class DvmFeedListItemViewModel @Inject constructor(
                     userId = activeAccountStore.activeUserId(),
                     comment = zapAction.zapDescription,
                     amountInSats = zapAction.zapAmount,
-                    target = ZapTarget.Event(
-                        id = zapAction.dvmFeed.eventId,
-                        authorPubkey = zapAction.dvmFeed.dvmPubkey,
-                        authorLnUrlDecoded = zapAction.dvmFeed.dvmLnUrlDecoded,
+                    target = ZapTarget.ReplaceableEvent(
+                        kind = NostrEventKind.AppHandler.value,
+                        identifier = zapAction.dvmFeed.dvmId,
+                        eventId = zapAction.dvmFeed.eventId,
+                        eventAuthorId = zapAction.dvmFeed.dvmPubkey,
+                        eventAuthorLnUrlDecoded = zapAction.dvmFeed.dvmLnUrlDecoded,
                     ),
                 )
             } catch (error: ZapFailureException) {
