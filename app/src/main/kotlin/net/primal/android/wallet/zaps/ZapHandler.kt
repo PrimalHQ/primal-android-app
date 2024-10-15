@@ -104,12 +104,12 @@ class ZapHandler @Inject constructor(
         when (this) {
             is ZapTarget.Event -> EventStatsUpdater(
                 userId = userId,
-                eventId = this.id,
-                eventAuthorId = this.authorPubkey,
+                eventId = this.eventId,
+                eventAuthorId = this.eventAuthorId,
                 database = database,
             )
 
-            is ZapTarget.Article -> EventStatsUpdater(
+            is ZapTarget.ReplaceableEvent -> EventStatsUpdater(
                 userId = userId,
                 eventId = this.eventId,
                 eventAuthorId = this.eventAuthorId,

@@ -195,8 +195,9 @@ class ArticleDetailsViewModel @Inject constructor(
                     userId = activeAccountStore.activeUserId(),
                     comment = zapAction.zapDescription,
                     amountInSats = zapAction.zapAmount,
-                    target = ZapTarget.Article(
-                        articleId = article.articleId,
+                    target = ZapTarget.ReplaceableEvent(
+                        kind = NostrEventKind.LongFormContent.value,
+                        identifier = article.articleId,
                         eventId = article.eventId,
                         eventAuthorId = article.authorId,
                         eventAuthorLnUrlDecoded = postAuthorProfileData.lnUrlDecoded,
