@@ -1,4 +1,4 @@
-package net.primal.android.feeds.ui
+package net.primal.android.feeds.list.ui
 
 import android.os.Build
 import android.view.HapticFeedbackConstants
@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalSwitch
-import net.primal.android.feeds.ui.model.FeedUi
+import net.primal.android.feeds.list.ui.model.FeedUi
 import net.primal.android.theme.AppTheme
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem

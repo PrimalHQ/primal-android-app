@@ -1,4 +1,4 @@
-package net.primal.android.feeds.ui.model
+package net.primal.android.feeds.list.ui.model
 
 import net.primal.android.feeds.db.Feed
 import net.primal.android.feeds.domain.FEED_KIND_PRIMAL

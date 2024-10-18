@@ -1,4 +1,4 @@
-package net.primal.android.feeds.ui
+package net.primal.android.feeds.list.ui
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,13 +17,14 @@ import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.feeds.domain.DvmFeed
+import net.primal.android.feeds.dvm.ui.DvmFeedUi
+import net.primal.android.feeds.dvm.ui.DvmHeaderAndFeedList
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DvmFeedDetails(
-    dvmFeed: DvmFeed?,
+    dvmFeed: DvmFeedUi?,
     onClose: () -> Unit,
     onGoToWallet: (() -> Unit)? = null,
     modifier: Modifier = Modifier,

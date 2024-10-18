@@ -1,4 +1,4 @@
-package net.primal.android.feeds.ui
+package net.primal.android.feeds.dvm.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
@@ -6,17 +6,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import net.primal.android.articles.feed.ArticleFeedList
 import net.primal.android.core.errors.UiError
-import net.primal.android.feeds.domain.DvmFeed
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.domain.buildSpec
-import net.primal.android.feeds.item.DvmFeedListItem
 import net.primal.android.notes.feed.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 
 @Composable
 fun DvmHeaderAndFeedList(
-    dvmFeed: DvmFeed,
+    dvmFeed: DvmFeedUi,
     modifier: Modifier = Modifier,
     extended: Boolean = false,
     showFollowsActionsAvatarRow: Boolean = false,
@@ -25,10 +23,10 @@ fun DvmHeaderAndFeedList(
     onUiError: ((UiError) -> Unit)? = null,
 ) {
     Column(modifier = modifier) {
-        when (dvmFeed.kind) {
+        when (dvmFeed.data.kind) {
             FeedSpecKind.Reads -> {
                 ArticleFeedList(
-                    feedSpec = dvmFeed.buildSpec(specKind = dvmFeed.kind),
+                    feedSpec = dvmFeed.data.buildSpec(specKind = dvmFeed.data.kind),
                     previewMode = true,
                     pullToRefreshEnabled = false,
                     header = {
@@ -48,7 +46,7 @@ fun DvmHeaderAndFeedList(
 
             FeedSpecKind.Notes -> {
                 NoteFeedList(
-                    feedSpec = dvmFeed.buildSpec(specKind = dvmFeed.kind),
+                    feedSpec = dvmFeed.data.buildSpec(specKind = dvmFeed.data.kind),
                     noteCallbacks = NoteCallbacks(),
                     previewMode = true,
                     pullToRefreshEnabled = false,
