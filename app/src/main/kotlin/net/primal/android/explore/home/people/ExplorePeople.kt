@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnail
+import net.primal.android.core.compose.HeightAdjustableLoadingListPlaceholder
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalLoadingSpinner
@@ -81,8 +82,13 @@ fun ExplorePeople(
     eventPublisher: (ExplorePeopleContract.UiEvent) -> Unit,
     onProfileClick: (String) -> Unit,
 ) {
-    if (state.loading && state.people.isEmpty()) {
-        PrimalLoadingSpinner()
+    if (state.loading && state.people.isEmpty() || true) {
+        HeightAdjustableLoadingListPlaceholder(
+            modifier = Modifier.fillMaxSize(),
+            contentPaddingValues = paddingValues,
+            clipShape = AppTheme.shapes.small,
+            height = 132.dp,
+        )
     } else if (state.people.isEmpty()) {
         ListNoContent(
             modifier = Modifier.fillMaxSize(),
