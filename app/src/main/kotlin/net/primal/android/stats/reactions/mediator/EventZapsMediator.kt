@@ -1,4 +1,4 @@
-package net.primal.android.note.reactions.mediator
+package net.primal.android.stats.reactions.mediator
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
@@ -7,10 +7,10 @@ import androidx.paging.RemoteMediator
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.note.api.EventStatsApi
-import net.primal.android.note.api.model.EventZapsRequestBody
-import net.primal.android.note.db.EventZap
-import net.primal.android.note.repository.persistToDatabaseAsTransaction
+import net.primal.android.stats.api.EventStatsApi
+import net.primal.android.stats.api.model.EventZapsRequestBody
+import net.primal.android.stats.db.EventZap
+import net.primal.android.stats.repository.persistToDatabaseAsTransaction
 
 @ExperimentalPagingApi
 class EventZapsMediator(

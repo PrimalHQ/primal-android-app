@@ -29,7 +29,7 @@ import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.note.ui.EventZapUiModel
+import net.primal.android.stats.ui.EventZapUiModel
 import net.primal.android.theme.AppTheme
 
 @Composable

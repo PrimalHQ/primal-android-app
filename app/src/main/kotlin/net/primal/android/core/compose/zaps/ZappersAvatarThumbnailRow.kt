@@ -16,7 +16,7 @@ import java.util.*
 import kotlinx.datetime.Clock
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.note.ui.EventZapUiModel
+import net.primal.android.stats.ui.EventZapUiModel
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 

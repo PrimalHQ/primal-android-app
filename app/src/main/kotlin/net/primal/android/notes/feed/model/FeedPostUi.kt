@@ -8,8 +8,8 @@ import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.core.utils.usernameUiFriendly
-import net.primal.android.note.ui.EventZapUiModel
-import net.primal.android.note.ui.asEventZapUiModel
+import net.primal.android.stats.ui.EventZapUiModel
+import net.primal.android.stats.ui.asEventZapUiModel
 import net.primal.android.notes.db.FeedPost
 
 data class FeedPostUi(

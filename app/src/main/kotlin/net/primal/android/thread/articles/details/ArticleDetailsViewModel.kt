@@ -29,9 +29,9 @@ import net.primal.android.nostr.ext.nostrUriToPubkey
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nip19TLV
-import net.primal.android.note.repository.EventRepository
-import net.primal.android.note.ui.EventZapUiModel
-import net.primal.android.note.ui.asEventZapUiModel
+import net.primal.android.stats.repository.EventRepository
+import net.primal.android.stats.ui.EventZapUiModel
+import net.primal.android.stats.ui.asEventZapUiModel
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.profile.repository.ProfileRepository

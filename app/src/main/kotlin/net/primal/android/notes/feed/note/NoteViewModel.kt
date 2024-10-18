@@ -16,7 +16,7 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.note.repository.EventRepository
+import net.primal.android.stats.repository.EventRepository
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.NoteContract.UiState
 import net.primal.android.profile.repository.ProfileRepository

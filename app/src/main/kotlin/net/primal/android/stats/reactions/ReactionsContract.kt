@@ -1,8 +1,8 @@
-package net.primal.android.note.reactions
+package net.primal.android.stats.reactions
 
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
-import net.primal.android.note.ui.EventZapUiModel
+import net.primal.android.stats.ui.EventZapUiModel
 
 interface ReactionsContract {
     data class UiState(

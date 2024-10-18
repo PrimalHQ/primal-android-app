@@ -1,4 +1,4 @@
-package net.primal.android.note.repository
+package net.primal.android.stats.repository
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
@@ -17,10 +17,10 @@ import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.nostr.publish.NostrPublisher
-import net.primal.android.note.api.EventStatsApi
-import net.primal.android.note.api.model.EventZapsRequestBody
-import net.primal.android.note.db.EventZap
-import net.primal.android.note.reactions.mediator.EventZapsMediator
+import net.primal.android.stats.api.EventStatsApi
+import net.primal.android.stats.api.model.EventZapsRequestBody
+import net.primal.android.stats.db.EventZap
+import net.primal.android.stats.reactions.mediator.EventZapsMediator
 import timber.log.Timber
 
 class EventRepository @Inject constructor(

@@ -1,7 +1,7 @@
 package net.primal.android.notes.feed.model
 
-import net.primal.android.note.db.EventStats
-import net.primal.android.note.db.EventUserStats
+import net.primal.android.stats.db.EventStats
+import net.primal.android.stats.db.EventUserStats
 import net.primal.android.notes.db.FeedPostUserStats
 
 data class EventStatsUi(

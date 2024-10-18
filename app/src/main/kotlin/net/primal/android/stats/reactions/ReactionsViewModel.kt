@@ -1,4 +1,4 @@
-package net.primal.android.note.reactions
+package net.primal.android.stats.reactions
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -11,9 +11,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import net.primal.android.navigation.noteIdOrThrow
-import net.primal.android.note.reactions.ReactionsContract.UiState
-import net.primal.android.note.repository.EventRepository
-import net.primal.android.note.ui.asEventZapUiModel
+import net.primal.android.stats.reactions.ReactionsContract.UiState
+import net.primal.android.stats.repository.EventRepository
+import net.primal.android.stats.ui.asEventZapUiModel
 import net.primal.android.user.accounts.active.ActiveAccountStore
 
 @HiltViewModel
