@@ -22,7 +22,7 @@ class EventStatsUpdater(
             ?: EventStats(eventId = eventId)
     }
 
-    private val postUserStats: EventUserStats by lazy {
+    private val eventUserStats: EventUserStats by lazy {
         database.eventUserStats().find(eventId = eventId, userId = userId)
             ?: EventUserStats(eventId = eventId, userId = userId)
     }
@@ -30,13 +30,13 @@ class EventStatsUpdater(
     suspend fun increaseLikeStats() =
         database.withTransaction {
             database.eventStats().upsert(data = eventStats.copy(likes = eventStats.likes + 1))
-            database.eventUserStats().upsert(data = postUserStats.copy(liked = true))
+            database.eventUserStats().upsert(data = eventUserStats.copy(liked = true))
         }
 
     suspend fun increaseRepostStats() =
         database.withTransaction {
             database.eventStats().upsert(data = eventStats.copy(reposts = eventStats.reposts + 1))
-            database.eventUserStats().upsert(data = postUserStats.copy(reposted = true))
+            database.eventUserStats().upsert(data = eventUserStats.copy(reposted = true))
         }
 
     suspend fun increaseZapStats(amountInSats: Int, zapComment: String) =
@@ -47,7 +47,7 @@ class EventStatsUpdater(
                     satsZapped = eventStats.satsZapped + amountInSats,
                 ),
             )
-            database.eventUserStats().upsert(data = postUserStats.copy(zapped = true))
+            database.eventUserStats().upsert(data = eventUserStats.copy(zapped = true))
 
             database.eventZaps().insert(
                 data = EventZap(
@@ -65,7 +65,7 @@ class EventStatsUpdater(
     suspend fun revertStats() =
         database.withTransaction {
             database.eventStats().upsert(data = eventStats)
-            database.eventUserStats().upsert(data = postUserStats)
+            database.eventUserStats().upsert(data = eventUserStats)
             database.eventZaps().delete(
                 noteId = eventId,
                 senderId = userId,

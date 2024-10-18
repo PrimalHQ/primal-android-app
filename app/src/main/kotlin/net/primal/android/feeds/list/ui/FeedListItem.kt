@@ -1,4 +1,4 @@
-package net.primal.android.feeds.ui
+package net.primal.android.feeds.list.ui
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,7 +11,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import net.primal.android.feeds.ui.model.FeedUi
+import net.primal.android.feeds.list.ui.model.FeedUi
 import net.primal.android.theme.AppTheme
 
 @Composable

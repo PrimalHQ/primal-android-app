@@ -1,4 +1,4 @@
-package net.primal.android.feeds
+package net.primal.android.feeds.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,40 +7,43 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.feeds.FeedsContract.UiEvent
-import net.primal.android.feeds.FeedsContract.UiState
-import net.primal.android.feeds.FeedsContract.UiState.FeedMarketplaceStage
 import net.primal.android.feeds.db.Feed
 import net.primal.android.feeds.domain.DvmFeed
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.domain.buildSpec
+import net.primal.android.feeds.list.FeedListContract.UiEvent
+import net.primal.android.feeds.list.FeedListContract.UiState
+import net.primal.android.feeds.list.FeedListContract.UiState.FeedMarketplaceStage
+import net.primal.android.feeds.list.ui.model.FeedUi
+import net.primal.android.feeds.list.ui.model.asFeedPO
+import net.primal.android.feeds.list.ui.model.asFeedUi
+import net.primal.android.feeds.repository.DvmFeedListHandler
 import net.primal.android.feeds.repository.FeedsRepository
-import net.primal.android.feeds.ui.model.FeedUi
-import net.primal.android.feeds.ui.model.asFeedPO
-import net.primal.android.feeds.ui.model.asFeedUi
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import timber.log.Timber
 
-@HiltViewModel(assistedFactory = FeedsViewModel.Factory::class)
-class FeedsViewModel @AssistedInject constructor(
+@HiltViewModel(assistedFactory = FeedListViewModel.Factory::class)
+class FeedListViewModel @AssistedInject constructor(
     @Assisted activeFeed: FeedUi,
     @Assisted private val specKind: FeedSpecKind,
     private val feedRepository: FeedRepository,
     private val feedsRepository: FeedsRepository,
     private val activeAccountStore: ActiveAccountStore,
+    private val dvmFeedListHandler: DvmFeedListHandler,
 ) : ViewModel() {
 
     @AssistedFactory
     interface Factory {
-        fun create(activeFeed: FeedUi, specKind: FeedSpecKind): FeedsViewModel
+        fun create(activeFeed: FeedUi, specKind: FeedSpecKind): FeedListViewModel
     }
 
     private val _state = MutableStateFlow(UiState(activeFeed = activeFeed, specKind = specKind))
@@ -52,6 +55,8 @@ class FeedsViewModel @AssistedInject constructor(
 
     private var allFeeds: List<FeedUi> = emptyList()
     private var defaultFeeds: List<Feed> = emptyList()
+
+    private var dvmFeedsJob: Job? = null
 
     init {
         observeEvents()
@@ -87,17 +92,17 @@ class FeedsViewModel @AssistedInject constructor(
 
                     UiEvent.CloseFeedDetails -> {
                         val closingDvmFeed = _state.value.selectedDvmFeed
-                        if (closingDvmFeed != null) scheduleClearingDvmFeed(dvmFeed = closingDvmFeed)
+                        if (closingDvmFeed != null) scheduleClearingDvmFeed(dvmFeed = closingDvmFeed.data)
                         setState { copy(feedMarketplaceStage = FeedMarketplaceStage.FeedMarketplace) }
                     }
 
                     is UiEvent.AddDvmFeedToUserFeeds -> {
-                        addToUserFeeds(dvmFeed = it.dvmFeed)
+                        addToUserFeeds(dvmFeed = it.dvmFeed.data)
                         setState { copy(feedMarketplaceStage = FeedMarketplaceStage.FeedList) }
                     }
 
                     is UiEvent.RemoveDvmFeedFromUserFeeds -> {
-                        removeFromUserFeeds(spec = it.dvmFeed.buildSpec(specKind = specKind))
+                        removeFromUserFeeds(spec = it.dvmFeed.data.buildSpec(specKind = specKind))
                         setState { copy(feedMarketplaceStage = FeedMarketplaceStage.FeedList) }
                     }
 
@@ -203,8 +208,13 @@ class FeedsViewModel @AssistedInject constructor(
         viewModelScope.launch {
             setState { copy(fetchingDvmFeeds = true) }
             try {
-                val dvmFeeds = feedsRepository.fetchRecommendedDvmFeeds(specKind = specKind)
-                setState { copy(dvmFeeds = dvmFeeds) }
+                dvmFeedsJob?.cancel()
+                dvmFeedsJob = dvmFeedListHandler.fetchDvmFeedsAndObserveStatsUpdates(
+                    scope = viewModelScope,
+                    userId = activeAccountStore.activeUserId(),
+                ) { dvmFeeds ->
+                    setState { copy(dvmFeeds = dvmFeeds) }
+                }
             } catch (error: WssException) {
                 Timber.w(error)
             } finally {

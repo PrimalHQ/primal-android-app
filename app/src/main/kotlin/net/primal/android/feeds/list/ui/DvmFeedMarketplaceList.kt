@@ -1,4 +1,4 @@
-package net.primal.android.feeds.ui
+package net.primal.android.feeds.list.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,16 +16,16 @@ import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.feeds.domain.DvmFeed
-import net.primal.android.feeds.item.DvmFeedListItem
+import net.primal.android.feeds.dvm.ui.DvmFeedListItem
+import net.primal.android.feeds.dvm.ui.DvmFeedUi
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DvmFeedMarketplace(
-    dvmFeeds: List<DvmFeed>,
+    dvmFeeds: List<DvmFeedUi>,
     modifier: Modifier = Modifier,
-    onFeedClick: (dvmFeed: DvmFeed) -> Unit,
+    onFeedClick: (dvmFeed: DvmFeedUi) -> Unit,
     onGoToWallet: (() -> Unit)? = null,
     onClose: () -> Unit,
 ) {
@@ -49,7 +49,7 @@ fun DvmFeedMarketplace(
         ) {
             items(
                 items = dvmFeeds,
-                key = { it.dvmId },
+                key = { it.data.dvmId },
             ) {
                 Column {
                     DvmFeedListItem(

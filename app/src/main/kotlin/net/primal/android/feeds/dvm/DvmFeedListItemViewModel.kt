@@ -1,4 +1,4 @@
-package net.primal.android.feeds.item
+package net.primal.android.feeds.dvm
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.core.errors.UiError
 import net.primal.android.feeds.domain.DvmFeed
-import net.primal.android.feeds.item.DvmFeedListItemContract.UiEvent
-import net.primal.android.feeds.item.DvmFeedListItemContract.UiState
+import net.primal.android.feeds.dvm.DvmFeedListItemContract.UiEvent
+import net.primal.android.feeds.dvm.DvmFeedListItemContract.UiState
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.model.NostrEventKind
@@ -48,7 +48,7 @@ class DvmFeedListItemViewModel @Inject constructor(
         viewModelScope.launch {
             event.collect {
                 when (it) {
-                    is UiEvent.OnLikeClick -> onLikeClick(it.dvmFeed)
+                    is UiEvent.OnLikeClick -> onLikeClick(it.dvmFeed.data)
                     is UiEvent.OnZapClick -> onZapClick(it)
                     UiEvent.DismissError -> setState { copy(error = null) }
                 }
@@ -91,7 +91,7 @@ class DvmFeedListItemViewModel @Inject constructor(
 
     private fun onZapClick(zapAction: UiEvent.OnZapClick) =
         viewModelScope.launch {
-            if (zapAction.dvmFeed.dvmLnUrlDecoded == null) {
+            if (zapAction.dvmFeed.data.dvmLnUrlDecoded == null) {
                 setState { copy(error = UiError.MissingLightningAddress(RuntimeException())) }
                 return@launch
             }
@@ -103,10 +103,10 @@ class DvmFeedListItemViewModel @Inject constructor(
                     amountInSats = zapAction.zapAmount,
                     target = ZapTarget.ReplaceableEvent(
                         kind = NostrEventKind.AppHandler.value,
-                        identifier = zapAction.dvmFeed.dvmId,
-                        eventId = zapAction.dvmFeed.eventId,
-                        eventAuthorId = zapAction.dvmFeed.dvmPubkey,
-                        eventAuthorLnUrlDecoded = zapAction.dvmFeed.dvmLnUrlDecoded,
+                        identifier = zapAction.dvmFeed.data.dvmId,
+                        eventId = zapAction.dvmFeed.data.eventId,
+                        eventAuthorId = zapAction.dvmFeed.data.dvmPubkey,
+                        eventAuthorLnUrlDecoded = zapAction.dvmFeed.data.dvmLnUrlDecoded,
                     ),
                 )
             } catch (error: ZapFailureException) {

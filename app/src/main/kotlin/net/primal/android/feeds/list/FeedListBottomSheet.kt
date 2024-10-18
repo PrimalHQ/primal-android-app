@@ -1,4 +1,4 @@
-package net.primal.android.feeds
+package net.primal.android.feeds.list
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
@@ -24,13 +24,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import net.primal.android.R
-import net.primal.android.feeds.FeedsContract.UiState.FeedMarketplaceStage
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.domain.buildSpec
-import net.primal.android.feeds.ui.DvmFeedDetails
-import net.primal.android.feeds.ui.DvmFeedMarketplace
-import net.primal.android.feeds.ui.FeedList
-import net.primal.android.feeds.ui.model.FeedUi
+import net.primal.android.feeds.list.FeedListContract.UiState.FeedMarketplaceStage
+import net.primal.android.feeds.list.ui.DvmFeedDetails
+import net.primal.android.feeds.list.ui.DvmFeedMarketplace
+import net.primal.android.feeds.list.ui.FeedList
+import net.primal.android.feeds.list.ui.model.FeedUi
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,7 +43,7 @@ fun FeedsBottomSheet(
     onDismissRequest: () -> Unit,
     sheetState: SheetState = rememberModalBottomSheetState(),
 ) {
-    val viewModel = hiltViewModel<FeedsViewModel, FeedsViewModel.Factory>(
+    val viewModel = hiltViewModel<FeedListViewModel, FeedListViewModel.Factory>(
         key = activeFeed.spec,
         creationCallback = { it.create(activeFeed = activeFeed, specKind = feedSpecKind) },
     )
@@ -62,11 +62,11 @@ fun FeedsBottomSheet(
 @ExperimentalMaterial3Api
 @Composable
 private fun FeedsBottomSheet(
-    state: FeedsContract.UiState,
+    state: FeedListContract.UiState,
     onFeedClick: (FeedUi) -> Unit,
     onDismissRequest: () -> Unit,
     sheetState: SheetState = rememberModalBottomSheetState(),
-    eventPublisher: (FeedsContract.UiEvent) -> Unit,
+    eventPublisher: (FeedListContract.UiEvent) -> Unit,
     onGoToWallet: (() -> Unit)? = null,
 ) {
     ModalBottomSheet(
@@ -80,12 +80,12 @@ private fun FeedsBottomSheet(
         BackHandler {
             when (state.feedMarketplaceStage) {
                 FeedMarketplaceStage.FeedList -> if (state.isEditMode) {
-                    eventPublisher(FeedsContract.UiEvent.CloseEditMode)
+                    eventPublisher(FeedListContract.UiEvent.CloseEditMode)
                 } else {
                     onDismissRequest()
                 }
-                FeedMarketplaceStage.FeedMarketplace -> eventPublisher(FeedsContract.UiEvent.CloseFeedMarketplace)
-                FeedMarketplaceStage.FeedDetails -> eventPublisher(FeedsContract.UiEvent.CloseFeedDetails)
+                FeedMarketplaceStage.FeedMarketplace -> eventPublisher(FeedListContract.UiEvent.CloseFeedMarketplace)
+                FeedMarketplaceStage.FeedDetails -> eventPublisher(FeedListContract.UiEvent.CloseFeedDetails)
             }
         }
 
@@ -110,7 +110,7 @@ private fun FeedsBottomSheet(
                         onFeedClick = { feed ->
                             if (state.isEditMode) {
                                 eventPublisher(
-                                    FeedsContract.UiEvent.UpdateFeedSpecEnabled(
+                                    FeedListContract.UiEvent.UpdateFeedSpecEnabled(
                                         feedSpec = feed.spec,
                                         enabled = !feed.enabled,
                                     ),
@@ -119,25 +119,25 @@ private fun FeedsBottomSheet(
                                 onFeedClick(feed)
                             }
                         },
-                        onEditFeedClick = { eventPublisher(FeedsContract.UiEvent.OpenEditMode) },
+                        onEditFeedClick = { eventPublisher(FeedListContract.UiEvent.OpenEditMode) },
                         enableEditMode = true,
                         isEditMode = state.isEditMode,
-                        onAddFeedClick = { eventPublisher(FeedsContract.UiEvent.ShowFeedMarketplace) },
-                        onEditDoneClick = { eventPublisher(FeedsContract.UiEvent.CloseEditMode) },
-                        onFeedReordered = { eventPublisher(FeedsContract.UiEvent.FeedReordered(feeds = it)) },
+                        onAddFeedClick = { eventPublisher(FeedListContract.UiEvent.ShowFeedMarketplace) },
+                        onEditDoneClick = { eventPublisher(FeedListContract.UiEvent.CloseEditMode) },
+                        onFeedReordered = { eventPublisher(FeedListContract.UiEvent.FeedReordered(feeds = it)) },
                         onFeedEnabled = { feed, enabled ->
                             eventPublisher(
-                                FeedsContract.UiEvent.UpdateFeedSpecEnabled(
+                                FeedListContract.UiEvent.UpdateFeedSpecEnabled(
                                     feedSpec = feed.spec,
                                     enabled = enabled,
                                 ),
                             )
                         },
                         onFeedRemoved = {
-                            eventPublisher(FeedsContract.UiEvent.RemoveFeedFromUserFeeds(spec = it.spec))
+                            eventPublisher(FeedListContract.UiEvent.RemoveFeedFromUserFeeds(spec = it.spec))
                         },
                         onRestoreDefaultPrimalFeeds = {
-                            eventPublisher(FeedsContract.UiEvent.RestoreDefaultPrimalFeeds)
+                            eventPublisher(FeedListContract.UiEvent.RestoreDefaultPrimalFeeds)
                         },
                     )
 
@@ -145,15 +145,15 @@ private fun FeedsBottomSheet(
                     DvmFeedMarketplace(
                         modifier = Modifier.fillMaxSize(),
                         dvmFeeds = state.dvmFeeds,
-                        onFeedClick = { eventPublisher(FeedsContract.UiEvent.ShowFeedDetails(dvmFeed = it)) },
-                        onClose = { eventPublisher(FeedsContract.UiEvent.CloseFeedMarketplace) },
+                        onFeedClick = { eventPublisher(FeedListContract.UiEvent.ShowFeedDetails(dvmFeed = it)) },
+                        onClose = { eventPublisher(FeedListContract.UiEvent.CloseFeedMarketplace) },
                         onGoToWallet = onGoToWallet,
                     )
                 }
 
                 FeedMarketplaceStage.FeedDetails -> {
                     var addedToFeeds by remember(state.selectedDvmFeed) {
-                        val spec = state.selectedDvmFeed?.buildSpec(specKind = state.specKind)
+                        val spec = state.selectedDvmFeed?.data?.buildSpec(specKind = state.specKind)
                         mutableStateOf(state.feeds.map { it.spec }.contains(spec))
                     }
                     DvmFeedDetails(
@@ -161,20 +161,20 @@ private fun FeedsBottomSheet(
                         dvmFeed = state.selectedDvmFeed,
                         addedToFeeds = addedToFeeds,
                         onGoToWallet = onGoToWallet,
-                        onClose = { eventPublisher(FeedsContract.UiEvent.CloseFeedDetails) },
+                        onClose = { eventPublisher(FeedListContract.UiEvent.CloseFeedDetails) },
                         onAddOrRemoveFeed = {
                             if (state.selectedDvmFeed != null) {
                                 if (!addedToFeeds) {
                                     addedToFeeds = true
                                     eventPublisher(
-                                        FeedsContract.UiEvent.AddDvmFeedToUserFeeds(
+                                        FeedListContract.UiEvent.AddDvmFeedToUserFeeds(
                                             dvmFeed = state.selectedDvmFeed,
                                         ),
                                     )
                                 } else {
                                     addedToFeeds = true
                                     eventPublisher(
-                                        FeedsContract.UiEvent.RemoveDvmFeedFromUserFeeds(
+                                        FeedListContract.UiEvent.RemoveDvmFeedFromUserFeeds(
                                             dvmFeed = state.selectedDvmFeed,
                                         ),
                                     )

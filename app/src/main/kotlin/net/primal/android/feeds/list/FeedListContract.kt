@@ -1,11 +1,10 @@
-package net.primal.android.feeds
+package net.primal.android.feeds.list
 
-import net.primal.android.feeds.domain.DvmFeed
 import net.primal.android.feeds.domain.FeedSpecKind
-import net.primal.android.feeds.ui.model.FeedUi
-import net.primal.android.notes.home.HomeFeedContract.UiEvent
+import net.primal.android.feeds.dvm.ui.DvmFeedUi
+import net.primal.android.feeds.list.ui.model.FeedUi
 
-interface FeedsContract {
+interface FeedListContract {
     data class UiState(
         val activeFeed: FeedUi,
         val specKind: FeedSpecKind,
@@ -13,8 +12,8 @@ interface FeedsContract {
         val isEditMode: Boolean = false,
         val feedMarketplaceStage: FeedMarketplaceStage = FeedMarketplaceStage.FeedList,
         val fetchingDvmFeeds: Boolean = false,
-        val dvmFeeds: List<DvmFeed> = emptyList(),
-        val selectedDvmFeed: DvmFeed? = null,
+        val dvmFeeds: List<DvmFeedUi> = emptyList(),
+        val selectedDvmFeed: DvmFeedUi? = null,
     ) {
         enum class FeedMarketplaceStage {
             FeedList,
@@ -31,11 +30,11 @@ interface FeedsContract {
         data object ShowFeedMarketplace : UiEvent()
 
         data object CloseFeedMarketplace : UiEvent()
-        data class ShowFeedDetails(val dvmFeed: DvmFeed) : UiEvent()
+        data class ShowFeedDetails(val dvmFeed: DvmFeedUi) : UiEvent()
 
         data object CloseFeedDetails : UiEvent()
-        data class AddDvmFeedToUserFeeds(val dvmFeed: DvmFeed) : UiEvent()
-        data class RemoveDvmFeedFromUserFeeds(val dvmFeed: DvmFeed) : UiEvent()
+        data class AddDvmFeedToUserFeeds(val dvmFeed: DvmFeedUi) : UiEvent()
+        data class RemoveDvmFeedFromUserFeeds(val dvmFeed: DvmFeedUi) : UiEvent()
         data class RemoveFeedFromUserFeeds(val spec: String) : UiEvent()
 
         data object RestoreDefaultPrimalFeeds : UiEvent()

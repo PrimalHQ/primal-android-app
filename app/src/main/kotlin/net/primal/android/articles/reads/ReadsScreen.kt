@@ -42,9 +42,9 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
-import net.primal.android.feeds.FeedsBottomSheet
 import net.primal.android.feeds.domain.FeedSpecKind
-import net.primal.android.feeds.ui.model.FeedUi
+import net.primal.android.feeds.list.FeedsBottomSheet
+import net.primal.android.feeds.list.ui.model.FeedUi
 
 @Composable
 fun ReadsScreen(
