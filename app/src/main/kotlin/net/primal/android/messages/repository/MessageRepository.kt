@@ -81,6 +81,7 @@ class MessageRepository @Inject constructor(
                     messages = response.messages,
                     profileMetadata = response.profileMetadata,
                     mediaResources = response.cdnResources,
+                    primalUserNames = response.primalUserNames,
                 )
                 database.messageConversations().upsertAll(data = messageConversation)
             }
@@ -112,6 +113,7 @@ class MessageRepository @Inject constructor(
                 messages = response.messages,
                 profileMetadata = response.profileMetadata,
                 mediaResources = response.cdnResources,
+                primalUserNames = response.primalUserNames,
             )
         }
     }
@@ -159,6 +161,7 @@ class MessageRepository @Inject constructor(
                 messages = listOf(nostrEvent),
                 profileMetadata = emptyList(),
                 mediaResources = emptyList(),
+                primalUserNames = emptyList(),
             )
         }
     }

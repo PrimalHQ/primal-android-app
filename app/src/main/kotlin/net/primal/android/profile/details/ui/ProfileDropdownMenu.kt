@@ -29,6 +29,7 @@ import net.primal.android.theme.AppTheme
 fun ProfileDropdownMenu(
     profileId: String,
     profileName: String,
+    primalName: String?,
     isActiveUser: Boolean,
     isProfileMuted: Boolean,
     isProfileFeedInActiveUserFeeds: Boolean,
@@ -77,7 +78,10 @@ fun ProfileDropdownMenu(
             trailingIconVector = PrimalIcons.ContextShare,
             text = stringResource(id = R.string.profile_context_share_profile),
             onClick = {
-                systemShareText(context = context, text = resolvePrimalProfileLink(profileId = profileId))
+                systemShareText(
+                    context = context,
+                    text = resolvePrimalProfileLink(profileId = profileId, primalName = primalName),
+                )
                 menuVisible = false
             },
         )

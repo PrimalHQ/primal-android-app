@@ -8,4 +8,5 @@ data class UsersResponse(
     val userScores: PrimalEvent?,
     val followerCounts: PrimalEvent?,
     val cdnResources: List<PrimalEvent> = emptyList(),
+    val primalUserNames: List<PrimalEvent> = emptyList(),
 )

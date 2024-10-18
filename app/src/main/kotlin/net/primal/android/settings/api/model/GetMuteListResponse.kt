@@ -9,4 +9,5 @@ data class GetMuteListResponse(
     val muteList: NostrEvent? = null,
     val metadataEvents: List<NostrEvent> = emptyList(),
     val cdnResources: List<PrimalEvent> = emptyList(),
+    val primalUserNames: List<PrimalEvent> = emptyList(),
 )

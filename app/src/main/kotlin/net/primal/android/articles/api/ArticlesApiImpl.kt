@@ -41,6 +41,7 @@ class ArticlesApiImpl @Inject constructor(
             referencedEvents = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
             primalRelayHints = queryResult.filterPrimalEvents(NostrEventKind.PrimalRelayHint),
             primalLongFormWords = queryResult.filterPrimalEvents(NostrEventKind.PrimalLongFormWordsCount),
+            primalUserNames = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserName),
         )
     }
 
@@ -68,6 +69,7 @@ class ArticlesApiImpl @Inject constructor(
             primalLinkPreviews = queryResult.filterPrimalEvents(NostrEventKind.PrimalLinkPreview),
             primalRelayHints = queryResult.filterPrimalEvents(NostrEventKind.PrimalRelayHint),
             primalLongFormWords = queryResult.filterPrimalEvents(NostrEventKind.PrimalLongFormWordsCount),
+            primalUserNames = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserName),
         )
     }
 }

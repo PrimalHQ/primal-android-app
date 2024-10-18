@@ -72,6 +72,7 @@ enum class NostrEventKind(val value: Int) {
     PrimalSubSettings(value = 10_000_155),
     PrimalDvmFeedFollowsActions(value = 10_000_156),
     PrimalExplorePeopleNewFollowStats(value = 10_000_157),
+    PrimalUserName(value = 10_000_158),
     PrimalDvmFeedMetadata(value = 10_000_159),
     PrimalTrendingTopics(value = 10_000_160),
     PrimalWalletOperation(value = 10_000_300),

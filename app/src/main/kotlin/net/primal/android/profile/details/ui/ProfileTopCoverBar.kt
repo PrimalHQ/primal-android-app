@@ -173,6 +173,7 @@ private fun ProfileTopAppBar(
                     isProfileFeedInActiveUserFeeds = state.isProfileFeedInActiveUserFeeds,
                     profileName = state.profileDetails?.authorDisplayName ?: "",
                     eventPublisher = eventPublisher,
+                    primalName = state.profileDetails?.primalName,
                 )
             },
         )

@@ -17,6 +17,7 @@ import net.primal.android.nostr.ext.mapAsMessageDataPO
 import net.primal.android.nostr.ext.mapAsPostDataPO
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.mapNotNullAsPostDataPO
+import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.notes.api.FeedApi
@@ -37,6 +38,7 @@ class MessagesProcessor @Inject constructor(
         messages: List<NostrEvent>,
         profileMetadata: List<NostrEvent>,
         mediaResources: List<PrimalEvent>,
+        primalUserNames: List<PrimalEvent>,
     ) {
         val messageDataList = messages.mapAsMessageDataPO(
             userId = userId,
@@ -46,10 +48,16 @@ class MessagesProcessor @Inject constructor(
         processNostrUrisAndSave(userId = userId, messageDataList = messageDataList)
 
         val cdnResources = mediaResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+        val primalUserNamesMap = primalUserNames.parseAndMapPrimalUserNames()
         val attachments = messageDataList.flatMapMessagesAsNoteAttachmentPO()
 
         database.withTransaction {
-            database.profiles().upsertAll(data = profileMetadata.mapAsProfileDataPO(cdnResources = cdnResources))
+            database.profiles().upsertAll(
+                data = profileMetadata.mapAsProfileDataPO(
+                    cdnResources = cdnResources,
+                    primalUserNames = primalUserNamesMap,
+                ),
+            )
             database.messages().upsertAll(data = messageDataList)
             database.attachments().upsertAllNoteAttachments(data = attachments)
         }
@@ -92,8 +100,12 @@ class MessagesProcessor @Inject constructor(
         val remoteProfiles = if (missingProfileIds.isNotEmpty()) {
             try {
                 val response = usersApi.getUserProfilesMetadata(userIds = missingProfileIds)
+                val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
                 val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-                val profiles = response.metadataEvents.mapAsProfileDataPO(cdnResources = cdnResources)
+                val profiles = response.metadataEvents.mapAsProfileDataPO(
+                    cdnResources = cdnResources,
+                    primalUserNames = primalUserNames,
+                )
                 database.profiles().upsertAll(data = profiles)
                 profiles
             } catch (error: WssException) {
