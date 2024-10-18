@@ -15,8 +15,9 @@ import net.primal.android.feeds.dvm.DvmFeedListItemContract.UiEvent
 import net.primal.android.feeds.dvm.DvmFeedListItemContract.UiState
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.nostr.ext.asReplaceableEventTag
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.note.repository.NoteRepository
+import net.primal.android.note.repository.EventRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.domain.ZapTarget
 import net.primal.android.wallet.zaps.InvalidZapRequestException
@@ -28,7 +29,7 @@ import timber.log.Timber
 @HiltViewModel
 class DvmFeedListItemViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
-    private val noteRepository: NoteRepository,
+    private val eventRepository: EventRepository,
     private val zapHandler: ZapHandler,
 ) : ViewModel() {
 
@@ -75,10 +76,12 @@ class DvmFeedListItemViewModel @Inject constructor(
     private fun onLikeClick(dvmFeed: DvmFeed) =
         viewModelScope.launch {
             try {
-                noteRepository.likeEvent(
+                val aTagValue = "${NostrEventKind.AppHandler.value}:${dvmFeed.dvmPubkey}:${dvmFeed.dvmId}"
+                eventRepository.likeEvent(
                     userId = activeAccountStore.activeUserId(),
                     eventId = dvmFeed.eventId,
                     eventAuthorId = dvmFeed.dvmPubkey,
+                    optionalTags = listOf(aTagValue.asReplaceableEventTag()),
                 )
             } catch (error: NostrPublishException) {
                 setState { copy(error = UiError.FailedToPublishLikeEvent(error)) }
