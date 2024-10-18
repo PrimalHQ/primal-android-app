@@ -2,7 +2,7 @@ package net.primal.android.thread.articles.details
 
 import net.primal.android.core.errors.UiError
 import net.primal.android.nostr.utils.Naddr
-import net.primal.android.note.ui.EventZapUiModel
+import net.primal.android.stats.ui.EventZapUiModel
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.thread.articles.details.ui.ArticleDetailsUi

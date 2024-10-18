@@ -1,4 +1,4 @@
-package net.primal.android.note.db
+package net.primal.android.stats.db
 
 import androidx.room.Entity
 import androidx.room.Index

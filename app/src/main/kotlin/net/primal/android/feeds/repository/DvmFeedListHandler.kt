@@ -7,7 +7,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.dvm.ui.DvmFeedUi
-import net.primal.android.note.repository.EventRepository
+import net.primal.android.stats.repository.EventRepository
 import net.primal.android.profile.repository.ProfileRepository
 
 class DvmFeedListHandler @Inject constructor(

@@ -1,4 +1,4 @@
-package net.primal.android.note.api
+package net.primal.android.stats.api
 
 import javax.inject.Inject
 import kotlinx.serialization.encodeToString
@@ -9,10 +9,10 @@ import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.note.api.model.EventActionsRequestBody
-import net.primal.android.note.api.model.EventActionsResponse
-import net.primal.android.note.api.model.EventZapsRequestBody
-import net.primal.android.note.api.model.EventZapsResponse
+import net.primal.android.stats.api.model.EventActionsRequestBody
+import net.primal.android.stats.api.model.EventActionsResponse
+import net.primal.android.stats.api.model.EventZapsRequestBody
+import net.primal.android.stats.api.model.EventZapsResponse
 
 class EventStatsApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,

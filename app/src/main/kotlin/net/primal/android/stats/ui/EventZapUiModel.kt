@@ -1,10 +1,10 @@
-package net.primal.android.note.ui
+package net.primal.android.stats.ui
 
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.core.utils.usernameUiFriendly
-import net.primal.android.note.db.EventZap
+import net.primal.android.stats.db.EventZap
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 
 data class EventZapUiModel(

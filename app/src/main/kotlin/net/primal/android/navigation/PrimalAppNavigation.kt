@@ -71,8 +71,8 @@ import net.primal.android.navigation.deeplinking.ext.handleDeeplink
 import net.primal.android.navigation.splash.SplashContract
 import net.primal.android.navigation.splash.SplashScreen
 import net.primal.android.navigation.splash.SplashViewModel
-import net.primal.android.note.reactions.ReactionsScreen
-import net.primal.android.note.reactions.ReactionsViewModel
+import net.primal.android.stats.reactions.ReactionsScreen
+import net.primal.android.stats.reactions.ReactionsViewModel
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedScreen
 import net.primal.android.notes.home.HomeFeedViewModel
