@@ -1,4 +1,4 @@
-package net.primal.android.explore.home
+package net.primal.android.explore.home.topics
 
 data class TopicUi(
     val name: String,

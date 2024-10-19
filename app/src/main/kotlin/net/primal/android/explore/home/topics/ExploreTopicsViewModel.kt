@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.explore.db.TrendingTopic
-import net.primal.android.explore.home.TopicUi
 import net.primal.android.explore.home.topics.ExploreTopicsContract.UiEvent
 import net.primal.android.explore.home.topics.ExploreTopicsContract.UiState
 import net.primal.android.explore.repository.ExploreRepository

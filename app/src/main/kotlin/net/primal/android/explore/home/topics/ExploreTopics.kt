@@ -31,7 +31,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import net.primal.android.R
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
-import net.primal.android.explore.home.TopicUi
 import net.primal.android.theme.AppTheme
 
 @Composable
