@@ -1,58 +1,62 @@
 package net.primal.android.core.compose.icons.primaliconpack
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathFillType.Companion.EvenOdd
+import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.StrokeCap.Companion.Butt
-import androidx.compose.ui.graphics.StrokeJoin.Companion.Miter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.icons.PrimalIcons
 
-public val PrimalIcons.Home: ImageVector
+val PrimalIcons.Home: ImageVector
     get() {
-        if (_home != null) {
-            return _home!!
+        if (_Home != null) {
+            return _Home!!
         }
-        _home = Builder(name = "Home", defaultWidth = 24.0.dp, defaultHeight = 24.0.dp,
-                viewportWidth = 24.0f, viewportHeight = 24.0f).apply {
-            path(fill = SolidColor(Color(0xFFAAAAAA)), stroke = null, strokeLineWidth = 0.0f,
-                    strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
-                    pathFillType = EvenOdd) {
-                moveTo(11.5486f, 1.401f)
-                curveTo(11.8159f, 1.1997f, 12.1841f, 1.1997f, 12.4513f, 1.401f)
-                lineTo(23.4376f, 9.6784f)
-                curveTo(23.7747f, 9.9323f, 23.8528f, 10.4278f, 23.604f, 10.7822f)
-                curveTo(23.3589f, 11.1314f, 22.8938f, 11.2045f, 22.5622f, 10.9547f)
-                lineTo(20.7929f, 9.6216f)
-                lineTo(19.75f, 20.7362f)
-                verticalLineTo(20.7479f)
-                curveTo(19.75f, 21.7144f, 18.9665f, 22.4979f, 18.0f, 22.4979f)
-                horizontalLineTo(6.0001f)
-                curveTo(5.0336f, 22.4979f, 4.2501f, 21.7144f, 4.2501f, 20.7479f)
-                verticalLineTo(20.7362f)
-                lineTo(3.2071f, 9.6216f)
-                lineTo(1.4378f, 10.9547f)
-                curveTo(1.1062f, 11.2045f, 0.6411f, 11.1314f, 0.3959f, 10.7822f)
-                curveTo(0.1471f, 10.4278f, 0.2253f, 9.9323f, 0.5623f, 9.6784f)
-                lineTo(11.5486f, 1.401f)
+        _Home = ImageVector.Builder(
+            name = "Home",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 24f,
+            viewportHeight = 24f
+        ).apply {
+            path(
+                fill = SolidColor(Color(0xFFAAAAAA)),
+                pathFillType = PathFillType.EvenOdd
+            ) {
+                moveTo(11.624f, 3.167f)
+                curveTo(11.847f, 3f, 12.153f, 3f, 12.376f, 3.167f)
+                lineTo(21.531f, 10.065f)
+                curveTo(21.812f, 10.277f, 21.877f, 10.69f, 21.67f, 10.985f)
+                curveTo(21.466f, 11.276f, 21.078f, 11.337f, 20.802f, 11.129f)
+                lineTo(19.327f, 10.018f)
+                lineTo(18.458f, 19.28f)
+                verticalLineTo(19.29f)
+                curveTo(18.458f, 20.095f, 17.805f, 20.748f, 17f, 20.748f)
+                horizontalLineTo(7f)
+                curveTo(6.195f, 20.748f, 5.542f, 20.095f, 5.542f, 19.29f)
+                verticalLineTo(19.28f)
+                lineTo(4.673f, 10.018f)
+                lineTo(3.198f, 11.129f)
+                curveTo(2.922f, 11.337f, 2.534f, 11.276f, 2.33f, 10.985f)
+                curveTo(2.123f, 10.69f, 2.188f, 10.277f, 2.469f, 10.065f)
+                lineTo(11.624f, 3.167f)
                 close()
-                moveTo(12.7521f, 3.5635f)
-                curveTo(12.3068f, 3.228f, 11.6931f, 3.228f, 11.2478f, 3.5635f)
-                lineTo(4.7386f, 8.4677f)
-                lineTo(5.7501f, 19.6879f)
-                curveTo(5.7565f, 20.3728f, 6.3137f, 20.926f, 7.0001f, 20.926f)
-                horizontalLineTo(17.0f)
-                curveTo(17.6864f, 20.926f, 18.2435f, 20.3728f, 18.2499f, 19.6879f)
-                lineTo(19.2614f, 8.4678f)
-                lineTo(12.7521f, 3.5635f)
+                moveTo(12.627f, 4.97f)
+                curveTo(12.256f, 4.69f, 11.744f, 4.69f, 11.373f, 4.97f)
+                lineTo(5.949f, 9.056f)
+                lineTo(6.792f, 18.407f)
+                curveTo(6.797f, 18.977f, 7.261f, 19.438f, 7.833f, 19.438f)
+                horizontalLineTo(16.167f)
+                curveTo(16.739f, 19.438f, 17.203f, 18.977f, 17.208f, 18.407f)
+                lineTo(18.051f, 9.057f)
+                lineTo(12.627f, 4.97f)
                 close()
             }
-        }
-        .build()
-        return _home!!
+        }.build()
+
+        return _Home!!
     }
 
-private var _home: ImageVector? = null
+@Suppress("ObjectPropertyName")
+private var _Home: ImageVector? = null
