@@ -86,9 +86,9 @@ class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
         viewModelScope.launch {
             val uiState = state.value
             val searchParams = listOf(
+                uiState.searchKind.toSearchCommand(),
                 uiState.includedWords,
                 uiState.excludedWords?.let { it.split(" ").map { "-$it" }.joinToString(separator = " ") },
-                uiState.searchKind.toSearchCommand(),
                 uiState.postedBy.joinWithPrefix("from:"),
                 uiState.replyingTo.joinWithPrefix("to:"),
                 uiState.zappedBy.joinWithPrefix("zappedby:"),
