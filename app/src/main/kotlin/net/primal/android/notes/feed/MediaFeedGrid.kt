@@ -24,7 +24,6 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import net.primal.android.R
 import net.primal.android.core.compose.GridLoadingPlaceholder
-import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.notes.feed.model.FeedPostUi

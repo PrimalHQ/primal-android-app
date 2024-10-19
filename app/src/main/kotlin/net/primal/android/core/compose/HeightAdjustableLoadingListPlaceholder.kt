@@ -1,6 +1,5 @@
 package net.primal.android.core.compose
 
-import androidx.annotation.RawRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.theme.AppTheme
-
 
 @Composable
 fun HeightAdjustableLoadingListPlaceholder(
