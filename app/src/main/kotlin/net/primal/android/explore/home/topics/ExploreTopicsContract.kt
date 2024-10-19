@@ -1,6 +1,6 @@
 package net.primal.android.explore.home.topics
 
-import net.primal.android.explore.home.TopicUi
+import net.primal.android.explore.home.topics.ui.TopicUi
 
 interface ExploreTopicsContract {
     data class UiState(
