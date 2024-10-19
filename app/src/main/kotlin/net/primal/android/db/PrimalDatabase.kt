@@ -26,12 +26,6 @@ import net.primal.android.messages.db.MessageConversationDao
 import net.primal.android.messages.db.MessageConversationData
 import net.primal.android.nostr.db.EventRelayHints
 import net.primal.android.nostr.db.EventRelayHintsDao
-import net.primal.android.stats.db.EventStats
-import net.primal.android.stats.db.EventStatsDao
-import net.primal.android.stats.db.EventUserStats
-import net.primal.android.stats.db.EventUserStatsDao
-import net.primal.android.stats.db.EventZap
-import net.primal.android.stats.db.EventZapDao
 import net.primal.android.notes.db.FeedPostDao
 import net.primal.android.notes.db.FeedPostDataCrossRef
 import net.primal.android.notes.db.FeedPostDataCrossRefDao
@@ -51,6 +45,12 @@ import net.primal.android.profile.db.ProfileStats
 import net.primal.android.profile.db.ProfileStatsDao
 import net.primal.android.settings.muted.db.MutedUserDao
 import net.primal.android.settings.muted.db.MutedUserData
+import net.primal.android.stats.db.EventStats
+import net.primal.android.stats.db.EventStatsDao
+import net.primal.android.stats.db.EventUserStats
+import net.primal.android.stats.db.EventUserStatsDao
+import net.primal.android.stats.db.EventZap
+import net.primal.android.stats.db.EventZapDao
 import net.primal.android.thread.db.ArticleCommentCrossRef
 import net.primal.android.thread.db.NoteConversationCrossRef
 import net.primal.android.thread.db.ThreadConversationDao

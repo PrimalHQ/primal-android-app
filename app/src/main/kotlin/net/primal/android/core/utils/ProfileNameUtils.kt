@@ -1,9 +1,9 @@
 package net.primal.android.core.utils
 
 import net.primal.android.nostr.model.content.ContentMetadata
-import net.primal.android.stats.db.EventZap
 import net.primal.android.profile.db.ProfileData
 import net.primal.android.profile.domain.ProfileMetadata
+import net.primal.android.stats.db.EventZap
 
 fun ProfileData.usernameUiFriendly(): String = usernameUiFriendly(this.displayName, this.handle, this.ownerId)
 
