@@ -73,7 +73,7 @@ private fun ExploreZaps(
     eventPublisher: (ExploreZapsContract.UiEvent) -> Unit,
 ) {
     when {
-        state.loading && state.zaps.isEmpty() || true -> {
+        state.loading && state.zaps.isEmpty() -> {
             HeightAdjustableLoadingListPlaceholder(
                 modifier = Modifier.fillMaxSize(),
                 contentPaddingValues = paddingValues,

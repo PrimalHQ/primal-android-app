@@ -99,7 +99,7 @@ fun ExploreFeeds(
         )
     }
 
-    if (state.loading && state.feeds.isEmpty() || true) {
+    if (state.loading && state.feeds.isEmpty()) {
         HeightAdjustableLoadingListPlaceholder(
             modifier = Modifier.fillMaxSize(),
             contentPaddingValues = paddingValues,

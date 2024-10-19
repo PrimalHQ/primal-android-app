@@ -81,7 +81,7 @@ fun ExplorePeople(
     eventPublisher: (ExplorePeopleContract.UiEvent) -> Unit,
     onProfileClick: (String) -> Unit,
 ) {
-    if (state.loading && state.people.isEmpty() || true) {
+    if (state.loading && state.people.isEmpty()) {
         HeightAdjustableLoadingListPlaceholder(
             modifier = Modifier.fillMaxSize(),
             contentPaddingValues = paddingValues,
