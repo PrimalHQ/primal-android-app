@@ -13,9 +13,11 @@ import kotlinx.coroutines.launch
 import net.primal.android.explore.home.feeds.ExploreFeedsContract.UiState
 import net.primal.android.feeds.domain.DvmFeed
 import net.primal.android.feeds.domain.buildSpec
+import net.primal.android.feeds.dvm.ui.DvmFeedUi
 import net.primal.android.feeds.repository.DvmFeedListHandler
 import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import timber.log.Timber
 
@@ -23,6 +25,7 @@ import timber.log.Timber
 class ExploreFeedsViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val feedsRepository: FeedsRepository,
+    private val feedRepository: FeedRepository,
     private val dvmFeedListHandler: DvmFeedListHandler,
 ) : ViewModel() {
 
@@ -56,7 +59,15 @@ class ExploreFeedsViewModel @Inject constructor(
                     is ExploreFeedsContract.UiEvent.AddToUserFeeds -> addToUserFeeds(it.dvmFeed.data)
                     is ExploreFeedsContract.UiEvent.RemoveFromUserFeeds -> removeFromUserFeeds(it.dvmFeed.data)
                     ExploreFeedsContract.UiEvent.RefreshFeeds -> fetchAndObserveExploreFeeds()
+                    is ExploreFeedsContract.UiEvent.ClearDvmFeed -> scheduleClearingDvmFeed(it.dvmFeed)
                 }
+            }
+        }
+
+    private fun scheduleClearingDvmFeed(dvmFeed: DvmFeedUi) =
+        viewModelScope.launch {
+            dvmFeed.data.kind?.let {
+                feedRepository.removeFeedSpec(feedSpec = dvmFeed.data.buildSpec(specKind = it))
             }
         }
 
