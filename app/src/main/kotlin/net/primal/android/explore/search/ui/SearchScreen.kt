@@ -37,6 +37,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearch
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.explore.search.SearchContract
@@ -50,6 +51,7 @@ import net.primal.android.theme.AppTheme
 fun SearchScreen(
     viewModel: SearchViewModel,
     onClose: () -> Unit,
+    onAdvancedSearchClick: (query: String) -> Unit,
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onNaddrClick: (String) -> Unit,
@@ -60,6 +62,7 @@ fun SearchScreen(
         state = uiState.value,
         eventPublisher = { viewModel.setEvent(it) },
         onClose = onClose,
+        onAdvancedSearchClick = onAdvancedSearchClick,
         onProfileClick = onProfileClick,
         onNoteClick = onNoteClick,
         onNaddrClick = onNaddrClick,
@@ -73,6 +76,7 @@ fun SearchScreen(
     state: SearchContract.UiState,
     eventPublisher: (SearchContract.UiEvent) -> Unit,
     onClose: () -> Unit,
+    onAdvancedSearchClick: (query: String) -> Unit,
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onNaddrClick: (String) -> Unit,
@@ -97,6 +101,13 @@ fun SearchScreen(
                         onQueryChange = {
                             eventPublisher(SearchContract.UiEvent.SearchQueryUpdated(query = it))
                         },
+                    )
+                },
+                actions = {
+                    AppBarIcon(
+                        icon = PrimalIcons.AdvancedSearch,
+                        onClick = { onAdvancedSearchClick(state.searchQuery) },
+                        appBarIconContentDescription = stringResource(id = R.string.accessibility_search),
                     )
                 },
             )
