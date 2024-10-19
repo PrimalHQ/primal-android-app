@@ -66,8 +66,10 @@ class ProfileRepository @Inject constructor(
 
             val primalUserNames = users.primalUserNames.parseAndMapPrimalUserNames()
             val cdnResources = users.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-            val profiles =
-                users.metadataEvents.mapAsProfileDataPO(cdnResources = cdnResources, primalUserNames = primalUserNames)
+            val profiles = users.metadataEvents.mapAsProfileDataPO(
+                cdnResources = cdnResources,
+                primalUserNames = primalUserNames,
+            )
             database.profiles().upsertAll(data = profiles)
             profiles
         }
