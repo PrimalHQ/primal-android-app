@@ -22,4 +22,5 @@ data class ProfileData(
     val about: String? = null,
     val aboutUris: List<String>,
     val aboutHashtags: List<String>,
+    val primalName: String? = null,
 )

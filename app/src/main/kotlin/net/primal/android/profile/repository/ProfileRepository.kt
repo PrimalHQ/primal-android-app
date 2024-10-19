@@ -18,6 +18,8 @@ import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.ext.asReplaceableEventTag
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsProfileDataPO
+import net.primal.android.nostr.ext.parseAndMapPrimalUserName
+import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrUnsignedEvent
@@ -62,8 +64,12 @@ class ProfileRepository @Inject constructor(
         withContext(dispatchers.io()) {
             val users = usersApi.getUserProfileFollowedBy(profileId, userId, limit)
 
+            val primalUserNames = users.primalUserNames.parseAndMapPrimalUserNames()
             val cdnResources = users.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-            val profiles = users.metadataEvents.mapAsProfileDataPO(cdnResources = cdnResources)
+            val profiles = users.metadataEvents.mapAsProfileDataPO(
+                cdnResources = cdnResources,
+                primalUserNames = primalUserNames,
+            )
             database.profiles().upsertAll(data = profiles)
             profiles
         }
@@ -80,7 +86,11 @@ class ProfileRepository @Inject constructor(
         withContext(dispatchers.io()) {
             val response = usersApi.getUserProfile(userId = profileId)
             val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-            val profileMetadata = response.metadata?.asProfileDataPO(cdnResources = cdnResources)
+            val primalUserName = response.primalName.parseAndMapPrimalUserName()
+            val profileMetadata = response.metadata?.asProfileDataPO(
+                cdnResources = cdnResources,
+                primalUserNames = primalUserName,
+            )
             val profileStats = response.profileStats?.asProfileStatsPO()
 
             database.withTransaction {
@@ -143,8 +153,12 @@ class ProfileRepository @Inject constructor(
     private suspend fun queryRemoteUsers(apiBlock: suspend () -> UsersResponse): List<UserProfileSearchItem> =
         withContext(dispatchers.io()) {
             val response = apiBlock()
+            val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
             val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-            val profiles = response.contactsMetadata.mapAsProfileDataPO(cdnResources = cdnResources)
+            val profiles = response.contactsMetadata.mapAsProfileDataPO(
+                cdnResources = cdnResources,
+                primalUserNames = primalUserNames,
+            )
             val followersCountsMap = response.followerCounts?.takeContentAsPrimalUserFollowersCountsOrNull()
 
             database.profiles().upsertAll(data = profiles)

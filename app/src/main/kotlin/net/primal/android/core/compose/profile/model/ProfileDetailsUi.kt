@@ -17,6 +17,7 @@ data class ProfileDetailsUi(
     val aboutHashtags: List<String> = emptyList(),
     val aboutUris: List<String> = emptyList(),
     val website: String? = null,
+    val primalName: String? = null,
 )
 
 fun ProfileData.asProfileDetailsUi() =
@@ -32,4 +33,5 @@ fun ProfileData.asProfileDetailsUi() =
         aboutHashtags = this.aboutHashtags,
         aboutUris = this.aboutUris,
         website = this.website,
+        primalName = this.primalName,
     )

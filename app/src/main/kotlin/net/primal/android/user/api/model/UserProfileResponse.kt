@@ -9,4 +9,5 @@ data class UserProfileResponse(
     val metadata: NostrEvent? = null,
     val profileStats: PrimalEvent? = null,
     val cdnResources: List<PrimalEvent> = emptyList(),
+    val primalName: PrimalEvent? = null,
 )

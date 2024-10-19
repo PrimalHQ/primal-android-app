@@ -10,4 +10,5 @@ data class UserContactsResponse(
     val followMetadataList: List<NostrEvent> = emptyList(),
     val userScores: PrimalEvent? = null,
     val cdnResources: List<PrimalEvent> = emptyList(),
+    val primalUserNames: List<PrimalEvent> = emptyList(),
 )

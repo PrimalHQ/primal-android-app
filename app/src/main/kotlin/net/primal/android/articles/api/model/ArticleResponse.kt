@@ -20,4 +20,5 @@ data class ArticleResponse(
     val primalLinkPreviews: List<PrimalEvent>,
     val primalRelayHints: List<PrimalEvent>,
     val primalLongFormWords: List<PrimalEvent>,
+    val primalUserNames: List<PrimalEvent>,
 )

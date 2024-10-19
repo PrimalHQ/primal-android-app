@@ -20,4 +20,5 @@ fun resolvePrimalNoteLink(noteId: String) = "https://primal.net/e/${noteId.hexTo
 
 fun resolvePrimalArticleLink(naddr: String) = "https://primal.net/e/$naddr"
 
-fun resolvePrimalProfileLink(profileId: String) = "https://primal.net/p/${profileId.hexToNpubHrp()}"
+fun resolvePrimalProfileLink(profileId: String, primalName: String?) =
+    "https://primal.net/${primalName ?: ("p/" + profileId.hexToNpubHrp())}"
