@@ -795,6 +795,10 @@ private fun NavGraphBuilder.search(route: String, navController: NavController) 
         SearchScreen(
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
+            onAdvancedSearchClick = { query ->
+                navController.popBackStack()
+                navController.navigateToAdvancedSearch()
+            },
             onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
             onNoteClick = { noteId -> navController.navigateToThread(noteId) },
             onNaddrClick = { naddr -> navController.navigateToArticleDetails(naddr) },
