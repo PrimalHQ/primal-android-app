@@ -15,8 +15,12 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -41,6 +45,8 @@ import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedEr
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.domain.extractTopicFromFeedSpec
 import net.primal.android.feeds.domain.isSearchFeedSpec
+import net.primal.android.feeds.domain.resolveDefaultDescription
+import net.primal.android.feeds.domain.resolveDefaultTitle
 import net.primal.android.notes.feed.MediaFeedGrid
 import net.primal.android.notes.feed.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
@@ -79,6 +85,27 @@ fun ExploreFeedScreen(
     val feedTitle = state.extractTitle()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    var showSaveFeedBottomSheet by rememberSaveable { mutableStateOf(false) }
+
+    if (showSaveFeedBottomSheet && state.feedSpecKind != null) {
+        val addedToUserFeedsMessage = stringResource(id = R.string.app_added_to_user_feeds)
+        SaveFeedBottomSheet(
+            initialTitle = state.feedSpec.resolveDefaultTitle(),
+            initialDescription = state.feedSpec.resolveDefaultDescription(),
+            feedSpecKind = state.feedSpecKind,
+            onAddToUserFeed = { title, description ->
+                eventPublisher(AddToUserFeeds(title = title, description = description))
+                uiScope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = addedToUserFeedsMessage,
+                        duration = SnackbarDuration.Short,
+                    )
+                }
+            },
+            onDismissRequest = { showSaveFeedBottomSheet = false },
+        )
+    }
+
     SnackbarErrorHandler(
         error = state.error,
         snackbarHostState = snackbarHostState,
@@ -101,7 +128,6 @@ fun ExploreFeedScreen(
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            val addedToUserFeedsMessage = stringResource(id = R.string.app_added_to_user_feeds)
             val removedFromUserFeedsMessage = stringResource(id = R.string.app_removed_from_user_feeds)
             ExploreFeedTopAppBar(
                 title = feedTitle,
@@ -116,15 +142,7 @@ fun ExploreFeedScreen(
                         )
                     }
                 },
-                onAddToUserFeedsClick = {
-                    eventPublisher(AddToUserFeeds(title = "", description = ""))
-                    uiScope.launch {
-                        snackbarHostState.showSnackbar(
-                            message = addedToUserFeedsMessage,
-                            duration = SnackbarDuration.Short,
-                        )
-                    }
-                },
+                onAddToUserFeedsClick = { showSaveFeedBottomSheet = true },
                 scrollBehavior = scrollBehavior,
             )
         },
