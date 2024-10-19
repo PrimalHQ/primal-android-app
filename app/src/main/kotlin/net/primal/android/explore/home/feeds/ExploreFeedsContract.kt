@@ -13,6 +13,7 @@ interface ExploreFeedsContract {
         data class AddToUserFeeds(val dvmFeed: DvmFeedUi) : UiEvent()
         data class RemoveFromUserFeeds(val dvmFeed: DvmFeedUi) : UiEvent()
 
+        data class ClearDvmFeed(val dvmFeed: DvmFeedUi) : UiEvent()
         data object RefreshFeeds : UiEvent()
     }
 }
