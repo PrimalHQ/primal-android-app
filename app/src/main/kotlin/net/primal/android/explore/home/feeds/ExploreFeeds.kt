@@ -86,7 +86,10 @@ fun ExploreFeeds(
             )
         }
         DvmFeedDetailsBottomSheet(
-            onDismissRequest = { dvmFeedToShow = null },
+            onDismissRequest = {
+                dvmFeedToShow?.let { eventPublisher(ExploreFeedsContract.UiEvent.ClearDvmFeed(it)) }
+                dvmFeedToShow = null
+            },
             dvmFeed = selectedDvmFeed,
             addedToFeed = addedToFeed,
             addToUserFeeds = { eventPublisher(ExploreFeedsContract.UiEvent.AddToUserFeeds(it)) },
