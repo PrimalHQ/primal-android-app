@@ -23,7 +23,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import net.primal.android.R
-import net.primal.android.core.compose.ListLoading
+import net.primal.android.core.compose.GridLoadingPlaceholder
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.notes.feed.model.FeedPostUi
@@ -72,12 +72,13 @@ private fun MediaFeedGrid(
     if (pagingItems.isEmpty()) {
         EmptyItemsContent(
             pagingItems = pagingItems,
+            paddingValues = contentPadding,
             noContentVerticalArrangement = noContentVerticalArrangement,
             noContentPaddingValues = noContentPaddingValues,
         )
     } else {
         BoxWithConstraints {
-            val itemWidth = maxWidth / 3
+            val itemWidth = this.maxWidth / 3
             LazyVerticalGrid(
                 modifier = modifier,
                 columns = GridCells.Fixed(count = 3),
@@ -103,6 +104,7 @@ private fun MediaFeedGrid(
                                 item = item,
                                 maxWidthPx = itemWidth.value.toInt(),
                             )
+
                         else -> {}
                     }
                 }
@@ -114,13 +116,17 @@ private fun MediaFeedGrid(
 @Composable
 private fun EmptyItemsContent(
     pagingItems: LazyPagingItems<FeedPostUi>,
+    paddingValues: PaddingValues = PaddingValues(0.dp),
     noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
 ) {
     when (val refreshLoadState = pagingItems.loadState.refresh) {
         LoadState.Loading -> {
-            ListLoading(
+            GridLoadingPlaceholder(
                 modifier = Modifier.fillMaxSize(),
+                columnCount = 3,
+                repeat = 10,
+                contentPadding = paddingValues,
             )
         }
 

@@ -35,9 +35,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import net.primal.android.R
+import net.primal.android.core.compose.HeightAdjustableLoadingListPlaceholder
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
-import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.errors.UiError
@@ -100,7 +100,12 @@ fun ExploreFeeds(
     }
 
     if (state.loading && state.feeds.isEmpty()) {
-        PrimalLoadingSpinner()
+        HeightAdjustableLoadingListPlaceholder(
+            modifier = Modifier.fillMaxSize(),
+            contentPaddingValues = paddingValues,
+            clipShape = AppTheme.shapes.small,
+            height = 100.dp,
+        )
     } else if (state.feeds.isEmpty()) {
         ListNoContent(
             modifier = Modifier.fillMaxSize(),

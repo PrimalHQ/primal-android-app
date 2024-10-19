@@ -30,9 +30,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import net.primal.android.R
 import net.primal.android.core.compose.ListNoContent
-import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
-import net.primal.android.explore.home.TopicUi
+import net.primal.android.explore.home.topics.ui.TopicLoadingPlaceholder
+import net.primal.android.explore.home.topics.ui.TopicUi
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -79,8 +79,9 @@ fun ExploreTopics(
         },
     ) {
         if (state.loading && state.topics.isEmpty()) {
-            PrimalLoadingSpinner(
-                paddingValues = paddingValues,
+            TopicLoadingPlaceholder(
+                repeat = 4,
+                contentPadding = paddingValues,
             )
         } else if (state.topics.isEmpty()) {
             ListNoContent(
