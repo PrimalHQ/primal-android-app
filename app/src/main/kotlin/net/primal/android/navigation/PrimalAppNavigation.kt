@@ -111,7 +111,8 @@ private fun NavController.navigateToLogout() = navigate(route = "logout")
 
 private fun NavController.navigateToSearch() = navigate(route = "search")
 
-private fun NavController.navigateToAdvancedSearch() = navigate(route = "asearch")
+private fun NavController.navigateToAdvancedSearch(initialQuery: String? = null) =
+    navigate(route = "asearch?$INITIAL_QUERY=$initialQuery")
 
 private fun NavController.navigateToNoteEditor(args: NoteEditorArgs? = null) {
     navigate(route = "noteEditor?$NOTE_EDITOR_ARGS=${args?.toJson()?.asBase64Encoded()}")
@@ -363,8 +364,14 @@ fun PrimalAppNavigation() {
         )
 
         advancedSearch(
-            route = "asearch",
+            route = "asearch?$INITIAL_QUERY={$INITIAL_QUERY}",
             navController = navController,
+            arguments = listOf(
+                navArgument(INITIAL_QUERY) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+            ),
         )
 
         messages(
@@ -797,7 +804,7 @@ private fun NavGraphBuilder.search(route: String, navController: NavController) 
             onClose = { navController.navigateUp() },
             onAdvancedSearchClick = { query ->
                 navController.popBackStack()
-                navController.navigateToAdvancedSearch()
+                navController.navigateToAdvancedSearch(initialQuery = query)
             },
             onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
             onNoteClick = { noteId -> navController.navigateToThread(noteId) },
@@ -808,28 +815,32 @@ private fun NavGraphBuilder.search(route: String, navController: NavController) 
         )
     }
 
-private fun NavGraphBuilder.advancedSearch(route: String, navController: NavController) =
-    composable(
-        route = route,
-        enterTransition = { primalSlideInHorizontallyFromEnd },
-        exitTransition = { primalScaleOut },
-        popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontallyToEnd },
-    ) {
-        val viewModel = hiltViewModel<AdvancedSearchViewModel>()
+private fun NavGraphBuilder.advancedSearch(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) {
+    val viewModel = hiltViewModel<AdvancedSearchViewModel>()
 
-        ApplyEdgeToEdge()
-        LockToOrientationPortrait()
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
 
-        AdvancedSearchScreen(
-            viewModel = viewModel,
-            onClose = { navController.navigateUp() },
-            onNavigateToExploreNoteFeed = { feedSpec, renderType ->
-                navController.navigateToExploreFeed(feedSpec, renderType)
-            },
-            onNavigateToExploreArticleFeed = { feedSpec -> navController.navigateToExploreFeed(feedSpec) },
-        )
-    }
+    AdvancedSearchScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+        onNavigateToExploreNoteFeed = { feedSpec, renderType ->
+            navController.navigateToExploreFeed(feedSpec, renderType)
+        },
+        onNavigateToExploreArticleFeed = { feedSpec -> navController.navigateToExploreFeed(feedSpec) },
+    )
+}
 
 private fun NavGraphBuilder.messages(route: String, navController: NavController) =
     composable(
