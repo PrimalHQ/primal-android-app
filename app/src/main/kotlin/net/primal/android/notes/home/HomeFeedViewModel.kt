@@ -13,8 +13,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.config.AppConfigHandler
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.feeds.list.ui.model.asFeedUi
 import net.primal.android.feeds.repository.FeedsRepository
-import net.primal.android.feeds.ui.model.asFeedUi
 import net.primal.android.notes.home.HomeFeedContract.UiEvent
 import net.primal.android.notes.home.HomeFeedContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore

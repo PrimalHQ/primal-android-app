@@ -55,9 +55,9 @@ import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
-import net.primal.android.feeds.FeedsBottomSheet
 import net.primal.android.feeds.domain.FeedSpecKind
-import net.primal.android.feeds.ui.model.FeedUi
+import net.primal.android.feeds.list.FeedsBottomSheet
+import net.primal.android.feeds.list.ui.model.FeedUi
 import net.primal.android.notes.feed.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedContract.UiEvent
@@ -159,6 +159,7 @@ fun HomeFeedScreen(
                     uiScope.launch { pagerState.scrollToPage(page = pageIndex) }
                 },
                 scrollBehavior = scrollBehavior,
+                onGoToWallet = onGoToWallet,
             )
         },
         content = { paddingValues ->
@@ -226,6 +227,7 @@ private fun NoteFeedTopAppBar(
     activeFeed: FeedUi?,
     onFeedChanged: (FeedUi) -> Unit,
     scrollBehavior: TopAppBarScrollBehavior? = null,
+    onGoToWallet: (() -> Unit)? = null,
 ) {
     var feedPickerVisible by rememberSaveable { mutableStateOf(false) }
 
@@ -239,6 +241,7 @@ private fun NoteFeedTopAppBar(
             },
             onDismissRequest = { feedPickerVisible = false },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            onGoToWallet = onGoToWallet,
         )
     }
 

@@ -9,10 +9,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.core.compose.profile.model.asProfileDetailsUi
+import net.primal.android.explore.domain.ExploreZapNoteData
 import net.primal.android.explore.home.zaps.ExploreZapsContract.UiEvent
 import net.primal.android.explore.home.zaps.ExploreZapsContract.UiState
+import net.primal.android.explore.home.zaps.ui.ExploreZapNoteUi
 import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.notes.feed.model.asNoteNostrUriUi
+import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import timber.log.Timber
 
@@ -41,7 +46,7 @@ class ExploreZapsViewModel @Inject constructor(
                 val zaps = exploreRepository.fetchTrendingZaps(
                     userId = activeAccountStore.activeUserId(),
                 )
-                setState { copy(zaps = zaps) }
+                setState { copy(zaps = zaps.mapAsUiModel()) }
             } catch (error: WssException) {
                 Timber.w(error)
             } finally {
@@ -56,5 +61,19 @@ class ExploreZapsViewModel @Inject constructor(
                     UiEvent.RefreshZaps -> fetchExploreZaps()
                 }
             }
+        }
+
+    private fun List<ExploreZapNoteData>.mapAsUiModel() =
+        map { zapData ->
+            ExploreZapNoteUi(
+                sender = zapData.sender?.asProfileDetailsUi(),
+                receiver = zapData.receiver?.asProfileDetailsUi(),
+                amountSats = zapData.amountSats,
+                zapMessage = zapData.zapMessage,
+                createdAt = zapData.createdAt,
+                noteContentUi = zapData.noteData.toNoteContentUi(
+                    nostrUris = zapData.noteNostrUris.map { it.asNoteNostrUriUi() },
+                ),
+            )
         }
 }

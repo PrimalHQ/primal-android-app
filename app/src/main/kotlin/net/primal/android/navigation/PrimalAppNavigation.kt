@@ -71,8 +71,6 @@ import net.primal.android.navigation.deeplinking.ext.handleDeeplink
 import net.primal.android.navigation.splash.SplashContract
 import net.primal.android.navigation.splash.SplashScreen
 import net.primal.android.navigation.splash.SplashViewModel
-import net.primal.android.note.reactions.ReactionsScreen
-import net.primal.android.note.reactions.ReactionsViewModel
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedScreen
 import net.primal.android.notes.home.HomeFeedViewModel
@@ -87,6 +85,8 @@ import net.primal.android.profile.follows.ProfileFollowsScreen
 import net.primal.android.profile.follows.ProfileFollowsViewModel
 import net.primal.android.profile.qr.ProfileQrCodeViewModel
 import net.primal.android.profile.qr.ui.ProfileQrCodeViewerScreen
+import net.primal.android.stats.reactions.ReactionsScreen
+import net.primal.android.stats.reactions.ReactionsViewModel
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.thread.articles.details.ArticleDetailsScreen
@@ -750,16 +750,11 @@ private fun NavGraphBuilder.explore(
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
-        onHashtagClick = { hashtag ->
-            navController.navigateToExploreFeed(
-                feedSpec = buildAdvancedSearchNotesFeedSpec(query = hashtag),
-            )
-        },
-        onNoteClick = { noteId -> navController.navigateToThread(noteId) },
         onSearchClick = { navController.navigateToSearch() },
-        onTuneClick = { navController.navigateToAdvancedSearch() },
+        onAdvancedSearchClick = { navController.navigateToAdvancedSearch() },
         onClose = { navController.navigateUp() },
-        onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
+        noteCallbacks = noteCallbacksHandler(navController),
+        onGoToWallet = { navController.navigateToWallet() },
     )
 }
 

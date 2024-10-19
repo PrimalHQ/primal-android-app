@@ -40,14 +40,20 @@ import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.feeds.domain.DvmFeed
+import net.primal.android.core.errors.UiError
 import net.primal.android.feeds.domain.buildSpec
-import net.primal.android.feeds.item.DvmFeedListItem
-import net.primal.android.feeds.ui.DvmHeaderAndFeedList
+import net.primal.android.feeds.dvm.ui.DvmFeedListItem
+import net.primal.android.feeds.dvm.ui.DvmFeedUi
+import net.primal.android.feeds.dvm.ui.DvmHeaderAndFeedList
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun ExploreFeeds(modifier: Modifier = Modifier, paddingValues: PaddingValues = PaddingValues(all = 0.dp)) {
+fun ExploreFeeds(
+    modifier: Modifier = Modifier,
+    paddingValues: PaddingValues = PaddingValues(all = 0.dp),
+    onGoToWallet: (() -> Unit)? = null,
+    onUiError: ((UiError) -> Unit)? = null,
+) {
     val viewModel: ExploreFeedsViewModel = hiltViewModel<ExploreFeedsViewModel>()
     val uiState = viewModel.state.collectAsState()
 
@@ -56,6 +62,8 @@ fun ExploreFeeds(modifier: Modifier = Modifier, paddingValues: PaddingValues = P
         state = uiState.value,
         paddingValues = paddingValues,
         eventPublisher = viewModel::setEvent,
+        onGoToWallet = onGoToWallet,
+        onUiError = onUiError,
     )
 }
 
@@ -65,22 +73,26 @@ fun ExploreFeeds(
     state: ExploreFeedsContract.UiState,
     paddingValues: PaddingValues = PaddingValues(all = 0.dp),
     eventPublisher: (ExploreFeedsContract.UiEvent) -> Unit,
+    onGoToWallet: (() -> Unit)? = null,
+    onUiError: ((UiError) -> Unit)? = null,
 ) {
-    var dvmFeedToShow by remember { mutableStateOf<DvmFeed?>(null) }
+    var dvmFeedToShow by remember { mutableStateOf<DvmFeedUi?>(null) }
 
-    dvmFeedToShow?.let {
+    dvmFeedToShow?.let { selectedDvmFeed ->
         val addedToFeed by remember(dvmFeedToShow, state.userFeedSpecs) {
-            val kind = dvmFeedToShow?.kind
+            val kind = dvmFeedToShow?.data?.kind
             mutableStateOf(
-                kind?.let { state.userFeedSpecs.contains(dvmFeedToShow?.buildSpec(specKind = kind)) } ?: false,
+                kind?.let { state.userFeedSpecs.contains(dvmFeedToShow?.data?.buildSpec(specKind = kind)) } ?: false,
             )
         }
         DvmFeedDetailsBottomSheet(
             onDismissRequest = { dvmFeedToShow = null },
-            dvmFeed = it,
+            dvmFeed = selectedDvmFeed,
             addedToFeed = addedToFeed,
             addToUserFeeds = { eventPublisher(ExploreFeedsContract.UiEvent.AddToUserFeeds(it)) },
             removeFromUserFeeds = { eventPublisher(ExploreFeedsContract.UiEvent.RemoveFromUserFeeds(it)) },
+            onGoToWallet = onGoToWallet,
+            onUiError = onUiError,
         )
     }
 
@@ -108,7 +120,7 @@ fun ExploreFeeds(
 
             items(
                 items = state.feeds,
-                key = { "${it.dvmPubkey}:${it.dvmId}" },
+                key = { "${it.data.dvmPubkey}:${it.data.dvmId}" },
             ) { dvmFeed ->
                 DvmFeedListItem(
                     modifier = Modifier.padding(top = 8.dp),
@@ -116,6 +128,8 @@ fun ExploreFeeds(
                     listItemContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt3,
                     onFeedClick = { dvmFeedToShow = it },
                     showFollowsActionsAvatarRow = true,
+                    onGoToWallet = onGoToWallet,
+                    onUiError = onUiError,
                 )
             }
 
@@ -129,10 +143,12 @@ fun ExploreFeeds(
 private fun DvmFeedDetailsBottomSheet(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
-    dvmFeed: DvmFeed,
+    dvmFeed: DvmFeedUi,
+    onGoToWallet: (() -> Unit)? = null,
+    onUiError: ((UiError) -> Unit)? = null,
     addedToFeed: Boolean,
-    addToUserFeeds: (DvmFeed) -> Unit,
-    removeFromUserFeeds: (DvmFeed) -> Unit,
+    addToUserFeeds: (DvmFeedUi) -> Unit,
+    removeFromUserFeeds: (DvmFeedUi) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -188,9 +204,11 @@ private fun DvmFeedDetailsBottomSheet(
             DvmHeaderAndFeedList(
                 modifier = Modifier.padding(paddingValues),
                 dvmFeed = dvmFeed,
+                onGoToWallet = onGoToWallet,
                 extended = true,
                 showFollowsActionsAvatarRow = true,
                 clipShape = null,
+                onUiError = onUiError,
             )
         }
     }

@@ -95,10 +95,15 @@ interface AdvancedSearchContract {
         MyFollows,
         MyNetwork,
         MyFollowsInteractions,
+        MyNetworkInteractions,
+        NotMyFollows,
     }
 
     enum class SearchOrderBy {
         Time,
         ContentScore,
+        Replies,
+        SatsZapped,
+        Interactions,
     }
 }

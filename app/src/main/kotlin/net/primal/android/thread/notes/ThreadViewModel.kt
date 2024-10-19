@@ -21,9 +21,9 @@ import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.navigation.noteIdOrThrow
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.note.repository.NoteRepository
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
+import net.primal.android.stats.repository.EventRepository
 import net.primal.android.thread.notes.ThreadContract.UiEvent
 import net.primal.android.thread.notes.ThreadContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -35,7 +35,7 @@ class ThreadViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val feedRepository: FeedRepository,
-    private val noteRepository: NoteRepository,
+    private val eventRepository: EventRepository,
     private val articleRepository: ArticleRepository,
 ) : ViewModel() {
 
@@ -129,9 +129,10 @@ class ThreadViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 withContext(dispatcherProvider.io()) {
-                    noteRepository.fetchTopNoteZaps(
+                    eventRepository.fetchEventZaps(
                         userId = activeAccountStore.activeUserId(),
                         eventId = highlightPostId,
+                        limit = 15,
                     )
                 }
             } catch (error: WssException) {

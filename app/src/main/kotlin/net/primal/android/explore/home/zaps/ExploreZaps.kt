@@ -40,25 +40,26 @@ import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
-import net.primal.android.explore.api.model.ExploreZapData
+import net.primal.android.explore.home.zaps.ui.ExploreZapNoteUi
+import net.primal.android.notes.feed.model.NoteContentUi
+import net.primal.android.notes.feed.note.ui.NoteContent
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 
 @Composable
 fun ExploreZaps(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
-    onProfileClick: (String) -> Unit,
-    onNoteClick: (String) -> Unit,
+    noteCallbacks: NoteCallbacks,
 ) {
     val viewModel: ExploreZapsViewModel = hiltViewModel()
     val uiState = viewModel.state.collectAsState()
 
     ExploreZaps(
         modifier = modifier,
-        paddingValues = paddingValues,
-        onNoteClick = onNoteClick,
-        onProfileClick = onProfileClick,
         state = uiState.value,
+        paddingValues = paddingValues,
+        noteCallbacks = noteCallbacks,
         eventPublisher = viewModel::setEvent,
     )
 }
@@ -67,8 +68,7 @@ fun ExploreZaps(
 private fun ExploreZaps(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
-    onProfileClick: (String) -> Unit,
-    onNoteClick: (String) -> Unit,
+    noteCallbacks: NoteCallbacks,
     state: ExploreZapsContract.UiState,
     eventPublisher: (ExploreZapsContract.UiEvent) -> Unit,
 ) {
@@ -100,12 +100,11 @@ private fun ExploreZaps(
                 item { Spacer(modifier = Modifier.height(4.dp)) }
                 items(
                     items = state.zaps,
-                    key = { "${it.noteId}:${it.sender?.pubkey}:${it.createdAt.toEpochMilli()}" },
+                    key = { "${it.noteContentUi.noteId}:${it.sender?.pubkey}:${it.createdAt.toEpochMilli()}" },
                 ) { item ->
                     ZapListItem(
                         zapData = item,
-                        onProfileClick = onProfileClick,
-                        onNoteClick = onNoteClick,
+                        noteCallbacks = noteCallbacks,
                     )
                 }
                 item { Spacer(modifier = Modifier.height(4.dp)) }
@@ -117,31 +116,36 @@ private fun ExploreZaps(
 @Composable
 fun ZapListItem(
     modifier: Modifier = Modifier,
-    zapData: ExploreZapData,
-    onProfileClick: (String) -> Unit,
-    onNoteClick: (String) -> Unit,
+    zapData: ExploreZapNoteUi,
+    noteCallbacks: NoteCallbacks,
 ) {
     Column(
         modifier = modifier
             .clip(AppTheme.shapes.extraLarge)
-            .clickable { onNoteClick(zapData.noteId) }
+            .clickable(
+                interactionSource = null,
+                indication = null,
+                onClick = { noteCallbacks.onNoteClick?.invoke(zapData.noteContentUi.noteId) },
+            )
             .background(AppTheme.extraColorScheme.surfaceVariantAlt3)
             .padding(all = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         ZapHeader(
-            onReceiverAvatarClick = { zapData.receiver?.pubkey?.let { onProfileClick(it) } },
-            onSenderAvatarClick = { zapData.sender?.pubkey?.let { onProfileClick(it) } },
-            receiverCdnImage = zapData.receiver?.avatarCdnImage,
+            onSenderAvatarClick = { zapData.sender?.pubkey?.let { noteCallbacks.onProfileClick?.invoke(it) } },
             senderCdnImage = zapData.sender?.avatarCdnImage,
             amountSats = zapData.amountSats,
             message = zapData.zapMessage,
         )
         NoteSummary(
-            receiverDisplayName = zapData.receiver?.authorDisplayName,
-            noteContent = zapData.noteContent,
+            noteContent = zapData.noteContentUi,
             noteTimestamp = zapData.createdAt,
+            noteCallbacks = noteCallbacks,
+            onNoteClick = { noteCallbacks.onNoteClick?.invoke(it) },
+            receiverCdnResource = zapData.receiver?.avatarCdnImage,
+            receiverDisplayName = zapData.receiver?.authorDisplayName,
+            onReceiverAvatarClick = { zapData.receiver?.pubkey?.let { noteCallbacks.onProfileClick?.invoke(it) } },
         )
     }
 }
@@ -149,45 +153,57 @@ fun ZapListItem(
 @Composable
 private fun NoteSummary(
     receiverDisplayName: String?,
-    noteContent: String?,
+    noteContent: NoteContentUi,
+    receiverCdnResource: CdnImage?,
     noteTimestamp: Instant,
+    noteCallbacks: NoteCallbacks,
+    onReceiverAvatarClick: () -> Unit,
+    onNoteClick: (String) -> Unit,
 ) {
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 12.dp, bottom = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalAlignment = Alignment.Start,
+            .padding(start = 2.dp, end = 8.dp, bottom = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        receiverDisplayName?.let {
-            Row {
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(
-                            style = SpanStyle(
-                                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                                fontWeight = FontWeight.Bold,
-                            ),
-                        ) {
-                            append(receiverDisplayName)
-                        }
-                        withStyle(style = SpanStyle(color = AppTheme.extraColorScheme.onSurfaceVariantAlt3)) {
-                            append(" • ")
-                            append(noteTimestamp.asBeforeNowFormat())
-                        }
-                    },
-                    maxLines = 1,
-                    style = AppTheme.typography.bodyMedium,
-                )
+        AvatarThumbnail(
+            avatarCdnImage = receiverCdnResource,
+            avatarSize = 38.dp,
+            onClick = onReceiverAvatarClick,
+        )
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            receiverDisplayName?.let {
+                Row {
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(
+                                style = SpanStyle(
+                                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                                    fontWeight = FontWeight.Bold,
+                                ),
+                            ) {
+                                append(receiverDisplayName)
+                            }
+                            withStyle(style = SpanStyle(color = AppTheme.extraColorScheme.onSurfaceVariantAlt3)) {
+                                append(" • ")
+                                append(noteTimestamp.asBeforeNowFormat())
+                            }
+                        },
+                        maxLines = 1,
+                        style = AppTheme.typography.bodyMedium,
+                    )
+                }
             }
-        }
-        noteContent?.let {
-            Text(
-                text = noteContent.split("\n").filter { it.isNotBlank() }.joinToString(separator = " "),
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+            NoteContent(
+                expanded = false,
+                noteCallbacks = noteCallbacks,
+                data = noteContent,
+                contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                style = AppTheme.typography.bodyMedium,
+                onClick = { onNoteClick(noteContent.noteId) },
             )
         }
     }
@@ -195,9 +211,7 @@ private fun NoteSummary(
 
 @Composable
 private fun ZapHeader(
-    onReceiverAvatarClick: () -> Unit,
     onSenderAvatarClick: () -> Unit,
-    receiverCdnImage: CdnImage?,
     senderCdnImage: CdnImage?,
     amountSats: ULong,
     message: String?,
@@ -207,52 +221,42 @@ private fun ZapHeader(
             .fillMaxWidth()
             .clip(RoundedCornerShape(percent = 100))
             .background(AppTheme.colorScheme.background)
-            .padding(4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .padding(end = 16.dp)
+            .padding(2.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AvatarThumbnail(
             avatarCdnImage = senderCdnImage,
-            avatarSize = 42.dp,
+            avatarSize = 38.dp,
             onClick = onSenderAvatarClick,
         )
-
-        Column(
-            modifier = Modifier.padding(vertical = 4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
+        val numberFormat = NumberFormat.getNumberInstance()
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            val numberFormat = NumberFormat.getNumberInstance()
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
-            ) {
-                Icon(
-                    imageVector = PrimalIcons.LightningBoltFilled,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = AppTheme.colorScheme.onPrimary,
-                )
-                Text(
-                    text = numberFormat.format(amountSats.toLong()),
-                    fontWeight = FontWeight.ExtraBold,
-                    style = AppTheme.typography.bodyMedium,
-                )
-            }
-            if (!message.isNullOrEmpty()) {
-                Text(
-                    text = message,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = AppTheme.typography.bodySmall,
-                )
-            }
+            Icon(
+                imageVector = PrimalIcons.LightningBoltFilled,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = AppTheme.colorScheme.onPrimary,
+            )
+            Text(
+                text = numberFormat.format(amountSats.toLong()),
+                fontWeight = FontWeight.ExtraBold,
+                style = AppTheme.typography.bodyMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
-
-        AvatarThumbnail(
-            avatarCdnImage = receiverCdnImage,
-            avatarSize = 42.dp,
-            onClick = onReceiverAvatarClick,
-        )
+        if (!message.isNullOrEmpty()) {
+            Text(
+                text = message,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            )
+        }
     }
 }

@@ -1,20 +1,26 @@
 package net.primal.android.wallet.domain
 
+import kotlinx.serialization.json.JsonArray
+import net.primal.android.nostr.ext.asEventIdTag
+import net.primal.android.nostr.ext.asPubkeyTag
+import net.primal.android.nostr.ext.asReplaceableEventTag
+
 sealed class ZapTarget {
     data class Profile(
-        val pubkey: String,
-        val lnUrlDecoded: String,
+        val profileId: String,
+        val profileLnUrlDecoded: String,
     ) : ZapTarget()
 
-    data class Note(
-        val id: String,
-        val authorPubkey: String,
-        val authorLnUrlDecoded: String,
-    ) : ZapTarget()
-
-    data class Article(
+    data class Event(
         val eventId: String,
-        val articleId: String,
+        val eventAuthorId: String,
+        val eventAuthorLnUrlDecoded: String,
+    ) : ZapTarget()
+
+    data class ReplaceableEvent(
+        val kind: Int,
+        val identifier: String,
+        val eventId: String,
         val eventAuthorId: String,
         val eventAuthorLnUrlDecoded: String,
     ) : ZapTarget()
@@ -22,16 +28,37 @@ sealed class ZapTarget {
 
 fun ZapTarget.userId(): String {
     return when (this) {
-        is ZapTarget.Note -> this.authorPubkey
-        is ZapTarget.Profile -> this.pubkey
-        is ZapTarget.Article -> this.eventAuthorId
+        is ZapTarget.Event -> this.eventAuthorId
+        is ZapTarget.Profile -> this.profileId
+        is ZapTarget.ReplaceableEvent -> this.eventAuthorId
     }
 }
 
 fun ZapTarget.lnUrlDecoded(): String {
     return when (this) {
-        is ZapTarget.Note -> this.authorLnUrlDecoded
-        is ZapTarget.Profile -> this.lnUrlDecoded
-        is ZapTarget.Article -> this.eventAuthorLnUrlDecoded
+        is ZapTarget.Event -> this.eventAuthorLnUrlDecoded
+        is ZapTarget.Profile -> this.profileLnUrlDecoded
+        is ZapTarget.ReplaceableEvent -> this.eventAuthorLnUrlDecoded
     }
+}
+
+fun ZapTarget.toTags(): List<JsonArray> {
+    val tags = mutableListOf<JsonArray>()
+
+    when (this) {
+        is ZapTarget.Profile -> tags.add(profileId.asPubkeyTag())
+
+        is ZapTarget.Event -> {
+            tags.add(eventId.asEventIdTag())
+            tags.add(eventAuthorId.asPubkeyTag())
+        }
+
+        is ZapTarget.ReplaceableEvent -> {
+            tags.add(eventId.asEventIdTag())
+            tags.add(eventAuthorId.asPubkeyTag())
+            tags.add("$kind:$eventAuthorId:$identifier".asReplaceableEventTag())
+        }
+    }
+
+    return tags
 }

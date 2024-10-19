@@ -15,6 +15,8 @@ import net.primal.android.feeds.domain.DvmFeed
 import net.primal.android.feeds.domain.FEED_KIND_DVM
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.domain.buildSpec
+import net.primal.android.nostr.ext.asEventStatsPO
+import net.primal.android.nostr.ext.asEventUserStatsPO
 import net.primal.android.nostr.ext.findFirstIdentifier
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsProfileDataPO
@@ -27,6 +29,7 @@ import net.primal.android.nostr.model.primal.content.ContentDvmFeedMetadata
 import net.primal.android.nostr.model.primal.content.ContentPrimalDvmFeedMetadata
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventUserStats
+import net.primal.android.wallet.api.parseAsLNUrlOrNull
 
 class FeedsRepository @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
@@ -144,9 +147,9 @@ class FeedsRepository @Inject constructor(
         persistLocallyAndRemotelyUserFeeds(userId = userId, feeds = feeds, specKind = specKind)
     }
 
-    suspend fun fetchRecommendedDvmFeeds(specKind: FeedSpecKind? = null, pubkey: String? = null): List<DvmFeed> {
+    suspend fun fetchRecommendedDvmFeeds(userId: String, specKind: FeedSpecKind? = null): List<DvmFeed> {
         val response = withContext(dispatcherProvider.io()) {
-            feedsApi.getFeaturedFeeds(specKind = specKind, pubkey = pubkey)
+            feedsApi.getFeaturedFeeds(specKind = specKind, pubkey = userId)
         }
         val eventStatsMap = response.scores.parseAndMapContentByKey<ContentPrimalEventStats> { eventId }
         val metadata = response.feedMetadata.parseAndMapContentByKey<ContentDvmFeedMetadata> { eventId }
@@ -155,12 +158,13 @@ class FeedsRepository @Inject constructor(
 
         val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
         val profiles = response.userMetadata.mapAsProfileDataPO(cdnResources = cdnResources).distinctBy { it.ownerId }
-
         val profileScores = response.userScores.map { it.takeContentAsPrimalUserScoresOrNull() }
             .fold(emptyMap<String, Float>()) { acc, map -> acc + map }
 
         withContext(dispatcherProvider.io()) {
             database.profiles().upsertAll(data = profiles)
+            database.eventStats().upsertAll(data = eventStatsMap.values.map { it.asEventStatsPO() })
+            database.eventUserStats().upsertAll(data = userStats.values.map { it.asEventUserStatsPO(userId = userId) })
         }
 
         val dvmFeeds = response.dvmHandlers
@@ -169,30 +173,29 @@ class FeedsRepository @Inject constructor(
                 val dvmMetadata = NostrJson.decodeFromStringOrNull<ContentPrimalDvmFeedMetadata>(nostrEvent.content)
                 val dvmId = nostrEvent.tags.findFirstIdentifier()
                 val dvmTitle = dvmMetadata?.name
-                val profileDatasFromFollowsActions = profiles
-                    .filter { followsActions[nostrEvent.id]?.userIds?.contains(it.ownerId) == true }
-                    .sortedBy { profileData -> profileScores[profileData.ownerId] }
+
+                val actionUserIds = followsActions[nostrEvent.id]?.userIds
+                    ?.sortedBy { profileScores[it] }
+                    ?: emptyList()
 
                 if (dvmMetadata != null && dvmId != null && dvmTitle != null) {
                     DvmFeed(
+                        eventId = nostrEvent.id,
                         dvmId = dvmId,
                         dvmPubkey = nostrEvent.pubKey,
+                        dvmLnUrlDecoded = dvmMetadata.lud16?.parseAsLNUrlOrNull(),
                         avatarUrl = dvmMetadata.picture,
                         title = dvmTitle,
                         description = dvmMetadata.about,
                         amountInSats = dvmMetadata.amount,
                         primalSubscriptionRequired = dvmMetadata.subscription == true,
-                        totalLikes = eventStatsMap[nostrEvent.id]?.likes,
-                        totalSatsZapped = eventStatsMap[nostrEvent.id]?.satsZapped,
                         kind = when (metadata[nostrEvent.id]?.kind?.lowercase()) {
                             "notes" -> FeedSpecKind.Notes
                             "reads" -> FeedSpecKind.Reads
                             else -> null
                         },
-                        isPrimal = metadata[nostrEvent.id]?.isPrimal,
-                        followsActions = profileDatasFromFollowsActions,
-                        userLiked = userStats[nostrEvent.id]?.liked,
-                        userZapped = userStats[nostrEvent.id]?.zapped,
+                        isPrimalFeed = metadata[nostrEvent.id]?.isPrimal,
+                        actionUserIds = actionUserIds,
                     )
                 } else {
                     null
