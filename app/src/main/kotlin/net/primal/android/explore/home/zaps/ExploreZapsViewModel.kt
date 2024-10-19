@@ -73,7 +73,7 @@ class ExploreZapsViewModel @Inject constructor(
                 createdAt = zapData.createdAt,
                 noteContentUi = zapData.noteData.toNoteContentUi(
                     nostrUris = zapData.noteNostrUris.map { it.asNoteNostrUriUi() },
-                ),
+                ).copy(hashtags = emptyList()),
             )
         }
 }
