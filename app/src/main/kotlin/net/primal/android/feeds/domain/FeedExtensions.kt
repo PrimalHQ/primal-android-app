@@ -157,6 +157,8 @@ fun buildExploreMediaFeedSpec() = """{"id":"explore-media"}"""
 fun String.extractTopicFromFeedSpec(): String? {
     val noteQueryStartIndex = this.indexOf("\"query\":\"kind:1 #")
     val articleQueryStartIndex = this.indexOf("\"query\":\"kind:30023 #")
+    val articleTopicQueryPrefix = "{\"kind\":\"reads\",\"topic\":\""
+    val articleTopicQueryStartIndex = this.indexOf(articleTopicQueryPrefix)
 
     return if (noteQueryStartIndex != -1) {
         val noteTopicStartIndex = this.indexOf("#", startIndex = noteQueryStartIndex)
@@ -166,6 +168,9 @@ fun String.extractTopicFromFeedSpec(): String? {
         val articleTopicStartIndex = this.indexOf("#", startIndex = articleQueryStartIndex)
         val articleTopicEndIndex = this.indexOf("}", startIndex = articleQueryStartIndex) - 1
         this.substring(startIndex = articleTopicStartIndex, endIndex = articleTopicEndIndex)
+    } else if (articleTopicQueryStartIndex != -1) {
+        val articleTopicEndIndex = this.indexOf("}", startIndex = articleTopicQueryStartIndex) - 1
+        "#" + this.substring(startIndex = articleTopicQueryPrefix.length, endIndex = articleTopicEndIndex)
     } else {
         null
     }
