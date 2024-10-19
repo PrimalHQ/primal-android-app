@@ -1,2 +1,18 @@
 ## Changes
-New app shell & UX polish;
+- Implement save feed bottom sheet;
+- Implement primal user names with new url sharing;
+- Implement transferring query from simple search to advanced search;
+- Fix article topic feeds title;
+- Implement skeleton loaders on all Explore Tabs;
+- Fix zap bottom sheet title alignment;
+- Fix top zaps end margin (visual polish on notes feed);
+- Update bottom nav bar icons;
+- Add advanced search icon to simple search screen;
+- Fix explore dvm feeds not cleared on dismiss;
+- Update advanced search to reflect web app changes;
+- Implement DvmFeedListHandler with stats observer;
+- Fix zapping dvm feeds as replaceable events;
+- Implement liking and zapping on DvmFeeds;
+- Implement user mentions on explore zaps list item;
+- Implement new explore zaps UI update;
+- Implement primal badge support on dvm avatars;
