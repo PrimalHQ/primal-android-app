@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -28,19 +29,22 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.button.PrimalFilledButton
+import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SaveFeedBottomSheet(
-    onDismissRequest: () -> Unit,
-    onAddToUserFeed: (title: String, description: String) -> Unit,
     initialTitle: String,
     initialDescription: String,
+    feedSpecKind: FeedSpecKind,
+    onDismissRequest: () -> Unit,
+    onAddToUserFeed: (title: String, description: String) -> Unit,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
 ) {
     val scope = rememberCoroutineScope()
@@ -48,6 +52,7 @@ fun SaveFeedBottomSheet(
     var description by rememberSaveable { mutableStateOf(initialDescription) }
 
     ModalBottomSheet(
+        modifier = Modifier.statusBarsPadding(),
         tonalElevation = 0.dp,
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
@@ -56,7 +61,11 @@ fun SaveFeedBottomSheet(
     ) {
         CenterAlignedTopAppBar(
             title = {
-                Text(text = stringResource(id = R.string.explore_feeds_save_feed_bottom_sheet_title))
+                val titleResourceId = when (feedSpecKind) {
+                    FeedSpecKind.Reads -> stringResource(id = R.string.explore_feeds_save_reads_feed_bottom_sheet_title)
+                    FeedSpecKind.Notes -> stringResource(id = R.string.explore_feeds_save_home_feed_bottom_sheet_title)
+                }
+                Text(text = titleResourceId)
             },
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                 containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
@@ -64,7 +73,7 @@ fun SaveFeedBottomSheet(
         )
         Column(
             modifier = Modifier
-                .padding(all = 24.dp)
+                .padding(horizontal = 24.dp, vertical = 12.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
@@ -87,6 +96,7 @@ fun SaveFeedBottomSheet(
                 .padding(horizontal = 24.dp)
                 .padding(vertical = 32.dp)
                 .fillMaxWidth(),
+            enabled = title.isNotEmpty() && description.isNotEmpty(),
             onClick = {
                 scope.launch {
                     sheetState.hide()
@@ -120,6 +130,7 @@ fun TextFieldColumn(
         Text(
             text = label,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            style = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp),
         )
         TextField(
             shape = AppTheme.shapes.medium,
@@ -129,6 +140,8 @@ fun TextFieldColumn(
                 .fillMaxWidth(),
             value = value,
             onValueChange = onValueChange,
+            textStyle = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp),
+            maxLines = 2,
             trailingIcon = {
                 ClearButton(
                     onClick = {

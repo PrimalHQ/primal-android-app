@@ -87,12 +87,12 @@ fun ExploreFeedScreen(
 
     var showSaveFeedBottomSheet by rememberSaveable { mutableStateOf(false) }
 
-    if (showSaveFeedBottomSheet) {
+    if (showSaveFeedBottomSheet && state.feedSpecKind != null) {
         val addedToUserFeedsMessage = stringResource(id = R.string.app_added_to_user_feeds)
         SaveFeedBottomSheet(
-            onDismissRequest = { showSaveFeedBottomSheet = false },
             initialTitle = state.feedSpec.resolveDefaultTitle(),
             initialDescription = state.feedSpec.resolveDefaultDescription(),
+            feedSpecKind = state.feedSpecKind,
             onAddToUserFeed = { title, description ->
                 eventPublisher(AddToUserFeeds(title = title, description = description))
                 uiScope.launch {
@@ -102,6 +102,7 @@ fun ExploreFeedScreen(
                     )
                 }
             },
+            onDismissRequest = { showSaveFeedBottomSheet = false },
         )
     }
 
