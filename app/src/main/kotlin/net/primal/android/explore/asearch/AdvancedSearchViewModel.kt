@@ -1,5 +1,6 @@
 package net.primal.android.explore.asearch
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,9 +23,12 @@ import net.primal.android.explore.asearch.AdvancedSearchContract.SearchFilter
 import net.primal.android.explore.asearch.AdvancedSearchContract.UiEvent
 import net.primal.android.explore.asearch.AdvancedSearchContract.UiState
 import net.primal.android.explore.feed.ExploreFeedContract
+import net.primal.android.navigation.initialQuery
 
 @HiltViewModel
-class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
+class AdvancedSearchViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
+) : ViewModel() {
 
     companion object {
         private const val DATE_TIME_FORMAT = "yyyy-MM-dd_HH:mm"
@@ -34,7 +38,11 @@ class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
     private val dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT).withZone(ZoneId.systemDefault())
     private val dateFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT).withZone(ZoneId.systemDefault())
 
-    private val _state = MutableStateFlow(UiState())
+    private val _state = MutableStateFlow(
+        UiState(
+            includedWords = savedStateHandle.initialQuery,
+        ),
+    )
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -159,7 +167,8 @@ class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
                 "since:" + ZonedDateTime.now().minusYears(1).toInstant().toCommandFormattedDateTimeString()
 
             is AdvancedSearchContract.TimeModifier.Custom ->
-                "since:${this.startDate.toCommandFormattedDateString()} until:${this.endDate.toCommandFormattedDateString()}"
+                "since:${this.startDate.toCommandFormattedDateString()} " +
+                    "until:${this.endDate.toCommandFormattedDateString()}"
         }
 
     private fun AdvancedSearchContract.SearchScope.toSearchCommand() =

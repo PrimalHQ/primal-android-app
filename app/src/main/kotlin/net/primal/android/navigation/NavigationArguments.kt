@@ -25,6 +25,9 @@ const val RENDER_TYPE = "renderType"
 inline val SavedStateHandle.renderType: String
     get() = get<String>(RENDER_TYPE) ?: throw IllegalArgumentException("Missing required renderType argument.")
 
+const val INITIAL_QUERY = "initialQuery"
+inline val SavedStateHandle.initialQuery: String? get() = get(INITIAL_QUERY)
+
 const val EXPLORE_FEED_SPEC = "exploreFeedSpec"
 inline val SavedStateHandle.exploreFeedSpecOrThrow: String
     get() = get<String>(EXPLORE_FEED_SPEC)?.asBase64Decoded()?.ifEmpty { null }
