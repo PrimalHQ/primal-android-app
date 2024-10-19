@@ -72,6 +72,7 @@ private fun MediaFeedGrid(
     if (pagingItems.isEmpty()) {
         EmptyItemsContent(
             pagingItems = pagingItems,
+            paddingValues = contentPadding,
             noContentVerticalArrangement = noContentVerticalArrangement,
             noContentPaddingValues = noContentPaddingValues,
         )
@@ -103,6 +104,7 @@ private fun MediaFeedGrid(
                                 item = item,
                                 maxWidthPx = itemWidth.value.toInt(),
                             )
+
                         else -> {}
                     }
                 }
@@ -122,7 +124,9 @@ private fun EmptyItemsContent(
         LoadState.Loading -> {
             GridLoadingPlaceholder(
                 modifier = Modifier.fillMaxSize(),
-                contentPaddingValues = paddingValues,
+                columnCount = 3,
+                repeat = 10,
+                contentPadding = paddingValues,
             )
         }
 
