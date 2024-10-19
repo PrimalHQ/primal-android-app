@@ -28,9 +28,11 @@ class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
 
     companion object {
         private const val DATE_TIME_FORMAT = "yyyy-MM-dd_HH:mm"
+        private const val DATE_FORMAT = "yyyy-MM-dd"
     }
 
-    private val formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT).withZone(ZoneId.systemDefault())
+    private val dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT).withZone(ZoneId.systemDefault())
+    private val dateFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT).withZone(ZoneId.systemDefault())
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -85,7 +87,7 @@ class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
             val uiState = state.value
             val searchParams = listOf(
                 uiState.includedWords,
-                uiState.excludedWords?.let { "-$this" },
+                uiState.excludedWords?.let { it.split(" ").map { "-$it" }.joinToString(separator = " ") },
                 uiState.searchKind.toSearchCommand(),
                 uiState.postedBy.joinWithPrefix("from:"),
                 uiState.replyingTo.joinWithPrefix("to:"),
@@ -125,36 +127,39 @@ class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
         when (this) {
             AdvancedSearchContract.SearchKind.Notes -> "kind:1"
             AdvancedSearchContract.SearchKind.Reads -> "kind:30023"
-            AdvancedSearchContract.SearchKind.Images -> "kind:1 filter:image"
-            AdvancedSearchContract.SearchKind.Videos -> "kind:1 filter:video"
-            AdvancedSearchContract.SearchKind.Sound -> "kind:1 filter:audio"
-            AdvancedSearchContract.SearchKind.NoteReplies -> "kind:1 filter:replies"
-            AdvancedSearchContract.SearchKind.ReadsComments -> "kind:30023 filter:replies"
+            AdvancedSearchContract.SearchKind.Images -> "filter:image"
+            AdvancedSearchContract.SearchKind.Videos -> "filter:video"
+            AdvancedSearchContract.SearchKind.Sound -> "filter:audio"
+            AdvancedSearchContract.SearchKind.NoteReplies -> "kind:1 repliestokind:1"
+            AdvancedSearchContract.SearchKind.ReadsComments -> "kind:1 repliestokind:30023"
         }
 
     private fun AdvancedSearchContract.SearchOrderBy.toSearchCommand() =
         when (this) {
             AdvancedSearchContract.SearchOrderBy.Time -> ""
             AdvancedSearchContract.SearchOrderBy.ContentScore -> "orderby:score"
+            AdvancedSearchContract.SearchOrderBy.Replies -> "orderby:replies"
+            AdvancedSearchContract.SearchOrderBy.SatsZapped -> "orderby:satszapped"
+            AdvancedSearchContract.SearchOrderBy.Interactions -> "orderby:likes"
         }
 
     private fun AdvancedSearchContract.TimeModifier.toSearchCommand(): String =
         when (this) {
             AdvancedSearchContract.TimeModifier.Anytime -> ""
             AdvancedSearchContract.TimeModifier.Today ->
-                "since:" + ZonedDateTime.now().minusDays(1).toInstant().toCommandFormattedString()
+                "since:" + ZonedDateTime.now().minusDays(1).toInstant().toCommandFormattedDateTimeString()
 
             AdvancedSearchContract.TimeModifier.Week ->
-                "since:" + ZonedDateTime.now().minusDays(7).toInstant().toCommandFormattedString()
+                "since:" + ZonedDateTime.now().minusDays(7).toInstant().toCommandFormattedDateTimeString()
 
             AdvancedSearchContract.TimeModifier.Month ->
-                "since:" + ZonedDateTime.now().minusMonths(1).toInstant().toCommandFormattedString()
+                "since:" + ZonedDateTime.now().minusMonths(1).toInstant().toCommandFormattedDateTimeString()
 
             AdvancedSearchContract.TimeModifier.Year ->
-                "since:" + ZonedDateTime.now().minusYears(1).toInstant().toCommandFormattedString()
+                "since:" + ZonedDateTime.now().minusYears(1).toInstant().toCommandFormattedDateTimeString()
 
             is AdvancedSearchContract.TimeModifier.Custom ->
-                "since:${this.startDate.toCommandFormattedString()} before:${this.endDate.toCommandFormattedString()}"
+                "since:${this.startDate.toCommandFormattedDateString()} until:${this.endDate.toCommandFormattedDateString()}"
         }
 
     private fun AdvancedSearchContract.SearchScope.toSearchCommand() =
@@ -163,6 +168,8 @@ class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
             AdvancedSearchContract.SearchScope.MyFollows -> "scope:myfollows"
             AdvancedSearchContract.SearchScope.MyNetwork -> "scope:mynetwork"
             AdvancedSearchContract.SearchScope.MyFollowsInteractions -> "scope:myfollowinteractions"
+            AdvancedSearchContract.SearchScope.MyNetworkInteractions -> "scope:mynetworkinteractions"
+            AdvancedSearchContract.SearchScope.NotMyFollows -> "scope:notmyfollows"
         }
 
     private fun SearchFilter.toSearchCommand() =
@@ -186,10 +193,15 @@ class AdvancedSearchViewModel @Inject constructor() : ViewModel() {
             stringFilters.filter { it.isNotEmpty() }.joinToString(" ")
         }
 
-    private fun Instant.toCommandFormattedString() = formatter.format(this)
+    private fun Instant.toCommandFormattedDateTimeString() = dateTimeFormatter.format(this)
+    private fun Instant.toCommandFormattedDateString() = dateFormatter.format(this)
 
     private fun Set<UserProfileItemUi>.joinWithPrefix(prefix: String) =
-        this.joinToString(separator = " ") { prefix + it.profileId.hexToNpubHrp() }
+        if (this.isEmpty()) {
+            ""
+        } else {
+            "(" + this.joinToString(separator = " OR ") { prefix + it.profileId.hexToNpubHrp() } + ")"
+        }
 
     private fun Orientation?.toFilterQuery() =
         when (this) {
