@@ -86,6 +86,7 @@ class SettingsApiImpl @Inject constructor(
             muteList = queryResult.findNostrEvent(NostrEventKind.MuteList),
             metadataEvents = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
+            primalUserNames = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserName),
         )
     }
 }

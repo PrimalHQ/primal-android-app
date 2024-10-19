@@ -14,6 +14,7 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsWalletTransactionPO
+import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.api.model.UserProfilesResponse
@@ -50,6 +51,7 @@ class WalletTransactionsMediator(
                     }
                     ?: return MediatorResult.Success(endOfPaginationReached = true)
             }
+
             LoadType.APPEND -> {
                 state.lastItemOrNull()?.data?.updatedAt
                     ?: withContext(dispatchers.io()) {
@@ -108,8 +110,14 @@ class WalletTransactionsMediator(
             } else {
                 UserProfilesResponse()
             }
+            val primalUserNames = profilesResponse.primalUserNames.parseAndMapPrimalUserNames()
             val cdnResources = profilesResponse.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-            val profiles = profilesResponse.metadataEvents.map { it.asProfileDataPO(cdnResources = cdnResources) }
+            val profiles = profilesResponse.metadataEvents.map {
+                it.asProfileDataPO(
+                    cdnResources = cdnResources,
+                    primalUserNames = primalUserNames,
+                )
+            }
 
             database.withTransaction {
                 database.profiles().upsertAll(data = profiles)

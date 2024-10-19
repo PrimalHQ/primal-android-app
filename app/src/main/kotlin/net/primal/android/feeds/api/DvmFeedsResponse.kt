@@ -12,4 +12,5 @@ data class DvmFeedsResponse(
     val userMetadata: List<NostrEvent> = emptyList(),
     val cdnResources: List<PrimalEvent> = emptyList(),
     val userScores: List<PrimalEvent> = emptyList(),
+    val primalUserNames: List<PrimalEvent> = emptyList(),
 )
