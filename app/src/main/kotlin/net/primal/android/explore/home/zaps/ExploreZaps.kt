@@ -158,7 +158,7 @@ private fun NoteSummary(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 2.dp, end = 8.dp, bottom = 12.dp),
+            .padding(start = 2.dp, end = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         AvatarThumbnail(
