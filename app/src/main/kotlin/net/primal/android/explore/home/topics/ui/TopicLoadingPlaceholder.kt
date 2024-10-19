@@ -1,4 +1,4 @@
-package net.primal.android.explore.home.topics
+package net.primal.android.explore.home.topics.ui
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement

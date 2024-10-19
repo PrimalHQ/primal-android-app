@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.explore.db.TrendingTopic
 import net.primal.android.explore.home.topics.ExploreTopicsContract.UiEvent
 import net.primal.android.explore.home.topics.ExploreTopicsContract.UiState
+import net.primal.android.explore.home.topics.ui.TopicUi
 import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.networking.sockets.errors.WssException
 import timber.log.Timber
