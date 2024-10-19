@@ -281,7 +281,7 @@ private fun ZapTitle(
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            buildAnnotatedString {
+            text = buildAnnotatedString {
                 withStyle(
                     style = SpanStyle(
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
@@ -310,6 +310,7 @@ private fun ZapTitle(
                     append("SATS")
                 }
             },
+            textAlign = TextAlign.Center,
         )
     }
 }
