@@ -36,7 +36,7 @@ class ExploreFeedsViewModel @Inject constructor(
     private var dvmFeedsJob: Job? = null
 
     init {
-        fetchExploreFeeds()
+        fetchAndObserveExploreFeeds()
         observeAllUserFeeds()
         observeEvents()
     }
@@ -55,7 +55,7 @@ class ExploreFeedsViewModel @Inject constructor(
                 when (it) {
                     is ExploreFeedsContract.UiEvent.AddToUserFeeds -> addToUserFeeds(it.dvmFeed.data)
                     is ExploreFeedsContract.UiEvent.RemoveFromUserFeeds -> removeFromUserFeeds(it.dvmFeed.data)
-                    ExploreFeedsContract.UiEvent.RefreshFeeds -> fetchExploreFeeds()
+                    ExploreFeedsContract.UiEvent.RefreshFeeds -> fetchAndObserveExploreFeeds()
                 }
             }
         }
@@ -84,7 +84,7 @@ class ExploreFeedsViewModel @Inject constructor(
             }
         }
 
-    private fun fetchExploreFeeds() =
+    private fun fetchAndObserveExploreFeeds() =
         viewModelScope.launch {
             setState { copy(loading = true) }
             try {

@@ -62,7 +62,7 @@ class FeedListViewModel @AssistedInject constructor(
         observeEvents()
         observeFeeds()
         fetchAndProcessDefaultFeeds()
-        fetchLatestFeedMarketplace()
+        fetchAndObserveLatestFeedMarketplace()
     }
 
     private fun observeEvents() =
@@ -204,7 +204,7 @@ class FeedListViewModel @AssistedInject constructor(
             }
         }
 
-    private fun fetchLatestFeedMarketplace() =
+    private fun fetchAndObserveLatestFeedMarketplace() =
         viewModelScope.launch {
             setState { copy(fetchingDvmFeeds = true) }
             try {
@@ -213,7 +213,10 @@ class FeedListViewModel @AssistedInject constructor(
                     scope = viewModelScope,
                     userId = activeAccountStore.activeUserId(),
                 ) { dvmFeeds ->
-                    setState { copy(dvmFeeds = dvmFeeds) }
+                    val updatedSelectedDvmFeed = dvmFeeds.firstOrNull {
+                        _state.value.selectedDvmFeed?.data?.eventId == it.data.eventId
+                    }
+                    setState { copy(dvmFeeds = dvmFeeds, selectedDvmFeed = updatedSelectedDvmFeed) }
                 }
             } catch (error: WssException) {
                 Timber.w(error)
