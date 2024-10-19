@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PrimalIcons">
+    <option name="mode" value="Simple" />
+    <option name="packageName" value="net.primal.android.core.compose.icons.primaliconpack" />
+  </component>
+</project>

@@ -1,52 +1,50 @@
 package net.primal.android.core.compose.icons.primaliconpack
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathFillType.Companion.NonZero
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.StrokeCap.Companion.Butt
-import androidx.compose.ui.graphics.StrokeJoin.Companion.Miter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.icons.PrimalIcons
 
-public val PrimalIcons.NotificationsFilled: ImageVector
+val PrimalIcons.NotificationsFilled: ImageVector
     get() {
-        if (_notificationsfilled != null) {
-            return _notificationsfilled!!
+        if (_NotificationsFilled != null) {
+            return _NotificationsFilled!!
         }
-        _notificationsfilled = Builder(name = "Notificationsfilled", defaultWidth = 24.0.dp,
-                defaultHeight = 24.0.dp, viewportWidth = 24.0f, viewportHeight = 24.0f).apply {
-            path(fill = SolidColor(Color(0xFFffffff)), stroke = null, strokeLineWidth = 0.0f,
-                    strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
-                    pathFillType = NonZero) {
-                moveTo(1.3893f, 18.9959f)
-                curveTo(0.7325f, 18.9375f, 0.3013f, 18.2567f, 0.5525f, 17.6286f)
-                lineTo(1.5748f, 15.0729f)
-                curveTo(1.8583f, 14.3641f, 2.0039f, 13.6078f, 2.0039f, 12.8445f)
-                verticalLineTo(10.0f)
-                curveTo(2.0039f, 4.4771f, 6.4811f, 0.0f, 12.0039f, 0.0f)
-                curveTo(17.5268f, 0.0f, 22.0039f, 4.4771f, 22.0039f, 10.0f)
-                verticalLineTo(12.8445f)
-                curveTo(22.0039f, 13.6078f, 22.1496f, 14.3641f, 22.4331f, 15.0728f)
-                lineTo(23.4554f, 17.6286f)
-                curveTo(23.7066f, 18.2567f, 23.2753f, 18.9375f, 22.6186f, 18.9959f)
-                horizontalLineTo(1.3893f)
+        _NotificationsFilled = ImageVector.Builder(
+            name = "NotificationsFilled",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 24f,
+            viewportHeight = 24f
+        ).apply {
+            path(fill = SolidColor(Color(0xFFFFFFFF))) {
+                moveTo(3.991f, 17.83f)
+                curveTo(3.444f, 17.781f, 3.084f, 17.214f, 3.294f, 16.691f)
+                lineTo(4.146f, 14.561f)
+                curveTo(4.382f, 13.97f, 4.503f, 13.34f, 4.503f, 12.704f)
+                verticalLineTo(10.333f)
+                curveTo(4.503f, 5.731f, 7.401f, 2f, 12.003f, 2f)
+                curveTo(16.606f, 2f, 19.503f, 5.731f, 19.503f, 10.333f)
+                verticalLineTo(12.704f)
+                curveTo(19.503f, 13.34f, 19.625f, 13.97f, 19.861f, 14.561f)
+                lineTo(20.713f, 16.691f)
+                curveTo(20.922f, 17.214f, 20.563f, 17.781f, 20.015f, 17.83f)
+                horizontalLineTo(3.991f)
                 close()
             }
-            path(fill = SolidColor(Color(0xFFffffff)), stroke = null, strokeLineWidth = 0.0f,
-                    strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
-                    pathFillType = NonZero) {
-                moveTo(16.7763f, 20.4959f)
-                curveTo(16.1404f, 22.5266f, 14.2442f, 24.0f, 12.0039f, 24.0f)
-                curveTo(9.7636f, 24.0f, 7.8674f, 22.5266f, 7.2316f, 20.4959f)
-                horizontalLineTo(16.7763f)
+            path(fill = SolidColor(Color(0xFFFFFFFF))) {
+                moveTo(15.98f, 19.08f)
+                curveTo(15.45f, 20.772f, 13.87f, 22f, 12.003f, 22f)
+                curveTo(10.136f, 22f, 8.556f, 20.772f, 8.026f, 19.08f)
+                horizontalLineTo(15.98f)
                 close()
             }
-        }
-        .build()
-        return _notificationsfilled!!
+        }.build()
+
+        return _NotificationsFilled!!
     }
 
-private var _notificationsfilled: ImageVector? = null
+@Suppress("ObjectPropertyName")
+private var _NotificationsFilled: ImageVector? = null

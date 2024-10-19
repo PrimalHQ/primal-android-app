@@ -41,6 +41,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.foundation.ClickDebounce
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Explore
+import net.primal.android.core.compose.icons.primaliconpack.ExploreFilled
 import net.primal.android.core.compose.icons.primaliconpack.Home
 import net.primal.android.core.compose.icons.primaliconpack.HomeFilled
 import net.primal.android.core.compose.icons.primaliconpack.LongRead
@@ -288,7 +289,7 @@ private fun RowScope.PrimalNavigationBarItem(
                 },
             ) {
                 Icon(
-                    modifier = Modifier.size(22.dp),
+                    modifier = Modifier.size(24.dp),
                     imageVector = if (selected) {
                         primaryDestination.imageVectorSelected()
                     } else {
@@ -326,7 +327,7 @@ private fun PrimalTopLevelDestination.imageVectorSelected(): ImageVector {
         PrimalTopLevelDestination.Reads -> PrimalIcons.LongReadFilled
         PrimalTopLevelDestination.Wallet -> PrimalIcons.NavWalletBoltFilled
         PrimalTopLevelDestination.Notifications -> PrimalIcons.NotificationsFilled
-        PrimalTopLevelDestination.Explore -> PrimalIcons.Explore
+        PrimalTopLevelDestination.Explore -> PrimalIcons.ExploreFilled
     }
 }
 

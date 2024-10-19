@@ -3,6 +3,7 @@ package net.primal.android.core.compose.icons
 import kotlin.collections.List as ____KtList
 import androidx.compose.ui.graphics.vector.ImageVector
 import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearch
+import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearchFilled
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.AvatarNostrich
@@ -31,6 +32,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Downloads
 import net.primal.android.core.compose.icons.primaliconpack.DownloadsFilled
 import net.primal.android.core.compose.icons.primaliconpack.Edit
 import net.primal.android.core.compose.icons.primaliconpack.Explore
+import net.primal.android.core.compose.icons.primaliconpack.ExploreFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedBookmark
 import net.primal.android.core.compose.icons.primaliconpack.FeedBookmarkFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikes
@@ -121,6 +123,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             AvatarDefault,
             AvatarNostrich,
             AdvancedSearch,
+            AdvancedSearchFilled,
             Search,
             SearchFilled,
             Home,
@@ -137,6 +140,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             FeedReplies,
             Messages,
             Explore,
+            ExploreFilled,
             More,
             Edit,
             Discuss,
