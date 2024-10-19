@@ -249,6 +249,11 @@
     <string name="explore_trending_people_no_content">Unable to load trending people. Please try again.</string>
     <string name="explore_trending_zaps_no_content">Unable to load trending zaps. Please try again.</string>
     <string name="explore_feeds_no_content">Unable to load feeds. Please try again.</string>
+    <string name="explore_feeds_save_home_feed_bottom_sheet_title">Save to Home Feeds</string>
+    <string name="explore_feeds_save_reads_feed_bottom_sheet_title">Save to Reads Feeds</string>
+    <string name="explore_feeds_save_feed_title">Feed name:</string>
+    <string name="explore_feeds_save_feed_description">Feed description:</string>
+    <string name="explore_feeds_save_feed_save_button">Save</string>
 
     <string name="bookmarks_title_notes">Note Bookmarks</string>
     <string name="bookmarks_title_reads">Reads Bookmarks</string>

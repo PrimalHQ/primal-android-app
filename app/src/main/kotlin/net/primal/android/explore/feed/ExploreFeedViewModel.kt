@@ -19,8 +19,6 @@ import net.primal.android.explore.feed.ExploreFeedContract.UiEvent
 import net.primal.android.explore.feed.ExploreFeedContract.UiState
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
 import net.primal.android.feeds.domain.FEED_KIND_SEARCH
-import net.primal.android.feeds.domain.resolveDefaultDescription
-import net.primal.android.feeds.domain.resolveDefaultTitle
 import net.primal.android.feeds.domain.resolveFeedSpecKind
 import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.navigation.exploreFeedSpecOrThrow
@@ -94,8 +92,8 @@ class ExploreFeedViewModel @Inject constructor(
             if (feedSpecKind != null) {
                 feedsRepository.addFeedLocally(
                     feedSpec = exploreFeedSpec,
-                    title = exploreFeedSpec.resolveDefaultTitle(),
-                    description = exploreFeedSpec.resolveDefaultDescription(),
+                    title = event.title,
+                    description = event.description,
                     feedSpecKind = feedSpecKind,
                     feedKind = FEED_KIND_SEARCH,
                 )
