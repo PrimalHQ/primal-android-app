@@ -117,7 +117,7 @@ fun NoteFeedLazyColumn(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(horizontal = 8.dp)
-                                        .padding(top = 4.dp),
+                                        .padding(top = 4.dp, end = 2.dp),
                                     zaps = item.eventZaps,
                                 )
                             }
