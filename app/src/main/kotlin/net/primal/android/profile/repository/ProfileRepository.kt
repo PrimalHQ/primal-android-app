@@ -31,7 +31,6 @@ import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.asUserAccountFromFollowListEvent
 import net.primal.android.user.repository.UserRepository
-import timber.log.Timber
 
 class ProfileRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
@@ -86,7 +85,6 @@ class ProfileRepository @Inject constructor(
             val response = usersApi.getUserProfile(userId = profileId)
             val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
             val primalUserName = response.primalName.parseAndMapPrimalUserName()
-            Timber.tag("profile").i(primalUserName.toString())
             val profileMetadata = response.metadata?.asProfileDataPO(
                 cdnResources = cdnResources,
                 primalUserNames = primalUserName,
