@@ -52,9 +52,9 @@ import net.primal.android.core.compose.zaps.ZappersAvatarThumbnailRow
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
-import net.primal.android.stats.ui.EventZapUiModel
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.profile.report.ReportType
+import net.primal.android.stats.ui.EventZapUiModel
 import net.primal.android.theme.AppTheme
 
 @ExperimentalMaterial3Api

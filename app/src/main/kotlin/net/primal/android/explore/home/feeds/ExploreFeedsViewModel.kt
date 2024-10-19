@@ -4,9 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,7 +39,7 @@ class ExploreFeedsViewModel @Inject constructor(
     private var dvmFeedsJob: Job? = null
 
     init {
-        fetchExploreFeeds()
+        fetchAndObserveExploreFeeds()
         observeAllUserFeeds()
         observeEvents()
     }
@@ -60,7 +58,7 @@ class ExploreFeedsViewModel @Inject constructor(
                 when (it) {
                     is ExploreFeedsContract.UiEvent.AddToUserFeeds -> addToUserFeeds(it.dvmFeed.data)
                     is ExploreFeedsContract.UiEvent.RemoveFromUserFeeds -> removeFromUserFeeds(it.dvmFeed.data)
-                    ExploreFeedsContract.UiEvent.RefreshFeeds -> fetchExploreFeeds()
+                    ExploreFeedsContract.UiEvent.RefreshFeeds -> fetchAndObserveExploreFeeds()
                     is ExploreFeedsContract.UiEvent.ClearDvmFeed -> scheduleClearingDvmFeed(it.dvmFeed)
                 }
             }
@@ -97,7 +95,7 @@ class ExploreFeedsViewModel @Inject constructor(
             }
         }
 
-    private fun fetchExploreFeeds() =
+    private fun fetchAndObserveExploreFeeds() =
         viewModelScope.launch {
             setState { copy(loading = true) }
             try {
