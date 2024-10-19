@@ -68,7 +68,6 @@ class ExploreFeedsViewModel @Inject constructor(
 
     private fun scheduleClearingDvmFeed(dvmFeed: DvmFeedUi) =
         viewModelScope.launch {
-            delay(400.milliseconds)
             dvmFeed.data.kind?.let {
                 feedRepository.removeFeedSpec(feedSpec = dvmFeed.data.buildSpec(specKind = it))
             }
