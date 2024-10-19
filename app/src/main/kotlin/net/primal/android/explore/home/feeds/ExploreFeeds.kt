@@ -41,10 +41,10 @@ import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.errors.UiError
-import net.primal.android.feeds.domain.DvmFeed
 import net.primal.android.feeds.domain.buildSpec
-import net.primal.android.feeds.item.DvmFeedListItem
-import net.primal.android.feeds.ui.DvmHeaderAndFeedList
+import net.primal.android.feeds.dvm.ui.DvmFeedListItem
+import net.primal.android.feeds.dvm.ui.DvmFeedUi
+import net.primal.android.feeds.dvm.ui.DvmHeaderAndFeedList
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -76,18 +76,18 @@ fun ExploreFeeds(
     onGoToWallet: (() -> Unit)? = null,
     onUiError: ((UiError) -> Unit)? = null,
 ) {
-    var dvmFeedToShow by remember { mutableStateOf<DvmFeed?>(null) }
+    var dvmFeedToShow by remember { mutableStateOf<DvmFeedUi?>(null) }
 
-    dvmFeedToShow?.let {
+    dvmFeedToShow?.let { selectedDvmFeed ->
         val addedToFeed by remember(dvmFeedToShow, state.userFeedSpecs) {
-            val kind = dvmFeedToShow?.kind
+            val kind = dvmFeedToShow?.data?.kind
             mutableStateOf(
-                kind?.let { state.userFeedSpecs.contains(dvmFeedToShow?.buildSpec(specKind = kind)) } ?: false,
+                kind?.let { state.userFeedSpecs.contains(dvmFeedToShow?.data?.buildSpec(specKind = kind)) } ?: false,
             )
         }
         DvmFeedDetailsBottomSheet(
             onDismissRequest = { dvmFeedToShow = null },
-            dvmFeed = it,
+            dvmFeed = selectedDvmFeed,
             addedToFeed = addedToFeed,
             addToUserFeeds = { eventPublisher(ExploreFeedsContract.UiEvent.AddToUserFeeds(it)) },
             removeFromUserFeeds = { eventPublisher(ExploreFeedsContract.UiEvent.RemoveFromUserFeeds(it)) },
@@ -115,7 +115,7 @@ fun ExploreFeeds(
 
             items(
                 items = state.feeds,
-                key = { "${it.dvmPubkey}:${it.dvmId}" },
+                key = { "${it.data.dvmPubkey}:${it.data.dvmId}" },
             ) { dvmFeed ->
                 DvmFeedListItem(
                     modifier = Modifier.padding(top = 8.dp),
@@ -138,12 +138,12 @@ fun ExploreFeeds(
 private fun DvmFeedDetailsBottomSheet(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
-    dvmFeed: DvmFeed,
+    dvmFeed: DvmFeedUi,
     onGoToWallet: (() -> Unit)? = null,
     onUiError: ((UiError) -> Unit)? = null,
     addedToFeed: Boolean,
-    addToUserFeeds: (DvmFeed) -> Unit,
-    removeFromUserFeeds: (DvmFeed) -> Unit,
+    addToUserFeeds: (DvmFeedUi) -> Unit,
+    removeFromUserFeeds: (DvmFeedUi) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)

@@ -5,9 +5,9 @@ import net.primal.android.articles.db.Article
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.note.ui.EventZapUiModel
-import net.primal.android.note.ui.asEventZapUiModel
 import net.primal.android.notes.feed.model.EventStatsUi
+import net.primal.android.stats.ui.EventZapUiModel
+import net.primal.android.stats.ui.asEventZapUiModel
 
 data class FeedArticleUi(
     val aTag: String,

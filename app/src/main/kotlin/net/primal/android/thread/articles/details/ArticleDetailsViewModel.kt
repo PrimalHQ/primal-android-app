@@ -29,12 +29,12 @@ import net.primal.android.nostr.ext.nostrUriToPubkey
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nip19TLV
-import net.primal.android.note.repository.NoteRepository
-import net.primal.android.note.ui.EventZapUiModel
-import net.primal.android.note.ui.asEventZapUiModel
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.profile.repository.ProfileRepository
+import net.primal.android.stats.repository.EventRepository
+import net.primal.android.stats.ui.EventZapUiModel
+import net.primal.android.stats.ui.asEventZapUiModel
 import net.primal.android.thread.articles.details.ArticleDetailsContract.UiEvent
 import net.primal.android.thread.articles.details.ArticleDetailsContract.UiState
 import net.primal.android.thread.articles.details.ui.mapAsArticleDetailsUi
@@ -54,7 +54,7 @@ class ArticleDetailsViewModel @Inject constructor(
     private val articleRepository: ArticleRepository,
     private val feedRepository: FeedRepository,
     private val profileRepository: ProfileRepository,
-    private val noteRepository: NoteRepository,
+    private val eventRepository: EventRepository,
     private val zapHandler: ZapHandler,
 ) : ViewModel() {
 
@@ -195,8 +195,9 @@ class ArticleDetailsViewModel @Inject constructor(
                     userId = activeAccountStore.activeUserId(),
                     comment = zapAction.zapDescription,
                     amountInSats = zapAction.zapAmount,
-                    target = ZapTarget.Article(
-                        articleId = article.articleId,
+                    target = ZapTarget.ReplaceableEvent(
+                        kind = NostrEventKind.LongFormContent.value,
+                        identifier = article.articleId,
                         eventId = article.eventId,
                         eventAuthorId = article.authorId,
                         eventAuthorLnUrlDecoded = postAuthorProfileData.lnUrlDecoded,
@@ -220,7 +221,7 @@ class ArticleDetailsViewModel @Inject constructor(
             val article = _state.value.article
             if (article != null) {
                 try {
-                    noteRepository.likeEvent(
+                    eventRepository.likeEvent(
                         userId = activeAccountStore.activeUserId(),
                         eventId = article.eventId,
                         eventAuthorId = article.authorId,
@@ -242,7 +243,7 @@ class ArticleDetailsViewModel @Inject constructor(
             val article = _state.value.article
             if (article != null) {
                 try {
-                    noteRepository.repostEvent(
+                    eventRepository.repostEvent(
                         userId = activeAccountStore.activeUserId(),
                         eventId = article.eventId,
                         eventAuthorId = article.authorId,

@@ -520,6 +520,8 @@ private fun SearchScope.toDisplayName(): String =
         SearchScope.MyFollowsInteractions -> stringResource(
             id = R.string.asearch_search_scope_my_follows_interactions,
         )
+        SearchScope.MyNetworkInteractions -> stringResource(id = R.string.asearch_search_scope_my_network_interactions)
+        SearchScope.NotMyFollows -> stringResource(id = R.string.asearch_search_scope_not_my_follows)
     }
 
 @Composable
@@ -551,6 +553,9 @@ private fun SearchOrderBy.toDisplayName(): String =
         SearchOrderBy.ContentScore -> stringResource(
             id = R.string.asearch_search_order_by_content_score,
         )
+        SearchOrderBy.Replies -> stringResource(id = R.string.asearch_search_order_by_replies)
+        SearchOrderBy.SatsZapped -> stringResource(id = R.string.asearch_search_order_by_sats_zapped)
+        SearchOrderBy.Interactions -> stringResource(id = R.string.asearch_search_order_by_interactions)
     }
 
 @Composable

@@ -16,11 +16,11 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.note.repository.NoteRepository
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.NoteContract.UiState
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
+import net.primal.android.stats.repository.EventRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.domain.ZapTarget
 import net.primal.android.wallet.zaps.InvalidZapRequestException
@@ -32,7 +32,7 @@ import timber.log.Timber
 @HiltViewModel
 class NoteViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
-    private val noteRepository: NoteRepository,
+    private val eventRepository: EventRepository,
     private val profileRepository: ProfileRepository,
     private val zapHandler: ZapHandler,
     private val mutedUserRepository: MutedUserRepository,
@@ -87,7 +87,7 @@ class NoteViewModel @Inject constructor(
     private fun likePost(postLikeAction: UiEvent.PostLikeAction) =
         viewModelScope.launch {
             try {
-                noteRepository.likeEvent(
+                eventRepository.likeEvent(
                     userId = activeAccountStore.activeUserId(),
                     eventId = postLikeAction.postId,
                     eventAuthorId = postLikeAction.postAuthorId,
@@ -104,7 +104,7 @@ class NoteViewModel @Inject constructor(
     private fun repostPost(repostAction: UiEvent.RepostAction) =
         viewModelScope.launch {
             try {
-                noteRepository.repostEvent(
+                eventRepository.repostEvent(
                     userId = activeAccountStore.activeUserId(),
                     eventId = repostAction.postId,
                     eventAuthorId = repostAction.postAuthorId,

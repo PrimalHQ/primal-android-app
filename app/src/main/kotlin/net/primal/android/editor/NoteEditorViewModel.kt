@@ -49,7 +49,6 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nip19TLV
-import net.primal.android.note.repository.NoteRepository
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.profile.repository.ProfileRepository
@@ -63,7 +62,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val fileAnalyser: FileAnalyser,
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
-    private val noteRepository: NoteRepository,
+    private val notePublishHandler: NotePublishHandler,
     private val attachmentRepository: AttachmentsRepository,
     private val exploreRepository: ExploreRepository,
     private val profileRepository: ProfileRepository,
@@ -238,7 +237,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                 val article = _state.value.replyToArticle
                 val rootPost = _state.value.conversation.firstOrNull()
                 val replyToPost = _state.value.conversation.lastOrNull()
-                val publishedAndImported = noteRepository.publishShortTextNote(
+                val publishedAndImported = notePublishHandler.publishShortTextNote(
                     userId = activeAccountStore.activeUserId(),
                     content = _state.value.content.text.replaceUserMentionsWithUserIds(
                         users = _state.value.taggedUsers,

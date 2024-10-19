@@ -23,7 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.More
-import net.primal.android.note.ui.EventZapUiModel
+import net.primal.android.stats.ui.EventZapUiModel
 import net.primal.android.theme.AppTheme
 
 @ExperimentalLayoutApi

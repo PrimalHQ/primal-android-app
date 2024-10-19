@@ -6,8 +6,8 @@ import androidx.room.Query
 import androidx.room.RawQuery
 import androidx.room.Transaction
 import androidx.sqlite.db.SupportSQLiteQuery
-import net.primal.android.note.db.EventUserStats
 import net.primal.android.settings.muted.db.MutedUserData
+import net.primal.android.stats.db.EventUserStats
 
 @Dao
 interface FeedPostDao {

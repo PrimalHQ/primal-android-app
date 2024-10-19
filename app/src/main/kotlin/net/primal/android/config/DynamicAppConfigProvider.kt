@@ -15,7 +15,11 @@ class DynamicAppConfigProvider @Inject constructor(
 
     private val scope = CoroutineScope(dispatcherProvider.io())
 
-    override suspend fun cacheUrl(): StateFlow<String> = appConfigStore.config.map { it.cacheUrl }.stateIn(scope)
+    override suspend fun cacheUrl(): StateFlow<String> =
+        appConfigStore.config.map {
+//        it.cacheUrl
+            "wss://cache2.primal.net/v1"
+        }.stateIn(scope)
 
     override suspend fun uploadUrl(): StateFlow<String> = appConfigStore.config.map { it.uploadUrl }.stateIn(scope)
 
