@@ -26,8 +26,8 @@ import net.primal.android.core.compose.InfiniteLottieAnimation
 @Composable
 fun TopicLoadingPlaceholder(repeat: Int, contentPadding: PaddingValues) {
     val animationRawResId = when (LocalPrimalTheme.current.isDarkTheme) {
-        true -> R.raw.primal_loader_generic_square
-        false -> R.raw.primal_loader_generic_square_light
+        true -> R.raw.primal_loader_generic_square_light
+        false -> R.raw.primal_loader_generic_square_dark
     }
 
     Column(

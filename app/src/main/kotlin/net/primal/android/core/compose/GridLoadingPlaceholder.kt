@@ -26,7 +26,7 @@ fun GridLoadingPlaceholder(
     contentPadding: PaddingValues = PaddingValues(all = 0.dp),
 ) {
     val animationRawResId = when (LocalPrimalTheme.current.isDarkTheme) {
-        true -> R.raw.primal_loader_generic_square
+        true -> R.raw.primal_loader_generic_square_dark
         false -> R.raw.primal_loader_generic_square_light
     }
 
