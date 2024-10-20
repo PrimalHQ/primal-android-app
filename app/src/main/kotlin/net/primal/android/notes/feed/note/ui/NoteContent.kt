@@ -122,7 +122,7 @@ private fun String.ellipsize(expanded: Boolean, ellipsizeText: String): String {
     }
 }
 
-const val TWEET_MODE_THRESHOLD = 42
+const val TWEET_MODE_THRESHOLD = 21
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
