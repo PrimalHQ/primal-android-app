@@ -5,9 +5,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
@@ -15,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import net.primal.android.attachments.domain.NoteAttachmentType
@@ -31,7 +33,7 @@ fun NoteMediaAttachmentsHorizontalPager(
     mediaAttachments: List<NoteAttachmentUi> = emptyList(),
 ) {
     BoxWithConstraints(modifier = modifier) {
-        val imageSizeDp = findImageSize(attachment = mediaAttachments.first())
+        val imageSizeDp = findImageSizeOrNull(attachment = mediaAttachments.first())
         val imagesCount = mediaAttachments.size
 
         val pagerState = rememberPagerState { imagesCount }
@@ -41,6 +43,7 @@ fun NoteMediaAttachmentsHorizontalPager(
             NoteMediaAttachment(
                 attachment = attachment,
                 imageSizeDp = imageSizeDp,
+                maxWidth = maxWidth,
                 onClick = { positionMs ->
                     onMediaClick(
                         MediaClickEvent(
@@ -58,6 +61,7 @@ fun NoteMediaAttachmentsHorizontalPager(
                 NoteMediaAttachment(
                     attachment = attachment,
                     imageSizeDp = imageSizeDp,
+                    maxWidth = maxWidth,
                     onClick = { positionMs ->
                         onMediaClick(
                             MediaClickEvent(
@@ -95,7 +99,8 @@ fun NoteMediaAttachmentsHorizontalPager(
 @Composable
 private fun NoteMediaAttachment(
     attachment: NoteAttachmentUi,
-    imageSizeDp: DpSize,
+    maxWidth: Dp,
+    imageSizeDp: DpSize?,
     onClick: (positionMs: Long) -> Unit,
 ) {
     BoxWithConstraints(
@@ -109,9 +114,13 @@ private fun NoteMediaAttachment(
                 NoteAttachmentVideoPreview(
                     attachment = attachment,
                     onVideoClick = { positionMs -> onClick(positionMs) },
-                    modifier = Modifier
-                        .width(imageSizeDp.width)
-                        .height(imageSizeDp.height),
+                    modifier = if (imageSizeDp == null) {
+                        Modifier
+                            .width(maxWidth)
+                            .wrapContentHeight()
+                    } else {
+                        Modifier.size(imageSizeDp)
+                    },
                 )
             }
 
@@ -119,9 +128,13 @@ private fun NoteMediaAttachment(
                 NoteAttachmentImagePreview(
                     attachment = attachment,
                     maxWidth = this.maxWidth,
-                    modifier = Modifier
-                        .width(imageSizeDp.width)
-                        .height(imageSizeDp.height)
+                    modifier = if (imageSizeDp == null) {
+                        Modifier
+                            .width(maxWidth)
+                            .wrapContentHeight()
+                    } else {
+                        Modifier.size(imageSizeDp)
+                    }
                         .clickable { onClick(0L) },
                 )
             }

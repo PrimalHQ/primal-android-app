@@ -12,8 +12,8 @@ fun CdnResourceVariant?.calculateImageSize(
     maxWidth: Int,
     maxHeight: Int,
     density: Float,
-): DpSize {
-    if (this == null) return DpSize(maxWidth.dp, maxWidth.dp)
+): DpSize? {
+    if (this == null) return null
 
     val variantWidth = (width / density).toInt()
     val variantHeight = (height / density).toInt()

@@ -12,7 +12,7 @@ import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
 private const val MAX_SCREEN_HEIGHT_VISIBLE_AREA = 0.77
 
 @Composable
-fun BoxWithConstraintsScope.findImageSize(attachment: NoteAttachmentUi): DpSize {
+fun BoxWithConstraintsScope.findImageSizeOrNull(attachment: NoteAttachmentUi): DpSize? {
     val density = LocalDensity.current.density
     val maxWidthPx = with(LocalDensity.current) { maxWidth.roundToPx() }
     val maxWidth = maxWidth.value.toInt()

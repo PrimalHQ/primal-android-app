@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.DpSize
 import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
 import net.primal.android.core.compose.attachment.model.isMediaAttachment
@@ -37,14 +38,14 @@ fun NoteAttachments(
         linkAttachments.size == 1 -> {
             BoxWithConstraints(modifier = modifier) {
                 val attachment = linkAttachments.first()
-                val thumbnailImageSizeDp = findImageSize(attachment = attachment)
+                val thumbnailImageSizeDp = findImageSizeOrNull(attachment = attachment)
                 if (!attachment.title.isNullOrBlank() || !attachment.description.isNullOrBlank()) {
                     NoteLinkPreview(
                         url = attachment.url,
                         title = attachment.title,
                         description = attachment.description,
                         thumbnailUrl = attachment.thumbnailUrl,
-                        thumbnailImageSize = thumbnailImageSizeDp,
+                        thumbnailImageSize = thumbnailImageSizeDp ?: DpSize(maxWidth, maxWidth),
                         onClick = if (onUrlClick != null) {
                             { onUrlClick.invoke(attachment.url) }
                         } else {
