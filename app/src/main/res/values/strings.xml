@@ -254,6 +254,17 @@
     <string name="explore_feeds_save_feed_title">Feed name:</string>
     <string name="explore_feeds_save_feed_description">Feed description:</string>
     <string name="explore_feeds_save_feed_save_button">Save</string>
+    <string name="explore_feed_topic_feed_title">Topic: %1$s</string>
+    <string name="explore_feed_topic_feed_description">Tagged with %1$s</string>
+    <string name="explore_feed_topic_notes_feed_description">All notes tagged with %1$s</string>
+    <string name="explore_feed_topic_reads_feed_description">All reads tagged with %1$s</string>
+    <string name="explore_feed_advanced_search_feed_title">Search results</string>
+    <string name="explore_feed_simple_search_feed_title">Search: %1$s</string>
+    <string name="explore_feed_search_feed_description">Primal search results</string>
+    <string name="explore_feed_user_feed_title">User: %1$s</string>
+    <string name="explore_feed_user_feed_description">Latest by user follows</string>
+    <string name="explore_feed_user_notes_feed_description">Latest notes by user follows</string>
+    <string name="explore_feed_user_reads_feed_description">Latest articles by user follows</string>
 
     <string name="bookmarks_title_notes">Note Bookmarks</string>
     <string name="bookmarks_title_reads">Reads Bookmarks</string>
