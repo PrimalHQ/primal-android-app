@@ -16,8 +16,8 @@ enum class ContentAppearance(
     val tweetLineHeight: TextUnit,
 ) {
     Small(
-        noteBodyFontSize = 14.sp,
-        noteBodyLineHeight = 17.sp,
+        noteBodyFontSize = 15.sp,
+        noteBodyLineHeight = 18.sp,
         noteUsernameSize = 14.sp,
         noteAvatarSize = 28.dp,
         articleTextFontSize = 15.sp,
@@ -26,8 +26,8 @@ enum class ContentAppearance(
         tweetLineHeight = 25.sp,
     ),
     Default(
-        noteBodyFontSize = 15.sp,
-        noteBodyLineHeight = 17.sp,
+        noteBodyFontSize = 16.sp,
+        noteBodyLineHeight = 18.sp,
         noteUsernameSize = 14.sp,
         noteAvatarSize = 30.dp,
         articleTextFontSize = 16.sp,
@@ -37,7 +37,7 @@ enum class ContentAppearance(
     ),
     Large(
         noteBodyFontSize = 17.sp,
-        noteBodyLineHeight = 19.sp,
+        noteBodyLineHeight = 21.sp,
         noteUsernameSize = 16.sp,
         noteAvatarSize = 32.dp,
         articleTextFontSize = 18.sp,
@@ -47,7 +47,7 @@ enum class ContentAppearance(
     ),
     ExtraLarge(
         noteBodyFontSize = 19.sp,
-        noteBodyLineHeight = 21.sp,
+        noteBodyLineHeight = 23.sp,
         noteUsernameSize = 16.sp,
         noteAvatarSize = 34.dp,
         articleTextFontSize = 20.sp,
