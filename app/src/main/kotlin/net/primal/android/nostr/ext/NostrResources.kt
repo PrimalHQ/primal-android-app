@@ -4,6 +4,8 @@ import java.util.regex.Pattern
 import net.primal.android.articles.db.ArticleData
 import net.primal.android.articles.feed.ui.wordsCountToReadingTime
 import net.primal.android.attachments.db.NoteNostrUri
+import net.primal.android.attachments.domain.CdnResource
+import net.primal.android.attachments.domain.LinkPreviewData
 import net.primal.android.attachments.ext.flatMapPostsAsNoteAttachmentPO
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
@@ -188,6 +190,9 @@ fun List<PostData>.flatMapPostsAsNoteNostrUriPO(
     postIdToPostDataMap: Map<String, PostData>,
     articleIdToArticle: Map<String, ArticleData>,
     profileIdToProfileDataMap: Map<String, ProfileData>,
+    cdnResources: Map<String, CdnResource>,
+    linkPreviews: Map<String, LinkPreviewData>,
+    videoThumbnails: Map<String, String>,
 ): List<NoteNostrUri> =
     flatMap { postData ->
         postData.uris.mapAsNoteNostrUriPO(
@@ -195,6 +200,9 @@ fun List<PostData>.flatMapPostsAsNoteNostrUriPO(
             postIdToPostDataMap = postIdToPostDataMap,
             articleIdToArticle = articleIdToArticle,
             profileIdToProfileDataMap = profileIdToProfileDataMap,
+            cdnResources = cdnResources,
+            linkPreviews = linkPreviews,
+            videoThumbnails = videoThumbnails,
         )
     }
 
@@ -202,12 +210,18 @@ fun List<DirectMessageData>.flatMapMessagesAsNostrResourcePO(
     postIdToPostDataMap: Map<String, PostData>,
     articleIdToArticle: Map<String, ArticleData>,
     profileIdToProfileDataMap: Map<String, ProfileData>,
+    cdnResources: Map<String, CdnResource>,
+    linkPreviews: Map<String, LinkPreviewData>,
+    videoThumbnails: Map<String, String>,
 ) = flatMap { messageData ->
     messageData.uris.mapAsNoteNostrUriPO(
         eventId = messageData.messageId,
         postIdToPostDataMap = postIdToPostDataMap,
         articleIdToArticle = articleIdToArticle,
         profileIdToProfileDataMap = profileIdToProfileDataMap,
+        cdnResources = cdnResources,
+        linkPreviews = linkPreviews,
+        videoThumbnails = videoThumbnails,
     )
 }
 
@@ -216,6 +230,9 @@ fun List<String>.mapAsNoteNostrUriPO(
     postIdToPostDataMap: Map<String, PostData>,
     articleIdToArticle: Map<String, ArticleData>,
     profileIdToProfileDataMap: Map<String, ProfileData>,
+    cdnResources: Map<String, CdnResource>,
+    linkPreviews: Map<String, LinkPreviewData>,
+    videoThumbnails: Map<String, String>,
 ) = filter { it.isNostrUri() }.map { link ->
     val refUserProfileId = link.extractProfileId()
 
@@ -256,14 +273,17 @@ fun List<String>.mapAsNoteNostrUriPO(
                 authorInternetIdentifier = refPostAuthor.internetIdentifier,
                 authorLightningAddress = refPostAuthor.lightningAddress,
                 attachments = listOf(refNote).flatMapPostsAsNoteAttachmentPO(
-                    cdnResources = emptyMap(),
-                    linkPreviews = emptyMap(),
-                    videoThumbnails = emptyMap(),
+                    cdnResources = cdnResources,
+                    linkPreviews = linkPreviews,
+                    videoThumbnails = videoThumbnails,
                 ),
                 nostrUris = listOf(refNote).flatMapPostsAsNoteNostrUriPO(
                     postIdToPostDataMap = postIdToPostDataMap,
                     articleIdToArticle = articleIdToArticle,
                     profileIdToProfileDataMap = profileIdToProfileDataMap,
+                    cdnResources = cdnResources,
+                    linkPreviews = linkPreviews,
+                    videoThumbnails = videoThumbnails,
                 ),
             )
         } else {

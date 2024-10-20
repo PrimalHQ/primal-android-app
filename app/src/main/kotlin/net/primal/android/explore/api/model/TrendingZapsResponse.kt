@@ -8,6 +8,7 @@ data class TrendingZapsResponse(
     val paging: ContentPrimalPaging?,
     val metadata: List<NostrEvent> = emptyList(),
     val cdnResources: List<PrimalEvent> = emptyList(),
+    val primalLinkPreviews: List<PrimalEvent> = emptyList(),
     val usersScores: PrimalEvent? = null,
     val nostrZapEvents: List<NostrEvent> = emptyList(),
     val noteEvents: List<NostrEvent> = emptyList(),

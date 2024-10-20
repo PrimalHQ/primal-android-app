@@ -20,6 +20,8 @@ import net.primal.android.explore.db.TrendingTopic
 import net.primal.android.explore.domain.ExploreZapNoteData
 import net.primal.android.explore.domain.UserProfileSearchItem
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
+import net.primal.android.nostr.ext.flatMapNotNullAsLinkPreviewResource
+import net.primal.android.nostr.ext.flatMapNotNullAsVideoThumbnailsMap
 import net.primal.android.nostr.ext.flatMapPostsAsNoteNostrUriPO
 import net.primal.android.nostr.ext.mapAsEventZapDO
 import net.primal.android.nostr.ext.mapAsPostDataPO
@@ -43,6 +45,9 @@ class ExploreRepository @Inject constructor(
 
             val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
             val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+            val videoThumbnails = response.cdnResources.flatMapNotNullAsVideoThumbnailsMap()
+            val linkPreviews = response.primalLinkPreviews.flatMapNotNullAsLinkPreviewResource().asMapByKey { it.url }
+
             val profiles = response.metadata.mapAsProfileDataPO(
                 cdnResources = cdnResources,
                 primalUserNames = primalUserNames,
@@ -57,6 +62,9 @@ class ExploreRepository @Inject constructor(
                 postIdToPostDataMap = emptyMap(),
                 articleIdToArticle = emptyMap(),
                 profileIdToProfileDataMap = profilesMap,
+                cdnResources = cdnResources,
+                videoThumbnails = videoThumbnails,
+                linkPreviews = linkPreviews,
             )
 
             database.withTransaction {
