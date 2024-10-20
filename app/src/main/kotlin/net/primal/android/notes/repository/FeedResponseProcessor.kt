@@ -60,6 +60,9 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
         postIdToPostDataMap = allPosts.groupBy { it.postId }.mapValues { it.value.first() },
         articleIdToArticle = allArticles.groupBy { it.articleId }.mapValues { it.value.first() },
         profileIdToProfileDataMap = profileIdToProfileDataMap,
+        cdnResources = cdnResources,
+        videoThumbnails = videoThumbnails,
+        linkPreviews = linkPreviews,
     )
 
     val eventZaps = zaps.mapAsEventZapDO(profilesMap = profiles.associateBy { it.ownerId })

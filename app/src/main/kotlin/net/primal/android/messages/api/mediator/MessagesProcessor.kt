@@ -125,6 +125,9 @@ class MessagesProcessor @Inject constructor(
                 postIdToPostDataMap = referencedNotesMap,
                 articleIdToArticle = emptyMap(),
                 profileIdToProfileDataMap = referencedProfilesMap,
+                cdnResources = emptyMap(),
+                linkPreviews = emptyMap(),
+                videoThumbnails = emptyMap(),
             ),
         )
     }
