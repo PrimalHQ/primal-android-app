@@ -18,22 +18,23 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.button.PrimalFilledButton
+import net.primal.android.core.ext.onFocusSelectAll
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.theme.AppTheme
 
@@ -48,8 +49,12 @@ fun SaveFeedBottomSheet(
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
 ) {
     val scope = rememberCoroutineScope()
-    var title by rememberSaveable { mutableStateOf(initialTitle) }
-    var description by rememberSaveable { mutableStateOf(initialDescription) }
+    val title = rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue(text = initialTitle))
+    }
+    val description = rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue(text = initialDescription))
+    }
 
     ModalBottomSheet(
         modifier = Modifier.statusBarsPadding(),
@@ -79,15 +84,15 @@ fun SaveFeedBottomSheet(
         ) {
             TextFieldColumn(
                 value = title,
-                onValueChange = { title = it },
+                onValueChange = { title.value = it },
                 label = stringResource(id = R.string.explore_feeds_save_feed_title),
-                clearValue = { title = "" },
+                clearValue = { title.value = TextFieldValue() },
             )
             TextFieldColumn(
                 value = description,
-                onValueChange = { description = it },
+                onValueChange = { description.value = it },
                 label = stringResource(id = R.string.explore_feeds_save_feed_description),
-                clearValue = { description = "" },
+                clearValue = { description.value = TextFieldValue() },
             )
         }
 
@@ -96,7 +101,7 @@ fun SaveFeedBottomSheet(
                 .padding(horizontal = 24.dp)
                 .padding(vertical = 32.dp)
                 .fillMaxWidth(),
-            enabled = title.isNotEmpty() && description.isNotEmpty(),
+            enabled = title.value.text.isNotEmpty() && description.value.text.isNotEmpty(),
             onClick = {
                 scope.launch {
                     sheetState.hide()
@@ -105,7 +110,7 @@ fun SaveFeedBottomSheet(
                         onDismissRequest()
                     }
 
-                    onAddToUserFeed(title, description)
+                    onAddToUserFeed(title.value.text, description.value.text)
                 }
             },
         ) {
@@ -118,8 +123,8 @@ fun SaveFeedBottomSheet(
 fun TextFieldColumn(
     modifier: Modifier = Modifier,
     label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
+    value: MutableState<TextFieldValue>,
+    onValueChange: (TextFieldValue) -> Unit,
     clearValue: () -> Unit,
 ) {
     val focusRequester = remember { FocusRequester() }
@@ -137,8 +142,9 @@ fun TextFieldColumn(
             colors = PrimalDefaults.outlinedTextFieldColors(),
             modifier = Modifier
                 .focusRequester(focusRequester)
-                .fillMaxWidth(),
-            value = value,
+                .fillMaxWidth()
+                .onFocusSelectAll(value),
+            value = value.value,
             onValueChange = onValueChange,
             textStyle = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp),
             maxLines = 2,
