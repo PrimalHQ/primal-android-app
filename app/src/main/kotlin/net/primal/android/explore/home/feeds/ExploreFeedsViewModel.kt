@@ -95,12 +95,12 @@ class ExploreFeedsViewModel @Inject constructor(
             }
         }
 
-    private fun fetchAndObserveExploreFeeds() =
-        viewModelScope.launch {
+    private fun fetchAndObserveExploreFeeds() {
+        dvmFeedsJob?.cancel()
+        dvmFeedsJob = viewModelScope.launch {
             setState { copy(loading = true) }
             try {
-                dvmFeedsJob?.cancel()
-                dvmFeedsJob = dvmFeedListHandler.fetchDvmFeedsAndObserveStatsUpdates(
+                dvmFeedListHandler.fetchDvmFeedsAndObserveStatsUpdates(
                     scope = viewModelScope,
                     userId = activeAccountStore.activeUserId(),
                 ) { dvmFeeds ->
@@ -112,4 +112,5 @@ class ExploreFeedsViewModel @Inject constructor(
                 setState { copy(loading = false) }
             }
         }
+    }
 }
