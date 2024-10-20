@@ -16,12 +16,12 @@ class DvmFeedListHandler @Inject constructor(
     private val profileRepository: ProfileRepository,
 ) {
 
-    fun fetchDvmFeedsAndObserveStatsUpdates(
+    suspend fun fetchDvmFeedsAndObserveStatsUpdates(
         scope: CoroutineScope,
         userId: String,
         specKind: FeedSpecKind? = null,
         update: (List<DvmFeedUi>) -> Unit,
-    ) = scope.launch {
+    ) {
         val dvmFeeds = feedsRepository.fetchRecommendedDvmFeeds(userId = userId, specKind = specKind)
         val dvmIds = dvmFeeds.map { it.eventId }
         val stats = eventRepository.observeEventStats(eventIds = dvmIds).first().asMapByKey { it.eventId }

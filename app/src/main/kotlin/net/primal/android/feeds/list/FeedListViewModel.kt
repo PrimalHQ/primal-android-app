@@ -204,12 +204,12 @@ class FeedListViewModel @AssistedInject constructor(
             }
         }
 
-    private fun fetchAndObserveLatestFeedMarketplace() =
-        viewModelScope.launch {
+    private fun fetchAndObserveLatestFeedMarketplace() {
+        dvmFeedsJob?.cancel()
+        dvmFeedsJob = viewModelScope.launch {
             setState { copy(fetchingDvmFeeds = true) }
             try {
-                dvmFeedsJob?.cancel()
-                dvmFeedsJob = dvmFeedListHandler.fetchDvmFeedsAndObserveStatsUpdates(
+                dvmFeedListHandler.fetchDvmFeedsAndObserveStatsUpdates(
                     scope = viewModelScope,
                     userId = activeAccountStore.activeUserId(),
                 ) { dvmFeeds ->
@@ -224,6 +224,7 @@ class FeedListViewModel @AssistedInject constructor(
                 setState { copy(fetchingDvmFeeds = false) }
             }
         }
+    }
 
     private fun scheduleClearingDvmFeed(dvmFeed: DvmFeed) =
         viewModelScope.launch {
