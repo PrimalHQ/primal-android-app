@@ -2,6 +2,7 @@ package net.primal.android.notes.feed.note.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -203,7 +204,9 @@ fun NoteContent(
 
         if (data.attachments.isNotEmpty()) {
             NoteAttachments(
-                modifier = Modifier.padding(top = if (contentText.isEmpty()) 4.dp else 6.dp),
+                modifier = Modifier
+                    .padding(top = if (contentText.isEmpty()) 4.dp else 6.dp)
+                    .heightIn(min = 0.dp, max = 480.dp),
                 attachments = data.attachments,
                 onUrlClick = onUrlClick,
                 onMediaClick = noteCallbacks.onMediaClick,
