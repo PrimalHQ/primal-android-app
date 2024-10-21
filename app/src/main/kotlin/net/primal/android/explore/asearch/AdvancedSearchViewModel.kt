@@ -179,6 +179,7 @@ class AdvancedSearchViewModel @Inject constructor(
             AdvancedSearchContract.SearchScope.MyFollowsInteractions -> "scope:myfollowinteractions"
             AdvancedSearchContract.SearchScope.MyNetworkInteractions -> "scope:mynetworkinteractions"
             AdvancedSearchContract.SearchScope.NotMyFollows -> "scope:notmyfollows"
+            AdvancedSearchContract.SearchScope.MyNotifications -> "scope:mynotifications"
         }
 
     private fun SearchFilter.toSearchCommand() =

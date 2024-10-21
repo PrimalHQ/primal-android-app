@@ -94,6 +94,7 @@ interface AdvancedSearchContract {
         Global,
         MyFollows,
         MyNetwork,
+        MyNotifications,
         MyFollowsInteractions,
         MyNetworkInteractions,
         NotMyFollows,
