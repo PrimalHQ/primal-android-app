@@ -30,8 +30,8 @@ fun TopicLoadingPlaceholder(
     modifier: Modifier = Modifier,
 ) {
     val animationRawResId = when (LocalPrimalTheme.current.isDarkTheme) {
-        true -> R.raw.primal_loader_generic_square_light
-        false -> R.raw.primal_loader_generic_square_dark
+        true -> R.raw.primal_loader_generic_square_dark
+        false -> R.raw.primal_loader_generic_square_light
     }
 
     Column(
