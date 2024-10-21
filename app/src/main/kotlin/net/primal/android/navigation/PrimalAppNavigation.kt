@@ -57,10 +57,12 @@ import net.primal.android.explore.feed.ExploreFeedViewModel
 import net.primal.android.explore.home.ExploreHomeScreen
 import net.primal.android.explore.home.ExploreHomeViewModel
 import net.primal.android.explore.search.SearchViewModel
+import net.primal.android.explore.search.ui.SearchScope
 import net.primal.android.explore.search.ui.SearchScreen
 import net.primal.android.feeds.domain.buildAdvancedSearchNotesFeedSpec
+import net.primal.android.feeds.domain.buildAdvancedSearchNotificationsFeedSpec
+import net.primal.android.feeds.domain.buildAdvancedSearchReadsFeedSpec
 import net.primal.android.feeds.domain.buildReadsTopicFeedSpec
-import net.primal.android.feeds.domain.buildSimpleSearchNotesFeedSpec
 import net.primal.android.messages.chat.ChatScreen
 import net.primal.android.messages.chat.ChatViewModel
 import net.primal.android.messages.conversation.MessageConversationListViewModel
@@ -109,7 +111,8 @@ private fun NavController.navigateToWalletOnboarding() = navigate(route = "onboa
 
 private fun NavController.navigateToLogout() = navigate(route = "logout")
 
-private fun NavController.navigateToSearch() = navigate(route = "search")
+private fun NavController.navigateToSearch(searchScope: SearchScope) =
+    navigate(route = "search?$SEARCH_SCOPE=$searchScope")
 
 private fun NavController.navigateToAdvancedSearch(initialQuery: String? = null) =
     navigate(route = "asearch?$INITIAL_QUERY=$initialQuery")
@@ -359,7 +362,12 @@ fun PrimalAppNavigation() {
         )
 
         search(
-            route = "search",
+            route = "search?$SEARCH_SCOPE={$SEARCH_SCOPE}",
+            arguments = listOf(
+                navArgument(SEARCH_SCOPE) {
+                    type = NavType.StringType
+                },
+            ),
             navController = navController,
         )
 
@@ -656,7 +664,7 @@ private fun NavGraphBuilder.home(
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
         noteCallbacks = noteCallbacksHandler(navController),
         onGoToWallet = { navController.navigateToWallet() },
-        onSearchClick = { navController.navigateToSearch() },
+        onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
         onNewPostClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent?.asNoteEditorArgs()) },
     )
 }
@@ -696,7 +704,7 @@ private fun NavGraphBuilder.reads(
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
-        onSearchClick = { navController.navigateToSearch() },
+        onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Reads) },
         onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr) },
     )
 }
@@ -757,7 +765,7 @@ private fun NavGraphBuilder.explore(
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
-        onSearchClick = { navController.navigateToSearch() },
+        onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
         onAdvancedSearchClick = { navController.navigateToAdvancedSearch() },
         onClose = { navController.navigateUp() },
         noteCallbacks = noteCallbacksHandler(navController),
@@ -788,32 +796,42 @@ private fun NavGraphBuilder.exploreFeed(
     )
 }
 
-private fun NavGraphBuilder.search(route: String, navController: NavController) =
-    composable(
-        route = route,
-        enterTransition = { primalSlideInHorizontallyFromEnd },
-        exitTransition = { primalScaleOut },
-        popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontallyToEnd },
-    ) {
-        val viewModel = hiltViewModel<SearchViewModel>(it)
-        ApplyEdgeToEdge()
-        LockToOrientationPortrait()
-        SearchScreen(
-            viewModel = viewModel,
-            onClose = { navController.navigateUp() },
-            onAdvancedSearchClick = { query ->
-                navController.popBackStack()
-                navController.navigateToAdvancedSearch(initialQuery = query)
-            },
-            onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
-            onNoteClick = { noteId -> navController.navigateToThread(noteId) },
-            onNaddrClick = { naddr -> navController.navigateToArticleDetails(naddr) },
-            onSearchContent = { query ->
-                navController.navigateToExploreFeed(feedSpec = buildSimpleSearchNotesFeedSpec(query = query))
-            },
-        )
-    }
+private fun NavGraphBuilder.search(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) {
+    val viewModel = hiltViewModel<SearchViewModel>(it)
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
+    SearchScreen(
+        viewModel = viewModel,
+        searchScope = it.searchScopeOrThrow,
+        onClose = { navController.navigateUp() },
+        onAdvancedSearchClick = { query ->
+            navController.popBackStack()
+            navController.navigateToAdvancedSearch(initialQuery = query)
+        },
+        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+        onNoteClick = { noteId -> navController.navigateToThread(noteId) },
+        onNaddrClick = { naddr -> navController.navigateToArticleDetails(naddr) },
+        onSearchContent = { scope, query ->
+            val feedSpec = when (scope) {
+                SearchScope.Notes -> buildAdvancedSearchNotesFeedSpec(query = query)
+                SearchScope.Reads -> buildAdvancedSearchReadsFeedSpec(query = query)
+                SearchScope.MyNotifications -> buildAdvancedSearchNotificationsFeedSpec(query = query)
+            }
+            navController.navigateToExploreFeed(feedSpec = feedSpec)
+        },
+    )
+}
 
 private fun NavGraphBuilder.advancedSearch(
     route: String,
@@ -955,7 +973,7 @@ private fun NavGraphBuilder.notifications(
     LockToOrientationPortrait()
     NotificationsScreen(
         viewModel = viewModel,
-        onSearchClick = { navController.navigateToSearch() },
+        onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.MyNotifications) },
         onGoToWallet = { navController.navigateToWallet() },
         noteCallbacks = noteCallbacksHandler(navController),
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
