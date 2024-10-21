@@ -55,7 +55,7 @@ fun SearchScreen(
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onNaddrClick: (String) -> Unit,
-    onSearchContent: (query: String) -> Unit,
+    onSearchContent: (scope: SearchContract.SearchScope, query: String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
     SearchScreen(
@@ -80,7 +80,7 @@ fun SearchScreen(
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onNaddrClick: (String) -> Unit,
-    onSearchContent: (query: String) -> Unit,
+    onSearchContent: (scope: SearchContract.SearchScope, query: String) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
@@ -123,6 +123,7 @@ fun SearchScreen(
                             stringResource(id = R.string.explore_enter_query)
                         },
                         clickable = state.searchQuery.isNotBlank(),
+                        searchScope = state.scope,
                         onClick = {
                             keyboardController?.hide()
                             scope.launch {
@@ -137,7 +138,7 @@ fun SearchScreen(
                                     }
                                     profileId != null -> onProfileClick(profileId)
                                     naddr != null -> onNaddrClick(naddr)
-                                    else -> onSearchContent(query)
+                                    else -> onSearchContent(state.scope, query)
                                 }
                             }
                         },
@@ -203,6 +204,7 @@ fun SearchContentListItem(
     hint: String,
     clickable: Boolean,
     onClick: () -> Unit,
+    searchScope: SearchContract.SearchScope,
 ) {
     ListItem(
         modifier = Modifier.clickable(
@@ -222,8 +224,13 @@ fun SearchContentListItem(
             )
         },
         supportingContent = {
+            val resourceId = when (searchScope) {
+                SearchContract.SearchScope.Notes -> R.string.explore_search_notes
+                SearchContract.SearchScope.Reads -> R.string.explore_search_reads
+                SearchContract.SearchScope.MyNotifications -> R.string.explore_search_notifications
+            }
             Text(
-                text = stringResource(id = R.string.explore_search_nostr).lowercase(),
+                text = stringResource(id = resourceId).lowercase(),
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
             )
         },
