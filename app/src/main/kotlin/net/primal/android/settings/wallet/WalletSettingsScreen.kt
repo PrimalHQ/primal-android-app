@@ -1,11 +1,13 @@
 package net.primal.android.settings.wallet
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,6 +23,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -106,9 +109,11 @@ fun WalletSettingsScreen(
         content = { paddingValues ->
             Column(
                 modifier = Modifier
+                    .background(color = AppTheme.colorScheme.surfaceVariant)
+                    .fillMaxSize()
                     .verticalScroll(scrollState)
                     .padding(paddingValues),
-                verticalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Spacer(modifier = Modifier.height(16.dp))
@@ -261,6 +266,9 @@ private fun ExternalWalletListItem(preferPrimalWallet: Boolean, onExternalWallet
                 onCheckedChange = onExternalWalletSwitchChanged,
             )
         },
+        colors = ListItemDefaults.colors(
+            containerColor = AppTheme.colorScheme.surfaceVariant,
+        ),
     )
 }
 
