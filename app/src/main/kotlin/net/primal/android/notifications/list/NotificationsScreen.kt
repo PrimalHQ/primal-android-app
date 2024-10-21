@@ -52,6 +52,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
+import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.Search
@@ -375,14 +376,7 @@ private fun NotificationsList(
         if (seenPagingItems.isEmpty() && state.unseenNotifications.isEmpty()) {
             when (seenPagingItems.loadState.refresh) {
                 LoadState.Loading -> {
-                    item(contentType = "LoadingRefresh") {
-                        ListPlaceholderLoading(
-                            modifier = Modifier.fillMaxSize(),
-                            itemPadding = PaddingValues(top = 8.dp),
-                            lightAnimationResId = R.raw.primal_loader_notification_light_v3,
-                            darkAnimationResId = R.raw.primal_loader_notification_v3,
-                        )
-                    }
+                    heightAdjustableLoadingLazyListPlaceholder(height = 98.dp)
                 }
 
                 is LoadState.NotLoading -> {

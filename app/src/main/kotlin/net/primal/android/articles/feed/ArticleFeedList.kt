@@ -47,9 +47,9 @@ import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListLoadingError
 import net.primal.android.core.compose.ListNoContent
-import net.primal.android.core.compose.ListPlaceholderLoading
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
+import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
@@ -294,14 +294,7 @@ private fun LazyListScope.handleRefreshLoadState(
 ) {
     when (val refreshLoadState = pagingItems.loadState.refresh) {
         LoadState.Loading -> {
-            item(contentType = "LoadingRefresh") {
-                ListPlaceholderLoading(
-                    modifier = Modifier.fillMaxSize(),
-                    itemPadding = PaddingValues(top = 8.dp),
-                    lightAnimationResId = R.raw.primal_loader_reads_light_v3,
-                    darkAnimationResId = R.raw.primal_loader_reads_v3,
-                )
-            }
+            heightAdjustableLoadingLazyListPlaceholder()
         }
 
         is LoadState.NotLoading -> {

@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnail
-import net.primal.android.core.compose.HeightAdjustableLoadingListPlaceholder
+import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.button.FollowUnfollowButton
@@ -82,7 +82,7 @@ fun ExplorePeople(
     onProfileClick: (String) -> Unit,
 ) {
     if (state.loading && state.people.isEmpty()) {
-        HeightAdjustableLoadingListPlaceholder(
+        HeightAdjustableLoadingLazyListPlaceholder(
             modifier = Modifier.fillMaxSize(),
             contentPaddingValues = paddingValues,
             clipShape = AppTheme.shapes.small,
