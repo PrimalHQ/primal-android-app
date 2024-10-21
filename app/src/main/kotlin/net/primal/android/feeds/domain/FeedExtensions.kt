@@ -169,8 +169,6 @@ fun buildAdvancedSearchReadsFeedSpec(query: String) = """{"id":"advsearch","quer
 fun buildAdvancedSearchNotificationsFeedSpec(query: String) =
     """{"id":"advsearch","query":"kind:1 scope:mynotifications $query"}"""
 
-fun buildSimpleSearchNotesFeedSpec(query: String) = """{"id":"search","kind":"notes","query":"$query"}"""
-
 fun buildReadsTopicFeedSpec(hashtag: String) = """{"kind":"reads","topic":"${hashtag.substring(startIndex = 1)}"}"""
 
 fun buildExploreMediaFeedSpec() = """{"id":"explore-media"}"""
