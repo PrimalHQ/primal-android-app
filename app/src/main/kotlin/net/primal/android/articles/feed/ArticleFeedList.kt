@@ -2,6 +2,7 @@ package net.primal.android.articles.feed
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -55,6 +56,7 @@ import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
 import net.primal.android.core.errors.UiError
 import net.primal.android.notes.feed.note.ui.ConfirmFirstBookmarkAlertDialog
+import net.primal.android.theme.AppTheme
 import net.primal.android.thread.articles.ArticleContract
 import net.primal.android.thread.articles.ArticleViewModel
 import timber.log.Timber
@@ -160,7 +162,9 @@ private fun ArticleFeedList(
         indicatorPaddingValues = contentPadding,
     ) {
         ArticleFeedLazyColumn(
-            modifier = modifier,
+            modifier = modifier
+                .background(color = AppTheme.colorScheme.surfaceVariant)
+                .fillMaxSize(),
             articleState = articleState,
             pagingItems = pagingItems,
             listState = feedListState,
@@ -194,9 +198,7 @@ private fun ArticleFeedLazyColumn(
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
     LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
-            .animateContentSize(),
+        modifier = modifier.animateContentSize(),
         state = listState,
         contentPadding = contentPadding,
     ) {

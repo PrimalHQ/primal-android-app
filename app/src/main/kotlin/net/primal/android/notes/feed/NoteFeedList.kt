@@ -273,7 +273,9 @@ fun NoteFeedList(
         indicatorPaddingValues = paddingValues,
     ) {
         NoteFeedLazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .background(color = AppTheme.colorScheme.surfaceVariant)
+                .fillMaxSize(),
             contentPadding = paddingValues,
             pagingItems = pagingItems,
             listState = feedListState,
