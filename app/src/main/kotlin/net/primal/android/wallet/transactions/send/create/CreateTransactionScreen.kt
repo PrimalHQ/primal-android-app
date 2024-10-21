@@ -1,9 +1,11 @@
 package net.primal.android.wallet.transactions.send.create
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -14,6 +16,7 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.utils.ellipsizeMiddle
+import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.domain.DraftTxStatus
 import net.primal.android.wallet.transactions.send.create.ui.TransactionEditor
 import net.primal.android.wallet.transactions.send.create.ui.TransactionFailed
@@ -58,6 +61,10 @@ fun CreateTransactionScreen(
                     navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                     showDivider = false,
                     onNavigationIconClick = onClose,
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = AppTheme.colorScheme.surfaceVariant,
+                        scrolledContainerColor = AppTheme.colorScheme.surfaceVariant,
+                    ),
                 )
             }
         },
@@ -65,7 +72,9 @@ fun CreateTransactionScreen(
             when (state.transaction.status) {
                 DraftTxStatus.Draft -> {
                     TransactionEditor(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .background(color = AppTheme.colorScheme.surfaceVariant)
+                            .fillMaxSize(),
                         paddingValues = paddingValues,
                         state = state,
                         eventPublisher = eventPublisher,
@@ -75,7 +84,9 @@ fun CreateTransactionScreen(
 
                 DraftTxStatus.Sending -> {
                     TransactionSending(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .background(color = AppTheme.colorScheme.surfaceVariant)
+                            .fillMaxSize(),
                         amountInSats = state.transaction.amountSats.toLong(),
                         receiver = state.profileLightningAddress
                             ?: state.transaction.targetLud16
@@ -100,7 +111,9 @@ fun CreateTransactionScreen(
 
                 DraftTxStatus.Failed -> {
                     TransactionFailed(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .background(color = AppTheme.colorScheme.surfaceVariant)
+                            .fillMaxSize(),
                         errorMessage = state.error?.message ?: stringResource(id = R.string.app_generic_error),
                         onCloseClick = onClose,
                     )
