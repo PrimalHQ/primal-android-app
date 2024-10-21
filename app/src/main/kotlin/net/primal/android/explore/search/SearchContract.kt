@@ -5,7 +5,6 @@ import net.primal.android.core.compose.profile.model.UserProfileItemUi
 interface SearchContract {
 
     data class UiState(
-        val scope: SearchScope,
         val searching: Boolean = false,
         val searchQuery: String = "",
         val searchResults: List<UserProfileItemUi> = emptyList(),
@@ -19,11 +18,5 @@ interface SearchContract {
         data class SearchQueryUpdated(val query: String) : UiEvent()
         data class ProfileSelected(val profileId: String) : UiEvent()
         data object ResetSearchQuery : UiEvent()
-    }
-
-    enum class SearchScope {
-        Notes,
-        Reads,
-        MyNotifications,
     }
 }

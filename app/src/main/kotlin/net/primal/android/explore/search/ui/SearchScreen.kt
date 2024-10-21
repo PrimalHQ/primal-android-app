@@ -50,16 +50,18 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun SearchScreen(
     viewModel: SearchViewModel,
+    searchScope: SearchScope,
     onClose: () -> Unit,
     onAdvancedSearchClick: (query: String) -> Unit,
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onNaddrClick: (String) -> Unit,
-    onSearchContent: (scope: SearchContract.SearchScope, query: String) -> Unit,
+    onSearchContent: (scope: SearchScope, query: String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
     SearchScreen(
         state = uiState.value,
+        searchScope = searchScope,
         eventPublisher = { viewModel.setEvent(it) },
         onClose = onClose,
         onAdvancedSearchClick = onAdvancedSearchClick,
@@ -74,13 +76,14 @@ fun SearchScreen(
 @Composable
 fun SearchScreen(
     state: SearchContract.UiState,
+    searchScope: SearchScope,
     eventPublisher: (SearchContract.UiEvent) -> Unit,
     onClose: () -> Unit,
     onAdvancedSearchClick: (query: String) -> Unit,
     onProfileClick: (String) -> Unit,
     onNoteClick: (String) -> Unit,
     onNaddrClick: (String) -> Unit,
-    onSearchContent: (scope: SearchContract.SearchScope, query: String) -> Unit,
+    onSearchContent: (scope: SearchScope, query: String) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
@@ -123,7 +126,7 @@ fun SearchScreen(
                             stringResource(id = R.string.explore_enter_query)
                         },
                         clickable = state.searchQuery.isNotBlank(),
-                        searchScope = state.scope,
+                        searchScope = searchScope,
                         onClick = {
                             keyboardController?.hide()
                             scope.launch {
@@ -138,7 +141,7 @@ fun SearchScreen(
                                     }
                                     profileId != null -> onProfileClick(profileId)
                                     naddr != null -> onNaddrClick(naddr)
-                                    else -> onSearchContent(state.scope, query)
+                                    else -> onSearchContent(searchScope, query)
                                 }
                             }
                         },
@@ -204,7 +207,7 @@ fun SearchContentListItem(
     hint: String,
     clickable: Boolean,
     onClick: () -> Unit,
-    searchScope: SearchContract.SearchScope,
+    searchScope: SearchScope,
 ) {
     ListItem(
         modifier = Modifier.clickable(
@@ -225,9 +228,9 @@ fun SearchContentListItem(
         },
         supportingContent = {
             val resourceId = when (searchScope) {
-                SearchContract.SearchScope.Notes -> R.string.explore_search_notes
-                SearchContract.SearchScope.Reads -> R.string.explore_search_reads
-                SearchContract.SearchScope.MyNotifications -> R.string.explore_search_notifications
+                SearchScope.Notes -> R.string.explore_search_notes
+                SearchScope.Reads -> R.string.explore_search_reads
+                SearchScope.MyNotifications -> R.string.explore_search_notifications
             }
             Text(
                 text = stringResource(id = resourceId).lowercase(),

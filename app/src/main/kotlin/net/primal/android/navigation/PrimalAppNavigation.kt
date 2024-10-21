@@ -52,13 +52,12 @@ import net.primal.android.editor.ui.NoteEditorScreen
 import net.primal.android.explore.asearch.AdvancedSearchScreen
 import net.primal.android.explore.asearch.AdvancedSearchViewModel
 import net.primal.android.explore.feed.ExploreFeedContract
-import net.primal.android.explore.feed.ExploreFeedContract.RenderType
 import net.primal.android.explore.feed.ExploreFeedScreen
 import net.primal.android.explore.feed.ExploreFeedViewModel
 import net.primal.android.explore.home.ExploreHomeScreen
 import net.primal.android.explore.home.ExploreHomeViewModel
-import net.primal.android.explore.search.SearchContract.SearchScope
 import net.primal.android.explore.search.SearchViewModel
+import net.primal.android.explore.search.ui.SearchScope
 import net.primal.android.explore.search.ui.SearchScreen
 import net.primal.android.feeds.domain.buildAdvancedSearchNotesFeedSpec
 import net.primal.android.feeds.domain.buildAdvancedSearchNotificationsFeedSpec
@@ -814,6 +813,7 @@ private fun NavGraphBuilder.search(
     LockToOrientationPortrait()
     SearchScreen(
         viewModel = viewModel,
+        searchScope = it.searchScopeOrThrow,
         onClose = { navController.navigateUp() },
         onAdvancedSearchClick = { query ->
             navController.popBackStack()

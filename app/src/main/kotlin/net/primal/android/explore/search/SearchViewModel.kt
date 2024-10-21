@@ -1,6 +1,5 @@
 package net.primal.android.explore.search
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,22 +20,18 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.explore.search.SearchContract.UiEvent
 import net.primal.android.explore.search.SearchContract.UiState
-import net.primal.android.navigation.searchScope
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.repository.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val exploreRepository: ExploreRepository,
     private val profileRepository: ProfileRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(
-        UiState(scope = savedStateHandle.searchScope),
-    )
+    private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
