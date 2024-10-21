@@ -83,14 +83,14 @@ fun ExplorePeople(
 ) {
     if (state.loading && state.people.isEmpty()) {
         HeightAdjustableLoadingLazyListPlaceholder(
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier.fillMaxSize(),
             contentPaddingValues = paddingValues,
             clipShape = AppTheme.shapes.small,
             height = 132.dp,
         )
     } else if (state.people.isEmpty()) {
         ListNoContent(
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier.fillMaxSize(),
             noContentText = stringResource(id = R.string.explore_trending_people_no_content),
             refreshButtonVisible = true,
             onRefresh = { eventPublisher(ExplorePeopleContract.UiEvent.RefreshPeople) },
