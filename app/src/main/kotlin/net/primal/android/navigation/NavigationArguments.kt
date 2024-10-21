@@ -1,7 +1,9 @@
 package net.primal.android.navigation
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.navigation.NavBackStackEntry
 import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.explore.search.ui.SearchScope
 import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
 
@@ -27,6 +29,14 @@ inline val SavedStateHandle.renderType: String
 
 const val INITIAL_QUERY = "initialQuery"
 inline val SavedStateHandle.initialQuery: String? get() = get(INITIAL_QUERY)
+
+const val SEARCH_SCOPE = "searchScope"
+inline val SavedStateHandle.searchScopeOrThrow: SearchScope
+    get() = get<String>(SEARCH_SCOPE)?.let { SearchScope.valueOf(it) }
+        ?: throw IllegalArgumentException("Missing required searchScope argument.")
+inline val NavBackStackEntry.searchScopeOrThrow: SearchScope
+    get() = arguments?.getString(SEARCH_SCOPE)?.let { SearchScope.valueOf(it) }
+        ?: throw IllegalArgumentException("Missing required searchScope argument.")
 
 const val EXPLORE_FEED_SPEC = "exploreFeedSpec"
 inline val SavedStateHandle.exploreFeedSpecOrThrow: String
