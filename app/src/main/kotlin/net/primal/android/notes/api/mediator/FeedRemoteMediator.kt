@@ -8,16 +8,15 @@ import java.io.IOException
 import java.time.Instant
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feeds.domain.isNotesBookmarkFeedSpec
 import net.primal.android.feeds.domain.supportsNoteReposts
 import net.primal.android.feeds.domain.supportsUpwardsNotesPagination
+import net.primal.android.networking.primal.retryNetworkCall
 import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.notes.api.FeedApi
@@ -175,7 +174,9 @@ class FeedRemoteMediator(
             userPubKey = userId,
             limit = pageSize,
         )
-        val response = retry(times = 1, delay = RETRY_DELAY) {
+        val response = retryNetworkCall(
+            onBeforeDelay = { error -> Timber.w(error, "Attempting FeedRemoteMediator.retry().") },
+        ) {
             val response = withContext(dispatcherProvider.io()) { feedApi.getFeedBySpec(body = requestBody) }
             response.paging ?: throw WssException("PagingEvent not found.")
             response
@@ -201,7 +202,9 @@ class FeedRemoteMediator(
             }
         }
 
-        val feedResponse = retry(times = 1, delay = RETRY_DELAY) {
+        val feedResponse = retryNetworkCall(
+            onBeforeDelay = { error -> Timber.w(error, "Attempting FeedRemoteMediator.retry().") },
+        ) {
             val response = withContext(dispatcherProvider.io()) { feedApi.getFeedBySpec(body = requestBody) }
             if (response.paging == null) throw WssException("PagingEvent not found.")
             response
@@ -227,7 +230,9 @@ class FeedRemoteMediator(
             }
         }
 
-        val feedResponse = retry(times = 1, delay = RETRY_DELAY) {
+        val feedResponse = retryNetworkCall(
+            onBeforeDelay = { error -> Timber.w(error, "Attempting FeedRemoteMediator.retry().") },
+        ) {
             val response = withContext(dispatcherProvider.io()) { feedApi.getFeedBySpec(body = requestBody) }
             if (response.paging == null) throw WssException("PagingEvent not found.")
             response
@@ -237,23 +242,6 @@ class FeedRemoteMediator(
     }
 
     private fun Long.isRequestCacheExpired() = (Instant.now().epochSecond - this) < LAST_REQUEST_EXPIRY
-
-    private suspend fun <T> retry(
-        times: Int,
-        delay: Long,
-        block: suspend () -> T,
-    ): T {
-        repeat(times) {
-            try {
-                Timber.i("Executing retry $it.")
-                return block()
-            } catch (error: WssException) {
-                Timber.w(error, "Attempting FeedRemoteMediator.retry() in $delay millis.")
-                delay(delay)
-            }
-        }
-        return block()
-    }
 
 //    private suspend fun findFirstFeedPostRemoteKey(state: PagingState<Int, FeedPost>): FeedPostRemoteKey? {
 //        val firstItem = state.firstItemOrNull()
@@ -313,6 +301,5 @@ class FeedRemoteMediator(
 
     companion object {
         private val LAST_REQUEST_EXPIRY = 10.seconds.inWholeSeconds
-        private val RETRY_DELAY = 500.milliseconds.inWholeMilliseconds
     }
 }

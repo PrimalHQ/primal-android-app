@@ -7,6 +7,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.dvm.ui.DvmFeedUi
+import net.primal.android.networking.primal.retryNetworkCall
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.stats.repository.EventRepository
 
@@ -22,7 +23,9 @@ class DvmFeedListHandler @Inject constructor(
         specKind: FeedSpecKind? = null,
         update: (List<DvmFeedUi>) -> Unit,
     ) {
-        val dvmFeeds = feedsRepository.fetchRecommendedDvmFeeds(userId = userId, specKind = specKind)
+        val dvmFeeds = retryNetworkCall {
+            feedsRepository.fetchRecommendedDvmFeeds(userId = userId, specKind = specKind)
+        }
         val dvmIds = dvmFeeds.map { it.eventId }
         val stats = eventRepository.observeEventStats(eventIds = dvmIds).first().asMapByKey { it.eventId }
         val userStats = eventRepository.observeUserEventStatus(userId = userId, eventIds = dvmIds)
