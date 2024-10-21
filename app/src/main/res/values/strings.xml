@@ -294,6 +294,7 @@
     <string name="asearch_search_scope_my_follows_interactions">My Follows Interactions</string>
     <string name="asearch_search_scope_my_network_interactions">My Network Interactions</string>
     <string name="asearch_search_scope_not_my_follows">Not My Follows</string>
+    <string name="asearch_search_scope_my_notifications">My Notifications</string>
     <string name="asearch_search_order_by_time">Time</string>
     <string name="asearch_search_order_by_content_score">Content Score</string>
     <string name="asearch_search_order_by_replies">Number of Replies</string>
