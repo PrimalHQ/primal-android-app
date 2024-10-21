@@ -148,6 +148,7 @@ private fun ExploreHomeScreen(
                 when (pageIndex) {
                     FEEDS_INDEX -> {
                         ExploreFeeds(
+                            modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
                             paddingValues = paddingValues,
                             onGoToWallet = onGoToWallet,
                             onUiError = { uiError: UiError ->
@@ -162,6 +163,7 @@ private fun ExploreHomeScreen(
                     }
                     PEOPLE_INDEX -> {
                         ExplorePeople(
+                            modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
                             paddingValues = paddingValues,
                             onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
                             onUiError = { uiError: UiError ->
@@ -176,6 +178,7 @@ private fun ExploreHomeScreen(
                     }
                     ZAPS_INDEX -> {
                         ExploreZaps(
+                            modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
                             paddingValues = paddingValues,
                             noteCallbacks = noteCallbacks,
                         )
@@ -189,6 +192,7 @@ private fun ExploreHomeScreen(
                     }
                     TOPICS_INDEX -> {
                         ExploreTopics(
+                            modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
                             paddingValues = paddingValues,
                             onHashtagClick = { noteCallbacks.onHashtagClick?.invoke(it) },
                         )

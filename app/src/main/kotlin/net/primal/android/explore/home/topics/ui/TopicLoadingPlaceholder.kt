@@ -24,14 +24,18 @@ import net.primal.android.R
 import net.primal.android.core.compose.InfiniteLottieAnimation
 
 @Composable
-fun TopicLoadingPlaceholder(repeat: Int, contentPadding: PaddingValues) {
+fun TopicLoadingPlaceholder(
+    repeat: Int,
+    contentPadding: PaddingValues,
+    modifier: Modifier = Modifier,
+) {
     val animationRawResId = when (LocalPrimalTheme.current.isDarkTheme) {
         true -> R.raw.primal_loader_generic_square_light
         false -> R.raw.primal_loader_generic_square_dark
     }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .verticalScroll(rememberScrollState())
             .padding(vertical = 16.dp)
             .padding(contentPadding),

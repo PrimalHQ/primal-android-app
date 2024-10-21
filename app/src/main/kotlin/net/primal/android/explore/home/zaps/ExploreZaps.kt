@@ -75,7 +75,7 @@ private fun ExploreZaps(
     when {
         state.loading && state.zaps.isEmpty() -> {
             HeightAdjustableLoadingLazyListPlaceholder(
-                modifier = Modifier.fillMaxSize(),
+                modifier = modifier.fillMaxSize(),
                 contentPaddingValues = paddingValues,
                 clipShape = AppTheme.shapes.large,
                 height = 112.dp,
@@ -84,7 +84,7 @@ private fun ExploreZaps(
 
         state.zaps.isEmpty() -> {
             ListNoContent(
-                modifier = Modifier.fillMaxSize(),
+                modifier = modifier.fillMaxSize(),
                 noContentText = stringResource(id = R.string.explore_trending_zaps_no_content),
                 refreshButtonVisible = true,
                 onRefresh = { eventPublisher(ExploreZapsContract.UiEvent.RefreshZaps) },
@@ -220,7 +220,7 @@ private fun ZapHeader(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(percent = 100))
-            .background(AppTheme.colorScheme.background)
+            .background(AppTheme.colorScheme.surfaceVariant)
             .padding(end = 16.dp)
             .padding(2.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),

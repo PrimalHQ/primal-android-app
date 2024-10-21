@@ -101,14 +101,14 @@ fun ExploreFeeds(
 
     if (state.loading && state.feeds.isEmpty()) {
         HeightAdjustableLoadingLazyListPlaceholder(
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier.fillMaxSize(),
             contentPaddingValues = paddingValues,
             clipShape = AppTheme.shapes.small,
             height = 100.dp,
         )
     } else if (state.feeds.isEmpty()) {
         ListNoContent(
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier.fillMaxSize(),
             noContentText = stringResource(id = R.string.explore_feeds_no_content),
             refreshButtonVisible = true,
             onRefresh = { eventPublisher(ExploreFeedsContract.UiEvent.RefreshFeeds) },
