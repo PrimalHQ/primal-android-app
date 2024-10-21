@@ -13,5 +13,9 @@ fun UriHandler.openUriSafely(uri: String) {
             val scheme = if (uri.contains("@")) "mailto" else "https"
             openUri("$scheme://$uri")
         }
+    } catch (error: IllegalArgumentException) {
+        runCatching {
+            openUri("https://$uri")
+        }
     }
 }
