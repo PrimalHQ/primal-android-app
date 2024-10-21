@@ -62,6 +62,7 @@ import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.PrimalSliderThumb
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -371,10 +372,9 @@ private fun FontSizeSlider(
         colors = colors,
         interactionSource = interactionSource,
         thumb = {
-            SliderDefaults.Thumb(
+            PrimalSliderThumb(
                 interactionSource = interactionSource,
                 colors = colors,
-                enabled = true,
             )
         },
         track = { FontSizeTrack() },
