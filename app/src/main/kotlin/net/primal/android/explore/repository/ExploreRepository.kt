@@ -86,7 +86,7 @@ class ExploreRepository @Inject constructor(
                         noteNostrUris = nostrUris,
                     )
                 }
-            }
+            }.sortedByDescending { it.amountSats }
         }
 
     suspend fun fetchTrendingPeople(userId: String): List<ExplorePeopleData> =
