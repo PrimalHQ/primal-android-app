@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -27,8 +26,8 @@ import net.primal.android.R
 import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListLoadingError
 import net.primal.android.core.compose.ListNoContent
-import net.primal.android.core.compose.ListPlaceholderLoading
 import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.zaps.FeedNoteTopZapsSection
@@ -135,14 +134,7 @@ fun NoteFeedLazyColumn(
             when (val refreshLoadState = pagingItems.loadState.refresh) {
                 LoadState.Loading -> {
                     if (shouldShowLoadingState) {
-                        item(contentType = "LoadingRefresh") {
-                            ListPlaceholderLoading(
-                                modifier = Modifier.fillMaxSize(),
-                                itemPadding = PaddingValues(top = 8.dp),
-                                lightAnimationResId = R.raw.primal_loader_notes_light_v3,
-                                darkAnimationResId = R.raw.primal_loader_notes_v3,
-                            )
-                        }
+                        heightAdjustableLoadingLazyListPlaceholder()
                     }
                 }
 
