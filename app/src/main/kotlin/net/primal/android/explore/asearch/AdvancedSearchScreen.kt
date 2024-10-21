@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -453,10 +454,14 @@ private fun OptionListItem(
     onClick: () -> Unit,
     selectedContent: @Composable (RowScope.() -> Unit),
 ) {
+    val keyboard = LocalSoftwareKeyboardController.current
     ListItem(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clickable {
+                keyboard?.hide()
+                onClick()
+            },
         headlineContent = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -520,6 +525,7 @@ private fun SearchScope.toDisplayName(): String =
         SearchScope.MyFollowsInteractions -> stringResource(
             id = R.string.asearch_search_scope_my_follows_interactions,
         )
+
         SearchScope.MyNetworkInteractions -> stringResource(id = R.string.asearch_search_scope_my_network_interactions)
         SearchScope.NotMyFollows -> stringResource(id = R.string.asearch_search_scope_not_my_follows)
         SearchScope.MyNotifications -> stringResource(id = R.string.asearch_search_scope_my_notifications)
@@ -554,6 +560,7 @@ private fun SearchOrderBy.toDisplayName(): String =
         SearchOrderBy.ContentScore -> stringResource(
             id = R.string.asearch_search_order_by_content_score,
         )
+
         SearchOrderBy.Replies -> stringResource(id = R.string.asearch_search_order_by_replies)
         SearchOrderBy.SatsZapped -> stringResource(id = R.string.asearch_search_order_by_sats_zapped)
         SearchOrderBy.Interactions -> stringResource(id = R.string.asearch_search_order_by_interactions)
