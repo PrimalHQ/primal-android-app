@@ -3,6 +3,8 @@ package net.primal.android.core.compose.settings
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemColors
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -16,6 +18,9 @@ fun SettingsItem(
     supportText: String? = null,
     trailingContent: @Composable (() -> Unit)? = null,
     onClick: (() -> Unit)? = null,
+    colors: ListItemColors = ListItemDefaults.colors(
+        containerColor = AppTheme.colorScheme.surfaceVariant,
+    ),
 ) {
     ListItem(
         modifier = modifier.clickable(
@@ -43,5 +48,6 @@ fun SettingsItem(
             null
         },
         trailingContent = trailingContent,
+        colors = colors,
     )
 }

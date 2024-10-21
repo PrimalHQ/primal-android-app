@@ -1,8 +1,10 @@
 package net.primal.android.settings.content
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -23,6 +25,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.settings.SettingsItem
 import net.primal.android.notes.feed.note.ui.TWEET_MODE_THRESHOLD
 import net.primal.android.settings.content.ContentDisplaySettingsContract.UiEvent
+import net.primal.android.theme.AppTheme
 import net.primal.android.user.domain.ContentDisplaySettings
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,9 +60,11 @@ private fun ContentDisplaySettingsScreen(
         content = { paddingValues ->
             Column(
                 modifier = Modifier
+                    .background(color = AppTheme.colorScheme.surfaceVariant)
+                    .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .padding(paddingValues),
-                verticalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Spacer(modifier = Modifier.height(16.dp))

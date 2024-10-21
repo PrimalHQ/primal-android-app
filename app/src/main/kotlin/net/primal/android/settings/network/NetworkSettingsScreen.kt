@@ -1,5 +1,6 @@
 package net.primal.android.settings.network
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +20,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemColors
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -105,6 +108,7 @@ fun NetworkSettingsScreen(
         content = { paddingValues ->
             NetworkLazyColumn(
                 modifier = Modifier
+                    .background(color = AppTheme.colorScheme.surfaceVariant)
                     .fillMaxWidth()
                     .padding(paddingValues)
                     .imePadding(),
@@ -437,6 +441,9 @@ fun NetworkDestinationListItem(
     destinationUrl: String,
     connected: Boolean,
     onRemoveClick: (() -> Unit)? = null,
+    colors: ListItemColors = ListItemDefaults.colors(
+        containerColor = AppTheme.colorScheme.surfaceVariant,
+    ),
 ) {
     val success = AppTheme.extraColorScheme.successBright
     val failed = AppTheme.colorScheme.error
@@ -463,6 +470,7 @@ fun NetworkDestinationListItem(
                 )
             }
         },
+        colors = colors,
     )
 }
 

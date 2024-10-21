@@ -58,6 +58,7 @@ import androidx.emoji2.emojipicker.EmojiPickerView
 import java.text.NumberFormat
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDefaults
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -111,6 +112,9 @@ fun ZapSettingsScreen(
         },
         content = { paddingValues ->
             AnimatedContent(
+                modifier = Modifier
+                    .background(color = AppTheme.colorScheme.surfaceVariant)
+                    .fillMaxSize(),
                 targetState = uiState.editPresetIndex,
                 transitionSpec = {
                     when (targetState) {
@@ -242,7 +246,7 @@ private fun ZapDefaultListItem(
     Card(modifier = modifier) {
         ListItem(
             colors = ListItemDefaults.colors(
-                containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                containerColor = AppTheme.extraColorScheme.surfaceVariantAlt3,
             ),
             leadingContent = {
                 Icon(imageVector = PrimalIcons.FeedZaps, contentDescription = null)
@@ -276,38 +280,40 @@ private fun ZapCustomPresets(
     val numberFormat = remember { NumberFormat.getNumberInstance() }
     Card(modifier = modifier) {
         presets.forEach { zapItem ->
-            ListItem(
-                modifier = Modifier.clickable {
-                    onPresetClick(zapItem)
-                },
-                colors = ListItemDefaults.colors(
-                    containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                ),
-                leadingContent = {
-                    Text(text = zapItem.emoji)
-                },
-                headlineContent = {
-                    Text(
-                        text = zapItem.message,
-                        color = AppTheme.colorScheme.onPrimary,
-                    )
-                },
-                supportingContent = {
-                    Text(
-                        modifier = Modifier.padding(vertical = 2.dp),
-                        text = "${numberFormat.format(zapItem.amount)} sats",
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                    )
-                },
-                trailingContent = {
-                    Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos, contentDescription = null)
-                },
-            )
+            Column {
+                ListItem(
+                    modifier = Modifier.clickable {
+                        onPresetClick(zapItem)
+                    },
+                    colors = ListItemDefaults.colors(
+                        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt3,
+                    ),
+                    leadingContent = {
+                        Text(text = zapItem.emoji)
+                    },
+                    headlineContent = {
+                        Text(
+                            text = zapItem.message,
+                            color = AppTheme.colorScheme.onPrimary,
+                        )
+                    },
+                    supportingContent = {
+                        Text(
+                            modifier = Modifier.padding(vertical = 2.dp),
+                            text = "${numberFormat.format(zapItem.amount)} sats",
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                        )
+                    },
+                    trailingContent = {
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos, contentDescription = null)
+                    },
+                )
+                PrimalDivider()
+            }
         }
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ZapPresetEditor(
     paddingValues: PaddingValues,
@@ -394,7 +400,7 @@ private fun ZapPresetForm(
                 .width(96.dp)
                 .height(56.dp)
                 .padding(horizontal = 16.dp)
-                .background(color = AppTheme.extraColorScheme.surfaceVariantAlt1, shape = AppTheme.shapes.medium)
+                .background(color = AppTheme.extraColorScheme.surfaceVariantAlt3, shape = AppTheme.shapes.medium)
                 .clickable {
                     emojiPickerVisible = true
                 },

@@ -69,7 +69,6 @@ fun NotificationsSettingsScreen(
     eventPublisher: (NotificationsSettingsContract.UiEvent) -> Unit,
 ) {
     Scaffold(
-        modifier = Modifier,
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.settings_notifications_title),
@@ -80,7 +79,10 @@ fun NotificationsSettingsScreen(
         },
         content = { paddingValues ->
             LazyColumn(
-                modifier = Modifier.padding(paddingValues),
+                modifier = Modifier
+                    .background(color = AppTheme.colorScheme.surfaceVariant)
+                    .padding(paddingValues)
+                    .padding(top = 6.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
