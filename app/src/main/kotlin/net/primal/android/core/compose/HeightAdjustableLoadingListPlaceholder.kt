@@ -69,8 +69,9 @@ fun LazyListScope.heightAdjustableLoadingLazyListPlaceholder(
     repeat: Int = 10,
     height: Dp = 128.dp,
     showDivider: Boolean = true,
+    contentType: (Int) -> Any = { "LoadingRefresh" },
 ) {
-    items(count = repeat) {
+    items(count = repeat, contentType = contentType) {
         val animationRawResId = when (LocalPrimalTheme.current.isDarkTheme) {
             true -> R.raw.primal_loader_generic_square_dark
             false -> R.raw.primal_loader_generic_square_light
