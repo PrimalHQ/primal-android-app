@@ -129,7 +129,7 @@ class ExploreRepository @Inject constructor(
 
     suspend fun fetchTrendingTopics() =
         withContext(dispatchers.io()) {
-            val response = exploreApi.getTrendingTopics()
+            val response = retryNetworkCall { exploreApi.getTrendingTopics() }
             val topics = response.map { it.asTrendingTopicPO() }
 
             if (topics.isNotEmpty()) {
@@ -144,7 +144,7 @@ class ExploreRepository @Inject constructor(
 
     private suspend fun queryRemoteUsers(apiBlock: suspend () -> UsersResponse): List<UserProfileSearchItem> =
         withContext(dispatchers.io()) {
-            val response = apiBlock()
+            val response = retryNetworkCall { apiBlock() }
             val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
             val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
             val profiles = response.contactsMetadata.mapAsProfileDataPO(
