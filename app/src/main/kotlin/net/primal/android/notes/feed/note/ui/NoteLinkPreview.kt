@@ -1,7 +1,6 @@
 package net.primal.android.notes.feed.note.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -38,18 +38,18 @@ fun NoteLinkPreview(
                 color = AppTheme.extraColorScheme.surfaceVariantAlt3,
                 shape = AppTheme.shapes.small,
             )
-            .border(
-                width = 0.5.dp,
-                color = AppTheme.colorScheme.outline,
-                shape = AppTheme.shapes.small,
-            )
             .clickable(enabled = onClick != null, onClick = { onClick?.invoke() }),
     ) {
         if (thumbnailUrl != null) {
             SubcomposeAsyncImage(
                 model = thumbnailUrl,
                 modifier = Modifier
-                    .clip(shape = AppTheme.shapes.small)
+                    .clip(
+                        shape = AppTheme.shapes.small.copy(
+                            bottomStart = CornerSize(0.dp),
+                            bottomEnd = CornerSize(0.dp),
+                        ),
+                    )
                     .width(thumbnailImageSize.width)
                     .height(thumbnailImageSize.height),
                 contentDescription = null,
