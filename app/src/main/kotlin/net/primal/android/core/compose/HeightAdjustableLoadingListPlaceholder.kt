@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -22,7 +23,7 @@ import net.primal.android.R
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun HeightAdjustableLoadingListPlaceholder(
+fun HeightAdjustableLoadingLazyListPlaceholder(
     modifier: Modifier = Modifier,
     itemPadding: PaddingValues = PaddingValues(all = 0.dp),
     contentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
@@ -56,6 +57,44 @@ fun HeightAdjustableLoadingListPlaceholder(
                         .scale(10f)
                         .padding(itemPadding),
                     resId = animationRawResId,
+                )
+            }
+        }
+    }
+}
+
+fun LazyListScope.heightAdjustableLoadingLazyListPlaceholder(
+    modifier: Modifier = Modifier,
+    itemPadding: PaddingValues = PaddingValues(all = 16.dp),
+    repeat: Int = 10,
+    height: Dp = 128.dp,
+    showDivider: Boolean = true,
+    contentType: (Int) -> Any = { "LoadingRefresh" },
+) {
+    items(count = repeat, contentType = contentType) {
+        val animationRawResId = when (LocalPrimalTheme.current.isDarkTheme) {
+            true -> R.raw.primal_loader_generic_square_dark
+            false -> R.raw.primal_loader_generic_square_light
+        }
+
+        repeat(times = repeat) {
+            Box(
+                modifier = modifier
+                    .clipToBounds()
+                    .padding(itemPadding)
+                    .clip(AppTheme.shapes.small)
+                    .fillMaxWidth()
+                    .height(height),
+            ) {
+                InfiniteLottieAnimation(
+                    modifier = Modifier
+                        .scale(10f),
+                    resId = animationRawResId,
+                )
+            }
+            if (showDivider) {
+                PrimalDivider(
+                    color = AppTheme.extraColorScheme.surfaceVariantAlt3,
                 )
             }
         }

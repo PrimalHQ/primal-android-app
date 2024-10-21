@@ -35,7 +35,7 @@ import java.time.Instant
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AvatarThumbnail
-import net.primal.android.core.compose.HeightAdjustableLoadingListPlaceholder
+import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -74,7 +74,7 @@ private fun ExploreZaps(
 ) {
     when {
         state.loading && state.zaps.isEmpty() -> {
-            HeightAdjustableLoadingListPlaceholder(
+            HeightAdjustableLoadingLazyListPlaceholder(
                 modifier = Modifier.fillMaxSize(),
                 contentPaddingValues = paddingValues,
                 clipShape = AppTheme.shapes.large,
