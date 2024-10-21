@@ -12,6 +12,7 @@ import net.primal.android.articles.db.Article
 import net.primal.android.articles.db.ArticleFeedCrossRef
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.networking.primal.retryNetworkCall
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.mapNotNullAsArticleDataPO
 import timber.log.Timber
@@ -29,13 +30,15 @@ class ArticleFeedMediator(
         withContext(dispatcherProvider.io()) {
             val pageSize = state.config.pageSize
             val response = try {
-                articlesApi.getArticleFeed(
-                    body = ArticleFeedRequestBody(
-                        spec = feedSpec,
-                        userId = userId,
-                        limit = pageSize,
-                    ),
-                )
+                retryNetworkCall {
+                    articlesApi.getArticleFeed(
+                        body = ArticleFeedRequestBody(
+                            spec = feedSpec,
+                            userId = userId,
+                            limit = pageSize,
+                        ),
+                    )
+                }
             } catch (error: WssException) {
                 Timber.w(error)
                 null
