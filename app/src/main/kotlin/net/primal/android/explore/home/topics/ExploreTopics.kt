@@ -95,7 +95,9 @@ fun ExploreTopics(
             )
         } else {
             LazyColumn(
-                modifier = modifier.fillMaxSize(),
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(top = 6.dp),
                 contentPadding = paddingValues,
             ) {
                 items(
