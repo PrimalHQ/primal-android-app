@@ -522,6 +522,7 @@ private fun SearchScope.toDisplayName(): String =
         )
         SearchScope.MyNetworkInteractions -> stringResource(id = R.string.asearch_search_scope_my_network_interactions)
         SearchScope.NotMyFollows -> stringResource(id = R.string.asearch_search_scope_not_my_follows)
+        SearchScope.MyNotifications -> stringResource(id = R.string.asearch_search_scope_my_notifications)
     }
 
 @Composable
