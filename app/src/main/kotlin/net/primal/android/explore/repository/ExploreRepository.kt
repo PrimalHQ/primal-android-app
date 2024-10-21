@@ -19,6 +19,7 @@ import net.primal.android.explore.api.model.UsersResponse
 import net.primal.android.explore.db.TrendingTopic
 import net.primal.android.explore.domain.ExploreZapNoteData
 import net.primal.android.explore.domain.UserProfileSearchItem
+import net.primal.android.networking.primal.retryNetworkCall
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.flatMapNotNullAsLinkPreviewResource
 import net.primal.android.nostr.ext.flatMapNotNullAsVideoThumbnailsMap
@@ -41,7 +42,9 @@ class ExploreRepository @Inject constructor(
 
     suspend fun fetchTrendingZaps(userId: String): List<ExploreZapNoteData> =
         withContext(dispatchers.io()) {
-            val response = exploreApi.getTrendingZaps(body = ExploreRequestBody(userPubKey = userId, limit = 100))
+            val response = retryNetworkCall {
+                exploreApi.getTrendingZaps(body = ExploreRequestBody(userPubKey = userId, limit = 100))
+            }
 
             val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
             val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
@@ -86,12 +89,14 @@ class ExploreRepository @Inject constructor(
                         noteNostrUris = nostrUris,
                     )
                 }
-            }
+            }.sortedByDescending { it.amountSats }
         }
 
     suspend fun fetchTrendingPeople(userId: String): List<ExplorePeopleData> =
         withContext(dispatchers.io()) {
-            val response = exploreApi.getTrendingPeople(body = ExploreRequestBody(userPubKey = userId, limit = 100))
+            val response = retryNetworkCall {
+                exploreApi.getTrendingPeople(body = ExploreRequestBody(userPubKey = userId, limit = 100))
+            }
 
             val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
             val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
@@ -124,7 +129,7 @@ class ExploreRepository @Inject constructor(
 
     suspend fun fetchTrendingTopics() =
         withContext(dispatchers.io()) {
-            val response = exploreApi.getTrendingTopics()
+            val response = retryNetworkCall { exploreApi.getTrendingTopics() }
             val topics = response.map { it.asTrendingTopicPO() }
 
             if (topics.isNotEmpty()) {
@@ -139,7 +144,7 @@ class ExploreRepository @Inject constructor(
 
     private suspend fun queryRemoteUsers(apiBlock: suspend () -> UsersResponse): List<UserProfileSearchItem> =
         withContext(dispatchers.io()) {
-            val response = apiBlock()
+            val response = retryNetworkCall { apiBlock() }
             val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
             val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
             val profiles = response.contactsMetadata.mapAsProfileDataPO(

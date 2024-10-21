@@ -98,12 +98,6 @@ private fun ExternalWalletSection(
                     "https://nwc.getalby.com/apps/new?c=Primal-Android",
                 )
             },
-            onMutinyConnectClick = {
-                uriHandler.openUri(
-                    "https://app.mutinywallet.com/settings/connections" +
-                        "?callbackUri=primal&name=Primal-Android",
-                )
-            },
             onOtherConnectClick = onOtherConnectClick,
         )
     }
@@ -176,7 +170,6 @@ private fun ExternalWalletConnected(
 private fun ExternalWalletDisconnected(
     modifier: Modifier = Modifier,
     onAlbyConnectClick: () -> Unit,
-    onMutinyConnectClick: () -> Unit,
     onOtherConnectClick: () -> Unit,
 ) {
     Column(
@@ -189,15 +182,6 @@ private fun ExternalWalletDisconnected(
                 .fillMaxWidth()
                 .height(56.dp),
             onClick = onAlbyConnectClick,
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        ConnectMutinyWalletButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            onClick = onMutinyConnectClick,
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -227,27 +211,6 @@ fun ConnectAlbyWalletButton(modifier: Modifier = Modifier, onClick: (() -> Unit)
             style = AppTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium,
             color = Color.Black,
-            leadingIconTintColor = null,
-        )
-    }
-}
-
-private val mutinyColor = Color(0xFF4F1425)
-
-@Composable
-fun ConnectMutinyWalletButton(modifier: Modifier = Modifier, onClick: (() -> Unit)?) {
-    PrimalFilledButton(
-        modifier = modifier,
-        containerColor = mutinyColor,
-        onClick = onClick,
-    ) {
-        IconText(
-            text = stringResource(id = R.string.settings_wallet_nwc_connect_mutiny_wallet),
-            leadingIcon = ImageVector.vectorResource(id = R.drawable.mutiny_logo),
-            iconSize = 42.sp,
-            style = AppTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium,
-            color = Color.White,
             leadingIconTintColor = null,
         )
     }

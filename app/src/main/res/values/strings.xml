@@ -420,7 +420,6 @@
     <string name="settings_wallet_nwc_header_not_connected">Connect a Wallet</string>
     <string name="settings_wallet_nwc_header_connected">Wallet Connected</string>
     <string name="settings_wallet_nwc_connect_alby_wallet">Connect Alby Wallet</string>
-    <string name="settings_wallet_nwc_connect_mutiny_wallet">Connect Mutiny Wallet</string>
     <string name="settings_wallet_nwc_connect_other_wallet">Connect Other Wallet</string>
     <string name="settings_wallet_nwc_disconnect_wallet_button">Disconnect Wallet</string>
     <string name="settings_wallet_nwc_profile_lightning_address">Your Nostr Lightning Address:</string>

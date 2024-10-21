@@ -80,12 +80,13 @@ fun ExploreTopics(
     ) {
         if (state.loading && state.topics.isEmpty()) {
             TopicLoadingPlaceholder(
+                modifier = modifier,
                 repeat = 4,
                 contentPadding = paddingValues,
             )
         } else if (state.topics.isEmpty()) {
             ListNoContent(
-                modifier = Modifier.fillMaxSize(),
+                modifier = modifier.fillMaxSize(),
                 noContentText = stringResource(
                     id = R.string.explore_trending_topics_no_content,
                 ),
@@ -94,7 +95,9 @@ fun ExploreTopics(
             )
         } else {
             LazyColumn(
-                modifier = modifier.fillMaxSize(),
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(top = 6.dp),
                 contentPadding = paddingValues,
             ) {
                 items(

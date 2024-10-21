@@ -99,7 +99,7 @@ private fun MediaFeedGrid(
                                     .clickable {
                                         onNoteClick(item.postId)
                                     }
-                                    .padding(1.dp)
+                                    .padding(0.5.dp)
                                     .size(size = itemWidth),
                                 item = item,
                                 maxWidthPx = itemWidth.value.toInt(),
