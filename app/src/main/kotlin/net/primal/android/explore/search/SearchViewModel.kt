@@ -35,7 +35,7 @@ class SearchViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
-        UiState(scope = savedStateHandle.searchScope)
+        UiState(scope = savedStateHandle.searchScope),
     )
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }

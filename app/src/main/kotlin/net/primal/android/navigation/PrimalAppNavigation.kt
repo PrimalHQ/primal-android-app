@@ -64,7 +64,6 @@ import net.primal.android.feeds.domain.buildAdvancedSearchNotesFeedSpec
 import net.primal.android.feeds.domain.buildAdvancedSearchNotificationsFeedSpec
 import net.primal.android.feeds.domain.buildAdvancedSearchReadsFeedSpec
 import net.primal.android.feeds.domain.buildReadsTopicFeedSpec
-import net.primal.android.feeds.domain.buildSimpleSearchNotesFeedSpec
 import net.primal.android.messages.chat.ChatScreen
 import net.primal.android.messages.chat.ChatViewModel
 import net.primal.android.messages.conversation.MessageConversationListViewModel
@@ -802,38 +801,37 @@ private fun NavGraphBuilder.search(
     route: String,
     arguments: List<NamedNavArgument>,
     navController: NavController,
-) =
-    composable(
-        route = route,
-        arguments = arguments,
-        enterTransition = { primalSlideInHorizontallyFromEnd },
-        exitTransition = { primalScaleOut },
-        popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontallyToEnd },
-    ) {
-        val viewModel = hiltViewModel<SearchViewModel>(it)
-        ApplyEdgeToEdge()
-        LockToOrientationPortrait()
-        SearchScreen(
-            viewModel = viewModel,
-            onClose = { navController.navigateUp() },
-            onAdvancedSearchClick = { query ->
-                navController.popBackStack()
-                navController.navigateToAdvancedSearch(initialQuery = query)
-            },
-            onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
-            onNoteClick = { noteId -> navController.navigateToThread(noteId) },
-            onNaddrClick = { naddr -> navController.navigateToArticleDetails(naddr) },
-            onSearchContent = { scope, query ->
-                val feedSpec = when (scope) {
-                    SearchScope.Notes -> buildAdvancedSearchNotesFeedSpec(query = query)
-                    SearchScope.Reads -> buildAdvancedSearchReadsFeedSpec(query = query)
-                    SearchScope.MyNotifications -> buildAdvancedSearchNotificationsFeedSpec(query = query)
-                }
-                navController.navigateToExploreFeed(feedSpec = feedSpec)
-            },
-        )
-    }
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) {
+    val viewModel = hiltViewModel<SearchViewModel>(it)
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
+    SearchScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+        onAdvancedSearchClick = { query ->
+            navController.popBackStack()
+            navController.navigateToAdvancedSearch(initialQuery = query)
+        },
+        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+        onNoteClick = { noteId -> navController.navigateToThread(noteId) },
+        onNaddrClick = { naddr -> navController.navigateToArticleDetails(naddr) },
+        onSearchContent = { scope, query ->
+            val feedSpec = when (scope) {
+                SearchScope.Notes -> buildAdvancedSearchNotesFeedSpec(query = query)
+                SearchScope.Reads -> buildAdvancedSearchReadsFeedSpec(query = query)
+                SearchScope.MyNotifications -> buildAdvancedSearchNotificationsFeedSpec(query = query)
+            }
+            navController.navigateToExploreFeed(feedSpec = feedSpec)
+        },
+    )
+}
 
 private fun NavGraphBuilder.advancedSearch(
     route: String,

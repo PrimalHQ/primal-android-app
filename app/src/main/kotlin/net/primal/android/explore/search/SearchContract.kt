@@ -22,6 +22,8 @@ interface SearchContract {
     }
 
     enum class SearchScope {
-        Notes, Reads, MyNotifications,
+        Notes,
+        Reads,
+        MyNotifications,
     }
 }
