@@ -156,13 +156,10 @@ fun ThreadScreen(
         snackbarHostState = snackbarHostState,
     )
 
-    var topBarMaxHeightPx by remember { mutableIntStateOf(0) }
-    var bottomBarMaxHeightPx by remember { mutableIntStateOf(0) }
     Scaffold(
         modifier = Modifier.imePadding(),
         topBar = {
             PrimalTopAppBar(
-                modifier = Modifier.onSizeChanged { topBarMaxHeightPx = it.height },
                 title = stringResource(id = R.string.thread_title),
                 navigationIcon = PrimalIcons.ArrowBack,
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
@@ -178,7 +175,6 @@ fun ThreadScreen(
                 ThreadConversationLazyColumn(
                     paddingValues = paddingValues,
                     state = state,
-                    scaffoldBarsMaxHeightPx = bottomBarMaxHeightPx + topBarMaxHeightPx,
                     noteCallbacks = noteCallbacks,
                     onGoToWallet = onGoToWallet,
                     onReactionsClick = onReactionsClick,
@@ -239,7 +235,6 @@ fun ThreadScreen(
                 ReplyToBottomBar(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .onSizeChanged { bottomBarMaxHeightPx = it.height }
                         .navigationBarsPadding(),
                     replyState = replyState,
                     replyToPost = replyToPost,
@@ -273,7 +268,6 @@ fun ThreadScreen(
 private fun ThreadConversationLazyColumn(
     paddingValues: PaddingValues,
     state: ThreadContract.UiState,
-    scaffoldBarsMaxHeightPx: Int,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     onReactionsClick: (noteId: String) -> Unit,
@@ -310,7 +304,6 @@ private fun ThreadConversationLazyColumn(
         ThreadLazyColumn(
             modifier = Modifier.fillMaxSize(),
             state = state,
-            scaffoldBarsMaxHeightPx = scaffoldBarsMaxHeightPx,
             onReactionsClick = onReactionsClick,
             onGoToWallet = onGoToWallet,
             noteCallbacks = noteCallbacks,
@@ -324,7 +317,6 @@ private fun ThreadConversationLazyColumn(
 private fun ThreadLazyColumn(
     modifier: Modifier,
     state: ThreadContract.UiState,
-    scaffoldBarsMaxHeightPx: Int,
     onReactionsClick: (noteId: String) -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: (() -> Unit),
@@ -337,8 +329,7 @@ private fun ThreadLazyColumn(
 
     var extraSpacing by remember { mutableStateOf(0.dp) }
     extraSpacing = with(LocalDensity.current) {
-        threadListMaxHeightPx.toDp() - highlightPostHeightPx.toDp() -
-            scaffoldBarsMaxHeightPx.toDp() - repliesHeightPx.values.sum().toDp()
+        threadListMaxHeightPx.toDp() - highlightPostHeightPx.toDp() - repliesHeightPx.values.sum().toDp()
     }
 
     LazyColumn(
