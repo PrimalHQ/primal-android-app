@@ -30,6 +30,15 @@ inline val SavedStateHandle.renderType: String
 const val INITIAL_QUERY = "initialQuery"
 inline val SavedStateHandle.initialQuery: String? get() = get(INITIAL_QUERY)
 
+const val POSTED_BY = "postedBy"
+inline val SavedStateHandle.postedBy: List<String>?
+    get() = get<String>(POSTED_BY)
+        ?.trim()?.removeSurrounding(prefix = "[", suffix = "]")
+        ?.splitToSequence(",")
+        ?.map { it.trim() }
+        ?.filter { it.isNotEmpty() }
+        ?.toList()
+
 const val SEARCH_SCOPE = "searchScope"
 inline val SavedStateHandle.searchScopeOrThrow: SearchScope
     get() = get<String>(SEARCH_SCOPE)?.let { SearchScope.valueOf(it) }

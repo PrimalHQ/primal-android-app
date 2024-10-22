@@ -114,8 +114,10 @@ private fun NavController.navigateToLogout() = navigate(route = "logout")
 private fun NavController.navigateToSearch(searchScope: SearchScope) =
     navigate(route = "search?$SEARCH_SCOPE=$searchScope")
 
-private fun NavController.navigateToAdvancedSearch(initialQuery: String? = null) =
-    navigate(route = "asearch?$INITIAL_QUERY=$initialQuery")
+private fun NavController.navigateToAdvancedSearch(
+    initialQuery: String? = null,
+    initialPostedBy: List<String>? = null,
+) = navigate(route = "asearch?$INITIAL_QUERY=$initialQuery&$POSTED_BY=$initialPostedBy")
 
 private fun NavController.navigateToNoteEditor(args: NoteEditorArgs? = null) {
     navigate(route = "noteEditor?$NOTE_EDITOR_ARGS=${args?.toJson()?.asBase64Encoded()}")
@@ -372,10 +374,14 @@ fun PrimalAppNavigation() {
         )
 
         advancedSearch(
-            route = "asearch?$INITIAL_QUERY={$INITIAL_QUERY}",
+            route = "asearch?$INITIAL_QUERY={$INITIAL_QUERY}&$POSTED_BY={$POSTED_BY}",
             navController = navController,
             arguments = listOf(
                 navArgument(INITIAL_QUERY) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(POSTED_BY) {
                     type = NavType.StringType
                     nullable = true
                 },
@@ -1109,6 +1115,7 @@ private fun NavGraphBuilder.profile(
             )
         },
         onGoToWallet = { navController.navigateToWallet() },
+        onSearchClick = { navController.navigateToAdvancedSearch(initialPostedBy = listOf(it)) },
     )
 }
 

@@ -8,12 +8,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -36,6 +38,7 @@ import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.theme.AppTheme
@@ -57,6 +60,7 @@ fun ProfileTopCoverBar(
     state: ProfileDetailsContract.UiState,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     onClose: () -> Unit,
+    onSearchClick: () -> Unit,
     titleVisible: Boolean,
     coverValues: CoverValues,
     avatarValues: AvatarValues,
@@ -97,6 +101,7 @@ fun ProfileTopCoverBar(
             titleVisible = titleVisible,
             eventPublisher = eventPublisher,
             paddingValues = paddingValues,
+            onSearchClick = onSearchClick,
         )
 
         Box(
@@ -129,6 +134,7 @@ private fun ProfileTopAppBar(
     titleVisible: Boolean,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     onClose: () -> Unit,
+    onSearchClick: () -> Unit,
     paddingValues: PaddingValues,
 ) {
     Column(
@@ -166,6 +172,14 @@ private fun ProfileTopAppBar(
                 }
             },
             actions = {
+                ProfileAppBarIcon(
+                    icon = PrimalIcons.Search,
+                    onClick = onSearchClick,
+                    appBarIconContentDescription = null,
+                    enabledBackgroundColor = Color.Black.copy(alpha = 0.5f),
+                    tint = Color.White,
+                )
+                Spacer(modifier = Modifier.width(12.dp))
                 ProfileDropdownMenu(
                     profileId = state.profileId,
                     isActiveUser = state.isActiveUser,
