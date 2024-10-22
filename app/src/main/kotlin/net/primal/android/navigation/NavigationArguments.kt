@@ -3,6 +3,7 @@ package net.primal.android.navigation
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavBackStackEntry
 import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.explore.search.ui.SearchScope
 import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
@@ -32,17 +33,11 @@ inline val SavedStateHandle.initialQuery: String? get() = get(INITIAL_QUERY)
 
 const val POSTED_BY = "postedBy"
 inline val SavedStateHandle.postedBy: List<String>?
-    get() = get<String>(POSTED_BY)
-        ?.trim()?.removeSurrounding(prefix = "[", suffix = "]")
-        ?.splitToSequence(",")
-        ?.map { it.trim() }
-        ?.filter { it.isNotEmpty() }
-        ?.toList()
+    get() = get<String>(POSTED_BY)?.let {
+        NostrJson.decodeFromStringOrNull(it)
+    }
 
 const val SEARCH_SCOPE = "searchScope"
-inline val SavedStateHandle.searchScopeOrThrow: SearchScope
-    get() = get<String>(SEARCH_SCOPE)?.let { SearchScope.valueOf(it) }
-        ?: throw IllegalArgumentException("Missing required searchScope argument.")
 inline val NavBackStackEntry.searchScopeOrThrow: SearchScope
     get() = arguments?.getString(SEARCH_SCOPE)?.let { SearchScope.valueOf(it) }
         ?: throw IllegalArgumentException("Missing required searchScope argument.")
@@ -73,7 +68,7 @@ const val DRAFT_TRANSACTION = "draftTransaction"
 inline val SavedStateHandle.draftTransaction: DraftTx
     get() = get<String>(DRAFT_TRANSACTION)
         ?.asBase64Decoded()?.let {
-            NostrJson.decodeFromString(it)
+            NostrJson.decodeFromStringOrNull(it)
         } ?: throw IllegalArgumentException("Missing draft transaction.")
 
 const val LNBC = "lnbc"
