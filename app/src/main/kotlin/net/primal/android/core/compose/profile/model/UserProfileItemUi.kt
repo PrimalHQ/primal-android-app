@@ -3,6 +3,7 @@ package net.primal.android.core.compose.profile.model
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.explore.domain.UserProfileSearchItem
+import net.primal.android.profile.db.ProfileData
 
 data class UserProfileItemUi(
     val profileId: String,
@@ -22,4 +23,15 @@ fun UserProfileSearchItem.mapAsUserProfileUi() =
         avatarCdnImage = this.metadata.avatarCdnImage,
         followersCount = this.followersCount,
         score = this.score,
+    )
+
+fun ProfileData.asUserProfileItemUi() =
+    UserProfileItemUi(
+        profileId = this.ownerId,
+        displayName = this.authorNameUiFriendly(),
+        internetIdentifier = this.internetIdentifier,
+        avatarCdnImage = this.avatarCdnImage,
+        followersCount = null,
+        score = null,
+        isFollowed = null,
     )

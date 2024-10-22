@@ -84,6 +84,7 @@ import net.primal.android.wallet.domain.DraftTx
 fun ProfileDetailsScreen(
     viewModel: ProfileDetailsViewModel,
     onClose: () -> Unit,
+    onSearchClick: (String) -> Unit,
     noteCallbacks: NoteCallbacks,
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
@@ -126,6 +127,7 @@ fun ProfileDetailsScreen(
         state = uiState.value,
         snackbarHostState = snackbarHostState,
         onClose = onClose,
+        onSearchClick = onSearchClick,
         noteCallbacks = noteCallbacks,
         onEditProfileClick = onEditProfileClick,
         onMessageClick = onMessageClick,
@@ -152,6 +154,7 @@ fun ProfileDetailsScreen(
     state: ProfileDetailsContract.UiState,
     snackbarHostState: SnackbarHostState,
     onClose: () -> Unit,
+    onSearchClick: (String) -> Unit,
     noteCallbacks: NoteCallbacks,
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
@@ -294,6 +297,7 @@ fun ProfileDetailsScreen(
                             eventPublisher = eventPublisher,
                             onClose = onClose,
                             paddingValues = paddingValues,
+                            onSearchClick = { onSearchClick(state.profileId) },
                         )
                     }
                     item {
@@ -521,6 +525,7 @@ private fun PreviewProfileScreen() {
             ),
             snackbarHostState = SnackbarHostState(),
             onClose = {},
+            onSearchClick = {},
             noteCallbacks = NoteCallbacks(),
             onEditProfileClick = {},
             onMessageClick = {},
