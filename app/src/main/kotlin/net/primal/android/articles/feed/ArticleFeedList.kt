@@ -71,6 +71,7 @@ fun ArticleFeedList(
     noContentText: String = stringResource(id = R.string.article_feed_no_content),
     noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
+    shouldAnimateScrollToTop: Boolean = false,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     onUiError: ((UiError) -> Unit)? = null,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
@@ -101,6 +102,7 @@ fun ArticleFeedList(
         noContentText = noContentText,
         noContentVerticalArrangement = noContentVerticalArrangement,
         noContentPaddingValues = noContentPaddingValues,
+        shouldAnimateScrollToTop = shouldAnimateScrollToTop,
         articleEventPublisher = articleViewModel::setEvent,
     )
 }
@@ -117,6 +119,7 @@ private fun ArticleFeedList(
     noContentText: String = stringResource(id = R.string.article_feed_no_content),
     noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
+    shouldAnimateScrollToTop: Boolean = false,
     onArticleClick: (naddr: String) -> Unit,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
@@ -127,6 +130,10 @@ private fun ArticleFeedList(
 
     val pullToRefreshState = rememberPullToRefreshState()
     var pullToRefreshing by remember { mutableStateOf(false) }
+
+    LaunchedEffect(shouldAnimateScrollToTop) {
+        if (shouldAnimateScrollToTop) feedListState.animateScrollToItem(index = 0)
+    }
 
     var isMediatorRefreshing by remember { mutableStateOf<Boolean?>(null) }
     LaunchedEffect(pagingItems) {

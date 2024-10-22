@@ -78,6 +78,7 @@ fun NoteFeedList(
     noContentText: String = stringResource(id = R.string.feed_no_content),
     noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
+    shouldAnimateScrollToTop: Boolean = false,
     onUiError: ((UiError) -> Unit)? = null,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
@@ -121,6 +122,7 @@ fun NoteFeedList(
         noContentText = noContentText,
         noContentVerticalArrangement = noContentVerticalArrangement,
         noContentPaddingValues = noContentPaddingValues,
+        shouldAnimateScrollToTop = shouldAnimateScrollToTop,
     )
 }
 
@@ -137,12 +139,17 @@ private fun NoteFeedList(
     noContentText: String = stringResource(id = R.string.feed_no_content),
     noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
+    shouldAnimateScrollToTop: Boolean = false,
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val pagingItems = state.notes.collectAsLazyPagingItems()
     val listState = pagingItems.rememberLazyListStatePagingWorkaround()
+
+    LaunchedEffect(shouldAnimateScrollToTop) {
+        if (shouldAnimateScrollToTop) listState.animateScrollToItem(index = 0)
+    }
 
     LaunchedEffect(listState, pagingItems) {
         withContext(Dispatchers.IO) {
