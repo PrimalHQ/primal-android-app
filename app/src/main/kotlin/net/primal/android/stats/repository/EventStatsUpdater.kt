@@ -41,6 +41,7 @@ class EventStatsUpdater(
 
     suspend fun increaseZapStats(amountInSats: Int, zapComment: String) =
         database.withTransaction {
+            val zapSender = database.profiles().findProfileData(profileId = userId)
             database.eventStats().upsert(
                 data = eventStats.copy(
                     zaps = eventStats.zaps + 1,
@@ -56,6 +57,10 @@ class EventStatsUpdater(
                     eventId = eventId,
                     zapRequestAt = timestamp,
                     zapReceiptAt = timestamp,
+                    zapSenderAvatarCdnImage = zapSender?.avatarCdnImage,
+                    zapSenderHandle = zapSender?.handle,
+                    zapSenderDisplayName = zapSender?.displayName,
+                    zapSenderInternetIdentifier = zapSender?.internetIdentifier,
                     amountInBtc = amountInSats.toBtc(),
                     message = zapComment,
                 ),
