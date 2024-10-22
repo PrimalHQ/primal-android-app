@@ -10,6 +10,7 @@ import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.explore.api.model.UsersResponse
 import net.primal.android.explore.domain.UserProfileSearchItem
+import net.primal.android.networking.primal.retryNetworkCall
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.asEventIdTag
 import net.primal.android.nostr.ext.asProfileDataPO
@@ -84,7 +85,7 @@ class ProfileRepository @Inject constructor(
 
     suspend fun requestProfileUpdate(profileId: String) =
         withContext(dispatchers.io()) {
-            val response = usersApi.getUserProfile(userId = profileId)
+            val response = retryNetworkCall { usersApi.getUserProfile(userId = profileId) }
             val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
             val primalUserName = response.primalName.parseAndMapPrimalUserName()
             val profileMetadata = response.metadata?.asProfileDataPO(
