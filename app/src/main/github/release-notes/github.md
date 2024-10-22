@@ -1,21 +1,12 @@
 ## Changes
-- Implement contextual search (#207)
-- Fix backgrounds on notes and reads feeds in light theme
-- Fix backgrounds on settings screens on light theme
-- Polish wallet tx send background
-- Polish link previews
-- Fix topic padding and skeleton loaders
-- Fix background colors on ExploreScreen tabs
-- Fix background5 color in light themes
-- Implement skeleton loader updates for notes, articles and notifications (#206)
-- Add retry to ArticleFeedMediator
-- Implement network api call retries on user search and fetch topics
-- Implement retries on explore feeds, people and zaps network calls
-- Fix explore zaps sort order
-- Update generic skeleton loader for light theme
-- Add skeleton loader to individual media grid items; Fix media grid padding;
-- Hide keyboard when asearch option item is clicked (#205)
-- Remove Mutiny wallet from NWC settings
-- Fix can't open url when scheme is missing
-- Add my notifications scope to advanced search
-- Fix font size slider in appearance settings
+- Implement profile search (#211);
+- Update search command for time posted;
+- Fix breaking changes with extra spacing on ThreadScreen;
+- All feeds are now invalidated after 3 minutes;
+- Implement notes & replies polling on profile details;
+- Fix delays when tapping new notes pill on notes feeds;
+- Add retryNetworkCall when calling get user profile api endpoint;
+- Fix animate to top when tapping home or reads tabs;
+- Implement custom profile app bar icons;
+- Fix avatar issue when zapping a note;
+- Fix avatar images in dvm feeds;
