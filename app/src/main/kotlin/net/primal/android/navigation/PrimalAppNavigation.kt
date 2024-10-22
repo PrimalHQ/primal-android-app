@@ -23,6 +23,7 @@ import androidx.navigation.navOptions
 import java.net.URLEncoder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.encodeToString
 import net.primal.android.articles.reads.ReadsScreen
 import net.primal.android.articles.reads.ReadsViewModel
 import net.primal.android.attachments.gallery.MediaGalleryScreen
@@ -41,6 +42,7 @@ import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.findActivity
+import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.editor.di.noteEditorViewModel
@@ -114,8 +116,14 @@ private fun NavController.navigateToLogout() = navigate(route = "logout")
 private fun NavController.navigateToSearch(searchScope: SearchScope) =
     navigate(route = "search?$SEARCH_SCOPE=$searchScope")
 
-private fun NavController.navigateToAdvancedSearch(initialQuery: String? = null) =
-    navigate(route = "asearch?$INITIAL_QUERY=$initialQuery")
+private fun NavController.navigateToAdvancedSearch(
+    initialQuery: String? = null,
+    initialPostedBy: List<String>? = null,
+) = navigate(
+    route = "asearch" +
+        "?$INITIAL_QUERY=$initialQuery" +
+        "&$POSTED_BY=${NostrJson.encodeToString(initialPostedBy)}"
+)
 
 private fun NavController.navigateToNoteEditor(args: NoteEditorArgs? = null) {
     navigate(route = "noteEditor?$NOTE_EDITOR_ARGS=${args?.toJson()?.asBase64Encoded()}")
@@ -372,10 +380,14 @@ fun PrimalAppNavigation() {
         )
 
         advancedSearch(
-            route = "asearch?$INITIAL_QUERY={$INITIAL_QUERY}",
+            route = "asearch?$INITIAL_QUERY={$INITIAL_QUERY}&$POSTED_BY={$POSTED_BY}",
             navController = navController,
             arguments = listOf(
                 navArgument(INITIAL_QUERY) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(POSTED_BY) {
                     type = NavType.StringType
                     nullable = true
                 },
@@ -1109,6 +1121,7 @@ private fun NavGraphBuilder.profile(
             )
         },
         onGoToWallet = { navController.navigateToWallet() },
+        onSearchClick = { navController.navigateToAdvancedSearch(initialPostedBy = listOf(it)) },
     )
 }
 

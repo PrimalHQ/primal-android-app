@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
+import net.primal.android.core.compose.profile.model.asUserProfileItemUi
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.explore.asearch.AdvancedSearchContract.Orientation
 import net.primal.android.explore.asearch.AdvancedSearchContract.SearchFilter
@@ -23,10 +24,13 @@ import net.primal.android.explore.asearch.AdvancedSearchContract.UiEvent
 import net.primal.android.explore.asearch.AdvancedSearchContract.UiState
 import net.primal.android.explore.feed.ExploreFeedContract
 import net.primal.android.navigation.initialQuery
+import net.primal.android.navigation.postedBy
+import net.primal.android.profile.repository.ProfileRepository
 
 @HiltViewModel
 class AdvancedSearchViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    private val profileRepository: ProfileRepository,
 ) : ViewModel() {
 
     companion object {
@@ -34,6 +38,7 @@ class AdvancedSearchViewModel @Inject constructor(
     }
 
     private val dateFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT).withZone(ZoneId.systemDefault())
+    private val initialPostedBy = savedStateHandle.postedBy
 
     private val _state = MutableStateFlow(
         UiState(
@@ -52,6 +57,7 @@ class AdvancedSearchViewModel @Inject constructor(
 
     init {
         observeEvents()
+        fetchInitialPostedBy()
     }
 
     private fun observeEvents() =
@@ -84,6 +90,14 @@ class AdvancedSearchViewModel @Inject constructor(
                     is UiEvent.TimePostedChanged -> setState { copy(timePosted = it.timePosted) }
                     UiEvent.OnSearch -> onSearch()
                 }
+            }
+        }
+
+    private fun fetchInitialPostedBy() =
+        viewModelScope.launch {
+            initialPostedBy?.let {
+                val profiles = profileRepository.findProfilesData(initialPostedBy)
+                setState { copy(postedBy = profiles.map { it.asUserProfileItemUi() }.toSet()) }
             }
         }
 
