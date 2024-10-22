@@ -27,6 +27,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
@@ -82,8 +84,10 @@ private fun ReadsScreen(
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
     val snackbarHostState = remember { SnackbarHostState() }
 
+    var shouldAnimateScrollToTop by remember { mutableStateOf(false) }
     var activeFeed by remember { mutableStateOf<FeedUi?>(null) }
     val pagerState = rememberPagerState(pageCount = { state.feeds.size })
+
     LaunchedEffect(pagerState, state.feeds) {
         snapshotFlow { pagerState.currentPage }
             .collect { index ->
@@ -97,7 +101,11 @@ private fun ReadsScreen(
         drawerState = drawerState,
         activeDestination = PrimalTopLevelDestination.Reads,
         onActiveDestinationClick = {
-            /** uiScope.launch { feedListState.animateScrollToItem(index = 0) } **/
+            shouldAnimateScrollToTop = true
+            uiScope.launch {
+                delay(500.milliseconds)
+                shouldAnimateScrollToTop = false
+            }
         },
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
@@ -131,6 +139,7 @@ private fun ReadsScreen(
                     ArticleFeedList(
                         feedSpec = state.feeds[index].spec,
                         contentPadding = paddingValues,
+                        shouldAnimateScrollToTop = shouldAnimateScrollToTop,
                         onArticleClick = onArticleClick,
                         onUiError = { uiError: UiError ->
                             uiScope.launch {

@@ -41,6 +41,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
@@ -115,16 +117,9 @@ fun HomeFeedScreen(
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
     val snackbarHostState = remember { SnackbarHostState() }
 
+    var shouldAnimateScrollToTop by remember { mutableStateOf(false) }
     var activeFeed by remember { mutableStateOf<FeedUi?>(null) }
     val pagerState = rememberPagerState(pageCount = { state.feeds.size })
-    LaunchedEffect(pagerState, state.feeds) {
-        snapshotFlow { pagerState.currentPage }
-            .collect { index ->
-                if (state.feeds.isNotEmpty()) {
-                    activeFeed = state.feeds[index]
-                }
-            }
-    }
 
     val topAppBarState = remember {
         TopAppBarState(
@@ -134,12 +129,24 @@ fun HomeFeedScreen(
         )
     }
 
-    /** uiScope.launch { feedListState.animateScrollToItem(index = 0) } **/
+    LaunchedEffect(pagerState, state.feeds) {
+        snapshotFlow { pagerState.currentPage }
+            .collect { index ->
+                if (state.feeds.isNotEmpty()) {
+                    activeFeed = state.feeds[index]
+                }
+            }
+    }
+
     PrimalDrawerScaffold(
         drawerState = drawerState,
         activeDestination = PrimalTopLevelDestination.Home,
         onActiveDestinationClick = {
-            /** uiScope.launch { feedListState.animateScrollToItem(index = 0) } **/
+            shouldAnimateScrollToTop = true
+            uiScope.launch {
+                delay(500.milliseconds)
+                shouldAnimateScrollToTop = false
+            }
         },
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
@@ -181,6 +188,7 @@ fun HomeFeedScreen(
                         newNotesNoticeAlpha = (1 - topAppBarState.collapsedFraction) * 1.0f,
                         onGoToWallet = onGoToWallet,
                         contentPadding = paddingValues,
+                        shouldAnimateScrollToTop = shouldAnimateScrollToTop,
                         onUiError = { uiError ->
                             uiScope.launch {
                                 snackbarHostState.showSnackbar(
