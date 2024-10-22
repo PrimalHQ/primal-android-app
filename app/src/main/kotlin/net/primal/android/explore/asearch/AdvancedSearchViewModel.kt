@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
@@ -31,11 +30,9 @@ class AdvancedSearchViewModel @Inject constructor(
 ) : ViewModel() {
 
     companion object {
-        private const val DATE_TIME_FORMAT = "yyyy-MM-dd_HH:mm"
         private const val DATE_FORMAT = "yyyy-MM-dd"
     }
 
-    private val dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT).withZone(ZoneId.systemDefault())
     private val dateFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT).withZone(ZoneId.systemDefault())
 
     private val _state = MutableStateFlow(
@@ -154,17 +151,13 @@ class AdvancedSearchViewModel @Inject constructor(
     private fun AdvancedSearchContract.TimeModifier.toSearchCommand(): String =
         when (this) {
             AdvancedSearchContract.TimeModifier.Anytime -> ""
-            AdvancedSearchContract.TimeModifier.Today ->
-                "since:" + ZonedDateTime.now().minusDays(1).toInstant().toCommandFormattedDateTimeString()
+            AdvancedSearchContract.TimeModifier.Today -> "since:yesterday"
 
-            AdvancedSearchContract.TimeModifier.Week ->
-                "since:" + ZonedDateTime.now().minusDays(7).toInstant().toCommandFormattedDateTimeString()
+            AdvancedSearchContract.TimeModifier.Week -> "since:lastweek"
 
-            AdvancedSearchContract.TimeModifier.Month ->
-                "since:" + ZonedDateTime.now().minusMonths(1).toInstant().toCommandFormattedDateTimeString()
+            AdvancedSearchContract.TimeModifier.Month -> "since:lastmonth"
 
-            AdvancedSearchContract.TimeModifier.Year ->
-                "since:" + ZonedDateTime.now().minusYears(1).toInstant().toCommandFormattedDateTimeString()
+            AdvancedSearchContract.TimeModifier.Year -> "since:lastyear"
 
             is AdvancedSearchContract.TimeModifier.Custom ->
                 "since:${this.startDate.toCommandFormattedDateString()} " +
@@ -203,7 +196,6 @@ class AdvancedSearchViewModel @Inject constructor(
             stringFilters.filter { it.isNotEmpty() }.joinToString(" ")
         }
 
-    private fun Instant.toCommandFormattedDateTimeString() = dateTimeFormatter.format(this)
     private fun Instant.toCommandFormattedDateString() = dateFormatter.format(this)
 
     private fun Set<UserProfileItemUi>.joinWithPrefix(prefix: String) =
