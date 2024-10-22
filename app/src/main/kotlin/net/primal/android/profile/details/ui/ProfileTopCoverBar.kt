@@ -172,10 +172,15 @@ private fun ProfileTopAppBar(
                 }
             },
             actions = {
+                val profileName = state.profileDetails?.authorDisplayName ?: ""
                 ProfileAppBarIcon(
                     icon = PrimalIcons.Search,
                     onClick = onSearchClick,
-                    appBarIconContentDescription = null,
+                    appBarIconContentDescription = if (profileName.isEmpty()) {
+                        stringResource(id = R.string.accessibility_search)
+                    } else {
+                        stringResource(id = R.string.accessibility_profile_search, profileName)
+                    },
                     enabledBackgroundColor = Color.Black.copy(alpha = 0.5f),
                     tint = Color.White,
                 )
@@ -185,7 +190,7 @@ private fun ProfileTopAppBar(
                     isActiveUser = state.isActiveUser,
                     isProfileMuted = state.isProfileMuted,
                     isProfileFeedInActiveUserFeeds = state.isProfileFeedInActiveUserFeeds,
-                    profileName = state.profileDetails?.authorDisplayName ?: "",
+                    profileName = profileName,
                     eventPublisher = eventPublisher,
                     primalName = state.profileDetails?.primalName,
                 )
