@@ -1,11 +1,1 @@
-- Implement profile search (#211);
-- Update search command for time posted;
-- Fix breaking changes with extra spacing on ThreadScreen;
-- All feeds are now invalidated after 3 minutes;
-- Implement notes & replies polling on profile details;
-- Fix delays when tapping new notes pill on notes feeds;
-- Add retryNetworkCall when calling get user profile api endpoint;
-- Fix animate to top when tapping home or reads tabs;
-- Implement custom profile app bar icons;
-- Fix avatar issue when zapping a note;
-- Fix avatar images in dvm feeds;
+Wrapping up the beta build.
