@@ -8,7 +8,9 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Instant
 import kotlin.random.Random
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -185,18 +187,22 @@ class NoteFeedViewModel @AssistedInject constructor(
 
     private fun showLatestNotes() =
         viewModelScope.launch {
-            latestFeedResponse?.let {
+            latestFeedResponse?.let { latestFeed ->
                 feedRepository.replaceFeedSpec(
                     userId = activeAccountStore.activeUserId(),
                     feedSpec = feedSpec,
-                    response = it,
+                    response = latestFeed,
                 )
-            }
-            setState {
-                copy(
-                    notes = buildFeedByDirective(feedSpec),
-                    syncStats = FeedPostsSyncStats(),
-                )
+
+                viewModelScope.launch {
+                    delay(50.milliseconds)
+                    setState {
+                        copy(
+                            syncStats = FeedPostsSyncStats(),
+                            latestNotesUpdatedTimestamp = Instant.now(),
+                        )
+                    }
+                }
             }
         }
 

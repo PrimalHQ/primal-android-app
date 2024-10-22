@@ -147,8 +147,10 @@ private fun NoteFeedList(
     val pagingItems = state.notes.collectAsLazyPagingItems()
     val listState = pagingItems.rememberLazyListStatePagingWorkaround()
 
-    LaunchedEffect(shouldAnimateScrollToTop) {
-        if (shouldAnimateScrollToTop) listState.animateScrollToItem(index = 0)
+    LaunchedEffect(shouldAnimateScrollToTop, state.latestNotesUpdatedTimestamp) {
+        if (shouldAnimateScrollToTop || state.latestNotesUpdatedTimestamp != null) {
+            listState.animateScrollToItem(index = 0)
+        }
     }
 
     LaunchedEffect(listState, pagingItems) {

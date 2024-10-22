@@ -1,6 +1,7 @@
 package net.primal.android.notes.feed
 
 import androidx.paging.PagingData
+import java.time.Instant
 import kotlinx.coroutines.flow.Flow
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
@@ -13,6 +14,7 @@ interface NoteFeedContract {
         val feedAutoRefresh: Boolean = false,
         val syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
         val topVisibleNote: Pair<String, String?>? = null,
+        val latestNotesUpdatedTimestamp: Instant? = null,
     )
 
     sealed class UiEvent {
