@@ -41,9 +41,11 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import java.util.*
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -203,12 +205,19 @@ private fun NoteFeedList(
                 .graphicsLayer { this.alpha = newNotesNoticeAlpha },
         ) {
             if (state.syncStats.latestNoteIds.isNotEmpty() && pagingItems.isNotEmpty()) {
-                NewPostsButton(
-                    syncStats = state.syncStats,
-                    onClick = {
-                        eventPublisher(UiEvent.ShowLatestNotes)
-                    },
-                )
+                var buttonVisible by remember { mutableStateOf(false) }
+                LaunchedEffect(true) {
+                    delay(10.milliseconds)
+                    buttonVisible = true
+                }
+                if (buttonVisible) {
+                    NewPostsButton(
+                        syncStats = state.syncStats,
+                        onClick = {
+                            eventPublisher(UiEvent.ShowLatestNotes)
+                        },
+                    )
+                }
             }
         }
     }
