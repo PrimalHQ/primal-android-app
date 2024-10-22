@@ -6,8 +6,6 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import java.io.IOException
 import java.time.Instant
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.withContext
@@ -15,7 +13,6 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feeds.domain.isNotesBookmarkFeedSpec
 import net.primal.android.feeds.domain.supportsNoteReposts
-import net.primal.android.feeds.domain.supportsUpwardsNotesPagination
 import net.primal.android.networking.primal.retryNetworkCall
 import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.errors.WssException
@@ -55,17 +52,7 @@ class FeedRemoteMediator(
 
     private val feedProcessor: FeedProcessor = FeedProcessor(feedSpec = feedSpec, database = database)
 
-    private fun FeedPost?.isOlderThan(duration: Duration): Boolean {
-        if (this == null) return true
-        val postFeedCreateAt = Instant.ofEpochSecond(this.data.feedCreatedAt)
-        return postFeedCreateAt < Instant.now().minusSeconds(duration.inWholeSeconds)
-    }
-
-    private suspend fun shouldRefreshLatestFeed(): Boolean {
-        return newestFeedPostInDatabaseOrNull().isOlderThan(1.days)
-    }
-
-    private suspend fun shouldRefreshNonLatestFeed(feedDirective: String): Boolean {
+    private suspend fun shouldRefreshFeedSpec(feedDirective: String): Boolean {
         val lastCachedAt = withContext(dispatcherProvider.io()) {
             database.feedPostsRemoteKeys().lastCachedAt(directive = feedDirective)
         } ?: return true
@@ -75,9 +62,8 @@ class FeedRemoteMediator(
 
     private suspend fun shouldResetLocalCache() =
         when {
-            feedSpec.supportsUpwardsNotesPagination() -> shouldRefreshLatestFeed()
             feedSpec.isNotesBookmarkFeedSpec() -> true
-            else -> shouldRefreshNonLatestFeed(feedSpec)
+            else -> shouldRefreshFeedSpec(feedSpec)
         }
 
     override suspend fun initialize(): InitializeAction {
