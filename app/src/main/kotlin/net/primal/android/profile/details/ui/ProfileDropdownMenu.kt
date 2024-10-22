@@ -6,10 +6,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import net.primal.android.R
-import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenuItem
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -54,10 +54,12 @@ fun ProfileDropdownMenu(
         )
     }
 
-    AppBarIcon(
+    ProfileAppBarIcon(
         icon = PrimalIcons.More,
         onClick = { menuVisible = true },
         appBarIconContentDescription = stringResource(id = R.string.accessibility_profile_drop_down),
+        enabledBackgroundColor = Color.Black.copy(alpha = 0.5f),
+        tint = Color.White,
     )
 
     DropdownPrimalMenu(

@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import net.primal.android.R
 import net.primal.android.attachments.domain.findNearestOrNull
-import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
@@ -141,7 +140,7 @@ private fun ProfileTopAppBar(
                 scrolledContainerColor = Color.Transparent,
             ),
             navigationIcon = {
-                AppBarIcon(
+                ProfileAppBarIcon(
                     icon = PrimalIcons.ArrowBack,
                     appBarIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                     enabledBackgroundColor = Color.Black.copy(alpha = 0.5f),
@@ -157,6 +156,7 @@ private fun ProfileTopAppBar(
                     exit = fadeOut(),
                 ) {
                     NostrUserText(
+                        modifier = Modifier.padding(top = 4.dp),
                         displayName = state.profileDetails?.authorDisplayName
                             ?: state.profileId.asEllipsizedNpub(),
                         internetIdentifier = state.profileDetails?.internetIdentifier,
