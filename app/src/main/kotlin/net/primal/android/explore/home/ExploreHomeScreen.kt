@@ -7,10 +7,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
@@ -19,6 +21,7 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -36,6 +39,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -45,12 +49,16 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
+import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.IconText
+import net.primal.android.core.compose.InvisibleAppBarIcon
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearch
-import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
@@ -81,7 +89,6 @@ fun ExploreHomeScreen(
     onDrawerQrCodeClick: () -> Unit,
     onSearchClick: () -> Unit,
     onAdvancedSearchClick: () -> Unit,
-    onClose: () -> Unit,
     onGoToWallet: (() -> Unit)? = null,
     noteCallbacks: NoteCallbacks,
 ) {
@@ -94,7 +101,6 @@ fun ExploreHomeScreen(
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         onSearchClick = onSearchClick,
         onAdvancedSearchClick = onAdvancedSearchClick,
-        onClose = onClose,
         noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
     )
@@ -109,7 +115,6 @@ private fun ExploreHomeScreen(
     onDrawerQrCodeClick: () -> Unit,
     onSearchClick: () -> Unit,
     onAdvancedSearchClick: () -> Unit,
-    onClose: () -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: (() -> Unit)? = null,
 ) {
@@ -133,11 +138,15 @@ private fun ExploreHomeScreen(
         topAppBarState = topAppBarState,
         topAppBar = {
             ExploreTopAppBar(
-                onClose = onClose,
+                pagerState = pagerState,
+                actionIcon = PrimalIcons.AdvancedSearch,
+                avatarCdnImage = state.activeAccountAvatarCdnImage,
+                navigationIcon = PrimalIcons.AvatarDefault,
+                onNavigationIconClick = {
+                    uiScope.launch { drawerState.open() }
+                },
                 onSearchClick = onSearchClick,
                 onActionIconClick = onAdvancedSearchClick,
-                actionIcon = PrimalIcons.AdvancedSearch,
-                pagerState = pagerState,
                 scrollBehavior = topAppBarScrollBehavior,
             )
         },
@@ -161,6 +170,7 @@ private fun ExploreHomeScreen(
                             },
                         )
                     }
+
                     PEOPLE_INDEX -> {
                         ExplorePeople(
                             modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
@@ -176,6 +186,7 @@ private fun ExploreHomeScreen(
                             },
                         )
                     }
+
                     ZAPS_INDEX -> {
                         ExploreZaps(
                             modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
@@ -183,6 +194,7 @@ private fun ExploreHomeScreen(
                             noteCallbacks = noteCallbacks,
                         )
                     }
+
                     MEDIA_INDEX -> {
                         MediaFeedGrid(
                             feedSpec = buildExploreMediaFeedSpec(),
@@ -190,6 +202,7 @@ private fun ExploreHomeScreen(
                             onNoteClick = { noteCallbacks.onNoteClick?.invoke(it) },
                         )
                     }
+
                     TOPICS_INDEX -> {
                         ExploreTopics(
                             modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
@@ -211,10 +224,13 @@ private fun ExploreHomeScreen(
 fun ExploreTopAppBar(
     modifier: Modifier = Modifier,
     pagerState: PagerState,
-    onSearchClick: () -> Unit,
-    onActionIconClick: () -> Unit,
-    onClose: () -> Unit,
+    avatarCdnImage: CdnImage?,
+    navigationIcon: ImageVector?,
     actionIcon: ImageVector,
+    onNavigationIconClick: () -> Unit,
+    onActionIconClick: () -> Unit,
+    onSearchClick: () -> Unit,
+    navigationIconTintColor: Color = LocalContentColor.current,
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
     val scope = rememberCoroutineScope()
@@ -231,13 +247,27 @@ fun ExploreTopAppBar(
                 )
             },
             navigationIcon = {
-                IconButton(
-                    onClick = onClose,
-                ) {
-                    Icon(
-                        imageVector = PrimalIcons.ArrowBack,
-                        contentDescription = null,
+                if (avatarCdnImage != null) {
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                            .clip(CircleShape),
+                    ) {
+                        AvatarThumbnail(
+                            avatarCdnImage = avatarCdnImage,
+                            modifier = Modifier.size(32.dp),
+                            onClick = onNavigationIconClick,
+                        )
+                    }
+                } else if (navigationIcon != null) {
+                    AppBarIcon(
+                        icon = navigationIcon,
+                        iconSize = 22.dp,
+                        onClick = onNavigationIconClick,
+                        tint = navigationIconTintColor,
                     )
+                } else {
+                    InvisibleAppBarIcon()
                 }
             },
             actions = {
@@ -302,9 +332,11 @@ fun PreviewExploreTopAppBar() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         Surface {
             ExploreTopAppBar(
+                avatarCdnImage = null,
+                navigationIcon = PrimalIcons.AvatarDefault,
                 onSearchClick = {},
                 onActionIconClick = {},
-                onClose = {},
+                onNavigationIconClick = {},
                 actionIcon = Icons.Filled.Tune,
                 pagerState = rememberPagerState { EXPLORE_HOME_TAB_COUNT },
             )
