@@ -6,13 +6,18 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import java.io.IOException
 import java.time.Instant
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feeds.domain.isNotesBookmarkFeedSpec
+import net.primal.android.feeds.domain.isProfileAuthoredNoteRepliesFeedSpec
+import net.primal.android.feeds.domain.isProfileAuthoredNotesFeedSpec
 import net.primal.android.feeds.domain.supportsNoteReposts
+import net.primal.android.feeds.domain.supportsUpwardsNotesPagination
 import net.primal.android.networking.primal.retryNetworkCall
 import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.errors.WssException
@@ -52,18 +57,21 @@ class FeedRemoteMediator(
 
     private val feedProcessor: FeedProcessor = FeedProcessor(feedSpec = feedSpec, database = database)
 
-    private suspend fun shouldRefreshFeedSpec(feedDirective: String): Boolean {
+    private suspend fun String.isLastCacheTimestampOlderThan(duration: Duration): Boolean {
         val lastCachedAt = withContext(dispatcherProvider.io()) {
-            database.feedPostsRemoteKeys().lastCachedAt(directive = feedDirective)
+            database.feedPostsRemoteKeys().lastCachedAt(directive = this@isLastCacheTimestampOlderThan)
         } ?: return true
 
-        return lastCachedAt < Instant.now().minusSeconds(3.minutes.inWholeSeconds).epochSecond
+        return lastCachedAt < Instant.now().minusSeconds(duration.inWholeSeconds).epochSecond
     }
 
     private suspend fun shouldResetLocalCache() =
         when {
             feedSpec.isNotesBookmarkFeedSpec() -> true
-            else -> shouldRefreshFeedSpec(feedSpec)
+            feedSpec.isProfileAuthoredNotesFeedSpec() -> true
+            feedSpec.isProfileAuthoredNoteRepliesFeedSpec() -> true
+            feedSpec.supportsUpwardsNotesPagination() -> feedSpec.isLastCacheTimestampOlderThan(duration = 12.hours)
+            else -> feedSpec.isLastCacheTimestampOlderThan(duration = 3.minutes)
         }
 
     override suspend fun initialize(): InitializeAction {
@@ -72,7 +80,9 @@ class FeedRemoteMediator(
                 clearFeedSpec(feedSpec = feedSpec)
                 InitializeAction.LAUNCH_INITIAL_REFRESH
             }
-            else -> InitializeAction.SKIP_INITIAL_REFRESH
+            else -> {
+                InitializeAction.SKIP_INITIAL_REFRESH
+            }
         }
     }
 
