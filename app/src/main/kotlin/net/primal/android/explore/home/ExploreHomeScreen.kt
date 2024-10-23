@@ -68,7 +68,7 @@ import net.primal.android.explore.home.ui.TOPICS_INDEX
 import net.primal.android.explore.home.ui.ZAPS_INDEX
 import net.primal.android.explore.home.zaps.ExploreZaps
 import net.primal.android.feeds.domain.buildExploreMediaFeedSpec
-import net.primal.android.notes.feed.MediaFeedGrid
+import net.primal.android.notes.feed.grid.MediaFeedGrid
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme

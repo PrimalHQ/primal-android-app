@@ -1,4 +1,4 @@
-package net.primal.android.notes.feed
+package net.primal.android.notes.feed.list
 
 import androidx.paging.PagingData
 import java.time.Instant

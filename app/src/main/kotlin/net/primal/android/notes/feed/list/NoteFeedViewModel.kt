@@ -1,4 +1,4 @@
-package net.primal.android.notes.feed
+package net.primal.android.notes.feed.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -33,8 +33,8 @@ import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.notes.api.model.FeedResponse
 import net.primal.android.notes.db.FeedPost
-import net.primal.android.notes.feed.NoteFeedContract.UiEvent
-import net.primal.android.notes.feed.NoteFeedContract.UiState
+import net.primal.android.notes.feed.list.NoteFeedContract.UiEvent
+import net.primal.android.notes.feed.list.NoteFeedContract.UiState
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository

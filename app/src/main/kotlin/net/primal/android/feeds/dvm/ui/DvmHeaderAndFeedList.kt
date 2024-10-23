@@ -8,7 +8,7 @@ import net.primal.android.articles.feed.ArticleFeedList
 import net.primal.android.core.errors.UiError
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.domain.buildSpec
-import net.primal.android.notes.feed.NoteFeedList
+import net.primal.android.notes.feed.list.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 

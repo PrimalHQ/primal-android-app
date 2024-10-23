@@ -68,8 +68,8 @@ import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.utils.asEllipsizedNpub
-import net.primal.android.notes.feed.MediaFeedGrid
-import net.primal.android.notes.feed.NoteFeedList
+import net.primal.android.notes.feed.grid.MediaFeedGrid
+import net.primal.android.notes.feed.list.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
