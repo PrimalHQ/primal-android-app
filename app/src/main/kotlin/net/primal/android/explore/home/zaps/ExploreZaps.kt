@@ -198,9 +198,12 @@ private fun NoteSummary(
             }
             NoteContent(
                 expanded = false,
-                noteCallbacks = noteCallbacks,
+                noteCallbacks = noteCallbacks.copy(
+                    onProfileClick = null,
+                ),
                 data = noteContent,
                 contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                highlightColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 onClick = { onNoteClick(noteContent.noteId) },
