@@ -1,4 +1,4 @@
-package net.primal.android.notes.feed
+package net.primal.android.notes.feed.grid
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,7 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
-import net.primal.android.notes.feed.MediaFeedContract.UiState
+import net.primal.android.notes.feed.grid.MediaFeedContract.UiState
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
 

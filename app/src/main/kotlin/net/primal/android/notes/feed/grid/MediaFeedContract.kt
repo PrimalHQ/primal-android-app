@@ -1,4 +1,4 @@
-package net.primal.android.notes.feed
+package net.primal.android.notes.feed.grid
 
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow

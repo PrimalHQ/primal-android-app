@@ -1,4 +1,4 @@
-package net.primal.android.notes.feed
+package net.primal.android.notes.feed.list
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
