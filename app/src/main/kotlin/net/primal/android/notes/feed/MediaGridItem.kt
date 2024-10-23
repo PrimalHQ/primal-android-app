@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -32,8 +33,9 @@ fun MediaGridItem(
     item: FeedPostUi,
     maxWidthPx: Int,
 ) {
-    val attachment = item.attachments.firstOrNull()
-    val cdnResource = attachment?.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
+    val firstAttachment = item.attachments.firstOrNull()
+    val hasMultipleMediaAttachments = item.attachments.filter { it.isMediaAttachment() }.size > 1
+    val cdnResource = firstAttachment?.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
     val animationRawResId = when (LocalPrimalTheme.current.isDarkTheme) {
         true -> R.raw.primal_loader_generic_square_dark
         false -> R.raw.primal_loader_generic_square_light
@@ -45,7 +47,7 @@ fun MediaGridItem(
         SubcomposeAsyncImage(
             modifier = Modifier.fillMaxSize(),
             model = ImageRequest.Builder(LocalContext.current)
-                .data(cdnResource?.mediaUrl ?: attachment?.thumbnailUrl ?: attachment?.url)
+                .data(cdnResource?.mediaUrl ?: firstAttachment?.thumbnailUrl ?: firstAttachment?.url)
                 .crossfade(true)
                 .memoryCachePolicy(CachePolicy.ENABLED)
                 .build(),
@@ -56,22 +58,24 @@ fun MediaGridItem(
             },
         )
         when {
-            item.attachments.filter { it.isMediaAttachment() }.size > 1 -> {
+            hasMultipleMediaAttachments -> {
                 Icon(
                     modifier = Modifier
-                        .padding(top = 8.dp, end = 8.dp)
-                        .shadow(elevation = 8.dp, shape = AppTheme.shapes.extraSmall),
+                        .padding(top = 4.dp, end = 4.dp)
+                        .shadow(elevation = 4.dp, shape = AppTheme.shapes.extraSmall),
                     imageVector = PrimalIcons.MediaGalleryFilled,
+                    tint = Color.Unspecified,
                     contentDescription = null,
                 )
             }
 
-            attachment?.type == NoteAttachmentType.Video -> {
+            firstAttachment?.type == NoteAttachmentType.Video -> {
                 Icon(
                     modifier = Modifier
-                        .padding(top = 8.dp, end = 8.dp)
-                        .shadow(elevation = 8.dp, shape = AppTheme.shapes.extraSmall),
+                        .padding(top = 4.dp, end = 4.dp)
+                        .shadow(elevation = 4.dp, shape = AppTheme.shapes.extraSmall),
                     imageVector = PrimalIcons.MediaVideoFilled,
+                    tint = Color.Unspecified,
                     contentDescription = null,
                 )
             }
