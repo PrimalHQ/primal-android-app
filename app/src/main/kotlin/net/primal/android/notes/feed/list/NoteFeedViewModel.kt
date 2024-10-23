@@ -8,7 +8,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.Instant
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -194,14 +193,12 @@ class NoteFeedViewModel @AssistedInject constructor(
                     response = latestFeed,
                 )
 
+                delay(50.milliseconds)
+                setState { copy(syncStats = FeedPostsSyncStats(), shouldAnimateScrollToTop = true) }
+
                 viewModelScope.launch {
-                    delay(50.milliseconds)
-                    setState {
-                        copy(
-                            syncStats = FeedPostsSyncStats(),
-                            latestNotesUpdatedTimestamp = Instant.now(),
-                        )
-                    }
+                    delay(1.seconds)
+                    setState { copy(shouldAnimateScrollToTop = false) }
                 }
             }
         }
