@@ -1,4 +1,5 @@
 ## Changes
+- Fix image/video advanced search not showing the feed
 - Set chronological feeds to expire after 24 hours
 - Fix New Notes pill button feed performances
 - Fix referenced events borders per figma design
