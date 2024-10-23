@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -45,7 +44,6 @@ import net.primal.android.BuildConfig
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.FeedArticleListItem
 import net.primal.android.articles.feed.ui.FeedArticleUi
-import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListLoadingError
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
@@ -336,14 +334,11 @@ private fun LazyListScope.handleRefreshLoadState(
 
 private fun LazyListScope.handleMediatorAppendState(pagingItems: LazyPagingItems<FeedArticleUi>) {
     when (val appendMediatorLoadState = pagingItems.loadState.mediator?.append) {
-        LoadState.Loading -> item(contentType = "LoadingAppend") {
-            ListLoading(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
-                    .padding(vertical = 8.dp),
+        LoadState.Loading ->
+            heightAdjustableLoadingLazyListPlaceholder(
+                contentType = { "LoadingPrepend" },
+                repeat = 1,
             )
-        }
 
         is LoadState.Error -> if (BuildConfig.FEATURE_PRIMAL_CRASH_REPORTER) {
             item(contentType = "AppendError") {
