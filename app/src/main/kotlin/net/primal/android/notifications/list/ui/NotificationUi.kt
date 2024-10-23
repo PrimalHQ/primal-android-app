@@ -16,5 +16,5 @@ data class NotificationUi(
     val actionPost: FeedPostUi? = null,
     val actionUserSatsZapped: Long? = null,
 ) {
-    val uniqueKey = "$notificationType;${createdAt.toEpochMilli()};$actionUserId"
+    val uniqueKey = "$notificationType;${createdAt.toEpochMilli()};$actionUserId;${actionPost?.postId}"
 }

@@ -117,7 +117,7 @@ class NotificationsViewModel @Inject constructor(
 
                     copy(
                         unseenNotifications = unseenNotifications.map { byType ->
-                            byType.map { it.asNotificationUi() }
+                            byType.map { it.asNotificationUi() }.distinctBy { it.uniqueKey }
                         },
                     )
                 }
