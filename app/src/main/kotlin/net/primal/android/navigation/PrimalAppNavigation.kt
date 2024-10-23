@@ -122,7 +122,7 @@ private fun NavController.navigateToAdvancedSearch(
 ) = navigate(
     route = "asearch" +
         "?$INITIAL_QUERY=$initialQuery" +
-        "&$POSTED_BY=${NostrJson.encodeToString(initialPostedBy)}"
+        "&$POSTED_BY=${NostrJson.encodeToString(initialPostedBy)}",
 )
 
 private fun NavController.navigateToNoteEditor(args: NoteEditorArgs? = null) {
