@@ -33,13 +33,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -333,13 +331,6 @@ fun ProfileDetailsScreen(
                                 .height(screenHeight + tabVerticalPadding * 2),
                         ) {
                             val pagerState = rememberPagerState { PROFILE_TAB_COUNT }
-                            var activePageIndex by remember { mutableStateOf<Int?>(null) }
-                            LaunchedEffect(pagerState) {
-                                snapshotFlow { pagerState.currentPage }
-                                    .collect { index ->
-                                        activePageIndex = index
-                                    }
-                            }
 
                             ProfileTabs(
                                 selectedTabIndex = pagerState.currentPage,
@@ -388,7 +379,7 @@ fun ProfileDetailsScreen(
                                             ),
                                             noteCallbacks = noteCallbacks,
                                             onGoToWallet = onGoToWallet,
-                                            pollingEnabled = activePageIndex == pageIndex,
+                                            pollingEnabled = false,
                                             pullToRefreshEnabled = false,
                                             onUiError = { uiError ->
                                                 uiScope.launch {
