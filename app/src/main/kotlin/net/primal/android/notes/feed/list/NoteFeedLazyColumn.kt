@@ -139,7 +139,7 @@ fun NoteFeedLazyColumn(
                 }
 
                 is LoadState.NotLoading -> {
-                    if (shouldShowNoContentState) {
+                    if (shouldShowNoContentState && pagingItems.loadState.isIdle) {
                         item(contentType = "NoContent") {
                             ListNoContent(
                                 modifier = Modifier.fillParentMaxSize(),
