@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -43,7 +42,6 @@ import kotlinx.coroutines.launch
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
-import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListLoadingError
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
@@ -404,13 +402,12 @@ private fun NotificationsList(
         }
 
         when (seenPagingItems.loadState.mediator?.append) {
-            LoadState.Loading -> item(contentType = "LoadingAppend") {
-                ListLoading(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(64.dp),
+            LoadState.Loading ->
+                heightAdjustableLoadingLazyListPlaceholder(
+                    contentType = { "LoadingAppend" },
+                    height = 98.dp,
+                    repeat = 1,
                 )
-            }
 
             is LoadState.Error -> item(contentType = "AppendError") {
                 ListLoadingError(

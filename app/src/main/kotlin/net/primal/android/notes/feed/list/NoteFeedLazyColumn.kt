@@ -23,7 +23,6 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import net.primal.android.BuildConfig
 import net.primal.android.R
-import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListLoadingError
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
@@ -169,12 +168,10 @@ fun NoteFeedLazyColumn(
         }
 
         when (val appendMediatorLoadState = pagingItems.loadState.mediator?.append) {
-            LoadState.Loading -> item(contentType = "LoadingAppend") {
-                ListLoading(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(64.dp)
-                        .padding(vertical = 8.dp),
+            LoadState.Loading -> {
+                heightAdjustableLoadingLazyListPlaceholder(
+                    contentType = { "LoadingPrepend" },
+                    repeat = 1,
                 )
             }
 
