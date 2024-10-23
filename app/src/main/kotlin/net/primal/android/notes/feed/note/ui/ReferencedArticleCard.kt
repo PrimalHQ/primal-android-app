@@ -16,15 +16,20 @@ import net.primal.android.theme.AppTheme
 @ExperimentalMaterial3Api
 @Composable
 fun ReferencedArticleCard(
-    modifier: Modifier = Modifier,
     data: FeedArticleUi,
+    modifier: Modifier = Modifier,
+    hasBorder: Boolean = false,
     colors: CardColors = referencedArticleCardColors(),
     onClick: (() -> Unit)? = null,
 ) {
     NoteSurfaceCard(
         modifier = modifier.wrapContentHeight(),
         colors = colors,
-        border = BorderStroke(width = 0.5.dp, color = AppTheme.colorScheme.outline),
+        border = if (hasBorder) {
+            BorderStroke(width = 0.5.dp, color = AppTheme.colorScheme.outline)
+        } else {
+            null
+        },
     ) {
         FeedArticleListItem(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),

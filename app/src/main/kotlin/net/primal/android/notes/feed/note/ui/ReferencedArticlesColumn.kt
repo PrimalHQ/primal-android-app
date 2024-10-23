@@ -17,11 +17,12 @@ import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReferencedArticlesColumn(
-    modifier: Modifier = Modifier,
     articleResources: List<NoteNostrUriUi>,
     expanded: Boolean,
     containerColor: Color,
     noteCallbacks: NoteCallbacks,
+    modifier: Modifier = Modifier,
+    hasBorder: Boolean = false,
 ) {
     val displayableNotes = if (articleResources.isNotEmpty()) {
         if (expanded) articleResources else articleResources.subList(0, 1)
@@ -52,6 +53,7 @@ fun ReferencedArticlesColumn(
                     readingTimeInMinutes = data.articleReadingTimeInMinutes,
                 ),
                 colors = CardDefaults.cardColors(containerColor = containerColor),
+                hasBorder = hasBorder,
                 onClick = {
                     noteCallbacks.onArticleClick?.invoke(data.naddr)
                 },

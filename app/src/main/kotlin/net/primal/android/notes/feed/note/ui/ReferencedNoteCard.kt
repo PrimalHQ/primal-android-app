@@ -26,9 +26,10 @@ import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
 fun ReferencedNoteCard(
-    modifier: Modifier = Modifier,
     data: FeedPostUi,
     noteCallbacks: NoteCallbacks,
+    modifier: Modifier = Modifier,
+    hasBorder: Boolean = false,
     colors: CardColors = referencedNoteCardColors(),
 ) {
     NoteSurfaceCard(
@@ -39,7 +40,11 @@ fun ReferencedNoteCard(
                 onClick = { noteCallbacks.onNoteClick?.invoke(data.postId) },
             ),
         colors = colors,
-        border = BorderStroke(width = 0.5.dp, color = AppTheme.colorScheme.outline),
+        border = if (hasBorder) {
+            BorderStroke(width = 0.5.dp, color = AppTheme.colorScheme.outline)
+        } else {
+            null
+        },
     ) {
         FeedNoteHeader(
             modifier = Modifier
@@ -60,6 +65,7 @@ fun ReferencedNoteCard(
                 .padding(top = 4.dp),
             data = data.toNoteContentUi(),
             expanded = false,
+            referencedEventsHaveBorder = true,
             onClick = { noteCallbacks.onNoteClick?.invoke(data.postId) },
             onUrlClick = { _ -> noteCallbacks.onNoteClick?.invoke(data.postId) },
             noteCallbacks = noteCallbacks,

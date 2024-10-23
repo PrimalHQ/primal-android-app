@@ -18,11 +18,12 @@ import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 
 @Composable
 fun ReferencedNotesColumn(
-    modifier: Modifier = Modifier,
     postResources: List<NoteNostrUriUi>,
     expanded: Boolean,
     containerColor: Color,
     noteCallbacks: NoteCallbacks,
+    modifier: Modifier = Modifier,
+    hasBorder: Boolean = false,
 ) {
     val displayableNotes = if (postResources.isNotEmpty()) {
         if (expanded) postResources else postResources.subList(0, 1)
@@ -55,6 +56,7 @@ fun ReferencedNotesColumn(
                     rawNostrEventJson = "",
                     replyToAuthorHandle = null,
                 ),
+                hasBorder = hasBorder,
                 colors = CardDefaults.cardColors(containerColor = containerColor),
                 noteCallbacks = noteCallbacks,
             )
