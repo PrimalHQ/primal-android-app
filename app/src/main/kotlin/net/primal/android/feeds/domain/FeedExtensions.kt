@@ -93,6 +93,7 @@ fun String.isReadsBookmarkFeedSpec(): Boolean {
 fun buildLatestNotesUserFeedSpec(userId: String) = """{"id":"feed","kind":"notes","pubkey":"$userId"}"""
 
 fun String.resolveFeedSpecKind(): FeedSpecKind? {
+    // TODO Update to work with Image, Video and Sound search types
     return when {
         this.isNotesFeedSpec() -> FeedSpecKind.Notes
         this.isReadsFeedSpec() -> FeedSpecKind.Reads

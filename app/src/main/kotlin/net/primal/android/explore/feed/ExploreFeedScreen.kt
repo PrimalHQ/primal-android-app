@@ -154,7 +154,7 @@ fun ExploreFeedScreen(
                     contentPadding = paddingValues,
                 )
 
-                FeedSpecKind.Notes -> ExploreNoteFeed(
+                else -> ExploreNoteFeed(
                     feedSpec = state.feedSpec,
                     renderType = state.renderType,
                     noteCallbacks = noteCallbacks,
@@ -169,8 +169,6 @@ fun ExploreFeedScreen(
                         }
                     },
                 )
-
-                null -> UnknownFeedSpecKind(feedSpec = state.feedSpec)
             }
         },
         snackbarHost = {
