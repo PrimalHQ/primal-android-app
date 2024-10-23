@@ -1,12 +1,16 @@
 ## Changes
-- Implement profile search (#211);
-- Update search command for time posted;
-- Fix breaking changes with extra spacing on ThreadScreen;
-- All feeds are now invalidated after 3 minutes;
-- Implement notes & replies polling on profile details;
-- Fix delays when tapping new notes pill on notes feeds;
-- Add retryNetworkCall when calling get user profile api endpoint;
-- Fix animate to top when tapping home or reads tabs;
-- Implement custom profile app bar icons;
-- Fix avatar issue when zapping a note;
-- Fix avatar images in dvm feeds;
+- Set chronological feeds to expire after 24 hours
+- Fix New Notes pill button feed performances
+- Fix referenced events borders per figma design
+- Fix uniqueKey for NotificationUi list item
+- Fix crash when scrolling to top from long distance in notes feed
+- Adjust paging config for notes
+- Fix losing feed position when tapping new notes pill
+- Update business logic to always fetch profile details feed
+- Remove polling in profile details
+- Implement skeleton loaders for prepend loads
+- Add isIdle check before showing no content on notes feed
+- Implement user avatar on explore screen
+- Disable mention clicks and highlighting on explore zaps
+- Add page spacing between note attachments in feed
+- Implement media feed indicators (#212)
