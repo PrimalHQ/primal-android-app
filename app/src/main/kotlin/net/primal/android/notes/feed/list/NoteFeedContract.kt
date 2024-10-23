@@ -12,7 +12,6 @@ interface NoteFeedContract {
         val feedPostsCount: Int = 0,
         val feedAutoRefresh: Boolean = false,
         val syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
-        val topVisibleNote: Pair<String, String?>? = null,
         val shouldAnimateScrollToTop: Boolean? = null,
     )
 
