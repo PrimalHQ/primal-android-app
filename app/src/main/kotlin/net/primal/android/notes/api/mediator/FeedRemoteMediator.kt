@@ -70,7 +70,7 @@ class FeedRemoteMediator(
             feedSpec.isNotesBookmarkFeedSpec() -> true
             feedSpec.isProfileAuthoredNotesFeedSpec() -> true
             feedSpec.isProfileAuthoredNoteRepliesFeedSpec() -> true
-            feedSpec.supportsUpwardsNotesPagination() -> feedSpec.isLastCacheTimestampOlderThan(duration = 12.hours)
+            feedSpec.supportsUpwardsNotesPagination() -> feedSpec.isLastCacheTimestampOlderThan(duration = 24.hours)
             else -> feedSpec.isLastCacheTimestampOlderThan(duration = 3.minutes)
         }
 
