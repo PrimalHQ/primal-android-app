@@ -53,7 +53,7 @@ fun NoteMediaAttachmentsHorizontalPager(
                 },
             )
         } else {
-            HorizontalPager(state = pagerState) {
+            HorizontalPager(state = pagerState, pageSpacing = 12.dp) {
                 val attachment = mediaAttachments[it]
                 NoteMediaAttachment(
                     attachment = attachment,
