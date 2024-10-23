@@ -69,7 +69,6 @@ class FeedRepository @Inject constructor(
         withContext(dispatcherProvider.io()) {
             database.feedPostsRemoteKeys().deleteByDirective(feedSpec)
             database.feedsConnections().deleteConnectionsByDirective(feedSpec)
-            database.posts().deleteOrphanPosts()
         }
 
     suspend fun replaceFeedSpec(
