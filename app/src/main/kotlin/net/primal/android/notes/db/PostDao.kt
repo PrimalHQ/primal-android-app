@@ -11,9 +11,6 @@ interface PostDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertAll(data: List<PostData>)
 
-    @Query("DELETE FROM PostData WHERE postId NOT IN (SELECT DISTINCT postId FROM FeedPostDataCrossRef)")
-    fun deleteOrphanPosts()
-
     @Query("SELECT * FROM PostData WHERE postId = :postId")
     fun findByPostId(postId: String): PostData?
 

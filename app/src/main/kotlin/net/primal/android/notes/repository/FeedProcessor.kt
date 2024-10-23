@@ -24,7 +24,6 @@ class FeedProcessor(
             if (clearFeed) {
                 database.feedPostsRemoteKeys().deleteByDirective(feedSpec)
                 database.feedsConnections().deleteConnectionsByDirective(feedSpec)
-                database.posts().deleteOrphanPosts()
             }
 
             response.persistToDatabaseAsTransaction(userId = userId, database = database)

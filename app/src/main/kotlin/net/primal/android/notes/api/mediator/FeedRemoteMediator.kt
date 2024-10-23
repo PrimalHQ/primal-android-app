@@ -140,7 +140,6 @@ class FeedRemoteMediator(
         withContext(dispatcherProvider.io()) {
             database.feedPostsRemoteKeys().deleteByDirective(feedSpec)
             database.feedsConnections().deleteConnectionsByDirective(feedSpec)
-            database.posts().deleteOrphanPosts()
         }
 
     private suspend fun FeedRemoteMediator.syncFeed(
