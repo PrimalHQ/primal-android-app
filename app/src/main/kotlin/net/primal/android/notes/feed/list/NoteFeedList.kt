@@ -159,7 +159,7 @@ private fun NoteFeedList(
         withContext(Dispatchers.IO) {
             snapshotFlow { listState.firstVisibleItemIndex to pagingItems.itemCount }
                 .distinctUntilChanged()
-                .filter { (_, size) -> size > 0 }
+                .filter { (index, size) -> size > 0 && index < size }
                 .collect { (index, _) ->
                     val firstVisibleNote = pagingItems.peek(index)
                     if (firstVisibleNote != null) {

@@ -65,6 +65,7 @@ class NoteFeedViewModel @AssistedInject constructor(
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     private var latestFeedResponse: FeedResponse? = null
+    private var topVisibleNote: Pair<String, String?>? = null
 
     private var pollingJob: Job? = null
 
@@ -80,10 +81,8 @@ class NoteFeedViewModel @AssistedInject constructor(
                     UiEvent.StartPolling -> startPollingIfSupported()
                     UiEvent.StopPolling -> stopPolling()
                     UiEvent.ShowLatestNotes -> showLatestNotes()
-                    is UiEvent.UpdateCurrentTopVisibleNote -> setState {
-                        copy(
-                            topVisibleNote = it.noteId to it.repostId,
-                        )
+                    is UiEvent.UpdateCurrentTopVisibleNote -> {
+                        topVisibleNote = it.noteId to it.repostId
                     }
                 }
             }
@@ -117,9 +116,7 @@ class NoteFeedViewModel @AssistedInject constructor(
         }
 
     private fun FeedPostsSyncStats.isTopVisibleNoteTheLatestNote(): Boolean {
-        val topVisibleNote = _state.value.topVisibleNote
         val topNoteId = topVisibleNote?.first
-
         val newestNoteId = this.latestNoteIds.firstOrNull()
         return newestNoteId == topNoteId
     }
