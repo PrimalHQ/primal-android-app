@@ -65,6 +65,8 @@ import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
 import net.primal.android.core.compose.icons.primaliconpack.Link
 import net.primal.android.core.compose.icons.primaliconpack.LongRead
 import net.primal.android.core.compose.icons.primaliconpack.LongReadFilled
+import net.primal.android.core.compose.icons.primaliconpack.MediaGalleryFilled
+import net.primal.android.core.compose.icons.primaliconpack.MediaVideoFilled
 import net.primal.android.core.compose.icons.primaliconpack.Message
 import net.primal.android.core.compose.icons.primaliconpack.Messages
 import net.primal.android.core.compose.icons.primaliconpack.MessagesFilled
@@ -213,6 +215,8 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             HomeFilled,
             Downloads,
             DownloadsFilled,
+            MediaGalleryFilled,
+            MediaVideoFilled,
             Messages,
             MessagesFilled,
             LongRead,
