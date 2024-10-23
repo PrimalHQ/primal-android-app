@@ -779,7 +779,6 @@ private fun NavGraphBuilder.explore(
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
         onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
         onAdvancedSearchClick = { navController.navigateToAdvancedSearch() },
-        onClose = { navController.navigateUp() },
         noteCallbacks = noteCallbacksHandler(navController),
         onGoToWallet = { navController.navigateToWallet() },
     )
