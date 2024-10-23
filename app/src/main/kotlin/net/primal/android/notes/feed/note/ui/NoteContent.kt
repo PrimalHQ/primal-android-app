@@ -135,6 +135,7 @@ fun NoteContent(
     overflow: TextOverflow = TextOverflow.Clip,
     enableTweetsMode: Boolean = false,
     textSelectable: Boolean = false,
+    referencedEventsHaveBorder: Boolean = false,
     highlightColor: Color = AppTheme.colorScheme.secondary,
     contentColor: Color = AppTheme.colorScheme.onSurface,
     referencedEventsContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
@@ -221,6 +222,7 @@ fun NoteContent(
                 expanded = expanded,
                 containerColor = referencedEventsContainerColor,
                 noteCallbacks = noteCallbacks,
+                hasBorder = referencedEventsHaveBorder,
             )
         }
 
@@ -232,6 +234,7 @@ fun NoteContent(
                 expanded = expanded,
                 containerColor = referencedEventsContainerColor,
                 noteCallbacks = noteCallbacks,
+                hasBorder = referencedEventsHaveBorder,
             )
         }
     }
