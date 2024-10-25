@@ -216,10 +216,7 @@ fun TransactionDetailsScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ArticlePost(
-    data: FeedArticleUi,
-    noteCallbacks: NoteCallbacks,
-) {
+private fun ArticlePost(data: FeedArticleUi, noteCallbacks: NoteCallbacks) {
     Text(
         modifier = Modifier
             .fillMaxWidth()
