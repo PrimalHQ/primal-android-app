@@ -98,10 +98,7 @@ private fun ExploreZaps(
                 contentPadding = paddingValues,
             ) {
                 item { Spacer(modifier = Modifier.height(4.dp)) }
-                items(
-                    items = state.zaps,
-                    key = { "${it.noteContentUi.noteId}:${it.sender?.pubkey}:${it.createdAt.toEpochMilli()}" },
-                ) { item ->
+                items(items = state.zaps) { item ->
                     ZapListItem(
                         zapData = item,
                         noteCallbacks = noteCallbacks,
