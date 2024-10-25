@@ -89,6 +89,13 @@ class ArticleRepository @Inject constructor(
                 .filterNotNull()
         }
 
+    suspend fun observeArticleByEventId(eventId: String, articleAuthorId: String) =
+        withContext(dispatchers.io()) {
+            database.articles().observeArticleByEventId(eventId = eventId, authorId = articleAuthorId)
+                .distinctUntilChanged()
+                .filterNotNull()
+        }
+
     suspend fun observeArticleComments(articleId: String, articleAuthorId: String) =
         withContext(dispatchers.io()) {
             val userId = activeAccountStore.activeUserId()

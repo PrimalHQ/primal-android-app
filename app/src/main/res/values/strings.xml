@@ -698,6 +698,7 @@
     <string name="wallet_transaction_details_sent_to">Sent To</string>
     <string name="wallet_transaction_details_received_from">Received From</string>
     <string name="wallet_transaction_details_zapped_note">Zapped Note</string>
+    <string name="wallet_transaction_details_zapped_article">Zapped Article</string>
     <string name="wallet_transaction_details_date_item">Date</string>
     <string name="wallet_transaction_details_status_item">Status</string>
     <string name="wallet_transaction_details_type_item">Transaction Type</string>
