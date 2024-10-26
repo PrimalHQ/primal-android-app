@@ -1,6 +1,1 @@
-Reordering feeds.
-Caching service override feature.
-Publishing events through caching service proxy.
-Progress while uploading.
-Take photo on note editor and thread screen.
 Stability fixes.

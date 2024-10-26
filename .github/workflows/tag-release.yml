@@ -51,7 +51,7 @@ jobs:
           primal-${{ github.ref_name }}-crash-reporter-mapping.zip
 
     - name: Publish AAB to Google Play
-      run: ./gradlew publishGooglePlayReleaseBundle --track "internal" --release-name "${{ github.ref_name }}"
+      run: ./gradlew publishGooglePlayReleaseBundle --track "alpha" --release-name "${{ github.ref_name }}"
 
   release:
    name: Create GitHub release
