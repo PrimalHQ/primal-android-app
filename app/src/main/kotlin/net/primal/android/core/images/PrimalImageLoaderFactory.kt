@@ -14,10 +14,11 @@ import javax.inject.Singleton
 
 @Singleton
 class PrimalImageLoaderFactory @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @ApplicationContext context: Context,
 ) : ImageLoaderFactory {
 
     private val defaultBuilder by lazy { ImageLoader.Builder(context) }
+    private val imageCacheDir by lazy { context.cacheDir.resolve("image_cache") }
 
     override fun newImageLoader(): ImageLoader {
         return defaultBuilder
@@ -34,7 +35,7 @@ class PrimalImageLoaderFactory @Inject constructor(
             }
             .diskCache {
                 DiskCache.Builder()
-                    .directory(context.cacheDir.resolve("image_cache"))
+                    .directory(imageCacheDir)
                     .maxSizePercent(0.02)
                     .build()
             }
