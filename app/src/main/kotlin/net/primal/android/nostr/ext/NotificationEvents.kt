@@ -69,6 +69,7 @@ fun ContentPrimalNotification.asNotificationPOOrNull(): NotificationData? {
     val actionOnPostId = parseActionPostId(type = type)
 
     return NotificationData(
+        notificationId = this.id,
         ownerId = this.pubkey,
         createdAt = this.createdAt,
         type = type,
