@@ -567,6 +567,7 @@ private class NotificationsParameterProvider : PreviewParameterProvider<List<Not
         get() = sequenceOf(
             listOf(
                 NotificationUi(
+                    notificationId = "",
                     ownerId = "",
                     notificationType = NotificationType.NEW_USER_FOLLOWED_YOU,
                     createdAt = Instant.now(),
@@ -577,6 +578,7 @@ private class NotificationsParameterProvider : PreviewParameterProvider<List<Not
             ),
             listOf(
                 NotificationUi(
+                    notificationId = "",
                     ownerId = "",
                     notificationType = NotificationType.NEW_USER_FOLLOWED_YOU,
                     createdAt = Instant.now(),
@@ -585,6 +587,7 @@ private class NotificationsParameterProvider : PreviewParameterProvider<List<Not
                     actionUserId = "",
                 ),
                 NotificationUi(
+                    notificationId = "",
                     ownerId = "",
                     notificationType = NotificationType.NEW_USER_FOLLOWED_YOU,
                     createdAt = Instant.now(),
@@ -595,6 +598,7 @@ private class NotificationsParameterProvider : PreviewParameterProvider<List<Not
             ),
             listOf(
                 NotificationUi(
+                    notificationId = "",
                     ownerId = "",
                     notificationType = NotificationType.YOUR_POST_WAS_ZAPPED,
                     createdAt = Instant.now(),
@@ -607,6 +611,7 @@ private class NotificationsParameterProvider : PreviewParameterProvider<List<Not
             ),
             listOf(
                 NotificationUi(
+                    notificationId = "",
                     ownerId = "",
                     notificationType = NotificationType.YOUR_POST_WAS_ZAPPED,
                     createdAt = Instant.now(),
@@ -617,6 +622,7 @@ private class NotificationsParameterProvider : PreviewParameterProvider<List<Not
                     actionUserSatsZapped = 2121,
                 ),
                 NotificationUi(
+                    notificationId = "",
                     ownerId = "",
                     notificationType = NotificationType.YOUR_POST_WAS_ZAPPED,
                     createdAt = Instant.now(),
@@ -629,6 +635,7 @@ private class NotificationsParameterProvider : PreviewParameterProvider<List<Not
             ),
             listOf(
                 NotificationUi(
+                    notificationId = "",
                     ownerId = "",
                     notificationType = NotificationType.YOUR_POST_WAS_LIKED,
                     createdAt = Instant.now(),
@@ -641,6 +648,7 @@ private class NotificationsParameterProvider : PreviewParameterProvider<List<Not
             ),
             listOf(
                 NotificationUi(
+                    notificationId = "",
                     ownerId = "",
                     notificationType = NotificationType.YOUR_POST_WAS_REPOSTED,
                     createdAt = Instant.now(),
@@ -653,6 +661,7 @@ private class NotificationsParameterProvider : PreviewParameterProvider<List<Not
             ),
             listOf(
                 NotificationUi(
+                    notificationId = "",
                     ownerId = "",
                     notificationType = NotificationType.YOUR_POST_WAS_REPLIED_TO,
                     createdAt = Instant.now(),
@@ -665,6 +674,7 @@ private class NotificationsParameterProvider : PreviewParameterProvider<List<Not
             ),
             listOf(
                 NotificationUi(
+                    notificationId = "",
                     ownerId = "",
                     notificationType = NotificationType.YOU_WERE_MENTIONED_IN_POST,
                     createdAt = Instant.now(),
@@ -677,6 +687,7 @@ private class NotificationsParameterProvider : PreviewParameterProvider<List<Not
             ),
             listOf(
                 NotificationUi(
+                    notificationId = "",
                     ownerId = "",
                     notificationType = NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST,
                     createdAt = Instant.now(),

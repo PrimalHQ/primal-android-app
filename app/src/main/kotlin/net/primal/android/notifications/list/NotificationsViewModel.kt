@@ -142,6 +142,7 @@ class NotificationsViewModel @Inject constructor(
                                         }
                                     }
                                 }
+
                                 false -> notificationsByType.forEach {
                                     unseenNotifications.add(listOf(it))
                                 }
@@ -247,6 +248,7 @@ class NotificationsViewModel @Inject constructor(
 
     private fun Notification.asNotificationUi(): NotificationUi {
         return NotificationUi(
+            notificationId = this.data.notificationId,
             ownerId = this.data.ownerId,
             notificationType = this.data.type,
             createdAt = Instant.ofEpochSecond(this.data.createdAt),
