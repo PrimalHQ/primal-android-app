@@ -105,9 +105,9 @@ class ExplorePeopleViewModel @Inject constructor(
                         is WssException, is NostrPublishException, is ProfileRepository.FollowListNotFound ->
                             setState { copy(error = UiError.FailedToFollowUser(error)) }
 
-                        is ProfileRepository.PossibleFollowListCorruption -> setState { copy(shouldApproveFollow = true) }is MissingRelaysException -> setState {
-                            copy(
-                                error = UiError.MissingRelaysConfiguration(error),
+                        is ProfileRepository.PossibleFollowListCorruption -> setState { copy(shouldApproveFollow = true) }is ProfileRepository.PossibleFollowListCorruption -> setState { copy(shouldApproveFollow = true) }
+
+                    is MissingRelaysException -> setState { copy(error = UiError.MissingRelaysConfiguration(error),
                             )
                         }
 
@@ -137,9 +137,9 @@ class ExplorePeopleViewModel @Inject constructor(
                         is WssException, is NostrPublishException, is ProfileRepository.FollowListNotFound ->
                             setState { copy(error = UiError.FailedToUnfollowUser(error)) }
 
-                        is ProfileRepository.PossibleFollowListCorruption -> setState { copy(shouldApproveUnfollow = true) }is MissingRelaysException -> setState {
-                            copy(
-                                error = UiError.MissingRelaysConfiguration(error),
+                        is ProfileRepository.PossibleFollowListCorruption -> setState { copy(shouldApproveUnfollow = true) }is ProfileRepository.PossibleFollowListCorruption -> setState { copy(shouldApproveUnfollow = true) }
+
+                    is MissingRelaysException -> setState { copy(error = UiError.MissingRelaysConfiguration(error),
                             )
                         }
 

@@ -26,6 +26,8 @@ interface ProfileDetailsContract {
             ProfileFeedSpec.AuthoredMedia,
         ),
         val error: ProfileError? = null,
+        val shouldApproveFollow: Boolean = false,
+        val shouldApproveUnfollow: Boolean = false,
         val zapError: UiError? = null,
         val zappingState: ZappingState = ZappingState(),
         val shouldApproveFollow: Boolean = false,
@@ -78,5 +80,6 @@ interface ProfileDetailsContract {
         data object DismissError : UiEvent()
         data object DismissConfirmFollowUnfollowAlertDialog : UiEvent()
         data object DismissZapError : UiEvent()
+        data object DismissConfirmFollowUnfollowAlertDialog : UiEvent()
     }
 }
