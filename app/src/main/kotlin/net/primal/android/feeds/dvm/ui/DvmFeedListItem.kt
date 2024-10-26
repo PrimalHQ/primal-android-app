@@ -321,10 +321,10 @@ private fun CreatedByPrimalRow() {
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                     ),
                 ) {
-                    append("Created by")
+                    append(stringResource(id = R.string.dvm_feed_created_by))
                 }
                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                    append(" Primal")
+                    append(" " + stringResource(id = R.string.app_name))
                 }
             },
             style = AppTheme.typography.bodySmall,
