@@ -178,7 +178,6 @@ class NotificationsViewModel @Inject constructor(
             ),
             hashtags = this.actionPost.hashtags,
             rawNostrEventJson = this.actionPost.raw,
-            replyToAuthorHandle = "alex",
         )
     }
 }
