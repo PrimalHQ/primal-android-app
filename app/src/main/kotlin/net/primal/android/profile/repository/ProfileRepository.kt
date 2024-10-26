@@ -105,34 +105,49 @@ class ProfileRepository @Inject constructor(
             }
         }
 
-    @Throws(FollowListNotFound::class, NostrPublishException::class)
-    suspend fun follow(userId: String, followedUserId: String) {
-        updateFollowList(userId = userId) {
+    @Throws(FollowListNotFound::class, NostrPublishException::class, PossibleFollowListCorruption::class)
+    suspend fun follow(
+        userId: String,
+        followedUserId: String,
+        forceUpdate: Boolean,
+    ) {
+        updateFollowList(userId = userId, forceUpdate = forceUpdate) {
             toMutableSet().apply { add(followedUserId) }
         }
     }
 
-    @Throws(FollowListNotFound::class, NostrPublishException::class)
-    suspend fun unfollow(userId: String, unfollowedUserId: String) {
-        updateFollowList(userId = userId) {
+    @Throws(FollowListNotFound::class, NostrPublishException::class, PossibleFollowListCorruption::class)
+    suspend fun unfollow(
+        userId: String,
+        unfollowedUserId: String,
+        forceUpdate: Boolean,
+    ) {
+        updateFollowList(userId = userId, forceUpdate = forceUpdate) {
             toMutableSet().apply { remove(unfollowedUserId) }
         }
     }
 
-    @Throws(FollowListNotFound::class, NostrPublishException::class)
-    private suspend fun updateFollowList(userId: String, reducer: Set<String>.() -> Set<String>) =
-        withContext(dispatchers.io()) {
-            val userFollowList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
-                ?: throw FollowListNotFound()
+    @Throws(FollowListNotFound::class, NostrPublishException::class, PossibleFollowListCorruption::class)
+    private suspend fun updateFollowList(
+        userId: String,
+        forceUpdate: Boolean,
+        reducer: Set<String>.() -> Set<String>,
+    ) = withContext(dispatchers.io()) {
+        val userFollowList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
+            ?: throw FollowListNotFound()
 
-            userRepository.updateFollowList(userId, userFollowList)
-
-            setFollowList(
-                userId = userId,
-                contacts = userFollowList.following.reducer(),
-                content = userFollowList.followListEventContent ?: "",
-            )
+        if (userFollowList.following.isEmpty() && !forceUpdate) {
+            throw PossibleFollowListCorruption()
         }
+
+        userRepository.updateFollowList(userId, userFollowList)
+
+        setFollowList(
+            userId = userId,
+            contacts = userFollowList.following.reducer(),
+            content = userFollowList.followListEventContent ?: "",
+        )
+    }
 
     @Throws(NostrPublishException::class)
     suspend fun setFollowList(
@@ -222,4 +237,5 @@ class ProfileRepository @Inject constructor(
     }
 
     class FollowListNotFound : Exception()
+    class PossibleFollowListCorruption : Exception()
 }

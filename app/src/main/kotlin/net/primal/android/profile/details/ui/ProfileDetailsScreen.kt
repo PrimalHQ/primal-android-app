@@ -114,6 +114,7 @@ fun ProfileDetailsScreen(
                 ProfileDetailsContract.SideEffect.ProfileFeedAdded -> uiScope.launch {
                     snackbarHostState.showSnackbar(message = addedToUserFeedsMessage)
                 }
+
                 ProfileDetailsContract.SideEffect.ProfileFeedRemoved -> uiScope.launch {
                     snackbarHostState.showSnackbar(message = removedFromUserFeedsMessage)
                 }
@@ -233,6 +234,35 @@ fun ProfileDetailsScreen(
                     }
                 }
         }
+    }
+
+    if (state.shouldApproveFollow) {
+        ConfirmFollowUnfollowProfileAlertDialog(
+            onClose = { eventPublisher(ProfileDetailsContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
+            onActionConfirmed = {
+                eventPublisher(
+                    ProfileDetailsContract.UiEvent.FollowAction(
+                        profileId = state.profileId,
+                        forceUpdate = true,
+                    ),
+                )
+            },
+            profileAction = ProfileAction.Follow,
+        )
+    }
+    if (state.shouldApproveUnfollow) {
+        ConfirmFollowUnfollowProfileAlertDialog(
+            onClose = { eventPublisher(ProfileDetailsContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
+            onActionConfirmed = {
+                eventPublisher(
+                    ProfileDetailsContract.UiEvent.UnfollowAction(
+                        profileId = state.profileId,
+                        forceUpdate = true,
+                    ),
+                )
+            },
+            profileAction = ProfileAction.Unfollow,
+        )
     }
 
     Scaffold(

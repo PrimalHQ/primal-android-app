@@ -74,8 +74,22 @@ fun ProfileDetailsHeader(
                     onUnableToZapProfile()
                 }
             },
-            onFollow = { eventPublisher(ProfileDetailsContract.UiEvent.FollowAction(state.profileId)) },
-            onUnfollow = { eventPublisher(ProfileDetailsContract.UiEvent.UnfollowAction(state.profileId)) },
+            onFollow = {
+                eventPublisher(
+                    ProfileDetailsContract.UiEvent.FollowAction(
+                        profileId = state.profileId,
+                        forceUpdate = false,
+                    ),
+                )
+            },
+            onUnfollow = {
+                eventPublisher(
+                    ProfileDetailsContract.UiEvent.UnfollowAction(
+                        profileId = state.profileId,
+                        forceUpdate = false,
+                    ),
+                )
+            },
             onDrawerQrCodeClick = onDrawerQrCodeClick,
             onFollowsClick = onFollowsClick,
             onProfileClick = onProfileClick,

@@ -72,10 +72,12 @@ class ProfileFollowsViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.FollowProfile -> follow(profileId = it.profileId)
-                    is UiEvent.UnfollowProfile -> unfollow(profileId = it.profileId)
+                    is UiEvent.FollowProfile -> follow(profileId = it.profileId, forceUpdate = it.forceUpdate)
+                    is UiEvent.UnfollowProfile -> unfollow(profileId = it.profileId, forceUpdate = it.forceUpdate)
                     UiEvent.DismissError -> setState { copy(error = null) }
                     UiEvent.ReloadData -> fetchFollows()
+                    UiEvent.DismissConfirmFollowUnfollowAlertDialog ->
+                        setState { copy(shouldApproveFollow = false, shouldApproveUnfollow = false) }
                 }
             }
         }
@@ -124,13 +126,14 @@ class ProfileFollowsViewModel @Inject constructor(
         setState { copy(userFollowing = this.userFollowing.toMutableSet().apply { remove(profileId) }) }
     }
 
-    private fun follow(profileId: String) =
+    private fun follow(profileId: String, forceUpdate: Boolean) =
         viewModelScope.launch {
             updateStateProfileFollow(profileId)
             try {
                 profileRepository.follow(
                     userId = activeAccountStore.activeUserId(),
                     followedUserId = profileId,
+                    forceUpdate = forceUpdate,
                 )
             } catch (error: WssException) {
                 Timber.w(error)
@@ -148,16 +151,21 @@ class ProfileFollowsViewModel @Inject constructor(
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.FailedToFollowUser(error))
                 updateStateProfileUnfollow(profileId)
+            } catch (error: ProfileRepository.PossibleFollowListCorruption) {
+                Timber.w(error)
+                updateStateProfileUnfollow(profileId)
+                setState { copy(shouldApproveFollow = true) }
             }
         }
 
-    private fun unfollow(profileId: String) =
+    private fun unfollow(profileId: String, forceUpdate: Boolean) =
         viewModelScope.launch {
             updateStateProfileUnfollow(profileId)
             try {
                 profileRepository.unfollow(
                     userId = activeAccountStore.activeUserId(),
                     unfollowedUserId = profileId,
+                    forceUpdate = forceUpdate,
                 )
             } catch (error: WssException) {
                 Timber.w(error)
@@ -175,6 +183,10 @@ class ProfileFollowsViewModel @Inject constructor(
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.FailedToUnfollowUser(error))
                 updateStateProfileFollow(profileId)
+            } catch (error: ProfileRepository.PossibleFollowListCorruption) {
+                Timber.w(error)
+                updateStateProfileFollow(profileId)
+                setState { copy(shouldApproveUnfollow = true) }
             }
         }
 

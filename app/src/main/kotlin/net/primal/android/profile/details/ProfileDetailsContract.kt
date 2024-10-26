@@ -24,6 +24,8 @@ interface ProfileDetailsContract {
             ProfileFeedSpec.AuthoredMedia,
         ),
         val error: ProfileError? = null,
+        val shouldApproveFollow: Boolean = false,
+        val shouldApproveUnfollow: Boolean = false,
     ) {
         sealed class ProfileError {
             data class MissingRelaysConfiguration(val cause: Throwable) : ProfileError()
@@ -43,8 +45,14 @@ interface ProfileDetailsContract {
     }
 
     sealed class UiEvent {
-        data class FollowAction(val profileId: String) : UiEvent()
-        data class UnfollowAction(val profileId: String) : UiEvent()
+        data class FollowAction(
+            val profileId: String,
+            val forceUpdate: Boolean,
+        ) : UiEvent()
+        data class UnfollowAction(
+            val profileId: String,
+            val forceUpdate: Boolean,
+        ) : UiEvent()
         data class AddProfileFeedAction(
             val profileId: String,
             val feedTitle: String,
@@ -57,5 +65,6 @@ interface ProfileDetailsContract {
         data object RequestProfileUpdate : UiEvent()
         data class ReportAbuse(val type: ReportType, val profileId: String, val noteId: String? = null) : UiEvent()
         data object DismissError : UiEvent()
+        data object DismissConfirmFollowUnfollowAlertDialog : UiEvent()
     }
 }
