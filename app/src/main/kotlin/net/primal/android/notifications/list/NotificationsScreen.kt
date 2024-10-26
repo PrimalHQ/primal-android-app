@@ -293,7 +293,7 @@ private fun NotificationsList(
     ) {
         items(
             items = state.unseenNotifications,
-            key = { it.map { notificationUi -> notificationUi.uniqueKey }.toString() },
+            key = { it.map { it.notificationId } },
             contentType = { it.first().notificationType },
         ) {
             NotificationListItem(
@@ -328,7 +328,7 @@ private fun NotificationsList(
 
         items(
             count = seenPagingItems.itemCount,
-            key = seenPagingItems.itemKey(key = { it.uniqueKey }),
+            key = seenPagingItems.itemKey(key = { it.notificationId }),
             contentType = seenPagingItems.itemContentType { it.notificationType },
         ) {
             val item = seenPagingItems[it]

@@ -1,12 +1,13 @@
 package net.primal.android.notifications.db
 
 import androidx.room.Entity
+import androidx.room.PrimaryKey
 import net.primal.android.notifications.domain.NotificationType
 
-@Entity(
-    primaryKeys = ["ownerId", "createdAt", "type"],
-)
+@Entity
 data class NotificationData(
+    @PrimaryKey
+    val notificationId: String,
     val ownerId: String,
     val createdAt: Long,
     val type: NotificationType,

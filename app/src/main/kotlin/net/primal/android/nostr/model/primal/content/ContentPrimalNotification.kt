@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ContentPrimalNotification(
+    val id: String,
     val pubkey: String,
     @SerialName("created_at") val createdAt: Long,
     val type: Int,
