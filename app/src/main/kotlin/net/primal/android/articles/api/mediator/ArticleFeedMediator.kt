@@ -15,7 +15,6 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.primal.retryNetworkCall
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.mapNotNullAsArticleDataPO
-import timber.log.Timber
 
 @OptIn(ExperimentalPagingApi::class)
 class ArticleFeedMediator(
@@ -27,9 +26,9 @@ class ArticleFeedMediator(
 ) : RemoteMediator<Int, Article>() {
 
     override suspend fun load(loadType: LoadType, state: PagingState<Int, Article>): MediatorResult {
-        withContext(dispatcherProvider.io()) {
-            val pageSize = state.config.pageSize
-            val response = try {
+        val pageSize = state.config.pageSize
+        return try {
+            val response = withContext(dispatcherProvider.io()) {
                 retryNetworkCall {
                     articlesApi.getArticleFeed(
                         body = ArticleFeedRequestBody(
@@ -39,37 +38,36 @@ class ArticleFeedMediator(
                         ),
                     )
                 }
-            } catch (error: WssException) {
-                Timber.w(error)
-                null
             }
 
-            val connections = response?.articles
-                ?.mapNotNullAsArticleDataPO()
-                ?.map {
-                    ArticleFeedCrossRef(
-                        spec = feedSpec,
-                        articleId = it.articleId,
-                        articleAuthorId = it.authorId,
-                    )
-                }
-
-            database.withTransaction {
-                if (loadType == LoadType.REFRESH) {
-                    database.articleFeedsConnections().deleteConnectionsBySpec(spec = feedSpec)
-                }
-
-                if (!connections.isNullOrEmpty()) {
-                    database.articleFeedsConnections().connect(data = connections)
-                }
-
-                response?.persistToDatabaseAsTransaction(
-                    userId = userId,
-                    database = database,
+            val connections = response.articles.mapNotNullAsArticleDataPO().map {
+                ArticleFeedCrossRef(
+                    spec = feedSpec,
+                    articleId = it.articleId,
+                    articleAuthorId = it.authorId,
                 )
             }
-        }
 
-        return MediatorResult.Success(endOfPaginationReached = true)
+            withContext(dispatcherProvider.io()) {
+                database.withTransaction {
+                    if (loadType == LoadType.REFRESH) {
+                        database.articleFeedsConnections().deleteConnectionsBySpec(spec = feedSpec)
+                    }
+
+                    if (connections.isNotEmpty()) {
+                        database.articleFeedsConnections().connect(data = connections)
+                    }
+
+                    response.persistToDatabaseAsTransaction(
+                        userId = userId,
+                        database = database,
+                    )
+                }
+            }
+
+            MediatorResult.Success(endOfPaginationReached = true)
+        } catch (error: WssException) {
+            MediatorResult.Error(error)
+        }
     }
 }
