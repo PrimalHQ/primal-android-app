@@ -5,7 +5,6 @@ import dagger.assisted.AssistedInject
 import java.time.Instant
 import kotlin.time.Duration
 import net.primal.android.bookmarks.BookmarksRepository
-import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.NostrSignUnauthorized
 import net.primal.android.settings.repository.SettingsRepository

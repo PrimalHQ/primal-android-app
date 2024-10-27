@@ -22,7 +22,6 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import net.primal.android.R
 
-
 @Composable
 fun FeedsErrorColumn(
     modifier: Modifier = Modifier,
@@ -72,5 +71,4 @@ fun FeedsErrorColumn(
             }
         }
     }
-
 }

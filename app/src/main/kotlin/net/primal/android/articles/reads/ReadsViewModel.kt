@@ -74,7 +74,7 @@ class ReadsViewModel @Inject constructor(
                     givenDefaultFeeds = emptyList(),
                     specKind = FeedSpecKind.Reads,
                 )
-            } catch (error : WssException) {
+            } catch (error: WssException) {
                 Timber.w(error)
             } finally {
                 setState { copy(loading = false) }

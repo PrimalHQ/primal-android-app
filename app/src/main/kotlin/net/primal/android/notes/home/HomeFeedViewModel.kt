@@ -73,7 +73,7 @@ class HomeFeedViewModel @Inject constructor(
                     givenDefaultFeeds = emptyList(),
                     specKind = FeedSpecKind.Notes,
                 )
-            } catch (error : WssException) {
+            } catch (error: WssException) {
                 Timber.w(error)
             } finally {
                 setState { copy(loading = false) }
