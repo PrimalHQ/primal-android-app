@@ -20,7 +20,6 @@ class UserDataUpdater @AssistedInject constructor(
     private val userRepository: UserRepository,
     private val walletRepository: WalletRepository,
     private val relayRepository: RelayRepository,
-    private val feedsRepository: FeedsRepository,
     private val bookmarksRepository: BookmarksRepository,
 ) {
 
@@ -42,7 +41,6 @@ class UserDataUpdater @AssistedInject constructor(
     }
 
     private suspend fun updateData() {
-        feedsRepository.fetchAndPersistNoteFeeds(userId = userId)
         settingsRepository.fetchAndPersistAppSettings(userId = userId)
         settingsRepository.ensureZapConfig(userId = userId)
         relayRepository.fetchAndUpdateUserRelays(userId = userId)
@@ -53,6 +51,5 @@ class UserDataUpdater @AssistedInject constructor(
         } catch (error: NostrSignUnauthorized) {
             Timber.w(error)
         }
-        feedsRepository.fetchAndPersistArticleFeeds(userId = userId)
     }
 }

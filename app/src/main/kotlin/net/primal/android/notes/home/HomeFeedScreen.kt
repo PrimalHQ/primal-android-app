@@ -2,6 +2,8 @@ package net.primal.android.notes.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
@@ -48,6 +50,9 @@ import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.FeedsErrorColumn
+import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
+import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -97,6 +102,7 @@ fun HomeFeedScreen(
         noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
         onNewPostClick = onNewPostClick,
+        eventPublisher = viewModel::setEvent,
     )
 }
 
@@ -111,6 +117,7 @@ fun HomeFeedScreen(
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     onNewPostClick: (content: TextFieldValue?) -> Unit,
+    eventPublisher: (UiEvent) -> Unit,
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
@@ -199,6 +206,19 @@ fun HomeFeedScreen(
                         },
                     )
                 }
+            } else if (state.loading) {
+                HeightAdjustableLoadingLazyListPlaceholder(
+                    height = 128.dp,
+                    contentPaddingValues = paddingValues,
+                    itemPadding = PaddingValues(horizontal = 16.dp),
+                )
+            } else {
+                FeedsErrorColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    text = stringResource(id = R.string.feeds_error_loading_user_feeds),
+                    onRefresh = { eventPublisher(UiEvent.RefreshNoteFeeds) },
+                    onRestoreDefaultFeeds = { eventPublisher(UiEvent.RestoreDefaultNoteFeeds) },
+                )
             }
         },
         floatingActionButton = {
