@@ -39,10 +39,6 @@ class NostrSocketClient(
     private val socketListener = object : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
             onSocketConnectionOpened?.invoke(socketUrl)
-            if (incomingCompressionEnabled) {
-                val id = UUID.randomUUID()
-                sendMessage("""["REQ","$id",{"cache":["set_primal_protocol",{"compression":"zlib"}]}]""")
-            }
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
@@ -98,6 +94,10 @@ class NostrSocketClient(
                     request = wssRequest,
                     listener = socketListener,
                 )
+                if (incomingCompressionEnabled) {
+                    val id = UUID.randomUUID()
+                    sendMessage("""["REQ","$id",{"cache":["set_primal_protocol",{"compression":"zlib"}]}]""")
+                }
             }
         }
 
