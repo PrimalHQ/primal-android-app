@@ -1111,7 +1111,7 @@ private fun NavGraphBuilder.profile(
         noteCallbacks = noteCallbacksHandler(navController),
         onEditProfileClick = { navController.navigateToProfileEditor() },
         onMessageClick = { profileId -> navController.navigateToChat(profileId = profileId) },
-        onZapProfileClick = { transaction -> navController.navigateToWalletCreateTransaction(transaction) },
+        onSendWalletTx = { transaction -> navController.navigateToWalletCreateTransaction(transaction) },
         onDrawerQrCodeClick = { profileId -> navController.navigateToProfileQrCodeViewer(profileId) },
         onFollowsClick = { profileId, followsType ->
             navController.navigateToProfileFollows(

@@ -92,7 +92,7 @@ fun ProfileDetailsScreen(
     noteCallbacks: NoteCallbacks,
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
-    onZapProfileClick: (DraftTx) -> Unit,
+    onSendWalletTx: (DraftTx) -> Unit,
     onDrawerQrCodeClick: (String) -> Unit,
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
     onGoToWallet: () -> Unit,
@@ -154,7 +154,7 @@ fun ProfileDetailsScreen(
         noteCallbacks = noteCallbacks,
         onEditProfileClick = onEditProfileClick,
         onMessageClick = onMessageClick,
-        onZapProfileClick = onZapProfileClick,
+        onSendWalletTx = onSendWalletTx,
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         onGoToWallet = onGoToWallet,
         onFollowsClick = onFollowsClick,
@@ -181,7 +181,7 @@ fun ProfileDetailsScreen(
     noteCallbacks: NoteCallbacks,
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
-    onZapProfileClick: (DraftTx) -> Unit,
+    onSendWalletTx: (DraftTx) -> Unit,
     onDrawerQrCodeClick: (String) -> Unit,
     onGoToWallet: () -> Unit,
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
@@ -363,10 +363,14 @@ fun ProfileDetailsScreen(
                             onEditProfileClick = onEditProfileClick,
                             onMessageClick = onMessageClick,
                             onZapProfileClick = {
-                                when (state.zappingState.walletPreference) {
-                                    WalletPreference.NostrWalletConnect -> showZapOptions = true
-                                    WalletPreference.PrimalWallet -> onZapProfileClick(it)
-                                    WalletPreference.Undefined -> showCantZapWarning = true
+                                if (state.zappingState.walletConnected) {
+                                    if (state.zappingState.walletPreference == WalletPreference.NostrWalletConnect) {
+                                        showZapOptions = true
+                                    } else {
+                                        onSendWalletTx(it)
+                                    }
+                                } else {
+                                    showCantZapWarning = true
                                 }
                             },
                             onDrawerQrCodeClick = { onDrawerQrCodeClick(state.profileId) },
@@ -584,7 +588,7 @@ private fun PreviewProfileScreen() {
             noteCallbacks = NoteCallbacks(),
             onEditProfileClick = {},
             onMessageClick = {},
-            onZapProfileClick = {},
+            onSendWalletTx = {},
             onDrawerQrCodeClick = {},
             onFollowsClick = { _, _ -> },
             onGoToWallet = {},
