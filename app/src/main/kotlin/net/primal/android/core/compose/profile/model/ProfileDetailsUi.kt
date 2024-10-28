@@ -18,6 +18,7 @@ data class ProfileDetailsUi(
     val aboutUris: List<String> = emptyList(),
     val website: String? = null,
     val primalName: String? = null,
+    val lnUrlDecoded: String? = null,
 )
 
 fun ProfileData.asProfileDetailsUi() =
@@ -34,4 +35,5 @@ fun ProfileData.asProfileDetailsUi() =
         aboutUris = this.aboutUris,
         website = this.website,
         primalName = this.primalName,
+        lnUrlDecoded = this.lnUrlDecoded,
     )

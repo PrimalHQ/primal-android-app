@@ -271,6 +271,8 @@
     <string name="explore_feed_user_notes_feed_description">Latest notes by user follows</string>
     <string name="explore_feed_user_reads_feed_description">Latest articles by user follows</string>
 
+    <string name="dvm_feed_created_by">Created by</string>
+
     <string name="bookmarks_title_notes">Note Bookmarks</string>
     <string name="bookmarks_title_reads">Reads Bookmarks</string>
     <string name="bookmarks_bottom_sheet_notes">Note Bookmarks</string>
@@ -537,6 +539,9 @@
     <string name="profile_follow">Follow</string>
     <string name="profile_unfollow">Unfollow</string>
 
+    <string name="profile_zap_bottom_sheet_fallback_title">Profile</string>
+    <string name="profile_zap_sent_message">Zap sent successfully.</string>
+
     <string name="profile_qr_code_profile_tab">Profile</string>
     <string name="profile_qr_code_lightning_tab">Lightning Address</string>
     <string name="profile_qr_code_scan_qr_code">Scan QR Code</string>
@@ -700,6 +705,7 @@
     <string name="wallet_transaction_details_sent_to">Sent To</string>
     <string name="wallet_transaction_details_received_from">Received From</string>
     <string name="wallet_transaction_details_zapped_note">Zapped Note</string>
+    <string name="wallet_transaction_details_zapped_article">Zapped Article</string>
     <string name="wallet_transaction_details_date_item">Date</string>
     <string name="wallet_transaction_details_status_item">Status</string>
     <string name="wallet_transaction_details_type_item">Transaction Type</string>

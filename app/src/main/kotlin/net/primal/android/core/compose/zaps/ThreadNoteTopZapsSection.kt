@@ -77,6 +77,25 @@ private fun TwoLineTopZapsSection(
                 modifier = Modifier.fillMaxWidth(),
                 zaps = otherZaps,
                 onClick = onClick,
+                overflow = ContextualFlowRowOverflow.expandIndicator(
+                    content = {
+                        Icon(
+                            modifier = Modifier
+                                .background(
+                                    color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                                    shape = CircleShape,
+                                )
+                                .size(26.dp)
+                                .padding(horizontal = 4.dp)
+                                .clickable(
+                                    enabled = onClick != null,
+                                    onClick = { onClick?.invoke() },
+                                ),
+                            imageVector = PrimalIcons.More,
+                            contentDescription = null,
+                        )
+                    },
+                ),
             )
         }
 
@@ -89,6 +108,7 @@ private fun TwoLineTopZapsSection(
 private fun ContextualZapsFlowRow(
     modifier: Modifier,
     zaps: List<EventZapUiModel>,
+    overflow: ContextualFlowRowOverflow = ContextualFlowRowOverflow.Clip,
     onClick: (() -> Unit)? = null,
 ) {
     ContextualFlowRow(
@@ -96,25 +116,7 @@ private fun ContextualZapsFlowRow(
         itemCount = zaps.size,
         verticalArrangement = Arrangement.Center,
         maxLines = 1,
-        overflow = ContextualFlowRowOverflow.expandIndicator(
-            content = {
-                Icon(
-                    modifier = Modifier
-                        .background(
-                            color = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                            shape = CircleShape,
-                        )
-                        .size(26.dp)
-                        .padding(horizontal = 4.dp)
-                        .clickable(
-                            enabled = onClick != null,
-                            onClick = { onClick?.invoke() },
-                        ),
-                    imageVector = PrimalIcons.More,
-                    contentDescription = null,
-                )
-            },
-        ),
+        overflow = overflow,
     ) {
         val zap = zaps[it]
         key(zap.id) {
@@ -153,6 +155,7 @@ private fun SingleLineTopZapsSection(
                 modifier = Modifier.fillMaxWidth(),
                 zaps = otherZaps,
                 onClick = onClick,
+                overflow = ContextualFlowRowOverflow.Clip,
             )
         }
     }

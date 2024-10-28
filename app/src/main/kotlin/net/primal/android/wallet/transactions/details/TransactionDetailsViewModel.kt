@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.primal.android.articles.ArticleRepository
+import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.navigation.transactionIdOrThrow
@@ -31,6 +33,7 @@ class TransactionDetailsViewModel @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val walletRepository: WalletRepository,
     private val feedRepository: FeedRepository,
+    private val articleRepository: ArticleRepository,
 ) : ViewModel() {
 
     private val transactionId = savedStateHandle.transactionIdOrThrow
@@ -53,6 +56,32 @@ class TransactionDetailsViewModel @Inject constructor(
             tx?.data?.zapNoteId?.let {
                 observeZappedNote(it)
                 fetchZappedNote(it)
+                observeZappedArticle(articleId = it, articleAuthorId = tx.data.zapNoteAuthorId)
+                fetchZappedArticle(articleId = it, articleAuthorId = tx.data.zapNoteAuthorId)
+            }
+        }
+
+    private fun observeZappedArticle(articleId: String, articleAuthorId: String?) =
+        viewModelScope.launch {
+            articleAuthorId?.let {
+                articleRepository.observeArticleByEventId(eventId = articleId, articleAuthorId = articleAuthorId)
+                    .collect {
+                        setState { copy(articlePost = it.mapAsFeedArticleUi()) }
+                    }
+            }
+        }
+
+    private fun fetchZappedArticle(articleId: String, articleAuthorId: String?) =
+        viewModelScope.launch {
+            setState { copy(loading = true) }
+            try {
+                articleAuthorId?.let {
+                    articleRepository.fetchArticleAndComments(articleId = articleId, articleAuthorId = articleAuthorId)
+                }
+            } catch (error: WssException) {
+                Timber.w(error)
+            } finally {
+                setState { copy(loading = false) }
             }
         }
 
