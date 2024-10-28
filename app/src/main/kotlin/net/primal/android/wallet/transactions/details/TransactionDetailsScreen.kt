@@ -80,6 +80,8 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.launch
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
+import net.primal.android.articles.feed.ui.FeedArticleUi
+import net.primal.android.articles.feed.ui.generateNaddrString
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -93,9 +95,12 @@ import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.core.utils.formatToDefaultDateTimeFormat
+import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.notes.feed.note.ui.FeedNoteHeader
+import net.primal.android.notes.feed.note.ui.ReferencedArticleCard
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
+import net.primal.android.notes.feed.note.ui.referencedArticleCardColors
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
 import net.primal.android.wallet.domain.TxState
@@ -192,36 +197,84 @@ fun TransactionDetailsScreen(
                 Spacer(modifier = Modifier.height(32.dp))
 
                 state.feedPost?.let {
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 8.dp),
-                        text = stringResource(id = R.string.wallet_transaction_details_zapped_note).uppercase(),
-                        textAlign = TextAlign.Start,
-                        style = AppTheme.typography.bodyMedium,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                    )
-
-                    FeedNoteCard(
+                    NotePost(
                         data = it,
-                        modifier = Modifier.padding(horizontal = 12.dp),
-                        colors = transactionCardColors(),
                         noteCallbacks = noteCallbacks,
-                        onUiError = { uiError ->
-                            uiScope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = uiError.resolveUiErrorMessage(context),
-                                    duration = SnackbarDuration.Short,
-                                )
-                            }
-                        },
+                        snackbarHostState = snackbarHostState,
                     )
-
-                    Spacer(modifier = Modifier.height(32.dp))
+                }
+                state.articlePost?.let {
+                    ArticlePost(
+                        data = it,
+                        noteCallbacks = noteCallbacks,
+                    )
                 }
             }
         },
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ArticlePost(data: FeedArticleUi, noteCallbacks: NoteCallbacks) {
+    Text(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 8.dp),
+        text = stringResource(id = R.string.wallet_transaction_details_zapped_article).uppercase(),
+        textAlign = TextAlign.Start,
+        style = AppTheme.typography.bodyMedium,
+        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+    )
+
+    ReferencedArticleCard(
+        modifier = Modifier.padding(horizontal = 12.dp),
+        data = data,
+        onClick = {
+            noteCallbacks.onArticleClick?.invoke(data.generateNaddrString())
+        },
+        colors = referencedArticleCardColors().copy(
+            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+        ),
+    )
+
+    Spacer(modifier = Modifier.height(32.dp))
+}
+
+@Composable
+private fun NotePost(
+    data: FeedPostUi,
+    noteCallbacks: NoteCallbacks,
+    snackbarHostState: SnackbarHostState,
+) {
+    val uiScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    Text(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 8.dp),
+        text = stringResource(id = R.string.wallet_transaction_details_zapped_note).uppercase(),
+        textAlign = TextAlign.Start,
+        style = AppTheme.typography.bodyMedium,
+        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+    )
+
+    FeedNoteCard(
+        data = data,
+        modifier = Modifier.padding(horizontal = 12.dp),
+        colors = transactionCardColors(),
+        noteCallbacks = noteCallbacks,
+        onUiError = { uiError ->
+            uiScope.launch {
+                snackbarHostState.showSnackbar(
+                    message = uiError.resolveUiErrorMessage(context),
+                    duration = SnackbarDuration.Short,
+                )
+            }
+        },
+    )
+
+    Spacer(modifier = Modifier.height(32.dp))
 }
 
 @Composable
@@ -265,6 +318,7 @@ private fun TransactionDetailDataUi?.resolveTitle(): String {
                 TxState.CREATED, TxState.PROCESSING -> stringResource(
                     id = R.string.wallet_transaction_details_title_payment_pending,
                 )
+
                 else -> stringResource(id = R.string.wallet_transaction_details_title_payment_received)
             }
         }
@@ -276,6 +330,7 @@ private fun TransactionDetailDataUi?.resolveTitle(): String {
                 TxState.CREATED, TxState.PROCESSING -> stringResource(
                     id = R.string.wallet_transaction_details_title_payment_pending,
                 )
+
                 else -> stringResource(id = R.string.wallet_transaction_details_title_payment_received)
             }
         }

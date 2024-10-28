@@ -47,7 +47,7 @@ fun ReferencedArticleCard(
 }
 
 @Composable
-private fun referencedArticleCardColors() =
+fun referencedArticleCardColors() =
     CardDefaults.cardColors(
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
     )
