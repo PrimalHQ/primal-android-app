@@ -197,6 +197,9 @@
     <string name="feed_no_content">There is no content in this feed.</string>
     <string name="feed_error_loading">Unable to load content for this feed. Please try again.</string>
     <string name="feed_refresh_button">Refresh</string>
+    <string name="feed_restore_default_feeds_button">Restore default feeds</string>
+    <string name="feeds_error_loading_user_feeds">Unable to load feeds. Please try again.</string>
+    <string name="feeds_or">or</string>
 
     <string name="feed_new_posts_notice_general">posted</string>
     <string name="feed_new_posts_notice_100plus">100+ new notes</string>
