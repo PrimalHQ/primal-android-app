@@ -26,6 +26,7 @@ class PrimalDrawerViewModel @Inject constructor(
         PrimalDrawerContract.UiState(
             menuItems = listOf(
                 DrawerScreenDestination.Profile,
+                DrawerScreenDestination.Premium,
                 DrawerScreenDestination.Messages,
                 DrawerScreenDestination.Bookmarks(userId = activeAccountStore.activeUserId()),
                 DrawerScreenDestination.Settings,
