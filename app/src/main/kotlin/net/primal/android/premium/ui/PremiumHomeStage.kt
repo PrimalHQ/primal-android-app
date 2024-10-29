@@ -60,6 +60,7 @@ fun PremiumHomeStage(onClose: () -> Unit, onFindPrimalName: () -> Unit) {
             text = stringResource(id = R.string.premium_subscribe_to_get),
             color = AppTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold,
+            style = AppTheme.typography.bodyLarge,
         )
         PremiumOfferCard(
             modifier = Modifier.padding(bottom = 16.dp),
@@ -194,6 +195,7 @@ private fun LearnMoreSection(onLearnMoreClick: () -> Unit) {
                 .clickable { onLearnMoreClick() },
             text = stringResource(id = R.string.premium_learn_more),
             color = AppTheme.colorScheme.secondary,
+            style = AppTheme.typography.bodyLarge,
         )
     }
 }
@@ -218,7 +220,8 @@ private fun PriceRow() {
             Text(
                 text = stringResource(id = R.string.premium_price_or),
                 color = AppTheme.extraColorScheme.surfaceVariantAlt2,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                style = AppTheme.typography.bodyLarge,
             )
         }
         PricePeriodColumn(
