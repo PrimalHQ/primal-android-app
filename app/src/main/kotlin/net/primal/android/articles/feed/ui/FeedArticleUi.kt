@@ -5,6 +5,9 @@ import net.primal.android.articles.db.Article
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
+import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.utils.Naddr
+import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.stats.ui.EventZapUiModel
 import net.primal.android.stats.ui.asEventZapUiModel
@@ -48,3 +51,10 @@ fun Article.mapAsFeedArticleUi(): FeedArticleUi {
 }
 
 fun Int?.wordsCountToReadingTime() = ((this ?: 1) / 200) + 1
+
+fun FeedArticleUi.generateNaddrString(): String =
+    Naddr(
+        identifier = this.articleId,
+        userId = this.authorId,
+        kind = NostrEventKind.LongFormContent.value,
+    ).toNaddrString()

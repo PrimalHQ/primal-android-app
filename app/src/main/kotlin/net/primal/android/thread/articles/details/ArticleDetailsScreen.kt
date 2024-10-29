@@ -351,7 +351,7 @@ private fun ArticleDetailsScreen(
                             )
                         }
                     },
-                    onZapLongClick = { invokeZapOptionsOrShowWarning() },
+                    onZapClick = { invokeZapOptionsOrShowWarning() },
                 )
             }
         },

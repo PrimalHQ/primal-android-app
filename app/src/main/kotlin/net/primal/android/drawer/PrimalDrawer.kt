@@ -304,6 +304,7 @@ private fun DrawerFooter(onThemeSwitch: () -> Unit) {
 
 sealed class DrawerScreenDestination {
     data object Profile : DrawerScreenDestination()
+    data object Premium : DrawerScreenDestination()
     data object Messages : DrawerScreenDestination()
     data class Bookmarks(val userId: String) : DrawerScreenDestination()
     data object Settings : DrawerScreenDestination()
@@ -314,6 +315,7 @@ sealed class DrawerScreenDestination {
 private fun DrawerScreenDestination.label(): String {
     return when (this) {
         DrawerScreenDestination.Profile -> stringResource(R.string.drawer_destination_profile)
+        DrawerScreenDestination.Premium -> stringResource(id = R.string.drawer_destination_premium)
         DrawerScreenDestination.Messages -> stringResource(R.string.drawer_destination_messages)
         is DrawerScreenDestination.Bookmarks -> stringResource(R.string.drawer_destination_bookmarks)
         DrawerScreenDestination.Settings -> stringResource(R.string.drawer_destination_settings)

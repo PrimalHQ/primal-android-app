@@ -9,5 +9,11 @@ interface ReadsScreenContract {
         val feeds: List<FeedUi> = emptyList(),
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val badges: Badges = Badges(),
+        val loading: Boolean = false,
     )
+
+    sealed class UiEvent {
+        data object RestoreDefaultFeeds : UiEvent()
+        data object RefreshReadsFeeds : UiEvent()
+    }
 }

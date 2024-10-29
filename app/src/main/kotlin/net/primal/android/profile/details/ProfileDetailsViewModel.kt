@@ -19,6 +19,7 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileStatsUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.core.errors.UiError
 import net.primal.android.feeds.domain.FEED_KIND_USER
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.domain.buildLatestNotesUserFeedSpec
@@ -34,6 +35,11 @@ import net.primal.android.profile.details.ProfileDetailsContract.UiState.Profile
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.wallet.domain.ZapTarget
+import net.primal.android.wallet.zaps.InvalidZapRequestException
+import net.primal.android.wallet.zaps.ZapFailureException
+import net.primal.android.wallet.zaps.ZapHandler
+import net.primal.android.wallet.zaps.hasWallet
 import timber.log.Timber
 
 @HiltViewModel
@@ -44,6 +50,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private val feedsRepository: FeedsRepository,
     private val profileRepository: ProfileRepository,
     private val mutedUserRepository: MutedUserRepository,
+    private val zapHandler: ZapHandler,
 ) : ViewModel() {
 
     private val profileId: String = savedStateHandle.profileId ?: activeAccountStore.activeUserId()
@@ -105,11 +112,52 @@ class ProfileDetailsViewModel @Inject constructor(
 
                     is UiEvent.ReportAbuse -> reportAbuse(it)
                     UiEvent.DismissError -> setState { copy(error = null) }
+                    is UiEvent.ZapProfile -> zapProfile(
+                        profileId = it.profileId,
+                        profileLnUrlDecoded = it.profileLnUrlDecoded,
+                        zapAmount = it.zapAmount,
+                        zapDescription = it.zapDescription,
+                    )
+                    UiEvent.DismissZapError -> setState { copy(zapError = null) }
                     UiEvent.DismissConfirmFollowUnfollowAlertDialog ->
                         setState { copy(shouldApproveFollow = false, shouldApproveUnfollow = false) }
                 }
             }
         }
+
+    private fun zapProfile(
+        profileId: String,
+        profileLnUrlDecoded: String?,
+        zapAmount: ULong?,
+        zapDescription: String?,
+    ) = viewModelScope.launch {
+        if (profileLnUrlDecoded == null) {
+            setState { copy(zapError = UiError.MissingLightningAddress(RuntimeException())) }
+            return@launch
+        }
+
+        try {
+            zapHandler.zap(
+                userId = activeAccountStore.activeUserId(),
+                target = ZapTarget.Profile(
+                    profileId = profileId,
+                    profileLnUrlDecoded = profileLnUrlDecoded,
+                ),
+                amountInSats = zapAmount,
+                comment = zapDescription,
+            )
+            setEffect(ProfileDetailsContract.SideEffect.ProfileZapSent)
+        } catch (error: ZapFailureException) {
+            setState { copy(zapError = UiError.FailedToPublishZapEvent(error)) }
+            Timber.w(error)
+        } catch (error: MissingRelaysException) {
+            setState { copy(zapError = UiError.MissingRelaysConfiguration(error)) }
+            Timber.w(error)
+        } catch (error: InvalidZapRequestException) {
+            setState { copy(zapError = UiError.InvalidZapRequest(error)) }
+            Timber.w(error)
+        }
+    }
 
     private fun requestProfileUpdate() =
         viewModelScope.launch {
@@ -138,6 +186,13 @@ class ProfileDetailsViewModel @Inject constructor(
                 setState {
                     copy(
                         isProfileFollowed = it.following.contains(profileId),
+                        zappingState = this.zappingState.copy(
+                            walletConnected = it.hasWallet(),
+                            walletPreference = it.walletPreference,
+                            zapDefault = it.appSettings?.zapDefault ?: this.zappingState.zapDefault,
+                            zapsConfig = it.appSettings?.zapsConfig ?: this.zappingState.zapsConfig,
+                            walletBalanceInBtc = it.primalWalletState.balanceInBtc,
+                        ),
                     )
                 }
             }

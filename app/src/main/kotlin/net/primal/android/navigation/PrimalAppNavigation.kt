@@ -80,6 +80,8 @@ import net.primal.android.notes.home.HomeFeedScreen
 import net.primal.android.notes.home.HomeFeedViewModel
 import net.primal.android.notifications.list.NotificationsScreen
 import net.primal.android.notifications.list.NotificationsViewModel
+import net.primal.android.premium.PremiumHomeScreen
+import net.primal.android.premium.PremiumHomeViewModel
 import net.primal.android.profile.details.ProfileDetailsViewModel
 import net.primal.android.profile.details.ui.ProfileDetailsScreen
 import net.primal.android.profile.domain.ProfileFollowsType
@@ -226,6 +228,8 @@ fun NavController.navigateToExploreFeed(
 
 private fun NavController.navigateToBookmarks() = navigate(route = "bookmarks")
 
+private fun NavController.navigateToPremium() = navigate(route = "premium")
+
 fun noteCallbacksHandler(navController: NavController) =
     NoteCallbacks(
         onNoteClick = { postId -> navController.navigateToThread(noteId = postId) },
@@ -275,6 +279,7 @@ fun PrimalAppNavigation() {
     val drawerDestinationHandler: (DrawerScreenDestination) -> Unit = {
         when (it) {
             DrawerScreenDestination.Profile -> navController.navigateToProfile()
+            DrawerScreenDestination.Premium -> navController.navigateToPremium()
             DrawerScreenDestination.Messages -> navController.navigateToMessages()
             is DrawerScreenDestination.Bookmarks -> navController.navigateToBookmarks()
             DrawerScreenDestination.Settings -> navController.navigateToSettings()
@@ -392,6 +397,11 @@ fun PrimalAppNavigation() {
                     nullable = true
                 },
             ),
+        )
+
+        premium(
+            route = "premium",
+            navController = navController,
         )
 
         messages(
@@ -871,6 +881,25 @@ private fun NavGraphBuilder.advancedSearch(
     )
 }
 
+private fun NavGraphBuilder.premium(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        val viewModel = hiltViewModel<PremiumHomeViewModel>()
+
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+
+        PremiumHomeScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+        )
+    }
+
 private fun NavGraphBuilder.messages(route: String, navController: NavController) =
     composable(
         route = route,
@@ -1111,7 +1140,7 @@ private fun NavGraphBuilder.profile(
         noteCallbacks = noteCallbacksHandler(navController),
         onEditProfileClick = { navController.navigateToProfileEditor() },
         onMessageClick = { profileId -> navController.navigateToChat(profileId = profileId) },
-        onZapProfileClick = { transaction -> navController.navigateToWalletCreateTransaction(transaction) },
+        onSendWalletTx = { transaction -> navController.navigateToWalletCreateTransaction(transaction) },
         onDrawerQrCodeClick = { profileId -> navController.navigateToProfileQrCodeViewer(profileId) },
         onFollowsClick = { profileId, followsType ->
             navController.navigateToProfileFollows(

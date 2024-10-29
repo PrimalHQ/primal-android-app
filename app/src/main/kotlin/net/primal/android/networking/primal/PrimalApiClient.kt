@@ -228,6 +228,6 @@ class PrimalApiClient(
 
     companion object {
         const val MAX_RETRIES = 3
-        private const val RETRY_DELAY_MILLIS = 1_000L
+        private const val RETRY_DELAY_MILLIS = 500L
     }
 }

@@ -41,4 +41,14 @@ interface ArticleDao {
         """,
     )
     fun observeArticle(articleId: String, authorId: String): Flow<Article>
+
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM ArticleData
+        WHERE eventId = :eventId AND authorId = :authorId
+        ORDER BY publishedAt DESC LIMIT 1
+        """,
+    )
+    fun observeArticleByEventId(eventId: String, authorId: String): Flow<Article>
 }

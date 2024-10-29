@@ -108,6 +108,7 @@ class NotificationsViewModel @Inject constructor(
                                         }
                                     }
                                 }
+
                                 false -> notificationsByType.forEach {
                                     unseenNotifications.add(listOf(it))
                                 }
@@ -117,7 +118,7 @@ class NotificationsViewModel @Inject constructor(
 
                     copy(
                         unseenNotifications = unseenNotifications.map { byType ->
-                            byType.map { it.asNotificationUi() }.distinctBy { it.uniqueKey }
+                            byType.map { it.asNotificationUi() }
                         },
                     )
                 }
@@ -141,6 +142,7 @@ class NotificationsViewModel @Inject constructor(
 
     private fun Notification.asNotificationUi(): NotificationUi {
         return NotificationUi(
+            notificationId = this.data.notificationId,
             ownerId = this.data.ownerId,
             notificationType = this.data.type,
             createdAt = Instant.ofEpochSecond(this.data.createdAt),
@@ -176,7 +178,6 @@ class NotificationsViewModel @Inject constructor(
             ),
             hashtags = this.actionPost.hashtags,
             rawNostrEventJson = this.actionPost.raw,
-            replyToAuthorHandle = "alex",
         )
     }
 }

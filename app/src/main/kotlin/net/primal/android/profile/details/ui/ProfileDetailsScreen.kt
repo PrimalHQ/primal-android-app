@@ -33,11 +33,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,13 +71,17 @@ import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.notes.feed.grid.MediaFeedGrid
 import net.primal.android.notes.feed.list.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
+import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
+import net.primal.android.notes.feed.zaps.ZapBottomSheet
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
 import net.primal.android.profile.details.ProfileDetailsViewModel
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.domain.DraftTx
+import net.primal.android.wallet.zaps.canZap
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,7 +92,7 @@ fun ProfileDetailsScreen(
     noteCallbacks: NoteCallbacks,
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
-    onZapProfileClick: (DraftTx) -> Unit,
+    onSendWalletTx: (DraftTx) -> Unit,
     onDrawerQrCodeClick: (String) -> Unit,
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
     onGoToWallet: () -> Unit,
@@ -101,11 +107,13 @@ fun ProfileDetailsScreen(
     }
 
     val uiScope = rememberCoroutineScope()
+    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val pullToRefreshState = rememberPullToRefreshState()
     val pullToRefreshing = remember { mutableStateOf(false) }
     val addedToUserFeedsMessage = stringResource(id = R.string.app_added_to_user_feeds)
     val removedFromUserFeedsMessage = stringResource(id = R.string.app_removed_from_user_feeds)
+    val profileZapSentMessage = stringResource(id = R.string.profile_zap_sent_message)
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect {
@@ -118,7 +126,23 @@ fun ProfileDetailsScreen(
                 ProfileDetailsContract.SideEffect.ProfileFeedRemoved -> uiScope.launch {
                     snackbarHostState.showSnackbar(message = removedFromUserFeedsMessage)
                 }
+
+                ProfileDetailsContract.SideEffect.ProfileZapSent -> uiScope.launch {
+                    snackbarHostState.showSnackbar(message = profileZapSentMessage)
+                }
             }
+        }
+    }
+
+    LaunchedEffect(viewModel, uiState.value.zapError) {
+        uiState.value.zapError?.let {
+            uiScope.launch {
+                snackbarHostState.showSnackbar(
+                    message = it.resolveUiErrorMessage(context),
+                    duration = SnackbarDuration.Short,
+                )
+            }
+            viewModel.setEvent(ProfileDetailsContract.UiEvent.DismissZapError)
         }
     }
 
@@ -130,7 +154,7 @@ fun ProfileDetailsScreen(
         noteCallbacks = noteCallbacks,
         onEditProfileClick = onEditProfileClick,
         onMessageClick = onMessageClick,
-        onZapProfileClick = onZapProfileClick,
+        onSendWalletTx = onSendWalletTx,
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         onGoToWallet = onGoToWallet,
         onFollowsClick = onFollowsClick,
@@ -157,7 +181,7 @@ fun ProfileDetailsScreen(
     noteCallbacks: NoteCallbacks,
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
-    onZapProfileClick: (DraftTx) -> Unit,
+    onSendWalletTx: (DraftTx) -> Unit,
     onDrawerQrCodeClick: (String) -> Unit,
     onGoToWallet: () -> Unit,
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
@@ -191,6 +215,39 @@ fun ProfileDetailsScreen(
 
     val uiScope = rememberCoroutineScope()
     val context = LocalContext.current
+
+    var showCantZapWarning by remember { mutableStateOf(false) }
+    if (showCantZapWarning) {
+        UnableToZapBottomSheet(
+            zappingState = state.zappingState,
+            onDismissRequest = { showCantZapWarning = false },
+            onGoToWallet = { onGoToWallet.invoke() },
+        )
+    }
+
+    var showZapOptions by remember { mutableStateOf(false) }
+    if (showZapOptions) {
+        ZapBottomSheet(
+            onDismissRequest = { showZapOptions = false },
+            receiverName = state.profileDetails?.userDisplayName
+                ?: stringResource(id = R.string.profile_zap_bottom_sheet_fallback_title),
+            zappingState = state.zappingState,
+            onZap = { zapAmount, zapDescription ->
+                if (state.zappingState.canZap(zapAmount)) {
+                    eventPublisher(
+                        ProfileDetailsContract.UiEvent.ZapProfile(
+                            profileId = state.profileId,
+                            profileLnUrlDecoded = state.profileDetails?.lnUrlDecoded,
+                            zapAmount = zapAmount.toULong(),
+                            zapDescription = zapDescription,
+                        ),
+                    )
+                } else {
+                    showCantZapWarning = true
+                }
+            },
+        )
+    }
 
     SnackbarErrorHandler(
         error = state.error,
@@ -334,7 +391,17 @@ fun ProfileDetailsScreen(
                             eventPublisher = eventPublisher,
                             onEditProfileClick = onEditProfileClick,
                             onMessageClick = onMessageClick,
-                            onZapProfileClick = onZapProfileClick,
+                            onZapProfileClick = {
+                                if (state.zappingState.walletConnected) {
+                                    if (state.zappingState.walletPreference == WalletPreference.NostrWalletConnect) {
+                                        showZapOptions = true
+                                    } else {
+                                        onSendWalletTx(it)
+                                    }
+                                } else {
+                                    showCantZapWarning = true
+                                }
+                            },
                             onDrawerQrCodeClick = { onDrawerQrCodeClick(state.profileId) },
                             onUnableToZapProfile = {
                                 uiScope.launch {
@@ -550,7 +617,7 @@ private fun PreviewProfileScreen() {
             noteCallbacks = NoteCallbacks(),
             onEditProfileClick = {},
             onMessageClick = {},
-            onZapProfileClick = {},
+            onSendWalletTx = {},
             onDrawerQrCodeClick = {},
             onFollowsClick = { _, _ -> },
             onGoToWallet = {},

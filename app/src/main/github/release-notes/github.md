@@ -1,17 +1,3 @@
 ## Changes
-- Fix image/video advanced search not showing the feed
-- Set chronological feeds to expire after 24 hours
-- Fix New Notes pill button feed performances
-- Fix referenced events borders per figma design
-- Fix uniqueKey for NotificationUi list item
-- Fix crash when scrolling to top from long distance in notes feed
-- Adjust paging config for notes
-- Fix losing feed position when tapping new notes pill
-- Update business logic to always fetch profile details feed
-- Remove polling in profile details
-- Implement skeleton loaders for prepend loads
-- Add isIdle check before showing no content on notes feed
-- Implement user avatar on explore screen
-- Disable mention clicks and highlighting on explore zaps
-- Add page spacing between note attachments in feed
-- Implement media feed indicators (#212)
+- Fixed api calls failing sometimes even though all events were received;
+- Zap on article pill is now clickable;
