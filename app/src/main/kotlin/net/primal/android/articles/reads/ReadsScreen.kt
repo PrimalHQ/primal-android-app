@@ -1,6 +1,8 @@
 package net.primal.android.articles.reads
 
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
@@ -25,8 +27,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -35,6 +39,8 @@ import net.primal.android.R
 import net.primal.android.articles.feed.ArticleFeedList
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.FeedsErrorColumn
+import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -66,6 +72,7 @@ fun ReadsScreen(
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         onSearchClick = onSearchClick,
         onArticleClick = onArticleClick,
+        eventPublisher = viewModel::setEvent,
     )
 }
 
@@ -78,6 +85,7 @@ private fun ReadsScreen(
     onDrawerQrCodeClick: () -> Unit,
     onSearchClick: () -> Unit,
     onArticleClick: (naddr: String) -> Unit,
+    eventPublisher: (ReadsScreenContract.UiEvent) -> Unit,
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
@@ -151,6 +159,19 @@ private fun ReadsScreen(
                         },
                     )
                 }
+            } else if (state.loading) {
+                HeightAdjustableLoadingLazyListPlaceholder(
+                    height = 128.dp,
+                    contentPaddingValues = paddingValues,
+                    itemPadding = PaddingValues(horizontal = 16.dp),
+                )
+            } else {
+                FeedsErrorColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    text = stringResource(id = R.string.feeds_error_loading_user_feeds),
+                    onRefresh = { eventPublisher(ReadsScreenContract.UiEvent.RefreshReadsFeeds) },
+                    onRestoreDefaultFeeds = { eventPublisher(ReadsScreenContract.UiEvent.RestoreDefaultFeeds) },
+                )
             }
         },
         snackbarHost = {
