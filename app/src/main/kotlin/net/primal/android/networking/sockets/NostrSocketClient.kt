@@ -31,10 +31,11 @@ class NostrSocketClient(
 ) {
 
     val socketUrl = wssRequest.url.toString().cleanWebSocketUrl()
+    private var webSocket: WebSocket? = null
 
     private val scope = CoroutineScope(dispatcherProvider.io())
     private val webSocketMutex = Mutex()
-    private var webSocket: WebSocket? = null
+    private val emittingMutex = Mutex()
 
     private val socketListener = object : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
@@ -108,7 +109,9 @@ class NostrSocketClient(
     private fun processIncomingMessage(text: String) {
         text.parseIncomingMessage()?.let {
             scope.launch {
-                mutableIncomingMessagesSharedFlow.emit(value = it)
+                emittingMutex.withLock {
+                    mutableIncomingMessagesSharedFlow.emit(value = it)
+                }
             }
         }
     }
