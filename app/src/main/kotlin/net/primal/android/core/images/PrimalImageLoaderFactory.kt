@@ -7,6 +7,7 @@ import coil.ImageLoaderFactory
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.decode.VideoFrameDecoder
+import coil.disk.DiskCache
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -17,6 +18,7 @@ class PrimalImageLoaderFactory @Inject constructor(
 ) : ImageLoaderFactory {
 
     private val defaultBuilder by lazy { ImageLoader.Builder(context) }
+    private val imageCacheDir by lazy { context.cacheDir.resolve("image_cache") }
 
     override fun newImageLoader(): ImageLoader {
         return defaultBuilder
@@ -30,6 +32,12 @@ class PrimalImageLoaderFactory @Inject constructor(
 
                 // Video frames
                 add(VideoFrameDecoder.Factory())
+            }
+            .diskCache {
+                DiskCache.Builder()
+                    .directory(imageCacheDir)
+                    .maxSizePercent(0.02)
+                    .build()
             }
             .build()
     }
