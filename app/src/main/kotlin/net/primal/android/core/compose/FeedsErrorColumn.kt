@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import net.primal.android.R
+import net.primal.android.theme.AppTheme
 
 @Composable
 fun FeedsErrorColumn(
@@ -44,27 +45,30 @@ fun FeedsErrorColumn(
         Column(
             modifier = modifier,
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+            verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
         ) {
             Text(
                 modifier = Modifier
                     .wrapContentSize()
-                    .padding(horizontal = 32.dp),
+                    .padding(horizontal = 32.dp)
+                    .padding(bottom = 16.dp),
                 text = text,
                 textAlign = TextAlign.Center,
             )
 
-            TextButton(
-                modifier = Modifier.padding(vertical = 8.dp),
-                onClick = onRefresh,
-            ) {
+            TextButton(onClick = onRefresh) {
                 Text(
                     text = stringResource(id = R.string.feed_refresh_button).uppercase(),
                 )
             }
-            TextButton(
-                onClick = onRestoreDefaultFeeds,
-            ) {
+
+            Text(
+                text = stringResource(R.string.feeds_or),
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            )
+
+            TextButton(onClick = onRestoreDefaultFeeds) {
                 Text(
                     text = stringResource(id = R.string.feed_restore_default_feeds_button).uppercase(),
                 )

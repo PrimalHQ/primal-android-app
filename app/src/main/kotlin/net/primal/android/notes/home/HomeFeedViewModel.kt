@@ -16,6 +16,7 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.list.ui.model.asFeedUi
 import net.primal.android.feeds.repository.FeedsRepository
+import net.primal.android.networking.primal.retryNetworkCall
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.notes.home.HomeFeedContract.UiEvent
 import net.primal.android.notes.home.HomeFeedContract.UiState
@@ -84,7 +85,9 @@ class HomeFeedViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(loading = true) }
             try {
-                feedsRepository.fetchAndPersistNoteFeeds(userId = activeAccountStore.activeUserId())
+                retryNetworkCall {
+                    feedsRepository.fetchAndPersistNoteFeeds(userId = activeAccountStore.activeUserId())
+                }
             } catch (error: WssException) {
                 Timber.w(error)
             } finally {
