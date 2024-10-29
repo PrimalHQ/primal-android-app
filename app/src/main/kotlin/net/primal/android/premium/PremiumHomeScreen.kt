@@ -33,7 +33,7 @@ private fun PremiumHomeScreen(
 ) {
     AnimatedContent(
         modifier = Modifier
-            .background(AppTheme.colorScheme.background)
+            .background(AppTheme.colorScheme.surfaceVariant)
             .fillMaxSize(),
         label = "PremiumStages",
         targetState = state.stage,

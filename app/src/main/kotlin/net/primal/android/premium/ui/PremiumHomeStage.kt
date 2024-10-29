@@ -37,8 +37,6 @@ import net.primal.android.core.compose.icons.primaliconpack.PrimalPremiumDark
 import net.primal.android.core.compose.icons.primaliconpack.VerifiedFilled
 import net.primal.android.theme.AppTheme
 
-private val OrColor = Color(0xFF020101)
-
 @Composable
 fun PremiumHomeStage(onClose: () -> Unit, onFindPrimalName: () -> Unit) {
     Column(
@@ -138,7 +136,7 @@ private fun DescriptionSection(headerText: String, bulletPoints: List<String>) {
         bulletPoints.onEach {
             Text(
                 text = "• $it",
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 style = AppTheme.typography.bodyLarge,
             )
         }
@@ -217,7 +215,11 @@ private fun PriceRow() {
                 .background(AppTheme.extraColorScheme.onSurfaceVariantAlt3),
             contentAlignment = Alignment.Center,
         ) {
-            Text(text = stringResource(id = R.string.premium_price_or), color = OrColor, fontWeight = FontWeight.Bold)
+            Text(
+                text = stringResource(id = R.string.premium_price_or),
+                color = AppTheme.extraColorScheme.surfaceVariantAlt2,
+                fontWeight = FontWeight.Bold
+            )
         }
         PricePeriodColumn(
             price = stringResource(id = R.string.premium_annually_price),
@@ -241,7 +243,7 @@ private fun PricePeriodColumn(price: String, period: String) {
         )
         Text(
             text = period,
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             style = AppTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,
         )
@@ -271,7 +273,6 @@ private fun ButtonsColumn(
         ) {
             Text(
                 text = stringResource(id = R.string.premium_find_primal_name_button),
-                color = AppTheme.colorScheme.onBackground,
                 style = AppTheme.typography.bodyLarge,
                 fontWeight = FontWeight.SemiBold,
             )
