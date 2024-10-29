@@ -78,12 +78,14 @@ import net.primal.android.core.compose.icons.primaliconpack.NavWalletBolt
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletFilled
 import net.primal.android.core.compose.icons.primaliconpack.NewDM
+import net.primal.android.core.compose.icons.primaliconpack.NostrichFilled
 import net.primal.android.core.compose.icons.primaliconpack.Notifications
 import net.primal.android.core.compose.icons.primaliconpack.NotificationsFilled
 import net.primal.android.core.compose.icons.primaliconpack.Notrich
 import net.primal.android.core.compose.icons.primaliconpack.Paste
 import net.primal.android.core.compose.icons.primaliconpack.PhotoFromGallery
 import net.primal.android.core.compose.icons.primaliconpack.Play
+import net.primal.android.core.compose.icons.primaliconpack.PrimalPremiumDark
 import net.primal.android.core.compose.icons.primaliconpack.QrCode
 import net.primal.android.core.compose.icons.primaliconpack.Quote
 import net.primal.android.core.compose.icons.primaliconpack.Read
@@ -100,6 +102,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Unmute
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedRemove
 import net.primal.android.core.compose.icons.primaliconpack.Verified
+import net.primal.android.core.compose.icons.primaliconpack.VerifiedFilled
 import net.primal.android.core.compose.icons.primaliconpack.WalletBitcoinPayment
 import net.primal.android.core.compose.icons.primaliconpack.WalletError
 import net.primal.android.core.compose.icons.primaliconpack.WalletLightningPayment
@@ -152,6 +155,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             Help,
             FeedReposts,
             Verified,
+            VerifiedFilled,
             QrCode,
             DarkMode,
             LightMode,
@@ -207,6 +211,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             Keyboard,
             PhotoFromGallery,
             Paste,
+            PrimalPremiumDark,
             Directory,
             Subtract,
             ConnectRelay,
@@ -221,6 +226,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             MessagesFilled,
             LongRead,
             LongReadFilled,
+            NostrichFilled,
             Notifications,
             NotificationsFilled,
             Bookmarks,

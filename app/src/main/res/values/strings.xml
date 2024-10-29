@@ -77,12 +77,35 @@
     <string name="primary_destination_explore_label">Explore</string>
 
     <string name="drawer_destination_profile">Profile</string>
+    <string name="drawer_destination_premium">Premium</string>
     <string name="drawer_destination_messages">Messages</string>
     <string name="drawer_destination_bookmarks">Bookmarks</string>
     <string name="drawer_destination_settings">Settings</string>
     <string name="drawer_destination_sign_out">Sign Out</string>
     <string name="drawer_followers_suffix">Followers</string>
     <string name="drawer_following_suffix">Following</string>
+
+    <string name="premium_subscribe_to_get">Subscribe to Primal Premium to get:</string>
+    <string name="premium_primal_name">Primal Name</string>
+    <string name="premium_primal_name_benefit_one">Verified nostr address</string>
+    <string name="premium_primal_name_benefit_two">Bitcoin lightning address</string>
+    <string name="premium_primal_name_benefit_three">VIP profile on primal.net</string>
+    <string name="premium_nostr_tools">Nostr Tools</string>
+    <string name="premium_nostr_tools_benefit_one">Media hosting</string>
+    <string name="premium_nostr_tools_benefit_two">Advanced search</string>
+    <string name="premium_nostr_tools_benefit_three">Premium paid relay</string>
+    <string name="premium_nostr_tools_benefit_four">Nostr account backup</string>
+    <string name="premium_learn_more">Learn More About Premium</string>
+    <string name="premium_monthly_price">$6.99</string>
+    <string name="premium_period_monthly">monthly</string>
+    <string name="premium_annually_price">$79.99</string>
+    <string name="premium_period_annually">annually</string>
+    <string name="premium_price_or">or</string>
+    <string name="premium_start_by_reserving_primal_name">
+        Start by reserving your Primal Name:
+    </string>
+    <string name="premium_find_primal_name_button">Find Primal Name</string>
+    <string name="premium_cancel_button">Cancel</string>
 
     <string name="feed_reposted_suffix">reposted</string>
     <string name="feed_see_more">See more…</string>

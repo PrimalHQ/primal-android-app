@@ -31,18 +31,15 @@ class NostrSocketClient(
 ) {
 
     val socketUrl = wssRequest.url.toString().cleanWebSocketUrl()
+    private var webSocket: WebSocket? = null
 
     private val scope = CoroutineScope(dispatcherProvider.io())
     private val webSocketMutex = Mutex()
-    private var webSocket: WebSocket? = null
+    private val emittingMutex = Mutex()
 
     private val socketListener = object : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
             onSocketConnectionOpened?.invoke(socketUrl)
-            if (incomingCompressionEnabled) {
-                val id = UUID.randomUUID()
-                sendMessage("""["REQ","$id",{"cache":["set_primal_protocol",{"compression":"zlib"}]}]""")
-            }
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
@@ -98,6 +95,10 @@ class NostrSocketClient(
                     request = wssRequest,
                     listener = socketListener,
                 )
+                if (incomingCompressionEnabled) {
+                    val id = UUID.randomUUID()
+                    sendMessage("""["REQ","$id",{"cache":["set_primal_protocol",{"compression":"zlib"}]}]""")
+                }
             }
         }
 
@@ -108,7 +109,9 @@ class NostrSocketClient(
     private fun processIncomingMessage(text: String) {
         text.parseIncomingMessage()?.let {
             scope.launch {
-                mutableIncomingMessagesSharedFlow.emit(value = it)
+                emittingMutex.withLock {
+                    mutableIncomingMessagesSharedFlow.emit(value = it)
+                }
             }
         }
     }
