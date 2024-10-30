@@ -290,19 +290,21 @@ private fun ConversationListItem(
                 Box(
                     modifier = Modifier.weight(1f),
                 ) {
-                    val timestamp = conversation.lastMessageAt.asBeforeNowFormat()
+                    val timestamp = conversation.lastMessageAt?.asBeforeNowFormat()
                     val suffixText = buildAnnotatedString {
                         val hasVerifiedBadge = !conversation.participantInternetIdentifier.isNullOrEmpty()
                         if (!hasVerifiedBadge) append(' ')
-                        append(
-                            AnnotatedString(
-                                text = "| $timestamp",
-                                spanStyle = SpanStyle(
-                                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                                    fontStyle = AppTheme.typography.bodySmall.fontStyle,
+                        if (timestamp != null) {
+                            append(
+                                AnnotatedString(
+                                    text = "| $timestamp",
+                                    spanStyle = SpanStyle(
+                                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                                        fontStyle = AppTheme.typography.bodySmall.fontStyle,
+                                    ),
                                 ),
-                            ),
-                        )
+                            )
+                        }
                     }
 
                     NostrUserText(
@@ -325,9 +327,9 @@ private fun ConversationListItem(
         supportingContent = {
             val annotatedContent = renderContentAsAnnotatedString(
                 data = NoteContentUi(
-                    noteId = conversation.lastMessageId,
-                    content = conversation.lastMessageSnippet,
-                    hashtags = conversation.lastMessageSnippet.parseHashtags(),
+                    noteId = conversation.lastMessageId ?: "",
+                    content = conversation.lastMessageSnippet ?: conversation.participantInternetIdentifier ?: "",
+                    hashtags = conversation.lastMessageSnippet?.parseHashtags() ?: emptyList(),
                     attachments = conversation.lastMessageAttachments,
                     nostrUris = conversation.lastMessageNostrUris,
                 ),
