@@ -20,7 +20,7 @@ data class MessageConversation(
         entityColumn = "messageId",
         parentColumn = "lastMessageId",
     )
-    val lastMessage: DirectMessageData,
+    val lastMessage: DirectMessageData?,
 
     @Relation(
         entityColumn = "eventId",
