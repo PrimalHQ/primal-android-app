@@ -167,6 +167,7 @@ fun MessageListScreen(
                 contentPadding = paddingValues,
                 onConversationClick = onConversationClick,
                 onProfileClick = onProfileClick,
+                onRefreshClick = { eventPublisher(UiEvent.RefreshConversations) },
             )
         },
         floatingActionButton = {
@@ -199,6 +200,7 @@ private fun ConversationsList(
     contentPadding: PaddingValues = PaddingValues(0.dp),
     onConversationClick: (String) -> Unit,
     onProfileClick: (profileId: String) -> Unit,
+    onRefreshClick: () -> Unit,
 ) {
     LazyColumn(
         modifier = modifier,
@@ -254,7 +256,10 @@ private fun ConversationsList(
                             noContentText = stringResource(
                                 id = R.string.messages_conversations_initial_loading_error,
                             ),
-                            onRefresh = { conversations.refresh() },
+                            onRefresh = {
+                                onRefreshClick()
+                                conversations.refresh()
+                            },
                         )
                     }
                 }
