@@ -82,6 +82,7 @@ class MessageConversationListViewModel @Inject constructor(
 
     private fun fetchConversations() =
         viewModelScope.launch {
+            setState { copy(loading = true) }
             try {
                 when (state.value.activeRelation) {
                     ConversationRelation.Follows -> {
@@ -96,6 +97,8 @@ class MessageConversationListViewModel @Inject constructor(
                 }
             } catch (error: WssException) {
                 Timber.w(error)
+            } finally {
+                setState { copy(loading = false) }
             }
         }
 

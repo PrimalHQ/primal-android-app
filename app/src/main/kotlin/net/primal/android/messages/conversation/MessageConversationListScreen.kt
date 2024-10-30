@@ -57,16 +57,17 @@ import androidx.lifecycle.Lifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnail
-import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
+import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.NewDM
@@ -157,6 +158,7 @@ fun MessageListScreen(
         },
         content = { paddingValues ->
             ConversationsList(
+                loading = state.loading,
                 conversations = conversations,
                 modifier = Modifier
                     .background(color = AppTheme.colorScheme.surfaceVariant)
@@ -190,6 +192,7 @@ fun MessageListScreen(
 
 @Composable
 private fun ConversationsList(
+    loading: Boolean,
     conversations: LazyPagingItems<MessageConversationUi>,
     modifier: Modifier = Modifier,
     state: LazyListState = rememberLazyListState(),
@@ -205,11 +208,12 @@ private fun ConversationsList(
         items(
             count = conversations.itemCount,
             key = conversations.itemKey { it.participantId },
+            contentType = conversations.itemContentType(),
         ) {
             val conversation = conversations[it]
 
             when {
-                conversation != null -> {
+                conversation != null -> Column {
                     ConversationListItem(
                         conversation = conversation,
                         onConversationClick = onConversationClick,
@@ -223,16 +227,17 @@ private fun ConversationsList(
         }
 
         if (conversations.isEmpty()) {
-            when (conversations.loadState.refresh) {
-                LoadState.Loading -> {
-                    item(contentType = "LoadingRefresh") {
-                        ListLoading(
-                            modifier = Modifier.fillParentMaxSize(),
-                        )
-                    }
+            val loadState = conversations.loadState.refresh
+            when {
+                loadState is LoadState.Loading || loading -> {
+                    heightAdjustableLoadingLazyListPlaceholder(
+                        height = 48.dp,
+                        showDivider = true,
+                        itemPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                    )
                 }
 
-                is LoadState.NotLoading -> {
+                loadState is LoadState.NotLoading -> {
                     item(contentType = "NoContent") {
                         ListNoContent(
                             modifier = Modifier.fillParentMaxSize(),
@@ -242,7 +247,7 @@ private fun ConversationsList(
                     }
                 }
 
-                is LoadState.Error -> {
+                loadState is LoadState.Error -> {
                     item(contentType = "RefreshError") {
                         ListNoContent(
                             modifier = Modifier.fillParentMaxSize(),
@@ -328,6 +333,7 @@ private fun ConversationListItem(
             )
 
             Text(
+                modifier = Modifier.padding(top = 4.dp),
                 text = if (conversation.isLastMessageFromUser) {
                     buildAnnotatedString {
                         append(stringResource(id = R.string.chat_message_user_snippet_prefix))
@@ -337,7 +343,7 @@ private fun ConversationListItem(
                     annotatedContent
                 },
                 overflow = TextOverflow.Ellipsis,
-                minLines = 2,
+                minLines = 1,
                 maxLines = 2,
                 style = AppTheme.typography.bodySmall,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
