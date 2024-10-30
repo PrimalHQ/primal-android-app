@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -32,8 +33,11 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
@@ -42,6 +46,7 @@ import net.primal.android.R
 import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.IconText
+import net.primal.android.core.compose.WrappedContentWithSuffix
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedReplies
@@ -120,30 +125,14 @@ private fun ListItemHeader(
     onMuteUserClick: (() -> Unit)? = null,
     onReportContentClick: ((reportType: ReportType) -> Unit)? = null,
 ) {
-    Row(
-        modifier = Modifier.height(32.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        AvatarThumbnail(
-            avatarSize = 24.dp,
-            borderSize = 0.dp,
-            avatarCdnImage = data.authorAvatarCdnImage,
-        )
-
-        Text(
-            modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .padding(top = 4.dp)
-                .weight(1f),
-            text = "${data.authorName} • ${data.publishedAt.asBeforeNowFormat(shortFormat = false)}",
-            style = textStyle,
-        )
-
+    val overflowIconSizeDp = 40.dp
+    Box(contentAlignment = Alignment.TopEnd) {
         if (enabledDropdownMenu) {
             ArticleDropdownMenuIcon(
                 modifier = Modifier
-                    .size(42.dp)
+                    .size(overflowIconSizeDp)
                     .padding(top = 6.dp)
+                    .offset(x = 4.dp)
                     .clip(CircleShape),
                 articleId = data.articleId,
                 articleContent = data.content,
@@ -164,12 +153,53 @@ private fun ListItemHeader(
                 },
             )
         }
+
+        Row(
+            modifier = Modifier
+                .height(32.dp)
+                .padding(end = overflowIconSizeDp - 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            AvatarThumbnail(
+                avatarSize = 24.dp,
+                borderSize = 0.dp,
+                avatarCdnImage = data.authorAvatarCdnImage,
+            )
+
+            Box(modifier = Modifier.fillMaxWidth()) {
+                WrappedContentWithSuffix(
+                    modifier = Modifier,
+                    wrappedContent = {
+                        Text(
+                            modifier = Modifier.padding(start = 8.dp, top = 4.dp),
+                            text = data.authorName,
+                            style = textStyle,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    },
+                    suffixFixedContent = {
+                        Text(
+                            modifier = Modifier.padding(top = 4.dp),
+                            text = " • ${data.publishedAt.asBeforeNowFormat()}",
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            style = textStyle,
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        )
+                    },
+                )
+            }
+        }
     }
 }
 
 @Composable
-private fun ListItemContent(data: FeedArticleUi) {
-    Row(modifier = Modifier.padding(top = 4.dp)) {
+private fun ListItemContent(
+    data: FeedArticleUi,
+    modifier: Modifier = Modifier,
+) {
+    Row(modifier = modifier) {
         Text(
             modifier = Modifier
                 .padding(top = 8.dp, end = 16.dp)
@@ -290,18 +320,15 @@ private fun ArticleImagePlaceholder() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview
-@Composable
-private fun PreviewFeedArticleListItem() {
-    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
-        FeedArticleListItem(
-            data = FeedArticleUi(
+private class FeedArticleUiProvider : PreviewParameterProvider<FeedArticleUi> {
+    override val values: Sequence<FeedArticleUi>
+        get() = sequenceOf(
+            FeedArticleUi(
                 aTag = "",
                 eventId = "",
                 articleId = "",
                 authorId = "1234",
-                authorName = "JeffG",
+                authorName = "majstor",
                 content = "This is content.",
                 title = "Purple Tech",
                 isBookmarked = false,
@@ -341,6 +368,64 @@ private fun PreviewFeedArticleListItem() {
                     ),
                 ),
             ),
+            FeedArticleUi(
+                aTag = "",
+                eventId = "",
+                articleId = "",
+                authorId = "1234",
+                authorName = "majstor of long author user names and other stuff",
+                content = "This is content.",
+                title = "Purple Tech",
+                isBookmarked = false,
+                publishedAt = Instant.now(),
+                rawNostrEventJson = "raaaaw",
+                readingTimeInMinutes = 5,
+                stats = EventStatsUi(
+                    repliesCount = 23,
+                ),
+                eventZaps = listOf(
+                    EventZapUiModel(
+                        id = "",
+                        zapperId = "",
+                        zapperName = "",
+                        zapperHandle = "",
+                        amountInSats = 200L.toULong(),
+                        message = "",
+                        zappedAt = 0,
+                    ),
+                    EventZapUiModel(
+                        id = "",
+                        zapperId = "",
+                        zapperName = "",
+                        zapperHandle = "",
+                        amountInSats = 200L.toULong(),
+                        message = "",
+                        zappedAt = 0,
+                    ),
+                    EventZapUiModel(
+                        id = "",
+                        zapperId = "",
+                        zapperName = "",
+                        zapperHandle = "",
+                        amountInSats = 200L.toULong(),
+                        message = "",
+                        zappedAt = 0,
+                    ),
+                ),
+            ),
+        )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview
+@Composable
+private fun PreviewFeedArticleListItem(
+    @PreviewParameter(provider = FeedArticleUiProvider::class)
+    articleUi: FeedArticleUi,
+) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+        FeedArticleListItem(
+            data = articleUi,
             modifier = Modifier.padding(all = 16.dp),
         )
     }
