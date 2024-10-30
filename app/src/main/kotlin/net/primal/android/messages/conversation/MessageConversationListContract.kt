@@ -7,6 +7,7 @@ import net.primal.android.messages.domain.ConversationRelation
 
 interface MessageConversationListContract {
     data class UiState(
+        val loading: Boolean = false,
         val activeRelation: ConversationRelation,
         val conversations: Flow<PagingData<MessageConversationUi>>,
     )

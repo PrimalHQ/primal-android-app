@@ -4,7 +4,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -22,7 +21,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import net.primal.android.R
-import net.primal.android.core.compose.ListLoading
+import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.theme.AppTheme
 
@@ -89,14 +88,13 @@ fun TransactionsLazyColumn(
         if (pagingItems.isEmpty()) {
             when (pagingItems.loadState.refresh) {
                 LoadState.Loading -> {
-                    item(contentType = "LoadingRefresh") {
-                        ListLoading(
-                            modifier = Modifier
-                                .fillParentMaxSize()
-                                .padding(bottom = 80.dp),
-                        )
-                    }
+                    heightAdjustableLoadingLazyListPlaceholder(
+                        height = 80.dp,
+                        showDivider = false,
+                        itemPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    )
                 }
+
                 else -> Unit
             }
         }
