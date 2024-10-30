@@ -20,12 +20,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import net.primal.android.R
-import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.SnackbarErrorHandler
+import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.explore.search.ui.FollowUnfollowVisibility
@@ -197,9 +198,11 @@ private fun FollowsLazyColumn(
 
         if (state.users.isEmpty()) {
             when (state.loading) {
-                true -> item(contentType = "LoadingContent") {
-                    ListLoading(modifier = Modifier.fillParentMaxSize())
-                }
+                true -> heightAdjustableLoadingLazyListPlaceholder(
+                    height = 48.dp,
+                    showDivider = true,
+                    itemPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                )
 
                 false -> item(contentType = "NoContent") {
                     ListNoContent(

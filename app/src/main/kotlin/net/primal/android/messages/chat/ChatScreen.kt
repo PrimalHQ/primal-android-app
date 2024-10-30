@@ -55,13 +55,13 @@ import kotlin.time.Duration.Companion.minutes
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.AvatarThumbnail
-import net.primal.android.core.compose.ListLoading
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
+import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.isEmpty
@@ -248,11 +248,10 @@ private fun ChatList(
         if (messages.isEmpty()) {
             when (messages.loadState.refresh) {
                 LoadState.Loading -> {
-                    item(contentType = "LoadingRefresh") {
-                        ListLoading(
-                            modifier = Modifier.fillParentMaxSize(),
-                        )
-                    }
+                    heightAdjustableLoadingLazyListPlaceholder(
+                        height = 96.dp,
+                        itemPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    )
                 }
 
                 is LoadState.NotLoading -> {
