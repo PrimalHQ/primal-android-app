@@ -111,7 +111,7 @@ private fun String.clearParsedPrimalLinks(): String {
     return newContent
 }
 
-private const val ELLIPSIZE_THRESHOLD = 500
+private const val ELLIPSIZE_THRESHOLD = 300
 
 private fun String.ellipsize(expanded: Boolean, ellipsizeText: String): String {
     val shouldEllipsize = length > ELLIPSIZE_THRESHOLD
