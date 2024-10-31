@@ -1,4 +1,4 @@
-package net.primal.android.profile.editor.ui
+package net.primal.android.core.compose
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,21 +19,25 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
-import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.theme.AppTheme
 
 @Composable
 fun PrimalOutlinedTextField(
-    header: String,
+    header: String?,
     value: String,
     onValueChange: (String) -> Unit,
     isRequired: Boolean = false,
     prefix: String? = null,
     isMultiline: Boolean = false,
+    fontSize: TextUnit = 16.sp,
+    textAlign: TextAlign = TextAlign.Start,
+    isError: Boolean = false,
 ) {
     Column(
         modifier = Modifier
@@ -44,12 +48,14 @@ fun PrimalOutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text(
-                text = header.uppercase(),
-                fontWeight = FontWeight.Normal,
-                fontSize = 16.sp,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-            )
+            header?.let {
+                Text(
+                    text = header.uppercase(),
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 16.sp,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                )
+            }
             if (isRequired) {
                 Text(
                     buildAnnotatedString {
@@ -81,12 +87,14 @@ fun PrimalOutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             colors = PrimalDefaults.outlinedTextFieldColors(),
             shape = AppTheme.shapes.medium,
+            isError = isError,
             singleLine = !isMultiline,
             minLines = if (isMultiline) 6 else 0,
             value = value,
             onValueChange = onValueChange,
             textStyle = AppTheme.typography.bodyLarge.copy(
-                fontSize = 16.sp,
+                fontSize = fontSize,
+                textAlign = textAlign,
             ),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
             leadingIcon = if (prefix != null) {
