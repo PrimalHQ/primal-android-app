@@ -1,4 +1,4 @@
-package net.primal.android.premium
+package net.primal.android.premium.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,11 +7,10 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.premium.PremiumHomeContract.UiEvent
-import net.primal.android.premium.PremiumHomeContract.UiState
+import net.primal.android.premium.home.PremiumHomeContract.UiEvent
+import net.primal.android.premium.home.PremiumHomeContract.UiState
 
 @HiltViewModel
 class PremiumHomeViewModel @Inject constructor() : ViewModel() {
