@@ -171,7 +171,7 @@ private fun VideoThumbnailImagePreview(
 }
 
 @Composable
-private fun PlayButton(onClick: () -> Unit) {
+fun PlayButton(onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .size(64.dp)

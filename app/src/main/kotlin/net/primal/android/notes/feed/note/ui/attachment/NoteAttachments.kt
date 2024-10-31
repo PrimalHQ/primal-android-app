@@ -8,6 +8,7 @@ import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
 import net.primal.android.core.compose.attachment.model.isMediaAttachment
 import net.primal.android.notes.feed.note.ui.NoteLinkPreview
+import net.primal.android.notes.feed.note.ui.NoteVideoLinkPreview
 import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
 
 @ExperimentalFoundationApi
@@ -37,20 +38,38 @@ fun NoteAttachments(
         linkAttachments.size == 1 -> {
             BoxWithConstraints(modifier = modifier) {
                 val attachment = linkAttachments.first()
-                val thumbnailImageSizeDp = findImageSize(attachment = attachment)
-                if (!attachment.title.isNullOrBlank() || !attachment.description.isNullOrBlank()) {
-                    NoteLinkPreview(
-                        url = attachment.url,
-                        title = attachment.title,
-                        description = attachment.description,
-                        thumbnailUrl = attachment.thumbnailUrl,
-                        thumbnailImageSize = thumbnailImageSizeDp,
-                        onClick = if (onUrlClick != null) {
-                            { onUrlClick.invoke(attachment.url) }
-                        } else {
-                            null
-                        },
-                    )
+                when (attachment.type) {
+                    NoteAttachmentType.YouTube,
+                    NoteAttachmentType.Rumble,
+                    -> {
+                        val thumbnailImageSizeDp = findImageSize(attachment = attachment)
+                        NoteVideoLinkPreview(
+                            url = attachment.url,
+                            title = attachment.title,
+                            thumbnailUrl = attachment.thumbnailUrl,
+                            thumbnailImageSize = thumbnailImageSizeDp,
+                            onClick = if (onUrlClick != null) {
+                                { onUrlClick.invoke(attachment.url) }
+                            } else {
+                                null
+                            },
+                        )
+                    }
+
+                    else -> {
+                        if (!attachment.title.isNullOrBlank()) {
+                            NoteLinkPreview(
+                                url = attachment.url,
+                                title = attachment.title,
+                                thumbnailUrl = attachment.thumbnailUrl,
+                                onClick = if (onUrlClick != null) {
+                                    { onUrlClick.invoke(attachment.url) }
+                                } else {
+                                    null
+                                },
+                            )
+                        }
+                    }
                 }
             }
         }
