@@ -67,6 +67,8 @@ private fun detectNoteAttachmentType(url: String, mimeType: String?): NoteAttach
                 url.contains(".youtube.com") -> NoteAttachmentType.YouTube
                 url.contains("/youtube.com") -> NoteAttachmentType.YouTube
                 url.contains("/youtu.be") -> NoteAttachmentType.YouTube
+                url.contains(".rumble.com") -> NoteAttachmentType.Rumble
+                url.contains("/rumble.com") -> NoteAttachmentType.Rumble
                 else -> NoteAttachmentType.Other
             }
         }

@@ -6,5 +6,6 @@ enum class NoteAttachmentType {
     Audio,
     Pdf,
     YouTube,
+    Rumble,
     Other,
 }
