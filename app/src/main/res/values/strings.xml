@@ -107,6 +107,13 @@
     <string name="premium_find_primal_name_button">Find Primal Name</string>
     <string name="premium_cancel_button">Cancel</string>
 
+    <string name="premium_primal_name_title">Find Primal Name</string>
+    <string name="premium_primal_name_search_button">Search</string>
+    <string name="premium_primal_name_unavailable_message">Sorry, that name is currently unavailable</string>
+    <string name="premium_primal_name_nostr_address">Nostr address</string>
+    <string name="premium_primal_name_lightning_address">Lightning address</string>
+    <string name="premium_primal_name_vip_profile">VIP profile</string>
+
     <string name="feed_reposted_suffix">reposted</string>
     <string name="feed_see_more">See more…</string>
 
