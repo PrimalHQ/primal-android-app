@@ -52,6 +52,7 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedRepostsFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
 import net.primal.android.core.compose.icons.primaliconpack.FontSize
+import net.primal.android.core.compose.icons.primaliconpack.GenericLinkIcon
 import net.primal.android.core.compose.icons.primaliconpack.Help
 import net.primal.android.core.compose.icons.primaliconpack.Home
 import net.primal.android.core.compose.icons.primaliconpack.HomeFilled
@@ -241,6 +242,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             FeedNewLikeFilled,
             FeedBookmark,
             FeedBookmarkFilled,
+            GenericLinkIcon,
         )
         return __PrimalIcons!!
     }
