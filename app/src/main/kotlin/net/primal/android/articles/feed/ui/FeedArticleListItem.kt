@@ -195,10 +195,7 @@ private fun ListItemHeader(
 }
 
 @Composable
-private fun ListItemContent(
-    data: FeedArticleUi,
-    modifier: Modifier = Modifier,
-) {
+private fun ListItemContent(data: FeedArticleUi, modifier: Modifier = Modifier) {
     Row(modifier = modifier) {
         Text(
             modifier = Modifier
