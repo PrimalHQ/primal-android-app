@@ -1,4 +1,4 @@
-package net.primal.android.premium
+package net.primal.android.premium.home
 
 interface PremiumHomeContract {
     data class UiState(

@@ -80,8 +80,8 @@ import net.primal.android.notes.home.HomeFeedScreen
 import net.primal.android.notes.home.HomeFeedViewModel
 import net.primal.android.notifications.list.NotificationsScreen
 import net.primal.android.notifications.list.NotificationsViewModel
-import net.primal.android.premium.PremiumHomeScreen
-import net.primal.android.premium.PremiumHomeViewModel
+import net.primal.android.premium.home.PremiumHomeScreen
+import net.primal.android.premium.home.PremiumHomeViewModel
 import net.primal.android.profile.details.ProfileDetailsViewModel
 import net.primal.android.profile.details.ui.ProfileDetailsScreen
 import net.primal.android.profile.domain.ProfileFollowsType

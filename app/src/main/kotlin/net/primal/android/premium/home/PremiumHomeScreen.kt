@@ -1,5 +1,6 @@
-package net.primal.android.premium
+package net.primal.android.premium.home
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.slideInHorizontally
@@ -11,6 +12,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import net.primal.android.R
+import net.primal.android.premium.primalName.PremiumPrimalNameStage
 import net.primal.android.premium.ui.PremiumHomeStage
 import net.primal.android.theme.AppTheme
 
@@ -31,6 +35,22 @@ private fun PremiumHomeScreen(
     onClose: () -> Unit,
     eventPublisher: (PremiumHomeContract.UiEvent) -> Unit,
 ) {
+    BackHandler {
+        when (state.stage) {
+            PremiumHomeContract.PremiumStage.Home -> onClose()
+            PremiumHomeContract.PremiumStage.FindPrimalName -> eventPublisher(
+                PremiumHomeContract.UiEvent.MoveToPremiumStage(
+                    PremiumHomeContract.PremiumStage.Home,
+                ),
+            )
+
+            PremiumHomeContract.PremiumStage.Purchase -> eventPublisher(
+                PremiumHomeContract.UiEvent.MoveToPremiumStage(
+                    PremiumHomeContract.PremiumStage.FindPrimalName,
+                ),
+            )
+        }
+    }
     AnimatedContent(
         modifier = Modifier
             .background(AppTheme.colorScheme.surfaceVariant)
@@ -54,7 +74,23 @@ private fun PremiumHomeScreen(
             }
 
             PremiumHomeContract.PremiumStage.FindPrimalName -> {
-                Text(text = "find primal name", color = AppTheme.colorScheme.onBackground)
+                PremiumPrimalNameStage(
+                    titleText = stringResource(id = R.string.premium_primal_name_title),
+                    onBack = {
+                        eventPublisher(
+                            PremiumHomeContract.UiEvent.MoveToPremiumStage(
+                                PremiumHomeContract.PremiumStage.Home,
+                            ),
+                        )
+                    },
+                    onPrimalNameAvailable = { primalName ->
+                        eventPublisher(
+                            PremiumHomeContract.UiEvent.MoveToPremiumStage(
+                                PremiumHomeContract.PremiumStage.Purchase,
+                            ),
+                        )
+                    },
+                )
             }
 
             PremiumHomeContract.PremiumStage.Purchase -> {
