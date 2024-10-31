@@ -8,5 +8,6 @@ interface PremiumPrimalNameContract {
 
     sealed class UiEvent {
         data class CheckPrimalName(val name: String) : UiEvent()
+        data object ResetNameAvailable : UiEvent()
     }
 }

@@ -66,17 +66,12 @@ private fun PremiumPrimalNameStage(
     initialName: String? = null,
 ) {
     var primalName by remember { mutableStateOf(initialName ?: "") }
-    var isErrorState by remember { mutableStateOf(false) }
-    var isTextFieldDirty by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.isNameAvailable) {
         if (state.isNameAvailable == true) {
             onPrimalNameAvailable(primalName)
+            eventPublisher(PremiumPrimalNameContract.UiEvent.ResetNameAvailable)
         }
-    }
-
-    LaunchedEffect(state.isNameAvailable, isTextFieldDirty) {
-        isErrorState = state.isNameAvailable == false && !isTextFieldDirty
     }
 
     Scaffold(
@@ -95,7 +90,6 @@ private fun PremiumPrimalNameStage(
                     .navigationBarsPadding()
                     .padding(32.dp),
                 onClick = {
-                    isTextFieldDirty = false
                     eventPublisher(PremiumPrimalNameContract.UiEvent.CheckPrimalName(primalName))
                 },
             ) {
@@ -119,15 +113,15 @@ private fun PremiumPrimalNameStage(
                 header = null,
                 value = primalName,
                 onValueChange = {
-                    isTextFieldDirty = true
+                    eventPublisher(PremiumPrimalNameContract.UiEvent.ResetNameAvailable)
                     primalName = it.trim()
                 },
                 textAlign = TextAlign.Center,
-                isError = isErrorState,
+                isError = state.isNameAvailable == false,
                 fontSize = 20.sp,
             )
             Text(
-                text = if (isErrorState) {
+                text = if (state.isNameAvailable == false) {
                     stringResource(id = R.string.premium_primal_name_unavailable_message)
                 } else {
                     " "

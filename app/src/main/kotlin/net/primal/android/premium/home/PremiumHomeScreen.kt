@@ -46,7 +46,7 @@ private fun PremiumHomeScreen(
 
             PremiumHomeContract.PremiumStage.Purchase -> eventPublisher(
                 PremiumHomeContract.UiEvent.MoveToPremiumStage(
-                    PremiumHomeContract.PremiumStage.Purchase,
+                    PremiumHomeContract.PremiumStage.FindPrimalName,
                 ),
             )
         }
