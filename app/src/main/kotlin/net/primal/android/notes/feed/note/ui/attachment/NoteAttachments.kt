@@ -48,6 +48,7 @@ fun NoteAttachments(
                             title = attachment.title,
                             thumbnailUrl = attachment.thumbnailUrl,
                             thumbnailImageSize = thumbnailImageSizeDp,
+                            type = attachment.type,
                             onClick = if (onUrlClick != null) {
                                 { onUrlClick.invoke(attachment.url) }
                             } else {
