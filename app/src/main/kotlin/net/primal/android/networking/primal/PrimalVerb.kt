@@ -44,4 +44,5 @@ enum class PrimalVerb(val identifier: String) {
     EXPLORE_TOPICS("explore_topics"),
     EXPLORE_PEOPLE("explore_people"),
     EXPLORE_ZAPS("explore_zaps"),
+    MEMBERSHIP_NAME_AVAILABLE("membership_name_available"),
 }
