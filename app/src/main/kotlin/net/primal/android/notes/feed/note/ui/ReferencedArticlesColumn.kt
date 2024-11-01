@@ -1,6 +1,7 @@
 package net.primal.android.notes.feed.note.ui
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,7 +36,9 @@ fun ReferencedArticlesColumn(
             val data = nostrResourceUi.referencedArticle
             checkNotNull(data)
             ReferencedArticleCard(
-                modifier = Modifier.padding(vertical = 4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
                 data = FeedArticleUi(
                     aTag = data.aTag,
                     eventId = data.eventId,
