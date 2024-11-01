@@ -1,6 +1,7 @@
 package net.primal.android.notes.feed.note.ui
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
@@ -36,7 +37,9 @@ fun ReferencedNotesColumn(
             val data = nostrResourceUi.referencedNote
             checkNotNull(data)
             ReferencedNoteCard(
-                modifier = Modifier.padding(vertical = 4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
                 data = FeedPostUi(
                     postId = data.postId,
                     repostId = null,
