@@ -111,6 +111,11 @@ private fun String.clearParsedPrimalLinks(): String {
     return newContent
 }
 
+private fun String.limitLineBreaks(maxBreaks: Int = 2): String {
+    val maxBreakPattern = "(\\n){${maxBreaks + 1},}".toRegex()
+    return this.replace(maxBreakPattern, "\n".repeat(maxBreaks))
+}
+
 private const val ELLIPSIZE_THRESHOLD = 300
 
 private fun String.ellipsize(expanded: Boolean, ellipsizeText: String): String {
@@ -287,6 +292,7 @@ fun renderContentAsAnnotatedString(
         .remove(texts = data.invoices)
         .replaceNostrProfileUrisWithHandles(resources = mentionedUsers)
         .clearParsedPrimalLinks()
+        .limitLineBreaks(maxBreaks = 2)
         .trim()
         .ellipsize(expanded = expanded, ellipsizeText = seeMoreText)
 
