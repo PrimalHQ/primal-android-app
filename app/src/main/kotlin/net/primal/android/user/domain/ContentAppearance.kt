@@ -18,7 +18,7 @@ enum class ContentAppearance(
     Small(
         noteBodyFontSize = 15.sp,
         noteBodyLineHeight = 22.sp,
-        noteUsernameSize = 14.sp,
+        noteUsernameSize = 16.sp,
         noteAvatarSize = 32.dp,
         articleTextFontSize = 15.sp,
         articleTextLineHeight = 26.sp,
@@ -28,7 +28,7 @@ enum class ContentAppearance(
     Default(
         noteBodyFontSize = 16.sp,
         noteBodyLineHeight = 22.sp,
-        noteUsernameSize = 14.sp,
+        noteUsernameSize = 16.sp,
         noteAvatarSize = 34.dp,
         articleTextFontSize = 16.sp,
         articleTextLineHeight = 28.sp,
@@ -38,7 +38,7 @@ enum class ContentAppearance(
     Large(
         noteBodyFontSize = 19.sp,
         noteBodyLineHeight = 25.sp,
-        noteUsernameSize = 16.sp,
+        noteUsernameSize = 18.sp,
         noteAvatarSize = 36.dp,
         articleTextFontSize = 18.sp,
         articleTextLineHeight = 30.sp,
@@ -48,7 +48,7 @@ enum class ContentAppearance(
     ExtraLarge(
         noteBodyFontSize = 21.sp,
         noteBodyLineHeight = 27.sp,
-        noteUsernameSize = 16.sp,
+        noteUsernameSize = 18.sp,
         noteAvatarSize = 38.dp,
         articleTextFontSize = 20.sp,
         articleTextLineHeight = 32.sp,
