@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.premium.primalName.PremiumPrimalNameContract.UiState
 import net.primal.android.premium.primalName.PremiumPrimalNameContract.UiEvent
+import net.primal.android.premium.primalName.PremiumPrimalNameContract.UiState
 import net.primal.android.premium.repository.PremiumRepository
 import timber.log.Timber
 
@@ -22,7 +22,6 @@ class PremiumPrimalNameViewModel @Inject constructor(
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
-
 
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }

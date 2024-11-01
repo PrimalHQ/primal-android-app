@@ -19,12 +19,8 @@ import net.primal.android.R
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.theme.AppTheme
 
-
 @Composable
-fun PremiumPrimalNameTable(
-    modifier: Modifier = Modifier,
-    primalName: String,
-) {
+fun PremiumPrimalNameTable(modifier: Modifier = Modifier, primalName: String) {
     Column(
         modifier = modifier
             .clip(AppTheme.shapes.large)

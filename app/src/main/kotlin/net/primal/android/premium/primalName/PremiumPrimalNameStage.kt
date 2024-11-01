@@ -34,7 +34,6 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.premium.ui.PremiumPrimalNameTable
 import net.primal.android.theme.AppTheme
 
-
 @Composable
 fun PremiumPrimalNameStage(
     titleText: String,
