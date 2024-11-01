@@ -38,7 +38,11 @@ import net.primal.android.core.compose.icons.primaliconpack.VerifiedFilled
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun PremiumHomeStage(onClose: () -> Unit, onFindPrimalName: () -> Unit) {
+fun PremiumHomeStage(
+    onClose: () -> Unit,
+    onFindPrimalName: () -> Unit,
+    onLearnMoreClick: () -> Unit,
+) {
     Column(
         modifier = Modifier
             .padding(16.dp)
@@ -64,7 +68,7 @@ fun PremiumHomeStage(onClose: () -> Unit, onFindPrimalName: () -> Unit) {
         )
         PremiumOfferCard(
             modifier = Modifier.padding(bottom = 16.dp),
-            onLearnMoreClick = {},
+            onLearnMoreClick = onLearnMoreClick,
         )
         PriceRow()
         ButtonsColumn(
