@@ -1,6 +1,5 @@
 package net.primal.android.premium.info
 
-import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,12 +21,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.room.util.TableInfo
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.PrimalSingleTab
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -35,7 +32,6 @@ import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.theme.AppTheme
-
 
 internal const val MORE_INFO_TAB_COUNT = 3
 
@@ -45,9 +41,7 @@ internal const val FAQ_TAB_INDEX = 2
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PremiumMoreInfoScreen(
-    onClose: () -> Unit,
-) {
+fun PremiumMoreInfoScreen(onClose: () -> Unit) {
     val pagerState = rememberPagerState { MORE_INFO_TAB_COUNT }
 
     Scaffold(
@@ -87,11 +81,9 @@ fun PremiumMoreInfoScreen(
                 }
 
                 FEATURES_TAB_INDEX -> {
-
                 }
 
                 FAQ_TAB_INDEX -> {
-
                 }
             }
         }
@@ -100,14 +92,11 @@ fun PremiumMoreInfoScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun MoreInfoTopAppBar(
-    pagerState: PagerState,
-    onClose: () -> Unit,
-) {
+private fun MoreInfoTopAppBar(pagerState: PagerState, onClose: () -> Unit) {
     val uiScope = rememberCoroutineScope()
 
     Column(
-        modifier = Modifier.background(AppTheme.colorScheme.surface)
+        modifier = Modifier.background(AppTheme.colorScheme.surface),
     ) {
         PrimalTopAppBar(
             title = "Primal Premium",
@@ -122,15 +111,11 @@ private fun MoreInfoTopAppBar(
             onFeaturesTabClick = { uiScope.launch { pagerState.scrollToPage(FEATURES_TAB_INDEX) } },
             onFAQTabClick = { uiScope.launch { pagerState.scrollToPage(FAQ_TAB_INDEX) } },
         )
-
     }
-
 }
 
 @Composable
-private fun WhyPremiumTabContent(
-    modifier: Modifier = Modifier,
-) {
+private fun WhyPremiumTabContent(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(26.dp),
@@ -153,7 +138,7 @@ private fun WhyPremiumTabContent(
             At Primal, we don’t rely on advertising. We don’t monetize user data. Our users are our customers. Our sole focus is to make the best possible product for our users. We open source all our work to help the Nostr ecosystem flourish. By signing up for Primal Premium, you are enabling us to continue building for Nostr. 
             
             Be the change you want to see in the world. If you don’t want to be the product, consider being the customer. 
-        """.trimIndent(),
+            """.trimIndent(),
         )
     }
 }
@@ -201,7 +186,5 @@ private fun MoreInfoTabs(
             onClick = onFAQTabClick,
             textStyle = AppTheme.typography.bodyMedium,
         )
-
     }
-
 }
