@@ -1,12 +1,5 @@
 ## Changes
-- Implement new link previews
-- Use ellipsis for long author names in reads, but keep timestamp
-- Update ContentAppearance; Set 300 chars note limit on note feeds;
-- Fix unable to render conversations if DM is missing
-- Implement refresh on conversation error state actually refreshes data
-- Implement skeleton loaders messages, chats, wallet tx & profile follows;
-- Fixed loading logic on DM conversations screen;
-- Implement no feeds states on HomeFeedScreen and ReadsScreen (#217)
-- Improve media caching (#215)
-- Implement initial premium home screen (#218)
-- Implement find primal name on premium (#219)
+- Implement mandatory full width on referenced notes and articles;
+- Implement line break trimming on note content;
+- Update username size content appearance;
+- Fix missing zap icon on top zap;
