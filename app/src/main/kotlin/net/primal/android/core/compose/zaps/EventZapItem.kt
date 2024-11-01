@@ -13,8 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
 import net.primal.android.core.compose.AvatarThumbnail
+import net.primal.android.core.compose.IconText
+import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.FeedNewZapFilled
 import net.primal.android.stats.ui.EventZapUiModel
 import net.primal.android.theme.AppTheme
 
@@ -47,14 +51,16 @@ fun EventZapItem(
             onClick = onClick,
         )
 
-        Text(
-            modifier = Modifier.padding(horizontal = 8.dp),
+        IconText(
+            modifier = Modifier.padding(start = 4.dp, end = 8.dp),
             text = numberFormat.format(noteZap.amountInSats.toLong()),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             style = AppTheme.typography.bodySmall,
             color = AppTheme.colorScheme.onSurface,
             fontWeight = FontWeight.SemiBold,
+            leadingIcon = if (showMessage) PrimalIcons.FeedNewZapFilled else null,
+            iconSize = 14.sp,
         )
 
         if (showMessage && !noteZap.message.isNullOrEmpty()) {
