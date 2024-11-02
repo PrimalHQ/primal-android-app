@@ -36,6 +36,10 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.premium.info.ui.FAQTabContent
+import net.primal.android.premium.info.ui.FeaturesTabContent
+import net.primal.android.premium.info.ui.MoreInfoTabs
+import net.primal.android.premium.info.ui.WhyPremiumTabContent
 import net.primal.android.theme.AppTheme
 
 internal const val MORE_INFO_TAB_COUNT = 3
@@ -79,11 +83,18 @@ fun PremiumMoreInfoScreen(onClose: () -> Unit) {
                     WhyPremiumTabContent(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(20.dp),
+                            .padding(horizontal = 20.dp)
+                            .padding(top = 20.dp),
                     )
                 }
 
                 FEATURES_TAB_INDEX -> {
+                    FeaturesTabContent(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 20.dp)
+                            .padding(top = 20.dp),
+                    )
                 }
 
                 FAQ_TAB_INDEX -> {
@@ -119,128 +130,6 @@ private fun MoreInfoTopAppBar(pagerState: PagerState, onClose: () -> Unit) {
             onWhyPremiumTabClick = { uiScope.launch { pagerState.scrollToPage(WHY_PREMIUM_TAB_INDEX) } },
             onFeaturesTabClick = { uiScope.launch { pagerState.scrollToPage(FEATURES_TAB_INDEX) } },
             onFAQTabClick = { uiScope.launch { pagerState.scrollToPage(FAQ_TAB_INDEX) } },
-        )
-    }
-}
-
-@Composable
-private fun WhyPremiumTabContent(modifier: Modifier = Modifier) {
-    QAColumn(
-        modifier = modifier,
-        question = "Why Get Primal Premium?",
-        answer = """
-            Become a Nostr power user and help shape the future! Open protocols like Nostr give us the opportunity to regain control over our online lives. 
-            
-            At Primal, we don’t rely on advertising. We don’t monetize user data. Our users are our customers. Our sole focus is to make the best possible product for our users. We open source all our work to help the Nostr ecosystem flourish. By signing up for Primal Premium, you are enabling us to continue building for Nostr. 
-            
-            Be the change you want to see in the world. If you don’t want to be the product, consider being the customer. 
-            """.trimIndent(),
-    )
-}
-
-@Composable
-private fun FAQTabContent(
-    modifier: Modifier = Modifier,
-) {
-    val questionAndAnswerPairs = listOf(
-        Pair(
-            "Become a Nostr power user and help shape the future?",
-            """
-            At Primal, we don’t rely on advertising. We don’t monetize user data. Our users are our customers. Our sole focus is to make the best possible product for our users. We open source all our work to help the Nostr ecosystem flourish. By signing up for Primal Premium, you are enabling us to continue building for Nostr. 
-        """.trimIndent(),
-        ),
-        Pair(
-            "Open protocols like Nostr give us the opportunity to regain control over our online lives?",
-            """
-            At Primal, we don’t rely on advertising. We don’t monetize user data. Our users are our customers. Our sole focus is to make the best possible product for our users. We open source all our work to help the Nostr ecosystem flourish. By signing up for Primal Premium, you are enabling us to continue building for Nostr. 
-        """.trimIndent(),
-        ),
-    )
-    LazyColumn(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(42.dp),
-    ) {
-        items(
-            items = questionAndAnswerPairs,
-            key = { it.first },
-        ) { qaPair ->
-            QAColumn(
-                question = qaPair.first,
-                answer = qaPair.second,
-            )
-        }
-    }
-}
-
-@Composable
-fun QAColumn(
-    modifier: Modifier = Modifier,
-    question: String,
-    answer: String,
-) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(26.dp),
-    ) {
-        Text(
-            text = question,
-            fontWeight = FontWeight.Bold,
-            style = AppTheme.typography.bodyLarge,
-            fontSize = 18.sp,
-        )
-        Text(
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-            style = AppTheme.typography.bodyLarge,
-            lineHeight = 24.sp,
-            fontSize = 18.sp,
-            textAlign = TextAlign.Justify,
-            text = answer,
-        )
-    }
-}
-
-@Composable
-private fun MoreInfoTabs(
-    modifier: Modifier = Modifier,
-    selectedTabIndex: Int,
-    onWhyPremiumTabClick: () -> Unit,
-    onFeaturesTabClick: () -> Unit,
-    onFAQTabClick: () -> Unit,
-) {
-    TabRow(
-        modifier = modifier.padding(vertical = 4.dp),
-        selectedTabIndex = selectedTabIndex,
-        indicator = { tabPositions ->
-            if (selectedTabIndex < tabPositions.size) {
-                TabRowDefaults.SecondaryIndicator(
-                    modifier = Modifier
-                        .tabIndicatorOffset(tabPositions[selectedTabIndex])
-                        .padding(horizontal = 16.dp)
-                        .padding(bottom = 4.dp)
-                        .clip(RoundedCornerShape(percent = 100)),
-                    height = 4.dp,
-                    color = AppTheme.colorScheme.tertiary,
-                )
-            }
-        },
-    ) {
-        PrimalSingleTab(
-            selected = selectedTabIndex == WHY_PREMIUM_TAB_INDEX,
-            text = "Why Premium".uppercase(),
-            onClick = onWhyPremiumTabClick,
-            textStyle = AppTheme.typography.bodyMedium,
-        )
-        PrimalSingleTab(
-            selected = selectedTabIndex == FEATURES_TAB_INDEX,
-            text = "Features".uppercase(),
-            onClick = onFeaturesTabClick,
-            textStyle = AppTheme.typography.bodyMedium,
-        )
-        PrimalSingleTab(
-            selected = selectedTabIndex == FAQ_TAB_INDEX,
-            text = "FAQ".uppercase(),
-            onClick = onFAQTabClick,
-            textStyle = AppTheme.typography.bodyMedium,
         )
     }
 }
