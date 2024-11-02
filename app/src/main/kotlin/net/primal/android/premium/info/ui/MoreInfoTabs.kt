@@ -17,7 +17,6 @@ import net.primal.android.premium.info.FEATURES_TAB_INDEX
 import net.primal.android.premium.info.WHY_PREMIUM_TAB_INDEX
 import net.primal.android.theme.AppTheme
 
-
 @Composable
 fun MoreInfoTabs(
     modifier: Modifier = Modifier,

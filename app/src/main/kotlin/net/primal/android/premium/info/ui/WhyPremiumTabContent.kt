@@ -13,4 +13,3 @@ fun WhyPremiumTabContent(modifier: Modifier = Modifier) {
         answer = stringResource(id = R.string.premium_more_info_why_premium_answer).trimIndent(),
     )
 }
-

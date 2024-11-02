@@ -32,12 +32,8 @@ import net.primal.android.core.compose.icons.primaliconpack.Check
 import net.primal.android.theme.AppTheme
 import org.apache.commons.lang3.NotImplementedException
 
-
 @Composable
-fun FeaturesTabContent(
-    modifier: Modifier = Modifier,
-    contentPadding: PaddingValues,
-) {
+fun FeaturesTabContent(modifier: Modifier = Modifier, contentPadding: PaddingValues) {
     val features = listOf(
         Feature(
             featureText = stringResource(id = R.string.premium_more_info_features_table_first_row),
@@ -150,10 +146,7 @@ private fun FeatureStringRow(
 }
 
 @Composable
-private fun RowScope.FeatureText(
-    featureText: String,
-    isHeaderRow: Boolean = false,
-) {
+private fun RowScope.FeatureText(featureText: String, isHeaderRow: Boolean = false) {
     Text(
         modifier = Modifier
             .padding(end = 16.dp)
@@ -173,10 +166,7 @@ private fun RowScope.FeatureText(
 }
 
 @Composable
-private fun RowScope.OfferText(
-    text: String,
-    isHeaderRow: Boolean = false,
-) {
+private fun RowScope.OfferText(text: String, isHeaderRow: Boolean = false) {
     Text(
         modifier = Modifier
             .fillMaxWidth()
@@ -211,13 +201,10 @@ private fun FeatureBooleanRow(
         OfferIcon(value = free)
         OfferIcon(value = premium)
     }
-
 }
 
 @Composable
-private fun RowScope.OfferIcon(
-    value: Boolean,
-) {
+private fun RowScope.OfferIcon(value: Boolean) {
     Box(
         modifier = Modifier
             .weight(1f)
@@ -237,9 +224,7 @@ private fun RowScope.OfferIcon(
 }
 
 @Composable
-private fun <T : Any> Feature<T>.ToFeatureRow(
-    modifier: Modifier = Modifier,
-) =
+private fun <T : Any> Feature<T>.ToFeatureRow(modifier: Modifier = Modifier) =
     when {
         this.free is String && this.premium is String ->
             FeatureStringRow(
@@ -261,7 +246,6 @@ private fun <T : Any> Feature<T>.ToFeatureRow(
             "don't know how to handle types ${this.free::class} and ${this.premium::class}",
         )
     }
-
 
 data class Feature<T : Any>(
     val featureText: String,
