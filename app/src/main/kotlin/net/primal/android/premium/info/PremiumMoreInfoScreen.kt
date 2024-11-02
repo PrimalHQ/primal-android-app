@@ -101,8 +101,8 @@ fun PremiumMoreInfoScreen(onClose: () -> Unit) {
                     FAQTabContent(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(horizontal = 20.dp)
-                            .padding(top = 20.dp),
+                            .padding(horizontal = 20.dp),
+                        contentPadding = paddingValues,
                     )
                 }
             }

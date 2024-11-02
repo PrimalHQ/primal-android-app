@@ -1,6 +1,9 @@
 package net.primal.android.premium.info.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
@@ -11,6 +14,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun FAQTabContent(
     modifier: Modifier = Modifier,
+    contentPadding: PaddingValues,
 ) {
     val questionAndAnswerPairs = listOf(
         Pair(
@@ -27,17 +31,21 @@ fun FAQTabContent(
         ),
     )
     LazyColumn(
+        contentPadding = contentPadding,
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(42.dp),
     ) {
+        item { Spacer(modifier = Modifier.height(20.dp)) }
         items(
             items = questionAndAnswerPairs,
             key = { it.first },
         ) { qaPair ->
-            QAColumn(
-                question = qaPair.first,
-                answer = qaPair.second,
-            )
+            repeat(times = 2) {
+                QAColumn(
+                    question = qaPair.first,
+                    answer = qaPair.second,
+                )
+                Spacer(modifier = Modifier.height(42.dp))
+            }
         }
     }
 }
