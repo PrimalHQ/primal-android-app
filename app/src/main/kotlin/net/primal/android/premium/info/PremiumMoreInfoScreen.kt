@@ -3,6 +3,7 @@ package net.primal.android.premium.info
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,6 +22,9 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarState
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -60,22 +64,27 @@ fun PremiumMoreInfoScreen(onClose: () -> Unit) {
             )
         },
         bottomBar = {
-            PrimalFilledButton(
+            Box(
                 modifier = Modifier
-                    .padding(vertical = 24.dp, horizontal = 36.dp)
-                    .navigationBarsPadding()
+                    .background(AppTheme.colorScheme.surfaceVariant)
                     .fillMaxWidth(),
-                onClick = onClose,
-                containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                contentColor = AppTheme.colorScheme.onBackground,
-            ) {
-                Text(text = "Close", fontWeight = FontWeight.Bold)
+                ) {
+                PrimalFilledButton(
+                    modifier = Modifier
+                        .padding(vertical = 24.dp, horizontal = 36.dp)
+                        .navigationBarsPadding()
+                        .fillMaxWidth(),
+                    onClick = onClose,
+                    containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                    contentColor = AppTheme.colorScheme.onBackground,
+                ) {
+                    Text(text = "Close", fontWeight = FontWeight.Bold)
+                }
             }
         },
     ) { paddingValues ->
         HorizontalPager(
             state = pagerState,
-            contentPadding = paddingValues,
             modifier = Modifier.background(AppTheme.colorScheme.surfaceVariant),
         ) { currentPage ->
             when (currentPage) {
@@ -83,6 +92,7 @@ fun PremiumMoreInfoScreen(onClose: () -> Unit) {
                     WhyPremiumTabContent(
                         modifier = Modifier
                             .fillMaxSize()
+                            .padding(paddingValues)
                             .padding(horizontal = 20.dp)
                             .padding(top = 20.dp),
                     )
@@ -92,8 +102,8 @@ fun PremiumMoreInfoScreen(onClose: () -> Unit) {
                     FeaturesTabContent(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(horizontal = 20.dp)
-                            .padding(top = 20.dp),
+                            .padding(horizontal = 20.dp),
+                        contentPadding = paddingValues,
                     )
                 }
 
