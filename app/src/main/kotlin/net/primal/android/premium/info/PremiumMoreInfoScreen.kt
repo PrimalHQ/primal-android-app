@@ -30,11 +30,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import net.primal.android.R
 import net.primal.android.core.compose.PrimalSingleTab
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalFilledButton
@@ -68,7 +70,7 @@ fun PremiumMoreInfoScreen(onClose: () -> Unit) {
                 modifier = Modifier
                     .background(AppTheme.colorScheme.surfaceVariant)
                     .fillMaxWidth(),
-                ) {
+            ) {
                 PrimalFilledButton(
                     modifier = Modifier
                         .padding(vertical = 24.dp, horizontal = 36.dp)
@@ -78,7 +80,10 @@ fun PremiumMoreInfoScreen(onClose: () -> Unit) {
                     containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
                     contentColor = AppTheme.colorScheme.onBackground,
                 ) {
-                    Text(text = "Close", fontWeight = FontWeight.Bold)
+                    Text(
+                        text = stringResource(id = R.string.premium_more_info_close_button),
+                        fontWeight = FontWeight.Bold,
+                    )
                 }
             }
         },
@@ -129,7 +134,7 @@ private fun MoreInfoTopAppBar(pagerState: PagerState, onClose: () -> Unit) {
         modifier = Modifier.background(AppTheme.colorScheme.surface),
     ) {
         PrimalTopAppBar(
-            title = "Primal Premium",
+            title = stringResource(id = R.string.premium_more_info_title),
             navigationIcon = PrimalIcons.ArrowBack,
             onNavigationIconClick = onClose,
             showDivider = false,

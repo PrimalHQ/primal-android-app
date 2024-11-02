@@ -7,8 +7,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import net.primal.android.R
 
 
 @Composable
@@ -18,16 +21,12 @@ fun FAQTabContent(
 ) {
     val questionAndAnswerPairs = listOf(
         Pair(
-            "Become a Nostr power user and help shape the future?",
-            """
-            At Primal, we don’t rely on advertising. We don’t monetize user data. Our users are our customers. Our sole focus is to make the best possible product for our users. We open source all our work to help the Nostr ecosystem flourish. By signing up for Primal Premium, you are enabling us to continue building for Nostr. 
-        """.trimIndent(),
+            stringResource(id = R.string.premium_more_info_faq_first_question),
+            stringResource(id = R.string.premium_more_info_faq_first_answer),
         ),
         Pair(
-            "Open protocols like Nostr give us the opportunity to regain control over our online lives?",
-            """
-            At Primal, we don’t rely on advertising. We don’t monetize user data. Our users are our customers. Our sole focus is to make the best possible product for our users. We open source all our work to help the Nostr ecosystem flourish. By signing up for Primal Premium, you are enabling us to continue building for Nostr. 
-        """.trimIndent(),
+            stringResource(id = R.string.premium_more_info_faq_second_question),
+            stringResource(id = R.string.premium_more_info_faq_second_answer),
         ),
     )
     LazyColumn(
@@ -49,4 +48,3 @@ fun FAQTabContent(
         }
     }
 }
-

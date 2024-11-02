@@ -8,7 +8,9 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import net.primal.android.R
 import net.primal.android.core.compose.PrimalSingleTab
 import net.primal.android.premium.info.FAQ_TAB_INDEX
 import net.primal.android.premium.info.FEATURES_TAB_INDEX
@@ -43,19 +45,19 @@ fun MoreInfoTabs(
     ) {
         PrimalSingleTab(
             selected = selectedTabIndex == WHY_PREMIUM_TAB_INDEX,
-            text = "Why Premium".uppercase(),
+            text = stringResource(id = R.string.premium_more_info_why_premium).uppercase(),
             onClick = onWhyPremiumTabClick,
             textStyle = AppTheme.typography.bodyMedium,
         )
         PrimalSingleTab(
             selected = selectedTabIndex == FEATURES_TAB_INDEX,
-            text = "Features".uppercase(),
+            text = stringResource(id = R.string.premium_more_info_features).uppercase(),
             onClick = onFeaturesTabClick,
             textStyle = AppTheme.typography.bodyMedium,
         )
         PrimalSingleTab(
             selected = selectedTabIndex == FAQ_TAB_INDEX,
-            text = "FAQ".uppercase(),
+            text = stringResource(id = R.string.premium_more_info_faq),
             onClick = onFAQTabClick,
             textStyle = AppTheme.typography.bodyMedium,
         )

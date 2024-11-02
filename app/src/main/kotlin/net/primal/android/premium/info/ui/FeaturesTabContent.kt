@@ -19,11 +19,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import net.primal.android.R
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Check
@@ -37,16 +39,56 @@ fun FeaturesTabContent(
     contentPadding: PaddingValues,
 ) {
     val features = listOf(
-        Feature(featureText = "Apps for Web, iOS, Android", free = true, premium = true),
-        Feature(featureText = "Built-in bitcoin lightning wallet", free = true, premium = true),
-        Feature(featureText = "Global Nostr text and user search", free = true, premium = true),
-        Feature(featureText = "Media storage capacity", free = "1 Gb", premium = "10 Gb"),
-        Feature(featureText = "Media maximum file size", free = "100mb", premium = "1 Gb"),
-        Feature(featureText = "Verified Nostr Address", free = false, premium = true),
-        Feature(featureText = "Custom Lightning Address", free = false, premium = true),
-        Feature(featureText = "VIP Profile on primal.net", free = false, premium = true),
-        Feature(featureText = "Advanced Nostr search", free = false, premium = true),
-        Feature(featureText = "Premium paid relay", free = false, premium = true),
+        Feature(
+            featureText = stringResource(id = R.string.premium_more_info_features_table_first_row),
+            free = true,
+            premium = true,
+        ),
+        Feature(
+            featureText = stringResource(id = R.string.premium_more_info_features_table_second_row),
+            free = true,
+            premium = true,
+        ),
+        Feature(
+            featureText = stringResource(id = R.string.premium_more_info_features_table_third_row),
+            free = true,
+            premium = true,
+        ),
+        Feature(
+            featureText = stringResource(id = R.string.premium_more_info_features_table_fourth_row),
+            free = "1 Gb",
+            premium = "10 Gb",
+        ),
+        Feature(
+            featureText = stringResource(id = R.string.premium_more_info_features_table_fifth_row),
+            free = "100mb",
+            premium = "1 Gb",
+        ),
+        Feature(
+            featureText = stringResource(id = R.string.premium_more_info_features_table_sixth_row),
+            free = false,
+            premium = true,
+        ),
+        Feature(
+            featureText = stringResource(id = R.string.premium_more_info_features_table_seventh_row),
+            free = false,
+            premium = true,
+        ),
+        Feature(
+            featureText = stringResource(id = R.string.premium_more_info_features_table_eighth_row),
+            free = false,
+            premium = true,
+        ),
+        Feature(
+            featureText = stringResource(id = R.string.premium_more_info_features_table_ninth_row),
+            free = false,
+            premium = true,
+        ),
+        Feature(
+            featureText = stringResource(id = R.string.premium_more_info_features_table_tenth_row),
+            free = false,
+            premium = true,
+        ),
     )
 
     LazyColumn(
@@ -58,9 +100,9 @@ fun FeaturesTabContent(
             Spacer(modifier = Modifier.height(20.dp))
             FeatureStringRow(
                 modifier = Modifier.clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp)),
-                featureText = "Feature",
-                free = "Free",
-                premium = "Premium",
+                featureText = stringResource(id = R.string.premium_more_info_features_table_header_feature),
+                free = stringResource(id = R.string.premium_more_info_features_table_header_free),
+                premium = stringResource(id = R.string.premium_more_info_features_table_header_premium),
                 isHeaderRow = true,
             )
         }
