@@ -1,12 +1,16 @@
 package net.primal.android.premium.info
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -21,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -39,7 +44,6 @@ internal const val WHY_PREMIUM_TAB_INDEX = 0
 internal const val FEATURES_TAB_INDEX = 1
 internal const val FAQ_TAB_INDEX = 2
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PremiumMoreInfoScreen(onClose: () -> Unit) {
     val pagerState = rememberPagerState { MORE_INFO_TAB_COUNT }
@@ -54,9 +58,8 @@ fun PremiumMoreInfoScreen(onClose: () -> Unit) {
         bottomBar = {
             PrimalFilledButton(
                 modifier = Modifier
-                    .padding(vertical = 24.dp)
-                    .padding(horizontal = 36.dp)
-                    .systemBarsPadding()
+                    .padding(vertical = 24.dp, horizontal = 36.dp)
+                    .navigationBarsPadding()
                     .fillMaxWidth(),
                 onClick = onClose,
                 containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
@@ -84,6 +87,12 @@ fun PremiumMoreInfoScreen(onClose: () -> Unit) {
                 }
 
                 FAQ_TAB_INDEX -> {
+                    FAQTabContent(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 20.dp)
+                            .padding(top = 20.dp),
+                    )
                 }
             }
         }
@@ -116,12 +125,65 @@ private fun MoreInfoTopAppBar(pagerState: PagerState, onClose: () -> Unit) {
 
 @Composable
 private fun WhyPremiumTabContent(modifier: Modifier = Modifier) {
+    QAColumn(
+        modifier = modifier,
+        question = "Why Get Primal Premium?",
+        answer = """
+            Become a Nostr power user and help shape the future! Open protocols like Nostr give us the opportunity to regain control over our online lives. 
+            
+            At Primal, we don’t rely on advertising. We don’t monetize user data. Our users are our customers. Our sole focus is to make the best possible product for our users. We open source all our work to help the Nostr ecosystem flourish. By signing up for Primal Premium, you are enabling us to continue building for Nostr. 
+            
+            Be the change you want to see in the world. If you don’t want to be the product, consider being the customer. 
+            """.trimIndent(),
+    )
+}
+
+@Composable
+private fun FAQTabContent(
+    modifier: Modifier = Modifier,
+) {
+    val questionAndAnswerPairs = listOf(
+        Pair(
+            "Become a Nostr power user and help shape the future?",
+            """
+            At Primal, we don’t rely on advertising. We don’t monetize user data. Our users are our customers. Our sole focus is to make the best possible product for our users. We open source all our work to help the Nostr ecosystem flourish. By signing up for Primal Premium, you are enabling us to continue building for Nostr. 
+        """.trimIndent(),
+        ),
+        Pair(
+            "Open protocols like Nostr give us the opportunity to regain control over our online lives?",
+            """
+            At Primal, we don’t rely on advertising. We don’t monetize user data. Our users are our customers. Our sole focus is to make the best possible product for our users. We open source all our work to help the Nostr ecosystem flourish. By signing up for Primal Premium, you are enabling us to continue building for Nostr. 
+        """.trimIndent(),
+        ),
+    )
+    LazyColumn(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(42.dp),
+    ) {
+        items(
+            items = questionAndAnswerPairs,
+            key = { it.first },
+        ) { qaPair ->
+            QAColumn(
+                question = qaPair.first,
+                answer = qaPair.second,
+            )
+        }
+    }
+}
+
+@Composable
+fun QAColumn(
+    modifier: Modifier = Modifier,
+    question: String,
+    answer: String,
+) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(26.dp),
     ) {
         Text(
-            text = "Why Get Primal Premium?",
+            text = question,
             fontWeight = FontWeight.Bold,
             style = AppTheme.typography.bodyLarge,
             fontSize = 18.sp,
@@ -132,13 +194,7 @@ private fun WhyPremiumTabContent(modifier: Modifier = Modifier) {
             lineHeight = 24.sp,
             fontSize = 18.sp,
             textAlign = TextAlign.Justify,
-            text = """
-            Become a Nostr power user and help shape the future! Open protocols like Nostr give us the opportunity to regain control over our online lives. 
-            
-            At Primal, we don’t rely on advertising. We don’t monetize user data. Our users are our customers. Our sole focus is to make the best possible product for our users. We open source all our work to help the Nostr ecosystem flourish. By signing up for Primal Premium, you are enabling us to continue building for Nostr. 
-            
-            Be the change you want to see in the world. If you don’t want to be the product, consider being the customer. 
-            """.trimIndent(),
+            text = answer,
         )
     }
 }
