@@ -26,6 +26,7 @@ fun QAColumn(
             fontWeight = FontWeight.Bold,
             style = AppTheme.typography.bodyLarge,
             fontSize = 18.sp,
+            textAlign = TextAlign.Justify,
         )
         Text(
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
