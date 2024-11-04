@@ -1,6 +1,7 @@
 package net.primal.android.notes.feed.note.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,7 +35,8 @@ import net.primal.android.notes.feed.note.ui.attachment.NoteImageLoadingPlacehol
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
-private val ThumbnailSize = 100.dp
+private val ThumbnailWidth = 100.dp
+private val ThumbnailHeight = 90.dp
 
 @Composable
 fun NoteLinkPreview(
@@ -46,11 +48,9 @@ fun NoteLinkPreview(
     Row(
         modifier = Modifier
             .padding(top = 4.dp, bottom = 8.dp)
-            .height(height = ThumbnailSize)
-            .background(
-                color = AppTheme.extraColorScheme.surfaceVariantAlt3,
-                shape = AppTheme.shapes.small,
-            )
+            .height(height = ThumbnailHeight)
+            .background(color = AppTheme.extraColorScheme.surfaceVariantAlt3, shape = AppTheme.shapes.small)
+            .border(width = 0.5.dp, color = AppTheme.extraColorScheme.surfaceVariantAlt1, shape = AppTheme.shapes.small)
             .clickable(enabled = onClick != null, onClick = { onClick?.invoke() }),
     ) {
         if (thumbnailUrl != null) {
@@ -64,9 +64,9 @@ fun NoteLinkPreview(
                         ),
                     )
                     .background(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
-                    .size(size = ThumbnailSize),
+                    .size(width = ThumbnailWidth, height = ThumbnailHeight),
                 contentDescription = null,
-                contentScale = ContentScale.FillHeight,
+                contentScale = ContentScale.Crop,
                 loading = {
                     NoteImageLoadingPlaceholder()
                 },
@@ -97,7 +97,7 @@ fun NoteLinkPreview(
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             val tld = url.extractTLD()
             if (tld != null) {
@@ -110,6 +110,7 @@ fun NoteLinkPreview(
                     maxLines = 1,
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                     style = AppTheme.typography.bodyMedium,
+                    fontSize = 15.sp,
                 )
             }
         }
@@ -122,7 +123,7 @@ fun NoteLinkPreview(
 private fun GenericLinkThumbnailIcon() {
     Box(
         modifier = Modifier
-            .size(size = ThumbnailSize)
+            .size(width = ThumbnailWidth, height = ThumbnailHeight)
             .clip(
                 shape = AppTheme.shapes.small.copy(
                     topEnd = CornerSize(0.dp),
