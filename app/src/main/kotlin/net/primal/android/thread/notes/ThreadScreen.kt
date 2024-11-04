@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -109,7 +110,6 @@ fun ThreadScreen(
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     onExpandReply: (args: NoteEditorArgs) -> Unit,
-    onReactionsClick: (noteId: String) -> Unit,
 ) {
     val uiState by viewModel.state.collectAsState()
 
@@ -129,7 +129,6 @@ fun ThreadScreen(
         noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
         onExpandReply = onExpandReply,
-        onReactionsClick = onReactionsClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -142,7 +141,6 @@ fun ThreadScreen(
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     onExpandReply: (args: NoteEditorArgs) -> Unit,
-    onReactionsClick: (noteId: String) -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
 ) {
     val context = LocalContext.current
@@ -177,7 +175,6 @@ fun ThreadScreen(
                     state = state,
                     noteCallbacks = noteCallbacks,
                     onGoToWallet = onGoToWallet,
-                    onReactionsClick = onReactionsClick,
                     eventPublisher = eventPublisher,
                     onUiError = { uiError ->
                         uiScope.launch {
@@ -270,7 +267,6 @@ private fun ThreadConversationLazyColumn(
     state: ThreadContract.UiState,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
-    onReactionsClick: (noteId: String) -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
     onUiError: ((UiError) -> Unit)? = null,
 ) {
@@ -304,7 +300,6 @@ private fun ThreadConversationLazyColumn(
         ThreadLazyColumn(
             modifier = Modifier.fillMaxSize(),
             state = state,
-            onReactionsClick = onReactionsClick,
             onGoToWallet = onGoToWallet,
             noteCallbacks = noteCallbacks,
             onUiError = onUiError,
@@ -317,7 +312,6 @@ private fun ThreadConversationLazyColumn(
 private fun ThreadLazyColumn(
     modifier: Modifier,
     state: ThreadContract.UiState,
-    onReactionsClick: (noteId: String) -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: (() -> Unit),
     paddingValues: PaddingValues = PaddingValues(all = 0.dp),
@@ -397,7 +391,11 @@ private fun ThreadLazyColumn(
                                 if (item.eventZaps.isNotEmpty()) {
                                     ThreadNoteTopZapsSection(
                                         zaps = item.eventZaps,
-                                        onClick = { onReactionsClick(item.postId) },
+                                        onClick = if (noteCallbacks.onEventReactionsClick != null) {
+                                            { noteCallbacks.onEventReactionsClick.invoke(item.postId) }
+                                        } else {
+                                            null
+                                        },
                                     )
                                 }
 
@@ -412,7 +410,12 @@ private fun ThreadLazyColumn(
 
                                 if (item.stats.hasAnyCount()) {
                                     ThreadNoteStatsRow(
-                                        modifier = Modifier.padding(top = 10.dp),
+                                        modifier = Modifier
+                                            .padding(top = 10.dp)
+                                            .clickable(
+                                                enabled = noteCallbacks.onEventReactionsClick != null,
+                                                onClick = { noteCallbacks.onEventReactionsClick?.invoke(item.postId) },
+                                            ),
                                         eventStats = item.stats,
                                     )
                                 }
@@ -690,7 +693,6 @@ fun ThreadScreenPreview() {
             noteCallbacks = NoteCallbacks(),
             onGoToWallet = {},
             onExpandReply = {},
-            onReactionsClick = {},
             eventPublisher = {},
         )
     }

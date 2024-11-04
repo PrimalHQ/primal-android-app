@@ -9,7 +9,11 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.stats.ui.EventZapUiModel
 
 @Composable
-fun FeedNoteTopZapsSection(zaps: List<EventZapUiModel>, modifier: Modifier = Modifier) {
+fun FeedNoteTopZapsSection(
+    zaps: List<EventZapUiModel>,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
+) {
     Row(modifier = modifier) {
         if (zaps.isNotEmpty()) {
             Box(
@@ -20,12 +24,14 @@ fun FeedNoteTopZapsSection(zaps: List<EventZapUiModel>, modifier: Modifier = Mod
                 EventZapItem(
                     noteZap = zaps.first(),
                     showMessage = true,
+                    onClick = onClick,
                 )
             }
         }
         if (zaps.size > 1) {
             ZappersAvatarThumbnailRow(
                 zaps = zaps.drop(n = 1).take(n = 3),
+                onClick = onClick,
             )
         }
     }
