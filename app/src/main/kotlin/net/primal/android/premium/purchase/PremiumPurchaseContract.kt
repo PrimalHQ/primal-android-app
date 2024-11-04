@@ -6,6 +6,7 @@ interface PremiumPurchaseContract {
     data class UiState(
         val profile: ProfileDetailsUi? = null,
         val promoCodeValidity: Boolean? = null,
+        val isCheckingPromoCodeValidity: Boolean = false,
     )
 
     sealed class UiEvent {

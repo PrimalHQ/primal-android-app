@@ -32,6 +32,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.OtpTextField
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalFilledButton
+import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,6 +40,7 @@ import net.primal.android.theme.AppTheme
 fun PremiumPromoCodeBottomSheet(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
+    isCheckingPromoCodeValidity: Boolean,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     onCodeCodeConfirmed: (String) -> Unit,
     promoCodeValidity: Boolean? = null,
@@ -74,6 +76,7 @@ fun PremiumPromoCodeBottomSheet(
                         isFieldDirty = false
                         onCodeCodeConfirmed(promoCode)
                     },
+                    isCheckingPromoCodeValidity = isCheckingPromoCodeValidity,
                 )
             },
         ) { paddingValues ->
@@ -124,6 +127,7 @@ fun BottomBarButtonsColumn(
     modifier: Modifier = Modifier,
     onApplyClick: () -> Unit,
     onCancelClick: () -> Unit,
+    isCheckingPromoCodeValidity: Boolean,
 ) {
     Column(
         modifier = modifier
@@ -133,17 +137,14 @@ fun BottomBarButtonsColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        PrimalFilledButton(
+        PrimalLoadingButton(
+            loading = isCheckingPromoCodeValidity,
             modifier = Modifier.fillMaxWidth(),
             onClick = onApplyClick,
-        ) {
-            Text(
-                text = stringResource(id = R.string.premium_promo_code_apply_button),
-                style = AppTheme.typography.bodyLarge,
-                color = Color.White,
-                fontWeight = FontWeight.SemiBold,
-            )
-        }
+            text = stringResource(id = R.string.premium_promo_code_apply_button),
+            contentColor = Color.White,
+            fontWeight = FontWeight.SemiBold,
+        )
         PrimalFilledButton(
             modifier = Modifier.fillMaxWidth(),
             onClick = onCancelClick,

@@ -100,6 +100,7 @@ private fun PremiumPurchaseStage(
             onCodeCodeConfirmed = {
                 eventPublisher(PremiumPurchaseContract.UiEvent.ApplyPromoCode(it))
             },
+            isCheckingPromoCodeValidity = state.isCheckingPromoCodeValidity,
         )
     }
     Scaffold(
