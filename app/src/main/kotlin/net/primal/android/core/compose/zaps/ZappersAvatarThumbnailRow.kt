@@ -21,7 +21,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
-fun ZappersAvatarThumbnailRow(zaps: List<EventZapUiModel>) {
+fun ZappersAvatarThumbnailRow(zaps: List<EventZapUiModel>, onClick: (() -> Unit)? = null) {
     Box(
         modifier = Modifier,
         contentAlignment = Alignment.CenterEnd,
@@ -37,6 +37,7 @@ fun ZappersAvatarThumbnailRow(zaps: List<EventZapUiModel>) {
                     hasBorder = true,
                     borderSize = 1.dp,
                     borderColor = AppTheme.colorScheme.surface,
+                    onClick = onClick,
                 )
             }
         }

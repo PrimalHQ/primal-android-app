@@ -263,13 +263,13 @@
     <string name="thread_stats_likes">Likes</string>
     <string name="thread_stats_reposts">Reposts</string>
 
-    <string name="note_reactions_title">Note Reactions</string>
-    <string name="note_reactions_zaps_tab">Zaps</string>
-    <string name="note_reactions_likes_tab">Likes</string>
-    <string name="note_reactions_reposts_tab">Reposts</string>
-    <string name="note_reactions_zaps_no_content">There are no zaps for this note.</string>
-    <string name="note_reactions_likes_no_content">There are no likes for this note.</string>
-    <string name="note_reactions_reposts_no_content">There are no reposts for this note.</string>
+    <string name="reactions_title">Reactions</string>
+    <string name="reactions_zaps_tab">Zaps</string>
+    <string name="reactions_likes_tab">Likes</string>
+    <string name="reactions_reposts_tab">Reposts</string>
+    <string name="reactions_zaps_no_content">There are no zaps.</string>
+    <string name="reactions_likes_no_content">There are no likes.</string>
+    <string name="reactions_reposts_no_content">There are no reposts.</string>
 
     <string name="explore_search_nostr">Search Nostr</string>
     <string name="explore_search_notes">Search Notes</string>

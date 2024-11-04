@@ -1,6 +1,7 @@
 package net.primal.android.thread.articles.details
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -113,7 +114,6 @@ fun ArticleDetailsScreen(
     onArticleHashtagClick: (hashtag: String) -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
-    onReactionsClick: (eventId: String) -> Unit,
 ) {
     val detailsState by viewModel.state.collectAsState()
     DisposableLifecycleObserverEffect(viewModel) {
@@ -133,7 +133,6 @@ fun ArticleDetailsScreen(
         articleEventPublisher = articleViewModel::setEvent,
         onClose = onClose,
         onArticleHashtagClick = onArticleHashtagClick,
-        onReactionsClick = onReactionsClick,
         noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
     )
@@ -147,7 +146,6 @@ private fun ArticleDetailsScreen(
     detailsEventPublisher: (UiEvent) -> Unit,
     articleEventPublisher: (ArticleContract.UiEvent) -> Unit,
     onArticleHashtagClick: (hashtag: String) -> Unit,
-    onReactionsClick: (eventId: String) -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     onClose: () -> Unit,
@@ -292,7 +290,6 @@ private fun ArticleDetailsScreen(
                         detailsState.naddr?.toNaddrString()?.let { noteCallbacks.onArticleReplyClick?.invoke(it) }
                     },
                     onArticleHashtagClick = onArticleHashtagClick,
-                    onReactionsClick = onReactionsClick,
                     onZapOptionsClick = { invokeZapOptionsOrShowWarning() },
                     onGoToWallet = onGoToWallet,
                     noteCallbacks = noteCallbacks,
@@ -419,7 +416,6 @@ private fun ArticleContentWithComments(
     paddingValues: PaddingValues,
     onArticleCommentClick: (naddr: String) -> Unit,
     onArticleHashtagClick: (hashtag: String) -> Unit,
-    onReactionsClick: (eventId: String) -> Unit,
     onZapOptionsClick: () -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
@@ -481,7 +477,9 @@ private fun ArticleContentWithComments(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
                     topZaps = state.topZaps,
-                    onTopZapsClick = { state.article?.eventId?.let(onReactionsClick) },
+                    onTopZapsClick = {
+                        state.article?.eventId?.let { noteCallbacks.onEventReactionsClick?.invoke(it) }
+                    },
                     onZapClick = onZapOptionsClick,
                 )
             }
@@ -568,6 +566,10 @@ private fun ArticleContentWithComments(
                     if (state.article.eventStatsUi.satsZapped > 0) {
                         val numberFormat = NumberFormat.getNumberInstance()
                         Row(
+                            modifier = Modifier.clickable(
+                                enabled = noteCallbacks.onEventReactionsClick != null,
+                                onClick = { noteCallbacks.onEventReactionsClick?.invoke(state.article.eventId) },
+                            ),
                             verticalAlignment = Alignment.Bottom,
                         ) {
                             IconText(
@@ -592,7 +594,12 @@ private fun ArticleContentWithComments(
 
                     if (state.article.eventStatsUi.hasAnyCount()) {
                         ThreadNoteStatsRow(
-                            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+                            modifier = Modifier
+                                .padding(top = 16.dp, bottom = 8.dp)
+                                .clickable(
+                                    enabled = noteCallbacks.onEventReactionsClick != null,
+                                    onClick = { noteCallbacks.onEventReactionsClick?.invoke(state.article.eventId) },
+                                ),
                             eventStats = state.article.eventStatsUi,
                         )
                     }

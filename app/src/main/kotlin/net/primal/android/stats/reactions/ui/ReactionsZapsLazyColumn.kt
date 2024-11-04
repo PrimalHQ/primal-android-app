@@ -64,7 +64,7 @@ fun ReactionsZapsLazyColumn(
             item(contentType = "NoContent") {
                 ListNoContent(
                     modifier = Modifier.fillParentMaxSize(),
-                    noContentText = stringResource(R.string.note_reactions_zaps_no_content),
+                    noContentText = stringResource(R.string.reactions_zaps_no_content),
                     refreshButtonVisible = false,
                 )
             }
