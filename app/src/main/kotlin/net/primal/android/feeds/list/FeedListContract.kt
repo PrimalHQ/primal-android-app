@@ -35,6 +35,8 @@ interface FeedListContract {
         data object CloseFeedDetails : UiEvent()
         data class AddDvmFeedToUserFeeds(val dvmFeed: DvmFeedUi) : UiEvent()
         data class RemoveDvmFeedFromUserFeeds(val dvmFeed: DvmFeedUi) : UiEvent()
+        data class EnableFeedInUserFeeds(val spec: String) : UiEvent()
+        data class DisableFeedInUserFeeds(val spec: String) : UiEvent()
         data class RemoveFeedFromUserFeeds(val spec: String) : UiEvent()
 
         data object RestoreDefaultPrimalFeeds : UiEvent()

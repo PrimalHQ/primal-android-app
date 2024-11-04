@@ -18,7 +18,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -152,31 +151,36 @@ private fun FeedsBottomSheet(
                 }
 
                 FeedMarketplaceStage.FeedDetails -> {
-                    var addedToFeeds by remember(state.selectedDvmFeed) {
+                    val localSelectedFeed by remember(state.selectedDvmFeed) {
                         val spec = state.selectedDvmFeed?.data?.buildSpec(specKind = state.specKind)
-                        mutableStateOf(state.feeds.map { it.spec }.contains(spec))
+                        val foundFeed = state.feeds.firstOrNull { it.spec == spec }
+                        mutableStateOf(foundFeed)
                     }
                     DvmFeedDetails(
                         modifier = Modifier.fillMaxSize(),
                         dvmFeed = state.selectedDvmFeed,
-                        addedToFeeds = addedToFeeds,
+                        localFeed = localSelectedFeed,
                         onGoToWallet = onGoToWallet,
                         onClose = { eventPublisher(FeedListContract.UiEvent.CloseFeedDetails) },
                         onAddOrRemoveFeed = {
                             if (state.selectedDvmFeed != null) {
-                                if (!addedToFeeds) {
-                                    addedToFeeds = true
-                                    eventPublisher(
+                                val localFeed = localSelectedFeed
+                                when {
+                                    localFeed == null -> eventPublisher(
                                         FeedListContract.UiEvent.AddDvmFeedToUserFeeds(
                                             dvmFeed = state.selectedDvmFeed,
                                         ),
                                     )
-                                } else {
-                                    addedToFeeds = true
-                                    eventPublisher(
+                                    localFeed.deletable -> eventPublisher(
                                         FeedListContract.UiEvent.RemoveDvmFeedFromUserFeeds(
                                             dvmFeed = state.selectedDvmFeed,
                                         ),
+                                    )
+                                    localFeed.enabled -> eventPublisher(
+                                        FeedListContract.UiEvent.DisableFeedInUserFeeds(spec = localFeed.spec),
+                                    )
+                                    else -> eventPublisher(
+                                        FeedListContract.UiEvent.EnableFeedInUserFeeds(spec = localFeed.spec),
                                     )
                                 }
                             }
