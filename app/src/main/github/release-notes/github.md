@@ -1,5 +1,11 @@
 ## Changes
-- Implement mandatory full width on referenced notes and articles;
-- Implement line break trimming on note content;
-- Update username size content appearance;
-- Fix missing zap icon on top zap;
+- Disable Premium in drawer;
+- Implement primalSpec field in DVM feeds;
+- Implement Follow/Following on ArticleDetailsScreen;
+- Implement click listeners to open ReactionsScreen;
+- Implement Reactions screen with likes and reposts;
+- Update link previews;
+- Add emission delays to EOSE messages in NostrSocketClient;
+- Fix paddings on top zap;
+- Implement premium more info screen (#220);
+- Upgrade libs;
