@@ -11,10 +11,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import net.primal.android.R
 import net.primal.android.premium.primalName.PremiumPrimalNameStage
+import net.primal.android.premium.purchase.PremiumPurchaseStage
 import net.primal.android.premium.ui.PremiumHomeStage
 import net.primal.android.theme.AppTheme
 
@@ -41,6 +47,7 @@ private fun PremiumHomeScreen(
     onMoreInfoClick: () -> Unit,
     eventPublisher: (PremiumHomeContract.UiEvent) -> Unit,
 ) {
+    var primalName by rememberSaveable { mutableStateOf<String?>(null) }
     BackHandler {
         when (state.stage) {
             PremiumHomeContract.PremiumStage.Home -> onClose()
@@ -83,6 +90,7 @@ private fun PremiumHomeScreen(
             PremiumHomeContract.PremiumStage.FindPrimalName -> {
                 PremiumPrimalNameStage(
                     titleText = stringResource(id = R.string.premium_primal_name_title),
+                    initialName = primalName,
                     onBack = {
                         eventPublisher(
                             PremiumHomeContract.UiEvent.MoveToPremiumStage(
@@ -90,7 +98,8 @@ private fun PremiumHomeScreen(
                             ),
                         )
                     },
-                    onPrimalNameAvailable = { primalName ->
+                    onPrimalNameAvailable = {
+                        primalName = it
                         eventPublisher(
                             PremiumHomeContract.UiEvent.MoveToPremiumStage(
                                 PremiumHomeContract.PremiumStage.Purchase,
@@ -101,7 +110,19 @@ private fun PremiumHomeScreen(
             }
 
             PremiumHomeContract.PremiumStage.Purchase -> {
-                Text(text = "purchase", color = AppTheme.colorScheme.onBackground)
+                primalName?.let {
+                    PremiumPurchaseStage(
+                        primalName = it,
+                        onBack = {
+                            eventPublisher(
+                                PremiumHomeContract.UiEvent.MoveToPremiumStage(
+                                    PremiumHomeContract.PremiumStage.FindPrimalName,
+                                ),
+                            )
+                        },
+                        onLearnMoreClick = onMoreInfoClick,
+                    )
+                }
             }
         }
     }
