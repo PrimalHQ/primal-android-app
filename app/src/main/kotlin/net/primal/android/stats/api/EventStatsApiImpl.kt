@@ -52,6 +52,7 @@ class EventStatsApiImpl @Inject constructor(
             userFollowersCount = queryResult.findPrimalEvent(NostrEventKind.PrimalUserFollowersCounts),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
             primalUserNames = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserName),
+            actions = queryResult.filterNostrEvents(NostrEventKind.valueOf(body.kind)),
         )
     }
 }

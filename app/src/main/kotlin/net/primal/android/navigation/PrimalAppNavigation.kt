@@ -92,8 +92,8 @@ import net.primal.android.profile.follows.ProfileFollowsScreen
 import net.primal.android.profile.follows.ProfileFollowsViewModel
 import net.primal.android.profile.qr.ProfileQrCodeViewModel
 import net.primal.android.profile.qr.ui.ProfileQrCodeViewerScreen
-import net.primal.android.stats.reactions.ReactionsScreen
 import net.primal.android.stats.reactions.ReactionsViewModel
+import net.primal.android.stats.reactions.ui.ReactionsScreen
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.thread.articles.details.ArticleDetailsScreen

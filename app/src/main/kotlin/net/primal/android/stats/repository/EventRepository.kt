@@ -5,21 +5,29 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
+import androidx.room.withTransaction
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.asEventIdTag
 import net.primal.android.nostr.ext.asPubkeyTag
+import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
+import net.primal.android.nostr.ext.mapAsProfileDataPO
+import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
+import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.stats.api.EventStatsApi
+import net.primal.android.stats.api.model.EventActionsRequestBody
 import net.primal.android.stats.api.model.EventZapsRequestBody
 import net.primal.android.stats.db.EventZap
+import net.primal.android.stats.domain.EventAction
 import net.primal.android.stats.reactions.mediator.EventZapsMediator
 import timber.log.Timber
 
@@ -104,6 +112,40 @@ class EventRepository @Inject constructor(
             throw error
         }
     }
+
+    suspend fun fetchEventActions(eventId: String, kind: Int): List<EventAction> =
+        withContext(dispatcherProvider.io()) {
+            val response = eventStatsApi.getEventActions(
+                body = EventActionsRequestBody(
+                    eventId = eventId,
+                    kind = kind,
+                    limit = 100,
+                ),
+            )
+
+            val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource()
+            val primalNames = response.primalUserNames.parseAndMapPrimalUserNames()
+            val profiles = response.profiles.mapAsProfileDataPO(
+                cdnResources = cdnResources,
+                primalUserNames = primalNames,
+            )
+            database.withTransaction {
+                database.profiles().upsertAll(data = profiles)
+            }
+
+            val userScoresMap = response.userScores?.takeContentAsPrimalUserScoresOrNull()
+            val profilesMap = profiles.asMapByKey { it.ownerId }
+            response.actions.mapNotNull { action ->
+                profilesMap[action.pubKey]?.let { profileData ->
+                    EventAction(
+                        profile = profileData,
+                        score = userScoresMap?.get(action.pubKey) ?: 0f,
+                        actionEventData = action,
+                        actionEventKind = action.kind,
+                    )
+                }
+            }.sortedByDescending { it.score }.distinctBy { it.profile }
+        }
 
     suspend fun fetchEventZaps(
         userId: String,

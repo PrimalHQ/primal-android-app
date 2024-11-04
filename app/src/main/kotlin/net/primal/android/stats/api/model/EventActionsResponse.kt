@@ -9,4 +9,5 @@ data class EventActionsResponse(
     val userFollowersCount: PrimalEvent?,
     val cdnResources: List<PrimalEvent>,
     val primalUserNames: List<PrimalEvent>,
+    val actions: List<NostrEvent>,
 )

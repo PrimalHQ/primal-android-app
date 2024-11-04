@@ -7,5 +7,8 @@ import net.primal.android.stats.ui.EventZapUiModel
 interface ReactionsContract {
     data class UiState(
         val zaps: Flow<PagingData<EventZapUiModel>>,
+        val loading: Boolean = true,
+        val likes: List<EventActionUi> = emptyList(),
+        val reposts: List<EventActionUi> = emptyList(),
     )
 }
