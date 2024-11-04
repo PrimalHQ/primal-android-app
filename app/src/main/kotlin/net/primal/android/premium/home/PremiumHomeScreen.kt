@@ -45,7 +45,6 @@ private fun PremiumHomeScreen(
     onMoreInfoClick: () -> Unit,
     eventPublisher: (PremiumHomeContract.UiEvent) -> Unit,
 ) {
-    var primalName by rememberSaveable { mutableStateOf<String?>(null) }
     BackHandler {
         when (state.stage) {
             PremiumHomeContract.PremiumStage.Home -> onClose()
@@ -88,7 +87,7 @@ private fun PremiumHomeScreen(
             PremiumHomeContract.PremiumStage.FindPrimalName -> {
                 PremiumPrimalNameStage(
                     titleText = stringResource(id = R.string.premium_primal_name_title),
-                    initialName = primalName,
+                    initialName = state.primalName,
                     onBack = {
                         eventPublisher(
                             PremiumHomeContract.UiEvent.MoveToPremiumStage(
@@ -97,7 +96,9 @@ private fun PremiumHomeScreen(
                         )
                     },
                     onPrimalNameAvailable = {
-                        primalName = it
+                        eventPublisher(
+                            PremiumHomeContract.UiEvent.SetPrimalName(primalName = it)
+                        )
                         eventPublisher(
                             PremiumHomeContract.UiEvent.MoveToPremiumStage(
                                 PremiumHomeContract.PremiumStage.Purchase,
@@ -108,7 +109,7 @@ private fun PremiumHomeScreen(
             }
 
             PremiumHomeContract.PremiumStage.Purchase -> {
-                primalName?.let {
+                state.primalName?.let {
                     PremiumPurchaseStage(
                         primalName = it,
                         onBack = {
