@@ -4,7 +4,9 @@ import java.io.ByteArrayOutputStream
 import java.util.*
 import java.util.zip.Deflater
 import java.util.zip.Inflater
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
@@ -35,7 +37,6 @@ class NostrSocketClient(
 
     private val scope = CoroutineScope(dispatcherProvider.io())
     private val webSocketMutex = Mutex()
-    private val emittingMutex = Mutex()
 
     private val socketListener = object : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
@@ -109,9 +110,10 @@ class NostrSocketClient(
     private fun processIncomingMessage(text: String) {
         text.parseIncomingMessage()?.let {
             scope.launch {
-                emittingMutex.withLock {
-                    mutableIncomingMessagesSharedFlow.emit(value = it)
+                if (it is NostrIncomingMessage.EoseMessage) {
+                    delay(50.milliseconds)
                 }
+                mutableIncomingMessagesSharedFlow.emit(value = it)
             }
         }
     }
