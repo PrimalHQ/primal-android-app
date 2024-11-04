@@ -19,13 +19,18 @@ import net.primal.android.premium.ui.PremiumHomeStage
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun PremiumHomeScreen(viewModel: PremiumHomeViewModel, onClose: () -> Unit) {
+fun PremiumHomeScreen(
+    viewModel: PremiumHomeViewModel,
+    onClose: () -> Unit,
+    onMoreInfoClick: () -> Unit,
+) {
     val uiState = viewModel.state.collectAsState()
 
     PremiumHomeScreen(
         state = uiState.value,
         onClose = onClose,
         eventPublisher = viewModel::setEvent,
+        onMoreInfoClick = onMoreInfoClick,
     )
 }
 
@@ -33,6 +38,7 @@ fun PremiumHomeScreen(viewModel: PremiumHomeViewModel, onClose: () -> Unit) {
 private fun PremiumHomeScreen(
     state: PremiumHomeContract.UiState,
     onClose: () -> Unit,
+    onMoreInfoClick: () -> Unit,
     eventPublisher: (PremiumHomeContract.UiEvent) -> Unit,
 ) {
     BackHandler {
@@ -70,6 +76,7 @@ private fun PremiumHomeScreen(
                             ),
                         )
                     },
+                    onLearnMoreClick = onMoreInfoClick,
                 )
             }
 
