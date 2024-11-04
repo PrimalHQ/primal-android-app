@@ -175,7 +175,7 @@ private fun MoreInfoPromoCodeRow(
         VerticalDivider(
             modifier = Modifier.height(20.dp),
             thickness = 1.dp,
-            color = AppTheme.colorScheme.outline
+            color = AppTheme.colorScheme.outline,
         )
         Text(
             modifier = Modifier.clickable { onPromoCodeClick() },
@@ -239,8 +239,8 @@ private fun TOSNotice() {
             withStyle(
                 style = SpanStyle(
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                    fontSize = 14.sp
-                )
+                    fontSize = 14.sp,
+                ),
             ) {
                 append(stringResource(id = R.string.premium_purchase_tos_notice))
             }
@@ -248,8 +248,8 @@ private fun TOSNotice() {
                 withStyle(
                     style = SpanStyle(
                         color = AppTheme.colorScheme.secondary,
-                        fontSize = 14.sp
-                    )
+                        fontSize = 14.sp,
+                    ),
                 ) {
                     append(" " + stringResource(id = R.string.premium_purchase_tos))
                 }

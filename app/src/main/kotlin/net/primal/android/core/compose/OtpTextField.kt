@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -75,7 +74,8 @@ fun OtpTextField(
 
 @Composable
 private fun RowScope.CharText(
-    index: Int, text: String,
+    index: Int,
+    text: String,
     width: Dp?,
 ) {
     val char = when {

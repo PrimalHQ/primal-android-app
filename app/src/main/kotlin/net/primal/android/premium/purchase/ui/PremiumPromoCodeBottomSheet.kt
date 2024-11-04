@@ -28,12 +28,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import net.primal.android.R
 import net.primal.android.core.compose.OtpTextField
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.theme.AppTheme
-import net.primal.android.R
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -120,14 +119,12 @@ fun PremiumPromoCodeBottomSheet(
     }
 }
 
-
 @Composable
 fun BottomBarButtonsColumn(
     modifier: Modifier = Modifier,
     onApplyClick: () -> Unit,
     onCancelClick: () -> Unit,
 ) {
-
     Column(
         modifier = modifier
             .navigationBarsPadding()
