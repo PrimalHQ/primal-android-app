@@ -81,7 +81,7 @@ private fun PremiumPurchaseStage(
                 .padding(horizontal = 24.dp)
                 .padding(paddingValues),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.Bottom),
+            verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
         ) {
             state.profile?.let {
                 AvatarThumbnail(
