@@ -9,6 +9,7 @@ data class DvmFeed(
     val description: String? = null,
     val avatarUrl: String? = null,
     val amountInSats: String? = null,
+    val primalSpec: String? = null,
     val primalSubscriptionRequired: Boolean? = null,
     val isPaid: Boolean = amountInSats != null && amountInSats != "free" || primalSubscriptionRequired == true,
     val kind: FeedSpecKind? = null,
@@ -16,5 +17,6 @@ data class DvmFeed(
     val actionUserIds: List<String> = emptyList(),
 )
 
-fun DvmFeed.buildSpec(specKind: FeedSpecKind): String =
-    "{\"dvm_id\":\"$dvmId\",\"dvm_pubkey\":\"$dvmPubkey\",\"kind\":\"${specKind.id}\"}"
+fun DvmFeed.buildSpec(specKind: FeedSpecKind): String {
+    return primalSpec ?: "{\"dvm_id\":\"$dvmId\",\"dvm_pubkey\":\"$dvmPubkey\",\"kind\":\"${specKind.id}\"}"
+}

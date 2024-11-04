@@ -201,6 +201,7 @@ class FeedsRepository @Inject constructor(
                             else -> null
                         },
                         isPrimalFeed = metadata[nostrEvent.id]?.isPrimal,
+                        primalSpec = dvmMetadata.primalSpec,
                         actionUserIds = actionUserIds,
                     )
                 } else {

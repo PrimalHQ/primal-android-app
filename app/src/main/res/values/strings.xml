@@ -190,6 +190,8 @@
     <string name="feed_details_title">Feed Details</string>
     <string name="feed_details_add_feed">Add Feed</string>
     <string name="feed_details_remove_feed">Remove Feed</string>
+    <string name="feed_details_enable_feed">Enable Feed</string>
+    <string name="feed_details_disable_feed">Disable Feed</string>
     <string name="feed_list_add_feed">Add Feed</string>
     <string name="feed_list_edit">Edit</string>
     <string name="feed_list_done">Done</string>

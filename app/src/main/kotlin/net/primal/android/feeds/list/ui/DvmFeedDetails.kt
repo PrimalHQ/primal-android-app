@@ -19,16 +19,17 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.feeds.dvm.ui.DvmFeedUi
 import net.primal.android.feeds.dvm.ui.DvmHeaderAndFeedList
+import net.primal.android.feeds.list.ui.model.FeedUi
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DvmFeedDetails(
     dvmFeed: DvmFeedUi?,
+    localFeed: FeedUi?,
     onClose: () -> Unit,
     onGoToWallet: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
-    addedToFeeds: Boolean = false,
     onAddOrRemoveFeed: (() -> Unit)? = null,
 ) {
     Scaffold(
@@ -67,10 +68,11 @@ fun DvmFeedDetails(
                 PrimalLoadingButton(
                     modifier = Modifier.fillMaxWidth(),
                     enabled = onAddOrRemoveFeed != null,
-                    text = if (addedToFeeds) {
-                        stringResource(id = R.string.feed_details_remove_feed)
-                    } else {
-                        stringResource(id = R.string.feed_details_add_feed)
+                    text = when {
+                        localFeed == null -> stringResource(id = R.string.feed_details_add_feed)
+                        localFeed.deletable -> stringResource(id = R.string.feed_details_remove_feed)
+                        localFeed.enabled -> stringResource(id = R.string.feed_details_remove_feed)
+                        else -> stringResource(id = R.string.feed_details_add_feed)
                     },
                     onClick = { onAddOrRemoveFeed?.invoke() },
                 )
