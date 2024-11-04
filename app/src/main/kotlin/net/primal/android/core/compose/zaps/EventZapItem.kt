@@ -52,7 +52,7 @@ fun EventZapItem(
         )
 
         IconText(
-            modifier = Modifier.padding(start = 4.dp, end = 8.dp),
+            modifier = Modifier.padding(start = 4.dp, end = 8.dp, top = 2.dp),
             text = numberFormat.format(noteZap.amountInSats.toLong()),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -65,7 +65,7 @@ fun EventZapItem(
 
         if (showMessage && !noteZap.message.isNullOrEmpty()) {
             Text(
-                modifier = Modifier.padding(end = 8.dp),
+                modifier = Modifier.padding(end = 8.dp, top = 0.5.dp),
                 text = noteZap.message,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
