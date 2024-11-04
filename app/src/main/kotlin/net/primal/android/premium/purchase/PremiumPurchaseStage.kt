@@ -40,7 +40,6 @@ import net.primal.android.theme.AppTheme
 
 @Composable
 fun PremiumPurchaseStage(
-    modifier: Modifier = Modifier,
     primalName: String,
     onBack: () -> Unit,
     onLearnMoreClick: () -> Unit,
@@ -198,8 +197,7 @@ private fun TOSNotice() {
             withStyle(style = SpanStyle(color = AppTheme.extraColorScheme.onSurfaceVariantAlt2, fontSize = 14.sp)) {
                 append(stringResource(id = R.string.premium_purchase_tos_notice))
             }
-            // TODO(marko): change to real TOS link
-            withLink(link = LinkAnnotation.Url("https://primal.net")) {
+            withLink(link = LinkAnnotation.Url("https://primal.net/terms")) {
                 withStyle(style = SpanStyle(color = AppTheme.colorScheme.secondary, fontSize = 14.sp)) {
                     append(" " + stringResource(id = R.string.premium_purchase_tos))
                 }
