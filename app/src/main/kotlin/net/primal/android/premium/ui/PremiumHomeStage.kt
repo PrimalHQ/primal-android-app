@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -62,12 +63,13 @@ fun PremiumHomeStage(
         )
         Text(
             text = stringResource(id = R.string.premium_subscribe_to_get),
-            color = AppTheme.colorScheme.onBackground,
-            fontWeight = FontWeight.Bold,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             style = AppTheme.typography.bodyLarge,
         )
         PremiumOfferCard(
-            modifier = Modifier.padding(bottom = 16.dp),
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 16.dp, top = 8.dp),
             onLearnMoreClick = onLearnMoreClick,
         )
         PriceRow()
@@ -111,7 +113,7 @@ private fun PrimalNameRow(modifier: Modifier = Modifier) {
     ) {
         IconBadge(
             modifier = Modifier.padding(horizontal = 7.dp),
-            size = 72.dp,
+            size = 62.dp,
             imageVector = PrimalIcons.VerifiedFilled,
         )
         DescriptionSection(
@@ -143,6 +145,7 @@ private fun DescriptionSection(headerText: String, bulletPoints: List<String>) {
                 text = "• $it",
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 style = AppTheme.typography.bodyLarge,
+                fontSize = 16.sp,
             )
         }
     }
@@ -170,7 +173,7 @@ private fun NostrToolsRow(modifier: Modifier = Modifier) {
         horizontalArrangement = Arrangement.spacedBy(24.dp, Alignment.Start),
     ) {
         IconBadge(
-            size = 86.dp,
+            size = 76.dp,
             imageVector = PrimalIcons.NostrichFilled,
         )
         DescriptionSection(
