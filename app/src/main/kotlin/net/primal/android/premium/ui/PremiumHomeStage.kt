@@ -1,5 +1,6 @@
 package net.primal.android.premium.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -30,13 +32,17 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.NostrichFilled
-import net.primal.android.core.compose.icons.primaliconpack.PrimalPremiumDark
+import net.primal.android.core.compose.icons.primaliconpack.PrimalPremium
 import net.primal.android.core.compose.icons.primaliconpack.VerifiedFilled
 import net.primal.android.theme.AppTheme
+
+internal val PREMIUM_TINT_DARK = Color(0xFFDDDDDD)
+internal val PREMIUM_TINT_LIGHT = Color(0xFF222222)
 
 @Composable
 fun PremiumHomeStage(
@@ -52,14 +58,8 @@ fun PremiumHomeStage(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Bottom),
     ) {
-        Icon(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 28.dp)
-                .size(58.dp),
-            imageVector = PrimalIcons.PrimalPremiumDark,
-            contentDescription = null,
-            tint = Color.Unspecified,
+        PrimalPremiumLogoHeader(
+            modifier = Modifier.padding(bottom = 24.dp)
         )
         Text(
             text = stringResource(id = R.string.premium_subscribe_to_get),
@@ -79,6 +79,36 @@ fun PremiumHomeStage(
             onFindPrimalName = onFindPrimalName,
         )
     }
+}
+
+@Composable
+fun PrimalPremiumLogoHeader(
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.primal_wave_logo_summer),
+            contentDescription = null,
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(AppTheme.colorScheme.background)
+                .size(46.dp),
+        )
+        Icon(
+            imageVector = PrimalIcons.PrimalPremium,
+            contentDescription = null,
+            tint = if (LocalPrimalTheme.current.isDarkTheme) {
+                PREMIUM_TINT_DARK
+            } else {
+                PREMIUM_TINT_LIGHT
+            }
+        )
+    }
+
 }
 
 @Composable
