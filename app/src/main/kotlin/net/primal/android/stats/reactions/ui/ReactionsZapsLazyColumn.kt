@@ -1,20 +1,16 @@
-package net.primal.android.stats.reactions
+package net.primal.android.stats.reactions.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -25,74 +21,55 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnail
+import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
-import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
+import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.utils.shortened
+import net.primal.android.stats.reactions.ReactionsContract
 import net.primal.android.stats.ui.EventZapUiModel
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun ReactionsScreen(
-    viewModel: ReactionsViewModel,
-    onClose: () -> Unit,
-    onProfileClick: (profileId: String) -> Unit,
-) {
-    val state = viewModel.state.collectAsState()
-
-    ReactionsScreen(
-        state = state.value,
-        onClose = onClose,
-        onProfileClick = onProfileClick,
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ReactionsScreen(
+fun ReactionsZapsLazyColumn(
+    modifier: Modifier,
     state: ReactionsContract.UiState,
-    onClose: () -> Unit,
     onProfileClick: (profileId: String) -> Unit,
 ) {
-    Scaffold(
-        topBar = {
-            PrimalTopAppBar(
-                title = stringResource(id = R.string.note_reactions_title),
-                navigationIcon = PrimalIcons.ArrowBack,
-                onNavigationIconClick = onClose,
-                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
-            )
-        },
-        content = { paddingValues ->
-            val pagingItems = state.zaps.collectAsLazyPagingItems()
-            val listState = pagingItems.rememberLazyListStatePagingWorkaround()
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                state = listState,
-            ) {
-                items(
-                    count = pagingItems.itemCount,
-                    key = pagingItems.itemKey { it.id },
-                ) {
-                    val item = pagingItems[it]
-                    when {
-                        item != null -> NoteZapListItem(
-                            data = item,
-                            onProfileClick = onProfileClick,
-                        )
+    val pagingItems = state.zaps.collectAsLazyPagingItems()
+    val listState = pagingItems.rememberLazyListStatePagingWorkaround()
+    LazyColumn(
+        modifier = modifier,
+        state = listState,
+    ) {
+        items(
+            count = pagingItems.itemCount,
+            key = pagingItems.itemKey { it.id },
+        ) {
+            val item = pagingItems[it]
+            when {
+                item != null -> NoteZapListItem(
+                    data = item,
+                    onProfileClick = onProfileClick,
+                )
 
-                        else -> Unit
-                    }
-                }
+                else -> Unit
             }
-        },
-    )
+        }
+
+        if (pagingItems.isEmpty()) {
+            item(contentType = "NoContent") {
+                ListNoContent(
+                    modifier = Modifier.fillParentMaxSize(),
+                    noContentText = stringResource(R.string.note_reactions_zaps_no_content),
+                    refreshButtonVisible = false,
+                )
+            }
+        }
+    }
 }
 
 @Composable
