@@ -2,7 +2,6 @@ package net.primal.android.premium.info
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -112,22 +111,19 @@ fun PremiumMoreInfoScreen(onClose: () -> Unit) {
 @Composable
 private fun MoreInfoTopAppBar(pagerState: PagerState, onClose: () -> Unit) {
     val uiScope = rememberCoroutineScope()
-
-    Column(
-        modifier = Modifier.background(AppTheme.colorScheme.surface),
-    ) {
-        PrimalTopAppBar(
-            title = stringResource(id = R.string.premium_more_info_title),
-            navigationIcon = PrimalIcons.ArrowBack,
-            onNavigationIconClick = onClose,
-            showDivider = false,
-        )
-        MoreInfoTabs(
-            modifier = Modifier.padding(top = 8.dp),
-            selectedTabIndex = pagerState.currentPage,
-            onWhyPremiumTabClick = { uiScope.launch { pagerState.scrollToPage(WHY_PREMIUM_TAB_INDEX) } },
-            onFeaturesTabClick = { uiScope.launch { pagerState.scrollToPage(FEATURES_TAB_INDEX) } },
-            onFAQTabClick = { uiScope.launch { pagerState.scrollToPage(FAQ_TAB_INDEX) } },
-        )
-    }
+    PrimalTopAppBar(
+        title = stringResource(id = R.string.premium_more_info_title),
+        navigationIcon = PrimalIcons.ArrowBack,
+        onNavigationIconClick = onClose,
+        showDivider = false,
+        footer = {
+            MoreInfoTabs(
+                modifier = Modifier.padding(top = 8.dp),
+                selectedTabIndex = pagerState.currentPage,
+                onWhyPremiumTabClick = { uiScope.launch { pagerState.scrollToPage(WHY_PREMIUM_TAB_INDEX) } },
+                onFeaturesTabClick = { uiScope.launch { pagerState.scrollToPage(FEATURES_TAB_INDEX) } },
+                onFAQTabClick = { uiScope.launch { pagerState.scrollToPage(FAQ_TAB_INDEX) } },
+            )
+        },
+    )
 }
