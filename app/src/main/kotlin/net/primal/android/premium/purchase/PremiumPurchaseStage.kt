@@ -14,8 +14,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -28,6 +35,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.NostrUserText
@@ -35,6 +43,7 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.premium.purchase.ui.PremiumPromoCodeBottomSheet
 import net.primal.android.premium.ui.PremiumPrimalNameTable
 import net.primal.android.theme.AppTheme
 
@@ -65,6 +74,34 @@ private fun PremiumPurchaseStage(
     onLearnMoreClick: () -> Unit,
     eventPublisher: (PremiumPurchaseContract.UiEvent) -> Unit,
 ) {
+    val uiScope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var promoCodeBottomSheetVisibility by remember { mutableStateOf(false) }
+    LaunchedEffect(state.promoCodeValidity) {
+        if (state.promoCodeValidity == true) {
+            uiScope.launch {
+                sheetState.hide()
+            }.invokeOnCompletion {
+                if (!sheetState.isVisible) {
+                    promoCodeBottomSheetVisibility = false
+                }
+            }
+        }
+    }
+
+    if (promoCodeBottomSheetVisibility) {
+        PremiumPromoCodeBottomSheet(
+            sheetState = sheetState,
+            promoCodeValidity = state.promoCodeValidity,
+            onDismissRequest = {
+                promoCodeBottomSheetVisibility = false
+                eventPublisher(PremiumPurchaseContract.UiEvent.ClearPromoCodeValidity)
+            },
+            onCodeCodeConfirmed = {
+                eventPublisher(PremiumPurchaseContract.UiEvent.ApplyPromoCode(it))
+            },
+        )
+    }
     Scaffold(
         topBar = {
             PrimalTopAppBar(
@@ -108,7 +145,7 @@ private fun PremiumPurchaseStage(
             MoreInfoPromoCodeRow(
                 modifier = Modifier.padding(vertical = 8.dp),
                 onLearnMoreClick = onLearnMoreClick,
-                onPromoCodeClick = {},
+                onPromoCodeClick = { promoCodeBottomSheetVisibility = true },
             )
             BuyPremiumButtons(
                 modifier = Modifier.padding(horizontal = 12.dp),
@@ -135,7 +172,11 @@ private fun MoreInfoPromoCodeRow(
             color = AppTheme.colorScheme.secondary,
             style = AppTheme.typography.bodyMedium,
         )
-        VerticalDivider(modifier = Modifier.height(20.dp), thickness = 1.dp, color = AppTheme.colorScheme.outline)
+        VerticalDivider(
+            modifier = Modifier.height(20.dp),
+            thickness = 1.dp,
+            color = AppTheme.colorScheme.outline
+        )
         Text(
             modifier = Modifier.clickable { onPromoCodeClick() },
             text = stringResource(id = R.string.premium_purchase_promo_code),
@@ -195,11 +236,21 @@ fun BuyPremiumButton(startText: String, endText: String) {
 private fun TOSNotice() {
     Text(
         text = buildAnnotatedString {
-            withStyle(style = SpanStyle(color = AppTheme.extraColorScheme.onSurfaceVariantAlt2, fontSize = 14.sp)) {
+            withStyle(
+                style = SpanStyle(
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    fontSize = 14.sp
+                )
+            ) {
                 append(stringResource(id = R.string.premium_purchase_tos_notice))
             }
             withLink(link = LinkAnnotation.Url("https://primal.net/terms")) {
-                withStyle(style = SpanStyle(color = AppTheme.colorScheme.secondary, fontSize = 14.sp)) {
+                withStyle(
+                    style = SpanStyle(
+                        color = AppTheme.colorScheme.secondary,
+                        fontSize = 14.sp
+                    )
+                ) {
                     append(" " + stringResource(id = R.string.premium_purchase_tos))
                 }
             }

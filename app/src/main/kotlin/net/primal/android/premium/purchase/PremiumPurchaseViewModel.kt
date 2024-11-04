@@ -29,13 +29,29 @@ class PremiumPurchaseViewModel @Inject constructor(
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
+        observeEvents()
         observeActiveProfile(profileId = activeAccountStore.activeUserId())
     }
+
+    private fun observeEvents() =
+        viewModelScope.launch {
+            events.collect {
+                when (it) {
+                    is UiEvent.ApplyPromoCode -> tryApplyPromoCode(it.promoCode)
+                    UiEvent.ClearPromoCodeValidity -> setState { copy(promoCodeValidity = null) }
+                }
+            }
+        }
 
     private fun observeActiveProfile(profileId: String) =
         viewModelScope.launch {
             profileRepository.observeProfile(profileId = profileId).collect {
                 setState { copy(profile = it.metadata?.asProfileDetailsUi()) }
             }
+        }
+
+    private fun tryApplyPromoCode(promoCode: String) =
+        viewModelScope.launch {
+            setState { copy(promoCodeValidity = true) }
         }
 }
