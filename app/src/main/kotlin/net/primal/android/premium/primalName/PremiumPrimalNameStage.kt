@@ -79,6 +79,7 @@ private fun PremiumPrimalNameStage(
                 title = titleText,
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onBack,
+                showDivider = false,
             )
         },
         bottomBar = {

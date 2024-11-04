@@ -71,6 +71,7 @@ private fun PremiumPurchaseStage(
                 title = stringResource(id = R.string.premium_purchase_title),
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onBack,
+                showDivider = false,
             )
         },
     ) { paddingValues ->
