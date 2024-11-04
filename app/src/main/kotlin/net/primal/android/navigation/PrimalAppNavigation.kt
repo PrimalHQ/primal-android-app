@@ -82,6 +82,7 @@ import net.primal.android.notifications.list.NotificationsScreen
 import net.primal.android.notifications.list.NotificationsViewModel
 import net.primal.android.premium.home.PremiumHomeScreen
 import net.primal.android.premium.home.PremiumHomeViewModel
+import net.primal.android.premium.info.PremiumMoreInfoScreen
 import net.primal.android.profile.details.ProfileDetailsViewModel
 import net.primal.android.profile.details.ui.ProfileDetailsScreen
 import net.primal.android.profile.domain.ProfileFollowsType
@@ -114,6 +115,8 @@ private fun NavController.navigateToOnboarding() = navigate(route = "onboarding"
 private fun NavController.navigateToWalletOnboarding() = navigate(route = "onboardingWallet")
 
 private fun NavController.navigateToLogout() = navigate(route = "logout")
+
+private fun NavController.navigateToPremiumMoreInfo() = navigate(route = "premiumMoreInfo")
 
 private fun NavController.navigateToSearch(searchScope: SearchScope) =
     navigate(route = "search?$SEARCH_SCOPE=$searchScope")
@@ -401,6 +404,11 @@ fun PrimalAppNavigation() {
 
         premium(
             route = "premium",
+            navController = navController,
+        )
+
+        premiumMoreInfo(
+            route = "premiumMoreInfo",
             navController = navController,
         )
 
@@ -896,6 +904,23 @@ private fun NavGraphBuilder.premium(route: String, navController: NavController)
 
         PremiumHomeScreen(
             viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+            onMoreInfoClick = { navController.navigateToPremiumMoreInfo() },
+        )
+    }
+
+private fun NavGraphBuilder.premiumMoreInfo(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+
+        PremiumMoreInfoScreen(
             onClose = { navController.navigateUp() },
         )
     }

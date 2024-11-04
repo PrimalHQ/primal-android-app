@@ -9,6 +9,7 @@ import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.AvatarNostrich
 import net.primal.android.core.compose.icons.primaliconpack.Bookmarks
 import net.primal.android.core.compose.icons.primaliconpack.BookmarksFilled
+import net.primal.android.core.compose.icons.primaliconpack.Check
 import net.primal.android.core.compose.icons.primaliconpack.ConnectRelay
 import net.primal.android.core.compose.icons.primaliconpack.ContextAddBookmark
 import net.primal.android.core.compose.icons.primaliconpack.ContextBroadcast
@@ -165,6 +166,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             Key,
             Copy,
             Link,
+            Check,
             Message,
             MuteUser,
             Report,
