@@ -31,6 +31,7 @@ class PremiumHomeViewModel @Inject constructor() : ViewModel() {
             events.collect {
                 when (it) {
                     is UiEvent.MoveToPremiumStage -> setState { copy(stage = it.stage) }
+                    is UiEvent.SetPrimalName -> setState { copy(primalName = it.primalName) }
                 }
             }
         }

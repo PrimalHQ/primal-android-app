@@ -114,6 +114,15 @@
     <string name="premium_primal_name_lightning_address">Lightning address</string>
     <string name="premium_primal_name_vip_profile">VIP profile</string>
 
+    <string name="premium_purchase_title">Congrats!</string>
+    <string name="premium_purchase_primal_name_available">Your Primal Name is available!</string>
+    <string name="premium_purchase_learn_more">Learn about Premium</string>
+    <string name="premium_purchase_promo_code">Have a promo code?</string>
+    <string name="premium_purchase_get_annual_plan">Get Annual Plan</string>
+    <string name="premium_purchase_get_monthly_plan">Get Monthly Plan</string>
+    <string name="premium_purchase_tos_notice">By proceeding you acknowledge that\nyou agree to our </string>
+    <string name="premium_purchase_tos">Terms of Service</string>
+
     <string name="feed_reposted_suffix">reposted</string>
     <string name="feed_see_more">See more…</string>
 
