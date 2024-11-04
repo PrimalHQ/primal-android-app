@@ -4,13 +4,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -39,8 +37,6 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.premium.ui.PremiumPrimalNameTable
 import net.primal.android.theme.AppTheme
-import org.bouncycastle.math.raw.Mod
-
 
 @Composable
 fun PremiumPurchaseStage(
@@ -59,8 +55,6 @@ fun PremiumPurchaseStage(
         onBack = onBack,
         onLearnMoreClick = onLearnMoreClick,
     )
-
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,7 +66,6 @@ private fun PremiumPurchaseStage(
     onLearnMoreClick: () -> Unit,
     eventPublisher: (PremiumPurchaseContract.UiEvent) -> Unit,
 ) {
-
     Scaffold(
         topBar = {
             PrimalTopAppBar(
@@ -150,13 +143,10 @@ private fun MoreInfoPromoCodeRow(
             style = AppTheme.typography.bodyMedium,
         )
     }
-
 }
 
 @Composable
-fun BuyPremiumButtons(
-    modifier: Modifier = Modifier,
-) {
+fun BuyPremiumButtons(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -171,14 +161,10 @@ fun BuyPremiumButtons(
             endText = "$6.99",
         )
     }
-
 }
 
 @Composable
-fun BuyPremiumButton(
-    startText: String,
-    endText: String,
-) {
+fun BuyPremiumButton(startText: String, endText: String) {
     PrimalFilledButton(
         modifier = Modifier.fillMaxWidth(),
         height = 64.dp,
@@ -205,7 +191,6 @@ fun BuyPremiumButton(
     }
 }
 
-
 @Composable
 private fun TOSNotice() {
     Text(
@@ -221,5 +206,4 @@ private fun TOSNotice() {
             }
         },
     )
-
 }
