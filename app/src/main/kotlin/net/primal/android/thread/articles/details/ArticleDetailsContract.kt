@@ -10,6 +10,7 @@ import net.primal.android.thread.articles.details.ui.ArticleDetailsUi
 interface ArticleDetailsContract {
     data class UiState(
         val naddr: Naddr? = null,
+        val isAuthorFollowed: Boolean = false,
         val article: ArticleDetailsUi? = null,
         val referencedNotes: List<FeedPostUi> = emptyList(),
         val npubToDisplayNameMap: Map<String, String> = emptyMap(),
@@ -31,5 +32,6 @@ interface ArticleDetailsContract {
         data class ZapArticle(val zapAmount: ULong? = null, val zapDescription: String? = null) : UiEvent()
         data object LikeArticle : UiEvent()
         data object RepostAction : UiEvent()
+        data object ToggleAuthorFollows : UiEvent()
     }
 }
