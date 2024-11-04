@@ -833,4 +833,9 @@
     <string name="article_details_zap">Zap</string>
     <string name="article_details_comments_section_title">Comments</string>
     <string name="article_details_post_comment_button">Post comment</string>
+    <string name="article_author_follow_button">Follow</string>
+    <string name="article_author_following_button">Following</string>
+    <string name="article_author_confirm_unfollow_text">Unfollow %1$s?</string>
+    <string name="article_author_confirm_unfollow_button">Unfollow</string>
+    <string name="article_author_dismiss_unfollow_button">Dismiss</string>
 </resources>

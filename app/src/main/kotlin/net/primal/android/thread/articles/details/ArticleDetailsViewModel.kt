@@ -88,6 +88,7 @@ class ArticleDetailsViewModel @Inject constructor(
                     is UiEvent.ZapArticle -> zapArticle(zapAction = it)
                     UiEvent.LikeArticle -> likeArticle()
                     UiEvent.RepostAction -> repostPost()
+                    UiEvent.ToggleAuthorFollows -> followUnfollowAuthor()
                 }
             }
         }
@@ -168,6 +169,7 @@ class ArticleDetailsViewModel @Inject constructor(
                 .collect {
                     setState {
                         copy(
+                            isAuthorFollowed = it.data.following.contains(naddr?.userId),
                             zappingState = this.zappingState.copy(
                                 walletConnected = it.data.hasWallet(),
                                 walletPreference = it.data.walletPreference,
@@ -261,4 +263,44 @@ class ArticleDetailsViewModel @Inject constructor(
                 }
             }
         }
+
+    private fun followUnfollowAuthor() {
+        val article = _state.value.article ?: return
+        val isAuthorFollowed = _state.value.isAuthorFollowed
+        setState { copy(isAuthorFollowed = !isAuthorFollowed) }
+
+        viewModelScope.launch {
+            try {
+                if (isAuthorFollowed) {
+                    profileRepository.unfollow(
+                        userId = activeAccountStore.activeUserId(),
+                        unfollowedUserId = article.authorId,
+                    )
+                } else {
+                    profileRepository.follow(
+                        userId = activeAccountStore.activeUserId(),
+                        followedUserId = article.authorId,
+                    )
+                }
+            } catch (error: Exception) {
+                when (error) {
+                    is WssException, is ProfileRepository.FollowListNotFound, is NostrPublishException -> {
+                        Timber.e(error)
+                        setState {
+                            copy(
+                                isAuthorFollowed = isAuthorFollowed,
+                                error = if (isAuthorFollowed) {
+                                    UiError.FailedToUnfollowUser(cause = error)
+                                } else {
+                                    UiError.FailedToFollowUser(cause = error)
+                                },
+                            )
+                        }
+                    }
+
+                    else -> throw error
+                }
+            }
+        }
+    }
 }
