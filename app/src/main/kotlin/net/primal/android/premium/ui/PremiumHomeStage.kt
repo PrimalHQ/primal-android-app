@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -63,7 +62,7 @@ fun PremiumHomeStage(
                 onNavigationIconClick = onClose,
                 showDivider = false,
             )
-        }
+        },
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -74,7 +73,7 @@ fun PremiumHomeStage(
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Bottom),
         ) {
             PrimalPremiumLogoHeader(
-                modifier = Modifier.padding(bottom = 24.dp)
+                modifier = Modifier.padding(bottom = 24.dp),
             )
             Text(
                 text = stringResource(id = R.string.premium_subscribe_to_get),
@@ -94,14 +93,11 @@ fun PremiumHomeStage(
                 onFindPrimalName = onFindPrimalName,
             )
         }
-
     }
 }
 
 @Composable
-fun PrimalPremiumLogoHeader(
-    modifier: Modifier = Modifier,
-) {
+fun PrimalPremiumLogoHeader(modifier: Modifier = Modifier) {
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterHorizontally),
@@ -122,10 +118,9 @@ fun PrimalPremiumLogoHeader(
                 PREMIUM_TINT_DARK
             } else {
                 PREMIUM_TINT_LIGHT
-            }
+            },
         )
     }
-
 }
 
 @Composable
