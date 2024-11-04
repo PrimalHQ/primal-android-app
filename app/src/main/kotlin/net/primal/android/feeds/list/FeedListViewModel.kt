@@ -106,6 +106,16 @@ class FeedListViewModel @AssistedInject constructor(
                         setState { copy(feedMarketplaceStage = FeedMarketplaceStage.FeedList) }
                     }
 
+                    is UiEvent.DisableFeedInUserFeeds -> {
+                        updateEnabledUserFeeds(spec = it.spec, enabled = false)
+                        setState { copy(feedMarketplaceStage = FeedMarketplaceStage.FeedList) }
+                    }
+
+                    is UiEvent.EnableFeedInUserFeeds -> {
+                        updateEnabledUserFeeds(spec = it.spec, enabled = true)
+                        setState { copy(feedMarketplaceStage = FeedMarketplaceStage.FeedList) }
+                    }
+
                     is UiEvent.RemoveFeedFromUserFeeds -> {
                         removeFromUserFeeds(spec = it.spec)
                     }
@@ -246,6 +256,18 @@ class FeedListViewModel @AssistedInject constructor(
             updateFeedsState()
             feedsRepository.removeFeedLocally(feedSpec = spec)
             persistRemotelyFeeds()
+        }
+
+    private fun updateEnabledUserFeeds(spec: String, enabled: Boolean) =
+        viewModelScope.launch {
+            val feedIndex = allFeeds.indexOfFirst { it.spec == spec }
+            if (feedIndex != -1) {
+                allFeeds = allFeeds.toMutableList().apply {
+                    this[feedIndex] = this[feedIndex].copy(enabled = enabled)
+                }
+                updateFeedsState()
+                persistRemotelyFeeds()
+            }
         }
 
     private fun persistRemotelyFeeds() =

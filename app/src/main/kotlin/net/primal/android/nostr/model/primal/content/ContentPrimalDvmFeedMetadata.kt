@@ -1,5 +1,6 @@
 package net.primal.android.nostr.model.primal.content
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
@@ -11,6 +12,7 @@ data class ContentPrimalDvmFeedMetadata(
     val image: String? = null,
     val cashuAccepted: Boolean? = null,
     val nip90Params: JsonObject? = null,
+    @SerialName("primal_spec") val primalSpec: String? = null,
     val encryptionSupported: Boolean? = null,
     val lud16: String? = null,
     val name: String? = null,
