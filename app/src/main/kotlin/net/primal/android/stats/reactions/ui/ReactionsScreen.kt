@@ -63,7 +63,7 @@ private fun ReactionsScreen(
     Scaffold(
         topBar = {
             PrimalTopAppBar(
-                title = stringResource(id = R.string.note_reactions_title),
+                title = stringResource(id = R.string.reactions_title),
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onClose,
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
@@ -120,7 +120,7 @@ private fun ReactionsScreen(
                             reactions = state.likes,
                             reactionIcon = PrimalIcons.FeedLikes,
                             loading = state.loading,
-                            noContentText = stringResource(R.string.note_reactions_likes_no_content),
+                            noContentText = stringResource(R.string.reactions_likes_no_content),
                             onProfileClick = onProfileClick,
                         )
                     }
@@ -133,7 +133,7 @@ private fun ReactionsScreen(
                             reactions = state.reposts,
                             reactionIcon = PrimalIcons.FeedReposts,
                             loading = state.loading,
-                            noContentText = stringResource(R.string.note_reactions_reposts_no_content),
+                            noContentText = stringResource(R.string.reactions_reposts_no_content),
                             onProfileClick = onProfileClick,
                         )
                     }
@@ -171,19 +171,19 @@ private fun ReactionsTabs(
     ) {
         PrimalSingleTab(
             selected = selectedTabIndex == ZAPS_TAB_INDEX,
-            text = stringResource(id = R.string.note_reactions_zaps_tab).uppercase(),
+            text = stringResource(id = R.string.reactions_zaps_tab).uppercase(),
             onClick = onZapsClick,
             textStyle = AppTheme.typography.bodyMedium,
         )
         PrimalSingleTab(
             selected = selectedTabIndex == LIKES_TAB_INDEX,
-            text = stringResource(id = R.string.note_reactions_likes_tab).uppercase(),
+            text = stringResource(id = R.string.reactions_likes_tab).uppercase(),
             onClick = onLikesClick,
             textStyle = AppTheme.typography.bodyMedium,
         )
         PrimalSingleTab(
             selected = selectedTabIndex == REPOSTS_TAB_INDEX,
-            text = stringResource(id = R.string.note_reactions_reposts_tab).uppercase(),
+            text = stringResource(id = R.string.reactions_reposts_tab).uppercase(),
             onClick = onRepostsClick,
             textStyle = AppTheme.typography.bodyMedium,
         )

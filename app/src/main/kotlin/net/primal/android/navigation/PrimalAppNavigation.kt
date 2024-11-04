@@ -210,7 +210,7 @@ fun NavController.navigateToThread(noteId: String) = navigate(route = "thread/$n
 
 fun NavController.navigateToArticleDetails(naddr: String) = navigate(route = "article/$naddr")
 
-fun NavController.navigateToNoteReactions(noteId: String) = navigate(route = "reactions/$noteId")
+fun NavController.navigateToReactions(eventId: String) = navigate(route = "reactions/$eventId")
 
 fun NavController.navigateToMediaGallery(
     noteId: String,
@@ -262,6 +262,9 @@ fun noteCallbacksHandler(navController: NavController) =
         },
         onPayInvoiceClick = {
             navController.navigateToWalletCreateTransaction(lnbc = it.lnbc)
+        },
+        onEventReactionsClick = { noteId ->
+            navController.navigateToReactions(eventId = noteId)
         },
     )
 
@@ -471,7 +474,7 @@ fun PrimalAppNavigation() {
             navController = navController,
         )
 
-        noteReactions(
+        reactions(
             route = "reactions/{$NOTE_ID}",
             arguments = listOf(
                 navArgument(NOTE_ID) {
@@ -1068,7 +1071,6 @@ private fun NavGraphBuilder.thread(
         noteCallbacks = noteCallbacksHandler(navController),
         onGoToWallet = { navController.navigateToWallet() },
         onExpandReply = { args -> navController.navigateToNoteEditor(args) },
-        onReactionsClick = { noteId -> navController.navigateToNoteReactions(noteId = noteId) },
     )
 }
 
@@ -1095,11 +1097,10 @@ private fun NavGraphBuilder.articleDetails(
         },
         noteCallbacks = noteCallbacksHandler(navController),
         onGoToWallet = { navController.navigateToWallet() },
-        onReactionsClick = { noteId -> navController.navigateToNoteReactions(noteId = noteId) },
     )
 }
 
-private fun NavGraphBuilder.noteReactions(
+private fun NavGraphBuilder.reactions(
     route: String,
     arguments: List<NamedNavArgument>,
     navController: NavController,

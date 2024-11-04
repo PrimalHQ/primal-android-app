@@ -11,4 +11,5 @@ data class NoteCallbacks(
     val onHashtagClick: ((hashtag: String) -> Unit)? = null,
     val onMediaClick: ((event: MediaClickEvent) -> Unit)? = null,
     val onPayInvoiceClick: ((event: InvoicePayClickEvent) -> Unit)? = null,
+    val onEventReactionsClick: ((eventId: String) -> Unit)? = null,
 )
