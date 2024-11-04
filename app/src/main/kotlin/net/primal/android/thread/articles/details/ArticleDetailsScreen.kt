@@ -293,6 +293,7 @@ private fun ArticleDetailsScreen(
                     onZapOptionsClick = { invokeZapOptionsOrShowWarning() },
                     onGoToWallet = onGoToWallet,
                     noteCallbacks = noteCallbacks,
+                    onFollowUnfollowClick = { detailsEventPublisher(UiEvent.ToggleAuthorFollows) },
                     onPostAction = { action ->
                         when (action) {
                             FeedPostAction.Reply -> {
@@ -421,6 +422,7 @@ private fun ArticleContentWithComments(
     onGoToWallet: () -> Unit,
     onPostAction: ((FeedPostAction) -> Unit)? = null,
     onPostLongPressAction: ((FeedPostAction) -> Unit)? = null,
+    onFollowUnfollowClick: (() -> Unit)? = null,
     onUiError: ((UiError) -> Unit)? = null,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -441,10 +443,12 @@ private fun ArticleContentWithComments(
                         .background(color = AppTheme.colorScheme.surface)
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp),
+                    authorFollowed = state.isAuthorFollowed,
                     authorCdnImage = state.article.authorAvatarCdnImage,
                     authorDisplayName = state.article.authorDisplayName,
                     authorInternetIdentifier = state.article.authorInternetIdentifier,
                     onAuthorAvatarClick = { noteCallbacks.onProfileClick?.invoke(state.article.authorId) },
+                    onFollowUnfollowClick = onFollowUnfollowClick,
                 )
                 PrimalDivider()
             }
