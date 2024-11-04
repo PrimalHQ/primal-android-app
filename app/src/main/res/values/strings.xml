@@ -114,37 +114,6 @@
     <string name="premium_primal_name_lightning_address">Lightning address</string>
     <string name="premium_primal_name_vip_profile">VIP profile</string>
 
-    <string name="premium_more_info_title">Primal Premium</string>
-    <string name="premium_more_info_close_button">Close</string>
-    <string name="premium_more_info_why_premium_question">Why Get Primal Premium?</string>
-    <string name="premium_more_info_why_premium_answer">
-            Become a Nostr power user and help shape the future! Open protocols like Nostr give us the opportunity to regain control over our online lives.
-            \n\nAt Primal, we don’t rely on advertising. We don’t monetize user data. Our users are our customers. Our sole focus is to make the best possible product for our users. We open source all our work to help the Nostr ecosystem flourish. By signing up for Primal Premium, you are enabling us to continue building for Nostr.
-            \n\nBe the change you want to see in the world. If you don’t want to be the product, consider being the customer.
-    </string>
-    <string name="premium_more_info_faq_first_question">Become a Nostr power user and help shape the future?</string>
-    <string name="premium_more_info_faq_first_answer">At Primal, we don’t rely on advertising. We don’t monetize user data. Our users are our customers. Our sole focus is to make the best possible product for our users. We open source all our work to help the Nostr ecosystem flourish. By signing up for Primal Premium, you are enabling us to continue building for Nostr.</string>
-    <string name="premium_more_info_faq_second_question">Open protocols like Nostr give us the opportunity to regain control over our online lives?</string>
-    <string name="premium_more_info_faq_second_answer">At Primal, we don’t rely on advertising. We don’t monetize user data. Our users are our customers. Our sole focus is to make the best possible product for our users. We open source all our work to help the Nostr ecosystem flourish. By signing up for Primal Premium, you are enabling us to continue building for Nostr.</string>
-
-    <string name="premium_more_info_why_premium">Why Premium</string>
-    <string name="premium_more_info_features">Features</string>
-    <string name="premium_more_info_faq">FAQ</string>
-
-    <string name="premium_more_info_features_table_header_feature">Feature</string>
-    <string name="premium_more_info_features_table_header_free">Free</string>
-    <string name="premium_more_info_features_table_header_premium">Premium</string>
-    <string name="premium_more_info_features_table_first_row">Apps for Web, iOS, Android</string>
-    <string name="premium_more_info_features_table_second_row">Built-in bitcoin lightning wallet</string>
-    <string name="premium_more_info_features_table_third_row">Global Nostr text and user search</string>
-    <string name="premium_more_info_features_table_fourth_row">Media storage capacity</string>
-    <string name="premium_more_info_features_table_fifth_row">Media maximum file size</string>
-    <string name="premium_more_info_features_table_sixth_row">Verified Nostr Address</string>
-    <string name="premium_more_info_features_table_seventh_row">Custom Lightning Address</string>
-    <string name="premium_more_info_features_table_eighth_row">VIP Profile on primal.net</string>
-    <string name="premium_more_info_features_table_ninth_row">Advanced Nostr search</string>
-    <string name="premium_more_info_features_table_tenth_row">Premium paid relay</string>
-
     <string name="feed_reposted_suffix">reposted</string>
     <string name="feed_see_more">See more…</string>
 
