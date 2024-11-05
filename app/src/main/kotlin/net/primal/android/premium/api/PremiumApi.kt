@@ -8,7 +8,7 @@ interface PremiumApi {
 
     suspend fun isPrimalNameAvailable(name: String): NameAvailableResponse
 
-    suspend fun getMembershipStatus(userId: String): MembershipStatusResponse
+    suspend fun getPremiumMembershipStatus(userId: String): MembershipStatusResponse?
 
     suspend fun purchaseMembership(userId: String, body: PurchaseMembershipRequest)
 }

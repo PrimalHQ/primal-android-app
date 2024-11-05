@@ -134,8 +134,7 @@ private fun PremiumHomeScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .clickable { onClose() }
-                    ,
+                        .clickable { onClose() },
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(

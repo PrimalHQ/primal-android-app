@@ -36,7 +36,7 @@ class PremiumApiImpl @Inject constructor(
             ?: throw WssException("Invalid content")
     }
 
-    override suspend fun getMembershipStatus(userId: String): MembershipStatusResponse {
+    override suspend fun getPremiumMembershipStatus(userId: String): MembershipStatusResponse? {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET_MEMBERSHIP_STATUS,
@@ -53,7 +53,6 @@ class PremiumApiImpl @Inject constructor(
         )
         val statusEvent = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalMembershipStatus)
         return NostrJson.decodeFromStringOrNull<MembershipStatusResponse>(statusEvent?.content)
-            ?: throw WssException("Invalid content")
     }
 
     override suspend fun purchaseMembership(userId: String, body: PurchaseMembershipRequest) {
