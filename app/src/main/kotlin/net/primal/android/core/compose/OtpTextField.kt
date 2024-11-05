@@ -4,7 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,6 +21,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import net.primal.android.theme.AppTheme
 
@@ -31,6 +32,9 @@ fun OtpTextField(
     onOtpTextChange: (String) -> Unit,
     otpCount: Int = 6,
     onCodeConfirmed: ((String) -> Unit)? = null,
+    charSpacing: Dp = 8.dp,
+    charWidth: Dp? = 44.dp,
+    keyboardType: KeyboardType = KeyboardType.NumberPassword,
 ) {
     BasicTextField(
         modifier = modifier,
@@ -44,7 +48,7 @@ fun OtpTextField(
             }
         },
         keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.NumberPassword,
+            keyboardType = keyboardType,
             imeAction = if (otpText.length == otpCount) ImeAction.Go else ImeAction.Done,
         ),
         keyboardActions = KeyboardActions(
@@ -57,12 +61,11 @@ fun OtpTextField(
         decorationBox = {
             Row(
                 modifier = Modifier.height(56.dp),
-                horizontalArrangement = Arrangement.Center,
+                horizontalArrangement = Arrangement.spacedBy(charSpacing, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 repeat(otpCount) {
-                    CharText(index = it, text = otpText)
-                    Spacer(modifier = Modifier.width(8.dp))
+                    CharText(index = it, text = otpText, width = charWidth)
                 }
             }
         },
@@ -70,7 +73,11 @@ fun OtpTextField(
 }
 
 @Composable
-private fun CharText(index: Int, text: String) {
+private fun RowScope.CharText(
+    index: Int,
+    text: String,
+    width: Dp?,
+) {
     val char = when {
         index == text.length -> ""
         index > text.length -> ""
@@ -78,7 +85,13 @@ private fun CharText(index: Int, text: String) {
     }
     Box(
         modifier = Modifier
-            .width(44.dp)
+            .run {
+                if (width == null) {
+                    weight(1f)
+                } else {
+                    width(width)
+                }
+            }
             .fillMaxHeight()
             .background(
                 color = AppTheme.extraColorScheme.surfaceVariantAlt1,
