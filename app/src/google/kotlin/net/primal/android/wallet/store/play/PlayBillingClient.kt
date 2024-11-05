@@ -7,6 +7,7 @@ import com.android.billingclient.api.BillingClient.BillingResponseCode
 import com.android.billingclient.api.BillingClientStateListener
 import com.android.billingclient.api.BillingFlowParams
 import com.android.billingclient.api.BillingResult
+import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.QueryProductDetailsParams
@@ -29,6 +30,9 @@ import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.InAppProduct
 import net.primal.android.wallet.store.domain.SatsPurchase
 import net.primal.android.wallet.store.domain.SatsPurchaseQuote
+import net.primal.android.wallet.store.domain.SubscriptionBillingPeriod
+import net.primal.android.wallet.store.domain.SubscriptionProduct
+import net.primal.android.wallet.store.domain.SubscriptionPurchase
 import timber.log.Timber
 
 class PlayBillingClient @Inject constructor(
@@ -50,8 +54,11 @@ class PlayBillingClient @Inject constructor(
 
     private var purchaseQuote: SatsPurchaseQuote? = null
 
-    private val _purchases = MutableSharedFlow<SatsPurchase>()
-    override val purchases = _purchases.asSharedFlow()
+    private val _satsPurchases = MutableSharedFlow<SatsPurchase>()
+    override val satsPurchases = _satsPurchases.asSharedFlow()
+
+    private val _subscriptionPurchases = MutableSharedFlow<SubscriptionPurchase>()
+    override val subscriptionPurchases = _subscriptionPurchases.asSharedFlow()
 
     private var _minSatsInAppProduct: PlayInAppProduct? = null
     override val minSatsInAppProduct: InAppProduct?
@@ -60,6 +67,21 @@ class PlayBillingClient @Inject constructor(
                 productId = it.productId,
                 priceCurrencyCode = it.priceCurrencyCode,
                 priceAmountMicros = it.priceAmountMicros,
+            )
+        }
+
+    private var _subscriptionProducts: List<PlaySubscriptionProduct> = emptyList()
+    override val subscriptionProducts: List<SubscriptionProduct>
+        get() = _subscriptionProducts.map {
+            SubscriptionProduct(
+                productId = it.productId,
+                priceCurrencyCode = it.priceCurrencyCode,
+                priceAmountMicros = it.priceAmountMicros,
+                billingPeriod = if (it.productId.contains("monthly")) {
+                    SubscriptionBillingPeriod.Monthly
+                } else {
+                    SubscriptionBillingPeriod.Yearly
+                },
             )
         }
 
@@ -74,8 +96,13 @@ class PlayBillingClient @Inject constructor(
             if (!connectSuccess) return false
 
             if (_minSatsInAppProduct == null) {
-                initializeProducts()
+                initializeMinSatsProduct()
             }
+
+            if (_subscriptionProducts.isEmpty()) {
+                initializeSubscriptions()
+            }
+
             return true
         }
 
@@ -104,7 +131,7 @@ class PlayBillingClient @Inject constructor(
         }
     }
 
-    private suspend fun initializeProducts() {
+    private suspend fun initializeMinSatsProduct() {
         val response = billingClient.queryProductDetails(minSatsQueryProductDetailsParams)
         val productDetails = response.productDetailsList?.firstOrNull()
         val offerDetails = productDetails?.oneTimePurchaseOfferDetails
@@ -119,6 +146,37 @@ class PlayBillingClient @Inject constructor(
                 googlePlayProductDetails = productDetails,
             )
         }
+    }
+
+    private suspend fun initializeSubscriptions() {
+        _subscriptionProducts = queryAllSubscriptionDetails().mapNotNull { productDetails ->
+            val offerDetails = productDetails.subscriptionOfferDetails?.firstOrNull()
+            val pricing = offerDetails?.pricingPhases?.pricingPhaseList?.firstOrNull()
+            val offerToken = offerDetails?.offerToken
+            if (pricing != null && offerToken != null) {
+                PlaySubscriptionProduct(
+                    productId = productDetails.productId,
+                    title = productDetails.title,
+                    name = productDetails.name,
+                    priceAmountMicros = pricing.priceAmountMicros,
+                    priceCurrencyCode = pricing.priceCurrencyCode,
+                    formattedPrice = pricing.formattedPrice,
+                    googlePlayProductDetails = productDetails,
+                    googlePlayOfferToken = offerToken,
+                )
+            } else {
+                null
+            }
+        }
+    }
+
+    private suspend fun queryAllSubscriptionDetails(): List<ProductDetails> {
+        val monthlyResponse = billingClient.queryProductDetails(premiumMonthlyProductDetailsParams)
+        val yearlyResponse = billingClient.queryProductDetails(premiumYearlyProductDetailsParams)
+        return listOfNotNull(
+            monthlyResponse.productDetailsList?.firstOrNull(),
+            yearlyResponse.productDetailsList?.firstOrNull(),
+        )
     }
 
     @Throws(BillingNotAvailable::class, ProductNotAvailable::class)
@@ -141,18 +199,45 @@ class PlayBillingClient @Inject constructor(
         billingClient.launchBillingFlow(activity, billingFlowParams)
     }
 
+    @Throws(BillingNotAvailable::class)
+    override suspend fun launchSubscriptionBillingFlow(subscriptionProduct: SubscriptionProduct, activity: Activity) {
+        val initialized = ensureBillingClientInitialized()
+        if (!initialized) throw BillingNotAvailable()
+
+        val subscription = _subscriptionProducts.find { it.productId == subscriptionProduct.productId }
+            ?: throw ProductNotAvailable()
+
+        val subscriptionParamsList = listOf(
+            BillingFlowParams.ProductDetailsParams.newBuilder()
+                .setProductDetails(subscription.googlePlayProductDetails)
+                .setOfferToken(subscription.googlePlayOfferToken)
+                .build(),
+        )
+
+        val billingFlowParams = BillingFlowParams.newBuilder()
+            .setProductDetailsParamsList(subscriptionParamsList)
+            .build()
+
+        billingClient.launchBillingFlow(activity, billingFlowParams)
+    }
+
     override suspend fun refreshMinSatsInAppProduct() {
         val initialized = ensureBillingClientInitialized()
-        if (initialized) initializeProducts()
+        if (initialized) initializeMinSatsProduct()
+    }
+
+    override suspend fun refreshSubscriptionProducts() {
+        val initialized = ensureBillingClientInitialized()
+        if (initialized) initializeSubscriptions()
     }
 
     override fun onPurchasesUpdated(billingResult: BillingResult, purchases: MutableList<Purchase>?) {
         scope.launch {
             purchases?.forEach { purchase ->
-                purchaseQuote?.let { quote ->
-                    _purchases.emit(
-                        SatsPurchase(
-                            quote = quote,
+                val productId = purchase.products.firstOrNull()
+                if (productId.equals(PREMIUM_MONTHLY_PRODUCT_ID) || productId.equals(PREMIUM_YEARLY_PRODUCT_ID)) {
+                    _subscriptionPurchases.emit(
+                        SubscriptionPurchase(
                             orderId = purchase.orderId,
                             productId = MIN_SATS_PRODUCT_ID,
                             purchaseTime = purchase.purchaseTime,
@@ -160,6 +245,19 @@ class PlayBillingClient @Inject constructor(
                             quantity = purchase.quantity,
                         ),
                     )
+                } else {
+                    purchaseQuote?.let { quote ->
+                        _satsPurchases.emit(
+                            SatsPurchase(
+                                quote = quote,
+                                orderId = purchase.orderId,
+                                productId = MIN_SATS_PRODUCT_ID,
+                                purchaseTime = purchase.purchaseTime,
+                                purchaseToken = purchase.purchaseToken,
+                                quantity = purchase.quantity,
+                            ),
+                        )
+                    }
                 }
             }
         }
@@ -173,6 +271,30 @@ class PlayBillingClient @Inject constructor(
                     QueryProductDetailsParams.Product.newBuilder()
                         .setProductId(MIN_SATS_PRODUCT_ID)
                         .setProductType(BillingClient.ProductType.INAPP)
+                        .build(),
+                ),
+            )
+            .build()
+
+        private const val PREMIUM_MONTHLY_PRODUCT_ID = "monthly_premium"
+        private val premiumMonthlyProductDetailsParams = QueryProductDetailsParams.newBuilder()
+            .setProductList(
+                listOf(
+                    QueryProductDetailsParams.Product.newBuilder()
+                        .setProductId(PREMIUM_MONTHLY_PRODUCT_ID)
+                        .setProductType(BillingClient.ProductType.SUBS)
+                        .build(),
+                ),
+            )
+            .build()
+
+        private const val PREMIUM_YEARLY_PRODUCT_ID = "yearly_premium"
+        private val premiumYearlyProductDetailsParams = QueryProductDetailsParams.newBuilder()
+            .setProductList(
+                listOf(
+                    QueryProductDetailsParams.Product.newBuilder()
+                        .setProductId(PREMIUM_YEARLY_PRODUCT_ID)
+                        .setProductType(BillingClient.ProductType.SUBS)
                         .build(),
                 ),
             )

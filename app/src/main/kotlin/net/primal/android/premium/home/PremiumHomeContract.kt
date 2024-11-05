@@ -1,7 +1,10 @@
 package net.primal.android.premium.home
 
+import net.primal.android.wallet.store.domain.SubscriptionProduct
+
 interface PremiumHomeContract {
     data class UiState(
+        val subscriptions: List<SubscriptionProduct> = emptyList(),
         val stage: PremiumStage = PremiumStage.Home,
         val primalName: String? = null,
     )
@@ -15,5 +18,6 @@ interface PremiumHomeContract {
         Home,
         FindPrimalName,
         Purchase,
+        Success,
     }
 }

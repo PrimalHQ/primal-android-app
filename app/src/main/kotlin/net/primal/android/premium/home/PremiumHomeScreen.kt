@@ -7,13 +7,16 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.premium.primalName.PremiumPrimalNameStage
 import net.primal.android.premium.purchase.PremiumPurchaseStage
@@ -45,7 +48,10 @@ private fun PremiumHomeScreen(
 ) {
     BackHandler {
         when (state.stage) {
-            PremiumHomeContract.PremiumStage.Home -> onClose()
+            PremiumHomeContract.PremiumStage.Home,
+            PremiumHomeContract.PremiumStage.Success,
+            -> onClose()
+
             PremiumHomeContract.PremiumStage.FindPrimalName -> eventPublisher(
                 PremiumHomeContract.UiEvent.MoveToPremiumStage(
                     PremiumHomeContract.PremiumStage.Home,
@@ -70,6 +76,7 @@ private fun PremiumHomeScreen(
         when (stage) {
             PremiumHomeContract.PremiumStage.Home -> {
                 PremiumHomeStage(
+                    subscriptions = state.subscriptions,
                     onClose = onClose,
                     onFindPrimalName = {
                         eventPublisher(
@@ -110,6 +117,7 @@ private fun PremiumHomeScreen(
                 state.primalName?.let {
                     PremiumPurchaseStage(
                         primalName = it,
+                        subscriptions = state.subscriptions,
                         onBack = {
                             eventPublisher(
                                 PremiumHomeContract.UiEvent.MoveToPremiumStage(
@@ -118,6 +126,22 @@ private fun PremiumHomeScreen(
                             )
                         },
                         onLearnMoreClick = onMoreInfoClick,
+                    )
+                }
+            }
+
+            PremiumHomeContract.PremiumStage.Success -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable { onClose() }
+                    ,
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = "Success! LFG!!!",
+                        style = AppTheme.typography.bodyLarge,
+                        fontSize = 28.sp,
                     )
                 }
             }
@@ -139,7 +163,10 @@ private fun AnimatedContentTransitionScope<PremiumHomeContract.PremiumStage>.tra
                         .togetherWith(slideOutHorizontally(targetOffsetX = { it }))
                 }
 
-                PremiumHomeContract.PremiumStage.FindPrimalName, PremiumHomeContract.PremiumStage.Purchase -> {
+                PremiumHomeContract.PremiumStage.FindPrimalName,
+                PremiumHomeContract.PremiumStage.Purchase,
+                PremiumHomeContract.PremiumStage.Success,
+                -> {
                     slideInHorizontally(initialOffsetX = { it })
                         .togetherWith(slideOutHorizontally(targetOffsetX = { -it }))
                 }
@@ -147,6 +174,11 @@ private fun AnimatedContentTransitionScope<PremiumHomeContract.PremiumStage>.tra
         }
 
         PremiumHomeContract.PremiumStage.Purchase -> {
+            slideInHorizontally(initialOffsetX = { -it })
+                .togetherWith(slideOutHorizontally(targetOffsetX = { it }))
+        }
+
+        PremiumHomeContract.PremiumStage.Success -> {
             slideInHorizontally(initialOffsetX = { -it })
                 .togetherWith(slideOutHorizontally(targetOffsetX = { it }))
         }

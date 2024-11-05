@@ -16,11 +16,15 @@ import net.primal.android.premium.purchase.PremiumPurchaseContract.UiEvent
 import net.primal.android.premium.purchase.PremiumPurchaseContract.UiState
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.wallet.store.PrimalBillingClient
+import net.primal.android.wallet.store.domain.InAppPurchaseException
+import timber.log.Timber
 
 @HiltViewModel
 class PremiumPurchaseViewModel @Inject constructor(
     activeAccountStore: ActiveAccountStore,
     private val profileRepository: ProfileRepository,
+    private val primalBillingClient: PrimalBillingClient,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -41,6 +45,7 @@ class PremiumPurchaseViewModel @Inject constructor(
                 when (it) {
                     is UiEvent.ApplyPromoCode -> tryApplyPromoCode(it.promoCode)
                     UiEvent.ClearPromoCodeValidity -> setState { copy(promoCodeValidity = null) }
+                    is UiEvent.RequestPurchase -> launchBillingFlow(it)
                 }
             }
         }
@@ -57,5 +62,18 @@ class PremiumPurchaseViewModel @Inject constructor(
             setState { copy(isCheckingPromoCodeValidity = true) }
             delay(1.seconds)
             setState { copy(promoCodeValidity = true, isCheckingPromoCodeValidity = false) }
+        }
+
+    private fun launchBillingFlow(event: UiEvent.RequestPurchase) =
+        viewModelScope.launch {
+            try {
+                primalBillingClient.launchSubscriptionBillingFlow(
+                    subscriptionProduct = event.subscriptionProduct,
+                    activity = event.activity,
+                )
+            } catch (error: InAppPurchaseException) {
+                Timber.w(error)
+                // TODO Handle error?
+            }
         }
 }

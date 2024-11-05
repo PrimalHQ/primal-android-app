@@ -96,9 +96,7 @@
     <string name="premium_nostr_tools_benefit_three">Premium paid relay</string>
     <string name="premium_nostr_tools_benefit_four">Nostr account backup</string>
     <string name="premium_learn_more">Learn More About Premium</string>
-    <string name="premium_monthly_price">$6.99</string>
     <string name="premium_period_monthly">monthly</string>
-    <string name="premium_annually_price">$79.99</string>
     <string name="premium_period_annually">annually</string>
     <string name="premium_price_or">or</string>
     <string name="premium_start_by_reserving_primal_name">
