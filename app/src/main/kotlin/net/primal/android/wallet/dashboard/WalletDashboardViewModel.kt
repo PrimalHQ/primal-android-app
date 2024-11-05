@@ -91,7 +91,7 @@ class WalletDashboardViewModel @Inject constructor(
 
     private fun subscribeToPurchases() =
         viewModelScope.launch {
-            primalBillingClient.purchases.collect { purchase ->
+            primalBillingClient.satsPurchases.collect { purchase ->
                 confirmPurchase(purchase = purchase)
             }
         }

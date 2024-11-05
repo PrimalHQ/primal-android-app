@@ -99,7 +99,7 @@ class InAppPurchaseBuyViewModel @Inject constructor(
 
     private fun subscribeToPurchases() =
         viewModelScope.launch {
-            primalBillingClient.purchases.collect { purchase ->
+            primalBillingClient.satsPurchases.collect { purchase ->
                 if (purchase.quote.quoteId == _state.value.purchasingQuote?.quoteId) {
                     setEffect(SideEffect.PurchaseConfirmed)
                 }

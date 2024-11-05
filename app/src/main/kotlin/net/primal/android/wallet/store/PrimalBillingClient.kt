@@ -5,14 +5,24 @@ import kotlinx.coroutines.flow.SharedFlow
 import net.primal.android.wallet.store.domain.InAppProduct
 import net.primal.android.wallet.store.domain.SatsPurchase
 import net.primal.android.wallet.store.domain.SatsPurchaseQuote
+import net.primal.android.wallet.store.domain.SubscriptionProduct
+import net.primal.android.wallet.store.domain.SubscriptionPurchase
 
 interface PrimalBillingClient {
 
-    val purchases: SharedFlow<SatsPurchase>
+    val satsPurchases: SharedFlow<SatsPurchase>
+
+    val subscriptionPurchases: SharedFlow<SubscriptionPurchase>
 
     val minSatsInAppProduct: InAppProduct?
 
+    val subscriptionProducts: List<SubscriptionProduct>
+
     suspend fun launchMinSatsBillingFlow(quote: SatsPurchaseQuote, activity: Activity)
 
+    suspend fun launchSubscriptionBillingFlow(subscriptionProduct: SubscriptionProduct, activity: Activity)
+
     suspend fun refreshMinSatsInAppProduct()
+
+    suspend fun refreshSubscriptionProducts()
 }
