@@ -1,5 +1,6 @@
 package net.primal.android.premium.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,9 +13,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -23,58 +25,100 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
+import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.NostrichFilled
-import net.primal.android.core.compose.icons.primaliconpack.PrimalPremiumDark
+import net.primal.android.core.compose.icons.primaliconpack.PrimalPremium
 import net.primal.android.core.compose.icons.primaliconpack.VerifiedFilled
 import net.primal.android.theme.AppTheme
 
+internal val PREMIUM_TINT_DARK = Color(0xFFDDDDDD)
+internal val PREMIUM_TINT_LIGHT = Color(0xFF222222)
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PremiumHomeStage(
     onClose: () -> Unit,
     onFindPrimalName: () -> Unit,
     onLearnMoreClick: () -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .padding(16.dp)
-            .systemBarsPadding()
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Bottom),
-    ) {
-        Icon(
+    Scaffold(
+        topBar = {
+            PrimalTopAppBar(
+                title = "",
+                navigationIcon = PrimalIcons.ArrowBack,
+                onNavigationIconClick = onClose,
+                showDivider = false,
+            )
+        },
+    ) { paddingValues ->
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 28.dp)
-                .size(58.dp),
-            imageVector = PrimalIcons.PrimalPremiumDark,
+                .padding(16.dp)
+                .padding(paddingValues)
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Bottom),
+        ) {
+            PrimalPremiumLogoHeader(
+                modifier = Modifier.padding(bottom = 24.dp),
+            )
+            Text(
+                text = stringResource(id = R.string.premium_subscribe_to_get),
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                style = AppTheme.typography.bodyLarge,
+            )
+            PremiumOfferCard(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 16.dp, top = 8.dp),
+                onLearnMoreClick = onLearnMoreClick,
+            )
+            PriceRow()
+            ButtonsColumn(
+                modifier = Modifier.padding(16.dp),
+                onClose = onClose,
+                onFindPrimalName = onFindPrimalName,
+            )
+        }
+    }
+}
+
+@Composable
+fun PrimalPremiumLogoHeader(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.primal_wave_logo_summer),
             contentDescription = null,
-            tint = Color.Unspecified,
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(AppTheme.colorScheme.background)
+                .size(46.dp),
         )
-        Text(
-            text = stringResource(id = R.string.premium_subscribe_to_get),
-            color = AppTheme.colorScheme.onBackground,
-            fontWeight = FontWeight.Bold,
-            style = AppTheme.typography.bodyLarge,
-        )
-        PremiumOfferCard(
-            modifier = Modifier.padding(bottom = 16.dp),
-            onLearnMoreClick = onLearnMoreClick,
-        )
-        PriceRow()
-        ButtonsColumn(
-            modifier = Modifier.padding(16.dp),
-            onClose = onClose,
-            onFindPrimalName = onFindPrimalName,
+        Icon(
+            imageVector = PrimalIcons.PrimalPremium,
+            contentDescription = null,
+            tint = if (LocalPrimalTheme.current.isDarkTheme) {
+                PREMIUM_TINT_DARK
+            } else {
+                PREMIUM_TINT_LIGHT
+            },
         )
     }
 }
@@ -111,7 +155,7 @@ private fun PrimalNameRow(modifier: Modifier = Modifier) {
     ) {
         IconBadge(
             modifier = Modifier.padding(horizontal = 7.dp),
-            size = 72.dp,
+            size = 62.dp,
             imageVector = PrimalIcons.VerifiedFilled,
         )
         DescriptionSection(
@@ -143,6 +187,7 @@ private fun DescriptionSection(headerText: String, bulletPoints: List<String>) {
                 text = "• $it",
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 style = AppTheme.typography.bodyLarge,
+                fontSize = 16.sp,
             )
         }
     }
@@ -170,7 +215,7 @@ private fun NostrToolsRow(modifier: Modifier = Modifier) {
         horizontalArrangement = Arrangement.spacedBy(24.dp, Alignment.Start),
     ) {
         IconBadge(
-            size = 86.dp,
+            size = 76.dp,
             imageVector = PrimalIcons.NostrichFilled,
         )
         DescriptionSection(

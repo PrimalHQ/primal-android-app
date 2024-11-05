@@ -87,7 +87,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Notrich
 import net.primal.android.core.compose.icons.primaliconpack.Paste
 import net.primal.android.core.compose.icons.primaliconpack.PhotoFromGallery
 import net.primal.android.core.compose.icons.primaliconpack.Play
-import net.primal.android.core.compose.icons.primaliconpack.PrimalPremiumDark
+import net.primal.android.core.compose.icons.primaliconpack.PrimalPremium
 import net.primal.android.core.compose.icons.primaliconpack.QrCode
 import net.primal.android.core.compose.icons.primaliconpack.Quote
 import net.primal.android.core.compose.icons.primaliconpack.Read
@@ -214,7 +214,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             Keyboard,
             PhotoFromGallery,
             Paste,
-            PrimalPremiumDark,
+            PrimalPremium,
             Directory,
             Subtract,
             ConnectRelay,
