@@ -153,15 +153,6 @@ class NostrNotary @Inject constructor(
         ).signOrThrow(hexPrivateKey = Hex.decode(nwc.keypair.privateKey))
     }
 
-    fun signImageUploadNostrEvent(userId: String, content: String): NostrEvent {
-        return NostrUnsignedEvent(
-            pubKey = userId,
-            kind = NostrEventKind.PrimalSimpleUploadRequest.value,
-            content = content,
-            tags = emptyList(),
-        ).signOrThrow(nsec = findNsecOrThrow(userId))
-    }
-
     fun signMuteListNostrEvent(userId: String, mutedUserIds: Set<String>): NostrEvent {
         val tags = mutedUserIds.map { it.asPubkeyTag() }
         return NostrUnsignedEvent(
