@@ -23,9 +23,10 @@ class PremiumRepository @Inject constructor(
 
     suspend fun fetchMembershipStatus(userId: String) {
         withContext(dispatchers.io()) {
-            val response = premiumApi.getMembershipStatus(userId = userId)
-            accountsStore.getAndUpdateAccount(userId = userId) {
-                this.copy(premiumMembership = response.toPremiumMembership())
+            premiumApi.getPremiumMembershipStatus(userId = userId)?.let { response ->
+                accountsStore.getAndUpdateAccount(userId = userId) {
+                    this.copy(premiumMembership = response.toPremiumMembership())
+                }
             }
         }
     }
