@@ -1,11 +1,6 @@
 ## Changes
-- Disable Premium in drawer;
-- Implement primalSpec field in DVM feeds;
-- Implement Follow/Following on ArticleDetailsScreen;
-- Implement click listeners to open ReactionsScreen;
-- Implement Reactions screen with likes and reposts;
-- Update link previews;
-- Add emission delays to EOSE messages in NostrSocketClient;
-- Fix paddings on top zap;
-- Implement premium more info screen (#220);
-- Upgrade libs;
+- Implement PoC Google Play subscriptions integration
+- Implement fetching premium membership status
+- Implement premium promo code bottom sheet without api (#223)
+- Update premium home screen (#224)
+- Implement Premium Purchase Screen UI (#221)
