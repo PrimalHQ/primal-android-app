@@ -6,6 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import net.primal.android.networking.di.PrimalWalletApiClient
 import net.primal.android.networking.primal.PrimalApiClient
+import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.premium.api.PremiumApi
 import net.primal.android.premium.api.PremiumApiImpl
 
@@ -14,6 +15,12 @@ import net.primal.android.premium.api.PremiumApiImpl
 object PremiumModule {
 
     @Provides
-    fun providePremiumApi(@PrimalWalletApiClient primalApiClient: PrimalApiClient): PremiumApi =
-        PremiumApiImpl(primalApiClient = primalApiClient)
+    fun providePremiumApi(
+        @PrimalWalletApiClient primalApiClient: PrimalApiClient,
+        nostrNotary: NostrNotary,
+    ): PremiumApi =
+        PremiumApiImpl(
+            primalApiClient = primalApiClient,
+            nostrNotary = nostrNotary,
+        )
 }
