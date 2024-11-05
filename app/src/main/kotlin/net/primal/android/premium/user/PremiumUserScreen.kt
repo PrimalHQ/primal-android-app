@@ -160,7 +160,7 @@ private fun SupportUsNotice(onSupportPrimal: () -> Unit) {
         Row {
             Text(
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                text = stringResource(id = R.string.premium_enjoying_primal_if_so),
+                text = stringResource(id = R.string.premium_enjoying_primal_if_so) + " ",
                 style = AppTheme.typography.bodyMedium,
             )
             Text(
