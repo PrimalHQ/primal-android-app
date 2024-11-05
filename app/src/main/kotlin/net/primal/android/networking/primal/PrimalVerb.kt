@@ -27,8 +27,6 @@ enum class PrimalVerb(val identifier: String) {
     MARK_DM_CONVERSATION_AS_READ("reset_directmsg_count"),
     MARK_ALL_DMS_AS_READ("reset_directmsg_counts"),
     NEW_DMS_COUNT("directmsg_count_2"),
-    WALLET("wallet"),
-    WALLET_MONITOR("wallet_monitor_2"),
     DEFAULT_RELAYS("get_default_relays"),
     IS_USER_FOLLOWING("is_user_following"),
     GET_BOOKMARKS_LIST("get_bookmarks"),
@@ -44,5 +42,8 @@ enum class PrimalVerb(val identifier: String) {
     EXPLORE_TOPICS("explore_topics"),
     EXPLORE_PEOPLE("explore_people"),
     EXPLORE_ZAPS("explore_zaps"),
-    MEMBERSHIP_NAME_AVAILABLE("membership_name_available"),
+    WALLET("wallet"),
+    WALLET_MONITOR("wallet_monitor_2"),
+    WALLET_MEMBERSHIP_NAME_AVAILABLE("membership_name_available"),
+    WALLET_MEMBERSHIP_STATUS("membership_status"),
 }

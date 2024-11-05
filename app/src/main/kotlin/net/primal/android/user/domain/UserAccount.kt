@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.nostr.model.primal.content.ContentAppSettings
+import net.primal.android.premium.domain.PremiumMembership
 import net.primal.android.wallet.domain.WalletSettings
 import net.primal.android.wallet.domain.WalletState
 
@@ -34,6 +35,7 @@ data class UserAccount(
     val interests: List<String> = emptyList(),
     val followListEventContent: String? = null,
     val cachingProxyEnabled: Boolean = false,
+    val premiumMembership: PremiumMembership? = null,
 ) {
     companion object {
         val EMPTY = UserAccount(
