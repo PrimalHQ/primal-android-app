@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,13 +31,31 @@ class PremiumPurchaseViewModel @Inject constructor(
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
+        observeEvents()
         observeActiveProfile(profileId = activeAccountStore.activeUserId())
     }
+
+    private fun observeEvents() =
+        viewModelScope.launch {
+            events.collect {
+                when (it) {
+                    is UiEvent.ApplyPromoCode -> tryApplyPromoCode(it.promoCode)
+                    UiEvent.ClearPromoCodeValidity -> setState { copy(promoCodeValidity = null) }
+                }
+            }
+        }
 
     private fun observeActiveProfile(profileId: String) =
         viewModelScope.launch {
             profileRepository.observeProfile(profileId = profileId).collect {
                 setState { copy(profile = it.metadata?.asProfileDetailsUi()) }
             }
+        }
+
+    private fun tryApplyPromoCode(promoCode: String) =
+        viewModelScope.launch {
+            setState { copy(isCheckingPromoCodeValidity = true) }
+            delay(1.seconds)
+            setState { copy(promoCodeValidity = true, isCheckingPromoCodeValidity = false) }
         }
 }
