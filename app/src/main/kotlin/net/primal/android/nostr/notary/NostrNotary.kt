@@ -72,11 +72,15 @@ class NostrNotary @Inject constructor(
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
 
-    fun signAuthorizationNostrEvent(userId: String, description: String): NostrEvent {
+    fun signAuthorizationNostrEvent(
+        userId: String,
+        description: String,
+        tags: List<JsonArray> = emptyList(),
+    ): NostrEvent {
         return NostrUnsignedEvent(
             pubKey = userId,
             kind = NostrEventKind.ApplicationSpecificData.value,
-            tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
+            tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()) + tags,
             content = NostrJson.encodeToString(
                 AppSettingsDescription(description = description),
             ),

@@ -7,6 +7,7 @@ import kotlin.time.Duration
 import net.primal.android.bookmarks.BookmarksRepository
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.NostrSignUnauthorized
+import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
@@ -20,6 +21,7 @@ class UserDataUpdater @AssistedInject constructor(
     private val walletRepository: WalletRepository,
     private val relayRepository: RelayRepository,
     private val bookmarksRepository: BookmarksRepository,
+    private val premiumRepository: PremiumRepository,
 ) {
 
     private var lastTimeFetched: Instant = Instant.EPOCH
@@ -42,6 +44,7 @@ class UserDataUpdater @AssistedInject constructor(
     private suspend fun updateData() {
         settingsRepository.fetchAndPersistAppSettings(userId = userId)
         settingsRepository.ensureZapConfig(userId = userId)
+        premiumRepository.fetchMembershipStatus(userId = userId)
         relayRepository.fetchAndUpdateUserRelays(userId = userId)
         userRepository.fetchAndUpdateUserAccount(userId = userId)
         bookmarksRepository.fetchAndPersistPublicBookmarks(userId = userId)
