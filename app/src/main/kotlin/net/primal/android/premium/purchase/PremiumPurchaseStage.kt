@@ -25,11 +25,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -41,15 +43,20 @@ import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalFilledButton
+import net.primal.android.core.compose.findActivity
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.premium.purchase.ui.PremiumPromoCodeBottomSheet
 import net.primal.android.premium.ui.PremiumPrimalNameTable
+import net.primal.android.premium.ui.toGetSubscriptionString
+import net.primal.android.premium.ui.toPricingString
 import net.primal.android.theme.AppTheme
+import net.primal.android.wallet.store.domain.SubscriptionProduct
 
 @Composable
 fun PremiumPurchaseStage(
     primalName: String,
+    subscriptions: List<SubscriptionProduct>,
     onBack: () -> Unit,
     onLearnMoreClick: () -> Unit,
 ) {
@@ -58,6 +65,7 @@ fun PremiumPurchaseStage(
 
     PremiumPurchaseStage(
         state = uiState.value,
+        subscriptions = subscriptions,
         eventPublisher = viewModel::setEvent,
         primalName = primalName,
         onBack = onBack,
@@ -69,12 +77,14 @@ fun PremiumPurchaseStage(
 @Composable
 private fun PremiumPurchaseStage(
     primalName: String,
+    subscriptions: List<SubscriptionProduct>,
     state: PremiumPurchaseContract.UiState,
     onBack: () -> Unit,
     onLearnMoreClick: () -> Unit,
     eventPublisher: (PremiumPurchaseContract.UiEvent) -> Unit,
 ) {
     val uiScope = rememberCoroutineScope()
+    val activity = LocalContext.current.findActivity()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var promoCodeBottomSheetVisibility by remember { mutableStateOf(false) }
     LaunchedEffect(state.promoCodeValidity) {
@@ -148,10 +158,22 @@ private fun PremiumPurchaseStage(
                 onLearnMoreClick = onLearnMoreClick,
                 onPromoCodeClick = { promoCodeBottomSheetVisibility = true },
             )
-            BuyPremiumButtons(
-                modifier = Modifier.padding(horizontal = 12.dp),
-            )
-            TOSNotice()
+
+            if (activity != null) {
+                BuyPremiumButtons(
+                    modifier = Modifier.padding(horizontal = 12.dp),
+                    subscriptions = subscriptions,
+                    onClick = { subscription ->
+                        eventPublisher(
+                            PremiumPurchaseContract.UiEvent.RequestPurchase(
+                                activity = activity,
+                                subscriptionProduct = subscription,
+                            ),
+                        )
+                    },
+                )
+                TOSNotice()
+            }
         }
     }
 }
@@ -188,29 +210,37 @@ private fun MoreInfoPromoCodeRow(
 }
 
 @Composable
-fun BuyPremiumButtons(modifier: Modifier = Modifier) {
+fun BuyPremiumButtons(
+    modifier: Modifier = Modifier,
+    subscriptions: List<SubscriptionProduct>,
+    onClick: (SubscriptionProduct) -> Unit,
+) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        BuyPremiumButton(
-            startText = stringResource(id = R.string.premium_purchase_get_annual_plan),
-            endText = "$79.99",
-        )
-        BuyPremiumButton(
-            startText = stringResource(id = R.string.premium_purchase_get_monthly_plan),
-            endText = "$6.99",
-        )
+        subscriptions.forEach {
+            BuyPremiumButton(
+                startText = it.toGetSubscriptionString(),
+                endText = it.toPricingString(),
+                onClick = { onClick(it) },
+            )
+        }
     }
 }
 
 @Composable
-fun BuyPremiumButton(startText: String, endText: String) {
+fun BuyPremiumButton(
+    startText: String,
+    endText: String,
+    onClick: () -> Unit,
+) {
     PrimalFilledButton(
         modifier = Modifier.fillMaxWidth(),
         height = 64.dp,
         shape = RoundedCornerShape(percent = 100),
+        onClick = onClick,
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -256,5 +286,6 @@ private fun TOSNotice() {
                 }
             }
         },
+        textAlign = TextAlign.Center,
     )
 }

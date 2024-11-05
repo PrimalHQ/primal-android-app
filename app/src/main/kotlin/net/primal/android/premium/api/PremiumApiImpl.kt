@@ -15,6 +15,7 @@ import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.premium.api.model.MembershipStatusResponse
 import net.primal.android.premium.api.model.NameAvailableRequest
 import net.primal.android.premium.api.model.NameAvailableResponse
+import net.primal.android.premium.api.model.PurchaseMembershipRequest
 import net.primal.android.settings.api.model.AppSpecificDataRequest
 
 class PremiumApiImpl @Inject constructor(
@@ -53,5 +54,21 @@ class PremiumApiImpl @Inject constructor(
         val statusEvent = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalMembershipStatus)
         return NostrJson.decodeFromStringOrNull<MembershipStatusResponse>(statusEvent?.content)
             ?: throw WssException("Invalid content")
+    }
+
+    override suspend fun purchaseMembership(userId: String, body: PurchaseMembershipRequest) {
+        primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.WALLET_PURCHASE_MEMBERSHIP,
+                optionsJson = NostrJson.encodeToString(
+                    AppSpecificDataRequest(
+                        eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
+                            userId = userId,
+                            content = NostrJson.encodeToString(body),
+                        ),
+                    ),
+                ),
+            ),
+        )
     }
 }

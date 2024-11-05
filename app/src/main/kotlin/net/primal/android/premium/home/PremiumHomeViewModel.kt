@@ -9,11 +9,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.home.PremiumHomeContract.UiEvent
 import net.primal.android.premium.home.PremiumHomeContract.UiState
+import net.primal.android.premium.repository.PremiumRepository
+import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.wallet.store.PrimalBillingClient
+import timber.log.Timber
 
 @HiltViewModel
-class PremiumHomeViewModel @Inject constructor() : ViewModel() {
+class PremiumHomeViewModel @Inject constructor(
+    private val primalBillingClient: PrimalBillingClient,
+    private val premiumRepository: PremiumRepository,
+    private val activeAccountStore: ActiveAccountStore,
+) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -24,6 +33,19 @@ class PremiumHomeViewModel @Inject constructor() : ViewModel() {
 
     init {
         observeEvents()
+        initBillingClient()
+        subscribeToPurchases()
+    }
+
+    private fun initBillingClient() {
+        viewModelScope.launch {
+            primalBillingClient.refreshSubscriptionProducts()
+            setState {
+                copy(
+                    subscriptions = primalBillingClient.subscriptionProducts,
+                )
+            }
+        }
     }
 
     private fun observeEvents() =
@@ -32,6 +54,24 @@ class PremiumHomeViewModel @Inject constructor() : ViewModel() {
                 when (it) {
                     is UiEvent.MoveToPremiumStage -> setState { copy(stage = it.stage) }
                     is UiEvent.SetPrimalName -> setState { copy(primalName = it.primalName) }
+                }
+            }
+        }
+
+    private fun subscribeToPurchases() =
+        viewModelScope.launch {
+            primalBillingClient.subscriptionPurchases.collect { purchase ->
+                _state.value.primalName?.let { primalName ->
+                    try {
+                        premiumRepository.purchaseMembership(
+                            userId = activeAccountStore.activeUserId(),
+                            primalName = primalName,
+                            purchase = purchase,
+                        )
+                        setState { copy(stage = PremiumHomeContract.PremiumStage.Success) }
+                    } catch (error: WssException) {
+                        Timber.e(error)
+                    }
                 }
             }
         }

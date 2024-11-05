@@ -5,8 +5,10 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.premium.api.PremiumApi
 import net.primal.android.premium.api.model.MembershipStatusResponse
+import net.primal.android.premium.api.model.PurchaseMembershipRequest
 import net.primal.android.premium.domain.PremiumMembership
 import net.primal.android.user.accounts.UserAccountsStore
+import net.primal.android.wallet.store.domain.SubscriptionPurchase
 
 class PremiumRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
@@ -25,6 +27,25 @@ class PremiumRepository @Inject constructor(
             accountsStore.getAndUpdateAccount(userId = userId) {
                 this.copy(premiumMembership = response.toPremiumMembership())
             }
+        }
+    }
+
+    suspend fun purchaseMembership(
+        userId: String,
+        primalName: String,
+        purchase: SubscriptionPurchase,
+    ) {
+        withContext(dispatchers.io()) {
+            premiumApi.purchaseMembership(
+                userId = userId,
+                body = PurchaseMembershipRequest(
+                    platform = "android",
+                    name = primalName,
+                    orderId = purchase.orderId,
+                    purchaseToken = purchase.purchaseToken,
+                    productId = purchase.productId,
+                ),
+            )
         }
     }
 

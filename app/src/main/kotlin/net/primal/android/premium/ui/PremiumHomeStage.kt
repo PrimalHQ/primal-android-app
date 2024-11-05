@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
+import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -43,6 +44,7 @@ import net.primal.android.core.compose.icons.primaliconpack.NostrichFilled
 import net.primal.android.core.compose.icons.primaliconpack.PrimalPremium
 import net.primal.android.core.compose.icons.primaliconpack.VerifiedFilled
 import net.primal.android.theme.AppTheme
+import net.primal.android.wallet.store.domain.SubscriptionProduct
 
 internal val PREMIUM_TINT_DARK = Color(0xFFDDDDDD)
 internal val PREMIUM_TINT_LIGHT = Color(0xFF222222)
@@ -50,6 +52,7 @@ internal val PREMIUM_TINT_LIGHT = Color(0xFF222222)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PremiumHomeStage(
+    subscriptions: List<SubscriptionProduct>,
     onClose: () -> Unit,
     onFindPrimalName: () -> Unit,
     onLearnMoreClick: () -> Unit,
@@ -86,7 +89,7 @@ fun PremiumHomeStage(
                     .padding(bottom = 16.dp, top = 8.dp),
                 onLearnMoreClick = onLearnMoreClick,
             )
-            PriceRow()
+            PriceRow(subscriptions = subscriptions)
             ButtonsColumn(
                 modifier = Modifier.padding(16.dp),
                 onClose = onClose,
@@ -250,33 +253,49 @@ private fun LearnMoreSection(onLearnMoreClick: () -> Unit) {
 }
 
 @Composable
-private fun PriceRow() {
+private fun PriceRow(subscriptions: List<SubscriptionProduct>) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterHorizontally),
+        horizontalArrangement = Arrangement.Center,
     ) {
-        PricePeriodColumn(
-            price = stringResource(id = R.string.premium_monthly_price),
-            period = stringResource(id = R.string.premium_period_monthly),
-        )
-        Box(
-            modifier = Modifier
-                .size(28.dp)
-                .clip(CircleShape)
-                .background(AppTheme.extraColorScheme.onSurfaceVariantAlt3),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = stringResource(id = R.string.premium_price_or),
-                color = AppTheme.extraColorScheme.surfaceVariantAlt2,
-                fontWeight = FontWeight.Bold,
-                style = AppTheme.typography.bodyLarge,
-            )
+        when {
+            subscriptions.isEmpty() -> {
+                Box(modifier = Modifier.height(43.dp)) {
+                    PrimalLoadingSpinner()
+                }
+            }
+
+            else -> {
+                val firstSubscription = subscriptions.first()
+                PricePeriodColumn(
+                    price = firstSubscription.toPricingString(),
+                    period = firstSubscription.toBillingPeriodString(),
+                )
+
+                if (subscriptions.size >= 2) {
+                    val secondSubscription = subscriptions[1]
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 24.dp)
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .background(AppTheme.extraColorScheme.onSurfaceVariantAlt3),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.premium_price_or),
+                            color = AppTheme.extraColorScheme.surfaceVariantAlt2,
+                            fontWeight = FontWeight.Bold,
+                            style = AppTheme.typography.bodyLarge,
+                        )
+                    }
+                    PricePeriodColumn(
+                        price = secondSubscription.toPricingString(),
+                        period = secondSubscription.toBillingPeriodString(),
+                    )
+                }
+            }
         }
-        PricePeriodColumn(
-            price = stringResource(id = R.string.premium_annually_price),
-            period = stringResource(id = R.string.premium_period_annually),
-        )
     }
 }
 
