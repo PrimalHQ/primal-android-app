@@ -46,7 +46,7 @@ class PremiumBuyingViewModel @Inject constructor(
 
     private fun initBillingClient() {
         viewModelScope.launch {
-            primalBillingClient.refreshSubscriptionProducts()
+            primalBillingClient.fetchBillingProducts()
             setState {
                 copy(
                     subscriptions = primalBillingClient.subscriptionProducts,
@@ -74,7 +74,7 @@ class PremiumBuyingViewModel @Inject constructor(
                 setState {
                     copy(
                         profile = it.metadata?.asProfileDetailsUi(),
-                        primalName = this.primalName ?: it.metadata?.handle
+                        primalName = this.primalName ?: it.metadata?.handle,
                     )
                 }
             }

@@ -18,11 +18,10 @@ interface PrimalBillingClient {
 
     val subscriptionProducts: List<SubscriptionProduct>
 
+    suspend fun fetchBillingProducts()
+
     suspend fun launchMinSatsBillingFlow(quote: SatsPurchaseQuote, activity: Activity)
 
     suspend fun launchSubscriptionBillingFlow(subscriptionProduct: SubscriptionProduct, activity: Activity)
 
-    suspend fun refreshMinSatsInAppProduct()
-
-    suspend fun refreshSubscriptionProducts()
 }
