@@ -5,9 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PurchaseMembershipRequest(
-    val platform: String,
     val name: String,
-    @SerialName("order_id") val orderId: String?,
-    @SerialName("product_id") val productId: String,
-    @SerialName("purchase_token") val purchaseToken: String,
+    @SerialName("receiver_pubkey") val receiverUserId: String,
+    @SerialName("product_id") val primalProductId: String? = null,
+    @SerialName("android_subscription") val playSubscription: String? = null,
 )
