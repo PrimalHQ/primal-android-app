@@ -91,6 +91,7 @@ class PrimalDrawerViewModel @Inject constructor(
         listOf(
             DrawerScreenDestination.Profile,
             DrawerScreenDestination.Premium(hasPremium = hasPremium),
+            DrawerScreenDestination.DemoBuyPremium,
             DrawerScreenDestination.Messages,
             DrawerScreenDestination.Bookmarks(userId = userId),
             DrawerScreenDestination.Settings,
