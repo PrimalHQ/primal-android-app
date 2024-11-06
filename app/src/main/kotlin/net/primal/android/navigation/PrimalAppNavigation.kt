@@ -83,6 +83,8 @@ import net.primal.android.notifications.list.NotificationsViewModel
 import net.primal.android.premium.home.PremiumHomeScreen
 import net.primal.android.premium.home.PremiumHomeViewModel
 import net.primal.android.premium.info.PremiumMoreInfoScreen
+import net.primal.android.premium.user.PremiumUserScreen
+import net.primal.android.premium.user.PremiumUserViewModel
 import net.primal.android.profile.details.ProfileDetailsViewModel
 import net.primal.android.profile.details.ui.ProfileDetailsScreen
 import net.primal.android.profile.domain.ProfileFollowsType
@@ -232,6 +234,7 @@ fun NavController.navigateToExploreFeed(
 private fun NavController.navigateToBookmarks() = navigate(route = "bookmarks")
 
 private fun NavController.navigateToPremium() = navigate(route = "premium")
+private fun NavController.navigateToPremiumUser() = navigate(route = "premiumUser")
 
 fun noteCallbacksHandler(navController: NavController) =
     NoteCallbacks(
@@ -285,7 +288,7 @@ fun PrimalAppNavigation() {
     val drawerDestinationHandler: (DrawerScreenDestination) -> Unit = {
         when (it) {
             DrawerScreenDestination.Profile -> navController.navigateToProfile()
-            DrawerScreenDestination.Premium -> navController.navigateToPremium()
+            DrawerScreenDestination.Premium -> navController.navigateToPremiumUser()
             DrawerScreenDestination.Messages -> navController.navigateToMessages()
             is DrawerScreenDestination.Bookmarks -> navController.navigateToBookmarks()
             DrawerScreenDestination.Settings -> navController.navigateToSettings()
@@ -407,6 +410,11 @@ fun PrimalAppNavigation() {
 
         premium(
             route = "premium",
+            navController = navController,
+        )
+
+        premiumUser(
+            route = "premiumUser",
             navController = navController,
         )
 
@@ -909,6 +917,27 @@ private fun NavGraphBuilder.premium(route: String, navController: NavController)
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
             onMoreInfoClick = { navController.navigateToPremiumMoreInfo() },
+        )
+    }
+
+private fun NavGraphBuilder.premiumUser(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        val viewModel = hiltViewModel<PremiumUserViewModel>()
+
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+
+        PremiumUserScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+            onManagePremium = {},
+            onSupportPrimal = {},
         )
     }
 
