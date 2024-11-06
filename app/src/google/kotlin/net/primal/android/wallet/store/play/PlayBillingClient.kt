@@ -221,14 +221,12 @@ class PlayBillingClient @Inject constructor(
         billingClient.launchBillingFlow(activity, billingFlowParams)
     }
 
-    override suspend fun refreshMinSatsInAppProduct() {
+    override suspend fun fetchBillingProducts() {
         val initialized = ensureBillingClientInitialized()
-        if (initialized) initializeMinSatsProduct()
-    }
-
-    override suspend fun refreshSubscriptionProducts() {
-        val initialized = ensureBillingClientInitialized()
-        if (initialized) initializeSubscriptions()
+        if (initialized) {
+            initializeSubscriptions()
+            initializeMinSatsProduct()
+        }
     }
 
     override fun onPurchasesUpdated(billingResult: BillingResult, purchases: MutableList<Purchase>?) {
