@@ -7,20 +7,17 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.sp
 import net.primal.android.R
+import net.primal.android.premium.buying.home.PremiumBuyingHomeStage
 import net.primal.android.premium.buying.name.PremiumPrimalNameStage
 import net.primal.android.premium.buying.purchase.PremiumPurchaseStage
-import net.primal.android.premium.ui.PremiumHomeStage
+import net.primal.android.premium.buying.success.PremiumBuyingSuccessStage
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -39,6 +36,7 @@ fun PremiumBuyingScreen(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PremiumBuyingScreen(
     state: PremiumBuyingContract.UiState,
@@ -46,25 +44,12 @@ private fun PremiumBuyingScreen(
     onMoreInfoClick: () -> Unit,
     eventPublisher: (PremiumBuyingContract.UiEvent) -> Unit,
 ) {
-    BackHandler {
-        when (state.stage) {
-            PremiumBuyingContract.PremiumStage.Home,
-            PremiumBuyingContract.PremiumStage.Success,
-            -> onClose()
+    PremiumBuyingBackHandler(
+        stage = state.stage,
+        onClose = onClose,
+        eventPublisher = eventPublisher,
+    )
 
-            PremiumBuyingContract.PremiumStage.FindPrimalName -> eventPublisher(
-                PremiumBuyingContract.UiEvent.MoveToPremiumStage(
-                    PremiumBuyingContract.PremiumStage.Home,
-                ),
-            )
-
-            PremiumBuyingContract.PremiumStage.Purchase -> eventPublisher(
-                PremiumBuyingContract.UiEvent.MoveToPremiumStage(
-                    PremiumBuyingContract.PremiumStage.FindPrimalName,
-                ),
-            )
-        }
-    }
     AnimatedContent(
         modifier = Modifier
             .background(AppTheme.colorScheme.surfaceVariant)
@@ -75,7 +60,7 @@ private fun PremiumBuyingScreen(
     ) { stage ->
         when (stage) {
             PremiumBuyingContract.PremiumStage.Home -> {
-                PremiumHomeStage(
+                PremiumBuyingHomeStage(
                     subscriptions = state.subscriptions,
                     onClose = onClose,
                     onFindPrimalName = {
@@ -114,35 +99,57 @@ private fun PremiumBuyingScreen(
             }
 
             PremiumBuyingContract.PremiumStage.Purchase -> {
-                state.primalName?.let {
-                    PremiumPurchaseStage(
-                        primalName = it,
-                        subscriptions = state.subscriptions,
-                        onBack = {
-                            eventPublisher(
-                                PremiumBuyingContract.UiEvent.MoveToPremiumStage(
-                                    PremiumBuyingContract.PremiumStage.FindPrimalName,
-                                ),
-                            )
-                        },
-                        onLearnMoreClick = onMoreInfoClick,
-                    )
-                }
+                PremiumPurchaseStage(
+                    state = state,
+                    eventPublisher = eventPublisher,
+                    onBack = {
+                        eventPublisher(
+                            PremiumBuyingContract.UiEvent.MoveToPremiumStage(
+                                PremiumBuyingContract.PremiumStage.FindPrimalName,
+                            ),
+                        )
+                    },
+                    onLearnMoreClick = onMoreInfoClick,
+                )
             }
 
             PremiumBuyingContract.PremiumStage.Success -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clickable { onClose() },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = "Success! LFG!!!",
-                        style = AppTheme.typography.bodyLarge,
-                        fontSize = 28.sp,
-                    )
-                }
+                PremiumBuyingSuccessStage(
+                    onClose = onClose,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PremiumBuyingBackHandler(
+    stage: PremiumBuyingContract.PremiumStage,
+    onClose: () -> Unit,
+    eventPublisher: (PremiumBuyingContract.UiEvent) -> Unit,
+) {
+    BackHandler {
+        when (stage) {
+            PremiumBuyingContract.PremiumStage.Home,
+            PremiumBuyingContract.PremiumStage.Success,
+            -> {
+                onClose()
+            }
+
+            PremiumBuyingContract.PremiumStage.FindPrimalName -> {
+                eventPublisher(
+                    PremiumBuyingContract.UiEvent.MoveToPremiumStage(
+                        PremiumBuyingContract.PremiumStage.Home,
+                    ),
+                )
+            }
+
+            PremiumBuyingContract.PremiumStage.Purchase -> {
+                eventPublisher(
+                    PremiumBuyingContract.UiEvent.MoveToPremiumStage(
+                        PremiumBuyingContract.PremiumStage.FindPrimalName,
+                    ),
+                )
             }
         }
     }
@@ -175,6 +182,7 @@ private fun AnimatedContentTransitionScope<PremiumBuyingContract.PremiumStage>.t
                     slideInHorizontally(initialOffsetX = { it })
                         .togetherWith(slideOutHorizontally(targetOffsetX = { -it }))
                 }
+
                 else -> {
                     slideInHorizontally(initialOffsetX = { -it })
                         .togetherWith(slideOutHorizontally(targetOffsetX = { it }))

@@ -1,4 +1,4 @@
-package net.primal.android.premium.buying.purchase.ui
+package net.primal.android.premium.buying.purchase
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -35,7 +36,7 @@ import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.theme.AppTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+@ExperimentalMaterial3Api
 @Composable
 fun PremiumPromoCodeBottomSheet(
     modifier: Modifier = Modifier,
@@ -49,7 +50,7 @@ fun PremiumPromoCodeBottomSheet(
     var promoCode by remember { mutableStateOf("") }
     var isFieldDirty by remember { mutableStateOf(false) }
     ModalBottomSheet(
-        modifier = modifier,
+        modifier = modifier.statusBarsPadding(),
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
         containerColor = AppTheme.colorScheme.surfaceVariant,
