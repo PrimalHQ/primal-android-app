@@ -121,6 +121,11 @@
     <string name="premium_purchase_tos_notice">By proceeding you acknowledge that\nyou agree to our </string>
     <string name="premium_purchase_tos">Terms of Service</string>
 
+    <string name="premium_success_purchase_title">Success</string>
+    <string name="premium_success_purchase_headline">Success, payment received!</string>
+    <string name="premium_success_purchase_supporting_text">Your subscription is now active!</string>
+    <string name="premium_success_purchase_done_button">Done</string>
+
     <string name="premium_promo_code_title">Apply a Promo Code</string>
     <string name="premium_promo_code_enter_code_below">If you have a promo code enter it below:</string>
     <string name="premium_promo_code_invalid_code_message">Invalid code. Please try again.</string>
