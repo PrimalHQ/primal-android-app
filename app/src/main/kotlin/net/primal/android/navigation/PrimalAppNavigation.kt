@@ -288,7 +288,11 @@ fun PrimalAppNavigation() {
     val drawerDestinationHandler: (DrawerScreenDestination) -> Unit = {
         when (it) {
             DrawerScreenDestination.Profile -> navController.navigateToProfile()
-            DrawerScreenDestination.Premium -> navController.navigateToPremiumUser()
+            is DrawerScreenDestination.Premium -> if (it.hasPremium) {
+                navController.navigateToPremiumUser()
+            } else {
+                navController.navigateToPremium()
+            }
             DrawerScreenDestination.Messages -> navController.navigateToMessages()
             is DrawerScreenDestination.Bookmarks -> navController.navigateToBookmarks()
             DrawerScreenDestination.Settings -> navController.navigateToSettings()
