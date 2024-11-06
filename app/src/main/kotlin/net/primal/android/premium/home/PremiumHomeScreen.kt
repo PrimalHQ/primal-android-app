@@ -1,146 +1,132 @@
 package net.primal.android.premium.home
 
-import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
-import net.primal.android.premium.primalName.PremiumPrimalNameStage
-import net.primal.android.premium.purchase.PremiumPurchaseStage
-import net.primal.android.premium.ui.PremiumHomeStage
+import net.primal.android.core.compose.AvatarThumbnail
+import net.primal.android.core.compose.NostrUserText
+import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.button.PrimalFilledButton
+import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.premium.ui.PremiumBadge
+import net.primal.android.premium.ui.PrimalPremiumTable
+import net.primal.android.premium.utils.isPremiumFree
+import net.primal.android.premium.utils.isPrimalLegend
 import net.primal.android.theme.AppTheme
 
 @Composable
 fun PremiumHomeScreen(
     viewModel: PremiumHomeViewModel,
     onClose: () -> Unit,
-    onMoreInfoClick: () -> Unit,
+    onManagePremium: () -> Unit,
+    onSupportPrimal: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
     PremiumHomeScreen(
-        state = uiState.value,
         onClose = onClose,
-        eventPublisher = viewModel::setEvent,
-        onMoreInfoClick = onMoreInfoClick,
+        onManagePremium = onManagePremium,
+        state = uiState.value,
+        onSupportPrimal = onSupportPrimal,
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PremiumHomeScreen(
     state: PremiumHomeContract.UiState,
     onClose: () -> Unit,
-    onMoreInfoClick: () -> Unit,
-    eventPublisher: (PremiumHomeContract.UiEvent) -> Unit,
+    onManagePremium: () -> Unit,
+    onSupportPrimal: () -> Unit,
 ) {
-    BackHandler {
-        when (state.stage) {
-            PremiumHomeContract.PremiumStage.Home,
-            PremiumHomeContract.PremiumStage.Success,
-            -> onClose()
-
-            PremiumHomeContract.PremiumStage.FindPrimalName -> eventPublisher(
-                PremiumHomeContract.UiEvent.MoveToPremiumStage(
-                    PremiumHomeContract.PremiumStage.Home,
-                ),
+    Scaffold(
+        topBar = {
+            PrimalTopAppBar(
+                title = stringResource(id = R.string.premium_member_title),
+                navigationIcon = PrimalIcons.ArrowBack,
+                onNavigationIconClick = onClose,
+                showDivider = false,
             )
-
-            PremiumHomeContract.PremiumStage.Purchase -> eventPublisher(
-                PremiumHomeContract.UiEvent.MoveToPremiumStage(
-                    PremiumHomeContract.PremiumStage.FindPrimalName,
-                ),
+        },
+        bottomBar = {
+            PremiumUserBottomBar(
+                onClick = onManagePremium,
             )
-        }
-    }
-    AnimatedContent(
-        modifier = Modifier
-            .background(AppTheme.colorScheme.surfaceVariant)
-            .fillMaxSize(),
-        label = "PremiumStages",
-        targetState = state.stage,
-        transitionSpec = { transitionSpecBetweenStages() },
-    ) { stage ->
-        when (stage) {
-            PremiumHomeContract.PremiumStage.Home -> {
-                PremiumHomeStage(
-                    subscriptions = state.subscriptions,
-                    onClose = onClose,
-                    onFindPrimalName = {
-                        eventPublisher(
-                            PremiumHomeContract.UiEvent.MoveToPremiumStage(
-                                PremiumHomeContract.PremiumStage.FindPrimalName,
-                            ),
-                        )
-                    },
-                    onLearnMoreClick = onMoreInfoClick,
+        },
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp)
+                .padding(paddingValues)
+                .navigationBarsPadding(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterVertically),
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                AvatarThumbnail(
+                    avatarCdnImage = state.avatarCdnImage,
+                    avatarSize = 80.dp,
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                NostrUserText(
+                    modifier = Modifier.padding(start = 8.dp),
+                    displayName = state.displayName,
+                    internetIdentifier = state.profileNostrAddress,
+                    internetIdentifierBadgeSize = 24.dp,
+                    fontSize = 20.sp,
                 )
             }
 
-            PremiumHomeContract.PremiumStage.FindPrimalName -> {
-                PremiumPrimalNameStage(
-                    titleText = stringResource(id = R.string.premium_primal_name_title),
-                    initialName = state.primalName,
-                    onBack = {
-                        eventPublisher(
-                            PremiumHomeContract.UiEvent.MoveToPremiumStage(
-                                PremiumHomeContract.PremiumStage.Home,
-                            ),
-                        )
-                    },
-                    onPrimalNameAvailable = {
-                        eventPublisher(
-                            PremiumHomeContract.UiEvent.SetPrimalName(primalName = it),
-                        )
-                        eventPublisher(
-                            PremiumHomeContract.UiEvent.MoveToPremiumStage(
-                                PremiumHomeContract.PremiumStage.Purchase,
-                            ),
-                        )
-                    },
+            state.membership?.let {
+                PremiumBadge(
+                    firstCohort = it.cohort1,
+                    secondCohort = it.cohort2,
+                    topColor = AppTheme.colorScheme.primary,
                 )
-            }
-
-            PremiumHomeContract.PremiumStage.Purchase -> {
-                state.primalName?.let {
-                    PremiumPurchaseStage(
-                        primalName = it,
-                        subscriptions = state.subscriptions,
-                        onBack = {
-                            eventPublisher(
-                                PremiumHomeContract.UiEvent.MoveToPremiumStage(
-                                    PremiumHomeContract.PremiumStage.FindPrimalName,
-                                ),
-                            )
-                        },
-                        onLearnMoreClick = onMoreInfoClick,
+                if (it.cohort2.isPremiumFree()) {
+                    Text(
+                        modifier = Modifier.padding(horizontal = 36.dp),
+                        text = stringResource(id = R.string.premium_member_early_primal_user),
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        style = AppTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,
+                        lineHeight = 22.sp,
                     )
                 }
-            }
-
-            PremiumHomeContract.PremiumStage.Success -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clickable { onClose() },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = "Success! LFG!!!",
-                        style = AppTheme.typography.bodyLarge,
-                        fontSize = 28.sp,
+                PrimalPremiumTable(
+                    premiumMembership = it,
+                )
+                if (!it.cohort1.isPrimalLegend()) {
+                    SupportUsNotice(
+                        onSupportPrimal = onSupportPrimal,
                     )
                 }
             }
@@ -148,42 +134,64 @@ private fun PremiumHomeScreen(
     }
 }
 
-private fun AnimatedContentTransitionScope<PremiumHomeContract.PremiumStage>.transitionSpecBetweenStages() =
-    when (initialState) {
-        PremiumHomeContract.PremiumStage.Home -> {
-            slideInHorizontally(initialOffsetX = { it })
-                .togetherWith(slideOutHorizontally(targetOffsetX = { -it }))
-        }
-
-        PremiumHomeContract.PremiumStage.FindPrimalName -> {
-            when (targetState) {
-                PremiumHomeContract.PremiumStage.Home -> {
-                    slideInHorizontally(initialOffsetX = { -it })
-                        .togetherWith(slideOutHorizontally(targetOffsetX = { it }))
-                }
-
-                else -> {
-                    slideInHorizontally(initialOffsetX = { it })
-                        .togetherWith(slideOutHorizontally(targetOffsetX = { -it }))
-                }
-            }
-        }
-
-        PremiumHomeContract.PremiumStage.Purchase -> {
-            when (targetState) {
-                PremiumHomeContract.PremiumStage.Success -> {
-                    slideInHorizontally(initialOffsetX = { it })
-                        .togetherWith(slideOutHorizontally(targetOffsetX = { -it }))
-                }
-                else -> {
-                    slideInHorizontally(initialOffsetX = { -it })
-                        .togetherWith(slideOutHorizontally(targetOffsetX = { it }))
-                }
-            }
-        }
-
-        PremiumHomeContract.PremiumStage.Success -> {
-            slideInHorizontally(initialOffsetX = { -it })
-                .togetherWith(slideOutHorizontally(targetOffsetX = { it }))
+@Composable
+private fun PremiumUserBottomBar(modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Box(
+        modifier = modifier
+            .navigationBarsPadding()
+            .padding(36.dp),
+    ) {
+        PrimalFilledButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = onClick,
+        ) {
+            Text(
+                modifier = Modifier.padding(vertical = 8.dp),
+                text = stringResource(id = R.string.premium_manage_premium_button),
+                style = AppTheme.typography.bodyLarge,
+                fontWeight = FontWeight.SemiBold,
+            )
         }
     }
+}
+
+@Composable
+private fun SupportUsNotice(onSupportPrimal: () -> Unit) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            text = stringResource(id = R.string.premium_enjoying_primal),
+            style = AppTheme.typography.bodyMedium,
+        )
+        Row {
+            Text(
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                text = stringResource(id = R.string.premium_enjoying_primal_if_so) + " ",
+                style = AppTheme.typography.bodyMedium,
+            )
+            Text(
+                modifier = Modifier.clickable { onSupportPrimal() },
+                style = AppTheme.typography.bodyMedium,
+                text = buildAnnotatedString {
+                    withStyle(
+                        style = SpanStyle(
+                            color = AppTheme.colorScheme.secondary,
+                        ),
+                    ) {
+                        append(stringResource(id = R.string.premium_support_us))
+                    }
+                    withStyle(
+                        style = SpanStyle(
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        ),
+                    ) {
+                        append(".")
+                    }
+                },
+            )
+        }
+    }
+}
