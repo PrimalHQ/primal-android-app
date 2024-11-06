@@ -1,4 +1,4 @@
-package net.primal.android.premium.purchase.ui
+package net.primal.android.premium.buying.purchase.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement

@@ -1,23 +1,15 @@
 package net.primal.android.premium.home
 
-import net.primal.android.wallet.store.domain.SubscriptionProduct
+import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.premium.domain.PremiumMembership
 
 interface PremiumHomeContract {
+
     data class UiState(
-        val subscriptions: List<SubscriptionProduct> = emptyList(),
-        val stage: PremiumStage = PremiumStage.Home,
-        val primalName: String? = null,
+        val displayName: String = "",
+        val avatarCdnImage: CdnImage? = null,
+        val profileNostrAddress: String? = null,
+        val profileLightningAddress: String? = null,
+        val membership: PremiumMembership? = null,
     )
-
-    sealed class UiEvent {
-        data class MoveToPremiumStage(val stage: PremiumStage) : UiEvent()
-        data class SetPrimalName(val primalName: String) : UiEvent()
-    }
-
-    enum class PremiumStage {
-        Home,
-        FindPrimalName,
-        Purchase,
-        Success,
-    }
 }

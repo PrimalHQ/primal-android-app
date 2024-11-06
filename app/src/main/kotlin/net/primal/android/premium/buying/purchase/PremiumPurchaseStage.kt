@@ -1,4 +1,4 @@
-package net.primal.android.premium.purchase
+package net.primal.android.premium.buying.purchase
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -48,7 +48,7 @@ import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.findActivity
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.premium.purchase.ui.PremiumPromoCodeBottomSheet
+import net.primal.android.premium.buying.purchase.ui.PremiumPromoCodeBottomSheet
 import net.primal.android.premium.ui.PremiumPrimalNameTable
 import net.primal.android.premium.ui.toGetSubscriptionString
 import net.primal.android.premium.ui.toPricingString

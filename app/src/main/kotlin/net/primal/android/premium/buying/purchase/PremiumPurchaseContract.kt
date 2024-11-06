@@ -1,4 +1,4 @@
-package net.primal.android.premium.purchase
+package net.primal.android.premium.buying.purchase
 
 import android.app.Activity
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi

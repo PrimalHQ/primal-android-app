@@ -1,4 +1,4 @@
-package net.primal.android.premium.purchase
+package net.primal.android.premium.buying.purchase
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
-import net.primal.android.premium.purchase.PremiumPurchaseContract.UiEvent
-import net.primal.android.premium.purchase.PremiumPurchaseContract.UiState
+import net.primal.android.premium.buying.purchase.PremiumPurchaseContract.UiEvent
+import net.primal.android.premium.buying.purchase.PremiumPurchaseContract.UiState
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.store.PrimalBillingClient

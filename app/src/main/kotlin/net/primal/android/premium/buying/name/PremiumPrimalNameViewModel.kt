@@ -1,4 +1,4 @@
-package net.primal.android.premium.primalName
+package net.primal.android.premium.buying.name
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.premium.primalName.PremiumPrimalNameContract.UiEvent
-import net.primal.android.premium.primalName.PremiumPrimalNameContract.UiState
+import net.primal.android.premium.buying.name.PremiumPrimalNameContract.UiEvent
+import net.primal.android.premium.buying.name.PremiumPrimalNameContract.UiState
 import net.primal.android.premium.repository.PremiumRepository
 import timber.log.Timber
 
