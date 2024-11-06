@@ -40,11 +40,10 @@ class PremiumRepository @Inject constructor(
             premiumApi.purchaseMembership(
                 userId = userId,
                 body = PurchaseMembershipRequest(
-                    platform = "android",
                     name = primalName,
-                    orderId = purchase.orderId,
-                    purchaseToken = purchase.purchaseToken,
-                    productId = purchase.productId,
+                    receiverUserId = userId,
+                    primalProductId = null,
+                    playSubscription = purchase.playSubscriptionJson,
                 ),
             )
         }
