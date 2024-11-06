@@ -115,7 +115,8 @@ private fun PremiumBuyingScreen(
 
             PremiumBuyingContract.PremiumStage.Success -> {
                 PremiumBuyingSuccessStage(
-                    onClose = onClose,
+                    modifier = Modifier.fillMaxSize(),
+                    onDoneClick = onClose,
                 )
             }
         }
