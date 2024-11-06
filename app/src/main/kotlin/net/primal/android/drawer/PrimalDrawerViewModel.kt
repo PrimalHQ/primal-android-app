@@ -24,16 +24,10 @@ class PrimalDrawerViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(
         PrimalDrawerContract.UiState(
-            menuItems = listOf(
-                DrawerScreenDestination.Profile,
-                DrawerScreenDestination.Premium,
-                DrawerScreenDestination.Messages,
-                DrawerScreenDestination.Bookmarks(userId = activeAccountStore.activeUserId()),
-                DrawerScreenDestination.Settings,
-                DrawerScreenDestination.SignOut,
-            ),
+            menuItems = buildDrawerMenuItems(userId = activeAccountStore.activeUserId()),
         ),
     )
+
     val state = _state.asStateFlow()
     private fun setState(reducer: PrimalDrawerContract.UiState.() -> PrimalDrawerContract.UiState) {
         _state.getAndUpdate { it.reducer() }
@@ -63,7 +57,13 @@ class PrimalDrawerViewModel @Inject constructor(
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect {
                 setState {
-                    copy(activeUserAccount = it)
+                    copy(
+                        activeUserAccount = it,
+                        menuItems = buildDrawerMenuItems(
+                            userId = it.pubkey,
+                            hasPremium = it.premiumMembership != null,
+                        ),
+                    )
                 }
             }
         }
@@ -86,4 +86,14 @@ class PrimalDrawerViewModel @Inject constructor(
             }
         activeThemeStore.setUserTheme(theme = newThemeName)
     }
+
+    private fun buildDrawerMenuItems(hasPremium: Boolean = false, userId: String) =
+        listOf(
+            DrawerScreenDestination.Profile,
+            DrawerScreenDestination.Premium(hasPremium = hasPremium),
+            DrawerScreenDestination.Messages,
+            DrawerScreenDestination.Bookmarks(userId = userId),
+            DrawerScreenDestination.Settings,
+            DrawerScreenDestination.SignOut,
+        )
 }
