@@ -127,6 +127,17 @@
     <string name="premium_promo_code_apply_button">Apply Promo Code</string>
     <string name="premium_promo_code_cancel_button">Cancel</string>
 
+    <string name="premium_member_title">Premium</string>
+    <string name="premium_member_early_primal_user">Hey there! You are an early Primal user who interacted with our team, so we gave you 6 months of Primal Premium for free. ♥\uFE0F\uD83E\uDEC2</string>
+    <string name="premium_manage_premium_button">Manage Premium</string>
+    <string name="premium_enjoying_primal">Are you enjoying Primal?</string>
+    <string name="premium_enjoying_primal_if_so">If so, see how you can</string>
+    <string name="premium_support_us">support us</string>
+    <string name="premium_table_expires">Expires</string>
+    <string name="premium_table_never">Never</string>
+    <string name="premium_table_renews_on">Renews on</string>
+    <string name="premium_table_apply">apply</string>
+
     <string name="feed_reposted_suffix">reposted</string>
     <string name="feed_see_more">See more…</string>
 
