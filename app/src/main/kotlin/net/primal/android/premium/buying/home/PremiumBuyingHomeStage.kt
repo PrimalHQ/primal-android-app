@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -30,6 +31,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -56,10 +58,11 @@ internal val PREMIUM_TINT_LIGHT = Color(0xFF222222)
 @ExperimentalMaterial3Api
 @Composable
 fun PremiumBuyingHomeStage(
+    loading: Boolean,
     subscriptions: List<SubscriptionProduct>,
     onClose: () -> Unit,
-    onFindPrimalName: () -> Unit,
     onLearnMoreClick: () -> Unit,
+    onFindPrimalName: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -97,7 +100,10 @@ fun PremiumBuyingHomeStage(
                     .padding(bottom = 16.dp, top = 8.dp),
                 onLearnMoreClick = onLearnMoreClick,
             )
-            PriceRow(subscriptions = subscriptions)
+            PriceRow(
+                loading = loading,
+                subscriptions = subscriptions,
+            )
             ButtonsColumn(
                 modifier = Modifier.padding(16.dp),
                 onClose = onClose,
@@ -261,7 +267,7 @@ private fun LearnMoreSection(onLearnMoreClick: () -> Unit) {
 }
 
 @Composable
-private fun PriceRow(subscriptions: List<SubscriptionProduct>) {
+private fun PriceRow(loading: Boolean, subscriptions: List<SubscriptionProduct>) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -269,7 +275,19 @@ private fun PriceRow(subscriptions: List<SubscriptionProduct>) {
         when {
             subscriptions.isEmpty() -> {
                 Box(modifier = Modifier.height(43.dp)) {
-                    PrimalLoadingSpinner()
+                    if (loading) {
+                        PrimalLoadingSpinner()
+                    } else {
+                        Text(
+                            modifier = Modifier
+                                .wrapContentSize()
+                                .padding(horizontal = 48.dp),
+                            text = stringResource(id = R.string.premium_google_play_not_available),
+                            textAlign = TextAlign.Center,
+                            style = AppTheme.typography.bodySmall,
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                        )
+                    }
                 }
             }
 

@@ -61,8 +61,10 @@ private fun PremiumBuyingScreen(
         when (stage) {
             PremiumBuyingContract.PremiumStage.Home -> {
                 PremiumBuyingHomeStage(
+                    loading = state.loading,
                     subscriptions = state.subscriptions,
                     onClose = onClose,
+                    onLearnMoreClick = onMoreInfoClick,
                     onFindPrimalName = {
                         eventPublisher(
                             PremiumBuyingContract.UiEvent.MoveToPremiumStage(
@@ -70,7 +72,6 @@ private fun PremiumBuyingScreen(
                             ),
                         )
                     },
-                    onLearnMoreClick = onMoreInfoClick,
                 )
             }
 

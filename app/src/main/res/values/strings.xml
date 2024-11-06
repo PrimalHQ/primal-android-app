@@ -104,6 +104,7 @@
     </string>
     <string name="premium_find_primal_name_button">Find Primal Name</string>
     <string name="premium_cancel_button">Cancel</string>
+    <string name="premium_google_play_not_available">Unable to connect to the Google Play Store. Please try again in a few moments.</string>
 
     <string name="premium_primal_name_title">Find Primal Name</string>
     <string name="premium_primal_name_search_button">Search</string>
@@ -703,7 +704,7 @@
     <string name="wallet_in_app_purchase_now_button">Purchase Now</string>
     <string name="wallet_in_app_purchase_pay_label">Pay</string>
     <string name="wallet_in_app_purchase_to_receive_label">To receive</string>
-    <string name="wallet_in_app_purchase_not_available">Unable to connect to Google Play Store services. Please try again.</string>
+    <string name="wallet_in_app_purchase_not_available">Unable to connect to the Google Play Store services. Please try again.</string>
     <string name="wallet_in_app_purchase_store_try_again">Try again</string>
     <string name="wallet_in_app_purchase_error_confirmation_failed">We were unable to confirm your purchase. Please reach out to Primal Support.</string>
     <string name="wallet_action_button_send">Send</string>

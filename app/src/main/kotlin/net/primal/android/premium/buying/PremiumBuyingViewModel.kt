@@ -49,6 +49,7 @@ class PremiumBuyingViewModel @Inject constructor(
             primalBillingClient.fetchBillingProducts()
             setState {
                 copy(
+                    loading = false,
                     subscriptions = primalBillingClient.subscriptionProducts,
                 )
             }
@@ -114,7 +115,6 @@ class PremiumBuyingViewModel @Inject constructor(
                 )
             } catch (error: InAppPurchaseException) {
                 Timber.w(error)
-                // TODO Handle error?
             }
         }
 }
