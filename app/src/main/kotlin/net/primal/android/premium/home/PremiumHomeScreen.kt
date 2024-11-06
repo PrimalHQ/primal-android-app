@@ -162,10 +162,7 @@ private fun AnimatedContentTransitionScope<PremiumHomeContract.PremiumStage>.tra
                         .togetherWith(slideOutHorizontally(targetOffsetX = { it }))
                 }
 
-                PremiumHomeContract.PremiumStage.FindPrimalName,
-                PremiumHomeContract.PremiumStage.Purchase,
-                PremiumHomeContract.PremiumStage.Success,
-                -> {
+                else -> {
                     slideInHorizontally(initialOffsetX = { it })
                         .togetherWith(slideOutHorizontally(targetOffsetX = { -it }))
                 }
@@ -173,8 +170,16 @@ private fun AnimatedContentTransitionScope<PremiumHomeContract.PremiumStage>.tra
         }
 
         PremiumHomeContract.PremiumStage.Purchase -> {
-            slideInHorizontally(initialOffsetX = { -it })
-                .togetherWith(slideOutHorizontally(targetOffsetX = { it }))
+            when (targetState) {
+                PremiumHomeContract.PremiumStage.Success -> {
+                    slideInHorizontally(initialOffsetX = { it })
+                        .togetherWith(slideOutHorizontally(targetOffsetX = { -it }))
+                }
+                else -> {
+                    slideInHorizontally(initialOffsetX = { -it })
+                        .togetherWith(slideOutHorizontally(targetOffsetX = { it }))
+                }
+            }
         }
 
         PremiumHomeContract.PremiumStage.Success -> {
