@@ -71,7 +71,12 @@ class PremiumBuyingViewModel @Inject constructor(
     private fun observeActiveProfile() =
         viewModelScope.launch {
             profileRepository.observeProfile(profileId = activeAccountStore.activeUserId()).collect {
-                setState { copy(profile = it.metadata?.asProfileDetailsUi()) }
+                setState {
+                    copy(
+                        profile = it.metadata?.asProfileDetailsUi(),
+                        primalName = this.primalName ?: it.metadata?.handle
+                    )
+                }
             }
         }
 
