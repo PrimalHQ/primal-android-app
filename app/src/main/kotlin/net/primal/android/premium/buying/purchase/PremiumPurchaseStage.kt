@@ -19,7 +19,6 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,7 +37,6 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnail
@@ -48,42 +46,20 @@ import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.findActivity
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.premium.buying.purchase.ui.PremiumPromoCodeBottomSheet
+import net.primal.android.premium.buying.PremiumBuyingContract
 import net.primal.android.premium.ui.PremiumPrimalNameTable
 import net.primal.android.premium.ui.toGetSubscriptionString
 import net.primal.android.premium.ui.toPricingString
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.store.domain.SubscriptionProduct
 
+@ExperimentalMaterial3Api
 @Composable
 fun PremiumPurchaseStage(
-    primalName: String,
-    subscriptions: List<SubscriptionProduct>,
+    state: PremiumBuyingContract.UiState,
     onBack: () -> Unit,
     onLearnMoreClick: () -> Unit,
-) {
-    val viewModel = hiltViewModel<PremiumPurchaseViewModel>()
-    val uiState = viewModel.state.collectAsState()
-
-    PremiumPurchaseStage(
-        state = uiState.value,
-        subscriptions = subscriptions,
-        eventPublisher = viewModel::setEvent,
-        primalName = primalName,
-        onBack = onBack,
-        onLearnMoreClick = onLearnMoreClick,
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun PremiumPurchaseStage(
-    primalName: String,
-    subscriptions: List<SubscriptionProduct>,
-    state: PremiumPurchaseContract.UiState,
-    onBack: () -> Unit,
-    onLearnMoreClick: () -> Unit,
-    eventPublisher: (PremiumPurchaseContract.UiEvent) -> Unit,
+    eventPublisher: (PremiumBuyingContract.UiEvent) -> Unit,
 ) {
     val uiScope = rememberCoroutineScope()
     val activity = LocalContext.current.findActivity()
@@ -107,10 +83,10 @@ private fun PremiumPurchaseStage(
             promoCodeValidity = state.promoCodeValidity,
             onDismissRequest = {
                 promoCodeBottomSheetVisibility = false
-                eventPublisher(PremiumPurchaseContract.UiEvent.ClearPromoCodeValidity)
+                eventPublisher(PremiumBuyingContract.UiEvent.ClearPromoCodeValidity)
             },
             onCodeCodeConfirmed = {
-                eventPublisher(PremiumPurchaseContract.UiEvent.ApplyPromoCode(it))
+                eventPublisher(PremiumBuyingContract.UiEvent.ApplyPromoCode(it))
             },
             isCheckingPromoCodeValidity = state.isCheckingPromoCodeValidity,
         )
@@ -135,27 +111,28 @@ private fun PremiumPurchaseStage(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
         ) {
-            state.profile?.let {
+            if (state.profile != null && state.primalName != null) {
                 AvatarThumbnail(
-                    avatarCdnImage = it.avatarCdnImage,
+                    avatarCdnImage = state.profile.avatarCdnImage,
                     avatarSize = 80.dp,
                 )
                 NostrUserText(
-                    displayName = it.authorDisplayName,
-                    internetIdentifier = "$primalName@primal.net",
+                    displayName = state.profile.authorDisplayName,
+                    internetIdentifier = "${state.primalName}@primal.net",
                     internetIdentifierBadgeSize = 24.dp,
                     fontSize = 20.sp,
                 )
+                Text(
+                    modifier = Modifier.padding(horizontal = 12.dp),
+                    text = stringResource(id = R.string.premium_purchase_primal_name_available),
+                    style = AppTheme.typography.bodyLarge,
+                    color = AppTheme.extraColorScheme.successBright,
+                )
+                PremiumPrimalNameTable(
+                    primalName = state.primalName,
+                )
             }
-            Text(
-                modifier = Modifier.padding(horizontal = 12.dp),
-                text = stringResource(id = R.string.premium_purchase_primal_name_available),
-                style = AppTheme.typography.bodyLarge,
-                color = AppTheme.extraColorScheme.successBright,
-            )
-            PremiumPrimalNameTable(
-                primalName = primalName,
-            )
+
             MoreInfoPromoCodeRow(
                 modifier = Modifier.padding(vertical = 8.dp),
                 onLearnMoreClick = onLearnMoreClick,
@@ -165,10 +142,10 @@ private fun PremiumPurchaseStage(
             if (activity != null) {
                 BuyPremiumButtons(
                     modifier = Modifier.padding(horizontal = 12.dp),
-                    subscriptions = subscriptions,
+                    subscriptions = state.subscriptions,
                     onClick = { subscription ->
                         eventPublisher(
-                            PremiumPurchaseContract.UiEvent.RequestPurchase(
+                            PremiumBuyingContract.UiEvent.RequestPurchase(
                                 activity = activity,
                                 subscriptionProduct = subscription,
                             ),

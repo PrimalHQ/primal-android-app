@@ -1,4 +1,4 @@
-package net.primal.android.premium.ui
+package net.primal.android.premium.buying.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -45,15 +45,17 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.NostrichFilled
 import net.primal.android.core.compose.icons.primaliconpack.PrimalPremium
 import net.primal.android.core.compose.icons.primaliconpack.VerifiedFilled
+import net.primal.android.premium.ui.toBillingPeriodString
+import net.primal.android.premium.ui.toPricingString
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.store.domain.SubscriptionProduct
 
 internal val PREMIUM_TINT_DARK = Color(0xFFDDDDDD)
 internal val PREMIUM_TINT_LIGHT = Color(0xFF222222)
 
-@OptIn(ExperimentalMaterial3Api::class)
+@ExperimentalMaterial3Api
 @Composable
-fun PremiumHomeStage(
+fun PremiumBuyingHomeStage(
     subscriptions: List<SubscriptionProduct>,
     onClose: () -> Unit,
     onFindPrimalName: () -> Unit,
