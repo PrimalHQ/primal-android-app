@@ -87,16 +87,16 @@ private fun PremiumUserScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
         ) {
             AvatarThumbnail(
-                avatarCdnImage = state.userAccount.avatarCdnImage,
+                avatarCdnImage = state.avatarCdnImage,
                 avatarSize = 80.dp,
             )
             NostrUserText(
-                displayName = state.userAccount.authorDisplayName,
-                internetIdentifier = state.userAccount.internetIdentifier,
+                displayName = state.displayName,
+                internetIdentifier = state.profileNostrAddress,
                 internetIdentifierBadgeSize = 24.dp,
                 fontSize = 20.sp,
             )
-            state.userAccount.premiumMembership?.let {
+            state.membership?.let {
                 PremiumBadge(
                     firstCohort = it.cohort1,
                     secondCohort = it.cohort2,

@@ -41,7 +41,15 @@ class PremiumUserViewModel @Inject constructor(
     private fun observeActiveAccount() =
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect {
-                setState { copy(userAccount = it) }
+                setState {
+                    copy(
+                        displayName = it.authorDisplayName,
+                        avatarCdnImage = it.avatarCdnImage,
+                        profileNostrAddress = it.internetIdentifier,
+                        profileLightningAddress = it.lightningAddress,
+                        membership = it.premiumMembership,
+                    )
+                }
             }
         }
 }
