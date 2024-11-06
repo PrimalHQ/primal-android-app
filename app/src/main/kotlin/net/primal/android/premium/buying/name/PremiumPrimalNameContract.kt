@@ -1,4 +1,4 @@
-package net.primal.android.premium.primalName
+package net.primal.android.premium.buying.name
 
 interface PremiumPrimalNameContract {
 
