@@ -23,6 +23,5 @@ class AospBillingClient : PrimalBillingClient {
     override suspend fun launchSubscriptionBillingFlow(subscriptionProduct: SubscriptionProduct, activity: Activity) =
         Unit
 
-    override suspend fun refreshMinSatsInAppProduct() = Unit
-    override suspend fun refreshSubscriptionProducts() = Unit
+    override suspend fun fetchBillingProducts() = Unit
 }

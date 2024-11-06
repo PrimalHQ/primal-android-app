@@ -65,7 +65,7 @@ class InAppPurchaseBuyViewModel @Inject constructor(
 
     private fun refreshQuote() =
         viewModelScope.launch {
-            primalBillingClient.refreshMinSatsInAppProduct()
+            primalBillingClient.fetchBillingProducts()
             setState { copy(minSatsInAppProduct = primalBillingClient.minSatsInAppProduct) }
             _state.value.minSatsInAppProduct?.let { inAppProduct ->
                 try {
