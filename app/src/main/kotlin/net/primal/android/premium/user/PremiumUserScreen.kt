@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -84,18 +86,25 @@ private fun PremiumUserScreen(
                 .padding(paddingValues)
                 .navigationBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
+            verticalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterVertically),
         ) {
-            AvatarThumbnail(
-                avatarCdnImage = state.avatarCdnImage,
-                avatarSize = 80.dp,
-            )
-            NostrUserText(
-                displayName = state.displayName,
-                internetIdentifier = state.profileNostrAddress,
-                internetIdentifierBadgeSize = 24.dp,
-                fontSize = 20.sp,
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                AvatarThumbnail(
+                    avatarCdnImage = state.avatarCdnImage,
+                    avatarSize = 80.dp,
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                NostrUserText(
+                    modifier = Modifier.padding(start = 8.dp),
+                    displayName = state.displayName,
+                    internetIdentifier = state.profileNostrAddress,
+                    internetIdentifierBadgeSize = 24.dp,
+                    fontSize = 20.sp,
+                )
+            }
+
             state.membership?.let {
                 PremiumBadge(
                     firstCohort = it.cohort1,
