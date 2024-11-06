@@ -6,4 +6,5 @@ data class SubscriptionPurchase(
     val purchaseTime: Long,
     val purchaseToken: String,
     val quantity: Int,
+    val playSubscriptionJson: String,
 )

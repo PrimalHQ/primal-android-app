@@ -235,14 +235,15 @@ class PlayBillingClient @Inject constructor(
         scope.launch {
             purchases?.forEach { purchase ->
                 val productId = purchase.products.firstOrNull()
-                if (productId.equals(PREMIUM_MONTHLY_PRODUCT_ID) || productId.equals(PREMIUM_YEARLY_PRODUCT_ID)) {
+                if (productId != null && productId.isSubscriptionProductId()) {
                     _subscriptionPurchases.emit(
                         SubscriptionPurchase(
                             orderId = purchase.orderId,
-                            productId = MIN_SATS_PRODUCT_ID,
+                            productId = productId,
                             purchaseTime = purchase.purchaseTime,
                             purchaseToken = purchase.purchaseToken,
                             quantity = purchase.quantity,
+                            playSubscriptionJson = purchase.originalJson,
                         ),
                     )
                 } else {
@@ -261,6 +262,10 @@ class PlayBillingClient @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun String?.isSubscriptionProductId(): Boolean {
+        return this == PREMIUM_MONTHLY_PRODUCT_ID || this == PREMIUM_YEARLY_PRODUCT_ID
     }
 
     companion object {
