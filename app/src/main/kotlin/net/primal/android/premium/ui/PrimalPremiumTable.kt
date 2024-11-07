@@ -56,7 +56,11 @@ fun PrimalPremiumTable(modifier: Modifier = Modifier, premiumMembership: Premium
             )
         } else {
             PrimalPremiumTableRow(
-                key = stringResource(id = R.string.premium_table_renews_on),
+                key = when {
+                    premiumMembership.isExpired() -> stringResource(id = R.string.premium_table_expired_on)
+                    premiumMembership.recurring -> stringResource(id = R.string.premium_table_renews_on)
+                    else -> stringResource(id = R.string.premium_table_expires_on)
+                },
                 value = Instant.ofEpochSecond(premiumMembership.expiresOn).formatToDefaultDateFormat(FormatStyle.LONG),
                 alwaysHideApply = true,
             )
