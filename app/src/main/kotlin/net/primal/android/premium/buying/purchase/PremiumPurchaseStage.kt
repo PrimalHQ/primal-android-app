@@ -15,7 +15,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -175,17 +174,17 @@ private fun MoreInfoPromoCodeRow(
             color = AppTheme.colorScheme.secondary,
             style = AppTheme.typography.bodyMedium,
         )
-        VerticalDivider(
-            modifier = Modifier.height(20.dp),
-            thickness = 1.dp,
-            color = AppTheme.colorScheme.outline,
-        )
-        Text(
-            modifier = Modifier.clickable { onPromoCodeClick() },
-            text = stringResource(id = R.string.premium_purchase_promo_code),
-            color = AppTheme.colorScheme.secondary,
-            style = AppTheme.typography.bodyMedium,
-        )
+//        VerticalDivider(
+//            modifier = Modifier.height(20.dp),
+//            thickness = 1.dp,
+//            color = AppTheme.colorScheme.outline,
+//        )
+//        Text(
+//            modifier = Modifier.clickable { onPromoCodeClick() },
+//            text = stringResource(id = R.string.premium_purchase_promo_code),
+//            color = AppTheme.colorScheme.secondary,
+//            style = AppTheme.typography.bodyMedium,
+//        )
     }
 }
 
