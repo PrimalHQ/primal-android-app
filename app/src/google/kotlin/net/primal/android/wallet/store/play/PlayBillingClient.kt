@@ -7,10 +7,12 @@ import com.android.billingclient.api.BillingClient.BillingResponseCode
 import com.android.billingclient.api.BillingClientStateListener
 import com.android.billingclient.api.BillingFlowParams
 import com.android.billingclient.api.BillingResult
+import com.android.billingclient.api.PendingPurchasesParams
 import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.QueryProductDetailsParams
+import com.android.billingclient.api.QueryPurchasesParams
 import com.android.billingclient.api.queryProductDetails
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -45,7 +47,11 @@ class PlayBillingClient @Inject constructor(
     private val billingClient by lazy {
         BillingClient.newBuilder(appContext)
             .setListener(this)
-            .enablePendingPurchases()
+            .enablePendingPurchases(
+                PendingPurchasesParams.newBuilder()
+                    .enableOneTimeProducts()
+                    .build(),
+            )
             .build()
     }
 
@@ -61,29 +67,7 @@ class PlayBillingClient @Inject constructor(
     override val subscriptionPurchases = _subscriptionPurchases.asSharedFlow()
 
     private var _minSatsInAppProduct: PlayInAppProduct? = null
-    override val minSatsInAppProduct: InAppProduct?
-        get() = _minSatsInAppProduct?.let {
-            InAppProduct(
-                productId = it.productId,
-                priceCurrencyCode = it.priceCurrencyCode,
-                priceAmountMicros = it.priceAmountMicros,
-            )
-        }
-
     private var _subscriptionProducts: List<PlaySubscriptionProduct> = emptyList()
-    override val subscriptionProducts: List<SubscriptionProduct>
-        get() = _subscriptionProducts.map {
-            SubscriptionProduct(
-                productId = it.productId,
-                priceCurrencyCode = it.priceCurrencyCode,
-                priceAmountMicros = it.priceAmountMicros,
-                billingPeriod = if (it.productId.contains("monthly")) {
-                    SubscriptionBillingPeriod.Monthly
-                } else {
-                    SubscriptionBillingPeriod.Yearly
-                },
-            )
-        }
 
     init {
         scope.launch { ensureBillingClientInitialized() }
@@ -96,11 +80,11 @@ class PlayBillingClient @Inject constructor(
             if (!connectSuccess) return false
 
             if (_minSatsInAppProduct == null) {
-                initializeMinSatsProduct()
+                queryMinSatsInAppProduct()
             }
 
             if (_subscriptionProducts.isEmpty()) {
-                initializeSubscriptions()
+                queryPlaySubscriptionProducts()
             }
 
             return true
@@ -131,12 +115,12 @@ class PlayBillingClient @Inject constructor(
         }
     }
 
-    private suspend fun initializeMinSatsProduct() {
+    private suspend fun queryMinSatsInAppProduct(): PlayInAppProduct? {
         val response = billingClient.queryProductDetails(minSatsQueryProductDetailsParams)
         val productDetails = response.productDetailsList?.firstOrNull()
         val offerDetails = productDetails?.oneTimePurchaseOfferDetails
-        if (productDetails != null && offerDetails != null) {
-            _minSatsInAppProduct = PlayInAppProduct(
+        return if (productDetails != null && offerDetails != null) {
+            PlayInAppProduct(
                 productId = productDetails.productId,
                 title = productDetails.title,
                 name = productDetails.name,
@@ -145,11 +129,13 @@ class PlayBillingClient @Inject constructor(
                 formattedPrice = offerDetails.formattedPrice,
                 googlePlayProductDetails = productDetails,
             )
+        } else {
+            null
         }
     }
 
-    private suspend fun initializeSubscriptions() {
-        _subscriptionProducts = queryAllSubscriptionDetails().mapNotNull { productDetails ->
+    private suspend fun queryPlaySubscriptionProducts(): List<PlaySubscriptionProduct> {
+        return queryAllSubscriptionDetails().mapNotNull { productDetails ->
             val offerDetails = productDetails.subscriptionOfferDetails?.firstOrNull()
             val pricing = offerDetails?.pricingPhases?.pricingPhaseList?.firstOrNull()
             val offerToken = offerDetails?.offerToken
@@ -177,6 +163,78 @@ class PlayBillingClient @Inject constructor(
             monthlyResponse.productDetailsList?.firstOrNull(),
             yearlyResponse.productDetailsList?.firstOrNull(),
         )
+    }
+
+    override suspend fun querySubscriptionProducts(): List<SubscriptionProduct> {
+        ensureBillingClientInitialized()
+        if (_subscriptionProducts.isEmpty()) {
+            _subscriptionProducts = queryPlaySubscriptionProducts()
+        }
+
+        return _subscriptionProducts.map {
+            SubscriptionProduct(
+                productId = it.productId,
+                priceCurrencyCode = it.priceCurrencyCode,
+                priceAmountMicros = it.priceAmountMicros,
+                billingPeriod = if (it.productId.contains("monthly")) {
+                    SubscriptionBillingPeriod.Monthly
+                } else {
+                    SubscriptionBillingPeriod.Yearly
+                },
+            )
+        }
+    }
+
+    override suspend fun queryMinSatsProduct(): InAppProduct? {
+        ensureBillingClientInitialized()
+        if (_minSatsInAppProduct == null) {
+            _minSatsInAppProduct = queryMinSatsInAppProduct()
+        }
+
+        return _minSatsInAppProduct?.let {
+            InAppProduct(
+                productId = it.productId,
+                priceCurrencyCode = it.priceCurrencyCode,
+                priceAmountMicros = it.priceAmountMicros,
+            )
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override suspend fun queryActiveSubscriptions(): List<SubscriptionPurchase> {
+        val params = QueryPurchasesParams.newBuilder()
+            .setProductType(BillingClient.ProductType.SUBS)
+            .build()
+
+        return try {
+            withTimeout(5.seconds) {
+                suspendCancellableCoroutine { continuation ->
+                    billingClient.queryPurchasesAsync(params) { billingResult, purchases ->
+                        if (billingResult.responseCode == BillingResponseCode.OK) {
+                            continuation.resume(
+                                value = purchases.mapNotNull {
+                                    val productId = it.products.firstOrNull()
+                                    if (productId != null && productId.isSubscriptionProductId()) {
+                                        it.mapAsSubscriptionPurchase(productId = productId)
+                                    } else {
+                                        null
+                                    }
+                                },
+                                onCancellation = { Timber.e(it) },
+                            )
+                        } else {
+                            continuation.resume(
+                                value = emptyList(),
+                                onCancellation = { Timber.e(it) },
+                            )
+                        }
+                    }
+                }
+            }
+        } catch (error: TimeoutCancellationException) {
+            Timber.w(error)
+            emptyList()
+        }
     }
 
     @Throws(BillingNotAvailable::class, ProductNotAvailable::class)
@@ -221,28 +279,13 @@ class PlayBillingClient @Inject constructor(
         billingClient.launchBillingFlow(activity, billingFlowParams)
     }
 
-    override suspend fun fetchBillingProducts() {
-        val initialized = ensureBillingClientInitialized()
-        if (initialized) {
-            initializeSubscriptions()
-            initializeMinSatsProduct()
-        }
-    }
-
     override fun onPurchasesUpdated(billingResult: BillingResult, purchases: MutableList<Purchase>?) {
         scope.launch {
             purchases?.forEach { purchase ->
                 val productId = purchase.products.firstOrNull()
                 if (productId != null && productId.isSubscriptionProductId()) {
                     _subscriptionPurchases.emit(
-                        SubscriptionPurchase(
-                            orderId = purchase.orderId,
-                            productId = productId,
-                            purchaseTime = purchase.purchaseTime,
-                            purchaseToken = purchase.purchaseToken,
-                            quantity = purchase.quantity,
-                            playSubscriptionJson = purchase.originalJson,
-                        ),
+                        purchase.mapAsSubscriptionPurchase(productId = productId),
                     )
                 } else {
                     purchaseQuote?.let { quote ->
@@ -261,6 +304,18 @@ class PlayBillingClient @Inject constructor(
             }
         }
     }
+
+    private fun Purchase.mapAsSubscriptionPurchase(productId: String) =
+        SubscriptionPurchase(
+            orderId = this.orderId,
+            productId = productId,
+            purchaseTime = this.purchaseTime,
+            purchaseState = this.purchaseState,
+            purchaseToken = this.purchaseToken,
+            quantity = this.quantity,
+            autoRenewing = this.isAutoRenewing,
+            playSubscriptionJson = this.originalJson,
+        )
 
     private fun String?.isSubscriptionProductId(): Boolean {
         return this == PREMIUM_MONTHLY_PRODUCT_ID || this == PREMIUM_YEARLY_PRODUCT_ID

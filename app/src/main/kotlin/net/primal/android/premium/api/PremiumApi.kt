@@ -11,4 +11,8 @@ interface PremiumApi {
     suspend fun getPremiumMembershipStatus(userId: String): MembershipStatusResponse?
 
     suspend fun purchaseMembership(userId: String, body: PurchaseMembershipRequest)
+
+    suspend fun getMembershipProducts()
+
+    suspend fun cancelMembership(userId: String, purchaseJson: String)
 }

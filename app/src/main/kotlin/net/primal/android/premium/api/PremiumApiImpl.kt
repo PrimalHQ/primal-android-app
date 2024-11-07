@@ -12,6 +12,7 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
+import net.primal.android.premium.api.model.MembershipProductsRequest
 import net.primal.android.premium.api.model.MembershipStatusResponse
 import net.primal.android.premium.api.model.NameAvailableRequest
 import net.primal.android.premium.api.model.NameAvailableResponse
@@ -64,6 +65,53 @@ class PremiumApiImpl @Inject constructor(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
                             userId = userId,
                             content = NostrJson.encodeToString(body),
+                        ),
+                    ),
+                ),
+            ),
+        )
+    }
+
+    override suspend fun getMembershipProducts() {
+        primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.WALLET_MEMBERSHIP_PRODUCTS,
+                optionsJson = NostrJson.encodeToString(MembershipProductsRequest(origin = "android")),
+            ),
+        )
+
+//        "kind": 10000604,
+//        [
+//            {
+//                "product_id": "1-month-premium",
+//                "tier": "premium",
+//                "months": 1,
+//                "max_storage": 107374182400,
+//                "label": "Primal Premium 1M Subscription",
+//                "android_product_id": "monthly_premium",
+//                "short_product_id": "1M"
+//            },
+//            {
+//                "product_id": "12-months-premium",
+//                "tier": "premium",
+//                "months": 12,
+//                "max_storage": 107374182400,
+//                "label": "Primal Premium 12M Subscription",
+//                "android_product_id": "yearly_premium",
+//                "short_product_id": "12M"
+//            }
+//        ]
+    }
+
+    override suspend fun cancelMembership(userId: String, purchaseJson: String) {
+        primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.WALLET_MEMBERSHIP_CANCEL,
+                optionsJson = NostrJson.encodeToString(
+                    AppSpecificDataRequest(
+                        eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
+                            userId = userId,
+                            content = purchaseJson,
                         ),
                     ),
                 ),
