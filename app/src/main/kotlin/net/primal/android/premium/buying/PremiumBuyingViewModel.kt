@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
+import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.buying.PremiumBuyingContract.UiEvent
 import net.primal.android.premium.buying.PremiumBuyingContract.UiState
@@ -38,20 +39,20 @@ class PremiumBuyingViewModel @Inject constructor(
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
-        initBillingClient()
         observeEvents()
         observePurchases()
         observeActiveProfile()
+        fetchSubscriptionProducts()
     }
 
-    private fun initBillingClient() {
+    private fun fetchSubscriptionProducts() {
         viewModelScope.launch {
-            primalBillingClient.fetchBillingProducts()
-            setState {
-                copy(
-                    loading = false,
-                    subscriptions = primalBillingClient.subscriptionProducts,
-                )
+            if (isGoogleBuild()) {
+                val subscriptionProducts = primalBillingClient.querySubscriptionProducts()
+                setState { copy(loading = false, subscriptions = subscriptionProducts) }
+            } else {
+                premiumRepository.fetchMembershipProducts()
+                setState { copy(loading = false) }
             }
         }
     }
