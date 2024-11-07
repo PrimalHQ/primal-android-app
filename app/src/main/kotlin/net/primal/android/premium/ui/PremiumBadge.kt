@@ -24,6 +24,7 @@ fun PremiumBadge(
     topColor: Color,
     middleColor: Color = topColor,
     bottomColor: Color = topColor,
+    membershipExpired: Boolean,
 ) {
     val colorStops = arrayOf(
         0.0f to topColor,
@@ -38,6 +39,7 @@ fun PremiumBadge(
                 brush = Brush.verticalGradient(
                     colorStops = colorStops,
                 ),
+                alpha = if (membershipExpired) 0.5f else 1.0f,
             )
             .padding(start = 16.dp, end = 3.dp)
             .padding(vertical = 3.dp),

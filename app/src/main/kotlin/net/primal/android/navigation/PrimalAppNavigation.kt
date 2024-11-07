@@ -940,6 +940,7 @@ private fun NavGraphBuilder.premiumHome(route: String, navController: NavControl
         PremiumHomeScreen(
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
+            onRenewSubscription = { navController.navigateToPremiumBuying() },
             onManagePremium = {},
             onSupportPrimal = {},
         )
