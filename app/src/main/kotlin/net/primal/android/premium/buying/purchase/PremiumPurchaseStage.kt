@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -141,14 +140,18 @@ fun PremiumPurchaseStage(
             if (activity != null) {
                 BuyPremiumButtons(
                     modifier = Modifier.padding(horizontal = 12.dp),
+                    hasActiveSubscription = state.hasActiveSubscription,
                     subscriptions = state.subscriptions,
-                    onClick = { subscription ->
+                    onBuySubscription = { subscription ->
                         eventPublisher(
                             PremiumBuyingContract.UiEvent.RequestPurchase(
                                 activity = activity,
                                 subscriptionProduct = subscription,
                             ),
                         )
+                    },
+                    onRestoreSubscription = {
+                        eventPublisher(PremiumBuyingContract.UiEvent.RestoreSubscription)
                     },
                 )
                 TOSNotice()
@@ -190,21 +193,47 @@ private fun MoreInfoPromoCodeRow(
 
 @Composable
 fun BuyPremiumButtons(
-    modifier: Modifier = Modifier,
+    modifier: Modifier,
+    hasActiveSubscription: Boolean,
     subscriptions: List<SubscriptionProduct>,
-    onClick: (SubscriptionProduct) -> Unit,
+    onBuySubscription: (SubscriptionProduct) -> Unit,
+    onRestoreSubscription: () -> Unit,
 ) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        subscriptions.forEach {
-            BuyPremiumButton(
-                startText = it.toGetSubscriptionString(),
-                endText = it.toPricingString(),
-                onClick = { onClick(it) },
+        if (hasActiveSubscription) {
+            Text(
+                modifier = Modifier.padding(horizontal = 32.dp),
+                text = stringResource(R.string.premium_purchase_restore_subscription_explanation),
+                textAlign = TextAlign.Center,
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             )
+
+            PrimalFilledButton(
+                modifier = Modifier.fillMaxWidth(),
+                height = 64.dp,
+                shape = RoundedCornerShape(percent = 100),
+                onClick = onRestoreSubscription,
+            ) {
+                Text(
+                    text = stringResource(R.string.premium_purchase_restore_subscription),
+                    style = AppTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 20.sp,
+                )
+            }
+        } else {
+            subscriptions.forEach {
+                BuyPremiumButton(
+                    startText = it.toGetSubscriptionString(),
+                    endText = it.toPricingString(),
+                    onClick = { onBuySubscription(it) },
+                )
+            }
         }
     }
 }

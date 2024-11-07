@@ -10,6 +10,7 @@ interface PremiumBuyingContract {
         val subscriptions: List<SubscriptionProduct> = emptyList(),
         val stage: PremiumStage = PremiumStage.Home,
         val primalName: String? = null,
+        val hasActiveSubscription: Boolean = false,
 
         val profile: ProfileDetailsUi? = null,
         val promoCodeValidity: Boolean? = null,
@@ -22,6 +23,8 @@ interface PremiumBuyingContract {
 
         data class ApplyPromoCode(val promoCode: String) : UiEvent()
         data object ClearPromoCodeValidity : UiEvent()
+
+        data object RestoreSubscription : UiEvent()
 
         data class RequestPurchase(
             val activity: Activity,
