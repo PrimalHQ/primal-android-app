@@ -1,5 +1,6 @@
 package net.primal.android.premium.domain
 
+import kotlinx.datetime.Clock
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -15,4 +16,7 @@ data class PremiumMembership(
     val expiresOn: Long,
     val cohort1: String,
     val cohort2: String,
-)
+) {
+    fun isExpired() = Clock.System.now().epochSeconds > expiresOn
+    val recurring: Boolean = true
+}

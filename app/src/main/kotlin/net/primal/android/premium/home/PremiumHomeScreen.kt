@@ -49,15 +49,17 @@ import net.primal.android.theme.AppTheme
 fun PremiumHomeScreen(
     viewModel: PremiumHomeViewModel,
     onClose: () -> Unit,
+    onRenewSubscription: () -> Unit,
     onManagePremium: () -> Unit,
     onSupportPrimal: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
     PremiumHomeScreen(
-        onClose = onClose,
-        onManagePremium = onManagePremium,
         state = uiState.value,
+        onClose = onClose,
+        onRenewSubscription = onRenewSubscription,
+        onManagePremium = onManagePremium,
         onSupportPrimal = onSupportPrimal,
         eventPublisher = viewModel::setEvent,
     )
@@ -68,6 +70,7 @@ fun PremiumHomeScreen(
 private fun PremiumHomeScreen(
     state: PremiumHomeContract.UiState,
     onClose: () -> Unit,
+    onRenewSubscription: () -> Unit,
     onManagePremium: () -> Unit,
     onSupportPrimal: () -> Unit,
     eventPublisher: (PremiumHomeContract.UiEvent) -> Unit,
@@ -82,10 +85,18 @@ private fun PremiumHomeScreen(
             )
         },
         bottomBar = {
-//            PremiumUserBottomBar(
+            if (state.membership?.isExpired() == true) {
+                BottomBarButton(
+                    text = stringResource(id = R.string.premium_renew_subscription),
+                    onClick = onRenewSubscription,
+                )
+            } else {
+                Spacer(modifier = Modifier.height(80.dp))
+            }
+//            BottomBarButton(
+//                text = stringResource(id = R.string.premium_manage_premium_button),
 //                onClick = onManagePremium,
 //            )
-            Spacer(modifier = Modifier.height(80.dp))
         },
     ) { paddingValues ->
         Column(
@@ -118,6 +129,7 @@ private fun PremiumHomeScreen(
                 PremiumBadge(
                     firstCohort = it.cohort1,
                     secondCohort = it.cohort2,
+                    membershipExpired = it.isExpired(),
                     topColor = AppTheme.colorScheme.primary,
                 )
                 if (it.cohort2.isPremiumFree()) {
@@ -134,19 +146,21 @@ private fun PremiumHomeScreen(
                     premiumMembership = it,
                 )
                 if (!it.cohort1.isPrimalLegend()) {
-                    var showCancelSubscription by remember { mutableStateOf(false) }
-                    if (showCancelSubscription) {
-                        CancelSubscriptionAlertDialog(
-                            onDismissRequest = { showCancelSubscription = false },
-                            onConfirm = {
-                                showCancelSubscription = false
-                                eventPublisher(PremiumHomeContract.UiEvent.CancelSubscription)
-                            },
+                    if (it.recurring) {
+                        var showCancelSubscription by remember { mutableStateOf(false) }
+                        if (showCancelSubscription) {
+                            CancelSubscriptionAlertDialog(
+                                onDismissRequest = { showCancelSubscription = false },
+                                onConfirm = {
+                                    showCancelSubscription = false
+                                    eventPublisher(PremiumHomeContract.UiEvent.CancelSubscription)
+                                },
+                            )
+                        }
+                        SupportUsNotice(
+                            onSupportPrimal = { showCancelSubscription = true },
                         )
                     }
-                    SupportUsNotice(
-                        onSupportPrimal = { showCancelSubscription = true },
-                    )
                 }
             }
         }
@@ -188,7 +202,11 @@ private fun CancelSubscriptionAlertDialog(onDismissRequest: () -> Unit, onConfir
 }
 
 @Composable
-private fun PremiumUserBottomBar(modifier: Modifier = Modifier, onClick: () -> Unit) {
+private fun BottomBarButton(
+    text: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
     Box(
         modifier = modifier
             .navigationBarsPadding()
@@ -200,7 +218,7 @@ private fun PremiumUserBottomBar(modifier: Modifier = Modifier, onClick: () -> U
         ) {
             Text(
                 modifier = Modifier.padding(vertical = 8.dp),
-                text = stringResource(id = R.string.premium_manage_premium_button),
+                text = text,
                 style = AppTheme.typography.bodyLarge,
                 fontWeight = FontWeight.SemiBold,
             )
