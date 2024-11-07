@@ -115,7 +115,7 @@ private fun MoreInfoTopAppBar(pagerState: PagerState, onClose: () -> Unit) {
         title = stringResource(id = R.string.premium_more_info_title),
         navigationIcon = PrimalIcons.ArrowBack,
         onNavigationIconClick = onClose,
-        showDivider = false,
+        showDivider = true,
         footer = {
             MoreInfoTabs(
                 modifier = Modifier.padding(top = 8.dp),

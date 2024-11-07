@@ -41,6 +41,7 @@ fun MoreInfoTabs(
                 )
             }
         },
+        divider = {},
     ) {
         PrimalSingleTab(
             selected = selectedTabIndex == WHY_PREMIUM_TAB_INDEX,
