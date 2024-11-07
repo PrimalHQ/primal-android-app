@@ -12,4 +12,8 @@ interface PremiumHomeContract {
         val profileLightningAddress: String? = null,
         val membership: PremiumMembership? = null,
     )
+
+    sealed class UiEvent {
+        data object CancelSubscription : UiEvent()
+    }
 }

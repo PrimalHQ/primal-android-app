@@ -104,7 +104,7 @@
     </string>
     <string name="premium_find_primal_name_button">Find Primal Name</string>
     <string name="premium_cancel_button">Cancel</string>
-    <string name="premium_google_play_not_available">Unable to connect to the Google Play Store. Please try again in a few moments.</string>
+    <string name="premium_google_play_not_available">Unable to connect to the Google Play Store. Check your Google account and try again.</string>
 
     <string name="premium_primal_name_title">Find Primal Name</string>
     <string name="premium_primal_name_search_button">Search</string>
@@ -136,9 +136,12 @@
     <string name="premium_member_title">Premium</string>
     <string name="premium_member_early_primal_user">Hey there! You are an early Primal user who interacted with our team, so we gave you 6 months of Primal Premium for free. ♥\uFE0F\uD83E\uDEC2</string>
     <string name="premium_manage_premium_button">Manage Premium</string>
-    <string name="premium_enjoying_primal">Are you enjoying Primal?</string>
-    <string name="premium_enjoying_primal_if_so">If so, see how you can</string>
-    <string name="premium_support_us">support us</string>
+<!--    <string name="premium_enjoying_primal">Are you enjoying Primal?</string>-->
+<!--    <string name="premium_enjoying_primal_if_so">If so, see how you can</string>-->
+<!--    <string name="premium_support_us">support us</string>-->
+    <string name="premium_enjoying_primal">Your subscription will renew automatically.</string>
+    <string name="premium_enjoying_primal_if_so">If you wish to stop it, you can</string>
+    <string name="premium_support_us">cancel now</string>
     <string name="premium_table_expires">Expires</string>
     <string name="premium_table_never">Never</string>
     <string name="premium_table_renews_on">Renews on</string>

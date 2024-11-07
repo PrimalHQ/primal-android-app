@@ -14,11 +14,11 @@ interface PrimalBillingClient {
 
     val subscriptionPurchases: SharedFlow<SubscriptionPurchase>
 
-    val minSatsInAppProduct: InAppProduct?
+    suspend fun queryMinSatsProduct(): InAppProduct?
 
-    val subscriptionProducts: List<SubscriptionProduct>
+    suspend fun querySubscriptionProducts(): List<SubscriptionProduct>
 
-    suspend fun fetchBillingProducts()
+    suspend fun queryActiveSubscriptions(): List<SubscriptionPurchase>
 
     suspend fun launchMinSatsBillingFlow(quote: SatsPurchaseQuote, activity: Activity)
 

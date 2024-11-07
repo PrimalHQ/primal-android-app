@@ -30,15 +30,9 @@ class InAppPurchaseBuyViewModel @Inject constructor(
     private val walletRepository: WalletRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(
-        UiState(
-            minSatsInAppProduct = primalBillingClient.minSatsInAppProduct,
-        ),
-    )
+    private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
-    private fun setState(reducer: UiState.() -> UiState) {
-        _state.getAndUpdate { it.reducer() }
-    }
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
     private val events = MutableSharedFlow<UiEvent>()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
@@ -65,8 +59,8 @@ class InAppPurchaseBuyViewModel @Inject constructor(
 
     private fun refreshQuote() =
         viewModelScope.launch {
-            primalBillingClient.fetchBillingProducts()
-            setState { copy(minSatsInAppProduct = primalBillingClient.minSatsInAppProduct) }
+            val minSatsInAppProduct = primalBillingClient.queryMinSatsProduct()
+            setState { copy(minSatsInAppProduct = minSatsInAppProduct) }
             _state.value.minSatsInAppProduct?.let { inAppProduct ->
                 try {
                     val previousQuote = _state.value.quote

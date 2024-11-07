@@ -49,6 +49,21 @@ class PremiumRepository @Inject constructor(
         }
     }
 
+    suspend fun fetchMembershipProducts() {
+        withContext(dispatchers.io()) {
+            withContext(dispatchers.io()) {
+                premiumApi.getMembershipProducts()
+            }
+        }
+    }
+
+    suspend fun cancelSubscription(userId: String, purchaseJson: String) {
+        withContext(dispatchers.io()) {
+            premiumApi.cancelMembership(userId = userId, purchaseJson = purchaseJson)
+            fetchMembershipStatus(userId = userId)
+        }
+    }
+
     private fun MembershipStatusResponse.toPremiumMembership(): PremiumMembership {
         return PremiumMembership(
             userId = this.pubkey,

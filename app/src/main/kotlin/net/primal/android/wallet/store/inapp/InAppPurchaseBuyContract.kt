@@ -6,7 +6,7 @@ import net.primal.android.wallet.store.domain.SatsPurchaseQuote
 
 interface InAppPurchaseBuyContract {
     data class UiState(
-        val minSatsInAppProduct: InAppProduct?,
+        val minSatsInAppProduct: InAppProduct? = null,
         val quote: SatsPurchaseQuote? = null,
         val purchasingQuote: SatsPurchaseQuote? = null,
         val error: Throwable? = null,
