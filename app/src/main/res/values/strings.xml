@@ -119,6 +119,8 @@
     <string name="premium_purchase_promo_code">Have a promo code?</string>
     <string name="premium_purchase_get_annual_plan">Get Annual Plan</string>
     <string name="premium_purchase_get_monthly_plan">Get Monthly Plan</string>
+    <string name="premium_purchase_restore_subscription">Restore Your Subscription</string>
+    <string name="premium_purchase_restore_subscription_explanation">Your Google Play account already has an active Primal Premium subscription, connected to a different Nostr account. You can restore it below:</string>
     <string name="premium_purchase_tos_notice">By proceeding you acknowledge that\nyou agree to our </string>
     <string name="premium_purchase_tos">Terms of Service</string>
 

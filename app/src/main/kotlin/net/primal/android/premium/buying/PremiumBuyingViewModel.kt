@@ -21,6 +21,7 @@ import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.InAppPurchaseException
+import net.primal.android.wallet.store.domain.SubscriptionPurchase
 import timber.log.Timber
 
 @HiltViewModel
@@ -30,6 +31,8 @@ class PremiumBuyingViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
+
+    private var purchase: SubscriptionPurchase? = null
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -42,10 +45,10 @@ class PremiumBuyingViewModel @Inject constructor(
         observeEvents()
         observePurchases()
         observeActiveProfile()
-        fetchSubscriptionProducts()
+        initBillingClient()
     }
 
-    private fun fetchSubscriptionProducts() {
+    private fun initBillingClient() {
         viewModelScope.launch {
             if (isGoogleBuild()) {
                 val subscriptionProducts = primalBillingClient.querySubscriptionProducts()
@@ -54,6 +57,16 @@ class PremiumBuyingViewModel @Inject constructor(
                 premiumRepository.fetchMembershipProducts()
                 setState { copy(loading = false) }
             }
+
+            fetchActiveSubscription()
+        }
+    }
+
+    private fun fetchActiveSubscription() {
+        viewModelScope.launch {
+            val purchases = primalBillingClient.queryActiveSubscriptions()
+            purchase = purchases.firstOrNull()
+            setState { copy(hasActiveSubscription = purchase != null) }
         }
     }
 
@@ -66,6 +79,7 @@ class PremiumBuyingViewModel @Inject constructor(
                     is UiEvent.ApplyPromoCode -> tryApplyPromoCode(it.promoCode)
                     UiEvent.ClearPromoCodeValidity -> setState { copy(promoCodeValidity = null) }
                     is UiEvent.RequestPurchase -> launchBillingFlow(it)
+                    UiEvent.RestoreSubscription -> restorePurchase()
                 }
             }
         }
@@ -95,6 +109,8 @@ class PremiumBuyingViewModel @Inject constructor(
                         setState { copy(stage = PremiumBuyingContract.PremiumStage.Success) }
                     } catch (error: WssException) {
                         Timber.e(error)
+                        this@PremiumBuyingViewModel.purchase = purchase
+                        setState { copy(hasActiveSubscription = true) }
                     }
                 }
             }
@@ -116,6 +132,24 @@ class PremiumBuyingViewModel @Inject constructor(
                 )
             } catch (error: InAppPurchaseException) {
                 Timber.w(error)
+            }
+        }
+
+    private fun restorePurchase() =
+        viewModelScope.launch {
+            val primalName = _state.value.primalName
+            val existingPurchase = purchase
+            if (primalName != null && existingPurchase != null) {
+                try {
+                    premiumRepository.purchaseMembership(
+                        userId = activeAccountStore.activeUserId(),
+                        primalName = primalName,
+                        purchase = existingPurchase,
+                    )
+                    setState { copy(stage = PremiumBuyingContract.PremiumStage.Success) }
+                } catch (error: WssException) {
+                    Timber.e(error)
+                }
             }
         }
 }
