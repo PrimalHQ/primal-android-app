@@ -138,7 +138,8 @@
     <string name="premium_member_title">Premium</string>
     <string name="premium_member_early_primal_user">Hey there! You are an early Primal user who interacted with our team, so we gave you 6 months of Primal Premium for free. ♥\uFE0F\uD83E\uDEC2</string>
     <string name="premium_manage_premium_button">Manage Premium</string>
-    <string name="premium_renew_subscription">Renew subscription</string>
+    <string name="premium_renew_subscription">Renew Subscription</string>
+    <string name="premium_extend_subscription">Extend Subscription</string>
 <!--    <string name="premium_enjoying_primal">Are you enjoying Primal?</string>-->
 <!--    <string name="premium_enjoying_primal_if_so">If so, see how you can</string>-->
 <!--    <string name="premium_support_us">support us</string>-->

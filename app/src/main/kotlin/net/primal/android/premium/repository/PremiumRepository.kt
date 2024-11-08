@@ -75,8 +75,10 @@ class PremiumRepository @Inject constructor(
             usedStorageInBytes = this.usedStorage,
             maxStorageInBytes = this.maxStorage,
             expiresOn = this.expiresOn,
+            renewsOn = this.renewsOn,
             cohort1 = this.cohort1,
             cohort2 = this.cohort2,
+            recurring = this.recurring,
         )
     }
 }

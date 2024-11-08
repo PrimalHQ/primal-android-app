@@ -16,7 +16,8 @@ data class PremiumMembership(
     val expiresOn: Long,
     val cohort1: String,
     val cohort2: String,
+    val recurring: Boolean = false,
+    val renewsOn: Long? = null,
 ) {
     fun isExpired() = Clock.System.now().epochSeconds > expiresOn
-    val recurring: Boolean = true
 }
