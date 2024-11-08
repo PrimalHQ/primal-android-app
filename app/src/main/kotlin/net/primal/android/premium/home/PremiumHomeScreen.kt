@@ -144,6 +144,7 @@ private fun PremiumHomeScreen(
 
             state.membership?.let {
                 PremiumBadge(
+                    modifier = Modifier.clickable { onSupportPrimal() },
                     firstCohort = it.cohort1,
                     secondCohort = it.cohort2,
                     membershipExpired = it.isExpired(),
