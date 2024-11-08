@@ -7,17 +7,25 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import net.primal.android.R
+import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.premium.buying.home.PremiumBuyingHomeStage
 import net.primal.android.premium.buying.name.PremiumPrimalNameStage
 import net.primal.android.premium.buying.purchase.PremiumPurchaseStage
 import net.primal.android.premium.buying.success.PremiumBuyingSuccessStage
+import net.primal.android.premium.ui.toHumanReadableString
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -50,77 +58,92 @@ private fun PremiumBuyingScreen(
         eventPublisher = eventPublisher,
     )
 
-    AnimatedContent(
-        modifier = Modifier
-            .background(AppTheme.colorScheme.surfaceVariant)
-            .fillMaxSize(),
-        label = "PremiumStages",
-        targetState = state.stage,
-        transitionSpec = { transitionSpecBetweenStages() },
-    ) { stage ->
-        when (stage) {
-            PremiumBuyingContract.PremiumStage.Home -> {
-                PremiumBuyingHomeStage(
-                    loading = state.loading,
-                    subscriptions = state.subscriptions,
-                    onClose = onClose,
-                    onLearnMoreClick = onMoreInfoClick,
-                    onFindPrimalName = {
-                        eventPublisher(
-                            PremiumBuyingContract.UiEvent.MoveToPremiumStage(
-                                PremiumBuyingContract.PremiumStage.FindPrimalName,
-                            ),
-                        )
-                    },
-                )
-            }
+    val snackbarHostState = remember { SnackbarHostState() }
+    SnackbarErrorHandler(
+        error = state.error,
+        snackbarHostState = snackbarHostState,
+        errorMessageResolver = { it.toHumanReadableString() },
+        onErrorDismiss = { eventPublisher(PremiumBuyingContract.UiEvent.DismissError) },
+    )
 
-            PremiumBuyingContract.PremiumStage.FindPrimalName -> {
-                PremiumPrimalNameStage(
-                    titleText = stringResource(id = R.string.premium_primal_name_title),
-                    initialName = state.primalName,
-                    onBack = {
-                        eventPublisher(
-                            PremiumBuyingContract.UiEvent.MoveToPremiumStage(
-                                PremiumBuyingContract.PremiumStage.Home,
-                            ),
-                        )
-                    },
-                    onPrimalNameAvailable = {
-                        eventPublisher(
-                            PremiumBuyingContract.UiEvent.SetPrimalName(primalName = it),
-                        )
-                        eventPublisher(
-                            PremiumBuyingContract.UiEvent.MoveToPremiumStage(
-                                PremiumBuyingContract.PremiumStage.Purchase,
-                            ),
-                        )
-                    },
-                )
-            }
+    Box(contentAlignment = Alignment.BottomCenter) {
+        AnimatedContent(
+            modifier = Modifier
+                .background(AppTheme.colorScheme.surfaceVariant)
+                .fillMaxSize(),
+            label = "BuyingPremiumStages",
+            targetState = state.stage,
+            transitionSpec = { transitionSpecBetweenStages() },
+        ) { stage ->
+            when (stage) {
+                PremiumBuyingContract.PremiumStage.Home -> {
+                    PremiumBuyingHomeStage(
+                        loading = state.loading,
+                        subscriptions = state.subscriptions,
+                        onClose = onClose,
+                        onLearnMoreClick = onMoreInfoClick,
+                        onFindPrimalName = {
+                            eventPublisher(
+                                PremiumBuyingContract.UiEvent.MoveToPremiumStage(
+                                    PremiumBuyingContract.PremiumStage.FindPrimalName,
+                                ),
+                            )
+                        },
+                    )
+                }
 
-            PremiumBuyingContract.PremiumStage.Purchase -> {
-                PremiumPurchaseStage(
-                    state = state,
-                    eventPublisher = eventPublisher,
-                    onBack = {
-                        eventPublisher(
-                            PremiumBuyingContract.UiEvent.MoveToPremiumStage(
-                                PremiumBuyingContract.PremiumStage.FindPrimalName,
-                            ),
-                        )
-                    },
-                    onLearnMoreClick = onMoreInfoClick,
-                )
-            }
+                PremiumBuyingContract.PremiumStage.FindPrimalName -> {
+                    PremiumPrimalNameStage(
+                        titleText = stringResource(id = R.string.premium_primal_name_title),
+                        initialName = state.primalName,
+                        onBack = {
+                            eventPublisher(
+                                PremiumBuyingContract.UiEvent.MoveToPremiumStage(
+                                    PremiumBuyingContract.PremiumStage.Home,
+                                ),
+                            )
+                        },
+                        onPrimalNameAvailable = {
+                            eventPublisher(
+                                PremiumBuyingContract.UiEvent.SetPrimalName(primalName = it),
+                            )
+                            eventPublisher(
+                                PremiumBuyingContract.UiEvent.MoveToPremiumStage(
+                                    PremiumBuyingContract.PremiumStage.Purchase,
+                                ),
+                            )
+                        },
+                    )
+                }
 
-            PremiumBuyingContract.PremiumStage.Success -> {
-                PremiumBuyingSuccessStage(
-                    modifier = Modifier.fillMaxSize(),
-                    onDoneClick = onClose,
-                )
+                PremiumBuyingContract.PremiumStage.Purchase -> {
+                    PremiumPurchaseStage(
+                        state = state,
+                        eventPublisher = eventPublisher,
+                        onBack = {
+                            eventPublisher(
+                                PremiumBuyingContract.UiEvent.MoveToPremiumStage(
+                                    PremiumBuyingContract.PremiumStage.FindPrimalName,
+                                ),
+                            )
+                        },
+                        onLearnMoreClick = onMoreInfoClick,
+                    )
+                }
+
+                PremiumBuyingContract.PremiumStage.Success -> {
+                    PremiumBuyingSuccessStage(
+                        modifier = Modifier.fillMaxSize(),
+                        onDoneClick = onClose,
+                    )
+                }
             }
         }
+
+        SnackbarHost(
+            modifier = Modifier.navigationBarsPadding(),
+            hostState = snackbarHostState,
+        )
     }
 }
 
