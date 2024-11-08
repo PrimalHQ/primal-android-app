@@ -140,9 +140,9 @@
     <string name="premium_manage_premium_button">Manage Premium</string>
     <string name="premium_renew_subscription">Renew Subscription</string>
     <string name="premium_extend_subscription">Extend Subscription</string>
-<!--    <string name="premium_enjoying_primal">Are you enjoying Primal?</string>-->
-<!--    <string name="premium_enjoying_primal_if_so">If so, see how you can</string>-->
-<!--    <string name="premium_support_us">support us</string>-->
+    <!--    <string name="premium_enjoying_primal">Are you enjoying Primal?</string>-->
+    <!--    <string name="premium_enjoying_primal_if_so">If so, see how you can</string>-->
+    <!--    <string name="premium_support_us">support us</string>-->
     <string name="premium_enjoying_primal">Your subscription will renew automatically.</string>
     <string name="premium_enjoying_primal_if_so">If you wish to stop it, you can</string>
     <string name="premium_support_us">cancel now</string>
@@ -152,6 +152,8 @@
     <string name="premium_table_expires_on">Expires on</string>
     <string name="premium_table_expired_on">Expired on</string>
     <string name="premium_table_apply">apply</string>
+
+    <string name="premium_support_primal_title">Support Primal</string>
 
     <string name="premium_manage_title">Manage Premium</string>
     <string name="premium_manage_nostr_tools">Nostr Tools</string>
@@ -216,6 +218,17 @@
     <string name="premium_error_play_subscription_purchase_not_found">Unable to cancel the subscription. Please check if you are logged in with your Google Account and try again.</string>
     <string name="premium_error_failed_to_cancel_subscription">Unable to cancel the subscription. Please check your connection and try again.</string>
     <string name="premium_error_failed_to_process_subscription_purchase">We were unable to process your subscription purchase. Please reach out to Primal Support.</string>
+
+    <string name="premium_support_primal_description">Be a part of the Nostr revolution and help us continue building for this ecosystem.</string>
+    <string name="premium_support_primal_review_call_title">Leave a 5 Star Review</string>
+    <string name="premium_support_primal_review_call_description">Play Store reviews really help improve the visibility of Nostr apps at this early stage.</string>
+    <string name="premium_support_primal_review_call_button_text">Go to App Listing</string>
+    <string name="premium_support_primal_buy_subscription_title">Buy a Subscription</string>
+    <string name="premium_support_primal_buy_subscription_description">Extend your existing subscription to gain peace of mind and help fund Primal.</string>
+    <string name="premium_support_primal_buy_subscription_button_text">Buy Primal Premium</string>
+    <string name="premium_support_primal_become_a_legend_title">Become a Legend</string>
+    <string name="premium_support_primal_become_a_legend_description">Donate $1.000 or more to gain permanent membership and exclusive perks!</string>
+    <string name="premium_support_primal_become_a_legend_button_text">Become a Legend Now</string>
 
     <string name="feed_reposted_suffix">reposted</string>
     <string name="feed_see_more">See more…</string>
