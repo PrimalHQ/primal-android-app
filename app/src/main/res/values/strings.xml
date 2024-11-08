@@ -140,7 +140,8 @@
     <string name="premium_member_title">Premium</string>
     <string name="premium_member_early_primal_user">Hey there! You are an early Primal user who interacted with our team, so we gave you 6 months of Primal Premium for free. ♥\uFE0F\uD83E\uDEC2</string>
     <string name="premium_manage_premium_button">Manage Premium</string>
-    <string name="premium_renew_subscription">Renew subscription</string>
+    <string name="premium_renew_subscription">Renew Subscription</string>
+    <string name="premium_extend_subscription">Extend Subscription</string>
 <!--    <string name="premium_enjoying_primal">Are you enjoying Primal?</string>-->
 <!--    <string name="premium_enjoying_primal_if_so">If so, see how you can</string>-->
 <!--    <string name="premium_support_us">support us</string>-->
@@ -153,6 +154,10 @@
     <string name="premium_table_expires_on">Expires on</string>
     <string name="premium_table_expired_on">Expired on</string>
     <string name="premium_table_apply">apply</string>
+
+    <string name="premium_error_play_subscription_purchase_not_found">Unable to cancel the subscription. Please check if you are logged in with your Google Account and try again.</string>
+    <string name="premium_error_failed_to_cancel_subscription">Unable to cancel the subscription. Please check your connection and try again.</string>
+    <string name="premium_error_failed_to_process_subscription_purchase">We were unable to process your subscription purchase. Please reach out to Primal Support.</string>
 
     <string name="feed_reposted_suffix">reposted</string>
     <string name="feed_see_more">See more…</string>

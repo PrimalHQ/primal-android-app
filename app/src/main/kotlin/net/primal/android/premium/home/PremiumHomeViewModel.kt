@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.premium.domain.MembershipError
 import net.primal.android.premium.home.PremiumHomeContract.UiEvent
 import net.primal.android.premium.home.PremiumHomeContract.UiState
 import net.primal.android.premium.repository.PremiumRepository
@@ -49,9 +50,9 @@ class PremiumHomeViewModel @Inject constructor(
             events.collect {
                 when (it) {
                     UiEvent.CancelSubscription -> cancelSubscription()
+                    UiEvent.DismissError -> setState { copy(error = null) }
                     UiEvent.ApplyPrimalLightningAddress -> applyPrimalLightningAddress()
                     UiEvent.ApplyPrimalNostrAddress -> applyPrimalNostrAddress()
-                    UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
         }
@@ -66,10 +67,10 @@ class PremiumHomeViewModel @Inject constructor(
                 userRepository.setNostrAddress(userId = activeAccountStore.activeUserId(), nostrAddress = nip05)
             } catch (error: WssException) {
                 Timber.w(error)
-                setState { copy(error = PremiumHomeContract.ApplyError.ProfileMetadataNotFound) }
+                setState { copy(error = MembershipError.ProfileMetadataNotFound) }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
-                setState { copy(error = PremiumHomeContract.ApplyError.FailedToApplyNostrAddress) }
+                setState { copy(error = MembershipError.FailedToApplyNostrAddress) }
             }
         }
 
@@ -82,18 +83,18 @@ class PremiumHomeViewModel @Inject constructor(
                 userRepository.setLightningAddress(userId = activeAccountStore.activeUserId(), lightningAddress = lud16)
             } catch (error: WssException) {
                 Timber.w(error)
-                setState { copy(error = PremiumHomeContract.ApplyError.ProfileMetadataNotFound) }
+                setState { copy(error = MembershipError.ProfileMetadataNotFound) }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
-                setState { copy(error = PremiumHomeContract.ApplyError.FailedToApplyLightningAddress) }
+                setState { copy(error = MembershipError.FailedToApplyLightningAddress) }
             }
         }
 
-    private fun fetchActiveSubscription() {
-        viewModelScope.launch {
-            val purchases = billingClient.queryActiveSubscriptions()
-            purchase = purchases.firstOrNull()
-        }
+    private fun fetchActiveSubscription() = viewModelScope.launch { fetchActivePurchase() }
+
+    private suspend fun fetchActivePurchase() {
+        val purchases = billingClient.queryActiveSubscriptions()
+        purchase = purchases.firstOrNull()
     }
 
     private fun fetchMembershipStatus() =
@@ -122,19 +123,22 @@ class PremiumHomeViewModel @Inject constructor(
 
     private fun cancelSubscription() =
         viewModelScope.launch {
-            purchase?.let {
+            val userId = activeAccountStore.activeUserId()
+            fetchActivePurchase()
+            val purchase = this@PremiumHomeViewModel.purchase
+            if (purchase != null) {
                 try {
-                    premiumRepository.cancelSubscription(
-                        userId = activeAccountStore.activeUserId(),
-                        purchaseJson = it.playSubscriptionJson,
-                    )
+                    premiumRepository.cancelSubscription(userId = userId, purchaseJson = purchase.playSubscriptionJson)
                 } catch (error: WssException) {
-                    Timber.e(error)
+                    setState { copy(error = MembershipError.FailedToCancelSubscription(cause = error)) }
                 }
+                fetchMembershipStatus()
+            } else {
+                setState { copy(error = MembershipError.PlaySubscriptionPurchaseNotFound) }
             }
         }
 
     private fun String.constructPrimalNostrAddress() = "$this@primal.net"
 
-    private fun String.constructPrimalLightningAddress() = "$this.@primal.net"
+    private fun String.constructPrimalLightningAddress() = "$this@primal.net"
 }

@@ -44,6 +44,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.premium.ui.PremiumBadge
 import net.primal.android.premium.ui.PrimalPremiumTable
+import net.primal.android.premium.ui.toHumanReadableString
 import net.primal.android.premium.utils.isPremiumFree
 import net.primal.android.premium.utils.isPrimalLegend
 import net.primal.android.theme.AppTheme
@@ -82,19 +83,10 @@ private fun PremiumHomeScreen(
     SnackbarErrorHandler(
         error = state.error,
         snackbarHostState = snackbarHostState,
-        errorMessageResolver = {
-            when (it) {
-                is PremiumHomeContract.ApplyError.FailedToApplyNostrAddress ->
-                    stringResource(id = R.string.app_error_unable_to_set_nostr_address)
-
-                PremiumHomeContract.ApplyError.FailedToApplyLightningAddress ->
-                    stringResource(id = R.string.app_error_unable_to_set_lightning_address)
-
-                PremiumHomeContract.ApplyError.ProfileMetadataNotFound ->
-                    stringResource(id = R.string.app_generic_error)
-            }
+        errorMessageResolver = { it.toHumanReadableString() },
+        onErrorDismiss = {
+            eventPublisher(PremiumHomeContract.UiEvent.DismissError)
         },
-        onErrorDismiss = { eventPublisher(PremiumHomeContract.UiEvent.DismissError) },
     )
 
     Scaffold(
@@ -121,9 +113,7 @@ private fun PremiumHomeScreen(
 //            )
         },
         snackbarHost = {
-            SnackbarHost(
-                hostState = snackbarHostState,
-            )
+            SnackbarHost(hostState = snackbarHostState)
         },
     ) { paddingValues ->
         Column(

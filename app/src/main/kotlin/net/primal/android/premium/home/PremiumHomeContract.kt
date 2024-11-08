@@ -1,6 +1,7 @@
 package net.primal.android.premium.home
 
 import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.premium.domain.MembershipError
 import net.primal.android.premium.domain.PremiumMembership
 
 interface PremiumHomeContract {
@@ -11,21 +12,13 @@ interface PremiumHomeContract {
         val profileNostrAddress: String? = null,
         val profileLightningAddress: String? = null,
         val membership: PremiumMembership? = null,
-        val error: ApplyError? = null,
+        val error: MembershipError? = null,
     )
 
     sealed class UiEvent {
         data object CancelSubscription : UiEvent()
-
+        data object DismissError : UiEvent()
         data object ApplyPrimalNostrAddress : UiEvent()
         data object ApplyPrimalLightningAddress : UiEvent()
-
-        data object DismissError : UiEvent()
-    }
-
-    sealed class ApplyError {
-        data object FailedToApplyNostrAddress : ApplyError()
-        data object FailedToApplyLightningAddress : ApplyError()
-        data object ProfileMetadataNotFound : ApplyError()
     }
 }
