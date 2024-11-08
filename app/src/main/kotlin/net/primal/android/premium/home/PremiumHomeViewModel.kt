@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.premium.domain.MembershipError
 import net.primal.android.premium.home.PremiumHomeContract.UiEvent
 import net.primal.android.premium.home.PremiumHomeContract.UiState
 import net.primal.android.premium.repository.PremiumRepository
@@ -46,16 +47,17 @@ class PremiumHomeViewModel @Inject constructor(
             events.collect {
                 when (it) {
                     UiEvent.CancelSubscription -> cancelSubscription()
+                    UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
         }
     }
 
-    private fun fetchActiveSubscription() {
-        viewModelScope.launch {
-            val purchases = billingClient.queryActiveSubscriptions()
-            purchase = purchases.firstOrNull()
-        }
+    private fun fetchActiveSubscription() = viewModelScope.launch { fetchActivePurchase() }
+
+    private suspend fun fetchActivePurchase() {
+        val purchases = billingClient.queryActiveSubscriptions()
+        purchase = purchases.firstOrNull()
     }
 
     private fun fetchMembershipStatus() =
@@ -84,15 +86,18 @@ class PremiumHomeViewModel @Inject constructor(
 
     private fun cancelSubscription() =
         viewModelScope.launch {
-            purchase?.let {
+            val userId = activeAccountStore.activeUserId()
+            fetchActivePurchase()
+            val purchase = this@PremiumHomeViewModel.purchase
+            if (purchase != null) {
                 try {
-                    premiumRepository.cancelSubscription(
-                        userId = activeAccountStore.activeUserId(),
-                        purchaseJson = it.playSubscriptionJson,
-                    )
+                    premiumRepository.cancelSubscription(userId = userId, purchaseJson = purchase.playSubscriptionJson)
                 } catch (error: WssException) {
-                    Timber.e(error)
+                    setState { copy(error = MembershipError.FailedToCancelSubscription(cause = error)) }
                 }
+                fetchMembershipStatus()
+            } else {
+                setState { copy(error = MembershipError.PlaySubscriptionPurchaseNotFound) }
             }
         }
 }

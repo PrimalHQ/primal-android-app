@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,11 +38,13 @@ import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.premium.ui.PremiumBadge
 import net.primal.android.premium.ui.PrimalPremiumTable
+import net.primal.android.premium.ui.toHumanReadableString
 import net.primal.android.premium.utils.isPremiumFree
 import net.primal.android.premium.utils.isPrimalLegend
 import net.primal.android.theme.AppTheme
@@ -75,6 +79,16 @@ private fun PremiumHomeScreen(
     onSupportPrimal: () -> Unit,
     eventPublisher: (PremiumHomeContract.UiEvent) -> Unit,
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    SnackbarErrorHandler(
+        error = state.error,
+        snackbarHostState = snackbarHostState,
+        errorMessageResolver = { it.toHumanReadableString() },
+        onErrorDismiss = {
+            eventPublisher(PremiumHomeContract.UiEvent.DismissError)
+        },
+    )
+
     Scaffold(
         topBar = {
             PrimalTopAppBar(
@@ -97,6 +111,9 @@ private fun PremiumHomeScreen(
 //                text = stringResource(id = R.string.premium_manage_premium_button),
 //                onClick = onManagePremium,
 //            )
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
         },
     ) { paddingValues ->
         Column(
