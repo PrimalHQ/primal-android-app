@@ -16,6 +16,7 @@ import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.buying.PremiumBuyingContract.UiEvent
 import net.primal.android.premium.buying.PremiumBuyingContract.UiState
+import net.primal.android.premium.domain.MembershipError
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -80,6 +81,7 @@ class PremiumBuyingViewModel @Inject constructor(
                     UiEvent.ClearPromoCodeValidity -> setState { copy(promoCodeValidity = null) }
                     is UiEvent.RequestPurchase -> launchBillingFlow(it)
                     UiEvent.RestoreSubscription -> restorePurchase()
+                    UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
         }
@@ -110,7 +112,12 @@ class PremiumBuyingViewModel @Inject constructor(
                     } catch (error: WssException) {
                         Timber.e(error)
                         this@PremiumBuyingViewModel.purchase = purchase
-                        setState { copy(hasActiveSubscription = true) }
+                        setState {
+                            copy(
+                                hasActiveSubscription = true,
+                                error = MembershipError.FailedToProcessSubscriptionPurchase(cause = error),
+                            )
+                        }
                     }
                 }
             }

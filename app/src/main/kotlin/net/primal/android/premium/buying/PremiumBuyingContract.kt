@@ -2,6 +2,7 @@ package net.primal.android.premium.buying
 
 import android.app.Activity
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.premium.domain.MembershipError
 import net.primal.android.wallet.store.domain.SubscriptionProduct
 
 interface PremiumBuyingContract {
@@ -15,6 +16,8 @@ interface PremiumBuyingContract {
         val profile: ProfileDetailsUi? = null,
         val promoCodeValidity: Boolean? = null,
         val isCheckingPromoCodeValidity: Boolean = false,
+
+        val error: MembershipError? = null,
     )
 
     sealed class UiEvent {
@@ -25,6 +28,8 @@ interface PremiumBuyingContract {
         data object ClearPromoCodeValidity : UiEvent()
 
         data object RestoreSubscription : UiEvent()
+
+        data object DismissError : UiEvent()
 
         data class RequestPurchase(
             val activity: Activity,
