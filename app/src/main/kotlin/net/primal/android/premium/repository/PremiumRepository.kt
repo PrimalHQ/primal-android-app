@@ -4,6 +4,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.premium.api.PremiumApi
+import net.primal.android.premium.api.model.CancelMembershipRequest
 import net.primal.android.premium.api.model.MembershipStatusResponse
 import net.primal.android.premium.api.model.PurchaseMembershipRequest
 import net.primal.android.premium.domain.PremiumMembership
@@ -59,7 +60,10 @@ class PremiumRepository @Inject constructor(
 
     suspend fun cancelSubscription(userId: String, purchaseJson: String) {
         withContext(dispatchers.io()) {
-            premiumApi.cancelMembership(userId = userId, purchaseJson = purchaseJson)
+            premiumApi.cancelMembership(
+                userId = userId,
+                body = CancelMembershipRequest(playSubscription = purchaseJson),
+            )
             fetchMembershipStatus(userId = userId)
         }
     }

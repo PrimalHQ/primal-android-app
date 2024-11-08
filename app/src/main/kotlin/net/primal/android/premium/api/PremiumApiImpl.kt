@@ -12,6 +12,7 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
+import net.primal.android.premium.api.model.CancelMembershipRequest
 import net.primal.android.premium.api.model.MembershipProductsRequest
 import net.primal.android.premium.api.model.MembershipStatusResponse
 import net.primal.android.premium.api.model.NameAvailableRequest
@@ -103,7 +104,7 @@ class PremiumApiImpl @Inject constructor(
 //        ]
     }
 
-    override suspend fun cancelMembership(userId: String, purchaseJson: String) {
+    override suspend fun cancelMembership(userId: String, body: CancelMembershipRequest) {
         primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET_MEMBERSHIP_CANCEL,
@@ -111,7 +112,7 @@ class PremiumApiImpl @Inject constructor(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
                             userId = userId,
-                            content = purchaseJson,
+                            content = NostrJson.encodeToString(body),
                         ),
                     ),
                 ),
