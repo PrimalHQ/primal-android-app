@@ -85,6 +85,8 @@ import net.primal.android.premium.buying.PremiumBuyingViewModel
 import net.primal.android.premium.home.PremiumHomeScreen
 import net.primal.android.premium.home.PremiumHomeViewModel
 import net.primal.android.premium.info.PremiumMoreInfoScreen
+import net.primal.android.premium.manage.PremiumManageContract
+import net.primal.android.premium.manage.PremiumManageScreen
 import net.primal.android.profile.details.ProfileDetailsViewModel
 import net.primal.android.profile.details.ui.ProfileDetailsScreen
 import net.primal.android.profile.domain.ProfileFollowsType
@@ -234,6 +236,7 @@ private fun NavController.navigateToBookmarks() = navigate(route = "bookmarks")
 private fun NavController.navigateToPremiumBuying() = navigate(route = "premium/buying")
 private fun NavController.navigateToPremiumHome() = navigate(route = "premium/home")
 private fun NavController.navigateToPremiumMoreInfo() = navigate(route = "premium/info")
+private fun NavController.navigateToPremiumManage() = navigate(route = "premium/manage")
 
 fun noteCallbacksHandler(navController: NavController) =
     NoteCallbacks(
@@ -293,6 +296,7 @@ fun PrimalAppNavigation() {
                 navController.navigateToPremiumBuying()
             }
             DrawerScreenDestination.DemoBuyPremium -> navController.navigateToPremiumBuying()
+            DrawerScreenDestination.DemoManagePremium -> navController.navigateToPremiumManage()
             DrawerScreenDestination.Messages -> navController.navigateToMessages()
             is DrawerScreenDestination.Bookmarks -> navController.navigateToBookmarks()
             DrawerScreenDestination.Settings -> navController.navigateToSettings()
@@ -424,6 +428,11 @@ fun PrimalAppNavigation() {
 
         premiumMoreInfo(
             route = "premium/info",
+            navController = navController,
+        )
+
+        premiumManage(
+            route = "premium/manage",
             navController = navController,
         )
 
@@ -959,6 +968,35 @@ private fun NavGraphBuilder.premiumMoreInfo(route: String, navController: NavCon
 
         PremiumMoreInfoScreen(
             onClose = { navController.navigateUp() },
+        )
+    }
+
+private fun NavGraphBuilder.premiumManage(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+
+        PremiumManageScreen(
+            onFAQClick = { navController.navigateToPremiumMoreInfo() },
+            onClose = { navController.navigateUp() },
+            onDestination = {
+                when (it) {
+                    PremiumManageContract.ManageDestination.MediaManagement -> TODO()
+                    PremiumManageContract.ManageDestination.PremiumRelay -> TODO()
+                    PremiumManageContract.ManageDestination.ContactListBackup -> TODO()
+                    PremiumManageContract.ManageDestination.ContentBackup -> TODO()
+                    PremiumManageContract.ManageDestination.ManageSubscription -> TODO()
+                    PremiumManageContract.ManageDestination.ChangePrimalName -> TODO()
+                    PremiumManageContract.ManageDestination.ExtendSubscription -> TODO()
+                    PremiumManageContract.ManageDestination.LegendaryProfileCustomization -> TODO()
+                }
+            }
         )
     }
 
