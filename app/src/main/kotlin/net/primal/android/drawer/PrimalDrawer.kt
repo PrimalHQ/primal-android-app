@@ -305,6 +305,7 @@ private fun DrawerFooter(onThemeSwitch: () -> Unit) {
 sealed class DrawerScreenDestination {
     data object Profile : DrawerScreenDestination()
     data class Premium(val hasPremium: Boolean) : DrawerScreenDestination()
+    data object DemoManagePremium : DrawerScreenDestination()
     data object Messages : DrawerScreenDestination()
     data class Bookmarks(val userId: String) : DrawerScreenDestination()
     data object Settings : DrawerScreenDestination()
@@ -317,6 +318,7 @@ private fun DrawerScreenDestination.label(): String {
         DrawerScreenDestination.Profile -> stringResource(R.string.drawer_destination_profile)
         is DrawerScreenDestination.Premium -> stringResource(id = R.string.drawer_destination_premium)
         DrawerScreenDestination.Messages -> stringResource(R.string.drawer_destination_messages)
+        DrawerScreenDestination.DemoManagePremium -> "Premium Manage"
         is DrawerScreenDestination.Bookmarks -> stringResource(R.string.drawer_destination_bookmarks)
         DrawerScreenDestination.Settings -> stringResource(R.string.drawer_destination_settings)
         DrawerScreenDestination.SignOut -> stringResource(R.string.drawer_destination_sign_out)
