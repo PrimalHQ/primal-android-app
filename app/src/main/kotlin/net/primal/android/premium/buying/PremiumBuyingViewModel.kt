@@ -137,16 +137,18 @@ class PremiumBuyingViewModel @Inject constructor(
 
     private fun restorePurchase() =
         viewModelScope.launch {
+            val userId = activeAccountStore.activeUserId()
             val primalName = _state.value.primalName
             val existingPurchase = purchase
             if (primalName != null && existingPurchase != null) {
                 try {
                     premiumRepository.purchaseMembership(
-                        userId = activeAccountStore.activeUserId(),
+                        userId = userId,
                         primalName = primalName,
                         purchase = existingPurchase,
                     )
                     setState { copy(stage = PremiumBuyingContract.PremiumStage.Success) }
+                    premiumRepository.fetchMembershipStatus(userId = userId)
                 } catch (error: WssException) {
                     Timber.e(error)
                 }
