@@ -1,5 +1,6 @@
 package net.primal.android.premium.api
 
+import net.primal.android.premium.api.model.CancelMembershipRequest
 import net.primal.android.premium.api.model.MembershipStatusResponse
 import net.primal.android.premium.api.model.NameAvailableResponse
 import net.primal.android.premium.api.model.PurchaseMembershipRequest
@@ -14,5 +15,5 @@ interface PremiumApi {
 
     suspend fun getMembershipProducts()
 
-    suspend fun cancelMembership(userId: String, purchaseJson: String)
+    suspend fun cancelMembership(userId: String, body: CancelMembershipRequest)
 }
