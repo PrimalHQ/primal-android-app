@@ -20,10 +20,9 @@ import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.premium.manage.ui.ManageDestinationTable
 import net.primal.android.premium.manage.PremiumManageContract.ManageDestination
+import net.primal.android.premium.manage.ui.ManageDestinationTable
 import net.primal.android.theme.AppTheme
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,9 +75,7 @@ fun PremiumManageScreen(
 }
 
 @Composable
-fun FAQNoticeRow(
-    onFAQClick: () -> Unit,
-) {
+fun FAQNoticeRow(onFAQClick: () -> Unit) {
     Row {
         Text(
             text = stringResource(id = R.string.premium_manage_have_a_question) + " ",

@@ -1030,12 +1030,24 @@ private fun NavGraphBuilder.premiumManage(route: String, navController: NavContr
             onClose = { navController.navigateUp() },
             onDestination = {
                 when (it) {
-                    PremiumManageContract.ManageDestination.MediaManagement -> navController.navigateToPremiumMediaManagement()
-                    PremiumManageContract.ManageDestination.PremiumRelay -> navController.navigateToPremiumRelay()
-                    PremiumManageContract.ManageDestination.ContactListBackup -> navController.navigateToPremiumContactList()
-                    PremiumManageContract.ManageDestination.ContentBackup -> navController.navigateToPremiumContentBackup()
-                    PremiumManageContract.ManageDestination.ManageSubscription -> navController.navigateToPremiumOrderHistory()
-                    PremiumManageContract.ManageDestination.ChangePrimalName -> navController.navigateToPremiumChangePrimalName()
+                    PremiumManageContract.ManageDestination.MediaManagement ->
+                        navController.navigateToPremiumMediaManagement()
+
+                    PremiumManageContract.ManageDestination.PremiumRelay ->
+                        navController.navigateToPremiumRelay()
+
+                    PremiumManageContract.ManageDestination.ContactListBackup ->
+                        navController.navigateToPremiumContactList()
+
+                    PremiumManageContract.ManageDestination.ContentBackup ->
+                        navController.navigateToPremiumContentBackup()
+
+                    PremiumManageContract.ManageDestination.ManageSubscription ->
+                        navController.navigateToPremiumOrderHistory()
+
+                    PremiumManageContract.ManageDestination.ChangePrimalName ->
+                        navController.navigateToPremiumChangePrimalName()
+
                     PremiumManageContract.ManageDestination.ExtendSubscription -> TODO()
                     PremiumManageContract.ManageDestination.LegendaryProfileCustomization -> TODO()
                 }

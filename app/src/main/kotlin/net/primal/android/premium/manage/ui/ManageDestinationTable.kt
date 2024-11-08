@@ -24,7 +24,6 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.premium.manage.PremiumManageContract
 import net.primal.android.theme.AppTheme
 
-
 @Composable
 fun ManageDestinationTable(
     modifier: Modifier = Modifier,
@@ -91,12 +90,27 @@ private fun DestinationRow(
 @Composable
 private fun PremiumManageContract.ManageDestination.toDisplayString(): String =
     when (this) {
-        PremiumManageContract.ManageDestination.MediaManagement -> stringResource(id = R.string.premium_manage_media_management)
-        PremiumManageContract.ManageDestination.PremiumRelay -> stringResource(id = R.string.premium_manage_premium_relay)
-        PremiumManageContract.ManageDestination.ContactListBackup -> stringResource(id = R.string.premium_manage_contact_list_backup)
-        PremiumManageContract.ManageDestination.ContentBackup -> stringResource(id = R.string.premium_manage_content_backup)
-        PremiumManageContract.ManageDestination.ManageSubscription -> stringResource(id = R.string.premium_manage_manage_subscription)
-        PremiumManageContract.ManageDestination.ChangePrimalName -> stringResource(id = R.string.premium_manage_change_primal_name)
-        PremiumManageContract.ManageDestination.ExtendSubscription -> stringResource(id = R.string.premium_manage_extend_subscription)
-        PremiumManageContract.ManageDestination.LegendaryProfileCustomization -> stringResource(id = R.string.premium_manage_legendary_customization)
+        PremiumManageContract.ManageDestination.MediaManagement ->
+            stringResource(id = R.string.premium_manage_media_management)
+
+        PremiumManageContract.ManageDestination.PremiumRelay ->
+            stringResource(id = R.string.premium_manage_premium_relay)
+
+        PremiumManageContract.ManageDestination.ContactListBackup ->
+            stringResource(id = R.string.premium_manage_contact_list_backup)
+
+        PremiumManageContract.ManageDestination.ContentBackup ->
+            stringResource(id = R.string.premium_manage_content_backup)
+
+        PremiumManageContract.ManageDestination.ManageSubscription ->
+            stringResource(id = R.string.premium_manage_manage_subscription)
+
+        PremiumManageContract.ManageDestination.ChangePrimalName ->
+            stringResource(id = R.string.premium_manage_change_primal_name)
+
+        PremiumManageContract.ManageDestination.ExtendSubscription ->
+            stringResource(id = R.string.premium_manage_extend_subscription)
+
+        PremiumManageContract.ManageDestination.LegendaryProfileCustomization ->
+            stringResource(id = R.string.premium_manage_legendary_customization)
     }
