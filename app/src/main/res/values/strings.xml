@@ -167,6 +167,52 @@
     <string name="premium_manage_extend_subscription">Extend Your Subscription</string>
     <string name="premium_manage_legendary_customization">Legendary Profile Customization</string>
 
+    <string name="premium_media_management_title">Media Management</string>
+    <string name="premium_media_management_images">Images</string>
+    <string name="premium_media_management_videos">Videos</string>
+    <string name="premium_media_management_other">Other</string>
+    <string name="premium_media_management_calculating">Calculating…</string>
+    <string name="premium_media_management_table_file">File</string>
+    <string name="premium_media_management_table_details">Details</string>
+    <string name="premium_media_management_table_copy">Copy</string>
+    <string name="premium_media_management_table_delete">Delete</string>
+    <string name="premium_media_management_table_type_image">Image</string>
+    <string name="premium_media_management_table_type_video">Video</string>
+
+    <string name="premium_relay_title">Premium Relay</string>
+    <string name="premium_relay_top_app_bar_title">Premium Relay</string>
+    <string name="premium_relay_running">Running</string>
+    <string name="premium_relay_description">The Primal Premium relay is a high-performance Nostr relay that only accepts content from Primal Premium users. Posting to this relay improves your visibility on the Nostr network because it guarantees high signal and lack of spam to any Nostr user that reads from it. </string>
+    <string name="premium_relay_connect_button">Connect to Premium Relay</string>
+    <string name="premium_relay_connected_button">Connected to Premium Relay</string>
+
+    <string name="premium_recover_contact_list_title">Recover Contact List</string>
+    <string name="premium_recover_contact_list_table_date">Date</string>
+    <string name="premium_recover_contact_list_table_follows">Follows</string>
+    <string name="premium_recover_contact_list_table_recover_list">Recover List</string>
+    <string name="premium_recover_contact_list_table_recover_button">Recover</string>
+
+    <string name="premium_order_history_title">Manage Subscription</string>
+    <string name="premium_order_history_table_date">Date</string>
+    <string name="premium_order_history_table_purchase">Purchase</string>
+    <string name="premium_order_history_table_amount">Amount</string>
+    <plurals name="premium_purchase_months">
+        <item quantity="one">Premium %1$s month</item>
+        <item quantity="other">Premium %1$s months</item>
+    </plurals>
+
+    <string name="premium_change_primal_name_title">Change your Primal name</string>
+    <string name="premium_name_changed_title">Primal name Changed</string>
+    <string name="premium_name_changed_button">Change Primal Name Now</string>
+
+    <string name="premium_content_backup_title">Content Backup</string>
+    <string name="premium_content_backup_table_count">Count</string>
+    <string name="premium_content_backup_table_type">Type</string>
+    <string name="premium_content_backup_table_type_notes">Type</string>
+    <string name="premium_content_backup_table_type_reactions">Reactions</string>
+    <string name="premium_content_backup_table_type_articles">Articles</string>
+    <string name="premium_content_backup_table_rebroadcast">Rebroadcast</string>
+
     <string name="premium_error_play_subscription_purchase_not_found">Unable to cancel the subscription. Please check if you are logged in with your Google Account and try again.</string>
     <string name="premium_error_failed_to_cancel_subscription">Unable to cancel the subscription. Please check your connection and try again.</string>
     <string name="premium_error_failed_to_process_subscription_purchase">We were unable to process your subscription purchase. Please reach out to Primal Support.</string>

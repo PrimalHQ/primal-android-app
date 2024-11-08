@@ -87,6 +87,12 @@ import net.primal.android.premium.home.PremiumHomeViewModel
 import net.primal.android.premium.info.PremiumMoreInfoScreen
 import net.primal.android.premium.manage.PremiumManageContract
 import net.primal.android.premium.manage.PremiumManageScreen
+import net.primal.android.premium.manage.contact.PremiumContactListScreen
+import net.primal.android.premium.manage.content.PremiumContentBackupScreen
+import net.primal.android.premium.manage.media.PremiumMediaManagementScreen
+import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameScreen
+import net.primal.android.premium.manage.order.PremiumOrderHistoryScreen
+import net.primal.android.premium.manage.relay.PremiumRelayScreen
 import net.primal.android.profile.details.ProfileDetailsViewModel
 import net.primal.android.profile.details.ui.ProfileDetailsScreen
 import net.primal.android.profile.domain.ProfileFollowsType
@@ -237,6 +243,12 @@ private fun NavController.navigateToPremiumBuying() = navigate(route = "premium/
 private fun NavController.navigateToPremiumHome() = navigate(route = "premium/home")
 private fun NavController.navigateToPremiumMoreInfo() = navigate(route = "premium/info")
 private fun NavController.navigateToPremiumManage() = navigate(route = "premium/manage")
+private fun NavController.navigateToPremiumMediaManagement() = navigate(route = "premium/manage/media")
+private fun NavController.navigateToPremiumContactList() = navigate(route = "premium/manage/contacts")
+private fun NavController.navigateToPremiumContentBackup() = navigate(route = "premium/manage/content")
+private fun NavController.navigateToPremiumChangePrimalName() = navigate(route = "premium/manage/changePrimalName")
+private fun NavController.navigateToPremiumOrderHistory() = navigate(route = "premium/manage/order")
+private fun NavController.navigateToPremiumRelay() = navigate(route = "premium/manage/relay")
 
 fun noteCallbacksHandler(navController: NavController) =
     NoteCallbacks(
@@ -295,6 +307,7 @@ fun PrimalAppNavigation() {
             } else {
                 navController.navigateToPremiumBuying()
             }
+
             DrawerScreenDestination.DemoBuyPremium -> navController.navigateToPremiumBuying()
             DrawerScreenDestination.DemoManagePremium -> navController.navigateToPremiumManage()
             DrawerScreenDestination.Messages -> navController.navigateToMessages()
@@ -433,6 +446,36 @@ fun PrimalAppNavigation() {
 
         premiumManage(
             route = "premium/manage",
+            navController = navController,
+        )
+
+        premiumContactList(
+            route = "premium/manage/contacts",
+            navController = navController,
+        )
+
+        premiumContentBackup(
+            route = "premium/manage/content",
+            navController = navController,
+        )
+
+        premiumMediaManagement(
+            route = "premium/manage/media",
+            navController = navController,
+        )
+
+        premiumChangePrimalName(
+            route = "premium/manage/changePrimalName",
+            navController = navController,
+        )
+
+        premiumOrderHistory(
+            route = "premium/manage/order",
+            navController = navController,
+        )
+
+        premiumRelay(
+            route = "premium/manage/relay",
             navController = navController,
         )
 
@@ -987,17 +1030,101 @@ private fun NavGraphBuilder.premiumManage(route: String, navController: NavContr
             onClose = { navController.navigateUp() },
             onDestination = {
                 when (it) {
-                    PremiumManageContract.ManageDestination.MediaManagement -> TODO()
-                    PremiumManageContract.ManageDestination.PremiumRelay -> TODO()
-                    PremiumManageContract.ManageDestination.ContactListBackup -> TODO()
-                    PremiumManageContract.ManageDestination.ContentBackup -> TODO()
-                    PremiumManageContract.ManageDestination.ManageSubscription -> TODO()
-                    PremiumManageContract.ManageDestination.ChangePrimalName -> TODO()
+                    PremiumManageContract.ManageDestination.MediaManagement -> navController.navigateToPremiumMediaManagement()
+                    PremiumManageContract.ManageDestination.PremiumRelay -> navController.navigateToPremiumRelay()
+                    PremiumManageContract.ManageDestination.ContactListBackup -> navController.navigateToPremiumContactList()
+                    PremiumManageContract.ManageDestination.ContentBackup -> navController.navigateToPremiumContentBackup()
+                    PremiumManageContract.ManageDestination.ManageSubscription -> navController.navigateToPremiumOrderHistory()
+                    PremiumManageContract.ManageDestination.ChangePrimalName -> navController.navigateToPremiumChangePrimalName()
                     PremiumManageContract.ManageDestination.ExtendSubscription -> TODO()
                     PremiumManageContract.ManageDestination.LegendaryProfileCustomization -> TODO()
                 }
-            }
+            },
         )
+    }
+
+private fun NavGraphBuilder.premiumContactList(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+
+        PremiumContactListScreen()
+    }
+
+private fun NavGraphBuilder.premiumContentBackup(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+
+        PremiumContentBackupScreen()
+    }
+
+private fun NavGraphBuilder.premiumMediaManagement(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+
+        PremiumMediaManagementScreen()
+    }
+
+private fun NavGraphBuilder.premiumChangePrimalName(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+
+        PremiumChangePrimalNameScreen()
+    }
+
+private fun NavGraphBuilder.premiumOrderHistory(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+
+        PremiumOrderHistoryScreen()
+    }
+
+private fun NavGraphBuilder.premiumRelay(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+
+        PremiumRelayScreen()
     }
 
 private fun NavGraphBuilder.messages(route: String, navController: NavController) =
