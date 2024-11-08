@@ -292,7 +292,6 @@ fun PrimalAppNavigation() {
             } else {
                 navController.navigateToPremiumBuying()
             }
-            DrawerScreenDestination.DemoBuyPremium -> navController.navigateToPremiumBuying()
             DrawerScreenDestination.Messages -> navController.navigateToMessages()
             is DrawerScreenDestination.Bookmarks -> navController.navigateToBookmarks()
             DrawerScreenDestination.Settings -> navController.navigateToSettings()
