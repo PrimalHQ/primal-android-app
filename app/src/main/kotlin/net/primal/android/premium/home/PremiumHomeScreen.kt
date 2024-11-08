@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,6 +38,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -75,6 +78,25 @@ private fun PremiumHomeScreen(
     onSupportPrimal: () -> Unit,
     eventPublisher: (PremiumHomeContract.UiEvent) -> Unit,
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    SnackbarErrorHandler(
+        error = state.error,
+        snackbarHostState = snackbarHostState,
+        errorMessageResolver = {
+            when (it) {
+                is PremiumHomeContract.ApplyError.FailedToApplyNostrAddress ->
+                    stringResource(id = R.string.app_error_unable_to_set_nostr_address)
+
+                PremiumHomeContract.ApplyError.FailedToApplyLightningAddress ->
+                    stringResource(id = R.string.app_error_unable_to_set_lightning_address)
+
+                PremiumHomeContract.ApplyError.ProfileMetadataNotFound ->
+                    stringResource(id = R.string.app_generic_error)
+            }
+        },
+        onErrorDismiss = { eventPublisher(PremiumHomeContract.UiEvent.DismissError) },
+    )
+
     Scaffold(
         topBar = {
             PrimalTopAppBar(
@@ -97,6 +119,11 @@ private fun PremiumHomeScreen(
 //                text = stringResource(id = R.string.premium_manage_premium_button),
 //                onClick = onManagePremium,
 //            )
+        },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+            )
         },
     ) { paddingValues ->
         Column(
@@ -144,6 +171,10 @@ private fun PremiumHomeScreen(
                 }
                 PrimalPremiumTable(
                     premiumMembership = it,
+                    onApplyPrimalNostrAddress = { eventPublisher(PremiumHomeContract.UiEvent.ApplyPrimalNostrAddress) },
+                    onApplyPrimalLightningAddress = {
+                        eventPublisher(PremiumHomeContract.UiEvent.ApplyPrimalLightningAddress)
+                    },
                 )
                 if (!it.cohort1.isPrimalLegend()) {
                     if (it.recurring) {

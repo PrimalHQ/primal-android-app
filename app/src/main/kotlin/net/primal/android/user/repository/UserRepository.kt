@@ -119,6 +119,18 @@ class UserRepository @Inject constructor(
     }
 
     @Throws(NostrPublishException::class, WssException::class)
+    suspend fun setNostrAddress(userId: String, nostrAddress: String) {
+        val userProfileResponse = usersApi.getUserProfile(userId = userId)
+        val metadata = NostrJson.decodeFromStringOrNull<ContentMetadata>(userProfileResponse.metadata?.content)
+            ?: throw WssException("Profile Content Metadata not found.")
+
+        setUserProfileAndUpdateLocally(
+            userId = userId,
+            contentMetadata = metadata.copy(nip05 = nostrAddress),
+        )
+    }
+
+    @Throws(NostrPublishException::class, WssException::class)
     suspend fun setLightningAddress(userId: String, lightningAddress: String) {
         val userProfileResponse = usersApi.getUserProfile(userId = userId)
         val metadata = NostrJson.decodeFromStringOrNull<ContentMetadata>(userProfileResponse.metadata?.content)

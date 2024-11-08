@@ -26,7 +26,12 @@ import net.primal.android.premium.utils.isPrimalLegend
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun PrimalPremiumTable(modifier: Modifier = Modifier, premiumMembership: PremiumMembership) {
+fun PrimalPremiumTable(
+    modifier: Modifier = Modifier,
+    premiumMembership: PremiumMembership,
+    onApplyPrimalNostrAddress: () -> Unit,
+    onApplyPrimalLightningAddress: () -> Unit,
+) {
     Column(
         modifier = modifier
             .clip(AppTheme.shapes.large)
@@ -35,11 +40,13 @@ fun PrimalPremiumTable(modifier: Modifier = Modifier, premiumMembership: Premium
         PrimalPremiumTableRow(
             key = stringResource(id = R.string.premium_primal_name_nostr_address),
             value = premiumMembership.nostrAddress,
+            onApplyClick = onApplyPrimalNostrAddress,
         )
         PrimalDivider()
         PrimalPremiumTableRow(
             key = stringResource(id = R.string.premium_primal_name_lightning_address),
             value = premiumMembership.lightningAddress,
+            onApplyClick = onApplyPrimalLightningAddress,
         )
         PrimalDivider()
         PrimalPremiumTableRow(
@@ -74,6 +81,7 @@ private fun PrimalPremiumTableRow(
     key: String,
     value: String,
     alwaysHideApply: Boolean = false,
+    onApplyClick: (() -> Unit)? = null,
 ) {
     val shouldShowApply = !value.endsWith("@primal.net") && !alwaysHideApply
     Row(
@@ -123,7 +131,7 @@ private fun PrimalPremiumTableRow(
                         style = AppTheme.typography.bodyMedium,
                     )
                     Text(
-                        modifier = Modifier.clickable { },
+                        modifier = Modifier.clickable { onApplyClick?.invoke() },
                         text = stringResource(id = R.string.premium_table_apply),
                         color = AppTheme.colorScheme.secondary,
                         style = AppTheme.typography.bodyMedium,
