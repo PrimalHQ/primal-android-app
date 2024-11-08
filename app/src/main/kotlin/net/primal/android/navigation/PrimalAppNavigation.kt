@@ -93,6 +93,9 @@ import net.primal.android.premium.manage.media.PremiumMediaManagementScreen
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameScreen
 import net.primal.android.premium.manage.order.PremiumOrderHistoryScreen
 import net.primal.android.premium.manage.relay.PremiumRelayScreen
+import net.primal.android.premium.support.SupportPrimalContract
+import net.primal.android.premium.support.SupportPrimalScreen
+import net.primal.android.premium.support.SupportPrimalViewModel
 import net.primal.android.profile.details.ProfileDetailsViewModel
 import net.primal.android.profile.details.ui.ProfileDetailsScreen
 import net.primal.android.profile.domain.ProfileFollowsType
@@ -241,6 +244,7 @@ private fun NavController.navigateToBookmarks() = navigate(route = "bookmarks")
 
 private fun NavController.navigateToPremiumBuying() = navigate(route = "premium/buying")
 private fun NavController.navigateToPremiumHome() = navigate(route = "premium/home")
+private fun NavController.navigateToPremiumSupportPrimal() = navigate(route = "premium/supportPrimal")
 private fun NavController.navigateToPremiumMoreInfo() = navigate(route = "premium/info")
 private fun NavController.navigateToPremiumManage() = navigate(route = "premium/manage")
 private fun NavController.navigateToPremiumMediaManagement() = navigate(route = "premium/manage/media")
@@ -435,6 +439,11 @@ fun PrimalAppNavigation() {
 
         premiumHome(
             route = "premium/home",
+            navController = navController,
+        )
+
+        premiumSupportPrimal(
+            route = "premium/supportPrimal",
             navController = navController,
         )
 
@@ -993,7 +1002,28 @@ private fun NavGraphBuilder.premiumHome(route: String, navController: NavControl
             onClose = { navController.navigateUp() },
             onRenewSubscription = { navController.navigateToPremiumBuying() },
             onManagePremium = {},
-            onSupportPrimal = {},
+            onSupportPrimal = { navController.navigateToPremiumSupportPrimal() },
+        )
+    }
+
+private fun NavGraphBuilder.premiumSupportPrimal(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        val viewModel = hiltViewModel<SupportPrimalViewModel>()
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+        SupportPrimalScreen(
+            viewModel = viewModel,
+            callbacks = SupportPrimalContract.ScreenCallbacks(
+                onClose = { navController.navigateUp() },
+                onBuySubscription = { },
+                onBecomeLegend = { },
+            ),
         )
     }
 
