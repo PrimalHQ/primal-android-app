@@ -28,6 +28,8 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun PrimalPremiumTable(
     modifier: Modifier = Modifier,
+    profileNostrAddress: String?,
+    profileLightningAddress: String?,
     premiumMembership: PremiumMembership,
     onApplyPrimalNostrAddress: () -> Unit,
     onApplyPrimalLightningAddress: () -> Unit,
@@ -39,14 +41,16 @@ fun PrimalPremiumTable(
     ) {
         PrimalPremiumTableRow(
             key = stringResource(id = R.string.premium_primal_name_nostr_address),
-            value = premiumMembership.nostrAddress,
+            value = profileNostrAddress ?: stringResource(id = R.string.premium_primal_name_not_set_value),
             onApplyClick = onApplyPrimalNostrAddress,
+            primalPremiumValue = premiumMembership.nostrAddress,
         )
         PrimalDivider()
         PrimalPremiumTableRow(
             key = stringResource(id = R.string.premium_primal_name_lightning_address),
-            value = premiumMembership.lightningAddress,
+            value = profileLightningAddress ?: stringResource(id = R.string.premium_primal_name_not_set_value),
             onApplyClick = onApplyPrimalLightningAddress,
+            primalPremiumValue = premiumMembership.lightningAddress,
         )
         PrimalDivider()
         PrimalPremiumTableRow(
@@ -89,6 +93,7 @@ private fun PrimalPremiumTableRow(
     value: String,
     alwaysHideApply: Boolean = false,
     onApplyClick: (() -> Unit)? = null,
+    primalPremiumValue: String? = null,
 ) {
     val shouldShowApply = !value.endsWith("@primal.net") && !alwaysHideApply
     Row(
@@ -132,11 +137,13 @@ private fun PrimalPremiumTableRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        text = value.toPrimalDomain(),
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                        style = AppTheme.typography.bodyMedium,
-                    )
+                    primalPremiumValue?.let {
+                        Text(
+                            text = primalPremiumValue,
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                            style = AppTheme.typography.bodyMedium,
+                        )
+                    }
                     Text(
                         modifier = Modifier.clickable { onApplyClick?.invoke() },
                         text = stringResource(id = R.string.premium_table_apply),
@@ -149,5 +156,4 @@ private fun PrimalPremiumTableRow(
     }
 }
 
-private fun String.toPrimalDomain() = "${this.split("@")[0]}@primal.net"
 private fun String.stripUrlProtocol() = this.dropWhile { it != ':' }.drop(3)

@@ -160,6 +160,8 @@ private fun PremiumHomeScreen(
                     )
                 }
                 PrimalPremiumTable(
+                    profileNostrAddress = state.profileNostrAddress,
+                    profileLightningAddress = state.profileLightningAddress,
                     premiumMembership = it,
                     onApplyPrimalNostrAddress = { eventPublisher(PremiumHomeContract.UiEvent.ApplyPrimalNostrAddress) },
                     onApplyPrimalLightningAddress = {

@@ -61,7 +61,7 @@ class PremiumHomeViewModel @Inject constructor(
     private fun applyPrimalNostrAddress() =
         viewModelScope.launch {
             val premiumMembership = state.value.membership ?: return@launch
-            val nip05 = premiumMembership.premiumName.constructPrimalNostrAddress()
+            val nip05 = premiumMembership.nostrAddress
 
             try {
                 userRepository.setNostrAddress(userId = activeAccountStore.activeUserId(), nostrAddress = nip05)
@@ -77,7 +77,7 @@ class PremiumHomeViewModel @Inject constructor(
     private fun applyPrimalLightningAddress() =
         viewModelScope.launch {
             val premiumMembership = state.value.membership ?: return@launch
-            val lud16 = premiumMembership.premiumName.constructPrimalLightningAddress()
+            val lud16 = premiumMembership.lightningAddress
 
             try {
                 userRepository.setLightningAddress(userId = activeAccountStore.activeUserId(), lightningAddress = lud16)
@@ -137,8 +137,4 @@ class PremiumHomeViewModel @Inject constructor(
                 setState { copy(error = MembershipError.PlaySubscriptionPurchaseNotFound) }
             }
         }
-
-    private fun String.constructPrimalNostrAddress() = "$this@primal.net"
-
-    private fun String.constructPrimalLightningAddress() = "$this@primal.net"
 }
