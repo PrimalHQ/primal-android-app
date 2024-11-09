@@ -22,11 +22,12 @@ interface PremiumChangePrimalNameContract {
 
     sealed class SideEffect {
         data object PrimalNameChanged : SideEffect()
+        data object PrimalNameTaken : SideEffect()
     }
 
     sealed class NameChangeError {
-        // TODO: consider handling more specific errors here, e.g. PrimalNameTaken (someone snatched it)
         data object GenericError : NameChangeError()
+        data object PrimalNameTaken : NameChangeError()
     }
 
     enum class ChangePrimalNameStage {

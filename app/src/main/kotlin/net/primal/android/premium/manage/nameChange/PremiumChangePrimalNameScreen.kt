@@ -42,6 +42,9 @@ fun PremiumChangePrimalNameScreen(viewModel: PremiumChangePrimalNameViewModel, o
         viewModel.effects.collect {
             when (it) {
                 PremiumChangePrimalNameContract.SideEffect.PrimalNameChanged -> onClose()
+                PremiumChangePrimalNameContract.SideEffect.PrimalNameTaken -> viewModel.setEvent(
+                    PremiumChangePrimalNameContract.UiEvent.SetStage(ChangePrimalNameStage.PickNew),
+                )
             }
         }
     }
@@ -69,6 +72,9 @@ private fun PremiumChangePrimalNameScreen(
             when (it) {
                 PremiumChangePrimalNameContract.NameChangeError.GenericError ->
                     stringResource(id = R.string.app_generic_error)
+
+                PremiumChangePrimalNameContract.NameChangeError.PrimalNameTaken ->
+                    stringResource(id = R.string.premium_name_change_name_taken_error)
             }
         },
         onErrorDismiss = { eventPublisher(PremiumChangePrimalNameContract.UiEvent.DismissError) },
@@ -102,6 +108,7 @@ private fun PremiumChangePrimalNameScreen(
                         eventPublisher(PremiumChangePrimalNameContract.UiEvent.SetPrimalName(it))
                         eventPublisher(PremiumChangePrimalNameContract.UiEvent.SetStage(ChangePrimalNameStage.Confirm))
                     },
+                    snackbarHostState = snackbarHostState,
                 )
             }
 

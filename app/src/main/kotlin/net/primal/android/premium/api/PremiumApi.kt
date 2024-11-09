@@ -8,6 +8,7 @@ import net.primal.android.premium.api.model.PurchaseMembershipRequest
 interface PremiumApi {
 
     suspend fun isPrimalNameAvailable(name: String): NameAvailableResponse
+    suspend fun changePrimalName(userId: String, name: String): NameAvailableResponse
 
     suspend fun getPremiumMembershipStatus(userId: String): MembershipStatusResponse?
 

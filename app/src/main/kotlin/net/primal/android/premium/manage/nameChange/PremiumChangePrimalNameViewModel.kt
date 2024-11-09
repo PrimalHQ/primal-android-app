@@ -13,14 +13,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameContract.SideEffect
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameContract.UiEvent
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameContract.UiState
+import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import timber.log.Timber
 
 @HiltViewModel
 class PremiumChangePrimalNameViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
+    private val premiumRepository: PremiumRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -55,18 +59,25 @@ class PremiumChangePrimalNameViewModel @Inject constructor(
         viewModelScope.launch {
             val primalName = state.value.primalName ?: throw IllegalStateException("primal name cannot be null")
             setState { copy(changingName = true) }
-            delay(1.seconds)
-            // TODO: actually call api here and change primal name
-            /* on Error
-            setState {
-                copy(
-                    changingName = false,
-                    error = PremiumChangePrimalNameContract.NameChangeError.GenericError,
+
+            try {
+                val result = premiumRepository.changePrimalName(
+                    userId = activeAccountStore.activeUserId(),
+                    name = primalName,
                 )
+
+                if (!result) {
+                    setEffect(SideEffect.PrimalNameTaken)
+                    setState { copy(error = PremiumChangePrimalNameContract.NameChangeError.PrimalNameTaken) }
+                } else {
+                    setEffect(SideEffect.PrimalNameChanged)
+                }
+            } catch (error: WssException) {
+                Timber.w(error)
+                setState { copy(error = PremiumChangePrimalNameContract.NameChangeError.GenericError) }
+            } finally {
+                setState { copy(changingName = false) }
             }
-             */
-            setState { copy(changingName = false) }
-            setEffect(SideEffect.PrimalNameChanged)
         }
 
     private fun observeActiveAccount() =
