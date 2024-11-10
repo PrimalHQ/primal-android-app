@@ -95,7 +95,7 @@ private fun PrimalPremiumTableRow(
     onApplyClick: (() -> Unit)? = null,
     primalPremiumValue: String? = null,
 ) {
-    val shouldShowApply = !value.endsWith("@primal.net") && !alwaysHideApply
+    val shouldShowApply = value != primalPremiumValue && !alwaysHideApply
     Row(
         modifier = modifier
             .padding(horizontal = 16.dp, vertical = 18.dp),
