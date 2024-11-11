@@ -22,6 +22,13 @@ class PremiumRepository @Inject constructor(
             response.available
         }
 
+    suspend fun changePrimalName(userId: String, name: String): Boolean =
+        withContext(dispatchers.io()) {
+            val response = premiumApi.changePrimalName(userId = userId, name = name)
+
+            response.available
+        }
+
     suspend fun fetchMembershipStatus(userId: String) {
         withContext(dispatchers.io()) {
             premiumApi.getPremiumMembershipStatus(userId = userId)?.let { response ->
