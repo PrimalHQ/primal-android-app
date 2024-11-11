@@ -1,5 +1,8 @@
 package net.primal.android.premium.support
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +22,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -48,6 +52,7 @@ private fun SupportPrimalScreen(
     state: SupportPrimalContract.UiState,
     callbacks: SupportPrimalContract.ScreenCallbacks,
 ) {
+    val context = LocalContext.current
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -88,33 +93,37 @@ private fun SupportPrimalScreen(
                 title = stringResource(R.string.premium_support_primal_review_call_title),
                 description = stringResource(R.string.premium_support_primal_review_call_description),
                 buttonText = stringResource(R.string.premium_support_primal_review_call_button_text),
-                onClick = {},
+                onClick = { openGooglePlayAppDetails(context = context) },
             )
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            SupportCard(
-                modifier = Modifier.fillMaxSize(),
-                painter = painterResource(R.drawable.support_primal_buy_subscription),
-                title = stringResource(R.string.premium_support_primal_buy_subscription_title),
-                description = stringResource(R.string.premium_support_primal_buy_subscription_description),
-                buttonText = stringResource(R.string.premium_support_primal_buy_subscription_button_text),
-                onClick = {},
-            )
+            if (!state.hasMembership) {
+                SupportCard(
+                    modifier = Modifier.fillMaxSize(),
+                    painter = painterResource(R.drawable.support_primal_buy_subscription),
+                    title = stringResource(R.string.premium_support_primal_buy_subscription_title),
+                    description = stringResource(R.string.premium_support_primal_buy_subscription_description),
+                    buttonText = stringResource(R.string.premium_support_primal_buy_subscription_button_text),
+                    onClick = {},
+                )
 
-            Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(20.dp))
+            }
 
-            SupportCard(
-                modifier = Modifier.fillMaxSize(),
-                painter = painterResource(R.drawable.support_primal_legend),
-                painterVerticalPadding = 0.dp,
-                title = stringResource(R.string.premium_support_primal_become_a_legend_title),
-                description = stringResource(R.string.premium_support_primal_become_a_legend_description),
-                buttonText = stringResource(R.string.premium_support_primal_become_a_legend_button_text),
-                onClick = {},
-            )
+            if (!state.isPrimalLegend) {
+                SupportCard(
+                    modifier = Modifier.fillMaxSize(),
+                    painter = painterResource(R.drawable.support_primal_legend),
+                    painterVerticalPadding = 0.dp,
+                    title = stringResource(R.string.premium_support_primal_become_a_legend_title),
+                    description = stringResource(R.string.premium_support_primal_become_a_legend_description),
+                    buttonText = stringResource(R.string.premium_support_primal_become_a_legend_button_text),
+                    onClick = {},
+                )
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+            }
         }
     }
 }
@@ -177,5 +186,24 @@ private fun SupportCard(
                 fontSize = 16.sp,
             )
         }
+    }
+}
+
+private fun openGooglePlayAppDetails(context: Context) {
+    val packageName = context.packageName
+    try {
+        val intent = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("market://details?id=$packageName&reviewId=0"),
+        )
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+    } catch (error: Exception) {
+        val intent = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("https://play.google.com/store/apps/details?id=$packageName"),
+        )
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
     }
 }
