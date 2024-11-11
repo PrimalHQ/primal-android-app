@@ -16,5 +16,14 @@ fun MembershipError.toHumanReadableString(): String {
 
         MembershipError.PlaySubscriptionPurchaseNotFound ->
             stringResource(R.string.premium_error_play_subscription_purchase_not_found)
+
+        is MembershipError.FailedToApplyNostrAddress ->
+            stringResource(id = R.string.app_error_unable_to_set_nostr_address)
+
+        MembershipError.FailedToApplyLightningAddress ->
+            stringResource(id = R.string.app_error_unable_to_set_lightning_address)
+
+        MembershipError.ProfileMetadataNotFound ->
+            stringResource(id = R.string.app_generic_error)
     }
 }

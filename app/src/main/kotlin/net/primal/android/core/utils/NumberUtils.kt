@@ -3,6 +3,7 @@ package net.primal.android.core.utils
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.*
+import kotlin.math.pow
 
 fun Int.shortened(): String = toLong().shortened()
 
@@ -33,6 +34,9 @@ fun Long.shortened(): String {
 
     return "1T+"
 }
+
+fun Long.toMegaBytes(): Float = (this / 1024f.pow(2))
+fun Long.toGigaBytes(): Float = (this / 1024f.pow(3))
 
 fun String.toFormattedNumberString(): String {
     val symbols: DecimalFormatSymbols = DecimalFormatSymbols.getInstance()

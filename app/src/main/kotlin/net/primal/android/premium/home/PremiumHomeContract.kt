@@ -18,5 +18,7 @@ interface PremiumHomeContract {
     sealed class UiEvent {
         data object CancelSubscription : UiEvent()
         data object DismissError : UiEvent()
+        data object ApplyPrimalNostrAddress : UiEvent()
+        data object ApplyPrimalLightningAddress : UiEvent()
     }
 }

@@ -22,6 +22,8 @@
     <string name="app_error_invalid_naddr">Unable to load content. The address is invalid.</string>
     <string name="app_error_unable_to_follow_profile">Unable to follow profile. Please try again.</string>
     <string name="app_error_unable_to_unfollow_profile">Unable to unfollow profile. Please try again.</string>
+    <string name="app_error_unable_to_set_nostr_address">Unable to set nostr address. Please try again.</string>
+    <string name="app_error_unable_to_set_lightning_address">Unable to set lightning address. Please try again.</string>
 
     <string name="welcome_sign_in_button_title">Sign In</string>
     <string name="welcome_create_account_button_title">Create Account</string>
@@ -112,6 +114,7 @@
     <string name="premium_primal_name_nostr_address">Nostr address</string>
     <string name="premium_primal_name_lightning_address">Lightning address</string>
     <string name="premium_primal_name_vip_profile">VIP profile</string>
+    <string name="premium_primal_name_not_set_value">[not set]</string>
 
     <string name="premium_purchase_title">Congrats!</string>
     <string name="premium_purchase_primal_name_available">Your Primal Name is available!</string>
@@ -180,6 +183,9 @@
     <string name="premium_media_management_table_delete">Delete</string>
     <string name="premium_media_management_table_type_image">Image</string>
     <string name="premium_media_management_table_type_video">Video</string>
+    <string name="premium_media_management_used_storage">%1$.2f GB of %2$.0f GB used</string>
+    <string name="premium_media_management_free_storage">%1$.2f GB free</string>
+    <string name="premium_media_management_media_size">%1$.1f MB</string>
 
     <string name="premium_relay_title">Premium Relay</string>
     <string name="premium_relay_top_app_bar_title">Premium Relay</string>

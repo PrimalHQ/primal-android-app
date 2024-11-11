@@ -7,4 +7,8 @@ sealed class MembershipError {
     data class FailedToCancelSubscription(val cause: Throwable) : MembershipError()
 
     data class FailedToProcessSubscriptionPurchase(val cause: Throwable) : MembershipError()
+
+    data object FailedToApplyNostrAddress : MembershipError()
+    data object FailedToApplyLightningAddress : MembershipError()
+    data object ProfileMetadataNotFound : MembershipError()
 }
