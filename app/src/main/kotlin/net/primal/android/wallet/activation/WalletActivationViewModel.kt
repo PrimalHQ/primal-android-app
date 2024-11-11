@@ -167,16 +167,14 @@ class WalletActivationViewModel @Inject constructor(
                     userRepository.updateWalletPreference(userId, WalletPreference.PrimalWallet)
                 }
                 activeUser.primalWallet?.lightningAddress?.let {
-                    withContext(coroutineDispatcher.io()) {
-                        try {
-                            userRepository.setLightningAddress(userId = userId, lightningAddress = it)
-                        } catch (error: NostrPublishException) {
-                            Timber.w(error)
-                        } catch (error: WssException) {
-                            Timber.w(error)
-                        } catch (error: MissingRelaysException) {
-                            Timber.w(error)
-                        }
+                    try {
+                        userRepository.setLightningAddress(userId = userId, lightningAddress = it)
+                    } catch (error: NostrPublishException) {
+                        Timber.w(error)
+                    } catch (error: WssException) {
+                        Timber.w(error)
+                    } catch (error: MissingRelaysException) {
+                        Timber.w(error)
                     }
                 }
 

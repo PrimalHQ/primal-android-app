@@ -26,7 +26,14 @@ import net.primal.android.premium.utils.isPrimalLegend
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun PrimalPremiumTable(modifier: Modifier = Modifier, premiumMembership: PremiumMembership) {
+fun PrimalPremiumTable(
+    modifier: Modifier = Modifier,
+    profileNostrAddress: String?,
+    profileLightningAddress: String?,
+    premiumMembership: PremiumMembership,
+    onApplyPrimalNostrAddress: () -> Unit,
+    onApplyPrimalLightningAddress: () -> Unit,
+) {
     Column(
         modifier = modifier
             .clip(AppTheme.shapes.large)
@@ -34,12 +41,16 @@ fun PrimalPremiumTable(modifier: Modifier = Modifier, premiumMembership: Premium
     ) {
         PrimalPremiumTableRow(
             key = stringResource(id = R.string.premium_primal_name_nostr_address),
-            value = premiumMembership.nostrAddress,
+            value = profileNostrAddress ?: stringResource(id = R.string.premium_primal_name_not_set_value),
+            onApplyClick = onApplyPrimalNostrAddress,
+            primalPremiumValue = premiumMembership.nostrAddress,
         )
         PrimalDivider()
         PrimalPremiumTableRow(
             key = stringResource(id = R.string.premium_primal_name_lightning_address),
-            value = premiumMembership.lightningAddress,
+            value = profileLightningAddress ?: stringResource(id = R.string.premium_primal_name_not_set_value),
+            onApplyClick = onApplyPrimalLightningAddress,
+            primalPremiumValue = premiumMembership.lightningAddress,
         )
         PrimalDivider()
         PrimalPremiumTableRow(
@@ -81,8 +92,10 @@ private fun PrimalPremiumTableRow(
     key: String,
     value: String,
     alwaysHideApply: Boolean = false,
+    onApplyClick: (() -> Unit)? = null,
+    primalPremiumValue: String? = null,
 ) {
-    val shouldShowApply = !value.endsWith("@primal.net") && !alwaysHideApply
+    val shouldShowApply = value != primalPremiumValue && !alwaysHideApply
     Row(
         modifier = modifier
             .padding(horizontal = 16.dp, vertical = 18.dp),
@@ -124,13 +137,15 @@ private fun PrimalPremiumTableRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    primalPremiumValue?.let {
+                        Text(
+                            text = primalPremiumValue,
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                            style = AppTheme.typography.bodyMedium,
+                        )
+                    }
                     Text(
-                        text = value.toPrimalDomain(),
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                        style = AppTheme.typography.bodyMedium,
-                    )
-                    Text(
-                        modifier = Modifier.clickable { },
+                        modifier = Modifier.clickable { onApplyClick?.invoke() },
                         text = stringResource(id = R.string.premium_table_apply),
                         color = AppTheme.colorScheme.secondary,
                         style = AppTheme.typography.bodyMedium,
@@ -141,5 +156,4 @@ private fun PrimalPremiumTableRow(
     }
 }
 
-private fun String.toPrimalDomain() = "${this.split("@")[0]}@primal.net"
 private fun String.stripUrlProtocol() = this.dropWhile { it != ':' }.drop(3)
