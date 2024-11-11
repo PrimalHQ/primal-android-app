@@ -121,11 +121,15 @@ private fun PremiumBuyingScreen(
                         state = state,
                         eventPublisher = eventPublisher,
                         onBack = {
-                            eventPublisher(
-                                PremiumBuyingContract.UiEvent.MoveToPremiumStage(
-                                    PremiumBuyingContract.PremiumStage.FindPrimalName,
-                                ),
-                            )
+                            if (state.isExtendingPremium) {
+                                onClose()
+                            } else {
+                                eventPublisher(
+                                    PremiumBuyingContract.UiEvent.MoveToPremiumStage(
+                                        PremiumBuyingContract.PremiumStage.FindPrimalName,
+                                    ),
+                                )
+                            }
                         },
                         onLearnMoreClick = onMoreInfoClick,
                     )

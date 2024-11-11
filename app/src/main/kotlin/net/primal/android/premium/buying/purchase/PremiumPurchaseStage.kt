@@ -92,7 +92,11 @@ fun PremiumPurchaseStage(
     Scaffold(
         topBar = {
             PrimalTopAppBar(
-                title = stringResource(id = R.string.premium_purchase_title),
+                title = if (state.isExtendingPremium) {
+                    stringResource(id = R.string.premium_extend_subscription_title)
+                } else {
+                    stringResource(id = R.string.premium_purchase_title)
+                },
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onBack,
                 showDivider = false,
@@ -120,14 +124,26 @@ fun PremiumPurchaseStage(
                     internetIdentifierBadgeSize = 24.dp,
                     fontSize = 20.sp,
                 )
-                Text(
-                    modifier = Modifier.padding(horizontal = 12.dp),
-                    text = stringResource(id = R.string.premium_purchase_primal_name_available),
-                    style = AppTheme.typography.bodyLarge,
-                    color = AppTheme.extraColorScheme.successBright,
-                )
+                if (!state.isExtendingPremium) {
+                    Text(
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                        text = stringResource(id = R.string.premium_purchase_primal_name_available),
+                        style = AppTheme.typography.bodyLarge,
+                        color = AppTheme.extraColorScheme.successBright,
+                    )
+                }
                 PremiumPrimalNameTable(
                     primalName = state.primalName,
+                )
+            }
+
+            if (state.isExtendingPremium) {
+                Text(
+                    modifier = Modifier.padding(horizontal = 32.dp),
+                    text = stringResource(id = R.string.premium_extend_subscription_notice),
+                    style = AppTheme.typography.bodyMedium,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    textAlign = TextAlign.Center,
                 )
             }
 

@@ -8,6 +8,7 @@ import net.primal.android.wallet.store.domain.SubscriptionProduct
 interface PremiumBuyingContract {
     data class UiState(
         val loading: Boolean = true,
+        val isExtendingPremium: Boolean = false,
         val subscriptions: List<SubscriptionProduct> = emptyList(),
         val stage: PremiumStage = PremiumStage.Home,
         val primalName: String? = null,
