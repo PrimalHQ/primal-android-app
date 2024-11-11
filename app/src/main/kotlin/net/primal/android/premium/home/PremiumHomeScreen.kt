@@ -47,7 +47,7 @@ import net.primal.android.theme.AppTheme
 fun PremiumHomeScreen(
     viewModel: PremiumHomeViewModel,
     onClose: () -> Unit,
-    onRenewSubscription: () -> Unit,
+    onRenewSubscription: (primalName: String) -> Unit,
     onManagePremium: () -> Unit,
     onSupportPrimal: () -> Unit,
 ) {
@@ -68,7 +68,7 @@ fun PremiumHomeScreen(
 private fun PremiumHomeScreen(
     state: PremiumHomeContract.UiState,
     onClose: () -> Unit,
-    onRenewSubscription: () -> Unit,
+    onRenewSubscription: (primalName: String) -> Unit,
     onManagePremium: () -> Unit,
     onSupportPrimal: () -> Unit,
     eventPublisher: (PremiumHomeContract.UiEvent) -> Unit,
@@ -96,7 +96,9 @@ private fun PremiumHomeScreen(
             if (state.membership?.isExpired() == true) {
                 BottomBarButton(
                     text = stringResource(id = R.string.premium_renew_subscription),
-                    onClick = onRenewSubscription,
+                    onClick = {
+                        onRenewSubscription(state.membership.premiumName)
+                    },
                 )
             } else {
                 BottomBarButton(
