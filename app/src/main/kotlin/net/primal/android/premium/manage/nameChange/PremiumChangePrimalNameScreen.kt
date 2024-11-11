@@ -42,9 +42,6 @@ fun PremiumChangePrimalNameScreen(viewModel: PremiumChangePrimalNameViewModel, o
         viewModel.effects.collect {
             when (it) {
                 PremiumChangePrimalNameContract.SideEffect.PrimalNameChanged -> onClose()
-                PremiumChangePrimalNameContract.SideEffect.PrimalNameTaken -> viewModel.setEvent(
-                    PremiumChangePrimalNameContract.UiEvent.SetStage(ChangePrimalNameStage.PickNew),
-                )
             }
         }
     }

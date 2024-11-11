@@ -4,9 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,6 +12,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameContract.ChangePrimalNameStage
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameContract.SideEffect
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameContract.UiEvent
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameContract.UiState
@@ -67,8 +66,12 @@ class PremiumChangePrimalNameViewModel @Inject constructor(
                 )
 
                 if (!result) {
-                    setEffect(SideEffect.PrimalNameTaken)
-                    setState { copy(error = PremiumChangePrimalNameContract.NameChangeError.PrimalNameTaken) }
+                    setState {
+                        copy(
+                            error = PremiumChangePrimalNameContract.NameChangeError.PrimalNameTaken,
+                            stage = ChangePrimalNameStage.PickNew
+                        )
+                    }
                 } else {
                     setEffect(SideEffect.PrimalNameChanged)
                 }

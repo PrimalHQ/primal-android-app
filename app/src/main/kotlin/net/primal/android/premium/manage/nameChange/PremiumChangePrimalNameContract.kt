@@ -22,7 +22,6 @@ interface PremiumChangePrimalNameContract {
 
     sealed class SideEffect {
         data object PrimalNameChanged : SideEffect()
-        data object PrimalNameTaken : SideEffect()
     }
 
     sealed class NameChangeError {
