@@ -42,7 +42,7 @@ fun PremiumMediaManagementScreen(state: PremiumMediaManagementContract.UiState, 
     ) { paddingValues ->
         Column(
             modifier = Modifier
-                .padding(24.dp)
+                .padding(horizontal = 16.dp, vertical = 24.dp)
                 .padding(paddingValues),
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {

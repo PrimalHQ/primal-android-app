@@ -2,10 +2,9 @@ package net.primal.android.premium.manage.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -83,22 +82,29 @@ private fun MediaListItem(
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        SubcomposeAsyncImage(
-            modifier = Modifier
-                .padding(end = 12.dp)
-                .aspectRatio(16 / 9.toFloat())
-                .weight(3f),
-            model = ImageRequest.Builder(context).data(item.thumbnailUrl).build(),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
+        Box(
+            modifier = Modifier.weight(2.70f),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            SubcomposeAsyncImage(
+                modifier = Modifier.size(width = 64.dp, height = 48.dp),
+                model = ImageRequest.Builder(context).data(item.thumbnailUrl).build(),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+            )
+        }
+        MediaItemDetailsColumn(
+            modifier = Modifier.Companion.weight(5f),
+            item = item,
         )
-        MediaItemDetailsColumn(item)
         ActionIcon(
+            modifier = Modifier.weight(2f),
             imageVector = PrimalIcons.Copy,
             onClick = onCopyClick,
             tint = AppTheme.colorScheme.onPrimary,
         )
         ActionIcon(
+            modifier = Modifier.weight(2f),
             imageVector = PrimalIcons.Delete,
             tint = DELETE_COLOR,
             onClick = onDeleteClick,
@@ -107,9 +113,9 @@ private fun MediaListItem(
 }
 
 @Composable
-private fun RowScope.MediaItemDetailsColumn(item: MediaUiItem) {
+private fun MediaItemDetailsColumn(modifier: Modifier, item: MediaUiItem) {
     Column(
-        modifier = Modifier.Companion.weight(5f),
+        modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         val mediaType = when (item.type) {
@@ -132,7 +138,7 @@ private fun RowScope.MediaItemDetailsColumn(item: MediaUiItem) {
 }
 
 @Composable
-private fun RowScope.ActionIcon(
+private fun ActionIcon(
     modifier: Modifier = Modifier,
     imageVector: ImageVector,
     onClick: () -> Unit,
@@ -142,9 +148,7 @@ private fun RowScope.ActionIcon(
         onClick = onClick,
     ) {
         Icon(
-            modifier = modifier
-                .size(20.dp)
-                .weight(2f),
+            modifier = modifier.size(20.dp),
             imageVector = imageVector,
             contentDescription = null,
             tint = tint,
