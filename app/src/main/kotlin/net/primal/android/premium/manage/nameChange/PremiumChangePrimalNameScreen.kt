@@ -130,7 +130,7 @@ private fun ChangePremiumNameConfirmationStage(
     Scaffold(
         topBar = {
             PrimalTopAppBar(
-                title = stringResource(id = R.string.premium_name_changed_title),
+                title = stringResource(id = R.string.premium_change_primal_name_title),
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = {
                     eventPublisher(
