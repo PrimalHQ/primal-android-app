@@ -75,6 +75,7 @@ enum class NostrEventKind(val value: Int) {
     PrimalUserName(value = 10_000_158),
     PrimalDvmFeedMetadata(value = 10_000_159),
     PrimalTrendingTopics(value = 10_000_160),
+    PrimalClientConfig(value = 10_000_162),
     PrimalWalletOperation(value = 10_000_300),
     PrimalWalletBalance(value = 10_000_301),
     PrimalWalletDepositInvoice(value = 10_000_302),

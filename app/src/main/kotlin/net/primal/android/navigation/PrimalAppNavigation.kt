@@ -94,6 +94,7 @@ import net.primal.android.premium.manage.media.PremiumMediaManagementViewModel
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameScreen
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameViewModel
 import net.primal.android.premium.manage.order.PremiumOrderHistoryScreen
+import net.primal.android.premium.manage.order.PremiumOrderHistoryViewModel
 import net.primal.android.premium.manage.relay.PremiumRelayScreen
 import net.primal.android.premium.manage.relay.PremiumRelayViewModel
 import net.primal.android.premium.support.SupportPrimalContract
@@ -1004,7 +1005,7 @@ private fun NavGraphBuilder.premiumHome(route: String, navController: NavControl
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
             onRenewSubscription = { navController.navigateToPremiumBuying() },
-            onManagePremium = {},
+            onManagePremium = { navController.navigateToPremiumManage() },
             onSupportPrimal = { navController.navigateToPremiumSupportPrimal() },
         )
     }
@@ -1161,10 +1162,14 @@ private fun NavGraphBuilder.premiumOrderHistory(route: String, navController: Na
         popEnterTransition = { primalScaleIn },
         popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
+        val viewModel = hiltViewModel<PremiumOrderHistoryViewModel>()
         ApplyEdgeToEdge()
         LockToOrientationPortrait()
 
-        PremiumOrderHistoryScreen()
+        PremiumOrderHistoryScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+        )
     }
 
 private fun NavGraphBuilder.premiumRelay(route: String, navController: NavController) =
