@@ -210,8 +210,9 @@
     </plurals>
 
     <string name="premium_change_primal_name_title">Change your Primal name</string>
-    <string name="premium_name_changed_title">Primal name Changed</string>
+    <string name="premium_name_changed_title">Primal name changed</string>
     <string name="premium_name_changed_button">Change Primal Name Now</string>
+    <string name="premium_name_change_name_taken_error">Oops! Looks like someone just snatched that name. Please try another one!</string>
 
     <string name="premium_content_backup_title">Content Backup</string>
     <string name="premium_content_backup_table_count">Count</string>

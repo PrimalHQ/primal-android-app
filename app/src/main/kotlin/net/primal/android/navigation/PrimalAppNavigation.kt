@@ -92,6 +92,7 @@ import net.primal.android.premium.manage.content.PremiumContentBackupScreen
 import net.primal.android.premium.manage.media.PremiumMediaManagementScreen
 import net.primal.android.premium.manage.media.PremiumMediaManagementViewModel
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameScreen
+import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameViewModel
 import net.primal.android.premium.manage.order.PremiumOrderHistoryScreen
 import net.primal.android.premium.manage.relay.PremiumRelayScreen
 import net.primal.android.premium.manage.relay.PremiumRelayViewModel
@@ -1079,8 +1080,8 @@ private fun NavGraphBuilder.premiumManage(route: String, navController: NavContr
                     PremiumManageContract.ManageDestination.ChangePrimalName ->
                         navController.navigateToPremiumChangePrimalName()
 
-                    PremiumManageContract.ManageDestination.ExtendSubscription -> TODO()
-                    PremiumManageContract.ManageDestination.LegendaryProfileCustomization -> TODO()
+                    PremiumManageContract.ManageDestination.ExtendSubscription -> Unit
+                    PremiumManageContract.ManageDestination.LegendaryProfileCustomization -> Unit
                 }
             },
         )
@@ -1141,10 +1142,15 @@ private fun NavGraphBuilder.premiumChangePrimalName(route: String, navController
         popEnterTransition = { primalScaleIn },
         popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
+        val viewModel = hiltViewModel<PremiumChangePrimalNameViewModel>()
+
         ApplyEdgeToEdge()
         LockToOrientationPortrait()
 
-        PremiumChangePrimalNameScreen()
+        PremiumChangePrimalNameScreen(
+            onClose = { navController.navigateUp() },
+            viewModel = viewModel,
+        )
     }
 
 private fun NavGraphBuilder.premiumOrderHistory(route: String, navController: NavController) =

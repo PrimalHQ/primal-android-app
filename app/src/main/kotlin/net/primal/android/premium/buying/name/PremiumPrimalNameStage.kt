@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,6 +43,7 @@ fun PremiumPrimalNameStage(
     onBack: () -> Unit,
     onPrimalNameAvailable: (String) -> Unit,
     initialName: String? = null,
+    snackbarHostState: SnackbarHostState? = null,
 ) {
     val viewModel = hiltViewModel<PremiumPrimalNameViewModel>()
     val uiState = viewModel.state.collectAsState()
@@ -52,6 +55,7 @@ fun PremiumPrimalNameStage(
         eventPublisher = viewModel::setEvent,
         initialName = initialName,
         state = uiState.value,
+        snackbarHostState = snackbarHostState,
     )
 }
 
@@ -64,6 +68,7 @@ private fun PremiumPrimalNameStage(
     onPrimalNameAvailable: (String) -> Unit,
     eventPublisher: (PremiumPrimalNameContract.UiEvent) -> Unit,
     initialName: String? = null,
+    snackbarHostState: SnackbarHostState? = null,
 ) {
     var primalName by remember { mutableStateOf(initialName ?: "") }
 
@@ -100,6 +105,11 @@ private fun PremiumPrimalNameStage(
                     color = Color.White,
                     fontWeight = FontWeight.SemiBold,
                 )
+            }
+        },
+        snackbarHost = {
+            snackbarHostState?.let {
+                SnackbarHost(hostState = it)
             }
         },
     ) { paddingValues ->
