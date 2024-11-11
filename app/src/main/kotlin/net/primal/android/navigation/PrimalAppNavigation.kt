@@ -90,6 +90,7 @@ import net.primal.android.premium.manage.PremiumManageScreen
 import net.primal.android.premium.manage.contact.PremiumContactListScreen
 import net.primal.android.premium.manage.content.PremiumContentBackupScreen
 import net.primal.android.premium.manage.media.PremiumMediaManagementScreen
+import net.primal.android.premium.manage.media.PremiumMediaManagementViewModel
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameScreen
 import net.primal.android.premium.manage.order.PremiumOrderHistoryScreen
 import net.primal.android.premium.manage.relay.PremiumRelayScreen
@@ -1120,10 +1121,15 @@ private fun NavGraphBuilder.premiumMediaManagement(route: String, navController:
         popEnterTransition = { primalScaleIn },
         popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
+        val viewModel = hiltViewModel<PremiumMediaManagementViewModel>()
+
         ApplyEdgeToEdge()
         LockToOrientationPortrait()
 
-        PremiumMediaManagementScreen()
+        PremiumMediaManagementScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+        )
     }
 
 private fun NavGraphBuilder.premiumChangePrimalName(route: String, navController: NavController) =
