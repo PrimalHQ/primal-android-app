@@ -143,18 +143,16 @@
     <string name="premium_manage_premium_button">Manage Premium</string>
     <string name="premium_renew_subscription">Renew Subscription</string>
     <string name="premium_extend_subscription">Extend Subscription</string>
-    <!--    <string name="premium_enjoying_primal">Are you enjoying Primal?</string>-->
-    <!--    <string name="premium_enjoying_primal_if_so">If so, see how you can</string>-->
-    <!--    <string name="premium_support_us">support us</string>-->
-    <string name="premium_enjoying_primal">Your subscription will renew automatically.</string>
-    <string name="premium_enjoying_primal_if_so">If you wish to stop it, you can</string>
-    <string name="premium_support_us">cancel now</string>
+    <string name="premium_enjoying_primal">Are you enjoying Primal?</string>
+    <string name="premium_enjoying_primal_if_so">If so, see how you can</string>
+    <string name="premium_support_us">support us</string>
     <string name="premium_table_expires">Expires</string>
     <string name="premium_table_never">Never</string>
     <string name="premium_table_renews_on">Renews on</string>
     <string name="premium_table_expires_on">Expires on</string>
     <string name="premium_table_expired_on">Expired on</string>
     <string name="premium_table_apply">apply</string>
+    <string name="premium_expired_subscription_notice">Your Primal Premium subscription has expired.\nYou can renew it below:</string>
 
     <string name="premium_support_primal_title">Support Primal</string>
 

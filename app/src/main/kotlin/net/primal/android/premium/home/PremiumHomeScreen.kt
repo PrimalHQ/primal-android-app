@@ -11,19 +11,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -46,7 +41,6 @@ import net.primal.android.premium.ui.PremiumBadge
 import net.primal.android.premium.ui.PrimalPremiumTable
 import net.primal.android.premium.ui.toHumanReadableString
 import net.primal.android.premium.utils.isPremiumFree
-import net.primal.android.premium.utils.isPrimalLegend
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -105,12 +99,11 @@ private fun PremiumHomeScreen(
                     onClick = onRenewSubscription,
                 )
             } else {
-                Spacer(modifier = Modifier.height(80.dp))
+                BottomBarButton(
+                    text = stringResource(id = R.string.premium_manage_premium_button),
+                    onClick = onManagePremium,
+                )
             }
-//            BottomBarButton(
-//                text = stringResource(id = R.string.premium_manage_premium_button),
-//                onClick = onManagePremium,
-//            )
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
@@ -144,7 +137,6 @@ private fun PremiumHomeScreen(
 
             state.membership?.let {
                 PremiumBadge(
-                    modifier = Modifier.clickable { onSupportPrimal() },
                     firstCohort = it.cohort1,
                     secondCohort = it.cohort2,
                     membershipExpired = it.isExpired(),
@@ -169,60 +161,28 @@ private fun PremiumHomeScreen(
                         eventPublisher(PremiumHomeContract.UiEvent.ApplyPrimalLightningAddress)
                     },
                 )
-                if (!it.cohort1.isPrimalLegend()) {
-                    if (it.recurring) {
-                        var showCancelSubscription by remember { mutableStateOf(false) }
-                        if (showCancelSubscription) {
-                            CancelSubscriptionAlertDialog(
-                                onDismissRequest = { showCancelSubscription = false },
-                                onConfirm = {
-                                    showCancelSubscription = false
-                                    eventPublisher(PremiumHomeContract.UiEvent.CancelSubscription)
-                                },
-                            )
-                        }
-                        SupportUsNotice(
-                            onSupportPrimal = { showCancelSubscription = true },
+
+                when {
+                    it.isExpired() -> {
+                        Text(
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                            text = stringResource(id = R.string.premium_expired_subscription_notice),
+                            style = AppTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
                         )
                     }
+
+                    state.showSupportUsNotice -> {
+                        SupportUsNotice(
+                            onSupportPrimal = onSupportPrimal,
+                        )
+                    }
+
+                    else -> Unit
                 }
             }
         }
     }
-}
-
-@Composable
-private fun CancelSubscriptionAlertDialog(onDismissRequest: () -> Unit, onConfirm: () -> Unit) {
-    AlertDialog(
-        containerColor = AppTheme.colorScheme.surfaceVariant,
-        onDismissRequest = onDismissRequest,
-        title = {
-            Text(
-                text = "Cancel Premium?",
-            )
-        },
-        text = {
-            Text(
-                text = "Your subscription will remain active until the end of your current billing period, " +
-                    "so you can continue enjoying premium features until then. " +
-                    "No further charges will be made after that date.",
-            )
-        },
-        dismissButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text(
-                    text = "Keep Premium",
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(
-                    text = "Cancel Subscription",
-                )
-            }
-        },
-    )
 }
 
 @Composable
@@ -260,6 +220,7 @@ private fun SupportUsNotice(onSupportPrimal: () -> Unit) {
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             text = stringResource(id = R.string.premium_enjoying_primal),
             style = AppTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
         )
         Row {
             Text(

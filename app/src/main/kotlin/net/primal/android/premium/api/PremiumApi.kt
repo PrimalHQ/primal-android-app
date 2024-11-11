@@ -18,4 +18,6 @@ interface PremiumApi {
     suspend fun getMembershipProducts()
 
     suspend fun cancelMembership(userId: String, body: CancelMembershipRequest)
+
+    suspend fun shouldShowSupportUs(): Boolean
 }

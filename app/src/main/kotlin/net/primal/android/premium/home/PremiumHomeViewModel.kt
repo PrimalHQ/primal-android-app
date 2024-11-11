@@ -15,21 +15,17 @@ import net.primal.android.premium.domain.MembershipError
 import net.primal.android.premium.home.PremiumHomeContract.UiEvent
 import net.primal.android.premium.home.PremiumHomeContract.UiState
 import net.primal.android.premium.repository.PremiumRepository
+import net.primal.android.premium.utils.isPrimalLegend
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
-import net.primal.android.wallet.store.PrimalBillingClient
-import net.primal.android.wallet.store.domain.SubscriptionPurchase
 import timber.log.Timber
 
 @HiltViewModel
 class PremiumHomeViewModel @Inject constructor(
-    private val billingClient: PrimalBillingClient,
     private val premiumRepository: PremiumRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val userRepository: UserRepository,
 ) : ViewModel() {
-
-    private var purchase: SubscriptionPurchase? = null
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -41,15 +37,14 @@ class PremiumHomeViewModel @Inject constructor(
     init {
         observeEvents()
         fetchMembershipStatus()
-        fetchActiveSubscription()
         observeActiveAccount()
+        fetchShouldShowSupport()
     }
 
     private fun observeEvents() {
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    UiEvent.CancelSubscription -> cancelSubscription()
                     UiEvent.DismissError -> setState { copy(error = null) }
                     UiEvent.ApplyPrimalLightningAddress -> applyPrimalLightningAddress()
                     UiEvent.ApplyPrimalNostrAddress -> applyPrimalNostrAddress()
@@ -57,6 +52,21 @@ class PremiumHomeViewModel @Inject constructor(
             }
         }
     }
+
+    private fun observeActiveAccount() =
+        viewModelScope.launch {
+            activeAccountStore.activeUserAccount.collect {
+                setState {
+                    copy(
+                        displayName = it.authorDisplayName,
+                        avatarCdnImage = it.avatarCdnImage,
+                        profileNostrAddress = it.internetIdentifier,
+                        profileLightningAddress = it.lightningAddress,
+                        membership = it.premiumMembership,
+                    )
+                }
+            }
+        }
 
     private fun applyPrimalNostrAddress() =
         viewModelScope.launch {
@@ -90,13 +100,6 @@ class PremiumHomeViewModel @Inject constructor(
             }
         }
 
-    private fun fetchActiveSubscription() = viewModelScope.launch { fetchActivePurchase() }
-
-    private suspend fun fetchActivePurchase() {
-        val purchases = billingClient.queryActiveSubscriptions()
-        purchase = purchases.firstOrNull()
-    }
-
     private fun fetchMembershipStatus() =
         viewModelScope.launch {
             try {
@@ -106,35 +109,18 @@ class PremiumHomeViewModel @Inject constructor(
             }
         }
 
-    private fun observeActiveAccount() =
+    private fun fetchShouldShowSupport() =
         viewModelScope.launch {
-            activeAccountStore.activeUserAccount.collect {
+            try {
+                val clientConfigShowSupport = premiumRepository.shouldShowSupportUsNotice()
                 setState {
                     copy(
-                        displayName = it.authorDisplayName,
-                        avatarCdnImage = it.avatarCdnImage,
-                        profileNostrAddress = it.internetIdentifier,
-                        profileLightningAddress = it.lightningAddress,
-                        membership = it.premiumMembership,
+                        showSupportUsNotice = clientConfigShowSupport &&
+                            membership?.cohort1?.isPrimalLegend() == false,
                     )
                 }
-            }
-        }
-
-    private fun cancelSubscription() =
-        viewModelScope.launch {
-            val userId = activeAccountStore.activeUserId()
-            fetchActivePurchase()
-            val purchase = this@PremiumHomeViewModel.purchase
-            if (purchase != null) {
-                try {
-                    premiumRepository.cancelSubscription(userId = userId, purchaseJson = purchase.playSubscriptionJson)
-                } catch (error: WssException) {
-                    setState { copy(error = MembershipError.FailedToCancelSubscription(cause = error)) }
-                }
-                fetchMembershipStatus()
-            } else {
-                setState { copy(error = MembershipError.PlaySubscriptionPurchaseNotFound) }
+            } catch (error: WssException) {
+                Timber.e(error)
             }
         }
 }
