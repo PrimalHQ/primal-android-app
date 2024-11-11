@@ -93,6 +93,7 @@ import net.primal.android.premium.manage.media.PremiumMediaManagementScreen
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameScreen
 import net.primal.android.premium.manage.order.PremiumOrderHistoryScreen
 import net.primal.android.premium.manage.relay.PremiumRelayScreen
+import net.primal.android.premium.manage.relay.PremiumRelayViewModel
 import net.primal.android.premium.support.SupportPrimalContract
 import net.primal.android.premium.support.SupportPrimalScreen
 import net.primal.android.premium.support.SupportPrimalViewModel
@@ -1162,10 +1163,15 @@ private fun NavGraphBuilder.premiumRelay(route: String, navController: NavContro
         popEnterTransition = { primalScaleIn },
         popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
+        val viewModel = hiltViewModel<PremiumRelayViewModel>()
+
         ApplyEdgeToEdge()
         LockToOrientationPortrait()
 
-        PremiumRelayScreen()
+        PremiumRelayScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+        )
     }
 
 private fun NavGraphBuilder.messages(route: String, navController: NavController) =
