@@ -73,6 +73,7 @@ class PremiumChangePrimalNameViewModel @Inject constructor(
                         )
                     }
                 } else {
+                    premiumRepository.fetchMembershipStatus(userId = activeAccountStore.activeUserId())
                     setEffect(SideEffect.PrimalNameChanged)
                 }
             } catch (error: WssException) {
