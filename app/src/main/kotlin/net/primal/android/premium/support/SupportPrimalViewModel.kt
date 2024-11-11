@@ -31,6 +31,7 @@ class SupportPrimalViewModel @Inject constructor(
             activeAccountStore.activeUserAccount.collect {
                 setState {
                     copy(
+                        primalName = it.premiumMembership?.premiumName,
                         isPrimalLegend = it.premiumMembership?.cohort2.isPrimalLegend(),
                         hasMembership = it.premiumMembership != null && !it.premiumMembership.cohort2.isPremiumFree(),
                     )

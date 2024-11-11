@@ -98,14 +98,14 @@ private fun SupportPrimalScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            if (!state.hasMembership || true) {
+            if (!state.hasMembership) {
                 SupportCard(
                     modifier = Modifier.fillMaxSize(),
                     painter = painterResource(R.drawable.support_primal_buy_subscription),
                     title = stringResource(R.string.premium_support_primal_buy_subscription_title),
                     description = stringResource(R.string.premium_support_primal_buy_subscription_description),
                     buttonText = stringResource(R.string.premium_support_primal_buy_subscription_button_text),
-                    onClick = callbacks.onBuySubscription,
+                    onClick = { if (state.primalName != null) callbacks.onExtendSubscription(state.primalName) },
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))

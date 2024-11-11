@@ -1,5 +1,6 @@
 package net.primal.android.premium.buying
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,7 +14,9 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.utils.isGoogleBuild
+import net.primal.android.navigation.extendExistingPremiumName
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.premium.buying.PremiumBuyingContract.PremiumStage
 import net.primal.android.premium.buying.PremiumBuyingContract.UiEvent
 import net.primal.android.premium.buying.PremiumBuyingContract.UiState
 import net.primal.android.premium.domain.MembershipError
@@ -27,6 +30,7 @@ import timber.log.Timber
 
 @HiltViewModel
 class PremiumBuyingViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val primalBillingClient: PrimalBillingClient,
     private val premiumRepository: PremiumRepository,
     private val profileRepository: ProfileRepository,
@@ -35,7 +39,13 @@ class PremiumBuyingViewModel @Inject constructor(
 
     private var purchase: SubscriptionPurchase? = null
 
-    private val _state = MutableStateFlow(UiState())
+    private val _state = MutableStateFlow(
+        UiState(
+            isExtendingPremium = savedStateHandle.extendExistingPremiumName != null,
+            primalName = savedStateHandle.extendExistingPremiumName,
+            stage = if (savedStateHandle.extendExistingPremiumName != null) PremiumStage.Purchase else PremiumStage.Home,
+        ),
+    )
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -108,7 +118,7 @@ class PremiumBuyingViewModel @Inject constructor(
                             primalName = primalName,
                             purchase = purchase,
                         )
-                        setState { copy(stage = PremiumBuyingContract.PremiumStage.Success) }
+                        setState { copy(stage = PremiumStage.Success) }
                     } catch (error: WssException) {
                         Timber.e(error)
                         this@PremiumBuyingViewModel.purchase = purchase
@@ -154,7 +164,7 @@ class PremiumBuyingViewModel @Inject constructor(
                         primalName = primalName,
                         purchase = existingPurchase,
                     )
-                    setState { copy(stage = PremiumBuyingContract.PremiumStage.Success) }
+                    setState { copy(stage = PremiumStage.Success) }
                     premiumRepository.fetchMembershipStatus(userId = userId)
                 } catch (error: WssException) {
                     Timber.e(error)

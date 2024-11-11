@@ -28,6 +28,9 @@ const val RENDER_TYPE = "renderType"
 inline val SavedStateHandle.renderType: String
     get() = get<String>(RENDER_TYPE) ?: throw IllegalArgumentException("Missing required renderType argument.")
 
+const val EXTEND_EXISTING_PREMIUM_NAME = "extendExistingPremiumName"
+inline val SavedStateHandle.extendExistingPremiumName: String? get() = get(EXTEND_EXISTING_PREMIUM_NAME)
+
 const val INITIAL_QUERY = "initialQuery"
 inline val SavedStateHandle.initialQuery: String? get() = get(INITIAL_QUERY)
 
