@@ -23,6 +23,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
@@ -95,6 +96,7 @@ private fun MediaListItem(
         ActionIcon(
             imageVector = PrimalIcons.Copy,
             onClick = onCopyClick,
+            tint = AppTheme.colorScheme.onPrimary,
         )
         ActionIcon(
             imageVector = PrimalIcons.Delete,
@@ -160,26 +162,28 @@ private fun TableHeader(modifier: Modifier = Modifier) {
         Text(
             modifier = Modifier.weight(3f),
             text = stringResource(id = R.string.premium_media_management_table_file),
-            style = AppTheme.typography.bodyLarge,
+            style = AppTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,
         )
         Text(
             modifier = Modifier.weight(5f),
             text = stringResource(id = R.string.premium_media_management_table_details),
-            style = AppTheme.typography.bodyLarge,
+            style = AppTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,
         )
         Text(
             modifier = Modifier.weight(2f),
             text = stringResource(id = R.string.premium_media_management_table_copy),
-            style = AppTheme.typography.bodyLarge,
+            style = AppTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.End,
         )
         Text(
             modifier = Modifier.weight(2f),
             text = stringResource(id = R.string.premium_media_management_table_delete),
-            style = AppTheme.typography.bodyLarge,
+            style = AppTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.End,
         )
     }
 }
