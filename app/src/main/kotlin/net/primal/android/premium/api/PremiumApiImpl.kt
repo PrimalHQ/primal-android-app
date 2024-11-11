@@ -3,6 +3,7 @@ package net.primal.android.premium.api
 import javax.inject.Inject
 import kotlinx.serialization.encodeToString
 import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.networking.di.PrimalWalletApiClient
 import net.primal.android.networking.primal.PrimalApiClient
@@ -13,6 +14,7 @@ import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.premium.api.model.CancelMembershipRequest
+import net.primal.android.premium.api.model.ChangeNameRequest
 import net.primal.android.premium.api.model.MembershipProductsRequest
 import net.primal.android.premium.api.model.MembershipStatusResponse
 import net.primal.android.premium.api.model.NameAvailableRequest
@@ -30,6 +32,26 @@ class PremiumApiImpl @Inject constructor(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET_MEMBERSHIP_NAME_AVAILABLE,
                 optionsJson = NostrJson.encodeToString(NameAvailableRequest(name = name)),
+            ),
+        )
+
+        val event = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalMembershipNameAvailable)
+        return NostrJson.decodeFromStringOrNull<NameAvailableResponse>(event?.content)
+            ?: throw WssException("Invalid content")
+    }
+
+    override suspend fun changePrimalName(userId: String, name: String): NameAvailableResponse {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.WALLET_MEMBERSHIP_CHANGE_NAME,
+                optionsJson = NostrJsonEncodeDefaults.encodeToString(
+                    AppSpecificDataRequest(
+                        eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
+                            userId = userId,
+                            content = NostrJson.encodeToString(ChangeNameRequest(name = name)),
+                        ),
+                    ),
+                ),
             ),
         )
 
