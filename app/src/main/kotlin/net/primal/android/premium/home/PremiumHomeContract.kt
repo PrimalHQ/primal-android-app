@@ -12,11 +12,11 @@ interface PremiumHomeContract {
         val profileNostrAddress: String? = null,
         val profileLightningAddress: String? = null,
         val membership: PremiumMembership? = null,
+        val showSupportUsNotice: Boolean = false,
         val error: MembershipError? = null,
     )
 
     sealed class UiEvent {
-        data object CancelSubscription : UiEvent()
         data object DismissError : UiEvent()
         data object ApplyPrimalNostrAddress : UiEvent()
         data object ApplyPrimalLightningAddress : UiEvent()

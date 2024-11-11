@@ -5,6 +5,7 @@ import kotlinx.serialization.encodeToString
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
+import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.di.PrimalWalletApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
@@ -20,10 +21,12 @@ import net.primal.android.premium.api.model.MembershipStatusResponse
 import net.primal.android.premium.api.model.NameAvailableRequest
 import net.primal.android.premium.api.model.NameAvailableResponse
 import net.primal.android.premium.api.model.PurchaseMembershipRequest
+import net.primal.android.premium.api.model.ShowSupportUsResponse
 import net.primal.android.settings.api.model.AppSpecificDataRequest
 
 class PremiumApiImpl @Inject constructor(
     @PrimalWalletApiClient private val primalApiClient: PrimalApiClient,
+    @PrimalCacheApiClient private val primalCacheApiClient: PrimalApiClient,
     private val nostrNotary: NostrNotary,
 ) : PremiumApi {
 
@@ -140,5 +143,12 @@ class PremiumApiImpl @Inject constructor(
                 ),
             ),
         )
+    }
+
+    override suspend fun shouldShowSupportUs(): Boolean {
+        val result = primalCacheApiClient.query(message = PrimalCacheFilter(primalVerb = PrimalVerb.CLIENT_CONFIG))
+        val configEvent = result.findPrimalEvent(NostrEventKind.PrimalClientConfig)
+        val response = NostrJson.decodeFromStringOrNull<ShowSupportUsResponse>(configEvent?.content)
+        return response?.showSupportPrimal == true
     }
 }

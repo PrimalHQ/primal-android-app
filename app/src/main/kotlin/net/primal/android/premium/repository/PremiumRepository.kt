@@ -39,6 +39,11 @@ class PremiumRepository @Inject constructor(
         }
     }
 
+    suspend fun shouldShowSupportUsNotice() =
+        withContext(dispatchers.io()) {
+            premiumApi.shouldShowSupportUs()
+        }
+
     suspend fun purchaseMembership(
         userId: String,
         primalName: String,
