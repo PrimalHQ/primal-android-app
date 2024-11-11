@@ -249,6 +249,9 @@ fun NavController.navigateToExploreFeed(
 private fun NavController.navigateToBookmarks() = navigate(route = "bookmarks")
 
 private fun NavController.navigateToPremiumBuying() = navigate(route = "premium/buying")
+private fun NavController.navigateToPremiumExtendSubscription(primalName: String) =
+    navigate(route = "premium/buying?$EXTEND_EXISTING_PREMIUM_NAME=$primalName")
+
 private fun NavController.navigateToPremiumHome() = navigate(route = "premium/home")
 private fun NavController.navigateToPremiumSupportPrimal() = navigate(route = "premium/supportPrimal")
 private fun NavController.navigateToPremiumMoreInfo() = navigate(route = "premium/info")
@@ -435,7 +438,16 @@ fun PrimalAppNavigation() {
             ),
         )
 
-        premiumBuying(route = "premium/buying", navController = navController)
+        premiumBuying(
+            route = "premium/buying?$EXTEND_EXISTING_PREMIUM_NAME={$EXTEND_EXISTING_PREMIUM_NAME}",
+            arguments = listOf(
+                navArgument(EXTEND_EXISTING_PREMIUM_NAME) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+            ),
+            navController = navController,
+        )
 
         premiumHome(route = "premium/home", navController = navController)
 
@@ -930,25 +942,29 @@ private fun NavGraphBuilder.advancedSearch(
     )
 }
 
-private fun NavGraphBuilder.premiumBuying(route: String, navController: NavController) =
-    composable(
-        route = route,
-        enterTransition = { primalSlideInHorizontallyFromEnd },
-        exitTransition = { primalScaleOut },
-        popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontallyToEnd },
-    ) {
-        val viewModel = hiltViewModel<PremiumBuyingViewModel>()
+private fun NavGraphBuilder.premiumBuying(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) {
+    val viewModel = hiltViewModel<PremiumBuyingViewModel>()
 
-        ApplyEdgeToEdge()
-        LockToOrientationPortrait()
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
 
-        PremiumBuyingScreen(
-            viewModel = viewModel,
-            onClose = { navController.navigateUp() },
-            onMoreInfoClick = { navController.navigateToPremiumMoreInfo() },
-        )
-    }
+    PremiumBuyingScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+        onMoreInfoClick = { navController.navigateToPremiumMoreInfo() },
+    )
+}
 
 private fun NavGraphBuilder.premiumHome(route: String, navController: NavController) =
     composable(
@@ -987,7 +1003,7 @@ private fun NavGraphBuilder.premiumSupportPrimal(route: String, navController: N
             viewModel = viewModel,
             callbacks = SupportPrimalContract.ScreenCallbacks(
                 onClose = { navController.navigateUp() },
-                onBuySubscription = { navController.navigateToPremiumBuying() },
+                onExtendSubscription = { navController.navigateToPremiumExtendSubscription(primalName = it) },
                 onBecomeLegend = { navController.navigateToPremiumBecomeLegend() },
             ),
         )
