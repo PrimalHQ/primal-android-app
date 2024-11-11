@@ -98,14 +98,14 @@ private fun SupportPrimalScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            if (!state.hasMembership) {
+            if (!state.hasMembership || true) {
                 SupportCard(
                     modifier = Modifier.fillMaxSize(),
                     painter = painterResource(R.drawable.support_primal_buy_subscription),
                     title = stringResource(R.string.premium_support_primal_buy_subscription_title),
                     description = stringResource(R.string.premium_support_primal_buy_subscription_description),
                     buttonText = stringResource(R.string.premium_support_primal_buy_subscription_button_text),
-                    onClick = {},
+                    onClick = callbacks.onBuySubscription,
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -119,7 +119,7 @@ private fun SupportPrimalScreen(
                     title = stringResource(R.string.premium_support_primal_become_a_legend_title),
                     description = stringResource(R.string.premium_support_primal_become_a_legend_description),
                     buttonText = stringResource(R.string.premium_support_primal_become_a_legend_button_text),
-                    onClick = {},
+                    onClick = callbacks.onBecomeLegend,
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))

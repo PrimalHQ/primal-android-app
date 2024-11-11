@@ -156,6 +156,8 @@
 
     <string name="premium_support_primal_title">Support Primal</string>
 
+    <string name="premium_become_legend_primal_title">Become a Primal Legend</string>
+
     <string name="premium_manage_title">Manage Premium</string>
     <string name="premium_manage_nostr_tools">Nostr Tools</string>
     <string name="premium_manage_primal_account">Primal Account</string>

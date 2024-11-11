@@ -85,6 +85,8 @@ import net.primal.android.premium.buying.PremiumBuyingViewModel
 import net.primal.android.premium.home.PremiumHomeScreen
 import net.primal.android.premium.home.PremiumHomeViewModel
 import net.primal.android.premium.info.PremiumMoreInfoScreen
+import net.primal.android.premium.legend.PremiumBecomeLegendScreen
+import net.primal.android.premium.legend.PremiumBecomeLegendViewModel
 import net.primal.android.premium.manage.PremiumManageContract
 import net.primal.android.premium.manage.PremiumManageScreen
 import net.primal.android.premium.manage.contact.PremiumContactListScreen
@@ -250,6 +252,7 @@ private fun NavController.navigateToPremiumBuying() = navigate(route = "premium/
 private fun NavController.navigateToPremiumHome() = navigate(route = "premium/home")
 private fun NavController.navigateToPremiumSupportPrimal() = navigate(route = "premium/supportPrimal")
 private fun NavController.navigateToPremiumMoreInfo() = navigate(route = "premium/info")
+private fun NavController.navigateToPremiumBecomeLegend() = navigate(route = "premium/legend/become")
 private fun NavController.navigateToPremiumManage() = navigate(route = "premium/manage")
 private fun NavController.navigateToPremiumMediaManagement() = navigate(route = "premium/manage/media")
 private fun NavController.navigateToPremiumContactList() = navigate(route = "premium/manage/contacts")
@@ -390,10 +393,7 @@ fun PrimalAppNavigation() {
             onDrawerScreenClick = drawerDestinationHandler,
         )
 
-        bookmarks(
-            route = "bookmarks",
-            navController = navController,
-        )
+        bookmarks(route = "bookmarks", navController = navController)
 
         exploreFeed(
             route = "explore/note?$EXPLORE_FEED_SPEC={$EXPLORE_FEED_SPEC}&$RENDER_TYPE={$RENDER_TYPE}",
@@ -435,65 +435,31 @@ fun PrimalAppNavigation() {
             ),
         )
 
-        premiumBuying(
-            route = "premium/buying",
-            navController = navController,
-        )
+        premiumBuying(route = "premium/buying", navController = navController)
 
-        premiumHome(
-            route = "premium/home",
-            navController = navController,
-        )
+        premiumHome(route = "premium/home", navController = navController)
 
-        premiumSupportPrimal(
-            route = "premium/supportPrimal",
-            navController = navController,
-        )
+        premiumSupportPrimal(route = "premium/supportPrimal", navController = navController)
 
-        premiumMoreInfo(
-            route = "premium/info",
-            navController = navController,
-        )
+        premiumMoreInfo(route = "premium/info", navController = navController)
 
-        premiumManage(
-            route = "premium/manage",
-            navController = navController,
-        )
+        premiumBecomeLegend(route = "premium/legend/become", navController = navController)
 
-        premiumContactList(
-            route = "premium/manage/contacts",
-            navController = navController,
-        )
+        premiumManage(route = "premium/manage", navController = navController)
 
-        premiumContentBackup(
-            route = "premium/manage/content",
-            navController = navController,
-        )
+        premiumContactList(route = "premium/manage/contacts", navController = navController)
 
-        premiumMediaManagement(
-            route = "premium/manage/media",
-            navController = navController,
-        )
+        premiumContentBackup(route = "premium/manage/content", navController = navController)
 
-        premiumChangePrimalName(
-            route = "premium/manage/changePrimalName",
-            navController = navController,
-        )
+        premiumMediaManagement(route = "premium/manage/media", navController = navController)
 
-        premiumOrderHistory(
-            route = "premium/manage/order",
-            navController = navController,
-        )
+        premiumChangePrimalName(route = "premium/manage/changePrimalName", navController = navController)
 
-        premiumRelay(
-            route = "premium/manage/relay",
-            navController = navController,
-        )
+        premiumOrderHistory(route = "premium/manage/order", navController = navController)
 
-        messages(
-            route = "messages",
-            navController = navController,
-        )
+        premiumRelay(route = "premium/manage/relay", navController = navController)
+
+        messages(route = "messages", navController = navController)
 
         chat(
             route = "messages/{$PROFILE_ID}",
@@ -505,10 +471,7 @@ fun PrimalAppNavigation() {
             navController = navController,
         )
 
-        newMessage(
-            route = "messages/new",
-            navController = navController,
-        )
+        newMessage(route = "messages/new", navController = navController)
 
         notifications(
             route = "notifications",
@@ -1024,8 +987,8 @@ private fun NavGraphBuilder.premiumSupportPrimal(route: String, navController: N
             viewModel = viewModel,
             callbacks = SupportPrimalContract.ScreenCallbacks(
                 onClose = { navController.navigateUp() },
-                onBuySubscription = { },
-                onBecomeLegend = { },
+                onBuySubscription = { navController.navigateToPremiumBuying() },
+                onBecomeLegend = { navController.navigateToPremiumBecomeLegend() },
             ),
         )
     }
@@ -1042,6 +1005,24 @@ private fun NavGraphBuilder.premiumMoreInfo(route: String, navController: NavCon
         LockToOrientationPortrait()
 
         PremiumMoreInfoScreen(
+            onClose = { navController.navigateUp() },
+        )
+    }
+
+private fun NavGraphBuilder.premiumBecomeLegend(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        val viewModel = hiltViewModel<PremiumBecomeLegendViewModel>()
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+
+        PremiumBecomeLegendScreen(
+            viewModel = viewModel,
             onClose = { navController.navigateUp() },
         )
     }
