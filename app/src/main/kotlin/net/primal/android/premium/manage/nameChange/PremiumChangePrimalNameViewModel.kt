@@ -69,7 +69,7 @@ class PremiumChangePrimalNameViewModel @Inject constructor(
                     setState {
                         copy(
                             error = PremiumChangePrimalNameContract.NameChangeError.PrimalNameTaken,
-                            stage = ChangePrimalNameStage.PickNew
+                            stage = ChangePrimalNameStage.PickNew,
                         )
                     }
                 } else {

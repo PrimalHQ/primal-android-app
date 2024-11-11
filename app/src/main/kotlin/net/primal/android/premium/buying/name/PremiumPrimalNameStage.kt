@@ -111,7 +111,7 @@ private fun PremiumPrimalNameStage(
             snackbarHostState?.let {
                 SnackbarHost(hostState = it)
             }
-        }
+        },
     ) { paddingValues ->
         Column(
             modifier = Modifier

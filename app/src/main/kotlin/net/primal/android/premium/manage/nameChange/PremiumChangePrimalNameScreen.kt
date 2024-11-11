@@ -110,56 +110,66 @@ private fun PremiumChangePrimalNameScreen(
             }
 
             ChangePrimalNameStage.Confirm -> {
-                Scaffold(
-                    topBar = {
-                        PrimalTopAppBar(
-                            title = stringResource(id = R.string.premium_name_changed_title),
-                            navigationIcon = PrimalIcons.ArrowBack,
-                            onNavigationIconClick = {
-                                eventPublisher(
-                                    PremiumChangePrimalNameContract.UiEvent.SetStage(ChangePrimalNameStage.PickNew),
-                                )
-                            },
-                        )
-                    },
-                    bottomBar = {
-                        Box(
-                            modifier = Modifier
-                                .navigationBarsPadding()
-                                .padding(all = 36.dp),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            PrimalLoadingButton(
-                                modifier = Modifier.fillMaxWidth(),
-                                text = stringResource(id = R.string.premium_name_changed_button),
-                                onClick = {
-                                    eventPublisher(PremiumChangePrimalNameContract.UiEvent.ConfirmPrimalNameChange)
-                                },
-                                loading = state.changingName,
-                            )
-                        }
-                    },
-                    snackbarHost = {
-                        SnackbarHost(hostState = snackbarHostState)
-                    },
-                ) { paddingValues ->
-                    ifNotNull(
-                        state.primalName,
-                        state.profileAvatarCdnImage,
-                        state.profileDisplayName,
-                    ) { primalName, avatarCdnImage, displayName ->
-                        ConfirmNameChangeStage(
-                            modifier = Modifier
-                                .padding(horizontal = 20.dp)
-                                .fillMaxSize(),
-                            contentPadding = paddingValues,
-                            primalName = primalName,
-                            profileAvatarCdnImage = avatarCdnImage,
-                            profileDisplayName = displayName,
-                        )
-                    }
-                }
+                ChangePremiumNameConfirmationStage(
+                    state = state,
+                    eventPublisher = eventPublisher,
+                    snackbarHostState = snackbarHostState,
+                )
             }
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun ChangePremiumNameConfirmationStage(
+    eventPublisher: (PremiumChangePrimalNameContract.UiEvent) -> Unit,
+    state: PremiumChangePrimalNameContract.UiState,
+    snackbarHostState: SnackbarHostState,
+) {
+    Scaffold(
+        topBar = {
+            PrimalTopAppBar(
+                title = stringResource(id = R.string.premium_name_changed_title),
+                navigationIcon = PrimalIcons.ArrowBack,
+                onNavigationIconClick = {
+                    eventPublisher(
+                        PremiumChangePrimalNameContract.UiEvent.SetStage(ChangePrimalNameStage.PickNew),
+                    )
+                },
+            )
+        },
+        bottomBar = {
+            Box(
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .padding(all = 36.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                PrimalLoadingButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(id = R.string.premium_name_changed_button),
+                    onClick = {
+                        eventPublisher(PremiumChangePrimalNameContract.UiEvent.ConfirmPrimalNameChange)
+                    },
+                    loading = state.changingName,
+                )
+            }
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
+    ) { paddingValues ->
+        ifNotNull(state.primalName, state.profileDisplayName) { primalName, profileDisplayName ->
+            ConfirmNameChangeStage(
+                modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .fillMaxSize(),
+                contentPadding = paddingValues,
+                primalName = primalName,
+                profileAvatarCdnImage = state.profileAvatarCdnImage,
+                profileDisplayName = profileDisplayName,
+            )
         }
     }
 }

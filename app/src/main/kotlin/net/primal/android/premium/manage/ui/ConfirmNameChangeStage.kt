@@ -22,7 +22,7 @@ import net.primal.android.theme.AppTheme
 fun ConfirmNameChangeStage(
     modifier: Modifier = Modifier,
     primalName: String,
-    profileAvatarCdnImage: CdnImage,
+    profileAvatarCdnImage: CdnImage?,
     profileDisplayName: String,
     contentPadding: PaddingValues,
 ) {
