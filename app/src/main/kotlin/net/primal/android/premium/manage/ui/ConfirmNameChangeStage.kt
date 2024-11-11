@@ -3,6 +3,8 @@ package net.primal.android.premium.manage.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,8 +31,10 @@ fun ConfirmNameChangeStage(
     Column(
         modifier = modifier.padding(contentPadding),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
+        Spacer(modifier = Modifier.height(48.dp))
+
         AvatarThumbnail(
             avatarCdnImage = profileAvatarCdnImage,
             avatarSize = 80.dp,
