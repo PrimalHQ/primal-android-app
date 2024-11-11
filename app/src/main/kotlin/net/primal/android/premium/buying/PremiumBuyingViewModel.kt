@@ -43,7 +43,11 @@ class PremiumBuyingViewModel @Inject constructor(
         UiState(
             isExtendingPremium = savedStateHandle.extendExistingPremiumName != null,
             primalName = savedStateHandle.extendExistingPremiumName,
-            stage = if (savedStateHandle.extendExistingPremiumName != null) PremiumStage.Purchase else PremiumStage.Home,
+            stage = if (savedStateHandle.extendExistingPremiumName != null) {
+                PremiumStage.Purchase
+            } else {
+                PremiumStage.Home
+            },
         ),
     )
     val state = _state.asStateFlow()
