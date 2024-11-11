@@ -114,7 +114,7 @@
     <string name="premium_primal_name_nostr_address">Nostr address</string>
     <string name="premium_primal_name_lightning_address">Lightning address</string>
     <string name="premium_primal_name_vip_profile">VIP profile</string>
-    <string name="premium_primal_name_not_set_value">not set</string>
+    <string name="premium_primal_name_not_set_value">[not set]</string>
 
     <string name="premium_purchase_title">Congrats!</string>
     <string name="premium_purchase_primal_name_available">Your Primal Name is available!</string>
