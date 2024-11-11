@@ -161,7 +161,13 @@ private fun PremiumHomeScreen(
                     )
                 }
                 PrimalPremiumTable(
+                    profileNostrAddress = state.profileNostrAddress,
+                    profileLightningAddress = state.profileLightningAddress,
                     premiumMembership = it,
+                    onApplyPrimalNostrAddress = { eventPublisher(PremiumHomeContract.UiEvent.ApplyPrimalNostrAddress) },
+                    onApplyPrimalLightningAddress = {
+                        eventPublisher(PremiumHomeContract.UiEvent.ApplyPrimalLightningAddress)
+                    },
                 )
                 if (!it.cohort1.isPrimalLegend()) {
                     if (it.recurring) {

@@ -9,12 +9,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.domain.MembershipError
 import net.primal.android.premium.home.PremiumHomeContract.UiEvent
 import net.primal.android.premium.home.PremiumHomeContract.UiState
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
 import timber.log.Timber
@@ -24,6 +26,7 @@ class PremiumHomeViewModel @Inject constructor(
     private val billingClient: PrimalBillingClient,
     private val premiumRepository: PremiumRepository,
     private val activeAccountStore: ActiveAccountStore,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
     private var purchase: SubscriptionPurchase? = null
@@ -48,10 +51,44 @@ class PremiumHomeViewModel @Inject constructor(
                 when (it) {
                     UiEvent.CancelSubscription -> cancelSubscription()
                     UiEvent.DismissError -> setState { copy(error = null) }
+                    UiEvent.ApplyPrimalLightningAddress -> applyPrimalLightningAddress()
+                    UiEvent.ApplyPrimalNostrAddress -> applyPrimalNostrAddress()
                 }
             }
         }
     }
+
+    private fun applyPrimalNostrAddress() =
+        viewModelScope.launch {
+            val premiumMembership = state.value.membership ?: return@launch
+            val nip05 = premiumMembership.nostrAddress
+
+            try {
+                userRepository.setNostrAddress(userId = activeAccountStore.activeUserId(), nostrAddress = nip05)
+            } catch (error: WssException) {
+                Timber.w(error)
+                setState { copy(error = MembershipError.ProfileMetadataNotFound) }
+            } catch (error: NostrPublishException) {
+                Timber.w(error)
+                setState { copy(error = MembershipError.FailedToApplyNostrAddress) }
+            }
+        }
+
+    private fun applyPrimalLightningAddress() =
+        viewModelScope.launch {
+            val premiumMembership = state.value.membership ?: return@launch
+            val lud16 = premiumMembership.lightningAddress
+
+            try {
+                userRepository.setLightningAddress(userId = activeAccountStore.activeUserId(), lightningAddress = lud16)
+            } catch (error: WssException) {
+                Timber.w(error)
+                setState { copy(error = MembershipError.ProfileMetadataNotFound) }
+            } catch (error: NostrPublishException) {
+                Timber.w(error)
+                setState { copy(error = MembershipError.FailedToApplyLightningAddress) }
+            }
+        }
 
     private fun fetchActiveSubscription() = viewModelScope.launch { fetchActivePurchase() }
 

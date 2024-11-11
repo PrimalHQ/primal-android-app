@@ -1,6 +1,8 @@
 package net.primal.android.user.repository
 
 import javax.inject.Inject
+import kotlinx.coroutines.withContext
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.core.utils.authorNameUiFriendly
@@ -29,6 +31,7 @@ import net.primal.android.wallet.domain.WalletSettings
 
 class UserRepository @Inject constructor(
     private val database: PrimalDatabase,
+    private val dispatchers: CoroutineDispatcherProvider,
     private val userAccountFetcher: UserAccountFetcher,
     private val accountsStore: UserAccountsStore,
     private val fileUploader: PrimalFileUploader,
@@ -119,16 +122,30 @@ class UserRepository @Inject constructor(
     }
 
     @Throws(NostrPublishException::class, WssException::class)
-    suspend fun setLightningAddress(userId: String, lightningAddress: String) {
-        val userProfileResponse = usersApi.getUserProfile(userId = userId)
-        val metadata = NostrJson.decodeFromStringOrNull<ContentMetadata>(userProfileResponse.metadata?.content)
-            ?: throw WssException("Profile Content Metadata not found.")
+    suspend fun setNostrAddress(userId: String, nostrAddress: String) =
+        withContext(dispatchers.io()) {
+            val userProfileResponse = usersApi.getUserProfile(userId = userId)
+            val metadata = NostrJson.decodeFromStringOrNull<ContentMetadata>(userProfileResponse.metadata?.content)
+                ?: throw WssException("Profile Content Metadata not found.")
 
-        setUserProfileAndUpdateLocally(
-            userId = userId,
-            contentMetadata = metadata.copy(lud16 = lightningAddress),
-        )
-    }
+            setUserProfileAndUpdateLocally(
+                userId = userId,
+                contentMetadata = metadata.copy(nip05 = nostrAddress),
+            )
+        }
+
+    @Throws(NostrPublishException::class, WssException::class)
+    suspend fun setLightningAddress(userId: String, lightningAddress: String) =
+        withContext(dispatchers.io()) {
+            val userProfileResponse = usersApi.getUserProfile(userId = userId)
+            val metadata = NostrJson.decodeFromStringOrNull<ContentMetadata>(userProfileResponse.metadata?.content)
+                ?: throw WssException("Profile Content Metadata not found.")
+
+            setUserProfileAndUpdateLocally(
+                userId = userId,
+                contentMetadata = metadata.copy(lud16 = lightningAddress),
+            )
+        }
 
     private suspend fun setUserProfileAndUpdateLocally(userId: String, contentMetadata: ContentMetadata) {
         val profileMetadataNostrEvent = nostrPublisher.publishUserProfile(
