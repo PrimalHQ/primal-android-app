@@ -13,11 +13,11 @@ data class PremiumMembership(
     val vipProfile: String,
     val usedStorageInBytes: Long,
     val maxStorageInBytes: Long,
-    val expiresOn: Long,
     val cohort1: String,
     val cohort2: String,
+    val expiresOn: Long? = null,
     val recurring: Boolean = false,
     val renewsOn: Long? = null,
 ) {
-    fun isExpired() = Clock.System.now().epochSeconds > expiresOn
+    fun isExpired() = expiresOn != null && Clock.System.now().epochSeconds > expiresOn
 }
