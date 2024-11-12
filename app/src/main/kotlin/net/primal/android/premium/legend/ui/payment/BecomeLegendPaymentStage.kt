@@ -34,7 +34,7 @@ fun BecomeLegendPaymentStage(modifier: Modifier = Modifier, onClose: () -> Unit)
         },
         bottomBar = {
             BecomeLegendBottomBarButton(
-                text = stringResource(R.string.premium_become_legend_button_pay_now),
+                text = stringResource(R.string.premium_become_legend_button_copy_invoice),
                 onClick = {},
             )
         },

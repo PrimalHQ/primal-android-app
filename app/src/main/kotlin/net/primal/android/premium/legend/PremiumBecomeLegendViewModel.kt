@@ -30,7 +30,21 @@ class PremiumBecomeLegendViewModel @Inject constructor() : ViewModel() {
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    UiEvent.ShowAmountEditor -> Unit
+                    UiEvent.ShowAmountEditor -> setState {
+                        copy(stage = PremiumBecomeLegendContract.BecomeLegendStage.PickAmount)
+                    }
+
+                    UiEvent.GoBackToIntro -> setState {
+                        copy(stage = PremiumBecomeLegendContract.BecomeLegendStage.Intro)
+                    }
+
+                    UiEvent.ShowPaymentInstructions -> setState {
+                        copy(stage = PremiumBecomeLegendContract.BecomeLegendStage.Payment)
+                    }
+
+                    UiEvent.ShowSuccess -> setState {
+                        copy(stage = PremiumBecomeLegendContract.BecomeLegendStage.Success)
+                    }
                 }
             }
         }
