@@ -19,14 +19,16 @@ class PremiumBecomeLegendContract {
         val selectedAmountInBtc: BigDecimal = minLegendThresholdInBtc,
         val bitcoinAddress: String? = null,
         val qrCodeValue: String? = null,
+        val membershipQuoteId: String? = null,
     )
 
     sealed class UiEvent {
         data object ShowAmountEditor : UiEvent()
         data object GoBackToIntro : UiEvent()
         data object ShowPaymentInstructions : UiEvent()
-        data object ShowSuccess : UiEvent()
         data class UpdateSelectedAmount(val newAmount: Float) : UiEvent()
+        data object StartPurchaseMonitor : UiEvent()
+        data object StopPurchaseMonitor : UiEvent()
     }
 
     enum class BecomeLegendStage {
