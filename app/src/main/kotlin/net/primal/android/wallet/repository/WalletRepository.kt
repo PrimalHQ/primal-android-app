@@ -128,6 +128,9 @@ class WalletRepository @Inject constructor(
         )
     }
 
+    suspend fun getExchangeRate(userId: String) =
+        withContext(dispatcherProvider.io()) { walletApi.getExchangeRate(userId) }
+
     suspend fun parseLnUrl(userId: String, lnurl: String): ParsedLnUrlResponse {
         return walletApi.parseLnUrl(userId = userId, lnurl = lnurl)
     }
