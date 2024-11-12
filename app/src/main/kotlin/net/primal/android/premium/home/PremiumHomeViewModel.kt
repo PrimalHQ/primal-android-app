@@ -36,7 +36,6 @@ class PremiumHomeViewModel @Inject constructor(
 
     init {
         observeEvents()
-        fetchMembershipStatus()
         observeActiveAccount()
         fetchShouldShowSupport()
     }
@@ -48,6 +47,7 @@ class PremiumHomeViewModel @Inject constructor(
                     UiEvent.DismissError -> setState { copy(error = null) }
                     UiEvent.ApplyPrimalLightningAddress -> applyPrimalLightningAddress()
                     UiEvent.ApplyPrimalNostrAddress -> applyPrimalNostrAddress()
+                    UiEvent.RequestMembershipUpdate -> fetchMembershipStatus()
                 }
             }
         }

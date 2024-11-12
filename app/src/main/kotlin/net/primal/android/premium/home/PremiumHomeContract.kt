@@ -20,5 +20,6 @@ interface PremiumHomeContract {
         data object DismissError : UiEvent()
         data object ApplyPrimalNostrAddress : UiEvent()
         data object ApplyPrimalLightningAddress : UiEvent()
+        data object RequestMembershipUpdate : UiEvent()
     }
 }
