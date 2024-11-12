@@ -1,5 +1,6 @@
 package net.primal.android.premium.legend
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.slideInHorizontally
@@ -36,6 +37,12 @@ private fun PremiumBecomeLegendScreen(
     eventPublisher: (PremiumBecomeLegendContract.UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
+    BecomeLegendBackHandler(
+        stage = state.stage,
+        eventPublisher = eventPublisher,
+        onClose = onClose,
+    )
+
     AnimatedContent(
         modifier = Modifier
             .background(AppTheme.colorScheme.surfaceVariant)
@@ -49,20 +56,22 @@ private fun PremiumBecomeLegendScreen(
                 BecomeLegendIntroStage(
                     modifier = Modifier.fillMaxSize(),
                     onClose = onClose,
+                    onNext = { eventPublisher(PremiumBecomeLegendContract.UiEvent.ShowAmountEditor) },
                 )
             }
 
             BecomeLegendStage.PickAmount -> {
                 BecomeLegendAmountStage(
                     modifier = Modifier.fillMaxSize(),
-                    onClose = onClose,
+                    onClose = { eventPublisher(PremiumBecomeLegendContract.UiEvent.GoBackToIntro) },
+                    onNext = { eventPublisher(PremiumBecomeLegendContract.UiEvent.ShowPaymentInstructions) },
                 )
             }
 
             BecomeLegendStage.Payment -> {
                 BecomeLegendPaymentStage(
                     modifier = Modifier.fillMaxSize(),
-                    onClose = onClose,
+                    onClose = { eventPublisher(PremiumBecomeLegendContract.UiEvent.ShowAmountEditor) },
                 )
             }
 
@@ -71,6 +80,31 @@ private fun PremiumBecomeLegendScreen(
                     modifier = Modifier.fillMaxSize(),
                     onDoneClick = onClose,
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BecomeLegendBackHandler(
+    stage: BecomeLegendStage,
+    onClose: () -> Unit,
+    eventPublisher: (PremiumBecomeLegendContract.UiEvent) -> Unit,
+) {
+    BackHandler {
+        when (stage) {
+            BecomeLegendStage.Intro,
+            BecomeLegendStage.Success,
+            -> {
+                onClose()
+            }
+
+            BecomeLegendStage.PickAmount -> {
+                eventPublisher(PremiumBecomeLegendContract.UiEvent.GoBackToIntro)
+            }
+
+            BecomeLegendStage.Payment -> {
+                eventPublisher(PremiumBecomeLegendContract.UiEvent.ShowAmountEditor)
             }
         }
     }

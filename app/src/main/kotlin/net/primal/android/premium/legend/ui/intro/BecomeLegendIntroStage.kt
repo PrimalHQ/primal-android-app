@@ -33,7 +33,11 @@ import net.primal.android.theme.AppTheme
 
 @ExperimentalMaterial3Api
 @Composable
-fun BecomeLegendIntroStage(modifier: Modifier = Modifier, onClose: () -> Unit) {
+fun BecomeLegendIntroStage(
+    modifier: Modifier = Modifier,
+    onClose: () -> Unit,
+    onNext: () -> Unit,
+) {
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -47,7 +51,7 @@ fun BecomeLegendIntroStage(modifier: Modifier = Modifier, onClose: () -> Unit) {
         bottomBar = {
             BecomeLegendBottomBarButton(
                 text = stringResource(R.string.premium_become_legend_button_start),
-                onClick = {},
+                onClick = onNext,
             )
         },
     ) { paddingValues ->
