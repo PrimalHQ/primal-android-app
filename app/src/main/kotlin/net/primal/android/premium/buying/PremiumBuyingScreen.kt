@@ -29,18 +29,13 @@ import net.primal.android.premium.ui.toHumanReadableString
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun PremiumBuyingScreen(
-    viewModel: PremiumBuyingViewModel,
-    onClose: () -> Unit,
-    onMoreInfoClick: () -> Unit,
-) {
+fun PremiumBuyingScreen(viewModel: PremiumBuyingViewModel, screenCallbacks: PremiumBuyingContract.ScreenCallbacks) {
     val uiState = viewModel.state.collectAsState()
 
     PremiumBuyingScreen(
         state = uiState.value,
-        onClose = onClose,
         eventPublisher = viewModel::setEvent,
-        onMoreInfoClick = onMoreInfoClick,
+        screenCallbacks = screenCallbacks,
     )
 }
 
@@ -48,13 +43,12 @@ fun PremiumBuyingScreen(
 @Composable
 private fun PremiumBuyingScreen(
     state: PremiumBuyingContract.UiState,
-    onClose: () -> Unit,
-    onMoreInfoClick: () -> Unit,
     eventPublisher: (PremiumBuyingContract.UiEvent) -> Unit,
+    screenCallbacks: PremiumBuyingContract.ScreenCallbacks,
 ) {
     PremiumBuyingBackHandler(
         stage = state.stage,
-        onClose = onClose,
+        onClose = screenCallbacks.onClose,
         eventPublisher = eventPublisher,
     )
 
@@ -80,8 +74,8 @@ private fun PremiumBuyingScreen(
                     PremiumBuyingHomeStage(
                         loading = state.loading,
                         subscriptions = state.subscriptions,
-                        onClose = onClose,
-                        onLearnMoreClick = onMoreInfoClick,
+                        onClose = screenCallbacks.onClose,
+                        onLearnMoreClick = screenCallbacks.onMoreInfoClick,
                         onFindPrimalName = {
                             eventPublisher(
                                 PremiumBuyingContract.UiEvent.MoveToPremiumStage(
@@ -122,7 +116,7 @@ private fun PremiumBuyingScreen(
                         eventPublisher = eventPublisher,
                         onBack = {
                             if (state.isExtendingPremium) {
-                                onClose()
+                                screenCallbacks.onClose()
                             } else {
                                 eventPublisher(
                                     PremiumBuyingContract.UiEvent.MoveToPremiumStage(
@@ -131,14 +125,20 @@ private fun PremiumBuyingScreen(
                                 )
                             }
                         },
-                        onLearnMoreClick = onMoreInfoClick,
+                        onLearnMoreClick = screenCallbacks.onMoreInfoClick,
                     )
                 }
 
                 PremiumBuyingContract.PremiumStage.Success -> {
                     PremiumBuyingSuccessStage(
                         modifier = Modifier.fillMaxSize(),
-                        onDoneClick = onClose,
+                        onDoneClick = {
+                            if (state.isExtendingPremium) {
+                                screenCallbacks.onClose()
+                            } else {
+                                screenCallbacks.onPremiumPurchased()
+                            }
+                        },
                     )
                 }
             }

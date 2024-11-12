@@ -44,4 +44,10 @@ interface PremiumBuyingContract {
         Purchase,
         Success,
     }
+
+    data class ScreenCallbacks(
+        val onClose: () -> Unit,
+        val onMoreInfoClick: () -> Unit,
+        val onPremiumPurchased: () -> Unit,
+    )
 }
