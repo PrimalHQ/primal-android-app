@@ -1,9 +1,7 @@
 ## Changes
-- Implement Extend Subscription;
-- Implement Support Primal screen and support-us flag;
-- Implement Change Primal Name Screen (#228);
-- Implement Order History empty screen with existing cancel subscription logic;
-- Implement Premium Relay Screen (#231);
-- Implement Premium media management screen UI (#230);
-- Implement Manage Premium Screen (#227);
-- Implement apply logic on premium home screen (#226);
+- Update to latest membership status api response
+- Implement buying Primal Legend
+- Add refreshing membership on premium home screen start
+- Implement navigating to premium home after premium purchase
+- Update settings order and rename account to keys
+- Fix renew subscription navigation
