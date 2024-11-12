@@ -571,7 +571,7 @@
 
     <string name="settings_title">Settings</string>
 
-    <string name="settings_keys_title">Account</string>
+    <string name="settings_keys_title">Keys</string>
     <string name="settings_keys_copy_public_key">Copy public key</string>
     <string name="settings_keys_public_key_hint">Anyone on Nostr can find you via your public key. Feel free to share anywhere.</string>
     <string name="settings_keys_public_key_title">Your Public Key</string>

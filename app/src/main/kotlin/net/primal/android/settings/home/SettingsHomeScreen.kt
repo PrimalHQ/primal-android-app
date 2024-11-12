@@ -152,7 +152,7 @@ private fun VersionListItem(versionName: String) {
 @Composable
 private fun PrimalSettingsSection.title(): String {
     return when (this) {
-        PrimalSettingsSection.Account -> stringResource(id = R.string.settings_keys_title)
+        PrimalSettingsSection.Keys -> stringResource(id = R.string.settings_keys_title)
         PrimalSettingsSection.Network -> stringResource(id = R.string.settings_network_title)
         PrimalSettingsSection.Wallet -> stringResource(id = R.string.settings_wallet_title)
         PrimalSettingsSection.Appearance -> stringResource(id = R.string.settings_appearance_title)
