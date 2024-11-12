@@ -80,6 +80,7 @@ import net.primal.android.notes.home.HomeFeedScreen
 import net.primal.android.notes.home.HomeFeedViewModel
 import net.primal.android.notifications.list.NotificationsScreen
 import net.primal.android.notifications.list.NotificationsViewModel
+import net.primal.android.premium.buying.PremiumBuyingContract
 import net.primal.android.premium.buying.PremiumBuyingScreen
 import net.primal.android.premium.buying.PremiumBuyingViewModel
 import net.primal.android.premium.home.PremiumHomeScreen
@@ -961,8 +962,14 @@ private fun NavGraphBuilder.premiumBuying(
 
     PremiumBuyingScreen(
         viewModel = viewModel,
-        onClose = { navController.navigateUp() },
-        onMoreInfoClick = { navController.navigateToPremiumMoreInfo() },
+        screenCallbacks = PremiumBuyingContract.ScreenCallbacks(
+            onClose = { navController.navigateUp() },
+            onMoreInfoClick = { navController.navigateToPremiumMoreInfo() },
+            onPremiumPurchased = {
+                navController.popBackStack()
+                navController.navigateToPremiumHome()
+            },
+        ),
     )
 }
 
