@@ -64,6 +64,7 @@ private fun PremiumBecomeLegendScreen(
                 BecomeLegendAmountStage(
                     modifier = Modifier.fillMaxSize(),
                     state = state,
+                    eventPublisher = eventPublisher,
                     onClose = { eventPublisher(PremiumBecomeLegendContract.UiEvent.GoBackToIntro) },
                     onNext = { eventPublisher(PremiumBecomeLegendContract.UiEvent.ShowPaymentInstructions) },
                 )
@@ -72,6 +73,7 @@ private fun PremiumBecomeLegendScreen(
             BecomeLegendStage.Payment -> {
                 BecomeLegendPaymentStage(
                     modifier = Modifier.fillMaxSize(),
+                    state = state,
                     onClose = { eventPublisher(PremiumBecomeLegendContract.UiEvent.ShowAmountEditor) },
                 )
             }

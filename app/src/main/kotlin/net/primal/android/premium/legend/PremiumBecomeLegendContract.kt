@@ -16,6 +16,9 @@ class PremiumBecomeLegendContract {
         val minLegendThresholdInBtc: BigDecimal = BigDecimal.ZERO,
         val maxLegendThresholdInBtc: BigDecimal = BigDecimal.ONE,
         val exchangeBtcUsdRate: Double? = null,
+        val selectedAmountInBtc: BigDecimal = minLegendThresholdInBtc,
+        val bitcoinAddress: String? = null,
+        val qrCodeValue: String? = null,
     )
 
     sealed class UiEvent {
@@ -23,6 +26,7 @@ class PremiumBecomeLegendContract {
         data object GoBackToIntro : UiEvent()
         data object ShowPaymentInstructions : UiEvent()
         data object ShowSuccess : UiEvent()
+        data class UpdateSelectedAmount(val newAmount: Float) : UiEvent()
     }
 
     enum class BecomeLegendStage {
