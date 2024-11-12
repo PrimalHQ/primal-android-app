@@ -30,9 +30,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.math.RoundingMode
-import java.text.NumberFormat
-import java.util.*
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.NostrUserText
@@ -41,8 +38,8 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.premium.legend.PremiumBecomeLegendContract
-import net.primal.android.premium.legend.PremiumBecomeLegendContract.Companion.LEGEND_THRESHOLD_IN_USD
 import net.primal.android.premium.legend.ui.BecomeLegendBottomBarButton
+import net.primal.android.premium.legend.ui.PrimalLegendAmount
 import net.primal.android.premium.ui.PremiumBadge
 import net.primal.android.theme.AppTheme
 
@@ -51,6 +48,7 @@ import net.primal.android.theme.AppTheme
 fun BecomeLegendAmountStage(
     modifier: Modifier,
     state: PremiumBecomeLegendContract.UiState,
+    eventPublisher: (PremiumBecomeLegendContract.UiEvent) -> Unit,
     onClose: () -> Unit,
     onNext: () -> Unit,
 ) {
@@ -108,37 +106,12 @@ fun BecomeLegendAmountStage(
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            var slideValue by remember { mutableFloatStateOf(state.minLegendThresholdInBtc.toFloat()) }
-            val btcValue = slideValue.toBigDecimal().setScale(9, RoundingMode.HALF_UP)
+            var slideValue by remember { mutableFloatStateOf(state.selectedAmountInBtc.toFloat()) }
 
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                MainAmountText(
-                    modifier = Modifier.padding(start = 32.dp),
-                    amount = String.format(Locale.US, "%.8f", btcValue),
-                    currency = "BTC",
-                    textSize = 44.sp,
-                )
-
-                val usdValue = if (state.exchangeBtcUsdRate != null) {
-                    btcValue * state.exchangeBtcUsdRate.toBigDecimal()
-                } else {
-                    null
-                }
-
-                if (usdValue != null) {
-                    val numberFormat = remember { NumberFormat.getNumberInstance() }
-
-                    AltAmountText(
-                        modifier = Modifier.padding(top = 8.dp),
-                        amount = numberFormat.format(
-                            usdValue.toInt().coerceAtLeast(minimumValue = LEGEND_THRESHOLD_IN_USD),
-                        ),
-                        currency = "USD",
-                    )
-                }
-            }
+            PrimalLegendAmount(
+                btcValue = state.selectedAmountInBtc,
+                exchangeBtcUsdRate = state.exchangeBtcUsdRate,
+            )
 
             Column(
                 modifier = Modifier.padding(horizontal = 10.dp),
@@ -168,8 +141,9 @@ fun BecomeLegendAmountStage(
                     value = slideValue,
                     onValueChange = {
                         slideValue = it
+                        eventPublisher(PremiumBecomeLegendContract.UiEvent.UpdateSelectedAmount(newAmount = it))
                     },
-                    steps = 256,
+                    steps = (state.maxLegendThresholdInBtc - state.minLegendThresholdInBtc).toInt(),
                     valueRange = state.minLegendThresholdInBtc.toFloat()..state.maxLegendThresholdInBtc.toFloat(),
                 )
 

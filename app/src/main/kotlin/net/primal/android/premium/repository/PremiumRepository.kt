@@ -80,6 +80,14 @@ class PremiumRepository @Inject constructor(
         }
     }
 
+    suspend fun fetchPrimalLegendPaymentInstructions(userId: String, primalName: String) =
+        withContext(dispatchers.io()) {
+            premiumApi.getPrimalLegendPaymentInstructions(
+                userId = userId,
+                primalName = primalName,
+            )
+        }
+
     private fun MembershipStatusResponse.toPremiumMembership(): PremiumMembership {
         return PremiumMembership(
             userId = this.pubkey,

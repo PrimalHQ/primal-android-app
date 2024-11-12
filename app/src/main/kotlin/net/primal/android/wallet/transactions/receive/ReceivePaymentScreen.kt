@@ -381,7 +381,7 @@ private fun ViewerActionsRow(
 }
 
 @Composable
-private fun QrCodeBox(qrCodeValue: String?, network: Network) {
+fun QrCodeBox(qrCodeValue: String?, network: Network) {
     Box(
         modifier = Modifier.background(Color.White, shape = AppTheme.shapes.extraLarge),
         contentAlignment = Alignment.Center,
@@ -406,7 +406,7 @@ private fun QrCodeBox(qrCodeValue: String?, network: Network) {
 
 @Composable
 @Suppress("MagicNumber")
-private fun rememberQrCodeDrawable(text: String, network: Network): Drawable {
+fun rememberQrCodeDrawable(text: String, network: Network): Drawable {
     val context = LocalContext.current
     return remember(text, network) {
         val data = QrData.Text(text)
