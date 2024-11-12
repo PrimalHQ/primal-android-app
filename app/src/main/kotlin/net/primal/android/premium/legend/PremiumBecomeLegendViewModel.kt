@@ -11,7 +11,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.encodeToString
+import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.networking.di.PrimalWalletApiClient
+import net.primal.android.networking.primal.PrimalApiClient
+import net.primal.android.networking.primal.PrimalCacheFilter
+import net.primal.android.networking.primal.PrimalSocketSubscription
+import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.ext.takeContentOrNull
+import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.premium.api.model.MembershipPurchaseMonitorRequestBody
+import net.primal.android.premium.api.model.MembershipPurchaseMonitorResponse
 import net.primal.android.premium.legend.PremiumBecomeLegendContract.Companion.LEGEND_THRESHOLD_IN_USD
 import net.primal.android.premium.legend.PremiumBecomeLegendContract.UiEvent
 import net.primal.android.premium.legend.PremiumBecomeLegendContract.UiState
@@ -26,6 +39,7 @@ class PremiumBecomeLegendViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val walletRepository: WalletRepository,
     private val premiumRepository: PremiumRepository,
+    @PrimalWalletApiClient private val walletApiClient: PrimalApiClient,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -35,34 +49,14 @@ class PremiumBecomeLegendViewModel @Inject constructor(
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
+    private var monitorSubscription: PrimalSocketSubscription<MembershipPurchaseMonitorResponse>? = null
+    private var monitorMutex = Mutex()
+
     init {
         observeEvents()
         observeActiveAccount()
         fetchExchangeRate()
         fetchLegendPaymentInstructions()
-    }
-
-    private fun fetchLegendPaymentInstructions() {
-        _state.value.membership?.premiumName?.let { primalName ->
-            viewModelScope.launch {
-                try {
-                    val response = premiumRepository.fetchPrimalLegendPaymentInstructions(
-                        userId = activeAccountStore.activeUserId(),
-                        primalName = primalName,
-                    )
-
-                    setState {
-                        copy(
-                            minLegendThresholdInBtc = response.amountBtc.toBigDecimal(),
-                            selectedAmountInBtc = response.amountBtc.toBigDecimal(),
-                            bitcoinAddress = response.qrCode.parseBitcoinPaymentInstructions()?.address,
-                        )
-                    }
-                } catch (error: WssException) {
-                    Timber.e(error)
-                }
-            }
-        }
     }
 
     private fun observeEvents() =
@@ -83,10 +77,6 @@ class PremiumBecomeLegendViewModel @Inject constructor(
                         copy(stage = PremiumBecomeLegendContract.BecomeLegendStage.Payment)
                     }
 
-                    UiEvent.ShowSuccess -> setState {
-                        copy(stage = PremiumBecomeLegendContract.BecomeLegendStage.Success)
-                    }
-
                     is UiEvent.UpdateSelectedAmount -> {
                         val newAmountInBtc = it.newAmount.toBigDecimal().setScale(8, RoundingMode.HALF_UP)
                         setState {
@@ -96,6 +86,10 @@ class PremiumBecomeLegendViewModel @Inject constructor(
                             )
                         }
                     }
+
+                    UiEvent.StartPurchaseMonitor -> startPurchaseMonitorIfStopped()
+
+                    UiEvent.StopPurchaseMonitor -> stopPurchaseMonitor()
                 }
             }
         }
@@ -141,4 +135,86 @@ class PremiumBecomeLegendViewModel @Inject constructor(
             }
         }
     }
+
+    private fun fetchLegendPaymentInstructions() {
+        _state.value.membership?.premiumName?.let { primalName ->
+            viewModelScope.launch {
+                try {
+                    val response = premiumRepository.fetchPrimalLegendPaymentInstructions(
+                        userId = activeAccountStore.activeUserId(),
+                        primalName = primalName,
+                    )
+
+                    setState {
+                        copy(
+                            minLegendThresholdInBtc = response.amountBtc.toBigDecimal(),
+                            selectedAmountInBtc = response.amountBtc.toBigDecimal(),
+                            bitcoinAddress = response.qrCode.parseBitcoinPaymentInstructions()?.address,
+                            membershipQuoteId = response.membershipQuoteId,
+                        )
+                    }
+
+                    startPurchaseMonitorIfStopped()
+                } catch (error: WssException) {
+                    Timber.e(error)
+                }
+            }
+        }
+    }
+
+    private fun subscribeToPurchaseMonitor(quoteId: String) =
+        PrimalSocketSubscription.launch(
+            scope = viewModelScope,
+            primalApiClient = walletApiClient,
+            cacheFilter = PrimalCacheFilter(
+                primalVerb = PrimalVerb.WALLET_MEMBERSHIP_PURCHASE_MONITOR,
+                optionsJson = NostrJson.encodeToString(
+                    MembershipPurchaseMonitorRequestBody(membershipQuoteId = quoteId),
+                ),
+            ),
+            transformer = {
+                if (primalEvent?.kind == NostrEventKind.PrimalMembershipPurchaseMonitor.value) {
+                    primalEvent.takeContentOrNull<MembershipPurchaseMonitorResponse>()
+                } else {
+                    null
+                }
+            },
+        ) {
+            if (it.completedAt != null) {
+                fetchMembershipStatus()
+                setState { copy(stage = PremiumBecomeLegendContract.BecomeLegendStage.Success) }
+                stopPurchaseMonitor()
+            }
+        }
+
+    private fun startPurchaseMonitorIfStopped() {
+        viewModelScope.launch {
+            monitorMutex.withLock {
+                if (monitorSubscription == null) {
+                    val quoteId = _state.value.membershipQuoteId
+                    if (quoteId != null) {
+                        monitorSubscription = subscribeToPurchaseMonitor(quoteId = quoteId)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun stopPurchaseMonitor() {
+        viewModelScope.launch {
+            monitorMutex.withLock {
+                monitorSubscription?.unsubscribe()
+                monitorSubscription = null
+            }
+        }
+    }
+
+    private fun fetchMembershipStatus() =
+        viewModelScope.launch {
+            try {
+                premiumRepository.fetchMembershipStatus(activeAccountStore.activeUserId())
+            } catch (error: WssException) {
+                Timber.w(error)
+            }
+        }
 }

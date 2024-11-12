@@ -94,6 +94,7 @@ enum class NostrEventKind(val value: Int) {
     PrimalWalletUpdatedAt(value = 10_000_317),
     PrimalMembershipNameAvailable(value = 10_000_600),
     PrimalMembershipLegendPaymentInstructions(value = 10_000_601),
+    PrimalMembershipPurchaseMonitor(value = 10_000_602),
     PrimalMembershipStatus(value = 10_000_603),
     PrimalAppState(value = 10_000_999),
     PrimalLongFormContent(value = 10_030_023),

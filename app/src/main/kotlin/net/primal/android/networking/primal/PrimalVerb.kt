@@ -51,4 +51,5 @@ enum class PrimalVerb(val identifier: String) {
     WALLET_PURCHASE_MEMBERSHIP("membership_purchase_product"),
     WALLET_MEMBERSHIP_PRODUCTS("membership_products"),
     WALLET_MEMBERSHIP_CANCEL("membership_cancel_product"),
+    WALLET_MEMBERSHIP_PURCHASE_MONITOR("membership_purchase_monitor"),
 }

@@ -12,6 +12,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.Lifecycle
+import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.premium.legend.PremiumBecomeLegendContract.BecomeLegendStage
 import net.primal.android.premium.legend.ui.amount.BecomeLegendAmountStage
 import net.primal.android.premium.legend.ui.intro.BecomeLegendIntroStage
@@ -22,6 +24,14 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun PremiumBecomeLegendScreen(viewModel: PremiumBecomeLegendViewModel, onClose: () -> Unit) {
     val state = viewModel.state.collectAsState()
+
+    DisposableLifecycleObserverEffect(viewModel) {
+        when (it) {
+            Lifecycle.Event.ON_START -> viewModel.setEvent(PremiumBecomeLegendContract.UiEvent.StartPurchaseMonitor)
+            Lifecycle.Event.ON_STOP -> viewModel.setEvent(PremiumBecomeLegendContract.UiEvent.StopPurchaseMonitor)
+            else -> Unit
+        }
+    }
 
     PremiumBecomeLegendScreen(
         state = state.value,
