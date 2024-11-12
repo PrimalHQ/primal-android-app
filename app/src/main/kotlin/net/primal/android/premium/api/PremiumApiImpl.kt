@@ -12,10 +12,12 @@ import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asPubkeyTag
+import net.primal.android.nostr.ext.takeContentOrNull
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.premium.api.model.CancelMembershipRequest
 import net.primal.android.premium.api.model.ChangeNameRequest
+import net.primal.android.premium.api.model.LegendPaymentInstructionsResponse
 import net.primal.android.premium.api.model.MembershipProductsRequest
 import net.primal.android.premium.api.model.MembershipStatusResponse
 import net.primal.android.premium.api.model.NameAvailableRequest
@@ -96,6 +98,35 @@ class PremiumApiImpl @Inject constructor(
                 ),
             ),
         )
+    }
+
+    override suspend fun getPrimalLegendPaymentInstructions(
+        userId: String,
+        primalName: String,
+    ): LegendPaymentInstructionsResponse {
+        val result = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.WALLET_PURCHASE_MEMBERSHIP,
+                optionsJson = NostrJson.encodeToString(
+                    AppSpecificDataRequest(
+                        eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
+                            userId = userId,
+                            content = NostrJson.encodeToString(
+                                PurchaseMembershipRequest(
+                                    primalProductId = "legend-premium",
+                                    name = primalName,
+                                    receiverUserId = userId,
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        val event = result.findPrimalEvent(NostrEventKind.PrimalMembershipLegendPaymentInstructions)
+        return event?.takeContentOrNull<LegendPaymentInstructionsResponse>()
+            ?: throw WssException("Missing event or invalid content.")
     }
 
     override suspend fun getMembershipProducts() {
