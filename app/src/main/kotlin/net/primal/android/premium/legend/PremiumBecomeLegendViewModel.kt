@@ -9,11 +9,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.premium.legend.PremiumBecomeLegendContract.Companion.LEGEND_THRESHOLD_IN_USD
 import net.primal.android.premium.legend.PremiumBecomeLegendContract.UiEvent
 import net.primal.android.premium.legend.PremiumBecomeLegendContract.UiState
+import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.wallet.repository.WalletRepository
+import timber.log.Timber
 
 @HiltViewModel
-class PremiumBecomeLegendViewModel @Inject constructor() : ViewModel() {
+class PremiumBecomeLegendViewModel @Inject constructor(
+    private val activeAccountStore: ActiveAccountStore,
+    private val walletRepository: WalletRepository,
+) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -24,6 +32,8 @@ class PremiumBecomeLegendViewModel @Inject constructor() : ViewModel() {
 
     init {
         observeEvents()
+        observeActiveAccount()
+        fetchExchangeRate()
     }
 
     private fun observeEvents() =
@@ -48,4 +58,37 @@ class PremiumBecomeLegendViewModel @Inject constructor() : ViewModel() {
                 }
             }
         }
+
+    private fun observeActiveAccount() =
+        viewModelScope.launch {
+            activeAccountStore.activeUserAccount.collect {
+                setState {
+                    copy(
+                        displayName = it.authorDisplayName,
+                        avatarCdnImage = it.avatarCdnImage,
+                        profileNostrAddress = it.internetIdentifier,
+                        profileLightningAddress = it.lightningAddress,
+                        membership = it.premiumMembership,
+                    )
+                }
+            }
+        }
+
+    private fun fetchExchangeRate() {
+        viewModelScope.launch {
+            try {
+                val btcRate = walletRepository.getExchangeRate(
+                    userId = activeAccountStore.activeUserId(),
+                )
+                setState {
+                    copy(
+                        minLegendThresholdInBtc = (LEGEND_THRESHOLD_IN_USD / btcRate).toBigDecimal(),
+                        exchangeBtcUsdRate = btcRate,
+                    )
+                }
+            } catch (error: WssException) {
+                Timber.e(error)
+            }
+        }
+    }
 }

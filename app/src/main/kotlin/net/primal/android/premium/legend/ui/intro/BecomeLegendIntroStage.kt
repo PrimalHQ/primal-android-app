@@ -34,7 +34,7 @@ import net.primal.android.theme.AppTheme
 @ExperimentalMaterial3Api
 @Composable
 fun BecomeLegendIntroStage(
-    modifier: Modifier = Modifier,
+    modifier: Modifier,
     onClose: () -> Unit,
     onNext: () -> Unit,
 ) {

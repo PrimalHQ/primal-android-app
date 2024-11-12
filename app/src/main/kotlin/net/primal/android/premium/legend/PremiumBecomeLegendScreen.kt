@@ -63,6 +63,7 @@ private fun PremiumBecomeLegendScreen(
             BecomeLegendStage.PickAmount -> {
                 BecomeLegendAmountStage(
                     modifier = Modifier.fillMaxSize(),
+                    state = state,
                     onClose = { eventPublisher(PremiumBecomeLegendContract.UiEvent.GoBackToIntro) },
                     onNext = { eventPublisher(PremiumBecomeLegendContract.UiEvent.ShowPaymentInstructions) },
                 )

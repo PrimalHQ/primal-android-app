@@ -9,7 +9,7 @@ import net.primal.android.premium.ui.PaymentSuccess
 
 @ExperimentalMaterial3Api
 @Composable
-fun BecomeLegendSuccessStage(modifier: Modifier = Modifier, onDoneClick: () -> Unit) {
+fun BecomeLegendSuccessStage(modifier: Modifier, onDoneClick: () -> Unit) {
     PaymentSuccess(
         modifier = modifier,
         title = stringResource(R.string.premium_become_legend_success_title),

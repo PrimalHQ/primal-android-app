@@ -56,4 +56,6 @@ interface WalletApi {
         onChainAddress: String,
         amountInBtc: String,
     ): List<MiningFeeTier>
+
+    suspend fun getExchangeRate(userId: String): Double
 }

@@ -20,6 +20,7 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.takeContentOrNull
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.PrimalEvent
+import net.primal.android.nostr.model.primal.content.ContentWalletExchangeRate
 import net.primal.android.nostr.model.primal.content.ContentWalletTransaction
 import net.primal.android.nostr.model.primal.content.WalletActivationContent
 import net.primal.android.nostr.model.primal.content.WalletUserInfoContent
@@ -28,6 +29,7 @@ import net.primal.android.wallet.api.model.ActivateWalletRequestBody
 import net.primal.android.wallet.api.model.BalanceRequestBody
 import net.primal.android.wallet.api.model.BalanceResponse
 import net.primal.android.wallet.api.model.DepositRequestBody
+import net.primal.android.wallet.api.model.ExchangeRateRequestBody
 import net.primal.android.wallet.api.model.GetActivationCodeRequestBody
 import net.primal.android.wallet.api.model.InAppPurchaseQuoteRequestBody
 import net.primal.android.wallet.api.model.InAppPurchaseQuoteResponse
@@ -352,5 +354,22 @@ class WalletApiImpl @Inject constructor(
         val content = takeContentOrNull<WalletActivationContent>()
             ?: throw WssException("Missing or invalid content in response.")
         return content.lud16
+    }
+
+    override suspend fun getExchangeRate(userId: String): Double {
+        val result = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.WALLET,
+                optionsJson = buildWalletOptionsJson(
+                    userId = userId,
+                    walletVerb = WalletOperationVerb.EXCHANGE_RATE,
+                    requestBody = ExchangeRateRequestBody,
+                ),
+            ),
+        )
+
+        return result.findPrimalEvent(NostrEventKind.PrimalWalletExchangeRate)
+            ?.takeContentOrNull<ContentWalletExchangeRate>()?.rate
+            ?: throw WssException("Missing or invalid content in response.")
     }
 }

@@ -21,7 +21,7 @@ import net.primal.android.premium.legend.ui.BecomeLegendBottomBarButton
 
 @ExperimentalMaterial3Api
 @Composable
-fun BecomeLegendPaymentStage(modifier: Modifier = Modifier, onClose: () -> Unit) {
+fun BecomeLegendPaymentStage(modifier: Modifier, onClose: () -> Unit) {
     Scaffold(
         modifier = modifier,
         topBar = {
