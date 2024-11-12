@@ -8,6 +8,9 @@ class PremiumBecomeLegendContract {
 
     sealed class UiEvent {
         data object ShowAmountEditor : UiEvent()
+        data object GoBackToIntro : UiEvent()
+        data object ShowPaymentInstructions : UiEvent()
+        data object ShowSuccess : UiEvent()
     }
 
     enum class BecomeLegendStage {

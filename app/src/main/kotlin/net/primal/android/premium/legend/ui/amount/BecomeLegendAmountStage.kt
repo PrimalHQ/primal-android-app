@@ -21,7 +21,11 @@ import net.primal.android.premium.legend.ui.BecomeLegendBottomBarButton
 
 @ExperimentalMaterial3Api
 @Composable
-fun BecomeLegendAmountStage(modifier: Modifier = Modifier, onClose: () -> Unit) {
+fun BecomeLegendAmountStage(
+    modifier: Modifier = Modifier,
+    onClose: () -> Unit,
+    onNext: () -> Unit,
+) {
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -35,7 +39,7 @@ fun BecomeLegendAmountStage(modifier: Modifier = Modifier, onClose: () -> Unit) 
         bottomBar = {
             BecomeLegendBottomBarButton(
                 text = stringResource(R.string.premium_become_legend_button_pay_now),
-                onClick = {},
+                onClick = onNext,
             )
         },
     ) { paddingValues ->
