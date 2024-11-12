@@ -17,8 +17,8 @@ import net.primal.android.settings.content.ContentDisplaySettingsViewModel
 import net.primal.android.settings.home.PrimalSettingsSection
 import net.primal.android.settings.home.SettingsHomeScreen
 import net.primal.android.settings.home.SettingsHomeViewModel
-import net.primal.android.settings.keys.AccountSettingsScreen
-import net.primal.android.settings.keys.AccountSettingsViewModel
+import net.primal.android.settings.keys.KeysSettingsScreen
+import net.primal.android.settings.keys.KeysSettingsViewModel
 import net.primal.android.settings.muted.list.MutedSettingsScreen
 import net.primal.android.settings.muted.list.MutedSettingsViewModel
 import net.primal.android.settings.network.NetworkSettingsScreen
@@ -52,7 +52,7 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
             onClose = { navController.navigateUp() },
             onSettingsSectionClick = {
                 when (it) {
-                    PrimalSettingsSection.Account -> navController.navigateToAccountSettings()
+                    PrimalSettingsSection.Keys -> navController.navigateToAccountSettings()
                     PrimalSettingsSection.Network -> navController.navigateToNetworkSettings()
                     PrimalSettingsSection.Wallet -> navController.navigateToWalletSettings()
                     PrimalSettingsSection.Appearance -> navController.navigateToAppearanceSettings()
@@ -112,9 +112,9 @@ private fun NavGraphBuilder.keys(route: String, navController: NavController) =
         popEnterTransition = { primalScaleIn },
         popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
-        val viewModel = hiltViewModel<AccountSettingsViewModel>(it)
+        val viewModel = hiltViewModel<KeysSettingsViewModel>(it)
         LockToOrientationPortrait()
-        AccountSettingsScreen(
+        KeysSettingsScreen(
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
         )

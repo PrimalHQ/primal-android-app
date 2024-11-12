@@ -1,12 +1,12 @@
 package net.primal.android.settings.home
 
 enum class PrimalSettingsSection {
-    Account,
+    Keys,
+    Wallet,
+    Network,
     Appearance,
     ContentDisplay,
     MutedAccounts,
     Notifications,
-    Network,
-    Wallet,
     Zaps,
 }

@@ -52,10 +52,10 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
-fun AccountSettingsScreen(viewModel: AccountSettingsViewModel, onClose: () -> Unit) {
+fun KeysSettingsScreen(viewModel: KeysSettingsViewModel, onClose: () -> Unit) {
     val uiState = viewModel.state.collectAsState()
 
-    AccountSettingsScreen(
+    KeysSettingsScreen(
         state = uiState.value,
         onClose = onClose,
     )
@@ -63,7 +63,7 @@ fun AccountSettingsScreen(viewModel: AccountSettingsViewModel, onClose: () -> Un
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AccountSettingsScreen(state: AccountSettingsContract.UiState, onClose: () -> Unit) {
+fun KeysSettingsScreen(state: KeysSettingsContract.UiState, onClose: () -> Unit) {
     Scaffold(
         modifier = Modifier,
         topBar = {
@@ -273,8 +273,8 @@ fun PrivateKeySection(nsec: String) {
 @Composable
 fun PreviewSettingsHomeScreen() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
-        AccountSettingsScreen(
-            state = AccountSettingsContract.UiState(
+        KeysSettingsScreen(
+            state = KeysSettingsContract.UiState(
                 avatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
                 npub = "npub16c0nh3dnadzqpm76uctf5hqhe2lny344zsmpm6feee9p5rdxaa9q586nvr",
                 nsec = "nsec1w33tr4t0gg3gvrhjh5mxqzvt7xzdrrk64tr0j7mnqdfrrarfj3yqlf8hxp",
