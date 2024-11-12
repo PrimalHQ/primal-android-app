@@ -13,9 +13,9 @@ data class MembershipStatusResponse(
     @SerialName("primal_vip_profile") val primalVipProfile: String,
     @SerialName("used_storage") val usedStorage: Long,
     @SerialName("max_storage") val maxStorage: Long,
-    @SerialName("expires_on") val expiresOn: Long,
     @SerialName("cohort_1") val cohort1: String,
     @SerialName("cohort_2") val cohort2: String,
+    @SerialName("expires_on") val expiresOn: Long? = null,
     @SerialName("recurring") val recurring: Boolean = false,
     @SerialName("renews_on") val renewsOn: Long? = null,
 )

@@ -75,11 +75,13 @@ fun PrimalPremiumTable(
                 value = when {
                     premiumMembership.recurring && premiumMembership.renewsOn != null ->
                         Instant.ofEpochSecond(premiumMembership.renewsOn)
+                            .formatToDefaultDateFormat(FormatStyle.LONG)
 
-                    else ->
-                        Instant.ofEpochSecond(premiumMembership.expiresOn)
-                }
-                    .formatToDefaultDateFormat(FormatStyle.LONG),
+                    premiumMembership.expiresOn != null -> Instant.ofEpochSecond(premiumMembership.expiresOn)
+                        .formatToDefaultDateFormat(FormatStyle.LONG)
+
+                    else -> stringResource(R.string.premium_table_never)
+                },
                 alwaysHideApply = true,
             )
         }
