@@ -5,20 +5,22 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.manage.media.PremiumMediaManagementContract.UiState
-import net.primal.android.premium.manage.media.model.MediaType
-import net.primal.android.premium.manage.media.model.MediaUiItem
+import net.primal.android.premium.manage.media.repository.MediaManagementRepository
+import net.primal.android.premium.manage.media.ui.MediaType
+import net.primal.android.premium.manage.media.ui.MediaUiItem
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import timber.log.Timber
 
 @HiltViewModel
 class PremiumMediaManagementViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
+    private val mediaManagementRepository: MediaManagementRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -26,75 +28,71 @@ class PremiumMediaManagementViewModel @Inject constructor(
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
     init {
-        setMaxAndUsedStorage()
-        fetchMediaBreakdown()
+        observeActiveAccount()
+        fetchMediaStats()
+        fetchMediaUploads()
     }
 
-    private fun setMaxAndUsedStorage() =
+    private fun fetchMediaUploads() {
         viewModelScope.launch {
-            val premiumMembership = activeAccountStore.activeUserAccount().premiumMembership
-            setState {
-                copy(
-                    usedStorageInBytes = premiumMembership?.usedStorageInBytes,
-                    maxStorageInBytes = premiumMembership?.maxStorageInBytes,
-                )
-            }
-        }
+            try {
+                val mediaUploads = mediaManagementRepository.fetchMediaUploads(
+                    userId = activeAccountStore.activeUserId(),
+                ) ?: emptyList()
 
-    private fun fetchMediaBreakdown() =
-        viewModelScope.launch {
-            val imgUrl = "https://images.stockcake.com/public/9/e/0/9e0955ab-0177-" +
-                "48a2-a346-1525da173e28_medium/verdant-grass-field-stockcake.jpg"
-            delay(1.seconds)
-            setState {
-                copy(
-                    calculating = false,
-                    imagesInBytes = 35_791_394_133,
-                    videosInBytes = 17_791_394_133,
-                    otherInBytes = 12_791_394_133,
-                    mediaItems = listOf(
-                        MediaUiItem(
-                            mediaId = "asdf",
-                            thumbnailUrl = imgUrl,
-                            mediaUrl = imgUrl,
-                            sizeInBytes = 1_000_000,
-                            type = MediaType.Image,
-                            date = Instant.now(),
-                        ),
-                        MediaUiItem(
-                            mediaId = "asdf1",
-                            thumbnailUrl = imgUrl,
-                            mediaUrl = imgUrl,
-                            sizeInBytes = 1_000_000,
-                            type = MediaType.Video,
-                            date = Instant.now(),
-                        ),
-                        MediaUiItem(
-                            mediaId = "asdf2",
-                            thumbnailUrl = imgUrl,
-                            mediaUrl = imgUrl,
-                            sizeInBytes = 2_600_000,
-                            type = MediaType.Image,
-                            date = Instant.now(),
-                        ),
-                        MediaUiItem(
-                            mediaId = "asdf3",
-                            thumbnailUrl = imgUrl,
-                            mediaUrl = imgUrl,
-                            sizeInBytes = 3_000_000,
-                            type = MediaType.Video,
-                            date = Instant.now(),
-                        ),
-                        MediaUiItem(
-                            mediaId = "asdf4",
-                            thumbnailUrl = imgUrl,
-                            mediaUrl = imgUrl,
-                            sizeInBytes = 1_000_000,
-                            type = MediaType.Image,
-                            date = Instant.now(),
-                        ),
-                    ),
-                )
+                val uploads = mediaUploads.map { mediaInfo ->
+                    val cdnVariant = mediaInfo.cdnResource?.variants?.minByOrNull { it.width }
+                    MediaUiItem(
+                        mediaId = mediaInfo.url,
+                        thumbnailUrl = cdnVariant?.mediaUrl,
+                        mediaUrl = mediaInfo.url,
+                        sizeInBytes = mediaInfo.sizeInBytes,
+                        type = when {
+                            mediaInfo.mimetype?.contains("image") == true -> MediaType.Image
+                            mediaInfo.mimetype?.contains("video") == true -> MediaType.Video
+                            else -> MediaType.Other
+                        },
+                        createdAt = mediaInfo.createdAt?.let(Instant::ofEpochSecond),
+                    )
+                }
+
+                setState { copy(mediaItems = uploads) }
+            } catch (error: WssException) {
+                Timber.e(error)
             }
         }
+    }
+
+    private fun fetchMediaStats() {
+        viewModelScope.launch {
+            setState { copy(calculating = true) }
+            try {
+                val stats = mediaManagementRepository.fetchMediaStats(userId = activeAccountStore.activeUserId())
+                setState {
+                    copy(
+                        imagesInBytes = stats.imagesInBytes,
+                        videosInBytes = stats.videosInBytes,
+                        otherInBytes = stats.otherFilesInBytes,
+                    )
+                }
+            } catch (error: WssException) {
+                Timber.e(error)
+            } finally {
+                setState { copy(calculating = false) }
+            }
+        }
+    }
+
+    private fun observeActiveAccount() {
+        viewModelScope.launch {
+            activeAccountStore.activeUserAccount.collect {
+                setState {
+                    copy(
+                        usedStorageInBytes = it.premiumMembership?.usedStorageInBytes,
+                        maxStorageInBytes = it.premiumMembership?.maxStorageInBytes,
+                    )
+                }
+            }
+        }
+    }
 }

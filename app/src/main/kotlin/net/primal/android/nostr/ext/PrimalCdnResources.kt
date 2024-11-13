@@ -13,10 +13,8 @@ private fun List<PrimalEvent>.flatMapNotNullAsContentPrimalEventResources() =
 fun List<PrimalEvent>.flatMapNotNullAsCdnResource() =
     flatMapNotNullAsContentPrimalEventResources()
         .flatMap {
-            val eventId = it.eventId
             it.resources.map { eventResource ->
                 CdnResource(
-                    eventId = eventId,
                     contentType = eventResource.mimeType,
                     url = eventResource.url,
                     variants = eventResource.variants.map { variant ->

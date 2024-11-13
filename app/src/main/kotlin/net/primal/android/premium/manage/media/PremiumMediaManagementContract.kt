@@ -1,6 +1,6 @@
 package net.primal.android.premium.manage.media
 
-import net.primal.android.premium.manage.media.model.MediaUiItem
+import net.primal.android.premium.manage.media.ui.MediaUiItem
 
 interface PremiumMediaManagementContract {
     data class UiState(
@@ -10,7 +10,6 @@ interface PremiumMediaManagementContract {
         val videosInBytes: Long? = null,
         val otherInBytes: Long? = null,
         val mediaItems: List<MediaUiItem> = emptyList(),
-
         val calculating: Boolean = true,
     )
 }

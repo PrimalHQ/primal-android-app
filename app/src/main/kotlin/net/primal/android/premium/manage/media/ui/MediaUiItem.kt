@@ -1,4 +1,4 @@
-package net.primal.android.premium.manage.media.model
+package net.primal.android.premium.manage.media.ui
 
 import java.time.Instant
 
@@ -8,10 +8,11 @@ data class MediaUiItem(
     val mediaUrl: String,
     val sizeInBytes: Long,
     val type: MediaType,
-    val date: Instant,
+    val createdAt: Instant? = null,
 )
 
 enum class MediaType {
     Image,
     Video,
+    Other,
 }
