@@ -5,6 +5,7 @@ import net.primal.android.premium.api.model.LegendPaymentInstructionsResponse
 import net.primal.android.premium.api.model.MembershipStatusResponse
 import net.primal.android.premium.api.model.NameAvailableResponse
 import net.primal.android.premium.api.model.PurchaseMembershipRequest
+import net.primal.android.premium.domain.PremiumPurchaseOrder
 
 interface PremiumApi {
 
@@ -26,4 +27,6 @@ interface PremiumApi {
     suspend fun cancelMembership(userId: String, body: CancelMembershipRequest)
 
     suspend fun shouldShowSupportUs(): Boolean
+
+    suspend fun getOrdersHistory(userId: String): List<PremiumPurchaseOrder>
 }

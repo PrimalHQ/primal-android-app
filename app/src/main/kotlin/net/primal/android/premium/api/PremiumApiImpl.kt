@@ -24,6 +24,7 @@ import net.primal.android.premium.api.model.NameAvailableRequest
 import net.primal.android.premium.api.model.NameAvailableResponse
 import net.primal.android.premium.api.model.PurchaseMembershipRequest
 import net.primal.android.premium.api.model.ShowSupportUsResponse
+import net.primal.android.premium.domain.PremiumPurchaseOrder
 import net.primal.android.settings.api.model.AppSpecificDataRequest
 
 class PremiumApiImpl @Inject constructor(
@@ -181,5 +182,25 @@ class PremiumApiImpl @Inject constructor(
         val configEvent = result.findPrimalEvent(NostrEventKind.PrimalClientConfig)
         val response = NostrJson.decodeFromStringOrNull<ShowSupportUsResponse>(configEvent?.content)
         return response?.showSupportPrimal == true
+    }
+
+    override suspend fun getOrdersHistory(userId: String): List<PremiumPurchaseOrder> {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.WALLET_MEMBERSHIP_PURCHASE_HISTORY,
+                optionsJson = NostrJsonEncodeDefaults.encodeToString(
+                    AppSpecificDataRequest(
+                        eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
+                            userId = userId,
+                            content = "{\"since\": 0, \"limit\": 100}",
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        val historyEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalMembershipHistory)
+        return historyEvent.takeContentOrNull<List<PremiumPurchaseOrder>>()
+            ?: throw WssException("Missing event or invalid content.")
     }
 }

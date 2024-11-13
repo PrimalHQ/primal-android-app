@@ -88,6 +88,11 @@ class PremiumRepository @Inject constructor(
             )
         }
 
+    suspend fun fetchOrderHistory(userId: String) =
+        withContext(dispatchers.io()) {
+            premiumApi.getOrdersHistory(userId = userId)
+        }
+
     private fun MembershipStatusResponse.toPremiumMembership(): PremiumMembership {
         return PremiumMembership(
             userId = this.pubkey,
