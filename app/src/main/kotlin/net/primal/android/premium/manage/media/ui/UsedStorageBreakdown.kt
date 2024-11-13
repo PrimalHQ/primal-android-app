@@ -1,4 +1,4 @@
-package net.primal.android.premium.manage.ui
+package net.primal.android.premium.manage.media.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

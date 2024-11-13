@@ -1,4 +1,4 @@
-package net.primal.android.premium.manage.ui
+package net.primal.android.premium.manage.media.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -7,15 +7,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -28,48 +25,17 @@ import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import java.time.format.FormatStyle
 import net.primal.android.R
-import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Copy
 import net.primal.android.core.compose.icons.primaliconpack.Delete
 import net.primal.android.core.utils.formatToDefaultDateFormat
 import net.primal.android.core.utils.toMegaBytes
-import net.primal.android.premium.manage.media.model.MediaType
-import net.primal.android.premium.manage.media.model.MediaUiItem
 import net.primal.android.theme.AppTheme
 
 val DELETE_COLOR = Color(0xFFFA3C3C)
 
 @Composable
-fun MediaTable(
-    modifier: Modifier = Modifier,
-    items: List<MediaUiItem>,
-    onCopyClick: (MediaUiItem) -> Unit,
-    onDeleteClick: (MediaUiItem) -> Unit,
-) {
-    LazyColumn(
-        modifier = modifier
-            .clip(AppTheme.shapes.medium),
-    ) {
-        item(key = "tableHeader") {
-            TableHeader()
-        }
-        items(
-            items = items,
-            key = { it.mediaId },
-        ) { item ->
-            PrimalDivider()
-            MediaListItem(
-                item = item,
-                onCopyClick = { onCopyClick(item) },
-                onDeleteClick = { onDeleteClick(item) },
-            )
-        }
-    }
-}
-
-@Composable
-private fun MediaListItem(
+fun MediaListItem(
     modifier: Modifier = Modifier,
     item: MediaUiItem,
     onCopyClick: () -> Unit,
@@ -88,13 +54,15 @@ private fun MediaListItem(
         ) {
             SubcomposeAsyncImage(
                 modifier = Modifier.size(width = 64.dp, height = 48.dp),
-                model = ImageRequest.Builder(context).data(item.thumbnailUrl).build(),
+                model = ImageRequest.Builder(context)
+                    .data(item.thumbnailUrl ?: item.mediaUrl)
+                    .build(),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
             )
         }
         MediaItemDetailsColumn(
-            modifier = Modifier.Companion.weight(5f),
+            modifier = Modifier.weight(5f),
             item = item,
         )
         ActionIcon(
@@ -121,6 +89,7 @@ private fun MediaItemDetailsColumn(modifier: Modifier, item: MediaUiItem) {
         val mediaType = when (item.type) {
             MediaType.Image -> stringResource(id = R.string.premium_media_management_table_type_image)
             MediaType.Video -> stringResource(id = R.string.premium_media_management_table_type_video)
+            MediaType.Other -> stringResource(R.string.premium_media_management_table_type_other)
         }
         Text(
             text = stringResource(
@@ -130,7 +99,7 @@ private fun MediaItemDetailsColumn(modifier: Modifier, item: MediaUiItem) {
             style = AppTheme.typography.bodyLarge,
         )
         Text(
-            text = item.date.formatToDefaultDateFormat(FormatStyle.MEDIUM),
+            text = item.createdAt?.formatToDefaultDateFormat(FormatStyle.MEDIUM) ?: "",
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             style = AppTheme.typography.bodyMedium,
         )
@@ -157,7 +126,7 @@ private fun ActionIcon(
 }
 
 @Composable
-private fun TableHeader(modifier: Modifier = Modifier) {
+fun TableHeader(modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .background(AppTheme.extraColorScheme.surfaceVariantAlt1)
