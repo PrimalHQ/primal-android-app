@@ -48,8 +48,8 @@ private fun PremiumBuyingScreen(
 ) {
     PremiumBuyingBackHandler(
         stage = state.stage,
-        onClose = screenCallbacks.onClose,
         eventPublisher = eventPublisher,
+        screenCallbacks = screenCallbacks,
     )
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -154,16 +154,12 @@ private fun PremiumBuyingScreen(
 @Composable
 private fun PremiumBuyingBackHandler(
     stage: PremiumBuyingContract.PremiumStage,
-    onClose: () -> Unit,
     eventPublisher: (PremiumBuyingContract.UiEvent) -> Unit,
+    screenCallbacks: PremiumBuyingContract.ScreenCallbacks,
 ) {
     BackHandler {
         when (stage) {
-            PremiumBuyingContract.PremiumStage.Home,
-            PremiumBuyingContract.PremiumStage.Success,
-            -> {
-                onClose()
-            }
+            PremiumBuyingContract.PremiumStage.Home -> screenCallbacks.onClose()
 
             PremiumBuyingContract.PremiumStage.FindPrimalName -> {
                 eventPublisher(
@@ -180,6 +176,8 @@ private fun PremiumBuyingBackHandler(
                     ),
                 )
             }
+
+            PremiumBuyingContract.PremiumStage.Success -> screenCallbacks.onPremiumPurchased()
         }
     }
 }
