@@ -22,7 +22,11 @@ import net.primal.android.premium.legend.ui.success.BecomeLegendSuccessStage
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun PremiumBecomeLegendScreen(viewModel: PremiumBecomeLegendViewModel, onClose: () -> Unit) {
+fun PremiumBecomeLegendScreen(
+    viewModel: PremiumBecomeLegendViewModel,
+    onClose: () -> Unit,
+    onLegendPurchased: () -> Unit,
+) {
     val state = viewModel.state.collectAsState()
 
     DisposableLifecycleObserverEffect(viewModel) {
@@ -37,6 +41,7 @@ fun PremiumBecomeLegendScreen(viewModel: PremiumBecomeLegendViewModel, onClose: 
         state = state.value,
         eventPublisher = viewModel::setEvent,
         onClose = onClose,
+        onLegendPurchased = onLegendPurchased,
     )
 }
 
@@ -46,11 +51,13 @@ private fun PremiumBecomeLegendScreen(
     state: PremiumBecomeLegendContract.UiState,
     eventPublisher: (PremiumBecomeLegendContract.UiEvent) -> Unit,
     onClose: () -> Unit,
+    onLegendPurchased: () -> Unit,
 ) {
     BecomeLegendBackHandler(
         stage = state.stage,
         eventPublisher = eventPublisher,
         onClose = onClose,
+        onLegendPurchased = onLegendPurchased,
     )
 
     AnimatedContent(
@@ -91,7 +98,7 @@ private fun PremiumBecomeLegendScreen(
             BecomeLegendStage.Success -> {
                 BecomeLegendSuccessStage(
                     modifier = Modifier.fillMaxSize(),
-                    onDoneClick = onClose,
+                    onDoneClick = onLegendPurchased,
                 )
             }
         }
@@ -102,23 +109,18 @@ private fun PremiumBecomeLegendScreen(
 private fun BecomeLegendBackHandler(
     stage: BecomeLegendStage,
     onClose: () -> Unit,
+    onLegendPurchased: () -> Unit,
     eventPublisher: (PremiumBecomeLegendContract.UiEvent) -> Unit,
 ) {
     BackHandler {
         when (stage) {
-            BecomeLegendStage.Intro,
-            BecomeLegendStage.Success,
-            -> {
-                onClose()
-            }
+            BecomeLegendStage.Intro -> onClose()
 
-            BecomeLegendStage.PickAmount -> {
-                eventPublisher(PremiumBecomeLegendContract.UiEvent.GoBackToIntro)
-            }
+            BecomeLegendStage.PickAmount -> eventPublisher(PremiumBecomeLegendContract.UiEvent.GoBackToIntro)
 
-            BecomeLegendStage.Payment -> {
-                eventPublisher(PremiumBecomeLegendContract.UiEvent.ShowAmountEditor)
-            }
+            BecomeLegendStage.Payment -> eventPublisher(PremiumBecomeLegendContract.UiEvent.ShowAmountEditor)
+
+            BecomeLegendStage.Success -> onLegendPurchased()
         }
     }
 }

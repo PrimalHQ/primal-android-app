@@ -1047,6 +1047,10 @@ private fun NavGraphBuilder.premiumBecomeLegend(route: String, navController: Na
         PremiumBecomeLegendScreen(
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
+            onLegendPurchased = {
+                navController.navigateUp()
+                navController.popBackStack()
+            },
         )
     }
 
