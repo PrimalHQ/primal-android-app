@@ -204,6 +204,7 @@
     <string name="premium_media_management_table_delete">Delete</string>
     <string name="premium_media_management_table_type_image">Image</string>
     <string name="premium_media_management_table_type_video">Video</string>
+    <string name="premium_media_management_table_type_other">Other</string>
     <string name="premium_media_management_used_storage">%1$.2f GB of %2$.0f GB used</string>
     <string name="premium_media_management_free_storage">%1$.2f GB free</string>
     <string name="premium_media_management_media_size">%1$.1f MB</string>
