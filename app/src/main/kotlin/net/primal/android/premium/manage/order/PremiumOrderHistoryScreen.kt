@@ -1,8 +1,14 @@
 package net.primal.android.premium.manage.order
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -17,14 +23,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import java.time.Instant
+import java.time.format.FormatStyle
 import net.primal.android.R
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.utils.formatToDefaultDateFormat
 import net.primal.android.theme.AppTheme
+import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 
 @Composable
 fun PremiumOrderHistoryScreen(viewModel: PremiumOrderHistoryViewModel, onClose: () -> Unit) {
@@ -37,7 +49,7 @@ fun PremiumOrderHistoryScreen(viewModel: PremiumOrderHistoryViewModel, onClose: 
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 private fun PremiumOrderHistoryScreen(
     state: PremiumOrderHistoryContract.UiState,
@@ -53,7 +65,7 @@ private fun PremiumOrderHistoryScreen(
             )
         },
         bottomBar = {
-            if (state.isSubscription) {
+            if (state.isRecurringSubscription) {
                 CancelSubscriptionButton(
                     cancelling = state.cancellingSubscription,
                     onCancelConfirmed = {
@@ -63,19 +75,92 @@ private fun PremiumOrderHistoryScreen(
             }
         },
     ) { paddingValues ->
-        Box(
+        LazyColumn(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentAlignment = Alignment.Center,
+                .padding(paddingValues)
+                .padding(horizontal = 12.dp)
+                .padding(top = 16.dp)
+                .fillMaxWidth()
+                .wrapContentHeight(align = Alignment.Top)
+                .background(
+                    color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                    shape = AppTheme.shapes.large,
+                ),
         ) {
-            Text(
-                modifier = Modifier.padding(horizontal = 64.dp),
-                text = "Your orders will appear here.",
-                textAlign = TextAlign.Center,
-                style = AppTheme.typography.bodyLarge,
-            )
+            stickyHeader {
+                Column {
+                    TableRow(
+                        date = stringResource(R.string.premium_order_history_date_header),
+                        label = stringResource(R.string.premium_order_history_purchase_header),
+                        amount = stringResource(R.string.premium_order_history_amount_header),
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    PrimalDivider()
+                }
+            }
+
+            items(state.orders) {
+                Column {
+                    TableRow(
+                        date = Instant.ofEpochSecond(it.purchasedAt).formatToDefaultDateFormat(
+                            FormatStyle.MEDIUM,
+                        ),
+                        label = it.productLabel,
+                        amount = if (it.amountUsd != null) {
+                            "$${it.amountUsd} USD"
+                        } else if (it.amountBtc != null) {
+                            "${it.amountBtc.toBigDecimal().toSats()} sats"
+                        } else {
+                            ""
+                        },
+                    )
+                    PrimalDivider()
+                }
+            }
         }
+    }
+}
+
+@Composable
+private fun TableRow(
+    date: String,
+    label: String,
+    amount: String,
+    fontWeight: FontWeight = FontWeight.Normal,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+    ) {
+        Text(
+            modifier = Modifier.weight(0.3f),
+            text = date,
+            style = AppTheme.typography.bodyMedium,
+            fontSize = 15.sp,
+            color = AppTheme.colorScheme.onSurface,
+            fontWeight = fontWeight,
+        )
+
+        Text(
+            modifier = Modifier
+                .weight(0.4f)
+                .padding(start = 16.dp, end = 32.dp),
+            text = label,
+            style = AppTheme.typography.bodyMedium,
+            fontSize = 15.sp,
+            color = AppTheme.colorScheme.onSurface,
+            fontWeight = fontWeight,
+        )
+
+        Text(
+            modifier = Modifier.weight(0.3f),
+            text = amount,
+            style = AppTheme.typography.bodyMedium,
+            fontSize = 15.sp,
+            color = AppTheme.colorScheme.onSurface,
+            fontWeight = fontWeight,
+        )
     }
 }
 
@@ -96,7 +181,7 @@ private fun CancelSubscriptionButton(cancelling: Boolean, onCancelConfirmed: () 
         loading = cancelling,
         enabled = !cancelling,
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-        text = "Cancel Premium Subscription",
+        text = stringResource(R.string.premium_order_history_cancel_subscription_button),
     )
 }
 
@@ -107,27 +192,25 @@ private fun CancelSubscriptionAlertDialog(onDismissRequest: () -> Unit, onConfir
         onDismissRequest = onDismissRequest,
         title = {
             Text(
-                text = "Cancel Premium?",
+                text = stringResource(R.string.premium_order_history_cancel_dialog_title),
             )
         },
         text = {
             Text(
-                text = "Your subscription will remain active until the end of your current billing period, " +
-                    "so you can continue enjoying premium features until then. " +
-                    "No further charges will be made after that date.",
+                text = stringResource(R.string.premium_order_history_cancel_dialog_text),
             )
         },
         dismissButton = {
             TextButton(onClick = onDismissRequest) {
                 Text(
-                    text = "Keep Premium",
+                    text = stringResource(R.string.premium_order_history_cancel_dialog_dismiss_button),
                 )
             }
         },
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text(
-                    text = "Cancel Subscription",
+                    text = stringResource(R.string.premium_order_history_cancel_dialog_confirm_button),
                 )
             }
         },
