@@ -17,6 +17,7 @@ import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
+import timber.log.Timber
 
 @HiltViewModel
 class PremiumOrderHistoryViewModel @Inject constructor(
@@ -38,6 +39,21 @@ class PremiumOrderHistoryViewModel @Inject constructor(
         observeEvents()
         observeActiveAccount()
         fetchActiveSubscription()
+        fetchOrderHistory()
+    }
+
+    private fun fetchOrderHistory() {
+        viewModelScope.launch {
+            setState { copy(fetchingHistory = true) }
+            try {
+                val orders = premiumRepository.fetchOrderHistory(userId = activeAccountStore.activeUserId())
+                setState { copy(orders = orders) }
+            } catch (error: WssException) {
+                Timber.e(error)
+            } finally {
+                setState { copy(fetchingHistory = false) }
+            }
+        }
     }
 
     private fun observeEvents() {
@@ -55,7 +71,7 @@ class PremiumOrderHistoryViewModel @Inject constructor(
             activeAccountStore.activeUserAccount.collect {
                 setState {
                     copy(
-                        isSubscription = it.premiumMembership?.recurring ?: false,
+                        isRecurringSubscription = it.premiumMembership?.recurring ?: false,
                     )
                 }
             }

@@ -96,6 +96,7 @@ enum class NostrEventKind(val value: Int) {
     PrimalMembershipLegendPaymentInstructions(value = 10_000_601),
     PrimalMembershipPurchaseMonitor(value = 10_000_602),
     PrimalMembershipStatus(value = 10_000_603),
+    PrimalMembershipHistory(value = 10_000_605),
     PrimalAppState(value = 10_000_999),
     PrimalLongFormContent(value = 10_030_023),
     Unknown(value = -1),
