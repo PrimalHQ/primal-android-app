@@ -113,4 +113,7 @@ private fun PremiumManageContract.ManageDestination.toDisplayString(): String =
 
         PremiumManageContract.ManageDestination.LegendaryProfileCustomization ->
             stringResource(id = R.string.premium_manage_legendary_customization)
+
+        PremiumManageContract.ManageDestination.BecomeALegend ->
+            stringResource(R.string.premium_manage_become_a_legend)
     }

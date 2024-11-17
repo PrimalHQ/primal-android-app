@@ -1,6 +1,11 @@
 package net.primal.android.premium.manage
 
 interface PremiumManageContract {
+
+    data class UiState(
+        val isLegend: Boolean = false,
+    )
+
     enum class ManageDestination {
         MediaManagement,
         PremiumRelay,
@@ -10,5 +15,6 @@ interface PremiumManageContract {
         ChangePrimalName,
         ExtendSubscription,
         LegendaryProfileCustomization,
+        BecomeALegend,
     }
 }

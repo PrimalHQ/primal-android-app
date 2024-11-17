@@ -9,6 +9,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -27,6 +28,25 @@ import net.primal.android.theme.AppTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PremiumManageScreen(
+    viewModel: PremiumManageViewModel,
+    onFAQClick: () -> Unit,
+    onDestination: (ManageDestination) -> Unit,
+    onClose: () -> Unit,
+) {
+    val state = viewModel.state.collectAsState()
+
+    PremiumManageScreen(
+        state = state.value,
+        onFAQClick = onFAQClick,
+        onDestination = onDestination,
+        onClose = onClose,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PremiumManageScreen(
+    state: PremiumManageContract.UiState,
     onFAQClick: () -> Unit,
     onDestination: (ManageDestination) -> Unit,
     onClose: () -> Unit,
@@ -60,11 +80,15 @@ fun PremiumManageScreen(
 
             ManageDestinationTable(
                 title = stringResource(id = R.string.premium_manage_primal_account),
-                destinations = listOf(
+                destinations = listOfNotNull(
                     ManageDestination.ManageSubscription,
                     ManageDestination.ChangePrimalName,
-                    ManageDestination.ExtendSubscription,
-                    ManageDestination.LegendaryProfileCustomization,
+                    if (!state.isLegend) ManageDestination.ExtendSubscription else null,
+                    if (state.isLegend) {
+                        ManageDestination.LegendaryProfileCustomization
+                    } else {
+                        ManageDestination.BecomeALegend
+                    },
                 ),
                 onDestination = onDestination,
             )
