@@ -90,6 +90,7 @@ import net.primal.android.premium.legend.PremiumBecomeLegendScreen
 import net.primal.android.premium.legend.PremiumBecomeLegendViewModel
 import net.primal.android.premium.manage.PremiumManageContract
 import net.primal.android.premium.manage.PremiumManageScreen
+import net.primal.android.premium.manage.PremiumManageViewModel
 import net.primal.android.premium.manage.contact.PremiumContactListScreen
 import net.primal.android.premium.manage.content.PremiumContentBackupScreen
 import net.primal.android.premium.manage.media.PremiumMediaManagementScreen
@@ -1062,10 +1063,13 @@ private fun NavGraphBuilder.premiumManage(route: String, navController: NavContr
         popEnterTransition = { primalScaleIn },
         popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
+        val viewModel = hiltViewModel<PremiumManageViewModel>()
+
         ApplyEdgeToEdge()
         LockToOrientationPortrait()
 
         PremiumManageScreen(
+            viewModel = viewModel,
             onFAQClick = { navController.navigateToPremiumMoreInfo() },
             onClose = { navController.navigateUp() },
             onDestination = {
@@ -1089,7 +1093,10 @@ private fun NavGraphBuilder.premiumManage(route: String, navController: NavContr
                         navController.navigateToPremiumChangePrimalName()
 
                     PremiumManageContract.ManageDestination.ExtendSubscription -> Unit
+
                     PremiumManageContract.ManageDestination.LegendaryProfileCustomization -> Unit
+
+                    PremiumManageContract.ManageDestination.BecomeALegend -> Unit
                 }
             },
         )
