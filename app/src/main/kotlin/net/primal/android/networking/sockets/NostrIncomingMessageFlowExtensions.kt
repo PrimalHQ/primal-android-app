@@ -1,10 +1,9 @@
 package net.primal.android.networking.sockets
 
-import java.util.UUID
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 
-fun Flow<NostrIncomingMessage>.filterBySubscriptionId(id: UUID) =
+fun Flow<NostrIncomingMessage>.filterBySubscriptionId(id: String) =
     filter {
         (it is NostrIncomingMessage.EventMessage && it.subscriptionId == id) ||
             (it is NostrIncomingMessage.EoseMessage && it.subscriptionId == id) ||

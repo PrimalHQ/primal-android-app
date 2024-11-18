@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.NostrIncomingMessage
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.networking.sockets.toPrimalSubscriptionId
 import timber.log.Timber
 
 class PrimalSocketSubscription<T> private constructor(
@@ -18,7 +19,7 @@ class PrimalSocketSubscription<T> private constructor(
     private val onEvent: suspend (T) -> Unit,
 ) {
 
-    private var id: UUID? = null
+    private var id: String? = null
     private var job: Job? = null
 
     companion object {
@@ -50,7 +51,7 @@ class PrimalSocketSubscription<T> private constructor(
     }
 
     private suspend fun subscribe() {
-        val newSubscriptionId = UUID.randomUUID()
+        val newSubscriptionId = UUID.randomUUID().toPrimalSubscriptionId()
         this.id = newSubscriptionId
         primalApiClient.subscribe(
             subscriptionId = newSubscriptionId,

@@ -97,7 +97,7 @@ class NostrSocketClient(
                     listener = socketListener,
                 )
                 if (incomingCompressionEnabled) {
-                    val id = UUID.randomUUID()
+                    val id = UUID.randomUUID().toPrimalSubscriptionId()
                     sendMessage("""["REQ","$id",{"cache":["set_primal_protocol",{"compression":"zlib"}]}]""")
                 }
             }
@@ -123,19 +123,19 @@ class NostrSocketClient(
         return webSocket?.send(text) == true
     }
 
-    fun sendREQ(subscriptionId: UUID, data: JsonObject): Boolean {
+    fun sendREQ(subscriptionId: String, data: JsonObject): Boolean {
         val reqMessage = data.buildNostrREQMessage(subscriptionId)
         return sendMessage(text = reqMessage)
     }
 
-    fun sendCOUNT(data: JsonObject): UUID? {
-        val subscriptionId: UUID = UUID.randomUUID()
+    fun sendCOUNT(data: JsonObject): String? {
+        val subscriptionId: String = UUID.randomUUID().toPrimalSubscriptionId()
         val reqMessage = data.buildNostrCOUNTMessage(subscriptionId)
         val success = sendMessage(text = reqMessage)
         return if (success) subscriptionId else null
     }
 
-    fun sendCLOSE(subscriptionId: UUID): Boolean {
+    fun sendCLOSE(subscriptionId: String): Boolean {
         return sendMessage(text = subscriptionId.buildNostrCLOSEMessage())
     }
 
