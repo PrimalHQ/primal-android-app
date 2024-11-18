@@ -65,6 +65,19 @@ class MediaManagementApiImpl @Inject constructor(
         )
     }
 
-    override suspend fun deleteMedia(userId: String) {
+    override suspend fun deleteMedia(userId: String, mediaUrl: String) {
+        primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.MEDIA_MANAGEMENT_DELETE,
+                optionsJson = NostrJson.encodeToString(
+                    AppSpecificDataRequest(
+                        eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
+                            userId = userId,
+                            content = "{\"url\":\"$mediaUrl\"}",
+                        ),
+                    ),
+                ),
+            ),
+        )
     }
 }

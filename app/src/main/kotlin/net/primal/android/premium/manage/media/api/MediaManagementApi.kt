@@ -9,5 +9,5 @@ interface MediaManagementApi {
 
     suspend fun getMediaUploads(userId: String): MediaUploadsResponse
 
-    suspend fun deleteMedia(userId: String)
+    suspend fun deleteMedia(userId: String, mediaUrl: String)
 }
