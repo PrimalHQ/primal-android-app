@@ -7,6 +7,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import java.util.*
 import net.primal.android.networking.sockets.NostrIncomingMessage
+import net.primal.android.networking.sockets.toPrimalSubscriptionId
 import net.primal.android.nostr.ext.isNotPrimalEventKind
 import net.primal.android.nostr.ext.isNotUnknown
 import net.primal.android.nostr.ext.isPrimalEventKind
@@ -56,7 +57,7 @@ class PrimalQueryResultTest {
         primalEvents: List<PrimalEvent> = emptyList(),
     ) = PrimalQueryResult(
         terminationMessage = NostrIncomingMessage.EoseMessage(
-            subscriptionId = UUID.randomUUID(),
+            subscriptionId = UUID.randomUUID().toPrimalSubscriptionId(),
         ),
         nostrEvents = nostrEvents,
         primalEvents = primalEvents,

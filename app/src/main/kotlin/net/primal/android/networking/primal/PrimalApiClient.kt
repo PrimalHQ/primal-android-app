@@ -31,6 +31,7 @@ import net.primal.android.networking.sockets.NostrSocketClient
 import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.networking.sockets.filterBySubscriptionId
+import net.primal.android.networking.sockets.toPrimalSubscriptionId
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import timber.log.Timber
@@ -119,7 +120,7 @@ class PrimalApiClient(
         val queryResult = runCatching {
             retrySendMessage(MAX_RETRIES) {
                 ensureSocketClientConnection()
-                val subscriptionId = UUID.randomUUID()
+                val subscriptionId = UUID.randomUUID().toPrimalSubscriptionId()
                 val deferredQueryResult = asyncQueryCollection(subscriptionId)
 
                 try {
@@ -137,7 +138,7 @@ class PrimalApiClient(
         return result ?: throw error
     }
 
-    private fun asyncQueryCollection(subscriptionId: UUID): Deferred<PrimalQueryResult> {
+    private fun asyncQueryCollection(subscriptionId: String): Deferred<PrimalQueryResult> {
         return scope.async(SupervisorJob()) {
             try {
                 collectQueryResult(subscriptionId)
@@ -147,7 +148,7 @@ class PrimalApiClient(
         }
     }
 
-    private fun sendMessageOrThrow(subscriptionId: UUID, data: JsonObject) {
+    private fun sendMessageOrThrow(subscriptionId: String, data: JsonObject) {
         val success = socketClient.sendREQ(subscriptionId = subscriptionId, data = data)
         if (!success) throw SocketSendMessageException(message = "Unable to send socket message.")
     }
@@ -161,7 +162,7 @@ class PrimalApiClient(
         }
     }
 
-    suspend fun subscribe(subscriptionId: UUID, message: PrimalCacheFilter): Flow<NostrIncomingMessage> {
+    suspend fun subscribe(subscriptionId: String, message: PrimalCacheFilter): Flow<NostrIncomingMessage> {
         ensureSocketClientConnection()
         try {
             retrySendMessage(MAX_RETRIES) {
@@ -174,14 +175,14 @@ class PrimalApiClient(
         return socketClient.incomingMessages.filterBySubscriptionId(id = subscriptionId)
     }
 
-    suspend fun closeSubscription(subscriptionId: UUID): Boolean {
+    suspend fun closeSubscription(subscriptionId: String): Boolean {
         ensureSocketClientConnection()
         return socketClient.sendCLOSE(subscriptionId = subscriptionId)
     }
 
     @OptIn(FlowPreview::class)
     @Throws(NostrNoticeException::class)
-    private suspend fun collectQueryResult(subscriptionId: UUID): PrimalQueryResult {
+    private suspend fun collectQueryResult(subscriptionId: String): PrimalQueryResult {
         val messages = socketClient.incomingMessages
             .filterBySubscriptionId(id = subscriptionId)
             .transformWhileEventsAreIncoming()
