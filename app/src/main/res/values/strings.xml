@@ -229,13 +229,24 @@
     <string name="premium_recover_contact_list_table_recover_button">Recover</string>
 
     <string name="premium_order_history_title">Manage Subscription</string>
+    <string name="premium_order_history_header">Order history</string>
+    <string name="premium_order_history_premium_valid_until">Primal Premium valid until:</string>
+    <string name="premium_order_history_premium_valid_forever">Forever</string>
+    <string name="premium_order_history_premium_hint_legend">You Legend</string>
+    <string name="premium_order_history_premium_hint_renews_app_store">Renews via App Store</string>
+    <string name="premium_order_history_premium_hint_renews_play_store">Renews via Play Store</string>
+    <string name="premium_order_history_premium_hint_does_not_renews">Does not renew</string>
+    <string name="premium_order_history_premium_expired">Expired</string>
+    <string name="premium_order_history_cancel_subscription_button">Cancel Premium Subscription</string>
+    <string name="premium_order_history_enable_renewal_button">Enable Renewal</string>
+    <string name="premium_order_history_extend_subscription_button">Extend Subscription</string>
+    <string name="premium_order_history_renews_subscription_button">Renew Subscription</string>
     <string name="premium_order_history_date_header">Date</string>
     <string name="premium_order_history_purchase_header">Purchase</string>
     <string name="premium_order_history_amount_header">Amount</string>
     <string name="premium_order_history_table_date">Date</string>
     <string name="premium_order_history_table_purchase">Purchase</string>
     <string name="premium_order_history_table_amount">Amount</string>
-    <string name="premium_order_history_cancel_subscription_button">Cancel Premium Subscription</string>
     <string name="premium_order_history_cancel_dialog_title">Cancel Premium?</string>
     <string name="premium_order_history_cancel_dialog_text">Your subscription will remain active until the end of your current billing period, so you can continue enjoying premium features until then. No further charges will be made after that date.</string>
     <string name="premium_order_history_cancel_dialog_confirm_button">Cancel Subscription</string>
