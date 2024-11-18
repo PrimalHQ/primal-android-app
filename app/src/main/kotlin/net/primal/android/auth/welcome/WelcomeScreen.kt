@@ -69,10 +69,10 @@ fun WelcomeScreen(onSignInClick: () -> Unit, onCreateAccountClick: () -> Unit) {
 
             Text(
                 modifier = Modifier.padding(vertical = 8.dp),
-                text = "The Social Bitcoin Wallet",
+                text = "Discover the Best of Nostr",
                 style = AppTheme.typography.bodyMedium.copy(
                     color = Color.White,
-                    fontSize = 18.sp,
+                    fontSize = 17.sp,
                     lineHeight = 24.sp,
                 ),
             )
