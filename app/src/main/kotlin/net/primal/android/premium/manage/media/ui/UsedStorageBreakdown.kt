@@ -187,7 +187,7 @@ private fun FreeStorageText(
         modifier = modifier.padding(end = 8.dp),
         text = stringResource(
             id = R.string.premium_media_management_free_storage,
-            maxStorageInBytes.toGigaBytes() - usedStorageInBytes.toGigaBytes(),
+            (maxStorageInBytes - usedStorageInBytes).toGigaBytes(roundUp = false),
         ),
         color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
         style = AppTheme.typography.bodyLarge,
@@ -232,7 +232,7 @@ private fun BoxBar(
 }
 
 @Composable
-private fun UsedStorageText(usedStorageInGigaBytes: Float, maxStorageInGigaBytes: Float) {
+private fun UsedStorageText(usedStorageInGigaBytes: String, maxStorageInGigaBytes: String) {
     Text(
         text = stringResource(
             id = R.string.premium_media_management_used_storage,
