@@ -21,6 +21,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -183,13 +184,12 @@ private fun PremiumHomeScreen(
                         )
                     }
 
-                    state.showSupportUsNotice -> {
+                    else -> {
                         SupportUsNotice(
+                            visible = state.showSupportUsNotice,
                             onSupportPrimal = onSupportPrimal,
                         )
                     }
-
-                    else -> Unit
                 }
             }
         }
@@ -222,8 +222,9 @@ private fun BottomBarButton(
 }
 
 @Composable
-private fun SupportUsNotice(onSupportPrimal: () -> Unit) {
+private fun SupportUsNotice(visible: Boolean, onSupportPrimal: () -> Unit) {
     Column(
+        modifier = Modifier.alpha(if (visible) 1.0f else 0.0f),
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -240,7 +241,11 @@ private fun SupportUsNotice(onSupportPrimal: () -> Unit) {
                 style = AppTheme.typography.bodyMedium,
             )
             Text(
-                modifier = Modifier.clickable { onSupportPrimal() },
+                modifier = Modifier
+                    .clickable(
+                        enabled = visible,
+                        onClick = onSupportPrimal,
+                    ),
                 style = AppTheme.typography.bodyMedium,
                 text = buildAnnotatedString {
                     withStyle(
