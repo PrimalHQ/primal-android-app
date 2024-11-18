@@ -1110,7 +1110,8 @@ private fun NavGraphBuilder.premiumManage(route: String, navController: NavContr
                     PremiumManageContract.ManageDestination.ChangePrimalName ->
                         navController.navigateToPremiumChangePrimalName()
 
-                    PremiumManageContract.ManageDestination.ExtendSubscription -> {
+                    is PremiumManageContract.ManageDestination.ExtendSubscription -> {
+                        navController.navigateToPremiumExtendSubscription(primalName = it.primalName)
                     }
 
                     PremiumManageContract.ManageDestination.LegendaryProfileCustomization -> Unit

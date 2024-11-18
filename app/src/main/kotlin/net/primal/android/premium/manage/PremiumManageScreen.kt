@@ -90,7 +90,11 @@ fun PremiumManageScreen(
                 destinations = listOfNotNull(
                     ManageDestination.ManageSubscription,
                     ManageDestination.ChangePrimalName,
-                    if (!state.isLegend && !state.isRecurring) ManageDestination.ExtendSubscription else null,
+                    if (!state.isLegend && !state.isRecurring) {
+                        ManageDestination.ExtendSubscription(state.primalName)
+                    } else {
+                        null
+                    },
                     if (state.isLegend) {
                         ManageDestination.LegendaryProfileCustomization
                     } else {
@@ -211,7 +215,7 @@ private fun ManageDestination.toDisplayString(): String =
         ManageDestination.ChangePrimalName ->
             stringResource(id = R.string.premium_manage_change_primal_name)
 
-        ManageDestination.ExtendSubscription ->
+        is ManageDestination.ExtendSubscription ->
             stringResource(id = R.string.premium_manage_extend_subscription)
 
         ManageDestination.LegendaryProfileCustomization ->
