@@ -4,6 +4,7 @@ interface PremiumManageContract {
 
     data class UiState(
         val isLegend: Boolean = false,
+        val isRecurring: Boolean = false,
     )
 
     enum class ManageDestination {

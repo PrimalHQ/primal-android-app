@@ -83,7 +83,7 @@ fun PremiumManageScreen(
                 destinations = listOfNotNull(
                     ManageDestination.ManageSubscription,
                     ManageDestination.ChangePrimalName,
-                    if (!state.isLegend) ManageDestination.ExtendSubscription else null,
+                    if (!state.isLegend && !state.isRecurring) ManageDestination.ExtendSubscription else null,
                     if (state.isLegend) {
                         ManageDestination.LegendaryProfileCustomization
                     } else {
