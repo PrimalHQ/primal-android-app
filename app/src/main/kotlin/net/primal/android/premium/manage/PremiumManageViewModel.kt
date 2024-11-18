@@ -31,6 +31,7 @@ class PremiumManageViewModel @Inject constructor(
                 setState {
                     copy(
                         isLegend = it.premiumMembership?.cohort1?.isPrimalLegend() == true,
+                        isRecurring = it.premiumMembership?.recurring == true,
                     )
                 }
             }
