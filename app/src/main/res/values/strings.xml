@@ -209,6 +209,10 @@
     <string name="premium_media_management_used_storage">%1$s GB of %2$s GB used</string>
     <string name="premium_media_management_free_storage">%1$s GB free</string>
     <string name="premium_media_management_media_size">%1$s MB</string>
+    <string name="premium_media_management_delete_upload_dialog_title">Delete?</string>
+    <string name="premium_media_management_delete_upload_dialog_text">Are you sure you want to delete this media file? Any notes referencing this media file will look broken.</string>
+    <string name="premium_media_management_delete_upload_dialog_confirm_button">Delete</string>
+    <string name="premium_media_management_delete_upload_dialog_dismiss_button">Dismiss</string>
 
     <string name="premium_relay_title">Premium Relay</string>
     <string name="premium_relay_top_app_bar_title">Premium Relay</string>
