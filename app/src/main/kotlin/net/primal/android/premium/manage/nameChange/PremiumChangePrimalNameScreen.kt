@@ -29,10 +29,8 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.core.utils.ifNotNull
 import net.primal.android.premium.buying.name.PremiumPrimalNameStage
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameContract.ChangePrimalNameStage
-import net.primal.android.premium.manage.ui.ConfirmNameChangeStage
 
 @Composable
 fun PremiumChangePrimalNameScreen(viewModel: PremiumChangePrimalNameViewModel, onClose: () -> Unit) {
@@ -160,15 +158,14 @@ private fun ChangePremiumNameConfirmationStage(
             SnackbarHost(hostState = snackbarHostState)
         },
     ) { paddingValues ->
-        ifNotNull(state.primalName, state.profileDisplayName) { primalName, profileDisplayName ->
+        if (state.primalName != null) {
             ConfirmNameChangeStage(
                 modifier = Modifier
                     .padding(horizontal = 20.dp)
                     .fillMaxSize(),
                 contentPadding = paddingValues,
-                primalName = primalName,
+                primalName = state.primalName,
                 profileAvatarCdnImage = state.profileAvatarCdnImage,
-                profileDisplayName = profileDisplayName,
             )
         }
     }

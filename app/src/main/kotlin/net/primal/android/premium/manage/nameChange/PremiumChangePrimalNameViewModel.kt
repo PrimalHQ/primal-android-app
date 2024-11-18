@@ -91,7 +91,6 @@ class PremiumChangePrimalNameViewModel @Inject constructor(
                     copy(
                         primalName = it.premiumMembership?.premiumName,
                         profileAvatarCdnImage = it.avatarCdnImage,
-                        profileDisplayName = it.authorDisplayName,
                     )
                 }
             }

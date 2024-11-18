@@ -7,7 +7,6 @@ interface PremiumChangePrimalNameContract {
         val stage: ChangePrimalNameStage = ChangePrimalNameStage.PickNew,
         val primalName: String? = null,
         val profileAvatarCdnImage: CdnImage? = null,
-        val profileDisplayName: String? = null,
         val changingName: Boolean = false,
         val error: NameChangeError? = null,
     )
