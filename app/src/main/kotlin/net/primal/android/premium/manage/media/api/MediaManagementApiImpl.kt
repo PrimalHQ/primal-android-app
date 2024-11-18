@@ -13,6 +13,7 @@ import net.primal.android.nostr.ext.takeContentOrNull
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.premium.manage.media.api.model.MediaStorageStats
+import net.primal.android.premium.manage.media.api.model.MediaUploadsRequestBody
 import net.primal.android.premium.manage.media.api.model.MediaUploadsResponse
 import net.primal.android.settings.api.model.AppSpecificDataRequest
 
@@ -46,11 +47,10 @@ class MediaManagementApiImpl @Inject constructor(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.MEDIA_MANAGEMENT_UPLOADS,
                 optionsJson = NostrJson.encodeToString(
-                    AppSpecificDataRequest(
-                        eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
-                            userId = userId,
-                            content = "{\"since\": 0, \"limit\": 1000}",
-                        ),
+                    MediaUploadsRequestBody(
+                        eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(userId = userId, content = ""),
+                        since = 0,
+                        limit = 1_000,
                     ),
                 ),
             ),
