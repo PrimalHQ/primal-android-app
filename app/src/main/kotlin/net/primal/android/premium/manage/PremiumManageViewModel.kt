@@ -30,6 +30,7 @@ class PremiumManageViewModel @Inject constructor(
             activeAccountStore.activeUserAccount.collect {
                 setState {
                     copy(
+                        primalName = it.premiumMembership?.premiumName ?: "",
                         isLegend = it.premiumMembership?.cohort1?.isPrimalLegend() == true,
                         isRecurring = it.premiumMembership?.recurring == true,
                     )
