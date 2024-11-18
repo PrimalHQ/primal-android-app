@@ -40,6 +40,10 @@ inline val SavedStateHandle.postedBy: List<String>?
         NostrJson.decodeFromStringOrNull(it)
     }
 
+const val PREMIUM_MORE_INFO_TAB_INDEX = "premiumMoreInfoTab"
+inline val NavBackStackEntry.premiumMoreInfoTabIndex: Int?
+    get() = arguments?.getInt(PREMIUM_MORE_INFO_TAB_INDEX)
+
 const val SEARCH_SCOPE = "searchScope"
 inline val NavBackStackEntry.searchScopeOrThrow: SearchScope
     get() = arguments?.getString(SEARCH_SCOPE)?.let { SearchScope.valueOf(it) }
