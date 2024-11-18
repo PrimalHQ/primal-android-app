@@ -3,7 +3,10 @@ package net.primal.android.drawer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Instant
 import javax.inject.Inject
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.days
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,6 +16,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.theme.active.ActiveThemeStore
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.subscriptions.SubscriptionsManager
 
 @HiltViewModel
@@ -63,10 +67,16 @@ class PrimalDrawerViewModel @Inject constructor(
                             userId = it.pubkey,
                             hasPremium = it.premiumMembership != null,
                         ),
+                        showPremiumBadge = it.premiumMembership == null && it.hasNotSeenPremiumInTheLast(7.days),
                     )
                 }
             }
         }
+
+    private fun UserAccount.hasNotSeenPremiumInTheLast(duration: Duration): Boolean {
+        val lastTimestamp = this.lastBuyPremiumTimestampInMillis ?: 0
+        return lastTimestamp < Instant.now().minusSeconds(duration.inWholeSeconds).epochSecond
+    }
 
     private fun subscribeToBadgesUpdates() =
         viewModelScope.launch {

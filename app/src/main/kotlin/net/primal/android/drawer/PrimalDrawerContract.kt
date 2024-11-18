@@ -10,6 +10,7 @@ interface PrimalDrawerContract {
         val loading: Boolean = false,
         val activeUserAccount: UserAccount? = null,
         val badges: Badges = Badges(),
+        val showPremiumBadge: Boolean = false,
     )
 
     sealed class UiEvent {
