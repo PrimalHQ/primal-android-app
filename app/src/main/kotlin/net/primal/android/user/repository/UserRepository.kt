@@ -2,6 +2,7 @@ package net.primal.android.user.repository
 
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
@@ -214,6 +215,12 @@ class UserRepository @Inject constructor(
     suspend fun updateCachingProxyEnabled(userId: String, enabled: Boolean) {
         accountsStore.getAndUpdateAccount(userId = userId) {
             copy(cachingProxyEnabled = enabled)
+        }
+    }
+
+    suspend fun updateBuyPremiumTimestamp(userId: String) {
+        accountsStore.getAndUpdateAccount(userId = userId) {
+            copy(lastBuyPremiumTimestampInMillis = Clock.System.now().toEpochMilliseconds())
         }
     }
 }

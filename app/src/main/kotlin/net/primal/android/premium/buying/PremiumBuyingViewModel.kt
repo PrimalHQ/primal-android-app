@@ -23,6 +23,7 @@ import net.primal.android.premium.domain.MembershipError
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.InAppPurchaseException
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
@@ -35,6 +36,7 @@ class PremiumBuyingViewModel @Inject constructor(
     private val premiumRepository: PremiumRepository,
     private val profileRepository: ProfileRepository,
     private val activeAccountStore: ActiveAccountStore,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
     private var purchase: SubscriptionPurchase? = null
@@ -61,6 +63,13 @@ class PremiumBuyingViewModel @Inject constructor(
         observePurchases()
         observeActiveProfile()
         initBillingClient()
+        markPremiumBuyingOpened()
+    }
+
+    private fun markPremiumBuyingOpened() {
+        viewModelScope.launch {
+            userRepository.updateBuyPremiumTimestamp(userId = activeAccountStore.activeUserId())
+        }
     }
 
     private fun initBillingClient() {

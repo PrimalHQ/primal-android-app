@@ -36,6 +36,7 @@ data class UserAccount(
     val followListEventContent: String? = null,
     val cachingProxyEnabled: Boolean = false,
     val premiumMembership: PremiumMembership? = null,
+    val lastBuyPremiumTimestampInMillis: Long? = null,
 ) {
     companion object {
         val EMPTY = UserAccount(
