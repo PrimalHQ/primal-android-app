@@ -55,6 +55,7 @@ fun ToSAndPrivacyPolicyText(
         text = annotatedString,
         style = AppTheme.typography.bodySmall.copy(
             color = color,
+            lineHeight = 22.sp,
             fontSize = fontSize,
             textAlign = TextAlign.Center,
         ),
