@@ -111,7 +111,7 @@ class NostrSocketClient(
         text.parseIncomingMessage()?.let {
             scope.launch {
                 if (it is NostrIncomingMessage.EoseMessage) {
-                    delay(50.milliseconds)
+                    delay(75.milliseconds)
                 }
                 mutableIncomingMessagesSharedFlow.emit(value = it)
             }
