@@ -15,6 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +38,7 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.utils.ifNotNull
+import net.primal.android.premium.manage.media.PremiumMediaManagementContract.UiEvent
 import net.primal.android.premium.manage.media.ui.MediaListItem
 import net.primal.android.premium.manage.media.ui.MediaUiItem
 import net.primal.android.premium.manage.media.ui.TableHeader
@@ -45,19 +47,39 @@ import net.primal.android.theme.AppTheme
 
 @Composable
 fun PremiumMediaManagementScreen(viewModel: PremiumMediaManagementViewModel, onClose: () -> Unit) {
+    val context = LocalContext.current
+    val uiScope = rememberCoroutineScope()
     val uiState = viewModel.state.collectAsState()
+
+    LaunchedEffect(viewModel) {
+        viewModel.effect.collect {
+            when (it) {
+                is PremiumMediaManagementContract.SideEffect.MediaDeleted -> uiScope.launch {
+                    Toast.makeText(
+                        context,
+                        context.getText(R.string.premium_media_management_deleted_successfully),
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+            }
+        }
+    }
 
     PremiumMediaManagementScreen(
         state = uiState.value,
+        eventPublisher = viewModel::setEvent,
         onClose = onClose,
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PremiumMediaManagementScreen(state: PremiumMediaManagementContract.UiState, onClose: () -> Unit) {
+fun PremiumMediaManagementScreen(
+    state: PremiumMediaManagementContract.UiState,
+    eventPublisher: (UiEvent) -> Unit,
+    onClose: () -> Unit,
+) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     var deleteMediaItem by remember { mutableStateOf<MediaUiItem?>(null) }
     deleteMediaItem?.let { item ->
         DeleteUploadAlertDialog(
@@ -65,9 +87,7 @@ fun PremiumMediaManagementScreen(state: PremiumMediaManagementContract.UiState, 
             onDismissRequest = { deleteMediaItem = null },
             onConfirm = {
                 deleteMediaItem = null
-                scope.launch {
-                    Toast.makeText(context, "Delete not yet implemented.", Toast.LENGTH_SHORT).show()
-                }
+                eventPublisher(UiEvent.DeleteMedia(mediaUrl = item.mediaUrl))
             },
         )
     }

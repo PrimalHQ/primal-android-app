@@ -12,4 +12,12 @@ interface PremiumMediaManagementContract {
         val mediaItems: List<MediaUiItem> = emptyList(),
         val calculating: Boolean = true,
     )
+
+    sealed class UiEvent {
+        data class DeleteMedia(val mediaUrl: String) : UiEvent()
+    }
+
+    sealed class SideEffect {
+        data class MediaDeleted(val mediaUrl: String) : SideEffect()
+    }
 }

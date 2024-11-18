@@ -35,4 +35,9 @@ class MediaManagementRepository @Inject constructor(
                 )
             }
         }
+
+    suspend fun deleteMedia(userId: String, mediaUrl: String) =
+        withContext(dispatchers.io()) {
+            mediaManagementApi.deleteMedia(userId = userId, mediaUrl = mediaUrl)
+        }
 }
