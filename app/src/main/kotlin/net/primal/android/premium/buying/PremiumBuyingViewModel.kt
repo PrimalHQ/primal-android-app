@@ -123,11 +123,12 @@ class PremiumBuyingViewModel @Inject constructor(
 
     private fun observePurchases() =
         viewModelScope.launch {
+            val userId = activeAccountStore.activeUserId()
             primalBillingClient.subscriptionPurchases.collect { purchase ->
                 _state.value.primalName?.let { primalName ->
                     try {
                         premiumRepository.purchaseMembership(
-                            userId = activeAccountStore.activeUserId(),
+                            userId = userId,
                             primalName = primalName,
                             purchase = purchase,
                         )
@@ -142,6 +143,8 @@ class PremiumBuyingViewModel @Inject constructor(
                             )
                         }
                     }
+
+                    runCatching { premiumRepository.fetchMembershipStatus(userId = userId) }
                 }
             }
         }
