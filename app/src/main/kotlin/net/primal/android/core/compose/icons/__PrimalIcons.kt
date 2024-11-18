@@ -24,6 +24,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextRemoveBookmar
 import net.primal.android.core.compose.icons.primaliconpack.ContextReportUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.Copy
+import net.primal.android.core.compose.icons.primaliconpack.CopyAlt
 import net.primal.android.core.compose.icons.primaliconpack.DarkMode
 import net.primal.android.core.compose.icons.primaliconpack.Delete
 import net.primal.android.core.compose.icons.primaliconpack.Directory
@@ -165,6 +166,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             ArrowBack,
             Key,
             Copy,
+            CopyAlt,
             Link,
             Check,
             Message,

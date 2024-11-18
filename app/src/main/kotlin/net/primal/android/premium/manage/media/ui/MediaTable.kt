@@ -5,14 +5,19 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FilePresent
+import androidx.compose.material.icons.filled.SmartDisplay
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -26,8 +31,9 @@ import coil.request.ImageRequest
 import java.time.format.FormatStyle
 import net.primal.android.R
 import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.Copy
+import net.primal.android.core.compose.icons.primaliconpack.CopyAlt
 import net.primal.android.core.compose.icons.primaliconpack.Delete
+import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
 import net.primal.android.core.utils.formatToDefaultDateFormat
 import net.primal.android.core.utils.toMegaBytes
 import net.primal.android.theme.AppTheme
@@ -53,12 +59,16 @@ fun MediaListItem(
             contentAlignment = Alignment.CenterStart,
         ) {
             SubcomposeAsyncImage(
-                modifier = Modifier.size(width = 64.dp, height = 48.dp),
+                modifier = Modifier
+                    .size(width = 64.dp, height = 48.dp)
+                    .clip(AppTheme.shapes.extraSmall),
                 model = ImageRequest.Builder(context)
                     .data(item.thumbnailUrl ?: item.mediaUrl)
                     .build(),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
+                loading = { PlaceholderIcon(type = item.type) },
+                error = { PlaceholderIcon(type = item.type) },
             )
         }
         MediaItemDetailsColumn(
@@ -67,7 +77,7 @@ fun MediaListItem(
         )
         ActionIcon(
             modifier = Modifier.weight(2f),
-            imageVector = PrimalIcons.Copy,
+            imageVector = PrimalIcons.CopyAlt,
             onClick = onCopyClick,
             tint = AppTheme.colorScheme.onPrimary,
         )
@@ -76,6 +86,26 @@ fun MediaListItem(
             imageVector = PrimalIcons.Delete,
             tint = DELETE_COLOR,
             onClick = onDeleteClick,
+        )
+    }
+}
+
+@Composable
+private fun PlaceholderIcon(type: MediaType) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = AppTheme.colorScheme.surface),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = when (type) {
+                MediaType.Image -> PrimalIcons.ImportPhotoFromGallery
+                MediaType.Video -> Icons.Filled.SmartDisplay
+                MediaType.Other -> Icons.Filled.FilePresent
+            },
+            contentDescription = "",
+            tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
         )
     }
 }
