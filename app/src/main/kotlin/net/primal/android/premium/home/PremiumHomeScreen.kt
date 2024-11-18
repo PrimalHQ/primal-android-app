@@ -138,10 +138,11 @@ private fun PremiumHomeScreen(
                     avatarSize = 80.dp,
                 )
                 Spacer(modifier = Modifier.height(16.dp))
+                val primalName = state.membership?.premiumName ?: ""
                 NostrUserText(
                     modifier = Modifier.padding(start = 8.dp),
-                    displayName = state.displayName,
-                    internetIdentifier = state.profileNostrAddress,
+                    displayName = primalName,
+                    internetIdentifier = "$primalName@primal.net",
                     internetIdentifierBadgeSize = 24.dp,
                     fontSize = 20.sp,
                 )
