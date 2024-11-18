@@ -119,7 +119,7 @@ fun PremiumPurchaseStage(
                     avatarSize = 80.dp,
                 )
                 NostrUserText(
-                    displayName = state.profile.authorDisplayName,
+                    displayName = state.primalName,
                     internetIdentifier = "${state.primalName}@primal.net",
                     internetIdentifierBadgeSize = 24.dp,
                     fontSize = 20.sp,
