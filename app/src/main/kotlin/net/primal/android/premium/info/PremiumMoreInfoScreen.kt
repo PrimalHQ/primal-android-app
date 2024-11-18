@@ -32,13 +32,18 @@ import net.primal.android.theme.AppTheme
 
 internal const val MORE_INFO_TAB_COUNT = 3
 
-internal const val WHY_PREMIUM_TAB_INDEX = 0
-internal const val FEATURES_TAB_INDEX = 1
-internal const val FAQ_TAB_INDEX = 2
+const val PREMIUM_MORE_INFO_WHY_TAB_INDEX = 0
+const val PREMIUM_MORE_INFO_FEATURES_TAB_INDEX = 1
+const val PREMIUM_MORE_INFO_FAQ_TAB_INDEX = 2
+
+private val tabsRange = PREMIUM_MORE_INFO_WHY_TAB_INDEX..PREMIUM_MORE_INFO_FAQ_TAB_INDEX
 
 @Composable
-fun PremiumMoreInfoScreen(onClose: () -> Unit) {
-    val pagerState = rememberPagerState { MORE_INFO_TAB_COUNT }
+fun PremiumMoreInfoScreen(initialTabIndex: Int = PREMIUM_MORE_INFO_WHY_TAB_INDEX, onClose: () -> Unit) {
+    val pagerState = rememberPagerState(
+        initialPage = if (initialTabIndex in tabsRange) initialTabIndex else PREMIUM_MORE_INFO_WHY_TAB_INDEX,
+        pageCount = { MORE_INFO_TAB_COUNT },
+    )
 
     Scaffold(
         topBar = {
@@ -75,7 +80,7 @@ fun PremiumMoreInfoScreen(onClose: () -> Unit) {
             modifier = Modifier.background(AppTheme.colorScheme.surfaceVariant),
         ) { currentPage ->
             when (currentPage) {
-                WHY_PREMIUM_TAB_INDEX -> {
+                PREMIUM_MORE_INFO_WHY_TAB_INDEX -> {
                     WhyPremiumTabContent(
                         modifier = Modifier
                             .fillMaxSize()
@@ -85,7 +90,7 @@ fun PremiumMoreInfoScreen(onClose: () -> Unit) {
                     )
                 }
 
-                FEATURES_TAB_INDEX -> {
+                PREMIUM_MORE_INFO_FEATURES_TAB_INDEX -> {
                     FeaturesTabContent(
                         modifier = Modifier
                             .fillMaxSize()
@@ -94,7 +99,7 @@ fun PremiumMoreInfoScreen(onClose: () -> Unit) {
                     )
                 }
 
-                FAQ_TAB_INDEX -> {
+                PREMIUM_MORE_INFO_FAQ_TAB_INDEX -> {
                     FAQTabContent(
                         modifier = Modifier
                             .fillMaxSize()
@@ -120,9 +125,15 @@ private fun MoreInfoTopAppBar(pagerState: PagerState, onClose: () -> Unit) {
             MoreInfoTabs(
                 modifier = Modifier.padding(top = 8.dp),
                 selectedTabIndex = pagerState.currentPage,
-                onWhyPremiumTabClick = { uiScope.launch { pagerState.scrollToPage(WHY_PREMIUM_TAB_INDEX) } },
-                onFeaturesTabClick = { uiScope.launch { pagerState.scrollToPage(FEATURES_TAB_INDEX) } },
-                onFAQTabClick = { uiScope.launch { pagerState.scrollToPage(FAQ_TAB_INDEX) } },
+                onWhyPremiumTabClick = { uiScope.launch { pagerState.scrollToPage(PREMIUM_MORE_INFO_WHY_TAB_INDEX) } },
+                onFeaturesTabClick = {
+                    uiScope.launch {
+                        pagerState.scrollToPage(
+                            PREMIUM_MORE_INFO_FEATURES_TAB_INDEX,
+                        )
+                    }
+                },
+                onFAQTabClick = { uiScope.launch { pagerState.scrollToPage(PREMIUM_MORE_INFO_FAQ_TAB_INDEX) } },
             )
         },
     )

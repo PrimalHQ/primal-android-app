@@ -85,6 +85,7 @@ import net.primal.android.premium.buying.PremiumBuyingScreen
 import net.primal.android.premium.buying.PremiumBuyingViewModel
 import net.primal.android.premium.home.PremiumHomeScreen
 import net.primal.android.premium.home.PremiumHomeViewModel
+import net.primal.android.premium.info.PREMIUM_MORE_INFO_FAQ_TAB_INDEX
 import net.primal.android.premium.info.PremiumMoreInfoScreen
 import net.primal.android.premium.legend.PremiumBecomeLegendScreen
 import net.primal.android.premium.legend.PremiumBecomeLegendViewModel
@@ -256,7 +257,9 @@ private fun NavController.navigateToPremiumExtendSubscription(primalName: String
 
 private fun NavController.navigateToPremiumHome() = navigate(route = "premium/home")
 private fun NavController.navigateToPremiumSupportPrimal() = navigate(route = "premium/supportPrimal")
-private fun NavController.navigateToPremiumMoreInfo() = navigate(route = "premium/info")
+private fun NavController.navigateToPremiumMoreInfo(tabIndex: Int = 0) =
+    navigate(route = "premium/info?$PREMIUM_MORE_INFO_TAB_INDEX=$tabIndex")
+
 private fun NavController.navigateToPremiumBecomeLegend() = navigate(route = "premium/legend/become")
 private fun NavController.navigateToPremiumManage() = navigate(route = "premium/manage")
 private fun NavController.navigateToPremiumMediaManagement() = navigate(route = "premium/manage/media")
@@ -455,7 +458,16 @@ fun PrimalAppNavigation() {
 
         premiumSupportPrimal(route = "premium/supportPrimal", navController = navController)
 
-        premiumMoreInfo(route = "premium/info", navController = navController)
+        premiumMoreInfo(
+            route = "premium/info?$PREMIUM_MORE_INFO_TAB_INDEX={$PREMIUM_MORE_INFO_TAB_INDEX}",
+            arguments = listOf(
+                navArgument(PREMIUM_MORE_INFO_TAB_INDEX) {
+                    type = NavType.IntType
+                    defaultValue = 0
+                },
+            ),
+            navController = navController,
+        )
 
         premiumBecomeLegend(route = "premium/legend/become", navController = navController)
 
@@ -1017,21 +1029,27 @@ private fun NavGraphBuilder.premiumSupportPrimal(route: String, navController: N
         )
     }
 
-private fun NavGraphBuilder.premiumMoreInfo(route: String, navController: NavController) =
-    composable(
-        route = route,
-        enterTransition = { primalSlideInHorizontallyFromEnd },
-        exitTransition = { primalScaleOut },
-        popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontallyToEnd },
-    ) {
-        ApplyEdgeToEdge()
-        LockToOrientationPortrait()
+private fun NavGraphBuilder.premiumMoreInfo(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) {
+    val initialTabIndex = it.premiumMoreInfoTabIndex
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
 
-        PremiumMoreInfoScreen(
-            onClose = { navController.navigateUp() },
-        )
-    }
+    PremiumMoreInfoScreen(
+        initialTabIndex = initialTabIndex ?: 0,
+        onClose = { navController.navigateUp() },
+    )
+}
 
 private fun NavGraphBuilder.premiumBecomeLegend(route: String, navController: NavController) =
     composable(
@@ -1070,7 +1088,7 @@ private fun NavGraphBuilder.premiumManage(route: String, navController: NavContr
 
         PremiumManageScreen(
             viewModel = viewModel,
-            onFAQClick = { navController.navigateToPremiumMoreInfo() },
+            onFAQClick = { navController.navigateToPremiumMoreInfo(tabIndex = PREMIUM_MORE_INFO_FAQ_TAB_INDEX) },
             onClose = { navController.navigateUp() },
             onDestination = {
                 when (it) {
