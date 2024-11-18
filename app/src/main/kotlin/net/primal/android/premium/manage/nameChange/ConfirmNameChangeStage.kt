@@ -1,4 +1,4 @@
-package net.primal.android.premium.manage.ui
+package net.primal.android.premium.manage.nameChange
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,7 +25,6 @@ fun ConfirmNameChangeStage(
     modifier: Modifier = Modifier,
     primalName: String,
     profileAvatarCdnImage: CdnImage?,
-    profileDisplayName: String,
     contentPadding: PaddingValues,
 ) {
     Column(
@@ -40,7 +39,7 @@ fun ConfirmNameChangeStage(
             avatarSize = 80.dp,
         )
         NostrUserText(
-            displayName = profileDisplayName,
+            displayName = primalName,
             internetIdentifier = "$primalName@primal.net",
             internetIdentifierBadgeSize = 24.dp,
             fontSize = 20.sp,
