@@ -108,6 +108,7 @@ class PremiumRepository @Inject constructor(
             cohort1 = this.cohort1,
             cohort2 = this.cohort2,
             recurring = this.recurring,
+            origin = this.origin,
         )
     }
 }

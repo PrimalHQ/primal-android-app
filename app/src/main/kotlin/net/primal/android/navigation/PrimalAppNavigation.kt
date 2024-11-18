@@ -1204,6 +1204,7 @@ private fun NavGraphBuilder.premiumOrderHistory(route: String, navController: Na
 
         PremiumOrderHistoryScreen(
             viewModel = viewModel,
+            onExtendSubscription = { navController.navigateToPremiumExtendSubscription(primalName = it) },
             onClose = { navController.navigateUp() },
         )
     }

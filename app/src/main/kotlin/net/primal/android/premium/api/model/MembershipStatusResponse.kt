@@ -18,4 +18,5 @@ data class MembershipStatusResponse(
     @SerialName("expires_on") val expiresOn: Long? = null,
     @SerialName("recurring") val recurring: Boolean = false,
     @SerialName("renews_on") val renewsOn: Long? = null,
+    @SerialName("origin") val origin: String? = null,
 )
