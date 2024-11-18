@@ -123,6 +123,7 @@ private fun PremiumPrimalNameStage(
             PrimalOutlinedTextField(
                 header = null,
                 value = primalName,
+                forceFocus = true,
                 onValueChange = {
                     eventPublisher(PremiumPrimalNameContract.UiEvent.ResetNameAvailable)
                     primalName = it.trim()
