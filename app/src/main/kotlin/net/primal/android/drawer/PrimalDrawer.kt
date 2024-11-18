@@ -116,6 +116,7 @@ fun PrimalDrawer(
                     .padding(vertical = 32.dp),
                 menuItems = state.menuItems,
                 badges = state.badges,
+                showPremiumBadge = state.showPremiumBadge,
                 onDrawerDestinationClick = onDrawerDestinationClick,
             )
 
@@ -242,6 +243,7 @@ private fun DrawerMenu(
     modifier: Modifier,
     menuItems: List<DrawerScreenDestination>,
     badges: Badges,
+    showPremiumBadge: Boolean,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
 ) {
     LazyColumn(
@@ -260,6 +262,13 @@ private fun DrawerMenu(
                     BadgedBox(
                         badge = {
                             if (item is DrawerScreenDestination.Messages && badges.unreadMessagesCount > 0) {
+                                Badge(
+                                    modifier = Modifier
+                                        .size(size = 10.dp)
+                                        .offset(x = 8.dp),
+                                    containerColor = AppTheme.colorScheme.primary,
+                                )
+                            } else if (item is DrawerScreenDestination.Premium && showPremiumBadge) {
                                 Badge(
                                     modifier = Modifier
                                         .size(size = 10.dp)
