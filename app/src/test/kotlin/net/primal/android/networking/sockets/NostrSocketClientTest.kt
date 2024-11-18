@@ -40,7 +40,7 @@ class NostrSocketClientTest {
             val client = buildSuccessfulNostrSocketClient()
             client.ensureSocketConnection()
             val actual = client.sendREQ(
-                subscriptionId = UUID.randomUUID(),
+                subscriptionId = UUID.randomUUID().toPrimalSubscriptionId(),
                 data = buildJsonObject {},
             )
             actual shouldBe true
@@ -52,7 +52,7 @@ class NostrSocketClientTest {
             val client = buildFailingNostrSocketClient()
             client.ensureSocketConnection()
             val actual = client.sendREQ(
-                subscriptionId = UUID.randomUUID(),
+                subscriptionId = UUID.randomUUID().toPrimalSubscriptionId(),
                 data = buildJsonObject {},
             )
             actual shouldBe false
@@ -118,7 +118,7 @@ class NostrSocketClientTest {
             val mockWebSocket = mockk<FakeWebSocket>(relaxed = true)
             val fakeNostrSocketClient = buildFakeNostrSocketClient(webSocket = mockWebSocket)
             fakeNostrSocketClient.ensureSocketConnection()
-            val subscriptionId = UUID.randomUUID()
+            val subscriptionId = UUID.randomUUID().toPrimalSubscriptionId()
             fakeNostrSocketClient.sendCLOSE(subscriptionId = subscriptionId)
 
             verify {
