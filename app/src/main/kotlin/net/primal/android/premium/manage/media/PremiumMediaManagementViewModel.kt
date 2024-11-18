@@ -5,15 +5,21 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import javax.inject.Inject
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.premium.manage.media.PremiumMediaManagementContract.SideEffect
+import net.primal.android.premium.manage.media.PremiumMediaManagementContract.UiEvent
 import net.primal.android.premium.manage.media.PremiumMediaManagementContract.UiState
 import net.primal.android.premium.manage.media.repository.MediaManagementRepository
 import net.primal.android.premium.manage.media.ui.MediaType
 import net.primal.android.premium.manage.media.ui.MediaUiItem
+import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import timber.log.Timber
 
@@ -21,16 +27,48 @@ import timber.log.Timber
 class PremiumMediaManagementViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val mediaManagementRepository: MediaManagementRepository,
+    private val premiumRepository: PremiumRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
+    private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
+    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
+
+    private val _effect: Channel<SideEffect> = Channel()
+    val effect = _effect.receiveAsFlow()
+    private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effect.send(effect) }
+
     init {
         observeActiveAccount()
+        observeEvents()
         fetchMediaStats()
         fetchMediaUploads()
+    }
+
+    private fun observeEvents() {
+        viewModelScope.launch {
+            events.collect {
+                when (it) {
+                    is UiEvent.DeleteMedia -> deleteMedia(mediaUrl = it.mediaUrl)
+                }
+            }
+        }
+    }
+
+    private fun observeActiveAccount() {
+        viewModelScope.launch {
+            activeAccountStore.activeUserAccount.collect {
+                setState {
+                    copy(
+                        usedStorageInBytes = it.premiumMembership?.usedStorageInBytes,
+                        maxStorageInBytes = it.premiumMembership?.maxStorageInBytes,
+                    )
+                }
+            }
+        }
     }
 
     private fun fetchMediaUploads() {
@@ -83,15 +121,24 @@ class PremiumMediaManagementViewModel @Inject constructor(
         }
     }
 
-    private fun observeActiveAccount() {
+    private fun deleteMedia(mediaUrl: String) {
+        val userId = activeAccountStore.activeUserId()
         viewModelScope.launch {
-            activeAccountStore.activeUserAccount.collect {
+            try {
+                mediaManagementRepository.deleteMedia(userId = userId, mediaUrl = mediaUrl)
                 setState {
                     copy(
-                        usedStorageInBytes = it.premiumMembership?.usedStorageInBytes,
-                        maxStorageInBytes = it.premiumMembership?.maxStorageInBytes,
+                        mediaItems = mediaItems.toMutableList().apply {
+                            removeIf { it.mediaUrl == mediaUrl }
+                        },
                     )
                 }
+                setEffect(SideEffect.MediaDeleted(mediaUrl = mediaUrl))
+
+                fetchMediaStats()
+                premiumRepository.fetchMembershipStatus(userId = userId)
+            } catch (error: WssException) {
+                Timber.e(error)
             }
         }
     }
