@@ -147,7 +147,7 @@ private fun PremiumHomeScreen(
                     internetIdentifier = "$primalName@primal.net",
                     internetIdentifierBadgeSize = 24.dp,
                     fontSize = 20.sp,
-                    customBadge = state.legendaryProfile,
+                    customBadge = if (state.customBadge) state.legendaryProfile else null,
                 )
             }
 
