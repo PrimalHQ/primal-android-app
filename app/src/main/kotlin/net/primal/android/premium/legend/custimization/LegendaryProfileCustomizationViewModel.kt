@@ -24,6 +24,7 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
 
     init {
         observeActiveAccount()
+        observeProfile()
         requestProfileUpdate()
     }
 
@@ -38,6 +39,14 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
                 }
             }
         }
+
+    private fun observeProfile() {
+        viewModelScope.launch {
+            profileRepository.observeProfile(profileId = activeAccountStore.activeUserId()).collect {
+                setState { copy(legendProfile = it.metadata?.primalLegendProfile) }
+            }
+        }
+    }
 
     private fun requestProfileUpdate() {
         viewModelScope.launch {
