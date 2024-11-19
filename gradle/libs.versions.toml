@@ -4,11 +4,11 @@ activity-compose = "1.9.3"
 activity-ktx = "1.9.3"
 agp = "8.7.2"
 appcompat = "1.7.0"
-bitcoinj-core = "0.16.2"
+bitcoinj-core = "0.16.3"
 camera = "1.4.0"
-compose-bom = "2024.10.01"
+compose-bom = "2024.11.00"
 compose-lottie = "6.4.0"
-compose-navigation = "2.8.3"
+compose-navigation = "2.8.4"
 compose-richtext = "1.0.0-alpha01"
 constraintlayout = "2.2.0"
 constraintlayout-compose = "1.1.0"
@@ -24,6 +24,7 @@ espresso-core = "3.6.1"
 flippable = "1.5.4"
 guava = "33.0.0-android"
 hilt = "1.2.0"
+jetbrains-markdown = "0.7.3"
 junit = "4.13.2"
 junit-android-runner = "1.2.1"
 ktlint-wrapper-plugin = "12.1.1"
@@ -38,7 +39,7 @@ material-icons = "1.7.5"
 media3-exoplayer = "1.4.1"
 mockk = "1.13.12"
 okhttp = "4.12.0"
-paging = "3.3.2"
+paging = "3.3.4"
 placeholder = "2.0.0"
 play-publishing = "3.8.4"
 play-billing = "7.1.1"
@@ -92,6 +93,7 @@ compose-constraintlayout = { module = "androidx.constraintlayout:constraintlayou
 androidx-emoji2-emojipicker = { group = "androidx.emoji2", name = "emoji2-emojipicker", version.ref = "emoji2-emojipicker" }
 flippable = { module = "com.wajahatkarim:flippable", version.ref = "flippable" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
+jetbrains-markdown = { module = "org.jetbrains:markdown", version.ref = "jetbrains-markdown" }
 
 richtext-commonmark = { module = "com.halilibo.compose-richtext:richtext-commonmark", version.ref = "compose-richtext" }
 richtext-markdown = { module = "com.halilibo.compose-richtext:richtext-markdown", version.ref = "compose-richtext" }
