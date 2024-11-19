@@ -43,7 +43,8 @@ class FeedApiImpl @Inject constructor(
             primalLinkPreviews = queryResult.filterPrimalEvents(NostrEventKind.PrimalLinkPreview),
             referencedEvents = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
             primalRelayHints = queryResult.filterPrimalEvents(NostrEventKind.PrimalRelayHint),
-            primalUserNames = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserName),
+            primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
+            primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
         )
     }
 
@@ -70,7 +71,8 @@ class FeedApiImpl @Inject constructor(
             primalLinkPreviews = queryResult.filterPrimalEvents(NostrEventKind.PrimalLinkPreview),
             referencedEvents = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
             primalRelayHints = queryResult.filterPrimalEvents(NostrEventKind.PrimalRelayHint),
-            primalUserNames = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserName),
+            primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
+            primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
         )
     }
 
@@ -97,7 +99,8 @@ class FeedApiImpl @Inject constructor(
             primalLinkPreviews = queryResult.filterPrimalEvents(NostrEventKind.PrimalLinkPreview),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
             primalRelayHints = queryResult.filterPrimalEvents(NostrEventKind.PrimalRelayHint),
-            primalUserNames = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserName),
+            primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
+            primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
         )
     }
 }

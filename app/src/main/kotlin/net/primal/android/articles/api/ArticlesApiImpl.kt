@@ -41,7 +41,8 @@ class ArticlesApiImpl @Inject constructor(
             referencedEvents = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
             primalRelayHints = queryResult.filterPrimalEvents(NostrEventKind.PrimalRelayHint),
             primalLongFormWords = queryResult.filterPrimalEvents(NostrEventKind.PrimalLongFormWordsCount),
-            primalUserNames = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserName),
+            primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
+            primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
         )
     }
 
@@ -69,7 +70,8 @@ class ArticlesApiImpl @Inject constructor(
             primalLinkPreviews = queryResult.filterPrimalEvents(NostrEventKind.PrimalLinkPreview),
             primalRelayHints = queryResult.filterPrimalEvents(NostrEventKind.PrimalRelayHint),
             primalLongFormWords = queryResult.filterPrimalEvents(NostrEventKind.PrimalLongFormWordsCount),
-            primalUserNames = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserName),
+            primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
+            primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
         )
     }
 }

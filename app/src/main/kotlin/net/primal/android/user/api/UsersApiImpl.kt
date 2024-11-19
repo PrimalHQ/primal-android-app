@@ -37,7 +37,8 @@ class UsersApiImpl @Inject constructor(
             metadata = queryResult.findNostrEvent(NostrEventKind.Metadata),
             profileStats = queryResult.findPrimalEvent(NostrEventKind.PrimalUserProfileStats),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
-            primalName = queryResult.findPrimalEvent(NostrEventKind.PrimalUserName),
+            primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
+            primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
         )
     }
 
@@ -62,7 +63,8 @@ class UsersApiImpl @Inject constructor(
         return UserProfilesResponse(
             metadataEvents = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
-            primalUserNames = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserName),
+            primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
+            primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
         )
     }
 
@@ -81,7 +83,8 @@ class UsersApiImpl @Inject constructor(
             followMetadataList = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             userScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
-            primalUserNames = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserName),
+            primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
+            primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
         )
     }
 
@@ -99,7 +102,8 @@ class UsersApiImpl @Inject constructor(
             metadataEvents = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
             userScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
-            primalUserNames = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserName),
+            primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
+            primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
         )
     }
 
@@ -116,7 +120,8 @@ class UsersApiImpl @Inject constructor(
             followerCounts = queryResult.findPrimalEvent(NostrEventKind.PrimalUserFollowersCounts),
             userScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
-            primalUserNames = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserName),
+            primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
+            primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
         )
     }
 
@@ -133,7 +138,8 @@ class UsersApiImpl @Inject constructor(
             followerCounts = queryResult.findPrimalEvent(NostrEventKind.PrimalUserFollowersCounts),
             userScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
-            primalUserNames = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserName),
+            primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
+            primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
         )
     }
 

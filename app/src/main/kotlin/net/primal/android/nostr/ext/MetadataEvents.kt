@@ -12,25 +12,39 @@ import net.primal.android.core.utils.parseUris
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.profile.db.ProfileData
+import net.primal.android.profile.domain.PrimalLegendProfile
 import net.primal.android.wallet.api.decodeLNUrlOrNull
 import net.primal.android.wallet.api.parseAsLNUrlOrNull
 
-fun List<NostrEvent>.mapAsProfileDataPO(cdnResources: List<CdnResource>, primalUserNames: Map<String, String>) =
-    map { nostrEvent ->
-        nostrEvent.asProfileDataPO(
-            cdnResources = cdnResources.asMapByKey { it.url },
-            primalUserNames = primalUserNames,
-        )
-    }
+fun List<NostrEvent>.mapAsProfileDataPO(
+    cdnResources: List<CdnResource>,
+    primalUserNames: Map<String, String>,
+    primalLegendProfiles: Map<String, PrimalLegendProfile>,
+) = map { nostrEvent ->
+    nostrEvent.asProfileDataPO(
+        cdnResources = cdnResources.asMapByKey { it.url },
+        primalUserNames = primalUserNames,
+        primalLegendProfiles = primalLegendProfiles,
 
-fun List<NostrEvent>.mapAsProfileDataPO(cdnResources: Map<String, CdnResource>, primalUserNames: Map<String, String>) =
-    map {
-        it.asProfileDataPO(cdnResources = cdnResources, primalUserNames = primalUserNames)
-    }
+    )
+}
+
+fun List<NostrEvent>.mapAsProfileDataPO(
+    cdnResources: Map<String, CdnResource>,
+    primalUserNames: Map<String, String>,
+    primalLegendProfiles: Map<String, PrimalLegendProfile>,
+) = map {
+    it.asProfileDataPO(
+        cdnResources = cdnResources,
+        primalUserNames = primalUserNames,
+        primalLegendProfiles = primalLegendProfiles,
+    )
+}
 
 fun NostrEvent.asProfileDataPO(
     cdnResources: Map<String, CdnResource>,
     primalUserNames: Map<String, String>,
+    primalLegendProfiles: Map<String, PrimalLegendProfile>,
 ): ProfileData {
     val metadata = NostrJson.decodeFromStringOrNull<ContentMetadata>(this.content)
 
@@ -61,5 +75,6 @@ fun NostrEvent.asProfileDataPO(
         },
         website = metadata?.website,
         primalName = primalUserNames[this.pubKey],
+        primalLegendProfile = primalLegendProfiles[this.pubKey],
     )
 }

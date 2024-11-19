@@ -72,7 +72,6 @@ fun LegendaryProfileCustomizationScreen(state: LegendaryProfileCustomizationCont
             BottomBarButton(
                 text = stringResource(id = R.string.premium_legend_profile_apply_button),
                 onClick = {
-
                 },
             )
         },

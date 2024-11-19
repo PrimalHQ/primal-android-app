@@ -9,5 +9,6 @@ data class ConversationsResponse(
     val messages: List<NostrEvent>,
     val profileMetadata: List<NostrEvent>,
     val cdnResources: List<PrimalEvent>,
-    val primalUserNames: List<PrimalEvent>,
+    val primalUserNames: PrimalEvent? = null,
+    val primalLegendProfiles: PrimalEvent? = null,
 )
