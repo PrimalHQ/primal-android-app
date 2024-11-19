@@ -115,7 +115,7 @@ fun LegendaryProfileCustomizationScreen(state: LegendaryProfileCustomizationCont
                     firstCohort = state.membership.cohort1,
                     secondCohort = state.membership.cohort2,
                     membershipExpired = state.membership.isExpired(),
-                    topColor = AppTheme.colorScheme.primary,
+                    legendaryProfile = state.legendaryProfile,
                 )
 
                 PrimalDivider(modifier = Modifier.padding(top = 16.dp))
@@ -124,8 +124,7 @@ fun LegendaryProfileCustomizationScreen(state: LegendaryProfileCustomizationCont
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 32.dp, vertical = 8.dp),
-                    activeLegendaryProfile = state.legendProfile?.styleId?.let(LegendaryProfile::valueById)
-                        ?: LegendaryProfile.NO_CUSTOMIZATION,
+                    activeLegendaryProfile = state.legendaryProfile,
                     onProfileChanged = { newLegendaryProfileColors ->
                     },
                 )
@@ -134,10 +133,10 @@ fun LegendaryProfileCustomizationScreen(state: LegendaryProfileCustomizationCont
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
-                    avatarRing = state.legendProfile?.avatarGlow == true,
+                    avatarRing = state.avatarGlow,
                     onAvatarRingChanged = { newState ->
                     },
-                    customBadge = state.legendProfile?.customBadge == true,
+                    customBadge = state.customBadge,
                     onCustomBadgeChanged = { newState ->
                     },
                 )

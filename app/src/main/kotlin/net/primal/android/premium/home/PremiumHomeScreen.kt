@@ -148,14 +148,16 @@ private fun PremiumHomeScreen(
                 )
             }
 
-            state.membership?.let {
+            if (state.membership != null) {
                 PremiumBadge(
-                    firstCohort = it.cohort1,
-                    secondCohort = it.cohort2,
-                    membershipExpired = it.isExpired(),
-                    topColor = AppTheme.colorScheme.primary,
+                    firstCohort = state.membership.cohort1,
+                    secondCohort = state.membership.cohort2,
+                    membershipExpired = state.membership.isExpired(),
+                    legendaryProfile = state.legendaryProfile,
+
                 )
-                if (it.cohort2.isPremiumFree()) {
+
+                if (state.membership.cohort2.isPremiumFree()) {
                     Text(
                         modifier = Modifier.padding(horizontal = 36.dp),
                         text = stringResource(id = R.string.premium_member_early_primal_user),
@@ -165,10 +167,11 @@ private fun PremiumHomeScreen(
                         lineHeight = 22.sp,
                     )
                 }
+
                 PrimalPremiumTable(
                     profileNostrAddress = state.profileNostrAddress,
                     profileLightningAddress = state.profileLightningAddress,
-                    premiumMembership = it,
+                    premiumMembership = state.membership,
                     onApplyPrimalNostrAddress = { eventPublisher(PremiumHomeContract.UiEvent.ApplyPrimalNostrAddress) },
                     onApplyPrimalLightningAddress = {
                         eventPublisher(PremiumHomeContract.UiEvent.ApplyPrimalLightningAddress)
@@ -176,7 +179,7 @@ private fun PremiumHomeScreen(
                 )
 
                 when {
-                    it.isExpired() -> {
+                    state.membership.isExpired() -> {
                         Text(
                             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                             text = stringResource(id = R.string.premium_expired_subscription_notice),

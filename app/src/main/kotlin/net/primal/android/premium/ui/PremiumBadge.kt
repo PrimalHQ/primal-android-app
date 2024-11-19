@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import net.primal.android.premium.legend.LegendaryProfile
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -21,24 +22,18 @@ fun PremiumBadge(
     modifier: Modifier = Modifier,
     firstCohort: String,
     secondCohort: String,
-    topColor: Color,
-    middleColor: Color = topColor,
-    bottomColor: Color = topColor,
+    legendaryProfile: LegendaryProfile,
     membershipExpired: Boolean,
 ) {
-    val colorStops = arrayOf(
-        0.0f to topColor,
-        0.4937f to topColor,
-        0.523f to middleColor,
-        1f to bottomColor,
-    )
     Row(
         modifier = modifier
             .clip(AppTheme.shapes.extraLarge)
             .background(
-                brush = Brush.verticalGradient(
-                    colorStops = colorStops,
-                ),
+                brush = if (legendaryProfile != LegendaryProfile.NO_CUSTOMIZATION) {
+                    legendaryProfile.brush
+                } else {
+                    Brush.linearGradient(listOf(AppTheme.colorScheme.tertiary, AppTheme.colorScheme.tertiary))
+                },
                 alpha = if (membershipExpired) 0.5f else 1.0f,
             )
             .padding(start = 16.dp, end = 3.dp)
