@@ -117,4 +117,11 @@ enum class LegendaryProfile(
             ),
         ),
     ),
+    ;
+
+    companion object {
+        fun valueById(id: String): LegendaryProfile? {
+            return LegendaryProfile.entries.find { it.id == id }
+        }
+    }
 }
