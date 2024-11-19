@@ -1,9 +1,19 @@
 ## Changes
-- Increase EOSE delay in NostrSocketClient from 50 to 75 msec
-- Implement new subscription header
-- Add updating membership status on membership purchase
-- Add opening Extend Subscription from manage premium
-- Add opening BecomeALegend from manage premium
-- Fix line spacing on welcome screen
-- Implement premium badge logic
-- Implement media deletion
+- Implement legend support in drawer (side menu)
+- Implement custom badge support in profile details
+- Fix custom badge now showing if disabled in legend profile
+- Implement saving legend profile customization
+- Fix badge jumping on legendary profile customization
+- Implement live preview during legendary profile customization
+- Fix not showing custom badge if primal nip05 is missing
+- Implement support for avatar glow and custom badge on article feeds & article details
+- Implement support for avatar glow and custom badge on note feeds
+- Implement support for avatar glow on profile details header
+- Implement support for custom badge
+- Implement support for avatar glow
+- Implement support for gradients in PrimalBadge in premium section
+- Implement reading existing legendary profile settings on customization screen
+- Implement parsing and storing primal legends data for profiles
+- Implement UI for legendary profile customization
+- Add empty Legendary profile customization screen;
+- Add empty Contact List Backup screen and empty Backup content screen;
