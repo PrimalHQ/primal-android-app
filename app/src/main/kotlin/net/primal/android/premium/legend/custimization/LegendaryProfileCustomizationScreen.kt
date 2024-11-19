@@ -108,6 +108,7 @@ fun LegendaryProfileCustomizationScreen(state: LegendaryProfileCustomizationCont
                     displayName = primalName,
                     internetIdentifier = "$primalName@primal.net",
                     internetIdentifierBadgeSize = 24.dp,
+                    customBadge = state.legendaryProfile,
                     fontSize = 20.sp,
                 )
             }
