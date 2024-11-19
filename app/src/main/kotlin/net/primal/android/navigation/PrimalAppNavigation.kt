@@ -87,8 +87,10 @@ import net.primal.android.premium.home.PremiumHomeScreen
 import net.primal.android.premium.home.PremiumHomeViewModel
 import net.primal.android.premium.info.PREMIUM_MORE_INFO_FAQ_TAB_INDEX
 import net.primal.android.premium.info.PremiumMoreInfoScreen
-import net.primal.android.premium.legend.PremiumBecomeLegendScreen
-import net.primal.android.premium.legend.PremiumBecomeLegendViewModel
+import net.primal.android.premium.legend.become.PremiumBecomeLegendScreen
+import net.primal.android.premium.legend.become.PremiumBecomeLegendViewModel
+import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationScreen
+import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationViewModel
 import net.primal.android.premium.manage.PremiumManageContract
 import net.primal.android.premium.manage.PremiumManageScreen
 import net.primal.android.premium.manage.PremiumManageViewModel
@@ -261,6 +263,7 @@ private fun NavController.navigateToPremiumMoreInfo(tabIndex: Int = 0) =
     navigate(route = "premium/info?$PREMIUM_MORE_INFO_TAB_INDEX=$tabIndex")
 
 private fun NavController.navigateToPremiumBecomeLegend() = navigate(route = "premium/legend/become")
+private fun NavController.navigateToPremiumLegendaryProfile() = navigate(route = "premium/legend/profile")
 private fun NavController.navigateToPremiumManage() = navigate(route = "premium/manage")
 private fun NavController.navigateToPremiumMediaManagement() = navigate(route = "premium/manage/media")
 private fun NavController.navigateToPremiumContactList() = navigate(route = "premium/manage/contacts")
@@ -470,6 +473,8 @@ fun PrimalAppNavigation() {
         )
 
         premiumBecomeLegend(route = "premium/legend/become", navController = navController)
+
+        premiumLegendaryProfile(route = "premium/legend/profile", navController = navController)
 
         premiumManage(route = "premium/manage", navController = navController)
 
@@ -1073,6 +1078,24 @@ private fun NavGraphBuilder.premiumBecomeLegend(route: String, navController: Na
         )
     }
 
+private fun NavGraphBuilder.premiumLegendaryProfile(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        val viewModel = hiltViewModel<LegendaryProfileCustomizationViewModel>()
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+
+        LegendaryProfileCustomizationScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+        )
+    }
+
 private fun NavGraphBuilder.premiumManage(route: String, navController: NavController) =
     composable(
         route = route,
@@ -1110,15 +1133,14 @@ private fun NavGraphBuilder.premiumManage(route: String, navController: NavContr
                     PremiumManageContract.ManageDestination.ChangePrimalName ->
                         navController.navigateToPremiumChangePrimalName()
 
-                    is PremiumManageContract.ManageDestination.ExtendSubscription -> {
+                    is PremiumManageContract.ManageDestination.ExtendSubscription ->
                         navController.navigateToPremiumExtendSubscription(primalName = it.primalName)
-                    }
 
-                    PremiumManageContract.ManageDestination.LegendaryProfileCustomization -> Unit
+                    PremiumManageContract.ManageDestination.LegendaryProfileCustomization ->
+                        navController.navigateToPremiumLegendaryProfile()
 
-                    PremiumManageContract.ManageDestination.BecomeALegend -> {
+                    PremiumManageContract.ManageDestination.BecomeALegend ->
                         navController.navigateToPremiumBecomeLegend()
-                    }
                 }
             },
         )
@@ -1135,7 +1157,9 @@ private fun NavGraphBuilder.premiumContactList(route: String, navController: Nav
         ApplyEdgeToEdge()
         LockToOrientationPortrait()
 
-        PremiumContactListScreen()
+        PremiumContactListScreen(
+            onClose = { navController.navigateUp() },
+        )
     }
 
 private fun NavGraphBuilder.premiumContentBackup(route: String, navController: NavController) =
@@ -1149,7 +1173,9 @@ private fun NavGraphBuilder.premiumContentBackup(route: String, navController: N
         ApplyEdgeToEdge()
         LockToOrientationPortrait()
 
-        PremiumContentBackupScreen()
+        PremiumContentBackupScreen(
+            onClose = { navController.navigateUp() },
+        )
     }
 
 private fun NavGraphBuilder.premiumMediaManagement(route: String, navController: NavController) =

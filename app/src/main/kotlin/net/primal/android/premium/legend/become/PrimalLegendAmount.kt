@@ -1,4 +1,4 @@
-package net.primal.android.premium.legend.ui
+package net.primal.android.premium.legend.become
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -11,9 +11,9 @@ import androidx.compose.ui.unit.sp
 import java.math.BigDecimal
 import java.text.NumberFormat
 import java.util.*
-import net.primal.android.premium.legend.PremiumBecomeLegendContract.Companion.LEGEND_THRESHOLD_IN_USD
-import net.primal.android.premium.legend.ui.amount.AltAmountText
-import net.primal.android.premium.legend.ui.amount.MainAmountText
+import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.Companion.LEGEND_THRESHOLD_IN_USD
+import net.primal.android.premium.legend.become.ui.amount.AltAmountText
+import net.primal.android.premium.legend.become.ui.amount.MainAmountText
 
 @Composable
 fun PrimalLegendAmount(btcValue: BigDecimal, exchangeBtcUsdRate: Double?) {

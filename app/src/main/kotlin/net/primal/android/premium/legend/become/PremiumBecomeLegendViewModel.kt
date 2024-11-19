@@ -1,4 +1,4 @@
-package net.primal.android.premium.legend
+package net.primal.android.premium.legend.become
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -25,9 +25,9 @@ import net.primal.android.nostr.ext.takeContentOrNull
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.premium.api.model.MembershipPurchaseMonitorRequestBody
 import net.primal.android.premium.api.model.MembershipPurchaseMonitorResponse
-import net.primal.android.premium.legend.PremiumBecomeLegendContract.Companion.LEGEND_THRESHOLD_IN_USD
-import net.primal.android.premium.legend.PremiumBecomeLegendContract.UiEvent
-import net.primal.android.premium.legend.PremiumBecomeLegendContract.UiState
+import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.Companion.LEGEND_THRESHOLD_IN_USD
+import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.UiEvent
+import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.UiState
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.repository.WalletRepository
