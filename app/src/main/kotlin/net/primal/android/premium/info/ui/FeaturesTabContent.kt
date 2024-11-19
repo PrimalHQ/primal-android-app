@@ -85,6 +85,21 @@ fun FeaturesTabContent(modifier: Modifier = Modifier, contentPadding: PaddingVal
             free = false,
             premium = true,
         ),
+        Feature(
+            featureText = stringResource(id = R.string.premium_more_info_features_table_eleventh_row),
+            free = false,
+            premium = true,
+        ),
+        Feature(
+            featureText = stringResource(id = R.string.premium_more_info_features_table_twelfth_row),
+            free = false,
+            premium = true,
+        ),
+        Feature(
+            featureText = stringResource(id = R.string.premium_more_info_features_table_thirteenth_row),
+            free = false,
+            premium = true,
+        ),
     )
 
     LazyColumn(
