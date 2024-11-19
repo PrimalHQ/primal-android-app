@@ -1,4 +1,4 @@
-package net.primal.android.premium.legend.ui
+package net.primal.android.premium.legend.become
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth

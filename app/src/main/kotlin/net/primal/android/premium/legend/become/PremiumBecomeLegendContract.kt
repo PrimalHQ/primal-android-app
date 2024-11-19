@@ -1,4 +1,4 @@
-package net.primal.android.premium.legend
+package net.primal.android.premium.legend.become
 
 import java.math.BigDecimal
 import net.primal.android.attachments.domain.CdnImage
