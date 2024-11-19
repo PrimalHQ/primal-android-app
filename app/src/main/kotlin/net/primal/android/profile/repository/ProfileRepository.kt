@@ -19,7 +19,7 @@ import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.ext.asReplaceableEventTag
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsProfileDataPO
-import net.primal.android.nostr.ext.parseAndMapPrimalUserName
+import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
 import net.primal.android.nostr.model.NostrEventKind
@@ -66,10 +66,12 @@ class ProfileRepository @Inject constructor(
             val users = usersApi.getUserProfileFollowedBy(profileId, userId, limit)
 
             val primalUserNames = users.primalUserNames.parseAndMapPrimalUserNames()
+            val primalLegendProfiles = users.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
             val cdnResources = users.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
             val profiles = users.metadataEvents.mapAsProfileDataPO(
                 cdnResources = cdnResources,
                 primalUserNames = primalUserNames,
+                primalLegendProfiles = primalLegendProfiles,
             )
             database.profiles().upsertAll(data = profiles)
             profiles
@@ -87,10 +89,12 @@ class ProfileRepository @Inject constructor(
         withContext(dispatchers.io()) {
             val response = retryNetworkCall { usersApi.getUserProfile(userId = profileId) }
             val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-            val primalUserName = response.primalName.parseAndMapPrimalUserName()
+            val primalUserName = response.primalUserNames.parseAndMapPrimalUserNames()
+            val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
             val profileMetadata = response.metadata?.asProfileDataPO(
                 cdnResources = cdnResources,
                 primalUserNames = primalUserName,
+                primalLegendProfiles = primalLegendProfiles,
             )
             val profileStats = response.profileStats?.asProfileStatsPO()
 
@@ -170,10 +174,12 @@ class ProfileRepository @Inject constructor(
         withContext(dispatchers.io()) {
             val response = apiBlock()
             val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
+            val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
             val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
             val profiles = response.contactsMetadata.mapAsProfileDataPO(
                 cdnResources = cdnResources,
                 primalUserNames = primalUserNames,
+                primalLegendProfiles = primalLegendProfiles,
             )
             val followersCountsMap = response.followerCounts?.takeContentAsPrimalUserFollowersCountsOrNull()
 

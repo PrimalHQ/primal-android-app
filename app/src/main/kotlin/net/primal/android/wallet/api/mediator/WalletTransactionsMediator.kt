@@ -14,6 +14,7 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsWalletTransactionPO
+import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.api.UsersApi
@@ -111,11 +112,13 @@ class WalletTransactionsMediator(
                 UserProfilesResponse()
             }
             val primalUserNames = profilesResponse.primalUserNames.parseAndMapPrimalUserNames()
+            val primalLegendProfiles = profilesResponse.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
             val cdnResources = profilesResponse.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
             val profiles = profilesResponse.metadataEvents.map {
                 it.asProfileDataPO(
                     cdnResources = cdnResources,
                     primalUserNames = primalUserNames,
+                    primalLegendProfiles = primalLegendProfiles,
                 )
             }
 

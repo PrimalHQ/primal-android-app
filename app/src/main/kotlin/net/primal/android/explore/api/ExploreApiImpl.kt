@@ -44,7 +44,8 @@ class ExploreApiImpl @Inject constructor(
             usersFollowStats = queryResult.findPrimalEvent(NostrEventKind.PrimalExplorePeopleNewFollowStats),
             usersScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
             usersFollowCount = queryResult.findPrimalEvent(NostrEventKind.PrimalUserFollowersCounts),
-            primalUserNames = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserName),
+            primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
+            primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
         )
     }
 
@@ -66,7 +67,8 @@ class ExploreApiImpl @Inject constructor(
             usersScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
             nostrZapEvents = queryResult.filterNostrEvents(NostrEventKind.Zap),
             noteEvents = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
-            primalUserNames = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserName),
+            primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
+            primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
         )
     }
 
@@ -96,7 +98,8 @@ class ExploreApiImpl @Inject constructor(
             userScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
             followerCounts = queryResult.findPrimalEvent(NostrEventKind.PrimalUserFollowersCounts),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
-            primalUserNames = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserName),
+            primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
+            primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
         )
     }
 
@@ -113,7 +116,8 @@ class ExploreApiImpl @Inject constructor(
             userScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
             followerCounts = queryResult.findPrimalEvent(NostrEventKind.PrimalUserFollowersCounts),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
-            primalUserNames = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserName),
+            primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
+            primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
         )
     }
 }

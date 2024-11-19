@@ -17,6 +17,7 @@ import net.primal.android.nostr.ext.mapNotNullAsArticleDataPO
 import net.primal.android.nostr.ext.mapNotNullAsEventStatsPO
 import net.primal.android.nostr.ext.mapNotNullAsEventUserStatsPO
 import net.primal.android.nostr.ext.mapNotNullAsPostDataPO
+import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.thread.db.ArticleCommentCrossRef
 
@@ -28,8 +29,13 @@ suspend fun ArticleResponse.persistToDatabaseAsTransaction(userId: String, datab
     val wordsCountMap = this.primalLongFormWords.flatMapAsWordCount()
 
     val primalUserNames = this.primalUserNames.parseAndMapPrimalUserNames()
+    val primalLegendProfiles = this.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
 
-    val profiles = this.metadata.mapAsProfileDataPO(cdnResources = cdnResources, primalUserNames = primalUserNames)
+    val profiles = this.metadata.mapAsProfileDataPO(
+        cdnResources = cdnResources,
+        primalUserNames = primalUserNames,
+        primalLegendProfiles = primalLegendProfiles,
+    )
     val referencedNotes = this.referencedEvents.mapNotNullAsPostDataPO()
 
     val allNotes = this.notes.mapAsPostDataPO(referencedPosts = referencedNotes)

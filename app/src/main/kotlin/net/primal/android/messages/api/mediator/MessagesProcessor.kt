@@ -17,6 +17,7 @@ import net.primal.android.nostr.ext.mapAsMessageDataPO
 import net.primal.android.nostr.ext.mapAsPostDataPO
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.mapNotNullAsPostDataPO
+import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.primal.PrimalEvent
@@ -38,7 +39,8 @@ class MessagesProcessor @Inject constructor(
         messages: List<NostrEvent>,
         profileMetadata: List<NostrEvent>,
         mediaResources: List<PrimalEvent>,
-        primalUserNames: List<PrimalEvent>,
+        primalUserNames: PrimalEvent?,
+        primalLegendProfiles: PrimalEvent?,
     ) {
         val messageDataList = messages.mapAsMessageDataPO(
             userId = userId,
@@ -49,6 +51,7 @@ class MessagesProcessor @Inject constructor(
 
         val cdnResources = mediaResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
         val primalUserNamesMap = primalUserNames.parseAndMapPrimalUserNames()
+        val primalLegendProfilesMap = primalLegendProfiles.parseAndMapPrimalLegendProfiles()
         val attachments = messageDataList.flatMapMessagesAsNoteAttachmentPO()
 
         database.withTransaction {
@@ -56,6 +59,7 @@ class MessagesProcessor @Inject constructor(
                 data = profileMetadata.mapAsProfileDataPO(
                     cdnResources = cdnResources,
                     primalUserNames = primalUserNamesMap,
+                    primalLegendProfiles = primalLegendProfilesMap,
                 ),
             )
             database.messages().upsertAll(data = messageDataList)
@@ -101,10 +105,12 @@ class MessagesProcessor @Inject constructor(
             try {
                 val response = usersApi.getUserProfilesMetadata(userIds = missingProfileIds)
                 val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
+                val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
                 val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
                 val profiles = response.metadataEvents.mapAsProfileDataPO(
                     cdnResources = cdnResources,
                     primalUserNames = primalUserNames,
+                    primalLegendProfiles = primalLegendProfiles,
                 )
                 database.profiles().upsertAll(data = profiles)
                 profiles
