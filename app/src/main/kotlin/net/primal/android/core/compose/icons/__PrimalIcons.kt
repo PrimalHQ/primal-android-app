@@ -89,6 +89,15 @@ import net.primal.android.core.compose.icons.primaliconpack.Notrich
 import net.primal.android.core.compose.icons.primaliconpack.Paste
 import net.primal.android.core.compose.icons.primaliconpack.PhotoFromGallery
 import net.primal.android.core.compose.icons.primaliconpack.Play
+import net.primal.android.core.compose.icons.primaliconpack.PrimalBadgeAqua
+import net.primal.android.core.compose.icons.primaliconpack.PrimalBadgeBlue
+import net.primal.android.core.compose.icons.primaliconpack.PrimalBadgeBrown
+import net.primal.android.core.compose.icons.primaliconpack.PrimalBadgeGold
+import net.primal.android.core.compose.icons.primaliconpack.PrimalBadgePurple
+import net.primal.android.core.compose.icons.primaliconpack.PrimalBadgePurpleHaze
+import net.primal.android.core.compose.icons.primaliconpack.PrimalBadgeSilver
+import net.primal.android.core.compose.icons.primaliconpack.PrimalBadgeSunFire
+import net.primal.android.core.compose.icons.primaliconpack.PrimalBadgeTeal
 import net.primal.android.core.compose.icons.primaliconpack.PrimalPremium
 import net.primal.android.core.compose.icons.primaliconpack.QrCode
 import net.primal.android.core.compose.icons.primaliconpack.Quote
@@ -249,6 +258,15 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             FeedBookmarkFilled,
             GenericLinkIcon,
             LegendaryProfileNoCustomization,
+            PrimalBadgeGold,
+            PrimalBadgeBlue,
+            PrimalBadgeSilver,
+            PrimalBadgePurple,
+            PrimalBadgeAqua,
+            PrimalBadgePurpleHaze,
+            PrimalBadgeTeal,
+            PrimalBadgeBrown,
+            PrimalBadgeSunFire,
         )
         return __PrimalIcons!!
     }
