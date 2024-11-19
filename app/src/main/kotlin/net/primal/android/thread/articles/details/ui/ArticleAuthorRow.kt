@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -29,10 +30,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.core.compose.AvatarThumbnail
+import net.primal.android.core.compose.AvatarThumbnailCustomBorder
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.premium.legend.LegendaryProfile
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -42,6 +44,9 @@ fun ArticleAuthorRow(
     authorDisplayName: String,
     authorCdnImage: CdnImage? = null,
     authorInternetIdentifier: String? = null,
+    authorLegendAvatarGlow: Boolean = false,
+    authorLegendCustomBadge: Boolean = false,
+    authorLegendProfile: LegendaryProfile? = null,
     onAuthorAvatarClick: (() -> Unit)? = null,
     onFollowUnfollowClick: (() -> Unit)? = null,
 ) {
@@ -49,10 +54,15 @@ fun ArticleAuthorRow(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        AvatarThumbnail(
+        AvatarThumbnailCustomBorder(
             avatarSize = 42.dp,
             avatarCdnImage = authorCdnImage,
             onClick = onAuthorAvatarClick,
+            hasBorder = authorLegendAvatarGlow && authorLegendProfile != null,
+            borderBrush = when {
+                authorLegendProfile != null -> authorLegendProfile.brush
+                else -> Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
+            },
         )
 
         Column(
@@ -68,6 +78,7 @@ fun ArticleAuthorRow(
                     fontSize = 16.sp,
                     lineHeight = 16.sp,
                 ),
+                customBadge = if (authorLegendCustomBadge) authorLegendProfile else null,
             )
 
             if (!authorInternetIdentifier.isNullOrBlank()) {
