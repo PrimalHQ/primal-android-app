@@ -1,5 +1,6 @@
 package net.primal.android.drawer
 
+import net.primal.android.premium.legend.LegendaryProfile
 import net.primal.android.user.domain.Badges
 import net.primal.android.user.domain.UserAccount
 
@@ -11,6 +12,9 @@ interface PrimalDrawerContract {
         val activeUserAccount: UserAccount? = null,
         val badges: Badges = Badges(),
         val showPremiumBadge: Boolean = false,
+        val customBadge: Boolean = false,
+        val avatarGlow: Boolean = false,
+        val legendaryStyle: LegendaryProfile? = null,
     )
 
     sealed class UiEvent {

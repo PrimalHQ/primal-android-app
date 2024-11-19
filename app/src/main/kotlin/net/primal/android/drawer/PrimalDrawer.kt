@@ -30,6 +30,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -43,7 +45,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import java.text.NumberFormat
 import kotlinx.coroutines.launch
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnail
+import net.primal.android.core.compose.AvatarThumbnailCustomBorder
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.DarkMode
@@ -51,6 +53,7 @@ import net.primal.android.core.compose.icons.primaliconpack.LightMode
 import net.primal.android.core.compose.icons.primaliconpack.QrCode
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.utils.formatNip05Identifier
+import net.primal.android.premium.legend.LegendaryProfile
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.domain.Badges
@@ -107,6 +110,9 @@ fun PrimalDrawer(
         ) {
             DrawerHeader(
                 userAccount = state.activeUserAccount,
+                customBadge = state.customBadge,
+                avatarGlow = state.avatarGlow,
+                legendaryStyle = state.legendaryStyle,
                 onQrCodeClick = onQrCodeClick,
             )
 
@@ -134,7 +140,13 @@ fun PrimalDrawer(
 }
 
 @Composable
-private fun DrawerHeader(userAccount: UserAccount?, onQrCodeClick: () -> Unit) {
+private fun DrawerHeader(
+    userAccount: UserAccount?,
+    customBadge: Boolean,
+    avatarGlow: Boolean,
+    legendaryStyle: LegendaryProfile?,
+    onQrCodeClick: () -> Unit,
+) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
     ConstraintLayout(
         modifier = Modifier.fillMaxWidth(),
@@ -142,13 +154,18 @@ private fun DrawerHeader(userAccount: UserAccount?, onQrCodeClick: () -> Unit) {
         val startGuideline = createGuidelineFromStart(24.dp)
         val (avatarRef, usernameRef, iconRef, identifierRef, statsRef) = createRefs()
 
-        AvatarThumbnail(
+        AvatarThumbnailCustomBorder(
             modifier = Modifier.constrainAs(avatarRef) {
                 start.linkTo(startGuideline)
                 top.linkTo(parent.top, margin = 16.dp)
             },
             avatarSize = 52.dp,
             avatarCdnImage = userAccount?.avatarCdnImage,
+            hasBorder = avatarGlow && legendaryStyle != null,
+            borderBrush = when {
+                legendaryStyle != null -> legendaryStyle.brush
+                else -> Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
+            },
         )
 
         NostrUserText(
@@ -160,6 +177,7 @@ private fun DrawerHeader(userAccount: UserAccount?, onQrCodeClick: () -> Unit) {
                 top.linkTo(avatarRef.bottom, margin = 16.dp)
                 width = Dimension.preferredValue(220.dp)
             },
+            customBadge = if (customBadge) legendaryStyle else null,
         )
 
         IconButton(
