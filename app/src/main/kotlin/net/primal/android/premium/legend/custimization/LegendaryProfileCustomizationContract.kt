@@ -12,5 +12,18 @@ interface LegendaryProfileCustomizationContract {
         val customBadge: Boolean = false,
         val avatarGlow: Boolean = false,
         val legendaryProfile: LegendaryProfile = LegendaryProfile.NO_CUSTOMIZATION,
+        val applyingChanges: Boolean = false,
     )
+
+    sealed class UiEvent {
+        data class ApplyCustomization(
+            val customBadge: Boolean,
+            val avatarGlow: Boolean,
+            val style: LegendaryProfile,
+        ) : UiEvent()
+    }
+
+    sealed class SideEffect {
+        data object CustomizationSaved : SideEffect()
+    }
 }
