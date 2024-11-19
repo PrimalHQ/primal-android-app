@@ -6,6 +6,7 @@ import net.primal.android.explore.api.model.NewUserFollowStats
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentUserProfileStats
 import net.primal.android.profile.db.ProfileStats
+import net.primal.android.profile.domain.PrimalLegendProfile
 
 fun List<PrimalEvent>.mapNotNullAsProfileStatsPO() = mapNotNull { it.asProfileStatsPO() }
 
@@ -35,17 +36,12 @@ fun PrimalEvent.takeContentAsPrimalUserScoresOrNull(): Map<String, Float> {
     return NostrJson.decodeFromString(this.content)
 }
 
-fun List<PrimalEvent>.parseAndMapPrimalUserNames() =
-    this.map {
-        runCatching {
-            it.takeContentAsPrimalUserNameOrNull()
-        }.getOrNull()
-    }.filterNotNull().fold(emptyMap<String, String>()) { acc, item -> acc + item }
+fun PrimalEvent?.parseAndMapPrimalUserNames(): Map<String, String> {
+    return NostrJson.decodeFromStringOrNull<Map<String, String>>(this?.content) ?: emptyMap()
+}
 
-fun PrimalEvent?.parseAndMapPrimalUserName() = listOf(this).filterNotNull().parseAndMapPrimalUserNames()
-
-fun PrimalEvent.takeContentAsPrimalUserNameOrNull(): Map<String, String> {
-    return NostrJson.decodeFromString(this.content)
+fun PrimalEvent?.parseAndMapPrimalLegendProfiles(): Map<String, PrimalLegendProfile> {
+    return NostrJson.decodeFromStringOrNull<Map<String, PrimalLegendProfile>>(this?.content) ?: emptyMap()
 }
 
 fun PrimalEvent.takeContentAsPrimalUserFollowersCountsOrNull(): Map<String, Int> {

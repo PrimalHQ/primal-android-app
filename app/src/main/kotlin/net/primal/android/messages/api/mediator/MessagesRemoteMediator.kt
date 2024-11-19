@@ -87,6 +87,7 @@ class MessagesRemoteMediator(
                 profileMetadata = response.profileMetadata,
                 mediaResources = response.cdnResources,
                 primalUserNames = response.primalUserNames,
+                primalLegendProfiles = response.primalLegendProfiles,
             )
         }
 

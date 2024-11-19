@@ -43,6 +43,7 @@ import net.primal.android.profile.db.ProfileInteraction
 import net.primal.android.profile.db.ProfileInteractionDao
 import net.primal.android.profile.db.ProfileStats
 import net.primal.android.profile.db.ProfileStatsDao
+import net.primal.android.profile.db.serialization.ProfileTypeConverters
 import net.primal.android.settings.muted.db.MutedUserDao
 import net.primal.android.settings.muted.db.MutedUserData
 import net.primal.android.stats.db.EventStats
@@ -88,12 +89,13 @@ import net.primal.android.wallet.db.WalletTransactionData
         ArticleCommentCrossRef::class,
         ArticleFeedCrossRef::class,
     ],
-    version = 44,
+    version = 45,
     exportSchema = true,
 )
 @TypeConverters(
     ListsTypeConverters::class,
     AttachmentTypeConverters::class,
+    ProfileTypeConverters::class,
 )
 abstract class PrimalDatabase : RoomDatabase() {
 

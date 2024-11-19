@@ -9,5 +9,6 @@ data class UserProfilesResponse(
     val metadataEvents: List<NostrEvent> = emptyList(),
     val cdnResources: List<PrimalEvent> = emptyList(),
     val userScores: PrimalEvent? = null,
-    val primalUserNames: List<PrimalEvent> = emptyList(),
+    val primalUserNames: PrimalEvent? = null,
+    val primalLegendProfiles: PrimalEvent? = null,
 )

@@ -11,7 +11,8 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.ext.asProfileStatsPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
-import net.primal.android.nostr.ext.parseAndMapPrimalUserName
+import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
+import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.asUserAccountFromFollowListEvent
@@ -27,10 +28,12 @@ class UserAccountFetcher @Inject constructor(
             usersApi.getUserProfile(userId = userId)
         }
         val cdnResources = userProfileResponse.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-        val primalUserName = userProfileResponse.primalName.parseAndMapPrimalUserName()
+        val primalUserName = userProfileResponse.primalUserNames.parseAndMapPrimalUserNames()
+        val primalLegendProfiles = userProfileResponse.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
         val profileData = userProfileResponse.metadata?.asProfileDataPO(
             cdnResources = cdnResources,
             primalUserNames = primalUserName,
+            primalLegendProfiles = primalLegendProfiles,
         ) ?: return null
         val profileStats = userProfileResponse.profileStats?.asProfileStatsPO()
 

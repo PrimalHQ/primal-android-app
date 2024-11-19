@@ -28,6 +28,7 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.findFirstEventId
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsProfileDataPO
+import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.notes.api.model.FeedResponse
@@ -162,7 +163,12 @@ class NoteFeedViewModel @AssistedInject constructor(
 
         val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
         val primalUserNames = this.primalUserNames.parseAndMapPrimalUserNames()
-        val profiles = this.metadata.mapAsProfileDataPO(cdnResources = cdnResources, primalUserNames = primalUserNames)
+        val primalLegendProfiles = this.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
+        val profiles = this.metadata.mapAsProfileDataPO(
+            cdnResources = cdnResources,
+            primalUserNames = primalUserNames,
+            primalLegendProfiles = primalLegendProfiles,
+        )
         val avatarCdnImages = allNotes
             .mapNotNull { note -> profiles.find { it.ownerId == note.pubKey }?.avatarCdnImage }
             .distinct()

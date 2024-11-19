@@ -6,13 +6,19 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsEventZapDO
 import net.primal.android.nostr.ext.mapAsProfileDataPO
+import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.stats.api.model.EventZapsResponse
 
 suspend fun EventZapsResponse.persistToDatabaseAsTransaction(database: PrimalDatabase) {
     val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
     val primalUserNames = this.primalUserNames.parseAndMapPrimalUserNames()
-    val profiles = this.profiles.mapAsProfileDataPO(cdnResources = cdnResources, primalUserNames = primalUserNames)
+    val primalLegendProfiles = this.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
+    val profiles = this.profiles.mapAsProfileDataPO(
+        cdnResources = cdnResources,
+        primalUserNames = primalUserNames,
+        primalLegendProfiles = primalLegendProfiles,
+    )
     val eventZaps = this.zaps.mapAsEventZapDO(profilesMap = profiles.associateBy { it.ownerId })
     database.withTransaction {
         database.profiles().upsertAll(data = profiles)
