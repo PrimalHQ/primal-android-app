@@ -235,7 +235,7 @@ dependencies {
     implementation(libs.androidx.emoji2.emojipicker)
     implementation(libs.androidx.webkit)
 
-    implementation("org.jetbrains:markdown:0.7.3")
+    implementation(libs.jetbrains.markdown)
     implementation(libs.richtext.commonmark)
     implementation(libs.richtext.ui)
     implementation(libs.richtext.ui.material3)
