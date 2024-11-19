@@ -1,4 +1,4 @@
-package net.primal.android.premium.legend.ui.payment
+package net.primal.android.premium.legend.become.ui.payment
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -27,9 +27,9 @@ import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.premium.legend.PremiumBecomeLegendContract
-import net.primal.android.premium.legend.ui.BecomeLegendBottomBarButton
-import net.primal.android.premium.legend.ui.PrimalLegendAmount
+import net.primal.android.premium.legend.become.BecomeLegendBottomBarButton
+import net.primal.android.premium.legend.become.PremiumBecomeLegendContract
+import net.primal.android.premium.legend.become.PrimalLegendAmount
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.domain.Network
 import net.primal.android.wallet.transactions.receive.QrCodeBox

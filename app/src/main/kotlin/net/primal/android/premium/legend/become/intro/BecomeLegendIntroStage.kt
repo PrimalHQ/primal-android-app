@@ -1,4 +1,4 @@
-package net.primal.android.premium.legend.ui.intro
+package net.primal.android.premium.legend.become.ui.intro
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -28,7 +28,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.premium.legend.ui.BecomeLegendBottomBarButton
+import net.primal.android.premium.legend.become.BecomeLegendBottomBarButton
 import net.primal.android.theme.AppTheme
 
 @ExperimentalMaterial3Api

@@ -1,4 +1,4 @@
-package net.primal.android.premium.legend
+package net.primal.android.premium.legend.become
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
@@ -14,11 +14,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
-import net.primal.android.premium.legend.PremiumBecomeLegendContract.BecomeLegendStage
-import net.primal.android.premium.legend.ui.amount.BecomeLegendAmountStage
-import net.primal.android.premium.legend.ui.intro.BecomeLegendIntroStage
-import net.primal.android.premium.legend.ui.payment.BecomeLegendPaymentStage
-import net.primal.android.premium.legend.ui.success.BecomeLegendSuccessStage
+import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.BecomeLegendStage
+import net.primal.android.premium.legend.become.ui.amount.BecomeLegendAmountStage
+import net.primal.android.premium.legend.become.ui.intro.BecomeLegendIntroStage
+import net.primal.android.premium.legend.become.ui.payment.BecomeLegendPaymentStage
+import net.primal.android.premium.legend.become.ui.success.BecomeLegendSuccessStage
 import net.primal.android.theme.AppTheme
 
 @Composable
