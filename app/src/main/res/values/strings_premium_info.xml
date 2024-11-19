@@ -29,4 +29,7 @@
     <string name="premium_more_info_features_table_eighth_row">VIP Profile on primal.net</string>
     <string name="premium_more_info_features_table_ninth_row">Advanced Nostr search</string>
     <string name="premium_more_info_features_table_tenth_row">Premium paid relay</string>
+    <string name="premium_more_info_features_table_eleventh_row">Nostr contact list backup</string>
+    <string name="premium_more_info_features_table_twelfth_row">Nostr account content backup</string>
+    <string name="premium_more_info_features_table_thirteenth_row">Much more to come!</string>
 </resources>
