@@ -24,6 +24,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,15 +57,28 @@ import net.primal.android.theme.AppTheme
 fun LegendaryProfileCustomizationScreen(viewModel: LegendaryProfileCustomizationViewModel, onClose: () -> Unit) {
     val uiState by viewModel.state.collectAsState()
 
+    LaunchedEffect(viewModel, onClose) {
+        viewModel.effect.collect {
+            when (it) {
+                LegendaryProfileCustomizationContract.SideEffect.CustomizationSaved -> onClose()
+            }
+        }
+    }
+
     LegendaryProfileCustomizationScreen(
         state = uiState,
+        eventPublisher = viewModel::setEvent,
         onClose = onClose,
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LegendaryProfileCustomizationScreen(state: LegendaryProfileCustomizationContract.UiState, onClose: () -> Unit) {
+fun LegendaryProfileCustomizationScreen(
+    state: LegendaryProfileCustomizationContract.UiState,
+    eventPublisher: (LegendaryProfileCustomizationContract.UiEvent) -> Unit,
+    onClose: () -> Unit,
+) {
     val snackbarHostState = remember { SnackbarHostState() }
     var customBadge by remember(state.customBadge) { mutableStateOf(state.customBadge) }
     var avatarGlow by remember(state.avatarGlow) { mutableStateOf(state.avatarGlow) }
@@ -82,6 +96,13 @@ fun LegendaryProfileCustomizationScreen(state: LegendaryProfileCustomizationCont
             BottomBarButton(
                 text = stringResource(id = R.string.premium_legend_profile_apply_button),
                 onClick = {
+                    eventPublisher(
+                        LegendaryProfileCustomizationContract.UiEvent.ApplyCustomization(
+                            customBadge = customBadge,
+                            avatarGlow = avatarGlow,
+                            style = selectedProfile,
+                        ),
+                    )
                 },
             )
         },

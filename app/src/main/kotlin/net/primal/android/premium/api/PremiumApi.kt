@@ -6,6 +6,7 @@ import net.primal.android.premium.api.model.MembershipStatusResponse
 import net.primal.android.premium.api.model.NameAvailableResponse
 import net.primal.android.premium.api.model.PurchaseMembershipRequest
 import net.primal.android.premium.domain.PremiumPurchaseOrder
+import net.primal.android.profile.domain.PrimalLegendProfile
 
 interface PremiumApi {
 
@@ -29,4 +30,6 @@ interface PremiumApi {
     suspend fun shouldShowSupportUs(): Boolean
 
     suspend fun getOrdersHistory(userId: String): List<PremiumPurchaseOrder>
+
+    suspend fun updateLegendProfile(userId: String, profile: PrimalLegendProfile)
 }
