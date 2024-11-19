@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
@@ -44,7 +45,7 @@ import coil.compose.SubcomposeAsyncImage
 import java.time.Instant
 import net.primal.android.R
 import net.primal.android.attachments.domain.findNearestOrNull
-import net.primal.android.core.compose.AvatarThumbnail
+import net.primal.android.core.compose.AvatarThumbnailCustomBorder
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.WrappedContentWithSuffix
 import net.primal.android.core.compose.asBeforeNowFormat
@@ -160,10 +161,14 @@ private fun ListItemHeader(
                 .padding(end = overflowIconSizeDp - 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            AvatarThumbnail(
+            AvatarThumbnailCustomBorder(
                 avatarSize = 24.dp,
-                borderSize = 0.dp,
                 avatarCdnImage = data.authorAvatarCdnImage,
+                hasBorder = data.authorLegendAvatarGlow && data.authorLegendProfile != null,
+                borderBrush = when {
+                    data.authorLegendProfile != null -> data.authorLegendProfile.brush
+                    else -> Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
+                },
             )
 
             Box(modifier = Modifier.fillMaxWidth()) {
