@@ -22,6 +22,46 @@ fun FAQTabContent(modifier: Modifier = Modifier, contentPadding: PaddingValues) 
             stringResource(id = R.string.premium_more_info_faq_second_question),
             stringResource(id = R.string.premium_more_info_faq_second_answer),
         ),
+        Pair(
+            stringResource(id = R.string.premium_more_info_faq_third_question),
+            stringResource(id = R.string.premium_more_info_faq_third_answer),
+        ),
+        Pair(
+            stringResource(id = R.string.premium_more_info_faq_fourth_question),
+            stringResource(id = R.string.premium_more_info_faq_fourth_answer),
+        ),
+        Pair(
+            stringResource(id = R.string.premium_more_info_faq_fifth_question),
+            stringResource(id = R.string.premium_more_info_faq_fifth_answer),
+        ),
+        Pair(
+            stringResource(id = R.string.premium_more_info_faq_sixth_question),
+            stringResource(id = R.string.premium_more_info_faq_sixth_answer),
+        ),
+        Pair(
+            stringResource(id = R.string.premium_more_info_faq_seventh_question),
+            stringResource(id = R.string.premium_more_info_faq_seventh_answer),
+        ),
+        Pair(
+            stringResource(id = R.string.premium_more_info_faq_eighth_question),
+            stringResource(id = R.string.premium_more_info_faq_eighth_answer),
+        ),
+        Pair(
+            stringResource(id = R.string.premium_more_info_faq_ninth_question),
+            stringResource(id = R.string.premium_more_info_faq_ninth_answer),
+        ),
+        Pair(
+            stringResource(id = R.string.premium_more_info_faq_tenth_question),
+            stringResource(id = R.string.premium_more_info_faq_tenth_answer),
+        ),
+        Pair(
+            stringResource(id = R.string.premium_more_info_faq_eleventh_question),
+            stringResource(id = R.string.premium_more_info_faq_eleventh_answer),
+        ),
+        Pair(
+            stringResource(id = R.string.premium_more_info_faq_twelfth_question),
+            stringResource(id = R.string.premium_more_info_faq_twelfth_answer),
+        ),
     )
     LazyColumn(
         contentPadding = contentPadding,
@@ -32,13 +72,11 @@ fun FAQTabContent(modifier: Modifier = Modifier, contentPadding: PaddingValues) 
             items = questionAndAnswerPairs,
             key = { it.first },
         ) { qaPair ->
-            repeat(times = 2) {
-                QAColumn(
-                    question = qaPair.first,
-                    answer = qaPair.second,
-                )
-                Spacer(modifier = Modifier.height(42.dp))
-            }
+            QAColumn(
+                question = qaPair.first,
+                answer = qaPair.second,
+            )
+            Spacer(modifier = Modifier.height(42.dp))
         }
     }
 }
