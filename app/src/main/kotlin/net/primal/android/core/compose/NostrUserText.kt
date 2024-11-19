@@ -1,6 +1,7 @@
 package net.primal.android.core.compose
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
@@ -112,6 +113,7 @@ fun NostrUserText(
                 val surfaceColor = AppTheme.colorScheme.surface
                 Image(
                     modifier = Modifier
+                        .padding(bottom = 1.dp)
                         .size(internetIdentifierBadgeSize)
                         .drawBehind {
                             drawCircle(
