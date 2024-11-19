@@ -26,9 +26,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -63,6 +66,10 @@ fun LegendaryProfileCustomizationScreen(viewModel: LegendaryProfileCustomization
 @Composable
 fun LegendaryProfileCustomizationScreen(state: LegendaryProfileCustomizationContract.UiState, onClose: () -> Unit) {
     val snackbarHostState = remember { SnackbarHostState() }
+    var customBadge by remember(state.customBadge) { mutableStateOf(state.customBadge) }
+    var avatarGlow by remember(state.avatarGlow) { mutableStateOf(state.avatarGlow) }
+    var selectedProfile by remember(state.legendaryProfile) { mutableStateOf(state.legendaryProfile) }
+
     Scaffold(
         topBar = {
             PrimalTopAppBar(
@@ -98,8 +105,12 @@ fun LegendaryProfileCustomizationScreen(state: LegendaryProfileCustomizationCont
                 AvatarThumbnailCustomBorder(
                     avatarCdnImage = state.avatarCdnImage,
                     avatarSize = 80.dp,
-                    hasBorder = state.avatarGlow,
-                    borderBrush = state.legendaryProfile.brush,
+                    hasBorder = true,
+                    borderBrush = if (avatarGlow) {
+                        selectedProfile.brush
+                    } else {
+                        Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
+                    },
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 val primalName = state.membership?.premiumName ?: ""
@@ -108,7 +119,7 @@ fun LegendaryProfileCustomizationScreen(state: LegendaryProfileCustomizationCont
                     displayName = primalName,
                     internetIdentifier = "$primalName@primal.net",
                     internetIdentifierBadgeSize = 24.dp,
-                    customBadge = state.legendaryProfile,
+                    customBadge = if (customBadge) selectedProfile else null,
                     fontSize = 20.sp,
                 )
             }
@@ -118,7 +129,7 @@ fun LegendaryProfileCustomizationScreen(state: LegendaryProfileCustomizationCont
                     firstCohort = state.membership.cohort1,
                     secondCohort = state.membership.cohort2,
                     membershipExpired = state.membership.isExpired(),
-                    legendaryProfile = state.legendaryProfile,
+                    legendaryProfile = selectedProfile,
                 )
 
                 PrimalDivider(modifier = Modifier.padding(top = 16.dp))
@@ -127,21 +138,18 @@ fun LegendaryProfileCustomizationScreen(state: LegendaryProfileCustomizationCont
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 32.dp, vertical = 8.dp),
-                    activeLegendaryProfile = state.legendaryProfile,
-                    onProfileChanged = { newLegendaryProfileColors ->
-                    },
+                    activeLegendaryProfile = selectedProfile,
+                    onProfileChanged = { selectedProfile = it },
                 )
 
                 SwitchSettings(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
-                    avatarRing = state.avatarGlow,
-                    onAvatarRingChanged = { newState ->
-                    },
-                    customBadge = state.customBadge,
-                    onCustomBadgeChanged = { newState ->
-                    },
+                    avatarRing = avatarGlow,
+                    onAvatarRingChanged = { avatarGlow = it },
+                    customBadge = customBadge,
+                    onCustomBadgeChanged = { customBadge = it },
                 )
 
                 Text(
