@@ -25,6 +25,7 @@ import net.primal.android.premium.api.model.NameAvailableResponse
 import net.primal.android.premium.api.model.PurchaseMembershipRequest
 import net.primal.android.premium.api.model.ShowSupportUsResponse
 import net.primal.android.premium.domain.PremiumPurchaseOrder
+import net.primal.android.profile.domain.PrimalLegendProfile
 import net.primal.android.settings.api.model.AppSpecificDataRequest
 
 class PremiumApiImpl @Inject constructor(
@@ -202,5 +203,21 @@ class PremiumApiImpl @Inject constructor(
         val historyEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalMembershipHistory)
         return historyEvent.takeContentOrNull<List<PremiumPurchaseOrder>>()
             ?: throw WssException("Missing event or invalid content.")
+    }
+
+    override suspend fun updateLegendProfile(userId: String, profile: PrimalLegendProfile) {
+        primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.WALLET_MEMBERSHIP_LEGEND_CUSTOMIZATION,
+                optionsJson = NostrJsonEncodeDefaults.encodeToString(
+                    AppSpecificDataRequest(
+                        eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
+                            userId = userId,
+                            content = NostrJson.encodeToString(profile),
+                        ),
+                    ),
+                ),
+            ),
+        )
     }
 }
