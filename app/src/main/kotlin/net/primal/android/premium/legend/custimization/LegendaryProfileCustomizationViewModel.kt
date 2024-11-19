@@ -9,11 +9,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationContract.UiState
+import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 
 @HiltViewModel
 class LegendaryProfileCustomizationViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
+    private val profileRepository: ProfileRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -22,14 +24,24 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
 
     init {
         observeActiveAccount()
+        requestProfileUpdate()
     }
 
     private fun observeActiveAccount() =
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect {
                 setState {
-                    copy()
+                    copy(
+                        avatarCdnImage = it.avatarCdnImage,
+                        membership = it.premiumMembership,
+                    )
                 }
             }
         }
+
+    private fun requestProfileUpdate() {
+        viewModelScope.launch {
+            profileRepository.requestProfileUpdate(profileId = activeAccountStore.activeUserId())
+        }
+    }
 }

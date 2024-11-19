@@ -62,6 +62,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamer
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
 import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.icons.primaliconpack.Keyboard
+import net.primal.android.core.compose.icons.primaliconpack.LegendaryProfileNoCustomization
 import net.primal.android.core.compose.icons.primaliconpack.LightMode
 import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
 import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
@@ -247,6 +248,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             FeedBookmark,
             FeedBookmarkFilled,
             GenericLinkIcon,
+            LegendaryProfileNoCustomization,
         )
         return __PrimalIcons!!
     }
