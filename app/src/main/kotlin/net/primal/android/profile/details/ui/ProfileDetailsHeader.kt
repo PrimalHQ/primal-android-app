@@ -40,6 +40,7 @@ import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.formatNip05Identifier
+import net.primal.android.premium.legend.LegendaryProfile
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.theme.AppTheme
@@ -140,6 +141,8 @@ private fun ProfileHeaderDetails(
             displayName = state.profileDetails?.authorDisplayName ?: state.profileId.asEllipsizedNpub(),
             internetIdentifier = state.profileDetails?.internetIdentifier,
             isProfileFollowingMe = state.isProfileFollowingMe,
+            customBadge = state.profileDetails?.customBadge == true,
+            legendStyle = state.profileDetails?.legendaryProfile,
         )
 
         if (state.profileDetails?.internetIdentifier?.isNotEmpty() == true) {
@@ -298,6 +301,8 @@ private fun UserDisplayName(
     displayName: String,
     internetIdentifier: String?,
     isProfileFollowingMe: Boolean,
+    customBadge: Boolean,
+    legendStyle: LegendaryProfile?,
 ) {
     Row(
         modifier = modifier,
@@ -316,6 +321,7 @@ private fun UserDisplayName(
                 lineHeight = 20.sp,
                 fontWeight = FontWeight.Bold,
             ),
+            customBadge = if (customBadge) legendStyle else null,
         )
 
         if (isProfileFollowingMe) {
