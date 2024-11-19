@@ -11,6 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -25,12 +27,13 @@ import java.time.Instant
 import kotlin.time.Duration.Companion.seconds
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.core.compose.AvatarThumbnail
+import net.primal.android.core.compose.AvatarThumbnailCustomBorder
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.ReplyingToText
 import net.primal.android.core.compose.WrappedContentWithSuffix
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.utils.formatNip05Identifier
+import net.primal.android.premium.legend.LegendaryProfile
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -46,6 +49,9 @@ fun FeedNoteHeader(
     authorAvatarVisible: Boolean = true,
     authorAvatarCdnImage: CdnImage? = null,
     authorInternetIdentifier: String? = null,
+    authorLegendAvatarGlow: Boolean = false,
+    authorLegendCustomBadge: Boolean = false,
+    authorLegendProfile: LegendaryProfile? = null,
     replyToAuthor: String? = null,
     label: String? = authorInternetIdentifier,
     labelStyle: TextStyle? = null,
@@ -62,10 +68,15 @@ fun FeedNoteHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (authorAvatarVisible) {
-            AvatarThumbnail(
+            AvatarThumbnailCustomBorder(
                 avatarCdnImage = authorAvatarCdnImage,
                 avatarSize = authorAvatarSize,
                 onClick = onAuthorAvatarClick,
+                hasBorder = authorLegendAvatarGlow && authorLegendProfile != null,
+                borderBrush = when {
+                    authorLegendProfile != null -> authorLegendProfile.brush
+                    else -> Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
+                },
             )
         }
 
@@ -96,6 +107,7 @@ fun FeedNoteHeader(
                         style = topRowTextStyle,
                         internetIdentifierBadgeSize = topRowTextStyle.fontSize.value.dp,
                         overflow = TextOverflow.Ellipsis,
+                        customBadge = if (authorLegendCustomBadge) authorLegendProfile else null,
                     )
                 },
                 suffixFixedContent = {
