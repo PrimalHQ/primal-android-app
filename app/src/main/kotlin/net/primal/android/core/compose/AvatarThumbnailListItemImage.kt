@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -40,6 +41,33 @@ fun AvatarThumbnail(
     onClick: (() -> Unit)? = null,
     defaultAvatar: @Composable () -> Unit = { DefaultAvatarThumbnailPlaceholderListItemImage() },
 ) {
+    AvatarThumbnailCustomBorder(
+        modifier = modifier,
+        avatarCdnImage = avatarCdnImage,
+        avatarSize = avatarSize,
+        hasBorder = hasBorder,
+        borderBrush = Brush.linearGradient(listOf(borderColor, borderColor)),
+        borderSize = borderSize,
+        backgroundColor = backgroundColor,
+        onClick = onClick,
+        defaultAvatar = defaultAvatar,
+    )
+}
+
+@Composable
+fun AvatarThumbnailCustomBorder(
+    modifier: Modifier = Modifier,
+    avatarCdnImage: CdnImage? = null,
+    avatarSize: Dp = 48.dp,
+    hasBorder: Boolean = false,
+    borderBrush: Brush = Brush.linearGradient(
+        listOf(AppTheme.colorScheme.primary, AppTheme.colorScheme.primary),
+    ),
+    borderSize: Dp = 2.dp,
+    backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+    onClick: (() -> Unit)? = null,
+    defaultAvatar: @Composable () -> Unit = { DefaultAvatarThumbnailPlaceholderListItemImage() },
+) {
     val variant = avatarCdnImage?.variants?.minByOrNull { it.width }
     val imageSource = variant?.mediaUrl ?: avatarCdnImage?.sourceUrl
     AvatarThumbnailListItemImage(
@@ -47,7 +75,7 @@ fun AvatarThumbnail(
         avatarSize = avatarSize,
         source = imageSource,
         hasBorder = hasBorder,
-        borderColor = borderColor,
+        borderBrush = borderBrush,
         borderSize = borderSize,
         backgroundColor = backgroundColor,
         onClick = onClick,
@@ -61,7 +89,9 @@ private fun AvatarThumbnailListItemImage(
     modifier: Modifier = Modifier,
     avatarSize: Dp = 48.dp,
     hasBorder: Boolean = false,
-    borderColor: Color = AppTheme.colorScheme.primary,
+    borderBrush: Brush = Brush.linearGradient(
+        listOf(AppTheme.colorScheme.primary, AppTheme.colorScheme.primary),
+    ),
     borderSize: Dp = 2.dp,
     backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onClick: (() -> Unit)? = null,
@@ -83,7 +113,7 @@ private fun AvatarThumbnailListItemImage(
                 size = avatarSize,
                 hasBorder = hasBorder,
                 borderSize = borderSize,
-                borderColor = borderColor,
+                borderBrush = borderBrush,
             )
             .clickable(enabled = onClick != null, onClick = { onClick?.invoke() }),
         contentDescription = stringResource(id = R.string.accessibility_profile_image),
@@ -103,14 +133,14 @@ fun Modifier.adjustAvatarBackground(
     size: Dp = 48.dp,
     hasBorder: Boolean = false,
     borderSize: Dp = 2.dp,
-    borderColor: Color,
+    borderBrush: Brush,
 ): Modifier {
     return if (hasBorder) {
         this
             .size(size + borderSize)
             .border(
                 width = borderSize,
-                color = borderColor,
+                brush = borderBrush,
                 shape = CircleShape,
             )
             .clip(CircleShape)
