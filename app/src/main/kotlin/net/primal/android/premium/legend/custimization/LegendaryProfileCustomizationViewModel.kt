@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.premium.legend.LegendaryProfile
 import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationContract.UiState
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -43,7 +44,14 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
     private fun observeProfile() {
         viewModelScope.launch {
             profileRepository.observeProfile(profileId = activeAccountStore.activeUserId()).collect {
-                setState { copy(legendProfile = it.metadata?.primalLegendProfile) }
+                setState {
+                    copy(
+                        avatarGlow = it.metadata?.primalLegendProfile?.avatarGlow == true,
+                        customBadge = it.metadata?.primalLegendProfile?.customBadge == true,
+                        legendaryProfile = LegendaryProfile.valueById(it.metadata?.primalLegendProfile?.styleId)
+                            ?: LegendaryProfile.NO_CUSTOMIZATION,
+                    )
+                }
             }
         }
     }

@@ -21,7 +21,7 @@ enum class LegendaryProfile(
                 0.00f to Color(0xFFFFB700),
                 0.49f to Color(0xFFFFB700),
                 0.50f to Color(0xFFCB721E),
-                1.00f to Color(0xFFFFB700),
+                1.00f to Color(0xFFFFAA00),
             ),
         ),
     ),
@@ -120,7 +120,7 @@ enum class LegendaryProfile(
     ;
 
     companion object {
-        fun valueById(id: String): LegendaryProfile? {
+        fun valueById(id: String?): LegendaryProfile? {
             return LegendaryProfile.entries.find { it.id == id }
         }
     }

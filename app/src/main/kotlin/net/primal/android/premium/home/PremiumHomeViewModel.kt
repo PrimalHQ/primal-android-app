@@ -14,8 +14,10 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.domain.MembershipError
 import net.primal.android.premium.home.PremiumHomeContract.UiEvent
 import net.primal.android.premium.home.PremiumHomeContract.UiState
+import net.primal.android.premium.legend.LegendaryProfile
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.premium.utils.isPrimalLegend
+import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import timber.log.Timber
@@ -25,6 +27,7 @@ class PremiumHomeViewModel @Inject constructor(
     private val premiumRepository: PremiumRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val userRepository: UserRepository,
+    private val profileRepository: ProfileRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -37,6 +40,7 @@ class PremiumHomeViewModel @Inject constructor(
     init {
         observeEvents()
         observeActiveAccount()
+        observeProfile()
         fetchShouldShowSupport()
     }
 
@@ -66,6 +70,21 @@ class PremiumHomeViewModel @Inject constructor(
                 }
             }
         }
+
+    private fun observeProfile() {
+        viewModelScope.launch {
+            profileRepository.observeProfile(profileId = activeAccountStore.activeUserId()).collect {
+                setState {
+                    copy(
+                        avatarGlow = it.metadata?.primalLegendProfile?.avatarGlow == true,
+                        customBadge = it.metadata?.primalLegendProfile?.customBadge == true,
+                        legendaryProfile = LegendaryProfile.valueById(it.metadata?.primalLegendProfile?.styleId)
+                            ?: LegendaryProfile.NO_CUSTOMIZATION,
+                    )
+                }
+            }
+        }
+    }
 
     private fun applyPrimalNostrAddress() =
         viewModelScope.launch {
