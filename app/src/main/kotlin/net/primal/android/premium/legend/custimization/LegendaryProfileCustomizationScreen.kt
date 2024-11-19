@@ -36,7 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnail
+import net.primal.android.core.compose.AvatarThumbnailCustomBorder
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalSwitch
@@ -95,9 +95,11 @@ fun LegendaryProfileCustomizationScreen(state: LegendaryProfileCustomizationCont
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                AvatarThumbnail(
+                AvatarThumbnailCustomBorder(
                     avatarCdnImage = state.avatarCdnImage,
                     avatarSize = 80.dp,
+                    hasBorder = state.avatarGlow,
+                    borderBrush = state.legendaryProfile.brush,
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 val primalName = state.membership?.premiumName ?: ""
