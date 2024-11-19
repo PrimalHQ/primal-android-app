@@ -1,6 +1,8 @@
 package net.primal.android.premium.legend.custimization
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -117,49 +120,26 @@ fun LegendaryProfileCustomizationScreen(state: LegendaryProfileCustomizationCont
 
                 PrimalDivider(modifier = Modifier.padding(top = 16.dp))
 
-                Column(
+                LegendaryColorPicker(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 32.dp, vertical = 8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        LegendProfileColorBox(profile = LegendaryProfile.NO_CUSTOMIZATION)
-
-                        LegendProfileColorBox(profile = LegendaryProfile.GOLD)
-
-                        LegendProfileColorBox(profile = LegendaryProfile.AQUA)
-
-                        LegendProfileColorBox(profile = LegendaryProfile.SILVER)
-
-                        LegendProfileColorBox(profile = LegendaryProfile.PURPLE)
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        LegendProfileColorBox(profile = LegendaryProfile.PURPLE_HAZE)
-
-                        LegendProfileColorBox(profile = LegendaryProfile.TEAL)
-
-                        LegendProfileColorBox(profile = LegendaryProfile.BROWN)
-
-                        LegendProfileColorBox(profile = LegendaryProfile.BLUE)
-
-                        LegendProfileColorBox(profile = LegendaryProfile.SUN_FIRE)
-                    }
-                }
+                    activeLegendaryProfile = state.legendProfile?.styleId?.let(LegendaryProfile::valueById)
+                        ?: LegendaryProfile.NO_CUSTOMIZATION,
+                    onProfileChanged = { newLegendaryProfileColors ->
+                    },
+                )
 
                 SwitchSettings(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
+                    avatarRing = state.legendProfile?.avatarGlow == true,
+                    onAvatarRingChanged = { newState ->
+                    },
+                    customBadge = state.legendProfile?.customBadge == true,
+                    onCustomBadgeChanged = { newState ->
+                    },
                 )
 
                 Text(
@@ -175,25 +155,135 @@ fun LegendaryProfileCustomizationScreen(state: LegendaryProfileCustomizationCont
 }
 
 @Composable
-private fun LegendProfileColorBox(profile: LegendaryProfile) {
-    Box(
-        modifier = Modifier
-            .size(40.dp)
-            .background(brush = profile.brush, shape = CircleShape),
-        contentAlignment = Alignment.Center,
+private fun LegendaryColorPicker(
+    modifier: Modifier,
+    activeLegendaryProfile: LegendaryProfile,
+    onProfileChanged: (LegendaryProfile) -> Unit,
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        if (profile == LegendaryProfile.NO_CUSTOMIZATION) {
-            Icon(
-                imageVector = PrimalIcons.LegendaryProfileNoCustomization,
-                contentDescription = null,
-                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            LegendProfileColorBox(
+                previewProfile = LegendaryProfile.NO_CUSTOMIZATION,
+                activeProfile = activeLegendaryProfile,
+                onClick = onProfileChanged,
+            )
+
+            LegendProfileColorBox(
+                previewProfile = LegendaryProfile.GOLD,
+                activeProfile = activeLegendaryProfile,
+                onClick = onProfileChanged,
+            )
+
+            LegendProfileColorBox(
+                previewProfile = LegendaryProfile.AQUA,
+                activeProfile = activeLegendaryProfile,
+                onClick = onProfileChanged,
+            )
+
+            LegendProfileColorBox(
+                previewProfile = LegendaryProfile.SILVER,
+                activeProfile = activeLegendaryProfile,
+                onClick = onProfileChanged,
+            )
+
+            LegendProfileColorBox(
+                previewProfile = LegendaryProfile.PURPLE,
+                activeProfile = activeLegendaryProfile,
+                onClick = onProfileChanged,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            LegendProfileColorBox(
+                previewProfile = LegendaryProfile.PURPLE_HAZE,
+                activeProfile = activeLegendaryProfile,
+                onClick = onProfileChanged,
+            )
+
+            LegendProfileColorBox(
+                previewProfile = LegendaryProfile.TEAL,
+                activeProfile = activeLegendaryProfile,
+                onClick = onProfileChanged,
+            )
+
+            LegendProfileColorBox(
+                previewProfile = LegendaryProfile.BROWN,
+                activeProfile = activeLegendaryProfile,
+                onClick = onProfileChanged,
+            )
+
+            LegendProfileColorBox(
+                previewProfile = LegendaryProfile.BLUE,
+                activeProfile = activeLegendaryProfile,
+                onClick = onProfileChanged,
+            )
+
+            LegendProfileColorBox(
+                previewProfile = LegendaryProfile.SUN_FIRE,
+                activeProfile = activeLegendaryProfile,
+                onClick = onProfileChanged,
             )
         }
     }
 }
 
 @Composable
-private fun SwitchSettings(modifier: Modifier) {
+private fun LegendProfileColorBox(
+    previewProfile: LegendaryProfile,
+    activeProfile: LegendaryProfile,
+    onClick: (LegendaryProfile) -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .clickable { onClick(previewProfile) }
+            .border(
+                width = 3.dp,
+                color = if (previewProfile == activeProfile) {
+                    AppTheme.colorScheme.onSurface
+                } else {
+                    Color.Transparent
+                },
+                shape = CircleShape,
+            )
+            .size(48.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier = Modifier
+                .background(brush = previewProfile.brush, shape = CircleShape)
+                .size(36.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (previewProfile == LegendaryProfile.NO_CUSTOMIZATION) {
+                Icon(
+                    imageVector = PrimalIcons.LegendaryProfileNoCustomization,
+                    contentDescription = null,
+                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SwitchSettings(
+    modifier: Modifier,
+    customBadge: Boolean,
+    onCustomBadgeChanged: (Boolean) -> Unit,
+    avatarRing: Boolean,
+    onAvatarRingChanged: (Boolean) -> Unit,
+) {
     Column(
         modifier = modifier.background(
             color = AppTheme.extraColorScheme.surfaceVariantAlt3,
@@ -211,8 +301,8 @@ private fun SwitchSettings(modifier: Modifier) {
                 style = AppTheme.typography.bodyMedium,
             )
             PrimalSwitch(
-                checked = false,
-                onCheckedChange = {},
+                checked = customBadge,
+                onCheckedChange = onCustomBadgeChanged,
             )
         }
 
@@ -229,8 +319,8 @@ private fun SwitchSettings(modifier: Modifier) {
                 style = AppTheme.typography.bodyMedium,
             )
             PrimalSwitch(
-                checked = true,
-                onCheckedChange = {},
+                checked = avatarRing,
+                onCheckedChange = onAvatarRingChanged,
             )
         }
     }
