@@ -32,6 +32,12 @@ import net.primal.android.core.compose.icons.primaliconpack.Discuss
 import net.primal.android.core.compose.icons.primaliconpack.Download
 import net.primal.android.core.compose.icons.primaliconpack.Downloads
 import net.primal.android.core.compose.icons.primaliconpack.DownloadsFilled
+import net.primal.android.core.compose.icons.primaliconpack.DrawerBookmarks
+import net.primal.android.core.compose.icons.primaliconpack.DrawerMessages
+import net.primal.android.core.compose.icons.primaliconpack.DrawerPremium
+import net.primal.android.core.compose.icons.primaliconpack.DrawerProfile
+import net.primal.android.core.compose.icons.primaliconpack.DrawerSettings
+import net.primal.android.core.compose.icons.primaliconpack.DrawerSignOut
 import net.primal.android.core.compose.icons.primaliconpack.Edit
 import net.primal.android.core.compose.icons.primaliconpack.Explore
 import net.primal.android.core.compose.icons.primaliconpack.ExploreFilled
@@ -267,6 +273,12 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             PrimalBadgeTeal,
             PrimalBadgeBrown,
             PrimalBadgeSunFire,
+            DrawerBookmarks,
+            DrawerMessages,
+            DrawerPremium,
+            DrawerProfile,
+            DrawerSettings,
+            DrawerSignOut,
         )
         return __PrimalIcons!!
     }
