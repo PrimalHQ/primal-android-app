@@ -12,4 +12,5 @@ data class NoteCallbacks(
     val onMediaClick: ((event: MediaClickEvent) -> Unit)? = null,
     val onPayInvoiceClick: ((event: InvoicePayClickEvent) -> Unit)? = null,
     val onEventReactionsClick: ((eventId: String) -> Unit)? = null,
+    val onGetPrimalPremiumClick: (() -> Unit)? = null,
 )

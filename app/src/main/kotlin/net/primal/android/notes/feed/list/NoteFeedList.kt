@@ -179,6 +179,7 @@ private fun NoteFeedList(
             pagingItems = pagingItems,
             pullToRefreshEnabled = pullToRefreshEnabled,
             feedListState = listState,
+            showPaywall = state.paywall,
             showTopZaps = showTopZaps,
             noteCallbacks = noteCallbacks,
             onGoToWallet = onGoToWallet,
@@ -228,6 +229,7 @@ private fun NoteFeedList(
 fun NoteFeedList(
     feedListState: LazyListState,
     pagingItems: LazyPagingItems<FeedPostUi>,
+    showPaywall: Boolean,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     showTopZaps: Boolean = false,
@@ -297,6 +299,7 @@ fun NoteFeedList(
             contentPadding = paddingValues,
             pagingItems = pagingItems,
             listState = feedListState,
+            showPaywall = showPaywall,
             noteCallbacks = noteCallbacks,
             onGoToWallet = onGoToWallet,
             showTopZaps = showTopZaps,

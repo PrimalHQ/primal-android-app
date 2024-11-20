@@ -412,6 +412,10 @@
     <string name="feed_lightning_invoice_expires_in">Expires: %1$s</string>
     <string name="feed_lightning_invoice_expired">This invoice has expired</string>
 
+    <string name="feed_paywall_title">This is a Primal Premium feed.</string>
+    <string name="feed_paywall_description">Buy a Subscription to become a Nostr power user and support our work:</string>
+    <string name="feed_paywall_get_premium_button">Get Primal Premium</string>
+
     <string name="post_repost_button_confirmation">Repost</string>
     <string name="post_quote_button_confirmation">Quote</string>
 

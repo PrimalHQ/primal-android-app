@@ -305,6 +305,7 @@ fun noteCallbacksHandler(navController: NavController) =
         onEventReactionsClick = { noteId ->
             navController.navigateToReactions(eventId = noteId)
         },
+        onGetPrimalPremiumClick = { navController.navigateToPremiumBuying() },
     )
 
 @Composable
