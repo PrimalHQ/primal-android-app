@@ -220,4 +220,20 @@ class PremiumApiImpl @Inject constructor(
             ),
         )
     }
+
+    override suspend fun getRecoveryContactsList(userId: String) {
+        primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.WALLET_MEMBERSHIP_RECOVERY_CONTACT_LISTS,
+                optionsJson = NostrJsonEncodeDefaults.encodeToString(
+                    AppSpecificDataRequest(
+                        eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
+                            userId = userId,
+                            content = "",
+                        ),
+                    ),
+                ),
+            ),
+        )
+    }
 }

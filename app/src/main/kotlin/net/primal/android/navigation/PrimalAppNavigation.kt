@@ -96,6 +96,7 @@ import net.primal.android.premium.manage.PremiumManageContract
 import net.primal.android.premium.manage.PremiumManageScreen
 import net.primal.android.premium.manage.PremiumManageViewModel
 import net.primal.android.premium.manage.contact.PremiumContactListScreen
+import net.primal.android.premium.manage.contact.PremiumContactListViewModel
 import net.primal.android.premium.manage.content.PremiumContentBackupScreen
 import net.primal.android.premium.manage.media.PremiumMediaManagementScreen
 import net.primal.android.premium.manage.media.PremiumMediaManagementViewModel
@@ -1188,10 +1189,11 @@ private fun NavGraphBuilder.premiumContactList(route: String, navController: Nav
         popEnterTransition = { primalScaleIn },
         popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
+        val viewModel = hiltViewModel<PremiumContactListViewModel>()
         ApplyEdgeToEdge()
         LockToOrientationPortrait()
-
         PremiumContactListScreen(
+            viewModel = viewModel,
             onClose = { navController.navigateUp() },
         )
     }

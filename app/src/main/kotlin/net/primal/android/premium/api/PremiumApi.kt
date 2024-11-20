@@ -32,4 +32,6 @@ interface PremiumApi {
     suspend fun getOrdersHistory(userId: String): List<PremiumPurchaseOrder>
 
     suspend fun updateLegendProfile(userId: String, profile: PrimalLegendProfile)
+
+    suspend fun getRecoveryContactsList(userId: String)
 }

@@ -99,6 +99,11 @@ class PremiumRepository @Inject constructor(
             premiumApi.updateLegendProfile(userId = userId, profile = profile)
         }
 
+    suspend fun fetchRecoveryContactsList(userId: String) =
+        withContext(dispatchers.io()) {
+            premiumApi.getRecoveryContactsList(userId = userId)
+        }
+
     private fun MembershipStatusResponse.toPremiumMembership(): PremiumMembership {
         return PremiumMembership(
             userId = this.pubkey,
