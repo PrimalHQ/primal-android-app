@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavBackStackEntry
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
+import net.primal.android.explore.asearch.AdvancedSearchContract
 import net.primal.android.explore.search.ui.SearchScope
 import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
@@ -38,6 +39,12 @@ const val POSTED_BY = "postedBy"
 inline val SavedStateHandle.postedBy: List<String>?
     get() = get<String>(POSTED_BY)?.let {
         NostrJson.decodeFromStringOrNull(it)
+    }
+
+const val SEARCH_KIND = "searchKind"
+inline val SavedStateHandle.searchKind: AdvancedSearchContract.SearchKind?
+    get() = get<String>(SEARCH_KIND)?.let {
+        AdvancedSearchContract.SearchKind.valueOf(it)
     }
 
 const val PREMIUM_MORE_INFO_TAB_INDEX = "premiumMoreInfoTab"

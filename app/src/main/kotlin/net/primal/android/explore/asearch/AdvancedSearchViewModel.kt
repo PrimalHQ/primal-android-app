@@ -25,6 +25,7 @@ import net.primal.android.explore.asearch.AdvancedSearchContract.UiState
 import net.primal.android.explore.feed.ExploreFeedContract
 import net.primal.android.navigation.initialQuery
 import net.primal.android.navigation.postedBy
+import net.primal.android.navigation.searchKind
 import net.primal.android.profile.repository.ProfileRepository
 
 @HiltViewModel
@@ -39,10 +40,12 @@ class AdvancedSearchViewModel @Inject constructor(
 
     private val dateFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT).withZone(ZoneId.systemDefault())
     private val initialPostedBy = savedStateHandle.postedBy
+    private val initialSearchKind = savedStateHandle.searchKind ?: AdvancedSearchContract.SearchKind.Notes
 
     private val _state = MutableStateFlow(
         UiState(
             includedWords = savedStateHandle.initialQuery,
+            searchKind = initialSearchKind,
         ),
     )
     val state = _state.asStateFlow()

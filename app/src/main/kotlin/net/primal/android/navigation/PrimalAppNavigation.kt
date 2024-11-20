@@ -51,6 +51,7 @@ import net.primal.android.editor.domain.NoteEditorArgs.Companion.asNoteEditorArg
 import net.primal.android.editor.domain.NoteEditorArgs.Companion.jsonAsNoteEditorArgs
 import net.primal.android.editor.domain.NoteEditorArgs.Companion.toNostrUriInNoteEditorArgs
 import net.primal.android.editor.ui.NoteEditorScreen
+import net.primal.android.explore.asearch.AdvancedSearchContract
 import net.primal.android.explore.asearch.AdvancedSearchScreen
 import net.primal.android.explore.asearch.AdvancedSearchViewModel
 import net.primal.android.explore.feed.ExploreFeedContract
@@ -146,10 +147,12 @@ private fun NavController.navigateToSearch(searchScope: SearchScope) =
 private fun NavController.navigateToAdvancedSearch(
     initialQuery: String? = null,
     initialPostedBy: List<String>? = null,
+    initialSearchKind: AdvancedSearchContract.SearchKind? = null,
 ) = navigate(
     route = "asearch" +
         "?$INITIAL_QUERY=$initialQuery" +
-        "&$POSTED_BY=${NostrJson.encodeToString(initialPostedBy)}",
+        "&$POSTED_BY=${NostrJson.encodeToString(initialPostedBy)}" +
+        "&$SEARCH_KIND=$initialSearchKind",
 )
 
 private fun NavController.navigateToNoteEditor(args: NoteEditorArgs? = null) {
@@ -433,7 +436,7 @@ fun PrimalAppNavigation() {
         )
 
         advancedSearch(
-            route = "asearch?$INITIAL_QUERY={$INITIAL_QUERY}&$POSTED_BY={$POSTED_BY}",
+            route = "asearch?$INITIAL_QUERY={$INITIAL_QUERY}&$POSTED_BY={$POSTED_BY}&$SEARCH_KIND={$SEARCH_KIND}",
             navController = navController,
             arguments = listOf(
                 navArgument(INITIAL_QUERY) {
@@ -441,6 +444,10 @@ fun PrimalAppNavigation() {
                     nullable = true
                 },
                 navArgument(POSTED_BY) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(SEARCH_KIND) {
                     type = NavType.StringType
                     nullable = true
                 },
@@ -914,13 +921,21 @@ private fun NavGraphBuilder.search(
     val viewModel = hiltViewModel<SearchViewModel>(it)
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
+    val searchScope = it.searchScopeOrThrow
     SearchScreen(
         viewModel = viewModel,
-        searchScope = it.searchScopeOrThrow,
+        searchScope = searchScope,
         onClose = { navController.navigateUp() },
         onAdvancedSearchClick = { query ->
             navController.popBackStack()
-            navController.navigateToAdvancedSearch(initialQuery = query)
+            when (searchScope) {
+                SearchScope.Notes -> navController.navigateToAdvancedSearch(initialQuery = query)
+                SearchScope.Reads -> navController.navigateToAdvancedSearch(
+                    initialQuery = query,
+                    initialSearchKind = AdvancedSearchContract.SearchKind.Reads,
+                )
+                SearchScope.MyNotifications -> navController.navigateToAdvancedSearch(initialQuery = query)
+            }
         },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
         onNoteClick = { noteId -> navController.navigateToThread(noteId) },
