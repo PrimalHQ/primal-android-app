@@ -231,6 +231,8 @@
     <string name="premium_recover_contact_list_dialog_text">Update your contact list based on the state from %1$s (%2$s of follows)?</string>
     <string name="premium_recover_contact_list_dialog_confirm_button">Recover</string>
     <string name="premium_recover_contact_list_dialog_dismiss_button">Dismiss</string>
+    <string name="premium_recover_contact_list_success">Contact list updated</string>
+    <string name="premium_recover_contact_list_failed">Failed to recover contact list. Please try again.</string>
 
 
     <string name="premium_order_history_title">Manage Subscription</string>

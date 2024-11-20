@@ -34,9 +34,10 @@ class NostrPublisher @Inject constructor(
     }
 
     @Throws(NostrPublishException::class)
-    suspend fun signAndPublishNostrEvent(userId: String, unsignedNostrEvent: NostrUnsignedEvent) {
+    suspend fun signAndPublishNostrEvent(userId: String, unsignedNostrEvent: NostrUnsignedEvent): NostrEvent {
         val signedNostrEvent = nostrNotary.signNostrEvent(userId = userId, event = unsignedNostrEvent)
         publishEvent(signedNostrEvent = signedNostrEvent)
+        return signedNostrEvent
     }
 
     @Throws(NostrPublishException::class)

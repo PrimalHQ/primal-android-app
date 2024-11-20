@@ -4,16 +4,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.premium.manage.contact.PremiumContactListContract.SideEffect
 import net.primal.android.premium.manage.contact.PremiumContactListContract.UiEvent
 import net.primal.android.premium.manage.contact.PremiumContactListContract.UiState
 import net.primal.android.premium.manage.contact.model.FollowListBackup
 import net.primal.android.premium.repository.PremiumRepository
+import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import timber.log.Timber
 
@@ -21,6 +25,7 @@ import timber.log.Timber
 class PremiumContactListViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val premiumRepository: PremiumRepository,
+    private val profileRepository: ProfileRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -29,6 +34,10 @@ class PremiumContactListViewModel @Inject constructor(
 
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
+
+    private val _effect: Channel<SideEffect> = Channel()
+    val effect = _effect.receiveAsFlow()
+    private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effect.send(effect) }
 
     init {
         fetchContactsLists()
@@ -61,15 +70,25 @@ class PremiumContactListViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.RecoverFollowList -> recoverFollowList(it)
+                    is UiEvent.RecoverFollowList -> recoverFollowList(backup = it.backup)
                 }
             }
         }
     }
 
-    private fun recoverFollowList(event: UiEvent.RecoverFollowList) {
+    private fun recoverFollowList(backup: FollowListBackup) {
         viewModelScope.launch {
-            // TODO Publish new follow list with content and tags from given event
+            try {
+                profileRepository.recoverFollowList(
+                    userId = activeAccountStore.activeUserId(),
+                    tags = backup.event.tags,
+                    content = backup.event.content,
+                )
+                setEffect(SideEffect.RecoverSuccessful)
+            } catch (error: Exception) {
+                Timber.e(error)
+                setEffect(SideEffect.RecoverFailed)
+            }
         }
     }
 }
