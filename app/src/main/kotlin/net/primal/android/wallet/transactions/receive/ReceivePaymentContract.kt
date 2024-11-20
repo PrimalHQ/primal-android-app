@@ -12,6 +12,7 @@ interface ReceivePaymentContract {
         val loading: Boolean = true,
         val editMode: Boolean = false,
         val creatingInvoice: Boolean = false,
+        val hasPremium: Boolean = false,
         val lightningNetworkDetails: NetworkDetails = NetworkDetails(network = Network.Lightning),
         val bitcoinNetworkDetails: NetworkDetails = NetworkDetails(network = Network.Bitcoin),
         val paymentDetails: PaymentDetails = PaymentDetails(),

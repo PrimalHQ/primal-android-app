@@ -33,6 +33,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -98,13 +99,18 @@ import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun ReceivePaymentScreen(viewModel: ReceivePaymentViewModel, onClose: () -> Unit) {
+fun ReceivePaymentScreen(
+    viewModel: ReceivePaymentViewModel,
+    onBuyPremium: () -> Unit,
+    onClose: () -> Unit,
+) {
     val uiState = viewModel.state.collectAsState()
 
     ReceivePaymentScreen(
         state = uiState.value,
-        onClose = onClose,
         eventPublisher = { viewModel.setEvent(it) },
+        onBuyPremium = onBuyPremium,
+        onClose = onClose,
     )
 }
 
@@ -113,8 +119,9 @@ fun ReceivePaymentScreen(viewModel: ReceivePaymentViewModel, onClose: () -> Unit
 @Composable
 fun ReceivePaymentScreen(
     state: UiState,
-    onClose: () -> Unit,
     eventPublisher: (ReceivePaymentContract.UiEvent) -> Unit,
+    onBuyPremium: () -> Unit,
+    onClose: () -> Unit,
 ) {
     val onCancel = { eventPublisher(ReceivePaymentContract.UiEvent.CancelInvoiceCreation) }
     BackHandler(enabled = state.editMode) { onCancel() }
@@ -140,6 +147,7 @@ fun ReceivePaymentScreen(
                     ReceivePaymentTab.Lightning -> stringResource(
                         id = R.string.wallet_receive_lightning_transaction_title,
                     )
+
                     ReceivePaymentTab.Bitcoin -> stringResource(id = R.string.wallet_receive_btc_transaction_title)
                 },
                 navigationIcon = PrimalIcons.ArrowBack,
@@ -159,6 +167,7 @@ fun ReceivePaymentScreen(
                 state = state,
                 paddingValues = paddingValues,
                 onCancel = onCancel,
+                onBuyPremium = onBuyPremium,
                 eventPublisher = eventPublisher,
             )
         },
@@ -198,15 +207,18 @@ private fun ReceiveContent(
     state: UiState,
     paddingValues: PaddingValues,
     eventPublisher: (ReceivePaymentContract.UiEvent) -> Unit,
+    onBuyPremium: () -> Unit,
     onCancel: () -> Unit,
 ) {
     val clipboardManager = LocalClipboardManager.current
 
     AnimatedContent(
+        modifier = Modifier.fillMaxSize(),
         targetState = state.editMode,
         label = "ReceivePaymentContent",
-    ) {
-        when (it) {
+        contentAlignment = Alignment.Center,
+    ) { inEditMode ->
+        when (inEditMode) {
             true -> {
                 ReceivePaymentEditor(
                     paddingValues = paddingValues,
@@ -228,6 +240,7 @@ private fun ReceiveContent(
                 ReceivePaymentViewer(
                     paddingValues = paddingValues,
                     state = state,
+                    onBuyPremium = onBuyPremium,
                     onCopyClick = {
                         when (state.currentTab) {
                             ReceivePaymentTab.Lightning -> state.lightningNetworkDetails.copyValue
@@ -249,6 +262,7 @@ private fun ReceiveContent(
 private fun ReceivePaymentViewer(
     paddingValues: PaddingValues,
     state: UiState,
+    onBuyPremium: () -> Unit,
     onCopyClick: () -> Unit,
     onEditClick: () -> Unit,
 ) {
@@ -266,9 +280,10 @@ private fun ReceivePaymentViewer(
 
     Column(
         modifier = Modifier
-            .padding(paddingValues)
-            .fillMaxSize(),
+            .fillMaxSize()
+            .padding(paddingValues),
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -308,7 +323,15 @@ private fun ReceivePaymentViewer(
 
         if (networkDetails.address != null) {
             TwoLineText(
-                title = stringResource(id = R.string.wallet_receive_transaction_receiving_to),
+                title = when (state.currentTab) {
+                    ReceivePaymentTab.Lightning -> stringResource(
+                        id = R.string.wallet_receive_transaction_your_lightning_address,
+                    )
+
+                    ReceivePaymentTab.Bitcoin -> stringResource(
+                        id = R.string.wallet_receive_transaction_your_bitcoin_address,
+                    )
+                },
                 content = when (state.currentTab) {
                     ReceivePaymentTab.Lightning -> networkDetails.address
                     ReceivePaymentTab.Bitcoin -> networkDetails.address.ellipsizeMiddle(size = 12)
@@ -319,6 +342,16 @@ private fun ReceivePaymentViewer(
                     ReceivePaymentTab.Bitcoin -> 1
                 },
             )
+            if (state.paymentDetails.comment == null && !state.hasPremium) {
+                TextButton(onClick = onBuyPremium) {
+                    Text(
+                        text = "get a custom lightning address",
+                        color = AppTheme.colorScheme.secondary,
+                        style = AppTheme.typography.bodyMedium,
+                        fontSize = 16.sp,
+                    )
+                }
+            }
             Spacer(modifier = Modifier.height(16.dp))
         }
 
@@ -338,6 +371,10 @@ private fun ReceivePaymentViewer(
             onCopyClick = onCopyClick,
             onEditClick = onEditClick,
         )
+
+        if (state.paymentDetails.comment == null) {
+            Spacer(modifier = Modifier.height(48.dp))
+        }
     }
 }
 
