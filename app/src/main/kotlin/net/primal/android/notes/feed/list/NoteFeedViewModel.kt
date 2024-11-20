@@ -72,6 +72,18 @@ class NoteFeedViewModel @AssistedInject constructor(
 
     init {
         subscribeToEvents()
+        observeActiveAccount()
+    }
+
+    private fun observeActiveAccount() {
+        viewModelScope.launch {
+            activeAccountStore.activeUserAccount.collect {
+                val hasPremiumMembership = it.premiumMembership?.isExpired() == false
+                setState {
+                    copy(paywall = feedSpec.isPremiumFeedSpec() && !hasPremiumMembership)
+                }
+            }
+        }
     }
 
     private fun subscribeToEvents() =
@@ -205,6 +217,8 @@ class NoteFeedViewModel @AssistedInject constructor(
                 }
             }
         }
+
+    private fun String.isPremiumFeedSpec() = this.contains("pas:1")
 
     companion object {
         private const val MAX_AVATARS = 3
