@@ -140,7 +140,7 @@ class AdvancedSearchViewModel @Inject constructor(
             }
         }
 
-    private fun String.buildFeedSpec(): String = """{"id":"advsearch","query":"$this"}""".trimIndent()
+    private fun String.buildFeedSpec(): String = """{"id":"advsearch","query":"$this pas:1"}""".trimIndent()
 
     private fun AdvancedSearchContract.SearchKind.toSearchCommand() =
         when (this) {
