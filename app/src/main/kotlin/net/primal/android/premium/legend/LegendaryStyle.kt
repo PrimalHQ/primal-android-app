@@ -4,7 +4,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
-enum class LegendaryProfile(
+enum class LegendaryStyle(
     val id: String,
     val brush: Brush,
 ) {
@@ -120,8 +120,8 @@ enum class LegendaryProfile(
     ;
 
     companion object {
-        fun valueById(id: String?): LegendaryProfile? {
-            return LegendaryProfile.entries.find { it.id == id }
+        fun valueById(id: String?): LegendaryStyle? {
+            return LegendaryStyle.entries.find { it.id == id }
         }
     }
 }

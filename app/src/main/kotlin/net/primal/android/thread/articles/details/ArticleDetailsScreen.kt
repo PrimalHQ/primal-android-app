@@ -449,7 +449,7 @@ private fun ArticleContentWithComments(
                     authorInternetIdentifier = state.article.authorInternetIdentifier,
                     authorLegendAvatarGlow = state.article.authorLegendAvatarGlow,
                     authorLegendCustomBadge = state.article.authorLegendCustomBadge,
-                    authorLegendProfile = state.article.authorLegendProfile,
+                    authorLegendaryStyle = state.article.authorLegendaryStyle,
                     onAuthorAvatarClick = { noteCallbacks.onProfileClick?.invoke(state.article.authorId) },
                     onFollowUnfollowClick = onFollowUnfollowClick,
                 )

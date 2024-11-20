@@ -164,9 +164,9 @@ private fun ListItemHeader(
             AvatarThumbnailCustomBorder(
                 avatarSize = 24.dp,
                 avatarCdnImage = data.authorAvatarCdnImage,
-                hasBorder = data.authorLegendAvatarGlow && data.authorLegendProfile != null,
+                hasBorder = data.authorLegendAvatarGlow && data.authorLegendaryStyle != null,
                 borderBrush = when {
-                    data.authorLegendProfile != null -> data.authorLegendProfile.brush
+                    data.authorLegendaryStyle != null -> data.authorLegendaryStyle.brush
                     else -> Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
                 },
             )

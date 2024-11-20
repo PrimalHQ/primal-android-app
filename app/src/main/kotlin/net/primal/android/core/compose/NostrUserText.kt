@@ -41,7 +41,7 @@ import net.primal.android.core.compose.icons.primaliconpack.PrimalBadgeTeal
 import net.primal.android.core.compose.icons.primaliconpack.Verified
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.utils.isPrimalIdentifier
-import net.primal.android.premium.legend.LegendaryProfile
+import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -57,7 +57,7 @@ fun NostrUserText(
     maxLines: Int = 1,
     internetIdentifierBadgeSize: Dp = 14.dp,
     internetIdentifierBadgeAlign: PlaceholderVerticalAlign = PlaceholderVerticalAlign.Center,
-    customBadge: LegendaryProfile? = null,
+    customBadgeStyle: LegendaryStyle? = null,
     annotatedStringPrefixBuilder: (AnnotatedString.Builder.() -> Unit)? = null,
     annotatedStringSuffixBuilder: (AnnotatedString.Builder.() -> Unit)? = null,
 ) {
@@ -88,21 +88,21 @@ fun NostrUserText(
         "verifiedBadge" to InlineTextContent(
             placeholder = Placeholder(placeholderSize, placeholderSize, internetIdentifierBadgeAlign),
         ) {
-            if (internetIdentifier.isPrimalIdentifier() && customBadge != null &&
-                customBadge != LegendaryProfile.NO_CUSTOMIZATION
+            if (internetIdentifier.isPrimalIdentifier() && customBadgeStyle != null &&
+                customBadgeStyle != LegendaryStyle.NO_CUSTOMIZATION
             ) {
                 @Suppress("KotlinConstantConditions")
-                val badgeVector = when (customBadge) {
-                    LegendaryProfile.GOLD -> PrimalIcons.PrimalBadgeGold
-                    LegendaryProfile.AQUA -> PrimalIcons.PrimalBadgeAqua
-                    LegendaryProfile.SILVER -> PrimalIcons.PrimalBadgeSilver
-                    LegendaryProfile.PURPLE -> PrimalIcons.PrimalBadgePurple
-                    LegendaryProfile.PURPLE_HAZE -> PrimalIcons.PrimalBadgePurpleHaze
-                    LegendaryProfile.TEAL -> PrimalIcons.PrimalBadgeTeal
-                    LegendaryProfile.BROWN -> PrimalIcons.PrimalBadgeBrown
-                    LegendaryProfile.BLUE -> PrimalIcons.PrimalBadgeBlue
-                    LegendaryProfile.SUN_FIRE -> PrimalIcons.PrimalBadgeSunFire
-                    LegendaryProfile.NO_CUSTOMIZATION -> throw IllegalStateException()
+                val badgeVector = when (customBadgeStyle) {
+                    LegendaryStyle.GOLD -> PrimalIcons.PrimalBadgeGold
+                    LegendaryStyle.AQUA -> PrimalIcons.PrimalBadgeAqua
+                    LegendaryStyle.SILVER -> PrimalIcons.PrimalBadgeSilver
+                    LegendaryStyle.PURPLE -> PrimalIcons.PrimalBadgePurple
+                    LegendaryStyle.PURPLE_HAZE -> PrimalIcons.PrimalBadgePurpleHaze
+                    LegendaryStyle.TEAL -> PrimalIcons.PrimalBadgeTeal
+                    LegendaryStyle.BROWN -> PrimalIcons.PrimalBadgeBrown
+                    LegendaryStyle.BLUE -> PrimalIcons.PrimalBadgeBlue
+                    LegendaryStyle.SUN_FIRE -> PrimalIcons.PrimalBadgeSunFire
+                    LegendaryStyle.NO_CUSTOMIZATION -> throw IllegalStateException()
                 }
                 Icon(
                     imageVector = badgeVector,
@@ -202,7 +202,7 @@ fun PreviewNostrUserTextWithCustomBadge() {
         Surface {
             NostrUserText(
                 displayName = "Nostr Adamus",
-                customBadge = LegendaryProfile.GOLD,
+                customBadgeStyle = LegendaryStyle.GOLD,
                 internetIdentifier = "legend@primal.net",
                 annotatedStringSuffixBuilder = {
                     append(" • 42 y. ago")

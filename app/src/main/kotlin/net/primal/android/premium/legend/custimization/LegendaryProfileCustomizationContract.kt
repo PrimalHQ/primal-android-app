@@ -2,7 +2,7 @@ package net.primal.android.premium.legend.custimization
 
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.premium.domain.PremiumMembership
-import net.primal.android.premium.legend.LegendaryProfile
+import net.primal.android.premium.legend.LegendaryStyle
 
 interface LegendaryProfileCustomizationContract {
 
@@ -11,7 +11,7 @@ interface LegendaryProfileCustomizationContract {
         val membership: PremiumMembership? = null,
         val customBadge: Boolean = false,
         val avatarGlow: Boolean = false,
-        val legendaryProfile: LegendaryProfile = LegendaryProfile.NO_CUSTOMIZATION,
+        val legendaryStyle: LegendaryStyle = LegendaryStyle.NO_CUSTOMIZATION,
         val applyingChanges: Boolean = false,
     )
 
@@ -19,7 +19,7 @@ interface LegendaryProfileCustomizationContract {
         data class ApplyCustomization(
             val customBadge: Boolean,
             val avatarGlow: Boolean,
-            val style: LegendaryProfile,
+            val style: LegendaryStyle,
         ) : UiEvent()
     }
 

@@ -6,7 +6,7 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.notes.feed.model.EventStatsUi
-import net.primal.android.premium.legend.LegendaryProfile
+import net.primal.android.premium.legend.LegendaryStyle
 
 data class ArticleDetailsUi(
     val aTag: String,
@@ -28,7 +28,7 @@ data class ArticleDetailsUi(
     val eventStatsUi: EventStatsUi = EventStatsUi(),
     val authorLegendAvatarGlow: Boolean = false,
     val authorLegendCustomBadge: Boolean = false,
-    val authorLegendProfile: LegendaryProfile? = null,
+    val authorLegendaryStyle: LegendaryStyle? = null,
 )
 
 fun Article.mapAsArticleDetailsUi(): ArticleDetailsUi {
@@ -52,6 +52,6 @@ fun Article.mapAsArticleDetailsUi(): ArticleDetailsUi {
         eventStatsUi = EventStatsUi.from(eventStats = this.eventStats, userStats = this.userEventStats),
         authorLegendAvatarGlow = this.author?.primalLegendProfile?.avatarGlow == true,
         authorLegendCustomBadge = this.author?.primalLegendProfile?.customBadge == true,
-        authorLegendProfile = LegendaryProfile.valueById(this.author?.primalLegendProfile?.styleId),
+        authorLegendaryStyle = LegendaryStyle.valueById(this.author?.primalLegendProfile?.styleId),
     )
 }

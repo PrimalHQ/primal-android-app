@@ -34,7 +34,7 @@ import net.primal.android.core.compose.AvatarThumbnailCustomBorder
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.premium.legend.LegendaryProfile
+import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -46,7 +46,7 @@ fun ArticleAuthorRow(
     authorInternetIdentifier: String? = null,
     authorLegendAvatarGlow: Boolean = false,
     authorLegendCustomBadge: Boolean = false,
-    authorLegendProfile: LegendaryProfile? = null,
+    authorLegendaryStyle: LegendaryStyle? = null,
     onAuthorAvatarClick: (() -> Unit)? = null,
     onFollowUnfollowClick: (() -> Unit)? = null,
 ) {
@@ -58,9 +58,9 @@ fun ArticleAuthorRow(
             avatarSize = 42.dp,
             avatarCdnImage = authorCdnImage,
             onClick = onAuthorAvatarClick,
-            hasBorder = authorLegendAvatarGlow && authorLegendProfile != null,
+            hasBorder = authorLegendAvatarGlow && authorLegendaryStyle != null,
             borderBrush = when {
-                authorLegendProfile != null -> authorLegendProfile.brush
+                authorLegendaryStyle != null -> authorLegendaryStyle.brush
                 else -> Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
             },
         )
@@ -78,7 +78,7 @@ fun ArticleAuthorRow(
                     fontSize = 16.sp,
                     lineHeight = 16.sp,
                 ),
-                customBadge = if (authorLegendCustomBadge) authorLegendProfile else null,
+                customBadgeStyle = if (authorLegendCustomBadge) authorLegendaryStyle else null,
             )
 
             if (!authorInternetIdentifier.isNullOrBlank()) {
