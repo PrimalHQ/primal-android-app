@@ -78,6 +78,7 @@ enum class NostrEventKind(val value: Int) {
     PrimalClientConfig(value = 10_000_162),
     PrimalUserMediaStorageStats(value = 10_000_163),
     PrimalUserUploadInfo(value = 10_000_164),
+    PrimalContentBroadcastStats(value = 10_000_166),
     PrimalLegendProfiles(value = 10_000_168),
     PrimalWalletOperation(value = 10_000_300),
     PrimalWalletBalance(value = 10_000_301),
