@@ -12,4 +12,9 @@ interface PremiumContactListContract {
     sealed class UiEvent {
         data class RecoverFollowList(val backup: FollowListBackup) : UiEvent()
     }
+
+    sealed class SideEffect {
+        data object RecoverSuccessful : SideEffect()
+        data object RecoverFailed : SideEffect()
+    }
 }

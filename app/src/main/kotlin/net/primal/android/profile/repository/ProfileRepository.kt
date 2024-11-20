@@ -5,6 +5,7 @@ import java.time.Instant
 import javax.inject.Inject
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonArray
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
@@ -149,6 +150,28 @@ class ProfileRepository @Inject constructor(
             contacts = contacts,
             content = content,
         )
+        userRepository.updateFollowList(
+            userId = userId,
+            contactsUserAccount = nostrEventResponse.asUserAccountFromFollowListEvent(),
+        )
+    }
+
+    @Throws(NostrPublishException::class)
+    suspend fun recoverFollowList(
+        userId: String,
+        tags: List<JsonArray>,
+        content: String,
+    ) = withContext(dispatchers.io()) {
+        val nostrEventResponse = nostrPublisher.signAndPublishNostrEvent(
+            userId = userId,
+            unsignedNostrEvent = NostrUnsignedEvent(
+                pubKey = userId,
+                kind = NostrEventKind.FollowList.value,
+                tags = tags,
+                content = content,
+            ),
+        )
+
         userRepository.updateFollowList(
             userId = userId,
             contactsUserAccount = nostrEventResponse.asUserAccountFromFollowListEvent(),

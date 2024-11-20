@@ -19,6 +19,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -45,10 +47,34 @@ import net.primal.android.theme.AppTheme
 
 @Composable
 fun PremiumContactListScreen(viewModel: PremiumContactListViewModel, onClose: () -> Unit) {
+    val context = LocalContext.current
     val uiState by viewModel.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(viewModel) {
+        viewModel.effect.collect {
+            when (it) {
+                PremiumContactListContract.SideEffect.RecoverFailed -> {
+                    snackbarHostState.showSnackbar(
+                        message = context.getString(R.string.premium_recover_contact_list_failed),
+                        withDismissAction = true,
+                    )
+                }
+
+                PremiumContactListContract.SideEffect.RecoverSuccessful -> {
+                    snackbarHostState.showSnackbar(
+                        message = context.getString(R.string.premium_recover_contact_list_success),
+                        withDismissAction = true,
+                    )
+                }
+            }
+        }
+    }
+
     PremiumContactListScreen(
         state = uiState,
         eventPublisher = viewModel::setEvent,
+        snackbarHostState = snackbarHostState,
         onClose = onClose,
     )
 }
@@ -62,6 +88,7 @@ private const val RecoverListWeight = 0.3f
 private fun PremiumContactListScreen(
     state: PremiumContactListContract.UiState,
     eventPublisher: (PremiumContactListContract.UiEvent) -> Unit,
+    snackbarHostState: SnackbarHostState,
     onClose: () -> Unit,
 ) {
     var recoverFollowList by remember { mutableStateOf<FollowListBackup?>(null) }
@@ -76,7 +103,6 @@ private fun PremiumContactListScreen(
         )
     }
 
-    val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
         topBar = {
             PrimalTopAppBar(
