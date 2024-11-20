@@ -277,6 +277,7 @@
     <string name="premium_content_backup_table_type_articles">Articles</string>
     <string name="premium_content_backup_table_rebroadcast">Rebroadcast</string>
     <string name="premium_content_backup_all_events">All Events</string>
+    <string name="premium_content_backup_stop_rebroadcast">Stop Rebroadcast</string>
 
     <string name="premium_error_play_subscription_purchase_not_found">Unable to cancel the subscription. Please check if you are logged in with your Google Account and try again.</string>
     <string name="premium_error_failed_to_cancel_subscription">Unable to cancel the subscription. Please check your connection and try again.</string>
