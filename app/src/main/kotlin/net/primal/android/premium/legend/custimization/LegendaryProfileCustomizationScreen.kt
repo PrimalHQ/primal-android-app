@@ -49,7 +49,7 @@ import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.LegendaryProfileNoCustomization
-import net.primal.android.premium.legend.LegendaryProfile
+import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.premium.ui.PremiumBadge
 import net.primal.android.theme.AppTheme
 
@@ -82,7 +82,7 @@ fun LegendaryProfileCustomizationScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var customBadge by remember(state.customBadge) { mutableStateOf(state.customBadge) }
     var avatarGlow by remember(state.avatarGlow) { mutableStateOf(state.avatarGlow) }
-    var selectedProfile by remember(state.legendaryProfile) { mutableStateOf(state.legendaryProfile) }
+    var selectedStyle by remember(state.legendaryStyle) { mutableStateOf(state.legendaryStyle) }
 
     Scaffold(
         topBar = {
@@ -100,7 +100,7 @@ fun LegendaryProfileCustomizationScreen(
                         LegendaryProfileCustomizationContract.UiEvent.ApplyCustomization(
                             customBadge = customBadge,
                             avatarGlow = avatarGlow,
-                            style = selectedProfile,
+                            style = selectedStyle,
                         ),
                     )
                 },
@@ -128,7 +128,7 @@ fun LegendaryProfileCustomizationScreen(
                     avatarSize = 80.dp,
                     hasBorder = true,
                     borderBrush = if (avatarGlow) {
-                        selectedProfile.brush
+                        selectedStyle.brush
                     } else {
                         Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
                     },
@@ -140,7 +140,7 @@ fun LegendaryProfileCustomizationScreen(
                     displayName = primalName,
                     internetIdentifier = "$primalName@primal.net",
                     internetIdentifierBadgeSize = 24.dp,
-                    customBadge = if (customBadge) selectedProfile else null,
+                    customBadgeStyle = if (customBadge) selectedStyle else null,
                     fontSize = 20.sp,
                 )
             }
@@ -150,7 +150,7 @@ fun LegendaryProfileCustomizationScreen(
                     firstCohort = state.membership.cohort1,
                     secondCohort = state.membership.cohort2,
                     membershipExpired = state.membership.isExpired(),
-                    legendaryProfile = selectedProfile,
+                    legendaryStyle = selectedStyle,
                 )
 
                 PrimalDivider(modifier = Modifier.padding(top = 16.dp))
@@ -159,8 +159,8 @@ fun LegendaryProfileCustomizationScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 32.dp, vertical = 8.dp),
-                    activeLegendaryProfile = selectedProfile,
-                    onProfileChanged = { selectedProfile = it },
+                    activeLegendaryStyle = selectedStyle,
+                    onStyleChanged = { selectedStyle = it },
                 )
 
                 SwitchSettings(
@@ -188,8 +188,8 @@ fun LegendaryProfileCustomizationScreen(
 @Composable
 private fun LegendaryColorPicker(
     modifier: Modifier,
-    activeLegendaryProfile: LegendaryProfile,
-    onProfileChanged: (LegendaryProfile) -> Unit,
+    activeLegendaryStyle: LegendaryStyle,
+    onStyleChanged: (LegendaryStyle) -> Unit,
 ) {
     Column(
         modifier = modifier,
@@ -199,34 +199,34 @@ private fun LegendaryColorPicker(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            LegendProfileColorBox(
-                previewProfile = LegendaryProfile.NO_CUSTOMIZATION,
-                activeProfile = activeLegendaryProfile,
-                onClick = onProfileChanged,
+            LegendaryStyleColorBox(
+                previewStyle = LegendaryStyle.NO_CUSTOMIZATION,
+                activeStyle = activeLegendaryStyle,
+                onClick = onStyleChanged,
             )
 
-            LegendProfileColorBox(
-                previewProfile = LegendaryProfile.GOLD,
-                activeProfile = activeLegendaryProfile,
-                onClick = onProfileChanged,
+            LegendaryStyleColorBox(
+                previewStyle = LegendaryStyle.GOLD,
+                activeStyle = activeLegendaryStyle,
+                onClick = onStyleChanged,
             )
 
-            LegendProfileColorBox(
-                previewProfile = LegendaryProfile.AQUA,
-                activeProfile = activeLegendaryProfile,
-                onClick = onProfileChanged,
+            LegendaryStyleColorBox(
+                previewStyle = LegendaryStyle.AQUA,
+                activeStyle = activeLegendaryStyle,
+                onClick = onStyleChanged,
             )
 
-            LegendProfileColorBox(
-                previewProfile = LegendaryProfile.SILVER,
-                activeProfile = activeLegendaryProfile,
-                onClick = onProfileChanged,
+            LegendaryStyleColorBox(
+                previewStyle = LegendaryStyle.SILVER,
+                activeStyle = activeLegendaryStyle,
+                onClick = onStyleChanged,
             )
 
-            LegendProfileColorBox(
-                previewProfile = LegendaryProfile.PURPLE,
-                activeProfile = activeLegendaryProfile,
-                onClick = onProfileChanged,
+            LegendaryStyleColorBox(
+                previewStyle = LegendaryStyle.PURPLE,
+                activeStyle = activeLegendaryStyle,
+                onClick = onStyleChanged,
             )
         }
 
@@ -236,51 +236,51 @@ private fun LegendaryColorPicker(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            LegendProfileColorBox(
-                previewProfile = LegendaryProfile.PURPLE_HAZE,
-                activeProfile = activeLegendaryProfile,
-                onClick = onProfileChanged,
+            LegendaryStyleColorBox(
+                previewStyle = LegendaryStyle.PURPLE_HAZE,
+                activeStyle = activeLegendaryStyle,
+                onClick = onStyleChanged,
             )
 
-            LegendProfileColorBox(
-                previewProfile = LegendaryProfile.TEAL,
-                activeProfile = activeLegendaryProfile,
-                onClick = onProfileChanged,
+            LegendaryStyleColorBox(
+                previewStyle = LegendaryStyle.TEAL,
+                activeStyle = activeLegendaryStyle,
+                onClick = onStyleChanged,
             )
 
-            LegendProfileColorBox(
-                previewProfile = LegendaryProfile.BROWN,
-                activeProfile = activeLegendaryProfile,
-                onClick = onProfileChanged,
+            LegendaryStyleColorBox(
+                previewStyle = LegendaryStyle.BROWN,
+                activeStyle = activeLegendaryStyle,
+                onClick = onStyleChanged,
             )
 
-            LegendProfileColorBox(
-                previewProfile = LegendaryProfile.BLUE,
-                activeProfile = activeLegendaryProfile,
-                onClick = onProfileChanged,
+            LegendaryStyleColorBox(
+                previewStyle = LegendaryStyle.BLUE,
+                activeStyle = activeLegendaryStyle,
+                onClick = onStyleChanged,
             )
 
-            LegendProfileColorBox(
-                previewProfile = LegendaryProfile.SUN_FIRE,
-                activeProfile = activeLegendaryProfile,
-                onClick = onProfileChanged,
+            LegendaryStyleColorBox(
+                previewStyle = LegendaryStyle.SUN_FIRE,
+                activeStyle = activeLegendaryStyle,
+                onClick = onStyleChanged,
             )
         }
     }
 }
 
 @Composable
-private fun LegendProfileColorBox(
-    previewProfile: LegendaryProfile,
-    activeProfile: LegendaryProfile,
-    onClick: (LegendaryProfile) -> Unit,
+private fun LegendaryStyleColorBox(
+    previewStyle: LegendaryStyle,
+    activeStyle: LegendaryStyle,
+    onClick: (LegendaryStyle) -> Unit,
 ) {
     Box(
         modifier = Modifier
-            .clickable { onClick(previewProfile) }
+            .clickable { onClick(previewStyle) }
             .border(
                 width = 3.dp,
-                color = if (previewProfile == activeProfile) {
+                color = if (previewStyle == activeStyle) {
                     AppTheme.colorScheme.onSurface
                 } else {
                     Color.Transparent
@@ -292,11 +292,11 @@ private fun LegendProfileColorBox(
     ) {
         Box(
             modifier = Modifier
-                .background(brush = previewProfile.brush, shape = CircleShape)
+                .background(brush = previewStyle.brush, shape = CircleShape)
                 .size(36.dp),
             contentAlignment = Alignment.Center,
         ) {
-            if (previewProfile == LegendaryProfile.NO_CUSTOMIZATION) {
+            if (previewStyle == LegendaryStyle.NO_CUSTOMIZATION) {
                 Icon(
                     imageVector = PrimalIcons.LegendaryProfileNoCustomization,
                     contentDescription = null,

@@ -14,7 +14,7 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.domain.MembershipError
 import net.primal.android.premium.home.PremiumHomeContract.UiEvent
 import net.primal.android.premium.home.PremiumHomeContract.UiState
-import net.primal.android.premium.legend.LegendaryProfile
+import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.premium.utils.isPrimalLegend
 import net.primal.android.profile.repository.ProfileRepository
@@ -78,8 +78,8 @@ class PremiumHomeViewModel @Inject constructor(
                     copy(
                         avatarGlow = it.metadata?.primalLegendProfile?.avatarGlow == true,
                         customBadge = it.metadata?.primalLegendProfile?.customBadge == true,
-                        legendaryProfile = LegendaryProfile.valueById(it.metadata?.primalLegendProfile?.styleId)
-                            ?: LegendaryProfile.NO_CUSTOMIZATION,
+                        legendaryStyle = LegendaryStyle.valueById(it.metadata?.primalLegendProfile?.styleId)
+                            ?: LegendaryStyle.NO_CUSTOMIZATION,
                     )
                 }
             }

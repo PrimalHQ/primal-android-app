@@ -33,7 +33,7 @@ import net.primal.android.core.compose.ReplyingToText
 import net.primal.android.core.compose.WrappedContentWithSuffix
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.utils.formatNip05Identifier
-import net.primal.android.premium.legend.LegendaryProfile
+import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -51,7 +51,7 @@ fun FeedNoteHeader(
     authorInternetIdentifier: String? = null,
     authorLegendAvatarGlow: Boolean = false,
     authorLegendCustomBadge: Boolean = false,
-    authorLegendProfile: LegendaryProfile? = null,
+    authorLegendaryStyle: LegendaryStyle? = null,
     replyToAuthor: String? = null,
     label: String? = authorInternetIdentifier,
     labelStyle: TextStyle? = null,
@@ -72,9 +72,9 @@ fun FeedNoteHeader(
                 avatarCdnImage = authorAvatarCdnImage,
                 avatarSize = authorAvatarSize,
                 onClick = onAuthorAvatarClick,
-                hasBorder = authorLegendAvatarGlow && authorLegendProfile != null,
+                hasBorder = authorLegendAvatarGlow && authorLegendaryStyle != null,
                 borderBrush = when {
-                    authorLegendProfile != null -> authorLegendProfile.brush
+                    authorLegendaryStyle != null -> authorLegendaryStyle.brush
                     else -> Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
                 },
             )
@@ -107,7 +107,7 @@ fun FeedNoteHeader(
                         style = topRowTextStyle,
                         internetIdentifierBadgeSize = topRowTextStyle.fontSize.value.dp,
                         overflow = TextOverflow.Ellipsis,
-                        customBadge = if (authorLegendCustomBadge) authorLegendProfile else null,
+                        customBadgeStyle = if (authorLegendCustomBadge) authorLegendaryStyle else null,
                     )
                 },
                 suffixFixedContent = {

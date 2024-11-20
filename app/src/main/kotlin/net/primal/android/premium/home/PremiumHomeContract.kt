@@ -3,7 +3,7 @@ package net.primal.android.premium.home
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.premium.domain.MembershipError
 import net.primal.android.premium.domain.PremiumMembership
-import net.primal.android.premium.legend.LegendaryProfile
+import net.primal.android.premium.legend.LegendaryStyle
 
 interface PremiumHomeContract {
 
@@ -13,7 +13,7 @@ interface PremiumHomeContract {
         val profileLightningAddress: String? = null,
         val membership: PremiumMembership? = null,
         val showSupportUsNotice: Boolean = false,
-        val legendaryProfile: LegendaryProfile = LegendaryProfile.NO_CUSTOMIZATION,
+        val legendaryStyle: LegendaryStyle = LegendaryStyle.NO_CUSTOMIZATION,
         val avatarGlow: Boolean = false,
         val customBadge: Boolean = false,
         val error: MembershipError? = null,

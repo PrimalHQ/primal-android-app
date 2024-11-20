@@ -37,7 +37,7 @@ import net.primal.android.core.compose.PrimalSliderThumb
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.premium.legend.LegendaryProfile
+import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.premium.legend.become.BecomeLegendBottomBarButton
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract
 import net.primal.android.premium.legend.become.PrimalLegendAmount
@@ -101,7 +101,7 @@ fun BecomeLegendAmountStage(
                     firstCohort = "Primal Legend",
                     secondCohort = it.cohort2,
                     membershipExpired = it.isExpired(),
-                    legendaryProfile = LegendaryProfile.NO_CUSTOMIZATION,
+                    legendaryStyle = LegendaryStyle.NO_CUSTOMIZATION,
                 )
             }
 

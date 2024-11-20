@@ -137,7 +137,7 @@ private fun PremiumHomeScreen(
                     avatarCdnImage = state.avatarCdnImage,
                     avatarSize = 80.dp,
                     hasBorder = state.avatarGlow,
-                    borderBrush = state.legendaryProfile.brush,
+                    borderBrush = state.legendaryStyle.brush,
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 val primalName = state.membership?.premiumName ?: ""
@@ -147,7 +147,7 @@ private fun PremiumHomeScreen(
                     internetIdentifier = "$primalName@primal.net",
                     internetIdentifierBadgeSize = 24.dp,
                     fontSize = 20.sp,
-                    customBadge = if (state.customBadge) state.legendaryProfile else null,
+                    customBadgeStyle = if (state.customBadge) state.legendaryStyle else null,
                 )
             }
 
@@ -156,7 +156,7 @@ private fun PremiumHomeScreen(
                     firstCohort = state.membership.cohort1,
                     secondCohort = state.membership.cohort2,
                     membershipExpired = state.membership.isExpired(),
-                    legendaryProfile = state.legendaryProfile,
+                    legendaryStyle = state.legendaryStyle,
 
                 )
 
