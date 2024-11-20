@@ -273,6 +273,7 @@
     <string name="premium_content_backup_table_type">Type</string>
     <string name="premium_content_backup_table_type_notes">Type</string>
     <string name="premium_content_backup_table_type_reactions">Reactions</string>
+    <string name="premium_content_backup_table_type_dms">DMs</string>
     <string name="premium_content_backup_table_type_articles">Articles</string>
     <string name="premium_content_backup_table_rebroadcast">Rebroadcast</string>
     <string name="premium_content_backup_all_events">All Events</string>
