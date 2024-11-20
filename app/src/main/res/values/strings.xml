@@ -227,6 +227,11 @@
     <string name="premium_recover_contact_list_table_follows">Follows</string>
     <string name="premium_recover_contact_list_table_recover_list">Recover List</string>
     <string name="premium_recover_contact_list_table_recover_button">Recover</string>
+    <string name="premium_recover_contact_list_dialog_title">Recover?</string>
+    <string name="premium_recover_contact_list_dialog_text">Update your contact list based on the state from %1$s (%2$s of follows)?</string>
+    <string name="premium_recover_contact_list_dialog_confirm_button">Recover</string>
+    <string name="premium_recover_contact_list_dialog_dismiss_button">Dismiss</string>
+
 
     <string name="premium_order_history_title">Manage Subscription</string>
     <string name="premium_order_history_header">Order history</string>

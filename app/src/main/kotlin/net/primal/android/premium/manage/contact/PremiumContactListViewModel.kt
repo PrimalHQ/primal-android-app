@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.manage.contact.PremiumContactListContract.UiEvent
 import net.primal.android.premium.manage.contact.PremiumContactListContract.UiState
+import net.primal.android.premium.manage.contact.model.FollowListBackup
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import timber.log.Timber
@@ -31,20 +32,44 @@ class PremiumContactListViewModel @Inject constructor(
 
     init {
         fetchContactsLists()
+        observeEvents()
     }
 
     private fun fetchContactsLists() {
         viewModelScope.launch {
             setState { copy(fetching = true) }
             try {
-                premiumRepository.fetchRecoveryContactsList(
-                    userId = activeAccountStore.activeUserId(),
-                )
+                val userId = activeAccountStore.activeUserId()
+                val followLists = premiumRepository.fetchRecoveryContactsList(userId = userId)
+                val backups = followLists.map {
+                    FollowListBackup(
+                        event = it,
+                        timestamp = it.createdAt,
+                        followsCount = it.tags.size,
+                    )
+                }.sortedByDescending { it.timestamp }
+                setState { copy(backups = backups) }
             } catch (error: WssException) {
                 Timber.e(error)
             } finally {
                 setState { copy(fetching = false) }
             }
+        }
+    }
+
+    private fun observeEvents() {
+        viewModelScope.launch {
+            events.collect {
+                when (it) {
+                    is UiEvent.RecoverFollowList -> recoverFollowList(it)
+                }
+            }
+        }
+    }
+
+    private fun recoverFollowList(event: UiEvent.RecoverFollowList) {
+        viewModelScope.launch {
+            // TODO Publish new follow list with content and tags from given event
         }
     }
 }

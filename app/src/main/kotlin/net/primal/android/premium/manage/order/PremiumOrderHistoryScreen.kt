@@ -41,6 +41,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.utils.formatToDefaultDateFormat
 import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.premium.buying.home.PrimalPremiumLogoHeader
+import net.primal.android.premium.ui.ManagePremiumTableRow
 import net.primal.android.premium.utils.isOriginAndroid
 import net.primal.android.premium.utils.isOriginIOS
 import net.primal.android.theme.AppTheme
@@ -62,6 +63,10 @@ fun PremiumOrderHistoryScreen(
     )
 }
 
+private const val DateWeight = 0.3f
+private const val PurchaseWeight = 0.4f
+private const val AmountWeight = 0.3f
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 private fun PremiumOrderHistoryScreen(
@@ -70,17 +75,6 @@ private fun PremiumOrderHistoryScreen(
     onExtendSubscription: (primalName: String) -> Unit,
     onClose: () -> Unit,
 ) {
-    var showCancelSubscriptionDialog by remember { mutableStateOf(false) }
-    if (showCancelSubscriptionDialog) {
-        CancelSubscriptionAlertDialog(
-            onDismissRequest = { showCancelSubscriptionDialog = false },
-            onConfirm = {
-                showCancelSubscriptionDialog = false
-                eventPublisher(PremiumOrderHistoryContract.UiEvent.CancelSubscription)
-            },
-        )
-    }
-
     Scaffold(
         topBar = {
             PrimalTopAppBar(
@@ -99,7 +93,7 @@ private fun PremiumOrderHistoryScreen(
                 .wrapContentHeight(align = Alignment.Top),
         ) {
             item {
-                Column(
+                SubscriptionHeader(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
@@ -107,121 +101,12 @@ private fun PremiumOrderHistoryScreen(
                             shape = AppTheme.shapes.large,
                         )
                         .padding(top = 18.dp, bottom = 6.dp),
-                ) {
-                    PrimalPremiumLogoHeader(
-                        modifier = Modifier
-                            .padding(bottom = 24.dp)
-                            .padding(horizontal = 18.dp),
-                    )
-
-                    Text(
-                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 18.dp),
-                        text = stringResource(R.string.premium_order_history_premium_valid_until),
-                        style = AppTheme.typography.bodyLarge,
-                        fontSize = 18.sp,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                    )
-
-                    Row(
-                        verticalAlignment = Alignment.Bottom,
-                    ) {
-                        Text(
-                            modifier = Modifier
-                                .padding(top = 8.dp, bottom = 4.dp)
-                                .padding(start = 18.dp),
-                            text = if (state.isLegend) {
-                                stringResource(R.string.premium_order_history_premium_valid_forever)
-                            } else if (state.expiresAt != null) {
-                                Instant.ofEpochSecond(state.expiresAt).formatToDefaultDateFormat(FormatStyle.LONG)
-                            } else {
-                                "Unknown"
-                            },
-                            style = AppTheme.typography.bodyLarge,
-                            fontSize = 24.sp,
-                            color = AppTheme.colorScheme.onSurface,
-                        )
-
-                        if (state.expiresAt != null && state.expiresAt < Clock.System.now().epochSeconds) {
-                            Text(
-                                modifier = Modifier.padding(start = 6.dp, bottom = 6.dp),
-                                text = "(${stringResource(
-                                    R.string.premium_order_history_premium_expired,
-                                ).lowercase()})",
-                                style = AppTheme.typography.bodySmall,
-                                fontSize = 14.sp,
-                                color = AppTheme.colorScheme.onSurface,
-                            )
-                        }
-                    }
-
-                    Text(
-                        modifier = Modifier
-                            .padding(vertical = 8.dp)
-                            .padding(horizontal = 18.dp),
-                        text = if (state.isLegend) {
-                            stringResource(R.string.premium_order_history_premium_hint_legend)
-                        } else if (state.isRecurringSubscription) {
-                            when {
-                                state.subscriptionOrigin.isOriginAndroid() -> {
-                                    stringResource(R.string.premium_order_history_premium_hint_renews_play_store)
-                                }
-
-                                state.subscriptionOrigin.isOriginIOS() -> {
-                                    stringResource(R.string.premium_order_history_premium_hint_renews_app_store)
-                                }
-
-                                else -> {
-                                    stringResource(R.string.premium_order_history_premium_hint_does_not_renews)
-                                }
-                            }
-                        } else {
-                            stringResource(R.string.premium_order_history_premium_hint_does_not_renews)
-                        },
-                        style = AppTheme.typography.bodySmall,
-                        fontSize = 14.sp,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                    )
-
-                    if (state.isRecurringSubscription) {
-                        TextButton(
-                            onClick = { showCancelSubscriptionDialog = true },
-                        ) {
-                            Text(
-                                modifier = Modifier.padding(horizontal = 6.dp),
-                                text = stringResource(R.string.premium_order_history_cancel_subscription_button),
-                                style = AppTheme.typography.bodyMedium,
-                                color = AppTheme.colorScheme.secondary,
-                                fontSize = 16.sp,
-                            )
-                        }
-                    } else if (!state.isLegend) {
-                        val expiresAt = state.expiresAt ?: 0
-                        val isExpired = expiresAt < Clock.System.now().epochSeconds
-                        TextButton(
-                            onClick = {
-                                onExtendSubscription(state.primalName)
-                            },
-                        ) {
-                            Text(
-                                modifier = Modifier.padding(horizontal = 6.dp),
-                                text = when {
-                                    isExpired -> stringResource(
-                                        R.string.premium_order_history_renews_subscription_button,
-                                    )
-                                    isGoogleBuild() -> stringResource(
-                                        R.string.premium_order_history_enable_renewal_button,
-                                    )
-                                    else -> stringResource(R.string.premium_order_history_extend_subscription_button)
-                                },
-                                style = AppTheme.typography.bodyMedium,
-                                color = AppTheme.colorScheme.secondary,
-                                fontSize = 16.sp,
-                            )
-                        }
-                    } else {
-                        Spacer(modifier = Modifier.height(6.dp))
-                    }
-                }
+                    state = state,
+                    onExtendSubscription = onExtendSubscription,
+                    onCancelSubscription = {
+                        eventPublisher(PremiumOrderHistoryContract.UiEvent.CancelSubscription)
+                    },
+                )
             }
 
             item {
@@ -245,10 +130,13 @@ private fun PremiumOrderHistoryScreen(
                             ),
                         ),
                 ) {
-                    TableRow(
-                        date = stringResource(R.string.premium_order_history_date_header),
-                        label = stringResource(R.string.premium_order_history_purchase_header),
-                        amount = stringResource(R.string.premium_order_history_amount_header),
+                    ManagePremiumTableRow(
+                        firstColumn = stringResource(R.string.premium_order_history_date_header),
+                        firstColumnWeight = DateWeight,
+                        secondColumn = stringResource(R.string.premium_order_history_purchase_header),
+                        secondColumnWeight = PurchaseWeight,
+                        thirdColumn = stringResource(R.string.premium_order_history_amount_header),
+                        thirdColumnWeight = AmountWeight,
                         fontWeight = FontWeight.SemiBold,
                     )
                     PrimalDivider()
@@ -270,18 +158,21 @@ private fun PremiumOrderHistoryScreen(
                         },
                     ),
                 ) {
-                    TableRow(
-                        date = Instant.ofEpochSecond(item.purchasedAt).formatToDefaultDateFormat(
+                    ManagePremiumTableRow(
+                        firstColumn = Instant.ofEpochSecond(item.purchasedAt).formatToDefaultDateFormat(
                             FormatStyle.MEDIUM,
                         ),
-                        label = item.productLabel,
-                        amount = if (item.amountUsd != null) {
+                        firstColumnWeight = DateWeight,
+                        secondColumn = item.productLabel,
+                        secondColumnWeight = PurchaseWeight,
+                        thirdColumn = if (item.amountUsd != null) {
                             "$${item.amountUsd} USD"
                         } else if (item.amountBtc != null) {
                             "${item.amountBtc.toBigDecimal().toSats()} sats"
                         } else {
                             ""
                         },
+                        thirdColumnWeight = AmountWeight,
                     )
 
                     if (!isLastItem) {
@@ -298,45 +189,143 @@ private fun PremiumOrderHistoryScreen(
 }
 
 @Composable
-private fun TableRow(
-    date: String,
-    label: String,
-    amount: String,
-    fontWeight: FontWeight = FontWeight.Normal,
+private fun SubscriptionHeader(
+    modifier: Modifier,
+    state: PremiumOrderHistoryContract.UiState,
+    onExtendSubscription: (primalName: String) -> Unit,
+    onCancelSubscription: () -> Unit,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 16.dp),
-    ) {
-        Text(
-            modifier = Modifier.weight(0.3f),
-            text = date,
-            style = AppTheme.typography.bodyMedium,
-            fontSize = 15.sp,
-            color = AppTheme.colorScheme.onSurface,
-            fontWeight = fontWeight,
+    var showCancelSubscriptionDialog by remember { mutableStateOf(false) }
+    if (showCancelSubscriptionDialog) {
+        CancelSubscriptionAlertDialog(
+            onDismissRequest = { showCancelSubscriptionDialog = false },
+            onConfirm = {
+                showCancelSubscriptionDialog = false
+                onCancelSubscription()
+            },
         )
+    }
+
+    Column(
+        modifier = modifier,
+    ) {
+        PrimalPremiumLogoHeader(
+            modifier = Modifier
+                .padding(bottom = 24.dp)
+                .padding(horizontal = 18.dp),
+        )
+
+        Text(
+            modifier = Modifier.padding(vertical = 8.dp, horizontal = 18.dp),
+            text = stringResource(R.string.premium_order_history_premium_valid_until),
+            style = AppTheme.typography.bodyLarge,
+            fontSize = 18.sp,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+        )
+
+        Row(
+            verticalAlignment = Alignment.Bottom,
+        ) {
+            Text(
+                modifier = Modifier
+                    .padding(top = 8.dp, bottom = 4.dp)
+                    .padding(start = 18.dp),
+                text = if (state.isLegend) {
+                    stringResource(R.string.premium_order_history_premium_valid_forever)
+                } else if (state.expiresAt != null) {
+                    Instant.ofEpochSecond(state.expiresAt).formatToDefaultDateFormat(FormatStyle.LONG)
+                } else {
+                    "Unknown"
+                },
+                style = AppTheme.typography.bodyLarge,
+                fontSize = 24.sp,
+                color = AppTheme.colorScheme.onSurface,
+            )
+
+            if (state.expiresAt != null && state.expiresAt < Clock.System.now().epochSeconds) {
+                Text(
+                    modifier = Modifier.padding(start = 6.dp, bottom = 6.dp),
+                    text = "(${
+                        stringResource(
+                            R.string.premium_order_history_premium_expired,
+                        ).lowercase()
+                    })",
+                    style = AppTheme.typography.bodySmall,
+                    fontSize = 14.sp,
+                    color = AppTheme.colorScheme.onSurface,
+                )
+            }
+        }
 
         Text(
             modifier = Modifier
-                .weight(0.4f)
-                .padding(start = 16.dp, end = 32.dp),
-            text = label,
-            style = AppTheme.typography.bodyMedium,
-            fontSize = 15.sp,
-            color = AppTheme.colorScheme.onSurface,
-            fontWeight = fontWeight,
+                .padding(vertical = 8.dp)
+                .padding(horizontal = 18.dp),
+            text = if (state.isLegend) {
+                stringResource(R.string.premium_order_history_premium_hint_legend)
+            } else if (state.isRecurringSubscription) {
+                when {
+                    state.subscriptionOrigin.isOriginAndroid() -> {
+                        stringResource(R.string.premium_order_history_premium_hint_renews_play_store)
+                    }
+
+                    state.subscriptionOrigin.isOriginIOS() -> {
+                        stringResource(R.string.premium_order_history_premium_hint_renews_app_store)
+                    }
+
+                    else -> {
+                        stringResource(R.string.premium_order_history_premium_hint_does_not_renews)
+                    }
+                }
+            } else {
+                stringResource(R.string.premium_order_history_premium_hint_does_not_renews)
+            },
+            style = AppTheme.typography.bodySmall,
+            fontSize = 14.sp,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
         )
 
-        Text(
-            modifier = Modifier.weight(0.3f),
-            text = amount,
-            style = AppTheme.typography.bodyMedium,
-            fontSize = 15.sp,
-            color = AppTheme.colorScheme.onSurface,
-            fontWeight = fontWeight,
-        )
+        if (state.isRecurringSubscription) {
+            TextButton(
+                onClick = { showCancelSubscriptionDialog = true },
+            ) {
+                Text(
+                    modifier = Modifier.padding(horizontal = 6.dp),
+                    text = stringResource(R.string.premium_order_history_cancel_subscription_button),
+                    style = AppTheme.typography.bodyMedium,
+                    color = AppTheme.colorScheme.secondary,
+                    fontSize = 16.sp,
+                )
+            }
+        } else if (!state.isLegend) {
+            val expiresAt = state.expiresAt ?: 0
+            val isExpired = expiresAt < Clock.System.now().epochSeconds
+            TextButton(
+                onClick = {
+                    onExtendSubscription(state.primalName)
+                },
+            ) {
+                Text(
+                    modifier = Modifier.padding(horizontal = 6.dp),
+                    text = when {
+                        isExpired -> stringResource(
+                            R.string.premium_order_history_renews_subscription_button,
+                        )
+
+                        isGoogleBuild() -> stringResource(
+                            R.string.premium_order_history_enable_renewal_button,
+                        )
+
+                        else -> stringResource(R.string.premium_order_history_extend_subscription_button)
+                    },
+                    style = AppTheme.typography.bodyMedium,
+                    color = AppTheme.colorScheme.secondary,
+                    fontSize = 16.sp,
+                )
+            }
+        } else {
+            Spacer(modifier = Modifier.height(6.dp))
+        }
     }
 }
 
