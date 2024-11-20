@@ -9,7 +9,7 @@ import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import net.primal.android.notes.feed.model.EventStatsUi
-import net.primal.android.premium.legend.LegendaryProfile
+import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.stats.ui.EventZapUiModel
 import net.primal.android.stats.ui.asEventZapUiModel
 
@@ -31,7 +31,7 @@ data class FeedArticleUi(
     val eventZaps: List<EventZapUiModel> = emptyList(),
     val authorLegendAvatarGlow: Boolean = false,
     val authorLegendCustomBadge: Boolean = false,
-    val authorLegendProfile: LegendaryProfile? = null,
+    val authorLegendaryStyle: LegendaryStyle? = null,
 )
 
 fun Article.mapAsFeedArticleUi(): FeedArticleUi {
@@ -53,7 +53,7 @@ fun Article.mapAsFeedArticleUi(): FeedArticleUi {
         eventZaps = this.eventZaps.map { it.asEventZapUiModel() },
         authorLegendAvatarGlow = this.author?.primalLegendProfile?.avatarGlow == true,
         authorLegendCustomBadge = this.author?.primalLegendProfile?.customBadge == true,
-        authorLegendProfile = LegendaryProfile.valueById(this.author?.primalLegendProfile?.styleId),
+        authorLegendaryStyle = LegendaryStyle.valueById(this.author?.primalLegendProfile?.styleId),
     )
 }
 

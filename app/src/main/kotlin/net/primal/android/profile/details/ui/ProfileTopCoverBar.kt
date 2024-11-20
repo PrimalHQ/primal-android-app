@@ -41,7 +41,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.utils.asEllipsizedNpub
-import net.primal.android.premium.legend.LegendaryProfile
+import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.theme.AppTheme
 
@@ -123,10 +123,10 @@ fun ProfileTopCoverBar(
                     ),
                 avatarCdnImage = state.profileDetails?.avatarCdnImage,
                 hasBorder = true,
-                borderBrush = if (state.profileDetails?.legendaryProfile != null && state.profileDetails.avatarGlow) {
-                    when (state.profileDetails.legendaryProfile) {
-                        LegendaryProfile.NO_CUSTOMIZATION -> Brush.linearGradient(listOf(Color.White, Color.White))
-                        else -> state.profileDetails.legendaryProfile.brush
+                borderBrush = if (state.profileDetails?.legendaryStyle != null && state.profileDetails.avatarGlow) {
+                    when (state.profileDetails.legendaryStyle) {
+                        LegendaryStyle.NO_CUSTOMIZATION -> Brush.linearGradient(listOf(Color.White, Color.White))
+                        else -> state.profileDetails.legendaryStyle.brush
                     }
                 } else {
                     Brush.linearGradient(listOf(Color.White, Color.White))

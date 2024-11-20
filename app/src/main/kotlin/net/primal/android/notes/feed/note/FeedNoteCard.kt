@@ -422,9 +422,9 @@ private fun FeedNote(
                 } else {
                     null
                 },
-                hasBorder = data.authorLegendAvatarGlow && data.authorLegendProfile != null,
+                hasBorder = data.authorLegendAvatarGlow && data.authorLegendaryStyle != null,
                 borderBrush = when {
-                    data.authorLegendProfile != null -> data.authorLegendProfile.brush
+                    data.authorLegendaryStyle != null -> data.authorLegendaryStyle.brush
                     else -> Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
                 },
             )
@@ -447,7 +447,7 @@ private fun FeedNote(
                 authorInternetIdentifier = data.authorInternetIdentifier,
                 authorLegendAvatarGlow = data.authorLegendAvatarGlow,
                 authorLegendCustomBadge = data.authorLegendCustomBadge,
-                authorLegendProfile = data.authorLegendProfile,
+                authorLegendaryStyle = data.authorLegendaryStyle,
                 replyToAuthor = if (showReplyTo) data.replyToAuthorHandle else null,
                 onAuthorAvatarClick = if (noteCallbacks.onProfileClick != null) {
                     { noteCallbacks.onProfileClick.invoke(data.authorId) }
