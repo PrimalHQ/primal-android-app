@@ -25,6 +25,7 @@ import net.primal.android.BuildConfig
 import net.primal.android.R
 import net.primal.android.core.compose.ListLoadingError
 import net.primal.android.core.compose.ListNoContent
+import net.primal.android.core.compose.PremiumFeedPaywall
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.isEmpty
@@ -43,6 +44,7 @@ fun NoteFeedLazyColumn(
     modifier: Modifier = Modifier,
     pagingItems: LazyPagingItems<FeedPostUi>,
     listState: LazyListState,
+    showPaywall: Boolean,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     showTopZaps: Boolean = false,
@@ -191,6 +193,16 @@ fun NoteFeedLazyColumn(
             }
 
             else -> Unit
+        }
+
+        if (pagingItems.isNotEmpty() && showPaywall) {
+            item(contentType = "Paywall") {
+                PremiumFeedPaywall(
+                    onClick = {
+                        noteCallbacks.onGetPrimalPremiumClick?.invoke()
+                    },
+                )
+            }
         }
 
         if (pagingItems.isNotEmpty()) {

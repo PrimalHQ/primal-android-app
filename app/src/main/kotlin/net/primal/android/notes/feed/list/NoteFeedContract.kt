@@ -9,6 +9,7 @@ interface NoteFeedContract {
 
     data class UiState(
         val notes: Flow<PagingData<FeedPostUi>>,
+        val paywall: Boolean = false,
         val feedPostsCount: Int = 0,
         val feedAutoRefresh: Boolean = false,
         val syncStats: FeedPostsSyncStats = FeedPostsSyncStats(),
