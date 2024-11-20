@@ -46,6 +46,7 @@ import net.primal.android.articles.feed.ui.FeedArticleListItem
 import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.core.compose.ListLoadingError
 import net.primal.android.core.compose.ListNoContent
+import net.primal.android.core.compose.PremiumFeedPaywall
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
@@ -63,6 +64,7 @@ import timber.log.Timber
 fun ArticleFeedList(
     feedSpec: String,
     onArticleClick: (naddr: String) -> Unit,
+    onGetPremiumClick: () -> Unit,
     modifier: Modifier = Modifier,
     pullToRefreshEnabled: Boolean = true,
     previewMode: Boolean = false,
@@ -94,6 +96,7 @@ fun ArticleFeedList(
         modifier = modifier,
         contentPadding = contentPadding,
         onArticleClick = onArticleClick,
+        onGetPremiumClick = onGetPremiumClick,
         header = header,
         stickyHeader = stickyHeader,
         pullToRefreshEnabled = pullToRefreshEnabled,
@@ -112,6 +115,7 @@ private fun ArticleFeedList(
     articleState: ArticleContract.UiState,
     modifier: Modifier = Modifier,
     articleEventPublisher: (ArticleContract.UiEvent) -> Unit,
+    onGetPremiumClick: () -> Unit,
     pullToRefreshEnabled: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     noContentText: String = stringResource(id = R.string.article_feed_no_content),
@@ -173,7 +177,9 @@ private fun ArticleFeedList(
             articleState = articleState,
             pagingItems = pagingItems,
             listState = feedListState,
+            showPaywall = feedState.paywall,
             onArticleClick = onArticleClick,
+            onGetPremiumClick = onGetPremiumClick,
             articleEventPublisher = articleEventPublisher,
             contentPadding = contentPadding,
             header = header,
@@ -192,9 +198,11 @@ private fun ArticleFeedLazyColumn(
     articleState: ArticleContract.UiState,
     pagingItems: LazyPagingItems<FeedArticleUi>,
     listState: LazyListState,
-    modifier: Modifier = Modifier,
+    showPaywall: Boolean,
     onArticleClick: (naddr: String) -> Unit,
+    onGetPremiumClick: () -> Unit,
     articleEventPublisher: (ArticleContract.UiEvent) -> Unit,
+    modifier: Modifier = Modifier,
     noContentText: String = stringResource(id = R.string.article_feed_no_content),
     noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
@@ -284,6 +292,12 @@ private fun ArticleFeedLazyColumn(
         }
 
         handleMediatorAppendState(pagingItems)
+
+        if (pagingItems.isNotEmpty() && showPaywall) {
+            item(contentType = "Paywall") {
+                PremiumFeedPaywall(onClick = onGetPremiumClick)
+            }
+        }
 
         if (pagingItems.isNotEmpty()) {
             item(contentType = "Footer") {

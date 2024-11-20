@@ -93,6 +93,7 @@ private fun BookmarksScreen(
                     onArticleClick = { naddr -> noteCallbacks.onArticleClick?.invoke(naddr) },
                     pullToRefreshEnabled = false,
                     noContentText = stringResource(R.string.bookmarks_no_content),
+                    onGetPremiumClick = { noteCallbacks.onGetPrimalPremiumClick?.invoke() },
                     onUiError = { uiError: UiError ->
                         uiScope.launch {
                             snackbarHostState.showSnackbar(
