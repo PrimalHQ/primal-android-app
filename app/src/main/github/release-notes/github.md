@@ -1,19 +1,24 @@
 ## Changes
-- Implement legend support in drawer (side menu)
-- Implement custom badge support in profile details
-- Fix custom badge now showing if disabled in legend profile
-- Implement saving legend profile customization
-- Fix badge jumping on legendary profile customization
-- Implement live preview during legendary profile customization
-- Fix not showing custom badge if primal nip05 is missing
-- Implement support for avatar glow and custom badge on article feeds & article details
-- Implement support for avatar glow and custom badge on note feeds
-- Implement support for avatar glow on profile details header
-- Implement support for custom badge
-- Implement support for avatar glow
-- Implement support for gradients in PrimalBadge in premium section
-- Implement reading existing legendary profile settings on customization screen
-- Implement parsing and storing primal legends data for profiles
-- Implement UI for legendary profile customization
-- Add empty Legendary profile customization screen;
-- Add empty Contact List Backup screen and empty Backup content screen;
+- Polish content backup list items
+- Implement broadcasting feature
+- Implement rendering content stats on Content Backup screen
+- Implement Content Backup screen UI
+- Fix custom badge in collapsed top bar in profile details
+- Fix colors in drawer
+- Implement legendary avatar ring on app shell
+- Rename LegendaryProfile enum to LegendaryStyle
+- Implement contact list recover functionality
+- Implement reading and rendering contact list backups
+- Fix margin on copy icon on media management screen
+- Fix getRecoveryContactsList endpoint
+- Update drawer menu items with icons
+- Implement contacts list api endpoint
+- Implement 'get custom ln address' button on wallet receive
+- Implement parametrized search scope on starting adv search
+- Implement parametrized search kind on starting adv search
+- Implement paywall on premium reads feeds
+- Implement paywall on premium note feeds
+- Add pas query param to adv search
+- Increase delay to propagate feed replacement to 100ms
+- Update Premium More Info FAQ content
+- Update Premium More Info Features content
