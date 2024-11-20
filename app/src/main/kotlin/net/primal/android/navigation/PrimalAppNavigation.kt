@@ -148,11 +148,13 @@ private fun NavController.navigateToAdvancedSearch(
     initialQuery: String? = null,
     initialPostedBy: List<String>? = null,
     initialSearchKind: AdvancedSearchContract.SearchKind? = null,
+    initialSearchScope: AdvancedSearchContract.SearchScope? = null,
 ) = navigate(
     route = "asearch" +
         "?$INITIAL_QUERY=$initialQuery" +
         "&$POSTED_BY=${NostrJson.encodeToString(initialPostedBy)}" +
-        "&$SEARCH_KIND=$initialSearchKind",
+        "&$SEARCH_KIND=$initialSearchKind" +
+        "&$ADV_SEARCH_SCOPE=$initialSearchScope",
 )
 
 private fun NavController.navigateToNoteEditor(args: NoteEditorArgs? = null) {
@@ -436,7 +438,11 @@ fun PrimalAppNavigation() {
         )
 
         advancedSearch(
-            route = "asearch?$INITIAL_QUERY={$INITIAL_QUERY}&$POSTED_BY={$POSTED_BY}&$SEARCH_KIND={$SEARCH_KIND}",
+            route = "asearch" +
+                "?$INITIAL_QUERY={$INITIAL_QUERY}" +
+                "&$POSTED_BY={$POSTED_BY}" +
+                "&$SEARCH_KIND={$SEARCH_KIND}" +
+                "&$ADV_SEARCH_SCOPE={$ADV_SEARCH_SCOPE}",
             navController = navController,
             arguments = listOf(
                 navArgument(INITIAL_QUERY) {
@@ -448,6 +454,10 @@ fun PrimalAppNavigation() {
                     nullable = true
                 },
                 navArgument(SEARCH_KIND) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(ADV_SEARCH_SCOPE) {
                     type = NavType.StringType
                     nullable = true
                 },
@@ -929,12 +939,19 @@ private fun NavGraphBuilder.search(
         onAdvancedSearchClick = { query ->
             navController.popBackStack()
             when (searchScope) {
-                SearchScope.Notes -> navController.navigateToAdvancedSearch(initialQuery = query)
+                SearchScope.Notes -> navController.navigateToAdvancedSearch(
+                    initialQuery = query,
+                )
+
                 SearchScope.Reads -> navController.navigateToAdvancedSearch(
                     initialQuery = query,
                     initialSearchKind = AdvancedSearchContract.SearchKind.Reads,
                 )
-                SearchScope.MyNotifications -> navController.navigateToAdvancedSearch(initialQuery = query)
+
+                SearchScope.MyNotifications -> navController.navigateToAdvancedSearch(
+                    initialQuery = query,
+                    initialSearchScope = AdvancedSearchContract.SearchScope.MyNotifications,
+                )
             }
         },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
