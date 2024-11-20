@@ -8,5 +8,6 @@ interface ArticleFeedContract {
 
     data class UiState(
         val articles: Flow<PagingData<FeedArticleUi>>,
+        val paywall: Boolean = false,
     )
 }

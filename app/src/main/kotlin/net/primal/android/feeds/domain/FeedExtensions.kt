@@ -226,3 +226,5 @@ fun String.isSearchFeedSpec(): Boolean = isAdvancedSearchFeedSpec() || isSimpleS
 fun String.isAdvancedSearchFeedSpec() = this.contains("\"id\":\"advsearch\"")
 
 fun String.isSimpleSearchFeedSpec() = this.contains("\"id\":\"search\"")
+
+fun String.isPremiumFeedSpec() = this.contains("pas:1")
