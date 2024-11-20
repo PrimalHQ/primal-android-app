@@ -62,6 +62,7 @@ fun ReadsScreen(
     onDrawerQrCodeClick: () -> Unit,
     onSearchClick: () -> Unit,
     onArticleClick: (naddr: String) -> Unit,
+    onGetPremiumClick: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -72,6 +73,7 @@ fun ReadsScreen(
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         onSearchClick = onSearchClick,
         onArticleClick = onArticleClick,
+        onGetPremiumClick = onGetPremiumClick,
         eventPublisher = viewModel::setEvent,
     )
 }
@@ -85,6 +87,7 @@ private fun ReadsScreen(
     onDrawerQrCodeClick: () -> Unit,
     onSearchClick: () -> Unit,
     onArticleClick: (naddr: String) -> Unit,
+    onGetPremiumClick: () -> Unit,
     eventPublisher: (ReadsScreenContract.UiEvent) -> Unit,
 ) {
     val context = LocalContext.current
@@ -149,6 +152,7 @@ private fun ReadsScreen(
                         contentPadding = paddingValues,
                         shouldAnimateScrollToTop = shouldAnimateScrollToTop,
                         onArticleClick = onArticleClick,
+                        onGetPremiumClick = onGetPremiumClick,
                         onUiError = { uiError: UiError ->
                             uiScope.launch {
                                 snackbarHostState.showSnackbar(

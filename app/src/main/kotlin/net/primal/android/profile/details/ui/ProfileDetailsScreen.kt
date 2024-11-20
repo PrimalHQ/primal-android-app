@@ -497,6 +497,7 @@ fun ProfileDetailsScreen(
                                                 profileId = state.profileId,
                                             ),
                                             onArticleClick = { naddr -> noteCallbacks.onArticleClick?.invoke(naddr) },
+                                            onGetPremiumClick = { noteCallbacks.onGetPrimalPremiumClick?.invoke() },
                                             pullToRefreshEnabled = false,
                                             noContentVerticalArrangement = Arrangement.Top,
                                             noContentPaddingValues = PaddingValues(top = 16.dp),

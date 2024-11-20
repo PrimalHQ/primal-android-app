@@ -41,6 +41,7 @@ fun DvmHeaderAndFeedList(
                     },
                     onArticleClick = {},
                     onUiError = {},
+                    onGetPremiumClick = {},
                 )
             }
 

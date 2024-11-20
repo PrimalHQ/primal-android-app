@@ -151,6 +151,7 @@ fun ExploreFeedScreen(
                 FeedSpecKind.Reads -> ExploreArticleFeed(
                     feedSpec = state.feedSpec,
                     onArticleClick = { noteCallbacks.onArticleClick?.invoke(it) },
+                    onGetPremiumClick = { noteCallbacks.onGetPrimalPremiumClick?.invoke() },
                     contentPadding = paddingValues,
                 )
 
@@ -238,12 +239,14 @@ private fun ExploreArticleFeed(
     feedSpec: String,
     contentPadding: PaddingValues,
     onArticleClick: (naddr: String) -> Unit,
+    onGetPremiumClick: () -> Unit,
     onUiError: ((UiError) -> Unit)? = null,
 ) {
     ArticleFeedList(
         feedSpec = feedSpec,
         contentPadding = contentPadding,
         onArticleClick = onArticleClick,
+        onGetPremiumClick = onGetPremiumClick,
         onUiError = onUiError,
     )
 }

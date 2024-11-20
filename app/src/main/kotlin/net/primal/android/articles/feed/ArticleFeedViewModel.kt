@@ -10,15 +10,20 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import net.primal.android.articles.ArticleRepository
 import net.primal.android.articles.feed.ArticleFeedContract.UiState
 import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
+import net.primal.android.feeds.domain.isPremiumFeedSpec
+import net.primal.android.user.accounts.active.ActiveAccountStore
 
 @HiltViewModel(assistedFactory = ArticleFeedViewModel.Factory::class)
 class ArticleFeedViewModel @AssistedInject constructor(
     @Assisted private val spec: String,
     private val articleRepository: ArticleRepository,
+    private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -33,4 +38,20 @@ class ArticleFeedViewModel @AssistedInject constructor(
 
     private val _state = MutableStateFlow(UiState(articles = buildFeedByDirective()))
     val state = _state.asStateFlow()
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
+
+    init {
+        observeActiveAccount()
+    }
+
+    private fun observeActiveAccount() {
+        viewModelScope.launch {
+            activeAccountStore.activeUserAccount.collect {
+                val hasPremiumMembership = it.premiumMembership?.isExpired() == false
+                setState {
+                    copy(paywall = spec.isPremiumFeedSpec() && !hasPremiumMembership)
+                }
+            }
+        }
+    }
 }

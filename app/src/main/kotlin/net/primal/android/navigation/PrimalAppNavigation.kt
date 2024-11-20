@@ -809,6 +809,7 @@ private fun NavGraphBuilder.reads(
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
         onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Reads) },
         onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr) },
+        onGetPremiumClick = { navController.navigateToPremiumBuying() },
     )
 }
 

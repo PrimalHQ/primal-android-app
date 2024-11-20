@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
+import net.primal.android.feeds.domain.isPremiumFeedSpec
 import net.primal.android.feeds.domain.supportsUpwardsNotesPagination
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.findFirstEventId
@@ -217,8 +218,6 @@ class NoteFeedViewModel @AssistedInject constructor(
                 }
             }
         }
-
-    private fun String.isPremiumFeedSpec() = this.contains("pas:1")
 
     companion object {
         private const val MAX_AVATARS = 3
