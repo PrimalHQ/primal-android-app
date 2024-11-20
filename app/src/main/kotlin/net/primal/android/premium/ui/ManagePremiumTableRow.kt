@@ -20,6 +20,7 @@ import net.primal.android.theme.AppTheme
 
 @Composable
 fun ManagePremiumTableRow(
+    modifier: Modifier,
     firstColumn: @Composable () -> Unit,
     firstColumnWeight: Float,
     firstColumnContentAlignment: Alignment = Alignment.TopStart,
@@ -31,9 +32,10 @@ fun ManagePremiumTableRow(
     thirdColumnContentAlignment: Alignment = Alignment.TopStart,
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier.weight(firstColumnWeight),

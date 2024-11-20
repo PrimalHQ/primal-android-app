@@ -3,9 +3,11 @@ package net.primal.android.premium.manage.content
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -127,18 +129,21 @@ fun PremiumContentBackupScreen(
             state.contentTypes.forEachIndexed { index, item ->
                 val isLastItem = index == state.contentTypes.size - 1
 
-                Column(
-                    modifier = Modifier.background(
-                        color = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                        shape = if (isLastItem) {
-                            AppTheme.shapes.large.copy(
-                                topEnd = CornerSize(0.dp),
-                                topStart = CornerSize(0.dp),
-                            )
-                        } else {
-                            RectangleShape
-                        },
-                    ),
+                Box(
+                    modifier = Modifier
+                        .height(56.dp)
+                        .background(
+                            color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                            shape = if (isLastItem) {
+                                AppTheme.shapes.large.copy(
+                                    topEnd = CornerSize(0.dp),
+                                    topStart = CornerSize(0.dp),
+                                )
+                            } else {
+                                RectangleShape
+                            },
+                        ),
+                    contentAlignment = Alignment.BottomCenter,
                 ) {
                     ContentListItem(
                         count = item.count,
@@ -184,6 +189,7 @@ private fun ContentListItem(
     val numberFormat = NumberFormat.getNumberInstance()
 
     ManagePremiumTableRow(
+        modifier = Modifier.fillMaxHeight(),
         firstColumnWeight = CountWeight,
         firstColumn = {
             if (count != null) {

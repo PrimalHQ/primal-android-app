@@ -183,7 +183,7 @@ class PremiumContentBackupViewModel @Inject constructor(
                             if (index != -1) {
                                 this[index] = this[index].copy(broadcasting = true, progress = 0.01f)
                             }
-                        }
+                        },
                     )
                 }
             } catch (error: WssException) {
