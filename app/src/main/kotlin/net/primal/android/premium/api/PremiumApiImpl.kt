@@ -29,13 +29,13 @@ import net.primal.android.profile.domain.PrimalLegendProfile
 import net.primal.android.settings.api.model.AppSpecificDataRequest
 
 class PremiumApiImpl @Inject constructor(
-    @PrimalWalletApiClient private val primalApiClient: PrimalApiClient,
+    @PrimalWalletApiClient private val primalWalletApiClient: PrimalApiClient,
     @PrimalCacheApiClient private val primalCacheApiClient: PrimalApiClient,
     private val nostrNotary: NostrNotary,
 ) : PremiumApi {
 
     override suspend fun isPrimalNameAvailable(name: String): NameAvailableResponse {
-        val queryResult = primalApiClient.query(
+        val queryResult = primalWalletApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET_MEMBERSHIP_NAME_AVAILABLE,
                 optionsJson = NostrJson.encodeToString(NameAvailableRequest(name = name)),
@@ -48,7 +48,7 @@ class PremiumApiImpl @Inject constructor(
     }
 
     override suspend fun changePrimalName(userId: String, name: String): NameAvailableResponse {
-        val queryResult = primalApiClient.query(
+        val queryResult = primalWalletApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET_MEMBERSHIP_CHANGE_NAME,
                 optionsJson = NostrJsonEncodeDefaults.encodeToString(
@@ -68,7 +68,7 @@ class PremiumApiImpl @Inject constructor(
     }
 
     override suspend fun getPremiumMembershipStatus(userId: String): MembershipStatusResponse? {
-        val queryResult = primalApiClient.query(
+        val queryResult = primalWalletApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET_MEMBERSHIP_STATUS,
                 optionsJson = NostrJson.encodeToString(
@@ -87,7 +87,7 @@ class PremiumApiImpl @Inject constructor(
     }
 
     override suspend fun purchaseMembership(userId: String, body: PurchaseMembershipRequest) {
-        primalApiClient.query(
+        primalWalletApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET_PURCHASE_MEMBERSHIP,
                 optionsJson = NostrJson.encodeToString(
@@ -106,7 +106,7 @@ class PremiumApiImpl @Inject constructor(
         userId: String,
         primalName: String,
     ): LegendPaymentInstructionsResponse {
-        val result = primalApiClient.query(
+        val result = primalWalletApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET_PURCHASE_MEMBERSHIP,
                 optionsJson = NostrJson.encodeToString(
@@ -132,7 +132,7 @@ class PremiumApiImpl @Inject constructor(
     }
 
     override suspend fun getMembershipProducts() {
-        primalApiClient.query(
+        primalWalletApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET_MEMBERSHIP_PRODUCTS,
                 optionsJson = NostrJson.encodeToString(MembershipProductsRequest(origin = "android")),
@@ -163,7 +163,7 @@ class PremiumApiImpl @Inject constructor(
     }
 
     override suspend fun cancelMembership(userId: String, body: CancelMembershipRequest) {
-        primalApiClient.query(
+        primalWalletApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET_MEMBERSHIP_CANCEL,
                 optionsJson = NostrJson.encodeToString(
@@ -186,7 +186,7 @@ class PremiumApiImpl @Inject constructor(
     }
 
     override suspend fun getOrdersHistory(userId: String): List<PremiumPurchaseOrder> {
-        val queryResult = primalApiClient.query(
+        val queryResult = primalWalletApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET_MEMBERSHIP_PURCHASE_HISTORY,
                 optionsJson = NostrJsonEncodeDefaults.encodeToString(
@@ -206,7 +206,7 @@ class PremiumApiImpl @Inject constructor(
     }
 
     override suspend fun updateLegendProfile(userId: String, profile: PrimalLegendProfile) {
-        primalApiClient.query(
+        primalWalletApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET_MEMBERSHIP_LEGEND_CUSTOMIZATION,
                 optionsJson = NostrJsonEncodeDefaults.encodeToString(
@@ -222,7 +222,7 @@ class PremiumApiImpl @Inject constructor(
     }
 
     override suspend fun getRecoveryContactsList(userId: String) {
-        primalApiClient.query(
+        primalCacheApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET_MEMBERSHIP_RECOVERY_CONTACT_LISTS,
                 optionsJson = NostrJsonEncodeDefaults.encodeToString(

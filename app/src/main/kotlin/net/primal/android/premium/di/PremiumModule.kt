@@ -22,7 +22,7 @@ object PremiumModule {
         nostrNotary: NostrNotary,
     ): PremiumApi =
         PremiumApiImpl(
-            primalApiClient = primalApiClient,
+            primalWalletApiClient = primalApiClient,
             primalCacheApiClient = primalCacheApiClient,
             nostrNotary = nostrNotary,
         )
