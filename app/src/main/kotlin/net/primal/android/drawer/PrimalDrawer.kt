@@ -220,7 +220,7 @@ private fun DrawerHeader(
                 AnnotatedString(
                     text = userAccount?.followingCount?.let { numberFormat.format(it) } ?: "-",
                     spanStyle = SpanStyle(
-                        color = AppTheme.colorScheme.onSurfaceVariant,
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                         fontStyle = AppTheme.typography.labelLarge.fontStyle,
                     ),
                 ),
@@ -229,7 +229,7 @@ private fun DrawerHeader(
                 AnnotatedString(
                     text = " " + stringResource(id = R.string.drawer_following_suffix),
                     spanStyle = SpanStyle(
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                         fontStyle = AppTheme.typography.labelLarge.fontStyle,
                     ),
                 ),
@@ -239,7 +239,7 @@ private fun DrawerHeader(
                 AnnotatedString(
                     text = userAccount?.followersCount?.let { numberFormat.format(it) } ?: "-",
                     spanStyle = SpanStyle(
-                        color = AppTheme.colorScheme.onSurfaceVariant,
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                         fontStyle = AppTheme.typography.labelLarge.fontStyle,
                     ),
                 ),
@@ -248,7 +248,7 @@ private fun DrawerHeader(
                 AnnotatedString(
                     text = " " + stringResource(id = R.string.drawer_followers_suffix),
                     spanStyle = SpanStyle(
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                         fontStyle = AppTheme.typography.labelLarge.fontStyle,
                     ),
                 ),
