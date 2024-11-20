@@ -33,12 +33,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -49,6 +52,12 @@ import net.primal.android.core.compose.AvatarThumbnailCustomBorder
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.DarkMode
+import net.primal.android.core.compose.icons.primaliconpack.DrawerBookmarks
+import net.primal.android.core.compose.icons.primaliconpack.DrawerMessages
+import net.primal.android.core.compose.icons.primaliconpack.DrawerPremium
+import net.primal.android.core.compose.icons.primaliconpack.DrawerProfile
+import net.primal.android.core.compose.icons.primaliconpack.DrawerSettings
+import net.primal.android.core.compose.icons.primaliconpack.DrawerSignOut
 import net.primal.android.core.compose.icons.primaliconpack.LightMode
 import net.primal.android.core.compose.icons.primaliconpack.QrCode
 import net.primal.android.core.compose.preview.PrimalPreview
@@ -276,21 +285,25 @@ private fun DrawerMenu(
                 modifier = Modifier.clickable {
                     onDrawerDestinationClick(item)
                 },
+                leadingContent = {
+                    Icon(
+                        modifier = Modifier.padding(start = 8.dp),
+                        imageVector = item.icon(),
+                        contentDescription = item.label(),
+                        tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    )
+                },
                 headlineContent = {
                     BadgedBox(
                         badge = {
-                            if (item is DrawerScreenDestination.Messages && badges.unreadMessagesCount > 0) {
+                            if (
+                                (item is DrawerScreenDestination.Messages && badges.unreadMessagesCount > 0) ||
+                                (item is DrawerScreenDestination.Premium && showPremiumBadge)
+                            ) {
                                 Badge(
                                     modifier = Modifier
-                                        .size(size = 10.dp)
-                                        .offset(x = 8.dp),
-                                    containerColor = AppTheme.colorScheme.primary,
-                                )
-                            } else if (item is DrawerScreenDestination.Premium && showPremiumBadge) {
-                                Badge(
-                                    modifier = Modifier
-                                        .size(size = 10.dp)
-                                        .offset(x = 8.dp),
+                                        .size(size = 8.dp)
+                                        .offset(x = 16.dp, y = (-8).dp),
                                     containerColor = AppTheme.colorScheme.primary,
                                 )
                             }
@@ -300,9 +313,12 @@ private fun DrawerMenu(
                             text = item.label().uppercase(),
                             modifier = Modifier
                                 .wrapContentWidth()
-                                .padding(horizontal = 8.dp, vertical = 8.dp),
+                                .padding(top = (3.5).dp),
                             style = AppTheme.typography.titleLarge,
-                            color = AppTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Normal,
+                            lineHeight = 20.sp,
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                         )
                     }
                 },
@@ -347,6 +363,18 @@ private fun DrawerScreenDestination.label(): String {
         is DrawerScreenDestination.Bookmarks -> stringResource(R.string.drawer_destination_bookmarks)
         DrawerScreenDestination.Settings -> stringResource(R.string.drawer_destination_settings)
         DrawerScreenDestination.SignOut -> stringResource(R.string.drawer_destination_sign_out)
+    }
+}
+
+@Composable
+private fun DrawerScreenDestination.icon(): ImageVector {
+    return when (this) {
+        DrawerScreenDestination.Profile -> PrimalIcons.DrawerProfile
+        is DrawerScreenDestination.Premium -> PrimalIcons.DrawerPremium
+        DrawerScreenDestination.Messages -> PrimalIcons.DrawerMessages
+        is DrawerScreenDestination.Bookmarks -> PrimalIcons.DrawerBookmarks
+        DrawerScreenDestination.Settings -> PrimalIcons.DrawerSettings
+        DrawerScreenDestination.SignOut -> PrimalIcons.DrawerSignOut
     }
 }
 

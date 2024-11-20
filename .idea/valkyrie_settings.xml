@@ -4,4 +4,8 @@
     <option name="mode" value="Simple" />
     <option name="packageName" value="net.primal.android.core.compose.icons.primaliconpack" />
   </component>
+  <component name="Valkyrie.Settings">
+    <option name="mode" value="Simple" />
+    <option name="packageName" value="net.primal.android.core.compose.icons.primaliconpack" />
+  </component>
 </project>
