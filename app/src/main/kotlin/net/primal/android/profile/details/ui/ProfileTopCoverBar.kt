@@ -177,6 +177,11 @@ private fun ProfileTopAppBar(
                         internetIdentifier = state.profileDetails?.internetIdentifier,
                         internetIdentifierBadgeSize = 20.dp,
                         internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
+                        customBadgeStyle = if (state.profileDetails?.customBadge == true) {
+                            state.profileDetails.legendaryStyle
+                        } else {
+                            null
+                        },
                     )
                 }
             },
