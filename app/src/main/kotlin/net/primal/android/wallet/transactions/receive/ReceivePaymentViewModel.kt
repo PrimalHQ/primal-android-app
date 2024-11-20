@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import net.primal.android.navigation.asUrlEncoded
 import net.primal.android.networking.sockets.errors.WssException
@@ -59,11 +58,16 @@ class ReceivePaymentViewModel @Inject constructor(
     private fun observeActiveAccount() =
         viewModelScope.launch {
             activeAccountStore.activeUserAccount
-                .mapNotNull { it.primalWallet?.lightningAddress }
                 .collect {
+                    val lightningAddress = it.primalWallet?.lightningAddress
                     setState {
                         copy(
-                            lightningNetworkDetails = this.lightningNetworkDetails.copy(address = it),
+                            lightningNetworkDetails = if (lightningAddress != null) {
+                                this.lightningNetworkDetails.copy(address = lightningAddress)
+                            } else {
+                                this.lightningNetworkDetails
+                            },
+                            hasPremium = it.premiumMembership != null,
                         )
                     }
                 }
