@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -34,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -51,6 +53,7 @@ fun PrimalTopAppBar(
     onNavigationIconClick: (() -> Unit)? = null,
     autoCloseKeyboardOnNavigationIconClick: Boolean = true,
     avatarCdnImage: CdnImage? = null,
+    avatarLegendaryStyle: LegendaryStyle? = null,
     actions: (@Composable RowScope.() -> Unit)? = null,
     showDivider: Boolean = true,
     scrollBehavior: TopAppBarScrollBehavior? = null,
@@ -74,10 +77,15 @@ fun PrimalTopAppBar(
                             .padding(horizontal = 8.dp)
                             .clip(CircleShape),
                     ) {
-                        AvatarThumbnail(
+                        AvatarThumbnailCustomBorder(
                             avatarCdnImage = avatarCdnImage,
                             modifier = Modifier.size(32.dp),
                             onClick = onNavigationIconClick,
+                            hasBorder = avatarLegendaryStyle != null,
+                            borderBrush = avatarLegendaryStyle?.brush
+                                ?: Brush.linearGradient(
+                                    listOf(AppTheme.colorScheme.primary, AppTheme.colorScheme.primary),
+                                ),
                         )
                     }
                 } else if (navigationIcon != null) {

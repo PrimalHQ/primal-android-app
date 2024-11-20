@@ -32,8 +32,9 @@ class ExploreHomeViewModel @Inject constructor(
             activeAccountStore.activeUserAccount.collect {
                 setState {
                     copy(
-                        activeAccountAvatarCdnImage = it.avatarCdnImage,
                         activeAccountPubkey = it.pubkey,
+                        activeAccountAvatarCdnImage = it.avatarCdnImage,
+                        activeAccountLegendaryStyle = if (it.avatarRing) it.legendaryStyle else null,
                     )
                 }
             }

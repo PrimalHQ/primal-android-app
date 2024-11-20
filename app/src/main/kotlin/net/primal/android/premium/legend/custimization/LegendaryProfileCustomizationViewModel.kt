@@ -20,6 +20,7 @@ import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.profile.domain.PrimalLegendProfile
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.repository.UserRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -27,6 +28,7 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val profileRepository: ProfileRepository,
     private val premiumRepository: PremiumRepository,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -70,7 +72,7 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
                         styleId = event.style.id,
                     ),
                 )
-                profileRepository.requestProfileUpdate(profileId = activeAccountStore.activeUserId())
+                userRepository.fetchAndUpdateUserAccount(userId = activeAccountStore.activeUserId())
                 setEffect(SideEffect.CustomizationSaved)
             } catch (error: WssException) {
                 Timber.e(error)
