@@ -1,5 +1,7 @@
 package net.primal.android.premium.manage.content.api
 
+import net.primal.android.premium.manage.content.api.model.BroadcastingStatus
+
 interface BroadcastApi {
 
     suspend fun getContentStats(userId: String): Map<Int, Long>
@@ -8,5 +10,5 @@ interface BroadcastApi {
 
     suspend fun cancelContentRebroadcast(userId: String)
 
-    suspend fun getContentRebroadcastStatus(userId: String)
+    suspend fun getContentRebroadcastStatus(userId: String) : BroadcastingStatus
 }
