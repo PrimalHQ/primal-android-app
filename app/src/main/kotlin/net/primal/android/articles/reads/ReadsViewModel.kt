@@ -100,7 +100,10 @@ class ReadsViewModel @Inject constructor(
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect {
                 setState {
-                    copy(activeAccountAvatarCdnImage = it.avatarCdnImage)
+                    copy(
+                        activeAccountAvatarCdnImage = it.avatarCdnImage,
+                        activeAccountLegendaryStyle = if (it.avatarRing) it.legendaryStyle else null,
+                    )
                 }
             }
         }

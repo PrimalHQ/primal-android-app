@@ -113,7 +113,12 @@ class HomeFeedViewModel @Inject constructor(
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect {
                 initUserUpdater(activeUserId = it.pubkey)
-                setState { copy(activeAccountAvatarCdnImage = it.avatarCdnImage) }
+                setState {
+                    copy(
+                        activeAccountAvatarCdnImage = it.avatarCdnImage,
+                        activeAccountLegendaryStyle = if (it.avatarRing) it.legendaryStyle else null,
+                    )
+                }
             }
         }
 
