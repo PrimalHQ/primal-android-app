@@ -77,6 +77,7 @@ class NotificationsViewModel @Inject constructor(
                 setState {
                     copy(
                         activeAccountAvatarCdnImage = it.avatarCdnImage,
+                        activeAccountLegendaryStyle = if (it.avatarRing) it.legendaryStyle else null,
                     )
                 }
             }

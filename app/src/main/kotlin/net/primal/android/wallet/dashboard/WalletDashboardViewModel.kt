@@ -79,6 +79,7 @@ class WalletDashboardViewModel @Inject constructor(
                 setState {
                     copy(
                         activeAccountAvatarCdnImage = it.avatarCdnImage,
+                        activeAccountLegendaryStyle = if (it.avatarRing) it.legendaryStyle else null,
                         primalWallet = it.primalWallet,
                         walletPreference = it.walletPreference,
                         walletBalance = it.primalWalletState.balanceInBtc?.toBigDecimal(),

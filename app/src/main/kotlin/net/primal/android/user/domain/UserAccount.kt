@@ -5,6 +5,7 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.nostr.model.primal.content.ContentAppSettings
 import net.primal.android.premium.domain.PremiumMembership
+import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.wallet.domain.WalletSettings
 import net.primal.android.wallet.domain.WalletState
 
@@ -37,6 +38,9 @@ data class UserAccount(
     val cachingProxyEnabled: Boolean = false,
     val premiumMembership: PremiumMembership? = null,
     val lastBuyPremiumTimestampInMillis: Long? = null,
+    val avatarRing: Boolean = false,
+    val customBadge: Boolean = false,
+    val legendaryStyle: LegendaryStyle? = null,
 ) {
     companion object {
         val EMPTY = UserAccount(
