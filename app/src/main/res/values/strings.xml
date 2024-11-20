@@ -916,7 +916,8 @@
     <string name="wallet_receive_lightning_transaction_title">Receive via Lightning</string>
     <string name="wallet_receive_btc_transaction_title">Receive On-chain</string>
     <string name="wallet_receive_transaction_title">Receive</string>
-    <string name="wallet_receive_transaction_receiving_to">Receiving to:</string>
+    <string name="wallet_receive_transaction_your_lightning_address">Your Lightning Address:</string>
+    <string name="wallet_receive_transaction_your_bitcoin_address">Your Bitcoin Address:</string>
     <string name="wallet_receive_transaction_comment">Comment:</string>
     <string name="wallet_receive_transaction_copy_button">Copy</string>
     <string name="wallet_receive_transaction_add_details_button">Add Details</string>

@@ -234,6 +234,7 @@ private fun NavGraphBuilder.receive(route: String, navController: NavController)
         LockToOrientationPortrait()
         ReceivePaymentScreen(
             viewModel = viewModel,
+            onBuyPremium = { navController.navigateToPremiumBuying() },
             onClose = { navController.navigateUp() },
         )
     }

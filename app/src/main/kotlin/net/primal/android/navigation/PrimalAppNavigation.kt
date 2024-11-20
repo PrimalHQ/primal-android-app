@@ -258,7 +258,7 @@ fun NavController.navigateToExploreFeed(
 
 private fun NavController.navigateToBookmarks() = navigate(route = "bookmarks")
 
-private fun NavController.navigateToPremiumBuying() = navigate(route = "premium/buying")
+fun NavController.navigateToPremiumBuying() = navigate(route = "premium/buying")
 private fun NavController.navigateToPremiumExtendSubscription(primalName: String) =
     navigate(route = "premium/buying?$EXTEND_EXISTING_PREMIUM_NAME=$primalName")
 
