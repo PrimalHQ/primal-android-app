@@ -76,7 +76,7 @@ fun MediaListItem(
             item = item,
         )
         ActionIcon(
-            modifier = Modifier.weight(2f),
+            modifier = Modifier.weight(2f).padding(end = 8.dp),
             imageVector = PrimalIcons.CopyAlt,
             onClick = onCopyClick,
             tint = AppTheme.colorScheme.onPrimary,
