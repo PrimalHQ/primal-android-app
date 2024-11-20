@@ -13,6 +13,7 @@ import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.ext.takeContentOrNull
+import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.premium.api.model.CancelMembershipRequest
@@ -221,8 +222,8 @@ class PremiumApiImpl @Inject constructor(
         )
     }
 
-    override suspend fun getRecoveryContactsList(userId: String) {
-        primalCacheApiClient.query(
+    override suspend fun getRecoveryContactsList(userId: String): List<NostrEvent> {
+        val queryResult = primalCacheApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET_MEMBERSHIP_RECOVERY_CONTACT_LISTS,
                 optionsJson = NostrJsonEncodeDefaults.encodeToString(
@@ -235,5 +236,7 @@ class PremiumApiImpl @Inject constructor(
                 ),
             ),
         )
+
+        return queryResult.filterNostrEvents(NostrEventKind.FollowList)
     }
 }

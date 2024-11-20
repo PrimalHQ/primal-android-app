@@ -1,5 +1,6 @@
 package net.primal.android.premium.api
 
+import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.premium.api.model.CancelMembershipRequest
 import net.primal.android.premium.api.model.LegendPaymentInstructionsResponse
 import net.primal.android.premium.api.model.MembershipStatusResponse
@@ -33,5 +34,5 @@ interface PremiumApi {
 
     suspend fun updateLegendProfile(userId: String, profile: PrimalLegendProfile)
 
-    suspend fun getRecoveryContactsList(userId: String)
+    suspend fun getRecoveryContactsList(userId: String): List<NostrEvent>
 }
