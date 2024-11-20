@@ -47,6 +47,12 @@ inline val SavedStateHandle.searchKind: AdvancedSearchContract.SearchKind?
         AdvancedSearchContract.SearchKind.valueOf(it)
     }
 
+const val ADV_SEARCH_SCOPE = "advSearchScope"
+inline val SavedStateHandle.advSearchScope: AdvancedSearchContract.SearchScope?
+    get() = get<String>(ADV_SEARCH_SCOPE)?.let {
+        AdvancedSearchContract.SearchScope.valueOf(it)
+    }
+
 const val PREMIUM_MORE_INFO_TAB_INDEX = "premiumMoreInfoTab"
 inline val NavBackStackEntry.premiumMoreInfoTabIndex: Int?
     get() = arguments?.getInt(PREMIUM_MORE_INFO_TAB_INDEX)
