@@ -98,6 +98,7 @@ import net.primal.android.premium.manage.PremiumManageViewModel
 import net.primal.android.premium.manage.contact.PremiumContactListScreen
 import net.primal.android.premium.manage.contact.PremiumContactListViewModel
 import net.primal.android.premium.manage.content.PremiumContentBackupScreen
+import net.primal.android.premium.manage.content.PremiumContentBackupViewModel
 import net.primal.android.premium.manage.media.PremiumMediaManagementScreen
 import net.primal.android.premium.manage.media.PremiumMediaManagementViewModel
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameScreen
@@ -1206,10 +1207,11 @@ private fun NavGraphBuilder.premiumContentBackup(route: String, navController: N
         popEnterTransition = { primalScaleIn },
         popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
+        val viewModel = hiltViewModel<PremiumContentBackupViewModel>()
         ApplyEdgeToEdge()
         LockToOrientationPortrait()
-
         PremiumContentBackupScreen(
+            viewModel = viewModel,
             onClose = { navController.navigateUp() },
         )
     }
