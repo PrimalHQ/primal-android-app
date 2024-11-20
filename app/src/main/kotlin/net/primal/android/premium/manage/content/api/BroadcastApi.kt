@@ -10,5 +10,5 @@ interface BroadcastApi {
 
     suspend fun cancelContentRebroadcast(userId: String)
 
-    suspend fun getContentRebroadcastStatus(userId: String) : BroadcastingStatus
+    suspend fun getContentRebroadcastStatus(userId: String): BroadcastingStatus
 }
