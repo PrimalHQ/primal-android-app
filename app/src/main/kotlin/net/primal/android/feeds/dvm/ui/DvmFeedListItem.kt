@@ -209,7 +209,7 @@ private fun DvmFeedListItem(
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
-                    if (extended) {
+                    if (extended && dvmFeed.data.isPrimalFeed == true) {
                         CreatedByPrimalRow()
                     }
                     Row(
