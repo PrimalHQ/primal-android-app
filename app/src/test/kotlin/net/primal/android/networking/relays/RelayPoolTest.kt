@@ -20,6 +20,7 @@ import net.primal.android.networking.primal.PrimalQueryResult
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.NostrIncomingMessage
 import net.primal.android.networking.sockets.NostrSocketClient
+import net.primal.android.networking.sockets.toPrimalSubscriptionId
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.PrimalEvent
@@ -251,7 +252,9 @@ class RelayPoolTest {
                 okHttpClient = mockk(relaxed = true),
                 primalApiClient = mockk(relaxed = true) {
                     coEvery { query(any()) } returns PrimalQueryResult(
-                        terminationMessage = NostrIncomingMessage.EoseMessage(subscriptionId = UUID.randomUUID()),
+                        terminationMessage = NostrIncomingMessage.EoseMessage(
+                            subscriptionId = UUID.randomUUID().toPrimalSubscriptionId(),
+                        ),
                     )
                 },
             ).apply {
@@ -279,7 +282,9 @@ class RelayPoolTest {
                 okHttpClient = mockk(relaxed = true),
                 primalApiClient = mockk(relaxed = true) {
                     coEvery { query(any()) } returns PrimalQueryResult(
-                        terminationMessage = NostrIncomingMessage.EoseMessage(subscriptionId = UUID.randomUUID()),
+                        terminationMessage = NostrIncomingMessage.EoseMessage(
+                            subscriptionId = UUID.randomUUID().toPrimalSubscriptionId(),
+                        ),
                         primalEvents = listOf(
                             PrimalEvent(
                                 kind = NostrEventKind.PrimalBroadcastResult.value,
@@ -313,7 +318,9 @@ class RelayPoolTest {
                 okHttpClient = mockk(relaxed = true),
                 primalApiClient = mockk(relaxed = true) {
                     coEvery { query(any()) } returns PrimalQueryResult(
-                        terminationMessage = NostrIncomingMessage.EoseMessage(subscriptionId = UUID.randomUUID()),
+                        terminationMessage = NostrIncomingMessage.EoseMessage(
+                            subscriptionId = UUID.randomUUID().toPrimalSubscriptionId(),
+                        ),
                         primalEvents = listOf(
                             PrimalEvent(
                                 kind = NostrEventKind.PrimalBroadcastResult.value,
@@ -357,7 +364,9 @@ class RelayPoolTest {
                 okHttpClient = mockk(relaxed = true),
                 primalApiClient = mockk(relaxed = true) {
                     coEvery { query(any()) } returns PrimalQueryResult(
-                        terminationMessage = NostrIncomingMessage.EoseMessage(subscriptionId = UUID.randomUUID()),
+                        terminationMessage = NostrIncomingMessage.EoseMessage(
+                            subscriptionId = UUID.randomUUID().toPrimalSubscriptionId(),
+                        ),
                         primalEvents = listOf(
                             PrimalEvent(
                                 kind = NostrEventKind.PrimalBroadcastResult.value,
