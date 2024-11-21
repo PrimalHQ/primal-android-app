@@ -95,7 +95,7 @@ class DvmFeedListItemViewModel @Inject constructor(
     private fun onZapClick(zapAction: UiEvent.OnZapClick) =
         viewModelScope.launch {
             if (zapAction.dvmFeed.data.dvmLnUrlDecoded == null) {
-                setState { copy(error = UiError.MissingLightningAddress(RuntimeException())) }
+                setState { copy(error = UiError.MissingLightningAddress(IllegalStateException("Missing ln url"))) }
                 return@launch
             }
 

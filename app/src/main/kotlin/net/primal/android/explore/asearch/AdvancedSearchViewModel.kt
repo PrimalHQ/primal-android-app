@@ -201,8 +201,8 @@ class AdvancedSearchViewModel @Inject constructor(
         } else {
             val stringFilters = arrayOf(
                 this.orientation.toFilterQuery(),
-                this.minReadTime.times(238).toFilterQueryOrEmpty("minwords", delimiter = ":"),
-                this.maxReadTime.times(238).toFilterQueryOrEmpty("maxwords", delimiter = ":"),
+                this.minReadTime.times(other = 238).toFilterQueryOrEmpty("minwords", delimiter = ":"),
+                this.maxReadTime.times(other = 238).toFilterQueryOrEmpty("maxwords", delimiter = ":"),
                 this.minDuration.toFilterQueryOrEmpty("minduration", delimiter = ":"),
                 this.maxDuration.toFilterQueryOrEmpty("maxduration", delimiter = ":"),
                 this.minContentScore.toFilterQueryOrEmpty("minscore", delimiter = ":"),

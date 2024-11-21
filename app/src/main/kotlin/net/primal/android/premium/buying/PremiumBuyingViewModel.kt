@@ -149,6 +149,7 @@ class PremiumBuyingViewModel @Inject constructor(
             }
         }
 
+    @Suppress("unused")
     private fun tryApplyPromoCode(promoCode: String) =
         viewModelScope.launch {
             setState { copy(isCheckingPromoCodeValidity = true) }

@@ -166,7 +166,7 @@ private fun RowScope.TopicLoadingItem(
             .height(36.dp)
             .clip(RoundedCornerShape(percent = 100))
             .fillMaxWidth()
-            .scale(20f)
+            .scale(scale = 20f)
             .weight(weight = weight)
             .border(width = 1.dp, color = Color.Red),
         resId = resId,

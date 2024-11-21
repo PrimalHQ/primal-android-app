@@ -54,7 +54,7 @@ fun HeightAdjustableLoadingLazyListPlaceholder(
             ) {
                 InfiniteLottieAnimation(
                     modifier = Modifier
-                        .scale(10f)
+                        .scale(scale = 10f)
                         .padding(itemPadding),
                     resId = animationRawResId,
                 )
@@ -87,8 +87,7 @@ fun LazyListScope.heightAdjustableLoadingLazyListPlaceholder(
                     .height(height),
             ) {
                 InfiniteLottieAnimation(
-                    modifier = Modifier
-                        .scale(10f),
+                    modifier = Modifier.scale(scale = 10f),
                     resId = animationRawResId,
                 )
             }

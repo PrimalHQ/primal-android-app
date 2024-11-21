@@ -89,50 +89,64 @@ class ExplorePeopleViewModel @Inject constructor(
     private fun follow(profileId: String, forceUpdate: Boolean) =
         viewModelScope.launch {
             updateStateProfileFollow(profileId)
-            try {
+
+            val followResult = runCatching {
                 profileRepository.follow(
                     userId = activeAccountStore.activeUserId(),
                     followedUserId = profileId,
                     forceUpdate = forceUpdate,
                 )
-            } catch (error: Exception) {
-                Timber.w(error)
-                when (error) {
-                    is WssException, is NostrPublishException, is ProfileRepository.FollowListNotFound ->
-                        setState { copy(error = UiError.FailedToFollowUser(error)) }
+            }
 
-                    is ProfileRepository.PossibleFollowListCorruption -> setState { copy(shouldApproveFollow = true) }
+            if (followResult.isFailure) {
+                followResult.exceptionOrNull()?.let { error ->
+                    Timber.w(error)
+                    when (error) {
+                        is WssException, is NostrPublishException, is ProfileRepository.FollowListNotFound ->
+                            setState { copy(error = UiError.FailedToFollowUser(error)) }
 
-                    is MissingRelaysException -> setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
+                        is ProfileRepository.PossibleFollowListCorruption -> setState { copy(shouldApproveFollow = true) }is MissingRelaysException -> setState {
+                            copy(
+                                error = UiError.MissingRelaysConfiguration(error),
+                            )
+                        }
 
-                    else -> setState { copy(error = UiError.GenericError()) }
+                        else -> setState { copy(error = UiError.GenericError()) }
+                    }
+                    updateStateProfileUnfollow(profileId)
                 }
-                updateStateProfileUnfollow(profileId)
             }
         }
 
     private fun unfollow(profileId: String, forceUpdate: Boolean) =
         viewModelScope.launch {
             updateStateProfileUnfollow(profileId)
-            try {
+
+            val unfollowResult = runCatching {
                 profileRepository.unfollow(
                     userId = activeAccountStore.activeUserId(),
                     unfollowedUserId = profileId,
                     forceUpdate = forceUpdate,
                 )
-            } catch (error: Exception) {
-                Timber.w(error)
-                when (error) {
-                    is WssException, is NostrPublishException, is ProfileRepository.FollowListNotFound ->
-                        setState { copy(error = UiError.FailedToUnfollowUser(error)) }
+            }
 
-                    is ProfileRepository.PossibleFollowListCorruption -> setState { copy(shouldApproveUnfollow = true) }
+            if (unfollowResult.isFailure) {
+                unfollowResult.exceptionOrNull()?.let { error ->
+                    Timber.w(error)
+                    when (error) {
+                        is WssException, is NostrPublishException, is ProfileRepository.FollowListNotFound ->
+                            setState { copy(error = UiError.FailedToUnfollowUser(error)) }
 
-                    is MissingRelaysException -> setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
+                        is ProfileRepository.PossibleFollowListCorruption -> setState { copy(shouldApproveUnfollow = true) }is MissingRelaysException -> setState {
+                            copy(
+                                error = UiError.MissingRelaysConfiguration(error),
+                            )
+                        }
 
-                    else -> setState { copy(error = UiError.GenericError()) }
+                        else -> setState { copy(error = UiError.GenericError()) }
+                    }
+                    updateStateProfileFollow(profileId)
                 }
-                updateStateProfileFollow(profileId)
             }
         }
 

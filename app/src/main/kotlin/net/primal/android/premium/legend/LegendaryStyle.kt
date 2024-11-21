@@ -4,6 +4,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
+@Suppress("MagicNumber")
 enum class LegendaryStyle(
     val id: String,
     val brush: Brush,

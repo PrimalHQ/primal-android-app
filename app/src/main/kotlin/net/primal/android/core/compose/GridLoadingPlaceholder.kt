@@ -31,7 +31,7 @@ fun GridLoadingPlaceholder(
     }
 
     BoxWithConstraints {
-        val height = maxWidth / 3
+        val height = maxWidth.div(other = 3)
         Column(
             modifier = modifier
                 .verticalScroll(state = rememberScrollState())

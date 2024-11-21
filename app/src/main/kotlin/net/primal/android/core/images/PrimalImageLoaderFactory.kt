@@ -36,7 +36,7 @@ class PrimalImageLoaderFactory @Inject constructor(
             .diskCache {
                 DiskCache.Builder()
                     .directory(imageCacheDir)
-                    .maxSizePercent(0.02)
+                    .maxSizePercent(percent = 0.02)
                     .build()
             }
             .build()

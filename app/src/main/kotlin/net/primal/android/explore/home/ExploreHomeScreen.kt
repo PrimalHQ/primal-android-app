@@ -76,7 +76,7 @@ import net.primal.android.explore.home.ui.PEOPLE_INDEX
 import net.primal.android.explore.home.ui.TOPICS_INDEX
 import net.primal.android.explore.home.ui.ZAPS_INDEX
 import net.primal.android.explore.home.zaps.ExploreZaps
-import net.primal.android.feeds.domain.buildExploreMediaFeedSpec
+import net.primal.android.feeds.domain.exploreMediaFeedSpec
 import net.primal.android.notes.feed.grid.MediaFeedGrid
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.LegendaryStyle
@@ -200,7 +200,7 @@ private fun ExploreHomeScreen(
 
                     MEDIA_INDEX -> {
                         MediaFeedGrid(
-                            feedSpec = buildExploreMediaFeedSpec(),
+                            feedSpec = exploreMediaFeedSpec,
                             contentPadding = paddingValues,
                             onNoteClick = { noteCallbacks.onNoteClick?.invoke(it) },
                         )

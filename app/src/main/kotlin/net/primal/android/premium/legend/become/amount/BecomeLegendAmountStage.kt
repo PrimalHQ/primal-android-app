@@ -1,4 +1,4 @@
-package net.primal.android.premium.legend.become.ui.amount
+package net.primal.android.premium.legend.become.amount
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement

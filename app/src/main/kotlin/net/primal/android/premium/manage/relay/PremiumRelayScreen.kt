@@ -117,6 +117,7 @@ fun PremiumRelayScreen(
 @Composable
 private fun RelayHeader(modifier: Modifier = Modifier, version: String) {
     Column(
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -179,6 +180,7 @@ private fun RelayField(
 @Composable
 fun RelayDescription(modifier: Modifier = Modifier) {
     Text(
+        modifier = modifier,
         text = stringResource(id = R.string.premium_relay_description),
         style = AppTheme.typography.bodyLarge,
         color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,

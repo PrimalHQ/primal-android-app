@@ -102,7 +102,7 @@ fun NostrUserText(
                     LegendaryStyle.BROWN -> PrimalIcons.PrimalBadgeBrown
                     LegendaryStyle.BLUE -> PrimalIcons.PrimalBadgeBlue
                     LegendaryStyle.SUN_FIRE -> PrimalIcons.PrimalBadgeSunFire
-                    LegendaryStyle.NO_CUSTOMIZATION -> throw IllegalStateException()
+                    LegendaryStyle.NO_CUSTOMIZATION -> error("Should not be rendered with custom icon.")
                 }
                 Icon(
                     imageVector = badgeVector,

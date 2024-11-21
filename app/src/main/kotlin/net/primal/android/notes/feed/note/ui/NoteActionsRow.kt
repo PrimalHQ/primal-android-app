@@ -71,7 +71,7 @@ fun FeedNoteActionsRow(
             highlighted = eventStats.userZapped,
             iconVector = PrimalIcons.FeedNewZap,
             // Zaps icons are tiny when below 18.sp so we have to increase it by 20% to fit in
-            iconSize = if (!highlightedNote) iconSize.times(1.2f) else iconSize,
+            iconSize = if (!highlightedNote) iconSize.times(other = 1.2f) else iconSize,
             iconVectorHighlight = PrimalIcons.FeedNewZapFilled,
             colorHighlight = AppTheme.extraColorScheme.zapped,
             onClick = onPostAction?.let {

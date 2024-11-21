@@ -223,7 +223,7 @@ class RelayPool(
                 when (it) {
                     is NostrIncomingMessage.OkMessage -> emit(it)
                     is NostrIncomingMessage.NoticeMessage -> throw NostrNoticeException(reason = it.message)
-                    else -> throw IllegalStateException("$it is not allowed")
+                    else -> error("$it is not allowed")
                 }
             }
             .timeout(PUBLISH_TIMEOUT.milliseconds)

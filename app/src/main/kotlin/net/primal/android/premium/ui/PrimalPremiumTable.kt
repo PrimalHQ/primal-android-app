@@ -158,4 +158,4 @@ private fun PrimalPremiumTableRow(
     }
 }
 
-private fun String.stripUrlProtocol() = this.dropWhile { it != ':' }.drop(3)
+private fun String.stripUrlProtocol() = this.dropWhile { it != ':' }.drop(n = 3)

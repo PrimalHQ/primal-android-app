@@ -85,8 +85,7 @@ class PremiumContactListViewModel @Inject constructor(
                     content = backup.event.content,
                 )
                 setEffect(SideEffect.RecoverSuccessful)
-            } catch (error: Exception) {
-                Timber.e(error)
+            } catch (_: Exception) {
                 setEffect(SideEffect.RecoverFailed)
             }
         }

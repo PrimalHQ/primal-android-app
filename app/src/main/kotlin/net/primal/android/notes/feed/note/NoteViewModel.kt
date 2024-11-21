@@ -124,7 +124,7 @@ class NoteViewModel @Inject constructor(
         viewModelScope.launch {
             val postAuthorProfileData = profileRepository.findProfileDataOrNull(profileId = zapAction.postAuthorId)
             if (postAuthorProfileData?.lnUrlDecoded == null) {
-                setState { copy(error = UiError.MissingLightningAddress(IllegalStateException())) }
+                setState { copy(error = UiError.MissingLightningAddress(IllegalStateException("Missing ln url"))) }
                 return@launch
             }
 
