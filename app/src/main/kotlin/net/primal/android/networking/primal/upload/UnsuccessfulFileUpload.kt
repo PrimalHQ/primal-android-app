@@ -1,3 +1,4 @@
 package net.primal.android.networking.primal.upload
 
-class UnsuccessfulFileUpload : RuntimeException()
+@Suppress("unused")
+class UnsuccessfulFileUpload(cause: Throwable?) : RuntimeException()
