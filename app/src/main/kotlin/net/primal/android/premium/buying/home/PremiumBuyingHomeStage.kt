@@ -47,6 +47,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.NostrichFilled
 import net.primal.android.core.compose.icons.primaliconpack.PrimalPremium
 import net.primal.android.core.compose.icons.primaliconpack.VerifiedFilled
+import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.premium.ui.toBillingPeriodString
 import net.primal.android.premium.ui.toPricingString
 import net.primal.android.theme.AppTheme
@@ -281,8 +282,11 @@ private fun PriceRow(loading: Boolean, subscriptions: List<SubscriptionProduct>)
                         Text(
                             modifier = Modifier
                                 .wrapContentSize()
-                                .padding(horizontal = 48.dp),
-                            text = stringResource(id = R.string.premium_google_play_not_available),
+                                .padding(horizontal = 32.dp),
+                            text = when {
+                                isGoogleBuild() -> stringResource(id = R.string.premium_google_play_not_available)
+                                else -> stringResource(id = R.string.premium_google_play_not_available_aosp)
+                            },
                             textAlign = TextAlign.Center,
                             style = AppTheme.typography.bodySmall,
                             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
