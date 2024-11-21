@@ -1,4 +1,4 @@
-package net.primal.android.premium.legend.become.ui.payment
+package net.primal.android.premium.legend.become.payment
 
 import android.content.ClipData
 import android.content.ClipboardManager

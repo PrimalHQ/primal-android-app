@@ -281,12 +281,12 @@ class FeedRemoteMediator(
                 .firstOrNull()
         }
 
-    private suspend fun newestFeedPostInDatabaseOrNull() =
-        withContext(dispatcherProvider.io()) {
-            database.feedPosts()
-                .newestFeedPosts(query = feedQueryBuilder.newestFeedPostsQuery(limit = 1))
-                .firstOrNull()
-        }
+//    private suspend fun newestFeedPostInDatabaseOrNull() =
+//        withContext(dispatcherProvider.io()) {
+//            database.feedPosts()
+//                .newestFeedPosts(query = feedQueryBuilder.newestFeedPostsQuery(limit = 1))
+//                .firstOrNull()
+//        }
 
     private inner class NoSuchFeedPostException : RuntimeException()
 

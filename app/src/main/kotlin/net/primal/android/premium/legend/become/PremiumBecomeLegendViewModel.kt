@@ -42,6 +42,10 @@ class PremiumBecomeLegendViewModel @Inject constructor(
     @PrimalWalletApiClient private val walletApiClient: PrimalApiClient,
 ) : ViewModel() {
 
+    private companion object {
+        private const val BTC_DECIMAL_PLACES = 8
+    }
+
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
@@ -78,7 +82,10 @@ class PremiumBecomeLegendViewModel @Inject constructor(
                     }
 
                     is UiEvent.UpdateSelectedAmount -> {
-                        val newAmountInBtc = it.newAmount.toBigDecimal().setScale(8, RoundingMode.HALF_UP)
+                        val newAmountInBtc = it.newAmount.toBigDecimal().setScale(
+                            BTC_DECIMAL_PLACES,
+                            RoundingMode.HALF_UP,
+                        )
                         setState {
                             copy(
                                 selectedAmountInBtc = newAmountInBtc,

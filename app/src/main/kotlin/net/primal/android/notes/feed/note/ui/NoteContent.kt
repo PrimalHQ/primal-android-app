@@ -128,6 +128,7 @@ private fun String.ellipsize(expanded: Boolean, ellipsizeText: String): String {
 }
 
 const val TWEET_MODE_THRESHOLD = 21
+const val MAX_LINE_BREAKS_IN_TWEET = 3
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -162,7 +163,7 @@ fun NoteContent(
         if (contentText.isNotEmpty()) {
             val tweetMode = enableTweetsMode && displaySettings.tweetsModeEnabled &&
                 contentText.length <= TWEET_MODE_THRESHOLD &&
-                contentText.count { it == '\n' } < 3
+                contentText.count { it == '\n' } < MAX_LINE_BREAKS_IN_TWEET
 
             PrimalClickableText(
                 modifier = Modifier.padding(bottom = 4.dp),

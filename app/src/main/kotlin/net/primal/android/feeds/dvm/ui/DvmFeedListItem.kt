@@ -36,8 +36,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -238,21 +236,19 @@ private fun DvmFeedListItem(
                             },
                         )
                         if (showFollowsActionsAvatarRow) {
-                            val maxAvatarsToShow = 5
                             val profileAvatarSize = 28.dp
-                            val avatarVisiblePercentage = 0.75f
-                            val avatarsShown = dvmFeed.actionUserAvatars.size.coerceAtMost(maxAvatarsToShow)
+                            val avatarsShown = dvmFeed.actionUserAvatars.size.coerceAtMost(MaxAvatarsToShow)
 
                             AvatarThumbnailsRow(
                                 modifier = Modifier
                                     .size(
-                                        width = profileAvatarSize * avatarVisiblePercentage * (avatarsShown - 1) +
+                                        width = profileAvatarSize * AvatarVisiblePercentage * (avatarsShown - 1) +
                                             profileAvatarSize,
                                         height = profileAvatarSize,
                                     ),
                                 avatarCdnImages = dvmFeed.actionUserAvatars,
                                 onClick = {},
-                                maxAvatarsToShow = maxAvatarsToShow,
+                                maxAvatarsToShow = MaxAvatarsToShow,
                                 displayAvatarOverflowIndicator = false,
                                 avatarBorderColor = listItemContainerColor,
                                 avatarSize = profileAvatarSize,
@@ -265,6 +261,9 @@ private fun DvmFeedListItem(
         )
     }
 }
+
+private const val AvatarVisiblePercentage = 0.75f
+private const val MaxAvatarsToShow = 5
 
 @Composable
 fun DvmFeedThumbnail(
@@ -419,7 +418,7 @@ private fun Badge(
         fontWeight = FontWeight.Bold,
         color = textColor,
         style = AppTheme.typography.bodySmall,
-        fontSize = TextUnit(10f, TextUnitType.Sp),
+        fontSize = 10.sp,
         textAlign = TextAlign.Center,
     )
 }

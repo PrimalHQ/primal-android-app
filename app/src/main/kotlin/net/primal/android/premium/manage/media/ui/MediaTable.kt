@@ -55,7 +55,7 @@ fun MediaListItem(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier.weight(2.70f),
+            modifier = Modifier.weight(weight = 2.70f),
             contentAlignment = Alignment.CenterStart,
         ) {
             SubcomposeAsyncImage(
@@ -72,7 +72,7 @@ fun MediaListItem(
             )
         }
         MediaItemDetailsColumn(
-            modifier = Modifier.weight(5f),
+            modifier = Modifier.weight(weight = 5f),
             item = item,
         )
         ActionIcon(
@@ -163,26 +163,26 @@ fun TableHeader(modifier: Modifier = Modifier) {
             .padding(16.dp),
     ) {
         Text(
-            modifier = Modifier.weight(3f),
+            modifier = Modifier.weight(weight = 3f),
             text = stringResource(id = R.string.premium_media_management_table_file),
             style = AppTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,
         )
         Text(
-            modifier = Modifier.weight(5f),
+            modifier = Modifier.weight(weight = 5f),
             text = stringResource(id = R.string.premium_media_management_table_details),
             style = AppTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,
         )
         Text(
-            modifier = Modifier.weight(2f),
+            modifier = Modifier.weight(weight = 2f),
             text = stringResource(id = R.string.premium_media_management_table_copy),
             style = AppTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.End,
         )
         Text(
-            modifier = Modifier.weight(2f),
+            modifier = Modifier.weight(weight = 2f),
             text = stringResource(id = R.string.premium_media_management_table_delete),
             style = AppTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,

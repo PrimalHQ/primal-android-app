@@ -188,7 +188,7 @@ class ArticleDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             val postAuthorProfileData = profileRepository.findProfileDataOrNull(profileId = article.authorId)
             if (postAuthorProfileData?.lnUrlDecoded == null) {
-                setState { copy(error = UiError.MissingLightningAddress(IllegalStateException())) }
+                setState { copy(error = UiError.MissingLightningAddress(IllegalStateException("Missing ln url"))) }
                 return@launch
             }
 
@@ -270,7 +270,7 @@ class ArticleDetailsViewModel @Inject constructor(
         setState { copy(isAuthorFollowed = !isAuthorFollowed) }
 
         viewModelScope.launch {
-            try {
+            val followUnfollowResult = runCatching {
                 if (isAuthorFollowed) {
                     profileRepository.unfollow(
                         userId = activeAccountStore.activeUserId(),
@@ -282,23 +282,27 @@ class ArticleDetailsViewModel @Inject constructor(
                         followedUserId = article.authorId,
                     )
                 }
-            } catch (error: Exception) {
-                when (error) {
-                    is WssException, is ProfileRepository.FollowListNotFound, is NostrPublishException -> {
-                        Timber.e(error)
-                        setState {
-                            copy(
-                                isAuthorFollowed = isAuthorFollowed,
-                                error = if (isAuthorFollowed) {
-                                    UiError.FailedToUnfollowUser(cause = error)
-                                } else {
-                                    UiError.FailedToFollowUser(cause = error)
-                                },
-                            )
-                        }
-                    }
+            }
 
-                    else -> throw error
+            if (followUnfollowResult.isFailure) {
+                followUnfollowResult.exceptionOrNull()?.let { error ->
+                    when (error) {
+                        is WssException, is ProfileRepository.FollowListNotFound, is NostrPublishException -> {
+                            Timber.e(error)
+                            setState {
+                                copy(
+                                    isAuthorFollowed = isAuthorFollowed,
+                                    error = if (isAuthorFollowed) {
+                                        UiError.FailedToUnfollowUser(cause = error)
+                                    } else {
+                                        UiError.FailedToFollowUser(cause = error)
+                                    },
+                                )
+                            }
+                        }
+
+                        else -> throw error
+                    }
                 }
             }
         }

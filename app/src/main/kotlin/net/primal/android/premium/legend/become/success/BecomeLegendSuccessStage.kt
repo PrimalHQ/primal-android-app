@@ -1,4 +1,4 @@
-package net.primal.android.premium.legend.become.ui.success
+package net.primal.android.premium.legend.become.success
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable

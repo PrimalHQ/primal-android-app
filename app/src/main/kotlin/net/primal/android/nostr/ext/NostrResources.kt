@@ -86,8 +86,8 @@ private fun String.nostrUriToBytes(): ByteArray? {
     val key = matcher.group(3)?.lowercase() ?: return null
     return try {
         (type + key).bechToBytesOrThrow()
-    } catch (error: Exception) {
-        Timber.w(error)
+    } catch (ignored: Exception) {
+        Timber.w(ignored)
         null
     }
 }
@@ -145,8 +145,8 @@ private fun String.extract(parser: (bechPrefix: String?, key: String?) -> String
 
     return try {
         parser(bechPrefix, key)
-    } catch (error: Exception) {
-        Timber.w(error)
+    } catch (ignored: Exception) {
+        Timber.w(ignored)
         null
     }
 }

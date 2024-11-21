@@ -47,6 +47,7 @@ fun String.splitIntoParagraphs(): List<String> {
     return this.split(Regex("\\n\\s*\\n")).map { it.trim() }
 }
 
+@Suppress("unused")
 private fun String.markdownToHtml(): String {
     val flavour = CommonMarkFlavourDescriptor()
     val parsedTree = MarkdownParser(flavour).buildMarkdownTreeFromString(this)

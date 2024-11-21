@@ -131,7 +131,7 @@ class ProfileDetailsViewModel @Inject constructor(
         zapDescription: String?,
     ) = viewModelScope.launch {
         if (profileLnUrlDecoded == null) {
-            setState { copy(zapError = UiError.MissingLightningAddress(RuntimeException())) }
+            setState { copy(zapError = UiError.MissingLightningAddress(IllegalStateException("Missing ln url"))) }
             return@launch
         }
 

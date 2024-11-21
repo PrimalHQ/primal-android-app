@@ -182,6 +182,7 @@ fun PremiumPurchaseStage(
     }
 }
 
+@Suppress("unused")
 @Composable
 private fun MoreInfoPromoCodeRow(
     modifier: Modifier = Modifier,

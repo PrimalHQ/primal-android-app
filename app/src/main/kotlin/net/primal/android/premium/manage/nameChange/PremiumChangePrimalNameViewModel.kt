@@ -56,7 +56,7 @@ class PremiumChangePrimalNameViewModel @Inject constructor(
 
     private fun confirmPrimalNameChange() =
         viewModelScope.launch {
-            val primalName = state.value.primalName ?: throw IllegalStateException("primal name cannot be null")
+            val primalName = state.value.primalName ?: error("primal name cannot be null")
             setState { copy(changingName = true) }
 
             try {

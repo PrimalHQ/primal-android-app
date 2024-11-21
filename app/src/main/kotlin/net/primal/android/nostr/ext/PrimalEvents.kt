@@ -11,7 +11,7 @@ inline fun <reified T> PrimalEvent?.takeContentOrNull(): T? {
         NostrJson.decodeFromJsonElement<T>(
             NostrJson.parseToJsonElement(this.content),
         )
-    } catch (error: IllegalArgumentException) {
+    } catch (_: IllegalArgumentException) {
         null
     }
 }

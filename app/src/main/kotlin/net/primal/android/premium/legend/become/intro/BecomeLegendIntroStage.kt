@@ -1,4 +1,4 @@
-package net.primal.android.premium.legend.become.ui.intro
+package net.primal.android.premium.legend.become.intro
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement

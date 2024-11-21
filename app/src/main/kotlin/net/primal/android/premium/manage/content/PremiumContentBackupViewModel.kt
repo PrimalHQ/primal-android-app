@@ -4,12 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -25,7 +23,6 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.takeContentOrNull
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.premium.manage.content.PremiumContentBackupContract.SideEffect
 import net.primal.android.premium.manage.content.PremiumContentBackupContract.UiEvent
 import net.primal.android.premium.manage.content.PremiumContentBackupContract.UiState
 import net.primal.android.premium.manage.content.api.model.BroadcastingStatus
@@ -50,10 +47,6 @@ class PremiumContentBackupViewModel @Inject constructor(
 
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
-
-    private val _effect: Channel<SideEffect> = Channel()
-    val effect = _effect.receiveAsFlow()
-    private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effect.send(effect) }
 
     private var monitorBroadcasting: PrimalSocketSubscription<BroadcastingStatus>? = null
     private var monitorMutex = Mutex()

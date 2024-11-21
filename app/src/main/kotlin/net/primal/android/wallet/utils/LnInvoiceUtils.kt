@@ -1,14 +1,14 @@
 package net.primal.android.wallet.utils
 
 import java.math.BigDecimal
-import java.util.Locale
+import java.util.*
 import java.util.regex.Pattern
 import timber.log.Timber
 
 // Made by Vitor Pamplona
 // https://github.com/vitorpamplona/amethyst/blob/main/quartz/src/main/java/com/vitorpamplona/quartz/encoders/LnInvoiceUtil.kt
 /** based on litecoinj */
-@SuppressWarnings("MagicNumber")
+@Suppress("MagicNumber", "UnusedPrivateProperty")
 object LnInvoiceUtils {
     private val invoicePattern = Pattern.compile(
         "lnbc((?<amount>\\d+)(?<multiplier>[munp])?)?1[^1\\s]+",
