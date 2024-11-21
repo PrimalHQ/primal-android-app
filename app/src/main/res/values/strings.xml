@@ -107,6 +107,7 @@
     <string name="premium_find_primal_name_button">Find Primal Name</string>
     <string name="premium_cancel_button">Cancel</string>
     <string name="premium_google_play_not_available">Unable to connect to the Google Play Store. Check your Google account and try again.</string>
+    <string name="premium_google_play_not_available_aosp">Google Play services are not available. You can use the Primal web app to buy Primal Premium.</string>
 
     <string name="premium_primal_name_title">Find Primal Name</string>
     <string name="premium_primal_name_search_button">Search</string>
