@@ -2,12 +2,15 @@ package net.primal.android.premium.buying.purchase
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -39,11 +42,13 @@ import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.NostrUserText
+import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.findActivity
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.premium.buying.PremiumBuyingContract
 import net.primal.android.premium.ui.PremiumPrimalNameTable
 import net.primal.android.premium.ui.toGetSubscriptionString
@@ -156,6 +161,7 @@ fun PremiumPurchaseStage(
             if (activity != null) {
                 BuyPremiumButtons(
                     modifier = Modifier.padding(horizontal = 12.dp),
+                    loading = state.loading,
                     hasActiveSubscription = state.hasActiveSubscription,
                     subscriptions = state.subscriptions,
                     onBuySubscription = { subscription ->
@@ -211,6 +217,7 @@ private fun MoreInfoPromoCodeRow(
 fun BuyPremiumButtons(
     modifier: Modifier,
     hasActiveSubscription: Boolean,
+    loading: Boolean,
     subscriptions: List<SubscriptionProduct>,
     onBuySubscription: (SubscriptionProduct) -> Unit,
     onRestoreSubscription: () -> Unit,
@@ -243,12 +250,40 @@ fun BuyPremiumButtons(
                 )
             }
         } else {
-            subscriptions.forEach {
-                BuyPremiumButton(
-                    startText = it.toGetSubscriptionString(),
-                    endText = it.toPricingString(),
-                    onClick = { onBuySubscription(it) },
-                )
+            when {
+                subscriptions.isEmpty() -> {
+                    Box(
+                        modifier = Modifier.height(144.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (loading) {
+                            PrimalLoadingSpinner(size = 32.dp)
+                        } else {
+                            Text(
+                                modifier = Modifier
+                                    .wrapContentSize()
+                                    .padding(horizontal = 16.dp),
+                                text = when {
+                                    isGoogleBuild() -> stringResource(id = R.string.premium_google_play_not_available)
+                                    else -> stringResource(id = R.string.premium_google_play_not_available_aosp)
+                                },
+                                textAlign = TextAlign.Center,
+                                style = AppTheme.typography.bodySmall,
+                                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                            )
+                        }
+                    }
+                }
+
+                else -> {
+                    subscriptions.forEach {
+                        BuyPremiumButton(
+                            startText = it.toGetSubscriptionString(),
+                            endText = it.toPricingString(),
+                            onClick = { onBuySubscription(it) },
+                        )
+                    }
+                }
             }
         }
     }
