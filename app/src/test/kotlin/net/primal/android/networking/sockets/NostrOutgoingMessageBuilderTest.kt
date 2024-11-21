@@ -1,7 +1,7 @@
 package net.primal.android.networking.sockets
 
 import io.kotest.matchers.shouldBe
-import java.util.UUID
+import java.util.*
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.junit.Test
@@ -10,7 +10,7 @@ class NostrOutgoingMessageBuilderTest {
 
     @Test
     fun `buildNostrREQMessage returns correct text message`() {
-        val subscriptionId = UUID.randomUUID()
+        val subscriptionId = UUID.randomUUID().toPrimalSubscriptionId()
         val filter = buildJsonObject {
             put("random", "random")
         }
@@ -41,7 +41,7 @@ class NostrOutgoingMessageBuilderTest {
 
     @Test
     fun `buildNostrCOUNTMessage returns correct text message`() {
-        val subscriptionId = UUID.randomUUID()
+        val subscriptionId = UUID.randomUUID().toPrimalSubscriptionId()
         val filter = buildJsonObject {
             put("random", "random")
         }
@@ -52,7 +52,7 @@ class NostrOutgoingMessageBuilderTest {
 
     @Test
     fun `buildNostrCLOSEMessage returns correct text message`() {
-        val subscriptionId = UUID.randomUUID()
+        val subscriptionId = UUID.randomUUID().toPrimalSubscriptionId()
         val actual = subscriptionId.buildNostrCLOSEMessage()
         actual shouldBe """["${NostrVerb.Outgoing.CLOSE}","$subscriptionId"]"""
     }
