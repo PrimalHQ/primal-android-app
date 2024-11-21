@@ -48,6 +48,7 @@ private fun PremiumBuyingScreen(
 ) {
     PremiumBuyingBackHandler(
         stage = state.stage,
+        isExtendingPremium = state.isExtendingPremium,
         eventPublisher = eventPublisher,
         screenCallbacks = screenCallbacks,
     )
@@ -154,6 +155,7 @@ private fun PremiumBuyingScreen(
 @Composable
 private fun PremiumBuyingBackHandler(
     stage: PremiumBuyingContract.PremiumStage,
+    isExtendingPremium: Boolean,
     eventPublisher: (PremiumBuyingContract.UiEvent) -> Unit,
     screenCallbacks: PremiumBuyingContract.ScreenCallbacks,
 ) {
@@ -170,14 +172,24 @@ private fun PremiumBuyingBackHandler(
             }
 
             PremiumBuyingContract.PremiumStage.Purchase -> {
-                eventPublisher(
-                    PremiumBuyingContract.UiEvent.MoveToPremiumStage(
-                        PremiumBuyingContract.PremiumStage.FindPrimalName,
-                    ),
-                )
+                if (isExtendingPremium) {
+                    screenCallbacks.onClose()
+                } else {
+                    eventPublisher(
+                        PremiumBuyingContract.UiEvent.MoveToPremiumStage(
+                            PremiumBuyingContract.PremiumStage.FindPrimalName,
+                        ),
+                    )
+                }
             }
 
-            PremiumBuyingContract.PremiumStage.Success -> screenCallbacks.onPremiumPurchased()
+            PremiumBuyingContract.PremiumStage.Success -> {
+                if (isExtendingPremium) {
+                    screenCallbacks.onClose()
+                } else {
+                    screenCallbacks.onPremiumPurchased()
+                }
+            }
         }
     }
 }
