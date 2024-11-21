@@ -1,24 +1,6 @@
 ## Changes
-- Polish content backup list items
-- Implement broadcasting feature
-- Implement rendering content stats on Content Backup screen
-- Implement Content Backup screen UI
-- Fix custom badge in collapsed top bar in profile details
-- Fix colors in drawer
-- Implement legendary avatar ring on app shell
-- Rename LegendaryProfile enum to LegendaryStyle
-- Implement contact list recover functionality
-- Implement reading and rendering contact list backups
-- Fix margin on copy icon on media management screen
-- Fix getRecoveryContactsList endpoint
-- Update drawer menu items with icons
-- Implement contacts list api endpoint
-- Implement 'get custom ln address' button on wallet receive
-- Implement parametrized search scope on starting adv search
-- Implement parametrized search kind on starting adv search
-- Implement paywall on premium reads feeds
-- Implement paywall on premium note feeds
-- Add pas query param to adv search
-- Increase delay to propagate feed replacement to 100ms
-- Update Premium More Info FAQ content
-- Update Premium More Info Features content
+- Add AOSP message on buying premium home screen
+- Add AOSP message on extend subscription screen
+- Add retryNetworkCall when fetching backup stats
+- Fix back handler for Extend Subscription
+- Fix typo in Content Backup
