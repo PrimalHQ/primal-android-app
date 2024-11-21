@@ -271,7 +271,7 @@
     <string name="premium_content_backup_title">Content Backup</string>
     <string name="premium_content_backup_table_count">Count</string>
     <string name="premium_content_backup_table_type">Type</string>
-    <string name="premium_content_backup_table_type_notes">Type</string>
+    <string name="premium_content_backup_table_type_notes">Notes</string>
     <string name="premium_content_backup_table_type_reactions">Reactions</string>
     <string name="premium_content_backup_table_type_dms">DMs</string>
     <string name="premium_content_backup_table_type_articles">Articles</string>
