@@ -20,6 +20,7 @@ import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalSocketSubscription
 import net.primal.android.networking.primal.PrimalVerb
+import net.primal.android.networking.primal.retryNetworkCall
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.takeContentOrNull
 import net.primal.android.nostr.model.NostrEventKind
@@ -66,7 +67,9 @@ class PremiumContentBackupViewModel @Inject constructor(
     private fun fetchBroadcastStatus() {
         viewModelScope.launch {
             try {
-                val status = broadcastRepository.fetchBroadcastStatus(userId = activeAccountStore.activeUserId())
+                val status = retryNetworkCall(retries = 2) {
+                    broadcastRepository.fetchBroadcastStatus(userId = activeAccountStore.activeUserId())
+                }
                 handleBroadcastStatus(status)
             } catch (error: WssException) {
                 Timber.e(error)
