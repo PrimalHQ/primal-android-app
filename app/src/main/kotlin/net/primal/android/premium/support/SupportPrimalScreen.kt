@@ -200,7 +200,7 @@ private fun openGooglePlayAppDetails(context: Context) {
         )
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)
-    } catch (error: Exception) {
+    } catch (_: Exception) {
         val intent = Intent(
             Intent.ACTION_VIEW,
             Uri.parse("https://play.google.com/store/apps/details?id=$packageName"),

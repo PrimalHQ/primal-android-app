@@ -87,44 +87,62 @@ class ExplorePeopleViewModel @Inject constructor(
     private fun follow(profileId: String) =
         viewModelScope.launch {
             updateStateProfileFollow(profileId)
-            try {
+
+            val followResult = runCatching {
                 profileRepository.follow(
                     userId = activeAccountStore.activeUserId(),
                     followedUserId = profileId,
                 )
-            } catch (error: Exception) {
-                Timber.w(error)
-                when (error) {
-                    is WssException, is NostrPublishException, is ProfileRepository.FollowListNotFound ->
-                        setState { copy(error = UiError.FailedToFollowUser(error)) }
+            }
 
-                    is MissingRelaysException -> setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
+            if (followResult.isFailure) {
+                followResult.exceptionOrNull()?.let { error ->
+                    Timber.w(error)
+                    when (error) {
+                        is WssException, is NostrPublishException, is ProfileRepository.FollowListNotFound ->
+                            setState { copy(error = UiError.FailedToFollowUser(error)) }
 
-                    else -> setState { copy(error = UiError.GenericError()) }
+                        is MissingRelaysException -> setState {
+                            copy(
+                                error = UiError.MissingRelaysConfiguration(error),
+                            )
+                        }
+
+                        else -> setState { copy(error = UiError.GenericError()) }
+                    }
+                    updateStateProfileUnfollow(profileId)
                 }
-                updateStateProfileUnfollow(profileId)
             }
         }
 
     private fun unfollow(profileId: String) =
         viewModelScope.launch {
             updateStateProfileUnfollow(profileId)
-            try {
+
+            val unfollowResult = runCatching {
                 profileRepository.unfollow(
                     userId = activeAccountStore.activeUserId(),
                     unfollowedUserId = profileId,
                 )
-            } catch (error: Exception) {
-                Timber.w(error)
-                when (error) {
-                    is WssException, is NostrPublishException, is ProfileRepository.FollowListNotFound ->
-                        setState { copy(error = UiError.FailedToUnfollowUser(error)) }
+            }
 
-                    is MissingRelaysException -> setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
+            if (unfollowResult.isFailure) {
+                unfollowResult.exceptionOrNull()?.let { error ->
+                    Timber.w(error)
+                    when (error) {
+                        is WssException, is NostrPublishException, is ProfileRepository.FollowListNotFound ->
+                            setState { copy(error = UiError.FailedToUnfollowUser(error)) }
 
-                    else -> setState { copy(error = UiError.GenericError()) }
+                        is MissingRelaysException -> setState {
+                            copy(
+                                error = UiError.MissingRelaysConfiguration(error),
+                            )
+                        }
+
+                        else -> setState { copy(error = UiError.GenericError()) }
+                    }
+                    updateStateProfileFollow(profileId)
                 }
-                updateStateProfileFollow(profileId)
             }
         }
 

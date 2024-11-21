@@ -9,11 +9,11 @@ import coil.decode.VideoFrameDecoder
 import coil.disk.DiskCache
 
 object AvatarCoilImageLoader {
-    private var avatarCoilImageLoader: ImageLoader? = null
+    private var defaultImageLoader: ImageLoader? = null
     private var noGifsImageLoader: ImageLoader? = null
 
     fun provideImageLoader(context: Context): ImageLoader =
-        avatarCoilImageLoader ?: constructImageLoader(context = context).also { avatarCoilImageLoader = it }
+        defaultImageLoader ?: constructImageLoader(context = context).also { defaultImageLoader = it }
 
     fun provideNoGifsImageLoader(context: Context): ImageLoader =
         noGifsImageLoader ?: constructNoGifsImageLoader(context = context).also { noGifsImageLoader = it }

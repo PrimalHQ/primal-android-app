@@ -33,8 +33,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.LocalPrimalTheme
@@ -197,7 +195,7 @@ private fun DescriptionSection(headerText: String, bulletPoints: List<String>) {
             text = headerText,
             color = AppTheme.colorScheme.onBackground,
             style = AppTheme.typography.bodyLarge,
-            fontSize = TextUnit(25f, TextUnitType.Sp),
+            fontSize = 25.sp,
             fontWeight = FontWeight.Bold,
         )
         bulletPoints.onEach {
@@ -339,7 +337,7 @@ private fun PricePeriodColumn(price: String, period: String) {
             text = price,
             color = AppTheme.colorScheme.onBackground,
             style = AppTheme.typography.bodyLarge,
-            fontSize = TextUnit(22f, TextUnitType.Sp),
+            fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
         )
         Text(

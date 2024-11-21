@@ -35,9 +35,13 @@ fun Long.shortened(): String {
     return "1T+"
 }
 
+@Suppress("MagicNumber")
 fun Long.toMegaBytes(roundUp: Boolean = true): String = (this / 1024f.pow(2)).toStringWithTwoDecimals(roundUp)
+
+@Suppress("MagicNumber")
 fun Long.toGigaBytes(roundUp: Boolean = true): String = (this / 1024f.pow(3)).toStringWithTwoDecimals(roundUp)
 
+@Suppress("MagicNumber")
 fun Float.toStringWithTwoDecimals(roundUp: Boolean): String {
     val roundedValue = if (roundUp) {
         ceil(this * 100) / 100

@@ -26,6 +26,8 @@ import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.stats.ui.EventZapUiModel
 import net.primal.android.theme.AppTheme
 
+private const val MaxZapsInSingleLine = 3
+
 @ExperimentalLayoutApi
 @Composable
 fun ThreadNoteTopZapsSection(
@@ -34,7 +36,7 @@ fun ThreadNoteTopZapsSection(
     onClick: (() -> Unit)? = null,
 ) {
     Box(modifier = modifier) {
-        if (zaps.size > 3) {
+        if (zaps.size > MaxZapsInSingleLine) {
             TwoLineTopZapsSection(
                 modifier = Modifier.animateContentSize(),
                 zaps = zaps,

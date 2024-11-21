@@ -40,7 +40,7 @@ class NotePublishHandler @Inject constructor(
         replyToAuthorId: String? = null,
     ): Boolean {
         if (rootArticleId != null && rootPostId != null) {
-            throw IllegalStateException("You can not have both article and post as root events.")
+            error("You can not have both article and post as root events.")
         }
 
         val replyPostData = replyToPostId?.let {

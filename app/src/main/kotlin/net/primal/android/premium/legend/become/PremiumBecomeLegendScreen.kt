@@ -15,10 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.BecomeLegendStage
-import net.primal.android.premium.legend.become.ui.amount.BecomeLegendAmountStage
-import net.primal.android.premium.legend.become.ui.intro.BecomeLegendIntroStage
-import net.primal.android.premium.legend.become.ui.payment.BecomeLegendPaymentStage
-import net.primal.android.premium.legend.become.ui.success.BecomeLegendSuccessStage
+import net.primal.android.premium.legend.become.amount.BecomeLegendAmountStage
+import net.primal.android.premium.legend.become.intro.BecomeLegendIntroStage
+import net.primal.android.premium.legend.become.payment.BecomeLegendPaymentStage
+import net.primal.android.premium.legend.become.success.BecomeLegendSuccessStage
 import net.primal.android.theme.AppTheme
 
 @Composable

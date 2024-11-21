@@ -16,6 +16,7 @@ fun SubscriptionProduct.toBillingPeriodString(): String {
     }
 }
 
+@Suppress("MagicNumber")
 @Composable
 fun SubscriptionProduct.toPricingString(): String {
     val numberFormat = remember { NumberFormat.getNumberInstance() }

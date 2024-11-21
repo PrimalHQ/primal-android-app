@@ -78,7 +78,7 @@ private fun MediaFeedGrid(
         )
     } else {
         BoxWithConstraints {
-            val itemWidth = this.maxWidth / 3
+            val itemWidth = this.maxWidth.div(other = 3)
             LazyVerticalGrid(
                 modifier = modifier,
                 columns = GridCells.Fixed(count = 3),

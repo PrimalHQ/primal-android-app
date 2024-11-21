@@ -24,8 +24,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
@@ -209,7 +207,7 @@ private fun UserFollowedByIndicator(
             maxLines = 2,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
             overflow = TextOverflow.Ellipsis,
-            style = AppTheme.typography.bodyMedium.copy(lineHeight = TextUnit(16.0f, TextUnitType.Sp)),
+            style = AppTheme.typography.bodyMedium.copy(lineHeight = 16.sp),
         )
     }
 }
@@ -375,7 +373,12 @@ private fun PreviewProfileHeaderDetails() {
                         internetIdentifier = "qa@primal.net",
                         about = "qauser",
                     ),
-                    profileStats = ProfileStatsUi(11, 12, 13, 14),
+                    profileStats = ProfileStatsUi(
+                        followingCount = 11,
+                        followersCount = 12,
+                        notesCount = 13,
+                        repliesCount = 14,
+                    ),
                 ),
                 onEditProfileClick = {},
                 onZapProfileClick = {},

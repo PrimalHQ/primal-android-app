@@ -16,6 +16,4 @@ interface PremiumContentBackupContract {
         data class StartBroadcasting(val type: ContentType) : UiEvent()
         data object StopBroadcasting : UiEvent()
     }
-
-    sealed class SideEffect
 }

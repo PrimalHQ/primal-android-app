@@ -221,7 +221,7 @@ private fun ContentListItem(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         modifier = Modifier.padding(end = 8.dp, top = 2.dp),
-                        text = "${(progress * 100).toInt().coerceIn(0..100)}%",
+                        text = "${(progress * 100).toInt().coerceIn(range = 0..100)}%",
                         style = AppTheme.typography.bodySmall,
                         fontSize = 12.sp,
                     )

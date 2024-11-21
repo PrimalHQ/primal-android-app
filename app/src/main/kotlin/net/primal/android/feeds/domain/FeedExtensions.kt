@@ -172,7 +172,7 @@ fun buildAdvancedSearchNotificationsFeedSpec(query: String) =
 
 fun buildReadsTopicFeedSpec(hashtag: String) = """{"kind":"reads","topic":"${hashtag.substring(startIndex = 1)}"}"""
 
-fun buildExploreMediaFeedSpec() = """{"id":"explore-media"}"""
+const val exploreMediaFeedSpec = """{"id":"explore-media"}"""
 
 fun String.extractTopicFromFeedSpec(): String? {
     val noteQueryStartIndex = this.indexOf("\"query\":\"kind:1 #")
