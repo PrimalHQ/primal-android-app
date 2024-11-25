@@ -17,6 +17,7 @@ interface OnboardingContract {
         val working: Boolean = false,
         val allSuggestions: List<Suggestion> = emptyList(),
         val suggestions: List<Suggestion> = emptyList(),
+        val customizeSuggestions: Boolean = false,
         val error: OnboardingError? = null,
     ) {
         sealed class OnboardingError {
@@ -32,6 +33,7 @@ interface OnboardingContract {
         data class ProfileBannerUriChanged(val bannerUri: Uri?) : UiEvent()
         data class InterestSelected(val suggestion: Suggestion) : UiEvent()
         data class InterestUnselected(val suggestion: Suggestion) : UiEvent()
+        data class SetFollowsCustomizing(val customizing: Boolean) : UiEvent()
         data object CreateNostrProfile : UiEvent()
         data object RequestNextStep : UiEvent()
         data object RequestPreviousStep : UiEvent()

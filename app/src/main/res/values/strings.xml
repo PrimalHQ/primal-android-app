@@ -34,6 +34,7 @@
 
     <string name="onboarding_title_create_account">Create Account</string>
     <string name="onboarding_title_your_interests">Your Interests</string>
+    <string name="onboarding_title_your_follows">Your Follows</string>
     <string name="onboarding_title_account_preview">Account Preview</string>
     <string name="onboarding_title_wallet_activation">Wallet Activation</string>
     <string name="onboarding_title_success">Success</string>
@@ -52,6 +53,12 @@
         <item quantity="one">1 interest selected</item>
         <item quantity="other">%1$s interests selected</item>
     </plurals>
+    <string name="onboarding_profile_follows_hint">We followed %1$s Nostr accounts based on the interests you selected.</string>
+    <string name="onboarding_profile_follows_keep_follows_headline_text">Keep the recommended follows</string>
+    <string name="onboarding_profile_follows_keep_follows_support_text">(you can update this later)</string>
+    <string name="onboarding_profile_follows_customize_follows_headline_text">Customize follows now</string>
+    <string name="onboarding_profile_follows_customize_follows_support_text">(edit the recommended follows)</string>
+
     <string name="onboarding_profile_preview_hint">We will use this info to create your Nostr account. If you wish to make any changes, you can always do so in your profile settings.</string>
     <string name="onboarding_profile_preview_change_banner">Change Banner</string>
     <string name="onboarding_profile_success_hint">Now you are ready to\nactivate your Primal Wallet.</string>

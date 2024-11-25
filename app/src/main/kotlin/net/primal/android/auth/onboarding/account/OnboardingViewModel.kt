@@ -88,9 +88,9 @@ class OnboardingViewModel @Inject constructor(
                         createNostrAccount()
                     }
 
-                    UiEvent.DismissError -> setState {
-                        copy(error = null)
-                    }
+                    UiEvent.DismissError -> setState { copy(error = null) }
+
+                    is UiEvent.SetFollowsCustomizing -> setState { copy(customizeSuggestions = it.customizing) }
                 }
             }
         }

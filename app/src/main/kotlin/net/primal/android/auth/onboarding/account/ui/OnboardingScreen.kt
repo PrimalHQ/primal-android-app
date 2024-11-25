@@ -85,6 +85,13 @@ private fun OnboardingScreen(
                     eventPublisher = eventPublisher,
                     onBack = onBack,
                 )
+
+                OnboardingStep.Follows -> OnboardingProfileFollowsScreen(
+                    state = state,
+                    eventPublisher = eventPublisher,
+                    onBack = onBack,
+                )
+
                 OnboardingStep.Preview -> OnboardingProfilePreviewScreen(
                     state = state,
                     eventPublisher = eventPublisher,
@@ -102,7 +109,8 @@ private fun OnboardingStep.backgroundPainter(): Painter {
     return when (this) {
         OnboardingStep.Details -> painterResource(id = R.drawable.onboarding_spot2)
         OnboardingStep.Interests -> painterResource(id = R.drawable.onboarding_spot3)
-        OnboardingStep.Preview -> painterResource(id = R.drawable.onboarding_spot4)
+        OnboardingStep.Follows -> painterResource(id = R.drawable.onboarding_spot4)
+        OnboardingStep.Preview -> painterResource(id = R.drawable.onboarding_spot5)
     }
 }
 
@@ -128,6 +136,9 @@ private class UiStateProvider(
                 Suggestion(group = "bitcoin", members = emptyList()),
                 Suggestion(group = "memes", members = emptyList()),
             ),
+        ),
+        OnboardingContract.UiState(
+            currentStep = OnboardingStep.Follows,
         ),
         OnboardingContract.UiState(
             currentStep = OnboardingStep.Preview,
