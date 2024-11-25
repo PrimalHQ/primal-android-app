@@ -18,6 +18,7 @@ fun DvmHeaderAndFeedList(
     modifier: Modifier = Modifier,
     extended: Boolean = false,
     showFollowsActionsAvatarRow: Boolean = false,
+    noteCallbacks: NoteCallbacks? = null,
     clipShape: Shape? = AppTheme.shapes.small,
     onGoToWallet: (() -> Unit)? = null,
     onUiError: ((UiError) -> Unit)? = null,
@@ -39,16 +40,16 @@ fun DvmHeaderAndFeedList(
                             onUiError = onUiError,
                         )
                     },
-                    onArticleClick = {},
+                    onArticleClick = { noteCallbacks?.onArticleClick?.invoke(it) },
                     onUiError = {},
-                    onGetPremiumClick = {},
+                    onGetPremiumClick = { noteCallbacks?.onGetPrimalPremiumClick?.invoke() },
                 )
             }
 
             FeedSpecKind.Notes -> {
                 NoteFeedList(
                     feedSpec = dvmFeed.data.buildSpec(specKind = dvmFeed.data.kind),
-                    noteCallbacks = NoteCallbacks(),
+                    noteCallbacks = noteCallbacks ?: NoteCallbacks(),
                     previewMode = true,
                     pullToRefreshEnabled = false,
                     pollingEnabled = false,

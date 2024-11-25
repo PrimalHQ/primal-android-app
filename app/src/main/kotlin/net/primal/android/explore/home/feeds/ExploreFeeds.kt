@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -44,12 +45,15 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.feeds.domain.buildSpec
 import net.primal.android.feeds.dvm.ui.DvmFeedListItem
 import net.primal.android.feeds.dvm.ui.DvmFeedUi
+import net.primal.android.feeds.dvm.ui.DvmFeedUiSaver
 import net.primal.android.feeds.dvm.ui.DvmHeaderAndFeedList
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 
 @Composable
 fun ExploreFeeds(
     modifier: Modifier = Modifier,
+    noteCallbacks: NoteCallbacks,
     paddingValues: PaddingValues = PaddingValues(all = 0.dp),
     onGoToWallet: (() -> Unit)? = null,
     onUiError: ((UiError) -> Unit)? = null,
@@ -60,6 +64,7 @@ fun ExploreFeeds(
     ExploreFeeds(
         modifier = modifier,
         state = uiState.value,
+        noteCallbacks = noteCallbacks,
         paddingValues = paddingValues,
         eventPublisher = viewModel::setEvent,
         onGoToWallet = onGoToWallet,
@@ -71,12 +76,13 @@ fun ExploreFeeds(
 fun ExploreFeeds(
     modifier: Modifier = Modifier,
     state: ExploreFeedsContract.UiState,
+    noteCallbacks: NoteCallbacks,
     paddingValues: PaddingValues = PaddingValues(all = 0.dp),
     eventPublisher: (ExploreFeedsContract.UiEvent) -> Unit,
     onGoToWallet: (() -> Unit)? = null,
     onUiError: ((UiError) -> Unit)? = null,
 ) {
-    var dvmFeedToShow by remember { mutableStateOf<DvmFeedUi?>(null) }
+    var dvmFeedToShow by rememberSaveable(saver = DvmFeedUiSaver) { mutableStateOf<DvmFeedUi?>(null) }
 
     dvmFeedToShow?.let { selectedDvmFeed ->
         val addedToFeed by remember(dvmFeedToShow, state.userFeedSpecs) {
@@ -90,6 +96,7 @@ fun ExploreFeeds(
                 dvmFeedToShow?.let { eventPublisher(ExploreFeedsContract.UiEvent.ClearDvmFeed(it)) }
                 dvmFeedToShow = null
             },
+            noteCallbacks = noteCallbacks,
             dvmFeed = selectedDvmFeed,
             addedToFeed = addedToFeed,
             addToUserFeeds = { eventPublisher(ExploreFeedsContract.UiEvent.AddToUserFeeds(it)) },
@@ -147,6 +154,7 @@ private fun DvmFeedDetailsBottomSheet(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
     dvmFeed: DvmFeedUi,
+    noteCallbacks: NoteCallbacks,
     onGoToWallet: (() -> Unit)? = null,
     onUiError: ((UiError) -> Unit)? = null,
     addedToFeed: Boolean,
@@ -207,6 +215,7 @@ private fun DvmFeedDetailsBottomSheet(
             DvmHeaderAndFeedList(
                 modifier = Modifier.padding(paddingValues),
                 dvmFeed = dvmFeed,
+                noteCallbacks = noteCallbacks,
                 onGoToWallet = onGoToWallet,
                 extended = true,
                 showFollowsActionsAvatarRow = true,

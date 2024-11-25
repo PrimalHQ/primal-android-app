@@ -163,6 +163,7 @@ private fun ExploreHomeScreen(
                             modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
                             paddingValues = paddingValues,
                             onGoToWallet = onGoToWallet,
+                            noteCallbacks = noteCallbacks,
                             onUiError = { uiError: UiError ->
                                 uiScope.launch {
                                     snackbarHostState.showSnackbar(

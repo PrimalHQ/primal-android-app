@@ -1,5 +1,8 @@
 package net.primal.android.feeds.domain
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class DvmFeed(
     val eventId: String,
     val dvmPubkey: String,
