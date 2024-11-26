@@ -14,6 +14,7 @@ interface OnboardingContract {
         val bannerUri: Uri? = null,
         val bannerRemoteUrl: String? = null,
         val accountCreated: Boolean = false,
+        val accountCreationStep: AccountCreationStep = AccountCreationStep.AccountPreview,
         val working: Boolean = false,
         val allSuggestions: List<FollowGroup> = emptyList(),
         val selectedSuggestions: List<FollowGroup> = emptyList(),
@@ -38,6 +39,7 @@ interface OnboardingContract {
         data class ToggleFollowEvent(val groupName: String, val userId: String) : UiEvent()
         data object KeepRecommendedFollows : UiEvent()
         data object CreateNostrProfile : UiEvent()
+        data object AcknowledgeNostrKeyCreation : UiEvent()
         data object RequestNextStep : UiEvent()
         data object RequestPreviousStep : UiEvent()
         data object DismissError : UiEvent()

@@ -716,7 +716,6 @@ private fun NavGraphBuilder.onboarding(route: String, navController: NavControll
         exitTransition = {
             when (targetState.destination.route) {
                 "welcome" -> slideOutHorizontally(targetOffsetX = { it })
-                "onboardingWallet" -> slideOutHorizontally(targetOffsetX = { -it })
                 else -> null
             }
         },
@@ -735,10 +734,7 @@ private fun NavGraphBuilder.onboarding(route: String, navController: NavControll
     }
 
 private fun NavGraphBuilder.onboardingWalletActivation(route: String, navController: NavController) =
-    composable(
-        route = route,
-        enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
-    ) {
+    composable(route = route) {
         val viewModel = hiltViewModel<WalletActivationViewModel>()
         PrimalTheme(PrimalTheme.Sunset) {
             ApplyEdgeToEdge(isDarkTheme = true)

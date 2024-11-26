@@ -36,9 +36,11 @@
     <string name="onboarding_title_your_interests">Your Interests</string>
     <string name="onboarding_title_your_follows">Your Follows</string>
     <string name="onboarding_title_account_preview">Account Preview</string>
+    <string name="onboarding_title_zaps_introduction">Primal Wallet</string>
     <string name="onboarding_title_wallet_activation">Wallet Activation</string>
     <string name="onboarding_title_success">Success</string>
     <string name="onboarding_button_next">Next</string>
+    <string name="onboarding_button_continue">Continue</string>
     <string name="onboarding_button_create_account_now">Create Account Now</string>
     <string name="onboarding_button_activate_wallet">Activate Wallet</string>
     <string name="onboarding_button_label_i_will_do_this_later">I\'ll do this later</string>
@@ -65,10 +67,13 @@
 
     <string name="onboarding_profile_preview_hint">We will use this info to create your Nostr account. If you wish to make any changes, you can always do so in your profile settings.</string>
     <string name="onboarding_profile_preview_change_banner">Change Banner</string>
-    <string name="onboarding_profile_success_hint">Now you are ready to\nactivate your Primal Wallet.</string>
-    <string name="onboarding_profile_success_description">Account created!\nYour Nostr key is available in your app settings.</string>
+    <string name="onboarding_profile_success_hint">Your Nostr key is available in your Account Settings.</string>
+    <string name="onboarding_profile_success_description">Account created!</string>
     <string name="onboarding_profile_create_error_image_upload">Unable to upload photo. Please try again.</string>
     <string name="onboarding_profile_create_error_failed_to_create">Something went wrong while creating your account. Please try again.</string>
+    <string name="onboarding_profile_zaps_introduction_title">Nostr is much more\nfun with ZAPS!</string>
+    <string name="onboarding_profile_zaps_introduction_description_1">Zaps are small payments that Nostr users send to each other. You can zap a note instead of hitting the like button.</string>
+    <string name="onboarding_profile_zaps_introduction_description_2">Activate your Primal Wallet to participate in the Nostr zapping economy and earn money for the awesome content you publish! </string>
 
     <string name="login_title">Sign In</string>
     <string name="login_description">Enter your Nostr key to sign in:</string>
