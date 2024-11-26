@@ -10,6 +10,8 @@ fun NavOptionsBuilder.clearBackStack() = popUpTo(id = 0)
 
 fun String.asUrlEncoded(): String = URLEncoder.encode(this, CharEncoding.UTF_8)
 
+fun String.asUrlDecodedNonNullable(): String = URLDecoder.decode(this, CharEncoding.UTF_8)
+
 fun String?.asUrlDecoded() =
     when (this) {
         null -> null
@@ -32,7 +34,7 @@ fun String?.isMainScreenRoute(): Boolean {
         "walletDashboard",
         "notifications",
         "explore",
-        -> true
+            -> true
 
         else -> false
     }

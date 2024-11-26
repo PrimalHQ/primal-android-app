@@ -74,6 +74,8 @@ inline val SavedStateHandle.nwcUrl: String? get() = get(NWC_URL)
 
 const val MEDIA_URL = "mediaUrl"
 inline val SavedStateHandle.mediaUrl: String? get() = get(MEDIA_URL)
+inline val SavedStateHandle.mediaUrlOrThrow: String
+    get() = get(MEDIA_URL) ?: throw IllegalArgumentException("Missing required $MEDIA_URL argument.")
 
 const val MEDIA_POSITION_MS = "mediaPositionMs"
 inline val SavedStateHandle.mediaPositionMs: Long get() = get(MEDIA_POSITION_MS) ?: 0L

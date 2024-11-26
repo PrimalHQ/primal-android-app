@@ -223,7 +223,7 @@ private fun MediaGalleryContent(
 }
 
 @Composable
-private fun GalleryDropdownMenu(onSaveClick: () -> Unit) {
+fun GalleryDropdownMenu(onSaveClick: () -> Unit) {
     var menuVisible by remember { mutableStateOf(false) }
 
     AppBarIcon(
