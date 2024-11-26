@@ -1,6 +1,3 @@
 ## Changes
-- Add AOSP message on buying premium home screen
-- Add AOSP message on extend subscription screen
-- Add retryNetworkCall when fetching backup stats
-- Fix back handler for Extend Subscription
-- Fix typo in Content Backup
+- Improved onboarding flow with follows customization and zaps introductions;
+- Fixed logic for Primal feed check on DVM feed preview;
