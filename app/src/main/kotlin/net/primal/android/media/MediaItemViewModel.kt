@@ -72,6 +72,5 @@ class MediaItemViewModel @Inject constructor(
                     setState { copy(error = UiState.MediaItemError.FailedToSaveMedia(error)) }
                 }
             }
-
         }
 }

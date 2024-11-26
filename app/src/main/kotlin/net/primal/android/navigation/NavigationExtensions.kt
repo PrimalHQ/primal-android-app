@@ -34,7 +34,7 @@ fun String?.isMainScreenRoute(): Boolean {
         "walletDashboard",
         "notifications",
         "explore",
-            -> true
+        -> true
 
         else -> false
     }

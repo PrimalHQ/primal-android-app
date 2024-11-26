@@ -6,7 +6,6 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,7 +41,6 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.theme.AppTheme
-
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -82,7 +80,6 @@ private fun SharedTransitionScope.MediaItemScreen(
     onClose: () -> Unit,
     animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
-
     val snackbarHostState = remember { SnackbarHostState() }
     SnackbarErrorHandler(
         error = state.error,

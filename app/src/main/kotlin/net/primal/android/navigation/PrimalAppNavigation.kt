@@ -1,14 +1,9 @@
 package net.primal.android.navigation
 
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -261,11 +256,10 @@ fun NavController.navigateToMediaGallery(
         "&$MEDIA_POSITION_MS=$mediaPositionMs",
 )
 
-fun NavController.navigateToMediaItem(
-    mediaUrl: String,
-) = navigate(
-    route = "mediaItem/${mediaUrl.asUrlEncoded()}",
-)
+fun NavController.navigateToMediaItem(mediaUrl: String) =
+    navigate(
+        route = "mediaItem/${mediaUrl.asUrlEncoded()}",
+    )
 
 fun NavController.navigateToExploreFeed(
     feedSpec: String,
