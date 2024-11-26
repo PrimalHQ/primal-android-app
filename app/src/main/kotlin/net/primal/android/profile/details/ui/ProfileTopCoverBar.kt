@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -61,6 +62,7 @@ data class CoverValues(
 fun ProfileTopCoverBar(
     state: ProfileDetailsContract.UiState,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
+    onMediaItemClick: (String) -> Unit,
     onClose: () -> Unit,
     onSearchClick: () -> Unit,
     titleVisible: Boolean,
@@ -81,6 +83,7 @@ fun ProfileTopCoverBar(
         val imageSource = variant?.mediaUrl ?: state.profileDetails?.coverCdnImage?.sourceUrl
         SubcomposeAsyncImage(
             modifier = Modifier
+                .clickable { imageSource?.let { onMediaItemClick(it) } }
                 .background(color = AppTheme.colorScheme.surface)
                 .fillMaxWidth()
                 .height(coverValues.coverHeight)
@@ -104,6 +107,7 @@ fun ProfileTopCoverBar(
             eventPublisher = eventPublisher,
             paddingValues = paddingValues,
             onSearchClick = onSearchClick,
+            onMediaClick = { imageSource?.let { onMediaItemClick(it) } },
         )
 
         Box(
@@ -121,11 +125,18 @@ fun ProfileTopCoverBar(
                         start = avatarValues.avatarPadding * 1 / 8,
                         end = avatarValues.avatarPadding * 7 / 8,
                     ),
+                onClick = { state.profileDetails?.avatarCdnImage?.sourceUrl?.let { onMediaItemClick(it) } },
                 avatarCdnImage = state.profileDetails?.avatarCdnImage,
                 hasBorder = true,
                 borderBrush = if (state.profileDetails?.legendaryStyle != null && state.profileDetails.avatarGlow) {
                     when (state.profileDetails.legendaryStyle) {
-                        LegendaryStyle.NO_CUSTOMIZATION -> Brush.linearGradient(listOf(Color.White, Color.White))
+                        LegendaryStyle.NO_CUSTOMIZATION -> Brush.linearGradient(
+                            listOf(
+                                Color.White,
+                                Color.White,
+                            ),
+                        )
+
                         else -> state.profileDetails.legendaryStyle.brush
                     }
                 } else {
@@ -144,12 +155,14 @@ private fun ProfileTopAppBar(
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     onClose: () -> Unit,
     onSearchClick: () -> Unit,
+    onMediaClick: () -> Unit,
     paddingValues: PaddingValues,
 ) {
     Column(
         modifier = Modifier.padding(paddingValues = paddingValues),
     ) {
         TopAppBar(
+            modifier = Modifier.clickable { onMediaClick() },
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = Color.Transparent,
                 scrolledContainerColor = Color.Transparent,
