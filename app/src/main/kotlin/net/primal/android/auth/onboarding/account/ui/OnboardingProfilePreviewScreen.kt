@@ -55,6 +55,7 @@ import net.primal.android.R
 import net.primal.android.auth.compose.ColumnWithBackground
 import net.primal.android.auth.compose.OnboardingBottomBar
 import net.primal.android.auth.compose.onboardingTextHintTypography
+import net.primal.android.auth.onboarding.account.AccountCreationStep
 import net.primal.android.auth.onboarding.account.OnboardingContract
 import net.primal.android.auth.onboarding.account.OnboardingStep
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -62,6 +63,8 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
+import net.primal.android.core.compose.icons.primaliconpack.CheckCircleOutline
+import net.primal.android.core.compose.icons.primaliconpack.OnboardingZapsExplained
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
 
@@ -107,45 +110,46 @@ fun OnboardingProfilePreviewScreen(
                 showDivider = false,
                 navigationIcon = if (canGoBack) PrimalIcons.ArrowBack else null,
                 navigationIconTintColor = Color.White,
-                onNavigationIconClick = onBack,
+                onNavigationIconClick = { if (canGoBack) onBack() },
             )
         },
         content = { paddingValues ->
             AnimatedContent(
-                targetState = state.accountCreated,
+                targetState = state.accountCreationStep,
                 label = "OnboardingProfilePreviewContent",
             ) {
                 when (it) {
-                    false -> {
-                        ProfileAccountPreviewContent(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(paddingValues),
-                            state = state,
-                            eventPublisher = eventPublisher,
-                        )
-                    }
+                    AccountCreationStep.AccountPreview -> ProfileAccountPreviewContent(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        state = state,
+                        eventPublisher = eventPublisher,
+                    )
 
-                    true -> {
-                        ProfileAccountCreatedContent(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(paddingValues),
-                            state = state,
-                        )
-                    }
+                    AccountCreationStep.AccountCreated -> ProfileAccountCreatedContent(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        state = state,
+                    )
+
+                    AccountCreationStep.ZapsIntroduction -> ProfileAccountZapsIntroductionContent(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                    )
                 }
             }
         },
         bottomBar = {
             ProfilePreviewBottomBar(
-                isAccountCreated = state.accountCreated,
+                accountCreationStep = state.accountCreationStep,
                 isWorking = state.working,
                 onWalletActivationClick = onActivateWallet,
                 onFinishOnboardingClick = onOnboarded,
-                onCreateAccountClick = {
-                    eventPublisher(OnboardingContract.UiEvent.CreateNostrProfile)
-                },
+                onContinueClick = { eventPublisher(OnboardingContract.UiEvent.AcknowledgeNostrKeyCreation) },
+                onCreateAccountClick = { eventPublisher(OnboardingContract.UiEvent.CreateNostrProfile) },
             )
         },
         snackbarHost = {
@@ -156,28 +160,29 @@ fun OnboardingProfilePreviewScreen(
 
 @Composable
 private fun ProfilePreviewBottomBar(
-    isAccountCreated: Boolean,
     isWorking: Boolean,
+    accountCreationStep: AccountCreationStep,
+    onCreateAccountClick: () -> Unit,
+    onContinueClick: () -> Unit,
     onWalletActivationClick: () -> Unit,
     onFinishOnboardingClick: () -> Unit,
-    onCreateAccountClick: () -> Unit,
 ) {
     OnboardingBottomBar(
-        buttonText = if (isAccountCreated) {
-            stringResource(id = R.string.onboarding_button_activate_wallet)
-        } else {
-            stringResource(id = R.string.onboarding_button_create_account_now)
+        buttonText = when (accountCreationStep) {
+            AccountCreationStep.AccountPreview -> stringResource(id = R.string.onboarding_button_create_account_now)
+            AccountCreationStep.AccountCreated -> stringResource(id = R.string.onboarding_button_continue)
+            AccountCreationStep.ZapsIntroduction -> stringResource(id = R.string.onboarding_button_activate_wallet)
         },
         buttonLoading = isWorking,
         onButtonClick = {
-            if (isAccountCreated) {
-                onWalletActivationClick()
-            } else {
-                onCreateAccountClick()
+            when (accountCreationStep) {
+                AccountCreationStep.AccountPreview -> onCreateAccountClick()
+                AccountCreationStep.AccountCreated -> onContinueClick()
+                AccountCreationStep.ZapsIntroduction -> onWalletActivationClick()
             }
         },
         footer = {
-            if (isAccountCreated) {
+            if (accountCreationStep == AccountCreationStep.ZapsIntroduction) {
                 TextButton(
                     modifier = Modifier.height(56.dp),
                     onClick = onFinishOnboardingClick,
@@ -196,10 +201,10 @@ private fun ProfilePreviewBottomBar(
 
 @Composable
 private fun OnboardingContract.UiState.resolveAppBarTitle(): String {
-    return if (accountCreated) {
-        stringResource(id = R.string.onboarding_title_success)
-    } else {
-        stringResource(id = R.string.onboarding_title_account_preview)
+    return when (this.accountCreationStep) {
+        AccountCreationStep.AccountPreview -> stringResource(id = R.string.onboarding_title_account_preview)
+        AccountCreationStep.AccountCreated -> stringResource(id = R.string.onboarding_title_success)
+        AccountCreationStep.ZapsIntroduction -> stringResource(id = R.string.onboarding_title_zaps_introduction)
     }
 }
 
@@ -246,6 +251,7 @@ private fun ProfileAccountPreviewContent(
                 text = stringResource(id = R.string.onboarding_profile_preview_hint),
                 textAlign = TextAlign.Center,
                 style = onboardingTextHintTypography(),
+                color = Color.White.copy(alpha = 0.8f),
             )
         }
     }
@@ -432,7 +438,7 @@ private fun ProfileAccountCreatedContent(modifier: Modifier = Modifier, state: O
         modifier = modifier,
     ) {
         Column(
-            modifier = Modifier.weight(weight = 0.5f),
+            modifier = Modifier.weight(weight = 0.6f),
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -445,16 +451,21 @@ private fun ProfileAccountCreatedContent(modifier: Modifier = Modifier, state: O
         }
 
         Column(
-            modifier = Modifier.weight(weight = 0.5f),
-            verticalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .weight(weight = 0.4f)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.Top,
         ) {
+            Spacer(modifier = Modifier.height(32.dp))
+
             Text(
                 modifier = Modifier
-                    .padding(horizontal = 32.dp)
+                    .padding(horizontal = 48.dp)
                     .fillMaxWidth(),
                 text = stringResource(id = R.string.onboarding_profile_success_hint),
                 textAlign = TextAlign.Center,
                 style = onboardingTextHintTypography(),
+                color = Color.White.copy(alpha = 0.8f),
             )
         }
     }
@@ -486,20 +497,21 @@ private fun ProfileCreatedSuccessBox(
             ),
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(36.dp))
 
-        Row(
+        Column(
             modifier = Modifier
+                .fillMaxWidth()
                 .background(
                     color = Color.Black.copy(alpha = 0.35f),
                     shape = AppTheme.shapes.large,
                 )
-                .padding(vertical = 20.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly,
+                .padding(vertical = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(space = 16.dp),
         ) {
             Image(
-                painter = painterResource(id = R.drawable.onboarding_key),
+                imageVector = PrimalIcons.CheckCircleOutline,
                 contentDescription = null,
                 colorFilter = ColorFilter.tint(color = Color.White),
                 modifier = Modifier.padding(start = 26.dp, end = 22.dp),
@@ -507,12 +519,12 @@ private fun ProfileCreatedSuccessBox(
             Text(
                 text = stringResource(id = R.string.onboarding_profile_success_description),
                 style = AppTheme.typography.bodyMedium.copy(
-                    fontSize = 16.sp,
+                    fontSize = 18.sp,
                     lineHeight = 22.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color.White.copy(alpha = 0.8f),
                 ),
-                modifier = Modifier.padding(end = 16.dp),
+                textAlign = TextAlign.Center,
             )
         }
     }
@@ -553,6 +565,62 @@ private fun SuccessAvatarBox(modifier: Modifier = Modifier, avatarUri: Uri?) {
     }
 }
 
+@Composable
+private fun ProfileAccountZapsIntroductionContent(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Image(
+                imageVector = PrimalIcons.OnboardingZapsExplained,
+                contentDescription = null,
+            )
+
+            Spacer(modifier = Modifier.height(48.dp))
+
+            Text(
+                modifier = Modifier.padding(horizontal = 32.dp),
+                text = stringResource(R.string.onboarding_profile_zaps_introduction_title),
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.sp,
+                lineHeight = 36.sp,
+
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                modifier = Modifier.padding(horizontal = 32.dp),
+                text = stringResource(R.string.onboarding_profile_zaps_introduction_description_1),
+                color = Color.White.copy(alpha = 0.8f),
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 17.sp,
+                lineHeight = 24.sp,
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                modifier = Modifier.padding(horizontal = 40.dp),
+                text = stringResource(R.string.onboarding_profile_zaps_introduction_description_2),
+                color = Color.White.copy(alpha = 0.8f),
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 17.sp,
+                lineHeight = 24.sp,
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
@@ -563,6 +631,7 @@ private fun PreviewOnboardingProfilePreviewScreen() {
         ) {
             OnboardingProfilePreviewScreen(
                 state = OnboardingContract.UiState(
+                    accountCreationStep = AccountCreationStep.AccountPreview,
                     avatarUri = null,
                     bannerUri = null,
                     profileDisplayName = "Preston",
@@ -589,11 +658,34 @@ private fun PreviewOnboardingProfileSuccessScreen() {
             OnboardingProfilePreviewScreen(
                 state = OnboardingContract.UiState(
                     accountCreated = true,
+                    accountCreationStep = AccountCreationStep.AccountCreated,
                     avatarUri = null,
                     bannerUri = null,
                     profileDisplayName = "Preston",
                     profileAboutYou = "Bitcoin & books. My bitcoin can remain in cold storage " +
                         "far longer than the market can remain irrational.",
+                ),
+                eventPublisher = {},
+                onBack = {},
+                onOnboarded = {},
+                onActivateWallet = {},
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview
+@Composable
+private fun PreviewOnboardingZapsIntroductionScreen() {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+        ColumnWithBackground(
+            backgroundPainter = painterResource(id = R.drawable.onboarding_spot4),
+        ) {
+            OnboardingProfilePreviewScreen(
+                state = OnboardingContract.UiState(
+                    accountCreated = true,
+                    accountCreationStep = AccountCreationStep.ZapsIntroduction,
                 ),
                 eventPublisher = {},
                 onBack = {},

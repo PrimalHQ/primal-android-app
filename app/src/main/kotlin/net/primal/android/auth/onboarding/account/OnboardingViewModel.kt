@@ -89,6 +89,12 @@ class OnboardingViewModel @Inject constructor(
                     is UiEvent.ToggleGroupFollowEvent -> toggleFollowGroupFollowing(event)
 
                     UiEvent.KeepRecommendedFollows -> keepRecommendedFollows()
+
+                    UiEvent.AcknowledgeNostrKeyCreation -> setState {
+                        copy(
+                            accountCreationStep = AccountCreationStep.ZapsIntroduction,
+                        )
+                    }
                 }
             }
         }
@@ -151,7 +157,7 @@ class OnboardingViewModel @Inject constructor(
                         interests = uiState.selectedSuggestions,
                     )
                 }
-                setState { copy(accountCreated = true) }
+                setState { copy(accountCreated = true, accountCreationStep = AccountCreationStep.AccountCreated) }
             } catch (error: UnsuccessfulFileUpload) {
                 Timber.w(error)
                 setState { copy(error = UiState.OnboardingError.ImageUploadFailed(error)) }

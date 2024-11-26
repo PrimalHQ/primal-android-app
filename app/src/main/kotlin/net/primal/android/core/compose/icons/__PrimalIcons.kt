@@ -10,6 +10,7 @@ import net.primal.android.core.compose.icons.primaliconpack.AvatarNostrich
 import net.primal.android.core.compose.icons.primaliconpack.Bookmarks
 import net.primal.android.core.compose.icons.primaliconpack.BookmarksFilled
 import net.primal.android.core.compose.icons.primaliconpack.Check
+import net.primal.android.core.compose.icons.primaliconpack.CheckCircleOutline
 import net.primal.android.core.compose.icons.primaliconpack.ConnectRelay
 import net.primal.android.core.compose.icons.primaliconpack.ContextAddBookmark
 import net.primal.android.core.compose.icons.primaliconpack.ContextBroadcast
@@ -92,6 +93,7 @@ import net.primal.android.core.compose.icons.primaliconpack.NostrichFilled
 import net.primal.android.core.compose.icons.primaliconpack.Notifications
 import net.primal.android.core.compose.icons.primaliconpack.NotificationsFilled
 import net.primal.android.core.compose.icons.primaliconpack.Notrich
+import net.primal.android.core.compose.icons.primaliconpack.OnboardingZapsExplained
 import net.primal.android.core.compose.icons.primaliconpack.Paste
 import net.primal.android.core.compose.icons.primaliconpack.PhotoFromGallery
 import net.primal.android.core.compose.icons.primaliconpack.Play
@@ -185,6 +187,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             CopyAlt,
             Link,
             Check,
+            CheckCircleOutline,
             Message,
             MuteUser,
             Report,
@@ -279,6 +282,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             DrawerProfile,
             DrawerSettings,
             DrawerSignOut,
+            OnboardingZapsExplained,
         )
         return __PrimalIcons!!
     }
