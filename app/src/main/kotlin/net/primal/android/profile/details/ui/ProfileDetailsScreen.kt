@@ -64,6 +64,7 @@ import net.primal.android.R
 import net.primal.android.articles.feed.ArticleFeedList
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.errors.UiError
@@ -564,46 +565,44 @@ private fun ProfileError.asHumanReadableText(context: Context): String {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 private fun PreviewProfileScreen() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
-        SharedTransitionScope {
-//            ProfileDetailsScreen(
-//                state = ProfileDetailsContract.UiState(
-//                    profileId = "b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b",
-//                    profileDetails = ProfileDetailsUi(
-//                        pubkey = "b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b",
-//                        authorDisplayName = "alex",
-//                        userDisplayName = "alex",
-//                        coverCdnImage = null,
-//                        avatarCdnImage = null,
-//                        internetIdentifier = "alex@primal.net",
-//                        lightningAddress = "alex@primal.net",
-//                        about = "Primal Android",
-//                        website = "https://appollo41.com",
-//                    ),
-//                    isProfileFollowed = false,
-//                    isProfileMuted = false,
-//                    isActiveUser = true,
-//                    isProfileFeedInActiveUserFeeds = false,
-//                ),
-//                snackbarHostState = SnackbarHostState(),
-//                onClose = {},
-//                onSearchClick = {},
-//                noteCallbacks = NoteCallbacks(),
-//                onEditProfileClick = {},
-//                onMessageClick = {},
-//                onSendWalletTx = {},
-//                onDrawerQrCodeClick = {},
-//                onFollowsClick = { _, _ -> },
-//                onMediaItemClick = {},
-//                onGoToWallet = {},
-//                eventPublisher = {},
-//                pullToRefreshing = remember { mutableStateOf(false) },
-//                pullToRefreshState = rememberPullToRefreshState(),
-//            )
-        }
+        ProfileDetailsScreen(
+            state = ProfileDetailsContract.UiState(
+                profileId = "b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b",
+                profileDetails = ProfileDetailsUi(
+                    pubkey = "b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b",
+                    authorDisplayName = "alex",
+                    userDisplayName = "alex",
+                    coverCdnImage = null,
+                    avatarCdnImage = null,
+                    internetIdentifier = "alex@primal.net",
+                    lightningAddress = "alex@primal.net",
+                    about = "Primal Android",
+                    website = "https://appollo41.com",
+                ),
+                isProfileFollowed = false,
+                isProfileMuted = false,
+                isActiveUser = true,
+                isProfileFeedInActiveUserFeeds = false,
+            ),
+            snackbarHostState = SnackbarHostState(),
+            onClose = {},
+            onSearchClick = {},
+            noteCallbacks = NoteCallbacks(),
+            onEditProfileClick = {},
+            onMessageClick = {},
+            onSendWalletTx = {},
+            onDrawerQrCodeClick = {},
+            onFollowsClick = { _, _ -> },
+            onMediaItemClick = {},
+            onGoToWallet = {},
+            eventPublisher = {},
+            pullToRefreshing = remember { mutableStateOf(false) },
+            pullToRefreshState = rememberPullToRefreshState(),
+        )
     }
 }
