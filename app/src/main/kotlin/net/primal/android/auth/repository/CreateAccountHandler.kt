@@ -2,7 +2,7 @@ package net.primal.android.auth.repository
 
 import java.io.IOException
 import javax.inject.Inject
-import net.primal.android.auth.onboarding.account.api.Suggestion
+import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.repository.SettingsRepository
@@ -21,7 +21,7 @@ class CreateAccountHandler @Inject constructor(
     suspend fun createNostrAccount(
         privateKey: String,
         profileMetadata: ProfileMetadata,
-        interests: List<Suggestion>,
+        interests: List<FollowGroup>,
     ) {
         val userId = authRepository.login(nostrKey = privateKey)
         val postCreateAccountResult = runCatching {
@@ -40,8 +40,13 @@ class CreateAccountHandler @Inject constructor(
         }
     }
 
-    private fun List<Suggestion>.mapToContacts(): Set<String> {
-        return flatMap { it.members.map { member -> member.userId } }.toSet()
+    private fun List<FollowGroup>.mapToContacts(): Set<String> {
+        return flatMap {
+            it.members
+                .filter { member -> member.followed }
+                .map { member -> member.userId }
+        }
+            .toSet()
     }
 
     class AccountCreationException(cause: Throwable) : IOException(cause)
