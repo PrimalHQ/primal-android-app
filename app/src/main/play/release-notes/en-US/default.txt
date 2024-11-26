@@ -1,5 +1,1 @@
-Primal 2.0
-
-- Reads
-- Explore
-- Advanced Search
+Stability and improvements.
