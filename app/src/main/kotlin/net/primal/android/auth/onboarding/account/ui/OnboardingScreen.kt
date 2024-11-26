@@ -19,7 +19,7 @@ import net.primal.android.auth.compose.ColumnWithBackground
 import net.primal.android.auth.onboarding.account.OnboardingContract
 import net.primal.android.auth.onboarding.account.OnboardingStep
 import net.primal.android.auth.onboarding.account.OnboardingViewModel
-import net.primal.android.auth.onboarding.account.api.Suggestion
+import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -122,19 +122,19 @@ private class UiStateProvider(
         OnboardingContract.UiState(
             currentStep = OnboardingStep.Interests,
             allSuggestions = listOf(
-                Suggestion(group = "art", members = emptyList()),
-                Suggestion(group = "bitcoin", members = emptyList()),
-                Suggestion(group = "memes", members = emptyList()),
-                Suggestion(group = "primal", members = emptyList()),
-                Suggestion(group = "android", members = emptyList()),
-                Suggestion(group = "nostr", members = emptyList()),
-                Suggestion(group = "developers", members = emptyList()),
-                Suggestion(group = "designers", members = emptyList()),
-                Suggestion(group = "human rights", members = emptyList()),
+                FollowGroup(name = "art", members = emptyList()),
+                FollowGroup(name = "bitcoin", members = emptyList()),
+                FollowGroup(name = "memes", members = emptyList()),
+                FollowGroup(name = "primal", members = emptyList()),
+                FollowGroup(name = "android", members = emptyList()),
+                FollowGroup(name = "nostr", members = emptyList()),
+                FollowGroup(name = "developers", members = emptyList()),
+                FollowGroup(name = "designers", members = emptyList()),
+                FollowGroup(name = "human rights", members = emptyList()),
             ),
-            suggestions = listOf(
-                Suggestion(group = "bitcoin", members = emptyList()),
-                Suggestion(group = "memes", members = emptyList()),
+            selectedSuggestions = listOf(
+                FollowGroup(name = "bitcoin", members = emptyList()),
+                FollowGroup(name = "memes", members = emptyList()),
             ),
         ),
         OnboardingContract.UiState(

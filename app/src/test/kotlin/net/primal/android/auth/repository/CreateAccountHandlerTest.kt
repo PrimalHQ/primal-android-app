@@ -1,15 +1,15 @@
 package net.primal.android.auth.repository
 
 import io.kotest.matchers.collections.shouldContain
-import io.kotest.matchers.collections.shouldContainAll
+import io.kotest.matchers.collections.shouldContainOnly
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import net.primal.android.auth.onboarding.account.api.Suggestion
-import net.primal.android.auth.onboarding.account.api.SuggestionMember
+import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
+import net.primal.android.auth.onboarding.account.ui.model.FollowGroupMember
 import net.primal.android.core.FakeDataStore
 import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.crypto.CryptoUtils
@@ -128,7 +128,7 @@ class CreateAccountHandlerTest {
         }
 
     @Test
-    fun createNostrAccount_followsEveryoneFromInterestsLists() =
+    fun createNostrAccount_followsEveryFollowedProfileFromInterestsLists() =
         runTest {
             val keyPair = CryptoUtils.generateHexEncodedKeypair()
             val profileRepository = mockk<ProfileRepository>(relaxed = true)
@@ -137,19 +137,28 @@ class CreateAccountHandlerTest {
                 profileRepository = profileRepository,
             )
 
-            val interestsList = listOf(Suggestion(group = "dev", members = primalTeamMembers))
+            val partiallyFollowedMembers = primalTeamMembers.mapIndexed { index, followGroupMember ->
+                followGroupMember.copy(followed = index % 2 == 0)
+            }
+            val partiallyFollowedInterestsList = listOf(FollowGroup(name = "dev", members = partiallyFollowedMembers))
+
+            val expectedMemberIds = partiallyFollowedMembers
+                .filter { it.followed }
+                .map { member -> member.userId } + keyPair.pubKey
+
             handler.createNostrAccount(
                 privateKey = keyPair.privateKey,
                 profileMetadata = ProfileMetadata(displayName = "Test", username = null),
-                interests = interestsList,
+                interests = partiallyFollowedInterestsList,
             )
 
             coVerify {
                 profileRepository.setFollowList(
                     withArg { it shouldBe keyPair.pubKey },
                     withArg {
-                        it shouldContain keyPair.pubKey
-                        it shouldContainAll primalTeamMembers.map { member -> member.userId }
+                        println(it)
+                        println(expectedMemberIds)
+                        it shouldContainOnly expectedMemberIds
                     },
                 )
             }
@@ -233,34 +242,35 @@ class CreateAccountHandlerTest {
                     profileMetadata = ProfileMetadata(displayName = "Test", username = null),
                     interests = emptyList(),
                 )
-            } catch (_: CreateAccountHandler.AccountCreationException) { }
+            } catch (_: CreateAccountHandler.AccountCreationException) {
+            }
 
             credentialsPersistence.latestData shouldBe emptyList()
             activeAccountPersistence.latestData shouldBe ""
         }
 
     private val primalTeamMembers = listOf(
-        SuggestionMember(
+        FollowGroupMember(
             name = "alex",
             userId = "npub1ky9s6hjl46wxcj9gcalhuk4ag2nea9yqufdyp9q9r496fns5g44sw0alex",
         ),
-        SuggestionMember(
+        FollowGroupMember(
             name = "moysie",
             userId = "npub19f2765hdx8u9lz777w7azed2wsn9mqkf2gvn67mkldx8dnxvggcsmhe9da",
         ),
-        SuggestionMember(
+        FollowGroupMember(
             name = "pavle",
             userId = "npub1k6tqlj78cpznd0yc74wy3k0elmj4nql87a3uzfz98tmj3tuzxywsf0dhk6",
         ),
-        SuggestionMember(
+        FollowGroupMember(
             name = "pedja",
             userId = "npub1mkde3807tcyyp2f98re7n7z0va8979atqkfja7avknvwdjg97vpq6ef0jp",
         ),
-        SuggestionMember(
+        FollowGroupMember(
             name = "marko",
             userId = "npub1zga04e73s7ard4kaektaha9vckdwll3y8auztyhl3uj764ua7vrqc7ppvc",
         ),
-        SuggestionMember(
+        FollowGroupMember(
             name = "miljan",
             userId = "npub16c0nh3dnadzqpm76uctf5hqhe2lny344zsmpm6feee9p5rdxaa9q586nvr",
         ),

@@ -1,7 +1,7 @@
 package net.primal.android.auth.onboarding.account
 
 import android.net.Uri
-import net.primal.android.auth.onboarding.account.api.Suggestion
+import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
 
 interface OnboardingContract {
 
@@ -15,9 +15,9 @@ interface OnboardingContract {
         val bannerRemoteUrl: String? = null,
         val accountCreated: Boolean = false,
         val working: Boolean = false,
-        val allSuggestions: List<Suggestion> = emptyList(),
-        val suggestions: List<Suggestion> = emptyList(),
-        val customizeSuggestions: Boolean = false,
+        val allSuggestions: List<FollowGroup> = emptyList(),
+        val selectedSuggestions: List<FollowGroup> = emptyList(),
+        val customizeFollows: Boolean = false,
         val error: OnboardingError? = null,
     ) {
         sealed class OnboardingError {
@@ -31,9 +31,12 @@ interface OnboardingContract {
         data class ProfileAboutYouUpdated(val aboutYou: String) : UiEvent()
         data class ProfileAvatarUriChanged(val avatarUri: Uri?) : UiEvent()
         data class ProfileBannerUriChanged(val bannerUri: Uri?) : UiEvent()
-        data class InterestSelected(val suggestion: Suggestion) : UiEvent()
-        data class InterestUnselected(val suggestion: Suggestion) : UiEvent()
+        data class InterestSelected(val groupName: String) : UiEvent()
+        data class InterestUnselected(val groupName: String) : UiEvent()
         data class SetFollowsCustomizing(val customizing: Boolean) : UiEvent()
+        data class ToggleGroupFollowEvent(val groupName: String) : UiEvent()
+        data class ToggleFollowEvent(val groupName: String, val userId: String) : UiEvent()
+        data object KeepRecommendedFollows : UiEvent()
         data object CreateNostrProfile : UiEvent()
         data object RequestNextStep : UiEvent()
         data object RequestPreviousStep : UiEvent()

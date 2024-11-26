@@ -28,7 +28,7 @@ import net.primal.android.auth.compose.OnboardingBottomBar
 import net.primal.android.auth.compose.onboardingTextHintTypography
 import net.primal.android.auth.onboarding.account.OnboardingContract
 import net.primal.android.auth.onboarding.account.OnboardingStep
-import net.primal.android.auth.onboarding.account.api.Suggestion
+import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -81,12 +81,12 @@ fun OnboardingProfileInterestsScreen(
                         .fillMaxSize()
                         .weight(1f),
                     allSuggestions = state.allSuggestions,
-                    selectedSuggestions = state.suggestions,
+                    selectedSuggestions = state.selectedSuggestions,
                     onSuggestionSelected = {
-                        eventPublisher(OnboardingContract.UiEvent.InterestSelected(it))
+                        eventPublisher(OnboardingContract.UiEvent.InterestSelected(groupName = it.name))
                     },
                     onSuggestionUnselected = {
-                        eventPublisher(OnboardingContract.UiEvent.InterestUnselected(it))
+                        eventPublisher(OnboardingContract.UiEvent.InterestUnselected(groupName = it.name))
                     },
                 )
 
@@ -96,8 +96,8 @@ fun OnboardingProfileInterestsScreen(
                         .padding(vertical = 32.dp),
                     text = pluralStringResource(
                         id = R.plurals.onboarding_profile_interests_selection_count,
-                        state.suggestions.size,
-                        state.suggestions.size,
+                        state.selectedSuggestions.size,
+                        state.selectedSuggestions.size,
                     ),
                     textAlign = TextAlign.Center,
                     style = onboardingTextHintTypography(),
@@ -107,7 +107,7 @@ fun OnboardingProfileInterestsScreen(
         bottomBar = {
             OnboardingBottomBar(
                 buttonText = stringResource(id = R.string.onboarding_button_next),
-                buttonEnabled = state.suggestions.isNotEmpty(),
+                buttonEnabled = state.selectedSuggestions.isNotEmpty(),
                 onButtonClick = { eventPublisher(OnboardingContract.UiEvent.RequestNextStep) },
                 footer = { OnboardingStepsIndicator(currentPage = OnboardingStep.Interests.index) },
             )
@@ -119,10 +119,10 @@ fun OnboardingProfileInterestsScreen(
 @Composable
 private fun InterestsContent(
     modifier: Modifier,
-    allSuggestions: List<Suggestion>,
-    selectedSuggestions: List<Suggestion>,
-    onSuggestionSelected: (Suggestion) -> Unit,
-    onSuggestionUnselected: (Suggestion) -> Unit,
+    allSuggestions: List<FollowGroup>,
+    selectedSuggestions: List<FollowGroup>,
+    onSuggestionSelected: (FollowGroup) -> Unit,
+    onSuggestionUnselected: (FollowGroup) -> Unit,
 ) {
     if (allSuggestions.isEmpty()) {
         Box(modifier = modifier) {
@@ -134,8 +134,8 @@ private fun InterestsContent(
             horizontalArrangement = Arrangement.Center,
             verticalArrangement = Arrangement.Top,
         ) {
-            allSuggestions.forEach {
-                val isSelected = selectedSuggestions.contains(it)
+            allSuggestions.forEach { group ->
+                val isSelected = selectedSuggestions.find { it.name == group.name } != null
                 SuggestionChip(
                     modifier = Modifier
                         .height(48.dp)
@@ -150,12 +150,12 @@ private fun InterestsContent(
                     label = {
                         Text(
                             modifier = Modifier.padding(horizontal = 2.dp),
-                            text = it.group.lowercase(),
+                            text = group.name.lowercase(),
                             style = AppTheme.typography.bodyLarge,
                             fontWeight = FontWeight.SemiBold,
                         )
                     },
-                    onClick = { if (isSelected) onSuggestionUnselected(it) else onSuggestionSelected(it) },
+                    onClick = { if (isSelected) onSuggestionUnselected(group) else onSuggestionSelected(group) },
                 )
             }
         }

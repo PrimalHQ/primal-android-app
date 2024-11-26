@@ -2,18 +2,24 @@ package net.primal.android.auth.onboarding.account.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
@@ -35,21 +41,28 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
+import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.auth.compose.ColumnWithBackground
 import net.primal.android.auth.compose.OnboardingBottomBar
 import net.primal.android.auth.compose.onboardingTextHintTypography
 import net.primal.android.auth.onboarding.account.OnboardingContract
 import net.primal.android.auth.onboarding.account.OnboardingStep
-import net.primal.android.auth.onboarding.account.api.Suggestion
-import net.primal.android.auth.onboarding.account.api.SuggestionMember
+import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
+import net.primal.android.auth.onboarding.account.ui.model.FollowGroupMember
+import net.primal.android.core.compose.AvatarThumbnail
+import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.utils.formatNip05Identifier
+import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.theme.AppTheme
 
 @ExperimentalMaterial3Api
@@ -60,15 +73,16 @@ fun OnboardingProfileFollowsScreen(
     onBack: () -> Unit,
 ) {
     fun backSequence() {
-        if (state.customizeSuggestions) {
+        if (state.customizeFollows) {
             eventPublisher(OnboardingContract.UiEvent.SetFollowsCustomizing(customizing = false))
         } else {
             onBack()
+            eventPublisher(OnboardingContract.UiEvent.KeepRecommendedFollows)
         }
     }
     BackHandler { backSequence() }
 
-    var shouldCustomize by remember { mutableStateOf(state.customizeSuggestions) }
+    var shouldCustomize by remember { mutableStateOf(state.customizeFollows) }
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {
@@ -87,13 +101,15 @@ fun OnboardingProfileFollowsScreen(
         },
         content = { paddingValues ->
             AnimatedContent(
-                targetState = state.customizeSuggestions,
+                targetState = state.customizeFollows,
                 label = "OnboardingProfileFollowsContent",
             ) { editMode ->
                 when (editMode) {
                     false -> {
-                        val followsCount by remember(state.suggestions) {
-                            mutableIntStateOf(state.suggestions.sumOf { it.members.size })
+                        val followsCount by remember(state.selectedSuggestions) {
+                            mutableIntStateOf(
+                                state.selectedSuggestions.flatMap { it.members }.size,
+                            )
                         }
                         ProfileAccountFollowsNoticeContent(
                             modifier = Modifier
@@ -108,9 +124,25 @@ fun OnboardingProfileFollowsScreen(
                     true -> {
                         ProfileAccountFollowsCustomizationContent(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .padding(paddingValues),
-                            state = state,
+                                .wrapContentHeight()
+                                .padding(paddingValues)
+                                .padding(horizontal = 16.dp)
+                                .padding(top = 16.dp, bottom = 8.dp)
+                                .clip(AppTheme.shapes.large),
+                            selectedSuggestions = state.selectedSuggestions,
+                            onGroupClick = { groupName ->
+                                eventPublisher(
+                                    OnboardingContract.UiEvent.ToggleGroupFollowEvent(groupName = groupName),
+                                )
+                            },
+                            onMemberClick = { groupName, userId ->
+                                eventPublisher(
+                                    OnboardingContract.UiEvent.ToggleFollowEvent(
+                                        groupName = groupName,
+                                        userId = userId,
+                                    ),
+                                )
+                            },
                         )
                     }
                 }
@@ -119,14 +151,15 @@ fun OnboardingProfileFollowsScreen(
         bottomBar = {
             OnboardingBottomBar(
                 buttonText = stringResource(id = R.string.onboarding_button_next),
-                buttonEnabled = state.suggestions.isNotEmpty(),
+                buttonEnabled = state.selectedSuggestions.isNotEmpty(),
                 onButtonClick = {
-                    if (state.customizeSuggestions) {
+                    if (state.customizeFollows) {
                         eventPublisher(OnboardingContract.UiEvent.RequestNextStep)
                     } else {
                         if (shouldCustomize) {
                             eventPublisher(OnboardingContract.UiEvent.SetFollowsCustomizing(customizing = true))
                         } else {
+                            eventPublisher(OnboardingContract.UiEvent.KeepRecommendedFollows)
                             eventPublisher(OnboardingContract.UiEvent.RequestNextStep)
                         }
                     }
@@ -209,7 +242,7 @@ private fun YourFollowsHintListItem(
                 modifier = Modifier.padding(top = 4.dp),
                 text = textSupporting,
                 style = AppTheme.typography.bodyMedium,
-                fontSize = 15.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Normal,
             )
         },
@@ -217,6 +250,11 @@ private fun YourFollowsHintListItem(
 }
 
 private val FollowsSwitchBorder = Color(0xFFD9D9D9)
+
+private val FollowsCustomizationForegroundColor = Color(0xFF111111)
+private val FollowsCustomizationForegroundAltColor = Color(0xFF666666)
+
+private val UnfollowMemberBackgroundColor = Color(0xFFE5E5E5)
 
 @Composable
 private fun FollowsSwitch(checked: Boolean) {
@@ -247,43 +285,178 @@ private fun FollowsSwitch(checked: Boolean) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ProfileAccountFollowsCustomizationContent(modifier: Modifier, state: OnboardingContract.UiState) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.SpaceBetween,
-    ) {
+fun ProfileAccountFollowsCustomizationContent(
+    modifier: Modifier,
+    selectedSuggestions: List<FollowGroup>,
+    onGroupClick: (groupName: String) -> Unit,
+    onMemberClick: (groupName: String, userId: String) -> Unit,
+) {
+    LazyColumn(modifier = modifier) {
+        val groups = selectedSuggestions.associateBy { it.name }
+        groups.forEach { group ->
+            stickyHeader {
+                FollowGroupListItem(
+                    group = group.value,
+                    onClick = { onGroupClick(group.value.name) },
+                )
+            }
+
+            items(items = group.value.members) { member ->
+                FollowGroupMemberListItem(
+                    member = member,
+                    onClick = { onMemberClick(group.value.name, member.userId) },
+                )
+            }
+        }
     }
+}
+
+@Composable
+private fun FollowGroupListItem(group: FollowGroup, onClick: () -> Unit) {
+    val isGroupFollowed = group.members.all { it.followed }
+    ListItem(
+        colors = ListItemDefaults.colors(
+            containerColor = Color.White.copy(alpha = 0.7f),
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(64.dp),
+        headlineContent = {
+            Text(
+                text = group.name,
+                maxLines = 2,
+                style = AppTheme.typography.bodyMedium,
+                color = FollowsCustomizationForegroundColor,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
+        },
+        trailingContent = {
+            PrimalFilledButton(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .size(width = 120.dp, height = 36.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                containerColor = if (isGroupFollowed) {
+                    Color.White
+                } else {
+                    Color.White
+                },
+                contentColor = if (isGroupFollowed) {
+                    FollowsCustomizationForegroundColor
+                } else {
+                    FollowsCustomizationForegroundColor
+                },
+                textStyle = AppTheme.typography.titleMedium.copy(
+                    lineHeight = 18.sp,
+                ),
+                onClick = onClick,
+            ) {
+                val text = if (isGroupFollowed) {
+                    stringResource(id = R.string.onboarding_profile_unfollow_all_button)
+                } else {
+                    stringResource(id = R.string.onboarding_profile_follow_all_button)
+                }
+                Text(text = text.lowercase())
+            }
+        },
+    )
+}
+
+@Composable
+private fun FollowGroupMemberListItem(member: FollowGroupMember, onClick: () -> Unit) {
+    val authorInternetIdentifier = member.metadata?.nip05
+    ListItem(
+        colors = ListItemDefaults.colors(
+            containerColor = Color.White,
+        ),
+        leadingContent = {
+            AvatarThumbnail(
+                avatarCdnImage = member.metadata?.picture?.let { CdnImage(sourceUrl = it) },
+            )
+        },
+        headlineContent = {
+            NostrUserText(
+                displayName = member.name,
+                displayNameColor = FollowsCustomizationForegroundColor,
+                fontSize = 14.sp,
+                internetIdentifier = member.metadata?.nip05,
+            )
+        },
+        supportingContent = {
+            if (!authorInternetIdentifier.isNullOrEmpty()) {
+                Text(
+                    text = authorInternetIdentifier.formatNip05Identifier(),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = AppTheme.typography.bodyMedium,
+                    color = FollowsCustomizationForegroundAltColor,
+                    fontSize = 14.sp,
+                )
+            }
+        },
+        trailingContent = {
+            PrimalFilledButton(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .size(width = 96.dp, height = 36.dp),
+                contentPadding = PaddingValues(horizontal = 12.dp),
+                containerColor = if (member.followed) {
+                    UnfollowMemberBackgroundColor
+                } else {
+                    UnfollowMemberBackgroundColor
+                },
+                contentColor = if (member.followed) {
+                    FollowsCustomizationForegroundColor
+                } else {
+                    FollowsCustomizationForegroundColor
+                },
+                textStyle = AppTheme.typography.titleMedium.copy(
+                    lineHeight = 14.sp,
+                ),
+                onClick = onClick,
+            ) {
+                val text = if (member.followed) {
+                    stringResource(id = R.string.onboarding_profile_unfollow_button)
+                } else {
+                    stringResource(id = R.string.onboarding_profile_follow_button)
+                }
+                Text(text = text.lowercase())
+            }
+        },
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-private fun PreviewOnboardingProfilePreviewScreen() {
+private fun PreviewOnboardingFollowsNoticeScreen() {
     PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         ColumnWithBackground(
             backgroundPainter = painterResource(id = R.drawable.onboarding_spot4),
         ) {
             OnboardingProfileFollowsScreen(
                 state = OnboardingContract.UiState(
-                    suggestions = listOf(
-                        Suggestion(
-                            group = "Bitcoin",
+                    selectedSuggestions = listOf(
+                        FollowGroup(
+                            name = "Bitcoin",
                             members = listOf(
-                                SuggestionMember(
+                                FollowGroupMember(
                                     name = "Princ Filip",
                                     userId = "npub198q8ksyxpurd7lq6mf409nrtf32pka48yp2z6lhxghpqe9zjllfq5wtwcp",
                                 ),
-                                SuggestionMember(
+                                FollowGroupMember(
                                     name = "ODELL",
                                     userId = "npub1qny3tkh0acurzla8x3zy4nhrjz5zd8l9sy9jys09umwng00manysew95gx",
                                 ),
                             ),
                         ),
-                        Suggestion(
-                            group = "Memes",
+                        FollowGroup(
+                            name = "Memes",
                             members = listOf(
-                                SuggestionMember(
+                                FollowGroupMember(
                                     name = "corndalorian",
                                     userId = "npub1lrnvvs6z78s9yjqxxr38uyqkmn34lsaxznnqgd877j4z2qej3j5s09qnw5",
                                 ),
@@ -301,15 +474,53 @@ private fun PreviewOnboardingProfilePreviewScreen() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-private fun PreviewOnboardingProfileSuccessScreen() {
+private fun PreviewOnboardingFollowsCustomizationScreen() {
     PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         ColumnWithBackground(
             backgroundPainter = painterResource(id = R.drawable.onboarding_spot4),
         ) {
             OnboardingProfileFollowsScreen(
                 state = OnboardingContract.UiState(
-                    suggestions = emptyList(),
-                    customizeSuggestions = true,
+                    customizeFollows = true,
+                    selectedSuggestions = listOf(
+                        FollowGroup(
+                            name = "Bitcoin",
+                            members = listOf(
+                                FollowGroupMember(
+                                    name = "Princ Filip",
+                                    userId = "npub198q8ksyxpurd7lq6mf409nrtf32pka48yp2z6lhxghpqe9zjllfq5wtwcp",
+                                    metadata = ContentMetadata(
+                                        name = "Princ Filip",
+                                        nip05 = "princfilip@primal.net",
+                                    ),
+                                    followed = true,
+                                ),
+                                FollowGroupMember(
+                                    name = "ODELL",
+                                    userId = "npub1qny3tkh0acurzla8x3zy4nhrjz5zd8l9sy9jys09umwng00manysew95gx",
+                                    metadata = ContentMetadata(
+                                        name = "ODELL",
+                                        nip05 = "odell@primal.net",
+                                    ),
+                                    followed = false,
+                                ),
+                            ),
+                        ),
+                        FollowGroup(
+                            name = "Memes",
+                            members = listOf(
+                                FollowGroupMember(
+                                    name = "corndalorian",
+                                    userId = "npub1lrnvvs6z78s9yjqxxr38uyqkmn34lsaxznnqgd877j4z2qej3j5s09qnw5",
+                                    metadata = ContentMetadata(
+                                        name = "corndalorian",
+                                        nip05 = "corndalorian@primal.net",
+                                    ),
+                                    followed = true,
+                                ),
+                            ),
+                        ),
+                    ),
                 ),
                 eventPublisher = {},
                 onBack = {},
