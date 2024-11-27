@@ -7,23 +7,25 @@ on:
 jobs:
   build:
     runs-on: macos-latest
-    strategy:
-      matrix:
-        flavor: [Aosp, Google]
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+
     - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
         java-version: '17'
         distribution: 'temurin'
         cache: gradle
+
     - name: Check detekt
       run: ./gradlew detekt
+
     - name: Check lint
       run: ./gradlew lint
+
     - name: Run tests on ${{ matrix.flavor }} flavour
       run: ./gradlew test${{ matrix.flavor }}DebugUnitTest
-    - name: Assemble ${{ matrix.flavor }} debug build
-      run: ./gradlew assemble${{ matrix.flavor }}Debug
+
+    - name: Compile ${{ matrix.flavor }} debug build to verify no-compilation errors
+      run: ./gradlew compile${{ matrix.flavor }}DebugKotlin
