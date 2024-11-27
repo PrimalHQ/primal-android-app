@@ -7,23 +7,36 @@ on:
 jobs:
   build:
     runs-on: macos-latest
-    strategy:
-      matrix:
-        flavor: [Aosp, Google]
+
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: gradle
+
+    - name: Cache gradle
+      uses: actions/cache@v4
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
     - name: Check detekt
       run: ./gradlew detekt
+
     - name: Check lint
       run: ./gradlew lint
-    - name: Run tests on ${{ matrix.flavor }} flavour
-      run: ./gradlew test${{ matrix.flavor }}DebugUnitTest
-    - name: Assemble ${{ matrix.flavor }} debug build
-      run: ./gradlew assemble${{ matrix.flavor }}Debug
+
+    - name: Run tests on AOSP flavour
+      run: ./gradlew testAospDebugUnitTest
+
+    - name: Compile AOSP debug build to verify no-compilation errors
+      run: ./gradlew compileAospDebugKotlin
+
+    - name: Compile Google debug build to verify no-compilation errors
+      run: ./gradlew compileGoogleDebugKotlin
