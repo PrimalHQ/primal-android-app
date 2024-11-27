@@ -1,12 +1,12 @@
 package net.primal.android.media
 
-import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -42,11 +42,13 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.theme.AppTheme
 
-@OptIn(ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
+@ExperimentalSharedTransitionApi
 @Composable
-fun SharedTransitionScope.MediaItemScreen(
+fun MediaItemScreen(
     viewModel: MediaItemViewModel,
     onClose: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -67,17 +69,19 @@ fun SharedTransitionScope.MediaItemScreen(
         state = uiState.value,
         onClose = onClose,
         eventPublisher = viewModel::setEvent,
+        sharedTransitionScope = sharedTransitionScope,
         animatedVisibilityScope = animatedVisibilityScope,
     )
 }
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+@ExperimentalMaterial3Api
+@ExperimentalSharedTransitionApi
 @Composable
-private fun SharedTransitionScope.MediaItemScreen(
+private fun MediaItemScreen(
     state: MediaItemContract.UiState,
     eventPublisher: (MediaItemContract.UiEvent) -> Unit,
     onClose: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -123,14 +127,17 @@ private fun SharedTransitionScope.MediaItemScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
     ) {
-        this.MediaItemContent(
-            mediaUrl = state.mediaUrl,
-            animatedVisibilityScope = animatedVisibilityScope,
-        )
+        with(sharedTransitionScope) {
+            MediaItemContent(
+                modifier = Modifier.padding(it),
+                mediaUrl = state.mediaUrl,
+                animatedVisibilityScope = animatedVisibilityScope,
+            )
+        }
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
+@ExperimentalSharedTransitionApi
 @Composable
 fun SharedTransitionScope.MediaItemContent(
     modifier: Modifier = Modifier,

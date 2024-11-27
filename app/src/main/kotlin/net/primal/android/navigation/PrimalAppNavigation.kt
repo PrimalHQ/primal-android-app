@@ -2,7 +2,6 @@ package net.primal.android.navigation
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -327,7 +326,7 @@ fun noteCallbacksHandler(navController: NavController) =
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun PrimalAppNavigation() {
+fun SharedTransitionScope.PrimalAppNavigation() {
     val navController = rememberNavController()
 
     val topLevelDestinationHandler: (PrimalTopLevelDestination) -> Unit = {
@@ -386,286 +385,284 @@ fun PrimalAppNavigation() {
         }
     }
 
-    SharedTransitionLayout {
-        NavHost(
+    NavHost(
+        navController = navController,
+        startDestination = "splash",
+    ) {
+        splash(route = "splash")
+
+        welcome(route = "welcome", navController = navController)
+
+        login(route = "login", navController = navController)
+
+        onboarding(route = "onboarding", navController = navController)
+
+        onboardingWalletActivation(route = "onboardingWallet", navController)
+
+        logout(route = "logout", navController = navController)
+
+        home(
+            route = "home",
             navController = navController,
-            startDestination = "splash",
-        ) {
-            splash(route = "splash")
+            onTopLevelDestinationChanged = topLevelDestinationHandler,
+            onDrawerScreenClick = drawerDestinationHandler,
+        )
 
-            welcome(route = "welcome", navController = navController)
+        reads(
+            route = "reads",
+            navController = navController,
+            onTopLevelDestinationChanged = topLevelDestinationHandler,
+            onDrawerScreenClick = drawerDestinationHandler,
+        )
 
-            login(route = "login", navController = navController)
+        explore(
+            route = "explore",
+            navController = navController,
+            onTopLevelDestinationChanged = topLevelDestinationHandler,
+            onDrawerScreenClick = drawerDestinationHandler,
+        )
 
-            onboarding(route = "onboarding", navController = navController)
+        bookmarks(route = "bookmarks", navController = navController)
 
-            onboardingWalletActivation(route = "onboardingWallet", navController)
+        exploreFeed(
+            route = "explore/note?$EXPLORE_FEED_SPEC={$EXPLORE_FEED_SPEC}&$RENDER_TYPE={$RENDER_TYPE}",
+            arguments = listOf(
+                navArgument(EXPLORE_FEED_SPEC) {
+                    type = NavType.StringType
+                    nullable = false
+                },
+                navArgument(RENDER_TYPE) {
+                    type = NavType.StringType
+                    nullable = false
+                },
+            ),
+            navController = navController,
+        )
 
-            logout(route = "logout", navController = navController)
+        search(
+            route = "search?$SEARCH_SCOPE={$SEARCH_SCOPE}",
+            arguments = listOf(
+                navArgument(SEARCH_SCOPE) {
+                    type = NavType.StringType
+                },
+            ),
+            navController = navController,
+        )
 
-            home(
-                route = "home",
-                navController = navController,
-                onTopLevelDestinationChanged = topLevelDestinationHandler,
-                onDrawerScreenClick = drawerDestinationHandler,
-            )
+        advancedSearch(
+            route = "asearch" +
+                "?$INITIAL_QUERY={$INITIAL_QUERY}" +
+                "&$POSTED_BY={$POSTED_BY}" +
+                "&$SEARCH_KIND={$SEARCH_KIND}" +
+                "&$ADV_SEARCH_SCOPE={$ADV_SEARCH_SCOPE}",
+            navController = navController,
+            arguments = listOf(
+                navArgument(INITIAL_QUERY) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(POSTED_BY) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(SEARCH_KIND) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(ADV_SEARCH_SCOPE) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+            ),
+        )
 
-            reads(
-                route = "reads",
-                navController = navController,
-                onTopLevelDestinationChanged = topLevelDestinationHandler,
-                onDrawerScreenClick = drawerDestinationHandler,
-            )
+        premiumBuying(
+            route = "premium/buying?$EXTEND_EXISTING_PREMIUM_NAME={$EXTEND_EXISTING_PREMIUM_NAME}",
+            arguments = listOf(
+                navArgument(EXTEND_EXISTING_PREMIUM_NAME) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+            ),
+            navController = navController,
+        )
 
-            explore(
-                route = "explore",
-                navController = navController,
-                onTopLevelDestinationChanged = topLevelDestinationHandler,
-                onDrawerScreenClick = drawerDestinationHandler,
-            )
+        premiumHome(route = "premium/home", navController = navController)
 
-            bookmarks(route = "bookmarks", navController = navController)
+        premiumSupportPrimal(route = "premium/supportPrimal", navController = navController)
 
-            exploreFeed(
-                route = "explore/note?$EXPLORE_FEED_SPEC={$EXPLORE_FEED_SPEC}&$RENDER_TYPE={$RENDER_TYPE}",
-                arguments = listOf(
-                    navArgument(EXPLORE_FEED_SPEC) {
-                        type = NavType.StringType
-                        nullable = false
-                    },
-                    navArgument(RENDER_TYPE) {
-                        type = NavType.StringType
-                        nullable = false
-                    },
-                ),
-                navController = navController,
-            )
+        premiumMoreInfo(
+            route = "premium/info?$PREMIUM_MORE_INFO_TAB_INDEX={$PREMIUM_MORE_INFO_TAB_INDEX}",
+            arguments = listOf(
+                navArgument(PREMIUM_MORE_INFO_TAB_INDEX) {
+                    type = NavType.IntType
+                    defaultValue = 0
+                },
+            ),
+            navController = navController,
+        )
 
-            search(
-                route = "search?$SEARCH_SCOPE={$SEARCH_SCOPE}",
-                arguments = listOf(
-                    navArgument(SEARCH_SCOPE) {
-                        type = NavType.StringType
-                    },
-                ),
-                navController = navController,
-            )
+        premiumBecomeLegend(route = "premium/legend/become", navController = navController)
 
-            advancedSearch(
-                route = "asearch" +
-                    "?$INITIAL_QUERY={$INITIAL_QUERY}" +
-                    "&$POSTED_BY={$POSTED_BY}" +
-                    "&$SEARCH_KIND={$SEARCH_KIND}" +
-                    "&$ADV_SEARCH_SCOPE={$ADV_SEARCH_SCOPE}",
-                navController = navController,
-                arguments = listOf(
-                    navArgument(INITIAL_QUERY) {
-                        type = NavType.StringType
-                        nullable = true
-                    },
-                    navArgument(POSTED_BY) {
-                        type = NavType.StringType
-                        nullable = true
-                    },
-                    navArgument(SEARCH_KIND) {
-                        type = NavType.StringType
-                        nullable = true
-                    },
-                    navArgument(ADV_SEARCH_SCOPE) {
-                        type = NavType.StringType
-                        nullable = true
-                    },
-                ),
-            )
+        premiumLegendaryProfile(route = "premium/legend/profile", navController = navController)
 
-            premiumBuying(
-                route = "premium/buying?$EXTEND_EXISTING_PREMIUM_NAME={$EXTEND_EXISTING_PREMIUM_NAME}",
-                arguments = listOf(
-                    navArgument(EXTEND_EXISTING_PREMIUM_NAME) {
-                        type = NavType.StringType
-                        nullable = true
-                    },
-                ),
-                navController = navController,
-            )
+        premiumManage(route = "premium/manage", navController = navController)
 
-            premiumHome(route = "premium/home", navController = navController)
+        premiumContactList(route = "premium/manage/contacts", navController = navController)
 
-            premiumSupportPrimal(route = "premium/supportPrimal", navController = navController)
+        premiumContentBackup(route = "premium/manage/content", navController = navController)
 
-            premiumMoreInfo(
-                route = "premium/info?$PREMIUM_MORE_INFO_TAB_INDEX={$PREMIUM_MORE_INFO_TAB_INDEX}",
-                arguments = listOf(
-                    navArgument(PREMIUM_MORE_INFO_TAB_INDEX) {
-                        type = NavType.IntType
-                        defaultValue = 0
-                    },
-                ),
-                navController = navController,
-            )
+        premiumMediaManagement(route = "premium/manage/media", navController = navController)
 
-            premiumBecomeLegend(route = "premium/legend/become", navController = navController)
+        premiumChangePrimalName(route = "premium/manage/changePrimalName", navController = navController)
 
-            premiumLegendaryProfile(route = "premium/legend/profile", navController = navController)
+        premiumOrderHistory(route = "premium/manage/order", navController = navController)
 
-            premiumManage(route = "premium/manage", navController = navController)
+        premiumRelay(route = "premium/manage/relay", navController = navController)
 
-            premiumContactList(route = "premium/manage/contacts", navController = navController)
+        messages(route = "messages", navController = navController)
 
-            premiumContentBackup(route = "premium/manage/content", navController = navController)
+        chat(
+            route = "messages/{$PROFILE_ID}",
+            arguments = listOf(
+                navArgument(PROFILE_ID) {
+                    type = NavType.StringType
+                },
+            ),
+            navController = navController,
+        )
 
-            premiumMediaManagement(route = "premium/manage/media", navController = navController)
+        newMessage(route = "messages/new", navController = navController)
 
-            premiumChangePrimalName(route = "premium/manage/changePrimalName", navController = navController)
+        notifications(
+            route = "notifications",
+            navController = navController,
+            onTopLevelDestinationChanged = topLevelDestinationHandler,
+            onDrawerScreenClick = drawerDestinationHandler,
+        )
 
-            premiumOrderHistory(route = "premium/manage/order", navController = navController)
+        noteEditor(
+            route = "noteEditor?$NOTE_EDITOR_ARGS={$NOTE_EDITOR_ARGS}",
+            arguments = listOf(
+                navArgument(NOTE_EDITOR_ARGS) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+            ),
+            navController = navController,
+        )
 
-            premiumRelay(route = "premium/manage/relay", navController = navController)
+        thread(
+            route = "thread/{$NOTE_ID}",
+            arguments = listOf(
+                navArgument(NOTE_ID) {
+                    type = NavType.StringType
+                },
+            ),
+            navController = navController,
+        )
 
-            messages(route = "messages", navController = navController)
+        articleDetails(
+            route = "article/{$NADDR}",
+            arguments = listOf(
+                navArgument(NADDR) {
+                    type = NavType.StringType
+                },
+            ),
+            navController = navController,
+        )
 
-            chat(
-                route = "messages/{$PROFILE_ID}",
-                arguments = listOf(
-                    navArgument(PROFILE_ID) {
-                        type = NavType.StringType
-                    },
-                ),
-                navController = navController,
-            )
+        reactions(
+            route = "reactions/{$NOTE_ID}",
+            arguments = listOf(
+                navArgument(NOTE_ID) {
+                    type = NavType.StringType
+                },
+            ),
+            navController = navController,
+        )
 
-            newMessage(route = "messages/new", navController = navController)
+        media(
+            route = "media/{$NOTE_ID}" +
+                "?$MEDIA_URL={$MEDIA_URL}" +
+                "&$MEDIA_POSITION_MS={$MEDIA_POSITION_MS}",
+            arguments = listOf(
+                navArgument(NOTE_ID) {
+                    type = NavType.StringType
+                },
+                navArgument(MEDIA_URL) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+                navArgument(MEDIA_POSITION_MS) {
+                    type = NavType.LongType
+                    nullable = false
+                    defaultValue = 0
+                },
+            ),
+            navController = navController,
+        )
 
-            notifications(
-                route = "notifications",
-                navController = navController,
-                onTopLevelDestinationChanged = topLevelDestinationHandler,
-                onDrawerScreenClick = drawerDestinationHandler,
-            )
+        mediaItem(
+            route = "mediaItem/{$MEDIA_URL}",
+            arguments = listOf(
+                navArgument(MEDIA_URL) {
+                    type = NavType.StringType
+                },
+            ),
+            navController = navController,
+            sharedTransitionScope = this@PrimalAppNavigation,
+        )
 
-            noteEditor(
-                route = "noteEditor?$NOTE_EDITOR_ARGS={$NOTE_EDITOR_ARGS}",
-                arguments = listOf(
-                    navArgument(NOTE_EDITOR_ARGS) {
-                        type = NavType.StringType
-                        nullable = true
-                        defaultValue = null
-                    },
-                ),
-                navController = navController,
-            )
+        profile(
+            route = "profile?$PROFILE_ID={$PROFILE_ID}",
+            arguments = listOf(
+                navArgument(PROFILE_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+            ),
+            navController = navController,
+        )
 
-            thread(
-                route = "thread/{$NOTE_ID}",
-                arguments = listOf(
-                    navArgument(NOTE_ID) {
-                        type = NavType.StringType
-                    },
-                ),
-                navController = navController,
-            )
+        profileFollows(
+            route = "profile/{$PROFILE_ID}/follows?$FOLLOWS_TYPE={$FOLLOWS_TYPE}",
+            arguments = listOf(
+                navArgument(PROFILE_ID) {
+                    type = NavType.StringType
+                },
+                navArgument(FOLLOWS_TYPE) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = ProfileFollowsType.Following.name
+                },
+            ),
+            navController = navController,
+        )
 
-            articleDetails(
-                route = "article/{$NADDR}",
-                arguments = listOf(
-                    navArgument(NADDR) {
-                        type = NavType.StringType
-                    },
-                ),
-                navController = navController,
-            )
+        profileEditor(route = "profileEditor", navController = navController)
 
-            reactions(
-                route = "reactions/{$NOTE_ID}",
-                arguments = listOf(
-                    navArgument(NOTE_ID) {
-                        type = NavType.StringType
-                    },
-                ),
-                navController = navController,
-            )
+        profileQrCodeViewer(
+            route = "profileQrCodeViewer?$PROFILE_ID={$PROFILE_ID}",
+            arguments = listOf(
+                navArgument(PROFILE_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+            ),
+            navController = navController,
+        )
 
-            media(
-                route = "media/{$NOTE_ID}" +
-                    "?$MEDIA_URL={$MEDIA_URL}" +
-                    "&$MEDIA_POSITION_MS={$MEDIA_POSITION_MS}",
-                arguments = listOf(
-                    navArgument(NOTE_ID) {
-                        type = NavType.StringType
-                    },
-                    navArgument(MEDIA_URL) {
-                        type = NavType.StringType
-                        nullable = true
-                        defaultValue = null
-                    },
-                    navArgument(MEDIA_POSITION_MS) {
-                        type = NavType.LongType
-                        nullable = false
-                        defaultValue = 0
-                    },
-                ),
-                navController = navController,
-            )
+        settingsNavigation(route = "settings", navController = navController)
 
-            mediaItem(
-                route = "mediaItem/{$MEDIA_URL}",
-                arguments = listOf(
-                    navArgument(MEDIA_URL) {
-                        type = NavType.StringType
-                    },
-                ),
-                navController = navController,
-                sharedTransitionScope = this@SharedTransitionLayout,
-            )
-
-            profile(
-                route = "profile?$PROFILE_ID={$PROFILE_ID}",
-                arguments = listOf(
-                    navArgument(PROFILE_ID) {
-                        type = NavType.StringType
-                        nullable = true
-                    },
-                ),
-                navController = navController,
-            )
-
-            profileFollows(
-                route = "profile/{$PROFILE_ID}/follows?$FOLLOWS_TYPE={$FOLLOWS_TYPE}",
-                arguments = listOf(
-                    navArgument(PROFILE_ID) {
-                        type = NavType.StringType
-                    },
-                    navArgument(FOLLOWS_TYPE) {
-                        type = NavType.StringType
-                        nullable = true
-                        defaultValue = ProfileFollowsType.Following.name
-                    },
-                ),
-                navController = navController,
-            )
-
-            profileEditor(route = "profileEditor", navController = navController)
-
-            profileQrCodeViewer(
-                route = "profileQrCodeViewer?$PROFILE_ID={$PROFILE_ID}",
-                arguments = listOf(
-                    navArgument(PROFILE_ID) {
-                        type = NavType.StringType
-                        nullable = true
-                    },
-                ),
-                navController = navController,
-            )
-
-            settingsNavigation(route = "settings", navController = navController)
-
-            walletNavigation(
-                route = "wallet",
-                navController = navController,
-                onTopLevelDestinationChanged = topLevelDestinationHandler,
-                onDrawerScreenClick = drawerDestinationHandler,
-            )
-        }
+        walletNavigation(
+            route = "wallet",
+            navController = navController,
+            onTopLevelDestinationChanged = topLevelDestinationHandler,
+            onDrawerScreenClick = drawerDestinationHandler,
+        )
     }
 }
 
@@ -1546,13 +1543,13 @@ private fun NavGraphBuilder.mediaItem(
 
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         ApplyEdgeToEdge(isDarkTheme = true)
-        with(sharedTransitionScope) {
-            MediaItemScreen(
-                onClose = { navController.navigateUp() },
-                viewModel = viewModel,
-                animatedVisibilityScope = this@composable,
-            )
-        }
+        MediaItemScreen(
+            onClose = { navController.navigateUp() },
+            viewModel = viewModel,
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = this@composable,
+
+        )
     }
 }
 
