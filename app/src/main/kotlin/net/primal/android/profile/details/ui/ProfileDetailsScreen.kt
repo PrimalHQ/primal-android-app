@@ -1,6 +1,7 @@
 package net.primal.android.profile.details.ui
 
 import android.content.Context
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -89,6 +90,7 @@ fun ProfileDetailsScreen(
     viewModel: ProfileDetailsViewModel,
     onClose: () -> Unit,
     onSearchClick: (String) -> Unit,
+    onMediaItemClick: (String) -> Unit,
     noteCallbacks: NoteCallbacks,
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
@@ -161,6 +163,7 @@ fun ProfileDetailsScreen(
         eventPublisher = { viewModel.setEvent(it) },
         pullToRefreshState = pullToRefreshState,
         pullToRefreshing = pullToRefreshing,
+        onMediaItemClick = onMediaItemClick,
     )
 }
 
@@ -171,12 +174,13 @@ internal const val READS_TAB_INDEX = 2
 internal const val MEDIA_TAB_INDEX = 3
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun ProfileDetailsScreen(
     state: ProfileDetailsContract.UiState,
     snackbarHostState: SnackbarHostState,
     onClose: () -> Unit,
+    onMediaItemClick: (String) -> Unit,
     onSearchClick: (String) -> Unit,
     noteCallbacks: NoteCallbacks,
     onEditProfileClick: () -> Unit,
@@ -383,6 +387,7 @@ fun ProfileDetailsScreen(
                             onClose = onClose,
                             paddingValues = paddingValues,
                             onSearchClick = { onSearchClick(state.profileId) },
+                            onMediaItemClick = onMediaItemClick,
                         )
                     }
                     item {
@@ -621,6 +626,7 @@ private fun PreviewProfileScreen() {
             onSendWalletTx = {},
             onDrawerQrCodeClick = {},
             onFollowsClick = { _, _ -> },
+            onMediaItemClick = {},
             onGoToWallet = {},
             eventPublisher = {},
             pullToRefreshing = remember { mutableStateOf(false) },

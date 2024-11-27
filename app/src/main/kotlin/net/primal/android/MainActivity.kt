@@ -4,6 +4,8 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.RippleConfiguration
@@ -41,7 +43,7 @@ class MainActivity : ComponentActivity() {
 
     lateinit var primalTheme: PrimalTheme
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -72,7 +74,10 @@ class MainActivity : ComponentActivity() {
                     LocalContentDisplaySettings provides contentDisplaySettings.value,
                 ) {
                     ApplyEdgeToEdge()
-                    PrimalAppNavigation()
+
+                    SharedTransitionLayout {
+                        PrimalAppNavigation()
+                    }
                 }
             }
         }

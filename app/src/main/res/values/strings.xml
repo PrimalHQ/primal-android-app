@@ -649,6 +649,10 @@
     <string name="media_gallery_toast_file_saved">File saved.</string>
     <string name="media_gallery_retry_save">Retry</string>
     <string name="media_gallery_error_photo_not_saved">Unable to save photo. Please try again.</string>
+    
+    <string name="media_item_saved">Media saved.</string>
+    <string name="media_item_error_on_save_message">Unable to save media. Please try again.</string>
+    <string name="media_item_error_on_save_try_again">Retry</string>
 
     <string name="settings_title">Settings</string>
 
