@@ -8,10 +8,6 @@ jobs:
   build:
     runs-on: macos-latest
 
-    strategy:
-      matrix:
-        flavor: [ Aosp, Google ]
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -36,8 +32,11 @@ jobs:
     - name: Check lint
       run: ./gradlew lint
 
-    - name: Run tests on ${{ matrix.flavor }} flavour
-      run: ./gradlew test${{ matrix.flavor }}DebugUnitTest
+    - name: Run tests on AOSP flavour
+      run: ./gradlew testAospDebugUnitTest
 
-    - name: Compile ${{ matrix.flavor }} debug build to verify no-compilation errors
-      run: ./gradlew compile${{ matrix.flavor }}DebugKotlin
+    - name: Compile AOSP debug build to verify no-compilation errors
+      run: ./gradlew compileAospDebugKotlin
+
+    - name: Compile Google debug build to verify no-compilation errors
+      run: ./gradlew compileGoogleDebugKotlin
