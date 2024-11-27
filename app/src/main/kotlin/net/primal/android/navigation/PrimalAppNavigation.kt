@@ -1,6 +1,8 @@
 package net.primal.android.navigation
 
 import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -66,6 +68,8 @@ import net.primal.android.feeds.domain.buildAdvancedSearchNotesFeedSpec
 import net.primal.android.feeds.domain.buildAdvancedSearchNotificationsFeedSpec
 import net.primal.android.feeds.domain.buildAdvancedSearchReadsFeedSpec
 import net.primal.android.feeds.domain.buildReadsTopicFeedSpec
+import net.primal.android.media.MediaItemScreen
+import net.primal.android.media.MediaItemViewModel
 import net.primal.android.messages.chat.ChatScreen
 import net.primal.android.messages.chat.ChatViewModel
 import net.primal.android.messages.conversation.MessageConversationListViewModel
@@ -251,6 +255,11 @@ fun NavController.navigateToMediaGallery(
         "&$MEDIA_POSITION_MS=$mediaPositionMs",
 )
 
+fun NavController.navigateToMediaItem(mediaUrl: String) =
+    navigate(
+        route = "mediaItem/${mediaUrl.asUrlEncoded()}",
+    )
+
 fun NavController.navigateToExploreFeed(
     feedSpec: String,
     renderType: ExploreFeedContract.RenderType = ExploreFeedContract.RenderType.List,
@@ -315,8 +324,9 @@ fun noteCallbacksHandler(navController: NavController) =
         onGetPrimalPremiumClick = { navController.navigateToPremiumBuying() },
     )
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun PrimalAppNavigation() {
+fun SharedTransitionScope.PrimalAppNavigation() {
     val navController = rememberNavController()
 
     val topLevelDestinationHandler: (PrimalTopLevelDestination) -> Unit = {
@@ -593,6 +603,17 @@ fun PrimalAppNavigation() {
                 },
             ),
             navController = navController,
+        )
+
+        mediaItem(
+            route = "mediaItem/{$MEDIA_URL}",
+            arguments = listOf(
+                navArgument(MEDIA_URL) {
+                    type = NavType.StringType
+                },
+            ),
+            navController = navController,
+            sharedTransitionScope = this@PrimalAppNavigation,
         )
 
         profile(
@@ -1504,6 +1525,30 @@ private fun NavGraphBuilder.media(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
+private fun NavGraphBuilder.mediaItem(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+    sharedTransitionScope: SharedTransitionScope,
+) = composable(
+    route = route,
+    arguments = arguments,
+) {
+    val viewModel = hiltViewModel<MediaItemViewModel>()
+
+    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+        ApplyEdgeToEdge(isDarkTheme = true)
+        MediaItemScreen(
+            onClose = { navController.navigateUp() },
+            viewModel = viewModel,
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = this@composable,
+
+        )
+    }
+}
+
 private fun NavGraphBuilder.profile(
     route: String,
     arguments: List<NamedNavArgument>,
@@ -1534,6 +1579,7 @@ private fun NavGraphBuilder.profile(
                 followsType = followsType,
             )
         },
+        onMediaItemClick = { navController.navigateToMediaItem(it) },
         onGoToWallet = { navController.navigateToWallet() },
         onSearchClick = { navController.navigateToAdvancedSearch(initialPostedBy = listOf(it)) },
     )
