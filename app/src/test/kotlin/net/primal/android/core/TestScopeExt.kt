@@ -18,5 +18,5 @@ import kotlinx.coroutines.test.advanceUntilIdle
 @ExperimentalCoroutinesApi
 suspend fun TestScope.advanceUntilIdleAndDelay() {
     advanceUntilIdle()
-    delay(88.milliseconds)
+    delay(42.milliseconds)
 }
