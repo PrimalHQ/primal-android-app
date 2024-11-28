@@ -118,6 +118,7 @@ class ProfileDetailsViewModel @Inject constructor(
                         zapAmount = it.zapAmount,
                         zapDescription = it.zapDescription,
                     )
+
                     UiEvent.DismissZapError -> setState { copy(zapError = null) }
                     UiEvent.DismissConfirmFollowUnfollowAlertDialog ->
                         setState { copy(shouldApproveFollow = false, shouldApproveUnfollow = false) }

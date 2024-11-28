@@ -30,8 +30,6 @@ interface ProfileDetailsContract {
         val shouldApproveUnfollow: Boolean = false,
         val zapError: UiError? = null,
         val zappingState: ZappingState = ZappingState(),
-        val shouldApproveFollow: Boolean = false,
-        val shouldApproveUnfollow: Boolean = false,
     ) {
         sealed class ProfileError {
             data class MissingRelaysConfiguration(val cause: Throwable) : ProfileError()
@@ -78,7 +76,6 @@ interface ProfileDetailsContract {
         data object RequestProfileUpdate : UiEvent()
         data class ReportAbuse(val type: ReportType, val profileId: String, val noteId: String? = null) : UiEvent()
         data object DismissError : UiEvent()
-        data object DismissConfirmFollowUnfollowAlertDialog : UiEvent()
         data object DismissZapError : UiEvent()
         data object DismissConfirmFollowUnfollowAlertDialog : UiEvent()
     }

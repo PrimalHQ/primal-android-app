@@ -138,21 +138,21 @@ class ProfileRepository @Inject constructor(
         forceUpdate: Boolean,
         reducer: Set<String>.() -> Set<String>,
     ) = withContext(dispatchers.io()) {
-        val userFollowList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
-            ?: throw FollowListNotFound()
+            val userFollowList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
+                ?: throw FollowListNotFound()
 
-        if (userFollowList.following.isEmpty() && !forceUpdate) {
+            if (userFollowList.following.isEmpty() && !forceUpdate) {
             throw PossibleFollowListCorruption()
         }
 
         userRepository.updateFollowList(userId, userFollowList)
 
-        setFollowList(
-            userId = userId,
-            contacts = userFollowList.following.reducer(),
-            content = userFollowList.followListEventContent ?: "",
-        )
-    }
+            setFollowList(
+                userId = userId,
+                contacts = userFollowList.following.reducer(),
+                content = userFollowList.followListEventContent ?: "",
+            )
+        }
 
     @Throws(NostrPublishException::class)
     suspend fun setFollowList(

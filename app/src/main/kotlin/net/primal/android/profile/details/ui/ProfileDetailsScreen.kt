@@ -296,7 +296,6 @@ fun ProfileDetailsScreen(
                 }
         }
     }
-
     if (state.shouldApproveFollow) {
         ConfirmFollowUnfollowProfileAlertDialog(
             onClose = { eventPublisher(ProfileDetailsContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
