@@ -88,38 +88,11 @@ fun ExplorePeople(
 ) {
     var lastFollowUnfollowProfileId by rememberSaveable { mutableStateOf<String?>(null) }
 
-    if (state.shouldApproveFollow) {
-        ConfirmFollowUnfollowProfileAlertDialog(
-            onClose = { eventPublisher(ExplorePeopleContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
-            onActionConfirmed = {
-                lastFollowUnfollowProfileId?.let {
-                    eventPublisher(
-                        ExplorePeopleContract.UiEvent.FollowUser(
-                            userId = it,
-                            forceUpdate = true,
-                        ),
-                    )
-                }
-            },
-            profileAction = ProfileAction.Follow,
-        )
-    }
-    if (state.shouldApproveUnfollow) {
-        ConfirmFollowUnfollowProfileAlertDialog(
-            onClose = { eventPublisher(ExplorePeopleContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
-            onActionConfirmed = {
-                lastFollowUnfollowProfileId?.let {
-                    eventPublisher(
-                        ExplorePeopleContract.UiEvent.UnfollowUser(
-                            userId = it,
-                            forceUpdate = true,
-                        ),
-                    )
-                }
-            },
-            profileAction = ProfileAction.Unfollow,
-        )
-    }
+    ApprovalAlertDialogs(
+        state = state,
+        eventPublisher = eventPublisher,
+        lastFollowUnfollowProfileId = lastFollowUnfollowProfileId,
+    )
 
     if (state.loading && state.people.isEmpty()) {
         HeightAdjustableLoadingLazyListPlaceholder(
@@ -175,6 +148,46 @@ fun ExplorePeople(
 
             item { Spacer(modifier = Modifier.height(4.dp)) }
         }
+    }
+}
+
+@Composable
+private fun ApprovalAlertDialogs(
+    state: ExplorePeopleContract.UiState,
+    eventPublisher: (ExplorePeopleContract.UiEvent) -> Unit,
+    lastFollowUnfollowProfileId: String?,
+) {
+    if (state.shouldApproveFollow) {
+        ConfirmFollowUnfollowProfileAlertDialog(
+            onClose = { eventPublisher(ExplorePeopleContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
+            onActionConfirmed = {
+                lastFollowUnfollowProfileId?.let {
+                    eventPublisher(
+                        ExplorePeopleContract.UiEvent.FollowUser(
+                            userId = it,
+                            forceUpdate = true,
+                        ),
+                    )
+                }
+            },
+            profileAction = ProfileAction.Follow,
+        )
+    }
+    if (state.shouldApproveUnfollow) {
+        ConfirmFollowUnfollowProfileAlertDialog(
+            onClose = { eventPublisher(ExplorePeopleContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
+            onActionConfirmed = {
+                lastFollowUnfollowProfileId?.let {
+                    eventPublisher(
+                        ExplorePeopleContract.UiEvent.UnfollowUser(
+                            userId = it,
+                            forceUpdate = true,
+                        ),
+                    )
+                }
+            },
+            profileAction = ProfileAction.Unfollow,
+        )
     }
 }
 

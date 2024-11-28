@@ -14,21 +14,21 @@ fun ConfirmFollowUnfollowProfileAlertDialog(
     onActionConfirmed: () -> Unit,
     profileAction: ProfileAction,
 ) {
-    val (title, text, positive, negative) = when (profileAction) {
+    val messages = when (profileAction) {
         ProfileAction.Follow -> {
-            arrayOf(
-                stringResource(id = R.string.context_confirm_follow_title),
-                stringResource(id = R.string.context_confirm_follow_text),
-                stringResource(id = R.string.context_confirm_follow_positive),
-                stringResource(id = R.string.context_confirm_follow_negative),
+            ApprovalMessages(
+                title = stringResource(id = R.string.context_confirm_follow_title),
+                text = stringResource(id = R.string.context_confirm_follow_text),
+                positive = stringResource(id = R.string.context_confirm_follow_positive),
+                negative = stringResource(id = R.string.context_confirm_follow_negative),
             )
         }
         ProfileAction.Unfollow -> {
-            arrayOf(
-                stringResource(id = R.string.context_confirm_unfollow_title),
-                stringResource(id = R.string.context_confirm_unfollow_text),
-                stringResource(id = R.string.context_confirm_unfollow_positive),
-                stringResource(id = R.string.context_confirm_unfollow_negative),
+            ApprovalMessages(
+                title = stringResource(id = R.string.context_confirm_unfollow_title),
+                text = stringResource(id = R.string.context_confirm_unfollow_text),
+                positive = stringResource(id = R.string.context_confirm_unfollow_positive),
+                negative = stringResource(id = R.string.context_confirm_unfollow_negative),
             )
         }
     }
@@ -37,30 +37,37 @@ fun ConfirmFollowUnfollowProfileAlertDialog(
         onDismissRequest = onClose,
         title = {
             Text(
-                text = title,
+                text = messages.title,
                 style = AppTheme.typography.titleLarge,
             )
         },
         text = {
             Text(
-                text = text,
+                text = messages.text,
                 style = AppTheme.typography.bodyLarge,
             )
         },
         dismissButton = {
             TextButton(onClick = onClose) {
-                Text(text = negative)
+                Text(text = messages.negative)
             }
         },
         confirmButton = {
             TextButton(onClick = onActionConfirmed) {
                 Text(
-                    text = positive,
+                    text = messages.positive,
                 )
             }
         },
     )
 }
+
+private data class ApprovalMessages(
+    val title: String,
+    val text: String,
+    val positive: String,
+    val negative: String,
+)
 
 enum class ProfileAction {
     Follow,
