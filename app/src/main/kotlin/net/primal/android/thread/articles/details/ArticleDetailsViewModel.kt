@@ -275,11 +275,13 @@ class ArticleDetailsViewModel @Inject constructor(
                     profileRepository.unfollow(
                         userId = activeAccountStore.activeUserId(),
                         unfollowedUserId = article.authorId,
+                        forceUpdate = false,
                     )
                 } else {
                     profileRepository.follow(
                         userId = activeAccountStore.activeUserId(),
                         followedUserId = article.authorId,
+                        forceUpdate = false,
                     )
                 }
             }
