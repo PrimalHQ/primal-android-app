@@ -10,12 +10,21 @@ interface ExplorePeopleContract {
         val people: List<ExplorePeopleData> = emptyList(),
         val userFollowing: Set<String> = emptySet(),
         val error: UiError? = null,
+        val shouldApproveFollow: Boolean = false,
+        val shouldApproveUnfollow: Boolean = false,
     )
 
     sealed class UiEvent {
-        data class FollowUser(val userId: String) : UiEvent()
-        data class UnfollowUser(val userId: String) : UiEvent()
+        data class FollowUser(
+            val userId: String,
+            val forceUpdate: Boolean,
+        ) : UiEvent()
+        data class UnfollowUser(
+            val userId: String,
+            val forceUpdate: Boolean,
+        ) : UiEvent()
 
+        data object DismissConfirmFollowUnfollowAlertDialog : UiEvent()
         data object RefreshPeople : UiEvent()
         data object DismissError : UiEvent()
     }

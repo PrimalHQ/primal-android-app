@@ -21,6 +21,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,6 +49,8 @@ import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.utils.shortened
 import net.primal.android.explore.api.model.ExplorePeopleData
+import net.primal.android.profile.details.ui.ConfirmFollowUnfollowProfileAlertDialog
+import net.primal.android.profile.details.ui.ProfileAction
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -81,6 +86,14 @@ fun ExplorePeople(
     eventPublisher: (ExplorePeopleContract.UiEvent) -> Unit,
     onProfileClick: (String) -> Unit,
 ) {
+    var lastFollowUnfollowProfileId by rememberSaveable { mutableStateOf<String?>(null) }
+
+    ApprovalAlertDialogs(
+        state = state,
+        eventPublisher = eventPublisher,
+        lastFollowUnfollowProfileId = lastFollowUnfollowProfileId,
+    )
+
     if (state.loading && state.people.isEmpty()) {
         HeightAdjustableLoadingLazyListPlaceholder(
             modifier = modifier.fillMaxSize(),
@@ -116,13 +129,18 @@ fun ExplorePeople(
                     isFollowed = state.userFollowing.contains(item.profile.pubkey),
                     onItemClick = { onProfileClick(item.profile.pubkey) },
                     onFollowClick = {
+                        lastFollowUnfollowProfileId = item.profile.pubkey
                         eventPublisher(
-                            ExplorePeopleContract.UiEvent.FollowUser(item.profile.pubkey),
+                            ExplorePeopleContract.UiEvent.FollowUser(userId = item.profile.pubkey, forceUpdate = false),
                         )
                     },
                     onUnfollowClick = {
+                        lastFollowUnfollowProfileId = item.profile.pubkey
                         eventPublisher(
-                            ExplorePeopleContract.UiEvent.UnfollowUser(item.profile.pubkey),
+                            ExplorePeopleContract.UiEvent.UnfollowUser(
+                                userId = item.profile.pubkey,
+                                forceUpdate = false,
+                            ),
                         )
                     },
                 )
@@ -130,6 +148,46 @@ fun ExplorePeople(
 
             item { Spacer(modifier = Modifier.height(4.dp)) }
         }
+    }
+}
+
+@Composable
+private fun ApprovalAlertDialogs(
+    state: ExplorePeopleContract.UiState,
+    eventPublisher: (ExplorePeopleContract.UiEvent) -> Unit,
+    lastFollowUnfollowProfileId: String?,
+) {
+    if (state.shouldApproveFollow) {
+        ConfirmFollowUnfollowProfileAlertDialog(
+            onClose = { eventPublisher(ExplorePeopleContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
+            onActionConfirmed = {
+                lastFollowUnfollowProfileId?.let {
+                    eventPublisher(
+                        ExplorePeopleContract.UiEvent.FollowUser(
+                            userId = it,
+                            forceUpdate = true,
+                        ),
+                    )
+                }
+            },
+            profileAction = ProfileAction.Follow,
+        )
+    }
+    if (state.shouldApproveUnfollow) {
+        ConfirmFollowUnfollowProfileAlertDialog(
+            onClose = { eventPublisher(ExplorePeopleContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
+            onActionConfirmed = {
+                lastFollowUnfollowProfileId?.let {
+                    eventPublisher(
+                        ExplorePeopleContract.UiEvent.UnfollowUser(
+                            userId = it,
+                            forceUpdate = true,
+                        ),
+                    )
+                }
+            },
+            profileAction = ProfileAction.Unfollow,
+        )
     }
 }
 

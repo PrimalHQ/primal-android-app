@@ -76,15 +76,17 @@ class ExplorePeopleViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.FollowUser -> follow(profileId = it.userId)
-                    is UiEvent.UnfollowUser -> unfollow(profileId = it.userId)
+                    is UiEvent.FollowUser -> follow(profileId = it.userId, forceUpdate = it.forceUpdate)
+                    is UiEvent.UnfollowUser -> unfollow(profileId = it.userId, forceUpdate = it.forceUpdate)
                     UiEvent.RefreshPeople -> fetchExplorePeople()
                     UiEvent.DismissError -> setState { copy(error = null) }
+                    UiEvent.DismissConfirmFollowUnfollowAlertDialog ->
+                        setState { copy(shouldApproveFollow = false, shouldApproveUnfollow = false) }
                 }
             }
         }
 
-    private fun follow(profileId: String) =
+    private fun follow(profileId: String, forceUpdate: Boolean) =
         viewModelScope.launch {
             updateStateProfileFollow(profileId)
 
@@ -92,6 +94,7 @@ class ExplorePeopleViewModel @Inject constructor(
                 profileRepository.follow(
                     userId = activeAccountStore.activeUserId(),
                     followedUserId = profileId,
+                    forceUpdate = forceUpdate,
                 )
             }
 
@@ -101,6 +104,12 @@ class ExplorePeopleViewModel @Inject constructor(
                     when (error) {
                         is WssException, is NostrPublishException, is ProfileRepository.FollowListNotFound ->
                             setState { copy(error = UiError.FailedToFollowUser(error)) }
+
+                        is ProfileRepository.PossibleFollowListCorruption -> setState {
+                            copy(
+                                shouldApproveFollow = true,
+                            )
+                        }
 
                         is MissingRelaysException -> setState {
                             copy(
@@ -115,7 +124,7 @@ class ExplorePeopleViewModel @Inject constructor(
             }
         }
 
-    private fun unfollow(profileId: String) =
+    private fun unfollow(profileId: String, forceUpdate: Boolean) =
         viewModelScope.launch {
             updateStateProfileUnfollow(profileId)
 
@@ -123,6 +132,7 @@ class ExplorePeopleViewModel @Inject constructor(
                 profileRepository.unfollow(
                     userId = activeAccountStore.activeUserId(),
                     unfollowedUserId = profileId,
+                    forceUpdate = forceUpdate,
                 )
             }
 
@@ -132,6 +142,12 @@ class ExplorePeopleViewModel @Inject constructor(
                     when (error) {
                         is WssException, is NostrPublishException, is ProfileRepository.FollowListNotFound ->
                             setState { copy(error = UiError.FailedToUnfollowUser(error)) }
+
+                        is ProfileRepository.PossibleFollowListCorruption -> setState {
+                            copy(
+                                shouldApproveUnfollow = true,
+                            )
+                        }
 
                         is MissingRelaysException -> setState {
                             copy(

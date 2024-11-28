@@ -120,6 +120,8 @@ class ProfileDetailsViewModel @Inject constructor(
                     )
 
                     UiEvent.DismissZapError -> setState { copy(zapError = null) }
+                    UiEvent.DismissConfirmFollowUnfollowAlertDialog ->
+                        setState { copy(shouldApproveFollow = false, shouldApproveUnfollow = false) }
                 }
             }
         }
@@ -311,6 +313,7 @@ class ProfileDetailsViewModel @Inject constructor(
                 profileRepository.follow(
                     userId = activeAccountStore.activeUserId(),
                     followedUserId = followAction.profileId,
+                    forceUpdate = followAction.forceUpdate,
                 )
             } catch (error: WssException) {
                 Timber.w(error)
@@ -328,6 +331,10 @@ class ProfileDetailsViewModel @Inject constructor(
                 Timber.w(error)
                 updateStateProfileAsUnfollowed()
                 setErrorState(error = ProfileError.FailedToFollowProfile(error))
+            } catch (error: ProfileRepository.PossibleFollowListCorruption) {
+                Timber.w(error)
+                updateStateProfileAsUnfollowed()
+                setState { copy(shouldApproveFollow = true) }
             }
         }
 
@@ -338,6 +345,7 @@ class ProfileDetailsViewModel @Inject constructor(
                 profileRepository.unfollow(
                     userId = activeAccountStore.activeUserId(),
                     unfollowedUserId = unfollowAction.profileId,
+                    forceUpdate = unfollowAction.forceUpdate,
                 )
             } catch (error: WssException) {
                 Timber.w(error)
@@ -355,6 +363,10 @@ class ProfileDetailsViewModel @Inject constructor(
                 Timber.w(error)
                 updateStateProfileAsFollowed()
                 setErrorState(error = ProfileError.FailedToUnfollowProfile(error))
+            } catch (error: ProfileRepository.PossibleFollowListCorruption) {
+                Timber.w(error)
+                updateStateProfileAsFollowed()
+                setState { copy(shouldApproveUnfollow = true) }
             }
         }
 

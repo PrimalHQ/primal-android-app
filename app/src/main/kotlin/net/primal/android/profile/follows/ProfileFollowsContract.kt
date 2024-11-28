@@ -12,6 +12,8 @@ interface ProfileFollowsContract {
         val userFollowing: Set<String> = emptySet(),
         val error: FollowsError? = null,
         val users: List<UserProfileItemUi> = emptyList(),
+        val shouldApproveFollow: Boolean = false,
+        val shouldApproveUnfollow: Boolean = false,
     ) {
         sealed class FollowsError {
             data class FailedToFollowUser(val cause: Throwable) : FollowsError()
@@ -21,8 +23,17 @@ interface ProfileFollowsContract {
     }
 
     sealed class UiEvent {
-        data class FollowProfile(val profileId: String) : UiEvent()
-        data class UnfollowProfile(val profileId: String) : UiEvent()
+        data class FollowProfile(
+            val profileId: String,
+            val forceUpdate: Boolean,
+        ) : UiEvent()
+
+        data class UnfollowProfile(
+            val profileId: String,
+            val forceUpdate: Boolean,
+        ) : UiEvent()
+
+        data object DismissConfirmFollowUnfollowAlertDialog : UiEvent()
         data object DismissError : UiEvent()
         data object ReloadData : UiEvent()
     }
