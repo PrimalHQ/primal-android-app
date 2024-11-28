@@ -1,12 +1,14 @@
 package net.primal.android.nostr.ext
 
 import java.util.regex.Pattern
+import kotlinx.serialization.encodeToString
 import net.primal.android.articles.db.ArticleData
 import net.primal.android.articles.feed.ui.wordsCountToReadingTime
 import net.primal.android.attachments.db.NoteNostrUri
 import net.primal.android.attachments.domain.CdnResource
 import net.primal.android.attachments.domain.LinkPreviewData
 import net.primal.android.attachments.ext.flatMapPostsAsNoteAttachmentPO
+import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
@@ -14,6 +16,7 @@ import net.primal.android.crypto.bech32ToHexOrThrow
 import net.primal.android.crypto.bechToBytesOrThrow
 import net.primal.android.crypto.toHex
 import net.primal.android.messages.db.DirectMessageData
+import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Nip19TLV
 import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
@@ -136,6 +139,19 @@ fun String.extractNoteId(): String? {
     }
 }
 
+fun String.extractEventId(): String? {
+    return extract { bechPrefix: String?, key: String? ->
+        when (bechPrefix?.lowercase()) {
+            NEVENT -> {
+                val tlv = Nip19TLV.parse((bechPrefix + key).bechToBytesOrThrow())
+                tlv[Nip19TLV.Type.SPECIAL.id]?.first()?.toHex()
+            }
+
+            else -> (bechPrefix + key).bechToBytesOrThrow().toHex()
+        }
+    }
+}
+
 private fun String.extract(parser: (bechPrefix: String?, key: String?) -> String?): String? {
     val matcher = nostrUriRegexPattern.matcher(this)
     if (!matcher.find()) return null
@@ -187,6 +203,7 @@ fun String.takeAsNaddrOrNull(): String? {
 }
 
 fun List<PostData>.flatMapPostsAsNoteNostrUriPO(
+    eventIdToNostrEvent: Map<String, NostrEvent>,
     postIdToPostDataMap: Map<String, PostData>,
     articleIdToArticle: Map<String, ArticleData>,
     profileIdToProfileDataMap: Map<String, ProfileData>,
@@ -197,6 +214,7 @@ fun List<PostData>.flatMapPostsAsNoteNostrUriPO(
     flatMap { postData ->
         postData.uris.mapAsNoteNostrUriPO(
             eventId = postData.postId,
+            eventIdToNostrEvent = eventIdToNostrEvent,
             postIdToPostDataMap = postIdToPostDataMap,
             articleIdToArticle = articleIdToArticle,
             profileIdToProfileDataMap = profileIdToProfileDataMap,
@@ -207,6 +225,7 @@ fun List<PostData>.flatMapPostsAsNoteNostrUriPO(
     }
 
 fun List<DirectMessageData>.flatMapMessagesAsNostrResourcePO(
+    eventIdToNostrEvent: Map<String, NostrEvent>,
     postIdToPostDataMap: Map<String, PostData>,
     articleIdToArticle: Map<String, ArticleData>,
     profileIdToProfileDataMap: Map<String, ProfileData>,
@@ -216,6 +235,7 @@ fun List<DirectMessageData>.flatMapMessagesAsNostrResourcePO(
 ) = flatMap { messageData ->
     messageData.uris.mapAsNoteNostrUriPO(
         eventId = messageData.messageId,
+        eventIdToNostrEvent = eventIdToNostrEvent,
         postIdToPostDataMap = postIdToPostDataMap,
         articleIdToArticle = articleIdToArticle,
         profileIdToProfileDataMap = profileIdToProfileDataMap,
@@ -227,6 +247,7 @@ fun List<DirectMessageData>.flatMapMessagesAsNostrResourcePO(
 
 fun List<String>.mapAsNoteNostrUriPO(
     eventId: String,
+    eventIdToNostrEvent: Map<String, NostrEvent>,
     postIdToPostDataMap: Map<String, PostData>,
     articleIdToArticle: Map<String, ArticleData>,
     profileIdToProfileDataMap: Map<String, ProfileData>,
@@ -250,9 +271,14 @@ fun List<String>.mapAsNoteNostrUriPO(
     val refArticle = articleIdToArticle[refNaddr?.identifier]
     val refArticleAuthor = profileIdToProfileDataMap[refNaddr?.userId]
 
+    val referencedNostrEvent: NostrEvent? = eventIdToNostrEvent[link.extractEventId()]
+    val rawRefEvent = NostrJson.encodeToString(referencedNostrEvent)
+
     NoteNostrUri(
         noteId = eventId,
         uri = link,
+        referencedEventRaw = rawRefEvent,
+        referencedEventAlt = referencedNostrEvent?.tags?.findFirstAltDescription(),
         referencedUser = if (refUserProfileId != null) {
             ReferencedUser(
                 userId = refUserProfileId,
@@ -278,6 +304,7 @@ fun List<String>.mapAsNoteNostrUriPO(
                     videoThumbnails = videoThumbnails,
                 ),
                 nostrUris = listOf(refNote).flatMapPostsAsNoteNostrUriPO(
+                    eventIdToNostrEvent = eventIdToNostrEvent,
                     postIdToPostDataMap = postIdToPostDataMap,
                     articleIdToArticle = articleIdToArticle,
                     profileIdToProfileDataMap = profileIdToProfileDataMap,

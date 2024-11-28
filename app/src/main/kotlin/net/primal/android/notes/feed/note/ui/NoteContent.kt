@@ -2,6 +2,9 @@ package net.primal.android.notes.feed.note.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
@@ -46,6 +49,11 @@ private fun List<NoteNostrUriUi>.filterMentionedNotes() = filter { it.referenced
 private fun List<NoteNostrUriUi>.filterMentionedArticles() = filter { it.referencedArticle != null }
 
 private fun List<NoteNostrUriUi>.filterMentionedUsers() = filter { it.referencedUser != null }
+
+private fun List<NoteNostrUriUi>.filterGenericEvents() =
+    filter {
+        it.referencedUser == null && it.referencedNote == null && it.referencedArticle == null
+    }
 
 private fun List<NoteNostrUriUi>.filterUnhandledNostrAddressUris() =
     filter {
@@ -243,6 +251,30 @@ fun NoteContent(
                 hasBorder = referencedEventsHaveBorder,
             )
         }
+
+        val genericEvents = data.nostrUris.filterGenericEvents()
+        if (genericEvents.isNotEmpty()) {
+            genericEvents.forEachIndexed { index, nostrUriUi ->
+                NoteUnknownEvent(
+                    modifier = Modifier.fillMaxWidth(),
+                    altDescription = nostrUriUi.referencedEventAlt
+                        ?: nostrUriUi.uri.nostrUriToMissingEventAltDescription(),
+                )
+
+                if (index < genericEvents.size - 1) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun String.nostrUriToMissingEventAltDescription(): String {
+    return if (contains("note1")) {
+        stringResource(R.string.feed_missing_event_alt_description_note)
+    } else {
+        stringResource(R.string.feed_missing_event_alt_description_event)
     }
 }
 
@@ -275,7 +307,6 @@ fun renderContentAsAnnotatedString(
 ): AnnotatedString {
     val mediaAttachments = data.attachments.filter { it.isMediaAttachment() }
     val linkAttachments = data.attachments.filterNot { it.isMediaAttachment() }
-    val mentionedEvents = data.nostrUris.filterMentionedNotes() + data.nostrUris.filterMentionedArticles()
     val mentionedUsers = data.nostrUris.filterMentionedUsers()
     val unhandledNostrAddressUris = data.nostrUris.filterUnhandledNostrAddressUris()
 
@@ -288,7 +319,7 @@ fun renderContentAsAnnotatedString(
     val refinedContent = data.content
         .cleanNostrUris()
         .remove(texts = mediaAttachments.map { it.url })
-        .remove(texts = if (!shouldKeepNostrNoteUris) mentionedEvents.map { it.uri } else emptyList())
+        .remove(texts = if (!shouldKeepNostrNoteUris) data.nostrUris.map { it.uri } else emptyList())
         .remove(texts = if (shouldDeleteLinks) linkAttachments.map { it.url } else emptyList())
         .remove(texts = data.invoices)
         .replaceNostrProfileUrisWithHandles(resources = mentionedUsers)
@@ -444,11 +475,74 @@ fun PreviewPostContent() {
                     nostrUris = listOf(
                         NoteNostrUriUi(
                             uri = "nostr:referencedUser",
+                            referencedEventAlt = null,
                             referencedNote = null,
                             referencedUser = ReferencedUser(
                                 userId = "nostr:referencedUser",
                                 handle = "alex",
                             ),
+                            referencedArticle = null,
+                        ),
+                    ),
+                    hashtags = listOf("#nostr"),
+                ),
+                expanded = false,
+                enableTweetsMode = false,
+                onClick = {},
+                onUrlClick = {},
+                noteCallbacks = NoteCallbacks(),
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewPostUnknownReferencedEventWithAlt() {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+        Surface(modifier = Modifier.fillMaxWidth()) {
+            NoteContent(
+                data = NoteContentUi(
+                    noteId = "",
+                    content = "This is amazing! nostr:nevent124124124214123412",
+                    attachments = emptyList(),
+                    nostrUris = listOf(
+                        NoteNostrUriUi(
+                            uri = "nostr:nevent124124124214123412",
+                            referencedEventAlt = "This is a music song.",
+                            referencedNote = null,
+                            referencedUser = null,
+                            referencedArticle = null,
+                        ),
+                    ),
+                    hashtags = listOf("#nostr"),
+                ),
+                expanded = false,
+                enableTweetsMode = false,
+                onClick = {},
+                onUrlClick = {},
+                noteCallbacks = NoteCallbacks(),
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewPostUnknownReferencedEventWithoutAlt() {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+        Surface(modifier = Modifier.fillMaxWidth()) {
+            NoteContent(
+                data = NoteContentUi(
+                    noteId = "",
+                    content = "This is amazing! nostr:note111",
+                    attachments = emptyList(),
+                    nostrUris = listOf(
+                        NoteNostrUriUi(
+                            uri = "nostr:note111",
+                            referencedEventAlt = null,
+                            referencedNote = null,
+                            referencedUser = null,
                             referencedArticle = null,
                         ),
                     ),
@@ -499,6 +593,7 @@ fun PreviewPostContentWithReferencedPost() {
                             ),
                             referencedUser = null,
                             referencedArticle = null,
+                            referencedEventAlt = null,
                         ),
                         NoteNostrUriUi(
                             uri = "nostr:referenced2Post",
@@ -516,6 +611,7 @@ fun PreviewPostContentWithReferencedPost() {
                             ),
                             referencedUser = null,
                             referencedArticle = null,
+                            referencedEventAlt = null,
                         ),
                     ),
                     hashtags = listOf("#nostr"),
@@ -541,7 +637,7 @@ fun PreviewPostContentWithReferencedPost() {
 @Composable
 fun PreviewPostContentWithTweet() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
-        Surface {
+        Surface(modifier = Modifier.fillMaxWidth()) {
             NoteContent(
                 data = NoteContentUi(
                     noteId = "",

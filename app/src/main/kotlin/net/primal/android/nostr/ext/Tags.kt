@@ -43,6 +43,8 @@ fun List<JsonArray>.findFirstPublishedAt() = firstOrNull { it.isPublishedAtTag()
 
 fun List<JsonArray>.findFirstIdentifier() = firstOrNull { it.isIdentifierTag() }?.getTagValueOrNull()
 
+fun List<JsonArray>.findFirstAltDescription() = firstOrNull { it.isAltTag() }?.getTagValueOrNull()
+
 fun JsonArray.isBolt11Tag() = getOrNull(0)?.jsonPrimitive?.content == "bolt11"
 
 fun JsonArray.isDescriptionTag() = getOrNull(0)?.jsonPrimitive?.content == "description"
@@ -62,6 +64,8 @@ fun JsonArray.isTitleTag() = getOrNull(0)?.jsonPrimitive?.content == "title"
 fun JsonArray.isSummaryTag() = getOrNull(0)?.jsonPrimitive?.content == "summary"
 
 fun JsonArray.isImageTag() = getOrNull(0)?.jsonPrimitive?.content == "image"
+
+fun JsonArray.isAltTag() = getOrNull(0)?.jsonPrimitive?.content == "alt"
 
 fun JsonArray.isPublishedAtTag() = getOrNull(0)?.jsonPrimitive?.content == "published_at"
 
