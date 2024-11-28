@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -22,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
+import net.primal.android.attachments.domain.NostrUriType
 import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.attachment.model.isMediaAttachment
 import net.primal.android.core.compose.preview.PrimalPreview
@@ -44,16 +46,7 @@ private const val NOTE_ANNOTATION_TAG = "note"
 private const val HASHTAG_ANNOTATION_TAG = "hashtag"
 private const val NOSTR_ADDRESS_ANNOTATION_TAG = "naddr"
 
-private fun List<NoteNostrUriUi>.filterMentionedNotes() = filter { it.referencedNote != null }
-
-private fun List<NoteNostrUriUi>.filterMentionedArticles() = filter { it.referencedArticle != null }
-
-private fun List<NoteNostrUriUi>.filterMentionedUsers() = filter { it.referencedUser != null }
-
-private fun List<NoteNostrUriUi>.filterGenericEvents() =
-    filter {
-        it.referencedUser == null && it.referencedNote == null && it.referencedArticle == null
-    }
+private fun List<NoteNostrUriUi>.filter(type: NostrUriType) = filter { it.type == type }
 
 private fun List<NoteNostrUriUi>.filterUnhandledNostrAddressUris() =
     filter {
@@ -228,7 +221,7 @@ fun NoteContent(
             )
         }
 
-        val referencedPostResources = data.nostrUris.filterMentionedNotes()
+        val referencedPostResources = data.nostrUris.filter(type = NostrUriType.Note)
         if (referencedPostResources.isNotEmpty()) {
             ReferencedNotesColumn(
                 modifier = Modifier.padding(top = 4.dp),
@@ -240,7 +233,7 @@ fun NoteContent(
             )
         }
 
-        val referencedArticleResources = data.nostrUris.filterMentionedArticles()
+        val referencedArticleResources = data.nostrUris.filter(type = NostrUriType.Article)
         if (referencedArticleResources.isNotEmpty()) {
             ReferencedArticlesColumn(
                 modifier = Modifier.padding(top = 4.dp),
@@ -252,7 +245,23 @@ fun NoteContent(
             )
         }
 
-        val genericEvents = data.nostrUris.filterGenericEvents()
+        val referencedHighlights = data.nostrUris.filter(type = NostrUriType.Highlight)
+        if (referencedHighlights.isNotEmpty()) {
+            referencedHighlights
+                .mapNotNull { it.referencedHighlight }
+                .forEachIndexed { index, higlight ->
+                    Text(
+                        text = higlight.text,
+                        color = Color.Green,
+                    )
+
+                    if (index < referencedHighlights.size - 1) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                    }
+                }
+        }
+
+        val genericEvents = data.nostrUris.filter(type = NostrUriType.Unsupported)
         if (genericEvents.isNotEmpty()) {
             genericEvents.forEachIndexed { index, nostrUriUi ->
                 NoteUnknownEvent(
@@ -307,7 +316,7 @@ fun renderContentAsAnnotatedString(
 ): AnnotatedString {
     val mediaAttachments = data.attachments.filter { it.isMediaAttachment() }
     val linkAttachments = data.attachments.filterNot { it.isMediaAttachment() }
-    val mentionedUsers = data.nostrUris.filterMentionedUsers()
+    val mentionedUsers = data.nostrUris.filter(type = NostrUriType.Profile)
     val unhandledNostrAddressUris = data.nostrUris.filterUnhandledNostrAddressUris()
 
     val shouldDeleteLinks = mediaAttachments.isEmpty() && linkAttachments.size == 1 &&
@@ -475,6 +484,7 @@ fun PreviewPostContent() {
                     nostrUris = listOf(
                         NoteNostrUriUi(
                             uri = "nostr:referencedUser",
+                            type = NostrUriType.Profile,
                             referencedEventAlt = null,
                             referencedNote = null,
                             referencedUser = ReferencedUser(
@@ -482,6 +492,7 @@ fun PreviewPostContent() {
                                 handle = "alex",
                             ),
                             referencedArticle = null,
+                            referencedHighlight = null,
                         ),
                     ),
                     hashtags = listOf("#nostr"),
@@ -509,10 +520,12 @@ fun PreviewPostUnknownReferencedEventWithAlt() {
                     nostrUris = listOf(
                         NoteNostrUriUi(
                             uri = "nostr:nevent124124124214123412",
+                            type = NostrUriType.Unsupported,
                             referencedEventAlt = "This is a music song.",
                             referencedNote = null,
                             referencedUser = null,
                             referencedArticle = null,
+                            referencedHighlight = null,
                         ),
                     ),
                     hashtags = listOf("#nostr"),
@@ -540,10 +553,12 @@ fun PreviewPostUnknownReferencedEventWithoutAlt() {
                     nostrUris = listOf(
                         NoteNostrUriUi(
                             uri = "nostr:note111",
+                            type = NostrUriType.Unsupported,
                             referencedEventAlt = null,
                             referencedNote = null,
                             referencedUser = null,
                             referencedArticle = null,
+                            referencedHighlight = null,
                         ),
                     ),
                     hashtags = listOf("#nostr"),
@@ -579,6 +594,7 @@ fun PreviewPostContentWithReferencedPost() {
                     nostrUris = listOf(
                         NoteNostrUriUi(
                             uri = "nostr:referencedPost",
+                            type = NostrUriType.Note,
                             referencedNote = ReferencedNote(
                                 postId = "postId",
                                 createdAt = 0,
@@ -594,9 +610,11 @@ fun PreviewPostContentWithReferencedPost() {
                             referencedUser = null,
                             referencedArticle = null,
                             referencedEventAlt = null,
+                            referencedHighlight = null,
                         ),
                         NoteNostrUriUi(
                             uri = "nostr:referenced2Post",
+                            type = NostrUriType.Note,
                             referencedNote = ReferencedNote(
                                 postId = "postId",
                                 createdAt = 0,
@@ -612,6 +630,7 @@ fun PreviewPostContentWithReferencedPost() {
                             referencedUser = null,
                             referencedArticle = null,
                             referencedEventAlt = null,
+                            referencedHighlight = null,
                         ),
                     ),
                     hashtags = listOf("#nostr"),

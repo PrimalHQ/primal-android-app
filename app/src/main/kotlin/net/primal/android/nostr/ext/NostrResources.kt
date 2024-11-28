@@ -1,14 +1,13 @@
 package net.primal.android.nostr.ext
 
 import java.util.regex.Pattern
-import kotlinx.serialization.encodeToString
 import net.primal.android.articles.db.ArticleData
 import net.primal.android.articles.feed.ui.wordsCountToReadingTime
 import net.primal.android.attachments.db.NoteNostrUri
 import net.primal.android.attachments.domain.CdnResource
 import net.primal.android.attachments.domain.LinkPreviewData
+import net.primal.android.attachments.domain.NostrUriType
 import net.primal.android.attachments.ext.flatMapPostsAsNoteAttachmentPO
-import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
@@ -18,10 +17,12 @@ import net.primal.android.crypto.toHex
 import net.primal.android.messages.db.DirectMessageData
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nip19TLV
 import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import net.primal.android.notes.db.PostData
 import net.primal.android.notes.db.ReferencedArticle
+import net.primal.android.notes.db.ReferencedHighlight
 import net.primal.android.notes.db.ReferencedNote
 import net.primal.android.notes.db.ReferencedUser
 import net.primal.android.profile.db.ProfileData
@@ -272,71 +273,141 @@ fun List<String>.mapAsNoteNostrUriPO(
     val refArticleAuthor = profileIdToProfileDataMap[refNaddr?.userId]
 
     val referencedNostrEvent: NostrEvent? = eventIdToNostrEvent[link.extractEventId()]
-    val rawRefEvent = NostrJson.encodeToString(referencedNostrEvent)
+
+    val refHighlightText = referencedNostrEvent?.content
+    val refHighlightATag = referencedNostrEvent?.tags?.findFirstATag()
+
+    val type = if (refUserProfileId != null) {
+        NostrUriType.Profile
+    } else if (refNote != null && refPostAuthor != null) {
+        NostrUriType.Note
+    } else if (refNaddr?.kind == NostrEventKind.LongFormContent.value &&
+        refArticle != null && refArticleAuthor != null
+    ) {
+        NostrUriType.Article
+    } else if (referencedNostrEvent?.kind == NostrEventKind.Highlight.value &&
+        refHighlightText?.isNotEmpty() == true && refHighlightATag != null
+    ) {
+        NostrUriType.Highlight
+    } else {
+        NostrUriType.Unsupported
+    }
 
     NoteNostrUri(
         noteId = eventId,
         uri = link,
-        referencedEventRaw = rawRefEvent,
+        type = type,
         referencedEventAlt = referencedNostrEvent?.tags?.findFirstAltDescription(),
-        referencedUser = if (refUserProfileId != null) {
-            ReferencedUser(
-                userId = refUserProfileId,
-                handle = profileIdToProfileDataMap[refUserProfileId]?.usernameUiFriendly()
-                    ?: refUserProfileId.asEllipsizedNpub(),
-            )
-        } else {
-            null
-        },
-        referencedNote = if (refNote != null && refPostAuthor != null) {
-            ReferencedNote(
-                postId = refNote.postId,
-                createdAt = refNote.createdAt,
-                content = refNote.content,
-                authorId = refNote.authorId,
-                authorName = refPostAuthor.authorNameUiFriendly(),
-                authorAvatarCdnImage = refPostAuthor.avatarCdnImage,
-                authorInternetIdentifier = refPostAuthor.internetIdentifier,
-                authorLightningAddress = refPostAuthor.lightningAddress,
-                attachments = listOf(refNote).flatMapPostsAsNoteAttachmentPO(
-                    cdnResources = cdnResources,
-                    linkPreviews = linkPreviews,
-                    videoThumbnails = videoThumbnails,
-                ),
-                nostrUris = listOf(refNote).flatMapPostsAsNoteNostrUriPO(
-                    eventIdToNostrEvent = eventIdToNostrEvent,
-                    postIdToPostDataMap = postIdToPostDataMap,
-                    articleIdToArticle = articleIdToArticle,
-                    profileIdToProfileDataMap = profileIdToProfileDataMap,
-                    cdnResources = cdnResources,
-                    linkPreviews = linkPreviews,
-                    videoThumbnails = videoThumbnails,
-                ),
-            )
-        } else {
-            null
-        },
-        referencedArticle = if (
-            refNaddr?.kind == NostrEventKind.LongFormContent.value &&
-            refArticle != null &&
-            refArticleAuthor != null
-        ) {
-            ReferencedArticle(
-                naddr = refNaddr.toNaddrString(),
-                aTag = refArticle.aTag,
-                eventId = refArticle.eventId,
-                articleId = refArticle.articleId,
-                articleTitle = refArticle.title,
-                authorId = refArticle.authorId,
-                authorName = refArticleAuthor.authorNameUiFriendly(),
-                authorAvatarCdnImage = refArticleAuthor.avatarCdnImage,
-                createdAt = refArticle.createdAt,
-                raw = refArticle.raw,
-                articleImageCdnImage = refArticle.imageCdnImage,
-                articleReadingTimeInMinutes = refArticle.wordsCount.wordsCountToReadingTime(),
-            )
-        } else {
-            null
-        },
+        referencedUser = takeAsReferencedUserOrNull(refUserProfileId, profileIdToProfileDataMap),
+        referencedNote = takeAsReferencedNoteOrNull(
+            refNote = refNote,
+            refPostAuthor = refPostAuthor,
+            cdnResources = cdnResources,
+            linkPreviews = linkPreviews,
+            videoThumbnails = videoThumbnails,
+            eventIdToNostrEvent = eventIdToNostrEvent,
+            postIdToPostDataMap = postIdToPostDataMap,
+            articleIdToArticle = articleIdToArticle,
+            profileIdToProfileDataMap = profileIdToProfileDataMap,
+        ),
+        referencedArticle = takeAsReferencedArticleOrNull(refNaddr, refArticle, refArticleAuthor),
+        referencedHighlight = takeAsReferencedHighlightOrNull(
+            highlight = refHighlightText,
+            aTag = refHighlightATag,
+            authorId = referencedNostrEvent?.tags?.findFirstProfileId(),
+        ),
     )
+}
+
+private fun takeAsReferencedNoteOrNull(
+    refNote: PostData?,
+    refPostAuthor: ProfileData?,
+    cdnResources: Map<String, CdnResource>,
+    linkPreviews: Map<String, LinkPreviewData>,
+    videoThumbnails: Map<String, String>,
+    eventIdToNostrEvent: Map<String, NostrEvent>,
+    postIdToPostDataMap: Map<String, PostData>,
+    articleIdToArticle: Map<String, ArticleData>,
+    profileIdToProfileDataMap: Map<String, ProfileData>,
+) = if (refNote != null && refPostAuthor != null) {
+    ReferencedNote(
+        postId = refNote.postId,
+        createdAt = refNote.createdAt,
+        content = refNote.content,
+        authorId = refNote.authorId,
+        authorName = refPostAuthor.authorNameUiFriendly(),
+        authorAvatarCdnImage = refPostAuthor.avatarCdnImage,
+        authorInternetIdentifier = refPostAuthor.internetIdentifier,
+        authorLightningAddress = refPostAuthor.lightningAddress,
+        attachments = listOf(refNote).flatMapPostsAsNoteAttachmentPO(
+            cdnResources = cdnResources,
+            linkPreviews = linkPreviews,
+            videoThumbnails = videoThumbnails,
+        ),
+        nostrUris = listOf(refNote).flatMapPostsAsNoteNostrUriPO(
+            eventIdToNostrEvent = eventIdToNostrEvent,
+            postIdToPostDataMap = postIdToPostDataMap,
+            articleIdToArticle = articleIdToArticle,
+            profileIdToProfileDataMap = profileIdToProfileDataMap,
+            cdnResources = cdnResources,
+            linkPreviews = linkPreviews,
+            videoThumbnails = videoThumbnails,
+        ),
+    )
+} else {
+    null
+}
+
+private fun takeAsReferencedUserOrNull(
+    refUserProfileId: String?,
+    profileIdToProfileDataMap: Map<String, ProfileData>,
+) = if (refUserProfileId != null) {
+    ReferencedUser(
+        userId = refUserProfileId,
+        handle = profileIdToProfileDataMap[refUserProfileId]?.usernameUiFriendly()
+            ?: refUserProfileId.asEllipsizedNpub(),
+    )
+} else {
+    null
+}
+
+private fun takeAsReferencedArticleOrNull(
+    refNaddr: Naddr?,
+    refArticle: ArticleData?,
+    refArticleAuthor: ProfileData?,
+) = if (
+    refNaddr?.kind == NostrEventKind.LongFormContent.value &&
+    refArticle != null &&
+    refArticleAuthor != null
+) {
+    ReferencedArticle(
+        naddr = refNaddr.toNaddrString(),
+        aTag = refArticle.aTag,
+        eventId = refArticle.eventId,
+        articleId = refArticle.articleId,
+        articleTitle = refArticle.title,
+        authorId = refArticle.authorId,
+        authorName = refArticleAuthor.authorNameUiFriendly(),
+        authorAvatarCdnImage = refArticleAuthor.avatarCdnImage,
+        createdAt = refArticle.createdAt,
+        raw = refArticle.raw,
+        articleImageCdnImage = refArticle.imageCdnImage,
+        articleReadingTimeInMinutes = refArticle.wordsCount.wordsCountToReadingTime(),
+    )
+} else {
+    null
+}
+
+private fun takeAsReferencedHighlightOrNull(
+    highlight: String?,
+    aTag: String?,
+    authorId: String?,
+) = if (highlight?.isNotEmpty() == true && aTag != null) {
+    ReferencedHighlight(
+        text = highlight,
+        aTag = aTag,
+        authorId = authorId,
+    )
+} else {
+    null
 }

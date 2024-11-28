@@ -8,30 +8,17 @@ import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.editor.domain.NoteAttachment
 
-fun List<JsonArray>.findFirstEventId(): String? {
-    val postTag = firstOrNull { it.isEventIdTag() }
-    return postTag?.getTagValueOrNull()
-}
+fun List<JsonArray>.findFirstEventId() = firstOrNull { it.isEventIdTag() }?.getTagValueOrNull()
 
-fun List<JsonArray>.findFirstProfileId(): String? {
-    val postAuthorTag = firstOrNull { it.isPubKeyTag() }
-    return postAuthorTag?.getTagValueOrNull()
-}
+fun List<JsonArray>.findFirstProfileId() = firstOrNull { it.isPubKeyTag() }?.getTagValueOrNull()
 
-fun List<JsonArray>.findFirstZapRequest(): String? {
-    val zapRequestTag = firstOrNull { it.isDescriptionTag() }
-    return zapRequestTag?.getTagValueOrNull()
-}
+fun List<JsonArray>.findFirstZapRequest() = firstOrNull { it.isDescriptionTag() }?.getTagValueOrNull()
 
-fun List<JsonArray>.findFirstZapAmount(): String? {
-    val zapRequestTag = firstOrNull { it.isAmountTag() }
-    return zapRequestTag?.getTagValueOrNull()
-}
+fun List<JsonArray>.findFirstZapAmount() = firstOrNull { it.isAmountTag() }?.getTagValueOrNull()
 
-fun List<JsonArray>.findFirstBolt11(): String? {
-    val zapRequestTag = firstOrNull { it.isBolt11Tag() }
-    return zapRequestTag?.getTagValueOrNull()
-}
+fun List<JsonArray>.findFirstBolt11() = firstOrNull { it.isBolt11Tag() }?.getTagValueOrNull()
+
+fun List<JsonArray>.findFirstATag() = firstOrNull { it.isATag() }?.getTagValueOrNull()
 
 fun List<JsonArray>.findFirstTitle() = firstOrNull { it.isTitleTag() }?.getTagValueOrNull()
 
@@ -58,6 +45,8 @@ fun JsonArray.isPubKeyTag() = getOrNull(0)?.jsonPrimitive?.content == "p"
 fun JsonArray.isHashtagTag() = getOrNull(0)?.jsonPrimitive?.content == "t"
 
 fun JsonArray.isIdentifierTag() = getOrNull(0)?.jsonPrimitive?.content == "d"
+
+fun JsonArray.isATag() = getOrNull(0)?.jsonPrimitive?.content == "a"
 
 fun JsonArray.isTitleTag() = getOrNull(0)?.jsonPrimitive?.content == "title"
 
