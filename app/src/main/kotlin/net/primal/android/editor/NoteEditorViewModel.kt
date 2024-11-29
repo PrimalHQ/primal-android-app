@@ -171,7 +171,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                         copy(
                             activeAccountAvatarCdnImage = it.data.avatarCdnImage,
                             activeAccountLegendaryCustomization =
-                                it.data.primalLegendProfile?.asLegendaryCustomization(),
+                            it.data.primalLegendProfile?.asLegendaryCustomization(),
                         )
                     }
                 }

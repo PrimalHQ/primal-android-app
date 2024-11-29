@@ -210,7 +210,7 @@ private fun PreviewArticleTopZapsSection() {
                             avatarGlow = true,
                             customBadge = true,
                             legendaryStyle = LegendaryStyle.SUN_FIRE,
-                        )
+                        ),
                     ),
                     EventZapUiModel(
                         id = "id",

@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import java.util.*
 import kotlinx.datetime.Clock
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.premium.legend.LegendaryCustomization
@@ -69,7 +68,7 @@ private fun PreviewZappersAvatarThumbnailRow() {
                             zapperLegendaryCustomization = LegendaryCustomization(
                                 avatarGlow = true,
                                 legendaryStyle = LegendaryStyle.SUN_FIRE,
-                            )
+                            ),
                         ),
                         EventZapUiModel(
                             id = UUID.randomUUID().toString(),

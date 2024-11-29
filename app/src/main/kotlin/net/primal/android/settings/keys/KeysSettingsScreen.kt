@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -108,7 +107,11 @@ fun KeysSettingsScreen(state: KeysSettingsContract.UiState, onClose: () -> Unit)
 }
 
 @Composable
-fun PublicKeySection(npub: String, avatarCdnImage: CdnImage?, legendaryCustomization: LegendaryCustomization?) {
+fun PublicKeySection(
+    npub: String,
+    avatarCdnImage: CdnImage?,
+    legendaryCustomization: LegendaryCustomization?,
+) {
     val context = LocalContext.current
 
     Text(

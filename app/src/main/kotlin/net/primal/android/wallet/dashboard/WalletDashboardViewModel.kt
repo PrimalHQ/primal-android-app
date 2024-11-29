@@ -17,7 +17,6 @@ import kotlinx.coroutines.launch
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.WalletPreference

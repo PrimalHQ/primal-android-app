@@ -54,7 +54,6 @@ import java.time.Instant
 import kotlin.time.Duration.Companion.minutes
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider

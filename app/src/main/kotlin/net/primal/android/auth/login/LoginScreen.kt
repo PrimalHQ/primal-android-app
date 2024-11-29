@@ -54,7 +54,6 @@ import net.primal.android.auth.compose.DefaultOnboardingAvatar
 import net.primal.android.auth.compose.OnboardingButton
 import net.primal.android.auth.compose.defaultOnboardingAvatarBackground
 import net.primal.android.core.compose.AppBarIcon
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.UiDensityMode
 import net.primal.android.core.compose.UniversalAvatarThumbnail

@@ -61,7 +61,6 @@ import com.wajahatkarim.flippable.Flippable
 import com.wajahatkarim.flippable.FlippableState
 import com.wajahatkarim.flippable.rememberFlipController
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.DefaultAvatarThumbnailPlaceholderListItemImage
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.UniversalAvatarThumbnail

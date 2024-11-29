@@ -5,7 +5,6 @@ import java.math.BigDecimal
 import kotlinx.coroutines.flow.Flow
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.premium.legend.LegendaryCustomization
-import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.user.domain.Badges
 import net.primal.android.user.domain.PrimalWallet
 import net.primal.android.user.domain.WalletPreference

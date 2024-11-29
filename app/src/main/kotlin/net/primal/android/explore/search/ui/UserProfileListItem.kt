@@ -23,7 +23,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.FollowUnfollowButton
 import net.primal.android.core.compose.preview.PrimalPreview
@@ -127,7 +126,7 @@ fun PreviewLegendaryUserProfileListItemWithFollow() {
                         avatarGlow = true,
                         customBadge = true,
                         legendaryStyle = LegendaryStyle.GOLD,
-                    )
+                    ),
                 ),
                 followUnfollowVisibility = FollowUnfollowVisibility.Visible,
                 isFollowed = false,
@@ -152,7 +151,7 @@ fun PreviewLegendaryUserProfileListItemWithUnfollow() {
                         avatarGlow = true,
                         customBadge = true,
                         legendaryStyle = LegendaryStyle.SUN_FIRE,
-                    )
+                    ),
                 ),
                 followUnfollowVisibility = FollowUnfollowVisibility.Visible,
                 isFollowed = true,

@@ -45,7 +45,6 @@ import java.time.format.DateTimeFormatter
 import kotlin.time.Duration.Companion.seconds
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.WrappedContentWithSuffix

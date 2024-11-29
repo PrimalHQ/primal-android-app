@@ -54,7 +54,6 @@ import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.list.FeedsBottomSheet
 import net.primal.android.feeds.list.ui.model.FeedUi
 import net.primal.android.premium.legend.LegendaryCustomization
-import net.primal.android.premium.legend.LegendaryStyle
 
 @Composable
 fun ReadsScreen(

@@ -62,7 +62,6 @@ import androidx.compose.ui.unit.sp
 import java.util.*
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.FeedArticleListItem
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.ImportPhotosIconButton
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider

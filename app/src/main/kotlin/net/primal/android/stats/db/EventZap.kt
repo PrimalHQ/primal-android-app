@@ -2,7 +2,6 @@ package net.primal.android.stats.db
 
 import androidx.room.Entity
 import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.profile.domain.PrimalLegendProfile
 
 @Entity(

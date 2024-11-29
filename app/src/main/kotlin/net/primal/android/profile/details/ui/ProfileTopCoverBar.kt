@@ -130,7 +130,9 @@ fun ProfileTopCoverBar(
                 onClick = { state.profileDetails?.avatarCdnImage?.sourceUrl?.let { onMediaItemClick(it) } },
                 avatarCdnImage = state.profileDetails?.avatarCdnImage,
                 hasBorder = true,
-                borderBrush = if (state.profileDetails?.legendaryCustomization?.legendaryStyle != null && state.profileDetails.legendaryCustomization.avatarGlow) {
+                borderBrush = if (state.profileDetails?.legendaryCustomization?.legendaryStyle != null &&
+                    state.profileDetails.legendaryCustomization.avatarGlow
+                ) {
                     when (state.profileDetails.legendaryCustomization.legendaryStyle) {
                         LegendaryStyle.NO_CUSTOMIZATION -> Brush.linearGradient(
                             listOf(
