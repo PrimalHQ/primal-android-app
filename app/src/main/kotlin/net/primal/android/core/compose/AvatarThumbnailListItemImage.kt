@@ -27,7 +27,44 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.images.AvatarCoilImageLoader
+import net.primal.android.premium.legend.LegendaryCustomization
+import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.theme.AppTheme
+
+@Composable
+fun UniversalAvatarThumbnail(
+    modifier: Modifier = Modifier,
+    avatarCdnImage: CdnImage? = null,
+    avatarSize: Dp = 48.dp,
+    hasBorder: Boolean = true,
+    hasGlowOverride: Boolean? = null,
+    fallbackBorderColor: Color = Color.Transparent,
+    legendaryCustomization: LegendaryCustomization? = null,
+    borderSize: Dp = 2.dp,
+    backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+    onClick: (() -> Unit)? = null,
+    defaultAvatar: @Composable () -> Unit = { DefaultAvatarThumbnailPlaceholderListItemImage() },
+) {
+    val variant = avatarCdnImage?.variants?.minByOrNull { it.width }
+    val imageSource = variant?.mediaUrl ?: avatarCdnImage?.sourceUrl
+    AvatarThumbnailListItemImage(
+        modifier = modifier,
+        avatarSize = avatarSize,
+        source = imageSource,
+        hasBorder = hasBorder,
+        borderBrush = legendaryCustomization?.legendaryStyle?.brush ?: Brush.linearGradient(
+            colors = listOf(
+                fallbackBorderColor,
+                fallbackBorderColor,
+            ),
+        ),
+        hasGlow = (hasGlowOverride ?: legendaryCustomization?.avatarGlow) == true,
+        borderSize = borderSize,
+        backgroundColor = backgroundColor,
+        onClick = onClick,
+        defaultAvatar = defaultAvatar,
+    )
+}
 
 @Composable
 fun AvatarThumbnail(
@@ -93,6 +130,7 @@ private fun AvatarThumbnailListItemImage(
         listOf(AppTheme.colorScheme.primary, AppTheme.colorScheme.primary),
     ),
     borderSize: Dp = 2.dp,
+    hasGlow: Boolean = false,
     backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onClick: (() -> Unit)? = null,
     defaultAvatar: @Composable () -> Unit,
