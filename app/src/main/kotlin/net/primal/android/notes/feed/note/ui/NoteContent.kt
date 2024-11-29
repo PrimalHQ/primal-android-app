@@ -7,12 +7,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -25,6 +28,8 @@ import net.primal.android.R
 import net.primal.android.attachments.domain.NostrUriType
 import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.attachment.model.isMediaAttachment
+import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.Document
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.utils.HashtagMatch
 import net.primal.android.core.utils.HashtagMatcher
@@ -265,6 +270,7 @@ fun NoteContent(
             genericEvents.forEachIndexed { index, nostrUriUi ->
                 NoteUnknownEvent(
                     modifier = Modifier.fillMaxWidth(),
+                    icon = nostrUriUi.uri.nostrUriToMissingEventIcon(),
                     altDescription = nostrUriUi.referencedEventAlt
                         ?: nostrUriUi.uri.nostrUriToMissingEventAltDescription(),
                 )
@@ -283,6 +289,15 @@ private fun String.nostrUriToMissingEventAltDescription(): String {
         stringResource(R.string.feed_missing_event_alt_description_note)
     } else {
         stringResource(R.string.feed_missing_event_alt_description_event)
+    }
+}
+
+@Composable
+private fun String.nostrUriToMissingEventIcon(): ImageVector {
+    return if (contains("note1")) {
+        Icons.Outlined.ErrorOutline
+    } else {
+        PrimalIcons.Document
     }
 }
 
