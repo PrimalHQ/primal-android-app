@@ -28,8 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
@@ -44,7 +42,6 @@ import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.launch
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.core.compose.AvatarThumbnailCustomBorder
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.preview.PrimalPreview

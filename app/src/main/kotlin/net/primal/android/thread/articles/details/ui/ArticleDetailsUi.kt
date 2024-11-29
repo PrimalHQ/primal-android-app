@@ -7,7 +7,6 @@ import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.premium.legend.LegendaryCustomization
-import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.premium.legend.asLegendaryCustomization
 
 data class ArticleDetailsUi(

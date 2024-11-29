@@ -30,8 +30,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -48,7 +46,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import java.text.NumberFormat
 import kotlinx.coroutines.launch
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnailCustomBorder
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons

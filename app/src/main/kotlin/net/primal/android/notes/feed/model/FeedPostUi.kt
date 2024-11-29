@@ -10,7 +10,6 @@ import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.notes.db.FeedPost
 import net.primal.android.premium.legend.LegendaryCustomization
-import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.stats.ui.EventZapUiModel
 import net.primal.android.stats.ui.asEventZapUiModel

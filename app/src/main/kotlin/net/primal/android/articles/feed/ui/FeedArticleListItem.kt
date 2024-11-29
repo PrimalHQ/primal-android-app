@@ -26,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
@@ -45,7 +44,6 @@ import coil.compose.SubcomposeAsyncImage
 import java.time.Instant
 import net.primal.android.R
 import net.primal.android.attachments.domain.findNearestOrNull
-import net.primal.android.core.compose.AvatarThumbnailCustomBorder
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.WrappedContentWithSuffix

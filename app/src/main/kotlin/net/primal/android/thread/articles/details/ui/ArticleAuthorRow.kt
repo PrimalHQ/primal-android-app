@@ -20,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -30,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.core.compose.AvatarThumbnailCustomBorder
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalFilledButton
@@ -221,7 +219,7 @@ fun PreviewArticleLegendaryAuthorRow() {
                     avatarGlow = true,
                     customBadge = true,
                     legendaryStyle = LegendaryStyle.SUN_FIRE,
-                )
+                ),
             )
         }
     }

@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnailCustomBorder
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.SnackbarErrorHandler
@@ -164,7 +163,7 @@ private fun PremiumHomeScreen(
                     legendaryStyle = state.avatarLegendaryCustomization?.legendaryStyle
                         ?: LegendaryStyle.NO_CUSTOMIZATION,
 
-                    )
+                )
 
                 if (state.membership.cohort2.isPremiumFree()) {
                     Text(

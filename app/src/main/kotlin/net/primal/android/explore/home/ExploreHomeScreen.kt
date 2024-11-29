@@ -39,7 +39,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -52,7 +51,6 @@ import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AppBarIcon
-import net.primal.android.core.compose.AvatarThumbnailCustomBorder
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.InvisibleAppBarIcon
 import net.primal.android.core.compose.PrimalDivider
@@ -81,7 +79,6 @@ import net.primal.android.feeds.domain.exploreMediaFeedSpec
 import net.primal.android.notes.feed.grid.MediaFeedGrid
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.LegendaryCustomization
-import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
