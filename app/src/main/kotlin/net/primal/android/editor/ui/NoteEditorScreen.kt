@@ -69,6 +69,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.ReplyingToText
 import net.primal.android.core.compose.TakePhotoIconButton
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
@@ -310,7 +311,7 @@ private fun NoteEditor(
         }
 
         Row {
-            AvatarThumbnail(
+            UniversalAvatarThumbnail(
                 modifier = Modifier
                     .drawWithCache {
                         onDrawBehind {
@@ -335,6 +336,7 @@ private fun NoteEditor(
                     .padding(top = 8.dp),
                 avatarSize = avatarSizeDp,
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
+                legendaryCustomization = state.activeAccountLegendaryCustomization,
             )
 
             NoteOutlinedTextField(

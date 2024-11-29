@@ -36,10 +36,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.FollowUnfollowButton
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
@@ -154,11 +154,12 @@ private fun ExplorePersonListItem(
                 modifier = Modifier.padding(horizontal = 12.dp),
                 verticalArrangement = Arrangement.Top,
             ) {
-                AvatarThumbnail(
+                UniversalAvatarThumbnail(
                     modifier = Modifier.padding(bottom = 24.dp),
                     avatarSize = 64.dp,
                     avatarCdnImage = person.profile.avatarCdnImage,
                     onClick = onItemClick,
+                    legendaryCustomization = person.profile.legendaryCustomization,
                 )
             }
 

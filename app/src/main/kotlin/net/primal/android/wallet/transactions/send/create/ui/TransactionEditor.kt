@@ -56,6 +56,7 @@ import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.UiDensityMode
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.detectUiDensityModeFromMaxHeight
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
@@ -388,10 +389,11 @@ private fun TransactionHeaderColumn(
                 )
             }
         } else {
-            AvatarThumbnail(
+            UniversalAvatarThumbnail(
                 modifier = Modifier.padding(vertical = verticalPadding.value),
                 avatarCdnImage = state.profileAvatarCdnImage,
                 avatarSize = avatarSize.value,
+                legendaryCustomization = state.profileLegendaryCustomization,
             )
         }
 
