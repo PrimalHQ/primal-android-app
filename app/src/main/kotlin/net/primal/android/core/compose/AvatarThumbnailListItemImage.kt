@@ -72,6 +72,10 @@ fun UniversalAvatarThumbnail(
     )
 }
 
+@Deprecated(
+    message = "This component is deprecated in favor of UniversalAvatarThumbnail",
+    replaceWith = ReplaceWith("UniversalAvatarThumbnail"),
+)
 @Composable
 fun AvatarThumbnail(
     modifier: Modifier = Modifier,
@@ -97,6 +101,10 @@ fun AvatarThumbnail(
     )
 }
 
+@Deprecated(
+    message = "This component is deprecated in favor of UniversalAvatarThumbnail",
+    replaceWith = ReplaceWith("UniversalAvatarThumbnail"),
+)
 @Composable
 fun AvatarThumbnailCustomBorder(
     modifier: Modifier = Modifier,
