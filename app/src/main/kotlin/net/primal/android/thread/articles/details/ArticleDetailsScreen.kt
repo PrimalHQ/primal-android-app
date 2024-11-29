@@ -447,9 +447,7 @@ private fun ArticleContentWithComments(
                     authorCdnImage = state.article.authorAvatarCdnImage,
                     authorDisplayName = state.article.authorDisplayName,
                     authorInternetIdentifier = state.article.authorInternetIdentifier,
-                    authorLegendAvatarGlow = state.article.authorLegendAvatarGlow,
-                    authorLegendCustomBadge = state.article.authorLegendCustomBadge,
-                    authorLegendaryStyle = state.article.authorLegendaryStyle,
+                    authorLegendaryCustomization = state.article.authorLegendaryCustomization,
                     onAuthorAvatarClick = { noteCallbacks.onProfileClick?.invoke(state.article.authorId) },
                     onFollowUnfollowClick = onFollowUnfollowClick,
                 )

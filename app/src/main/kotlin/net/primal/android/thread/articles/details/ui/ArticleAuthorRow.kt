@@ -32,8 +32,10 @@ import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AvatarThumbnailCustomBorder
 import net.primal.android.core.compose.NostrUserText
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.theme.AppTheme
 
@@ -44,9 +46,7 @@ fun ArticleAuthorRow(
     authorDisplayName: String,
     authorCdnImage: CdnImage? = null,
     authorInternetIdentifier: String? = null,
-    authorLegendAvatarGlow: Boolean = false,
-    authorLegendCustomBadge: Boolean = false,
-    authorLegendaryStyle: LegendaryStyle? = null,
+    authorLegendaryCustomization: LegendaryCustomization? = null,
     onAuthorAvatarClick: (() -> Unit)? = null,
     onFollowUnfollowClick: (() -> Unit)? = null,
 ) {
@@ -54,15 +54,11 @@ fun ArticleAuthorRow(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        AvatarThumbnailCustomBorder(
+        UniversalAvatarThumbnail(
             avatarSize = 42.dp,
             avatarCdnImage = authorCdnImage,
             onClick = onAuthorAvatarClick,
-            hasBorder = authorLegendAvatarGlow && authorLegendaryStyle != null,
-            borderBrush = when {
-                authorLegendaryStyle != null -> authorLegendaryStyle.brush
-                else -> Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
-            },
+            legendaryCustomization = authorLegendaryCustomization,
         )
 
         Column(
@@ -78,7 +74,11 @@ fun ArticleAuthorRow(
                     fontSize = 16.sp,
                     lineHeight = 16.sp,
                 ),
-                customBadgeStyle = if (authorLegendCustomBadge) authorLegendaryStyle else null,
+                customBadgeStyle = if (authorLegendaryCustomization?.customBadge == true) {
+                    authorLegendaryCustomization.legendaryStyle
+                } else {
+                    null
+                },
             )
 
             if (!authorInternetIdentifier.isNullOrBlank()) {
@@ -202,6 +202,26 @@ fun PreviewArticleAuthorRow() {
                 authorFollowed = true,
                 authorDisplayName = "miljan",
                 authorInternetIdentifier = "miljan@primal.net",
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewArticleLegendaryAuthorRow() {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+        Surface(modifier = Modifier.fillMaxWidth()) {
+            ArticleAuthorRow(
+                modifier = Modifier.fillMaxWidth(),
+                authorFollowed = true,
+                authorDisplayName = "miljan",
+                authorInternetIdentifier = "miljan@primal.net",
+                authorLegendaryCustomization = LegendaryCustomization(
+                    avatarGlow = true,
+                    customBadge = true,
+                    legendaryStyle = LegendaryStyle.SUN_FIRE,
+                )
             )
         }
     }

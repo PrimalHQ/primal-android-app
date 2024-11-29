@@ -30,9 +30,11 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AvatarThumbnailCustomBorder
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.ReplyingToText
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.WrappedContentWithSuffix
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.utils.formatNip05Identifier
+import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
@@ -49,9 +51,7 @@ fun FeedNoteHeader(
     authorAvatarVisible: Boolean = true,
     authorAvatarCdnImage: CdnImage? = null,
     authorInternetIdentifier: String? = null,
-    authorLegendAvatarGlow: Boolean = false,
-    authorLegendCustomBadge: Boolean = false,
-    authorLegendaryStyle: LegendaryStyle? = null,
+    authorLegendaryCustomization: LegendaryCustomization? = null,
     replyToAuthor: String? = null,
     label: String? = authorInternetIdentifier,
     labelStyle: TextStyle? = null,
@@ -68,15 +68,11 @@ fun FeedNoteHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (authorAvatarVisible) {
-            AvatarThumbnailCustomBorder(
+            UniversalAvatarThumbnail(
                 avatarCdnImage = authorAvatarCdnImage,
                 avatarSize = authorAvatarSize,
                 onClick = onAuthorAvatarClick,
-                hasBorder = authorLegendAvatarGlow && authorLegendaryStyle != null,
-                borderBrush = when {
-                    authorLegendaryStyle != null -> authorLegendaryStyle.brush
-                    else -> Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
-                },
+                legendaryCustomization = authorLegendaryCustomization,
             )
         }
 
@@ -107,7 +103,11 @@ fun FeedNoteHeader(
                         style = topRowTextStyle,
                         internetIdentifierBadgeSize = topRowTextStyle.fontSize.value.dp,
                         overflow = TextOverflow.Ellipsis,
-                        customBadgeStyle = if (authorLegendCustomBadge) authorLegendaryStyle else null,
+                        customBadgeStyle = if (authorLegendaryCustomization?.customBadge == true) {
+                            authorLegendaryCustomization.legendaryStyle
+                        } else {
+                            null
+                        },
                     )
                 },
                 suffixFixedContent = {
