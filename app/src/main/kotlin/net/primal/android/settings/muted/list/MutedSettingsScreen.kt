@@ -27,6 +27,7 @@ import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -119,9 +120,10 @@ fun MutedUserListItem(
             containerColor = AppTheme.colorScheme.surfaceVariant,
         ),
         leadingContent = {
-            AvatarThumbnail(
+            UniversalAvatarThumbnail(
                 avatarCdnImage = item.avatarCdnImage,
                 onClick = { onProfileClick(item.userId) },
+                legendaryCustomization = item.legendaryCustomization,
             )
         },
         headlineContent = {
