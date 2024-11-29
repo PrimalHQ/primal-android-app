@@ -88,36 +88,14 @@ fun FeedNoteHeader(
                 )
             }
 
-            WrappedContentWithSuffix(
-                wrappedContent = {
-                    NostrUserText(
-                        displayName = authorDisplayName,
-                        internetIdentifier = authorInternetIdentifier,
-                        annotatedStringSuffixBuilder = {
-                            append(suffixText)
-                        },
-                        style = topRowTextStyle,
-                        internetIdentifierBadgeSize = topRowTextStyle.fontSize.value.dp,
-                        overflow = TextOverflow.Ellipsis,
-                        customBadgeStyle = if (authorLegendaryCustomization?.customBadge == true) {
-                            authorLegendaryCustomization.legendaryStyle
-                        } else {
-                            null
-                        },
-                    )
-                },
-                suffixFixedContent = {
-                    if (postTimestamp != null) {
-                        Text(
-                            text = " • ${postTimestamp.asBeforeNowFormat()}",
-                            textAlign = TextAlign.Center,
-                            maxLines = 1,
-                            style = topRowTextStyle,
-                            fontSize = (displaySettings.contentAppearance.noteUsernameSize.value).sp,
-                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                        )
-                    }
-                },
+            NoteAuthorBadgeAndTimestampSection(
+                authorDisplayName = authorDisplayName,
+                authorInternetIdentifier = authorInternetIdentifier,
+                suffixText = suffixText,
+                topRowTextStyle = topRowTextStyle,
+                authorLegendaryCustomization = authorLegendaryCustomization,
+                postTimestamp = postTimestamp,
+                displaySettings = displaySettings,
             )
 
             if (!label.isNullOrEmpty() && !singleLine) {
@@ -140,6 +118,49 @@ fun FeedNoteHeader(
             }
         }
     }
+}
+
+@Composable
+private fun NoteAuthorBadgeAndTimestampSection(
+    authorDisplayName: String,
+    authorInternetIdentifier: String?,
+    suffixText: AnnotatedString,
+    topRowTextStyle: TextStyle,
+    authorLegendaryCustomization: LegendaryCustomization?,
+    postTimestamp: Instant?,
+    displaySettings: ContentDisplaySettings,
+) {
+    WrappedContentWithSuffix(
+        wrappedContent = {
+            NostrUserText(
+                displayName = authorDisplayName,
+                internetIdentifier = authorInternetIdentifier,
+                annotatedStringSuffixBuilder = {
+                    append(suffixText)
+                },
+                style = topRowTextStyle,
+                internetIdentifierBadgeSize = topRowTextStyle.fontSize.value.dp,
+                overflow = TextOverflow.Ellipsis,
+                customBadgeStyle = if (authorLegendaryCustomization?.customBadge == true) {
+                    authorLegendaryCustomization.legendaryStyle
+                } else {
+                    null
+                },
+            )
+        },
+        suffixFixedContent = {
+            if (postTimestamp != null) {
+                Text(
+                    text = " • ${postTimestamp.asBeforeNowFormat()}",
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    style = topRowTextStyle,
+                    fontSize = (displaySettings.contentAppearance.noteUsernameSize.value).sp,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                )
+            }
+        },
+    )
 }
 
 @Preview

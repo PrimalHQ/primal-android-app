@@ -60,6 +60,7 @@ import net.primal.android.core.compose.icons.primaliconpack.LightMode
 import net.primal.android.core.compose.icons.primaliconpack.QrCode
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.utils.formatNip05Identifier
+import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.theme.AppTheme
@@ -118,10 +119,8 @@ fun PrimalDrawer(
         ) {
             DrawerHeader(
                 userAccount = state.activeUserAccount,
-                customBadge = state.customBadge,
-                avatarGlow = state.avatarGlow,
-                legendaryStyle = state.legendaryStyle,
                 onQrCodeClick = onQrCodeClick,
+                legendaryCustomization = state.legendaryCustomization,
             )
 
             DrawerMenu(
@@ -150,9 +149,7 @@ fun PrimalDrawer(
 @Composable
 private fun DrawerHeader(
     userAccount: UserAccount?,
-    customBadge: Boolean,
-    avatarGlow: Boolean,
-    legendaryStyle: LegendaryStyle?,
+    legendaryCustomization: LegendaryCustomization?,
     onQrCodeClick: () -> Unit,
 ) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
@@ -169,7 +166,7 @@ private fun DrawerHeader(
             },
             avatarSize = 52.dp,
             avatarCdnImage = userAccount?.avatarCdnImage,
-            legendaryCustomization = userAccount?.primalLegendProfile?.asLegendaryCustomization(),
+            legendaryCustomization = legendaryCustomization,
         )
 
         NostrUserText(
@@ -181,7 +178,11 @@ private fun DrawerHeader(
                 top.linkTo(avatarRef.bottom, margin = 16.dp)
                 width = Dimension.preferredValue(220.dp)
             },
-            customBadgeStyle = if (customBadge) legendaryStyle else null,
+            customBadgeStyle = if (legendaryCustomization?.customBadge == true) {
+                legendaryCustomization.legendaryStyle
+            } else {
+                null
+            },
         )
 
         IconButton(

@@ -144,7 +144,7 @@ private fun AvatarThumbnailListItemImage(
         listOf(AppTheme.colorScheme.primary, AppTheme.colorScheme.primary),
     ),
     borderSize: Dp = 2.dp,
-    hasGlow: Boolean = false,
+    @Suppress("UnusedParameter") hasGlow: Boolean = false,
     backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onClick: (() -> Unit)? = null,
     defaultAvatar: @Composable () -> Unit,

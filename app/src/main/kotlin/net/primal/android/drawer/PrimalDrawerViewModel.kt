@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.premium.legend.LegendaryStyle
+import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.theme.active.ActiveThemeStore
 import net.primal.android.theme.domain.PrimalTheme
@@ -82,9 +83,7 @@ class PrimalDrawerViewModel @Inject constructor(
             profileRepository.observeProfile(profileId = activeAccountStore.activeUserId()).collect {
                 setState {
                     copy(
-                        avatarGlow = it.metadata?.primalLegendProfile?.avatarGlow == true,
-                        customBadge = it.metadata?.primalLegendProfile?.customBadge == true,
-                        legendaryStyle = LegendaryStyle.valueById(it.metadata?.primalLegendProfile?.styleId),
+                        legendaryCustomization = it.metadata?.primalLegendProfile?.asLegendaryCustomization(),
                     )
                 }
             }
