@@ -1,7 +1,6 @@
 package net.primal.android.drawer
 
 import net.primal.android.premium.legend.LegendaryCustomization
-import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.user.domain.Badges
 import net.primal.android.user.domain.UserAccount
 
