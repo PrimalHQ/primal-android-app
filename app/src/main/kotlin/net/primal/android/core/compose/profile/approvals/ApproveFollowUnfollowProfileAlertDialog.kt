@@ -1,4 +1,4 @@
-package net.primal.android.profile.details.ui
+package net.primal.android.core.compose.profile.approvals
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
@@ -9,7 +9,7 @@ import net.primal.android.R
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun ConfirmFollowUnfollowProfileAlertDialog(
+fun ApproveFollowUnfollowProfileAlertDialog(
     onClose: () -> Unit,
     onActionConfirmed: () -> Unit,
     profileAction: ProfileAction,
@@ -23,6 +23,7 @@ fun ConfirmFollowUnfollowProfileAlertDialog(
                 negative = stringResource(id = R.string.context_confirm_follow_negative),
             )
         }
+
         ProfileAction.Unfollow -> {
             ApprovalMessages(
                 title = stringResource(id = R.string.context_confirm_unfollow_title),

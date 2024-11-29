@@ -45,12 +45,12 @@ import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.button.FollowUnfollowButton
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.compose.profile.approvals.ApproveFollowUnfollowProfileAlertDialog
+import net.primal.android.core.compose.profile.approvals.ProfileAction
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.utils.shortened
 import net.primal.android.explore.api.model.ExplorePeopleData
-import net.primal.android.profile.details.ui.ConfirmFollowUnfollowProfileAlertDialog
-import net.primal.android.profile.details.ui.ProfileAction
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -158,7 +158,7 @@ private fun ApprovalAlertDialogs(
     lastFollowUnfollowProfileId: String?,
 ) {
     if (state.shouldApproveFollow) {
-        ConfirmFollowUnfollowProfileAlertDialog(
+        ApproveFollowUnfollowProfileAlertDialog(
             onClose = { eventPublisher(ExplorePeopleContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
             onActionConfirmed = {
                 lastFollowUnfollowProfileId?.let {
@@ -174,7 +174,7 @@ private fun ApprovalAlertDialogs(
         )
     }
     if (state.shouldApproveUnfollow) {
-        ConfirmFollowUnfollowProfileAlertDialog(
+        ApproveFollowUnfollowProfileAlertDialog(
             onClose = { eventPublisher(ExplorePeopleContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
             onActionConfirmed = {
                 lastFollowUnfollowProfileId?.let {

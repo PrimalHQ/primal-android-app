@@ -29,10 +29,10 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.profile.approvals.ApproveFollowUnfollowProfileAlertDialog
+import net.primal.android.core.compose.profile.approvals.ProfileAction
 import net.primal.android.explore.search.ui.FollowUnfollowVisibility
 import net.primal.android.explore.search.ui.UserProfileListItem
-import net.primal.android.profile.details.ui.ConfirmFollowUnfollowProfileAlertDialog
-import net.primal.android.profile.details.ui.ProfileAction
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.profile.follows.ProfileFollowsContract.UiState.FollowsError
 
@@ -136,7 +136,7 @@ private fun FollowApprovalAlertDialogs(
     lastFollowUnfollowProfileId: String?,
 ) {
     if (state.shouldApproveFollow) {
-        ConfirmFollowUnfollowProfileAlertDialog(
+        ApproveFollowUnfollowProfileAlertDialog(
             onClose = { eventPublisher(ProfileFollowsContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
             onActionConfirmed = {
                 lastFollowUnfollowProfileId?.let {
@@ -152,7 +152,7 @@ private fun FollowApprovalAlertDialogs(
         )
     }
     if (state.shouldApproveUnfollow) {
-        ConfirmFollowUnfollowProfileAlertDialog(
+        ApproveFollowUnfollowProfileAlertDialog(
             onClose = { eventPublisher(ProfileFollowsContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
             onActionConfirmed = {
                 lastFollowUnfollowProfileId?.let {
