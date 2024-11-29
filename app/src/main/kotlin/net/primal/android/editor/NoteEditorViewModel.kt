@@ -71,7 +71,7 @@ class NoteEditorViewModel @AssistedInject constructor(
 ) : ViewModel() {
 
     private val replyToNoteId = args.replyToNoteId
-    private val replyToArticleNaddr = args.replyToArticleNaddr?.let(Nip19TLV::parseAsNaddr)
+    private val replyToArticleNaddr = args.replyToArticleNaddr?.let(Nip19TLV::parseUriAsNaddrOrNull)
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()

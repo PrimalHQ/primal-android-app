@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 46,
-    "identityHash": "0e3be72662ad114f97ee4b849358fcf2",
+    "version": 47,
+    "identityHash": "3b388fe04b85780703286c11bae8a02e",
     "entities": [
       {
         "tableName": "PostData",
@@ -342,7 +342,7 @@
       },
       {
         "tableName": "EventZap",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eventId` TEXT NOT NULL, `zapSenderId` TEXT NOT NULL, `zapReceiverId` TEXT NOT NULL, `zapRequestAt` INTEGER NOT NULL, `zapReceiptAt` INTEGER NOT NULL, `amountInBtc` REAL NOT NULL, `message` TEXT, `zapSenderDisplayName` TEXT, `zapSenderHandle` TEXT, `zapSenderInternetIdentifier` TEXT, `zapSenderAvatarCdnImage` TEXT, PRIMARY KEY(`zapSenderId`, `eventId`, `zapRequestAt`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eventId` TEXT NOT NULL, `zapSenderId` TEXT NOT NULL, `zapReceiverId` TEXT NOT NULL, `zapRequestAt` INTEGER NOT NULL, `zapReceiptAt` INTEGER NOT NULL, `amountInBtc` REAL NOT NULL, `message` TEXT, `zapSenderDisplayName` TEXT, `zapSenderHandle` TEXT, `zapSenderInternetIdentifier` TEXT, `zapSenderAvatarCdnImage` TEXT, `zapSenderPrimalLegendProfile` TEXT, PRIMARY KEY(`zapSenderId`, `eventId`, `zapRequestAt`))",
         "fields": [
           {
             "fieldPath": "eventId",
@@ -407,6 +407,12 @@
           {
             "fieldPath": "zapSenderAvatarCdnImage",
             "columnName": "zapSenderAvatarCdnImage",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "zapSenderPrimalLegendProfile",
+            "columnName": "zapSenderPrimalLegendProfile",
             "affinity": "TEXT",
             "notNull": false
           }
@@ -494,7 +500,7 @@
       },
       {
         "tableName": "NoteNostrUri",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`noteId` TEXT NOT NULL, `uri` TEXT NOT NULL, `type` TEXT NOT NULL, `refEvent_alt` TEXT, `refHighlight_text` TEXT, `refHighlight_aTag` TEXT, `refHighlight_eventId` TEXT, `refHighlight_authorId` TEXT, `refNote_postId` TEXT, `refNote_createdAt` INTEGER, `refNote_content` TEXT, `refNote_authorId` TEXT, `refNote_authorName` TEXT, `refNote_authorAvatarCdnImage` TEXT, `refNote_authorInternetIdentifier` TEXT, `refNote_authorLightningAddress` TEXT, `refNote_attachments` TEXT, `refNote_nostrUris` TEXT, `refArticle_naddr` TEXT, `refArticle_aTag` TEXT, `refArticle_eventId` TEXT, `refArticle_articleId` TEXT, `refArticle_articleTitle` TEXT, `refArticle_authorId` TEXT, `refArticle_authorName` TEXT, `refArticle_authorAvatarCdnImage` TEXT, `refArticle_createdAt` INTEGER, `refArticle_raw` TEXT, `refArticle_articleImageCdnImage` TEXT, `refArticle_articleReadingTimeInMinutes` INTEGER, `refUser_userId` TEXT, `refUser_handle` TEXT, PRIMARY KEY(`noteId`, `uri`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`noteId` TEXT NOT NULL, `uri` TEXT NOT NULL, `type` TEXT NOT NULL, `refEvent_alt` TEXT, `refHighlight_text` TEXT, `refHighlight_eventId` TEXT, `refHighlight_authorId` TEXT, `refHighlight_aTag` TEXT, `refNote_postId` TEXT, `refNote_createdAt` INTEGER, `refNote_content` TEXT, `refNote_authorId` TEXT, `refNote_authorName` TEXT, `refNote_authorAvatarCdnImage` TEXT, `refNote_authorInternetIdentifier` TEXT, `refNote_authorLightningAddress` TEXT, `refNote_attachments` TEXT, `refNote_nostrUris` TEXT, `refArticle_naddr` TEXT, `refArticle_aTag` TEXT, `refArticle_eventId` TEXT, `refArticle_articleId` TEXT, `refArticle_articleTitle` TEXT, `refArticle_authorId` TEXT, `refArticle_authorName` TEXT, `refArticle_authorAvatarCdnImage` TEXT, `refArticle_createdAt` INTEGER, `refArticle_raw` TEXT, `refArticle_articleImageCdnImage` TEXT, `refArticle_articleReadingTimeInMinutes` INTEGER, `refUser_userId` TEXT, `refUser_handle` TEXT, PRIMARY KEY(`noteId`, `uri`))",
         "fields": [
           {
             "fieldPath": "noteId",
@@ -527,12 +533,6 @@
             "notNull": false
           },
           {
-            "fieldPath": "referencedHighlight.aTag",
-            "columnName": "refHighlight_aTag",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
             "fieldPath": "referencedHighlight.eventId",
             "columnName": "refHighlight_eventId",
             "affinity": "TEXT",
@@ -541,6 +541,12 @@
           {
             "fieldPath": "referencedHighlight.authorId",
             "columnName": "refHighlight_authorId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "referencedHighlight.aTag",
+            "columnName": "refHighlight_aTag",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -1777,7 +1783,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0e3be72662ad114f97ee4b849358fcf2')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3b388fe04b85780703286c11bae8a02e')"
     ]
   }
 }

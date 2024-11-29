@@ -8,30 +8,15 @@ import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.editor.domain.NoteAttachment
 
-fun List<JsonArray>.findFirstEventId(): String? {
-    val postTag = firstOrNull { it.isEventIdTag() }
-    return postTag?.getTagValueOrNull()
-}
+fun List<JsonArray>.findFirstEventId() = firstOrNull { it.isEventIdTag() }?.getTagValueOrNull()
 
-fun List<JsonArray>.findFirstProfileId(): String? {
-    val postAuthorTag = firstOrNull { it.isPubKeyTag() }
-    return postAuthorTag?.getTagValueOrNull()
-}
+fun List<JsonArray>.findFirstProfileId() = firstOrNull { it.isPubKeyTag() }?.getTagValueOrNull()
 
-fun List<JsonArray>.findFirstZapRequest(): String? {
-    val zapRequestTag = firstOrNull { it.isDescriptionTag() }
-    return zapRequestTag?.getTagValueOrNull()
-}
+fun List<JsonArray>.findFirstZapRequest() = firstOrNull { it.isDescriptionTag() }?.getTagValueOrNull()
 
-fun List<JsonArray>.findFirstZapAmount(): String? {
-    val zapRequestTag = firstOrNull { it.isAmountTag() }
-    return zapRequestTag?.getTagValueOrNull()
-}
+fun List<JsonArray>.findFirstZapAmount() = firstOrNull { it.isAmountTag() }?.getTagValueOrNull()
 
-fun List<JsonArray>.findFirstBolt11(): String? {
-    val zapRequestTag = firstOrNull { it.isBolt11Tag() }
-    return zapRequestTag?.getTagValueOrNull()
-}
+fun List<JsonArray>.findFirstBolt11() = firstOrNull { it.isBolt11Tag() }?.getTagValueOrNull()
 
 fun List<JsonArray>.findFirstTitle() = firstOrNull { it.isTitleTag() }?.getTagValueOrNull()
 
@@ -42,6 +27,8 @@ fun List<JsonArray>.findFirstImage() = firstOrNull { it.isImageTag() }?.getTagVa
 fun List<JsonArray>.findFirstPublishedAt() = firstOrNull { it.isPublishedAtTag() }?.getTagValueOrNull()
 
 fun List<JsonArray>.findFirstIdentifier() = firstOrNull { it.isIdentifierTag() }?.getTagValueOrNull()
+
+fun List<JsonArray>.findFirstAltDescription() = firstOrNull { it.isAltTag() }?.getTagValueOrNull()
 
 fun JsonArray.isBolt11Tag() = getOrNull(0)?.jsonPrimitive?.content == "bolt11"
 
@@ -57,11 +44,15 @@ fun JsonArray.isHashtagTag() = getOrNull(0)?.jsonPrimitive?.content == "t"
 
 fun JsonArray.isIdentifierTag() = getOrNull(0)?.jsonPrimitive?.content == "d"
 
+fun JsonArray.isATag() = getOrNull(0)?.jsonPrimitive?.content == "a"
+
 fun JsonArray.isTitleTag() = getOrNull(0)?.jsonPrimitive?.content == "title"
 
 fun JsonArray.isSummaryTag() = getOrNull(0)?.jsonPrimitive?.content == "summary"
 
 fun JsonArray.isImageTag() = getOrNull(0)?.jsonPrimitive?.content == "image"
+
+fun JsonArray.isAltTag() = getOrNull(0)?.jsonPrimitive?.content == "alt"
 
 fun JsonArray.isPublishedAtTag() = getOrNull(0)?.jsonPrimitive?.content == "published_at"
 

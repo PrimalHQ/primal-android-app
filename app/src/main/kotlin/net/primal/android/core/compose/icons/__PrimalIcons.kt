@@ -30,6 +30,7 @@ import net.primal.android.core.compose.icons.primaliconpack.DarkMode
 import net.primal.android.core.compose.icons.primaliconpack.Delete
 import net.primal.android.core.compose.icons.primaliconpack.Directory
 import net.primal.android.core.compose.icons.primaliconpack.Discuss
+import net.primal.android.core.compose.icons.primaliconpack.Document
 import net.primal.android.core.compose.icons.primaliconpack.Download
 import net.primal.android.core.compose.icons.primaliconpack.Downloads
 import net.primal.android.core.compose.icons.primaliconpack.DownloadsFilled
@@ -283,6 +284,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             DrawerSettings,
             DrawerSignOut,
             OnboardingZapsExplained,
+            Document,
         )
         return __PrimalIcons!!
     }

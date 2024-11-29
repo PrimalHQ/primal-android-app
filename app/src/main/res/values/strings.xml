@@ -439,6 +439,9 @@
     <string name="feed_lightning_invoice_expires_in">Expires: %1$s</string>
     <string name="feed_lightning_invoice_expired">This invoice has expired</string>
 
+    <string name="feed_missing_event_alt_description_note">Mentioned note not found.</string>
+    <string name="feed_missing_event_alt_description_event">Mentioned event not found.</string>
+
     <string name="feed_paywall_title">This is a Primal Premium feed.</string>
     <string name="feed_paywall_description">Buy a Subscription to become a Nostr power user and support our work:</string>
     <string name="feed_paywall_get_premium_button">Get Primal Premium</string>

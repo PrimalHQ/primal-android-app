@@ -23,6 +23,7 @@ enum class NostrEventKind(val value: Int) {
     Reporting(value = 1984),
     ZapRequest(value = 9734),
     Zap(value = 9735),
+    Highlight(value = 9802),
     MuteList(value = 10_000),
     PinList(value = 10_001),
     RelayListMetadata(value = 10_002),

@@ -67,7 +67,26 @@ class Nip19TLVTest {
     }
 
     @Test
-    fun parseAsNaddr_returnsProperValuesForNaddr1() {
+    fun parseUriAsNaddrOrNull_returnsProperValuesForNaddr1Uri() {
+        val naddr = "nostr:naddr1qqw9x6rfwpcxjmn894fks6ts09shyepdg3ty6tthv4unxmf5qy28wumn8ghj7un9d3shjtnyv" +
+            "9kh2uewd9hsyg86np9a0kajstc8u9h846rmy6320wdepdeydfz8w8cv7kh9sqv02gpsgqqqw4rsgwawdk"
+
+        val expectedIdentifier = "Shipping-Shipyard-DVM-wey3m4"
+        val expectedRelays = listOf("wss://relay.damus.io")
+        val expectedProfileId = "fa984bd7dbb282f07e16e7ae87b26a2a7b9b90b7246a44771f0cf5ae58018f52"
+        val expectedKind = 30023
+
+        val result = Nip19TLV.parseUriAsNaddrOrNull(naddr)
+        result.shouldNotBeNull()
+
+        result.identifier shouldBe expectedIdentifier
+        result.relays shouldBe expectedRelays
+        result.userId shouldBe expectedProfileId
+        result.kind shouldBe expectedKind
+    }
+
+    @Test
+    fun parseUriAsNaddrOrNull_returnsProperValuesForNaddr1WithoutNostrScheme() {
         val naddr = "naddr1qqw9x6rfwpcxjmn894fks6ts09shyepdg3ty6tthv4unxmf5qy28wumn8ghj7un9d3shjtnyv" +
             "9kh2uewd9hsyg86np9a0kajstc8u9h846rmy6320wdepdeydfz8w8cv7kh9sqv02gpsgqqqw4rsgwawdk"
 
@@ -76,7 +95,7 @@ class Nip19TLVTest {
         val expectedProfileId = "fa984bd7dbb282f07e16e7ae87b26a2a7b9b90b7246a44771f0cf5ae58018f52"
         val expectedKind = 30023
 
-        val result = Nip19TLV.parseAsNaddr(naddr)
+        val result = Nip19TLV.parseUriAsNaddrOrNull(naddr)
         result.shouldNotBeNull()
 
         result.identifier shouldBe expectedIdentifier

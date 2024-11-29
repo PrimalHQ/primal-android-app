@@ -3,6 +3,8 @@ package net.primal.android.notes.repository
 import androidx.room.withTransaction
 import net.primal.android.attachments.ext.flatMapPostsAsNoteAttachmentPO
 import net.primal.android.core.ext.asMapByKey
+import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.nostr.db.eventRelayHintsUpserter
 import net.primal.android.nostr.ext.flatMapAsEventHintsPO
@@ -21,6 +23,7 @@ import net.primal.android.nostr.ext.mapNotNullAsRepostDataPO
 import net.primal.android.nostr.ext.mapReferencedEventsAsArticleDataPO
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
+import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.notes.api.model.FeedResponse
 import net.primal.android.thread.db.ArticleCommentCrossRef
 import net.primal.android.thread.db.NoteConversationCrossRef
@@ -62,7 +65,10 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
         videoThumbnails = videoThumbnails,
     )
 
+    val refEvents = referencedEvents.mapNotNull { NostrJson.decodeFromStringOrNull<NostrEvent>(it.content) }
+
     val noteNostrUris = allPosts.flatMapPostsAsNoteNostrUriPO(
+        eventIdToNostrEvent = refEvents.associateBy { it.id },
         postIdToPostDataMap = allPosts.groupBy { it.postId }.mapValues { it.value.first() },
         articleIdToArticle = allArticles.groupBy { it.articleId }.mapValues { it.value.first() },
         profileIdToProfileDataMap = profileIdToProfileDataMap,

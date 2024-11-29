@@ -65,6 +65,7 @@ class ExploreRepository @Inject constructor(
 
             val notes = response.noteEvents.mapAsPostDataPO(referencedPosts = emptyList())
             val nostrUris = notes.flatMapPostsAsNoteNostrUriPO(
+                eventIdToNostrEvent = emptyMap(),
                 postIdToPostDataMap = emptyMap(),
                 articleIdToArticle = emptyMap(),
                 profileIdToProfileDataMap = profilesMap,

@@ -15,6 +15,7 @@ import net.primal.android.attachments.db.NoteNostrUri
 import net.primal.android.attachments.db.serialization.AttachmentTypeConverters
 import net.primal.android.bookmarks.db.PublicBookmark
 import net.primal.android.bookmarks.db.PublicBookmarkDao
+import net.primal.android.core.serialization.room.JsonTypeConverters
 import net.primal.android.core.serialization.room.ListsTypeConverters
 import net.primal.android.explore.db.TrendingTopic
 import net.primal.android.explore.db.TrendingTopicDao
@@ -89,11 +90,12 @@ import net.primal.android.wallet.db.WalletTransactionData
         ArticleCommentCrossRef::class,
         ArticleFeedCrossRef::class,
     ],
-    version = 46,
+    version = 47,
     exportSchema = true,
 )
 @TypeConverters(
     ListsTypeConverters::class,
+    JsonTypeConverters::class,
     AttachmentTypeConverters::class,
     ProfileTypeConverters::class,
 )
