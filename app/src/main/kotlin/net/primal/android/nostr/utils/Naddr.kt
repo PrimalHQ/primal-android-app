@@ -11,6 +11,7 @@ data class Naddr(
     val relays: List<String> = emptyList(),
 )
 
+@Suppress("MagicNumber")
 fun JsonArray.aTagToNaddr(): Naddr? {
     return if (this.isATag()) {
         val value = getOrNull(1)?.jsonPrimitive?.content
