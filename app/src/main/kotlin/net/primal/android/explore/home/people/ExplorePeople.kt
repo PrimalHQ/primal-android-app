@@ -43,7 +43,6 @@ import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.button.FollowUnfollowButton
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.approvals.ApproveFollowUnfollowProfileAlertDialog
-import net.primal.android.core.compose.profile.approvals.ProfileAction
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.utils.shortened
@@ -85,20 +84,22 @@ fun ExplorePeople(
 ) {
     if (state.shouldApproveProfileAction != null) {
         ApproveFollowUnfollowProfileAlertDialog(
-            profileAction = state.shouldApproveProfileAction,
-            onActionApproved = {
-                val event = when (state.shouldApproveProfileAction) {
-                    is ProfileAction.Follow -> ExplorePeopleContract.UiEvent.FollowUser(
+            profileApproval = state.shouldApproveProfileAction,
+            onFollowApproved = {
+                eventPublisher(
+                    ExplorePeopleContract.UiEvent.FollowUser(
                         userId = state.shouldApproveProfileAction.profileId,
                         forceUpdate = true,
-                    )
-
-                    is ProfileAction.Unfollow -> ExplorePeopleContract.UiEvent.UnfollowUser(
+                    ),
+                )
+            },
+            onUnfollowApproved = {
+                eventPublisher(
+                    ExplorePeopleContract.UiEvent.UnfollowUser(
                         userId = state.shouldApproveProfileAction.profileId,
                         forceUpdate = true,
-                    )
-                }
-                eventPublisher(event)
+                    ),
+                )
             },
             onClose = { eventPublisher(ExplorePeopleContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
         )

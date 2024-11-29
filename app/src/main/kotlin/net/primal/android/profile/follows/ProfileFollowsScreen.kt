@@ -26,7 +26,6 @@ import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholde
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.profile.approvals.ApproveFollowUnfollowProfileAlertDialog
-import net.primal.android.core.compose.profile.approvals.ProfileAction
 import net.primal.android.explore.search.ui.FollowUnfollowVisibility
 import net.primal.android.explore.search.ui.UserProfileListItem
 import net.primal.android.profile.domain.ProfileFollowsType
@@ -74,20 +73,22 @@ private fun ProfileFollowsScreen(
 
     if (state.shouldApproveProfileAction != null) {
         ApproveFollowUnfollowProfileAlertDialog(
-            profileAction = state.shouldApproveProfileAction,
-            onActionApproved = {
-                val event = when (state.shouldApproveProfileAction) {
-                    is ProfileAction.Follow -> ProfileFollowsContract.UiEvent.FollowProfile(
+            profileApproval = state.shouldApproveProfileAction,
+            onFollowApproved = {
+                eventPublisher(
+                    ProfileFollowsContract.UiEvent.FollowProfile(
                         profileId = state.shouldApproveProfileAction.profileId,
                         forceUpdate = true,
-                    )
-
-                    is ProfileAction.Unfollow -> ProfileFollowsContract.UiEvent.UnfollowProfile(
+                    ),
+                )
+            },
+            onUnfollowApproved = {
+                eventPublisher(
+                    ProfileFollowsContract.UiEvent.UnfollowProfile(
                         profileId = state.shouldApproveProfileAction.profileId,
                         forceUpdate = true,
-                    )
-                }
-                eventPublisher(event)
+                    ),
+                )
             },
             onClose = { eventPublisher(ProfileFollowsContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
         )

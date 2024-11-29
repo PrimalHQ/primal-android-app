@@ -10,12 +10,13 @@ import net.primal.android.theme.AppTheme
 
 @Composable
 fun ApproveFollowUnfollowProfileAlertDialog(
-    profileAction: ProfileAction,
-    onActionApproved: () -> Unit,
+    profileApproval: ProfileApproval,
+    onFollowApproved: () -> Unit,
+    onUnfollowApproved: () -> Unit,
     onClose: () -> Unit,
 ) {
-    val messages = when (profileAction) {
-        is ProfileAction.Follow -> {
+    val messages = when (profileApproval) {
+        is ProfileApproval.Follow -> {
             ApprovalMessages(
                 title = stringResource(id = R.string.context_confirm_follow_title),
                 text = stringResource(id = R.string.context_confirm_follow_text),
@@ -24,7 +25,7 @@ fun ApproveFollowUnfollowProfileAlertDialog(
             )
         }
 
-        is ProfileAction.Unfollow -> {
+        is ProfileApproval.Unfollow -> {
             ApprovalMessages(
                 title = stringResource(id = R.string.context_confirm_unfollow_title),
                 text = stringResource(id = R.string.context_confirm_unfollow_text),
@@ -54,7 +55,12 @@ fun ApproveFollowUnfollowProfileAlertDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onActionApproved) {
+            TextButton(
+                onClick = when (profileApproval) {
+                    is ProfileApproval.Follow -> onFollowApproved
+                    is ProfileApproval.Unfollow -> onUnfollowApproved
+                },
+            ) {
                 Text(
                     text = messages.positive,
                 )
@@ -70,7 +76,7 @@ private data class ApprovalMessages(
     val negative: String,
 )
 
-sealed class ProfileAction(open val profileId: String) {
-    data class Follow(override val profileId: String) : ProfileAction(profileId)
-    data class Unfollow(override val profileId: String) : ProfileAction(profileId)
+sealed class ProfileApproval(open val profileId: String) {
+    data class Follow(override val profileId: String) : ProfileApproval(profileId)
+    data class Unfollow(override val profileId: String) : ProfileApproval(profileId)
 }

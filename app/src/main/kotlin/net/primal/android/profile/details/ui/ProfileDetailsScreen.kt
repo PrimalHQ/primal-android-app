@@ -64,7 +64,6 @@ import net.primal.android.articles.feed.ArticleFeedList
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.approvals.ApproveFollowUnfollowProfileAlertDialog
-import net.primal.android.core.compose.profile.approvals.ProfileAction
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
@@ -301,20 +300,22 @@ fun ProfileDetailsScreen(
 
     if (state.shouldApproveProfileAction != null) {
         ApproveFollowUnfollowProfileAlertDialog(
-            profileAction = state.shouldApproveProfileAction,
-            onActionApproved = {
-                val event = when (state.shouldApproveProfileAction) {
-                    is ProfileAction.Follow -> ProfileDetailsContract.UiEvent.FollowAction(
+            profileApproval = state.shouldApproveProfileAction,
+            onFollowApproved = {
+                eventPublisher(
+                    ProfileDetailsContract.UiEvent.FollowAction(
                         profileId = state.shouldApproveProfileAction.profileId,
                         forceUpdate = true,
-                    )
-
-                    is ProfileAction.Unfollow -> ProfileDetailsContract.UiEvent.UnfollowAction(
+                    ),
+                )
+            },
+            onUnfollowApproved = {
+                eventPublisher(
+                    ProfileDetailsContract.UiEvent.UnfollowAction(
                         profileId = state.shouldApproveProfileAction.profileId,
                         forceUpdate = true,
-                    )
-                }
-                eventPublisher(event)
+                    ),
+                )
             },
             onClose = {
                 eventPublisher(ProfileDetailsContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog)

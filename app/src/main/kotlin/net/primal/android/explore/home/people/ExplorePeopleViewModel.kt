@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.core.compose.profile.approvals.ProfileAction
+import net.primal.android.core.compose.profile.approvals.ProfileApproval
 import net.primal.android.core.errors.UiError
 import net.primal.android.explore.home.people.ExplorePeopleContract.UiEvent
 import net.primal.android.explore.home.people.ExplorePeopleContract.UiState
@@ -107,7 +107,11 @@ class ExplorePeopleViewModel @Inject constructor(
                             setState { copy(error = UiError.FailedToFollowUser(error)) }
 
                         is ProfileRepository.FollowListNotFound ->
-                            setState { copy(shouldApproveProfileAction = ProfileAction.Follow(profileId = profileId)) }
+                            setState {
+                                copy(
+                                    shouldApproveProfileAction = ProfileApproval.Follow(profileId = profileId),
+                                )
+                            }
 
                         is MissingRelaysException ->
                             setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
@@ -141,7 +145,7 @@ class ExplorePeopleViewModel @Inject constructor(
                         is ProfileRepository.FollowListNotFound ->
                             setState {
                                 copy(
-                                    shouldApproveProfileAction = ProfileAction.Unfollow(profileId = profileId),
+                                    shouldApproveProfileAction = ProfileApproval.Unfollow(profileId = profileId),
                                 )
                             }
 

@@ -1,6 +1,6 @@
 package net.primal.android.profile.details
 
-import net.primal.android.core.compose.profile.approvals.ProfileAction
+import net.primal.android.core.compose.profile.approvals.ProfileApproval
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.core.errors.UiError
@@ -27,7 +27,7 @@ interface ProfileDetailsContract {
             ProfileFeedSpec.AuthoredMedia,
         ),
         val error: ProfileError? = null,
-        val shouldApproveProfileAction: ProfileAction? = null,
+        val shouldApproveProfileAction: ProfileApproval? = null,
         val zapError: UiError? = null,
         val zappingState: ZappingState = ZappingState(),
     ) {

@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.core.compose.profile.approvals.ProfileAction
+import net.primal.android.core.compose.profile.approvals.ProfileApproval
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileStatsUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
@@ -331,7 +331,11 @@ class ProfileDetailsViewModel @Inject constructor(
             } catch (error: ProfileRepository.FollowListNotFound) {
                 Timber.w(error)
                 updateStateProfileAsUnfollowed()
-                setState { copy(shouldApproveProfileAction = ProfileAction.Follow(profileId = followAction.profileId)) }
+                setState {
+                    copy(
+                        shouldApproveProfileAction = ProfileApproval.Follow(profileId = followAction.profileId),
+                    )
+                }
             }
         }
 
@@ -361,7 +365,7 @@ class ProfileDetailsViewModel @Inject constructor(
                 updateStateProfileAsFollowed()
                 setState {
                     copy(
-                        shouldApproveProfileAction = ProfileAction.Unfollow(profileId = unfollowAction.profileId),
+                        shouldApproveProfileAction = ProfileApproval.Unfollow(profileId = unfollowAction.profileId),
                     )
                 }
             }
