@@ -47,6 +47,7 @@ import net.primal.android.R
 import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.AvatarThumbnailCustomBorder
 import net.primal.android.core.compose.IconText
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.WrappedContentWithSuffix
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -161,14 +162,10 @@ private fun ListItemHeader(
                 .padding(end = overflowIconSizeDp - 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            AvatarThumbnailCustomBorder(
+            UniversalAvatarThumbnail(
                 avatarSize = 24.dp,
                 avatarCdnImage = data.authorAvatarCdnImage,
-                hasBorder = data.authorLegendAvatarGlow && data.authorLegendaryStyle != null,
-                borderBrush = when {
-                    data.authorLegendaryStyle != null -> data.authorLegendaryStyle.brush
-                    else -> Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
-                },
+                legendaryCustomization = data.authorLegendaryCustomization,
             )
 
             Box(modifier = Modifier.fillMaxWidth()) {

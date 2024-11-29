@@ -40,6 +40,7 @@ import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.AvatarThumbnailCustomBorder
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Search
@@ -118,7 +119,7 @@ fun ProfileTopCoverBar(
                 .offset(y = avatarValues.avatarOffsetY, x = avatarValues.avatarOffsetX)
                 .padding(horizontal = 16.dp),
         ) {
-            AvatarThumbnailCustomBorder(
+            UniversalAvatarThumbnail(
                 modifier = Modifier
                     .size(avatarValues.avatarSize)
                     .padding(
@@ -129,23 +130,8 @@ fun ProfileTopCoverBar(
                     ),
                 onClick = { state.profileDetails?.avatarCdnImage?.sourceUrl?.let { onMediaItemClick(it) } },
                 avatarCdnImage = state.profileDetails?.avatarCdnImage,
-                hasBorder = true,
-                borderBrush = if (state.profileDetails?.legendaryCustomization?.legendaryStyle != null &&
-                    state.profileDetails.legendaryCustomization.avatarGlow
-                ) {
-                    when (state.profileDetails.legendaryCustomization.legendaryStyle) {
-                        LegendaryStyle.NO_CUSTOMIZATION -> Brush.linearGradient(
-                            listOf(
-                                Color.White,
-                                Color.White,
-                            ),
-                        )
-
-                        else -> state.profileDetails.legendaryCustomization.legendaryStyle.brush
-                    }
-                } else {
-                    Brush.linearGradient(listOf(Color.White, Color.White))
-                },
+                fallbackBorderColor = Color.White,
+                legendaryCustomization = state.profileDetails?.legendaryCustomization,
             )
         }
     }

@@ -50,6 +50,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailCustomBorder
 import net.primal.android.core.compose.NostrUserText
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.DarkMode
 import net.primal.android.core.compose.icons.primaliconpack.DrawerBookmarks
@@ -63,6 +64,7 @@ import net.primal.android.core.compose.icons.primaliconpack.QrCode
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.premium.legend.LegendaryStyle
+import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.domain.Badges
@@ -163,18 +165,14 @@ private fun DrawerHeader(
         val startGuideline = createGuidelineFromStart(24.dp)
         val (avatarRef, usernameRef, iconRef, identifierRef, statsRef) = createRefs()
 
-        AvatarThumbnailCustomBorder(
+        UniversalAvatarThumbnail(
             modifier = Modifier.constrainAs(avatarRef) {
                 start.linkTo(startGuideline)
                 top.linkTo(parent.top, margin = 16.dp)
             },
             avatarSize = 52.dp,
             avatarCdnImage = userAccount?.avatarCdnImage,
-            hasBorder = avatarGlow && legendaryStyle != null,
-            borderBrush = when {
-                legendaryStyle != null -> legendaryStyle.brush
-                else -> Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
-            },
+            legendaryCustomization = userAccount?.primalLegendProfile?.asLegendaryCustomization(),
         )
 
         NostrUserText(
