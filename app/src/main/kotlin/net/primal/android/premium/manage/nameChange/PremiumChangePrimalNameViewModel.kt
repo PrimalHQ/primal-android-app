@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameContract.ChangePrimalNameStage
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameContract.SideEffect
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameContract.UiEvent
@@ -91,6 +92,7 @@ class PremiumChangePrimalNameViewModel @Inject constructor(
                     copy(
                         primalName = it.premiumMembership?.premiumName,
                         profileAvatarCdnImage = it.avatarCdnImage,
+                        profileLegendaryCustomization = it.primalLegendProfile?.asLegendaryCustomization(),
                     )
                 }
             }

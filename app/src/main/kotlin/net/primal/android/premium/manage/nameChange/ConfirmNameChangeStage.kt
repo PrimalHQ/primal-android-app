@@ -15,8 +15,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.NostrUserText
+import net.primal.android.core.compose.UniversalAvatarThumbnail
+import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.premium.ui.PremiumPrimalNameTable
 import net.primal.android.theme.AppTheme
 
@@ -25,6 +26,7 @@ fun ConfirmNameChangeStage(
     modifier: Modifier = Modifier,
     primalName: String,
     profileAvatarCdnImage: CdnImage?,
+    profileLegendaryCustomization: LegendaryCustomization?,
     contentPadding: PaddingValues,
 ) {
     Column(
@@ -34,15 +36,21 @@ fun ConfirmNameChangeStage(
     ) {
         Spacer(modifier = Modifier.height(48.dp))
 
-        AvatarThumbnail(
+        UniversalAvatarThumbnail(
             avatarCdnImage = profileAvatarCdnImage,
             avatarSize = 80.dp,
+            legendaryCustomization = profileLegendaryCustomization,
         )
         NostrUserText(
             displayName = primalName,
             internetIdentifier = "$primalName@primal.net",
             internetIdentifierBadgeSize = 24.dp,
             fontSize = 20.sp,
+            customBadgeStyle = if (profileLegendaryCustomization?.customBadge == true) {
+                profileLegendaryCustomization.legendaryStyle
+            } else {
+                null
+            },
         )
         Text(
             modifier = Modifier.padding(horizontal = 12.dp),

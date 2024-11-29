@@ -166,6 +166,7 @@ private fun ChangePremiumNameConfirmationStage(
                 contentPadding = paddingValues,
                 primalName = state.primalName,
                 profileAvatarCdnImage = state.profileAvatarCdnImage,
+                profileLegendaryCustomization = state.profileLegendaryCustomization,
             )
         }
     }
