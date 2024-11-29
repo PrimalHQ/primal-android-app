@@ -10,12 +10,12 @@ import net.primal.android.theme.AppTheme
 
 @Composable
 fun ApproveFollowUnfollowProfileAlertDialog(
-    onClose: () -> Unit,
-    onActionConfirmed: () -> Unit,
     profileAction: ProfileAction,
+    onActionApproved: () -> Unit,
+    onClose: () -> Unit,
 ) {
     val messages = when (profileAction) {
-        ProfileAction.Follow -> {
+        is ProfileAction.Follow -> {
             ApprovalMessages(
                 title = stringResource(id = R.string.context_confirm_follow_title),
                 text = stringResource(id = R.string.context_confirm_follow_text),
@@ -24,7 +24,7 @@ fun ApproveFollowUnfollowProfileAlertDialog(
             )
         }
 
-        ProfileAction.Unfollow -> {
+        is ProfileAction.Unfollow -> {
             ApprovalMessages(
                 title = stringResource(id = R.string.context_confirm_unfollow_title),
                 text = stringResource(id = R.string.context_confirm_unfollow_text),
@@ -54,7 +54,7 @@ fun ApproveFollowUnfollowProfileAlertDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onActionConfirmed) {
+            TextButton(onClick = onActionApproved) {
                 Text(
                     text = messages.positive,
                 )
@@ -70,7 +70,7 @@ private data class ApprovalMessages(
     val negative: String,
 )
 
-enum class ProfileAction {
-    Follow,
-    Unfollow,
+sealed class ProfileAction(open val profileId: String) {
+    data class Follow(override val profileId: String) : ProfileAction(profileId)
+    data class Unfollow(override val profileId: String) : ProfileAction(profileId)
 }

@@ -12,11 +12,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -62,7 +58,7 @@ private fun ProfileFollowsScreen(
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
-    var lastFollowUnfollowProfileId by rememberSaveable { mutableStateOf<String?>(null) }
+
     SnackbarErrorHandler(
         error = state.error,
         snackbarHostState = snackbarHostState,
@@ -76,11 +72,26 @@ private fun ProfileFollowsScreen(
         onErrorDismiss = { eventPublisher(ProfileFollowsContract.UiEvent.DismissError) },
     )
 
-    FollowApprovalAlertDialogs(
-        state = state,
-        eventPublisher = eventPublisher,
-        lastFollowUnfollowProfileId = lastFollowUnfollowProfileId,
-    )
+    if (state.shouldApproveProfileAction != null) {
+        ApproveFollowUnfollowProfileAlertDialog(
+            profileAction = state.shouldApproveProfileAction,
+            onActionApproved = {
+                val event = when (state.shouldApproveProfileAction) {
+                    is ProfileAction.Follow -> ProfileFollowsContract.UiEvent.FollowProfile(
+                        profileId = state.shouldApproveProfileAction.profileId,
+                        forceUpdate = true,
+                    )
+
+                    is ProfileAction.Unfollow -> ProfileFollowsContract.UiEvent.UnfollowProfile(
+                        profileId = state.shouldApproveProfileAction.profileId,
+                        forceUpdate = true,
+                    )
+                }
+                eventPublisher(event)
+            },
+            onClose = { eventPublisher(ProfileFollowsContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
+        )
+    }
 
     Scaffold(
         modifier = Modifier,
@@ -103,7 +114,6 @@ private fun ProfileFollowsScreen(
                 state = state,
                 onProfileClick = onProfileClick,
                 onFollowProfileClick = {
-                    lastFollowUnfollowProfileId = it
                     eventPublisher(
                         ProfileFollowsContract.UiEvent.FollowProfile(
                             profileId = it,
@@ -112,7 +122,6 @@ private fun ProfileFollowsScreen(
                     )
                 },
                 onUnfollowProfileClick = {
-                    lastFollowUnfollowProfileId = it
                     eventPublisher(
                         ProfileFollowsContract.UiEvent.UnfollowProfile(
                             profileId = it,
@@ -127,46 +136,6 @@ private fun ProfileFollowsScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
     )
-}
-
-@Composable
-private fun FollowApprovalAlertDialogs(
-    state: ProfileFollowsContract.UiState,
-    eventPublisher: (ProfileFollowsContract.UiEvent) -> Unit,
-    lastFollowUnfollowProfileId: String?,
-) {
-    if (state.shouldApproveFollow) {
-        ApproveFollowUnfollowProfileAlertDialog(
-            onClose = { eventPublisher(ProfileFollowsContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
-            onActionConfirmed = {
-                lastFollowUnfollowProfileId?.let {
-                    eventPublisher(
-                        ProfileFollowsContract.UiEvent.FollowProfile(
-                            profileId = it,
-                            forceUpdate = true,
-                        ),
-                    )
-                }
-            },
-            profileAction = ProfileAction.Follow,
-        )
-    }
-    if (state.shouldApproveUnfollow) {
-        ApproveFollowUnfollowProfileAlertDialog(
-            onClose = { eventPublisher(ProfileFollowsContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
-            onActionConfirmed = {
-                lastFollowUnfollowProfileId?.let {
-                    eventPublisher(
-                        ProfileFollowsContract.UiEvent.UnfollowProfile(
-                            profileId = it,
-                            forceUpdate = true,
-                        ),
-                    )
-                }
-            },
-            profileAction = ProfileAction.Unfollow,
-        )
-    }
 }
 
 @Composable

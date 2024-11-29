@@ -1,5 +1,6 @@
 package net.primal.android.profile.follows
 
+import net.primal.android.core.compose.profile.approvals.ProfileAction
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
 import net.primal.android.profile.domain.ProfileFollowsType
 
@@ -12,8 +13,7 @@ interface ProfileFollowsContract {
         val userFollowing: Set<String> = emptySet(),
         val error: FollowsError? = null,
         val users: List<UserProfileItemUi> = emptyList(),
-        val shouldApproveFollow: Boolean = false,
-        val shouldApproveUnfollow: Boolean = false,
+        val shouldApproveProfileAction: ProfileAction? = null,
     ) {
         sealed class FollowsError {
             data class FailedToFollowUser(val cause: Throwable) : FollowsError()
@@ -23,16 +23,8 @@ interface ProfileFollowsContract {
     }
 
     sealed class UiEvent {
-        data class FollowProfile(
-            val profileId: String,
-            val forceUpdate: Boolean,
-        ) : UiEvent()
-
-        data class UnfollowProfile(
-            val profileId: String,
-            val forceUpdate: Boolean,
-        ) : UiEvent()
-
+        data class FollowProfile(val profileId: String, val forceUpdate: Boolean) : UiEvent()
+        data class UnfollowProfile(val profileId: String, val forceUpdate: Boolean) : UiEvent()
         data object DismissConfirmFollowUnfollowAlertDialog : UiEvent()
         data object DismissError : UiEvent()
         data object ReloadData : UiEvent()

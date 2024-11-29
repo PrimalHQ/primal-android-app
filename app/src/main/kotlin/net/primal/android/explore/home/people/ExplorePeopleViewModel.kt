@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.core.compose.profile.approvals.ProfileAction
 import net.primal.android.core.errors.UiError
 import net.primal.android.explore.home.people.ExplorePeopleContract.UiEvent
 import net.primal.android.explore.home.people.ExplorePeopleContract.UiState
@@ -81,7 +82,7 @@ class ExplorePeopleViewModel @Inject constructor(
                     UiEvent.RefreshPeople -> fetchExplorePeople()
                     UiEvent.DismissError -> setState { copy(error = null) }
                     UiEvent.DismissConfirmFollowUnfollowAlertDialog ->
-                        setState { copy(shouldApproveFollow = false, shouldApproveUnfollow = false) }
+                        setState { copy(shouldApproveProfileAction = null) }
                 }
             }
         }
@@ -102,20 +103,14 @@ class ExplorePeopleViewModel @Inject constructor(
                 followResult.exceptionOrNull()?.let { error ->
                     Timber.w(error)
                     when (error) {
-                        is WssException, is NostrPublishException, is ProfileRepository.FollowListNotFound ->
+                        is WssException, is NostrPublishException ->
                             setState { copy(error = UiError.FailedToFollowUser(error)) }
 
-                        is ProfileRepository.PossibleFollowListCorruption -> setState {
-                            copy(
-                                shouldApproveFollow = true,
-                            )
-                        }
+                        is ProfileRepository.FollowListNotFound ->
+                            setState { copy(shouldApproveProfileAction = ProfileAction.Follow(profileId = profileId)) }
 
-                        is MissingRelaysException -> setState {
-                            copy(
-                                error = UiError.MissingRelaysConfiguration(error),
-                            )
-                        }
+                        is MissingRelaysException ->
+                            setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
 
                         else -> setState { copy(error = UiError.GenericError()) }
                     }
@@ -140,20 +135,18 @@ class ExplorePeopleViewModel @Inject constructor(
                 unfollowResult.exceptionOrNull()?.let { error ->
                     Timber.w(error)
                     when (error) {
-                        is WssException, is NostrPublishException, is ProfileRepository.FollowListNotFound ->
+                        is WssException, is NostrPublishException ->
                             setState { copy(error = UiError.FailedToUnfollowUser(error)) }
 
-                        is ProfileRepository.PossibleFollowListCorruption -> setState {
-                            copy(
-                                shouldApproveUnfollow = true,
-                            )
-                        }
+                        is ProfileRepository.FollowListNotFound ->
+                            setState {
+                                copy(
+                                    shouldApproveProfileAction = ProfileAction.Unfollow(profileId = profileId),
+                                )
+                            }
 
-                        is MissingRelaysException -> setState {
-                            copy(
-                                error = UiError.MissingRelaysConfiguration(error),
-                            )
-                        }
+                        is MissingRelaysException ->
+                            setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
 
                         else -> setState { copy(error = UiError.GenericError()) }
                     }

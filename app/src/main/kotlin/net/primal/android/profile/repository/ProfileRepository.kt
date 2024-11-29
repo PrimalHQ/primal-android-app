@@ -110,7 +110,7 @@ class ProfileRepository @Inject constructor(
             }
         }
 
-    @Throws(FollowListNotFound::class, NostrPublishException::class, PossibleFollowListCorruption::class)
+    @Throws(FollowListNotFound::class, NostrPublishException::class)
     suspend fun follow(
         userId: String,
         followedUserId: String,
@@ -121,7 +121,7 @@ class ProfileRepository @Inject constructor(
         }
     }
 
-    @Throws(FollowListNotFound::class, NostrPublishException::class, PossibleFollowListCorruption::class)
+    @Throws(FollowListNotFound::class, NostrPublishException::class)
     suspend fun unfollow(
         userId: String,
         unfollowedUserId: String,
@@ -132,25 +132,27 @@ class ProfileRepository @Inject constructor(
         }
     }
 
-    @Throws(FollowListNotFound::class, NostrPublishException::class, PossibleFollowListCorruption::class)
+    @Throws(FollowListNotFound::class, NostrPublishException::class)
     private suspend fun updateFollowList(
         userId: String,
         forceUpdate: Boolean,
         reducer: Set<String>.() -> Set<String>,
     ) = withContext(dispatchers.io()) {
         val userFollowList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
-            ?: throw FollowListNotFound()
-
-        if (userFollowList.following.isEmpty() && !forceUpdate) {
-            throw PossibleFollowListCorruption()
+        val isEmptyFollowList = userFollowList == null || userFollowList.following.isEmpty()
+        if (isEmptyFollowList && !forceUpdate) {
+            throw FollowListNotFound()
         }
 
-        userRepository.updateFollowList(userId, userFollowList)
+        if (userFollowList != null) {
+            userRepository.updateFollowList(userId, userFollowList)
+        }
 
+        val existingFollowing = userFollowList?.following ?: emptySet()
         setFollowList(
             userId = userId,
-            contacts = userFollowList.following.reducer(),
-            content = userFollowList.followListEventContent ?: "",
+            contacts = existingFollowing.reducer(),
+            content = userFollowList?.followListEventContent ?: "",
         )
     }
 
@@ -266,5 +268,4 @@ class ProfileRepository @Inject constructor(
     }
 
     class FollowListNotFound : Exception()
-    class PossibleFollowListCorruption : Exception()
 }

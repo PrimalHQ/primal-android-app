@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.primal.android.core.compose.profile.approvals.ProfileAction
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.usernameUiFriendly
@@ -77,7 +78,7 @@ class ProfileFollowsViewModel @Inject constructor(
                     UiEvent.DismissError -> setState { copy(error = null) }
                     UiEvent.ReloadData -> fetchFollows()
                     UiEvent.DismissConfirmFollowUnfollowAlertDialog ->
-                        setState { copy(shouldApproveFollow = false, shouldApproveUnfollow = false) }
+                        setState { copy(shouldApproveProfileAction = null) }
                 }
             }
         }
@@ -149,12 +150,8 @@ class ProfileFollowsViewModel @Inject constructor(
                 updateStateProfileUnfollow(profileId)
             } catch (error: ProfileRepository.FollowListNotFound) {
                 Timber.w(error)
-                setErrorState(error = UiState.FollowsError.FailedToFollowUser(error))
                 updateStateProfileUnfollow(profileId)
-            } catch (error: ProfileRepository.PossibleFollowListCorruption) {
-                Timber.w(error)
-                updateStateProfileUnfollow(profileId)
-                setState { copy(shouldApproveFollow = true) }
+                setState { copy(shouldApproveProfileAction = ProfileAction.Follow(profileId = profileId)) }
             }
         }
 
@@ -181,12 +178,8 @@ class ProfileFollowsViewModel @Inject constructor(
                 updateStateProfileFollow(profileId)
             } catch (error: ProfileRepository.FollowListNotFound) {
                 Timber.w(error)
-                setErrorState(error = UiState.FollowsError.FailedToUnfollowUser(error))
                 updateStateProfileFollow(profileId)
-            } catch (error: ProfileRepository.PossibleFollowListCorruption) {
-                Timber.w(error)
-                updateStateProfileFollow(profileId)
-                setState { copy(shouldApproveUnfollow = true) }
+                setState { copy(shouldApproveProfileAction = ProfileAction.Unfollow(profileId = profileId)) }
             }
         }
 

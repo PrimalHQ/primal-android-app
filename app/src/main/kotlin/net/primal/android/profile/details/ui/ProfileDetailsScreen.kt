@@ -298,32 +298,27 @@ fun ProfileDetailsScreen(
                 }
         }
     }
-    if (state.shouldApproveFollow) {
+
+    if (state.shouldApproveProfileAction != null) {
         ApproveFollowUnfollowProfileAlertDialog(
-            onClose = { eventPublisher(ProfileDetailsContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
-            onActionConfirmed = {
-                eventPublisher(
-                    ProfileDetailsContract.UiEvent.FollowAction(
-                        profileId = state.profileId,
+            profileAction = state.shouldApproveProfileAction,
+            onActionApproved = {
+                val event = when (state.shouldApproveProfileAction) {
+                    is ProfileAction.Follow -> ProfileDetailsContract.UiEvent.FollowAction(
+                        profileId = state.shouldApproveProfileAction.profileId,
                         forceUpdate = true,
-                    ),
-                )
-            },
-            profileAction = ProfileAction.Follow,
-        )
-    }
-    if (state.shouldApproveUnfollow) {
-        ApproveFollowUnfollowProfileAlertDialog(
-            onClose = { eventPublisher(ProfileDetailsContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
-            onActionConfirmed = {
-                eventPublisher(
-                    ProfileDetailsContract.UiEvent.UnfollowAction(
-                        profileId = state.profileId,
+                    )
+
+                    is ProfileAction.Unfollow -> ProfileDetailsContract.UiEvent.UnfollowAction(
+                        profileId = state.shouldApproveProfileAction.profileId,
                         forceUpdate = true,
-                    ),
-                )
+                    )
+                }
+                eventPublisher(event)
             },
-            profileAction = ProfileAction.Unfollow,
+            onClose = {
+                eventPublisher(ProfileDetailsContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog)
+            },
         )
     }
 

@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.primal.android.core.compose.profile.approvals.ProfileAction
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileStatsUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
@@ -121,7 +122,7 @@ class ProfileDetailsViewModel @Inject constructor(
 
                     UiEvent.DismissZapError -> setState { copy(zapError = null) }
                     UiEvent.DismissConfirmFollowUnfollowAlertDialog ->
-                        setState { copy(shouldApproveFollow = false, shouldApproveUnfollow = false) }
+                        setState { copy(shouldApproveProfileAction = null) }
                 }
             }
         }
@@ -330,11 +331,7 @@ class ProfileDetailsViewModel @Inject constructor(
             } catch (error: ProfileRepository.FollowListNotFound) {
                 Timber.w(error)
                 updateStateProfileAsUnfollowed()
-                setErrorState(error = ProfileError.FailedToFollowProfile(error))
-            } catch (error: ProfileRepository.PossibleFollowListCorruption) {
-                Timber.w(error)
-                updateStateProfileAsUnfollowed()
-                setState { copy(shouldApproveFollow = true) }
+                setState { copy(shouldApproveProfileAction = ProfileAction.Follow(profileId = followAction.profileId)) }
             }
         }
 
@@ -362,11 +359,11 @@ class ProfileDetailsViewModel @Inject constructor(
             } catch (error: ProfileRepository.FollowListNotFound) {
                 Timber.w(error)
                 updateStateProfileAsFollowed()
-                setErrorState(error = ProfileError.FailedToUnfollowProfile(error))
-            } catch (error: ProfileRepository.PossibleFollowListCorruption) {
-                Timber.w(error)
-                updateStateProfileAsFollowed()
-                setState { copy(shouldApproveUnfollow = true) }
+                setState {
+                    copy(
+                        shouldApproveProfileAction = ProfileAction.Unfollow(profileId = unfollowAction.profileId),
+                    )
+                }
             }
         }
 
