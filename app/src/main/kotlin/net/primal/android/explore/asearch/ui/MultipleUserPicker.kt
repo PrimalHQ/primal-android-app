@@ -46,9 +46,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalIconTextField
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Search
@@ -260,11 +260,12 @@ private fun SelectedUsersIndicator(
                     modifier = Modifier.size(54.dp),
                     contentAlignment = Alignment.BottomEnd,
                 ) {
-                    AvatarThumbnail(
+                    UniversalAvatarThumbnail(
                         modifier = Modifier.offset(x = (-6).dp, y = (-6).dp),
                         avatarSize = 48.dp,
                         avatarCdnImage = user.avatarCdnImage,
                         onClick = { onUserClick(user) },
+                        legendaryCustomization = user.legendaryCustomization,
                     )
                     Icon(
                         modifier = Modifier
