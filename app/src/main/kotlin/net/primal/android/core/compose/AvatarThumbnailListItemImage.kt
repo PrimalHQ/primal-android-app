@@ -47,12 +47,19 @@ fun UniversalAvatarThumbnail(
 ) {
     val variant = avatarCdnImage?.variants?.minByOrNull { it.width }
     val imageSource = variant?.mediaUrl ?: avatarCdnImage?.sourceUrl
+
+    val borderBrush = if (legendaryCustomization?.avatarGlow == true) {
+        legendaryCustomization.legendaryStyle?.brush
+    } else {
+        null
+    }
+
     AvatarThumbnailListItemImage(
         modifier = modifier,
         avatarSize = avatarSize,
         source = imageSource,
         hasBorder = hasBorder,
-        borderBrush = legendaryCustomization?.legendaryStyle?.brush ?: Brush.linearGradient(
+        borderBrush = borderBrush ?: Brush.linearGradient(
             colors = listOf(
                 fallbackBorderColor,
                 fallbackBorderColor,
