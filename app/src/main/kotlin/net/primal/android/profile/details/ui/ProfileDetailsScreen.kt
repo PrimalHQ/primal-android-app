@@ -63,6 +63,7 @@ import net.primal.android.R
 import net.primal.android.articles.feed.ArticleFeedList
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.compose.profile.approvals.ApproveFollowUnfollowProfileAlertDialog
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
@@ -295,6 +296,31 @@ fun ProfileDetailsScreen(
                     }
                 }
         }
+    }
+
+    if (state.shouldApproveProfileAction != null) {
+        ApproveFollowUnfollowProfileAlertDialog(
+            profileApproval = state.shouldApproveProfileAction,
+            onFollowApproved = {
+                eventPublisher(
+                    ProfileDetailsContract.UiEvent.FollowAction(
+                        profileId = state.shouldApproveProfileAction.profileId,
+                        forceUpdate = true,
+                    ),
+                )
+            },
+            onUnfollowApproved = {
+                eventPublisher(
+                    ProfileDetailsContract.UiEvent.UnfollowAction(
+                        profileId = state.shouldApproveProfileAction.profileId,
+                        forceUpdate = true,
+                    ),
+                )
+            },
+            onClose = {
+                eventPublisher(ProfileDetailsContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog)
+            },
+        )
     }
 
     Scaffold(

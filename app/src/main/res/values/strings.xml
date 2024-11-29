@@ -828,6 +828,16 @@
     <string name="context_confirm_bookmark_positive">Save Bookmark</string>
     <string name="context_confirm_bookmark_negative">No</string>
 
+    <string name="context_confirm_follow_title">Saving first follow</string>
+    <string name="context_confirm_follow_text">This will result in following a total of one account. Do you wish to continue?</string>
+    <string name="context_confirm_follow_positive">Save follow</string>
+    <string name="context_confirm_follow_negative">No</string>
+
+    <string name="context_confirm_unfollow_title">Saving unfollow</string>
+    <string name="context_confirm_unfollow_text">This will result in following a total of zero accounts. Do you wish to continue?</string>
+    <string name="context_confirm_unfollow_positive">Save unfollow</string>
+    <string name="context_confirm_unfollow_negative">No</string>
+
     <string name="dialog_report_abuse_title">Report abuse</string>
     <string name="dialog_report_abuse_description">All reports posted will be publicly visible.</string>
     <string name="dialog_report_button_dismiss">Dismiss</string>

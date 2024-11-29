@@ -1,4 +1,4 @@
-package net.primal.android.notes.feed.note.ui
+package net.primal.android.core.compose.profile.approvals
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
@@ -9,7 +9,7 @@ import net.primal.android.R
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun ConfirmFirstBookmarkAlertDialog(onClose: () -> Unit, onBookmarkConfirmed: () -> Unit) {
+fun ApproveBookmarkAlertDialog(onClose: () -> Unit, onBookmarkConfirmed: () -> Unit) {
     AlertDialog(
         containerColor = AppTheme.colorScheme.surfaceVariant,
         onDismissRequest = onClose,

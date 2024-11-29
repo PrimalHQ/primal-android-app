@@ -25,6 +25,7 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.profile.approvals.ApproveFollowUnfollowProfileAlertDialog
 import net.primal.android.explore.search.ui.FollowUnfollowVisibility
 import net.primal.android.explore.search.ui.UserProfileListItem
 import net.primal.android.profile.domain.ProfileFollowsType
@@ -56,6 +57,7 @@ private fun ProfileFollowsScreen(
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+
     SnackbarErrorHandler(
         error = state.error,
         snackbarHostState = snackbarHostState,
@@ -85,18 +87,70 @@ private fun ProfileFollowsScreen(
             )
         },
         content = { paddingValues ->
-            FollowsLazyColumn(
-                paddingValues = paddingValues,
+            ProfileFollowsContent(
                 state = state,
+                eventPublisher = eventPublisher,
+                paddingValues = paddingValues,
                 onProfileClick = onProfileClick,
-                onFollowProfileClick = { eventPublisher(ProfileFollowsContract.UiEvent.FollowProfile(it)) },
-                onUnfollowProfileClick = { eventPublisher(ProfileFollowsContract.UiEvent.UnfollowProfile(it)) },
-                onRefreshClick = { eventPublisher(ProfileFollowsContract.UiEvent.ReloadData) },
             )
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         },
+    )
+}
+
+@Composable
+private fun ProfileFollowsContent(
+    state: ProfileFollowsContract.UiState,
+    eventPublisher: (ProfileFollowsContract.UiEvent) -> Unit,
+    paddingValues: PaddingValues,
+    onProfileClick: (String) -> Unit,
+) {
+    if (state.shouldApproveProfileAction != null) {
+        ApproveFollowUnfollowProfileAlertDialog(
+            profileApproval = state.shouldApproveProfileAction,
+            onFollowApproved = {
+                eventPublisher(
+                    ProfileFollowsContract.UiEvent.FollowProfile(
+                        profileId = state.shouldApproveProfileAction.profileId,
+                        forceUpdate = true,
+                    ),
+                )
+            },
+            onUnfollowApproved = {
+                eventPublisher(
+                    ProfileFollowsContract.UiEvent.UnfollowProfile(
+                        profileId = state.shouldApproveProfileAction.profileId,
+                        forceUpdate = true,
+                    ),
+                )
+            },
+            onClose = { eventPublisher(ProfileFollowsContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
+        )
+    }
+
+    FollowsLazyColumn(
+        paddingValues = paddingValues,
+        state = state,
+        onProfileClick = onProfileClick,
+        onFollowProfileClick = {
+            eventPublisher(
+                ProfileFollowsContract.UiEvent.FollowProfile(
+                    profileId = it,
+                    forceUpdate = false,
+                ),
+            )
+        },
+        onUnfollowProfileClick = {
+            eventPublisher(
+                ProfileFollowsContract.UiEvent.UnfollowProfile(
+                    profileId = it,
+                    forceUpdate = false,
+                ),
+            )
+        },
+        onRefreshClick = { eventPublisher(ProfileFollowsContract.UiEvent.ReloadData) },
     )
 }
 

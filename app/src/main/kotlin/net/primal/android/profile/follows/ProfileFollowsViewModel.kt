@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.primal.android.core.compose.profile.approvals.ProfileApproval
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.usernameUiFriendly
@@ -72,10 +73,12 @@ class ProfileFollowsViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.FollowProfile -> follow(profileId = it.profileId)
-                    is UiEvent.UnfollowProfile -> unfollow(profileId = it.profileId)
+                    is UiEvent.FollowProfile -> follow(profileId = it.profileId, forceUpdate = it.forceUpdate)
+                    is UiEvent.UnfollowProfile -> unfollow(profileId = it.profileId, forceUpdate = it.forceUpdate)
                     UiEvent.DismissError -> setState { copy(error = null) }
                     UiEvent.ReloadData -> fetchFollows()
+                    UiEvent.DismissConfirmFollowUnfollowAlertDialog ->
+                        setState { copy(shouldApproveProfileAction = null) }
                 }
             }
         }
@@ -116,65 +119,77 @@ class ProfileFollowsViewModel @Inject constructor(
             }
         }
 
-    private fun updateStateProfileFollow(profileId: String) {
-        setState { copy(userFollowing = this.userFollowing.toMutableSet().apply { add(profileId) }) }
+    private fun updateStateProfileFollowAndClearApprovalFlag(profileId: String) {
+        setState {
+            copy(
+                userFollowing = this.userFollowing.toMutableSet().apply { add(profileId) },
+                shouldApproveProfileAction = null,
+            )
+        }
     }
 
-    private fun updateStateProfileUnfollow(profileId: String) {
-        setState { copy(userFollowing = this.userFollowing.toMutableSet().apply { remove(profileId) }) }
+    private fun updateStateProfileUnfollowAndClearApprovalFlag(profileId: String) {
+        setState {
+            copy(
+                userFollowing = this.userFollowing.toMutableSet().apply { remove(profileId) },
+                shouldApproveProfileAction = null,
+            )
+        }
     }
 
-    private fun follow(profileId: String) =
+    private fun follow(profileId: String, forceUpdate: Boolean) =
         viewModelScope.launch {
-            updateStateProfileFollow(profileId)
+            updateStateProfileFollowAndClearApprovalFlag(profileId)
             try {
                 profileRepository.follow(
                     userId = activeAccountStore.activeUserId(),
                     followedUserId = profileId,
+                    forceUpdate = forceUpdate,
                 )
             } catch (error: WssException) {
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.FailedToFollowUser(error))
-                updateStateProfileUnfollow(profileId)
+                updateStateProfileUnfollowAndClearApprovalFlag(profileId)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.FailedToFollowUser(error))
-                updateStateProfileUnfollow(profileId)
+                updateStateProfileUnfollowAndClearApprovalFlag(profileId)
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.MissingRelaysConfiguration(error))
-                updateStateProfileUnfollow(profileId)
+                updateStateProfileUnfollowAndClearApprovalFlag(profileId)
             } catch (error: ProfileRepository.FollowListNotFound) {
                 Timber.w(error)
-                setErrorState(error = UiState.FollowsError.FailedToFollowUser(error))
-                updateStateProfileUnfollow(profileId)
+                updateStateProfileUnfollowAndClearApprovalFlag(profileId)
+                setState { copy(shouldApproveProfileAction = ProfileApproval.Follow(profileId = profileId)) }
             }
         }
 
-    private fun unfollow(profileId: String) =
+    private fun unfollow(profileId: String, forceUpdate: Boolean) =
         viewModelScope.launch {
-            updateStateProfileUnfollow(profileId)
+            updateStateProfileUnfollowAndClearApprovalFlag(profileId)
             try {
                 profileRepository.unfollow(
                     userId = activeAccountStore.activeUserId(),
                     unfollowedUserId = profileId,
+                    forceUpdate = forceUpdate,
                 )
             } catch (error: WssException) {
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.FailedToUnfollowUser(error))
-                updateStateProfileFollow(profileId)
+                updateStateProfileFollowAndClearApprovalFlag(profileId)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.FailedToUnfollowUser(error))
-                updateStateProfileFollow(profileId)
+                updateStateProfileFollowAndClearApprovalFlag(profileId)
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.MissingRelaysConfiguration(error))
-                updateStateProfileFollow(profileId)
+                updateStateProfileFollowAndClearApprovalFlag(profileId)
             } catch (error: ProfileRepository.FollowListNotFound) {
                 Timber.w(error)
-                setErrorState(error = UiState.FollowsError.FailedToUnfollowUser(error))
-                updateStateProfileFollow(profileId)
+                updateStateProfileFollowAndClearApprovalFlag(profileId)
+                setState { copy(shouldApproveProfileAction = ProfileApproval.Unfollow(profileId = profileId)) }
             }
         }
 
