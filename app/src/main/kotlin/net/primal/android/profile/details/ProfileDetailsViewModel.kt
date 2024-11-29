@@ -303,13 +303,19 @@ class ProfileDetailsViewModel @Inject constructor(
             Timber.w(error)
         }
 
-    private fun updateStateProfileAsFollowed() = setState { copy(isProfileFollowed = true) }
+    private fun updateStateProfileAsFollowedAndClearApprovalFlag() =
+        setState {
+            copy(isProfileFollowed = true, shouldApproveProfileAction = null)
+        }
 
-    private fun updateStateProfileAsUnfollowed() = setState { copy(isProfileFollowed = false) }
+    private fun updateStateProfileAsUnfollowedAndClearApprovalFlag() =
+        setState {
+            copy(isProfileFollowed = false, shouldApproveProfileAction = null)
+        }
 
     private fun follow(followAction: UiEvent.FollowAction) =
         viewModelScope.launch {
-            updateStateProfileAsFollowed()
+            updateStateProfileAsFollowedAndClearApprovalFlag()
             try {
                 profileRepository.follow(
                     userId = activeAccountStore.activeUserId(),
@@ -318,19 +324,19 @@ class ProfileDetailsViewModel @Inject constructor(
                 )
             } catch (error: WssException) {
                 Timber.w(error)
-                updateStateProfileAsUnfollowed()
+                updateStateProfileAsUnfollowedAndClearApprovalFlag()
                 setErrorState(error = ProfileError.FailedToFollowProfile(error))
             } catch (error: NostrPublishException) {
                 Timber.w(error)
-                updateStateProfileAsUnfollowed()
+                updateStateProfileAsUnfollowedAndClearApprovalFlag()
                 setErrorState(error = ProfileError.FailedToFollowProfile(error))
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
-                updateStateProfileAsUnfollowed()
+                updateStateProfileAsUnfollowedAndClearApprovalFlag()
                 setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
             } catch (error: ProfileRepository.FollowListNotFound) {
                 Timber.w(error)
-                updateStateProfileAsUnfollowed()
+                updateStateProfileAsUnfollowedAndClearApprovalFlag()
                 setState {
                     copy(
                         shouldApproveProfileAction = ProfileApproval.Follow(profileId = followAction.profileId),
@@ -341,7 +347,7 @@ class ProfileDetailsViewModel @Inject constructor(
 
     private fun unfollow(unfollowAction: UiEvent.UnfollowAction) =
         viewModelScope.launch {
-            updateStateProfileAsUnfollowed()
+            updateStateProfileAsUnfollowedAndClearApprovalFlag()
             try {
                 profileRepository.unfollow(
                     userId = activeAccountStore.activeUserId(),
@@ -350,19 +356,19 @@ class ProfileDetailsViewModel @Inject constructor(
                 )
             } catch (error: WssException) {
                 Timber.w(error)
-                updateStateProfileAsFollowed()
+                updateStateProfileAsFollowedAndClearApprovalFlag()
                 setErrorState(error = ProfileError.FailedToUnfollowProfile(error))
             } catch (error: NostrPublishException) {
                 Timber.w(error)
-                updateStateProfileAsFollowed()
+                updateStateProfileAsFollowedAndClearApprovalFlag()
                 setErrorState(error = ProfileError.FailedToUnfollowProfile(error))
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
-                updateStateProfileAsFollowed()
+                updateStateProfileAsFollowedAndClearApprovalFlag()
                 setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
             } catch (error: ProfileRepository.FollowListNotFound) {
                 Timber.w(error)
-                updateStateProfileAsFollowed()
+                updateStateProfileAsFollowedAndClearApprovalFlag()
                 setState {
                     copy(
                         shouldApproveProfileAction = ProfileApproval.Unfollow(profileId = unfollowAction.profileId),

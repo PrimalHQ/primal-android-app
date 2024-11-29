@@ -89,7 +89,7 @@ class ExplorePeopleViewModel @Inject constructor(
 
     private fun follow(profileId: String, forceUpdate: Boolean) =
         viewModelScope.launch {
-            updateStateProfileFollow(profileId)
+            updateStateProfileFollowAndClearApprovalFlag(profileId)
 
             val followResult = runCatching {
                 profileRepository.follow(
@@ -102,30 +102,27 @@ class ExplorePeopleViewModel @Inject constructor(
             if (followResult.isFailure) {
                 followResult.exceptionOrNull()?.let { error ->
                     Timber.w(error)
+                    updateStateProfileUnfollowAndClearApprovalFlag(profileId)
                     when (error) {
                         is WssException, is NostrPublishException ->
                             setState { copy(error = UiError.FailedToFollowUser(error)) }
 
-                        is ProfileRepository.FollowListNotFound ->
-                            setState {
-                                copy(
-                                    shouldApproveProfileAction = ProfileApproval.Follow(profileId = profileId),
-                                )
-                            }
+                        is ProfileRepository.FollowListNotFound -> setState {
+                            copy(shouldApproveProfileAction = ProfileApproval.Follow(profileId = profileId))
+                        }
 
                         is MissingRelaysException ->
                             setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
 
                         else -> setState { copy(error = UiError.GenericError()) }
                     }
-                    updateStateProfileUnfollow(profileId)
                 }
             }
         }
 
     private fun unfollow(profileId: String, forceUpdate: Boolean) =
         viewModelScope.launch {
-            updateStateProfileUnfollow(profileId)
+            updateStateProfileUnfollowAndClearApprovalFlag(profileId)
 
             val unfollowResult = runCatching {
                 profileRepository.unfollow(
@@ -136,32 +133,39 @@ class ExplorePeopleViewModel @Inject constructor(
             }
 
             if (unfollowResult.isFailure) {
+                updateStateProfileFollowAndClearApprovalFlag(profileId)
                 unfollowResult.exceptionOrNull()?.let { error ->
                     Timber.w(error)
                     when (error) {
                         is WssException, is NostrPublishException ->
                             setState { copy(error = UiError.FailedToUnfollowUser(error)) }
 
-                        is ProfileRepository.FollowListNotFound ->
-                            setState {
-                                copy(
-                                    shouldApproveProfileAction = ProfileApproval.Unfollow(profileId = profileId),
-                                )
-                            }
+                        is ProfileRepository.FollowListNotFound -> setState {
+                            copy(shouldApproveProfileAction = ProfileApproval.Unfollow(profileId = profileId))
+                        }
 
                         is MissingRelaysException ->
                             setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
 
                         else -> setState { copy(error = UiError.GenericError()) }
                     }
-                    updateStateProfileFollow(profileId)
                 }
             }
         }
 
-    private fun updateStateProfileUnfollow(profileId: String) =
-        setState { copy(userFollowing = userFollowing - profileId) }
+    private fun updateStateProfileUnfollowAndClearApprovalFlag(profileId: String) =
+        setState {
+            copy(
+                userFollowing = userFollowing - profileId,
+                shouldApproveProfileAction = null,
+            )
+        }
 
-    private fun updateStateProfileFollow(profileId: String) =
-        setState { copy(userFollowing = userFollowing + profileId) }
+    private fun updateStateProfileFollowAndClearApprovalFlag(profileId: String) =
+        setState {
+            copy(
+                userFollowing = userFollowing + profileId,
+                shouldApproveProfileAction = null,
+            )
+        }
 }

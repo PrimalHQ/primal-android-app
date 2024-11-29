@@ -119,17 +119,27 @@ class ProfileFollowsViewModel @Inject constructor(
             }
         }
 
-    private fun updateStateProfileFollow(profileId: String) {
-        setState { copy(userFollowing = this.userFollowing.toMutableSet().apply { add(profileId) }) }
+    private fun updateStateProfileFollowAndClearApprovalFlag(profileId: String) {
+        setState {
+            copy(
+                userFollowing = this.userFollowing.toMutableSet().apply { add(profileId) },
+                shouldApproveProfileAction = null,
+            )
+        }
     }
 
-    private fun updateStateProfileUnfollow(profileId: String) {
-        setState { copy(userFollowing = this.userFollowing.toMutableSet().apply { remove(profileId) }) }
+    private fun updateStateProfileUnfollowAndClearApprovalFlag(profileId: String) {
+        setState {
+            copy(
+                userFollowing = this.userFollowing.toMutableSet().apply { remove(profileId) },
+                shouldApproveProfileAction = null,
+            )
+        }
     }
 
     private fun follow(profileId: String, forceUpdate: Boolean) =
         viewModelScope.launch {
-            updateStateProfileFollow(profileId)
+            updateStateProfileFollowAndClearApprovalFlag(profileId)
             try {
                 profileRepository.follow(
                     userId = activeAccountStore.activeUserId(),
@@ -139,25 +149,25 @@ class ProfileFollowsViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.FailedToFollowUser(error))
-                updateStateProfileUnfollow(profileId)
+                updateStateProfileUnfollowAndClearApprovalFlag(profileId)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.FailedToFollowUser(error))
-                updateStateProfileUnfollow(profileId)
+                updateStateProfileUnfollowAndClearApprovalFlag(profileId)
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.MissingRelaysConfiguration(error))
-                updateStateProfileUnfollow(profileId)
+                updateStateProfileUnfollowAndClearApprovalFlag(profileId)
             } catch (error: ProfileRepository.FollowListNotFound) {
                 Timber.w(error)
-                updateStateProfileUnfollow(profileId)
+                updateStateProfileUnfollowAndClearApprovalFlag(profileId)
                 setState { copy(shouldApproveProfileAction = ProfileApproval.Follow(profileId = profileId)) }
             }
         }
 
     private fun unfollow(profileId: String, forceUpdate: Boolean) =
         viewModelScope.launch {
-            updateStateProfileUnfollow(profileId)
+            updateStateProfileUnfollowAndClearApprovalFlag(profileId)
             try {
                 profileRepository.unfollow(
                     userId = activeAccountStore.activeUserId(),
@@ -167,18 +177,18 @@ class ProfileFollowsViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.FailedToUnfollowUser(error))
-                updateStateProfileFollow(profileId)
+                updateStateProfileFollowAndClearApprovalFlag(profileId)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.FailedToUnfollowUser(error))
-                updateStateProfileFollow(profileId)
+                updateStateProfileFollowAndClearApprovalFlag(profileId)
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.MissingRelaysConfiguration(error))
-                updateStateProfileFollow(profileId)
+                updateStateProfileFollowAndClearApprovalFlag(profileId)
             } catch (error: ProfileRepository.FollowListNotFound) {
                 Timber.w(error)
-                updateStateProfileFollow(profileId)
+                updateStateProfileFollowAndClearApprovalFlag(profileId)
                 setState { copy(shouldApproveProfileAction = ProfileApproval.Unfollow(profileId = profileId)) }
             }
         }
