@@ -247,6 +247,7 @@ private fun DvmFeedListItem(
                                         height = profileAvatarSize,
                                     ),
                                 avatarCdnImages = dvmFeed.actionUserAvatars,
+                                avatarLegendaryCustomizations = dvmFeed.actionUserLegendaryCustomizations,
                                 onClick = {},
                                 maxAvatarsToShow = MaxAvatarsToShow,
                                 displayAvatarOverflowIndicator = false,

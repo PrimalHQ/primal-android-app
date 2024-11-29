@@ -19,12 +19,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 
 @Composable
 fun AvatarThumbnailsRow(
     modifier: Modifier = Modifier,
     avatarCdnImages: List<CdnImage?>,
+    avatarLegendaryCustomizations: List<LegendaryCustomization?>,
     avatarOverlap: AvatarOverlap = AvatarOverlap.End,
     hasAvatarBorder: Boolean = true,
     avatarBorderSize: Dp = 2.dp,
@@ -70,11 +72,12 @@ fun AvatarThumbnailsRow(
                 }
 
                 AvatarSpacer(width = (layoutIndex * avatarVisibleWidth.value).dp) {
-                    AvatarThumbnail(
+                    UniversalAvatarThumbnail(
                         modifier = Modifier.size(avatarSize),
                         avatarCdnImage = imageCdnImage,
                         hasBorder = hasAvatarBorder,
-                        borderColor = avatarBorderColor,
+                        legendaryCustomization = runCatching { avatarLegendaryCustomizations[layoutIndex] }.getOrNull(),
+                        fallbackBorderColor = avatarBorderColor,
                         borderSize = avatarBorderSize,
                         onClick = { onClick(layoutIndex) },
                     )

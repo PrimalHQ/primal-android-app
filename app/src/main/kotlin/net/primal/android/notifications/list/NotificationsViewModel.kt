@@ -154,6 +154,7 @@ class NotificationsViewModel @Inject constructor(
                 ?: this.data.actionUserId?.asEllipsizedNpub(),
             actionUserInternetIdentifier = this.actionByUser?.internetIdentifier,
             actionUserAvatarCdnImage = this.actionByUser?.avatarCdnImage,
+            actionUserLegendaryCustomization = this.actionByUser?.primalLegendProfile?.asLegendaryCustomization(),
             actionUserSatsZapped = this.data.satsZapped,
             actionPost = this.extractFeedPostUi(),
         )

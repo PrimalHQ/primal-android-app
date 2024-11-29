@@ -191,6 +191,7 @@ private fun UserFollowedByIndicator(
         AvatarThumbnailsRow(
             avatarBorderColor = AppTheme.colorScheme.background,
             avatarCdnImages = profiles.map { it.avatarCdnImage },
+            avatarLegendaryCustomizations = profiles.map { it.legendaryCustomization },
             onClick = {
                 onProfileClick(profiles[it].pubkey)
             },

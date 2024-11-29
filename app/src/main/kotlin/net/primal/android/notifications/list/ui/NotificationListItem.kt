@@ -48,6 +48,8 @@ import net.primal.android.notes.feed.note.ui.FeedNoteActionsRow
 import net.primal.android.notes.feed.note.ui.NoteContent
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notifications.domain.NotificationType
+import net.primal.android.premium.legend.LegendaryCustomization
+import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme.Sunset
 
@@ -331,6 +333,7 @@ private fun NotificationsGroupHeader(
                 AvatarThumbnailsRow(
                     modifier = Modifier.fillMaxWidth(),
                     avatarCdnImages = notifications.map { it.actionUserAvatarCdnImage },
+                    avatarLegendaryCustomizations = notifications.map { it.actionUserLegendaryCustomization },
                     avatarOverlap = AvatarOverlap.None,
                     hasAvatarBorder = false,
                     onClick = { index ->
@@ -385,6 +388,7 @@ private fun HeaderContent(
     if (showAvatars) {
         AvatarThumbnailsRow(
             avatarCdnImages = notifications.map { it.actionUserAvatarCdnImage },
+            avatarLegendaryCustomizations = notifications.map { it.actionUserLegendaryCustomization },
             avatarOverlap = AvatarOverlap.None,
             hasAvatarBorder = false,
             onClick = { index ->
@@ -559,6 +563,10 @@ private class NotificationsParameterProvider : PreviewParameterProvider<List<Not
                     createdAt = Instant.now(),
                     actionUserDisplayName = "miljan",
                     actionUserInternetIdentifier = "miljan@primal.net",
+                    actionUserLegendaryCustomization = LegendaryCustomization(
+                        avatarGlow = true,
+                        legendaryStyle = LegendaryStyle.SUN_FIRE,
+                    ),
                     actionUserId = "",
                 ),
                 NotificationUi(
