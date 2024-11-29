@@ -16,10 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.stats.reactions.EventActionUi
 import net.primal.android.theme.AppTheme
@@ -75,10 +75,11 @@ private fun GenericReactionListItem(
             containerColor = AppTheme.colorScheme.surfaceVariant,
         ),
         leadingContent = {
-            AvatarThumbnail(
+            UniversalAvatarThumbnail(
                 avatarCdnImage = item.profile.avatarCdnImage,
                 avatarSize = 42.dp,
                 onClick = { onProfileClick(item.profile.pubkey) },
+                legendaryCustomization = item.profile.legendaryCustomization,
             )
         },
         headlineContent = {
