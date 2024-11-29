@@ -71,6 +71,42 @@ private fun ProfileFollowsScreen(
         onErrorDismiss = { eventPublisher(ProfileFollowsContract.UiEvent.DismissError) },
     )
 
+    Scaffold(
+        modifier = Modifier,
+        topBar = {
+            PrimalTopAppBar(
+                title = state.profileName?.let {
+                    when (state.followsType) {
+                        ProfileFollowsType.Following -> stringResource(id = R.string.profile_following_title, it)
+                        ProfileFollowsType.Followers -> stringResource(id = R.string.profile_followers_title, it)
+                    }
+                } ?: "",
+                navigationIcon = PrimalIcons.ArrowBack,
+                onNavigationIconClick = onClose,
+                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
+            )
+        },
+        content = { paddingValues ->
+            ProfileFollowsContent(
+                state = state,
+                eventPublisher = eventPublisher,
+                paddingValues = paddingValues,
+                onProfileClick = onProfileClick,
+            )
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
+    )
+}
+
+@Composable
+private fun ProfileFollowsContent(
+    state: ProfileFollowsContract.UiState,
+    eventPublisher: (ProfileFollowsContract.UiEvent) -> Unit,
+    paddingValues: PaddingValues,
+    onProfileClick: (String) -> Unit,
+) {
     if (state.shouldApproveProfileAction != null) {
         ApproveFollowUnfollowProfileAlertDialog(
             profileApproval = state.shouldApproveProfileAction,
@@ -94,48 +130,27 @@ private fun ProfileFollowsScreen(
         )
     }
 
-    Scaffold(
-        modifier = Modifier,
-        topBar = {
-            PrimalTopAppBar(
-                title = state.profileName?.let {
-                    when (state.followsType) {
-                        ProfileFollowsType.Following -> stringResource(id = R.string.profile_following_title, it)
-                        ProfileFollowsType.Followers -> stringResource(id = R.string.profile_followers_title, it)
-                    }
-                } ?: "",
-                navigationIcon = PrimalIcons.ArrowBack,
-                onNavigationIconClick = onClose,
-                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
+    FollowsLazyColumn(
+        paddingValues = paddingValues,
+        state = state,
+        onProfileClick = onProfileClick,
+        onFollowProfileClick = {
+            eventPublisher(
+                ProfileFollowsContract.UiEvent.FollowProfile(
+                    profileId = it,
+                    forceUpdate = false,
+                ),
             )
         },
-        content = { paddingValues ->
-            FollowsLazyColumn(
-                paddingValues = paddingValues,
-                state = state,
-                onProfileClick = onProfileClick,
-                onFollowProfileClick = {
-                    eventPublisher(
-                        ProfileFollowsContract.UiEvent.FollowProfile(
-                            profileId = it,
-                            forceUpdate = false,
-                        ),
-                    )
-                },
-                onUnfollowProfileClick = {
-                    eventPublisher(
-                        ProfileFollowsContract.UiEvent.UnfollowProfile(
-                            profileId = it,
-                            forceUpdate = false,
-                        ),
-                    )
-                },
-                onRefreshClick = { eventPublisher(ProfileFollowsContract.UiEvent.ReloadData) },
+        onUnfollowProfileClick = {
+            eventPublisher(
+                ProfileFollowsContract.UiEvent.UnfollowProfile(
+                    profileId = it,
+                    forceUpdate = false,
+                ),
             )
         },
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
-        },
+        onRefreshClick = { eventPublisher(ProfileFollowsContract.UiEvent.ReloadData) },
     )
 }
 
