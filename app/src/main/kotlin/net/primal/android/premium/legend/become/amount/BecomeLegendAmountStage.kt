@@ -31,10 +31,10 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalSliderThumb
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.premium.legend.LegendaryStyle
@@ -82,7 +82,7 @@ fun BecomeLegendAmountStage(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                AvatarThumbnail(
+                UniversalAvatarThumbnail(
                     avatarCdnImage = state.avatarCdnImage,
                     avatarSize = 80.dp,
                 )

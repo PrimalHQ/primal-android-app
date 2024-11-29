@@ -40,10 +40,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.findActivity
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -119,9 +119,10 @@ fun PremiumPurchaseStage(
             verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
         ) {
             if (state.profile != null && state.primalName != null) {
-                AvatarThumbnail(
+                UniversalAvatarThumbnail(
                     avatarCdnImage = state.profile.avatarCdnImage,
                     avatarSize = 80.dp,
+                    legendaryCustomization = state.profile.legendaryCustomization,
                 )
                 NostrUserText(
                     displayName = state.primalName,
