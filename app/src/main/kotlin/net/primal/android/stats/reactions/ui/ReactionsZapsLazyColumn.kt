@@ -24,6 +24,7 @@ import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
@@ -81,10 +82,11 @@ private fun NoteZapListItem(data: EventZapUiModel, onProfileClick: (profileId: S
                 containerColor = AppTheme.colorScheme.surfaceVariant,
             ),
             leadingContent = {
-                AvatarThumbnail(
+                UniversalAvatarThumbnail(
                     avatarCdnImage = data.zapperAvatarCdnImage,
                     avatarSize = 42.dp,
                     onClick = { onProfileClick(data.zapperId) },
+                    legendaryCustomization = data.zapperLegendaryCustomization,
                 )
             },
             headlineContent = {
