@@ -4,6 +4,8 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.core.utils.usernameUiFriendly
+import net.primal.android.premium.legend.LegendaryCustomization
+import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.stats.db.EventZap
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 
@@ -17,6 +19,7 @@ data class EventZapUiModel(
     val amountInSats: ULong,
     val zapperInternetIdentifier: String? = null,
     val zapperAvatarCdnImage: CdnImage? = null,
+    val zapperLegendaryCustomization: LegendaryCustomization? = null,
 ) {
     companion object {
         val DefaultComparator = compareByDescending<EventZapUiModel> { it.amountInSats }.thenBy { it.zappedAt }
@@ -34,4 +37,5 @@ fun EventZap.asEventZapUiModel() =
         zappedAt = this.zapRequestAt,
         message = this.message,
         amountInSats = this.amountInBtc.toBigDecimal().toSats(),
+        zapperLegendaryCustomization = this.zapSenderPrimalLegendProfile?.asLegendaryCustomization(),
     )
