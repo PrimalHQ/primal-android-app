@@ -24,11 +24,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnail
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.FollowUnfollowButton
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.core.utils.shortened
+import net.primal.android.premium.legend.LegendaryCustomization
+import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -46,9 +49,10 @@ fun UserProfileListItem(
         modifier = Modifier.clickable { onClick(data) },
         colors = colors,
         leadingContent = {
-            AvatarThumbnail(
+            UniversalAvatarThumbnail(
                 avatarCdnImage = data.avatarCdnImage,
                 onClick = { onClick(data) },
+                legendaryCustomization = data.legendaryCustomization,
             )
         },
         headlineContent = {
@@ -106,6 +110,56 @@ fun UserProfileListItem(
             }
         },
     )
+}
+
+@Preview
+@Composable
+fun PreviewLegendaryUserProfileListItemWithFollow() {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+        Surface {
+            UserProfileListItem(
+                data = UserProfileItemUi(
+                    profileId = "b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b",
+                    displayName = "alex",
+                    internetIdentifier = "alex@primal.net",
+                    followersCount = 12345,
+                    legendaryCustomization = LegendaryCustomization(
+                        avatarGlow = true,
+                        customBadge = true,
+                        legendaryStyle = LegendaryStyle.GOLD,
+                    )
+                ),
+                followUnfollowVisibility = FollowUnfollowVisibility.Visible,
+                isFollowed = false,
+                onClick = {},
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewLegendaryUserProfileListItemWithUnfollow() {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+        Surface {
+            UserProfileListItem(
+                data = UserProfileItemUi(
+                    profileId = "b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b",
+                    displayName = "alex",
+                    internetIdentifier = "alex@primal.net",
+                    followersCount = 12345,
+                    legendaryCustomization = LegendaryCustomization(
+                        avatarGlow = true,
+                        customBadge = true,
+                        legendaryStyle = LegendaryStyle.SUN_FIRE,
+                    )
+                ),
+                followUnfollowVisibility = FollowUnfollowVisibility.Visible,
+                isFollowed = true,
+                onClick = {},
+            )
+        }
+    }
 }
 
 @Preview
