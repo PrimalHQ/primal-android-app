@@ -15,8 +15,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.IconText
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedNewZapFilled
 import net.primal.android.stats.ui.EventZapUiModel
@@ -44,11 +44,12 @@ fun EventZapItem(
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        AvatarThumbnail(
+        UniversalAvatarThumbnail(
             modifier = Modifier.padding(start = 2.dp),
             avatarCdnImage = noteZap.zapperAvatarCdnImage,
             avatarSize = 24.dp,
             onClick = onClick,
+            legendaryCustomization = noteZap.zapperLegendaryCustomization,
         )
 
         IconText(
