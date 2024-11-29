@@ -56,9 +56,7 @@ class UserAccountFetcher @Inject constructor(
             followingCount = profileStats?.following,
             notesCount = profileStats?.notesCount,
             repliesCount = profileStats?.repliesCount,
-            customBadge = profileData.primalLegendProfile?.customBadge == true,
-            avatarRing = profileData.primalLegendProfile?.avatarGlow == true,
-            legendaryStyle = LegendaryStyle.valueById(profileData.primalLegendProfile?.styleId),
+            primalLegendProfile = profileData.primalLegendProfile,
         )
     }
 

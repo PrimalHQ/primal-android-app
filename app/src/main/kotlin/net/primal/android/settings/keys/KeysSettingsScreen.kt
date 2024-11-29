@@ -43,11 +43,13 @@ import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -87,6 +89,7 @@ fun KeysSettingsScreen(state: KeysSettingsContract.UiState, onClose: () -> Unit)
                     PublicKeySection(
                         npub = state.npub,
                         avatarCdnImage = state.avatarCdnImage,
+                        legendaryCustomization = state.legendaryCustomization,
                     )
                 }
 
@@ -105,7 +108,7 @@ fun KeysSettingsScreen(state: KeysSettingsContract.UiState, onClose: () -> Unit)
 }
 
 @Composable
-fun PublicKeySection(npub: String, avatarCdnImage: CdnImage?) {
+fun PublicKeySection(npub: String, avatarCdnImage: CdnImage?, legendaryCustomization: LegendaryCustomization?) {
     val context = LocalContext.current
 
     Text(
@@ -127,7 +130,10 @@ fun PublicKeySection(npub: String, avatarCdnImage: CdnImage?) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(modifier = Modifier.padding(start = 16.dp)) {
-            AvatarThumbnail(avatarCdnImage = avatarCdnImage)
+            UniversalAvatarThumbnail(
+                avatarCdnImage = avatarCdnImage,
+                legendaryCustomization = legendaryCustomization,
+            )
         }
         Text(
             modifier = Modifier.padding(all = 16.dp),
