@@ -17,6 +17,7 @@ import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.networking.primal.retryNetworkCall
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.legend.LegendaryStyle
+import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import timber.log.Timber
@@ -103,7 +104,7 @@ class ReadsViewModel @Inject constructor(
                 setState {
                     copy(
                         activeAccountAvatarCdnImage = it.avatarCdnImage,
-                        activeAccountLegendaryStyle = LegendaryStyle.valueById(it.primalLegendProfile?.styleId),
+                        activeAccountLegendaryCustomization = it.primalLegendProfile?.asLegendaryCustomization(),
                     )
                 }
             }

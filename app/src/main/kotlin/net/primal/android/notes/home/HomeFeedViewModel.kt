@@ -21,6 +21,7 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.notes.home.HomeFeedContract.UiEvent
 import net.primal.android.notes.home.HomeFeedContract.UiState
 import net.primal.android.premium.legend.LegendaryStyle
+import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.user.updater.UserDataUpdater
@@ -117,7 +118,7 @@ class HomeFeedViewModel @Inject constructor(
                 setState {
                     copy(
                         activeAccountAvatarCdnImage = it.avatarCdnImage,
-                        activeAccountLegendaryStyle = LegendaryStyle.valueById(it.primalLegendProfile?.styleId),
+                        activeAccountLegendaryCustomization = it.primalLegendProfile?.asLegendaryCustomization(),
                     )
                 }
             }

@@ -31,6 +31,7 @@ import net.primal.android.notifications.list.NotificationsContract.UiState
 import net.primal.android.notifications.list.ui.NotificationUi
 import net.primal.android.notifications.repository.NotificationRepository
 import net.primal.android.premium.legend.LegendaryStyle
+import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import timber.log.Timber
@@ -78,7 +79,7 @@ class NotificationsViewModel @Inject constructor(
                 setState {
                     copy(
                         activeAccountAvatarCdnImage = it.avatarCdnImage,
-                        activeAccountLegendaryStyle = LegendaryStyle.valueById(it.primalLegendProfile?.styleId),
+                        activeAccountLegendaryCustomization = it.primalLegendProfile?.asLegendaryCustomization(),
                     )
                 }
             }

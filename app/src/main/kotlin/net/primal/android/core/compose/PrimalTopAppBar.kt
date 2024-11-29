@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.theme.AppTheme
 
@@ -53,7 +54,7 @@ fun PrimalTopAppBar(
     onNavigationIconClick: (() -> Unit)? = null,
     autoCloseKeyboardOnNavigationIconClick: Boolean = true,
     avatarCdnImage: CdnImage? = null,
-    avatarLegendaryStyle: LegendaryStyle? = null,
+    legendaryCustomization: LegendaryCustomization? = null,
     actions: (@Composable RowScope.() -> Unit)? = null,
     showDivider: Boolean = true,
     scrollBehavior: TopAppBarScrollBehavior? = null,
@@ -77,15 +78,11 @@ fun PrimalTopAppBar(
                             .padding(horizontal = 8.dp)
                             .clip(CircleShape),
                     ) {
-                        AvatarThumbnailCustomBorder(
+                        UniversalAvatarThumbnail(
                             avatarCdnImage = avatarCdnImage,
                             modifier = Modifier.size(32.dp),
                             onClick = onNavigationIconClick,
-                            hasBorder = avatarLegendaryStyle != null,
-                            borderBrush = avatarLegendaryStyle?.brush
-                                ?: Brush.linearGradient(
-                                    listOf(AppTheme.colorScheme.primary, AppTheme.colorScheme.primary),
-                                ),
+                            legendaryCustomization = legendaryCustomization,
                         )
                     }
                 } else if (navigationIcon != null) {

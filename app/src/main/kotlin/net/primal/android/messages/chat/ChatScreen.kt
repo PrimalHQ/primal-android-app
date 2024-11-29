@@ -59,6 +59,7 @@ import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
@@ -138,10 +139,11 @@ fun ChatScreen(
                             .padding(horizontal = 8.dp)
                             .clip(CircleShape),
                     ) {
-                        AvatarThumbnail(
+                        UniversalAvatarThumbnail(
                             avatarCdnImage = state.participantProfile?.avatarCdnImage,
                             modifier = Modifier.size(32.dp),
                             onClick = { noteCallbacks.onProfileClick?.invoke(state.participantId) },
+                            legendaryCustomization = state.participantProfile?.legendaryCustomization,
                         )
                     }
                 },

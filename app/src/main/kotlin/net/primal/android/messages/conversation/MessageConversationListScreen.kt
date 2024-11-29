@@ -60,11 +60,11 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
@@ -280,9 +280,10 @@ private fun ConversationListItem(
         },
         colors = ListItemDefaults.colors(containerColor = AppTheme.colorScheme.surfaceVariant),
         leadingContent = {
-            AvatarThumbnail(
+            UniversalAvatarThumbnail(
                 avatarCdnImage = conversation.participantAvatarCdnImage,
                 onClick = { onProfileClick(conversation.participantId) },
+                legendaryCustomization = conversation.participantLegendaryCustomization,
             )
         },
         headlineContent = {
@@ -311,6 +312,7 @@ private fun ConversationListItem(
                         displayName = conversation.participantUsername,
                         internetIdentifier = conversation.participantInternetIdentifier,
                         annotatedStringSuffixBuilder = { append(suffixText) },
+                        customBadgeStyle = conversation.participantLegendaryCustomization?.legendaryStyle,
                         style = AppTheme.typography.bodyMedium,
                     )
                 }

@@ -67,6 +67,7 @@ import net.primal.android.feeds.list.ui.model.FeedUi
 import net.primal.android.notes.feed.list.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedContract.UiEvent
+import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.theme.AppTheme
 
@@ -166,7 +167,7 @@ fun HomeFeedScreen(
                 title = activeFeed?.title ?: "",
                 activeFeed = activeFeed,
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
-                avatarLegendaryStyle = state.activeAccountLegendaryStyle,
+                avatarLegendaryCustomization = state.activeAccountLegendaryCustomization,
                 onAvatarClick = { uiScope.launch { drawerState.open() } },
                 onSearchClick = onSearchClick,
                 onFeedChanged = { feed ->
@@ -255,7 +256,7 @@ private fun NoteFeedTopAppBar(
     onSearchClick: () -> Unit,
     activeFeed: FeedUi?,
     onFeedChanged: (FeedUi) -> Unit,
-    avatarLegendaryStyle: LegendaryStyle? = null,
+    avatarLegendaryCustomization: LegendaryCustomization? = null,
     scrollBehavior: TopAppBarScrollBehavior? = null,
     onGoToWallet: (() -> Unit)? = null,
 ) {
@@ -284,7 +285,7 @@ private fun NoteFeedTopAppBar(
             }
         },
         avatarCdnImage = avatarCdnImage,
-        avatarLegendaryStyle = avatarLegendaryStyle,
+        legendaryCustomization = avatarLegendaryCustomization,
         navigationIcon = PrimalIcons.AvatarDefault,
         onNavigationIconClick = onAvatarClick,
         actions = {

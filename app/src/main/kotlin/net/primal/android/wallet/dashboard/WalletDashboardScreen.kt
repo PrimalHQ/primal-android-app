@@ -180,7 +180,7 @@ fun WalletDashboardScreen(
                 modifier = Modifier.onSizeChanged { topBarHeight = it.height },
                 title = stringResource(id = R.string.wallet_title),
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
-                avatarLegendaryStyle = state.activeAccountLegendaryStyle,
+                legendaryCustomization = state.activeAccountLegendaryCustomization,
                 navigationIcon = PrimalIcons.AvatarDefault,
                 onNavigationIconClick = {
                     uiScope.launch { drawerState.open() }

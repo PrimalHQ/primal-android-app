@@ -53,6 +53,7 @@ import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.list.FeedsBottomSheet
 import net.primal.android.feeds.list.ui.model.FeedUi
+import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.premium.legend.LegendaryStyle
 
 @Composable
@@ -129,7 +130,7 @@ private fun ReadsScreen(
                 title = activeFeed?.title ?: "",
                 activeFeed = activeFeed,
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
-                avatarLegendaryStyle = state.activeAccountLegendaryStyle,
+                avatarLegendaryCustomization = state.activeAccountLegendaryCustomization,
                 onAvatarClick = { uiScope.launch { drawerState.open() } },
                 onSearchClick = onSearchClick,
                 onFeedChanged = { feed ->
@@ -195,7 +196,7 @@ private fun ArticleFeedTopAppBar(
     onSearchClick: () -> Unit,
     activeFeed: FeedUi?,
     onFeedChanged: (FeedUi) -> Unit,
-    avatarLegendaryStyle: LegendaryStyle? = null,
+    avatarLegendaryCustomization: LegendaryCustomization? = null,
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
     var feedPickerVisible by rememberSaveable { mutableStateOf(false) }
@@ -222,7 +223,7 @@ private fun ArticleFeedTopAppBar(
             }
         },
         avatarCdnImage = avatarCdnImage,
-        avatarLegendaryStyle = avatarLegendaryStyle,
+        legendaryCustomization = avatarLegendaryCustomization,
         navigationIcon = PrimalIcons.AvatarDefault,
         onNavigationIconClick = onAvatarClick,
         actions = {
