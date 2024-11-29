@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -202,6 +201,22 @@ fun NoteContent(
             )
         }
 
+        val referencedHighlights = data.nostrUris.filter(type = NostrUriType.Highlight)
+        if (referencedHighlights.isNotEmpty()) {
+            referencedHighlights
+                .mapNotNull { it.referencedHighlight }
+                .forEachIndexed { index, highlight ->
+                    ReferencedHighlight(
+                        highlight = highlight,
+                        onClick = { naddr -> noteCallbacks.onArticleClick?.invoke(naddr) },
+                    )
+
+                    if (index < referencedHighlights.size - 1) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                    }
+                }
+        }
+
         if (data.invoices.isNotEmpty()) {
             NoteLightningInvoice(
                 modifier = Modifier.padding(top = if (contentText.isEmpty()) 4.dp else 6.dp),
@@ -243,22 +258,6 @@ fun NoteContent(
                 noteCallbacks = noteCallbacks,
                 hasBorder = referencedEventsHaveBorder,
             )
-        }
-
-        val referencedHighlights = data.nostrUris.filter(type = NostrUriType.Highlight)
-        if (referencedHighlights.isNotEmpty()) {
-            referencedHighlights
-                .mapNotNull { it.referencedHighlight }
-                .forEachIndexed { index, higlight ->
-                    Text(
-                        text = higlight.text,
-                        color = Color.Green,
-                    )
-
-                    if (index < referencedHighlights.size - 1) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                    }
-                }
         }
 
         val genericEvents = data.nostrUris.filter(type = NostrUriType.Unsupported)

@@ -18,8 +18,6 @@ fun List<JsonArray>.findFirstZapAmount() = firstOrNull { it.isAmountTag() }?.get
 
 fun List<JsonArray>.findFirstBolt11() = firstOrNull { it.isBolt11Tag() }?.getTagValueOrNull()
 
-fun List<JsonArray>.findFirstATag() = firstOrNull { it.isATag() }?.getTagValueOrNull()
-
 fun List<JsonArray>.findFirstTitle() = firstOrNull { it.isTitleTag() }?.getTagValueOrNull()
 
 fun List<JsonArray>.findFirstSummary() = firstOrNull { it.isSummaryTag() }?.getTagValueOrNull()

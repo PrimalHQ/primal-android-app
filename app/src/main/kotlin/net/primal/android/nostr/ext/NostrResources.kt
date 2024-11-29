@@ -1,6 +1,7 @@
 package net.primal.android.nostr.ext
 
 import java.util.regex.Pattern
+import kotlinx.serialization.json.JsonArray
 import net.primal.android.articles.db.ArticleData
 import net.primal.android.articles.feed.ui.wordsCountToReadingTime
 import net.primal.android.attachments.db.NoteNostrUri
@@ -191,7 +192,7 @@ fun String.takeAsProfileHexIdOrNull(): String? {
 fun String.takeAsNaddrOrNull(): String? {
     return if (isNAddr() || isNAddrUri()) {
         val result = runCatching {
-            Nip19TLV.parseAsNaddr(this)
+            Nip19TLV.parseUriAsNaddrOrNull(this)
         }
         if (result.getOrNull() != null) {
             this
@@ -262,20 +263,14 @@ fun List<String>.mapAsNoteNostrUriPO(
     val refNote = postIdToPostDataMap[refNoteId]
     val refPostAuthor = profileIdToProfileDataMap[refNote?.authorId]
 
-    val refNaddr = Nip19TLV.parseAsNaddr(
-        naddr = if (link.startsWith("nostr:")) {
-            link.removePrefix("nostr:")
-        } else {
-            link
-        },
-    )
+    val refNaddr = Nip19TLV.parseUriAsNaddrOrNull(link)
     val refArticle = articleIdToArticle[refNaddr?.identifier]
     val refArticleAuthor = profileIdToProfileDataMap[refNaddr?.userId]
 
     val referencedNostrEvent: NostrEvent? = eventIdToNostrEvent[link.extractEventId()]
 
     val refHighlightText = referencedNostrEvent?.content
-    val refHighlightATag = referencedNostrEvent?.tags?.findFirstATag()
+    val refHighlightATag = referencedNostrEvent?.tags?.firstOrNull { it.isATag() }
 
     val type = if (refUserProfileId != null) {
         NostrUriType.Profile
@@ -312,6 +307,7 @@ fun List<String>.mapAsNoteNostrUriPO(
         ),
         referencedArticle = takeAsReferencedArticleOrNull(refNaddr, refArticle, refArticleAuthor),
         referencedHighlight = takeAsReferencedHighlightOrNull(
+            uri = link,
             highlight = refHighlightText,
             aTag = refHighlightATag,
             authorId = referencedNostrEvent?.tags?.findFirstProfileId(),
@@ -399,13 +395,16 @@ private fun takeAsReferencedArticleOrNull(
 }
 
 private fun takeAsReferencedHighlightOrNull(
+    uri: String,
     highlight: String?,
-    aTag: String?,
+    aTag: JsonArray?,
     authorId: String?,
 ) = if (highlight?.isNotEmpty() == true && aTag != null) {
+    val nevent = Nip19TLV.parseUriAsNeventOrNull(neventUri = uri)
     ReferencedHighlight(
         text = highlight,
         aTag = aTag,
+        eventId = nevent?.eventId,
         authorId = authorId,
     )
 } else {
