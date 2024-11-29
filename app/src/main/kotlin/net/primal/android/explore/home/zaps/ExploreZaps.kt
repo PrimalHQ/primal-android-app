@@ -34,9 +34,9 @@ import java.text.NumberFormat
 import java.time.Instant
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.ListNoContent
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
@@ -44,6 +44,7 @@ import net.primal.android.explore.home.zaps.ui.ExploreZapNoteUi
 import net.primal.android.notes.feed.model.NoteContentUi
 import net.primal.android.notes.feed.note.ui.NoteContent
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
+import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -134,6 +135,7 @@ fun ZapListItem(
             senderCdnImage = zapData.sender?.avatarCdnImage,
             amountSats = zapData.amountSats,
             message = zapData.zapMessage,
+            senderLegendaryCustomization = zapData.sender?.legendaryCustomization,
         )
         NoteSummary(
             noteContent = zapData.noteContentUi,
@@ -143,6 +145,7 @@ fun ZapListItem(
             receiverCdnResource = zapData.receiver?.avatarCdnImage,
             receiverDisplayName = zapData.receiver?.authorDisplayName,
             onReceiverAvatarClick = { zapData.receiver?.pubkey?.let { noteCallbacks.onProfileClick?.invoke(it) } },
+            receiverLegendaryCustomization = zapData.receiver?.legendaryCustomization,
         )
     }
 }
@@ -152,6 +155,7 @@ private fun NoteSummary(
     receiverDisplayName: String?,
     noteContent: NoteContentUi,
     receiverCdnResource: CdnImage?,
+    receiverLegendaryCustomization: LegendaryCustomization?,
     noteTimestamp: Instant,
     noteCallbacks: NoteCallbacks,
     onReceiverAvatarClick: () -> Unit,
@@ -163,10 +167,11 @@ private fun NoteSummary(
             .padding(start = 2.dp, end = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        AvatarThumbnail(
+        UniversalAvatarThumbnail(
             avatarCdnImage = receiverCdnResource,
             avatarSize = 38.dp,
             onClick = onReceiverAvatarClick,
+            legendaryCustomization = receiverLegendaryCustomization,
         )
         Column(
             verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -213,6 +218,7 @@ private fun NoteSummary(
 private fun ZapHeader(
     onSenderAvatarClick: () -> Unit,
     senderCdnImage: CdnImage?,
+    senderLegendaryCustomization: LegendaryCustomization?,
     amountSats: ULong,
     message: String?,
 ) {
@@ -226,10 +232,11 @@ private fun ZapHeader(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        AvatarThumbnail(
+        UniversalAvatarThumbnail(
             avatarCdnImage = senderCdnImage,
             avatarSize = 38.dp,
             onClick = onSenderAvatarClick,
+            legendaryCustomization = senderLegendaryCustomization,
         )
         val numberFormat = NumberFormat.getNumberInstance()
         Row(
