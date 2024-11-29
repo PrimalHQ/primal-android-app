@@ -52,9 +52,9 @@ import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWor
 import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
+import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
 import net.primal.android.core.errors.UiError
-import net.primal.android.notes.feed.note.ui.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.theme.AppTheme
 import net.primal.android.thread.articles.ArticleContract
 import net.primal.android.thread.articles.ArticleViewModel
@@ -239,7 +239,7 @@ private fun ArticleFeedLazyColumn(
             when {
                 item != null -> Column {
                     if (articleState.shouldApproveBookmark) {
-                        ConfirmFirstBookmarkAlertDialog(
+                        ApproveBookmarkAlertDialog(
                             onBookmarkConfirmed = {
                                 articleEventPublisher(
                                     ArticleContract.UiEvent.BookmarkAction(
