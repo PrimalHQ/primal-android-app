@@ -130,8 +130,8 @@ fun ProfileTopCoverBar(
                 onClick = { state.profileDetails?.avatarCdnImage?.sourceUrl?.let { onMediaItemClick(it) } },
                 avatarCdnImage = state.profileDetails?.avatarCdnImage,
                 hasBorder = true,
-                borderBrush = if (state.profileDetails?.legendaryStyle != null && state.profileDetails.avatarGlow) {
-                    when (state.profileDetails.legendaryStyle) {
+                borderBrush = if (state.profileDetails?.legendaryCustomization?.legendaryStyle != null && state.profileDetails.legendaryCustomization.avatarGlow) {
+                    when (state.profileDetails.legendaryCustomization.legendaryStyle) {
                         LegendaryStyle.NO_CUSTOMIZATION -> Brush.linearGradient(
                             listOf(
                                 Color.White,
@@ -139,7 +139,7 @@ fun ProfileTopCoverBar(
                             ),
                         )
 
-                        else -> state.profileDetails.legendaryStyle.brush
+                        else -> state.profileDetails.legendaryCustomization.legendaryStyle.brush
                     }
                 } else {
                     Brush.linearGradient(listOf(Color.White, Color.White))
@@ -196,8 +196,8 @@ private fun ProfileTopAppBar(
                         internetIdentifier = state.profileDetails?.internetIdentifier,
                         internetIdentifierBadgeSize = 20.dp,
                         internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
-                        customBadgeStyle = if (state.profileDetails?.customBadge == true) {
-                            state.profileDetails.legendaryStyle
+                        customBadgeStyle = if (state.profileDetails?.legendaryCustomization?.customBadge == true) {
+                            state.profileDetails.legendaryCustomization.legendaryStyle
                         } else {
                             null
                         },

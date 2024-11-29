@@ -125,8 +125,8 @@ private fun ProfileHeaderDetails(
             displayName = state.profileDetails?.authorDisplayName ?: state.profileId.asEllipsizedNpub(),
             internetIdentifier = state.profileDetails?.internetIdentifier,
             isProfileFollowingMe = state.isProfileFollowingMe,
-            customBadge = state.profileDetails?.customBadge == true,
-            legendaryStyle = state.profileDetails?.legendaryStyle,
+            customBadge = state.profileDetails?.legendaryCustomization?.customBadge == true,
+            legendaryStyle = state.profileDetails?.legendaryCustomization?.legendaryStyle,
         )
 
         if (state.profileDetails?.internetIdentifier?.isNotEmpty() == true) {
