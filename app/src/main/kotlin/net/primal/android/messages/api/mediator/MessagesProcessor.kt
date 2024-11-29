@@ -128,6 +128,7 @@ class MessagesProcessor @Inject constructor(
 
         database.attachments().upsertAllNostrUris(
             data = messageDataList.flatMapMessagesAsNostrResourcePO(
+                eventIdToNostrEvent = emptyMap(),
                 postIdToPostDataMap = referencedNotesMap,
                 articleIdToArticle = emptyMap(),
                 profileIdToProfileDataMap = referencedProfilesMap,

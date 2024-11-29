@@ -58,7 +58,7 @@ class ArticleDetailsViewModel @Inject constructor(
     private val zapHandler: ZapHandler,
 ) : ViewModel() {
 
-    private val naddr = Nip19TLV.parseAsNaddr(savedStateHandle.naddrOrThrow)
+    private val naddr = Nip19TLV.parseUriAsNaddrOrNull(savedStateHandle.naddrOrThrow)
 
     private val _state = MutableStateFlow(UiState(naddr = naddr))
     val state = _state.asStateFlow()
