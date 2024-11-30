@@ -21,6 +21,7 @@ import net.primal.android.navigation.transactionIdOrThrow
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
+import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.wallet.db.WalletTransaction
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.details.TransactionDetailsContract.UiState
@@ -128,6 +129,7 @@ class TransactionDetailsViewModel @Inject constructor(
             otherUserDisplayName = this.otherProfileData?.authorNameUiFriendly(),
             otherUserInternetIdentifier = this.otherProfileData?.internetIdentifier,
             otherUserLightningAddress = this.data.otherLightningAddress,
+            otherUserLegendaryCustomization = this.otherProfileData?.primalLegendProfile?.asLegendaryCustomization(),
             isZap = this.data.isZap,
             isStorePurchase = this.data.isStorePurchase,
         )

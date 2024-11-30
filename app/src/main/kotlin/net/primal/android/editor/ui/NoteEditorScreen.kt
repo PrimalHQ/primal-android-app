@@ -478,6 +478,7 @@ private fun ReplyToNote(replyToNote: FeedPostUi, connectionLineColor: Color) {
             postTimestamp = replyToNote.timestamp,
             authorAvatarCdnImage = replyToNote.authorAvatarCdnImage,
             authorInternetIdentifier = replyToNote.authorInternetIdentifier,
+            authorLegendaryCustomization = replyToNote.authorLegendaryCustomization,
             onAuthorAvatarClick = {},
         )
 
