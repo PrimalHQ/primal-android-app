@@ -229,6 +229,7 @@ private fun ExploreNoteFeed(
                 feedSpec = feedSpec,
                 contentPadding = contentPadding,
                 onNoteClick = { noteCallbacks.onNoteClick?.invoke(it) },
+                onGetPrimalPremiumClick = { noteCallbacks.onGetPrimalPremiumClick?.invoke() },
             )
         }
     }

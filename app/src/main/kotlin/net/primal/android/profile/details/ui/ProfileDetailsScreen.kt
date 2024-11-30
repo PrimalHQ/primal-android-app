@@ -523,6 +523,9 @@ fun ProfileDetailsScreen(
                                             onNoteClick = { naddr -> noteCallbacks.onNoteClick?.let { it(naddr) } },
                                             noContentVerticalArrangement = Arrangement.Top,
                                             noContentPaddingValues = PaddingValues(top = 16.dp),
+                                            onGetPrimalPremiumClick = {
+                                                noteCallbacks.onGetPrimalPremiumClick?.invoke()
+                                            },
                                         )
                                     }
                                 }

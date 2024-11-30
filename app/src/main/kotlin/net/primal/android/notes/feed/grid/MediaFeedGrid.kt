@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -25,14 +26,19 @@ import androidx.paging.compose.itemKey
 import net.primal.android.R
 import net.primal.android.core.compose.GridLoadingPlaceholder
 import net.primal.android.core.compose.ListNoContent
+import net.primal.android.core.compose.PremiumFeedPaywall
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.notes.feed.model.FeedPostUi
 import timber.log.Timber
+
+const val MAX_NOTES_BEFORE_PAYWALL = 25
+const val PAYWALL_COLUMN_SPAN = 3
 
 @Composable
 fun MediaFeedGrid(
     feedSpec: String,
     onNoteClick: (String) -> Unit,
+    onGetPrimalPremiumClick: () -> Unit,
     modifier: Modifier = Modifier,
     gridState: LazyGridState = rememberLazyGridState(),
     contentPadding: PaddingValues = PaddingValues(0.dp),
@@ -49,6 +55,7 @@ fun MediaFeedGrid(
     MediaFeedGrid(
         state = uiState.value,
         onNoteClick = onNoteClick,
+        onGetPrimalPremiumClick = onGetPrimalPremiumClick,
         gridState = gridState,
         modifier = modifier,
         contentPadding = contentPadding,
@@ -62,6 +69,7 @@ private fun MediaFeedGrid(
     modifier: Modifier = Modifier,
     state: MediaFeedContract.UiState,
     onNoteClick: (String) -> Unit,
+    onGetPrimalPremiumClick: () -> Unit,
     gridState: LazyGridState = rememberLazyGridState(),
     contentPadding: PaddingValues = PaddingValues(0.dp),
     noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
@@ -86,7 +94,7 @@ private fun MediaFeedGrid(
                 contentPadding = contentPadding,
             ) {
                 items(
-                    count = pagingItems.itemCount,
+                    count = pagingItems.itemCount.ifPaywallCoerceAtMost(state.paywall),
                     key = pagingItems.itemKey(key = { "${it.postId}${it.repostId}" }),
                     contentType = pagingItems.itemContentType(),
                 ) { index ->
@@ -107,6 +115,9 @@ private fun MediaFeedGrid(
 
                         else -> {}
                     }
+                }
+                item(span = { GridItemSpan(PAYWALL_COLUMN_SPAN) }) {
+                    PremiumFeedPaywall(onClick = onGetPrimalPremiumClick)
                 }
             }
         }
@@ -153,3 +164,6 @@ private fun EmptyItemsContent(
         }
     }
 }
+
+private fun Int.ifPaywallCoerceAtMost(paywall: Boolean) =
+    run { if (paywall) this.coerceAtMost(MAX_NOTES_BEFORE_PAYWALL) else this }
