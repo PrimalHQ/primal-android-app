@@ -93,16 +93,7 @@ fun FilterPicker(
     ) {
         Scaffold(
             topBar = {
-                CenterAlignedTopAppBar(
-                    title = {
-                        Text(
-                            text = stringResource(id = R.string.asearch_filter_sheet_title),
-                        )
-                    },
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
-                    ),
-                )
+                FilterPickerTopBar()
             },
             bottomBar = {
                 FilterPickerBottomBar(
@@ -167,6 +158,21 @@ fun FilterPicker(
             }
         }
     }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun FilterPickerTopBar() {
+    CenterAlignedTopAppBar(
+        title = {
+            Text(
+                text = stringResource(id = R.string.asearch_filter_sheet_title),
+            )
+        },
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+        ),
+    )
 }
 
 @Composable
