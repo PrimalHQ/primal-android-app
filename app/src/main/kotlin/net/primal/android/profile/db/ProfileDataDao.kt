@@ -24,7 +24,7 @@ interface ProfileDataDao {
         )
     }
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE) @Suppress("detekt:FunctionNaming", "FunctionName")
     fun _upsertAllProfileFields(data: List<ProfileData>)
 
     @Transaction
