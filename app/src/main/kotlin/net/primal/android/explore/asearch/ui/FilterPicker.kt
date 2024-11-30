@@ -28,6 +28,7 @@ import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.OutlinedTextFieldDefaults.Container
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -90,74 +91,80 @@ fun FilterPicker(
         sheetState = sheetState,
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(AppTheme.extraColorScheme.surfaceVariantAlt2),
-        ) {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(id = R.string.asearch_filter_sheet_title),
-                    )
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
-                ),
-            )
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp)
-                    .verticalScroll(rememberScrollState()),
-            ) {
-                if (searchKind.isReads()) {
-                    SliderColumn(
-                        label = stringResource(id = R.string.asearch_filter_min_read_time),
-                        value = filterState.minReadTime,
-                        onValueChange = { filterState = filterState.copy(minReadTime = it) },
-                        maxValue = 20,
-                    )
-                    SliderColumn(
-                        label = stringResource(id = R.string.asearch_filter_max_read_time),
-                        value = filterState.maxReadTime,
-                        onValueChange = { filterState = filterState.copy(maxReadTime = it) },
-                        maxValue = 20,
-                    )
-                }
-                if (searchKind.isImages() || searchKind.isVideos()) {
-                    OrientationRow(
-                        orientation = filterState.orientation,
-                        onOrientationSelected = { filterState = filterState.copy(orientation = it) },
-                    )
-                }
-                if (searchKind.isVideos() || searchKind.isSound()) {
-                    SliderColumn(
-                        label = stringResource(id = R.string.asearch_filter_min_duration),
-                        value = filterState.minDuration,
-                        onValueChange = { filterState = filterState.copy(minDuration = it) },
-                        maxValue = 600,
-                    )
-                    SliderColumn(
-                        label = stringResource(id = R.string.asearch_filter_max_duration),
-                        value = filterState.maxDuration,
-                        onValueChange = { filterState = filterState.copy(maxDuration = it) },
-                        maxValue = 600,
-                    )
-                }
-                CommonSliders(
-                    filterState = filterState,
-                    onFilterStateChange = { reducer -> filterState = filterState.reducer() },
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            text = stringResource(id = R.string.asearch_filter_sheet_title),
+                        )
+                    },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+                    ),
                 )
+            },
+            bottomBar = {
+                FilterPickerBottomBar(
+                    sheetState = sheetState,
+                    onDismissRequest = onDismissRequest,
+                    onFiltersSelected = { filterSelected(filterState) },
+                )
+            },
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxWidth()
+                    .background(AppTheme.extraColorScheme.surfaceVariantAlt2),
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp)
+                        .verticalScroll(rememberScrollState()),
+                ) {
+                    if (searchKind.isReads()) {
+                        SliderColumn(
+                            label = stringResource(id = R.string.asearch_filter_min_read_time),
+                            value = filterState.minReadTime,
+                            onValueChange = { filterState = filterState.copy(minReadTime = it) },
+                            maxValue = 20,
+                        )
+                        SliderColumn(
+                            label = stringResource(id = R.string.asearch_filter_max_read_time),
+                            value = filterState.maxReadTime,
+                            onValueChange = { filterState = filterState.copy(maxReadTime = it) },
+                            maxValue = 20,
+                        )
+                    }
+                    if (searchKind.isImages() || searchKind.isVideos()) {
+                        OrientationRow(
+                            orientation = filterState.orientation,
+                            onOrientationSelected = { filterState = filterState.copy(orientation = it) },
+                        )
+                    }
+                    if (searchKind.isVideos() || searchKind.isSound()) {
+                        SliderColumn(
+                            label = stringResource(id = R.string.asearch_filter_min_duration),
+                            value = filterState.minDuration,
+                            onValueChange = { filterState = filterState.copy(minDuration = it) },
+                            maxValue = 600,
+                        )
+                        SliderColumn(
+                            label = stringResource(id = R.string.asearch_filter_max_duration),
+                            value = filterState.maxDuration,
+                            onValueChange = { filterState = filterState.copy(maxDuration = it) },
+                            maxValue = 600,
+                        )
+                    }
+                    CommonSliders(
+                        filterState = filterState,
+                        onFilterStateChange = { reducer -> filterState = filterState.reducer() },
+                    )
+                }
             }
-
-            FilterPickerBottomBar(
-                sheetState = sheetState,
-                onDismissRequest = onDismissRequest,
-                onFiltersSelected = { filterSelected(filterState) },
-            )
         }
     }
 }
