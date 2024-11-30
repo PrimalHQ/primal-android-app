@@ -812,6 +812,10 @@
     <string name="profile_editor_input_header_bitcoin_lightning_address">Bitcoin lightning address</string>
     <string name="profile_editor_input_header_nip_05">Verified Nostr address (NIP 05)</string>
     <string name="profile_editor_required_field_hint">required</string>
+    <string name="profile_editor_premium_dialog_title">Primal Premium</string>
+    <string name="profile_editor_premium_dialog_description">You need a Primal Premium account to get a custom Nostr Verified Address and/or custom lightning address on Primal.</string>
+    <string name="profile_editor_premium_dialog_dismiss_text">Cancel</string>
+    <string name="profile_editor_premium_dialog_confirm_text">Okay</string>
 
     <string name="profile_followers_title">%1$s\'s followers</string>
     <string name="profile_following_title">%1$s\'s following</string>
