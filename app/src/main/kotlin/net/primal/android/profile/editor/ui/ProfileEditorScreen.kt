@@ -81,13 +81,13 @@ fun ProfileEditorScreen(
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
 
-    if (state.showPremiumPaywall) {
+    if (state.showPremiumPaywallDialog) {
         PrimalPremiumAlertDialog(
             onDismissClick = {
-                eventPublisher(ProfileEditorContract.UiEvent.DismissPrimalPremiumWarning)
+                eventPublisher(ProfileEditorContract.UiEvent.DismissPremiumPaywallDialog)
             },
             onConfirmClick = {
-                eventPublisher(ProfileEditorContract.UiEvent.DismissPrimalPremiumWarning)
+                eventPublisher(ProfileEditorContract.UiEvent.DismissPremiumPaywallDialog)
                 onNavigateToPremiumBuying()
             },
         )

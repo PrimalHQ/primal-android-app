@@ -102,7 +102,7 @@ class ProfileEditorViewModel @Inject constructor(
                     is UiEvent.SaveProfileEvent -> saveProfile()
 
                     UiEvent.DismissError -> setState { copy(error = null) }
-                    UiEvent.DismissPrimalPremiumWarning -> setState { copy(showPremiumPaywall = false) }
+                    UiEvent.DismissPremiumPaywallDialog -> setState { copy(showPremiumPaywallDialog = false) }
                 }
             }
         }
@@ -149,7 +149,7 @@ class ProfileEditorViewModel @Inject constructor(
 
                 val isActiveAccountPremium = activeAccountStore.activeUserAccount().hasPremiumMembership()
                 if (profile.hasPrimalPremiumAddresses() && !isActiveAccountPremium) {
-                    setState { copy(showPremiumPaywall = true) }
+                    setState { copy(showPremiumPaywallDialog = true) }
                 } else {
                     withContext(dispatcherProvider.io()) {
                         val lud16 = profile.lightningAddress
@@ -199,5 +199,4 @@ class ProfileEditorViewModel @Inject constructor(
 
     private fun ProfileMetadata.hasPrimalPremiumAddresses() =
         this.lightningAddress.isPrimalIdentifier() || this.nostrVerification.isPrimalIdentifier()
-
 }

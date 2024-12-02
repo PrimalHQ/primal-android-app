@@ -16,7 +16,7 @@ interface ProfileEditorContract {
         val localBannerUri: Uri? = null,
         val remoteAvatarUrl: String? = null,
         val remoteBannerUrl: String? = null,
-        val showPremiumPaywall: Boolean = false,
+        val showPremiumPaywallDialog: Boolean = false,
     ) {
         sealed class EditProfileError {
             data class MissingRelaysConfiguration(val cause: Throwable) : EditProfileError()
@@ -38,7 +38,7 @@ interface ProfileEditorContract {
         data class BannerUriChangedEvent(val bannerUri: Uri?) : UiEvent()
         data object SaveProfileEvent : UiEvent()
         data object DismissError : UiEvent()
-        data object DismissPrimalPremiumWarning : UiEvent()
+        data object DismissPremiumPaywallDialog : UiEvent()
     }
 
     sealed class SideEffect {
