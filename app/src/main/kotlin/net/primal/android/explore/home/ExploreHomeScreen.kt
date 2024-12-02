@@ -203,6 +203,7 @@ private fun ExploreHomeScreen(
                             feedSpec = exploreMediaFeedSpec,
                             contentPadding = paddingValues,
                             onNoteClick = { noteCallbacks.onNoteClick?.invoke(it) },
+                            onGetPrimalPremiumClick = { noteCallbacks.onGetPrimalPremiumClick?.invoke() },
                         )
                     }
 

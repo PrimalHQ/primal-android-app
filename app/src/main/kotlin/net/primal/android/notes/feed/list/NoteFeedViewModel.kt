@@ -39,6 +39,7 @@ import net.primal.android.notes.feed.list.NoteFeedContract.UiState
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
+import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import timber.log.Timber
 
@@ -79,9 +80,8 @@ class NoteFeedViewModel @AssistedInject constructor(
     private fun observeActiveAccount() {
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect {
-                val hasPremiumMembership = it.premiumMembership?.isExpired() == false
                 setState {
-                    copy(paywall = feedSpec.isPremiumFeedSpec() && !hasPremiumMembership)
+                    copy(paywall = feedSpec.isPremiumFeedSpec() && !it.hasPremiumMembership())
                 }
             }
         }
