@@ -102,7 +102,7 @@ class ProfileEditorViewModel @Inject constructor(
                     is UiEvent.SaveProfileEvent -> saveProfile()
 
                     UiEvent.DismissError -> setState { copy(error = null) }
-                    UiEvent.DismissPrimalPremiumWarning -> setState { copy(displayPrimalPremiumWarning = false) }
+                    UiEvent.DismissPrimalPremiumWarning -> setState { copy(showPremiumPaywall = false) }
                 }
             }
         }
@@ -134,7 +134,7 @@ class ProfileEditorViewModel @Inject constructor(
             }
         }
 
-    private suspend fun saveProfile() =
+    private fun saveProfile() =
         viewModelScope.launch {
             setState { copy(loading = true) }
             try {
@@ -147,23 +147,20 @@ class ProfileEditorViewModel @Inject constructor(
                     }
                 }
 
-                withContext(dispatcherProvider.io()) {
-                    val lud16 = profile.lightningAddress
-                    if (!lud16.isNullOrEmpty()) {
-                        lightningAddressChecker.validateLightningAddress(lud16 = lud16)
-                    }
-                }
-
                 val isActiveAccountPremium = activeAccountStore.activeUserAccount().hasPremiumMembership()
-                if (profile.checkIfPrimalPremiumNIP05OrLud16() && !isActiveAccountPremium) {
-                    setState { copy(displayPrimalPremiumWarning = true) }
-                    return@launch
-                }
+                if (profile.hasPrimalPremiumAddresses() && !isActiveAccountPremium) {
+                    setState { copy(showPremiumPaywall = true) }
+                } else {
+                    withContext(dispatcherProvider.io()) {
+                        val lud16 = profile.lightningAddress
+                        if (!lud16.isNullOrEmpty()) {
+                            lightningAddressChecker.validateLightningAddress(lud16 = lud16)
+                        }
 
-                withContext(dispatcherProvider.io()) {
-                    userRepository.setProfileMetadata(userId = profileId, profileMetadata = profile)
+                        userRepository.setProfileMetadata(userId = profileId, profileMetadata = profile)
+                    }
+                    setEffect(effect = SideEffect.AccountSuccessfulyEdited)
                 }
-                setEffect(effect = SideEffect.AccountSuccessfulyEdited)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setErrorState(error = EditProfileError.FailedToPublishMetadata(error))
@@ -184,22 +181,23 @@ class ProfileEditorViewModel @Inject constructor(
     private fun setErrorState(error: EditProfileError) {
         setState { copy(error = error) }
     }
-}
 
-fun UiState.toProfileMetadata(): ProfileMetadata {
-    return ProfileMetadata(
-        displayName = this.displayName,
-        username = this.username,
-        website = this.website.ifEmpty { null },
-        about = this.aboutMe.ifEmpty { null },
-        lightningAddress = this.lightningAddress.ifEmpty { null },
-        nostrVerification = this.nip05Identifier.ifEmpty { null },
-        localPictureUri = this.localAvatarUri,
-        localBannerUri = this.localBannerUri,
-        remotePictureUrl = this.remoteAvatarUrl,
-        remoteBannerUrl = this.remoteBannerUrl,
-    )
-}
+    private fun UiState.toProfileMetadata(): ProfileMetadata {
+        return ProfileMetadata(
+            displayName = this.displayName,
+            username = this.username,
+            website = this.website.ifEmpty { null },
+            about = this.aboutMe.ifEmpty { null },
+            lightningAddress = this.lightningAddress.ifEmpty { null },
+            nostrVerification = this.nip05Identifier.ifEmpty { null },
+            localPictureUri = this.localAvatarUri,
+            localBannerUri = this.localBannerUri,
+            remotePictureUrl = this.remoteAvatarUrl,
+            remoteBannerUrl = this.remoteBannerUrl,
+        )
+    }
 
-fun ProfileMetadata.checkIfPrimalPremiumNIP05OrLud16() =
-    this.lightningAddress.isPrimalIdentifier() || this.nostrVerification?.isPrimalIdentifier() == true
+    private fun ProfileMetadata.hasPrimalPremiumAddresses() =
+        this.lightningAddress.isPrimalIdentifier() || this.nostrVerification.isPrimalIdentifier()
+
+}

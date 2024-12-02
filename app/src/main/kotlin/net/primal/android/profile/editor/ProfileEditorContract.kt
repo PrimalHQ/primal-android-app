@@ -16,7 +16,7 @@ interface ProfileEditorContract {
         val localBannerUri: Uri? = null,
         val remoteAvatarUrl: String? = null,
         val remoteBannerUrl: String? = null,
-        val displayPrimalPremiumWarning: Boolean = false,
+        val showPremiumPaywall: Boolean = false,
     ) {
         sealed class EditProfileError {
             data class MissingRelaysConfiguration(val cause: Throwable) : EditProfileError()

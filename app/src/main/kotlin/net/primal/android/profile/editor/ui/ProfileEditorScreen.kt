@@ -81,7 +81,7 @@ fun ProfileEditorScreen(
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
 
-    if (state.displayPrimalPremiumWarning) {
+    if (state.showPremiumPaywall) {
         PrimalPremiumAlertDialog(
             onDismissClick = {
                 eventPublisher(ProfileEditorContract.UiEvent.DismissPrimalPremiumWarning)
