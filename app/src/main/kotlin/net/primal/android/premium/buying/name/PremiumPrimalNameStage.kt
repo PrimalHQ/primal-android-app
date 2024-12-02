@@ -16,13 +16,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,11 +72,14 @@ private fun PremiumPrimalNameStage(
     initialName: String? = null,
     snackbarHostState: SnackbarHostState? = null,
 ) {
-    var primalName by remember { mutableStateOf(initialName ?: "") }
+    var primalName by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        val name = initialName ?: ""
+        mutableStateOf(TextFieldValue(text = name, selection = TextRange(start = name.length, end = name.length)))
+    }
 
     LaunchedEffect(state.isNameAvailable) {
         if (state.isNameAvailable == true) {
-            onPrimalNameAvailable(primalName)
+            onPrimalNameAvailable(primalName.text)
             eventPublisher(PremiumPrimalNameContract.UiEvent.ResetNameAvailable)
         }
     }
@@ -96,7 +101,7 @@ private fun PremiumPrimalNameStage(
                     .navigationBarsPadding()
                     .padding(32.dp),
                 onClick = {
-                    eventPublisher(PremiumPrimalNameContract.UiEvent.CheckPrimalName(primalName))
+                    eventPublisher(PremiumPrimalNameContract.UiEvent.CheckPrimalName(primalName.text))
                 },
             ) {
                 Text(
@@ -125,8 +130,9 @@ private fun PremiumPrimalNameStage(
                 value = primalName,
                 onValueChange = {
                     eventPublisher(PremiumPrimalNameContract.UiEvent.ResetNameAvailable)
-                    primalName = it.trim()
+                    primalName = it
                 },
+                forceFocus = true,
                 textAlign = TextAlign.Center,
                 isError = state.isNameAvailable == false,
                 fontSize = 20.sp,
@@ -143,7 +149,7 @@ private fun PremiumPrimalNameStage(
 
             PremiumPrimalNameTable(
                 modifier = Modifier.padding(horizontal = 24.dp),
-                primalName = primalName,
+                primalName = primalName.text,
             )
         }
     }
