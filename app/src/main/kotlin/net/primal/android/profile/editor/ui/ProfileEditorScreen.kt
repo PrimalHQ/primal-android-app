@@ -13,10 +13,13 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -41,10 +44,15 @@ import net.primal.android.core.utils.isValidEmail
 import net.primal.android.core.utils.isValidUsername
 import net.primal.android.profile.editor.ProfileEditorContract
 import net.primal.android.profile.editor.ProfileEditorViewModel
+import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
-fun ProfileEditorScreen(viewModel: ProfileEditorViewModel, onClose: () -> Unit) {
+fun ProfileEditorScreen(
+    viewModel: ProfileEditorViewModel,
+    onClose: () -> Unit,
+    onNavigateToPremiumBuying: () -> Unit,
+) {
     LaunchedEffect(viewModel, onClose) {
         viewModel.effect.collect {
             when (it) {
@@ -58,6 +66,7 @@ fun ProfileEditorScreen(viewModel: ProfileEditorViewModel, onClose: () -> Unit) 
         state = state.value,
         eventPublisher = { viewModel.setEvent(it) },
         onClose = onClose,
+        onNavigateToPremiumBuying = onNavigateToPremiumBuying,
     )
 }
 
@@ -67,9 +76,22 @@ fun ProfileEditorScreen(
     state: ProfileEditorContract.UiState,
     eventPublisher: (ProfileEditorContract.UiEvent) -> Unit,
     onClose: () -> Unit,
+    onNavigateToPremiumBuying: () -> Unit,
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+
+    if (state.showPremiumPaywallDialog) {
+        PrimalPremiumAlertDialog(
+            onDismissClick = {
+                eventPublisher(ProfileEditorContract.UiEvent.DismissPremiumPaywallDialog)
+            },
+            onConfirmClick = {
+                eventPublisher(ProfileEditorContract.UiEvent.DismissPremiumPaywallDialog)
+                onNavigateToPremiumBuying()
+            },
+        )
+    }
 
     SnackbarErrorHandler(
         error = state.error,
@@ -256,6 +278,47 @@ private fun ProfileEditorForm(
     }
 }
 
+@Composable
+fun PrimalPremiumAlertDialog(
+    modifier: Modifier = Modifier,
+    onDismissClick: () -> Unit,
+    onConfirmClick: () -> Unit,
+) {
+    AlertDialog(
+        modifier = modifier,
+        containerColor = AppTheme.colorScheme.surfaceVariant,
+        onDismissRequest = onDismissClick,
+        title = {
+            Text(
+                text = stringResource(id = R.string.profile_editor_premium_dialog_title),
+                style = AppTheme.typography.titleLarge,
+            )
+        },
+        text = {
+            Text(
+                modifier = Modifier.padding(vertical = 8.dp),
+                text = stringResource(id = R.string.profile_editor_premium_dialog_description),
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            )
+        },
+        dismissButton = {
+            TextButton(onClick = onDismissClick) {
+                Text(text = stringResource(id = R.string.profile_editor_premium_dialog_dismiss_text))
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirmClick,
+            ) {
+                Text(
+                    text = stringResource(id = R.string.profile_editor_premium_dialog_confirm_text),
+                )
+            }
+        },
+    )
+}
+
 @Preview
 @Composable
 fun PreviewEditProfileScreen() {
@@ -271,6 +334,7 @@ fun PreviewEditProfileScreen() {
             ),
             eventPublisher = {},
             onClose = {},
+            onNavigateToPremiumBuying = {},
         )
     }
 }

@@ -1596,7 +1596,11 @@ private fun NavGraphBuilder.profileEditor(route: String, navController: NavContr
         val viewModel = hiltViewModel<ProfileEditorViewModel>()
         ApplyEdgeToEdge()
         LockToOrientationPortrait()
-        ProfileEditorScreen(viewModel = viewModel, onClose = { navController.navigateUp() })
+        ProfileEditorScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+            onNavigateToPremiumBuying = { navController.navigateToPremiumBuying() },
+        )
     }
 
 private fun NavGraphBuilder.profileFollows(
