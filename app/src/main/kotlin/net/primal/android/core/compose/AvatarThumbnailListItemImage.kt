@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
@@ -65,7 +66,7 @@ fun UniversalAvatarThumbnail(
             ),
         ),
         hasGlow = (hasGlowOverride ?: legendaryCustomization?.avatarGlow) == true,
-        borderSize = borderSize,
+        borderSize = avatarSize.mapAvatarSizeToBorderSize(),
         backgroundColor = backgroundColor,
         onClick = onClick,
         defaultAvatar = defaultAvatar,
@@ -189,19 +190,37 @@ fun Modifier.adjustAvatarBackground(
 ): Modifier {
     return if (hasBorder) {
         this
-            .size(size + borderSize)
+            .size(size + borderSize * 2)
             .border(
                 width = borderSize,
                 brush = borderBrush,
                 shape = CircleShape,
             )
+            .padding(borderSize)
             .clip(CircleShape)
     } else {
         this
-            .size(size)
+            .size(size + borderSize * 2)
+            .border(
+                width = borderSize,
+                brush = Brush.linearGradient(
+                    listOf(Color.Transparent, Color.Transparent),
+                ),
+                shape = CircleShape,
+            )
+            .padding(borderSize)
             .clip(CircleShape)
     }
 }
+
+private fun Dp.mapAvatarSizeToBorderSize(): Dp =
+    when {
+        this >= 112.dp -> 4.dp
+        this >= 80.dp -> 3.dp
+        this >= 32.dp -> 2.dp
+        this >= 24.dp -> (1.5).dp
+        else -> 1.dp
+    }
 
 @Composable
 fun DefaultAvatarThumbnailPlaceholderListItemImage(
