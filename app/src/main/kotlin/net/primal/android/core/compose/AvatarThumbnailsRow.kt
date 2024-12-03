@@ -78,7 +78,7 @@ fun AvatarThumbnailsRow(
                         hasBorder = hasAvatarBorder,
                         legendaryCustomization = runCatching { avatarLegendaryCustomizations[layoutIndex] }.getOrNull(),
                         fallbackBorderColor = avatarBorderColor,
-                        borderSize = avatarBorderSize,
+                        borderSizeOverride = avatarBorderSize,
                         onClick = { onClick(layoutIndex) },
                     )
                 }

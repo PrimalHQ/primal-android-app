@@ -37,7 +37,7 @@ fun ZappersAvatarThumbnailRow(zaps: List<EventZapUiModel>, onClick: (() -> Unit)
                     avatarSize = 24.dp,
                     avatarCdnImage = zap.zapperAvatarCdnImage,
                     hasBorder = true,
-                    borderSize = 1.dp,
+                    borderSizeOverride = 1.dp,
                     fallbackBorderColor = AppTheme.colorScheme.surface,
                     legendaryCustomization = zap.zapperLegendaryCustomization,
                     onClick = onClick,
