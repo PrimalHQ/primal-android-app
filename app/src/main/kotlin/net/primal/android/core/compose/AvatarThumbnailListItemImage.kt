@@ -73,68 +73,6 @@ fun UniversalAvatarThumbnail(
     )
 }
 
-@Deprecated(
-    message = "This component is deprecated in favor of UniversalAvatarThumbnail",
-    replaceWith = ReplaceWith("UniversalAvatarThumbnail"),
-)
-@Composable
-fun AvatarThumbnail(
-    modifier: Modifier = Modifier,
-    avatarCdnImage: CdnImage? = null,
-    avatarSize: Dp = 48.dp,
-    hasBorder: Boolean = false,
-    borderColor: Color = AppTheme.colorScheme.primary,
-    borderSize: Dp = 2.dp,
-    backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
-    onClick: (() -> Unit)? = null,
-    defaultAvatar: @Composable () -> Unit = { DefaultAvatarThumbnailPlaceholderListItemImage() },
-) {
-    AvatarThumbnailCustomBorder(
-        modifier = modifier,
-        avatarCdnImage = avatarCdnImage,
-        avatarSize = avatarSize,
-        hasBorder = hasBorder,
-        borderBrush = Brush.linearGradient(listOf(borderColor, borderColor)),
-        borderSize = borderSize,
-        backgroundColor = backgroundColor,
-        onClick = onClick,
-        defaultAvatar = defaultAvatar,
-    )
-}
-
-@Deprecated(
-    message = "This component is deprecated in favor of UniversalAvatarThumbnail",
-    replaceWith = ReplaceWith("UniversalAvatarThumbnail"),
-)
-@Composable
-fun AvatarThumbnailCustomBorder(
-    modifier: Modifier = Modifier,
-    avatarCdnImage: CdnImage? = null,
-    avatarSize: Dp = 48.dp,
-    hasBorder: Boolean = false,
-    borderBrush: Brush = Brush.linearGradient(
-        listOf(AppTheme.colorScheme.primary, AppTheme.colorScheme.primary),
-    ),
-    borderSize: Dp = 2.dp,
-    backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
-    onClick: (() -> Unit)? = null,
-    defaultAvatar: @Composable () -> Unit = { DefaultAvatarThumbnailPlaceholderListItemImage() },
-) {
-    val variant = avatarCdnImage?.variants?.minByOrNull { it.width }
-    val imageSource = variant?.mediaUrl ?: avatarCdnImage?.sourceUrl
-    AvatarThumbnailListItemImage(
-        modifier = modifier,
-        avatarSize = avatarSize,
-        source = imageSource,
-        hasBorder = hasBorder,
-        borderBrush = borderBrush,
-        borderSize = borderSize,
-        backgroundColor = backgroundColor,
-        onClick = onClick,
-        defaultAvatar = defaultAvatar,
-    )
-}
-
 @Composable
 private fun AvatarThumbnailListItemImage(
     source: Any?,
@@ -145,7 +83,7 @@ private fun AvatarThumbnailListItemImage(
         listOf(AppTheme.colorScheme.primary, AppTheme.colorScheme.primary),
     ),
     borderSize: Dp = 2.dp,
-    @Suppress("UnusedParameter") hasGlow: Boolean = false,
+    hasGlow: Boolean = false,
     backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onClick: (() -> Unit)? = null,
     defaultAvatar: @Composable () -> Unit,
