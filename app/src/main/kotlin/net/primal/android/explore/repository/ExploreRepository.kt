@@ -90,7 +90,7 @@ class ExploreRepository @Inject constructor(
                         amountSats = zapEvent.amountInBtc.toBigDecimal().toSats(),
                         zapMessage = zapEvent.message,
                         createdAt = Instant.ofEpochSecond(zapEvent.zapReceiptAt),
-                        noteNostrUris = nostrUris,
+                        noteNostrUris = nostrUris.filter { it.noteId == noteData.postId },
                     )
                 }
             }.sortedByDescending { it.amountSats }
