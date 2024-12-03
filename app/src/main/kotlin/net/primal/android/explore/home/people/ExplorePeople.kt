@@ -199,6 +199,11 @@ private fun ExplorePersonListItem(
                 NostrUserText(
                     displayName = person.profile.userDisplayName,
                     internetIdentifier = person.profile.internetIdentifier,
+                    customBadgeStyle = if (person.profile.legendaryCustomization?.customBadge == true) {
+                        person.profile.legendaryCustomization.legendaryStyle
+                    } else {
+                        null
+                    },
                 )
                 person.profile.internetIdentifier?.let {
                     Text(
@@ -234,13 +239,7 @@ private fun ExplorePersonListItem(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
                 ),
-                onClick = {
-                    if (isFollowed) {
-                        onUnfollowClick()
-                    } else {
-                        onFollowClick()
-                    }
-                },
+                onClick = { if (isFollowed) onUnfollowClick() else onFollowClick() },
             )
 
             FollowersIndicator(
