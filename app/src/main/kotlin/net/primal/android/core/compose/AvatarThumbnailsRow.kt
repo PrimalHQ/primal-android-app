@@ -73,8 +73,8 @@ fun AvatarThumbnailsRow(
 
                 AvatarSpacer(width = (layoutIndex * avatarVisibleWidth.value).dp) {
                     UniversalAvatarThumbnail(
-                        modifier = Modifier.size(avatarSize),
                         avatarCdnImage = imageCdnImage,
+                        avatarSize = avatarSize,
                         hasBorder = hasAvatarBorder,
                         legendaryCustomization = runCatching { avatarLegendaryCustomizations[layoutIndex] }.getOrNull(),
                         fallbackBorderColor = avatarBorderColor,
@@ -111,10 +111,10 @@ private fun AvatarOverflowIndicator(
             modifier = Modifier
                 .size(avatarSize)
                 .adjustAvatarBackground(
-                    size = 48.dp,
-                    hasBorder = hasAvatarBorder,
+                    avatarSize = 48.dp,
+                    hasOuterBorder = hasAvatarBorder,
                     borderBrush = Brush.linearGradient(listOf(avatarBorderColor, avatarBorderColor)),
-                    borderSize = avatarBorderSize,
+                    totalBorderSize = avatarBorderSize,
                 )
                 .background(color = moreBackgroundColor)
                 .fillMaxSize(),

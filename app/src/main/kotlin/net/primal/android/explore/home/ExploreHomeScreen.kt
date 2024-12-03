@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
@@ -259,7 +258,7 @@ fun ExploreTopAppBar(
                     ) {
                         UniversalAvatarThumbnail(
                             avatarCdnImage = avatarCdnImage,
-                            modifier = Modifier.size(32.dp),
+                            avatarSize = 32.dp,
                             onClick = onNavigationIconClick,
                             legendaryCustomization = avatarLegendaryCustomization,
                         )

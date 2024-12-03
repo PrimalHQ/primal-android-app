@@ -87,7 +87,7 @@ fun ProfileQrCodeViewer(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         UniversalAvatarThumbnail(
-            modifier = Modifier.size(108.dp),
+            avatarSize = 108.dp,
             avatarCdnImage = profileDetails?.avatarCdnImage,
             hasBorder = true,
             fallbackBorderColor = Color.White,

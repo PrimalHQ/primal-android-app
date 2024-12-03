@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBar
@@ -118,13 +117,13 @@ fun ProfileTopCoverBar(
         ) {
             UniversalAvatarThumbnail(
                 modifier = Modifier
-                    .size(avatarValues.avatarSize)
                     .padding(
                         top = avatarValues.avatarPadding * 0 / 3,
                         bottom = avatarValues.avatarPadding * 3 / 3,
                         start = avatarValues.avatarPadding * 1 / 8,
                         end = avatarValues.avatarPadding * 7 / 8,
                     ),
+                avatarSize = avatarValues.avatarSize,
                 onClick = { state.profileDetails?.avatarCdnImage?.sourceUrl?.let { onMediaItemClick(it) } },
                 avatarCdnImage = state.profileDetails?.avatarCdnImage,
                 fallbackBorderColor = Color.White,

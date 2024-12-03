@@ -48,26 +48,31 @@ fun UniversalAvatarThumbnail(
     val variant = avatarCdnImage?.variants?.minByOrNull { it.width }
     val imageSource = variant?.mediaUrl ?: avatarCdnImage?.sourceUrl
 
-    val borderBrush = if (legendaryCustomization?.avatarGlow == true &&
+    val hasLegendBorder = legendaryCustomization?.avatarGlow == true &&
         legendaryCustomization.legendaryStyle != LegendaryStyle.NO_CUSTOMIZATION
-    ) {
-        legendaryCustomization.legendaryStyle?.brush
+
+    val borderBrush = if (hasLegendBorder) {
+        legendaryCustomization?.legendaryStyle?.brush
     } else {
         null
     }
+
+    val totalBorderSize = avatarSize.resolveOuterBorderSizeFromAvatarSize() +
+        avatarSize.resolveInnerBorderSizeFromAvatarSize()
 
     AvatarThumbnailListItemImage(
         modifier = modifier,
         avatarSize = avatarSize,
         source = imageSource,
-        hasBorder = hasBorder,
+        hasOuterBorder = hasBorder && avatarSize > 0.dp,
+        hasInnerBorder = hasLegendBorder && avatarSize > 0.dp,
         borderBrush = borderBrush ?: Brush.linearGradient(
             colors = listOf(
                 fallbackBorderColor,
                 fallbackBorderColor,
             ),
         ),
-        borderSize = borderSizeOverride ?: avatarSize.mapAvatarSizeToBorderSize(),
+        totalBorderSize = borderSizeOverride ?: totalBorderSize,
         backgroundColor = backgroundColor,
         onClick = onClick,
         defaultAvatar = defaultAvatar,
@@ -75,15 +80,26 @@ fun UniversalAvatarThumbnail(
 }
 
 @Composable
+private fun defaultBorderBrush() =
+    Brush.linearGradient(
+        listOf(AppTheme.colorScheme.primary, AppTheme.colorScheme.primary),
+    )
+
+@Composable
+private fun transparentBorderBrush() =
+    Brush.linearGradient(
+        listOf(Color.Transparent, Color.Transparent),
+    )
+
+@Composable
 private fun AvatarThumbnailListItemImage(
     source: Any?,
     modifier: Modifier = Modifier,
     avatarSize: Dp = 48.dp,
-    hasBorder: Boolean = false,
-    borderBrush: Brush = Brush.linearGradient(
-        listOf(AppTheme.colorScheme.primary, AppTheme.colorScheme.primary),
-    ),
-    borderSize: Dp = 2.dp,
+    totalBorderSize: Dp = 2.dp,
+    hasOuterBorder: Boolean = false,
+    hasInnerBorder: Boolean = false,
+    borderBrush: Brush = defaultBorderBrush(),
     backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onClick: (() -> Unit)? = null,
     defaultAvatar: @Composable () -> Unit,
@@ -101,10 +117,11 @@ private fun AvatarThumbnailListItemImage(
         imageLoader = imageLoader,
         modifier = modifier
             .adjustAvatarBackground(
-                size = avatarSize,
-                hasBorder = hasBorder,
-                borderSize = borderSize,
+                avatarSize = avatarSize,
+                totalBorderSize = totalBorderSize,
                 borderBrush = borderBrush,
+                hasOuterBorder = hasOuterBorder,
+                hasInnerBorder = hasInnerBorder,
             )
             .clickable(enabled = onClick != null, onClick = { onClick?.invoke() }),
         contentDescription = stringResource(id = R.string.accessibility_profile_image),
@@ -120,45 +137,68 @@ private fun AvatarThumbnailListItemImage(
     )
 }
 
+@Composable
 fun Modifier.adjustAvatarBackground(
-    size: Dp = 48.dp,
-    hasBorder: Boolean = false,
-    borderSize: Dp = 2.dp,
+    avatarSize: Dp,
+    totalBorderSize: Dp,
     borderBrush: Brush,
+    hasOuterBorder: Boolean = false,
+    hasInnerBorder: Boolean = false,
 ): Modifier {
-    return if (hasBorder) {
+    return if (hasOuterBorder || hasInnerBorder) {
+        val innerBorderSize = avatarSize.resolveInnerBorderSizeFromAvatarSize()
+        val outerBorderSize = totalBorderSize - innerBorderSize
         this
-            .size(size + borderSize * 2)
+            .size(avatarSize + totalBorderSize * 2)
             .border(
-                width = borderSize,
+                width = outerBorderSize,
                 brush = borderBrush,
                 shape = CircleShape,
             )
-            .padding(borderSize)
+            .padding(outerBorderSize)
+            .then(
+                if (hasInnerBorder) {
+                    Modifier
+                        .border(
+                            width = innerBorderSize,
+                            color = AppTheme.colorScheme.background,
+                            shape = CircleShape,
+                        )
+                } else {
+                    Modifier
+                },
+            )
             .clip(CircleShape)
     } else {
         this
-            .size(size + borderSize * 2)
+            .size(avatarSize + totalBorderSize * 2)
             .border(
-                width = borderSize,
-                brush = Brush.linearGradient(
-                    listOf(Color.Transparent, Color.Transparent),
-                ),
+                width = totalBorderSize,
+                brush = transparentBorderBrush(),
                 shape = CircleShape,
             )
-            .padding(borderSize)
+            .padding(totalBorderSize)
             .clip(CircleShape)
     }
 }
 
 @Suppress("MagicNumber")
-private fun Dp.mapAvatarSizeToBorderSize(): Dp =
+private fun Dp.resolveOuterBorderSizeFromAvatarSize(): Dp =
     when {
         this >= 112.dp -> 4.dp
         this >= 80.dp -> 3.dp
         this >= 32.dp -> 2.dp
         this >= 24.dp -> (1.5).dp
         else -> 1.dp
+    }
+
+@Suppress("MagicNumber")
+private fun Dp.resolveInnerBorderSizeFromAvatarSize(): Dp =
+    when {
+        this >= 100.dp -> (1.5).dp
+        this >= 40.dp -> 1.dp
+        this >= 32.dp -> (0.5).dp
+        else -> 0.dp
     }
 
 @Composable

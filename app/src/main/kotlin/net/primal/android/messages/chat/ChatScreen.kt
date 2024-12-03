@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -140,7 +139,7 @@ fun ChatScreen(
                     ) {
                         UniversalAvatarThumbnail(
                             avatarCdnImage = state.participantProfile?.avatarCdnImage,
-                            modifier = Modifier.size(32.dp),
+                            avatarSize = 32.dp,
                             onClick = { noteCallbacks.onProfileClick?.invoke(state.participantId) },
                             legendaryCustomization = state.participantProfile?.legendaryCustomization,
                         )

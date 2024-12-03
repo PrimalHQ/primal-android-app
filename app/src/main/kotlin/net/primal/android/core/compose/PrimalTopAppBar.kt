@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
@@ -78,7 +77,7 @@ fun PrimalTopAppBar(
                     ) {
                         UniversalAvatarThumbnail(
                             avatarCdnImage = avatarCdnImage,
-                            modifier = Modifier.size(32.dp),
+                            avatarSize = 32.dp,
                             onClick = onNavigationIconClick,
                             legendaryCustomization = legendaryCustomization,
                         )
