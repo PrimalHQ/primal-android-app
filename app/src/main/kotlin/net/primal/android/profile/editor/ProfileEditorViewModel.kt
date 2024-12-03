@@ -14,10 +14,12 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.profile.editor.ProfileEditorContract.SideEffect
 import net.primal.android.profile.editor.ProfileEditorContract.UiEvent
@@ -32,7 +34,7 @@ import timber.log.Timber
 
 @HiltViewModel
 class ProfileEditorViewModel @Inject constructor(
-    activeAccountStore: ActiveAccountStore,
+    private val activeAccountStore: ActiveAccountStore,
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val profileRepository: ProfileRepository,
     private val userRepository: UserRepository,
@@ -67,6 +69,7 @@ class ProfileEditorViewModel @Inject constructor(
                             displayName = it.displayName,
                         )
                     }
+
                     is UiEvent.UsernameChangedEvent -> setState { copy(username = it.name) }
                     is UiEvent.AboutMeChangedEvent -> setState { copy(aboutMe = it.aboutMe) }
                     is UiEvent.WebsiteChangedEvent -> setState { copy(website = it.website) }
@@ -75,11 +78,13 @@ class ProfileEditorViewModel @Inject constructor(
                             lightningAddress = it.lightningAddress,
                         )
                     }
+
                     is UiEvent.Nip05IdentifierChangedEvent -> setState {
                         copy(
                             nip05Identifier = it.nip05Identifier,
                         )
                     }
+
                     is UiEvent.AvatarUriChangedEvent -> setState {
                         copy(
                             localAvatarUri = it.avatarUri,
@@ -97,6 +102,7 @@ class ProfileEditorViewModel @Inject constructor(
                     is UiEvent.SaveProfileEvent -> saveProfile()
 
                     UiEvent.DismissError -> setState { copy(error = null) }
+                    UiEvent.DismissPremiumPaywallDialog -> setState { copy(showPremiumPaywallDialog = false) }
                 }
             }
         }
@@ -128,7 +134,7 @@ class ProfileEditorViewModel @Inject constructor(
             }
         }
 
-    private suspend fun saveProfile() =
+    private fun saveProfile() =
         viewModelScope.launch {
             setState { copy(loading = true) }
             try {
@@ -141,14 +147,20 @@ class ProfileEditorViewModel @Inject constructor(
                     }
                 }
 
-                withContext(dispatcherProvider.io()) {
-                    val lud16 = profile.lightningAddress
-                    if (!lud16.isNullOrEmpty()) {
-                        lightningAddressChecker.validateLightningAddress(lud16 = lud16)
+                val isActiveAccountPremium = activeAccountStore.activeUserAccount().hasPremiumMembership()
+                if (profile.hasPrimalPremiumAddresses() && !isActiveAccountPremium) {
+                    setState { copy(showPremiumPaywallDialog = true) }
+                } else {
+                    withContext(dispatcherProvider.io()) {
+                        val lud16 = profile.lightningAddress
+                        if (!lud16.isNullOrEmpty()) {
+                            lightningAddressChecker.validateLightningAddress(lud16 = lud16)
+                        }
+
+                        userRepository.setProfileMetadata(userId = profileId, profileMetadata = profile)
                     }
-                    userRepository.setProfileMetadata(userId = profileId, profileMetadata = profile)
+                    setEffect(effect = SideEffect.AccountSuccessfulyEdited)
                 }
-                setEffect(effect = SideEffect.AccountSuccessfulyEdited)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setErrorState(error = EditProfileError.FailedToPublishMetadata(error))
@@ -169,19 +181,22 @@ class ProfileEditorViewModel @Inject constructor(
     private fun setErrorState(error: EditProfileError) {
         setState { copy(error = error) }
     }
-}
 
-fun UiState.toProfileMetadata(): ProfileMetadata {
-    return ProfileMetadata(
-        displayName = this.displayName,
-        username = this.username,
-        website = this.website.ifEmpty { null },
-        about = this.aboutMe.ifEmpty { null },
-        lightningAddress = this.lightningAddress.ifEmpty { null },
-        nostrVerification = this.nip05Identifier.ifEmpty { null },
-        localPictureUri = this.localAvatarUri,
-        localBannerUri = this.localBannerUri,
-        remotePictureUrl = this.remoteAvatarUrl,
-        remoteBannerUrl = this.remoteBannerUrl,
-    )
+    private fun UiState.toProfileMetadata(): ProfileMetadata {
+        return ProfileMetadata(
+            displayName = this.displayName,
+            username = this.username,
+            website = this.website.ifEmpty { null },
+            about = this.aboutMe.ifEmpty { null },
+            lightningAddress = this.lightningAddress.ifEmpty { null },
+            nostrVerification = this.nip05Identifier.ifEmpty { null },
+            localPictureUri = this.localAvatarUri,
+            localBannerUri = this.localBannerUri,
+            remotePictureUrl = this.remoteAvatarUrl,
+            remoteBannerUrl = this.remoteBannerUrl,
+        )
+    }
+
+    private fun ProfileMetadata.hasPrimalPremiumAddresses() =
+        this.lightningAddress.isPrimalIdentifier() || this.nostrVerification.isPrimalIdentifier()
 }

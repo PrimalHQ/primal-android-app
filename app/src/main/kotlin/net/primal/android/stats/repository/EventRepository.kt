@@ -133,7 +133,7 @@ class EventRepository @Inject constructor(
                 primalLegendProfiles = primalLegendProfiles,
             )
             database.withTransaction {
-                database.profiles().upsertAll(data = profiles)
+                database.profiles().insertOrUpdateAll(data = profiles)
             }
 
             val userScoresMap = response.userScores?.takeContentAsPrimalUserScoresOrNull()

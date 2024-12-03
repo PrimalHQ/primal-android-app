@@ -55,7 +55,7 @@ class MessagesProcessor @Inject constructor(
         val attachments = messageDataList.flatMapMessagesAsNoteAttachmentPO()
 
         database.withTransaction {
-            database.profiles().upsertAll(
+            database.profiles().insertOrUpdateAll(
                 data = profileMetadata.mapAsProfileDataPO(
                     cdnResources = cdnResources,
                     primalUserNames = primalUserNamesMap,
@@ -112,7 +112,7 @@ class MessagesProcessor @Inject constructor(
                     primalUserNames = primalUserNames,
                     primalLegendProfiles = primalLegendProfiles,
                 )
-                database.profiles().upsertAll(data = profiles)
+                database.profiles().insertOrUpdateAll(data = profiles)
                 profiles
             } catch (error: WssException) {
                 Timber.w(error)

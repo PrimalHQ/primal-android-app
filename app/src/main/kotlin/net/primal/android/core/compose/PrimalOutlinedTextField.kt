@@ -2,6 +2,7 @@ package net.primal.android.core.compose
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,7 +25,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -42,6 +42,55 @@ fun PrimalOutlinedTextField(
     header: String?,
     value: String,
     onValueChange: (String) -> Unit,
+    isRequired: Boolean = false,
+    prefix: String? = null,
+    isMultiline: Boolean = false,
+    fontSize: TextUnit = 16.sp,
+    textAlign: TextAlign = TextAlign.Start,
+    isError: Boolean = false,
+) {
+    PrimalOutlinedTextFieldShared(
+        header = header,
+        isRequired = isRequired,
+    ) {
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            colors = PrimalDefaults.outlinedTextFieldColors(),
+            shape = AppTheme.shapes.medium,
+            isError = isError,
+            singleLine = !isMultiline,
+            minLines = if (isMultiline) 6 else 0,
+            value = value,
+            onValueChange = onValueChange,
+            textStyle = AppTheme.typography.bodyLarge.copy(
+                fontSize = fontSize,
+                textAlign = textAlign,
+            ),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            leadingIcon = if (prefix != null) {
+                {
+                    Text(
+                        modifier = Modifier
+                            .align(alignment = Alignment.CenterHorizontally)
+                            .padding(bottom = 6.dp),
+                        text = prefix,
+                        fontWeight = FontWeight.W500,
+                        fontSize = 18.sp,
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                    )
+                }
+            } else {
+                null
+            },
+        )
+    }
+}
+
+@Composable
+fun PrimalOutlinedTextField(
+    header: String?,
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
     forceFocus: Boolean = false,
     isRequired: Boolean = false,
     prefix: String? = null,
@@ -59,12 +108,51 @@ fun PrimalOutlinedTextField(
         }
     }
 
-    var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(
-            TextFieldValue(text = value, selection = TextRange(start = value.length, end = value.length)),
+    PrimalOutlinedTextFieldShared(
+        header = header,
+        isRequired = isRequired,
+    ) {
+        OutlinedTextField(
+            modifier = Modifier
+                .focusRequester(focusRequester)
+                .fillMaxWidth(),
+            colors = PrimalDefaults.outlinedTextFieldColors(),
+            shape = AppTheme.shapes.medium,
+            isError = isError,
+            singleLine = !isMultiline,
+            minLines = if (isMultiline) 6 else 0,
+            value = value,
+            onValueChange = { onValueChange(it) },
+            textStyle = AppTheme.typography.bodyLarge.copy(
+                fontSize = fontSize,
+                textAlign = textAlign,
+            ),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            leadingIcon = if (prefix != null) {
+                {
+                    Text(
+                        modifier = Modifier
+                            .align(alignment = Alignment.CenterHorizontally)
+                            .padding(bottom = 6.dp),
+                        text = prefix,
+                        fontWeight = FontWeight.W500,
+                        fontSize = 18.sp,
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                    )
+                }
+            } else {
+                null
+            },
         )
     }
+}
 
+@Composable
+private fun PrimalOutlinedTextFieldShared(
+    header: String?,
+    isRequired: Boolean = false,
+    textField: @Composable ColumnScope.() -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -109,40 +197,7 @@ fun PrimalOutlinedTextField(
             }
         }
         Spacer(modifier = Modifier.height(4.dp))
-        OutlinedTextField(
-            modifier = Modifier
-                .focusRequester(focusRequester)
-                .fillMaxWidth(),
-            colors = PrimalDefaults.outlinedTextFieldColors(),
-            shape = AppTheme.shapes.medium,
-            isError = isError,
-            singleLine = !isMultiline,
-            minLines = if (isMultiline) 6 else 0,
-            value = textFieldValue,
-            onValueChange = {
-                textFieldValue = it
-                onValueChange(it.text)
-            },
-            textStyle = AppTheme.typography.bodyLarge.copy(
-                fontSize = fontSize,
-                textAlign = textAlign,
-            ),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            leadingIcon = if (prefix != null) {
-                {
-                    Text(
-                        modifier = Modifier
-                            .align(alignment = Alignment.CenterHorizontally)
-                            .padding(bottom = 6.dp),
-                        text = prefix,
-                        fontWeight = FontWeight.W500,
-                        fontSize = 18.sp,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-                    )
-                }
-            } else {
-                null
-            },
-        )
+
+        textField()
     }
 }

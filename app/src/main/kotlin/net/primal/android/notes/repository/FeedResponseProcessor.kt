@@ -83,7 +83,7 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
     val userPostStats = primalEventUserStats.mapNotNullAsEventUserStatsPO(userId = userId)
 
     database.withTransaction {
-        database.profiles().upsertAll(data = profiles)
+        database.profiles().insertOrUpdateAll(data = profiles)
         database.posts().upsertAll(data = allPosts)
         database.attachments().upsertAllNoteAttachments(data = noteAttachments)
         database.attachments().upsertAllNostrUris(data = noteNostrUris)

@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.primal.android.core.compose.profile.approvals.ProfileApproval
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileStatsUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
@@ -120,6 +121,8 @@ class ProfileDetailsViewModel @Inject constructor(
                     )
 
                     UiEvent.DismissZapError -> setState { copy(zapError = null) }
+                    UiEvent.DismissConfirmFollowUnfollowAlertDialog ->
+                        setState { copy(shouldApproveProfileAction = null) }
                 }
             }
         }
@@ -300,61 +303,77 @@ class ProfileDetailsViewModel @Inject constructor(
             Timber.w(error)
         }
 
-    private fun updateStateProfileAsFollowed() = setState { copy(isProfileFollowed = true) }
+    private fun updateStateProfileAsFollowedAndClearApprovalFlag() =
+        setState {
+            copy(isProfileFollowed = true, shouldApproveProfileAction = null)
+        }
 
-    private fun updateStateProfileAsUnfollowed() = setState { copy(isProfileFollowed = false) }
+    private fun updateStateProfileAsUnfollowedAndClearApprovalFlag() =
+        setState {
+            copy(isProfileFollowed = false, shouldApproveProfileAction = null)
+        }
 
     private fun follow(followAction: UiEvent.FollowAction) =
         viewModelScope.launch {
-            updateStateProfileAsFollowed()
+            updateStateProfileAsFollowedAndClearApprovalFlag()
             try {
                 profileRepository.follow(
                     userId = activeAccountStore.activeUserId(),
                     followedUserId = followAction.profileId,
+                    forceUpdate = followAction.forceUpdate,
                 )
             } catch (error: WssException) {
                 Timber.w(error)
-                updateStateProfileAsUnfollowed()
+                updateStateProfileAsUnfollowedAndClearApprovalFlag()
                 setErrorState(error = ProfileError.FailedToFollowProfile(error))
             } catch (error: NostrPublishException) {
                 Timber.w(error)
-                updateStateProfileAsUnfollowed()
+                updateStateProfileAsUnfollowedAndClearApprovalFlag()
                 setErrorState(error = ProfileError.FailedToFollowProfile(error))
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
-                updateStateProfileAsUnfollowed()
+                updateStateProfileAsUnfollowedAndClearApprovalFlag()
                 setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
             } catch (error: ProfileRepository.FollowListNotFound) {
                 Timber.w(error)
-                updateStateProfileAsUnfollowed()
-                setErrorState(error = ProfileError.FailedToFollowProfile(error))
+                updateStateProfileAsUnfollowedAndClearApprovalFlag()
+                setState {
+                    copy(
+                        shouldApproveProfileAction = ProfileApproval.Follow(profileId = followAction.profileId),
+                    )
+                }
             }
         }
 
     private fun unfollow(unfollowAction: UiEvent.UnfollowAction) =
         viewModelScope.launch {
-            updateStateProfileAsUnfollowed()
+            updateStateProfileAsUnfollowedAndClearApprovalFlag()
             try {
                 profileRepository.unfollow(
                     userId = activeAccountStore.activeUserId(),
                     unfollowedUserId = unfollowAction.profileId,
+                    forceUpdate = unfollowAction.forceUpdate,
                 )
             } catch (error: WssException) {
                 Timber.w(error)
-                updateStateProfileAsFollowed()
+                updateStateProfileAsFollowedAndClearApprovalFlag()
                 setErrorState(error = ProfileError.FailedToUnfollowProfile(error))
             } catch (error: NostrPublishException) {
                 Timber.w(error)
-                updateStateProfileAsFollowed()
+                updateStateProfileAsFollowedAndClearApprovalFlag()
                 setErrorState(error = ProfileError.FailedToUnfollowProfile(error))
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
-                updateStateProfileAsFollowed()
+                updateStateProfileAsFollowedAndClearApprovalFlag()
                 setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
             } catch (error: ProfileRepository.FollowListNotFound) {
                 Timber.w(error)
-                updateStateProfileAsFollowed()
-                setErrorState(error = ProfileError.FailedToUnfollowProfile(error))
+                updateStateProfileAsFollowedAndClearApprovalFlag()
+                setState {
+                    copy(
+                        shouldApproveProfileAction = ProfileApproval.Unfollow(profileId = unfollowAction.profileId),
+                    )
+                }
             }
         }
 

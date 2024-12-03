@@ -812,6 +812,10 @@
     <string name="profile_editor_input_header_bitcoin_lightning_address">Bitcoin lightning address</string>
     <string name="profile_editor_input_header_nip_05">Verified Nostr address (NIP 05)</string>
     <string name="profile_editor_required_field_hint">required</string>
+    <string name="profile_editor_premium_dialog_title">Primal Premium</string>
+    <string name="profile_editor_premium_dialog_description">You need a Primal Premium account to get a custom Nostr Verified Address and/or custom lightning address on Primal.</string>
+    <string name="profile_editor_premium_dialog_dismiss_text">Cancel</string>
+    <string name="profile_editor_premium_dialog_confirm_text">Okay</string>
 
     <string name="profile_followers_title">%1$s\'s followers</string>
     <string name="profile_following_title">%1$s\'s following</string>
@@ -827,6 +831,16 @@
     <string name="context_confirm_bookmark_text">You are about to save your first public bookmark. These bookmarks can be seen by other nostr users. Do you wish to continue?</string>
     <string name="context_confirm_bookmark_positive">Save Bookmark</string>
     <string name="context_confirm_bookmark_negative">No</string>
+
+    <string name="context_confirm_follow_title">Saving first follow</string>
+    <string name="context_confirm_follow_text">This will result in following a total of one account. Do you wish to continue?</string>
+    <string name="context_confirm_follow_positive">Save follow</string>
+    <string name="context_confirm_follow_negative">No</string>
+
+    <string name="context_confirm_unfollow_title">Saving unfollow</string>
+    <string name="context_confirm_unfollow_text">This will result in following a total of zero accounts. Do you wish to continue?</string>
+    <string name="context_confirm_unfollow_positive">Save unfollow</string>
+    <string name="context_confirm_unfollow_negative">No</string>
 
     <string name="dialog_report_abuse_title">Report abuse</string>
     <string name="dialog_report_abuse_description">All reports posted will be publicly visible.</string>

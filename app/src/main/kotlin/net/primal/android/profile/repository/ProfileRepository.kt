@@ -74,7 +74,7 @@ class ProfileRepository @Inject constructor(
                 primalUserNames = primalUserNames,
                 primalLegendProfiles = primalLegendProfiles,
             )
-            database.profiles().upsertAll(data = profiles)
+            database.profiles().insertOrUpdateAll(data = profiles)
             profiles
         }
 
@@ -101,7 +101,7 @@ class ProfileRepository @Inject constructor(
 
             database.withTransaction {
                 if (profileMetadata != null) {
-                    database.profiles().upsertAll(data = listOf(profileMetadata))
+                    database.profiles().insertOrUpdateAll(data = listOf(profileMetadata))
                 }
 
                 if (profileStats != null) {
@@ -111,33 +111,50 @@ class ProfileRepository @Inject constructor(
         }
 
     @Throws(FollowListNotFound::class, NostrPublishException::class)
-    suspend fun follow(userId: String, followedUserId: String) {
-        updateFollowList(userId = userId) {
+    suspend fun follow(
+        userId: String,
+        followedUserId: String,
+        forceUpdate: Boolean,
+    ) {
+        updateFollowList(userId = userId, forceUpdate = forceUpdate) {
             toMutableSet().apply { add(followedUserId) }
         }
     }
 
     @Throws(FollowListNotFound::class, NostrPublishException::class)
-    suspend fun unfollow(userId: String, unfollowedUserId: String) {
-        updateFollowList(userId = userId) {
+    suspend fun unfollow(
+        userId: String,
+        unfollowedUserId: String,
+        forceUpdate: Boolean,
+    ) {
+        updateFollowList(userId = userId, forceUpdate = forceUpdate) {
             toMutableSet().apply { remove(unfollowedUserId) }
         }
     }
 
     @Throws(FollowListNotFound::class, NostrPublishException::class)
-    private suspend fun updateFollowList(userId: String, reducer: Set<String>.() -> Set<String>) =
-        withContext(dispatchers.io()) {
-            val userFollowList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
-                ?: throw FollowListNotFound()
-
-            userRepository.updateFollowList(userId, userFollowList)
-
-            setFollowList(
-                userId = userId,
-                contacts = userFollowList.following.reducer(),
-                content = userFollowList.followListEventContent ?: "",
-            )
+    private suspend fun updateFollowList(
+        userId: String,
+        forceUpdate: Boolean,
+        reducer: Set<String>.() -> Set<String>,
+    ) = withContext(dispatchers.io()) {
+        val userFollowList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
+        val isEmptyFollowList = userFollowList == null || userFollowList.following.isEmpty()
+        if (isEmptyFollowList && !forceUpdate) {
+            throw FollowListNotFound()
         }
+
+        if (userFollowList != null) {
+            userRepository.updateFollowList(userId, userFollowList)
+        }
+
+        val existingFollowing = userFollowList?.following ?: emptySet()
+        setFollowList(
+            userId = userId,
+            contacts = existingFollowing.reducer(),
+            content = userFollowList?.followListEventContent ?: "",
+        )
+    }
 
     @Throws(NostrPublishException::class)
     suspend fun setFollowList(
@@ -191,7 +208,7 @@ class ProfileRepository @Inject constructor(
             )
             val followersCountsMap = response.followerCounts?.takeContentAsPrimalUserFollowersCountsOrNull()
 
-            database.profiles().upsertAll(data = profiles)
+            database.profiles().insertOrUpdateAll(data = profiles)
 
             profiles.map {
                 val score = followersCountsMap?.get(it.ownerId)

@@ -93,7 +93,8 @@ fun FilterPicker(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(AppTheme.extraColorScheme.surfaceVariantAlt2),
+                .background(AppTheme.extraColorScheme.surfaceVariantAlt2)
+                .verticalScroll(rememberScrollState()),
         ) {
             CenterAlignedTopAppBar(
                 title = {
@@ -110,8 +111,7 @@ fun FilterPicker(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(24.dp)
-                    .verticalScroll(rememberScrollState()),
+                    .padding(24.dp),
             ) {
                 if (searchKind.isReads()) {
                     SliderColumn(

@@ -10,8 +10,20 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ProfileDataDao {
 
+    @Transaction
+    fun insertOrUpdateAll(data: List<ProfileData>) {
+        val existingProfiles = findProfileData(data.map { it.ownerId }).associateBy { it.ownerId }
+        insertOrReplaceAll(
+            data.map {
+                it.copy(
+                    primalLegendProfile = it.primalLegendProfile ?: existingProfiles[it.ownerId]?.primalLegendProfile,
+                )
+            },
+        )
+    }
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun upsertAll(data: List<ProfileData>)
+    fun insertOrReplaceAll(data: List<ProfileData>)
 
     @Transaction
     @Query("SELECT * FROM ProfileData WHERE ownerId = :profileId")

@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.core.compose.profile.approvals.ProfileApproval
 import net.primal.android.core.errors.UiError
 import net.primal.android.explore.home.people.ExplorePeopleContract.UiEvent
 import net.primal.android.explore.home.people.ExplorePeopleContract.UiState
@@ -76,79 +77,95 @@ class ExplorePeopleViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.FollowUser -> follow(profileId = it.userId)
-                    is UiEvent.UnfollowUser -> unfollow(profileId = it.userId)
+                    is UiEvent.FollowUser -> follow(profileId = it.userId, forceUpdate = it.forceUpdate)
+                    is UiEvent.UnfollowUser -> unfollow(profileId = it.userId, forceUpdate = it.forceUpdate)
                     UiEvent.RefreshPeople -> fetchExplorePeople()
                     UiEvent.DismissError -> setState { copy(error = null) }
+                    UiEvent.DismissConfirmFollowUnfollowAlertDialog ->
+                        setState { copy(shouldApproveProfileAction = null) }
                 }
             }
         }
 
-    private fun follow(profileId: String) =
+    private fun follow(profileId: String, forceUpdate: Boolean) =
         viewModelScope.launch {
-            updateStateProfileFollow(profileId)
+            updateStateProfileFollowAndClearApprovalFlag(profileId)
 
             val followResult = runCatching {
                 profileRepository.follow(
                     userId = activeAccountStore.activeUserId(),
                     followedUserId = profileId,
+                    forceUpdate = forceUpdate,
                 )
             }
 
             if (followResult.isFailure) {
                 followResult.exceptionOrNull()?.let { error ->
                     Timber.w(error)
+                    updateStateProfileUnfollowAndClearApprovalFlag(profileId)
                     when (error) {
-                        is WssException, is NostrPublishException, is ProfileRepository.FollowListNotFound ->
+                        is WssException, is NostrPublishException ->
                             setState { copy(error = UiError.FailedToFollowUser(error)) }
 
-                        is MissingRelaysException -> setState {
-                            copy(
-                                error = UiError.MissingRelaysConfiguration(error),
-                            )
+                        is ProfileRepository.FollowListNotFound -> setState {
+                            copy(shouldApproveProfileAction = ProfileApproval.Follow(profileId = profileId))
                         }
+
+                        is MissingRelaysException ->
+                            setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
 
                         else -> setState { copy(error = UiError.GenericError()) }
                     }
-                    updateStateProfileUnfollow(profileId)
                 }
             }
         }
 
-    private fun unfollow(profileId: String) =
+    private fun unfollow(profileId: String, forceUpdate: Boolean) =
         viewModelScope.launch {
-            updateStateProfileUnfollow(profileId)
+            updateStateProfileUnfollowAndClearApprovalFlag(profileId)
 
             val unfollowResult = runCatching {
                 profileRepository.unfollow(
                     userId = activeAccountStore.activeUserId(),
                     unfollowedUserId = profileId,
+                    forceUpdate = forceUpdate,
                 )
             }
 
             if (unfollowResult.isFailure) {
+                updateStateProfileFollowAndClearApprovalFlag(profileId)
                 unfollowResult.exceptionOrNull()?.let { error ->
                     Timber.w(error)
                     when (error) {
-                        is WssException, is NostrPublishException, is ProfileRepository.FollowListNotFound ->
+                        is WssException, is NostrPublishException ->
                             setState { copy(error = UiError.FailedToUnfollowUser(error)) }
 
-                        is MissingRelaysException -> setState {
-                            copy(
-                                error = UiError.MissingRelaysConfiguration(error),
-                            )
+                        is ProfileRepository.FollowListNotFound -> setState {
+                            copy(shouldApproveProfileAction = ProfileApproval.Unfollow(profileId = profileId))
                         }
+
+                        is MissingRelaysException ->
+                            setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
 
                         else -> setState { copy(error = UiError.GenericError()) }
                     }
-                    updateStateProfileFollow(profileId)
                 }
             }
         }
 
-    private fun updateStateProfileUnfollow(profileId: String) =
-        setState { copy(userFollowing = userFollowing - profileId) }
+    private fun updateStateProfileUnfollowAndClearApprovalFlag(profileId: String) =
+        setState {
+            copy(
+                userFollowing = userFollowing - profileId,
+                shouldApproveProfileAction = null,
+            )
+        }
 
-    private fun updateStateProfileFollow(profileId: String) =
-        setState { copy(userFollowing = userFollowing + profileId) }
+    private fun updateStateProfileFollowAndClearApprovalFlag(profileId: String) =
+        setState {
+            copy(
+                userFollowing = userFollowing + profileId,
+                shouldApproveProfileAction = null,
+            )
+        }
 }

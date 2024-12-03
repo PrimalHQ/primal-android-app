@@ -1,1 +1,5 @@
+Improved onboarding flow.
+Tap to see profile and cover photo.
+Support for highlights.
+Follow/unfollow approvals.
 Stability and improvements.

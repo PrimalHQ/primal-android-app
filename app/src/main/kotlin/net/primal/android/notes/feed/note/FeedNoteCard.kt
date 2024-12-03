@@ -45,6 +45,7 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
@@ -53,7 +54,6 @@ import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
-import net.primal.android.notes.feed.note.ui.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.notes.feed.note.ui.FeedNoteActionsRow
 import net.primal.android.notes.feed.note.ui.FeedNoteHeader
 import net.primal.android.notes.feed.note.ui.NoteContent
@@ -219,7 +219,7 @@ private fun FeedNoteCard(
     }
 
     if (state.shouldApproveBookmark) {
-        ConfirmFirstBookmarkAlertDialog(
+        ApproveBookmarkAlertDialog(
             onBookmarkConfirmed = {
                 eventPublisher(
                     UiEvent.BookmarkAction(

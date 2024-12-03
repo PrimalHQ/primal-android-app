@@ -42,6 +42,7 @@ import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.FollowUnfollowButton
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.compose.profile.approvals.ApproveFollowUnfollowProfileAlertDialog
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.utils.shortened
@@ -81,6 +82,29 @@ fun ExplorePeople(
     eventPublisher: (ExplorePeopleContract.UiEvent) -> Unit,
     onProfileClick: (String) -> Unit,
 ) {
+    if (state.shouldApproveProfileAction != null) {
+        ApproveFollowUnfollowProfileAlertDialog(
+            profileApproval = state.shouldApproveProfileAction,
+            onFollowApproved = {
+                eventPublisher(
+                    ExplorePeopleContract.UiEvent.FollowUser(
+                        userId = state.shouldApproveProfileAction.profileId,
+                        forceUpdate = true,
+                    ),
+                )
+            },
+            onUnfollowApproved = {
+                eventPublisher(
+                    ExplorePeopleContract.UiEvent.UnfollowUser(
+                        userId = state.shouldApproveProfileAction.profileId,
+                        forceUpdate = true,
+                    ),
+                )
+            },
+            onClose = { eventPublisher(ExplorePeopleContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
+        )
+    }
+
     if (state.loading && state.people.isEmpty()) {
         HeightAdjustableLoadingLazyListPlaceholder(
             modifier = modifier.fillMaxSize(),
@@ -117,12 +141,18 @@ fun ExplorePeople(
                     onItemClick = { onProfileClick(item.profile.pubkey) },
                     onFollowClick = {
                         eventPublisher(
-                            ExplorePeopleContract.UiEvent.FollowUser(item.profile.pubkey),
+                            ExplorePeopleContract.UiEvent.FollowUser(
+                                userId = item.profile.pubkey,
+                                forceUpdate = false,
+                            ),
                         )
                     },
                     onUnfollowClick = {
                         eventPublisher(
-                            ExplorePeopleContract.UiEvent.UnfollowUser(item.profile.pubkey),
+                            ExplorePeopleContract.UiEvent.UnfollowUser(
+                                userId = item.profile.pubkey,
+                                forceUpdate = false,
+                            ),
                         )
                     },
                 )

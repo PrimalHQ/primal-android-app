@@ -67,6 +67,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Bookmarks
 import net.primal.android.core.compose.icons.primaliconpack.BookmarksFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedNewZapFilled
 import net.primal.android.core.compose.icons.primaliconpack.More
+import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.compose.zaps.ArticleTopZapsSection
 import net.primal.android.core.errors.UiError
@@ -83,7 +84,6 @@ import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
-import net.primal.android.notes.feed.note.ui.ConfirmFirstBookmarkAlertDialog
 import net.primal.android.notes.feed.note.ui.FeedNoteActionsRow
 import net.primal.android.notes.feed.note.ui.ReferencedNoteCard
 import net.primal.android.notes.feed.note.ui.ThreadNoteStatsRow
@@ -217,7 +217,7 @@ private fun ArticleDetailsScreen(
     }
 
     if (articleState.shouldApproveBookmark && detailsState.article != null) {
-        ConfirmFirstBookmarkAlertDialog(
+        ApproveBookmarkAlertDialog(
             onBookmarkConfirmed = {
                 articleEventPublisher(
                     ArticleContract.UiEvent.BookmarkAction(
