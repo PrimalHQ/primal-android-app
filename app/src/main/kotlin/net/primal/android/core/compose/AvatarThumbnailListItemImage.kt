@@ -48,8 +48,8 @@ fun UniversalAvatarThumbnail(
     val variant = avatarCdnImage?.variants?.minByOrNull { it.width }
     val imageSource = variant?.mediaUrl ?: avatarCdnImage?.sourceUrl
 
-    val borderBrush = if (legendaryCustomization?.avatarGlow == true
-        && legendaryCustomization.legendaryStyle != LegendaryStyle.NO_CUSTOMIZATION
+    val borderBrush = if (legendaryCustomization?.avatarGlow == true &&
+        legendaryCustomization.legendaryStyle != LegendaryStyle.NO_CUSTOMIZATION
     ) {
         legendaryCustomization.legendaryStyle?.brush
     } else {
@@ -151,6 +151,7 @@ fun Modifier.adjustAvatarBackground(
     }
 }
 
+@Suppress("MagicNumber")
 private fun Dp.mapAvatarSizeToBorderSize(): Dp =
     when {
         this >= 112.dp -> 4.dp
