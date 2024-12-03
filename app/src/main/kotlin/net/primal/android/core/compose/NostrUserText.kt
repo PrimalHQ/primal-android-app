@@ -88,9 +88,7 @@ fun NostrUserText(
         "verifiedBadge" to InlineTextContent(
             placeholder = Placeholder(placeholderSize, placeholderSize, internetIdentifierBadgeAlign),
         ) {
-            if (internetIdentifier.isPrimalIdentifier() && customBadgeStyle != null &&
-                customBadgeStyle != LegendaryStyle.NO_CUSTOMIZATION
-            ) {
+            if (customBadgeStyle != null && customBadgeStyle != LegendaryStyle.NO_CUSTOMIZATION) {
                 @Suppress("KotlinConstantConditions")
                 val badgeVector = when (customBadgeStyle) {
                     LegendaryStyle.GOLD -> PrimalIcons.PrimalBadgeGold
