@@ -54,9 +54,9 @@ import net.primal.android.auth.compose.DefaultOnboardingAvatar
 import net.primal.android.auth.compose.OnboardingButton
 import net.primal.android.auth.compose.defaultOnboardingAvatarBackground
 import net.primal.android.core.compose.AppBarIcon
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.UiDensityMode
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.detectUiDensityModeFromMaxHeight
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -397,11 +397,12 @@ private fun ProfileDetailsColumn(
         verticalArrangement = Arrangement.Bottom,
     ) {
         if (!(uiMode.isCompactOrLower() && keyboardVisible)) {
-            AvatarThumbnail(
+            UniversalAvatarThumbnail(
                 avatarCdnImage = profileDetails.avatarCdnImage,
                 avatarSize = 100.dp,
                 hasBorder = profileDetails.avatarCdnImage != null,
-                borderColor = Color.White,
+                fallbackBorderColor = Color.White,
+                legendaryCustomization = profileDetails.legendaryCustomization,
                 backgroundColor = defaultOnboardingAvatarBackground,
                 defaultAvatar = { DefaultOnboardingAvatar() },
             )

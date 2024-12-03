@@ -32,14 +32,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnailCustomBorder
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.SnackbarErrorHandler
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.premium.ui.PremiumBadge
 import net.primal.android.premium.ui.PrimalPremiumTable
 import net.primal.android.premium.ui.toHumanReadableString
@@ -133,11 +134,10 @@ private fun PremiumHomeScreen(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                AvatarThumbnailCustomBorder(
+                UniversalAvatarThumbnail(
                     avatarCdnImage = state.avatarCdnImage,
                     avatarSize = 80.dp,
-                    hasBorder = state.avatarGlow,
-                    borderBrush = state.legendaryStyle.brush,
+                    legendaryCustomization = state.avatarLegendaryCustomization,
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 val primalName = state.membership?.premiumName ?: ""
@@ -147,7 +147,11 @@ private fun PremiumHomeScreen(
                     internetIdentifier = "$primalName@primal.net",
                     internetIdentifierBadgeSize = 24.dp,
                     fontSize = 20.sp,
-                    customBadgeStyle = if (state.customBadge) state.legendaryStyle else null,
+                    customBadgeStyle = if (state.avatarLegendaryCustomization?.customBadge == true) {
+                        state.avatarLegendaryCustomization.legendaryStyle
+                    } else {
+                        null
+                    },
                 )
             }
 
@@ -156,7 +160,8 @@ private fun PremiumHomeScreen(
                     firstCohort = state.membership.cohort1,
                     secondCohort = state.membership.cohort2,
                     membershipExpired = state.membership.isExpired(),
-                    legendaryStyle = state.legendaryStyle,
+                    legendaryStyle = state.avatarLegendaryCustomization?.legendaryStyle
+                        ?: LegendaryStyle.NO_CUSTOMIZATION,
 
                 )
 

@@ -9,6 +9,7 @@ import net.primal.android.core.compose.profile.model.UserProfileItemUi
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.premium.legend.LegendaryCustomization
 
 interface NoteEditorContract {
 
@@ -19,6 +20,7 @@ interface NoteEditorContract {
         val publishing: Boolean = false,
         val error: NoteEditorError? = null,
         val activeAccountAvatarCdnImage: CdnImage? = null,
+        val activeAccountLegendaryCustomization: LegendaryCustomization? = null,
         val uploadingAttachments: Boolean = false,
         val attachments: List<NoteAttachment> = emptyList(),
         val taggedUsers: List<NoteTaggedUser> = emptyList(),

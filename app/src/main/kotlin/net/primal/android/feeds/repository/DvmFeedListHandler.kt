@@ -8,6 +8,7 @@ import net.primal.android.core.ext.asMapByKey
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.dvm.ui.DvmFeedUi
 import net.primal.android.networking.primal.retryNetworkCall
+import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.stats.repository.EventRepository
 
@@ -33,15 +34,19 @@ class DvmFeedListHandler @Inject constructor(
             .asMapByKey { it.eventId }
 
         var feeds = dvmFeeds.map { dvmFeed ->
+            val actionUsers = profileRepository.findProfilesData(profileIds = dvmFeed.actionUserIds)
+            val avatarLegendaryCustomizationPair = actionUsers
+                .filter { it.avatarCdnImage != null }
+                .map { Pair(it.avatarCdnImage, it.primalLegendProfile?.asLegendaryCustomization()) }
+
             DvmFeedUi(
                 data = dvmFeed,
                 userLiked = userStats[dvmFeed.eventId]?.liked,
                 userZapped = userStats[dvmFeed.eventId]?.zapped,
                 totalLikes = stats[dvmFeed.eventId]?.likes,
                 totalSatsZapped = stats[dvmFeed.eventId]?.satsZapped,
-                actionUserAvatars = profileRepository
-                    .findProfilesData(profileIds = dvmFeed.actionUserIds)
-                    .mapNotNull { it.avatarCdnImage },
+                actionUserAvatars = avatarLegendaryCustomizationPair.mapNotNull { it.first },
+                actionUserLegendaryCustomizations = avatarLegendaryCustomizationPair.map { it.second },
             )
         }
         update(feeds)

@@ -16,6 +16,7 @@ import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.navigation.draftTransaction
 import net.primal.android.navigation.lnbc
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.profile.db.ProfileData
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.scanner.analysis.WalletTextParser
@@ -191,6 +192,8 @@ class CreateTransactionViewModel @Inject constructor(
         setState {
             copy(
                 profileAvatarCdnImage = this@updateStateWithProfileData.avatarCdnImage,
+                profileLegendaryCustomization = this@updateStateWithProfileData
+                    .primalLegendProfile?.asLegendaryCustomization(),
                 profileDisplayName = this@updateStateWithProfileData.authorNameUiFriendly(),
                 profileLightningAddress = transaction.targetLud16 ?: this@updateStateWithProfileData.lightningAddress,
                 transaction = if (transaction.targetLud16 == null &&

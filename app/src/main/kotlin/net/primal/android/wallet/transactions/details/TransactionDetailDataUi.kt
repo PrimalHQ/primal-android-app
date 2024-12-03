@@ -2,6 +2,7 @@ package net.primal.android.wallet.transactions.details
 
 import java.time.Instant
 import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.wallet.domain.TxState
 import net.primal.android.wallet.domain.TxType
 
@@ -25,4 +26,5 @@ data class TransactionDetailDataUi(
     val otherUserInternetIdentifier: String? = null,
     val otherUserDisplayName: String? = null,
     val otherUserLightningAddress: String? = null,
+    val otherUserLegendaryCustomization: LegendaryCustomization? = null,
 )

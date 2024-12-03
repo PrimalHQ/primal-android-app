@@ -437,6 +437,7 @@ private fun MultipleUserPickerOptionListItem(
             } else {
                 AvatarThumbnailsRow(
                     avatarCdnImages = selectedUsers.map { it.avatarCdnImage },
+                    avatarLegendaryCustomizations = selectedUsers.map { it.legendaryCustomization },
                     onClick = {},
                     avatarOverlap = AvatarOverlap.None,
                     maxAvatarsToShow = 4,

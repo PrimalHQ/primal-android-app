@@ -19,9 +19,7 @@ fun UserAccount.copyProfileIfNotNull(profile: UserAccount?): UserAccount {
             avatarCdnImage = profile.avatarCdnImage,
             internetIdentifier = profile.internetIdentifier,
             lightningAddress = profile.lightningAddress,
-            avatarRing = profile.avatarRing,
-            customBadge = profile.customBadge,
-            legendaryStyle = profile.legendaryStyle,
+            primalLegendProfile = profile.primalLegendProfile,
         )
     } else {
         this

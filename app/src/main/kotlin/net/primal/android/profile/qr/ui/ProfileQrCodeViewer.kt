@@ -61,9 +61,9 @@ import com.wajahatkarim.flippable.Flippable
 import com.wajahatkarim.flippable.FlippableState
 import com.wajahatkarim.flippable.rememberFlipController
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.DefaultAvatarThumbnailPlaceholderListItemImage
 import net.primal.android.core.compose.PrimalLoadingSpinner
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Copy
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
@@ -86,11 +86,12 @@ fun ProfileQrCodeViewer(
             .padding(paddingValues),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        AvatarThumbnail(
+        UniversalAvatarThumbnail(
             modifier = Modifier.size(108.dp),
             avatarCdnImage = profileDetails?.avatarCdnImage,
             hasBorder = true,
-            borderColor = Color.White,
+            fallbackBorderColor = Color.White,
+            legendaryCustomization = profileDetails?.legendaryCustomization,
             defaultAvatar = {
                 DefaultAvatarThumbnailPlaceholderListItemImage(
                     backgroundColor = Color.White,

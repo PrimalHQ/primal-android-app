@@ -43,8 +43,8 @@ import java.text.NumberFormat
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AvatarOverlap
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.AvatarThumbnailsRow
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikes
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikesFilled
@@ -247,6 +247,7 @@ private fun DvmFeedListItem(
                                         height = profileAvatarSize,
                                     ),
                                 avatarCdnImages = dvmFeed.actionUserAvatars,
+                                avatarLegendaryCustomizations = dvmFeed.actionUserLegendaryCustomizations,
                                 onClick = {},
                                 maxAvatarsToShow = MaxAvatarsToShow,
                                 displayAvatarOverflowIndicator = false,
@@ -276,7 +277,7 @@ fun DvmFeedThumbnail(
         modifier = Modifier.size(avatarSize),
         contentAlignment = Alignment.BottomEnd,
     ) {
-        AvatarThumbnail(
+        UniversalAvatarThumbnail(
             avatarCdnImage = avatarCdnImage,
             avatarSize = avatarSize,
         )

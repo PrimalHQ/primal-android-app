@@ -28,8 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
@@ -44,8 +42,8 @@ import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.launch
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.core.compose.AvatarThumbnailCustomBorder
 import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
 import net.primal.android.core.errors.UiError
@@ -413,19 +411,15 @@ private fun FeedNote(
 
     Row {
         if (!fullWidthContent) {
-            AvatarThumbnailCustomBorder(
+            UniversalAvatarThumbnail(
                 modifier = Modifier.padding(avatarPaddingValues),
                 avatarSize = avatarSizeDp,
                 avatarCdnImage = data.authorAvatarCdnImage,
+                legendaryCustomization = data.authorLegendaryCustomization,
                 onClick = if (noteCallbacks.onProfileClick != null) {
                     { noteCallbacks.onProfileClick.invoke(data.authorId) }
                 } else {
                     null
-                },
-                hasBorder = data.authorLegendAvatarGlow && data.authorLegendaryStyle != null,
-                borderBrush = when {
-                    data.authorLegendaryStyle != null -> data.authorLegendaryStyle.brush
-                    else -> Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
                 },
             )
         }
@@ -445,9 +439,7 @@ private fun FeedNote(
                 authorDisplayName = data.authorName,
                 authorAvatarCdnImage = data.authorAvatarCdnImage,
                 authorInternetIdentifier = data.authorInternetIdentifier,
-                authorLegendAvatarGlow = data.authorLegendAvatarGlow,
-                authorLegendCustomBadge = data.authorLegendCustomBadge,
-                authorLegendaryStyle = data.authorLegendaryStyle,
+                authorLegendaryCustomization = data.authorLegendaryCustomization,
                 replyToAuthor = if (showReplyTo) data.replyToAuthorHandle else null,
                 onAuthorAvatarClick = if (noteCallbacks.onProfileClick != null) {
                     { noteCallbacks.onProfileClick.invoke(data.authorId) }

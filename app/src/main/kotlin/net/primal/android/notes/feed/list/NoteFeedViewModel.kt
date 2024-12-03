@@ -39,6 +39,7 @@ import net.primal.android.notes.feed.list.NoteFeedContract.UiState
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
+import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import timber.log.Timber
@@ -182,15 +183,23 @@ class NoteFeedViewModel @AssistedInject constructor(
             primalUserNames = primalUserNames,
             primalLegendProfiles = primalLegendProfiles,
         )
-        val avatarCdnImages = allNotes
-            .mapNotNull { note -> profiles.find { it.ownerId == note.pubKey }?.avatarCdnImage }
+        val avatarCdnImagesAndLegendaryCustomizations = allNotes
+            .mapNotNull { note -> profiles.find { it.ownerId == note.pubKey } }
+            .filter { profileData -> profileData.avatarCdnImage != null }
+            .map { profileData ->
+                Pair(
+                    profileData.avatarCdnImage,
+                    profileData.primalLegendProfile?.asLegendaryCustomization(),
+                )
+            }
             .distinct()
 
-        val limit = if (avatarCdnImages.count() <= MAX_AVATARS) avatarCdnImages.count() else MAX_AVATARS
+        val limit = avatarCdnImagesAndLegendaryCustomizations.count().coerceAtMost(MAX_AVATARS)
 
         val newSyncStats = FeedPostsSyncStats(
             latestNoteIds = allNotes.map { it.id },
-            latestAvatarCdnImages = avatarCdnImages.take(limit),
+            latestAvatarCdnImages = avatarCdnImagesAndLegendaryCustomizations.mapNotNull { it.first }.take(limit),
+            latestLegendaryCustomizations = avatarCdnImagesAndLegendaryCustomizations.map { it.second }.take(limit),
         )
 
         if (newSyncStats.isTopVisibleNoteTheLatestNote()) {

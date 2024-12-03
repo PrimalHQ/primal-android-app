@@ -9,7 +9,8 @@ import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.notes.db.FeedPost
-import net.primal.android.premium.legend.LegendaryStyle
+import net.primal.android.premium.legend.LegendaryCustomization
+import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.stats.ui.EventZapUiModel
 import net.primal.android.stats.ui.asEventZapUiModel
 
@@ -33,9 +34,7 @@ data class FeedPostUi(
     val replyToAuthorHandle: String? = null,
     val isBookmarked: Boolean = false,
     val eventZaps: List<EventZapUiModel> = emptyList(),
-    val authorLegendAvatarGlow: Boolean = false,
-    val authorLegendCustomBadge: Boolean = false,
-    val authorLegendaryStyle: LegendaryStyle? = null,
+    val authorLegendaryCustomization: LegendaryCustomization? = null,
 )
 
 fun FeedPost.asFeedPostUi(): FeedPostUi {
@@ -61,8 +60,6 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
         eventZaps = this.eventZaps
             .map { it.asEventZapUiModel() }
             .sortedWith(EventZapUiModel.DefaultComparator),
-        authorLegendAvatarGlow = this.author?.primalLegendProfile?.avatarGlow == true,
-        authorLegendCustomBadge = this.author?.primalLegendProfile?.customBadge == true,
-        authorLegendaryStyle = LegendaryStyle.valueById(this.author?.primalLegendProfile?.styleId),
+        authorLegendaryCustomization = this.author?.primalLegendProfile?.asLegendaryCustomization(),
     )
 }

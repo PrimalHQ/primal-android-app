@@ -6,7 +6,8 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.notes.feed.model.EventStatsUi
-import net.primal.android.premium.legend.LegendaryStyle
+import net.primal.android.premium.legend.LegendaryCustomization
+import net.primal.android.premium.legend.asLegendaryCustomization
 
 data class ArticleDetailsUi(
     val aTag: String,
@@ -26,9 +27,7 @@ data class ArticleDetailsUi(
     val hashtags: List<String> = emptyList(),
     val isBookmarked: Boolean = false,
     val eventStatsUi: EventStatsUi = EventStatsUi(),
-    val authorLegendAvatarGlow: Boolean = false,
-    val authorLegendCustomBadge: Boolean = false,
-    val authorLegendaryStyle: LegendaryStyle? = null,
+    val authorLegendaryCustomization: LegendaryCustomization? = null,
 )
 
 fun Article.mapAsArticleDetailsUi(): ArticleDetailsUi {
@@ -50,8 +49,6 @@ fun Article.mapAsArticleDetailsUi(): ArticleDetailsUi {
         hashtags = this.data.hashtags,
         isBookmarked = this.bookmark != null,
         eventStatsUi = EventStatsUi.from(eventStats = this.eventStats, userStats = this.userEventStats),
-        authorLegendAvatarGlow = this.author?.primalLegendProfile?.avatarGlow == true,
-        authorLegendCustomBadge = this.author?.primalLegendProfile?.customBadge == true,
-        authorLegendaryStyle = LegendaryStyle.valueById(this.author?.primalLegendProfile?.styleId),
+        authorLegendaryCustomization = this.author?.primalLegendProfile?.asLegendaryCustomization(),
     )
 }

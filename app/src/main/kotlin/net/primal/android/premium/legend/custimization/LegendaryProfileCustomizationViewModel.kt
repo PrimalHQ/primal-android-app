@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.premium.legend.LegendaryStyle
+import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationContract.SideEffect
 import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationContract.UiEvent
 import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationContract.UiState
@@ -99,10 +99,7 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
             profileRepository.observeProfile(profileId = activeAccountStore.activeUserId()).collect {
                 setState {
                     copy(
-                        avatarGlow = it.metadata?.primalLegendProfile?.avatarGlow == true,
-                        customBadge = it.metadata?.primalLegendProfile?.customBadge == true,
-                        legendaryStyle = LegendaryStyle.valueById(it.metadata?.primalLegendProfile?.styleId)
-                            ?: LegendaryStyle.NO_CUSTOMIZATION,
+                        avatarLegendaryCustomization = it.metadata?.primalLegendProfile?.asLegendaryCustomization(),
                     )
                 }
             }

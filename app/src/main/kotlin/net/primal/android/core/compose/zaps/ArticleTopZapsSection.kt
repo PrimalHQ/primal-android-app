@@ -24,11 +24,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.IconText
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.premium.legend.LegendaryCustomization
+import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.stats.ui.EventZapUiModel
 import net.primal.android.theme.AppTheme
 
@@ -86,11 +88,12 @@ private fun ArticleTopNoteZapRow(noteZap: EventZapUiModel, onClick: () -> Unit) 
             .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        AvatarThumbnail(
+        UniversalAvatarThumbnail(
             modifier = Modifier.padding(start = 2.dp),
             avatarCdnImage = noteZap.zapperAvatarCdnImage,
             avatarSize = 28.dp,
             onClick = onClick,
+            legendaryCustomization = noteZap.zapperLegendaryCustomization,
         )
 
         IconText(
@@ -134,11 +137,12 @@ private fun ArticleNoteZapListItem(noteZap: EventZapUiModel, onClick: () -> Unit
             .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        AvatarThumbnail(
+        UniversalAvatarThumbnail(
             modifier = Modifier.padding(start = 2.dp),
             avatarCdnImage = noteZap.zapperAvatarCdnImage,
             avatarSize = 24.dp,
             onClick = onClick,
+            legendaryCustomization = noteZap.zapperLegendaryCustomization,
         )
 
         Text(
@@ -202,6 +206,11 @@ private fun PreviewArticleTopZapsSection() {
                         zappedAt = 0,
                         message = "Top zap message!!!",
                         amountInSats = 21_21_21.toULong(),
+                        zapperLegendaryCustomization = LegendaryCustomization(
+                            avatarGlow = true,
+                            customBadge = true,
+                            legendaryStyle = LegendaryStyle.SUN_FIRE,
+                        ),
                     ),
                     EventZapUiModel(
                         id = "id",

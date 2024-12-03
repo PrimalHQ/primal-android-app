@@ -4,7 +4,7 @@ import androidx.paging.PagingData
 import java.math.BigDecimal
 import kotlinx.coroutines.flow.Flow
 import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.premium.legend.LegendaryStyle
+import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.user.domain.Badges
 import net.primal.android.user.domain.PrimalWallet
 import net.primal.android.user.domain.WalletPreference
@@ -14,7 +14,7 @@ interface WalletDashboardContract {
     data class UiState(
         val transactions: Flow<PagingData<TransactionListItemDataUi>>,
         val activeAccountAvatarCdnImage: CdnImage? = null,
-        val activeAccountLegendaryStyle: LegendaryStyle? = null,
+        val activeAccountLegendaryCustomization: LegendaryCustomization? = null,
         val badges: Badges = Badges(),
         val primalWallet: PrimalWallet? = null,
         val walletPreference: WalletPreference = WalletPreference.Undefined,

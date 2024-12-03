@@ -3,7 +3,8 @@ package net.primal.android.core.compose.profile.model
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
-import net.primal.android.premium.legend.LegendaryStyle
+import net.primal.android.premium.legend.LegendaryCustomization
+import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.profile.db.ProfileData
 
 data class ProfileDetailsUi(
@@ -20,9 +21,7 @@ data class ProfileDetailsUi(
     val website: String? = null,
     val primalName: String? = null,
     val lnUrlDecoded: String? = null,
-    val avatarGlow: Boolean = false,
-    val customBadge: Boolean = false,
-    val legendaryStyle: LegendaryStyle? = null,
+    val legendaryCustomization: LegendaryCustomization? = null,
 )
 
 fun ProfileData.asProfileDetailsUi() =
@@ -40,7 +39,5 @@ fun ProfileData.asProfileDetailsUi() =
         website = this.website,
         primalName = this.primalName,
         lnUrlDecoded = this.lnUrlDecoded,
-        avatarGlow = this.primalLegendProfile?.avatarGlow == true,
-        customBadge = this.primalLegendProfile?.customBadge == true,
-        legendaryStyle = LegendaryStyle.valueById(this.primalLegendProfile?.styleId),
+        legendaryCustomization = this.primalLegendProfile?.asLegendaryCustomization(),
     )

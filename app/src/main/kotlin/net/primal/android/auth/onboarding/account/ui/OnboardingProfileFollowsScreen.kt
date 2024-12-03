@@ -54,9 +54,9 @@ import net.primal.android.auth.onboarding.account.OnboardingContract
 import net.primal.android.auth.onboarding.account.OnboardingStep
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroupMember
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -373,7 +373,7 @@ private fun FollowGroupMemberListItem(member: FollowGroupMember, onClick: () -> 
             containerColor = Color.White,
         ),
         leadingContent = {
-            AvatarThumbnail(
+            UniversalAvatarThumbnail(
                 avatarCdnImage = member.metadata?.picture?.let { CdnImage(sourceUrl = it) },
             )
         },

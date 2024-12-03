@@ -135,8 +135,6 @@ fun TransactionDetailsScreen(
     onClose: () -> Unit,
     noteCallbacks: NoteCallbacks,
 ) {
-    val context = LocalContext.current
-    val uiScope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     val showTopBarDivider by remember { derivedStateOf { scrollState.value > 0 } }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -397,6 +395,7 @@ private fun TransactionCard(txData: TransactionDetailDataUi, onProfileClick: (St
                 authorDisplayName = txData.otherUserDisplayName,
                 authorAvatarCdnImage = txData.otherUserAvatarCdnImage,
                 authorInternetIdentifier = txData.otherUserInternetIdentifier,
+                authorLegendaryCustomization = txData.otherUserLegendaryCustomization,
                 onAuthorAvatarClick = { txData.otherUserId?.let(onProfileClick) },
                 label = txData.otherUserLightningAddress,
                 labelStyle = AppTheme.typography.bodyMedium,

@@ -100,9 +100,7 @@ private fun PremiumPrimalNameStage(
                     .fillMaxWidth()
                     .navigationBarsPadding()
                     .padding(32.dp),
-                onClick = {
-                    eventPublisher(PremiumPrimalNameContract.UiEvent.CheckPrimalName(primalName.text))
-                },
+                onClick = { eventPublisher(PremiumPrimalNameContract.UiEvent.CheckPrimalName(primalName.text)) },
             ) {
                 Text(
                     text = stringResource(id = R.string.premium_primal_name_search_button),

@@ -13,7 +13,6 @@ import net.primal.android.nostr.ext.asProfileStatsPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
-import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.asUserAccountFromFollowListEvent
@@ -56,9 +55,7 @@ class UserAccountFetcher @Inject constructor(
             followingCount = profileStats?.following,
             notesCount = profileStats?.notesCount,
             repliesCount = profileStats?.repliesCount,
-            customBadge = profileData.primalLegendProfile?.customBadge == true,
-            avatarRing = profileData.primalLegendProfile?.avatarGlow == true,
-            legendaryStyle = LegendaryStyle.valueById(profileData.primalLegendProfile?.styleId),
+            primalLegendProfile = profileData.primalLegendProfile,
         )
     }
 

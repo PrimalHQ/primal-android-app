@@ -1,12 +1,14 @@
 package net.primal.android.premium.manage.nameChange
 
 import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.premium.legend.LegendaryCustomization
 
 interface PremiumChangePrimalNameContract {
     data class UiState(
         val stage: ChangePrimalNameStage = ChangePrimalNameStage.PickNew,
         val primalName: String? = null,
         val profileAvatarCdnImage: CdnImage? = null,
+        val profileLegendaryCustomization: LegendaryCustomization? = null,
         val changingName: Boolean = false,
         val error: NameChangeError? = null,
     )

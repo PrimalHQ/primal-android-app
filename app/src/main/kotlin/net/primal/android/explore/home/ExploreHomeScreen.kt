@@ -39,7 +39,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -52,11 +51,11 @@ import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AppBarIcon
-import net.primal.android.core.compose.AvatarThumbnailCustomBorder
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.InvisibleAppBarIcon
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopLevelDestination
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearch
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
@@ -79,7 +78,7 @@ import net.primal.android.explore.home.zaps.ExploreZaps
 import net.primal.android.feeds.domain.exploreMediaFeedSpec
 import net.primal.android.notes.feed.grid.MediaFeedGrid
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
-import net.primal.android.premium.legend.LegendaryStyle
+import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -143,7 +142,7 @@ private fun ExploreHomeScreen(
                 pagerState = pagerState,
                 actionIcon = PrimalIcons.AdvancedSearch,
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
-                avatarLegendaryStyle = state.activeAccountLegendaryStyle,
+                avatarLegendaryCustomization = state.activeAccountLegendaryCustomization,
                 navigationIcon = PrimalIcons.AvatarDefault,
                 onNavigationIconClick = {
                     uiScope.launch { drawerState.open() }
@@ -234,7 +233,7 @@ fun ExploreTopAppBar(
     onNavigationIconClick: () -> Unit,
     onActionIconClick: () -> Unit,
     onSearchClick: () -> Unit,
-    avatarLegendaryStyle: LegendaryStyle? = null,
+    avatarLegendaryCustomization: LegendaryCustomization? = null,
     navigationIconTintColor: Color = LocalContentColor.current,
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
@@ -258,15 +257,11 @@ fun ExploreTopAppBar(
                             .padding(horizontal = 8.dp)
                             .clip(CircleShape),
                     ) {
-                        AvatarThumbnailCustomBorder(
+                        UniversalAvatarThumbnail(
                             avatarCdnImage = avatarCdnImage,
                             modifier = Modifier.size(32.dp),
                             onClick = onNavigationIconClick,
-                            hasBorder = avatarLegendaryStyle != null,
-                            borderBrush = avatarLegendaryStyle?.brush
-                                ?: Brush.linearGradient(
-                                    listOf(AppTheme.colorScheme.primary, AppTheme.colorScheme.primary),
-                                ),
+                            legendaryCustomization = avatarLegendaryCustomization,
                         )
                     }
                 } else if (navigationIcon != null) {

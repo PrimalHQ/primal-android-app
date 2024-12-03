@@ -45,8 +45,8 @@ import java.time.format.DateTimeFormatter
 import kotlin.time.Duration.Companion.seconds
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.core.compose.AvatarThumbnail
 import net.primal.android.core.compose.IconText
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.WrappedContentWithSuffix
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.WalletBitcoinPayment
@@ -54,6 +54,7 @@ import net.primal.android.core.compose.icons.primaliconpack.WalletLightningPayme
 import net.primal.android.core.compose.icons.primaliconpack.WalletPay
 import net.primal.android.core.compose.icons.primaliconpack.WalletReceive
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.domain.TxState
 import net.primal.android.wallet.domain.TxType
@@ -97,6 +98,7 @@ fun TransactionListItem(
                 isPending = data.txState.isPending(),
                 otherUserId = data.otherUserId,
                 otherUserAvatarCdnImage = data.otherUserAvatarCdnImage,
+                otherUserLegendaryCustomization = data.otherUserLegendaryCustomization,
                 onAvatarClick = onAvatarClick,
             )
         },
@@ -133,13 +135,15 @@ private fun TransactionLeadingContent(
     isPending: Boolean,
     otherUserId: String?,
     otherUserAvatarCdnImage: CdnImage?,
+    otherUserLegendaryCustomization: LegendaryCustomization?,
     onAvatarClick: (String) -> Unit,
 ) {
     when {
         otherUserId != null -> {
-            AvatarThumbnail(
+            UniversalAvatarThumbnail(
                 avatarCdnImage = otherUserAvatarCdnImage,
                 onClick = { onAvatarClick(otherUserId) },
+                legendaryCustomization = otherUserLegendaryCustomization,
             )
         }
 

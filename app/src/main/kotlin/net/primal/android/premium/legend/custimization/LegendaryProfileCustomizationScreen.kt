@@ -32,7 +32,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -40,15 +39,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
-import net.primal.android.core.compose.AvatarThumbnailCustomBorder
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.LegendaryProfileNoCustomization
+import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.premium.ui.PremiumBadge
 import net.primal.android.theme.AppTheme
@@ -80,9 +80,15 @@ fun LegendaryProfileCustomizationScreen(
     onClose: () -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
-    var customBadge by remember(state.customBadge) { mutableStateOf(state.customBadge) }
-    var avatarGlow by remember(state.avatarGlow) { mutableStateOf(state.avatarGlow) }
-    var selectedStyle by remember(state.legendaryStyle) { mutableStateOf(state.legendaryStyle) }
+    var customBadge by remember(state.avatarLegendaryCustomization?.customBadge) {
+        mutableStateOf(state.avatarLegendaryCustomization?.customBadge)
+    }
+    var avatarGlow by remember(state.avatarLegendaryCustomization?.avatarGlow) {
+        mutableStateOf(state.avatarLegendaryCustomization?.avatarGlow)
+    }
+    var selectedStyle by remember(state.avatarLegendaryCustomization?.legendaryStyle) {
+        mutableStateOf(state.avatarLegendaryCustomization?.legendaryStyle)
+    }
 
     Scaffold(
         topBar = {
@@ -98,9 +104,9 @@ fun LegendaryProfileCustomizationScreen(
                 onClick = {
                     eventPublisher(
                         LegendaryProfileCustomizationContract.UiEvent.ApplyCustomization(
-                            customBadge = customBadge,
-                            avatarGlow = avatarGlow,
-                            style = selectedStyle,
+                            customBadge = customBadge ?: false,
+                            avatarGlow = avatarGlow ?: false,
+                            style = selectedStyle ?: LegendaryStyle.NO_CUSTOMIZATION,
                         ),
                     )
                 },
@@ -123,15 +129,14 @@ fun LegendaryProfileCustomizationScreen(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                AvatarThumbnailCustomBorder(
+                UniversalAvatarThumbnail(
                     avatarCdnImage = state.avatarCdnImage,
                     avatarSize = 80.dp,
-                    hasBorder = true,
-                    borderBrush = if (avatarGlow) {
-                        selectedStyle.brush
-                    } else {
-                        Brush.linearGradient(listOf(Color.Transparent, Color.Transparent))
-                    },
+                    legendaryCustomization = LegendaryCustomization(
+                        avatarGlow = avatarGlow == true,
+                        customBadge = customBadge == true,
+                        legendaryStyle = selectedStyle,
+                    ),
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 val primalName = state.membership?.premiumName ?: ""
@@ -140,7 +145,7 @@ fun LegendaryProfileCustomizationScreen(
                     displayName = primalName,
                     internetIdentifier = "$primalName@primal.net",
                     internetIdentifierBadgeSize = 24.dp,
-                    customBadgeStyle = if (customBadge) selectedStyle else null,
+                    customBadgeStyle = if (customBadge == true) selectedStyle else null,
                     fontSize = 20.sp,
                 )
             }
@@ -150,7 +155,7 @@ fun LegendaryProfileCustomizationScreen(
                     firstCohort = state.membership.cohort1,
                     secondCohort = state.membership.cohort2,
                     membershipExpired = state.membership.isExpired(),
-                    legendaryStyle = selectedStyle,
+                    legendaryStyle = selectedStyle ?: LegendaryStyle.NO_CUSTOMIZATION,
                 )
 
                 PrimalDivider(modifier = Modifier.padding(top = 16.dp))
@@ -159,7 +164,7 @@ fun LegendaryProfileCustomizationScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 32.dp, vertical = 8.dp),
-                    activeLegendaryStyle = selectedStyle,
+                    activeLegendaryStyle = selectedStyle ?: LegendaryStyle.NO_CUSTOMIZATION,
                     onStyleChanged = { selectedStyle = it },
                 )
 
@@ -167,9 +172,9 @@ fun LegendaryProfileCustomizationScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
-                    avatarRing = avatarGlow,
+                    avatarRing = avatarGlow == true,
                     onAvatarRingChanged = { avatarGlow = it },
-                    customBadge = customBadge,
+                    customBadge = customBadge == true,
                     onCustomBadgeChanged = { customBadge = it },
                 )
 

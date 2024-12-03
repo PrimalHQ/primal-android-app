@@ -55,6 +55,7 @@ fun ReferencedNoteCard(
             singleLine = true,
             authorAvatarSize = 30.dp,
             authorAvatarCdnImage = data.authorAvatarCdnImage,
+            authorLegendaryCustomization = data.authorLegendaryCustomization,
             authorInternetIdentifier = data.authorInternetIdentifier,
             onAuthorAvatarClick = { noteCallbacks.onProfileClick?.invoke(data.authorId) },
         )

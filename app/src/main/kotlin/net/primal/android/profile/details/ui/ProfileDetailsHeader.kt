@@ -139,8 +139,8 @@ private fun ProfileHeaderDetails(
             displayName = state.profileDetails?.authorDisplayName ?: state.profileId.asEllipsizedNpub(),
             internetIdentifier = state.profileDetails?.internetIdentifier,
             isProfileFollowingMe = state.isProfileFollowingMe,
-            customBadge = state.profileDetails?.customBadge == true,
-            legendaryStyle = state.profileDetails?.legendaryStyle,
+            customBadge = state.profileDetails?.legendaryCustomization?.customBadge == true,
+            legendaryStyle = state.profileDetails?.legendaryCustomization?.legendaryStyle,
         )
 
         if (state.profileDetails?.internetIdentifier?.isNotEmpty() == true) {
@@ -205,6 +205,7 @@ private fun UserFollowedByIndicator(
         AvatarThumbnailsRow(
             avatarBorderColor = AppTheme.colorScheme.background,
             avatarCdnImages = profiles.map { it.avatarCdnImage },
+            avatarLegendaryCustomizations = profiles.map { it.legendaryCustomization },
             onClick = {
                 onProfileClick(profiles[it].pubkey)
             },

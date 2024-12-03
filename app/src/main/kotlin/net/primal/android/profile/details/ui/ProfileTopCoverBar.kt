@@ -26,7 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
@@ -37,14 +36,13 @@ import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import net.primal.android.R
 import net.primal.android.attachments.domain.findNearestOrNull
-import net.primal.android.core.compose.AvatarThumbnailCustomBorder
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.utils.asEllipsizedNpub
-import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.theme.AppTheme
 
@@ -118,7 +116,7 @@ fun ProfileTopCoverBar(
                 .offset(y = avatarValues.avatarOffsetY, x = avatarValues.avatarOffsetX)
                 .padding(horizontal = 16.dp),
         ) {
-            AvatarThumbnailCustomBorder(
+            UniversalAvatarThumbnail(
                 modifier = Modifier
                     .size(avatarValues.avatarSize)
                     .padding(
@@ -129,21 +127,8 @@ fun ProfileTopCoverBar(
                     ),
                 onClick = { state.profileDetails?.avatarCdnImage?.sourceUrl?.let { onMediaItemClick(it) } },
                 avatarCdnImage = state.profileDetails?.avatarCdnImage,
-                hasBorder = true,
-                borderBrush = if (state.profileDetails?.legendaryStyle != null && state.profileDetails.avatarGlow) {
-                    when (state.profileDetails.legendaryStyle) {
-                        LegendaryStyle.NO_CUSTOMIZATION -> Brush.linearGradient(
-                            listOf(
-                                Color.White,
-                                Color.White,
-                            ),
-                        )
-
-                        else -> state.profileDetails.legendaryStyle.brush
-                    }
-                } else {
-                    Brush.linearGradient(listOf(Color.White, Color.White))
-                },
+                fallbackBorderColor = Color.White,
+                legendaryCustomization = state.profileDetails?.legendaryCustomization,
             )
         }
     }
@@ -196,8 +181,8 @@ private fun ProfileTopAppBar(
                         internetIdentifier = state.profileDetails?.internetIdentifier,
                         internetIdentifierBadgeSize = 20.dp,
                         internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
-                        customBadgeStyle = if (state.profileDetails?.customBadge == true) {
-                            state.profileDetails.legendaryStyle
+                        customBadgeStyle = if (state.profileDetails?.legendaryCustomization?.customBadge == true) {
+                            state.profileDetails.legendaryCustomization.legendaryStyle
                         } else {
                             null
                         },

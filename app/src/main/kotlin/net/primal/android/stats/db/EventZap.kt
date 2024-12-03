@@ -2,6 +2,7 @@ package net.primal.android.stats.db
 
 import androidx.room.Entity
 import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.profile.domain.PrimalLegendProfile
 
 @Entity(
     primaryKeys = [
@@ -22,4 +23,5 @@ data class EventZap(
     val zapSenderHandle: String? = null,
     val zapSenderInternetIdentifier: String? = null,
     val zapSenderAvatarCdnImage: CdnImage? = null,
+    val zapSenderPrimalLegendProfile: PrimalLegendProfile? = null,
 )
