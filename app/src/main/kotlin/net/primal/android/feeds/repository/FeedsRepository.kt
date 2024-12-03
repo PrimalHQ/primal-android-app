@@ -171,7 +171,7 @@ class FeedsRepository @Inject constructor(
             .fold(emptyMap<String, Float>()) { acc, map -> acc + map }
 
         withContext(dispatcherProvider.io()) {
-            database.profiles().upsertAll(data = profiles)
+            database.profiles().insertOrUpdateAll(data = profiles)
             database.eventStats().upsertAll(data = eventStatsMap.values.map { it.asEventStatsPO() })
             database.eventUserStats().upsertAll(data = userStats.values.map { it.asEventUserStatsPO(userId = userId) })
         }

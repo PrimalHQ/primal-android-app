@@ -158,7 +158,7 @@ class UserRepository @Inject constructor(
             primalUserNames = emptyMap(),
             primalLegendProfiles = emptyMap(),
         )
-        database.profiles().upsertAll(data = listOf(profileData))
+        database.profiles().insertOrUpdateAll(data = listOf(profileData))
 
         accountsStore.getAndUpdateAccount(userId = userId) {
             this.copy(

@@ -21,7 +21,7 @@ suspend fun EventZapsResponse.persistToDatabaseAsTransaction(database: PrimalDat
     )
     val eventZaps = this.zaps.mapAsEventZapDO(profilesMap = profiles.associateBy { it.ownerId })
     database.withTransaction {
-        database.profiles().upsertAll(data = profiles)
+        database.profiles().insertOrUpdateAll(data = profiles)
         database.eventZaps().upsertAll(data = eventZaps)
     }
 }

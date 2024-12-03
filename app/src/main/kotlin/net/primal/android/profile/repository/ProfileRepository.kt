@@ -74,7 +74,7 @@ class ProfileRepository @Inject constructor(
                 primalUserNames = primalUserNames,
                 primalLegendProfiles = primalLegendProfiles,
             )
-            database.profiles().upsertAll(data = profiles)
+            database.profiles().insertOrUpdateAll(data = profiles)
             profiles
         }
 
@@ -101,7 +101,7 @@ class ProfileRepository @Inject constructor(
 
             database.withTransaction {
                 if (profileMetadata != null) {
-                    database.profiles().upsertAll(data = listOf(profileMetadata))
+                    database.profiles().insertOrUpdateAll(data = listOf(profileMetadata))
                 }
 
                 if (profileStats != null) {
@@ -208,7 +208,7 @@ class ProfileRepository @Inject constructor(
             )
             val followersCountsMap = response.followerCounts?.takeContentAsPrimalUserFollowersCountsOrNull()
 
-            database.profiles().upsertAll(data = profiles)
+            database.profiles().insertOrUpdateAll(data = profiles)
 
             profiles.map {
                 val score = followersCountsMap?.get(it.ownerId)
