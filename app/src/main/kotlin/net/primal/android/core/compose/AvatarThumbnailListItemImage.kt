@@ -29,6 +29,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.images.AvatarCoilImageLoader
 import net.primal.android.premium.legend.LegendaryCustomization
+import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -37,9 +38,8 @@ fun UniversalAvatarThumbnail(
     avatarCdnImage: CdnImage? = null,
     avatarSize: Dp = 48.dp,
     hasBorder: Boolean = true,
-    hasGlowOverride: Boolean? = null,
-    fallbackBorderColor: Color = Color.Transparent,
     legendaryCustomization: LegendaryCustomization? = null,
+    fallbackBorderColor: Color = Color.Transparent,
     borderSizeOverride: Dp? = null,
     backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onClick: (() -> Unit)? = null,
@@ -48,7 +48,9 @@ fun UniversalAvatarThumbnail(
     val variant = avatarCdnImage?.variants?.minByOrNull { it.width }
     val imageSource = variant?.mediaUrl ?: avatarCdnImage?.sourceUrl
 
-    val borderBrush = if (legendaryCustomization?.avatarGlow == true) {
+    val borderBrush = if (legendaryCustomization?.avatarGlow == true
+        && legendaryCustomization.legendaryStyle != LegendaryStyle.NO_CUSTOMIZATION
+    ) {
         legendaryCustomization.legendaryStyle?.brush
     } else {
         null
@@ -65,7 +67,6 @@ fun UniversalAvatarThumbnail(
                 fallbackBorderColor,
             ),
         ),
-        hasGlow = (hasGlowOverride ?: legendaryCustomization?.avatarGlow) == true,
         borderSize = borderSizeOverride ?: avatarSize.mapAvatarSizeToBorderSize(),
         backgroundColor = backgroundColor,
         onClick = onClick,
@@ -83,7 +84,6 @@ private fun AvatarThumbnailListItemImage(
         listOf(AppTheme.colorScheme.primary, AppTheme.colorScheme.primary),
     ),
     borderSize: Dp = 2.dp,
-    hasGlow: Boolean = false,
     backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onClick: (() -> Unit)? = null,
     defaultAvatar: @Composable () -> Unit,
