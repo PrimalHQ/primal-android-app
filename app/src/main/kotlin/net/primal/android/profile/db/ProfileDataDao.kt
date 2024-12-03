@@ -6,16 +6,14 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
-import net.primal.android.core.ext.asMapByKey
 
 @Dao
 interface ProfileDataDao {
 
     @Transaction
-    fun upsertAll(data: List<ProfileData>) {
-        val existingProfiles = findProfileData(data.map { it.ownerId }).asMapByKey { it.ownerId }
-
-        _upsertAllProfileFields(
+    fun insertOrUpdateAll(data: List<ProfileData>) {
+        val existingProfiles = findProfileData(data.map { it.ownerId }).associateBy { it.ownerId }
+        insertOrReplaceAll(
             data.map {
                 it.copy(
                     primalLegendProfile = it.primalLegendProfile ?: existingProfiles[it.ownerId]?.primalLegendProfile,
@@ -24,8 +22,8 @@ interface ProfileDataDao {
         )
     }
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE) @Suppress("detekt:FunctionNaming", "FunctionName")
-    fun _upsertAllProfileFields(data: List<ProfileData>)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertOrReplaceAll(data: List<ProfileData>)
 
     @Transaction
     @Query("SELECT * FROM ProfileData WHERE ownerId = :profileId")

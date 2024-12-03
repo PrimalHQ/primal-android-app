@@ -75,7 +75,7 @@ class ExploreRepository @Inject constructor(
             )
 
             database.withTransaction {
-                database.profiles().upsertAll(data = profiles)
+                database.profiles().insertOrUpdateAll(data = profiles)
                 database.eventZaps().upsertAll(data = eventZaps)
             }
 
@@ -115,7 +115,7 @@ class ExploreRepository @Inject constructor(
             val userFollowCount = response.usersFollowCount?.takeContentAsPrimalUserFollowersCountsOrNull()
 
             database.withTransaction {
-                database.profiles().upsertAll(data = profiles)
+                database.profiles().insertOrUpdateAll(data = profiles)
             }
 
             profiles.map {
@@ -166,7 +166,7 @@ class ExploreRepository @Inject constructor(
             }.sortedByDescending { it.score }
 
             database.withTransaction {
-                database.profiles().upsertAll(data = profiles)
+                database.profiles().insertOrUpdateAll(data = profiles)
                 database.profileStats().insertOrIgnore(
                     data = result.map {
                         ProfileStats(profileId = it.metadata.ownerId, followers = it.followersCount)

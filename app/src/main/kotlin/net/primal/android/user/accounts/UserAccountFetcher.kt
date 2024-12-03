@@ -40,7 +40,7 @@ class UserAccountFetcher @Inject constructor(
 
         withContext(dispatcherProvider.io()) {
             primalDatabase.withTransaction {
-                primalDatabase.profiles().upsertAll(data = listOf(profileData))
+                primalDatabase.profiles().insertOrUpdateAll(data = listOf(profileData))
                 profileStats?.let(primalDatabase.profileStats()::upsert)
             }
         }

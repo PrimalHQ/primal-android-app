@@ -123,7 +123,7 @@ class WalletTransactionsMediator(
             }
 
             database.withTransaction {
-                database.profiles().upsertAll(data = profiles)
+                database.profiles().insertOrUpdateAll(data = profiles)
                 database.walletTransactions().upsertAll(data = transactions)
             }
         }

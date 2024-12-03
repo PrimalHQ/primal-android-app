@@ -45,7 +45,7 @@ suspend fun ArticleResponse.persistToDatabaseAsTransaction(userId: String, datab
     val eventUserStats = this.primalEventUserStats.mapNotNullAsEventUserStatsPO(userId = userId)
 
     database.withTransaction {
-        database.profiles().upsertAll(data = profiles)
+        database.profiles().insertOrUpdateAll(data = profiles)
         database.posts().upsertAll(data = allNotes + referencedNotes)
         database.articles().upsertAll(list = allArticles)
         database.eventStats().upsertAll(data = eventStats)

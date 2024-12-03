@@ -85,7 +85,7 @@ class MutedUserRepository @Inject constructor(
             )
         }
 
-        database.profiles().upsertAll(data = profileData)
+        database.profiles().insertOrUpdateAll(data = profileData)
         return muteList
             .map { mutedUserId ->
                 mutedUserId.asMutedAccountPO(
