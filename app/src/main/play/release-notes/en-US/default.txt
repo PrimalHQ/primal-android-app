@@ -1,5 +1,2 @@
-Improved onboarding flow.
-Tap to see profile and cover photo.
-Support for highlights.
-Follow/unfollow approvals.
+Legend profile improvements.
 Stability and improvements.
