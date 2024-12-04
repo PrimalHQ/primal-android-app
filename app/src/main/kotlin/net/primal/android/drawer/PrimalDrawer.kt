@@ -291,12 +291,13 @@ private fun DrawerMenu(
                     )
                 },
                 headlineContent = {
+                    val isPremiumWithRequiredBadge = (item is DrawerScreenDestination.Premium && showPremiumBadge)
+                    val isMessagesWithUnreadCount = item is DrawerScreenDestination.Messages &&
+                        state.badges.unreadMessagesCount > 0
+
                     BadgedBox(
                         badge = {
-                            if (
-                                (item is DrawerScreenDestination.Messages && state.badges.unreadMessagesCount > 0) ||
-                                (item is DrawerScreenDestination.Premium && showPremiumBadge)
-                            ) {
+                            if (isMessagesWithUnreadCount || isPremiumWithRequiredBadge) {
                                 Badge(
                                     modifier = Modifier
                                         .size(size = 8.dp)
