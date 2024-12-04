@@ -44,7 +44,7 @@ import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.premium.ui.PremiumBadge
 import net.primal.android.premium.ui.PrimalPremiumTable
 import net.primal.android.premium.ui.toHumanReadableString
-import net.primal.android.premium.utils.isPremiumFree
+import net.primal.android.premium.utils.isPremiumFreeTier
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -165,7 +165,7 @@ private fun PremiumHomeScreen(
 
                 )
 
-                if (state.membership.cohort2.isPremiumFree()) {
+                if (state.membership.isPremiumFreeTier()) {
                     Text(
                         modifier = Modifier.padding(horizontal = 36.dp),
                         text = stringResource(id = R.string.premium_member_early_primal_user),

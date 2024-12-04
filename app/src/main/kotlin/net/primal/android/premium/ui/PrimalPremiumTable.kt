@@ -22,7 +22,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.utils.formatToDefaultDateFormat
 import net.primal.android.premium.domain.PremiumMembership
-import net.primal.android.premium.utils.isPrimalLegend
+import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -59,7 +59,7 @@ fun PrimalPremiumTable(
             alwaysHideApply = true,
         )
         PrimalDivider()
-        if (premiumMembership.cohort1.isPrimalLegend()) {
+        if (premiumMembership.isPrimalLegendTier()) {
             PrimalPremiumTableRow(
                 key = stringResource(id = R.string.premium_table_expires),
                 value = stringResource(id = R.string.premium_table_never),

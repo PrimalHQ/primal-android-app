@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.premium.support.SupportPrimalContract.UiState
-import net.primal.android.premium.utils.isPremiumFree
-import net.primal.android.premium.utils.isPrimalLegend
+import net.primal.android.premium.utils.isPremiumFreeTier
+import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.user.accounts.active.ActiveAccountStore
 
 @HiltViewModel
@@ -32,8 +32,8 @@ class SupportPrimalViewModel @Inject constructor(
                 setState {
                     copy(
                         primalName = it.premiumMembership?.premiumName,
-                        isPrimalLegend = it.premiumMembership?.cohort2.isPrimalLegend(),
-                        hasMembership = it.premiumMembership != null && !it.premiumMembership.cohort2.isPremiumFree(),
+                        isPrimalLegend = it.premiumMembership.isPrimalLegendTier(),
+                        hasMembership = it.premiumMembership != null && !it.premiumMembership.isPremiumFreeTier(),
                     )
                 }
             }

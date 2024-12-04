@@ -14,7 +14,7 @@ import net.primal.android.premium.domain.MembershipError
 import net.primal.android.premium.manage.order.PremiumOrderHistoryContract.UiEvent
 import net.primal.android.premium.manage.order.PremiumOrderHistoryContract.UiState
 import net.primal.android.premium.repository.PremiumRepository
-import net.primal.android.premium.utils.isPrimalLegend
+import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
@@ -74,7 +74,7 @@ class PremiumOrderHistoryViewModel @Inject constructor(
                     copy(
                         primalName = it.premiumMembership?.premiumName ?: "",
                         isRecurringSubscription = it.premiumMembership?.recurring ?: false,
-                        isLegend = it.premiumMembership?.cohort1?.isPrimalLegend() == true,
+                        isLegend = it.premiumMembership.isPrimalLegendTier(),
                         subscriptionOrigin = it.premiumMembership?.origin,
                         expiresAt = it.premiumMembership?.expiresOn,
                     )
