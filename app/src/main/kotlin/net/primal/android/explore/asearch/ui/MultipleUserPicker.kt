@@ -6,8 +6,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -141,6 +143,7 @@ fun MultipleUserPicker(
                     ) {
                         UserProfileListItem(
                             data = it,
+                            avatarSize = 42.dp,
                             onClick = { item ->
                                 selectedUsers = selectedUsers + item
                                 scope.launch {
@@ -236,9 +239,10 @@ private fun SelectedUsersIndicator(
     LazyRow(
         state = lazyListState,
         modifier = modifier
+            .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .padding(bottom = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.Start),
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (selectedUsers.isEmpty()) {
@@ -261,14 +265,14 @@ private fun SelectedUsersIndicator(
                     contentAlignment = Alignment.BottomEnd,
                 ) {
                     UniversalAvatarThumbnail(
-                        modifier = Modifier.offset(x = (-6).dp, y = (-6).dp),
-                        avatarSize = 48.dp,
+                        avatarSize = 42.dp,
                         avatarCdnImage = user.avatarCdnImage,
                         onClick = { onUserClick(user) },
                         legendaryCustomization = user.legendaryCustomization,
                     )
                     Icon(
                         modifier = Modifier
+                            .offset(x = (12).dp, y = (4).dp)
                             .clipToBounds()
                             .clip(CircleShape)
                             .clickable { onUserClick(user) }
@@ -278,6 +282,10 @@ private fun SelectedUsersIndicator(
                         tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                     )
                 }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }

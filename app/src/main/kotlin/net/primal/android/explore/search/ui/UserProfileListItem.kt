@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.UniversalAvatarThumbnail
@@ -41,6 +42,7 @@ fun UserProfileListItem(
     colors: ListItemColors = ListItemDefaults.colors(
         containerColor = AppTheme.colorScheme.surfaceVariant,
     ),
+    avatarSize: Dp = 48.dp,
     isFollowed: Boolean = false,
     onFollowUnfollowClick: (() -> Unit)? = null,
 ) {
@@ -50,6 +52,7 @@ fun UserProfileListItem(
         leadingContent = {
             UniversalAvatarThumbnail(
                 avatarCdnImage = data.avatarCdnImage,
+                avatarSize = avatarSize,
                 onClick = { onClick(data) },
                 legendaryCustomization = data.legendaryCustomization,
             )
