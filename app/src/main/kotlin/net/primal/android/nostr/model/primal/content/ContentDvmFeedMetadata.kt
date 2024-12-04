@@ -7,5 +7,4 @@ import kotlinx.serialization.Serializable
 data class ContentDvmFeedMetadata(
     @SerialName("event_id") val eventId: String,
     @SerialName("kind") val kind: String,
-    @SerialName("is_primal") val isPrimal: Boolean,
 )

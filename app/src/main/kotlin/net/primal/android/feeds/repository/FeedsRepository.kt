@@ -203,8 +203,8 @@ class FeedsRepository @Inject constructor(
                             "reads" -> FeedSpecKind.Reads
                             else -> null
                         },
-                        isPrimalFeed = metadata[nostrEvent.id]?.isPrimal,
                         primalSpec = dvmMetadata.primalSpec,
+                        isPrimalFeed = dvmMetadata.primalSpec?.isNotEmpty() == true,
                         actionUserIds = actionUserIds,
                     )
                 } else {
