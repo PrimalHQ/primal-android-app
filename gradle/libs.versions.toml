@@ -2,7 +2,7 @@
 accompanist = "0.34.0"
 activity-compose = "1.9.3"
 activity-ktx = "1.9.3"
-agp = "8.7.2"
+agp = "8.7.3"
 appcompat = "1.7.0"
 bitcoinj-core = "0.16.3"
 camera = "1.4.0"
