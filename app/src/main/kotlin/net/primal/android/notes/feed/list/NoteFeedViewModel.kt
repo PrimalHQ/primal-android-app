@@ -199,7 +199,6 @@ class NoteFeedViewModel @AssistedInject constructor(
         val newSyncStats = FeedPostsSyncStats(
             latestNoteIds = allNotes.map { it.id },
             latestAvatarCdnImages = avatarCdnImagesAndLegendaryCustomizations.mapNotNull { it.first }.take(limit),
-            latestLegendaryCustomizations = avatarCdnImagesAndLegendaryCustomizations.map { it.second }.take(limit),
         )
 
         if (newSyncStats.isTopVisibleNoteTheLatestNote()) {

@@ -26,7 +26,7 @@ import net.primal.android.theme.AppTheme
 fun AvatarThumbnailsRow(
     modifier: Modifier = Modifier,
     avatarCdnImages: List<CdnImage?>,
-    avatarLegendaryCustomizations: List<LegendaryCustomization?>,
+    avatarLegendaryCustomizations: List<LegendaryCustomization?> = emptyList(),
     avatarOverlap: AvatarOverlap = AvatarOverlap.End,
     hasAvatarBorder: Boolean = true,
     avatarBorderSize: Dp = 2.dp,
@@ -73,8 +73,8 @@ fun AvatarThumbnailsRow(
 
                 AvatarSpacer(width = (layoutIndex * avatarVisibleWidth.value).dp) {
                     UniversalAvatarThumbnail(
+                        modifier = Modifier.size(avatarSize),
                         avatarCdnImage = imageCdnImage,
-                        avatarSize = avatarSize,
                         hasBorder = hasAvatarBorder,
                         legendaryCustomization = runCatching { avatarLegendaryCustomizations[layoutIndex] }.getOrNull(),
                         fallbackBorderColor = avatarBorderColor,

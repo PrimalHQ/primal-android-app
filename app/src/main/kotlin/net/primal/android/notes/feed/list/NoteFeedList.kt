@@ -329,7 +329,6 @@ private fun NewPostsButton(syncStats: FeedPostsSyncStats, onClick: () -> Unit) {
         AvatarThumbnailsRow(
             modifier = Modifier.padding(start = 6.dp),
             avatarCdnImages = syncStats.latestAvatarCdnImages,
-            avatarLegendaryCustomizations = syncStats.latestLegendaryCustomizations,
             onClick = { onClick() },
         )
 
