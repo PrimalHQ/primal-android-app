@@ -341,11 +341,11 @@ fun renderContentAsAnnotatedString(
 
     val refinedContent = data.content
         .cleanNostrUris()
+        .replaceNostrProfileUrisWithHandles(resources = mentionedUsers)
         .remove(texts = mediaAttachments.map { it.url })
         .remove(texts = if (!shouldKeepNostrNoteUris) data.nostrUris.map { it.uri } else emptyList())
         .remove(texts = if (shouldDeleteLinks) linkAttachments.map { it.url } else emptyList())
         .remove(texts = data.invoices)
-        .replaceNostrProfileUrisWithHandles(resources = mentionedUsers)
         .clearParsedPrimalLinks()
         .limitLineBreaks(maxBreaks = 2)
         .trim()
@@ -491,8 +491,7 @@ fun PreviewPostContent() {
                 data = NoteContentUi(
                     noteId = "",
                     content = """
-                        Unfortunately the days of using pseudonyms in metaspace are numbered. #nostr 
-                        nostr:referencedUser
+                        Hey there nostr:referencedUser, how is life? #nostr 
                     """.trimIndent(),
                     attachments = emptyList(),
                     nostrUris = listOf(
