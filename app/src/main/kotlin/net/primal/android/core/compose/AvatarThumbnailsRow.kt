@@ -36,7 +36,7 @@ fun AvatarThumbnailsRow(
     avatarBorderColor: Color = Color.White,
     maxAvatarsToShow: Int? = null,
     displayAvatarOverflowIndicator: Boolean = true,
-    onClick: (Int) -> Unit,
+    onClick: ((Int) -> Unit)? = null,
 ) {
     val avatarVisibleWidth = if (avatarOverlap.isNone()) {
         avatarSize + avatarSpacing
@@ -79,7 +79,11 @@ fun AvatarThumbnailsRow(
                         legendaryCustomization = runCatching { avatarLegendaryCustomizations[layoutIndex] }.getOrNull(),
                         fallbackBorderColor = avatarBorderColor,
                         borderSizeOverride = avatarBorderSize,
-                        onClick = { onClick(layoutIndex) },
+                        onClick = if (onClick != null) {
+                            { onClick(layoutIndex) }
+                        } else {
+                            null
+                        },
                     )
                 }
             }

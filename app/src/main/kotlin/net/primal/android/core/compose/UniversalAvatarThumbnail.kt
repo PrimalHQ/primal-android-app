@@ -123,7 +123,13 @@ private fun AvatarThumbnailListItemImage(
                 hasOuterBorder = hasOuterBorder,
                 hasInnerBorder = hasInnerBorder,
             )
-            .clickable(enabled = onClick != null, onClick = { onClick?.invoke() }),
+            .then(
+                if (onClick != null) {
+                    Modifier.clickable(onClick = onClick)
+                } else {
+                    Modifier
+                },
+            ),
         contentDescription = stringResource(id = R.string.accessibility_profile_image),
         contentScale = ContentScale.Crop,
         loading = {
