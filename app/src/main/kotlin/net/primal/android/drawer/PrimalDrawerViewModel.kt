@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.theme.active.ActiveThemeStore
@@ -111,6 +112,7 @@ class PrimalDrawerViewModel @Inject constructor(
                 false -> PrimalTheme.Sunset.themeName
             }
         activeThemeStore.setUserTheme(theme = newThemeName)
+        setState { copy(themeManuallyInvertedTimestamp = Clock.System.now().toEpochMilliseconds()) }
     }
 
     private fun buildDrawerMenuItems(hasPremium: Boolean = false, userId: String) =

@@ -23,6 +23,7 @@ import androidx.compose.material3.DrawerState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -63,7 +64,6 @@ import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.android.user.domain.Badges
 import net.primal.android.user.domain.UserAccount
 
 @Composable
@@ -125,8 +125,7 @@ fun PrimalDrawer(
                 modifier = Modifier
                     .weight(1.0f)
                     .padding(vertical = 32.dp),
-                menuItems = state.menuItems,
-                badges = state.badges,
+                state = state,
                 showPremiumBadge = state.showPremiumBadge,
                 onDrawerDestinationClick = onDrawerDestinationClick,
             )
@@ -262,8 +261,7 @@ private fun DrawerHeader(
 @Composable
 private fun DrawerMenu(
     modifier: Modifier,
-    menuItems: List<DrawerScreenDestination>,
-    badges: Badges,
+    state: PrimalDrawerContract.UiState,
     showPremiumBadge: Boolean,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
 ) {
@@ -272,10 +270,15 @@ private fun DrawerMenu(
         verticalArrangement = Arrangement.Top,
     ) {
         items(
-            items = menuItems,
+            items = state.menuItems,
             key = { it.toString() },
         ) { item ->
             ListItem(
+                colors = ListItemDefaults.colors(
+                    containerColor = AppTheme.colorScheme.surface,
+                    leadingIconColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    headlineColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                ),
                 modifier = Modifier.clickable {
                     onDrawerDestinationClick(item)
                 },
@@ -291,7 +294,7 @@ private fun DrawerMenu(
                     BadgedBox(
                         badge = {
                             if (
-                                (item is DrawerScreenDestination.Messages && badges.unreadMessagesCount > 0) ||
+                                (item is DrawerScreenDestination.Messages && state.badges.unreadMessagesCount > 0) ||
                                 (item is DrawerScreenDestination.Premium && showPremiumBadge)
                             ) {
                                 Badge(
@@ -312,7 +315,6 @@ private fun DrawerMenu(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Normal,
                             lineHeight = 20.sp,
-                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                         )
                     }
                 },
@@ -334,6 +336,7 @@ private fun DrawerFooter(onThemeSwitch: () -> Unit) {
             Icon(
                 imageVector = iconVector,
                 contentDescription = stringResource(id = R.string.accessibility_toggle_between_dark_and_light_mode),
+                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             )
         }
     }
