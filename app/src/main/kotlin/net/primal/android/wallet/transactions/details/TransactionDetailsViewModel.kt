@@ -129,7 +129,8 @@ class TransactionDetailsViewModel @Inject constructor(
             otherUserDisplayName = this.otherProfileData?.authorNameUiFriendly(),
             otherUserInternetIdentifier = this.otherProfileData?.internetIdentifier,
             otherUserLightningAddress = this.data.otherLightningAddress,
-            otherUserLegendaryCustomization = this.otherProfileData?.primalLegendProfile?.asLegendaryCustomization(),
+            otherUserLegendaryCustomization = this.otherProfileData?.primalPremiumInfo
+                ?.legendProfile?.asLegendaryCustomization(),
             isZap = this.data.isZap,
             isStorePurchase = this.data.isStorePurchase,
         )

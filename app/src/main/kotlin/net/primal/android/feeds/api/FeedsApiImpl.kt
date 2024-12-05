@@ -48,6 +48,7 @@ class FeedsApiImpl @Inject constructor(
             userScores = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalUserScores),
             primalUserNames = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalUserNames),
             primalLegendProfiles = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalLegendProfiles),
+            primalPremiumInfo = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
         )
     }
 

@@ -4,6 +4,7 @@ import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.explore.api.model.NewUserFollowStats
 import net.primal.android.nostr.model.primal.PrimalEvent
+import net.primal.android.nostr.model.primal.content.ContentProfilePremiumInfo
 import net.primal.android.nostr.model.primal.content.ContentUserProfileStats
 import net.primal.android.profile.db.ProfileStats
 import net.primal.android.profile.domain.PrimalLegendProfile
@@ -42,6 +43,10 @@ fun PrimalEvent?.parseAndMapPrimalUserNames(): Map<String, String> {
 
 fun PrimalEvent?.parseAndMapPrimalLegendProfiles(): Map<String, PrimalLegendProfile> {
     return NostrJson.decodeFromStringOrNull<Map<String, PrimalLegendProfile>>(this?.content) ?: emptyMap()
+}
+
+fun PrimalEvent?.parseAndMapPrimalPremiumInfo(): Map<String, ContentProfilePremiumInfo> {
+    return NostrJson.decodeFromStringOrNull<Map<String, ContentProfilePremiumInfo>>(this?.content) ?: emptyMap()
 }
 
 fun PrimalEvent.takeContentAsPrimalUserFollowersCountsOrNull(): Map<String, Int> {

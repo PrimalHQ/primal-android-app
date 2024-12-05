@@ -37,7 +37,7 @@ fun ProfileData.asProfileDetailsUi() =
         aboutHashtags = this.aboutHashtags,
         aboutUris = this.aboutUris,
         website = this.website,
-        primalName = this.primalName,
+        primalName = this.primalPremiumInfo?.primalName,
         lnUrlDecoded = this.lnUrlDecoded,
-        legendaryCustomization = this.primalLegendProfile?.asLegendaryCustomization(),
+        legendaryCustomization = this.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
     )

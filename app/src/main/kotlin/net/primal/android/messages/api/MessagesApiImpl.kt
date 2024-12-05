@@ -45,6 +45,7 @@ class MessagesApiImpl @Inject constructor(
             cdnResources = response.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
             primalUserNames = response.findPrimalEvent(NostrEventKind.PrimalUserNames),
             primalLegendProfiles = response.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
+            primalPremiumInfo = response.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
         )
     }
 
@@ -65,6 +66,7 @@ class MessagesApiImpl @Inject constructor(
             cdnResources = response.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
             primalUserNames = response.findPrimalEvent(NostrEventKind.PrimalUserNames),
             primalLegendProfiles = response.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
+            primalPremiumInfo = response.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
         )
     }
 

@@ -28,6 +28,7 @@ import net.primal.android.nostr.ext.mapAsEventZapDO
 import net.primal.android.nostr.ext.mapAsPostDataPO
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
+import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowStats
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
@@ -48,6 +49,7 @@ class ExploreRepository @Inject constructor(
             }
 
             val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
+            val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
             val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
             val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
             val videoThumbnails = response.cdnResources.flatMapNotNullAsVideoThumbnailsMap()
@@ -56,6 +58,7 @@ class ExploreRepository @Inject constructor(
             val profiles = response.metadata.mapAsProfileDataPO(
                 cdnResources = cdnResources,
                 primalUserNames = primalUserNames,
+                primalPremiumInfo = primalPremiumInfo,
                 primalLegendProfiles = primalLegendProfiles,
             )
 
@@ -103,11 +106,13 @@ class ExploreRepository @Inject constructor(
             }
 
             val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
+            val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
             val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
             val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
             val profiles = response.metadata.mapAsProfileDataPO(
                 cdnResources = cdnResources,
                 primalUserNames = primalUserNames,
+                primalPremiumInfo = primalPremiumInfo,
                 primalLegendProfiles = primalLegendProfiles,
             )
             val userScoresMap = response.usersScores?.takeContentAsPrimalUserScoresOrNull()
@@ -152,11 +157,13 @@ class ExploreRepository @Inject constructor(
         withContext(dispatchers.io()) {
             val response = retryNetworkCall { apiBlock() }
             val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
+            val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
             val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
             val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
             val profiles = response.contactsMetadata.mapAsProfileDataPO(
                 cdnResources = cdnResources,
                 primalUserNames = primalUserNames,
+                primalPremiumInfo = primalPremiumInfo,
                 primalLegendProfiles = primalLegendProfiles,
             )
             val userScoresMap = response.userScores?.takeContentAsPrimalUserScoresOrNull()

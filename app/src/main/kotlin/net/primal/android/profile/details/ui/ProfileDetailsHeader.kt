@@ -349,6 +349,7 @@ private fun UserDisplayName(
     }
 }
 
+@Suppress("Unused", "UnusedPrivateMember")
 @Composable
 private fun ProfilePremiumBadge(
     modifier: Modifier = Modifier,

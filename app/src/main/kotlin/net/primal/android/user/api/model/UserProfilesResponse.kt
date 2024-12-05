@@ -11,4 +11,5 @@ data class UserProfilesResponse(
     val userScores: PrimalEvent? = null,
     val primalUserNames: PrimalEvent? = null,
     val primalLegendProfiles: PrimalEvent? = null,
+    val primalPremiumInfo: PrimalEvent? = null,
 )

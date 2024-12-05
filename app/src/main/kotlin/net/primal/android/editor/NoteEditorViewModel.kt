@@ -170,8 +170,8 @@ class NoteEditorViewModel @AssistedInject constructor(
                     setState {
                         copy(
                             activeAccountAvatarCdnImage = it.data.avatarCdnImage,
-                            activeAccountLegendaryCustomization =
-                            it.data.primalLegendProfile?.asLegendaryCustomization(),
+                            activeAccountLegendaryCustomization = it.data.primalLegendProfile
+                                ?.asLegendaryCustomization(),
                         )
                     }
                 }

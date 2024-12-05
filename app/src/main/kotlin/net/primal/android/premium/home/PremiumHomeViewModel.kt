@@ -76,7 +76,8 @@ class PremiumHomeViewModel @Inject constructor(
             profileRepository.observeProfile(profileId = activeAccountStore.activeUserId()).collect {
                 setState {
                     copy(
-                        avatarLegendaryCustomization = it.metadata?.primalLegendProfile?.asLegendaryCustomization(),
+                        avatarLegendaryCustomization = it.metadata?.primalPremiumInfo
+                            ?.legendProfile?.asLegendaryCustomization(),
                     )
                 }
             }

@@ -21,6 +21,7 @@ import net.primal.android.nostr.ext.findFirstIdentifier
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
+import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
 import net.primal.android.nostr.mappers.asContentArticleFeedData
@@ -159,12 +160,14 @@ class FeedsRepository @Inject constructor(
         val followsActions = response.feedFollowActions.parseAndMapContentByKey<ContentDvmFeedFollowsAction> { eventId }
 
         val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
+        val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
         val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
 
         val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
         val profiles = response.userMetadata.mapAsProfileDataPO(
             cdnResources = cdnResources,
             primalUserNames = primalUserNames,
+            primalPremiumInfo = primalPremiumInfo,
             primalLegendProfiles = primalLegendProfiles,
         ).distinctBy { it.ownerId }
         val profileScores = response.userScores.map { it.takeContentAsPrimalUserScoresOrNull() }

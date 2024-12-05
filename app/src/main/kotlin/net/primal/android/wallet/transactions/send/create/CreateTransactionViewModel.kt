@@ -192,8 +192,8 @@ class CreateTransactionViewModel @Inject constructor(
         setState {
             copy(
                 profileAvatarCdnImage = this@updateStateWithProfileData.avatarCdnImage,
-                profileLegendaryCustomization = this@updateStateWithProfileData
-                    .primalLegendProfile?.asLegendaryCustomization(),
+                profileLegendaryCustomization = this@updateStateWithProfileData.primalPremiumInfo
+                    ?.legendProfile?.asLegendaryCustomization(),
                 profileDisplayName = this@updateStateWithProfileData.authorNameUiFriendly(),
                 profileLightningAddress = transaction.targetLud16 ?: this@updateStateWithProfileData.lightningAddress,
                 transaction = if (transaction.targetLud16 == null &&

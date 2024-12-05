@@ -140,7 +140,8 @@ class MessageConversationListViewModel @Inject constructor(
             isLastMessageFromUser = this.lastMessage?.senderId == activeUserId,
             participantInternetIdentifier = this.participant?.internetIdentifier,
             participantAvatarCdnImage = this.participant?.avatarCdnImage,
-            participantLegendaryCustomization = this.participant?.primalLegendProfile?.asLegendaryCustomization(),
+            participantLegendaryCustomization = this.participant?.primalPremiumInfo
+                ?.legendProfile?.asLegendaryCustomization(),
             unreadMessagesCount = this.data.unreadMessagesCount,
         )
 }

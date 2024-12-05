@@ -49,6 +49,6 @@ fun Article.mapAsArticleDetailsUi(): ArticleDetailsUi {
         hashtags = this.data.hashtags,
         isBookmarked = this.bookmark != null,
         eventStatsUi = EventStatsUi.from(eventStats = this.eventStats, userStats = this.userEventStats),
-        authorLegendaryCustomization = this.author?.primalLegendProfile?.asLegendaryCustomization(),
+        authorLegendaryCustomization = this.author?.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
     )
 }

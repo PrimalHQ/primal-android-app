@@ -14,4 +14,5 @@ data class DvmFeedsResponse(
     val userScores: List<PrimalEvent> = emptyList(),
     val primalUserNames: PrimalEvent? = null,
     val primalLegendProfiles: PrimalEvent? = null,
+    val primalPremiumInfo: PrimalEvent? = null,
 )

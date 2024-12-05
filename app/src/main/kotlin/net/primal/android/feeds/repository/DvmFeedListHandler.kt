@@ -37,7 +37,7 @@ class DvmFeedListHandler @Inject constructor(
             val actionUsers = profileRepository.findProfilesData(profileIds = dvmFeed.actionUserIds)
             val avatarLegendaryCustomizationPair = actionUsers
                 .filter { it.avatarCdnImage != null }
-                .map { Pair(it.avatarCdnImage, it.primalLegendProfile?.asLegendaryCustomization()) }
+                .map { Pair(it.avatarCdnImage, it.primalPremiumInfo?.legendProfile?.asLegendaryCustomization()) }
 
             DvmFeedUi(
                 data = dvmFeed,

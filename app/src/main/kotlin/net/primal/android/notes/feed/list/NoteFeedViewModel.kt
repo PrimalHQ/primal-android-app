@@ -30,6 +30,7 @@ import net.primal.android.nostr.ext.findFirstEventId
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
+import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.notes.api.model.FeedResponse
@@ -177,10 +178,12 @@ class NoteFeedViewModel @AssistedInject constructor(
 
         val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
         val primalUserNames = this.primalUserNames.parseAndMapPrimalUserNames()
+        val primalPremiumInfo = this.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
         val primalLegendProfiles = this.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
         val profiles = this.metadata.mapAsProfileDataPO(
             cdnResources = cdnResources,
             primalUserNames = primalUserNames,
+            primalPremiumInfo = primalPremiumInfo,
             primalLegendProfiles = primalLegendProfiles,
         )
         val avatarCdnImagesAndLegendaryCustomizations = allNotes
@@ -189,7 +192,7 @@ class NoteFeedViewModel @AssistedInject constructor(
             .map { profileData ->
                 Pair(
                     profileData.avatarCdnImage,
-                    profileData.primalLegendProfile?.asLegendaryCustomization(),
+                    profileData.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
                 )
             }
             .distinct()

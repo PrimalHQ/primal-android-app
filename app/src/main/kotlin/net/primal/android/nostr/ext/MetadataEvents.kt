@@ -11,19 +11,23 @@ import net.primal.android.core.utils.parseHashtags
 import net.primal.android.core.utils.parseUris
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.content.ContentMetadata
+import net.primal.android.nostr.model.primal.content.ContentProfilePremiumInfo
 import net.primal.android.profile.db.ProfileData
 import net.primal.android.profile.domain.PrimalLegendProfile
+import net.primal.android.profile.domain.PrimalPremiumInfo
 import net.primal.android.wallet.api.decodeLNUrlOrNull
 import net.primal.android.wallet.api.parseAsLNUrlOrNull
 
 fun List<NostrEvent>.mapAsProfileDataPO(
     cdnResources: List<CdnResource>,
     primalUserNames: Map<String, String>,
+    primalPremiumInfo: Map<String, ContentProfilePremiumInfo>,
     primalLegendProfiles: Map<String, PrimalLegendProfile>,
 ) = map { nostrEvent ->
     nostrEvent.asProfileDataPO(
         cdnResources = cdnResources.asMapByKey { it.url },
         primalUserNames = primalUserNames,
+        primalPremiumInfo = primalPremiumInfo,
         primalLegendProfiles = primalLegendProfiles,
 
     )
@@ -32,11 +36,13 @@ fun List<NostrEvent>.mapAsProfileDataPO(
 fun List<NostrEvent>.mapAsProfileDataPO(
     cdnResources: Map<String, CdnResource>,
     primalUserNames: Map<String, String>,
+    primalPremiumInfo: Map<String, ContentProfilePremiumInfo>,
     primalLegendProfiles: Map<String, PrimalLegendProfile>,
 ) = map {
     it.asProfileDataPO(
         cdnResources = cdnResources,
         primalUserNames = primalUserNames,
+        primalPremiumInfo = primalPremiumInfo,
         primalLegendProfiles = primalLegendProfiles,
     )
 }
@@ -44,10 +50,11 @@ fun List<NostrEvent>.mapAsProfileDataPO(
 fun NostrEvent.asProfileDataPO(
     cdnResources: Map<String, CdnResource>,
     primalUserNames: Map<String, String>,
+    primalPremiumInfo: Map<String, ContentProfilePremiumInfo>,
     primalLegendProfiles: Map<String, PrimalLegendProfile>,
 ): ProfileData {
     val metadata = NostrJson.decodeFromStringOrNull<ContentMetadata>(this.content)
-
+    val premiumInfo = primalPremiumInfo[this.pubKey]
     return ProfileData(
         eventId = this.id,
         ownerId = this.pubKey,
@@ -74,7 +81,13 @@ fun NostrEvent.asProfileDataPO(
             )
         },
         website = metadata?.website,
-        primalName = primalUserNames[this.pubKey],
-        primalLegendProfile = primalLegendProfiles[this.pubKey],
+        primalPremiumInfo = PrimalPremiumInfo(
+            primalName = primalUserNames[this.pubKey],
+            cohort1 = premiumInfo?.cohort1,
+            cohort2 = premiumInfo?.cohort2,
+            tier = premiumInfo?.tier,
+            expiresAt = premiumInfo?.expiresAt,
+            legendProfile = primalLegendProfiles[this.pubKey],
+        ),
     )
 }
