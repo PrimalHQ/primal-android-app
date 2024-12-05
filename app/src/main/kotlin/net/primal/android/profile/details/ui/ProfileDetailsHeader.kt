@@ -15,6 +15,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -138,7 +142,6 @@ private fun ProfileHeaderDetails(
         UserDisplayName(
             displayName = state.profileDetails?.authorDisplayName ?: state.profileId.asEllipsizedNpub(),
             internetIdentifier = state.profileDetails?.internetIdentifier,
-            isProfileFollowingMe = state.isProfileFollowingMe,
             customBadge = state.profileDetails?.legendaryCustomization?.customBadge == true,
             legendaryStyle = state.profileDetails?.legendaryCustomization?.legendaryStyle,
         )
@@ -151,9 +154,10 @@ private fun ProfileHeaderDetails(
         }
 
         ProfileFollowIndicators(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp),
             followingCount = state.profileStats?.followingCount,
             followersCount = state.profileStats?.followersCount,
+            isProfileFollowingMe = state.isProfileFollowingMe,
             onFollowingClick = { onFollowsClick(state.profileId, ProfileFollowsType.Following) },
             onFollowersClick = { onFollowsClick(state.profileId, ProfileFollowsType.Followers) },
         )
@@ -232,6 +236,7 @@ private fun ProfileFollowIndicators(
     modifier: Modifier = Modifier,
     followingCount: Int?,
     followersCount: Int?,
+    isProfileFollowingMe: Boolean,
     onFollowingClick: () -> Unit,
     onFollowersClick: () -> Unit,
 ) {
@@ -278,7 +283,7 @@ private fun ProfileFollowIndicators(
     }
     Row(
         modifier = modifier,
-        verticalAlignment = Alignment.Bottom,
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Text(
@@ -291,48 +296,18 @@ private fun ProfileFollowIndicators(
             text = followersAnnotatedString,
             style = AppTheme.typography.labelLarge,
         )
-    }
-}
-
-@Composable
-private fun UserDisplayName(
-    modifier: Modifier = Modifier,
-    displayName: String,
-    internetIdentifier: String?,
-    isProfileFollowingMe: Boolean,
-    customBadge: Boolean,
-    legendaryStyle: LegendaryStyle?,
-) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        NostrUserText(
-            modifier = Modifier
-                .padding(start = 14.dp, end = 6.dp)
-                .padding(top = 12.dp, bottom = 3.dp),
-            displayName = displayName,
-            internetIdentifier = internetIdentifier,
-            internetIdentifierBadgeSize = 20.dp,
-            internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
-            style = AppTheme.typography.titleLarge.copy(
-                fontSize = 22.sp,
-                lineHeight = 20.sp,
-                fontWeight = FontWeight.Bold,
-            ),
-            customBadgeStyle = if (customBadge) legendaryStyle else null,
-        )
 
         if (isProfileFollowingMe) {
             Box(
                 modifier = Modifier
-                    .padding(top = 6.dp)
-                    .height(24.dp)
+                    .height(20.dp)
+                    .clip(AppTheme.shapes.extraLarge)
                     .background(
                         color = AppTheme.extraColorScheme.surfaceVariantAlt1,
                         shape = AppTheme.shapes.extraSmall,
                     )
-                    .padding(horizontal = 6.dp),
+                    .padding(horizontal = 12.dp)
+                    .padding(top = 0.5.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
@@ -341,6 +316,89 @@ private fun UserDisplayName(
                     style = AppTheme.typography.bodySmall,
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun UserDisplayName(
+    modifier: Modifier = Modifier,
+    displayName: String,
+    internetIdentifier: String?,
+    customBadge: Boolean,
+    legendaryStyle: LegendaryStyle?,
+) {
+    Row(
+        modifier = modifier.padding(top = 12.dp, bottom = 3.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        NostrUserText(
+            modifier = Modifier
+                .padding(start = 14.dp, end = 6.dp),
+            displayName = displayName,
+            internetIdentifier = internetIdentifier,
+            internetIdentifierBadgeSize = 21.dp,
+            internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
+            style = AppTheme.typography.titleLarge.copy(
+                fontSize = 22.sp,
+                lineHeight = 20.sp,
+                fontWeight = FontWeight.Bold,
+            ),
+            customBadgeStyle = if (customBadge) legendaryStyle else null,
+        )
+    }
+}
+
+@Composable
+private fun ProfilePremiumBadge(
+    modifier: Modifier = Modifier,
+    firstCohort: String,
+    secondCohort: String,
+    legendaryStyle: LegendaryStyle?,
+    membershipExpired: Boolean,
+) {
+    Row(
+        modifier = modifier
+            .padding(bottom = 1.dp)
+            .shadow(elevation = 1.dp, shape = AppTheme.shapes.extraLarge)
+            .height(20.dp)
+            .clip(AppTheme.shapes.extraLarge)
+            .background(
+                brush = if (legendaryStyle != null && legendaryStyle != LegendaryStyle.NO_CUSTOMIZATION) {
+                    legendaryStyle.brush
+                } else {
+                    Brush.linearGradient(listOf(AppTheme.colorScheme.tertiary, AppTheme.colorScheme.tertiary))
+                },
+                alpha = if (membershipExpired) 0.5f else 1.0f,
+            )
+            .padding(start = 10.dp, end = 2.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            modifier = Modifier.padding(top = 1.5.dp),
+            text = firstCohort,
+            fontWeight = FontWeight.Bold,
+            style = AppTheme.typography.bodyMedium,
+            fontSize = 12.sp,
+            color = Color.White,
+        )
+        Box(
+            modifier = Modifier
+                .height(16.dp)
+                .clip(AppTheme.shapes.extraLarge)
+                .background(Color.Black.copy(alpha = 0.4f)),
+        ) {
+            Text(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp, vertical = 2.dp)
+                    .padding(top = 0.75.dp),
+                text = secondCohort,
+                style = AppTheme.typography.bodySmall,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Normal,
+                color = Color.White,
+            )
         }
     }
 }
