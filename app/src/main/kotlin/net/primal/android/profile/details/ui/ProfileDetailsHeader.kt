@@ -44,6 +44,9 @@ import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.premium.legend.LegendaryStyle
+import net.primal.android.premium.utils.isPremiumFreeTier
+import net.primal.android.premium.utils.isPremiumTier
+import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.details.ui.model.PremiumProfileDataUi
 import net.primal.android.profile.details.ui.model.shouldShowPremiumBadge
@@ -146,8 +149,8 @@ private fun ProfileHeaderDetails(
         UserDisplayName(
             displayName = state.profileDetails?.authorDisplayName ?: state.profileId.asEllipsizedNpub(),
             internetIdentifier = state.profileDetails?.internetIdentifier,
-            premiumDetails = state.profileDetails?.premiumDetails,
-            activeUserHasPremiumMembership = state.activeUserHasPremiumMembership,
+            profilePremiumDetails = state.profileDetails?.premiumDetails,
+            activeUserPremiumTier = state.activeUserPremiumTier,
             onPremiumBadgeClick = onPremiumBadgeClick,
         )
 
@@ -330,19 +333,18 @@ private fun UserDisplayName(
     modifier: Modifier = Modifier,
     displayName: String,
     internetIdentifier: String?,
-    premiumDetails: PremiumProfileDataUi?,
-    activeUserHasPremiumMembership: Boolean,
+    profilePremiumDetails: PremiumProfileDataUi?,
+    activeUserPremiumTier: String?,
     onPremiumBadgeClick: (tier: String) -> Unit,
 ) {
-    val hasCustomBadge = premiumDetails?.legendaryCustomization?.customBadge == true
+    val hasCustomBadge = profilePremiumDetails?.legendaryCustomization?.customBadge == true
 
     Row(
         modifier = modifier.padding(top = 12.dp, bottom = 3.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         NostrUserText(
-            modifier = Modifier
-                .padding(start = 14.dp, end = 6.dp),
+            modifier = Modifier.padding(start = 14.dp, end = 6.dp),
             displayName = displayName,
             internetIdentifier = internetIdentifier,
             internetIdentifierBadgeSize = 21.dp,
@@ -352,19 +354,27 @@ private fun UserDisplayName(
                 lineHeight = 20.sp,
                 fontWeight = FontWeight.Bold,
             ),
-            customBadgeStyle = if (hasCustomBadge) premiumDetails?.legendaryCustomization?.legendaryStyle else null,
+            customBadgeStyle = if (hasCustomBadge) {
+                profilePremiumDetails?.legendaryCustomization?.legendaryStyle
+            } else {
+                null
+            },
         )
 
-        if (premiumDetails?.shouldShowPremiumBadge() == true) {
+        val isPremiumBadgeClickable = activeUserPremiumTier == null ||
+            activeUserPremiumTier.isPremiumFreeTier() ||
+            (activeUserPremiumTier.isPremiumTier() && profilePremiumDetails?.tier.isPrimalLegendTier())
+
+        if (profilePremiumDetails?.shouldShowPremiumBadge() == true) {
             ProfilePremiumBadge(
-                modifier = if (!activeUserHasPremiumMembership && premiumDetails.tier != null) {
-                    Modifier.clickable { onPremiumBadgeClick(premiumDetails.tier) }
+                modifier = if (isPremiumBadgeClickable && profilePremiumDetails.tier != null) {
+                    Modifier.clickable { onPremiumBadgeClick(profilePremiumDetails.tier) }
                 } else {
                     Modifier
                 },
-                firstCohort = premiumDetails.cohort1 ?: "",
-                secondCohort = premiumDetails.cohort2 ?: "",
-                legendaryStyle = premiumDetails.legendaryCustomization?.legendaryStyle,
+                firstCohort = profilePremiumDetails.cohort1 ?: "",
+                secondCohort = profilePremiumDetails.cohort2 ?: "",
+                legendaryStyle = profilePremiumDetails.legendaryCustomization?.legendaryStyle,
             )
         }
     }

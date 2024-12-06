@@ -12,7 +12,7 @@ interface ProfileDetailsContract {
     data class UiState(
         val profileId: String,
         val isActiveUser: Boolean,
-        val activeUserHasPremiumMembership: Boolean = false,
+        val activeUserPremiumTier: String? = null,
         val isProfileFollowed: Boolean = false,
         val isProfileFollowingMe: Boolean = false,
         val isProfileMuted: Boolean = false,
