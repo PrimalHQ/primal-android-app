@@ -64,6 +64,7 @@ fun ProfileDetailsHeader(
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onPremiumBadgeClick: (tier: String) -> Unit,
 ) {
     ProfileHeaderDetails(
         state = state,
@@ -99,6 +100,7 @@ fun ProfileDetailsHeader(
         onFollowsClick = onFollowsClick,
         onProfileClick = onProfileClick,
         onHashtagClick = onHashtagClick,
+        onPremiumBadgeClick = onPremiumBadgeClick,
     )
 }
 
@@ -114,6 +116,7 @@ private fun ProfileHeaderDetails(
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onPremiumBadgeClick: (tier: String) -> Unit,
 ) {
     val localUriHandler = LocalUriHandler.current
 
@@ -144,6 +147,8 @@ private fun ProfileHeaderDetails(
             displayName = state.profileDetails?.authorDisplayName ?: state.profileId.asEllipsizedNpub(),
             internetIdentifier = state.profileDetails?.internetIdentifier,
             premiumDetails = state.profileDetails?.premiumDetails,
+            activeUserHasPremiumMembership = state.activeUserHasPremiumMembership,
+            onPremiumBadgeClick = onPremiumBadgeClick,
         )
 
         if (state.profileDetails?.internetIdentifier?.isNotEmpty() == true) {
@@ -326,6 +331,8 @@ private fun UserDisplayName(
     displayName: String,
     internetIdentifier: String?,
     premiumDetails: PremiumProfileDataUi?,
+    activeUserHasPremiumMembership: Boolean,
+    onPremiumBadgeClick: (tier: String) -> Unit,
 ) {
     val hasCustomBadge = premiumDetails?.legendaryCustomization?.customBadge == true
 
@@ -350,6 +357,11 @@ private fun UserDisplayName(
 
         if (premiumDetails?.shouldShowPremiumBadge() == true) {
             ProfilePremiumBadge(
+                modifier = if (!activeUserHasPremiumMembership && premiumDetails.tier != null) {
+                    Modifier.clickable { onPremiumBadgeClick(premiumDetails.tier) }
+                } else {
+                    Modifier
+                },
                 firstCohort = premiumDetails.cohort1 ?: "",
                 secondCohort = premiumDetails.cohort2 ?: "",
                 legendaryStyle = premiumDetails.legendaryCustomization?.legendaryStyle,
@@ -480,6 +492,7 @@ private fun PreviewProfileHeaderDetails() {
                 onFollowsClick = { _, _ -> },
                 onProfileClick = {},
                 onHashtagClick = {},
+                onPremiumBadgeClick = {},
             )
         }
     }

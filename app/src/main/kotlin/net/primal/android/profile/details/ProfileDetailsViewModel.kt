@@ -30,6 +30,7 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.extractProfileId
+import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
 import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
@@ -188,6 +189,7 @@ class ProfileDetailsViewModel @Inject constructor(
                 setState {
                     copy(
                         isProfileFollowed = it.following.contains(profileId),
+                        activeUserHasPremiumMembership = it.hasPremiumMembership(),
                         zappingState = this.zappingState.copy(
                             walletConnected = it.hasWallet(),
                             walletPreference = it.walletPreference,

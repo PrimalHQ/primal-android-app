@@ -103,6 +103,7 @@ fun ProfileDetailsScreen(
     onDrawerQrCodeClick: (String) -> Unit,
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
     onGoToWallet: () -> Unit,
+    onPremiumBadgeClick: (tier: String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -165,6 +166,7 @@ fun ProfileDetailsScreen(
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         onGoToWallet = onGoToWallet,
         onFollowsClick = onFollowsClick,
+        onPremiumBadgeClick = onPremiumBadgeClick,
         eventPublisher = { viewModel.setEvent(it) },
         pullToRefreshState = pullToRefreshState,
         pullToRefreshing = pullToRefreshing,
@@ -194,6 +196,7 @@ fun ProfileDetailsScreen(
     onDrawerQrCodeClick: (String) -> Unit,
     onGoToWallet: () -> Unit,
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
+    onPremiumBadgeClick: (tier: String) -> Unit,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     pullToRefreshState: PullToRefreshState,
     pullToRefreshing: MutableState<Boolean>,
@@ -424,6 +427,7 @@ fun ProfileDetailsScreen(
                             onFollowsClick = onFollowsClick,
                             onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
                             onHashtagClick = { noteCallbacks.onHashtagClick?.invoke(it) },
+                            onPremiumBadgeClick = onPremiumBadgeClick,
                         )
                     }
                     item {
@@ -630,6 +634,7 @@ private fun PreviewProfileScreen() {
             onSendWalletTx = {},
             onDrawerQrCodeClick = {},
             onFollowsClick = { _, _ -> },
+            onPremiumBadgeClick = {},
             onMediaItemClick = {},
             onGoToWallet = {},
             eventPublisher = {},

@@ -114,6 +114,8 @@ import net.primal.android.premium.manage.relay.PremiumRelayViewModel
 import net.primal.android.premium.support.SupportPrimalContract
 import net.primal.android.premium.support.SupportPrimalScreen
 import net.primal.android.premium.support.SupportPrimalViewModel
+import net.primal.android.premium.utils.isPremiumTier
+import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.details.ProfileDetailsScreen
 import net.primal.android.profile.details.ProfileDetailsViewModel
 import net.primal.android.profile.domain.ProfileFollowsType
@@ -1582,6 +1584,13 @@ private fun NavGraphBuilder.profile(
         onMediaItemClick = { navController.navigateToMediaItem(it) },
         onGoToWallet = { navController.navigateToWallet() },
         onSearchClick = { navController.navigateToAdvancedSearch(initialPostedBy = listOf(it)) },
+        onPremiumBadgeClick = { premiumTier ->
+            if (premiumTier.isPrimalLegendTier()) {
+                navController.navigateToPremiumBecomeLegend()
+            } else if (premiumTier.isPremiumTier()) {
+                navController.navigateToPremiumBuying()
+            }
+        },
     )
 }
 
