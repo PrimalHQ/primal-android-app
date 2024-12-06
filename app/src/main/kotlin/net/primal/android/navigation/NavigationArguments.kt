@@ -32,6 +32,10 @@ inline val SavedStateHandle.renderType: String
 const val EXTEND_EXISTING_PREMIUM_NAME = "extendExistingPremiumName"
 inline val SavedStateHandle.extendExistingPremiumName: String? get() = get(EXTEND_EXISTING_PREMIUM_NAME)
 
+const val FROM_ORIGIN_PREMIUM_BADGE = "OriginPremiumBadge"
+const val FROM_ORIGIN = "buyingPremiumFromOrigin"
+inline val SavedStateHandle.buyingPremiumFromOrigin: String? get() = get(FROM_ORIGIN)
+
 const val INITIAL_QUERY = "initialQuery"
 inline val SavedStateHandle.initialQuery: String? get() = get(INITIAL_QUERY)
 

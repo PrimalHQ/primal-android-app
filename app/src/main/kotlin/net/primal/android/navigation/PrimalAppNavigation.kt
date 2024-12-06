@@ -271,7 +271,14 @@ fun NavController.navigateToExploreFeed(
 
 private fun NavController.navigateToBookmarks() = navigate(route = "bookmarks")
 
-fun NavController.navigateToPremiumBuying() = navigate(route = "premium/buying")
+fun NavController.navigateToPremiumBuying(fromOrigin: String? = null) {
+    if (fromOrigin?.isNotEmpty() == true) {
+        navigate(route = "premium/buying?$FROM_ORIGIN=$fromOrigin")
+    } else {
+        navigate(route = "premium/buying")
+    }
+}
+
 private fun NavController.navigateToPremiumExtendSubscription(primalName: String) =
     navigate(route = "premium/buying?$EXTEND_EXISTING_PREMIUM_NAME=$primalName")
 
@@ -479,9 +486,15 @@ fun SharedTransitionScope.PrimalAppNavigation() {
         )
 
         premiumBuying(
-            route = "premium/buying?$EXTEND_EXISTING_PREMIUM_NAME={$EXTEND_EXISTING_PREMIUM_NAME}",
+            route = "premium/buying" +
+                "?$EXTEND_EXISTING_PREMIUM_NAME={$EXTEND_EXISTING_PREMIUM_NAME}" +
+                "&$FROM_ORIGIN={$FROM_ORIGIN}",
             arguments = listOf(
                 navArgument(EXTEND_EXISTING_PREMIUM_NAME) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(FROM_ORIGIN) {
                     type = NavType.StringType
                     nullable = true
                 },
@@ -1588,7 +1601,7 @@ private fun NavGraphBuilder.profile(
             if (premiumTier.isPrimalLegendTier()) {
                 navController.navigateToPremiumBecomeLegend()
             } else if (premiumTier.isPremiumTier()) {
-                navController.navigateToPremiumBuying()
+                navController.navigateToPremiumBuying(fromOrigin = FROM_ORIGIN_PREMIUM_BADGE)
             }
         },
     )

@@ -74,6 +74,7 @@ private fun PremiumBuyingScreen(
                 PremiumBuyingContract.PremiumStage.Home -> {
                     PremiumBuyingHomeStage(
                         loading = state.loading,
+                        isPremiumBadgeOrigin = state.isPremiumBadgeOrigin,
                         subscriptions = state.subscriptions,
                         onClose = screenCallbacks.onClose,
                         onLearnMoreClick = screenCallbacks.onMoreInfoClick,

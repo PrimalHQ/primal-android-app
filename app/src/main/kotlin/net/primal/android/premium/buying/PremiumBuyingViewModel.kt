@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.utils.isGoogleBuild
+import net.primal.android.navigation.FROM_ORIGIN_PREMIUM_BADGE
+import net.primal.android.navigation.buyingPremiumFromOrigin
 import net.primal.android.navigation.extendExistingPremiumName
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.buying.PremiumBuyingContract.PremiumStage
@@ -44,6 +46,7 @@ class PremiumBuyingViewModel @Inject constructor(
     private val _state = MutableStateFlow(
         UiState(
             isExtendingPremium = savedStateHandle.extendExistingPremiumName != null,
+            isPremiumBadgeOrigin = savedStateHandle.buyingPremiumFromOrigin == FROM_ORIGIN_PREMIUM_BADGE,
             primalName = savedStateHandle.extendExistingPremiumName,
             stage = if (savedStateHandle.extendExistingPremiumName != null) {
                 PremiumStage.Purchase

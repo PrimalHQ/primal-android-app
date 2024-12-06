@@ -1,7 +1,6 @@
 package net.primal.android.profile.details
 
 import android.content.Context
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -181,7 +180,7 @@ internal const val READS_TAB_INDEX = 2
 internal const val MEDIA_TAB_INDEX = 3
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileDetailsScreen(
     state: ProfileDetailsContract.UiState,

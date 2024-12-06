@@ -9,6 +9,8 @@ interface PremiumBuyingContract {
     data class UiState(
         val loading: Boolean = true,
         val isExtendingPremium: Boolean = false,
+        val isPremiumBadgeOrigin: Boolean = false,
+
         val subscriptions: List<SubscriptionProduct> = emptyList(),
         val stage: PremiumStage = PremiumStage.Home,
         val primalName: String? = null,

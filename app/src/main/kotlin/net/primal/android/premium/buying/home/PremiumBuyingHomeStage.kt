@@ -58,6 +58,7 @@ internal val PREMIUM_TINT_LIGHT = Color(0xFF222222)
 @Composable
 fun PremiumBuyingHomeStage(
     loading: Boolean,
+    isPremiumBadgeOrigin: Boolean,
     subscriptions: List<SubscriptionProduct>,
     onClose: () -> Unit,
     onLearnMoreClick: () -> Unit,
@@ -66,7 +67,7 @@ fun PremiumBuyingHomeStage(
     Scaffold(
         topBar = {
             PrimalTopAppBar(
-                title = "",
+                title = if (isPremiumBadgeOrigin) stringResource(R.string.premium_primal_og_title) else "",
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onClose,
                 showDivider = false,
@@ -85,9 +86,21 @@ fun PremiumBuyingHomeStage(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Bottom),
         ) {
-            PrimalPremiumLogoHeader(
-                modifier = Modifier.padding(bottom = 24.dp),
-            )
+            if (isPremiumBadgeOrigin) {
+                Text(
+                    modifier = Modifier
+                        .padding(horizontal = 24.dp)
+                        .padding(bottom = 16.dp),
+                    textAlign = TextAlign.Center,
+                    text = stringResource(R.string.premium_primal_og_description),
+                    style = AppTheme.typography.bodyMedium,
+                    color = AppTheme.colorScheme.onSurface,
+                )
+            } else {
+                PrimalPremiumLogoHeader(
+                    modifier = Modifier.padding(bottom = 24.dp),
+                )
+            }
             Text(
                 text = stringResource(id = R.string.premium_subscribe_to_get),
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
@@ -104,7 +117,9 @@ fun PremiumBuyingHomeStage(
                 subscriptions = subscriptions,
             )
             ButtonsColumn(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 16.dp),
                 onClose = onClose,
                 onFindPrimalName = onFindPrimalName,
             )
@@ -145,7 +160,11 @@ private fun PremiumOfferCard(modifier: Modifier = Modifier, onLearnMoreClick: ()
         modifier = modifier
             .fillMaxWidth()
             .clip(AppTheme.shapes.large)
-            .border(width = 1.dp, color = AppTheme.extraColorScheme.surfaceVariantAlt1)
+            .border(
+                width = 1.dp,
+                color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                shape = AppTheme.shapes.large,
+            )
             .background(AppTheme.extraColorScheme.surfaceVariantAlt2),
     ) {
         PrimalNameRow(
