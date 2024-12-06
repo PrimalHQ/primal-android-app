@@ -180,10 +180,10 @@
     <string name="premium_become_legend_intro_subtitle">Donate $1000 or more to gain:</string>
     <string name="premium_become_legend_intro_perk_unlimited_premium_title">Forever Premium</string>
     <string name="premium_become_legend_intro_perk_unlimited_premium_description">Primal Premium subscription never expires for legends.</string>
-    <string name="premium_become_legend_intro_perk_private_builds_title">Private Beta Builds</string>
-    <string name="premium_become_legend_intro_perk_private_builds_description">Get access to new features before they are public.</string>
+    <string name="premium_become_legend_intro_perk_more_storage_title">Way More Storage</string>
+    <string name="premium_become_legend_intro_perk_more_storage_description">Get 100GB of Primal Premium media storage.</string>
     <string name="premium_become_legend_intro_perk_custom_profile_title">Legendary Custom Profile</string>
-    <string name="premium_become_legend_intro_perk_custom_profile_description">Option to pick the color of your verified badge and set the glow around your avatar.</string>
+    <string name="premium_become_legend_intro_perk_custom_profile_description">Pick the color of your verified badge and set a custom ring around your avatar.</string>
     <string name="premium_become_legend_intro_gratitude_title">♥️ Our Eternal Gratitude ♥️</string>
     <string name="premium_become_legend_intro_gratitude_description">We’ll never forget our biggest supporters. People like you will help Nostr succeed.</string>
     <string name="premium_become_legend_button_start">Become a Legend</string>

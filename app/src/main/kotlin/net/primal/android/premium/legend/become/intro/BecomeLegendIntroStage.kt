@@ -22,14 +22,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.premium.legend.become.BecomeLegendBottomBarButton
 import net.primal.android.theme.AppTheme
+import net.primal.android.theme.domain.PrimalTheme
 
 @ExperimentalMaterial3Api
 @Composable
@@ -55,76 +59,88 @@ fun BecomeLegendIntroStage(
             )
         },
     ) { paddingValues ->
-        Column(
+        IntroContent(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(state = rememberScrollState())
                 .padding(paddingValues)
                 .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top,
-        ) {
-            Spacer(modifier = Modifier.height(56.dp))
+        )
+    }
+}
 
-            Text(
-                text = stringResource(R.string.premium_become_legend_intro_subtitle),
-                textAlign = TextAlign.Center,
-                style = AppTheme.typography.bodyMedium,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Normal,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-            )
+@Composable
+private fun IntroContent(modifier: Modifier = Modifier) {
+    val isDarkTheme = LocalPrimalTheme.current.isDarkTheme
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top,
+    ) {
+        Spacer(modifier = Modifier.height(56.dp))
 
-            Spacer(modifier = Modifier.height(32.dp))
+        Text(
+            text = stringResource(R.string.premium_become_legend_intro_subtitle),
+            textAlign = TextAlign.Center,
+            style = AppTheme.typography.bodyMedium,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Normal,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+        )
 
-            PrimalLegendPerk(
-                modifier = Modifier.fillMaxWidth(),
-                painter = painterResource(R.drawable.legend_perk_unlimited_badge),
-                title = stringResource(R.string.premium_become_legend_intro_perk_unlimited_premium_title),
-                description = stringResource(R.string.premium_become_legend_intro_perk_unlimited_premium_description),
-            )
+        Spacer(modifier = Modifier.height(32.dp))
 
-            Spacer(modifier = Modifier.height(24.dp))
+        PrimalLegendPerk(
+            modifier = Modifier.fillMaxWidth(),
+            painter = painterResource(R.drawable.legend_perk_unlimited_badge),
+            title = stringResource(R.string.premium_become_legend_intro_perk_unlimited_premium_title),
+            description = stringResource(R.string.premium_become_legend_intro_perk_unlimited_premium_description),
+        )
 
-            PrimalLegendPerk(
-                modifier = Modifier.fillMaxWidth(),
-                painter = painterResource(R.drawable.legend_perk_private_builds),
-                title = stringResource(R.string.premium_become_legend_intro_perk_private_builds_title),
-                description = stringResource(R.string.premium_become_legend_intro_perk_private_builds_description),
-            )
+        Spacer(modifier = Modifier.height(24.dp))
 
-            Spacer(modifier = Modifier.height(24.dp))
+        PrimalLegendPerk(
+            modifier = Modifier.fillMaxWidth(),
+            painter = painterResource(R.drawable.legend_perk_more_storage_1),
+            title = stringResource(R.string.premium_become_legend_intro_perk_more_storage_title),
+            description = stringResource(R.string.premium_become_legend_intro_perk_more_storage_description),
+        )
 
-            PrimalLegendPerk(
-                modifier = Modifier.fillMaxWidth(),
-                painter = painterResource(R.drawable.legend_perk_profile),
-                title = stringResource(R.string.premium_become_legend_intro_perk_custom_profile_title),
-                description = stringResource(R.string.premium_become_legend_intro_perk_custom_profile_description),
-            )
+        Spacer(modifier = Modifier.height(24.dp))
 
-            Spacer(modifier = Modifier.height(40.dp))
+        PrimalLegendPerk(
+            modifier = Modifier.fillMaxWidth(),
+            painter = if (isDarkTheme) {
+                painterResource(R.drawable.legend_perk_profile_dark)
+            } else {
+                painterResource(R.drawable.legend_perk_profile)
+            },
+            title = stringResource(R.string.premium_become_legend_intro_perk_custom_profile_title),
+            description = stringResource(R.string.premium_become_legend_intro_perk_custom_profile_description),
+        )
 
-            Text(
-                text = stringResource(R.string.premium_become_legend_intro_gratitude_title),
-                textAlign = TextAlign.Center,
-                style = AppTheme.typography.bodyMedium,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = AppTheme.colorScheme.onSurface,
-            )
+        Spacer(modifier = Modifier.height(40.dp))
 
-            Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.premium_become_legend_intro_gratitude_title),
+            textAlign = TextAlign.Center,
+            style = AppTheme.typography.bodyMedium,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = AppTheme.colorScheme.onSurface,
+        )
 
-            Text(
-                modifier = Modifier.padding(horizontal = 32.dp),
-                text = stringResource(R.string.premium_become_legend_intro_gratitude_description),
-                textAlign = TextAlign.Center,
-                style = AppTheme.typography.bodyMedium,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-            )
-        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            modifier = Modifier.padding(horizontal = 32.dp),
+            text = stringResource(R.string.premium_become_legend_intro_gratitude_description),
+            textAlign = TextAlign.Center,
+            style = AppTheme.typography.bodyMedium,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Normal,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+        )
     }
 }
 
@@ -165,5 +181,18 @@ private fun PrimalLegendPerk(
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
             )
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview
+@Composable
+private fun PreviewIntro() {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+        BecomeLegendIntroStage(
+            modifier = Modifier.fillMaxSize(),
+            onClose = {},
+            onNext = {},
+        )
     }
 }
