@@ -287,7 +287,14 @@ private fun NavController.navigateToPremiumSupportPrimal() = navigate(route = "p
 private fun NavController.navigateToPremiumMoreInfo(tabIndex: Int = 0) =
     navigate(route = "premium/info?$PREMIUM_MORE_INFO_TAB_INDEX=$tabIndex")
 
-private fun NavController.navigateToPremiumBecomeLegend() = navigate(route = "premium/legend/become")
+private fun NavController.navigateToPremiumBuyPrimalLegend(fromOrigin: String? = null) {
+    if (fromOrigin?.isNotEmpty() == true) {
+        navigate(route = "premium/legend/buy?$FROM_ORIGIN=$fromOrigin")
+    } else {
+        navigate(route = "premium/legend/buy")
+    }
+}
+
 private fun NavController.navigateToPremiumLegendaryProfile() = navigate(route = "premium/legend/profile")
 private fun NavController.navigateToPremiumManage() = navigate(route = "premium/manage")
 private fun NavController.navigateToPremiumMediaManagement() = navigate(route = "premium/manage/media")
@@ -517,7 +524,16 @@ fun SharedTransitionScope.PrimalAppNavigation() {
             navController = navController,
         )
 
-        premiumBecomeLegend(route = "premium/legend/become", navController = navController)
+        premiumBuyPrimalLegend(
+            route = "premium/legend/buy?$FROM_ORIGIN={$FROM_ORIGIN}",
+            arguments = listOf(
+                navArgument(FROM_ORIGIN) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+            ),
+            navController = navController,
+        )
 
         premiumLegendaryProfile(route = "premium/legend/profile", navController = navController)
 
@@ -1097,7 +1113,7 @@ private fun NavGraphBuilder.premiumSupportPrimal(route: String, navController: N
             callbacks = SupportPrimalContract.ScreenCallbacks(
                 onClose = { navController.navigateUp() },
                 onExtendSubscription = { navController.navigateToPremiumExtendSubscription(primalName = it) },
-                onBecomeLegend = { navController.navigateToPremiumBecomeLegend() },
+                onBecomeLegend = { navController.navigateToPremiumBuyPrimalLegend() },
             ),
         )
     }
@@ -1124,27 +1140,31 @@ private fun NavGraphBuilder.premiumMoreInfo(
     )
 }
 
-private fun NavGraphBuilder.premiumBecomeLegend(route: String, navController: NavController) =
-    composable(
-        route = route,
-        enterTransition = { primalSlideInHorizontallyFromEnd },
-        exitTransition = { primalScaleOut },
-        popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontallyToEnd },
-    ) {
-        val viewModel = hiltViewModel<PremiumBecomeLegendViewModel>()
-        ApplyEdgeToEdge()
-        LockToOrientationPortrait()
+private fun NavGraphBuilder.premiumBuyPrimalLegend(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) {
+    val viewModel = hiltViewModel<PremiumBecomeLegendViewModel>()
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
 
-        PremiumBecomeLegendScreen(
-            viewModel = viewModel,
-            onClose = { navController.navigateUp() },
-            onLegendPurchased = {
-                navController.navigateUp()
-                navController.popBackStack()
-            },
-        )
-    }
+    PremiumBecomeLegendScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+        onLegendPurchased = {
+            navController.navigateUp()
+            navController.popBackStack()
+        },
+    )
+}
 
 private fun NavGraphBuilder.premiumLegendaryProfile(route: String, navController: NavController) =
     composable(
@@ -1208,7 +1228,7 @@ private fun NavGraphBuilder.premiumManage(route: String, navController: NavContr
                         navController.navigateToPremiumLegendaryProfile()
 
                     PremiumManageContract.ManageDestination.BecomeALegend ->
-                        navController.navigateToPremiumBecomeLegend()
+                        navController.navigateToPremiumBuyPrimalLegend()
                 }
             },
         )
@@ -1599,7 +1619,7 @@ private fun NavGraphBuilder.profile(
         onSearchClick = { navController.navigateToAdvancedSearch(initialPostedBy = listOf(it)) },
         onPremiumBadgeClick = { premiumTier ->
             if (premiumTier.isPrimalLegendTier()) {
-                navController.navigateToPremiumBecomeLegend()
+                navController.navigateToPremiumBuyPrimalLegend(fromOrigin = FROM_ORIGIN_PREMIUM_BADGE)
             } else if (premiumTier.isPremiumTier()) {
                 navController.navigateToPremiumBuying(fromOrigin = FROM_ORIGIN_PREMIUM_BADGE)
             }

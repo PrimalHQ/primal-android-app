@@ -1,5 +1,6 @@
 package net.primal.android.premium.legend.become
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,6 +16,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.encodeToString
 import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.navigation.FROM_ORIGIN_PREMIUM_BADGE
+import net.primal.android.navigation.buyingPremiumFromOrigin
 import net.primal.android.networking.di.PrimalWalletApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
@@ -36,6 +39,7 @@ import timber.log.Timber
 
 @HiltViewModel
 class PremiumBecomeLegendViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val activeAccountStore: ActiveAccountStore,
     private val walletRepository: WalletRepository,
     private val premiumRepository: PremiumRepository,
@@ -46,7 +50,11 @@ class PremiumBecomeLegendViewModel @Inject constructor(
         private const val BTC_DECIMAL_PLACES = 8
     }
 
-    private val _state = MutableStateFlow(UiState())
+    private val _state = MutableStateFlow(
+        UiState(
+            isPremiumBadgeOrigin = savedStateHandle.buyingPremiumFromOrigin == FROM_ORIGIN_PREMIUM_BADGE,
+        ),
+    )
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
 

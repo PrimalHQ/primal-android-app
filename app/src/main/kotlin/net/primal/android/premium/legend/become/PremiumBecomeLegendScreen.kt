@@ -72,6 +72,7 @@ private fun PremiumBecomeLegendScreen(
             BecomeLegendStage.Intro -> {
                 BecomeLegendIntroStage(
                     modifier = Modifier.fillMaxSize(),
+                    isPremiumBadgeOrigin = state.isPremiumBadgeOrigin,
                     onClose = onClose,
                     onNext = { eventPublisher(PremiumBecomeLegendContract.UiEvent.ShowAmountEditor) },
                 )

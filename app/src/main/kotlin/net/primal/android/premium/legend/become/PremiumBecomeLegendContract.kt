@@ -7,6 +7,7 @@ import net.primal.android.premium.domain.PremiumMembership
 class PremiumBecomeLegendContract {
 
     data class UiState(
+        val isPremiumBadgeOrigin: Boolean = false,
         val stage: BecomeLegendStage = BecomeLegendStage.Intro,
         val displayName: String = "",
         val avatarCdnImage: CdnImage? = null,

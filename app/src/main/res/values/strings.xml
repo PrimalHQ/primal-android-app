@@ -178,7 +178,8 @@
 
     <string name="premium_support_primal_title">Support Primal</string>
 
-    <string name="premium_become_legend_primal_title">Become a Primal Legend</string>
+    <string name="premium_become_legend_primal_title">Primal Legend</string>
+    <string name="premium_become_legend_intro_description">The Legend tier was created to recognize users who have made a significant\ncontribution to Primal.</string>
     <string name="premium_become_legend_intro_subtitle">Donate $1000 or more to gain:</string>
     <string name="premium_become_legend_intro_perk_unlimited_premium_title">Forever Premium</string>
     <string name="premium_become_legend_intro_perk_unlimited_premium_description">Primal Premium subscription never expires for legends.</string>

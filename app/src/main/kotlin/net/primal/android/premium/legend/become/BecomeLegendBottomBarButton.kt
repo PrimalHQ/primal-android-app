@@ -16,7 +16,8 @@ fun BecomeLegendBottomBarButton(text: String, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = 32.dp, vertical = 32.dp),
+            .padding(horizontal = 32.dp)
+            .padding(bottom = 32.dp, top = 16.dp),
         contentAlignment = Alignment.Center,
     ) {
         PrimalLoadingButton(

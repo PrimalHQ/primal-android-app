@@ -39,6 +39,7 @@ import net.primal.android.theme.domain.PrimalTheme
 @Composable
 fun BecomeLegendIntroStage(
     modifier: Modifier,
+    isPremiumBadgeOrigin: Boolean,
     onClose: () -> Unit,
     onNext: () -> Unit,
 ) {
@@ -65,25 +66,38 @@ fun BecomeLegendIntroStage(
                 .verticalScroll(state = rememberScrollState())
                 .padding(paddingValues)
                 .padding(horizontal = 24.dp),
+            isPremiumBadgeOrigin = isPremiumBadgeOrigin,
         )
     }
 }
 
 @Composable
-private fun IntroContent(modifier: Modifier = Modifier) {
+private fun IntroContent(modifier: Modifier = Modifier, isPremiumBadgeOrigin: Boolean) {
     val isDarkTheme = LocalPrimalTheme.current.isDarkTheme
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
     ) {
-        Spacer(modifier = Modifier.height(56.dp))
+        if (isPremiumBadgeOrigin) {
+            Text(
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .padding(vertical = 24.dp),
+                textAlign = TextAlign.Center,
+                text = stringResource(R.string.premium_become_legend_intro_description),
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.colorScheme.onSurface,
+            )
+        } else {
+            Spacer(modifier = Modifier.height(56.dp))
+        }
 
         Text(
             text = stringResource(R.string.premium_become_legend_intro_subtitle),
             textAlign = TextAlign.Center,
             style = AppTheme.typography.bodyMedium,
-            fontSize = 18.sp,
+            fontSize = 16.sp,
             fontWeight = FontWeight.Normal,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
         )
@@ -187,10 +201,25 @@ private fun PrimalLegendPerk(
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-private fun PreviewIntro() {
+private fun PreviewIntroDefault() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         BecomeLegendIntroStage(
             modifier = Modifier.fillMaxSize(),
+            isPremiumBadgeOrigin = false,
+            onClose = {},
+            onNext = {},
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview
+@Composable
+private fun PreviewIntroOriginPremiumBadge() {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+        BecomeLegendIntroStage(
+            modifier = Modifier.fillMaxSize(),
+            isPremiumBadgeOrigin = true,
             onClose = {},
             onNext = {},
         )
