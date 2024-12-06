@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -113,9 +114,14 @@ private fun SupportPrimalScreen(
             }
 
             if (!state.isPrimalLegend) {
+                val isDarkTheme = LocalPrimalTheme.current.isDarkTheme
                 SupportCard(
                     modifier = Modifier.fillMaxSize(),
-                    painter = painterResource(R.drawable.support_primal_legend),
+                    painter = if (isDarkTheme) {
+                        painterResource(R.drawable.support_primal_legend_dark)
+                    } else {
+                        painterResource(R.drawable.support_primal_legend)
+                    },
                     painterVerticalPadding = 0.dp,
                     title = stringResource(R.string.premium_support_primal_become_a_legend_title),
                     description = stringResource(R.string.premium_support_primal_become_a_legend_description),

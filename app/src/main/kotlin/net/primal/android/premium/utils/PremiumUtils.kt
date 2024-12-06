@@ -1,4 +1,5 @@
 @file:Suppress("TooManyFunctions")
+
 package net.primal.android.premium.utils
 
 import net.primal.android.premium.domain.PremiumMembership
