@@ -37,6 +37,7 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.premium.legend.become.BecomeLegendBottomBarButton
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract
@@ -85,6 +86,10 @@ fun BecomeLegendAmountStage(
                 UniversalAvatarThumbnail(
                     avatarCdnImage = state.avatarCdnImage,
                     avatarSize = 80.dp,
+                    legendaryCustomization = LegendaryCustomization(
+                        avatarGlow = true,
+                        legendaryStyle = LegendaryStyle.GOLD,
+                    ),
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 NostrUserText(
