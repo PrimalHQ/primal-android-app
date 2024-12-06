@@ -79,7 +79,7 @@ private fun GenericReactionListItem(
                 avatarCdnImage = item.profile.avatarCdnImage,
                 avatarSize = 42.dp,
                 onClick = { onProfileClick(item.profile.pubkey) },
-                legendaryCustomization = item.profile.legendaryCustomization,
+                legendaryCustomization = item.profile.premiumDetails?.legendaryCustomization,
             )
         },
         headlineContent = {

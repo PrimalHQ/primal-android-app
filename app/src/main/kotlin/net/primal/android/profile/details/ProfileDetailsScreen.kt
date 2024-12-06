@@ -1,4 +1,4 @@
-package net.primal.android.profile.details.ui
+package net.primal.android.profile.details
 
 import android.content.Context
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -75,9 +75,13 @@ import net.primal.android.notes.feed.list.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
-import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
-import net.primal.android.profile.details.ProfileDetailsViewModel
+import net.primal.android.profile.details.ui.AvatarValues
+import net.primal.android.profile.details.ui.CoverValues
+import net.primal.android.profile.details.ui.PROFILE_TAB_COUNT
+import net.primal.android.profile.details.ui.ProfileDetailsHeader
+import net.primal.android.profile.details.ui.ProfileTabs
+import net.primal.android.profile.details.ui.ProfileTopCoverBar
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme

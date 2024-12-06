@@ -114,8 +114,8 @@ import net.primal.android.premium.manage.relay.PremiumRelayViewModel
 import net.primal.android.premium.support.SupportPrimalContract
 import net.primal.android.premium.support.SupportPrimalScreen
 import net.primal.android.premium.support.SupportPrimalViewModel
+import net.primal.android.profile.details.ProfileDetailsScreen
 import net.primal.android.profile.details.ProfileDetailsViewModel
-import net.primal.android.profile.details.ui.ProfileDetailsScreen
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.profile.editor.ProfileEditorViewModel
 import net.primal.android.profile.editor.ui.ProfileEditorScreen

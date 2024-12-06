@@ -91,7 +91,7 @@ fun ProfileQrCodeViewer(
             avatarCdnImage = profileDetails?.avatarCdnImage,
             hasBorder = true,
             fallbackBorderColor = Color.White,
-            legendaryCustomization = profileDetails?.legendaryCustomization,
+            legendaryCustomization = profileDetails?.premiumDetails?.legendaryCustomization,
             defaultAvatar = {
                 DefaultAvatarThumbnailPlaceholderListItemImage(
                     backgroundColor = Color.White,

@@ -189,7 +189,7 @@ private fun ExplorePersonListItem(
                     avatarSize = 64.dp,
                     avatarCdnImage = person.profile.avatarCdnImage,
                     onClick = onItemClick,
-                    legendaryCustomization = person.profile.legendaryCustomization,
+                    legendaryCustomization = person.profile.premiumDetails?.legendaryCustomization,
                 )
             }
 
@@ -199,8 +199,8 @@ private fun ExplorePersonListItem(
                 NostrUserText(
                     displayName = person.profile.userDisplayName,
                     internetIdentifier = person.profile.internetIdentifier,
-                    customBadgeStyle = if (person.profile.legendaryCustomization?.customBadge == true) {
-                        person.profile.legendaryCustomization.legendaryStyle
+                    customBadgeStyle = if (person.profile.premiumDetails?.legendaryCustomization?.customBadge == true) {
+                        person.profile.premiumDetails.legendaryCustomization.legendaryStyle
                     } else {
                         null
                     },

@@ -135,7 +135,7 @@ fun ZapListItem(
             senderCdnImage = zapData.sender?.avatarCdnImage,
             amountSats = zapData.amountSats,
             message = zapData.zapMessage,
-            senderLegendaryCustomization = zapData.sender?.legendaryCustomization,
+            senderLegendaryCustomization = zapData.sender?.premiumDetails?.legendaryCustomization,
         )
         NoteSummary(
             noteContent = zapData.noteContentUi,
@@ -145,7 +145,7 @@ fun ZapListItem(
             receiverCdnResource = zapData.receiver?.avatarCdnImage,
             receiverDisplayName = zapData.receiver?.authorDisplayName,
             onReceiverAvatarClick = { zapData.receiver?.pubkey?.let { noteCallbacks.onProfileClick?.invoke(it) } },
-            receiverLegendaryCustomization = zapData.receiver?.legendaryCustomization,
+            receiverLegendaryCustomization = zapData.receiver?.premiumDetails?.legendaryCustomization,
         )
     }
 }

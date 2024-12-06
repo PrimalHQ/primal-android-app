@@ -42,8 +42,11 @@ import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.formatNip05Identifier
+import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.profile.details.ProfileDetailsContract
+import net.primal.android.profile.details.ui.model.PremiumProfileDataUi
+import net.primal.android.profile.details.ui.model.shouldShowPremiumBadge
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.domain.DraftTx
@@ -62,43 +65,41 @@ fun ProfileDetailsHeader(
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
 ) {
-    Column {
-        ProfileHeaderDetails(
-            state = state,
-            onEditProfileClick = onEditProfileClick,
-            onMessageClick = { onMessageClick(state.profileId) },
-            onZapProfileClick = {
-                val profileLud16 = state.profileDetails?.lightningAddress
-                if (profileLud16?.isLightningAddress() == true) {
-                    onZapProfileClick(
-                        DraftTx(targetUserId = state.profileId, targetLud16 = profileLud16),
-                    )
-                } else {
-                    onUnableToZapProfile()
-                }
-            },
-            onFollow = {
-                eventPublisher(
-                    ProfileDetailsContract.UiEvent.FollowAction(
-                        profileId = state.profileId,
-                        forceUpdate = false,
-                    ),
+    ProfileHeaderDetails(
+        state = state,
+        onEditProfileClick = onEditProfileClick,
+        onMessageClick = { onMessageClick(state.profileId) },
+        onZapProfileClick = {
+            val profileLud16 = state.profileDetails?.lightningAddress
+            if (profileLud16?.isLightningAddress() == true) {
+                onZapProfileClick(
+                    DraftTx(targetUserId = state.profileId, targetLud16 = profileLud16),
                 )
-            },
-            onUnfollow = {
-                eventPublisher(
-                    ProfileDetailsContract.UiEvent.UnfollowAction(
-                        profileId = state.profileId,
-                        forceUpdate = false,
-                    ),
-                )
-            },
-            onDrawerQrCodeClick = onDrawerQrCodeClick,
-            onFollowsClick = onFollowsClick,
-            onProfileClick = onProfileClick,
-            onHashtagClick = onHashtagClick,
-        )
-    }
+            } else {
+                onUnableToZapProfile()
+            }
+        },
+        onFollow = {
+            eventPublisher(
+                ProfileDetailsContract.UiEvent.FollowAction(
+                    profileId = state.profileId,
+                    forceUpdate = false,
+                ),
+            )
+        },
+        onUnfollow = {
+            eventPublisher(
+                ProfileDetailsContract.UiEvent.UnfollowAction(
+                    profileId = state.profileId,
+                    forceUpdate = false,
+                ),
+            )
+        },
+        onDrawerQrCodeClick = onDrawerQrCodeClick,
+        onFollowsClick = onFollowsClick,
+        onProfileClick = onProfileClick,
+        onHashtagClick = onHashtagClick,
+    )
 }
 
 @Composable
@@ -142,8 +143,7 @@ private fun ProfileHeaderDetails(
         UserDisplayName(
             displayName = state.profileDetails?.authorDisplayName ?: state.profileId.asEllipsizedNpub(),
             internetIdentifier = state.profileDetails?.internetIdentifier,
-            customBadge = state.profileDetails?.legendaryCustomization?.customBadge == true,
-            legendaryStyle = state.profileDetails?.legendaryCustomization?.legendaryStyle,
+            premiumDetails = state.profileDetails?.premiumDetails,
         )
 
         if (state.profileDetails?.internetIdentifier?.isNotEmpty() == true) {
@@ -209,7 +209,7 @@ private fun UserFollowedByIndicator(
         AvatarThumbnailsRow(
             avatarBorderColor = AppTheme.colorScheme.background,
             avatarCdnImages = profiles.map { it.avatarCdnImage },
-            avatarLegendaryCustomizations = profiles.map { it.legendaryCustomization },
+            avatarLegendaryCustomizations = profiles.map { it.premiumDetails?.legendaryCustomization },
             onClick = {
                 onProfileClick(profiles[it].pubkey)
             },
@@ -325,9 +325,10 @@ private fun UserDisplayName(
     modifier: Modifier = Modifier,
     displayName: String,
     internetIdentifier: String?,
-    customBadge: Boolean,
-    legendaryStyle: LegendaryStyle?,
+    premiumDetails: PremiumProfileDataUi?,
 ) {
+    val hasCustomBadge = premiumDetails?.legendaryCustomization?.customBadge == true
+
     Row(
         modifier = modifier.padding(top = 12.dp, bottom = 3.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -344,19 +345,25 @@ private fun UserDisplayName(
                 lineHeight = 20.sp,
                 fontWeight = FontWeight.Bold,
             ),
-            customBadgeStyle = if (customBadge) legendaryStyle else null,
+            customBadgeStyle = if (hasCustomBadge) premiumDetails?.legendaryCustomization?.legendaryStyle else null,
         )
+
+        if (premiumDetails?.shouldShowPremiumBadge() == true) {
+            ProfilePremiumBadge(
+                firstCohort = premiumDetails.cohort1 ?: "",
+                secondCohort = premiumDetails.cohort2 ?: "",
+                legendaryStyle = premiumDetails.legendaryCustomization?.legendaryStyle,
+            )
+        }
     }
 }
 
-@Suppress("Unused", "UnusedPrivateMember")
 @Composable
 private fun ProfilePremiumBadge(
     modifier: Modifier = Modifier,
     firstCohort: String,
     secondCohort: String,
     legendaryStyle: LegendaryStyle?,
-    membershipExpired: Boolean,
 ) {
     Row(
         modifier = modifier
@@ -370,7 +377,6 @@ private fun ProfilePremiumBadge(
                 } else {
                     Brush.linearGradient(listOf(AppTheme.colorScheme.tertiary, AppTheme.colorScheme.tertiary))
                 },
-                alpha = if (membershipExpired) 0.5f else 1.0f,
             )
             .padding(start = 10.dp, end = 2.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
@@ -446,6 +452,17 @@ private fun PreviewProfileHeaderDetails() {
                         authorDisplayName = "qauser",
                         internetIdentifier = "qa@primal.net",
                         about = "qauser",
+                        premiumDetails = PremiumProfileDataUi(
+                            primalName = "qa",
+                            cohort1 = "Legend",
+                            cohort2 = "2024",
+                            tier = "primal-legend",
+                            legendaryCustomization = LegendaryCustomization(
+                                avatarGlow = true,
+                                legendaryStyle = LegendaryStyle.BLUE,
+                                customBadge = true,
+                            ),
+                        ),
                     ),
                     profileStats = ProfileStatsUi(
                         followingCount = 11,

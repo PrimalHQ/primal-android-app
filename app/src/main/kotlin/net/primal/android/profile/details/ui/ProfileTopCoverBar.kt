@@ -127,7 +127,7 @@ fun ProfileTopCoverBar(
                 onClick = { state.profileDetails?.avatarCdnImage?.sourceUrl?.let { onMediaItemClick(it) } },
                 avatarCdnImage = state.profileDetails?.avatarCdnImage,
                 fallbackBorderColor = Color.White,
-                legendaryCustomization = state.profileDetails?.legendaryCustomization,
+                legendaryCustomization = state.profileDetails?.premiumDetails?.legendaryCustomization,
             )
         }
     }
@@ -173,6 +173,7 @@ private fun ProfileTopAppBar(
                     enter = fadeIn(),
                     exit = fadeOut(),
                 ) {
+                    val hasCustomBadge = state.profileDetails?.premiumDetails?.legendaryCustomization?.customBadge
                     NostrUserText(
                         modifier = Modifier.padding(top = 4.dp),
                         displayName = state.profileDetails?.authorDisplayName
@@ -180,8 +181,8 @@ private fun ProfileTopAppBar(
                         internetIdentifier = state.profileDetails?.internetIdentifier,
                         internetIdentifierBadgeSize = 20.dp,
                         internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
-                        customBadgeStyle = if (state.profileDetails?.legendaryCustomization?.customBadge == true) {
-                            state.profileDetails.legendaryCustomization.legendaryStyle
+                        customBadgeStyle = if (hasCustomBadge == true) {
+                            state.profileDetails.premiumDetails.legendaryCustomization.legendaryStyle
                         } else {
                             null
                         },
