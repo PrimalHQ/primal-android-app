@@ -93,15 +93,16 @@ fun BecomeLegendAmountStage(
                     internetIdentifier = state.profileNostrAddress,
                     internetIdentifierBadgeSize = 24.dp,
                     fontSize = 20.sp,
+                    customBadgeStyle = LegendaryStyle.GOLD,
                 )
             }
 
             state.membership?.let {
                 PremiumBadge(
-                    firstCohort = "Primal Legend",
+                    firstCohort = "Legend",
                     secondCohort = it.cohort2,
                     membershipExpired = it.isExpired(),
-                    legendaryStyle = LegendaryStyle.NO_CUSTOMIZATION,
+                    legendaryStyle = LegendaryStyle.GOLD,
                 )
             }
 
