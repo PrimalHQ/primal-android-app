@@ -1,2 +1,2 @@
-Legend profile improvements.
+Legend badges.
 Stability and improvements.

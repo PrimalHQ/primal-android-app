@@ -1,10 +1,10 @@
 ## Changes
-- Updated avatar border sizes according to design
-- Fixed broken mentions
-- Fixed isPrimalDvm api broken changes
-- Fixed cohort broken changes; Added premium tier business logic;
-- Fixed drawer menu items not changing background on theme change;
-- Updated legend styles;
-- Fixed avatars cutoff in advanced search user pickers;
-- Fixed avatar clicks not working on advanced search;
-- Disabled legendary avatar customization on new notes pill;
+- Show support us notice ALWAYS for TESTING PURPOSES
+- Set GOLD legendary style as default during become legend flow
+- Implemented Legend UX customization for direct buys;
+- Implemented Primal OG in buying premium;
+- Implemented clicks on premium badges on profile details screen;
+- Updated become legend intro screen;
+- Updated legend icons in SupportPrimalScreen;
+- Implement premium badge on profile details;
+- Updated "Follows You" badge on ProfileDetails screen;
