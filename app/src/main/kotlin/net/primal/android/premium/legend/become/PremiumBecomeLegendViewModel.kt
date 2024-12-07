@@ -95,16 +95,9 @@ class PremiumBecomeLegendViewModel @Inject constructor(
                     }
 
                     is UiEvent.UpdateSelectedAmount -> {
-                        val newAmountInBtc = it.newAmount.toBigDecimal().setScale(
-                            BTC_DECIMAL_PLACES,
-                            RoundingMode.HALF_UP,
+                        updatePaymentAmount(
+                            amount = it.newAmount.toBigDecimal().setScale(BTC_DECIMAL_PLACES, RoundingMode.HALF_UP),
                         )
-                        setState {
-                            copy(
-                                selectedAmountInBtc = newAmountInBtc,
-                                qrCodeValue = "bitcoin:${this.bitcoinAddress}?amount=$newAmountInBtc",
-                            )
-                        }
                     }
 
                     UiEvent.StartPurchaseMonitor -> startPurchaseMonitorIfStopped()
@@ -121,6 +114,15 @@ class PremiumBecomeLegendViewModel @Inject constructor(
                 }
             }
         }
+
+    private fun updatePaymentAmount(amount: BigDecimal) {
+        setState {
+            copy(
+                selectedAmountInBtc = amount,
+                qrCodeValue = "bitcoin:${this.bitcoinAddress}?amount=$amount",
+            )
+        }
+    }
 
     private fun observeActiveAccount() =
         viewModelScope.launch {
@@ -172,14 +174,16 @@ class PremiumBecomeLegendViewModel @Inject constructor(
                     primalName = primalName,
                 )
 
+                val minAmount = response.amountBtc.toBigDecimal().setScale(BTC_DECIMAL_PLACES, RoundingMode.HALF_UP)
                 setState {
                     copy(
-                        minLegendThresholdInBtc = response.amountBtc.toBigDecimal(),
-                        selectedAmountInBtc = response.amountBtc.toBigDecimal(),
+                        minLegendThresholdInBtc = minAmount,
+                        selectedAmountInBtc = minAmount,
                         bitcoinAddress = response.qrCode.parseBitcoinPaymentInstructions()?.address,
                         membershipQuoteId = response.membershipQuoteId,
                     )
                 }
+                updatePaymentAmount(amount = minAmount)
 
                 startPurchaseMonitorIfStopped()
             } catch (error: WssException) {
