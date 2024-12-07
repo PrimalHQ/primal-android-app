@@ -16,6 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -30,18 +31,23 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.time.Year
 import net.primal.android.R
 import net.primal.android.core.compose.NostrUserText
+import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalSliderThumb
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.premium.domain.PremiumMembership
 import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.premium.legend.become.BecomeLegendBottomBarButton
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract
+import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.UiState
 import net.primal.android.premium.legend.become.PrimalLegendAmount
+import net.primal.android.premium.legend.become.utils.arePaymentInstructionsAvailable
 import net.primal.android.premium.ui.PremiumBadge
 import net.primal.android.theme.AppTheme
 
@@ -49,7 +55,7 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun BecomeLegendAmountStage(
     modifier: Modifier,
-    state: PremiumBecomeLegendContract.UiState,
+    state: UiState,
     eventPublisher: (PremiumBecomeLegendContract.UiEvent) -> Unit,
     onClose: () -> Unit,
     onNext: () -> Unit,
@@ -68,6 +74,7 @@ fun BecomeLegendAmountStage(
             BecomeLegendBottomBarButton(
                 text = stringResource(R.string.premium_become_legend_button_pay_now),
                 onClick = onNext,
+                enabled = state.arePaymentInstructionsAvailable(),
             )
         },
     ) { paddingValues ->
@@ -95,87 +102,144 @@ fun BecomeLegendAmountStage(
                 NostrUserText(
                     modifier = Modifier.padding(start = 8.dp),
                     displayName = state.displayName,
-                    internetIdentifier = state.profileNostrAddress,
+                    internetIdentifier = "${state.primalName}@primal.net",
                     internetIdentifierBadgeSize = 24.dp,
                     fontSize = 20.sp,
                     customBadgeStyle = LegendaryStyle.GOLD,
                 )
             }
 
-            state.membership?.let {
-                PremiumBadge(
-                    firstCohort = "Legend",
-                    secondCohort = it.cohort2,
-                    membershipExpired = it.isExpired(),
-                    legendaryStyle = LegendaryStyle.GOLD,
-                )
-            }
+            PrimalPremiumBadge(
+                membership = state.membership,
+            )
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            var slideValue by remember { mutableFloatStateOf(state.selectedAmountInBtc.toFloat()) }
-
-            PrimalLegendAmount(
-                btcValue = state.selectedAmountInBtc,
-                exchangeBtcUsdRate = state.exchangeBtcUsdRate,
-            )
-
-            Column(
-                modifier = Modifier.padding(horizontal = 10.dp),
-            ) {
-                val sliderColors = sliderColors(value = slideValue.toInt())
-                val interactionSource = remember { MutableInteractionSource() }
-                Slider(
-                    modifier = Modifier.fillMaxWidth(),
-                    interactionSource = interactionSource,
-                    colors = sliderColors,
-                    track = {
-                        SliderDefaults.Track(
-                            sliderState = it,
-                            modifier = Modifier.scale(scaleX = 1f, scaleY = 0.35f),
-                            colors = sliderColors,
-                            drawStopIndicator = null,
-                            drawTick = { _, _ -> },
-                            thumbTrackGapSize = 0.dp,
-                        )
-                    },
-                    thumb = {
-                        PrimalSliderThumb(
-                            interactionSource = interactionSource,
-                            colors = sliderColors,
-                        )
-                    },
-                    value = slideValue,
-                    onValueChange = {
-                        slideValue = it
-                        eventPublisher(PremiumBecomeLegendContract.UiEvent.UpdateSelectedAmount(newAmount = it))
-                    },
-                    steps = (state.maxLegendThresholdInBtc - state.minLegendThresholdInBtc).toInt(),
-                    valueRange = state.minLegendThresholdInBtc.toFloat()..state.maxLegendThresholdInBtc.toFloat(),
+            if (state.arePaymentInstructionsAvailable()) {
+                SelectAmountSlider(
+                    state = state,
+                    eventPublisher = eventPublisher,
                 )
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    Text(
-                        text = "$1000",
-                        style = AppTheme.typography.bodyMedium,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                    )
-
-                    Text(
-                        text = "1 BTC",
-                        style = AppTheme.typography.bodyMedium,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                    )
-                }
+            } else if (state.isFetchingPaymentInstructions) {
+                PrimalLoadingSpinner()
+            } else {
+                NoPaymentInstructionsColumn(
+                    onRetryClick = { eventPublisher(PremiumBecomeLegendContract.UiEvent.FetchPaymentInstructions) },
+                )
             }
 
             Spacer(modifier = Modifier.height(48.dp))
         }
+    }
+}
+
+@Composable
+fun NoPaymentInstructionsColumn(onRetryClick: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text(
+            modifier = Modifier.padding(horizontal = 20.dp),
+            text = "We were unable to fetch payment instructions, please try again.",
+            textAlign = TextAlign.Center,
+            style = AppTheme.typography.bodyMedium,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+        )
+        TextButton(
+            onClick = onRetryClick,
+        ) {
+            Text(
+                text = "Retry",
+                style = AppTheme.typography.bodyLarge,
+                color = AppTheme.colorScheme.primary,
+            )
+        }
+    }
+}
+
+@ExperimentalMaterial3Api
+@Composable
+private fun SelectAmountSlider(state: UiState, eventPublisher: (PremiumBecomeLegendContract.UiEvent) -> Unit) {
+    var slideValue by remember { mutableFloatStateOf(state.selectedAmountInBtc.toFloat()) }
+
+    PrimalLegendAmount(
+        btcValue = state.selectedAmountInBtc,
+        exchangeBtcUsdRate = state.exchangeBtcUsdRate,
+    )
+
+    Column(
+        modifier = Modifier.padding(horizontal = 10.dp),
+    ) {
+        val sliderColors = sliderColors(value = slideValue.toInt())
+        val interactionSource = remember { MutableInteractionSource() }
+        Slider(
+            modifier = Modifier.fillMaxWidth(),
+            interactionSource = interactionSource,
+            colors = sliderColors,
+            track = {
+                SliderDefaults.Track(
+                    sliderState = it,
+                    modifier = Modifier.scale(scaleX = 1f, scaleY = 0.35f),
+                    colors = sliderColors,
+                    drawStopIndicator = null,
+                    drawTick = { _, _ -> },
+                    thumbTrackGapSize = 0.dp,
+                )
+            },
+            thumb = {
+                PrimalSliderThumb(
+                    interactionSource = interactionSource,
+                    colors = sliderColors,
+                )
+            },
+            value = slideValue,
+            onValueChange = {
+                slideValue = it
+                eventPublisher(PremiumBecomeLegendContract.UiEvent.UpdateSelectedAmount(newAmount = it))
+            },
+            steps = (state.maxLegendThresholdInBtc - state.minLegendThresholdInBtc).toInt(),
+            valueRange = state.minLegendThresholdInBtc.toFloat()..state.maxLegendThresholdInBtc.toFloat(),
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = "$1000",
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+            )
+
+            Text(
+                text = "1 BTC",
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+            )
+        }
+    }
+}
+
+@Composable
+fun PrimalPremiumBadge(membership: PremiumMembership?) {
+    if (membership != null) {
+        PremiumBadge(
+            firstCohort = "Legend",
+            secondCohort = membership.cohort2,
+            membershipExpired = membership.isExpired(),
+            legendaryStyle = LegendaryStyle.GOLD,
+        )
+    } else {
+        PremiumBadge(
+            firstCohort = "Legend",
+            secondCohort = Year.now().value.toString(),
+            membershipExpired = false,
+            legendaryStyle = LegendaryStyle.GOLD,
+        )
     }
 }
 

@@ -14,6 +14,8 @@ class PremiumBecomeLegendContract {
         val profileNostrAddress: String? = null,
         val profileLightningAddress: String? = null,
         val membership: PremiumMembership? = null,
+        val primalName: String? = null,
+        val isFetchingPaymentInstructions: Boolean = false,
         val minLegendThresholdInBtc: BigDecimal = BigDecimal.ZERO,
         val maxLegendThresholdInBtc: BigDecimal = BigDecimal.ONE,
         val exchangeBtcUsdRate: Double? = null,
@@ -26,14 +28,18 @@ class PremiumBecomeLegendContract {
     sealed class UiEvent {
         data object ShowAmountEditor : UiEvent()
         data object GoBackToIntro : UiEvent()
+        data object GoToFindPrimalNameStage : UiEvent()
+        data class PrimalNamePicked(val primalName: String) : UiEvent()
         data object ShowPaymentInstructions : UiEvent()
         data class UpdateSelectedAmount(val newAmount: Float) : UiEvent()
         data object StartPurchaseMonitor : UiEvent()
         data object StopPurchaseMonitor : UiEvent()
+        data object FetchPaymentInstructions : UiEvent()
     }
 
     enum class BecomeLegendStage {
         Intro,
+        PickPrimalName,
         PickAmount,
         Payment,
         Success,

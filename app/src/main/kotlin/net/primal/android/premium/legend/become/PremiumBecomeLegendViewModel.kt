@@ -31,6 +31,7 @@ import net.primal.android.premium.api.model.MembershipPurchaseMonitorResponse
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.Companion.LEGEND_THRESHOLD_IN_USD
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.UiEvent
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.UiState
+import net.primal.android.premium.legend.become.utils.arePaymentInstructionsAvailable
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.repository.WalletRepository
@@ -68,7 +69,6 @@ class PremiumBecomeLegendViewModel @Inject constructor(
         observeEvents()
         observeActiveAccount()
         fetchExchangeRate()
-        fetchLegendPaymentInstructions()
     }
 
     private fun observeEvents() =
@@ -76,9 +76,10 @@ class PremiumBecomeLegendViewModel @Inject constructor(
             events.collect {
                 when (it) {
                     UiEvent.ShowAmountEditor -> {
-                        if (_state.value.minLegendThresholdInBtc != BigDecimal.ONE) {
-                            setState { copy(stage = PremiumBecomeLegendContract.BecomeLegendStage.PickAmount) }
+                        if (!_state.value.arePaymentInstructionsAvailable()) {
+                            fetchLegendPaymentInstructions()
                         }
+                        setState { copy(stage = PremiumBecomeLegendContract.BecomeLegendStage.PickAmount) }
                     }
 
                     UiEvent.GoBackToIntro -> setState {
@@ -105,6 +106,11 @@ class PremiumBecomeLegendViewModel @Inject constructor(
                     UiEvent.StartPurchaseMonitor -> startPurchaseMonitorIfStopped()
 
                     UiEvent.StopPurchaseMonitor -> stopPurchaseMonitor()
+                    UiEvent.GoToFindPrimalNameStage ->
+                        setState { copy(stage = PremiumBecomeLegendContract.BecomeLegendStage.PickPrimalName) }
+
+                    is UiEvent.PrimalNamePicked -> setState { copy(primalName = it.primalName) }
+                    UiEvent.FetchPaymentInstructions -> fetchLegendPaymentInstructions()
                 }
             }
         }
@@ -119,6 +125,7 @@ class PremiumBecomeLegendViewModel @Inject constructor(
                         profileNostrAddress = it.internetIdentifier,
                         profileLightningAddress = it.lightningAddress,
                         membership = it.premiumMembership,
+                        primalName = it.premiumMembership?.premiumName,
                     )
                 }
             }
@@ -152,9 +159,10 @@ class PremiumBecomeLegendViewModel @Inject constructor(
     }
 
     private fun fetchLegendPaymentInstructions() {
-        _state.value.membership?.premiumName?.let { primalName ->
+        _state.value.primalName?.let { primalName ->
             viewModelScope.launch {
                 try {
+                    setState { copy(isFetchingPaymentInstructions = true) }
                     val response = premiumRepository.fetchPrimalLegendPaymentInstructions(
                         userId = activeAccountStore.activeUserId(),
                         primalName = primalName,
@@ -172,6 +180,8 @@ class PremiumBecomeLegendViewModel @Inject constructor(
                     startPurchaseMonitorIfStopped()
                 } catch (error: WssException) {
                     Timber.e(error)
+                } finally {
+                    setState { copy(isFetchingPaymentInstructions = false) }
                 }
             }
         }

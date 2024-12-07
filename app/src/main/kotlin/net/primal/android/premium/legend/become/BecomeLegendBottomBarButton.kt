@@ -11,7 +11,11 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.button.PrimalLoadingButton
 
 @Composable
-fun BecomeLegendBottomBarButton(text: String, onClick: () -> Unit) {
+fun BecomeLegendBottomBarButton(
+    text: String,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -24,6 +28,7 @@ fun BecomeLegendBottomBarButton(text: String, onClick: () -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             text = text,
             onClick = onClick,
+            enabled = enabled,
         )
     }
 }
