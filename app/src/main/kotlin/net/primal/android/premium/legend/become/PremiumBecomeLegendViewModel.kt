@@ -68,17 +68,22 @@ class PremiumBecomeLegendViewModel @Inject constructor(
         observeEvents()
         observeActiveAccount()
         fetchExchangeRate()
-        fetchLegendPaymentInstructions()
     }
 
     private fun observeEvents() =
         viewModelScope.launch {
             events.collect {
                 when (it) {
+                    UiEvent.GoToFindPrimalNameStage -> setState {
+                        copy(stage = PremiumBecomeLegendContract.BecomeLegendStage.PickPrimalName)
+                    }
+
                     UiEvent.ShowAmountEditor -> {
-                        if (_state.value.minLegendThresholdInBtc != BigDecimal.ONE) {
-                            setState { copy(stage = PremiumBecomeLegendContract.BecomeLegendStage.PickAmount) }
+                        val state = _state.value
+                        if (!state.arePaymentInstructionsAvailable() && state.primalName != null) {
+                            fetchLegendPaymentInstructions(primalName = state.primalName)
                         }
+                        setState { copy(stage = PremiumBecomeLegendContract.BecomeLegendStage.PickAmount) }
                     }
 
                     UiEvent.GoBackToIntro -> setState {
@@ -90,35 +95,44 @@ class PremiumBecomeLegendViewModel @Inject constructor(
                     }
 
                     is UiEvent.UpdateSelectedAmount -> {
-                        val newAmountInBtc = it.newAmount.toBigDecimal().setScale(
-                            BTC_DECIMAL_PLACES,
-                            RoundingMode.HALF_UP,
+                        updatePaymentAmount(
+                            amount = it.newAmount.toBigDecimal().setScale(BTC_DECIMAL_PLACES, RoundingMode.HALF_UP),
                         )
-                        setState {
-                            copy(
-                                selectedAmountInBtc = newAmountInBtc,
-                                qrCodeValue = "bitcoin:${this.bitcoinAddress}?amount=$newAmountInBtc",
-                            )
-                        }
                     }
 
                     UiEvent.StartPurchaseMonitor -> startPurchaseMonitorIfStopped()
 
                     UiEvent.StopPurchaseMonitor -> stopPurchaseMonitor()
+
+                    is UiEvent.PrimalNamePicked -> setState { copy(primalName = it.primalName) }
+
+                    UiEvent.FetchPaymentInstructions -> {
+                        _state.value.primalName?.let { primalName ->
+                            fetchLegendPaymentInstructions(primalName = primalName)
+                        }
+                    }
                 }
             }
         }
+
+    private fun updatePaymentAmount(amount: BigDecimal) {
+        setState {
+            copy(
+                selectedAmountInBtc = amount,
+                qrCodeValue = "bitcoin:${this.bitcoinAddress}?amount=$amount",
+            )
+        }
+    }
 
     private fun observeActiveAccount() =
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect {
                 setState {
                     copy(
-                        displayName = it.authorDisplayName,
                         avatarCdnImage = it.avatarCdnImage,
-                        profileNostrAddress = it.internetIdentifier,
-                        profileLightningAddress = it.lightningAddress,
-                        membership = it.premiumMembership,
+                        userHandle = it.userDisplayName,
+                        isPremiumUser = it.premiumMembership?.isExpired() == false,
+                        primalName = it.premiumMembership?.premiumName,
                     )
                 }
             }
@@ -151,31 +165,33 @@ class PremiumBecomeLegendViewModel @Inject constructor(
         }
     }
 
-    private fun fetchLegendPaymentInstructions() {
-        _state.value.membership?.premiumName?.let { primalName ->
-            viewModelScope.launch {
-                try {
-                    val response = premiumRepository.fetchPrimalLegendPaymentInstructions(
-                        userId = activeAccountStore.activeUserId(),
-                        primalName = primalName,
+    private fun fetchLegendPaymentInstructions(primalName: String) =
+        viewModelScope.launch {
+            try {
+                setState { copy(isFetchingPaymentInstructions = true) }
+                val response = premiumRepository.fetchPrimalLegendPaymentInstructions(
+                    userId = activeAccountStore.activeUserId(),
+                    primalName = primalName,
+                )
+
+                val minAmount = response.amountBtc.toBigDecimal().setScale(BTC_DECIMAL_PLACES, RoundingMode.HALF_UP)
+                setState {
+                    copy(
+                        minLegendThresholdInBtc = minAmount,
+                        selectedAmountInBtc = minAmount,
+                        bitcoinAddress = response.qrCode.parseBitcoinPaymentInstructions()?.address,
+                        membershipQuoteId = response.membershipQuoteId,
                     )
-
-                    setState {
-                        copy(
-                            minLegendThresholdInBtc = response.amountBtc.toBigDecimal(),
-                            selectedAmountInBtc = response.amountBtc.toBigDecimal(),
-                            bitcoinAddress = response.qrCode.parseBitcoinPaymentInstructions()?.address,
-                            membershipQuoteId = response.membershipQuoteId,
-                        )
-                    }
-
-                    startPurchaseMonitorIfStopped()
-                } catch (error: WssException) {
-                    Timber.e(error)
                 }
+                updatePaymentAmount(amount = minAmount)
+
+                startPurchaseMonitorIfStopped()
+            } catch (error: WssException) {
+                Timber.e(error)
+            } finally {
+                setState { copy(isFetchingPaymentInstructions = false) }
             }
         }
-    }
 
     private fun subscribeToPurchaseMonitor(quoteId: String) =
         PrimalSocketSubscription.launch(
