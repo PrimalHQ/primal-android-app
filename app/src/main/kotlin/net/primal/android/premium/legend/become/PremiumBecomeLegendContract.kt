@@ -2,18 +2,15 @@ package net.primal.android.premium.legend.become
 
 import java.math.BigDecimal
 import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.premium.domain.PremiumMembership
 
 class PremiumBecomeLegendContract {
 
     data class UiState(
         val isPremiumBadgeOrigin: Boolean = false,
         val stage: BecomeLegendStage = BecomeLegendStage.Intro,
-        val displayName: String = "",
         val avatarCdnImage: CdnImage? = null,
-        val profileNostrAddress: String? = null,
-        val profileLightningAddress: String? = null,
-        val membership: PremiumMembership? = null,
+        val userHandle: String? = null,
+        val isPremiumUser: Boolean = false,
         val primalName: String? = null,
         val isFetchingPaymentInstructions: Boolean = false,
         val minLegendThresholdInBtc: BigDecimal = BigDecimal.ZERO,
@@ -23,7 +20,13 @@ class PremiumBecomeLegendContract {
         val bitcoinAddress: String? = null,
         val qrCodeValue: String? = null,
         val membershipQuoteId: String? = null,
-    )
+    ) {
+        fun arePaymentInstructionsAvailable() =
+            this.minLegendThresholdInBtc != BigDecimal.ZERO &&
+                this.selectedAmountInBtc != BigDecimal.ONE &&
+                this.bitcoinAddress != null &&
+                this.membershipQuoteId != null
+    }
 
     sealed class UiEvent {
         data object ShowAmountEditor : UiEvent()

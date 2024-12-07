@@ -12,7 +12,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
+import net.primal.android.R
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.premium.buying.name.PremiumPrimalNameStage
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.BecomeLegendStage
@@ -55,14 +57,12 @@ private fun PremiumBecomeLegendScreen(
     onClose: () -> Unit,
     onLegendPurchased: () -> Unit,
 ) {
-    val isUserPremium = state.primalName != null && state.membership != null
-
     BecomeLegendBackHandler(
         stage = state.stage,
         eventPublisher = eventPublisher,
         onClose = onClose,
         onLegendPurchased = onLegendPurchased,
-        isPremium = isUserPremium,
+        isPremiumUser = state.isPremiumUser,
     )
 
     AnimatedContent(
@@ -80,7 +80,7 @@ private fun PremiumBecomeLegendScreen(
                     isPremiumBadgeOrigin = state.isPremiumBadgeOrigin,
                     onClose = onClose,
                     onNext = {
-                        if (isUserPremium) {
+                        if (state.isPremiumUser) {
                             eventPublisher(PremiumBecomeLegendContract.UiEvent.ShowAmountEditor)
                         } else {
                             eventPublisher(PremiumBecomeLegendContract.UiEvent.GoToFindPrimalNameStage)
@@ -91,13 +91,13 @@ private fun PremiumBecomeLegendScreen(
 
             BecomeLegendStage.PickPrimalName -> {
                 PremiumPrimalNameStage(
-                    titleText = "Find Primal Name",
+                    titleText = stringResource(R.string.premium_primal_name_title),
                     onBack = { eventPublisher(PremiumBecomeLegendContract.UiEvent.GoBackToIntro) },
                     onPrimalNameAvailable = {
                         eventPublisher(PremiumBecomeLegendContract.UiEvent.PrimalNamePicked(it))
                         eventPublisher(PremiumBecomeLegendContract.UiEvent.ShowAmountEditor)
                     },
-                    initialName = state.primalName,
+                    initialName = state.primalName ?: state.userHandle?.takeIf { !it.contains(" ") },
                 )
             }
 
@@ -107,7 +107,7 @@ private fun PremiumBecomeLegendScreen(
                     state = state,
                     eventPublisher = eventPublisher,
                     onClose = {
-                        if (isUserPremium) {
+                        if (state.isPremiumUser) {
                             eventPublisher(PremiumBecomeLegendContract.UiEvent.GoBackToIntro)
                         } else {
                             eventPublisher(PremiumBecomeLegendContract.UiEvent.GoToFindPrimalNameStage)
@@ -138,7 +138,7 @@ private fun PremiumBecomeLegendScreen(
 @Composable
 private fun BecomeLegendBackHandler(
     stage: BecomeLegendStage,
-    isPremium: Boolean,
+    isPremiumUser: Boolean,
     onClose: () -> Unit,
     onLegendPurchased: () -> Unit,
     eventPublisher: (PremiumBecomeLegendContract.UiEvent) -> Unit,
@@ -150,7 +150,7 @@ private fun BecomeLegendBackHandler(
             BecomeLegendStage.PickPrimalName -> eventPublisher(PremiumBecomeLegendContract.UiEvent.GoBackToIntro)
 
             BecomeLegendStage.PickAmount -> {
-                if (isPremium) {
+                if (isPremiumUser) {
                     eventPublisher(PremiumBecomeLegendContract.UiEvent.GoBackToIntro)
                 } else {
                     eventPublisher(PremiumBecomeLegendContract.UiEvent.GoToFindPrimalNameStage)

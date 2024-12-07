@@ -198,6 +198,8 @@
     <string name="premium_become_legend_success_headline">Success, payment received!</string>
     <string name="premium_become_legend_success_supporting_text">You are now a Primal Legend</string>
     <string name="premium_become_legend_success_done_button">Done</string>
+    <string name="premium_become_legend_failed_fetching_payment_instructions">Unable to get payment instructions. Please try again.</string>
+    <string name="premium_become_legend_retry_button">Retry</string>
 
     <string name="premium_manage_title">Manage Premium</string>
     <string name="premium_manage_nostr_tools">Nostr Tools</string>

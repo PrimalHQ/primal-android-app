@@ -34,20 +34,17 @@ import androidx.compose.ui.unit.sp
 import java.time.Year
 import net.primal.android.R
 import net.primal.android.core.compose.NostrUserText
-import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalSliderThumb
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.premium.domain.PremiumMembership
 import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.premium.legend.become.BecomeLegendBottomBarButton
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.UiState
 import net.primal.android.premium.legend.become.PrimalLegendAmount
-import net.primal.android.premium.legend.become.utils.arePaymentInstructionsAvailable
 import net.primal.android.premium.ui.PremiumBadge
 import net.primal.android.theme.AppTheme
 
@@ -101,7 +98,7 @@ fun BecomeLegendAmountStage(
                 Spacer(modifier = Modifier.height(16.dp))
                 NostrUserText(
                     modifier = Modifier.padding(start = 8.dp),
-                    displayName = state.displayName,
+                    displayName = state.primalName ?: "",
                     internetIdentifier = "${state.primalName}@primal.net",
                     internetIdentifierBadgeSize = 24.dp,
                     fontSize = 20.sp,
@@ -109,19 +106,20 @@ fun BecomeLegendAmountStage(
                 )
             }
 
-            PrimalPremiumBadge(
-                membership = state.membership,
+            PremiumBadge(
+                firstCohort = "Legend",
+                secondCohort = Year.now().value.toString(),
+                membershipExpired = false,
+                legendaryStyle = LegendaryStyle.GOLD,
             )
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            if (state.arePaymentInstructionsAvailable()) {
+            if (state.arePaymentInstructionsAvailable() || state.isFetchingPaymentInstructions) {
                 SelectAmountSlider(
                     state = state,
                     eventPublisher = eventPublisher,
                 )
-            } else if (state.isFetchingPaymentInstructions) {
-                PrimalLoadingSpinner()
             } else {
                 NoPaymentInstructionsColumn(
                     onRetryClick = { eventPublisher(PremiumBecomeLegendContract.UiEvent.FetchPaymentInstructions) },
@@ -142,7 +140,7 @@ fun NoPaymentInstructionsColumn(onRetryClick: () -> Unit) {
     ) {
         Text(
             modifier = Modifier.padding(horizontal = 20.dp),
-            text = "We were unable to fetch payment instructions, please try again.",
+            text = stringResource(R.string.premium_become_legend_failed_fetching_payment_instructions),
             textAlign = TextAlign.Center,
             style = AppTheme.typography.bodyMedium,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
@@ -151,7 +149,7 @@ fun NoPaymentInstructionsColumn(onRetryClick: () -> Unit) {
             onClick = onRetryClick,
         ) {
             Text(
-                text = "Retry",
+                text = stringResource(R.string.premium_become_legend_retry_button),
                 style = AppTheme.typography.bodyLarge,
                 color = AppTheme.colorScheme.primary,
             )
@@ -221,25 +219,6 @@ private fun SelectAmountSlider(state: UiState, eventPublisher: (PremiumBecomeLeg
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
             )
         }
-    }
-}
-
-@Composable
-fun PrimalPremiumBadge(membership: PremiumMembership?) {
-    if (membership != null) {
-        PremiumBadge(
-            firstCohort = "Legend",
-            secondCohort = membership.cohort2,
-            membershipExpired = membership.isExpired(),
-            legendaryStyle = LegendaryStyle.GOLD,
-        )
-    } else {
-        PremiumBadge(
-            firstCohort = "Legend",
-            secondCohort = Year.now().value.toString(),
-            membershipExpired = false,
-            legendaryStyle = LegendaryStyle.GOLD,
-        )
     }
 }
 
