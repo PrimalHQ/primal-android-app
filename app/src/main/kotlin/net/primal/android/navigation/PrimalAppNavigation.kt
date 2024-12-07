@@ -1161,7 +1161,11 @@ private fun NavGraphBuilder.premiumBuyPrimalLegend(
         onClose = { navController.navigateUp() },
         onLegendPurchased = {
             navController.navigateUp()
-            navController.popBackStack()
+            if (it.buyingPremiumFromOrigin == FROM_ORIGIN_PREMIUM_BADGE) {
+                navController.navigateToPremiumHome()
+            } else {
+                navController.popBackStack()
+            }
         },
     )
 }
