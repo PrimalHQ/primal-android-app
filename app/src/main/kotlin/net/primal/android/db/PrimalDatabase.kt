@@ -21,6 +21,8 @@ import net.primal.android.explore.db.TrendingTopic
 import net.primal.android.explore.db.TrendingTopicDao
 import net.primal.android.feeds.db.Feed
 import net.primal.android.feeds.db.FeedDao
+import net.primal.android.highlights.db.HighlightDao
+import net.primal.android.highlights.db.HighlightData
 import net.primal.android.messages.db.DirectMessageDao
 import net.primal.android.messages.db.DirectMessageData
 import net.primal.android.messages.db.MessageConversationDao
@@ -89,8 +91,9 @@ import net.primal.android.wallet.db.WalletTransactionData
         ArticleData::class,
         ArticleCommentCrossRef::class,
         ArticleFeedCrossRef::class,
+        HighlightData::class,
     ],
-    version = 47,
+    version = 48,
     exportSchema = true,
 )
 @TypeConverters(
@@ -150,4 +153,6 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun articles(): ArticleDao
 
     abstract fun articleFeedsConnections(): ArticleFeedCrossRefDao
+
+    abstract fun highlights(): HighlightDao
 }

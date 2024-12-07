@@ -3,6 +3,7 @@ package net.primal.android.articles.db
 import androidx.room.Embedded
 import androidx.room.Relation
 import net.primal.android.bookmarks.db.PublicBookmark
+import net.primal.android.highlights.db.HighlightData
 import net.primal.android.profile.db.ProfileData
 import net.primal.android.stats.db.EventStats
 import net.primal.android.stats.db.EventUserStats
@@ -26,4 +27,7 @@ data class Article(
 
     @Relation(entityColumn = "tagValue", parentColumn = "aTag")
     val bookmark: PublicBookmark? = null,
+
+    @Relation(entityColumn = "highlightEventId", parentColumn = "aTag")
+    val highlights: List<HighlightData> = emptyList(),
 )
