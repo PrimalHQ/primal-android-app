@@ -17,8 +17,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -387,6 +390,8 @@ private fun ProfilePremiumBadge(
     secondCohort: String,
     legendaryStyle: LegendaryStyle?,
 ) {
+    val density = LocalDensity.current
+    val shadowOffset = with(density) { 0.5.dp.toPx() }
     Row(
         modifier = modifier
             .padding(bottom = 1.dp)
@@ -408,7 +413,12 @@ private fun ProfilePremiumBadge(
             modifier = Modifier.padding(top = 1.5.dp),
             text = firstCohort,
             fontWeight = FontWeight.Bold,
-            style = AppTheme.typography.bodyMedium,
+            style = AppTheme.typography.bodyMedium.copy(
+                shadow = Shadow(
+                    color = Color.Black.copy(alpha = 0.5f),
+                    offset = Offset(x = shadowOffset, y = shadowOffset),
+                ),
+            ),
             fontSize = 12.sp,
             color = Color.White,
         )
