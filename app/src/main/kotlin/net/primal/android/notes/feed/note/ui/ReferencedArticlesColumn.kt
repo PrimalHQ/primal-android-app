@@ -9,9 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import java.time.Instant
-import net.primal.android.articles.feed.ui.FeedArticleUi
-import net.primal.android.notes.feed.model.EventStatsUi
+import net.primal.android.notes.db.asFeedArticleUi
 import net.primal.android.notes.feed.model.NoteNostrUriUi
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 
@@ -39,22 +37,7 @@ fun ReferencedArticlesColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp),
-                data = FeedArticleUi(
-                    aTag = data.aTag,
-                    eventId = data.eventId,
-                    articleId = data.articleId,
-                    title = data.articleTitle,
-                    content = "",
-                    publishedAt = Instant.ofEpochSecond(data.createdAt),
-                    authorId = data.authorId,
-                    authorName = data.authorName,
-                    rawNostrEventJson = data.raw,
-                    isBookmarked = false,
-                    stats = EventStatsUi(),
-                    authorAvatarCdnImage = data.authorAvatarCdnImage,
-                    imageCdnImage = data.articleImageCdnImage,
-                    readingTimeInMinutes = data.articleReadingTimeInMinutes,
-                ),
+                data = data.asFeedArticleUi(),
                 colors = CardDefaults.cardColors(containerColor = containerColor),
                 hasBorder = hasBorder,
                 onClick = {
