@@ -1,2 +1,1 @@
-Legend badges.
 Stability and improvements.
