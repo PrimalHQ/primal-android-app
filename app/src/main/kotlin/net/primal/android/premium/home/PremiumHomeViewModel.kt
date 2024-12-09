@@ -131,7 +131,7 @@ class PremiumHomeViewModel @Inject constructor(
                 val clientConfigShowSupport = premiumRepository.shouldShowSupportUsNotice()
                 setState {
                     copy(
-                        showSupportUsNotice = clientConfigShowSupport && !membership.isPrimalLegendTier() || true,
+                        showSupportUsNotice = clientConfigShowSupport && !membership.isPrimalLegendTier(),
                     )
                 }
             } catch (error: WssException) {
