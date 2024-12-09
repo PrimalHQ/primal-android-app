@@ -17,10 +17,15 @@ import net.primal.android.nostr.utils.aTagToNaddr
 import net.primal.android.notes.db.ReferencedHighlight
 import net.primal.android.theme.AppTheme
 
-private val HighlightBackground = Color(0xFF2E3726)
+private val HighlightBackgroundDark = Color(0xFF2E3726)
+private val HighlightBackgroundLight = Color(0xFFE8F3E8)
 
 @Composable
-fun ReferencedHighlight(highlight: ReferencedHighlight, onClick: (naddr: String) -> Unit) {
+fun ReferencedHighlight(
+    highlight: ReferencedHighlight,
+    isDarkTheme: Boolean,
+    onClick: (naddr: String) -> Unit,
+) {
     val naddr = highlight.aTag.aTagToNaddr()?.toNaddrString()
     Text(
         modifier = Modifier
@@ -31,8 +36,8 @@ fun ReferencedHighlight(highlight: ReferencedHighlight, onClick: (naddr: String)
             ),
         text = highlight.text,
         style = AppTheme.typography.bodyMedium.merge(
-            background = HighlightBackground,
-            color = Color.White,
+            background = if (isDarkTheme) HighlightBackgroundDark else HighlightBackgroundLight,
+            color = AppTheme.colorScheme.onSurface,
             fontSize = 16.sp,
             lineBreak = LineBreak.Paragraph,
             platformStyle = PlatformTextStyle(includeFontPadding = false),

@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.primal.android.LocalContentDisplaySettings
+import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.attachments.domain.NostrUriType
 import net.primal.android.core.compose.PrimalClickableText
@@ -153,6 +154,7 @@ fun NoteContent(
     onClick: ((offset: Offset) -> Unit)? = null,
     onUrlClick: ((url: String) -> Unit)? = null,
 ) {
+    val isDarkTheme = LocalPrimalTheme.current.isDarkTheme
     val displaySettings = LocalContentDisplaySettings.current
     val seeMoreText = stringResource(id = R.string.feed_see_more)
     val contentText = remember {
@@ -213,6 +215,7 @@ fun NoteContent(
                 .forEachIndexed { index, highlight ->
                     ReferencedHighlight(
                         highlight = highlight,
+                        isDarkTheme = isDarkTheme,
                         onClick = { naddr -> noteCallbacks.onArticleClick?.invoke(naddr) },
                     )
 
