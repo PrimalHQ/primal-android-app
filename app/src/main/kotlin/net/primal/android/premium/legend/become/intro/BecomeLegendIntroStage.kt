@@ -102,7 +102,7 @@ private fun IntroContent(modifier: Modifier = Modifier, isPremiumBadgeOrigin: Bo
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         PrimalLegendPerk(
             modifier = Modifier.fillMaxWidth(),
@@ -111,7 +111,7 @@ private fun IntroContent(modifier: Modifier = Modifier, isPremiumBadgeOrigin: Bo
             description = stringResource(R.string.premium_become_legend_intro_perk_unlimited_premium_description),
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         PrimalLegendPerk(
             modifier = Modifier.fillMaxWidth(),
@@ -120,7 +120,7 @@ private fun IntroContent(modifier: Modifier = Modifier, isPremiumBadgeOrigin: Bo
             description = stringResource(R.string.premium_become_legend_intro_perk_more_storage_description),
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         PrimalLegendPerk(
             modifier = Modifier.fillMaxWidth(),
@@ -133,7 +133,7 @@ private fun IntroContent(modifier: Modifier = Modifier, isPremiumBadgeOrigin: Bo
             description = stringResource(R.string.premium_become_legend_intro_perk_custom_profile_description),
         )
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
         Text(
             text = stringResource(R.string.premium_become_legend_intro_gratitude_title),
