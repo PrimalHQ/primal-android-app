@@ -48,7 +48,9 @@ class MediaFeedViewModel @AssistedInject constructor(
     private fun observeActiveAccount() =
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect {
-                setState { copy(paywall = feedSpec.isPremiumFeedSpec() && !it.hasPremiumMembership()) }
+                val isPremiumFeedSpec = feedSpec.isPremiumFeedSpec()
+                val userHasPremium = it.hasPremiumMembership()
+                setState { copy(paywall = isPremiumFeedSpec && !userHasPremium) }
             }
         }
 }
