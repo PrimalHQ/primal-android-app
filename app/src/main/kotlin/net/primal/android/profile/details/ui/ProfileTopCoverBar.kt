@@ -115,7 +115,7 @@ fun ProfileTopCoverBar(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .offset(y = avatarValues.avatarOffsetY, x = avatarValues.avatarOffsetX)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 12.dp),
         ) {
             val legendaryCustomization = state.profileDetails?.premiumDetails?.legendaryCustomization
             UniversalAvatarThumbnail(
