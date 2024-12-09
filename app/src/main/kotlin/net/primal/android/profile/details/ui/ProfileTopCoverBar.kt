@@ -33,6 +33,7 @@ import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
+import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.NostrUserText
@@ -70,6 +71,7 @@ fun ProfileTopCoverBar(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
 ) {
+    val isDarkTheme = LocalPrimalTheme.current.isDarkTheme
     val coverBlur = AppTheme.colorScheme.surface.copy(alpha = coverValues.coverAlpha)
 
     BoxWithConstraints(
@@ -115,6 +117,7 @@ fun ProfileTopCoverBar(
                 .offset(y = avatarValues.avatarOffsetY, x = avatarValues.avatarOffsetX)
                 .padding(horizontal = 16.dp),
         ) {
+            val legendaryCustomization = state.profileDetails?.premiumDetails?.legendaryCustomization
             UniversalAvatarThumbnail(
                 modifier = Modifier
                     .padding(
@@ -126,8 +129,9 @@ fun ProfileTopCoverBar(
                 avatarSize = avatarValues.avatarSize,
                 onClick = { state.profileDetails?.avatarCdnImage?.sourceUrl?.let { onMediaItemClick(it) } },
                 avatarCdnImage = state.profileDetails?.avatarCdnImage,
-                fallbackBorderColor = Color.White,
-                legendaryCustomization = state.profileDetails?.premiumDetails?.legendaryCustomization,
+                fallbackBorderColor = if (isDarkTheme) Color.Black else Color.White,
+                borderSizeOverride = if (legendaryCustomization == null) 5.dp else null,
+                legendaryCustomization = legendaryCustomization,
             )
         }
     }
