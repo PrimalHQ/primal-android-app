@@ -1778,68 +1778,6 @@
           }
         ],
         "foreignKeys": []
-      },
-      {
-        "tableName": "HighlightData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`highlightId` TEXT NOT NULL, `authorId` TEXT NOT NULL, `content` TEXT NOT NULL, `context` TEXT, `alt` TEXT, `highlightEventId` TEXT, `highlightEventAuthorId` TEXT, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`highlightId`))",
-        "fields": [
-          {
-            "fieldPath": "highlightId",
-            "columnName": "highlightId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "authorId",
-            "columnName": "authorId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "content",
-            "columnName": "content",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "context",
-            "columnName": "context",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "alt",
-            "columnName": "alt",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "highlightEventId",
-            "columnName": "highlightEventId",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "highlightEventAuthorId",
-            "columnName": "highlightEventAuthorId",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "createdAt",
-            "columnName": "createdAt",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "highlightId"
-          ]
-        },
-        "indices": [],
-        "foreignKeys": []
       }
     ],
     "views": [],
