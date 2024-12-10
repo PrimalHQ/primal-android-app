@@ -1,4 +1,5 @@
 @file:Suppress("detekt:all")
+
 package net.primal.android.thread.articles.details.ui.richtext
 
 import androidx.compose.foundation.layout.fillMaxWidth

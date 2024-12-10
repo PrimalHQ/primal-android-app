@@ -33,7 +33,7 @@ import net.primal.android.notes.repository.FeedProcessor
 import timber.log.Timber
 
 @ExperimentalPagingApi
-class FeedRemoteMediator(
+class NoteFeedRemoteMediator(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val feedSpec: String,
     private val userId: String,
@@ -142,7 +142,7 @@ class FeedRemoteMediator(
             database.feedsConnections().deleteConnectionsByDirective(feedSpec)
         }
 
-    private suspend fun FeedRemoteMediator.syncFeed(
+    private suspend fun NoteFeedRemoteMediator.syncFeed(
         loadType: LoadType,
         pagingState: PagingState<Int, FeedPost>,
         remoteKey: FeedPostRemoteKey?,

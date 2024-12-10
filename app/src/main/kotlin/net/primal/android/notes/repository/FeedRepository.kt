@@ -12,7 +12,7 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feeds.domain.supportsNoteReposts
 import net.primal.android.notes.api.FeedApi
-import net.primal.android.notes.api.mediator.FeedRemoteMediator
+import net.primal.android.notes.api.mediator.NoteFeedRemoteMediator
 import net.primal.android.notes.api.model.FeedBySpecRequestBody
 import net.primal.android.notes.api.model.FeedResponse
 import net.primal.android.notes.api.model.ThreadRequestBody
@@ -111,7 +111,7 @@ class FeedRepository @Inject constructor(
                 initialLoadSize = PAGE_SIZE * 3,
                 enablePlaceholders = true,
             ),
-            remoteMediator = FeedRemoteMediator(
+            remoteMediator = NoteFeedRemoteMediator(
                 dispatcherProvider = dispatcherProvider,
                 feedSpec = feedSpec,
                 userId = activeAccountStore.activeUserId(),
