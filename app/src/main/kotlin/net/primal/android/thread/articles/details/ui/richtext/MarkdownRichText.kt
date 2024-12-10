@@ -1,3 +1,4 @@
+@file:Suppress("detekt:all")
 package net.primal.android.thread.articles.details.ui.richtext
 
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,7 +32,6 @@ import com.halilibo.richtext.ui.string.InlineContent
 import com.halilibo.richtext.ui.string.RichTextString
 import com.halilibo.richtext.ui.string.Text
 import com.halilibo.richtext.ui.string.withFormat
-import timber.log.Timber
 
 /**
  *
@@ -94,10 +94,12 @@ private fun computeRichTextString(astNode: AstNode): RichTextString {
                     }
                     null
                 }
+
                 is AstEmphasis -> richTextStringBuilder.pushFormat(RichTextString.Format.Italic)
                 is AstStrikethrough -> richTextStringBuilder.pushFormat(
                     RichTextString.Format.Strikethrough,
                 )
+
                 is AstImage -> {
                     richTextStringBuilder.appendInlineContent(
                         content = InlineContent(
@@ -115,30 +117,35 @@ private fun computeRichTextString(astNode: AstNode): RichTextString {
                     )
                     null
                 }
+
                 is AstLink -> {
-                    Timber.tag("astLink").i(currentNodeType.toString())
                     richTextStringBuilder.pushFormat(
                         RichTextString.Format.Link(
                             destination = currentNodeType.destination,
                         ),
                     )
                 }
+
                 is AstSoftLineBreak -> {
                     richTextStringBuilder.append(" ")
                     null
                 }
+
                 is AstHardLineBreak -> {
                     richTextStringBuilder.append("\n")
                     null
                 }
+
                 is AstStrongEmphasis -> richTextStringBuilder.pushFormat(RichTextString.Format.Bold)
                 is AstText -> {
                     richTextStringBuilder.append(currentNodeType.literal)
                     null
                 }
+
                 is AstLinkReferenceDefinition -> richTextStringBuilder.pushFormat(
                     RichTextString.Format.Link(destination = currentNodeType.destination),
                 )
+
                 else -> null
             }
 
