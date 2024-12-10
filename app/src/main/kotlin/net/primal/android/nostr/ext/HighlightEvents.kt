@@ -17,7 +17,7 @@ fun NostrEvent.asHighlightData() =
         content = this.content,
         alt = this.tags.findFirstAltDescription(),
         context = this.tags.findFirstContextTag(),
-        highlightEventId = this.tags.findFirstReplaceableEventId(),
-        highlightEventAuthorId = this.tags.findFirstProfileId()?.extractProfileId(),
+        referencedEventId = this.tags.findFirstReplaceableEventId(),
+        referencedEventAuthorId = this.tags.findFirstProfileId()?.extractProfileId(),
         createdAt = this.createdAt,
     )

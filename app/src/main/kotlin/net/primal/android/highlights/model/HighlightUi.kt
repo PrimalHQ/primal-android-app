@@ -20,7 +20,7 @@ fun HighlightData.asHighlightUi() =
         content = content,
         context = context,
         alt = alt,
-        highlightEventId = highlightEventId,
-        highlightEventAuthorId = highlightEventAuthorId,
+        highlightEventId = referencedEventId,
+        highlightEventAuthorId = referencedEventAuthorId,
         createdAt = createdAt,
     )

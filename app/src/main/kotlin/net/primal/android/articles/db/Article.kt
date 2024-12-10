@@ -28,6 +28,6 @@ data class Article(
     @Relation(entityColumn = "tagValue", parentColumn = "aTag")
     val bookmark: PublicBookmark? = null,
 
-    @Relation(entityColumn = "highlightEventId", parentColumn = "aTag")
+    @Relation(entityColumn = "referencedEventId", parentColumn = "aTag")
     val highlights: List<HighlightData> = emptyList(),
 )

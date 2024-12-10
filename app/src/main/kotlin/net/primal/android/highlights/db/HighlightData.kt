@@ -11,7 +11,7 @@ data class HighlightData(
     val content: String,
     val context: String?,
     val alt: String?,
-    val highlightEventId: String?,
-    val highlightEventAuthorId: String?,
+    val referencedEventId: String?,
+    val referencedEventAuthorId: String?,
     val createdAt: Long,
 )
