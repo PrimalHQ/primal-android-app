@@ -50,7 +50,7 @@ fun Article.mapAsFeedArticleUi(): FeedArticleUi {
         stats = EventStatsUi.from(eventStats = this.eventStats, userStats = null),
         readingTimeInMinutes = this.data.wordsCount.wordsCountToReadingTime(),
         eventZaps = this.eventZaps.map { it.asEventZapUiModel() },
-        authorLegendaryCustomization = this.author?.primalLegendProfile?.asLegendaryCustomization(),
+        authorLegendaryCustomization = this.author?.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
     )
 }
 

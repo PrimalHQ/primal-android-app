@@ -11,18 +11,24 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.button.PrimalLoadingButton
 
 @Composable
-fun BecomeLegendBottomBarButton(text: String, onClick: () -> Unit) {
+fun BecomeLegendBottomBarButton(
+    text: String,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = 32.dp, vertical = 32.dp),
+            .padding(horizontal = 32.dp)
+            .padding(bottom = 32.dp, top = 16.dp),
         contentAlignment = Alignment.Center,
     ) {
         PrimalLoadingButton(
             modifier = Modifier.fillMaxWidth(),
             text = text,
             onClick = onClick,
+            enabled = enabled,
         )
     }
 }

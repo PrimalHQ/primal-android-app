@@ -26,7 +26,7 @@ fun UserProfileSearchItem.mapAsUserProfileUi() =
         avatarCdnImage = this.metadata.avatarCdnImage,
         followersCount = this.followersCount,
         score = this.score,
-        legendaryCustomization = this.metadata.primalLegendProfile?.asLegendaryCustomization(),
+        legendaryCustomization = this.metadata.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
     )
 
 fun ProfileData.asUserProfileItemUi() =
@@ -38,5 +38,5 @@ fun ProfileData.asUserProfileItemUi() =
         followersCount = null,
         score = null,
         isFollowed = null,
-        legendaryCustomization = this.primalLegendProfile?.asLegendaryCustomization(),
+        legendaryCustomization = this.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
     )

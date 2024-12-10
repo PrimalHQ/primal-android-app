@@ -163,7 +163,8 @@ class WalletDashboardViewModel @Inject constructor(
             otherUserId = this.data.otherUserId,
             otherUserAvatarCdnImage = this.otherProfileData?.avatarCdnImage,
             otherUserDisplayName = this.otherProfileData?.authorNameUiFriendly(),
-            otherUserLegendaryCustomization = this.otherProfileData?.primalLegendProfile?.asLegendaryCustomization(),
+            otherUserLegendaryCustomization = this.otherProfileData?.primalPremiumInfo
+                ?.legendProfile?.asLegendaryCustomization(),
             isZap = this.data.isZap,
             isStorePurchase = this.data.isStorePurchase,
             isOnChainPayment = this.data.onChainAddress != null,

@@ -12,9 +12,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
+import net.primal.android.R
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.premium.buying.name.PremiumPrimalNameStage
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.BecomeLegendStage
+import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.UiState
 import net.primal.android.premium.legend.become.amount.BecomeLegendAmountStage
 import net.primal.android.premium.legend.become.intro.BecomeLegendIntroStage
 import net.primal.android.premium.legend.become.payment.BecomeLegendPaymentStage
@@ -48,7 +52,7 @@ fun PremiumBecomeLegendScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PremiumBecomeLegendScreen(
-    state: PremiumBecomeLegendContract.UiState,
+    state: UiState,
     eventPublisher: (PremiumBecomeLegendContract.UiEvent) -> Unit,
     onClose: () -> Unit,
     onLegendPurchased: () -> Unit,
@@ -58,6 +62,7 @@ private fun PremiumBecomeLegendScreen(
         eventPublisher = eventPublisher,
         onClose = onClose,
         onLegendPurchased = onLegendPurchased,
+        isPremiumUser = state.isPremiumUser,
     )
 
     AnimatedContent(
@@ -72,8 +77,27 @@ private fun PremiumBecomeLegendScreen(
             BecomeLegendStage.Intro -> {
                 BecomeLegendIntroStage(
                     modifier = Modifier.fillMaxSize(),
+                    isPremiumBadgeOrigin = state.isPremiumBadgeOrigin,
                     onClose = onClose,
-                    onNext = { eventPublisher(PremiumBecomeLegendContract.UiEvent.ShowAmountEditor) },
+                    onNext = {
+                        if (state.isPremiumUser) {
+                            eventPublisher(PremiumBecomeLegendContract.UiEvent.ShowAmountEditor)
+                        } else {
+                            eventPublisher(PremiumBecomeLegendContract.UiEvent.GoToFindPrimalNameStage)
+                        }
+                    },
+                )
+            }
+
+            BecomeLegendStage.PickPrimalName -> {
+                PremiumPrimalNameStage(
+                    titleText = stringResource(R.string.premium_primal_name_title),
+                    onBack = { eventPublisher(PremiumBecomeLegendContract.UiEvent.GoBackToIntro) },
+                    onPrimalNameAvailable = {
+                        eventPublisher(PremiumBecomeLegendContract.UiEvent.PrimalNamePicked(it))
+                        eventPublisher(PremiumBecomeLegendContract.UiEvent.ShowAmountEditor)
+                    },
+                    initialName = state.primalName ?: state.userHandle?.takeIf { !it.contains(" ") },
                 )
             }
 
@@ -82,7 +106,13 @@ private fun PremiumBecomeLegendScreen(
                     modifier = Modifier.fillMaxSize(),
                     state = state,
                     eventPublisher = eventPublisher,
-                    onClose = { eventPublisher(PremiumBecomeLegendContract.UiEvent.GoBackToIntro) },
+                    onClose = {
+                        if (state.isPremiumUser) {
+                            eventPublisher(PremiumBecomeLegendContract.UiEvent.GoBackToIntro)
+                        } else {
+                            eventPublisher(PremiumBecomeLegendContract.UiEvent.GoToFindPrimalNameStage)
+                        }
+                    },
                     onNext = { eventPublisher(PremiumBecomeLegendContract.UiEvent.ShowPaymentInstructions) },
                 )
             }
@@ -108,6 +138,7 @@ private fun PremiumBecomeLegendScreen(
 @Composable
 private fun BecomeLegendBackHandler(
     stage: BecomeLegendStage,
+    isPremiumUser: Boolean,
     onClose: () -> Unit,
     onLegendPurchased: () -> Unit,
     eventPublisher: (PremiumBecomeLegendContract.UiEvent) -> Unit,
@@ -116,7 +147,15 @@ private fun BecomeLegendBackHandler(
         when (stage) {
             BecomeLegendStage.Intro -> onClose()
 
-            BecomeLegendStage.PickAmount -> eventPublisher(PremiumBecomeLegendContract.UiEvent.GoBackToIntro)
+            BecomeLegendStage.PickPrimalName -> eventPublisher(PremiumBecomeLegendContract.UiEvent.GoBackToIntro)
+
+            BecomeLegendStage.PickAmount -> {
+                if (isPremiumUser) {
+                    eventPublisher(PremiumBecomeLegendContract.UiEvent.GoBackToIntro)
+                } else {
+                    eventPublisher(PremiumBecomeLegendContract.UiEvent.GoToFindPrimalNameStage)
+                }
+            }
 
             BecomeLegendStage.Payment -> eventPublisher(PremiumBecomeLegendContract.UiEvent.ShowAmountEditor)
 
@@ -132,9 +171,23 @@ private fun AnimatedContentTransitionScope<BecomeLegendStage>.transitionSpecBetw
                 .togetherWith(slideOutHorizontally(targetOffsetX = { -it }))
         }
 
-        BecomeLegendStage.PickAmount -> {
+        BecomeLegendStage.PickPrimalName -> {
             when (targetState) {
                 BecomeLegendStage.Intro -> {
+                    slideInHorizontally(initialOffsetX = { -it })
+                        .togetherWith(slideOutHorizontally(targetOffsetX = { it }))
+                }
+
+                else -> {
+                    slideInHorizontally(initialOffsetX = { it })
+                        .togetherWith(slideOutHorizontally(targetOffsetX = { -it }))
+                }
+            }
+        }
+
+        BecomeLegendStage.PickAmount -> {
+            when (targetState) {
+                BecomeLegendStage.PickPrimalName, BecomeLegendStage.Intro -> {
                     slideInHorizontally(initialOffsetX = { -it })
                         .togetherWith(slideOutHorizontally(targetOffsetX = { it }))
                 }

@@ -89,7 +89,15 @@ private fun NoteZapListItem(data: EventZapUiModel, onProfileClick: (profileId: S
                 )
             },
             headlineContent = {
-                NostrUserText(displayName = data.zapperName, internetIdentifier = data.zapperInternetIdentifier)
+                NostrUserText(
+                    displayName = data.zapperName,
+                    internetIdentifier = data.zapperInternetIdentifier,
+                    customBadgeStyle = if (data.zapperLegendaryCustomization?.customBadge == true) {
+                        data.zapperLegendaryCustomization.legendaryStyle
+                    } else {
+                        null
+                    },
+                )
             },
             supportingContent = {
                 if (!data.message.isNullOrEmpty()) {

@@ -3,9 +3,10 @@ package net.primal.android.core.compose.profile.model
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
-import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.profile.db.ProfileData
+import net.primal.android.profile.details.ui.model.PremiumProfileDataUi
+import net.primal.android.profile.domain.PrimalPremiumInfo
 
 data class ProfileDetailsUi(
     val pubkey: String,
@@ -21,7 +22,7 @@ data class ProfileDetailsUi(
     val website: String? = null,
     val primalName: String? = null,
     val lnUrlDecoded: String? = null,
-    val legendaryCustomization: LegendaryCustomization? = null,
+    val premiumDetails: PremiumProfileDataUi? = null,
 )
 
 fun ProfileData.asProfileDetailsUi() =
@@ -37,7 +38,17 @@ fun ProfileData.asProfileDetailsUi() =
         aboutHashtags = this.aboutHashtags,
         aboutUris = this.aboutUris,
         website = this.website,
-        primalName = this.primalName,
+        primalName = this.primalPremiumInfo?.primalName,
         lnUrlDecoded = this.lnUrlDecoded,
-        legendaryCustomization = this.primalLegendProfile?.asLegendaryCustomization(),
+        premiumDetails = this.primalPremiumInfo?.asPremiumProfileDataUi(),
+    )
+
+private fun PrimalPremiumInfo.asPremiumProfileDataUi() =
+    PremiumProfileDataUi(
+        primalName = this.primalName,
+        cohort1 = this.cohort1,
+        cohort2 = this.cohort2,
+        tier = this.tier,
+        expiresAt = this.expiresAt,
+        legendaryCustomization = this.legendProfile?.asLegendaryCustomization(),
     )

@@ -83,7 +83,8 @@ class PrimalDrawerViewModel @Inject constructor(
             profileRepository.observeProfile(profileId = activeAccountStore.activeUserId()).collect {
                 setState {
                     copy(
-                        legendaryCustomization = it.metadata?.primalLegendProfile?.asLegendaryCustomization(),
+                        legendaryCustomization = it.metadata?.primalPremiumInfo
+                            ?.legendProfile?.asLegendaryCustomization(),
                     )
                 }
             }

@@ -14,9 +14,12 @@ interface ProfileDataDao {
     fun insertOrUpdateAll(data: List<ProfileData>) {
         val existingProfiles = findProfileData(data.map { it.ownerId }).associateBy { it.ownerId }
         insertOrReplaceAll(
-            data.map {
-                it.copy(
-                    primalLegendProfile = it.primalLegendProfile ?: existingProfiles[it.ownerId]?.primalLegendProfile,
+            data.map { profileData ->
+                profileData.copy(
+                    primalPremiumInfo = profileData.primalPremiumInfo?.copy(
+                        legendProfile = profileData.primalPremiumInfo.legendProfile
+                            ?: existingProfiles[profileData.ownerId]?.primalPremiumInfo?.legendProfile,
+                    ),
                 )
             },
         )

@@ -60,6 +60,6 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
         eventZaps = this.eventZaps
             .map { it.asEventZapUiModel() }
             .sortedWith(EventZapUiModel.DefaultComparator),
-        authorLegendaryCustomization = this.author?.primalLegendProfile?.asLegendaryCustomization(),
+        authorLegendaryCustomization = this.author?.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
     )
 }

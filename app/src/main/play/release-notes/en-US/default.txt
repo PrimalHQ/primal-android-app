@@ -1,2 +1,1 @@
-Legend profile improvements.
 Stability and improvements.

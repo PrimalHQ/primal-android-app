@@ -15,6 +15,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -38,8 +45,14 @@ import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.formatNip05Identifier
+import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.premium.legend.LegendaryStyle
+import net.primal.android.premium.utils.isPremiumFreeTier
+import net.primal.android.premium.utils.isPremiumTier
+import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.details.ProfileDetailsContract
+import net.primal.android.profile.details.ui.model.PremiumProfileDataUi
+import net.primal.android.profile.details.ui.model.shouldShowPremiumBadge
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.domain.DraftTx
@@ -57,44 +70,44 @@ fun ProfileDetailsHeader(
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onPremiumBadgeClick: (tier: String) -> Unit,
 ) {
-    Column {
-        ProfileHeaderDetails(
-            state = state,
-            onEditProfileClick = onEditProfileClick,
-            onMessageClick = { onMessageClick(state.profileId) },
-            onZapProfileClick = {
-                val profileLud16 = state.profileDetails?.lightningAddress
-                if (profileLud16?.isLightningAddress() == true) {
-                    onZapProfileClick(
-                        DraftTx(targetUserId = state.profileId, targetLud16 = profileLud16),
-                    )
-                } else {
-                    onUnableToZapProfile()
-                }
-            },
-            onFollow = {
-                eventPublisher(
-                    ProfileDetailsContract.UiEvent.FollowAction(
-                        profileId = state.profileId,
-                        forceUpdate = false,
-                    ),
+    ProfileHeaderDetails(
+        state = state,
+        onEditProfileClick = onEditProfileClick,
+        onMessageClick = { onMessageClick(state.profileId) },
+        onZapProfileClick = {
+            val profileLud16 = state.profileDetails?.lightningAddress
+            if (profileLud16?.isLightningAddress() == true) {
+                onZapProfileClick(
+                    DraftTx(targetUserId = state.profileId, targetLud16 = profileLud16),
                 )
-            },
-            onUnfollow = {
-                eventPublisher(
-                    ProfileDetailsContract.UiEvent.UnfollowAction(
-                        profileId = state.profileId,
-                        forceUpdate = false,
-                    ),
-                )
-            },
-            onDrawerQrCodeClick = onDrawerQrCodeClick,
-            onFollowsClick = onFollowsClick,
-            onProfileClick = onProfileClick,
-            onHashtagClick = onHashtagClick,
-        )
-    }
+            } else {
+                onUnableToZapProfile()
+            }
+        },
+        onFollow = {
+            eventPublisher(
+                ProfileDetailsContract.UiEvent.FollowAction(
+                    profileId = state.profileId,
+                    forceUpdate = false,
+                ),
+            )
+        },
+        onUnfollow = {
+            eventPublisher(
+                ProfileDetailsContract.UiEvent.UnfollowAction(
+                    profileId = state.profileId,
+                    forceUpdate = false,
+                ),
+            )
+        },
+        onDrawerQrCodeClick = onDrawerQrCodeClick,
+        onFollowsClick = onFollowsClick,
+        onProfileClick = onProfileClick,
+        onHashtagClick = onHashtagClick,
+        onPremiumBadgeClick = onPremiumBadgeClick,
+    )
 }
 
 @Composable
@@ -109,6 +122,7 @@ private fun ProfileHeaderDetails(
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
+    onPremiumBadgeClick: (tier: String) -> Unit,
 ) {
     val localUriHandler = LocalUriHandler.current
 
@@ -138,9 +152,9 @@ private fun ProfileHeaderDetails(
         UserDisplayName(
             displayName = state.profileDetails?.authorDisplayName ?: state.profileId.asEllipsizedNpub(),
             internetIdentifier = state.profileDetails?.internetIdentifier,
-            isProfileFollowingMe = state.isProfileFollowingMe,
-            customBadge = state.profileDetails?.legendaryCustomization?.customBadge == true,
-            legendaryStyle = state.profileDetails?.legendaryCustomization?.legendaryStyle,
+            profilePremiumDetails = state.profileDetails?.premiumDetails,
+            activeUserPremiumTier = state.activeUserPremiumTier,
+            onPremiumBadgeClick = onPremiumBadgeClick,
         )
 
         if (state.profileDetails?.internetIdentifier?.isNotEmpty() == true) {
@@ -151,9 +165,10 @@ private fun ProfileHeaderDetails(
         }
 
         ProfileFollowIndicators(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp),
             followingCount = state.profileStats?.followingCount,
             followersCount = state.profileStats?.followersCount,
+            isProfileFollowingMe = state.isProfileFollowingMe,
             onFollowingClick = { onFollowsClick(state.profileId, ProfileFollowsType.Following) },
             onFollowersClick = { onFollowsClick(state.profileId, ProfileFollowsType.Followers) },
         )
@@ -205,7 +220,7 @@ private fun UserFollowedByIndicator(
         AvatarThumbnailsRow(
             avatarBorderColor = AppTheme.colorScheme.background,
             avatarCdnImages = profiles.map { it.avatarCdnImage },
-            avatarLegendaryCustomizations = profiles.map { it.legendaryCustomization },
+            avatarLegendaryCustomizations = profiles.map { it.premiumDetails?.legendaryCustomization },
             onClick = {
                 onProfileClick(profiles[it].pubkey)
             },
@@ -232,6 +247,7 @@ private fun ProfileFollowIndicators(
     modifier: Modifier = Modifier,
     followingCount: Int?,
     followersCount: Int?,
+    isProfileFollowingMe: Boolean,
     onFollowingClick: () -> Unit,
     onFollowersClick: () -> Unit,
 ) {
@@ -278,7 +294,7 @@ private fun ProfileFollowIndicators(
     }
     Row(
         modifier = modifier,
-        verticalAlignment = Alignment.Bottom,
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Text(
@@ -291,48 +307,18 @@ private fun ProfileFollowIndicators(
             text = followersAnnotatedString,
             style = AppTheme.typography.labelLarge,
         )
-    }
-}
-
-@Composable
-private fun UserDisplayName(
-    modifier: Modifier = Modifier,
-    displayName: String,
-    internetIdentifier: String?,
-    isProfileFollowingMe: Boolean,
-    customBadge: Boolean,
-    legendaryStyle: LegendaryStyle?,
-) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        NostrUserText(
-            modifier = Modifier
-                .padding(start = 14.dp, end = 6.dp)
-                .padding(top = 12.dp, bottom = 3.dp),
-            displayName = displayName,
-            internetIdentifier = internetIdentifier,
-            internetIdentifierBadgeSize = 20.dp,
-            internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
-            style = AppTheme.typography.titleLarge.copy(
-                fontSize = 22.sp,
-                lineHeight = 20.sp,
-                fontWeight = FontWeight.Bold,
-            ),
-            customBadgeStyle = if (customBadge) legendaryStyle else null,
-        )
 
         if (isProfileFollowingMe) {
             Box(
                 modifier = Modifier
-                    .padding(top = 6.dp)
-                    .height(24.dp)
+                    .height(20.dp)
+                    .clip(AppTheme.shapes.extraLarge)
                     .background(
                         color = AppTheme.extraColorScheme.surfaceVariantAlt1,
                         shape = AppTheme.shapes.extraSmall,
                     )
-                    .padding(horizontal = 6.dp),
+                    .padding(horizontal = 12.dp)
+                    .padding(top = 0.5.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
@@ -341,6 +327,117 @@ private fun UserDisplayName(
                     style = AppTheme.typography.bodySmall,
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun UserDisplayName(
+    modifier: Modifier = Modifier,
+    displayName: String,
+    internetIdentifier: String?,
+    profilePremiumDetails: PremiumProfileDataUi?,
+    activeUserPremiumTier: String?,
+    onPremiumBadgeClick: (tier: String) -> Unit,
+) {
+    val hasCustomBadge = profilePremiumDetails?.legendaryCustomization?.customBadge == true
+
+    Row(
+        modifier = modifier.padding(top = 12.dp, bottom = 3.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        NostrUserText(
+            modifier = Modifier.padding(start = 14.dp, end = 6.dp),
+            displayName = displayName,
+            internetIdentifier = internetIdentifier,
+            internetIdentifierBadgeSize = 21.dp,
+            internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
+            style = AppTheme.typography.titleLarge.copy(
+                fontSize = 22.sp,
+                lineHeight = 20.sp,
+                fontWeight = FontWeight.Bold,
+            ),
+            customBadgeStyle = if (hasCustomBadge) {
+                profilePremiumDetails?.legendaryCustomization?.legendaryStyle
+            } else {
+                null
+            },
+        )
+
+        val isPremiumBadgeClickable = activeUserPremiumTier == null ||
+            activeUserPremiumTier.isPremiumFreeTier() ||
+            (activeUserPremiumTier.isPremiumTier() && profilePremiumDetails?.tier.isPrimalLegendTier())
+
+        if (profilePremiumDetails?.shouldShowPremiumBadge() == true) {
+            ProfilePremiumBadge(
+                modifier = if (isPremiumBadgeClickable && profilePremiumDetails.tier != null) {
+                    Modifier.clickable { onPremiumBadgeClick(profilePremiumDetails.tier) }
+                } else {
+                    Modifier
+                },
+                firstCohort = profilePremiumDetails.cohort1 ?: "",
+                secondCohort = profilePremiumDetails.cohort2 ?: "",
+                legendaryStyle = profilePremiumDetails.legendaryCustomization?.legendaryStyle,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ProfilePremiumBadge(
+    modifier: Modifier = Modifier,
+    firstCohort: String,
+    secondCohort: String,
+    legendaryStyle: LegendaryStyle?,
+) {
+    val density = LocalDensity.current
+    val shadowOffset = with(density) { 0.5.dp.toPx() }
+    Row(
+        modifier = modifier
+            .padding(bottom = 1.dp)
+            .shadow(elevation = 1.dp, shape = AppTheme.shapes.extraLarge)
+            .height(20.dp)
+            .clip(AppTheme.shapes.extraLarge)
+            .background(
+                brush = if (legendaryStyle != null && legendaryStyle != LegendaryStyle.NO_CUSTOMIZATION) {
+                    legendaryStyle.brush
+                } else {
+                    Brush.linearGradient(listOf(AppTheme.colorScheme.tertiary, AppTheme.colorScheme.tertiary))
+                },
+            )
+            .padding(start = 10.dp, end = 2.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            modifier = Modifier.padding(top = 1.5.dp),
+            text = firstCohort,
+            fontWeight = FontWeight.Bold,
+            style = AppTheme.typography.bodyMedium.copy(
+                shadow = Shadow(
+                    color = Color.Black.copy(alpha = 0.5f),
+                    offset = Offset(x = shadowOffset, y = shadowOffset),
+                ),
+            ),
+            fontSize = 12.sp,
+            color = Color.White,
+        )
+        Box(
+            modifier = Modifier
+                .height(16.dp)
+                .clip(AppTheme.shapes.extraLarge)
+                .background(Color.Black.copy(alpha = 0.4f)),
+        ) {
+            Text(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp, vertical = 2.dp)
+                    .padding(top = 0.75.dp),
+                text = secondCohort,
+                style = AppTheme.typography.bodySmall,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Normal,
+                color = Color.White,
+            )
         }
     }
 }
@@ -387,6 +484,17 @@ private fun PreviewProfileHeaderDetails() {
                         authorDisplayName = "qauser",
                         internetIdentifier = "qa@primal.net",
                         about = "qauser",
+                        premiumDetails = PremiumProfileDataUi(
+                            primalName = "qa",
+                            cohort1 = "Legend",
+                            cohort2 = "2024",
+                            tier = "primal-legend",
+                            legendaryCustomization = LegendaryCustomization(
+                                avatarGlow = true,
+                                legendaryStyle = LegendaryStyle.BLUE,
+                                customBadge = true,
+                            ),
+                        ),
                     ),
                     profileStats = ProfileStatsUi(
                         followingCount = 11,
@@ -404,6 +512,7 @@ private fun PreviewProfileHeaderDetails() {
                 onFollowsClick = { _, _ -> },
                 onProfileClick = {},
                 onHashtagClick = {},
+                onPremiumBadgeClick = {},
             )
         }
     }

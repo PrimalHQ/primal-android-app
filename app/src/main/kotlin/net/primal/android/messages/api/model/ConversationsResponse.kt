@@ -11,4 +11,5 @@ data class ConversationsResponse(
     val cdnResources: List<PrimalEvent>,
     val primalUserNames: PrimalEvent? = null,
     val primalLegendProfiles: PrimalEvent? = null,
+    val primalPremiumInfo: PrimalEvent? = null,
 )

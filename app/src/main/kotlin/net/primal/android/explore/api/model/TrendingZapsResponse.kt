@@ -14,4 +14,5 @@ data class TrendingZapsResponse(
     val noteEvents: List<NostrEvent> = emptyList(),
     val primalUserNames: PrimalEvent? = null,
     val primalLegendProfiles: PrimalEvent? = null,
+    val primalPremiumInfo: PrimalEvent? = null,
 )

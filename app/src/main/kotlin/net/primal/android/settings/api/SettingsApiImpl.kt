@@ -88,6 +88,7 @@ class SettingsApiImpl @Inject constructor(
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
             primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
             primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
+            primalPremiumInfo = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
         )
     }
 }

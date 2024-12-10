@@ -22,4 +22,5 @@ data class ArticleResponse(
     val primalLongFormWords: List<PrimalEvent>,
     val primalUserNames: PrimalEvent?,
     val primalLegendProfiles: PrimalEvent?,
+    val primalPremiumInfo: PrimalEvent?,
 )

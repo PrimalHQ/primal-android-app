@@ -1,10 +1,10 @@
 ## Changes
-- Updated avatar border sizes according to design
-- Fixed broken mentions
-- Fixed isPrimalDvm api broken changes
-- Fixed cohort broken changes; Added premium tier business logic;
-- Fixed drawer menu items not changing background on theme change;
-- Updated legend styles;
-- Fixed avatars cutoff in advanced search user pickers;
-- Fixed avatar clicks not working on advanced search;
-- Disabled legendary avatar customization on new notes pill;
+- Added text shadow to premium badge on profile details
+- Updated padding on become legend intro screen
+- Fixed paywall always shown on adv. search media grid
+- Implemented tap QR code to copy addresses on profile qr code viewer
+- Fixed profile details avatar horizontal padding
+- Fixed border size and color for non-legends in profile details
+- Reverted "Show support us notice always"
+- Fixed legend unlimited badge icon shadow
+- Fixed note highlight colors for light theme

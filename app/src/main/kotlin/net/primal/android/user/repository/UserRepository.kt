@@ -156,6 +156,7 @@ class UserRepository @Inject constructor(
         val profileData = profileMetadataNostrEvent.asProfileDataPO(
             cdnResources = emptyMap(),
             primalUserNames = emptyMap(),
+            primalPremiumInfo = emptyMap(),
             primalLegendProfiles = emptyMap(),
         )
         database.profiles().insertOrUpdateAll(data = listOf(profileData))

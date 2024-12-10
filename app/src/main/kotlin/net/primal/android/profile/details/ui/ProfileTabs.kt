@@ -19,6 +19,10 @@ import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
 import net.primal.android.R
 import net.primal.android.core.utils.shortened
+import net.primal.android.profile.details.MEDIA_TAB_INDEX
+import net.primal.android.profile.details.NOTES_TAB_INDEX
+import net.primal.android.profile.details.READS_TAB_INDEX
+import net.primal.android.profile.details.REPLIES_TAB_INDEX
 import net.primal.android.theme.AppTheme
 
 internal const val PROFILE_TAB_COUNT = 4

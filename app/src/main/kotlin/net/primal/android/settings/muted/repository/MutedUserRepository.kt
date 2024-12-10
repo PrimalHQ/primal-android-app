@@ -12,6 +12,7 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
+import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.settings.api.SettingsApi
@@ -75,12 +76,14 @@ class MutedUserRepository @Inject constructor(
         val response = settingsApi.getMuteList(userId = userId)
         val muteList = response.muteList?.tags?.mapToPubkeySet() ?: emptySet()
         val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
+        val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
         val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
         val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
         val profileData = response.metadataEvents.map {
             it.asProfileDataPO(
                 cdnResources = cdnResources,
                 primalUserNames = primalUserNames,
+                primalPremiumInfo = primalPremiumInfo,
                 primalLegendProfiles = primalLegendProfiles,
             )
         }

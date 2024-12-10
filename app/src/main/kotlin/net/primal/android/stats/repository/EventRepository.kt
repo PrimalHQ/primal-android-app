@@ -19,6 +19,7 @@ import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
+import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
 import net.primal.android.nostr.model.NostrEventKind
@@ -126,10 +127,12 @@ class EventRepository @Inject constructor(
 
             val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource()
             val primalNames = response.primalUserNames.parseAndMapPrimalUserNames()
+            val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
             val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
             val profiles = response.profiles.mapAsProfileDataPO(
                 cdnResources = cdnResources,
                 primalUserNames = primalNames,
+                primalPremiumInfo = primalPremiumInfo,
                 primalLegendProfiles = primalLegendProfiles,
             )
             database.withTransaction {

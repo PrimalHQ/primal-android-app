@@ -1,11 +1,17 @@
+@file:Suppress("TooManyFunctions")
+
 package net.primal.android.premium.utils
 
 import net.primal.android.premium.domain.PremiumMembership
 import net.primal.android.user.domain.UserAccount
 
-fun PremiumMembership?.isPremiumTier() = this?.tier == "premium"
-fun PremiumMembership?.isPremiumFreeTier() = this?.tier == "free"
-fun PremiumMembership?.isPrimalLegendTier() = this?.tier == "premium-legend"
+fun String?.isPremiumTier() = this == "premium"
+fun String?.isPremiumFreeTier() = this == "free"
+fun String?.isPrimalLegendTier() = this == "premium-legend"
+
+fun PremiumMembership?.isPremiumTier() = this?.tier.isPremiumTier()
+fun PremiumMembership?.isPremiumFreeTier() = this?.tier.isPremiumFreeTier()
+fun PremiumMembership?.isPrimalLegendTier() = this?.tier.isPrimalLegendTier()
 
 fun String?.isOriginAndroid() = this?.lowercase() == "android"
 fun String?.isOriginIOS() = this?.lowercase() == "ios"

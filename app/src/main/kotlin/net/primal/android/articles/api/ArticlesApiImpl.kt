@@ -43,6 +43,7 @@ class ArticlesApiImpl @Inject constructor(
             primalLongFormWords = queryResult.filterPrimalEvents(NostrEventKind.PrimalLongFormWordsCount),
             primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
             primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
+            primalPremiumInfo = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
         )
     }
 
@@ -72,6 +73,7 @@ class ArticlesApiImpl @Inject constructor(
             primalLongFormWords = queryResult.filterPrimalEvents(NostrEventKind.PrimalLongFormWordsCount),
             primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
             primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
+            primalPremiumInfo = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
         )
     }
 }

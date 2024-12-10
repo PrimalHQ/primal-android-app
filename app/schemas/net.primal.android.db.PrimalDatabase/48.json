@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 48,
-    "identityHash": "06f5bd9c678486ea2bbe40b4979a6961",
+    "identityHash": "d49be0b1b31ac794b304772bd1808137",
     "entities": [
       {
         "tableName": "PostData",
@@ -92,7 +92,7 @@
       },
       {
         "tableName": "ProfileData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ownerId` TEXT NOT NULL, `eventId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `raw` TEXT NOT NULL, `handle` TEXT, `displayName` TEXT, `internetIdentifier` TEXT, `lightningAddress` TEXT, `lnUrlDecoded` TEXT, `avatarCdnImage` TEXT, `bannerCdnImage` TEXT, `website` TEXT, `about` TEXT, `aboutUris` TEXT NOT NULL, `aboutHashtags` TEXT NOT NULL, `primalName` TEXT, `primalLegendProfile` TEXT, PRIMARY KEY(`ownerId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ownerId` TEXT NOT NULL, `eventId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `raw` TEXT NOT NULL, `handle` TEXT, `displayName` TEXT, `internetIdentifier` TEXT, `lightningAddress` TEXT, `lnUrlDecoded` TEXT, `avatarCdnImage` TEXT, `bannerCdnImage` TEXT, `website` TEXT, `about` TEXT, `aboutUris` TEXT NOT NULL, `aboutHashtags` TEXT NOT NULL, `primalName` TEXT, `primalPremiumInfo` TEXT, PRIMARY KEY(`ownerId`))",
         "fields": [
           {
             "fieldPath": "ownerId",
@@ -191,8 +191,8 @@
             "notNull": false
           },
           {
-            "fieldPath": "primalLegendProfile",
-            "columnName": "primalLegendProfile",
+            "fieldPath": "primalPremiumInfo",
+            "columnName": "primalPremiumInfo",
             "affinity": "TEXT",
             "notNull": false
           }
@@ -1845,7 +1845,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '06f5bd9c678486ea2bbe40b4979a6961')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd49be0b1b31ac794b304772bd1808137')"
     ]
   }
 }

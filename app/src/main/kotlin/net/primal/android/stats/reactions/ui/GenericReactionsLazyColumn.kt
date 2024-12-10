@@ -79,13 +79,18 @@ private fun GenericReactionListItem(
                 avatarCdnImage = item.profile.avatarCdnImage,
                 avatarSize = 42.dp,
                 onClick = { onProfileClick(item.profile.pubkey) },
-                legendaryCustomization = item.profile.legendaryCustomization,
+                legendaryCustomization = item.profile.premiumDetails?.legendaryCustomization,
             )
         },
         headlineContent = {
             NostrUserText(
                 displayName = item.profile.authorDisplayName,
                 internetIdentifier = item.profile.internetIdentifier,
+                customBadgeStyle = if (item.profile.premiumDetails?.legendaryCustomization?.customBadge == true) {
+                    item.profile.premiumDetails.legendaryCustomization.legendaryStyle
+                } else {
+                    null
+                },
             )
         },
         trailingContent = {

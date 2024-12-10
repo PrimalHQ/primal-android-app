@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.math.BigDecimal
@@ -21,7 +22,9 @@ fun PrimalLegendAmount(btcValue: BigDecimal, exchangeBtcUsdRate: Double?) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         MainAmountText(
-            modifier = Modifier.padding(start = 32.dp),
+            modifier = Modifier
+                .padding(start = 32.dp)
+                .alpha(alpha = if (btcValue == BigDecimal.ZERO) 0.5f else 1.0f),
             amount = String.format(Locale.US, "%.8f", btcValue),
             currency = "BTC",
             textSize = 44.sp,

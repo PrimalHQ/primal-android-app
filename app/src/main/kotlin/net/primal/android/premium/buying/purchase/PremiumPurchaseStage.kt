@@ -122,7 +122,7 @@ fun PremiumPurchaseStage(
                 UniversalAvatarThumbnail(
                     avatarCdnImage = state.profile.avatarCdnImage,
                     avatarSize = 80.dp,
-                    legendaryCustomization = state.profile.legendaryCustomization,
+                    legendaryCustomization = state.profile.premiumDetails?.legendaryCustomization,
                 )
                 NostrUserText(
                     displayName = state.primalName,

@@ -23,6 +23,7 @@ import net.primal.android.nostr.ext.mapNotNullAsRepostDataPO
 import net.primal.android.nostr.ext.mapReferencedEventsAsArticleDataPO
 import net.primal.android.nostr.ext.mapReferencedEventsAsHighlightDataPO
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
+import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.notes.api.model.FeedResponse
@@ -47,11 +48,13 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
     val allArticles = articles + referencedArticles
 
     val primalUserNames = this.primalUserNames.parseAndMapPrimalUserNames()
+    val primalPremiumInfo = this.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
     val primalLegendProfiles = this.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
 
     val profiles = metadata.mapAsProfileDataPO(
         cdnResources = cdnResources,
         primalUserNames = primalUserNames,
+        primalPremiumInfo = primalPremiumInfo,
         primalLegendProfiles = primalLegendProfiles,
     )
     val profileIdToProfileDataMap = profiles.asMapByKey { it.ownerId }

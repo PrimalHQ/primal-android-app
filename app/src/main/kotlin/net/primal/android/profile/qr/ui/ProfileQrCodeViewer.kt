@@ -91,7 +91,7 @@ fun ProfileQrCodeViewer(
             avatarCdnImage = profileDetails?.avatarCdnImage,
             hasBorder = true,
             fallbackBorderColor = Color.White,
-            legendaryCustomization = profileDetails?.legendaryCustomization,
+            legendaryCustomization = profileDetails?.premiumDetails?.legendaryCustomization,
             defaultAvatar = {
                 DefaultAvatarThumbnailPlaceholderListItemImage(
                     backgroundColor = Color.White,
@@ -155,6 +155,7 @@ private fun QrCodeViewer(
     val lud16 = lightningAddress.orEmpty()
     var isProfileTabSelected by remember { mutableStateOf(true) }
     val flipController = rememberFlipController()
+    val clipboardManager = LocalClipboardManager.current
 
     if (lud16.isNotEmpty()) {
         QrCodeTabs(
@@ -182,12 +183,18 @@ private fun QrCodeViewer(
         flipOnTouch = false,
         frontSide = {
             QrCodeBox(
-                qrCodeValue = "nostr:${profileId.hexToNpubHrp()}",
+                modifier = Modifier.clickable {
+                    clipboardManager.setText(AnnotatedString(text = pubkey))
+                },
+                qrCodeValue = "nostr:$pubkey}",
                 type = QrCodeType.Nostr,
             )
         },
         backSide = {
             QrCodeBox(
+                modifier = Modifier.clickable {
+                    clipboardManager.setText(AnnotatedString(text = lud16))
+                },
                 qrCodeValue = "lightning:$lud16",
                 type = QrCodeType.Lightning,
             )
@@ -205,9 +212,13 @@ private fun QrCodeViewer(
 }
 
 @Composable
-private fun QrCodeBox(qrCodeValue: String, type: QrCodeType) {
+private fun QrCodeBox(
+    modifier: Modifier,
+    qrCodeValue: String,
+    type: QrCodeType,
+) {
     Box(
-        modifier = Modifier.background(Color.White, shape = AppTheme.shapes.extraLarge),
+        modifier = modifier.background(Color.White, shape = AppTheme.shapes.extraLarge),
         contentAlignment = Alignment.Center,
     ) {
         if (qrCodeValue.isNotEmpty()) {

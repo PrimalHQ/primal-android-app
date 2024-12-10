@@ -116,8 +116,11 @@ private fun MediaFeedGrid(
                         else -> {}
                     }
                 }
-                item(span = { GridItemSpan(PAYWALL_COLUMN_SPAN) }) {
-                    PremiumFeedPaywall(onClick = onGetPrimalPremiumClick)
+
+                if (state.paywall) {
+                    item(span = { GridItemSpan(PAYWALL_COLUMN_SPAN) }) {
+                        PremiumFeedPaywall(onClick = onGetPrimalPremiumClick)
+                    }
                 }
             }
         }

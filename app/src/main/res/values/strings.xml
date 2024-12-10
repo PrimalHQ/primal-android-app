@@ -103,6 +103,8 @@
     <string name="drawer_followers_suffix">Followers</string>
     <string name="drawer_following_suffix">Following</string>
 
+    <string name="premium_primal_og_title">Primal OG</string>
+    <string name="premium_primal_og_description">The Primal OG tier was created to recognize those users who signed up to Primal Premium in the first year.</string>
     <string name="premium_subscribe_to_get">Subscribe to Primal Premium to get:</string>
     <string name="premium_primal_name">Primal Name</string>
     <string name="premium_primal_name_benefit_one">Verified nostr address</string>
@@ -176,14 +178,15 @@
 
     <string name="premium_support_primal_title">Support Primal</string>
 
-    <string name="premium_become_legend_primal_title">Become a Primal Legend</string>
+    <string name="premium_become_legend_primal_title">Primal Legend</string>
+    <string name="premium_become_legend_intro_description">The Legend tier was created to recognize users who have made a significant\ncontribution to Primal.</string>
     <string name="premium_become_legend_intro_subtitle">Donate $1000 or more to gain:</string>
     <string name="premium_become_legend_intro_perk_unlimited_premium_title">Forever Premium</string>
     <string name="premium_become_legend_intro_perk_unlimited_premium_description">Primal Premium subscription never expires for legends.</string>
-    <string name="premium_become_legend_intro_perk_private_builds_title">Private Beta Builds</string>
-    <string name="premium_become_legend_intro_perk_private_builds_description">Get access to new features before they are public.</string>
+    <string name="premium_become_legend_intro_perk_more_storage_title">Way More Storage</string>
+    <string name="premium_become_legend_intro_perk_more_storage_description">Get 100GB of Primal Premium media storage.</string>
     <string name="premium_become_legend_intro_perk_custom_profile_title">Legendary Custom Profile</string>
-    <string name="premium_become_legend_intro_perk_custom_profile_description">Option to pick the color of your verified badge and set the glow around your avatar.</string>
+    <string name="premium_become_legend_intro_perk_custom_profile_description">Pick the color of your verified badge and set a custom ring around your avatar.</string>
     <string name="premium_become_legend_intro_gratitude_title">♥️ Our Eternal Gratitude ♥️</string>
     <string name="premium_become_legend_intro_gratitude_description">We’ll never forget our biggest supporters. People like you will help Nostr succeed.</string>
     <string name="premium_become_legend_button_start">Become a Legend</string>
@@ -195,6 +198,8 @@
     <string name="premium_become_legend_success_headline">Success, payment received!</string>
     <string name="premium_become_legend_success_supporting_text">You are now a Primal Legend</string>
     <string name="premium_become_legend_success_done_button">Done</string>
+    <string name="premium_become_legend_failed_fetching_payment_instructions">Unable to get payment instructions. Please try again.</string>
+    <string name="premium_become_legend_retry_button">Retry</string>
 
     <string name="premium_manage_title">Manage Premium</string>
     <string name="premium_manage_nostr_tools">Nostr Tools</string>

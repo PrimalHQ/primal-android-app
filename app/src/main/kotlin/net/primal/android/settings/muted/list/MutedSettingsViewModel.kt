@@ -75,7 +75,7 @@ class MutedSettingsViewModel @Inject constructor(
             }
         }
 
-    private suspend fun unmuteEventHandler(event: UiEvent.UnmuteEvent) =
+    private fun unmuteEventHandler(event: UiEvent.UnmuteEvent) =
         viewModelScope.launch {
             try {
                 withContext(dispatcherProvider.io()) {
@@ -102,6 +102,6 @@ class MutedSettingsViewModel @Inject constructor(
             userId = this.mutedAccount.userId,
             avatarCdnImage = this.profileData?.avatarCdnImage,
             internetIdentifier = this.profileData?.internetIdentifier,
-            legendaryCustomization = this.profileData?.primalLegendProfile?.asLegendaryCustomization(),
+            legendaryCustomization = this.profileData?.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
         )
 }

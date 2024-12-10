@@ -188,6 +188,7 @@ class ProfileDetailsViewModel @Inject constructor(
                 setState {
                     copy(
                         isProfileFollowed = it.following.contains(profileId),
+                        activeUserPremiumTier = it.premiumMembership?.tier,
                         zappingState = this.zappingState.copy(
                             walletConnected = it.hasWallet(),
                             walletPreference = it.walletPreference,

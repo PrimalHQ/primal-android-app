@@ -3,6 +3,7 @@ package net.primal.android.premium.repository
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.networking.primal.retryNetworkCall
 import net.primal.android.premium.api.PremiumApi
 import net.primal.android.premium.api.model.CancelMembershipRequest
 import net.primal.android.premium.api.model.MembershipStatusResponse
@@ -83,10 +84,12 @@ class PremiumRepository @Inject constructor(
 
     suspend fun fetchPrimalLegendPaymentInstructions(userId: String, primalName: String) =
         withContext(dispatchers.io()) {
-            premiumApi.getPrimalLegendPaymentInstructions(
-                userId = userId,
-                primalName = primalName,
-            )
+            retryNetworkCall(retries = 2) {
+                premiumApi.getPrimalLegendPaymentInstructions(
+                    userId = userId,
+                    primalName = primalName,
+                )
+            }
         }
 
     suspend fun fetchOrderHistory(userId: String) =

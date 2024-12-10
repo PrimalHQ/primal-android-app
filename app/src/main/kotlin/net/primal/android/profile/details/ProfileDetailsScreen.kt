@@ -1,7 +1,6 @@
-package net.primal.android.profile.details.ui
+package net.primal.android.profile.details
 
 import android.content.Context
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -75,9 +74,13 @@ import net.primal.android.notes.feed.list.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
-import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
-import net.primal.android.profile.details.ProfileDetailsViewModel
+import net.primal.android.profile.details.ui.AvatarValues
+import net.primal.android.profile.details.ui.CoverValues
+import net.primal.android.profile.details.ui.PROFILE_TAB_COUNT
+import net.primal.android.profile.details.ui.ProfileDetailsHeader
+import net.primal.android.profile.details.ui.ProfileTabs
+import net.primal.android.profile.details.ui.ProfileTopCoverBar
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -99,6 +102,7 @@ fun ProfileDetailsScreen(
     onDrawerQrCodeClick: (String) -> Unit,
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
     onGoToWallet: () -> Unit,
+    onPremiumBadgeClick: (tier: String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -161,6 +165,7 @@ fun ProfileDetailsScreen(
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         onGoToWallet = onGoToWallet,
         onFollowsClick = onFollowsClick,
+        onPremiumBadgeClick = onPremiumBadgeClick,
         eventPublisher = { viewModel.setEvent(it) },
         pullToRefreshState = pullToRefreshState,
         pullToRefreshing = pullToRefreshing,
@@ -175,7 +180,7 @@ internal const val READS_TAB_INDEX = 2
 internal const val MEDIA_TAB_INDEX = 3
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileDetailsScreen(
     state: ProfileDetailsContract.UiState,
@@ -190,13 +195,14 @@ fun ProfileDetailsScreen(
     onDrawerQrCodeClick: (String) -> Unit,
     onGoToWallet: () -> Unit,
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
+    onPremiumBadgeClick: (tier: String) -> Unit,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     pullToRefreshState: PullToRefreshState,
     pullToRefreshing: MutableState<Boolean>,
 ) {
     val density = LocalDensity.current
 
-    val maxAvatarSizeDp = 88.dp
+    val maxAvatarSizeDp = 86.dp
     val maxAvatarSizePx = with(density) { maxAvatarSizeDp.roundToPx().toFloat() }
     val avatarSizePx = rememberSaveable { mutableFloatStateOf(maxAvatarSizePx) }
 
@@ -420,6 +426,7 @@ fun ProfileDetailsScreen(
                             onFollowsClick = onFollowsClick,
                             onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
                             onHashtagClick = { noteCallbacks.onHashtagClick?.invoke(it) },
+                            onPremiumBadgeClick = onPremiumBadgeClick,
                         )
                     }
                     item {
@@ -626,6 +633,7 @@ private fun PreviewProfileScreen() {
             onSendWalletTx = {},
             onDrawerQrCodeClick = {},
             onFollowsClick = { _, _ -> },
+            onPremiumBadgeClick = {},
             onMediaItemClick = {},
             onGoToWallet = {},
             eventPublisher = {},
