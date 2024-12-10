@@ -4,10 +4,11 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import com.halilibo.richtext.commonmark.CommonMarkdownParseOptions
 import com.halilibo.richtext.commonmark.CommonmarkAstNodeParser
-import com.halilibo.richtext.commonmark.MarkdownParseOptions
 import com.halilibo.richtext.markdown.BasicMarkdown
 import com.halilibo.richtext.ui.material3.RichText
+import net.primal.android.highlights.model.HighlightUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.thread.articles.details.ui.handleArticleLinkClick
 
@@ -15,6 +16,7 @@ import net.primal.android.thread.articles.details.ui.handleArticleLinkClick
 fun MarkdownRenderer(
     markdown: String,
     modifier: Modifier = Modifier,
+    highlights: List<HighlightUi> = emptyList(),
     onProfileClick: ((profileId: String) -> Unit)? = null,
     onNoteClick: ((noteId: String) -> Unit)? = null,
     onArticleClick: ((naddr: String) -> Unit)? = null,
@@ -26,14 +28,12 @@ fun MarkdownRenderer(
         codeBlockContent = AppTheme.colorScheme.onSurface,
         outlineColor = AppTheme.colorScheme.outline,
     )
-    val parser = remember(markdown) { CommonmarkAstNodeParser(MarkdownParseOptions.Default) }
+    val parser = remember(markdown) { CommonmarkAstNodeParser(CommonMarkdownParseOptions.Default) }
     val astNode = remember(parser) { parser.parse(markdown) }
 
     SelectionContainer {
         PrimalMarkdownStylesProvider {
-            RichText(
-                modifier = modifier,
-                style = richTextStyle,
+            PrimalMarkdownUriHandlerProvider(
                 linkClickHandler = { url ->
                     url.handleArticleLinkClick(
                         onProfileClick = onProfileClick,
@@ -43,7 +43,15 @@ fun MarkdownRenderer(
                     )
                 },
             ) {
-                BasicMarkdown(astNode = astNode)
+                RichText(
+                    modifier = modifier,
+                    style = richTextStyle,
+                ) {
+                    BasicMarkdown(
+                        astNode = astNode,
+                        astBlockNodeComposer = customBlockNodeComposer(highlights = highlights),
+                    )
+                }
             }
         }
     }

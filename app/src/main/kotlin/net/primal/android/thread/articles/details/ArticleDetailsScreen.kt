@@ -524,6 +524,7 @@ private fun ArticleContentWithComments(
                             .fillMaxWidth()
                             .padding(all = 16.dp),
                         markdown = part.markdown,
+                        highlights = state.article?.highlights ?: emptyList(),
                         onProfileClick = noteCallbacks.onProfileClick,
                         onNoteClick = noteCallbacks.onNoteClick,
                         onArticleClick = noteCallbacks.onArticleClick,

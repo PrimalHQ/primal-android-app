@@ -21,6 +21,7 @@ import net.primal.android.nostr.ext.mapNotNullAsEventUserStatsPO
 import net.primal.android.nostr.ext.mapNotNullAsPostDataPO
 import net.primal.android.nostr.ext.mapNotNullAsRepostDataPO
 import net.primal.android.nostr.ext.mapReferencedEventsAsArticleDataPO
+import net.primal.android.nostr.ext.mapReferencedEventsAsHighlightDataPO
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
@@ -43,6 +44,7 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
 
     val articles = this.articles.mapNotNullAsArticleDataPO(cdnResources = cdnResources)
     val referencedArticles = this.referencedEvents.mapReferencedEventsAsArticleDataPO(cdnResources = cdnResources)
+    val referencedHighlights = this.referencedEvents.mapReferencedEventsAsHighlightDataPO()
     val allArticles = articles + referencedArticles
 
     val primalUserNames = this.primalUserNames.parseAndMapPrimalUserNames()
@@ -95,6 +97,7 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
         database.eventStats().upsertAll(data = postStats)
         database.eventUserStats().upsertAll(data = userPostStats)
         database.articles().upsertAll(list = allArticles)
+        database.highlights().upsertAll(data = referencedHighlights)
 
         val eventHintsDao = database.eventHints()
         val hintsMap = eventHints.associateBy { it.eventId }

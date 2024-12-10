@@ -30,6 +30,12 @@ fun List<JsonArray>.findFirstIdentifier() = firstOrNull { it.isIdentifierTag() }
 
 fun List<JsonArray>.findFirstAltDescription() = firstOrNull { it.isAltTag() }?.getTagValueOrNull()
 
+fun List<JsonArray>.findFirstReplaceableEventId() = firstOrNull { it.isATag() }?.getTagValueOrNull()
+
+fun List<JsonArray>.findFirstContextTag() = firstOrNull { it.isContextTag() }?.getTagValueOrNull()
+
+fun JsonArray.isContextTag() = getOrNull(0)?.jsonPrimitive?.content == "context"
+
 fun JsonArray.isBolt11Tag() = getOrNull(0)?.jsonPrimitive?.content == "bolt11"
 
 fun JsonArray.isDescriptionTag() = getOrNull(0)?.jsonPrimitive?.content == "description"
