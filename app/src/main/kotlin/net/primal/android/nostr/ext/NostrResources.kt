@@ -335,7 +335,7 @@ private fun takeAsReferencedNoteOrNull(
         authorAvatarCdnImage = refPostAuthor.avatarCdnImage,
         authorInternetIdentifier = refPostAuthor.internetIdentifier,
         authorLightningAddress = refPostAuthor.lightningAddress,
-        authorPrimalPremiumInfo = refPostAuthor.primalPremiumInfo,
+        authorLegendProfile = refPostAuthor.primalPremiumInfo?.legendProfile,
         attachments = listOf(refNote).flatMapPostsAsNoteAttachmentPO(
             cdnResources = cdnResources,
             linkPreviews = linkPreviews,
@@ -386,7 +386,7 @@ private fun takeAsReferencedArticleOrNull(
         authorId = refArticle.authorId,
         authorName = refArticleAuthor.authorNameUiFriendly(),
         authorAvatarCdnImage = refArticleAuthor.avatarCdnImage,
-        authorPremiumInfo = refArticleAuthor.primalPremiumInfo,
+        authorLegendProfile = refArticleAuthor.primalPremiumInfo?.legendProfile,
         createdAt = refArticle.createdAt,
         raw = refArticle.raw,
         articleImageCdnImage = refArticle.imageCdnImage,

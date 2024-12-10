@@ -11,7 +11,7 @@ import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.premium.legend.asLegendaryCustomization
-import net.primal.android.profile.domain.PrimalPremiumInfo
+import net.primal.android.profile.domain.PrimalLegendProfile
 
 @Serializable
 data class ReferencedNote(
@@ -23,7 +23,7 @@ data class ReferencedNote(
     val authorAvatarCdnImage: CdnImage?,
     val authorInternetIdentifier: String?,
     val authorLightningAddress: String?,
-    val authorPrimalPremiumInfo: PrimalPremiumInfo?,
+    val authorLegendProfile: PrimalLegendProfile?,
     val attachments: List<NoteAttachment>,
     val nostrUris: List<NoteNostrUri>,
 )
@@ -39,7 +39,7 @@ fun ReferencedNote.asFeedPostUi() =
         authorHandle = this.authorName,
         authorInternetIdentifier = this.authorInternetIdentifier,
         authorAvatarCdnImage = this.authorAvatarCdnImage,
-        authorLegendaryCustomization = this.authorPrimalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
+        authorLegendaryCustomization = this.authorLegendProfile?.asLegendaryCustomization(),
         attachments = this.attachments.map { it.asNoteAttachmentUi() },
         nostrUris = this.nostrUris.map { it.asNoteNostrUriUi() },
         timestamp = Instant.ofEpochSecond(this.createdAt),

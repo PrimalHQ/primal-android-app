@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 49,
-    "identityHash": "445db5a3b2c5943f6eda113005052772",
+    "identityHash": "0473e1f610dcb9aacf4d22b344fefc16",
     "entities": [
       {
         "tableName": "PostData",
@@ -500,7 +500,7 @@
       },
       {
         "tableName": "NoteNostrUri",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`noteId` TEXT NOT NULL, `uri` TEXT NOT NULL, `type` TEXT NOT NULL, `refEvent_alt` TEXT, `refHighlight_text` TEXT, `refHighlight_eventId` TEXT, `refHighlight_authorId` TEXT, `refHighlight_aTag` TEXT, `refNote_postId` TEXT, `refNote_createdAt` INTEGER, `refNote_content` TEXT, `refNote_authorId` TEXT, `refNote_authorName` TEXT, `refNote_authorAvatarCdnImage` TEXT, `refNote_authorInternetIdentifier` TEXT, `refNote_authorLightningAddress` TEXT, `refNote_authorPrimalPremiumInfo` TEXT, `refNote_attachments` TEXT, `refNote_nostrUris` TEXT, `refArticle_naddr` TEXT, `refArticle_aTag` TEXT, `refArticle_eventId` TEXT, `refArticle_articleId` TEXT, `refArticle_articleTitle` TEXT, `refArticle_authorId` TEXT, `refArticle_authorName` TEXT, `refArticle_authorAvatarCdnImage` TEXT, `refArticle_authorPremiumInfo` TEXT, `refArticle_createdAt` INTEGER, `refArticle_raw` TEXT, `refArticle_articleImageCdnImage` TEXT, `refArticle_articleReadingTimeInMinutes` INTEGER, `refUser_userId` TEXT, `refUser_handle` TEXT, PRIMARY KEY(`noteId`, `uri`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`noteId` TEXT NOT NULL, `uri` TEXT NOT NULL, `type` TEXT NOT NULL, `refEvent_alt` TEXT, `refHighlight_text` TEXT, `refHighlight_eventId` TEXT, `refHighlight_authorId` TEXT, `refHighlight_aTag` TEXT, `refNote_postId` TEXT, `refNote_createdAt` INTEGER, `refNote_content` TEXT, `refNote_authorId` TEXT, `refNote_authorName` TEXT, `refNote_authorAvatarCdnImage` TEXT, `refNote_authorInternetIdentifier` TEXT, `refNote_authorLightningAddress` TEXT, `refNote_authorLegendProfile` TEXT, `refNote_attachments` TEXT, `refNote_nostrUris` TEXT, `refArticle_naddr` TEXT, `refArticle_aTag` TEXT, `refArticle_eventId` TEXT, `refArticle_articleId` TEXT, `refArticle_articleTitle` TEXT, `refArticle_authorId` TEXT, `refArticle_authorName` TEXT, `refArticle_authorAvatarCdnImage` TEXT, `refArticle_authorLegendProfile` TEXT, `refArticle_createdAt` INTEGER, `refArticle_raw` TEXT, `refArticle_articleImageCdnImage` TEXT, `refArticle_articleReadingTimeInMinutes` INTEGER, `refUser_userId` TEXT, `refUser_handle` TEXT, PRIMARY KEY(`noteId`, `uri`))",
         "fields": [
           {
             "fieldPath": "noteId",
@@ -599,8 +599,8 @@
             "notNull": false
           },
           {
-            "fieldPath": "referencedNote.authorPrimalPremiumInfo",
-            "columnName": "refNote_authorPrimalPremiumInfo",
+            "fieldPath": "referencedNote.authorLegendProfile",
+            "columnName": "refNote_authorLegendProfile",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -665,8 +665,8 @@
             "notNull": false
           },
           {
-            "fieldPath": "referencedArticle.authorPremiumInfo",
-            "columnName": "refArticle_authorPremiumInfo",
+            "fieldPath": "referencedArticle.authorLegendProfile",
+            "columnName": "refArticle_authorLegendProfile",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -1795,7 +1795,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '445db5a3b2c5943f6eda113005052772')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0473e1f610dcb9aacf4d22b344fefc16')"
     ]
   }
 }

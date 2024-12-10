@@ -6,7 +6,7 @@ import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.premium.legend.asLegendaryCustomization
-import net.primal.android.profile.domain.PrimalPremiumInfo
+import net.primal.android.profile.domain.PrimalLegendProfile
 
 @Serializable
 data class ReferencedArticle(
@@ -18,7 +18,7 @@ data class ReferencedArticle(
     val authorId: String,
     val authorName: String,
     val authorAvatarCdnImage: CdnImage?,
-    val authorPremiumInfo: PrimalPremiumInfo?,
+    val authorLegendProfile: PrimalLegendProfile?,
     val createdAt: Long,
     val raw: String,
     val articleImageCdnImage: CdnImage? = null,
@@ -39,7 +39,7 @@ fun ReferencedArticle.asFeedArticleUi() =
         isBookmarked = false,
         stats = EventStatsUi(),
         authorAvatarCdnImage = this.authorAvatarCdnImage,
-        authorLegendaryCustomization = this.authorPremiumInfo?.legendProfile?.asLegendaryCustomization(),
+        authorLegendaryCustomization = this.authorLegendProfile?.asLegendaryCustomization(),
         imageCdnImage = this.articleImageCdnImage,
         readingTimeInMinutes = this.articleReadingTimeInMinutes,
     )
