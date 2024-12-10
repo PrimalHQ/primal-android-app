@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -106,8 +107,10 @@ fun buildPrimalRichTextStyle(
             color = codeBlockContent,
             background = codeBlockBackground,
         ),
-        linkStyle = primalMarkdownBodyTextStyle.toSpanStyle().copy(
-            color = highlightColor,
+        linkStyle = TextLinkStyles(
+            style = primalMarkdownBodyTextStyle.toSpanStyle().copy(
+                color = highlightColor,
+            )
         ),
     ),
     paragraphSpacing = 20.sp,
