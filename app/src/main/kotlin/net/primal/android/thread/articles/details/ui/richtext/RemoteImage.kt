@@ -32,14 +32,14 @@ fun RemoteImage(
     url: String,
     contentDescription: String?,
     modifier: Modifier,
-    contentScale: ContentScale
+    contentScale: ContentScale,
 ) {
     val painter = rememberAsyncImagePainter(
         ImageRequest.Builder(LocalContext.current)
             .data(data = url)
             .size(Size.ORIGINAL)
             .crossfade(true)
-            .build()
+            .build(),
     )
 
     val density = LocalDensity.current
@@ -64,7 +64,7 @@ fun RemoteImage(
                     with(density) {
                         Modifier.size(
                             (width * scale).toDp(),
-                            (height * scale).toDp()
+                            (height * scale).toDp(),
                         )
                     }
                 } else {
@@ -79,7 +79,7 @@ fun RemoteImage(
             painter = painter,
             contentDescription = contentDescription,
             modifier = sizeModifier,
-            contentScale = contentScale
+            contentScale = contentScale,
         )
     }
 }

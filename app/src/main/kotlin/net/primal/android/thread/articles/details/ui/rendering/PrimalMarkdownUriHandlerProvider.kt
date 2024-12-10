@@ -6,7 +6,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 
-
 @Composable
 fun PrimalMarkdownUriHandlerProvider(linkClickHandler: (uri: String) -> Unit, content: @Composable () -> Unit) {
     val uriHandler = remember {

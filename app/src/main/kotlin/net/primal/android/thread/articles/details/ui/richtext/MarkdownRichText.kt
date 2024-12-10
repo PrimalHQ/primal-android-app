@@ -33,7 +33,6 @@ import com.halilibo.richtext.ui.string.Text
 import com.halilibo.richtext.ui.string.withFormat
 import timber.log.Timber
 
-
 /**
  *
  * NOTE: this component is copied from: https://github.com/halilozercan/compose-richtext
@@ -79,8 +78,8 @@ private fun computeRichTextString(astNode: AstNode): RichTextString {
         AstNodeTraversalEntry(
             astNode = astNode,
             isVisited = false,
-            formatIndex = null
-        )
+            formatIndex = null,
+        ),
     )
 
     while (iteratorStack.isNotEmpty()) {
@@ -97,22 +96,22 @@ private fun computeRichTextString(astNode: AstNode): RichTextString {
                 }
                 is AstEmphasis -> richTextStringBuilder.pushFormat(RichTextString.Format.Italic)
                 is AstStrikethrough -> richTextStringBuilder.pushFormat(
-                    RichTextString.Format.Strikethrough
+                    RichTextString.Format.Strikethrough,
                 )
                 is AstImage -> {
                     richTextStringBuilder.appendInlineContent(
                         content = InlineContent(
                             initialSize = {
                                 IntSize(128.dp.roundToPx(), 128.dp.roundToPx())
-                            }
+                            },
                         ) {
                             RemoteImage(
                                 url = currentNodeType.destination,
                                 contentDescription = currentNodeType.title,
                                 modifier = Modifier.fillMaxWidth(),
-                                contentScale = ContentScale.Inside
+                                contentScale = ContentScale.Inside,
                             )
-                        }
+                        },
                     )
                     null
                 }
@@ -120,8 +119,9 @@ private fun computeRichTextString(astNode: AstNode): RichTextString {
                     Timber.tag("astLink").i(currentNodeType.toString())
                     richTextStringBuilder.pushFormat(
                         RichTextString.Format.Link(
-                            destination = currentNodeType.destination
-                        ))
+                            destination = currentNodeType.destination,
+                        ),
+                    )
                 }
                 is AstSoftLineBreak -> {
                     richTextStringBuilder.append(" ")
@@ -137,7 +137,8 @@ private fun computeRichTextString(astNode: AstNode): RichTextString {
                     null
                 }
                 is AstLinkReferenceDefinition -> richTextStringBuilder.pushFormat(
-                    RichTextString.Format.Link(destination = currentNodeType.destination))
+                    RichTextString.Format.Link(destination = currentNodeType.destination),
+                )
                 else -> null
             }
 
@@ -145,8 +146,8 @@ private fun computeRichTextString(astNode: AstNode): RichTextString {
                 AstNodeTraversalEntry(
                     astNode = currentNode,
                     isVisited = true,
-                    formatIndex = newFormatIndex
-                )
+                    formatIndex = newFormatIndex,
+                ),
             )
 
             // Do not visit children of terminals such as Text, Image, etc.
@@ -156,8 +157,8 @@ private fun computeRichTextString(astNode: AstNode): RichTextString {
                         AstNodeTraversalEntry(
                             astNode = it,
                             isVisited = false,
-                            formatIndex = null
-                        )
+                            formatIndex = null,
+                        ),
                     )
                 }
             }
@@ -174,7 +175,7 @@ private fun computeRichTextString(astNode: AstNode): RichTextString {
 private data class AstNodeTraversalEntry(
     val astNode: AstNode,
     val isVisited: Boolean,
-    val formatIndex: Int?
+    val formatIndex: Int?,
 )
 
 private inline fun <reified T> List<T>.addFirst(item: T): List<T> {

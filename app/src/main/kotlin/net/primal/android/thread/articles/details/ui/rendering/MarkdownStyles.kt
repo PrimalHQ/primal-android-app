@@ -110,7 +110,7 @@ fun buildPrimalRichTextStyle(
         linkStyle = TextLinkStyles(
             style = primalMarkdownBodyTextStyle.toSpanStyle().copy(
                 color = highlightColor,
-            )
+            ),
         ),
     ),
     paragraphSpacing = 20.sp,

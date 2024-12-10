@@ -12,9 +12,7 @@ import com.halilibo.richtext.markdown.node.AstText
  * NOTE: this file was copied from: https://github.com/halilozercan/compose-richtext
  */
 
-internal fun AstNode.childrenSequence(
-    reverse: Boolean = false
-): Sequence<AstNode> {
+internal fun AstNode.childrenSequence(reverse: Boolean = false): Sequence<AstNode> {
     return if (!reverse) {
         generateSequence(this.links.firstChild) { it.links.next }
     } else {
@@ -30,10 +28,7 @@ internal fun AstNode.childrenSequence(
  *
  * @param filter A lambda to select valid children.
  */
-fun AstNode.filterChildren(
-    reverse: Boolean = false,
-    filter: (AstNode) -> Boolean
-): Sequence<AstNode> {
+fun AstNode.filterChildren(reverse: Boolean = false, filter: (AstNode) -> Boolean): Sequence<AstNode> {
     return childrenSequence(reverse).filter(filter)
 }
 
@@ -45,9 +40,9 @@ internal inline fun <reified T : AstNodeType> AstNode.filterChildrenType(): Sequ
  * These ASTNode types should never have any children. If any exists, ignore them.
  */
 internal fun AstNode.isRichTextTerminal(): Boolean {
-    return type is AstText
-        || type is AstCode
-        || type is AstImage
-        || type is AstSoftLineBreak
-        || type is AstHardLineBreak
+    return type is AstText ||
+        type is AstCode ||
+        type is AstImage ||
+        type is AstSoftLineBreak ||
+        type is AstHardLineBreak
 }
