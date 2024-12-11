@@ -4,6 +4,8 @@ import javax.inject.Inject
 import kotlinx.serialization.encodeToString
 import net.primal.android.articles.api.model.ArticleDetailsRequestBody
 import net.primal.android.articles.api.model.ArticleFeedRequestBody
+import net.primal.android.articles.api.model.ArticleHighlightsRequestBody
+import net.primal.android.articles.api.model.ArticleHighlightsResponse
 import net.primal.android.articles.api.model.ArticleResponse
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
@@ -20,7 +22,7 @@ class ArticlesApiImpl @Inject constructor(
     override suspend fun getArticleDetails(body: ArticleDetailsRequestBody): ArticleResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.BLOG_THREAD_VIEW,
+                primalVerb = PrimalVerb.ARTICLE_THREAD_VIEW,
                 optionsJson = NostrJson.encodeToString(body),
             ),
         )
@@ -74,6 +76,19 @@ class ArticlesApiImpl @Inject constructor(
             primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
             primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
             primalPremiumInfo = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
+        )
+    }
+
+    override suspend fun getArticleHighlights(body: ArticleHighlightsRequestBody): ArticleHighlightsResponse {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.GET_HIGHLIGHTS,
+                optionsJson = NostrJson.encodeToString(body),
+            ),
+        )
+
+        return ArticleHighlightsResponse(
+            highlights = queryResult.filterNostrEvents(kind = NostrEventKind.Highlight),
         )
     }
 }

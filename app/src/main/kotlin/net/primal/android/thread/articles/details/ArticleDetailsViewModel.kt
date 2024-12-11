@@ -101,6 +101,10 @@ class ArticleDetailsViewModel @Inject constructor(
                         articleAuthorId = naddr.userId,
                         articleId = naddr.identifier,
                     )
+                    articleRepository.fetchArticleHighlights(
+                        articleAuthorId = naddr.userId,
+                        articleId = naddr.identifier,
+                    )
                 } catch (error: WssException) {
                     Timber.w(error)
                 }

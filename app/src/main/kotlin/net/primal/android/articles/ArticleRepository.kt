@@ -16,9 +16,11 @@ import net.primal.android.articles.api.mediator.ArticleFeedMediator
 import net.primal.android.articles.api.mediator.persistArticleCommentsToDatabase
 import net.primal.android.articles.api.mediator.persistToDatabaseAsTransaction
 import net.primal.android.articles.api.model.ArticleDetailsRequestBody
+import net.primal.android.articles.api.model.ArticleHighlightsRequestBody
 import net.primal.android.articles.db.Article
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.nostr.ext.asHighlightData
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.user.accounts.active.ActiveAccountStore
 
@@ -73,13 +75,30 @@ class ArticleRepository @Inject constructor(
                     limit = 100,
                 ),
             )
-
             response.persistToDatabaseAsTransaction(userId = userId, database = database)
             response.persistArticleCommentsToDatabase(
                 articleId = articleId,
                 articleAuthorId = articleAuthorId,
                 database = database,
             )
+        }
+
+    suspend fun fetchArticleHighlights(articleId: String, articleAuthorId: String) =
+        withContext(dispatchers.io()) {
+            val userId = activeAccountStore.activeUserId()
+            val highlightsResponse = articlesApi.getArticleHighlights(
+                body = ArticleHighlightsRequestBody(
+                    userId = userId,
+                    identifier = articleId,
+                    authorUserId = articleAuthorId,
+                    kind = NostrEventKind.LongFormContent.value,
+                ),
+            )
+
+            val highlights = highlightsResponse.highlights.map { it.asHighlightData() }
+            if (highlights.isNotEmpty()) {
+                database.highlights().upsertAll(data = highlights)
+            }
         }
 
     suspend fun observeArticle(articleId: String, articleAuthorId: String) =
