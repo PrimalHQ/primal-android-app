@@ -222,6 +222,7 @@ class FeedListViewModel @AssistedInject constructor(
                 dvmFeedListHandler.fetchDvmFeedsAndObserveStatsUpdates(
                     scope = viewModelScope,
                     userId = activeAccountStore.activeUserId(),
+                    specKind = specKind,
                 ) { dvmFeeds ->
                     val updatedSelectedDvmFeed = dvmFeeds.firstOrNull {
                         _state.value.selectedDvmFeed?.data?.eventId == it.data.eventId
