@@ -2,14 +2,21 @@
 
 package net.primal.android.thread.articles.details.ui.richtext
 
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.halilibo.richtext.markdown.node.AstBlockQuote
@@ -75,6 +82,7 @@ internal fun RichTextScope.MarkdownRichText(
     astNode: AstNode,
     modifier: Modifier = Modifier,
     highlights: List<HighlightUi> = emptyList(),
+    onHighlightClick: ((highlightedText: String) -> Unit)? = null,
 ) {
     val isDarkTheme = LocalPrimalTheme.current.isDarkTheme
 
@@ -87,7 +95,30 @@ internal fun RichTextScope.MarkdownRichText(
         )
     }
 
-    Text(text = richText, modifier = modifier)
+    var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+    val highlightedLiterals = highlights.map { it.content }
+
+    val pressIndicator = Modifier.pointerInput(onHighlightClick, highlights) {
+        detectTapGestures { pos ->
+            layoutResult?.let { layoutResult ->
+                val charPosition = layoutResult.getOffsetForPosition(pos)
+                val scopedHighlights = TextMatcher(content = richText.text, texts = highlightedLiterals).matches()
+                val clickedHighlightTextMatch = scopedHighlights.firstOrNull {
+                    charPosition in it.startIndex..it.endIndex
+                }
+                if (clickedHighlightTextMatch != null) {
+                    onHighlightClick?.invoke(clickedHighlightTextMatch.value)
+                }
+            }
+        }
+    }
+
+    Box(modifier = modifier.then(pressIndicator)) {
+        Text(
+            text = richText,
+            onTextLayout = { layoutResult = it },
+        )
+    }
 }
 
 private fun computeRichTextString(

@@ -9,17 +9,23 @@ import com.halilibo.richtext.ui.RichTextScope
 import net.primal.android.highlights.model.HighlightUi
 import net.primal.android.thread.articles.details.ui.richtext.MarkdownRichText
 
-fun customBlockNodeComposer(highlights: List<HighlightUi>) =
-    object : AstBlockNodeComposer {
-        override fun predicate(astBlockNodeType: AstBlockNodeType): Boolean =
-            when (astBlockNodeType) {
-                AstParagraph -> true
-                else -> false
-            }
-
-        @Composable
-        override fun RichTextScope.Compose(astNode: AstNode, visitChildren: @Composable (AstNode) -> Unit) {
-            require(astNode.type == AstParagraph)
-            MarkdownRichText(astNode = astNode, highlights = highlights)
+fun customBlockNodeComposer(
+    highlights: List<HighlightUi>,
+    onHighlightClick: ((highlightedText: String) -> Unit)? = null,
+) = object : AstBlockNodeComposer {
+    override fun predicate(astBlockNodeType: AstBlockNodeType): Boolean =
+        when (astBlockNodeType) {
+            AstParagraph -> true
+            else -> false
         }
+
+    @Composable
+    override fun RichTextScope.Compose(astNode: AstNode, visitChildren: @Composable (AstNode) -> Unit) {
+        require(astNode.type == AstParagraph)
+        MarkdownRichText(
+            astNode = astNode,
+            highlights = highlights,
+            onHighlightClick = onHighlightClick,
+        )
     }
+}

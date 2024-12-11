@@ -21,6 +21,7 @@ fun MarkdownRenderer(
     onNoteClick: ((noteId: String) -> Unit)? = null,
     onArticleClick: ((naddr: String) -> Unit)? = null,
     onUrlClick: ((url: String) -> Unit)? = null,
+    onHighlightClick: ((highlightedText: String) -> Unit)? = null,
 ) {
     val richTextStyle = buildPrimalRichTextStyle(
         highlightColor = AppTheme.colorScheme.secondary,
@@ -49,7 +50,10 @@ fun MarkdownRenderer(
                 ) {
                     BasicMarkdown(
                         astNode = astNode,
-                        astBlockNodeComposer = customBlockNodeComposer(highlights = highlights),
+                        astBlockNodeComposer = customBlockNodeComposer(
+                            highlights = highlights,
+                            onHighlightClick = onHighlightClick,
+                        ),
                     )
                 }
             }

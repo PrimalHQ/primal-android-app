@@ -1,5 +1,6 @@
 package net.primal.android.thread.articles.details
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -426,6 +427,8 @@ private fun ArticleContentWithComments(
     onUiError: ((UiError) -> Unit)? = null,
 ) {
     val uriHandler = LocalUriHandler.current
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     LazyColumn(
         modifier = Modifier
@@ -529,6 +532,15 @@ private fun ArticleContentWithComments(
                         onNoteClick = noteCallbacks.onNoteClick,
                         onArticleClick = noteCallbacks.onArticleClick,
                         onUrlClick = { url -> uriHandler.openUriSafely(url) },
+                        onHighlightClick = { highlightedText ->
+                            scope.launch {
+                                Toast.makeText(
+                                    context,
+                                    highlightedText,
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                            }
+                        },
                     )
                 }
 
