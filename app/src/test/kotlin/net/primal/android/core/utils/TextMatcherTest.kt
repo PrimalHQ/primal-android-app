@@ -5,14 +5,14 @@ import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldNotContain
 import org.junit.Test
 
-class HashtagMatcherTest {
+class TextMatcherTest {
 
     @Test
     fun `matches should match all known hashtags`() {
         val hashtags = listOf("#TextureTuesday", "#Texture", "#Details", "#Photography")
-        val matcher = HashtagMatcher(
+        val matcher = TextMatcher(
             content = "Rusty iron chain on gray gravel. #TextureTuesday #Texture #Details #Photography",
-            hashtags = hashtags,
+            texts = hashtags,
         )
 
         val actual = matcher.matches().map { it.value }
@@ -22,9 +22,9 @@ class HashtagMatcherTest {
     @Test
     fun `matches should match hashtags which are contained in other hashtags`() {
         val hashtags = listOf("#TextureTuesday", "#Texture", "#Zapathon", "#Zap")
-        val matcher = HashtagMatcher(
+        val matcher = TextMatcher(
             content = "Rusty iron chain on gray gravel. #TextureTuesday #Texture #Zap #Zapathon",
-            hashtags = hashtags,
+            texts = hashtags,
         )
 
         val actual = matcher.matches().map { it.value }
@@ -34,9 +34,9 @@ class HashtagMatcherTest {
     @Test
     fun `matches should not match unknown hashtags`() {
         val hashtags = listOf("#Hiking", "#Trails")
-        val matcher = HashtagMatcher(
+        val matcher = TextMatcher(
             content = "The #Hiking Trails is available in Art prints with or without frame.",
-            hashtags = hashtags,
+            texts = hashtags,
         )
 
         val actual = matcher.matches().map { it.value }

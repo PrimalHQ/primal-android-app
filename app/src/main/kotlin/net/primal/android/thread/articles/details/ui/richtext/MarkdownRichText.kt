@@ -6,7 +6,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.halilibo.richtext.markdown.node.AstBlockQuote
@@ -33,6 +36,12 @@ import com.halilibo.richtext.ui.string.InlineContent
 import com.halilibo.richtext.ui.string.RichTextString
 import com.halilibo.richtext.ui.string.Text
 import com.halilibo.richtext.ui.string.withFormat
+import net.primal.android.LocalPrimalTheme
+import net.primal.android.core.utils.TextMatch
+import net.primal.android.core.utils.TextMatcher
+import net.primal.android.highlights.model.HighlightUi
+import net.primal.android.notes.feed.note.ui.HighlightBackgroundDark
+import net.primal.android.notes.feed.note.ui.HighlightBackgroundLight
 
 /**
  *
@@ -62,17 +71,32 @@ import com.halilibo.richtext.ui.string.withFormat
  * @param astNode Root node to accept as Text Content container.
  */
 @Composable
-internal fun RichTextScope.MarkdownRichText(astNode: AstNode, modifier: Modifier = Modifier) {
+internal fun RichTextScope.MarkdownRichText(
+    astNode: AstNode,
+    modifier: Modifier = Modifier,
+    highlights: List<HighlightUi> = emptyList(),
+) {
+    val isDarkTheme = LocalPrimalTheme.current.isDarkTheme
+
     // Assume that only RichText nodes reside below this level.
-    val richText = remember(astNode) {
-        computeRichTextString(astNode)
+    val richText = remember(astNode, highlights) {
+        computeRichTextString(
+            astNode = astNode,
+            isDarkTheme = isDarkTheme,
+            highlights = highlights,
+        )
     }
 
     Text(text = richText, modifier = modifier)
 }
 
-private fun computeRichTextString(astNode: AstNode): RichTextString {
+private fun computeRichTextString(
+    astNode: AstNode,
+    isDarkTheme: Boolean,
+    highlights: List<HighlightUi>,
+): RichTextString {
     val richTextStringBuilder = RichTextString.Builder()
+    val highlightedLiterals = highlights.map { it.content }
 
     // Modified pre-order traversal with pushFormat, popFormat support.
     var iteratorStack = listOf(
@@ -138,8 +162,32 @@ private fun computeRichTextString(astNode: AstNode): RichTextString {
                 }
 
                 is AstStrongEmphasis -> richTextStringBuilder.pushFormat(RichTextString.Format.Bold)
+
                 is AstText -> {
-                    richTextStringBuilder.append(currentNodeType.literal)
+                    val literal = currentNodeType.literal
+                    richTextStringBuilder.append(literal)
+
+                    val matchedHighlights = TextMatcher(content = literal, texts = highlightedLiterals).matches()
+                    if (matchedHighlights.isNotEmpty()) {
+                        richTextStringBuilder.withAnnotatedString {
+                            matchedHighlights.forEach {
+                                addHighlightAnnotation(
+                                    textMatch = it,
+                                    highlightBackgroundColor = if (isDarkTheme) {
+                                        HighlightBackgroundDark
+                                    } else {
+                                        HighlightBackgroundLight
+                                    },
+                                    highlightForegroundColor = if (isDarkTheme) {
+                                        Color.White
+                                    } else {
+                                        Color.Black
+                                    },
+                                )
+                            }
+                        }
+                    }
+
                     null
                 }
 
@@ -188,4 +236,24 @@ private data class AstNodeTraversalEntry(
 
 private inline fun <reified T> List<T>.addFirst(item: T): List<T> {
     return listOf(item) + this
+}
+
+private const val HIGHLIGHT_ANNOTATION_TAG = "highlight"
+
+private fun AnnotatedString.Builder.addHighlightAnnotation(
+    highlightBackgroundColor: Color,
+    highlightForegroundColor: Color,
+    textMatch: TextMatch,
+) {
+    addStyle(
+        style = SpanStyle(background = highlightBackgroundColor, color = highlightForegroundColor),
+        start = textMatch.startIndex,
+        end = textMatch.endIndex,
+    )
+    addStringAnnotation(
+        tag = HIGHLIGHT_ANNOTATION_TAG,
+        annotation = textMatch.value,
+        start = textMatch.startIndex,
+        end = textMatch.endIndex,
+    )
 }

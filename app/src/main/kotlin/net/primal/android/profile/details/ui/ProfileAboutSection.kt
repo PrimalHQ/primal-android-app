@@ -8,7 +8,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
-import net.primal.android.core.utils.HashtagMatcher
+import net.primal.android.core.utils.TextMatcher
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.nostr.ext.isNostrUri
 import net.primal.android.theme.AppTheme
@@ -111,7 +111,7 @@ fun renderTextAsAnnotatedString(
             }
         }
 
-        HashtagMatcher(content = refinedContent, hashtags = hashtags).matches()
+        TextMatcher(content = refinedContent, texts = hashtags).matches()
             .forEach {
                 addStyle(
                     style = SpanStyle(color = highlightColor),

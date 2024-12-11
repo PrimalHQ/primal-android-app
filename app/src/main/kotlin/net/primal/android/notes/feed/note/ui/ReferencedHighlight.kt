@@ -17,8 +17,8 @@ import net.primal.android.nostr.utils.aTagToNaddr
 import net.primal.android.notes.db.ReferencedHighlight
 import net.primal.android.theme.AppTheme
 
-private val HighlightBackgroundDark = Color(0xFF2E3726)
-private val HighlightBackgroundLight = Color(0xFFE8F3E8)
+val HighlightBackgroundDark = Color(0xFF2E3726)
+val HighlightBackgroundLight = Color(0xFFE8F3E8)
 
 @Composable
 fun ReferencedHighlight(

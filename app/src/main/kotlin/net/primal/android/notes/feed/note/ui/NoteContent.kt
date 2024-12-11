@@ -32,8 +32,8 @@ import net.primal.android.core.compose.attachment.model.isMediaAttachment
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Document
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.core.utils.HashtagMatch
-import net.primal.android.core.utils.HashtagMatcher
+import net.primal.android.core.utils.TextMatch
+import net.primal.android.core.utils.TextMatcher
 import net.primal.android.nostr.ext.cleanNostrUris
 import net.primal.android.notes.db.ReferencedNote
 import net.primal.android.notes.db.ReferencedUser
@@ -393,28 +393,28 @@ fun renderContentAsAnnotatedString(
             )
         }
 
-        HashtagMatcher(content = refinedContent, hashtags = data.hashtags)
+        TextMatcher(content = refinedContent, texts = data.hashtags)
             .matches()
             .forEach {
                 addHashtagAnnotation(
-                    hashtagMatch = it,
+                    textMatch = it,
                     highlightColor = highlightColor,
                 )
             }
     }
 }
 
-private fun AnnotatedString.Builder.addHashtagAnnotation(highlightColor: Color, hashtagMatch: HashtagMatch) {
+private fun AnnotatedString.Builder.addHashtagAnnotation(highlightColor: Color, textMatch: TextMatch) {
     addStyle(
         style = SpanStyle(color = highlightColor),
-        start = hashtagMatch.startIndex,
-        end = hashtagMatch.endIndex,
+        start = textMatch.startIndex,
+        end = textMatch.endIndex,
     )
     addStringAnnotation(
         tag = HASHTAG_ANNOTATION_TAG,
-        annotation = hashtagMatch.value,
-        start = hashtagMatch.startIndex,
-        end = hashtagMatch.endIndex,
+        annotation = textMatch.value,
+        start = textMatch.startIndex,
+        end = textMatch.endIndex,
     )
 }
 

@@ -18,7 +18,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
-import net.primal.android.core.utils.HashtagMatcher
+import net.primal.android.core.utils.TextMatcher
 import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.theme.AppTheme
 
@@ -120,7 +120,7 @@ private fun String.asAnnotatedStringWithTaggedUsers(
     val text = this
     return buildAnnotatedString {
         append(text)
-        HashtagMatcher(content = text, hashtags = taggedUsers.map { it.displayUsername }).matches()
+        TextMatcher(content = text, texts = taggedUsers.map { it.displayUsername }).matches()
             .forEach {
                 addStyle(
                     style = SpanStyle(color = highlightColor),
