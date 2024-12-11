@@ -8,8 +8,8 @@ data class HighlightUi(
     val content: String,
     val context: String?,
     val alt: String?,
-    val highlightEventId: String?,
-    val highlightEventAuthorId: String?,
+    val referencedEventATag: String?,
+    val referencedEventAuthorId: String?,
     val createdAt: Long,
 )
 
@@ -20,7 +20,7 @@ fun HighlightData.asHighlightUi() =
         content = content,
         context = context,
         alt = alt,
-        highlightEventId = referencedEventId,
-        highlightEventAuthorId = referencedEventAuthorId,
+        referencedEventATag = referencedEventATag,
+        referencedEventAuthorId = referencedEventAuthorId,
         createdAt = createdAt,
     )

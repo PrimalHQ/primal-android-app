@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 50,
-    "identityHash": "d3760b2268d561e1a4951fc2ce14e17b",
+    "identityHash": "9ea30b24f6af512fe828e6fa82ded8f6",
     "entities": [
       {
         "tableName": "PostData",
@@ -1793,7 +1793,7 @@
       },
       {
         "tableName": "HighlightData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`highlightId` TEXT NOT NULL, `authorId` TEXT NOT NULL, `content` TEXT NOT NULL, `context` TEXT, `alt` TEXT, `referencedEventId` TEXT, `referencedEventAuthorId` TEXT, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`highlightId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`highlightId` TEXT NOT NULL, `authorId` TEXT NOT NULL, `content` TEXT NOT NULL, `context` TEXT, `alt` TEXT, `referencedEventATag` TEXT, `referencedEventAuthorId` TEXT, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`highlightId`))",
         "fields": [
           {
             "fieldPath": "highlightId",
@@ -1826,8 +1826,8 @@
             "notNull": false
           },
           {
-            "fieldPath": "referencedEventId",
-            "columnName": "referencedEventId",
+            "fieldPath": "referencedEventATag",
+            "columnName": "referencedEventATag",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -1857,7 +1857,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd3760b2268d561e1a4951fc2ce14e17b')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9ea30b24f6af512fe828e6fa82ded8f6')"
     ]
   }
 }
