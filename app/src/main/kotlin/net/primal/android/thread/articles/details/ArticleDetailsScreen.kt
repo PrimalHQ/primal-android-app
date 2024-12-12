@@ -250,6 +250,7 @@ private fun ArticleDetailsScreen(
                 state = detailsState,
                 scrolledToTop = scrolledToTop,
                 onClose = onClose,
+                onToggleHighlightsClick = { detailsEventPublisher(UiEvent.ToggleHighlights) },
                 onBookmarkClick = {
                     if (detailsState.article != null) {
                         articleEventPublisher(
@@ -287,6 +288,7 @@ private fun ArticleDetailsScreen(
                     articleParts = articleParts,
                     listState = listState,
                     paddingValues = paddingValues,
+                    showHighlights = detailsState.showHighlights,
                     onArticleCommentClick = {
                         detailsState.naddr?.toNaddrString()?.let { noteCallbacks.onArticleReplyClick?.invoke(it) }
                     },
@@ -366,6 +368,7 @@ private fun ArticleDetailsTopAppBar(
     state: ArticleDetailsContract.UiState,
     scrolledToTop: Boolean,
     onClose: () -> Unit,
+    onToggleHighlightsClick: (() -> Unit)? = null,
     onBookmarkClick: (() -> Unit)? = null,
     onMuteUserClick: (() -> Unit)? = null,
     onReportContentClick: ((reportType: ReportType) -> Unit)? = null,
@@ -393,6 +396,8 @@ private fun ArticleDetailsTopAppBar(
                     articleRawData = state.article.eventRawNostrEvent,
                     authorId = state.article.authorId,
                     isBookmarked = state.article.isBookmarked,
+                    showHighlights = state.showHighlights,
+                    onToggleHighlightsClick = onToggleHighlightsClick,
                     onBookmarkClick = onBookmarkClick,
                     onMuteUserClick = onMuteUserClick,
                     onReportContentClick = onReportContentClick,
@@ -415,6 +420,7 @@ private fun ArticleContentWithComments(
     state: ArticleDetailsContract.UiState,
     articleParts: List<ArticlePartRender>,
     listState: LazyListState = rememberLazyListState(),
+    showHighlights: Boolean,
     paddingValues: PaddingValues,
     onArticleCommentClick: (naddr: String) -> Unit,
     onArticleHashtagClick: (hashtag: String) -> Unit,
@@ -527,6 +533,7 @@ private fun ArticleContentWithComments(
                             .fillMaxWidth()
                             .padding(all = 16.dp),
                         markdown = part.markdown,
+                        showHighlights = showHighlights,
                         highlights = state.article?.highlights ?: emptyList(),
                         onProfileClick = noteCallbacks.onProfileClick,
                         onNoteClick = noteCallbacks.onNoteClick,
