@@ -93,10 +93,12 @@ fun buildArticleBookmarksFeedSpec(userId: String): String =
 fun buildLatestNotesUserFeedSpec(userId: String) = """{"id":"feed","kind":"notes","pubkey":"$userId"}"""
 
 fun String.resolveFeedSpecKind(): FeedSpecKind? {
-    // TODO Update to work with Image, Video and Sound search types
     return when {
         this.isNotesFeedSpec() -> FeedSpecKind.Notes
         this.isReadsFeedSpec() -> FeedSpecKind.Reads
+        this.isImageSpec() -> FeedSpecKind.Notes
+        this.isVideoSpec() -> FeedSpecKind.Notes
+        this.isAudioSpec() -> FeedSpecKind.Notes
         else -> null
     }
 }
@@ -160,6 +162,12 @@ fun String.resolveDefaultDescription(): String =
     }.getOrDefault(defaultValue = "")
 
 fun String.isNotesFeedSpec() = this.contains("\"kind\":\"notes\"") || this.contains("kind:1")
+
+fun String.isImageSpec() = this.contains("\"query\":\"filter:image")
+
+fun String.isVideoSpec() = this.contains("\"query\":\"filter:video")
+
+fun String.isAudioSpec() = this.contains("\"query\":\"filter:audio")
 
 fun String.isReadsFeedSpec() = this.contains("\"kind\":\"reads\"") || this.contains("kind:30023")
 

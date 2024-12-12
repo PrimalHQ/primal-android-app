@@ -78,6 +78,40 @@ class FeedExtensionsKtTest {
         spec.isNotesBookmarkFeedSpec() shouldBe false
     }
 
+    @Test
+    fun isNotesFeedSpec_forProperFeedSpec_returnsTrue() {
+        val specId = "{\"id\":\"advsearch\",\"query\":\"kind:1 mehmedalija pas:1\"}"
+        val specText = "{\"id\":\"latest\",\"kind\":\"notes\"}"
+        specId.isNotesFeedSpec() shouldBe true
+        specText.isNotesFeedSpec() shouldBe true
+    }
+
+    @Test
+    fun isReadsFeedSpec_forProperFeedSpec_returnsTrue() {
+        val specId = "{\"id\":\"advsearch\",\"query\":\"kind:30023 code pas:1\"}"
+        val specText = "{\"id\":\"nostr-reads-feed\",\"kind\":\"reads\"}"
+        specId.isReadsFeedSpec() shouldBe true
+        specText.isReadsFeedSpec() shouldBe true
+    }
+
+    @Test
+    fun isImageFeedSpec_forProperFeedSpec_returnsTrue() {
+        val spec = "{\"id\":\"advsearch\",\"query\":\"filter:image waterfall pas:1\"}"
+        spec.isImageSpec() shouldBe true
+    }
+
+    @Test
+    fun isVideoFeedSpec_forProperFeedSpec_returnsTrue() {
+        val spec = "{\"id\":\"advsearch\",\"query\":\"filter:video running pas:1\"}"
+        spec.isVideoSpec() shouldBe true
+    }
+
+    @Test
+    fun isAudioFeedSpec_forProperFeedSpec_returnsTrue() {
+        val spec = "{\"id\":\"advsearch\",\"query\":\"filter:audio music pas:1\"}"
+        spec.isAudioSpec() shouldBe true
+    }
+
 //    @Test
 //    fun isReadsBookmarkFeedSpec_forProperFeedSpec_returnsTrue() {
 //        println(buildArticleBookmarksFeedSpec(userId = profileId))
