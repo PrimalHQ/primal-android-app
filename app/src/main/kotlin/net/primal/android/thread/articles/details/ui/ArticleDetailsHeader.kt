@@ -109,6 +109,7 @@ fun ArticleDetailsHeader(
                         }
                     },
                 markdown = summary,
+                showHighlights = false,
             )
         }
     }

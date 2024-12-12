@@ -5,11 +5,13 @@ import net.primal.android.nostr.utils.Naddr
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.stats.ui.EventZapUiModel
+import net.primal.android.thread.articles.ArticleContract.UiEvent
 import net.primal.android.thread.articles.details.ui.ArticleDetailsUi
 
 interface ArticleDetailsContract {
     data class UiState(
         val naddr: Naddr? = null,
+        val showHighlights: Boolean = true,
         val isAuthorFollowed: Boolean = false,
         val article: ArticleDetailsUi? = null,
         val referencedNotes: List<FeedPostUi> = emptyList(),
@@ -33,5 +35,6 @@ interface ArticleDetailsContract {
         data object LikeArticle : UiEvent()
         data object RepostAction : UiEvent()
         data object ToggleAuthorFollows : UiEvent()
+        data object ToggleHighlights : UiEvent()
     }
 }

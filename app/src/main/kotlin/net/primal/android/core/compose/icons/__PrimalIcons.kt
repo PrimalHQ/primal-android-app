@@ -19,11 +19,13 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteLink
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteText
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyPublicKey
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyRawData
+import net.primal.android.core.compose.icons.primaliconpack.ContextHideHighlightsOutlined
 import net.primal.android.core.compose.icons.primaliconpack.ContextMuteConversation
 import net.primal.android.core.compose.icons.primaliconpack.ContextMuteUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextRemoveBookmark
 import net.primal.android.core.compose.icons.primaliconpack.ContextReportUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextShare
+import net.primal.android.core.compose.icons.primaliconpack.ContextShowHighlightsOutlined
 import net.primal.android.core.compose.icons.primaliconpack.Copy
 import net.primal.android.core.compose.icons.primaliconpack.CopyAlt
 import net.primal.android.core.compose.icons.primaliconpack.DarkMode
@@ -64,6 +66,7 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
 import net.primal.android.core.compose.icons.primaliconpack.FontSize
 import net.primal.android.core.compose.icons.primaliconpack.GenericLinkIcon
 import net.primal.android.core.compose.icons.primaliconpack.Help
+import net.primal.android.core.compose.icons.primaliconpack.Highlight
 import net.primal.android.core.compose.icons.primaliconpack.Home
 import net.primal.android.core.compose.icons.primaliconpack.HomeFilled
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
@@ -111,6 +114,7 @@ import net.primal.android.core.compose.icons.primaliconpack.PrimalPremium
 import net.primal.android.core.compose.icons.primaliconpack.QrCode
 import net.primal.android.core.compose.icons.primaliconpack.Quote
 import net.primal.android.core.compose.icons.primaliconpack.Read
+import net.primal.android.core.compose.icons.primaliconpack.RemoveHighlight
 import net.primal.android.core.compose.icons.primaliconpack.Report
 import net.primal.android.core.compose.icons.primaliconpack.Repost
 import net.primal.android.core.compose.icons.primaliconpack.Search
@@ -198,8 +202,12 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             Zap,
             Repost,
             Quote,
+            Highlight,
+            RemoveHighlight,
             ContextCopyNoteLink,
             ContextCopyNoteId,
+            ContextShowHighlightsOutlined,
+            ContextHideHighlightsOutlined,
             ContextCopyPublicKey,
             ContextReportUser,
             ContextCopyRawData,

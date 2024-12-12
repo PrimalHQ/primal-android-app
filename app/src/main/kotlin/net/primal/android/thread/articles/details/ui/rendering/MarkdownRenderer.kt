@@ -15,6 +15,7 @@ import net.primal.android.thread.articles.details.ui.handleArticleLinkClick
 @Composable
 fun MarkdownRenderer(
     markdown: String,
+    showHighlights: Boolean,
     modifier: Modifier = Modifier,
     highlights: List<HighlightUi> = emptyList(),
     onProfileClick: ((profileId: String) -> Unit)? = null,
@@ -51,7 +52,7 @@ fun MarkdownRenderer(
                     BasicMarkdown(
                         astNode = astNode,
                         astBlockNodeComposer = customBlockNodeComposer(
-                            highlights = highlights,
+                            highlights = if (showHighlights) highlights else emptyList(),
                             onHighlightClick = onHighlightClick,
                         ),
                     )

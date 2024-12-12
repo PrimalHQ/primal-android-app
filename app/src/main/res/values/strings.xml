@@ -1053,6 +1053,8 @@
     </plurals>
 
     <string name="article_feed_context_share_article">Share article</string>
+    <string name="article_feed_context_hide_highglights">Hide Highlights</string>
+    <string name="article_feed_context_show_highglights">Show Highlights</string>
     <string name="article_feed_context_copy_article_link">Copy article link</string>
     <string name="article_feed_context_add_to_bookmark">Add to Bookmarks</string>
     <string name="article_feed_context_bookmark_added">Article added to your bookmarks.</string>

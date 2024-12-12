@@ -89,6 +89,7 @@ class ArticleDetailsViewModel @Inject constructor(
                     UiEvent.LikeArticle -> likeArticle()
                     UiEvent.RepostAction -> repostPost()
                     UiEvent.ToggleAuthorFollows -> followUnfollowAuthor()
+                    UiEvent.ToggleHighlights -> setState { copy(showHighlights = !showHighlights) }
                 }
             }
         }
