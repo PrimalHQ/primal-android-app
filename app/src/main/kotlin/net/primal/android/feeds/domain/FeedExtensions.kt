@@ -163,11 +163,11 @@ fun String.resolveDefaultDescription(): String =
 
 fun String.isNotesFeedSpec() = this.contains("\"kind\":\"notes\"") || this.contains("kind:1")
 
-fun String.isImageSpec() = this.contains("filter:image")
+fun String.isImageSpec() = this.contains("\"query\":\"filter:image")
 
-fun String.isVideoSpec() = this.contains("filter:video")
+fun String.isVideoSpec() = this.contains("\"query\":\"filter:video")
 
-fun String.isAudioSpec() = this.contains("filter:audio")
+fun String.isAudioSpec() = this.contains("\"query\":\"filter:audio")
 
 fun String.isReadsFeedSpec() = this.contains("\"kind\":\"reads\"") || this.contains("kind:30023")
 
