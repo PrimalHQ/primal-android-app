@@ -25,6 +25,19 @@ class UriUtilsTest {
     }
 
     @Test
+    fun `parseUrls should recognize urls with brackets`() {
+        val content = """
+            Some random links about bitcoin:
+            https://en.m.wikipedia.org/wiki/Bit_(money)
+        """.trimIndent()
+
+        val expectedUrls = content.parseUris()
+
+        expectedUrls shouldBe listOf("https://en.m.wikipedia.org/wiki/Bit_(money)")
+        expectedUrls.size shouldBeExactly 1
+    }
+
+    @Test
     fun `parseUrls should not return urls with brackets`() {
         val hugeContent = javaClass.getResource("/core/release_notes.txt")?.readText()
         hugeContent.shouldNotBeNull()
