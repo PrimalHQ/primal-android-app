@@ -5,10 +5,10 @@ activity-ktx = "1.9.3"
 agp = "8.7.3"
 appcompat = "1.7.0"
 bitcoinj-core = "0.16.3"
-camera = "1.4.0"
-compose-bom = "2024.11.00"
+camera = "1.4.1"
+compose-bom = "2024.12.01"
 compose-lottie = "6.4.0"
-compose-navigation = "2.8.4"
+compose-navigation = "2.8.5"
 compose-richtext = "1.0.0-alpha02"
 constraintlayout = "2.2.0"
 constraintlayout-compose = "1.1.0"
@@ -35,11 +35,11 @@ kotest = "5.9.0"
 ksp = "2.0.21-1.0.25"
 ktlint_compose_rules = "0.3.17"
 lifecycle = "2.8.7"
-material-icons = "1.7.5"
+material-icons = "1.7.6"
 media3-exoplayer = "1.5.0"
 mockk = "1.13.12"
 okhttp = "4.12.0"
-paging = "3.3.4"
+paging = "3.3.5"
 placeholder = "2.0.0"
 play-publishing = "3.8.4"
 play-billing = "7.1.1"
@@ -76,7 +76,7 @@ play-billing = { module = "com.android.billingclient:billing", version.ref = "pl
 play-billing-ktx = { module = "com.android.billingclient:billing-ktx", version.ref = "play-billing" }
 
 # UI libs
-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
+compose-bom = { group = "androidx.compose", name = "compose-bom-alpha", version.ref = "compose-bom" }
 compose-ui = { group = "androidx.compose.ui", name = "ui" }
 compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
