@@ -95,10 +95,7 @@ class ArticleRepository @Inject constructor(
                 ),
             )
 
-            val highlights = highlightsResponse.highlights.map { it.asHighlightData() }
-            if (highlights.isNotEmpty()) {
-                database.highlights().upsertAll(data = highlights)
-            }
+            highlightsResponse.persistToDatabaseAsTransaction(database = database)
         }
 
     suspend fun observeArticle(articleId: String, articleAuthorId: String) =
