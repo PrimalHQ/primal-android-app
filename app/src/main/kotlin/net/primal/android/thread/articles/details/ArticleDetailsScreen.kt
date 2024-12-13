@@ -102,6 +102,7 @@ import net.primal.android.thread.articles.details.ui.ArticleAuthorRow
 import net.primal.android.thread.articles.details.ui.ArticleDetailsHeader
 import net.primal.android.thread.articles.details.ui.ArticleHashtags
 import net.primal.android.thread.articles.details.ui.FloatingArticlePill
+import net.primal.android.thread.articles.details.ui.HighlightActivityBottomSheetHandler
 import net.primal.android.thread.articles.details.ui.rendering.HtmlRenderer
 import net.primal.android.thread.articles.details.ui.rendering.MarkdownRenderer
 import net.primal.android.thread.articles.details.ui.rendering.replaceProfileNostrUrisWithMarkdownLinks
@@ -221,6 +222,7 @@ private fun ArticleDetailsScreen(
 
     HighlightActivityBottomSheetHandler(
         selectedHighlight = detailsState.selectedHighlight,
+        dismissSelection = { detailsEventPublisher(UiEvent.DismissSelectedHighlight) },
     )
 
     if (articleState.shouldApproveBookmark && detailsState.article != null) {

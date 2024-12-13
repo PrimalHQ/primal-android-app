@@ -1076,4 +1076,9 @@
     <string name="article_author_confirm_unfollow_text">Unfollow %1$s?</string>
     <string name="article_author_confirm_unfollow_button">Unfollow</string>
     <string name="article_author_dismiss_unfollow_button">Dismiss</string>
+    <string name="article_details_highlight_activity_authors_zero">highlighted</string>
+    <plurals name="article_details_highlight_activity_authors">
+        <item quantity="one">and 1 other highlighted</item>
+        <item quantity="other">and %1$s others highlighted</item>
+    </plurals>
 </resources>
