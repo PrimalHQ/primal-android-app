@@ -94,7 +94,9 @@
 ## About The Project
 
 <div align="center">
-    <img src="https://primal.net/assets/primal_android-d87a6b0d.png" alt="iPhone Screenshot">
+    <img src="https://github.com/PrimalHQ/primal-android-app/blob/main/docs/screenshots/home_promo.png" alt="Primal Home Screenshot">
+    <img src="https://github.com/PrimalHQ/primal-android-app/blob/main/docs/screenshots/wallet_promo.png" alt="Primal Wallet Screenshot">
+    <img src="https://github.com/PrimalHQ/primal-android-app/blob/main/docs/screenshots/reads_promo.png" alt="Primal Reads Screenshot">
 </div>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
