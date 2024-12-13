@@ -93,7 +93,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-<div align="center" style="display: flex; justify-content: center; gap: 10px;">
+<div align="center" style="display: flex; justify-content: center; gap: 21px;">
     <img src="https://github.com/PrimalHQ/primal-android-app/blob/main/docs/screenshots/home_promo.png" alt="Primal Home Screenshot" width="256px">
     <img src="https://github.com/PrimalHQ/primal-android-app/blob/main/docs/screenshots/wallet_promo.png" alt="Primal Wallet Screenshot" width="256px">
     <img src="https://github.com/PrimalHQ/primal-android-app/blob/main/docs/screenshots/reads_promo.png" alt="Primal Reads Screenshot" width="256px">
