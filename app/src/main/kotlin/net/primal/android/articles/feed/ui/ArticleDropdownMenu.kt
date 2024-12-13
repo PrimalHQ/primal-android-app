@@ -25,10 +25,12 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteLink
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteText
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyPublicKey
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyRawData
+import net.primal.android.core.compose.icons.primaliconpack.ContextHideHighlightsOutlined
 import net.primal.android.core.compose.icons.primaliconpack.ContextMuteUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextRemoveBookmark
 import net.primal.android.core.compose.icons.primaliconpack.ContextReportUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextShare
+import net.primal.android.core.compose.icons.primaliconpack.ContextShowHighlightsOutlined
 import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.resolvePrimalArticleLink
 import net.primal.android.core.utils.systemShareText
@@ -50,6 +52,8 @@ fun ArticleDropdownMenuIcon(
     authorId: String,
     isBookmarked: Boolean,
     enabled: Boolean = true,
+    showHighlights: Boolean? = null,
+    onToggleHighlightsClick: (() -> Unit)? = null,
     onBookmarkClick: (() -> Unit)? = null,
     onMuteUserClick: (() -> Unit)? = null,
     onReportContentClick: ((reportType: ReportType) -> Unit)? = null,
@@ -103,6 +107,24 @@ fun ArticleDropdownMenuIcon(
                     menuVisible = false
                 },
             )
+            if (showHighlights != null) {
+                DropdownPrimalMenuItem(
+                    trailingIconVector = if (showHighlights) {
+                        PrimalIcons.ContextHideHighlightsOutlined
+                    } else {
+                        PrimalIcons.ContextShowHighlightsOutlined
+                    },
+                    text = if (showHighlights) {
+                        stringResource(id = R.string.article_feed_context_hide_highglights)
+                    } else {
+                        stringResource(id = R.string.article_feed_context_show_highglights)
+                    },
+                    onClick = {
+                        onToggleHighlightsClick?.invoke()
+                        menuVisible = false
+                    },
+                )
+            }
             DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.ContextCopyNoteLink,
                 text = stringResource(id = R.string.article_feed_context_copy_article_link),

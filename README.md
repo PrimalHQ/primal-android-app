@@ -93,8 +93,11 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-<div align="center">
-    <img src="https://primal.net/assets/primal_android-d87a6b0d.png" alt="iPhone Screenshot">
+<div align="center" style="display: flex; justify-content: center; gap: 21px;">
+    <img src="https://github.com/PrimalHQ/primal-android-app/blob/main/docs/screenshots/feeds.png" alt="Primal Feeds Screenshot" width="200px">
+    <img src="https://github.com/PrimalHQ/primal-android-app/blob/main/docs/screenshots/reads.png" alt="Primal Reads Screenshot" width="200px">
+    <img src="https://github.com/PrimalHQ/primal-android-app/blob/main/docs/screenshots/wallet.png" alt="Primal Wallet Screenshot" width="200px">
+    <img src="https://github.com/PrimalHQ/primal-android-app/blob/main/docs/screenshots/advsearch.png" alt="Primal Adv.Search Screenshot" width="200px">
 </div>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

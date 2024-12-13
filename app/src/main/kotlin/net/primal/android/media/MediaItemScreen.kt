@@ -167,7 +167,7 @@ fun SharedTransitionScope.MediaItemContent(
         ZoomableAsyncImage(
             modifier = Modifier
                 .sharedElement(
-                    state = rememberSharedContentState(key = "mediaItem"),
+                    sharedContentState = rememberSharedContentState(key = "mediaItem"),
                     animatedVisibilityScope = animatedVisibilityScope,
                 )
                 .fillMaxSize(),
