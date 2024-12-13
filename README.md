@@ -94,9 +94,9 @@
 ## About The Project
 
 <div align="center" style="display: flex; justify-content: center; gap: 10px;">
-    <img src="https://github.com/PrimalHQ/primal-android-app/blob/main/docs/screenshots/home_promo.png" alt="Primal Home Screenshot" style="max-width: 30%; height: auto;">
-    <img src="https://github.com/PrimalHQ/primal-android-app/blob/main/docs/screenshots/wallet_promo.png" alt="Primal Wallet Screenshot" style="max-width: 30%; height: auto;">
-    <img src="https://github.com/PrimalHQ/primal-android-app/blob/main/docs/screenshots/reads_promo.png" alt="Primal Reads Screenshot" style="max-width: 30%; height: auto;">
+    <img src="https://github.com/PrimalHQ/primal-android-app/blob/main/docs/screenshots/home_promo.png" alt="Primal Home Screenshot" style="max-width: 100px; height: auto;">
+    <img src="https://github.com/PrimalHQ/primal-android-app/blob/main/docs/screenshots/wallet_promo.png" alt="Primal Wallet Screenshot" style="max-width: 100px; height: auto;">
+    <img src="https://github.com/PrimalHQ/primal-android-app/blob/main/docs/screenshots/reads_promo.png" alt="Primal Reads Screenshot" style="max-width: 100px; height: auto;">
 </div>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
