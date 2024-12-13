@@ -2,6 +2,8 @@ package net.primal.android.highlights.model
 
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
+import net.primal.android.core.ext.asMapByKey
+import net.primal.android.core.ext.forEachKey
 import net.primal.android.highlights.db.Highlight
 
 data class HighlightUi(
@@ -16,6 +18,13 @@ data class HighlightUi(
     val comments: List<CommentUi>,
 )
 
+data class JoinedHighlightsUi(
+    val highlightId: String,
+    val authors: Set<ProfileDetailsUi>,
+    val content: String,
+    val comments: List<CommentUi>,
+)
+
 fun Highlight.asHighlightUi() =
     HighlightUi(
         highlightId = this.data.highlightId,
@@ -26,5 +35,27 @@ fun Highlight.asHighlightUi() =
         referencedEventATag = this.data.referencedEventATag,
         referencedEventAuthorId = this.data.referencedEventAuthorId,
         createdAt = this.data.createdAt,
+        comments = this.comments.map { it.toCommentUi() },
+    )
+
+operator fun JoinedHighlightsUi.plus(element: JoinedHighlightsUi): JoinedHighlightsUi =
+    JoinedHighlightsUi(
+        highlightId = this.highlightId,
+        authors = this.authors + element.authors,
+        content = this.content,
+        comments = this.comments + element.comments,
+    )
+
+fun List<Highlight>.joinOnContent(): List<JoinedHighlightsUi> =
+    this.groupBy { it.data.content }.map { it.value.sum() }
+
+fun List<Highlight>.sum() =
+    this.map { it.asJoinedHighlightsUi() }.reduce { acc, joinedHighlightsUi -> acc + joinedHighlightsUi }
+
+fun Highlight.asJoinedHighlightsUi() =
+    JoinedHighlightsUi(
+        highlightId = this.data.highlightId,
+        authors = setOfNotNull(this.author?.asProfileDetailsUi()),
+        content = this.data.content,
         comments = this.comments.map { it.toCommentUi() },
     )

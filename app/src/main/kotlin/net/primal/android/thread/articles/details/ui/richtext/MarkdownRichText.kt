@@ -47,6 +47,7 @@ import net.primal.android.LocalPrimalTheme
 import net.primal.android.core.utils.TextMatch
 import net.primal.android.core.utils.TextMatcher
 import net.primal.android.highlights.model.HighlightUi
+import net.primal.android.highlights.model.JoinedHighlightsUi
 import net.primal.android.notes.feed.note.ui.HighlightBackgroundDark
 import net.primal.android.notes.feed.note.ui.HighlightBackgroundLight
 
@@ -81,7 +82,7 @@ import net.primal.android.notes.feed.note.ui.HighlightBackgroundLight
 internal fun RichTextScope.MarkdownRichText(
     astNode: AstNode,
     modifier: Modifier = Modifier,
-    highlights: List<HighlightUi> = emptyList(),
+    highlights: List<JoinedHighlightsUi> = emptyList(),
     onHighlightClick: ((highlightedText: String) -> Unit)? = null,
 ) {
     val isDarkTheme = LocalPrimalTheme.current.isDarkTheme
@@ -124,7 +125,7 @@ internal fun RichTextScope.MarkdownRichText(
 private fun computeRichTextString(
     astNode: AstNode,
     isDarkTheme: Boolean,
-    highlights: List<HighlightUi>,
+    highlights: List<JoinedHighlightsUi>,
 ): RichTextString {
     val richTextStringBuilder = RichTextString.Builder()
     val highlightedLiterals = highlights.map { it.content }
