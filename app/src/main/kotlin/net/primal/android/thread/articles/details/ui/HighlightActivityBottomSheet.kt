@@ -9,14 +9,24 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,15 +39,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import fr.acinq.lightning.utils.UUID
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarOverlap
 import net.primal.android.core.compose.AvatarThumbnailsRow
+import net.primal.android.core.compose.NostrUserText
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.UniversalAvatarThumbnail
+import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedRepliesFilled
 import net.primal.android.core.compose.icons.primaliconpack.Highlight
 import net.primal.android.core.compose.icons.primaliconpack.Quote
+import net.primal.android.core.compose.icons.primaliconpack.RemoveHighlight
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.highlights.model.CommentUi
 import net.primal.android.highlights.model.JoinedHighlightsUi
 import net.primal.android.theme.AppTheme
 
@@ -46,11 +66,13 @@ import net.primal.android.theme.AppTheme
 fun HighlightActivityBottomSheetHandler(
     selectedHighlight: JoinedHighlightsUi?,
     dismissSelection: () -> Unit,
+    isHighlighted: Boolean,
 ) {
     if (selectedHighlight != null) {
         HighlightActivityBottomSheet(
             onDismissRequest = dismissSelection,
             selectedHighlight = selectedHighlight,
+            isHighlighted = isHighlighted,
         )
     }
 }
@@ -61,6 +83,7 @@ fun HighlightActivityBottomSheet(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
     selectedHighlight: JoinedHighlightsUi,
+    isHighlighted: Boolean,
 ) {
     ModalBottomSheet(
         tonalElevation = 0.dp,
@@ -68,50 +91,131 @@ fun HighlightActivityBottomSheet(
         onDismissRequest = onDismissRequest,
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
     ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
+        Column {
             PrimalTopAppBar(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
                     scrolledContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
                 ),
-                title = "Highlight Activity",
+                title = stringResource(id = R.string.article_details_highlight_activity_title),
                 textColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             )
-            Column {
-                HighlightAuthorsRow(authors = selectedHighlight.authors)
+            LazyColumn(
+                state = rememberLazyListState(),
+                modifier = Modifier.weight(weight = 1f, fill = false),
+            ) {
+                item {
+                    HighlightAuthorsRow(authors = selectedHighlight.authors)
+                }
+                items(
+                    items = selectedHighlight.comments,
+                    key = { it.commentId },
+                ) {
+                    CommentRow(comment = it)
+                }
             }
             HighlightActionButtons(
                 onQuoteClick = {},
                 onCommentClick = {},
                 onToggleHighlightClick = {},
+                isHighlighted = isHighlighted,
             )
         }
     }
 }
 
 @Composable
-fun HighlightActionButtons(onQuoteClick: () -> Unit, onCommentClick: () -> Unit, onToggleHighlightClick: () -> Unit) {
+fun CommentRow(
+    modifier: Modifier = Modifier,
+    comment: CommentUi,
+) {
+    PrimalDivider()
+    Column(
+        modifier = Modifier.padding(vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                UniversalAvatarThumbnail(
+                    avatarCdnImage = comment.authorCdnImage,
+                    legendaryCustomization = comment.authorLegendaryCustomization,
+                    avatarSize = 28.dp,
+                )
+                NostrUserText(
+                    modifier = Modifier.padding(start = 8.dp),
+                    displayName = comment.authorDisplayName ?: "",
+                    internetIdentifier = comment.authorInternetIdentifier,
+                    customBadgeStyle = if (comment.authorLegendaryCustomization?.customBadge == true) {
+                        comment.authorLegendaryCustomization.legendaryStyle
+                    } else {
+                        null
+                    },
+                )
+                Text(
+                    text = stringResource(id = R.string.article_details_highlight_activity_commented),
+                    style = AppTheme.typography.bodyMedium,
+                    color = AppTheme.colorScheme.onPrimary,
+                )
+            }
+            Text(
+                text = comment.createdAt.asBeforeNowFormat(),
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            )
+        }
+        Text(
+            modifier = Modifier.padding(start = 54.dp, end = 12.dp),
+            text = comment.content,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            style = AppTheme.typography.bodyMedium,
+        )
+    }
+}
+
+@Composable
+fun HighlightActionButtons(
+    modifier: Modifier = Modifier,
+    isHighlighted: Boolean,
+    onQuoteClick: () -> Unit,
+    onCommentClick: () -> Unit,
+    onToggleHighlightClick: () -> Unit,
+) {
     Row(
-        modifier = Modifier.padding(16.dp),
+        modifier = modifier.padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         ActionButton(
             icon = PrimalIcons.Quote,
             onClick = onQuoteClick,
-            text = "Quote",
+            text = stringResource(id = R.string.article_details_highlight_activity_quote),
         )
         ActionButton(
             icon = PrimalIcons.FeedRepliesFilled,
             onClick = onCommentClick,
-            text = "Comment",
+            text = stringResource(id = R.string.article_details_highlight_activity_comment),
         )
         ActionButton(
-            icon = PrimalIcons.Highlight,
+            icon = if (isHighlighted) {
+                PrimalIcons.RemoveHighlight
+            } else {
+                PrimalIcons.Highlight
+            },
             onClick = onToggleHighlightClick,
-            text = "Highlight",
+            text = if (isHighlighted) {
+                stringResource(id = R.string.article_details_highlight_activity_remove_highlight)
+            } else {
+                stringResource(id = R.string.article_details_highlight_activity_highlight)
+            },
         )
     }
 }
@@ -159,13 +263,13 @@ fun HighlightAuthorsRow(
     authors: Set<ProfileDetailsUi>,
 ) {
     Column(
-        modifier = Modifier.padding(vertical = 8.dp),
+        modifier = Modifier.padding(vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 24.dp),
+            modifier = Modifier.padding(horizontal = 18.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Icon(
                 modifier = Modifier.size(20.dp),
@@ -183,8 +287,9 @@ fun HighlightAuthorsRow(
             )
         }
         Text(
-            modifier = Modifier.padding(start = 60.dp),
+            modifier = Modifier.padding(start = 56.dp),
             text = authors.map { it.authorDisplayName }.buildHighlightedString(),
+            style = AppTheme.typography.bodyMedium,
         )
     }
 }

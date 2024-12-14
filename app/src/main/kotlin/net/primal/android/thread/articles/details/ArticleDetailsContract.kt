@@ -21,6 +21,7 @@ interface ArticleDetailsContract {
         val comments: List<FeedPostUi> = emptyList(),
         val zappingState: ZappingState = ZappingState(),
         val selectedHighlight: JoinedHighlightsUi? = null,
+        val isHighlighted: Boolean = false,
         val error: UiError? = null,
     )
 

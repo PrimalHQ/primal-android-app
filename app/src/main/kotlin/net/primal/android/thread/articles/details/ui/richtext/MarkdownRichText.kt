@@ -46,7 +46,6 @@ import com.halilibo.richtext.ui.string.withFormat
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.core.utils.TextMatch
 import net.primal.android.core.utils.TextMatcher
-import net.primal.android.highlights.model.HighlightUi
 import net.primal.android.highlights.model.JoinedHighlightsUi
 import net.primal.android.notes.feed.note.ui.HighlightBackgroundDark
 import net.primal.android.notes.feed.note.ui.HighlightBackgroundLight

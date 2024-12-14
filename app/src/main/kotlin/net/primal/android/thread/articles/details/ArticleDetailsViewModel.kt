@@ -91,10 +91,20 @@ class ArticleDetailsViewModel @Inject constructor(
                     UiEvent.ToggleAuthorFollows -> followUnfollowAuthor()
                     UiEvent.ToggleHighlights -> setState { copy(showHighlights = !showHighlights) }
                     is UiEvent.SelectHighlight -> setState {
-                        copy(selectedHighlight = article?.highlights?.first { h -> h.content == it.content })
+                        val highlight = article?.highlights?.first { h -> h.content == it.content }
+                        copy(
+                            selectedHighlight = highlight,
+                            isHighlighted = highlight?.authors?.map { a -> a.pubkey }
+                                ?.contains(activeAccountStore.activeUserId()) == true,
+                        )
                     }
 
-                    UiEvent.DismissSelectedHighlight -> setState { copy(selectedHighlight = null) }
+                    UiEvent.DismissSelectedHighlight -> setState {
+                        copy(
+                            selectedHighlight = null,
+                            isHighlighted = false,
+                        )
+                    }
                 }
             }
         }

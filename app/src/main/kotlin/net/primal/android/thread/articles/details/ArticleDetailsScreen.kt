@@ -223,6 +223,7 @@ private fun ArticleDetailsScreen(
     HighlightActivityBottomSheetHandler(
         selectedHighlight = detailsState.selectedHighlight,
         dismissSelection = { detailsEventPublisher(UiEvent.DismissSelectedHighlight) },
+        isHighlighted = detailsState.isHighlighted,
     )
 
     if (articleState.shouldApproveBookmark && detailsState.article != null) {
