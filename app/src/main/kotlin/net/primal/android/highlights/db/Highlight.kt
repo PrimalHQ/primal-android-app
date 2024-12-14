@@ -2,7 +2,6 @@ package net.primal.android.highlights.db
 
 import androidx.room.Embedded
 import androidx.room.Relation
-import net.primal.android.notes.db.FeedPost
 import net.primal.android.notes.db.PostData
 import net.primal.android.notes.db.PostWithAuthorData
 import net.primal.android.profile.db.ProfileData

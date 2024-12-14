@@ -2,8 +2,6 @@ package net.primal.android.highlights.model
 
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
-import net.primal.android.core.ext.asMapByKey
-import net.primal.android.core.ext.forEachKey
 import net.primal.android.highlights.db.Highlight
 
 data class HighlightUi(
@@ -46,8 +44,7 @@ operator fun JoinedHighlightsUi.plus(element: JoinedHighlightsUi): JoinedHighlig
         comments = this.comments + element.comments,
     )
 
-fun List<Highlight>.joinOnContent(): List<JoinedHighlightsUi> =
-    this.groupBy { it.data.content }.map { it.value.sum() }
+fun List<Highlight>.joinOnContent(): List<JoinedHighlightsUi> = this.groupBy { it.data.content }.map { it.value.sum() }
 
 fun List<Highlight>.sum() =
     this.map { it.asJoinedHighlightsUi() }.reduce { acc, joinedHighlightsUi -> acc + joinedHighlightsUi }

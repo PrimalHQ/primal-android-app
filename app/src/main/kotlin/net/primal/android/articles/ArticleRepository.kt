@@ -20,7 +20,6 @@ import net.primal.android.articles.api.model.ArticleHighlightsRequestBody
 import net.primal.android.articles.db.Article
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.nostr.ext.asHighlightData
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.user.accounts.active.ActiveAccountStore
 

@@ -17,7 +17,6 @@ import net.primal.android.notes.db.PostData
 fun List<NostrEvent>.mapNotNullAsHighlightComments(highlights: List<HighlightData>): List<PostData> =
     this.mapNotNull { it.asHighlightComment(highlights = highlights) }
 
-
 fun NostrEvent.asHighlightComment(highlights: List<HighlightData>): PostData? {
     if (!this.tags.containsRootOrReplyTag()) {
         return null

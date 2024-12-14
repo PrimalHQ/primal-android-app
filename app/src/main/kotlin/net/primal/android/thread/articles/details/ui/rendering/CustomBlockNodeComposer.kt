@@ -6,7 +6,6 @@ import com.halilibo.richtext.markdown.node.AstBlockNodeType
 import com.halilibo.richtext.markdown.node.AstNode
 import com.halilibo.richtext.markdown.node.AstParagraph
 import com.halilibo.richtext.ui.RichTextScope
-import net.primal.android.highlights.model.HighlightUi
 import net.primal.android.highlights.model.JoinedHighlightsUi
 import net.primal.android.thread.articles.details.ui.richtext.MarkdownRichText
 

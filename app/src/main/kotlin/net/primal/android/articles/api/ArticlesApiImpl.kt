@@ -98,7 +98,9 @@ class ArticlesApiImpl @Inject constructor(
             eventStats = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalEventStats),
             relayHints = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalRelayHint),
             zaps = queryResult.filterNostrEvents(kind = NostrEventKind.Zap),
-            primalLongFormContentWordsCount = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalLongFormWordsCount),
+            primalLongFormContentWordsCount = queryResult.filterPrimalEvents(
+                kind = NostrEventKind.PrimalLongFormWordsCount,
+            ),
             referencedEvents = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalReferencedEvent),
             highlightComments = queryResult.filterNostrEvents(kind = NostrEventKind.ShortTextNote),
         )

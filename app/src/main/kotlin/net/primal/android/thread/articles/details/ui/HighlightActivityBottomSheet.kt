@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -18,15 +17,9 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,10 +32,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import fr.acinq.lightning.utils.UUID
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarOverlap
 import net.primal.android.core.compose.AvatarThumbnailsRow
@@ -51,6 +40,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.asBeforeNowFormat
+import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedRepliesFilled
 import net.primal.android.core.compose.icons.primaliconpack.Highlight
@@ -61,6 +51,7 @@ import net.primal.android.highlights.model.CommentUi
 import net.primal.android.highlights.model.JoinedHighlightsUi
 import net.primal.android.theme.AppTheme
 
+internal val DARK_THEME_ACTION_BUTTON_COLOR = Color(0xFF282828)
 
 @Composable
 fun HighlightActivityBottomSheetHandler(
@@ -125,10 +116,7 @@ fun HighlightActivityBottomSheet(
 }
 
 @Composable
-fun CommentRow(
-    modifier: Modifier = Modifier,
-    comment: CommentUi,
-) {
+fun CommentRow(modifier: Modifier = Modifier, comment: CommentUi) {
     PrimalDivider()
     Column(
         modifier = Modifier.padding(vertical = 12.dp),
@@ -226,9 +214,15 @@ private fun RowScope.ActionButton(
     text: String,
     onClick: () -> Unit,
 ) {
+
+    val isDarkTheme = isAppInDarkPrimalTheme()
     Button(
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFF282828),
+            containerColor = if (isDarkTheme) {
+                DARK_THEME_ACTION_BUTTON_COLOR
+            } else {
+                AppTheme.extraColorScheme.surfaceVariantAlt3
+            },
         ),
         contentPadding = PaddingValues(vertical = 16.dp),
         shape = AppTheme.shapes.medium,
@@ -259,9 +253,7 @@ private fun RowScope.ActionButton(
 }
 
 @Composable
-fun HighlightAuthorsRow(
-    authors: Set<ProfileDetailsUi>,
-) {
+fun HighlightAuthorsRow(authors: Set<ProfileDetailsUi>) {
     Column(
         modifier = Modifier.padding(vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),

@@ -1,6 +1,5 @@
 package net.primal.android.thread.articles.details
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -74,7 +73,6 @@ import net.primal.android.core.compose.zaps.ArticleTopZapsSection
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
-import net.primal.android.highlights.model.JoinedHighlightsUi
 import net.primal.android.nostr.ext.isNEvent
 import net.primal.android.nostr.ext.isNEventUri
 import net.primal.android.nostr.ext.isNostrUri
@@ -109,7 +107,6 @@ import net.primal.android.thread.articles.details.ui.rendering.replaceProfileNos
 import net.primal.android.thread.articles.details.ui.rendering.splitIntoParagraphs
 import net.primal.android.thread.articles.details.ui.rendering.splitMarkdownByNostrUris
 import net.primal.android.wallet.zaps.canZap
-import timber.log.Timber
 
 @Composable
 fun ArticleDetailsScreen(
