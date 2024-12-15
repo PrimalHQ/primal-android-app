@@ -43,7 +43,7 @@ private val nostrUriRegexPattern: Pattern = Pattern.compile(
     Pattern.CASE_INSENSITIVE,
 )
 
-private val backendUrlRegexPattern: Pattern = Pattern.compile(
+private val urlRegexPattern: Pattern = Pattern.compile(
     "https?://(www\\.)?[-a-zA-Z0-9@:%.+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()_@:%+.~#?&//=]*)",
         Pattern.CASE_INSENSITIVE
 )
@@ -89,9 +89,18 @@ fun String.parseNostrUris(): List<String> {
     }.filter { it.nostrUriToBytes() != null }.toList()
 }
 
-fun String.parseBackendUrls(): List<String> {
-    return backendUrlRegexPattern.toRegex().findAll(this).map { matchResult ->
-        matchResult.groupValues[0]
+fun String.detectUrls(): List<String> {
+    val urlRegex = urlRegexPattern.toRegex()
+    return urlRegex.findAll(this).map { matchResult ->
+        val url = matchResult.groupValues[0]
+        val startIndex = matchResult.range.first
+        val charBefore = this.getOrNull(startIndex - 1)
+
+        when (charBefore) {
+            '(' -> url.trimEnd(')')
+            '[' -> url.trimEnd(']')
+            else -> url
+        }
     }.toList()
 }
 

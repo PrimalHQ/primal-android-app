@@ -6,7 +6,7 @@ import com.linkedin.urls.detection.UrlDetectorOptions
 import java.net.MalformedURLException
 import java.net.URL
 import net.primal.android.nostr.ext.parseNostrUris
-import net.primal.android.nostr.ext.parseBackendUrls
+import net.primal.android.nostr.ext.detectUrls
 import timber.log.Timber
 
 fun String.parseUris(): List<String> {
@@ -14,8 +14,8 @@ fun String.parseUris(): List<String> {
     val libUrls = urlDetector.detect()
         .filterInvalidTLDs()
         .map { it.originalUrl }
-    val customUrls = this.parseBackendUrls()
-    val mergedUrls = mergeUrls(libUrls, customUrls)
+    val customUrls = this.detectUrls()
+    val mergedUrls = mergeUrls(emptyList(), customUrls)
     val nostr = this.parseNostrUris()
 
     return nostr + mergedUrls
