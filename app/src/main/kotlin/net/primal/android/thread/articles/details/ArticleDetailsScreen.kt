@@ -1,6 +1,5 @@
 package net.primal.android.thread.articles.details
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -101,6 +100,7 @@ import net.primal.android.thread.articles.details.ui.ArticleAuthorRow
 import net.primal.android.thread.articles.details.ui.ArticleDetailsHeader
 import net.primal.android.thread.articles.details.ui.ArticleHashtags
 import net.primal.android.thread.articles.details.ui.FloatingArticlePill
+import net.primal.android.thread.articles.details.ui.HighlightActivityBottomSheetHandler
 import net.primal.android.thread.articles.details.ui.rendering.HtmlRenderer
 import net.primal.android.thread.articles.details.ui.rendering.MarkdownRenderer
 import net.primal.android.thread.articles.details.ui.rendering.replaceProfileNostrUrisWithMarkdownLinks
@@ -217,6 +217,12 @@ private fun ArticleDetailsScreen(
         )
     }
 
+    HighlightActivityBottomSheetHandler(
+        selectedHighlight = detailsState.selectedHighlight,
+        dismissSelection = { detailsEventPublisher(UiEvent.DismissSelectedHighlight) },
+        isHighlighted = detailsState.isHighlighted,
+    )
+
     if (articleState.shouldApproveBookmark && detailsState.article != null) {
         ApproveBookmarkAlertDialog(
             onBookmarkConfirmed = {
@@ -296,6 +302,7 @@ private fun ArticleDetailsScreen(
                     onZapOptionsClick = { invokeZapOptionsOrShowWarning() },
                     onGoToWallet = onGoToWallet,
                     noteCallbacks = noteCallbacks,
+                    onHighlightClick = { detailsEventPublisher(UiEvent.SelectHighlight(it)) },
                     onFollowUnfollowClick = { detailsEventPublisher(UiEvent.ToggleAuthorFollows) },
                     onPostAction = { action ->
                         when (action) {
@@ -425,6 +432,7 @@ private fun ArticleContentWithComments(
     onArticleCommentClick: (naddr: String) -> Unit,
     onArticleHashtagClick: (hashtag: String) -> Unit,
     onZapOptionsClick: () -> Unit,
+    onHighlightClick: (String) -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     onPostAction: ((FeedPostAction) -> Unit)? = null,
@@ -433,8 +441,6 @@ private fun ArticleContentWithComments(
     onUiError: ((UiError) -> Unit)? = null,
 ) {
     val uriHandler = LocalUriHandler.current
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
 
     LazyColumn(
         modifier = Modifier
@@ -539,15 +545,7 @@ private fun ArticleContentWithComments(
                         onNoteClick = noteCallbacks.onNoteClick,
                         onArticleClick = noteCallbacks.onArticleClick,
                         onUrlClick = { url -> uriHandler.openUriSafely(url) },
-                        onHighlightClick = { highlightedText ->
-                            scope.launch {
-                                Toast.makeText(
-                                    context,
-                                    highlightedText,
-                                    Toast.LENGTH_SHORT,
-                                ).show()
-                            }
-                        },
+                        onHighlightClick = onHighlightClick,
                     )
                 }
 

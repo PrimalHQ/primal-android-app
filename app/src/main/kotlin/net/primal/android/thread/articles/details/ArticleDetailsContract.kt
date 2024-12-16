@@ -1,6 +1,7 @@
 package net.primal.android.thread.articles.details
 
 import net.primal.android.core.errors.UiError
+import net.primal.android.highlights.model.JoinedHighlightsUi
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.ZappingState
@@ -19,6 +20,8 @@ interface ArticleDetailsContract {
         val topZaps: List<EventZapUiModel> = emptyList(),
         val comments: List<FeedPostUi> = emptyList(),
         val zappingState: ZappingState = ZappingState(),
+        val selectedHighlight: JoinedHighlightsUi? = null,
+        val isHighlighted: Boolean = false,
         val error: UiError? = null,
     )
 
@@ -36,5 +39,7 @@ interface ArticleDetailsContract {
         data object RepostAction : UiEvent()
         data object ToggleAuthorFollows : UiEvent()
         data object ToggleHighlights : UiEvent()
+        data class SelectHighlight(val content: String) : UiEvent()
+        data object DismissSelectedHighlight : UiEvent()
     }
 }

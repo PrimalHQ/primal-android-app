@@ -8,7 +8,7 @@ import com.halilibo.richtext.commonmark.CommonMarkdownParseOptions
 import com.halilibo.richtext.commonmark.CommonmarkAstNodeParser
 import com.halilibo.richtext.markdown.BasicMarkdown
 import com.halilibo.richtext.ui.material3.RichText
-import net.primal.android.highlights.model.HighlightUi
+import net.primal.android.highlights.model.JoinedHighlightsUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.thread.articles.details.ui.handleArticleLinkClick
 
@@ -17,7 +17,7 @@ fun MarkdownRenderer(
     markdown: String,
     showHighlights: Boolean,
     modifier: Modifier = Modifier,
-    highlights: List<HighlightUi> = emptyList(),
+    highlights: List<JoinedHighlightsUi> = emptyList(),
     onProfileClick: ((profileId: String) -> Unit)? = null,
     onNoteClick: ((noteId: String) -> Unit)? = null,
     onArticleClick: ((naddr: String) -> Unit)? = null,

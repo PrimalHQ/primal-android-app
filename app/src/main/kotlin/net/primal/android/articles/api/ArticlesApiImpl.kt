@@ -89,6 +89,20 @@ class ArticlesApiImpl @Inject constructor(
 
         return ArticleHighlightsResponse(
             highlights = queryResult.filterNostrEvents(kind = NostrEventKind.Highlight),
+            legendProfiles = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalLegendProfiles),
+            primalPremiumInfo = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalPremiumInfo),
+            primalUserNames = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalUserNames),
+            primalUserScores = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalUserScores),
+            cdnResources = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalCdnResource),
+            profileMetadatas = queryResult.filterNostrEvents(kind = NostrEventKind.Metadata),
+            eventStats = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalEventStats),
+            relayHints = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalRelayHint),
+            zaps = queryResult.filterNostrEvents(kind = NostrEventKind.Zap),
+            primalLongFormContentWordsCount = queryResult.filterPrimalEvents(
+                kind = NostrEventKind.PrimalLongFormWordsCount,
+            ),
+            referencedEvents = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalReferencedEvent),
+            highlightComments = queryResult.filterNostrEvents(kind = NostrEventKind.ShortTextNote),
         )
     }
 }
