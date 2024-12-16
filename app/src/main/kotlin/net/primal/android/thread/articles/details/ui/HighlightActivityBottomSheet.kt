@@ -125,7 +125,7 @@ fun CommentRow(modifier: Modifier = Modifier, comment: CommentUi) {
         Row(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp),
+                .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -161,7 +161,7 @@ fun CommentRow(modifier: Modifier = Modifier, comment: CommentUi) {
             )
         }
         Text(
-            modifier = Modifier.padding(start = 54.dp, end = 12.dp),
+            modifier = Modifier.padding(start = 58.dp, end = 12.dp),
             text = comment.content,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             style = AppTheme.typography.bodyMedium,
@@ -259,7 +259,7 @@ fun HighlightAuthorsRow(authors: Set<ProfileDetailsUi>) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 18.dp),
+            modifier = Modifier.padding(horizontal = 22.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
