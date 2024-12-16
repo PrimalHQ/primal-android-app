@@ -7,6 +7,7 @@ import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.editor.domain.NoteAttachment
+import net.primal.android.nostr.model.NostrEventKind
 
 fun List<JsonArray>.findFirstEventId() = firstOrNull { it.isEventIdTag() }?.getTagValueOrNull()
 
@@ -69,6 +70,18 @@ fun JsonArray.hasMentionMarker() = contains(JsonPrimitive("mention"))
 fun JsonArray.hasReplyMarker() = contains(JsonPrimitive("reply"))
 
 fun JsonArray.hasRootMarker() = contains(JsonPrimitive("root"))
+
+fun String.asCustomTag(tag: String): JsonArray =
+    buildJsonArray {
+        add(tag)
+        add(this@asCustomTag)
+    }
+
+fun NostrEventKind.asKindTag(): JsonArray =
+    buildJsonArray {
+        add("k")
+        add(this@asKindTag.value.toString())
+    }
 
 fun String.asEventIdTag(relayHint: String? = null, marker: String? = null): JsonArray =
     buildJsonArray {

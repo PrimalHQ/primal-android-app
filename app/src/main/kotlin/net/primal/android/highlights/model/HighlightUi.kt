@@ -21,6 +21,9 @@ data class JoinedHighlightsUi(
     val authors: Set<ProfileDetailsUi>,
     val content: String,
     val comments: List<CommentUi>,
+    val referencedEventATag: String?,
+    val referencedEventAuthorId: String?,
+    val context: String?,
 )
 
 fun Highlight.asHighlightUi() =
@@ -42,6 +45,9 @@ operator fun JoinedHighlightsUi.plus(element: JoinedHighlightsUi): JoinedHighlig
         authors = this.authors + element.authors,
         content = this.content,
         comments = this.comments + element.comments,
+        referencedEventATag = this.referencedEventATag ?: element.referencedEventATag,
+        referencedEventAuthorId = this.referencedEventAuthorId ?: element.referencedEventAuthorId,
+        context = this.context ?: element.context,
     )
 
 fun List<Highlight>.joinOnContent(): List<JoinedHighlightsUi> = this.groupBy { it.data.content }.map { it.value.sum() }
@@ -55,4 +61,7 @@ fun Highlight.asJoinedHighlightsUi() =
         authors = setOfNotNull(this.author?.asProfileDetailsUi()),
         content = this.data.content,
         comments = this.comments.map { it.toCommentUi() },
+        referencedEventATag = this.data.referencedEventATag,
+        referencedEventAuthorId = this.data.referencedEventAuthorId,
+        context = this.data.context,
     )

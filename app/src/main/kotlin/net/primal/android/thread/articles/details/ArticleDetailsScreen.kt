@@ -221,6 +221,9 @@ private fun ArticleDetailsScreen(
         selectedHighlight = detailsState.selectedHighlight,
         dismissSelection = { detailsEventPublisher(UiEvent.DismissSelectedHighlight) },
         isHighlighted = detailsState.isHighlighted,
+        onSaveHighlightClick = { detailsEventPublisher(UiEvent.PublishSelectedHighlight) },
+        onDeleteHighlightClick = { detailsEventPublisher(UiEvent.DeleteSelectedHighlight) },
+        isWorking = detailsState.isWorking,
     )
 
     if (articleState.shouldApproveBookmark && detailsState.article != null) {
@@ -540,7 +543,7 @@ private fun ArticleContentWithComments(
                             .padding(all = 16.dp),
                         markdown = part.markdown,
                         showHighlights = showHighlights,
-                        highlights = state.article?.highlights ?: emptyList(),
+                        highlights = state.highlights,
                         onProfileClick = noteCallbacks.onProfileClick,
                         onNoteClick = noteCallbacks.onNoteClick,
                         onArticleClick = noteCallbacks.onArticleClick,
