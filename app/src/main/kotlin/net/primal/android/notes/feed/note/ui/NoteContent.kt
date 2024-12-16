@@ -393,7 +393,11 @@ fun renderContentAsAnnotatedString(
             )
         }
 
-        TextMatcher(content = refinedContent, texts = data.hashtags)
+        TextMatcher(
+            content = refinedContent,
+            texts = data.hashtags,
+            repeatingOccurrences = true,
+        )
             .matches()
             .forEach {
                 addHashtagAnnotation(

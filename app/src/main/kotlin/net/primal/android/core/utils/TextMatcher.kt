@@ -3,6 +3,7 @@ package net.primal.android.core.utils
 class TextMatcher(
     content: String,
     texts: List<String>,
+    repeatingOccurrences: Boolean = false,
 ) {
 
     private val matches: MutableList<TextMatch> = mutableListOf()
@@ -26,16 +27,21 @@ class TextMatcher(
     }
 
     init {
-        texts.forEach {
-            val startIndex = content.indexOfNotMatchedBefore(text = it)
-            if (startIndex != null) {
+        texts.forEach { text ->
+            var currentIndex = content.indexOfNotMatchedBefore(text = text)
+
+            while (currentIndex != null) {
                 matches.add(
                     TextMatch(
-                        value = it,
-                        startIndex = startIndex,
-                        endIndex = startIndex + it.length,
-                    ),
+                        value = text,
+                        startIndex = currentIndex,
+                        endIndex = currentIndex + text.length,
+                    )
                 )
+
+                if (!repeatingOccurrences) break
+
+                currentIndex = content.indexOfNotMatchedBefore(text = text)
             }
         }
     }
