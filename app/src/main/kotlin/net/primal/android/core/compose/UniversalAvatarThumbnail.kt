@@ -45,9 +45,6 @@ fun UniversalAvatarThumbnail(
     onClick: (() -> Unit)? = null,
     defaultAvatar: @Composable () -> Unit = { DefaultAvatarThumbnailPlaceholderListItemImage() },
 ) {
-    val variant = avatarCdnImage?.variants?.minByOrNull { it.width }
-    val imageSource = variant?.mediaUrl ?: avatarCdnImage?.sourceUrl
-
     val hasLegendBorder = legendaryCustomization?.avatarGlow == true &&
         legendaryCustomization.legendaryStyle != LegendaryStyle.NO_CUSTOMIZATION
 
@@ -60,10 +57,13 @@ fun UniversalAvatarThumbnail(
     val totalBorderSize = avatarSize.resolveOuterBorderSizeFromAvatarSize() +
         avatarSize.resolveInnerBorderSizeFromAvatarSize()
 
+    val variant = avatarCdnImage?.variants?.minByOrNull { it.width }
+
     AvatarThumbnailListItemImage(
         modifier = modifier,
         avatarSize = avatarSize,
-        source = imageSource,
+        cdnVariantUrl = variant?.mediaUrl,
+        sourceUrl = avatarCdnImage?.sourceUrl,
         hasOuterBorder = hasBorder && avatarSize > 0.dp,
         hasInnerBorder = hasLegendBorder && avatarSize > 0.dp,
         borderBrush = borderBrush ?: Brush.linearGradient(
@@ -93,7 +93,8 @@ private fun transparentBorderBrush() =
 
 @Composable
 private fun AvatarThumbnailListItemImage(
-    source: Any?,
+    cdnVariantUrl: Any?,
+    sourceUrl: Any?,
     modifier: Modifier = Modifier,
     avatarSize: Dp = 48.dp,
     totalBorderSize: Dp = 2.dp,
@@ -113,7 +114,7 @@ private fun AvatarThumbnailListItemImage(
     }
 
     SubcomposeAsyncImage(
-        model = source,
+        model = cdnVariantUrl ?: sourceUrl,
         imageLoader = imageLoader,
         modifier = modifier
             .adjustAvatarBackground(
@@ -132,14 +133,28 @@ private fun AvatarThumbnailListItemImage(
             ),
         contentDescription = stringResource(id = R.string.accessibility_profile_image),
         contentScale = ContentScale.Crop,
-        loading = {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(color = backgroundColor),
+        loading = { AvatarLoadingBox(backgroundColor) },
+        error = {
+            SubcomposeAsyncImage(
+                model = sourceUrl,
+                imageLoader = imageLoader,
+                contentDescription = stringResource(id = R.string.accessibility_profile_image),
+                contentScale = ContentScale.Crop,
+                loading = { AvatarLoadingBox(backgroundColor) },
+                error = {
+                    defaultAvatar()
+                },
             )
         },
-        error = { defaultAvatar() },
+    )
+}
+
+@Composable
+private fun AvatarLoadingBox(backgroundColor: Color) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = backgroundColor),
     )
 }
 
