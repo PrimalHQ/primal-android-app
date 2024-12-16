@@ -2,6 +2,7 @@ package net.primal.android.core.utils
 
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainAll
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldNotContain
 import org.junit.Test
 
@@ -29,6 +30,20 @@ class TextMatcherTest {
 
         val actual = matcher.matches().map { it.value }
         actual.shouldContainAll(hashtags)
+    }
+
+    @Test
+    fun `matches should match hashtags and return hashtags with duplicates`() {
+        val hashtags = listOf("#nostr", "#bitcoin", "#sats", "#freedom")
+        val expected = listOf("#nostr", "#nostr", "#nostr", "#bitcoin", "#freedom", "#freedom", "#sats")
+        val matcher = TextMatcher(
+            content = "Hello I love #nostr #nostr somemore #nostr #bitcoin #freedom #sats #freedom",
+            texts = hashtags,
+            repeatingOccurrences = true,
+        )
+
+        val actual = matcher.matches().map { it.value }
+        actual.shouldContainExactlyInAnyOrder(expected)
     }
 
     @Test
