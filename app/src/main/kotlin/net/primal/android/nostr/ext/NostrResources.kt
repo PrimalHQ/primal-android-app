@@ -45,7 +45,7 @@ private val nostrUriRegexPattern: Pattern = Pattern.compile(
 
 private val urlRegexPattern: Pattern = Pattern.compile(
     "https?://(www\\.)?[-a-zA-Z0-9@:%.+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()_@:%+.~#?&//=]*)",
-        Pattern.CASE_INSENSITIVE
+    Pattern.CASE_INSENSITIVE,
 )
 
 fun String.isNostrUri(): Boolean {
