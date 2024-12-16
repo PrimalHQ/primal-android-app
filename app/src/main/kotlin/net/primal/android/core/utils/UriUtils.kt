@@ -6,15 +6,45 @@ import com.linkedin.urls.detection.UrlDetectorOptions
 import java.net.MalformedURLException
 import java.net.URL
 import net.primal.android.nostr.ext.parseNostrUris
+import net.primal.android.nostr.ext.detectUrls
 import timber.log.Timber
 
 fun String.parseUris(): List<String> {
     val urlDetector = UrlDetector(this, UrlDetectorOptions.JSON)
-    val urls = urlDetector.detect()
+    val libUrls = urlDetector.detect()
         .filterInvalidTLDs()
         .map { it.originalUrl }
+    val customUrls = this.detectUrls()
+    val mergedUrls = mergeUrls(emptyList(), customUrls)
     val nostr = this.parseNostrUris()
-    return urls + nostr
+
+    return nostr + mergedUrls
+}
+
+fun mergeUrls(libUrls: List<String>, customUrls: List<String>): List<String> {
+    val result = mutableListOf<String>()
+
+    val allUrls = (libUrls + customUrls).distinct()
+    val visited = mutableSetOf<String>()
+
+    for (url in allUrls) {
+        if (visited.any { existing -> isRelativeMatch(existing, url) }) {
+            val matchingUrl = visited.first { existing -> isRelativeMatch(existing, url) }
+            if (url.length > matchingUrl.length) {
+                visited.remove(matchingUrl)
+                visited.add(url)
+            }
+        } else {
+            visited.add(url)
+        }
+    }
+
+    result.addAll(visited)
+    return result
+}
+
+fun isRelativeMatch(url1: String, url2: String): Boolean {
+    return url1.startsWith(url2) || url2.startsWith(url1)
 }
 
 private fun List<Url>.filterInvalidTLDs() =
