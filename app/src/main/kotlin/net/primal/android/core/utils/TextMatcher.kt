@@ -36,7 +36,7 @@ class TextMatcher(
                         value = text,
                         startIndex = currentIndex,
                         endIndex = currentIndex + text.length,
-                    )
+                    ),
                 )
 
                 if (!repeatingOccurrences) break
