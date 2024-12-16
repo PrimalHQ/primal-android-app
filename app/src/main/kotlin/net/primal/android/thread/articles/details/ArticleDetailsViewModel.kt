@@ -118,7 +118,7 @@ class ArticleDetailsViewModel @Inject constructor(
     private fun publishSelectedHighlight() =
         viewModelScope.launch {
             val selectedHighlight = _state.value.selectedHighlight
-                ?: throw IllegalStateException("cannot enter this state without selecting a highlight.")
+            checkNotNull(selectedHighlight) { "cannot enter this state without selecting a highlight." }
 
             setState { copy(isWorking = true) }
             try {
@@ -141,7 +141,7 @@ class ArticleDetailsViewModel @Inject constructor(
     private fun removeSelectedHighlight() =
         viewModelScope.launch {
             val selectedHighlight = _state.value.selectedHighlight
-                ?: throw IllegalStateException("cannot enter this state without selecting a highlight.")
+            checkNotNull(selectedHighlight) { "cannot enter this state without selecting a highlight." }
 
             val rawHighlights = _state.value.article?.highlights
 
@@ -149,7 +149,8 @@ class ArticleDetailsViewModel @Inject constructor(
                 it.content == selectedHighlight.content &&
                     it.referencedEventATag == selectedHighlight.referencedEventATag &&
                     it.author?.pubkey == activeAccountStore.activeUserId()
-            } ?: throw IllegalStateException("we are trying to remove a highlight that doesn't exist.")
+            }
+            checkNotNull(highlightToDelete) { "we are trying to remove a highlight that doesn't exist." }
 
             setState { copy(isWorking = true) }
             try {
