@@ -71,10 +71,16 @@ fun JsonArray.hasReplyMarker() = contains(JsonPrimitive("reply"))
 
 fun JsonArray.hasRootMarker() = contains(JsonPrimitive("root"))
 
-fun String.asCustomTag(tag: String): JsonArray =
+fun String.asContextTag() =
     buildJsonArray {
-        add(tag)
-        add(this@asCustomTag)
+        add("context")
+        add(this@asContextTag)
+    }
+
+fun String.asAltTag() =
+    buildJsonArray {
+        add("alt")
+        add(this@asAltTag)
     }
 
 fun NostrEventKind.asKindTag(): JsonArray =

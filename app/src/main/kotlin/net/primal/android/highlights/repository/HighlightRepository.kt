@@ -5,7 +5,8 @@ import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.nostr.ext.asCustomTag
+import net.primal.android.nostr.ext.asAltTag
+import net.primal.android.nostr.ext.asContextTag
 import net.primal.android.nostr.ext.asEventIdTag
 import net.primal.android.nostr.ext.asHighlightData
 import net.primal.android.nostr.ext.asKindTag
@@ -43,8 +44,8 @@ class HighlightRepository @Inject constructor(
                 tags = listOfNotNull(
                     referencedEventATag?.asReplaceableEventTag(),
                     referencedEventAuthorTag?.asPubkeyTag(),
-                    context?.asCustomTag("context"),
-                    alt.asCustomTag("alt"),
+                    context?.asContextTag(),
+                    alt.asAltTag(),
                 ),
             ),
         )
