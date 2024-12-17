@@ -118,7 +118,10 @@ class ArticleDetailsViewModel @Inject constructor(
     private fun publishSelectedHighlight() =
         viewModelScope.launch {
             val selectedHighlight = _state.value.selectedHighlight
-            checkNotNull(selectedHighlight) { "cannot enter this state without selecting a highlight." }
+            if (selectedHighlight == null) {
+                Timber.w("cannot enter this state without selecting a highlight.")
+                return@launch
+            }
 
             setState { copy(isWorking = true) }
             try {
@@ -141,7 +144,10 @@ class ArticleDetailsViewModel @Inject constructor(
     private fun removeSelectedHighlight() =
         viewModelScope.launch {
             val selectedHighlight = _state.value.selectedHighlight
-            checkNotNull(selectedHighlight) { "cannot enter this state without selecting a highlight." }
+            if (selectedHighlight == null) {
+                Timber.w("cannot enter this state without selecting a highlight.")
+                return@launch
+            }
 
             val rawHighlights = _state.value.article?.highlights
 
@@ -150,7 +156,10 @@ class ArticleDetailsViewModel @Inject constructor(
                     it.referencedEventATag == selectedHighlight.referencedEventATag &&
                     it.author?.pubkey == activeAccountStore.activeUserId()
             }
-            checkNotNull(highlightToDelete) { "we are trying to remove a highlight that doesn't exist." }
+            if (highlightToDelete == null) {
+                Timber.w("we are trying to remove a highlight that doesn't exist.")
+                return@launch
+            }
 
             setState { copy(isWorking = true) }
             try {
