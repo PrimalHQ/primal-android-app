@@ -54,7 +54,7 @@ import net.primal.android.highlights.model.JoinedHighlightsUi
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nevent
-import net.primal.android.nostr.utils.Nip19TLV.asNeventString
+import net.primal.android.nostr.utils.Nip19TLV.toNeventString
 import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
@@ -133,15 +133,15 @@ fun HighlightActivityBottomSheet(
                 onQuoteClick = {
                     ifNotNull(
                         noteCallbacks.onHighlightQuoteClick,
-                        selectedHighlight.referencedEventATag,
+                        selectedHighlight.highlightId,
                         articleNaddr,
-                    ) { quoteCb, aTag, naddr ->
+                    ) { quoteCb, highlightId, naddr ->
                         quoteCb(
                             Nevent(
                                 kind = NostrEventKind.Highlight.value,
                                 userId = selectedHighlight.authors.first().pubkey,
-                                eventId = aTag,
-                            ).asNeventString(),
+                                eventId = highlightId,
+                            ).toNeventString(),
                             naddr.toNaddrString(),
                         )
                     }

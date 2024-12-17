@@ -45,7 +45,6 @@ import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.findActivity
 import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.crypto.hexToHighlightHrp
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.editor.di.noteEditorViewModel

@@ -5,8 +5,8 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.instanceOf
 import net.primal.android.crypto.toHex
 import net.primal.android.crypto.toNpub
-import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import net.primal.android.nostr.utils.Nip19TLV.toNeventString
+import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import org.junit.Test
 
 class Nip19TLVTest {
@@ -152,7 +152,27 @@ class Nip19TLVTest {
     }
 
     @Test
-    fun parseUriAsNeventOrNull_returnsProperValuesForNaddr1Uri() {
+    fun parseUriAsNeventOrNull_returnsProperValuesForNeventNoUris() {
+        val nevent = "nostr:nevent1qqs9gjvm6sh9wr2z3ns6el2cg2npuz09wz3nn35pjhluenmfekd53mqzyrtp7w" +
+            "79k045gq80mtnpdxjuzl9t7vjxk52rv80f888y5xsd5mh55qcyqqqzvjsk2whrp"
+
+        val expectedEventId = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec"
+        val expectedRelays = emptyList<String>()
+        val expectedUserId = "d61f3bc5b3eb4400efdae6169a5c17cabf3246b514361de939ce4a1a0da6ef4a"
+        val expectedKind = 9802
+
+        val result = Nip19TLV.parseUriAsNeventOrNull(nevent)
+        result.shouldNotBeNull()
+        println(result)
+
+        result.eventId shouldBe expectedEventId
+        result.relays shouldBe expectedRelays
+        result.userId shouldBe expectedUserId
+        result.kind shouldBe expectedKind
+    }
+
+    @Test
+    fun parseUriAsNeventOrNull_returnsProperValuesForNeventSingleUri() {
         val nevent = "nostr:nevent1qvzqqqpxfgpzp4sl80zm866yqrha4esknfwp0j4lxfrt29pkrh5nnnj2rgx6dm62qyvhwumn8g" +
             "hj7urjv4kkjatd9ec8y6tdv9kzumn9wshszymhwden5te0wp6hyurvv4cxzeewv4ej7qgkwaehxw309aex2mrp0yhx6mmnw" +
             "3ezuur4vghsqgz5fxdagtjhp4pgecdvl4vy9fs7p8jhpgeec6qetl7vea5umx6gaswmqppq"
@@ -173,6 +193,42 @@ class Nip19TLVTest {
     }
 
     @Test
+    fun parseUriAsNeventOrNull_returnsProperValuesForNeventMultipleUris() {
+        val nevent = "nostr:nevent1qqs9gjvm6sh9wr2z3ns6el2cg2npuz09wz3nn35pjhluenmfekd53mqp" +
+            "94mhxue69uhhyetvv9ujuerpd46hxtnfduk8wumn8ghj7urjv4kkjatd9ec8y6tdv9kzumn9wspzp4" +
+            "sl80zm866yqrha4esknfwp0j4lxfrt29pkrh5nnnj2rgx6dm62qvzqqqpxfgvudpun"
+
+        val expectedEventId = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec"
+        val expectedRelays = listOf("wss://relay.damus.io", "wss://premium.primal.net")
+        val expectedUserId = "d61f3bc5b3eb4400efdae6169a5c17cabf3246b514361de939ce4a1a0da6ef4a"
+        val expectedKind = 9802
+
+        val result = Nip19TLV.parseUriAsNeventOrNull(nevent)
+        result.shouldNotBeNull()
+        println(result)
+
+        result.eventId shouldBe expectedEventId
+        result.relays shouldBe expectedRelays
+        result.userId shouldBe expectedUserId
+        result.kind shouldBe expectedKind
+    }
+
+    @Test
+    fun toNeventString_createsProperNevent_forGivenNeventStructureWithoutRelays() {
+        val expectedNevent = "nevent1qqs9gjvm6sh9wr2z3ns6el2cg2npuz09wz3nn35pjhluenmfekd53mqzyrtp7w79k045g" +
+            "q80mtnpdxjuzl9t7vjxk52rv80f888y5xsd5mh55qcyqqqzvjsk2whrp"
+
+        val nevent = Nevent(
+            eventId = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec",
+            relays = emptyList(),
+            userId = "d61f3bc5b3eb4400efdae6169a5c17cabf3246b514361de939ce4a1a0da6ef4a",
+            kind = 9802,
+        )
+
+        nevent.toNeventString() shouldBe expectedNevent
+    }
+
+    @Test
     fun toNeventString_createsProperNevent_forGivenNeventStructureWithSingleRelay() {
         val expectedNevent = "nevent1qqs9gjvm6sh9wr2z3ns6el2cg2npuz09wz3nn35pjhluenmfekd53mqpr9mhxue69uhhqun" +
             "9d45h2mfwwpexjmtpdshxuet59upzp4sl80zm866yqrha4esknfwp0j4lxfrt29pkrh5nnnj2rgx6dm62qvzqqqpxfg8l385v"
@@ -180,6 +236,22 @@ class Nip19TLVTest {
         val nevent = Nevent(
             eventId = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec",
             relays = listOf("wss://premium.primal.net/"),
+            userId = "d61f3bc5b3eb4400efdae6169a5c17cabf3246b514361de939ce4a1a0da6ef4a",
+            kind = 9802,
+        )
+
+        nevent.toNeventString() shouldBe expectedNevent
+    }
+
+    @Test
+    fun toNeventString_createsProperNevent_forGivenNeventStructureWithMultipleRelays() {
+        val expectedNevent = "nevent1qqs9gjvm6sh9wr2z3ns6el2cg2npuz09wz3nn35pjhluenmfekd53mqp94mhxu" +
+            "e69uhhyetvv9ujuerpd46hxtnfduk8wumn8ghj7urjv4kkjatd9ec8y6tdv9kzumn9wspzp4sl80zm866yqrha" +
+            "4esknfwp0j4lxfrt29pkrh5nnnj2rgx6dm62qvzqqqpxfgvudpun"
+
+        val nevent = Nevent(
+            eventId = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec",
+            relays = listOf("wss://relay.damus.io", "wss://premium.primal.net"),
             userId = "d61f3bc5b3eb4400efdae6169a5c17cabf3246b514361de939ce4a1a0da6ef4a",
             kind = 9802,
         )
