@@ -229,9 +229,14 @@ class ArticleDetailsViewModel @Inject constructor(
                     }
 
                     setState {
+                        val joinedHighlights = article.highlights.joinOnContent()
+                        val selectedHighlight = selectedHighlight?.let {
+                            joinedHighlights.first { it.content == selectedHighlight.content }
+                        }
                         copy(
                             article = article.mapAsArticleDetailsUi(),
-                            highlights = article.highlights.joinOnContent(),
+                            highlights = joinedHighlights,
+                            selectedHighlight = selectedHighlight,
                             topZaps = article.eventZaps
                                 .map { it.asEventZapUiModel() }
                                 .sortedWith(EventZapUiModel.DefaultComparator),
