@@ -229,13 +229,11 @@ fun HighlightActionButtons(
             icon = PrimalIcons.Quote,
             onClick = onQuoteClick,
             text = stringResource(id = R.string.article_details_highlight_activity_quote),
-            isWorking = isWorking,
         )
         ActionButton(
             icon = PrimalIcons.FeedRepliesFilled,
             onClick = onCommentClick,
             text = stringResource(id = R.string.article_details_highlight_activity_comment),
-            isWorking = isWorking,
         )
         ActionButton(
             icon = if (isHighlighted) {
