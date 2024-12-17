@@ -108,34 +108,42 @@ object Nip19TLV {
         }
     }
 
+    fun Nevent.asNeventString(): String {
+        val tlv = mutableListOf<Byte>()
+
+        this.eventId.addIdentifierBytes(tlv::addAll)
+
+//        if (relays.isNotEmpty()) {
+//            this.relays.addRelayBytes(tlv::addAll)
+//        }
+
+//        this.userId.addAuthorBytes(tlv::addAll)
+
+//        this.kind.toKindBytes(tlv::addAll)
+
+        return Bech32.encodeBytes(
+            hrp = "nevent",
+            data = tlv.toByteArray(),
+            encoding = Bech32.Encoding.Bech32,
+        )
+    }
+
     fun Naddr.toNaddrString(): String {
         val tlv = mutableListOf<Byte>()
 
         // Add SPECIAL type
-        val identifierBytes = this.identifier.toByteArray(Charsets.US_ASCII)
-        tlv.add(Type.SPECIAL.id)
-        tlv.add(identifierBytes.size.toByte())
-        tlv.addAll(identifierBytes.toList())
+        this.identifier.addIdentifierBytes(tlv::addAll)
 
         // Add RELAY type if not empty
         if (this.relays.isNotEmpty()) {
-            val relaysBytes = this.relays.joinToString(",").toByteArray(Charsets.US_ASCII)
-            tlv.add(Type.RELAY.id)
-            tlv.add(relaysBytes.size.toByte())
-            tlv.addAll(relaysBytes.toList())
+            this.relays.addRelayBytes(tlv::addAll)
         }
 
         // Add AUTHOR type
-        val authorBytes = this.userId.hexToBytes()
-        tlv.add(Type.AUTHOR.id)
-        tlv.add(authorBytes.size.toByte())
-        tlv.addAll(authorBytes.toList())
+        this.userId.addAuthorBytes(tlv::addAll)
 
         // Add KIND type
-        val kindBytes = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(this.kind).array()
-        tlv.add(Type.KIND.id)
-        tlv.add(kindBytes.size.toByte())
-        tlv.addAll(kindBytes.toList())
+        this.kind.toKindBytes(tlv::addAll)
 
         return Bech32.encodeBytes(
             hrp = "naddr",
@@ -143,6 +151,33 @@ object Nip19TLV {
             encoding = Bech32.Encoding.Bech32,
         )
     }
+
+    private fun Int.toKindBytes(addAll: (List<Byte>) -> Boolean) {
+        val kindBytes = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(this).array()
+        addAll(kindBytes.toTLVBytes(type = Type.KIND))
+    }
+
+    private fun String.addAuthorBytes(addAll: (List<Byte>) -> Boolean) {
+        val authorBytes = this.hexToBytes()
+        addAll(authorBytes.toTLVBytes(type = Type.AUTHOR))
+    }
+
+    private fun String.addIdentifierBytes(addAll: (List<Byte>) -> Boolean) {
+        val identifierBytes = this.toByteArray(Charsets.US_ASCII)
+        addAll(identifierBytes.toTLVBytes(type = Type.SPECIAL))
+    }
+
+    private fun List<String>.addRelayBytes(addAll: (List<Byte>) -> Boolean) {
+        val relaysBytes = this.joinToString(",").toByteArray(Charsets.US_ASCII)
+        addAll(relaysBytes.toTLVBytes(type = Type.RELAY))
+    }
+
+    private fun ByteArray.toTLVBytes(type: Type) =
+        listOf(
+            type.id,
+            this.size.toByte(),
+        ) + this.toList()
+
 
     @Suppress("MagicNumber")
     private fun String.hexToBytes(): ByteArray {

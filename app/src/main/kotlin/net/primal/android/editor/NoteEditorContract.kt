@@ -8,6 +8,7 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteTaggedUser
+import net.primal.android.highlights.model.HighlightUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.premium.legend.LegendaryCustomization
 
@@ -17,6 +18,7 @@ interface NoteEditorContract {
         val content: TextFieldValue = TextFieldValue(),
         val conversation: List<FeedPostUi> = emptyList(),
         val replyToArticle: FeedArticleUi? = null,
+        val replyToHighlight: HighlightUi? = null,
         val publishing: Boolean = false,
         val error: NoteEditorError? = null,
         val activeAccountAvatarCdnImage: CdnImage? = null,

@@ -1,5 +1,7 @@
 package net.primal.android.highlights.repository
 
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import java.time.Instant
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
@@ -22,8 +24,14 @@ class HighlightRepository @Inject constructor(
     private val nostrPublisher: NostrPublisher,
 ) {
     companion object {
-        const val DEFAULT_ALT_TAG = "This is a highlight created in https://primal.net Android application"
+        const val DEFAULT_ALT_TAG =
+            "This is a highlight created in https://primal.net Android application"
     }
+
+    fun observeHighlightById(highlightId: String) =
+        database.highlights().observeById(highlightId = highlightId)
+            .distinctUntilChanged()
+            .filterNotNull()
 
     suspend fun publishAndSaveHighlight(
         userId: String,

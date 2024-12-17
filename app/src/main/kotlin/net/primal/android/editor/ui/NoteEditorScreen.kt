@@ -70,6 +70,7 @@ import net.primal.android.core.compose.ReplyingToText
 import net.primal.android.core.compose.TakePhotoIconButton
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalLoadingButton
+import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
@@ -79,11 +80,16 @@ import net.primal.android.editor.NoteEditorContract.UiState.NoteEditorError
 import net.primal.android.editor.NoteEditorViewModel
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.model.NoteContentUi
 import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.notes.feed.note.ui.FeedNoteHeader
 import net.primal.android.notes.feed.note.ui.NoteContent
+import net.primal.android.notes.feed.note.ui.ReferencedHighlight
+import net.primal.android.notes.db.ReferencedHighlight
+import net.primal.android.notes.db.toReferencedHighlight
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
+import timber.log.Timber
 
 @Composable
 fun NoteEditorScreen(viewModel: NoteEditorViewModel, onClose: () -> Unit) {
@@ -223,6 +229,20 @@ private fun NoteEditorBox(
                 .onSizeChanged { noteEditorMaxHeightPx = it.height },
             state = editorListState,
         ) {
+            if (state.replyToHighlight != null) {
+                item(
+                    key = state.replyToHighlight.highlightId,
+                    contentType = "MentionedHighlight",
+                ) {
+                    ReferencedHighlight(
+                        modifier = Modifier.padding(all = 16.dp),
+                        highlight = state.replyToHighlight.toReferencedHighlight(),
+                        isDarkTheme = isAppInDarkPrimalTheme(),
+                        onClick = {},
+                    )
+                    PrimalDivider()
+                }
+            }
             if (state.replyToArticle != null) {
                 item(
                     key = state.replyToArticle.eventId,
@@ -338,6 +358,7 @@ private fun NoteEditor(
                 legendaryCustomization = state.activeAccountLegendaryCustomization,
             )
 
+            Timber.tag("content").i(state.content.text)
             NoteOutlinedTextField(
                 modifier = Modifier
                     .offset(x = (-8).dp)

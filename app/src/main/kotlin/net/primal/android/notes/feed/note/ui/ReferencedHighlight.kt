@@ -22,13 +22,14 @@ val HighlightBackgroundLight = Color(0xFFE8F3E8)
 
 @Composable
 fun ReferencedHighlight(
+    modifier: Modifier = Modifier,
     highlight: ReferencedHighlight,
     isDarkTheme: Boolean,
     onClick: (naddr: String) -> Unit,
 ) {
     val naddr = highlight.aTag.aTagToNaddr()?.toNaddrString()
     Text(
-        modifier = Modifier
+        modifier = modifier
             .padding(top = 2.dp)
             .clickable(
                 enabled = naddr != null,
