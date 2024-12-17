@@ -216,7 +216,6 @@ private fun RowScope.ActionButton(
     text: String,
     onClick: () -> Unit,
 ) {
-
     val isDarkTheme = isAppInDarkPrimalTheme()
     Button(
         colors = ButtonDefaults.buttonColors(

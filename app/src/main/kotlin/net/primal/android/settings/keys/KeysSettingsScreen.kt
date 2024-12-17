@@ -2,6 +2,7 @@ package net.primal.android.settings.keys
 
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -49,6 +50,9 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.premium.legend.LegendaryCustomization
+import net.primal.android.security.BiometricHelper
+import net.primal.android.security.BiometricHelper.biometricAuthentication
+import net.primal.android.security.BiometricPromptParams
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -181,6 +185,13 @@ fun PrivateKeySection(nsec: String) {
     val context = LocalContext.current
     var privateKeyVisible by remember { mutableStateOf(false) }
 
+    val title = stringResource(id = R.string.biometric_prompt_title)
+    val subtitleShowPrivateKey = stringResource(id = R.string.biometric_prompt_subtitle_show_private_key)
+    val subtitleCopyPrivateKey = stringResource(id = R.string.biometric_prompt_subtitle_copy_private_key)
+    val descriptionShowPrivateKey = stringResource(id = R.string.biometric_prompt_description_show_private_key)
+    val descriptionCopyPrivateKey = stringResource(id = R.string.biometric_prompt_description_copy_private_key)
+    val cancelButtonText = stringResource(id = R.string.biometric_prompt_cancel)
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -194,12 +205,32 @@ fun PrivateKeySection(nsec: String) {
             color = AppTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Medium,
         )
-
         Text(
             modifier = Modifier
                 .padding(horizontal = 8.dp)
                 .clickable {
-                    privateKeyVisible = !privateKeyVisible
+                    if (!privateKeyVisible) {
+                        if (BiometricHelper.isBiometricAvailable(context)) {
+                            biometricAuthentication(
+                                activity = context,
+                                onAuthSucceed = { privateKeyVisible = true },
+                                biometricPromptParams = BiometricPromptParams(
+                                    title = title,
+                                    subtitle = subtitleShowPrivateKey,
+                                    description = descriptionShowPrivateKey,
+                                    cancelButtonText = cancelButtonText,
+                                ),
+                            )
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "Biometric authentication not available.",
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        }
+                    } else {
+                        privateKeyVisible = false
+                    }
                 },
             text = if (privateKeyVisible) {
                 stringResource(id = R.string.settings_keys_hide_key)
@@ -258,10 +289,20 @@ fun PrivateKeySection(nsec: String) {
                 stringResource(id = R.string.settings_keys_copy_private_key)
             },
             onClick = {
-                val clipboard = context.getSystemService(ClipboardManager::class.java)
-                val clip = ClipData.newPlainText("", nsec)
-                clipboard.setPrimaryClip(clip)
-                keyCopied = true
+                if (BiometricHelper.isBiometricAvailable(context)) {
+                    biometricAuthentication(
+                        activity = context,
+                        onAuthSucceed = { privateKeyVisible = true },
+                        biometricPromptParams = BiometricPromptParams(
+                            title = title,
+                            subtitle = subtitleCopyPrivateKey,
+                            description = descriptionCopyPrivateKey,
+                            cancelButtonText = cancelButtonText,
+                        ),
+                    )
+                } else {
+                    Toast.makeText(context, "Biometric authentication not available.", Toast.LENGTH_SHORT).show()
+                }
             },
         )
     }
