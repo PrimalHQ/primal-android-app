@@ -108,18 +108,34 @@ object Nip19TLV {
         }
     }
 
-    fun Nevent.asNeventString(): String {
+    fun Nevent.toNeventString(): String {
         val tlv = mutableListOf<Byte>()
 
-        this.eventId.addIdentifierBytes(tlv::addAll)
+        // Add EVENT_ID type
+        val identifierBytes = this.eventId.hexToBytes()
+        tlv.add(Type.SPECIAL.id)
+        tlv.add(identifierBytes.size.toByte())
+        tlv.addAll(identifierBytes.toList())
 
-//        if (relays.isNotEmpty()) {
-//            this.relays.addRelayBytes(tlv::addAll)
-//        }
+        // Add RELAY type if not empty
+        if (this.relays.isNotEmpty()) {
+            val relaysBytes = this.relays.joinToString(",").toByteArray(Charsets.US_ASCII)
+            tlv.add(Type.RELAY.id)
+            tlv.add(relaysBytes.size.toByte())
+            tlv.addAll(relaysBytes.toList())
+        }
 
-//        this.userId.addAuthorBytes(tlv::addAll)
+        // Add AUTHOR type
+        val authorBytes = this.userId.hexToBytes()
+        tlv.add(Type.AUTHOR.id)
+        tlv.add(authorBytes.size.toByte())
+        tlv.addAll(authorBytes.toList())
 
-//        this.kind.toKindBytes(tlv::addAll)
+        // Add KIND type
+        val kindBytes = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(this.kind).array()
+        tlv.add(Type.KIND.id)
+        tlv.add(kindBytes.size.toByte())
+        tlv.addAll(kindBytes.toList())
 
         return Bech32.encodeBytes(
             hrp = "nevent",
@@ -177,7 +193,6 @@ object Nip19TLV {
             type.id,
             this.size.toByte(),
         ) + this.toList()
-
 
     @Suppress("MagicNumber")
     private fun String.hexToBytes(): ByteArray {

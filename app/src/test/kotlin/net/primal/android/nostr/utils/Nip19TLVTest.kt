@@ -6,6 +6,7 @@ import io.kotest.matchers.types.instanceOf
 import net.primal.android.crypto.toHex
 import net.primal.android.crypto.toNpub
 import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
+import net.primal.android.nostr.utils.Nip19TLV.toNeventString
 import org.junit.Test
 
 class Nip19TLVTest {
@@ -148,5 +149,41 @@ class Nip19TLVTest {
         )
 
         naddr.toNaddrString() shouldBe expectedNaddr
+    }
+
+    @Test
+    fun parseUriAsNeventOrNull_returnsProperValuesForNaddr1Uri() {
+        val nevent = "nostr:nevent1qvzqqqpxfgpzp4sl80zm866yqrha4esknfwp0j4lxfrt29pkrh5nnnj2rgx6dm62qyvhwumn8g" +
+            "hj7urjv4kkjatd9ec8y6tdv9kzumn9wshszymhwden5te0wp6hyurvv4cxzeewv4ej7qgkwaehxw309aex2mrp0yhx6mmnw" +
+            "3ezuur4vghsqgz5fxdagtjhp4pgecdvl4vy9fs7p8jhpgeec6qetl7vea5umx6gaswmqppq"
+
+        val expectedEventId = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec"
+        val expectedRelays = listOf("wss://premium.primal.net/")
+        val expectedUserId = "d61f3bc5b3eb4400efdae6169a5c17cabf3246b514361de939ce4a1a0da6ef4a"
+        val expectedKind = 9802
+
+        val result = Nip19TLV.parseUriAsNeventOrNull(nevent)
+        result.shouldNotBeNull()
+        println(result)
+
+        result.eventId shouldBe expectedEventId
+        result.relays shouldBe expectedRelays
+        result.userId shouldBe expectedUserId
+        result.kind shouldBe expectedKind
+    }
+
+    @Test
+    fun toNeventString_createsProperNevent_forGivenNeventStructureWithSingleRelay() {
+        val expectedNevent = "nevent1qqs9gjvm6sh9wr2z3ns6el2cg2npuz09wz3nn35pjhluenmfekd53mqpr9mhxue69uhhqun" +
+            "9d45h2mfwwpexjmtpdshxuet59upzp4sl80zm866yqrha4esknfwp0j4lxfrt29pkrh5nnnj2rgx6dm62qvzqqqpxfg8l385v"
+
+        val nevent = Nevent(
+            eventId = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec",
+            relays = listOf("wss://premium.primal.net/"),
+            userId = "d61f3bc5b3eb4400efdae6169a5c17cabf3246b514361de939ce4a1a0da6ef4a",
+            kind = 9802,
+        )
+
+        nevent.toNeventString() shouldBe expectedNevent
     }
 }
