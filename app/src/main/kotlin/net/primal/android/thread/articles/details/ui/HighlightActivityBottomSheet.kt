@@ -57,14 +57,20 @@ internal val DARK_THEME_ACTION_BUTTON_COLOR = Color(0xFF282828)
 @Composable
 fun HighlightActivityBottomSheetHandler(
     selectedHighlight: JoinedHighlightsUi?,
-    dismissSelection: () -> Unit,
     isHighlighted: Boolean,
+    isWorking: Boolean,
+    dismissSelection: () -> Unit,
+    onSaveHighlightClick: () -> Unit,
+    onDeleteHighlightClick: () -> Unit,
 ) {
     if (selectedHighlight != null) {
         HighlightActivityBottomSheet(
             onDismissRequest = dismissSelection,
             selectedHighlight = selectedHighlight,
             isHighlighted = isHighlighted,
+            isWorking = isWorking,
+            onSaveHighlightClick = onSaveHighlightClick,
+            onDeleteHighlightClick = onDeleteHighlightClick,
         )
     }
 }
@@ -73,9 +79,12 @@ fun HighlightActivityBottomSheetHandler(
 @Composable
 fun HighlightActivityBottomSheet(
     modifier: Modifier = Modifier,
-    onDismissRequest: () -> Unit,
     selectedHighlight: JoinedHighlightsUi,
     isHighlighted: Boolean,
+    isWorking: Boolean,
+    onDismissRequest: () -> Unit,
+    onSaveHighlightClick: () -> Unit,
+    onDeleteHighlightClick: () -> Unit,
 ) {
     ModalBottomSheet(
         tonalElevation = 0.dp,
@@ -110,8 +119,10 @@ fun HighlightActivityBottomSheet(
             HighlightActionButtons(
                 onQuoteClick = {},
                 onCommentClick = {},
-                onToggleHighlightClick = {},
+                onSaveHighlightClick = onSaveHighlightClick,
+                onDeleteHighlightClick = onDeleteHighlightClick,
                 isHighlighted = isHighlighted,
+                isWorking = isWorking,
             )
         }
     }
@@ -175,9 +186,11 @@ fun CommentRow(modifier: Modifier = Modifier, comment: CommentUi) {
 fun HighlightActionButtons(
     modifier: Modifier = Modifier,
     isHighlighted: Boolean,
+    isWorking: Boolean,
     onQuoteClick: () -> Unit,
     onCommentClick: () -> Unit,
-    onToggleHighlightClick: () -> Unit,
+    onSaveHighlightClick: () -> Unit,
+    onDeleteHighlightClick: () -> Unit,
 ) {
     Row(
         modifier = modifier.padding(16.dp),
@@ -188,11 +201,13 @@ fun HighlightActionButtons(
             icon = PrimalIcons.Quote,
             onClick = onQuoteClick,
             text = stringResource(id = R.string.article_details_highlight_activity_quote),
+            isWorking = isWorking,
         )
         ActionButton(
             icon = PrimalIcons.FeedRepliesFilled,
             onClick = onCommentClick,
             text = stringResource(id = R.string.article_details_highlight_activity_comment),
+            isWorking = isWorking,
         )
         ActionButton(
             icon = if (isHighlighted) {
@@ -200,12 +215,19 @@ fun HighlightActionButtons(
             } else {
                 PrimalIcons.Highlight
             },
-            onClick = onToggleHighlightClick,
+            onClick = {
+                if (isHighlighted) {
+                    onDeleteHighlightClick()
+                } else {
+                    onSaveHighlightClick()
+                }
+            },
             text = if (isHighlighted) {
                 stringResource(id = R.string.article_details_highlight_activity_remove_highlight)
             } else {
                 stringResource(id = R.string.article_details_highlight_activity_highlight)
             },
+            isWorking = isWorking,
         )
     }
 }
@@ -215,16 +237,20 @@ private fun RowScope.ActionButton(
     icon: ImageVector,
     text: String,
     onClick: () -> Unit,
+    isWorking: Boolean = false,
 ) {
-
     val isDarkTheme = isAppInDarkPrimalTheme()
     Button(
+        enabled = !isWorking,
         colors = ButtonDefaults.buttonColors(
+            contentColor = AppTheme.colorScheme.onPrimary,
+            disabledContentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             containerColor = if (isDarkTheme) {
                 DARK_THEME_ACTION_BUTTON_COLOR
             } else {
                 AppTheme.extraColorScheme.surfaceVariantAlt3
             },
+            disabledContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
         ),
         contentPadding = PaddingValues(vertical = 16.dp),
         shape = AppTheme.shapes.medium,
@@ -240,13 +266,11 @@ private fun RowScope.ActionButton(
             Icon(
                 modifier = Modifier.size(24.dp),
                 imageVector = icon,
-                tint = AppTheme.colorScheme.onPrimary,
                 contentDescription = null,
             )
             Text(
                 text = text,
                 style = AppTheme.typography.bodyMedium,
-                color = AppTheme.colorScheme.onPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Visible,
             )
@@ -281,7 +305,7 @@ fun HighlightAuthorsRow(authors: Set<ProfileDetailsUi>) {
             )
         }
         Text(
-            modifier = Modifier.padding(start = 56.dp),
+            modifier = Modifier.padding(start = 60.dp),
             text = authors.map { it.authorDisplayName }.buildHighlightedString(),
             style = AppTheme.typography.bodyMedium,
         )

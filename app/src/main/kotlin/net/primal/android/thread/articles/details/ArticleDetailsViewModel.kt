@@ -15,6 +15,8 @@ import net.primal.android.articles.ArticleRepository
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.crypto.hexToNpubHrp
+import net.primal.android.highlights.model.joinOnContent
+import net.primal.android.highlights.repository.HighlightRepository
 import net.primal.android.navigation.naddrOrThrow
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -53,6 +55,7 @@ class ArticleDetailsViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val articleRepository: ArticleRepository,
     private val feedRepository: FeedRepository,
+    private val highlightRepository: HighlightRepository,
     private val profileRepository: ProfileRepository,
     private val eventRepository: EventRepository,
     private val zapHandler: ZapHandler,
@@ -91,11 +94,11 @@ class ArticleDetailsViewModel @Inject constructor(
                     UiEvent.ToggleAuthorFollows -> followUnfollowAuthor()
                     UiEvent.ToggleHighlights -> setState { copy(showHighlights = !showHighlights) }
                     is UiEvent.SelectHighlight -> setState {
-                        val highlight = article?.highlights?.first { h -> h.content == it.content }
+                        val highlight = highlights.first { h -> h.content == it.content }
                         copy(
                             selectedHighlight = highlight,
-                            isHighlighted = highlight?.authors?.map { a -> a.pubkey }
-                                ?.contains(activeAccountStore.activeUserId()) == true,
+                            isHighlighted = highlight.authors.map { a -> a.pubkey }
+                                .contains(activeAccountStore.activeUserId()),
                         )
                     }
 
@@ -105,7 +108,71 @@ class ArticleDetailsViewModel @Inject constructor(
                             isHighlighted = false,
                         )
                     }
+
+                    UiEvent.PublishSelectedHighlight -> publishSelectedHighlight()
+                    UiEvent.DeleteSelectedHighlight -> removeSelectedHighlight()
                 }
+            }
+        }
+
+    private fun publishSelectedHighlight() =
+        viewModelScope.launch {
+            val selectedHighlight = _state.value.selectedHighlight
+            if (selectedHighlight == null) {
+                Timber.w("cannot enter this state without selecting a highlight.")
+                return@launch
+            }
+
+            setState { copy(isWorking = true) }
+            try {
+                highlightRepository.publishAndSaveHighlight(
+                    userId = activeAccountStore.activeUserId(),
+                    content = selectedHighlight.content,
+                    referencedEventATag = selectedHighlight.referencedEventATag,
+                    referencedEventAuthorTag = selectedHighlight.referencedEventAuthorId,
+                    context = selectedHighlight.context,
+                )
+
+                setState { copy(isHighlighted = true) }
+            } catch (error: NostrPublishException) {
+                Timber.w(error)
+            } finally {
+                setState { copy(isWorking = false) }
+            }
+        }
+
+    private fun removeSelectedHighlight() =
+        viewModelScope.launch {
+            val selectedHighlight = _state.value.selectedHighlight
+            if (selectedHighlight == null) {
+                Timber.w("cannot enter this state without selecting a highlight.")
+                return@launch
+            }
+
+            val rawHighlights = _state.value.article?.highlights
+
+            val highlightToDelete = rawHighlights?.find {
+                it.content == selectedHighlight.content &&
+                    it.referencedEventATag == selectedHighlight.referencedEventATag &&
+                    it.author?.pubkey == activeAccountStore.activeUserId()
+            }
+            if (highlightToDelete == null) {
+                Timber.w("we are trying to remove a highlight that doesn't exist.")
+                return@launch
+            }
+
+            setState { copy(isWorking = true) }
+            try {
+                highlightRepository.publishDeleteHighlight(
+                    userId = activeAccountStore.activeUserId(),
+                    highlightId = highlightToDelete.highlightId,
+                )
+
+                setState { copy(isHighlighted = false) }
+            } catch (error: NostrPublishException) {
+                Timber.w(error)
+            } finally {
+                setState { copy(isWorking = false) }
             }
         }
 
@@ -162,8 +229,14 @@ class ArticleDetailsViewModel @Inject constructor(
                     }
 
                     setState {
+                        val joinedHighlights = article.highlights.joinOnContent()
+                        val selectedHighlight = selectedHighlight?.let {
+                            joinedHighlights.first { it.content == selectedHighlight.content }
+                        }
                         copy(
                             article = article.mapAsArticleDetailsUi(),
+                            highlights = joinedHighlights,
+                            selectedHighlight = selectedHighlight,
                             topZaps = article.eventZaps
                                 .map { it.asEventZapUiModel() }
                                 .sortedWith(EventZapUiModel.DefaultComparator),

@@ -6,7 +6,6 @@ import net.primal.android.nostr.utils.Naddr
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.stats.ui.EventZapUiModel
-import net.primal.android.thread.articles.ArticleContract.UiEvent
 import net.primal.android.thread.articles.details.ui.ArticleDetailsUi
 
 interface ArticleDetailsContract {
@@ -15,6 +14,7 @@ interface ArticleDetailsContract {
         val showHighlights: Boolean = true,
         val isAuthorFollowed: Boolean = false,
         val article: ArticleDetailsUi? = null,
+        val highlights: List<JoinedHighlightsUi> = emptyList(),
         val referencedNotes: List<FeedPostUi> = emptyList(),
         val npubToDisplayNameMap: Map<String, String> = emptyMap(),
         val topZaps: List<EventZapUiModel> = emptyList(),
@@ -23,6 +23,7 @@ interface ArticleDetailsContract {
         val selectedHighlight: JoinedHighlightsUi? = null,
         val isHighlighted: Boolean = false,
         val error: UiError? = null,
+        val isWorking: Boolean = false,
     )
 
     sealed class ArticlePartRender {
@@ -41,5 +42,7 @@ interface ArticleDetailsContract {
         data object ToggleHighlights : UiEvent()
         data class SelectHighlight(val content: String) : UiEvent()
         data object DismissSelectedHighlight : UiEvent()
+        data object PublishSelectedHighlight : UiEvent()
+        data object DeleteSelectedHighlight : UiEvent()
     }
 }
