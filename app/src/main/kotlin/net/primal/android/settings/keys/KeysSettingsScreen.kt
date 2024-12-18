@@ -23,10 +23,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +40,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.time.Duration.Companion.minutes
+import kotlinx.coroutines.delay
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.IconText
@@ -50,9 +54,8 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.premium.legend.LegendaryCustomization
-import net.primal.android.security.BiometricHelper
-import net.primal.android.security.BiometricHelper.biometricAuthentication
 import net.primal.android.security.BiometricPromptParams
+import net.primal.android.security.verifyBiometricIdentity
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -183,14 +186,22 @@ fun PublicKeySection(
 @Composable
 fun PrivateKeySection(nsec: String) {
     val context = LocalContext.current
-    var privateKeyVisible by remember { mutableStateOf(false) }
+    var privateKeyVisible by rememberSaveable { mutableStateOf(false) }
+    var authenticated by rememberSaveable { mutableStateOf(false) }
 
-    val title = stringResource(id = R.string.biometric_prompt_title)
-    val subtitleShowPrivateKey = stringResource(id = R.string.biometric_prompt_subtitle_show_private_key)
-    val subtitleCopyPrivateKey = stringResource(id = R.string.biometric_prompt_subtitle_copy_private_key)
-    val descriptionShowPrivateKey = stringResource(id = R.string.biometric_prompt_description_show_private_key)
-    val descriptionCopyPrivateKey = stringResource(id = R.string.biometric_prompt_description_copy_private_key)
-    val cancelButtonText = stringResource(id = R.string.biometric_prompt_cancel)
+    LaunchedEffect(authenticated) {
+        if (authenticated) {
+            delay(1.minutes)
+            authenticated = false
+        }
+    }
+
+    val biometricPromptTitle = stringResource(id = R.string.biometric_prompt_title)
+    val biometricPromptShowKeySubtitle = stringResource(id = R.string.biometric_prompt_subtitle_show_private_key)
+    val biometricPromptShowKeyDescription = stringResource(id = R.string.biometric_prompt_description_show_private_key)
+    val biometricPromptCopySubtitle = stringResource(id = R.string.biometric_prompt_subtitle_copy_private_key)
+    val biometricPromptCopyDescription = stringResource(id = R.string.biometric_prompt_description_copy_private_key)
+    val biometricPromptNotRecognized = stringResource(id = R.string.biometric_prompt_not_recognized)
 
     Row(
         modifier = Modifier
@@ -210,23 +221,35 @@ fun PrivateKeySection(nsec: String) {
                 .padding(horizontal = 8.dp)
                 .clickable {
                     if (!privateKeyVisible) {
-                        if (BiometricHelper.isBiometricAvailable(context)) {
-                            biometricAuthentication(
+                        if (authenticated) {
+                            privateKeyVisible = true
+                        } else {
+                            verifyBiometricIdentity(
                                 activity = context,
-                                onAuthSucceed = { privateKeyVisible = true },
+                                onAuthSucceed = {
+                                    privateKeyVisible = true
+                                    authenticated = true
+                                },
+                                onAuthFailed = {
+                                    Toast.makeText(
+                                        context,
+                                        biometricPromptNotRecognized,
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+                                },
+                                onAuthError = { _: Int, errString: CharSequence ->
+                                    Toast.makeText(
+                                        context,
+                                        errString,
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+                                },
                                 biometricPromptParams = BiometricPromptParams(
-                                    title = title,
-                                    subtitle = subtitleShowPrivateKey,
-                                    description = descriptionShowPrivateKey,
-                                    cancelButtonText = cancelButtonText,
+                                    title = biometricPromptTitle,
+                                    subtitle = biometricPromptShowKeySubtitle,
+                                    description = biometricPromptShowKeyDescription,
                                 ),
                             )
-                        } else {
-                            Toast.makeText(
-                                context,
-                                "Biometric authentication not available.",
-                                Toast.LENGTH_SHORT,
-                            ).show()
                         }
                     } else {
                         privateKeyVisible = false
@@ -289,19 +312,41 @@ fun PrivateKeySection(nsec: String) {
                 stringResource(id = R.string.settings_keys_copy_private_key)
             },
             onClick = {
-                if (BiometricHelper.isBiometricAvailable(context)) {
-                    biometricAuthentication(
+                if (authenticated) {
+                    val clipboard = context.getSystemService(ClipboardManager::class.java)
+                    val clip = ClipData.newPlainText("", nsec)
+                    clipboard.setPrimaryClip(clip)
+                    keyCopied = true
+                } else {
+                    verifyBiometricIdentity(
                         activity = context,
-                        onAuthSucceed = { privateKeyVisible = true },
+                        onAuthSucceed = {
+                            val clipboard = context.getSystemService(ClipboardManager::class.java)
+                            val clip = ClipData.newPlainText("", nsec)
+                            clipboard.setPrimaryClip(clip)
+                            keyCopied = true
+                            authenticated = true
+                        },
+                        onAuthFailed = {
+                            Toast.makeText(
+                                context,
+                                biometricPromptNotRecognized,
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        },
+                        onAuthError = { _: Int, errString: CharSequence ->
+                            Toast.makeText(
+                                context,
+                                errString,
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        },
                         biometricPromptParams = BiometricPromptParams(
-                            title = title,
-                            subtitle = subtitleCopyPrivateKey,
-                            description = descriptionCopyPrivateKey,
-                            cancelButtonText = cancelButtonText,
+                            title = biometricPromptTitle,
+                            subtitle = biometricPromptCopySubtitle,
+                            description = biometricPromptCopyDescription,
                         ),
                     )
-                } else {
-                    Toast.makeText(context, "Biometric authentication not available.", Toast.LENGTH_SHORT).show()
                 }
             },
         )

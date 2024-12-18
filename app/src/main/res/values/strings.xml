@@ -773,11 +773,12 @@
     <string name="settings_version_title">Version</string>
 
     <string name="biometric_prompt_title">Authenticate</string>
-    <string name="biometric_prompt_subtitle_show_private_key">Please verify your fingerprint to view the private key</string>
+    <string name="biometric_prompt_subtitle_show_private_key">Please verify your fingerprint to view the private key.</string>
     <string name="biometric_prompt_description_show_private_key">This ensures that only you can access the private key.</string>
-    <string name="biometric_prompt_subtitle_copy_private_key">Please verify your fingerprint to copy the private key</string>
+    <string name="biometric_prompt_subtitle_copy_private_key">Please verify your fingerprint to copy the private key.</string>
     <string name="biometric_prompt_description_copy_private_key">This ensures that only you can securely copy the private key.</string>
     <string name="biometric_prompt_cancel">Cancel</string>
+    <string name="biometric_prompt_not_recognized">Biometric authentication not recognized as belonging to the user.</string>
 
     <string name="profile_following_stat">following</string>
     <string name="profile_followers_stat">followers</string>

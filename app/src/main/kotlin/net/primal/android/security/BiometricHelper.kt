@@ -6,93 +6,81 @@ import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 
-object BiometricHelper {
-
-    fun biometricAuthentication(
-        activity: Context,
-        onAuthSucceed: (BiometricPrompt.AuthenticationResult) -> Unit,
-        biometricPromptParams: BiometricPromptParams,
-    ) {
+fun verifyBiometricIdentity(
+    activity: Context,
+    biometricPromptParams: BiometricPromptParams,
+    onAuthSucceed: () -> Unit,
+    onAuthFailed: (() -> Unit)? = null,
+    onAuthError: ((errorCode: Int, errString: CharSequence) -> Unit)? = null,
+) {
+    if (isBiometricAvailable(activity)) {
         showBiometricPrompt(
             activity = activity,
-            onAuthSucceed = onAuthSucceed,
             params = biometricPromptParams,
+            onAuthSucceed = onAuthSucceed,
+            onAuthFailed = onAuthFailed,
+            onAuthError = onAuthError,
         )
+    } else {
+        onAuthSucceed()
     }
+}
 
-    fun isBiometricAvailable(context: Context): Boolean {
-        val biometricManager = BiometricManager.from(context)
-        return when (
-            biometricManager.canAuthenticate(
-                BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.BIOMETRIC_WEAK,
-            )
-        ) {
-            BiometricManager.BIOMETRIC_SUCCESS -> true
-            else -> false
-        }
-    }
-
-    private fun showBiometricPrompt(
-        activity: Context,
-        onAuthSucceed: (BiometricPrompt.AuthenticationResult) -> Unit,
-        params: BiometricPromptParams,
+private fun isBiometricAvailable(context: Context): Boolean {
+    val biometricManager = BiometricManager.from(context)
+    return when (
+        biometricManager.canAuthenticate(
+            BiometricManager.Authenticators.BIOMETRIC_STRONG
+                or BiometricManager.Authenticators.DEVICE_CREDENTIAL,
+        )
     ) {
-        val promptInfo = getPromptInfo(
-            title = params.title,
-            subtitle = params.subtitle,
-            description = params.description,
-            cancelButtonText = params.cancelButtonText,
+        BiometricManager.BIOMETRIC_SUCCESS -> true
+        else -> false
+    }
+}
+
+private fun showBiometricPrompt(
+    activity: Context,
+    params: BiometricPromptParams,
+    onAuthSucceed: () -> Unit,
+    onAuthFailed: (() -> Unit)?,
+    onAuthError: ((errorCode: Int, errString: CharSequence) -> Unit)?,
+) {
+    val promptInfo = BiometricPrompt.PromptInfo.Builder()
+        .setTitle(params.title)
+        .setSubtitle(params.subtitle)
+        .setDescription(params.description)
+        .setConfirmationRequired(false)
+        .setAllowedAuthenticators(
+            BiometricManager.Authenticators.BIOMETRIC_STRONG
+                or BiometricManager.Authenticators.DEVICE_CREDENTIAL,
+        )
+        .build()
+
+    val biometricPrompt =
+        BiometricPrompt(
+            activity as FragmentActivity,
+            ContextCompat.getMainExecutor(activity),
+            object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    onAuthSucceed()
+                }
+
+                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                    onAuthError?.invoke(errorCode, errString)
+                }
+
+                override fun onAuthenticationFailed() {
+                    onAuthFailed?.invoke()
+                }
+            },
         )
 
-        val biometricPrompt = getBiometricPrompt(context = activity as FragmentActivity, onAuthSucceed = onAuthSucceed)
-
-        biometricPrompt.authenticate(promptInfo)
-    }
-
-    private fun getPromptInfo(
-        title: String,
-        subtitle: String,
-        description: String,
-        cancelButtonText: String,
-    ): BiometricPrompt.PromptInfo {
-        return BiometricPrompt.PromptInfo.Builder()
-            .setTitle(title)
-            .setSubtitle(subtitle)
-            .setDescription(description)
-            .setNegativeButtonText(cancelButtonText)
-            .setConfirmationRequired(false)
-            .build()
-    }
-
-    private fun getBiometricPrompt(
-        context: FragmentActivity,
-        onAuthSucceed: (BiometricPrompt.AuthenticationResult) -> Unit,
-    ): BiometricPrompt {
-        val biometricPrompt =
-            BiometricPrompt(
-                context,
-                ContextCompat.getMainExecutor(context),
-                object : BiometricPrompt.AuthenticationCallback() {
-                    override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                        onAuthSucceed(result)
-                    }
-
-                    override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                        super.onAuthenticationError(errorCode, errString)
-                    }
-
-                    override fun onAuthenticationFailed() {
-                        super.onAuthenticationFailed()
-                    }
-                },
-            )
-        return biometricPrompt
-    }
+    biometricPrompt.authenticate(promptInfo)
 }
 
 data class BiometricPromptParams(
     val title: String,
     val subtitle: String,
     val description: String,
-    val cancelButtonText: String,
 )
