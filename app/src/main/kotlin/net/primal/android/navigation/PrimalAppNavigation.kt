@@ -313,6 +313,12 @@ fun noteCallbacksHandler(navController: NavController) =
                 noteId.hexToNoteHrp().toNostrUriInNoteEditorArgs(),
             )
         },
+        onHighlightReplyClick = { id ->
+            navController.navigateToNoteEditor(args = NoteEditorArgs(replyToHighlightId = id))
+        },
+        onHighlightQuoteClick = { nevent, naddr ->
+            navController.navigateToNoteEditor(listOf(nevent, naddr).toNostrUriInNoteEditorArgs())
+        },
         onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr) },
         onArticleReplyClick = { naddr ->
             navController.navigateToNoteEditor(
