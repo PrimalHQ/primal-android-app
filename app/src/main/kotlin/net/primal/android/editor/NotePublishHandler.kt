@@ -1,12 +1,12 @@
 package net.primal.android.editor
 
-import java.util.*
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.core.utils.assertOnlyOneNotNull
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -35,18 +35,31 @@ class NotePublishHandler @Inject constructor(
         rootArticleEventId: String? = null,
         rootArticleId: String? = null,
         rootArticleAuthorId: String? = null,
+        rootHighlightId: String? = null,
+        rootHighlightAuthorId: String? = null,
         rootPostId: String? = null,
         replyToPostId: String? = null,
         replyToAuthorId: String? = null,
     ): Boolean {
-        if (rootArticleId != null && rootPostId != null) {
-            error("You can not have both article and post as root events.")
-        }
+        assertOnlyOneNotNull(
+            "You can have only one root event.",
+            rootArticleId,
+            rootPostId,
+            rootHighlightId,
+        )
 
         val replyPostData = replyToPostId?.let {
             withContext(dispatcherProvider.io()) {
                 database.posts().findByPostId(postId = it)
             }
+        }
+
+        val rootHighlightTags = if (rootHighlightId != null && rootHighlightAuthorId != null) {
+            listOf(
+                rootHighlightId.asEventIdTag(marker = "root"),
+            )
+        } else {
+            null
         }
 
         /* Article tag */
@@ -68,7 +81,7 @@ class NotePublishHandler @Inject constructor(
         } else {
             null
         }
-        val rootEventTags = rootArticleTags ?: listOf(rootPostTag)
+        val rootEventTags = rootHighlightTags ?: rootArticleTags ?: listOf(rootPostTag)
         val eventTags = setOfNotNull(*rootEventTags.toTypedArray(), replyEventTag) + mentionEventTags
 
         val relayHintsMap = withContext(dispatcherProvider.io()) {
@@ -85,10 +98,11 @@ class NotePublishHandler @Inject constructor(
         /* Pubkey tags */
         val existingPubkeyTags = replyPostData?.tags?.filter { it.isPubKeyTag() }?.toSet() ?: setOf()
         val replyAuthorPubkeyTag = replyToAuthorId?.asPubkeyTag()
+        val replyHighlightAuthorPubkeyTag = rootHighlightAuthorId?.asPubkeyTag()
         val rootArticleAuthorPubkeyTag = rootArticleAuthorId?.asPubkeyTag()
         val mentionPubkeyTags = content.parsePubkeyTags(marker = "mention").toSet()
         val pubkeyTags = existingPubkeyTags + mentionPubkeyTags +
-            setOfNotNull(replyAuthorPubkeyTag, rootArticleAuthorPubkeyTag)
+            setOfNotNull(replyAuthorPubkeyTag, rootArticleAuthorPubkeyTag, replyHighlightAuthorPubkeyTag)
 
         /* Hashtag tags */
         val hashtagTags = content.parseHashtagTags().toSet()

@@ -20,3 +20,16 @@ inline fun <U, V, T> ifNotNull(
         block(u, v, t)
     }
 }
+
+fun assertOnlyOneNotNull(
+    message: Any,
+    vararg args: Any?,
+) {
+    args.sumOf { (it != null).toInt() }.apply {
+        if (this != 1) {
+            error(message = message)
+        }
+    }
+}
+
+private fun Boolean.toInt() = if (this) 1 else 0

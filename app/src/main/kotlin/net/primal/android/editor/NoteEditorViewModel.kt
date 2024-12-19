@@ -17,7 +17,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -269,6 +268,8 @@ class NoteEditorViewModel @AssistedInject constructor(
                     rootArticleAuthorId = article?.authorId,
                     rootPostId = if (article == null) rootPost?.postId else null,
                     replyToPostId = replyToPost?.postId,
+                    rootHighlightId = replyToHighlightId,
+                    rootHighlightAuthorId = _state.value.replyToHighlight?.author?.pubkey,
                     replyToAuthorId = replyToPost?.authorId,
                 )
 
