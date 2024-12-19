@@ -184,7 +184,7 @@ private fun ProfileTopAppBar(
                         internetIdentifier = state.profileDetails?.internetIdentifier,
                         internetIdentifierBadgeSize = 20.dp,
                         internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
-                        authorLegendaryCustomization = state.profileDetails?.premiumDetails?.legendaryCustomization,
+                        legendaryCustomization = state.profileDetails?.premiumDetails?.legendaryCustomization,
                     )
                 }
             },

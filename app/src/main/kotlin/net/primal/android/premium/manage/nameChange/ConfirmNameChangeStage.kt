@@ -46,7 +46,7 @@ fun ConfirmNameChangeStage(
             internetIdentifier = "$primalName@primal.net",
             internetIdentifierBadgeSize = 24.dp,
             fontSize = 20.sp,
-            authorLegendaryCustomization = profileLegendaryCustomization,
+            legendaryCustomization = profileLegendaryCustomization,
         )
         Text(
             modifier = Modifier.padding(horizontal = 12.dp),

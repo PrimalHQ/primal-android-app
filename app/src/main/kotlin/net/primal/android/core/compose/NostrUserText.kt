@@ -58,14 +58,14 @@ fun NostrUserText(
     maxLines: Int = 1,
     internetIdentifierBadgeSize: Dp = 14.dp,
     internetIdentifierBadgeAlign: PlaceholderVerticalAlign = PlaceholderVerticalAlign.Center,
-    authorLegendaryCustomization: LegendaryCustomization? = null,
+    legendaryCustomization: LegendaryCustomization? = null,
     annotatedStringPrefixBuilder: (AnnotatedString.Builder.() -> Unit)? = null,
     annotatedStringSuffixBuilder: (AnnotatedString.Builder.() -> Unit)? = null,
 ) {
     val verifiedBadge = !internetIdentifier.isNullOrEmpty()
 
-    val customBadgeStyle = if (authorLegendaryCustomization?.customBadge == true) {
-        authorLegendaryCustomization.legendaryStyle
+    val customBadgeStyle = if (legendaryCustomization?.customBadge == true) {
+        legendaryCustomization.legendaryStyle
     } else {
         null
     }
@@ -163,7 +163,7 @@ fun PreviewNostrUserTextWithPrimalBadge() {
                 annotatedStringSuffixBuilder = {
                     append("• 42 y. ago")
                 },
-                authorLegendaryCustomization = null,
+                legendaryCustomization = null,
             )
         }
     }
@@ -180,7 +180,7 @@ fun PreviewNostrUserTextWithRandomBadge() {
                 annotatedStringSuffixBuilder = {
                     append("• 42 y. ago")
                 },
-                authorLegendaryCustomization = null,
+                legendaryCustomization = null,
             )
         }
     }
@@ -197,7 +197,7 @@ fun PreviewNostrUserTextWithoutBadge() {
                 annotatedStringSuffixBuilder = {
                     append(" • 42 y. ago")
                 },
-                authorLegendaryCustomization = null,
+                legendaryCustomization = null,
             )
         }
     }
@@ -214,7 +214,7 @@ fun PreviewNostrUserTextWithCustomBadge() {
                 annotatedStringSuffixBuilder = {
                     append(" • 42 y. ago")
                 },
-                authorLegendaryCustomization = LegendaryCustomization(
+                legendaryCustomization = LegendaryCustomization(
                     customBadge = true,
                     avatarGlow = true,
                     legendaryStyle = LegendaryStyle.GOLD,

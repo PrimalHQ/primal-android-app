@@ -175,7 +175,7 @@ private fun DrawerHeader(
                 top.linkTo(avatarRef.bottom, margin = 16.dp)
                 width = Dimension.preferredValue(220.dp)
             },
-            authorLegendaryCustomization = legendaryCustomization,
+            legendaryCustomization = legendaryCustomization,
         )
 
         IconButton(

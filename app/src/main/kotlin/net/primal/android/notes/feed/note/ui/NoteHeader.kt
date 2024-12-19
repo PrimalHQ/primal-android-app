@@ -141,7 +141,7 @@ private fun NoteAuthorBadgeAndTimestampSection(
                 style = topRowTextStyle,
                 internetIdentifierBadgeSize = topRowTextStyle.fontSize.value.dp,
                 overflow = TextOverflow.Ellipsis,
-                authorLegendaryCustomization = authorLegendaryCustomization,
+                legendaryCustomization = authorLegendaryCustomization,
             )
         },
         suffixFixedContent = {

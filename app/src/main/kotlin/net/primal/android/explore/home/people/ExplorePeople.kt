@@ -199,7 +199,7 @@ private fun ExplorePersonListItem(
                 NostrUserText(
                     displayName = person.profile.userDisplayName,
                     internetIdentifier = person.profile.internetIdentifier,
-                    authorLegendaryCustomization = person.profile.premiumDetails?.legendaryCustomization,
+                    legendaryCustomization = person.profile.premiumDetails?.legendaryCustomization,
                 )
                 person.profile.internetIdentifier?.let {
                     Text(

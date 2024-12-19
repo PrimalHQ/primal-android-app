@@ -72,7 +72,7 @@ fun ArticleAuthorRow(
                     fontSize = 16.sp,
                     lineHeight = 16.sp,
                 ),
-                authorLegendaryCustomization = authorLegendaryCustomization,
+                legendaryCustomization = authorLegendaryCustomization,
             )
 
             if (!authorInternetIdentifier.isNullOrBlank()) {

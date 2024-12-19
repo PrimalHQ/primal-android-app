@@ -130,6 +130,7 @@ fun MutedUserListItem(
                 displayName = item.displayName,
                 fontSize = 14.sp,
                 internetIdentifier = item.internetIdentifier,
+                legendaryCustomization = item.legendaryCustomization,
             )
         },
         supportingContent = {

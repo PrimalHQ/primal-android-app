@@ -145,11 +145,11 @@ fun LegendaryProfileCustomizationScreen(
                     displayName = primalName,
                     internetIdentifier = "$primalName@primal.net",
                     internetIdentifierBadgeSize = 24.dp,
-                    authorLegendaryCustomization =
-                    if (customBadge == true) {
-                        LegendaryCustomization(customBadge = true, legendaryStyle = selectedStyle)
-                    } else {
-                        null
+                    legendaryCustomization = customBadge?.let {
+                        LegendaryCustomization(
+                            customBadge = it,
+                            legendaryStyle = selectedStyle,
+                        )
                     },
                     fontSize = 20.sp,
                 )
