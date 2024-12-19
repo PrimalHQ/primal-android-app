@@ -232,6 +232,7 @@ dependencies {
     implementation(libs.constraintlayout)
 
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.emoji2)
     implementation(libs.androidx.emoji2.emojipicker)
     implementation(libs.androidx.webkit)
 

@@ -20,7 +20,7 @@ core-testing = "2.2.0"
 dagger = "2.51"
 datastore = "1.1.1"
 detekt = "1.23.6"
-emoji2-emojipicker = "1.5.0"
+emoji2 = "1.5.0"
 espresso-core = "3.6.1"
 flippable = "1.5.4"
 guava = "33.0.0-android" # do not upgrade (added with zap settings, should be removed)
@@ -91,7 +91,8 @@ compose-placeholder-material3 = { module = "io.github.fornewid:placeholder-mater
 constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 compose-constraintlayout = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayout-compose" }
 
-androidx-emoji2-emojipicker = { group = "androidx.emoji2", name = "emoji2-emojipicker", version.ref = "emoji2-emojipicker" }
+androidx-emoji2 = { group = "androidx.emoji2", name = "emoji2", version.ref = "emoji2" }
+androidx-emoji2-emojipicker = { group = "androidx.emoji2", name = "emoji2-emojipicker", version.ref = "emoji2" }
 flippable = { module = "com.wajahatkarim:flippable", version.ref = "flippable" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 jetbrains-markdown = { module = "org.jetbrains:markdown", version.ref = "jetbrains-markdown" }
