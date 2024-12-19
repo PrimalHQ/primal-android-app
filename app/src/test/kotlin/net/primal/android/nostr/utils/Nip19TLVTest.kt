@@ -5,8 +5,8 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.instanceOf
 import net.primal.android.crypto.toHex
 import net.primal.android.crypto.toNpub
-import net.primal.android.nostr.utils.Nip19TLV.toNeventString
 import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
+import net.primal.android.nostr.utils.Nip19TLV.toNeventString
 import org.junit.Test
 
 class Nip19TLVTest {

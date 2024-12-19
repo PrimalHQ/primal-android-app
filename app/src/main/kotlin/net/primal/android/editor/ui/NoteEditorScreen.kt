@@ -79,14 +79,13 @@ import net.primal.android.editor.NoteEditorContract.UiEvent
 import net.primal.android.editor.NoteEditorContract.UiState.NoteEditorError
 import net.primal.android.editor.NoteEditorViewModel
 import net.primal.android.editor.domain.NoteAttachment
+import net.primal.android.notes.db.ReferencedHighlight
+import net.primal.android.notes.db.toReferencedHighlight
 import net.primal.android.notes.feed.model.FeedPostUi
-import net.primal.android.notes.feed.model.NoteContentUi
 import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.notes.feed.note.ui.FeedNoteHeader
 import net.primal.android.notes.feed.note.ui.NoteContent
 import net.primal.android.notes.feed.note.ui.ReferencedHighlight
-import net.primal.android.notes.db.ReferencedHighlight
-import net.primal.android.notes.db.toReferencedHighlight
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import timber.log.Timber

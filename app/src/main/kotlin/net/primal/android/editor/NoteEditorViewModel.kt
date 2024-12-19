@@ -176,7 +176,6 @@ class NoteEditorViewModel @AssistedInject constructor(
                 .collect {
                     setState { copy(replyToHighlight = it.asHighlightUi()) }
                 }
-
         }
 
     private fun subscribeToActiveAccount() =
