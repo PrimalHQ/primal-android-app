@@ -81,6 +81,6 @@ private fun showBiometricPrompt(
 
 data class BiometricPromptParams(
     val title: String,
-    val subtitle: String,
-    val description: String,
+    val subtitle: String?,
+    val description: String?,
 )
