@@ -44,7 +44,9 @@ class NotePublishHandler @Inject constructor(
     ): Boolean {
         assertOnlyOneNotNull(
             "You can have only one root event.",
-            rootArticleId, rootPostId, rootHighlightId,
+            rootArticleId,
+            rootPostId,
+            rootHighlightId,
         )
 
         val replyPostData = replyToPostId?.let {
@@ -139,10 +141,7 @@ class NotePublishHandler @Inject constructor(
             setOfNotNull(replyAuthorPubkeyTag, rootArticleAuthorPubkeyTag, replyHighlightAuthorPubkeyTag)
     }
 
-    private fun buildRefinedContent(
-        attachmentUrls: List<String>,
-        content: String,
-    ): String {
+    private fun buildRefinedContent(attachmentUrls: List<String>, content: String): String {
         val refinedContent = if (attachmentUrls.isEmpty()) {
             content
         } else {
