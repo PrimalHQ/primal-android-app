@@ -20,6 +20,7 @@ import net.primal.android.nostr.ext.parseHashtagTags
 import net.primal.android.nostr.ext.parsePubkeyTags
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.publish.NostrPublisher
+import net.primal.android.notes.db.PostData
 
 class NotePublishHandler @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
@@ -43,9 +44,7 @@ class NotePublishHandler @Inject constructor(
     ): Boolean {
         assertOnlyOneNotNull(
             "You can have only one root event.",
-            rootArticleId,
-            rootPostId,
-            rootHighlightId,
+            rootArticleId, rootPostId, rootHighlightId,
         )
 
         val replyPostData = replyToPostId?.let {
@@ -96,13 +95,8 @@ class NotePublishHandler @Inject constructor(
         }
 
         /* Pubkey tags */
-        val existingPubkeyTags = replyPostData?.tags?.filter { it.isPubKeyTag() }?.toSet() ?: setOf()
-        val replyAuthorPubkeyTag = replyToAuthorId?.asPubkeyTag()
-        val replyHighlightAuthorPubkeyTag = rootHighlightAuthorId?.asPubkeyTag()
-        val rootArticleAuthorPubkeyTag = rootArticleAuthorId?.asPubkeyTag()
-        val mentionPubkeyTags = content.parsePubkeyTags(marker = "mention").toSet()
-        val pubkeyTags = existingPubkeyTags + mentionPubkeyTags +
-            setOfNotNull(replyAuthorPubkeyTag, rootArticleAuthorPubkeyTag, replyHighlightAuthorPubkeyTag)
+        val pubkeyTags =
+            constructPubkeyTags(replyPostData, replyToAuthorId, rootHighlightAuthorId, rootArticleAuthorId, content)
 
         /* Hashtag tags */
         val hashtagTags = content.parseHashtagTags().toSet()
@@ -112,19 +106,7 @@ class NotePublishHandler @Inject constructor(
         val iMetaTags = attachments.filter { it.isImageAttachment }.map { it.asIMetaTag() }
 
         /* Content */
-        val refinedContent = if (attachmentUrls.isEmpty()) {
-            content
-        } else {
-            StringBuilder().apply {
-                append(content)
-                appendLine()
-                appendLine()
-                attachmentUrls.forEach {
-                    append(it)
-                    appendLine()
-                }
-            }.toString()
-        }
+        val refinedContent = buildRefinedContent(attachmentUrls, content)
 
         val outboxRelays = replyToPostId?.let { noteId ->
             relayHintsMap[noteId]?.let { relayUrl -> listOf(relayUrl) }
@@ -138,5 +120,42 @@ class NotePublishHandler @Inject constructor(
                 outboxRelays = outboxRelays,
             )
         }
+    }
+
+    private fun constructPubkeyTags(
+        replyPostData: PostData?,
+        replyToAuthorId: String?,
+        rootHighlightAuthorId: String?,
+        rootArticleAuthorId: String?,
+        content: String,
+    ): Set<JsonArray> {
+        val existingPubkeyTags = replyPostData?.tags?.filter { it.isPubKeyTag() }?.toSet() ?: emptySet()
+        val replyAuthorPubkeyTag = replyToAuthorId?.asPubkeyTag()
+        val replyHighlightAuthorPubkeyTag = rootHighlightAuthorId?.asPubkeyTag()
+        val rootArticleAuthorPubkeyTag = rootArticleAuthorId?.asPubkeyTag()
+        val mentionPubkeyTags = content.parsePubkeyTags(marker = "mention").toSet()
+
+        return existingPubkeyTags + mentionPubkeyTags +
+            setOfNotNull(replyAuthorPubkeyTag, rootArticleAuthorPubkeyTag, replyHighlightAuthorPubkeyTag)
+    }
+
+    private fun buildRefinedContent(
+        attachmentUrls: List<String>,
+        content: String,
+    ): String {
+        val refinedContent = if (attachmentUrls.isEmpty()) {
+            content
+        } else {
+            StringBuilder().apply {
+                append(content)
+                appendLine()
+                appendLine()
+                attachmentUrls.forEach {
+                    append(it)
+                    appendLine()
+                }
+            }.toString()
+        }
+        return refinedContent
     }
 }
