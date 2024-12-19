@@ -104,7 +104,7 @@ fun BecomeLegendAmountStage(
                     fontSize = 20.sp,
                     authorLegendaryCustomization = LegendaryCustomization(
                         customBadge = true,
-                        legendaryStyle = LegendaryStyle.GOLD
+                        legendaryStyle = LegendaryStyle.GOLD,
                     ),
                 )
             }
