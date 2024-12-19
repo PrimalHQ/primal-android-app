@@ -102,7 +102,10 @@ fun BecomeLegendAmountStage(
                     internetIdentifier = "${state.primalName}@primal.net",
                     internetIdentifierBadgeSize = 24.dp,
                     fontSize = 20.sp,
-                    customBadgeStyle = LegendaryStyle.GOLD,
+                    authorLegendaryCustomization = LegendaryCustomization(
+                        customBadge = true,
+                        legendaryStyle = LegendaryStyle.GOLD
+                    ),
                 )
             }
 

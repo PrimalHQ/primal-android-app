@@ -357,11 +357,7 @@ private fun UserDisplayName(
                 lineHeight = 20.sp,
                 fontWeight = FontWeight.Bold,
             ),
-            customBadgeStyle = if (hasCustomBadge) {
-                profilePremiumDetails?.legendaryCustomization?.legendaryStyle
-            } else {
-                null
-            },
+            authorLegendaryCustomization = profilePremiumDetails?.legendaryCustomization,
         )
 
         val isPremiumBadgeClickable = activeUserPremiumTier == null ||
