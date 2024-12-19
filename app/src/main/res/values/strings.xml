@@ -772,6 +772,9 @@
 
     <string name="settings_version_title">Version</string>
 
+    <string name="biometric_prompt_title">Authenticate</string>
+    <string name="biometric_prompt_description">This ensures that only you can access the private key.</string>
+
     <string name="profile_following_stat">following</string>
     <string name="profile_followers_stat">followers</string>
     <string name="profile_reads_stat">reads</string>

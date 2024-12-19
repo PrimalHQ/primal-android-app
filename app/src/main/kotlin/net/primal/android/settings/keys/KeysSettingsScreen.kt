@@ -22,10 +22,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,8 +39,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.time.Duration.Companion.minutes
+import kotlinx.coroutines.delay
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.core.compose.BiometricPrompt
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -178,40 +183,97 @@ fun PublicKeySection(
 
 @Composable
 fun PrivateKeySection(nsec: String) {
-    val context = LocalContext.current
-    var privateKeyVisible by remember { mutableStateOf(false) }
+    var privateKeyVisible by rememberSaveable { mutableStateOf(false) }
+    var authenticated by rememberSaveable { mutableStateOf(false) }
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = stringResource(id = R.string.settings_keys_private_key_title).uppercase(),
-            style = AppTheme.typography.bodySmall,
-            color = AppTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Medium,
-        )
-
-        Text(
-            modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .clickable {
-                    privateKeyVisible = !privateKeyVisible
-                },
-            text = if (privateKeyVisible) {
-                stringResource(id = R.string.settings_keys_hide_key)
-            } else {
-                stringResource(id = R.string.settings_keys_show_key)
-            }.lowercase(),
-            style = AppTheme.typography.bodySmall,
-            color = AppTheme.colorScheme.secondary,
-            fontWeight = FontWeight.Medium,
-        )
+    LaunchedEffect(authenticated) {
+        if (authenticated) {
+            delay(1.minutes)
+            authenticated = false
+        }
     }
 
+    PrivateKeyTextTitle(
+        privateKeyVisible = privateKeyVisible,
+        onKeyVisibilityChanged = { privateKeyVisible = it },
+        authenticated = authenticated,
+        onAuthenticated = { authenticated = true },
+    )
+
+    PrivateKeyTextValue(
+        nsec = nsec,
+        privateKeyVisible = privateKeyVisible,
+    )
+
+    PrivateKeyCopyButton(
+        nsec = nsec,
+        authenticated = authenticated,
+        onAuthenticated = { authenticated = true },
+    )
+
+    IconText(
+        modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
+        text = stringResource(id = R.string.settings_keys_private_key_hint),
+        leadingIcon = Icons.Outlined.Warning,
+        iconSize = 16.sp,
+        lineHeight = 20.sp,
+        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+        leadingIconTintColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+        style = AppTheme.typography.bodySmall,
+    )
+}
+
+@Composable
+private fun PrivateKeyCopyButton(
+    nsec: String,
+    authenticated: Boolean,
+    onAuthenticated: () -> Unit,
+) {
+    val context = LocalContext.current
+    Box(modifier = Modifier.padding(vertical = 8.dp)) {
+        var keyCopied by remember { mutableStateOf(false) }
+        var showCopyBiometricPrompt by rememberSaveable { mutableStateOf(false) }
+        if (showCopyBiometricPrompt) {
+            BiometricPrompt(
+                onAuthSuccess = {
+                    val clipboard = context.getSystemService(ClipboardManager::class.java)
+                    val clip = ClipData.newPlainText("", nsec)
+                    clipboard.setPrimaryClip(clip)
+                    keyCopied = true
+                    onAuthenticated()
+                    showCopyBiometricPrompt = false
+                },
+                onAuthDismiss = {
+                    showCopyBiometricPrompt = false
+                },
+            )
+        }
+        PrimalLoadingButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            leadingIcon = if (keyCopied) Icons.Outlined.Check else Icons.Outlined.ContentCopy,
+            text = if (keyCopied) {
+                stringResource(id = R.string.settings_keys_key_copied)
+            } else {
+                stringResource(id = R.string.settings_keys_copy_private_key)
+            },
+            onClick = {
+                if (authenticated) {
+                    val clipboard = context.getSystemService(ClipboardManager::class.java)
+                    val clip = ClipData.newPlainText("", nsec)
+                    clipboard.setPrimaryClip(clip)
+                    keyCopied = true
+                } else {
+                    showCopyBiometricPrompt = true
+                }
+            },
+        )
+    }
+}
+
+@Composable
+private fun PrivateKeyTextValue(privateKeyVisible: Boolean, nsec: String) {
     Row(
         modifier = Modifier
             .padding(vertical = 16.dp)
@@ -244,38 +306,67 @@ fun PrivateKeySection(nsec: String) {
             overflow = if (privateKeyVisible) TextOverflow.Ellipsis else TextOverflow.Clip,
         )
     }
+}
 
-    Box(modifier = Modifier.padding(vertical = 8.dp)) {
-        var keyCopied by remember { mutableStateOf(false) }
-        PrimalLoadingButton(
+@Composable
+private fun PrivateKeyTextTitle(
+    privateKeyVisible: Boolean,
+    onKeyVisibilityChanged: (Boolean) -> Unit,
+    authenticated: Boolean,
+    onAuthenticated: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        var showPrivateKeyBiometricPrompt by rememberSaveable { mutableStateOf(false) }
+        if (showPrivateKeyBiometricPrompt) {
+            BiometricPrompt(
+                onAuthSuccess = {
+                    onKeyVisibilityChanged(true)
+                    onAuthenticated()
+                    showPrivateKeyBiometricPrompt = false
+                },
+                onAuthDismiss = {
+                    showPrivateKeyBiometricPrompt = false
+                },
+            )
+        }
+
+        Text(
+            text = stringResource(id = R.string.settings_keys_private_key_title).uppercase(),
+            style = AppTheme.typography.bodySmall,
+            color = AppTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Medium,
+        )
+
+        Text(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            leadingIcon = if (keyCopied) Icons.Outlined.Check else Icons.Outlined.ContentCopy,
-            text = if (keyCopied) {
-                stringResource(id = R.string.settings_keys_key_copied)
+                .padding(horizontal = 8.dp)
+                .clickable {
+                    if (!privateKeyVisible) {
+                        if (authenticated) {
+                            onKeyVisibilityChanged(true)
+                        } else {
+                            showPrivateKeyBiometricPrompt = true
+                        }
+                    } else {
+                        onKeyVisibilityChanged(false)
+                    }
+                },
+            text = if (privateKeyVisible) {
+                stringResource(id = R.string.settings_keys_hide_key)
             } else {
-                stringResource(id = R.string.settings_keys_copy_private_key)
-            },
-            onClick = {
-                val clipboard = context.getSystemService(ClipboardManager::class.java)
-                val clip = ClipData.newPlainText("", nsec)
-                clipboard.setPrimaryClip(clip)
-                keyCopied = true
-            },
+                stringResource(id = R.string.settings_keys_show_key)
+            }.lowercase(),
+            style = AppTheme.typography.bodySmall,
+            color = AppTheme.colorScheme.secondary,
+            fontWeight = FontWeight.Medium,
         )
     }
-
-    IconText(
-        modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
-        text = stringResource(id = R.string.settings_keys_private_key_hint),
-        leadingIcon = Icons.Outlined.Warning,
-        iconSize = 16.sp,
-        lineHeight = 20.sp,
-        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-        leadingIconTintColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-        style = AppTheme.typography.bodySmall,
-    )
 }
 
 @Preview
