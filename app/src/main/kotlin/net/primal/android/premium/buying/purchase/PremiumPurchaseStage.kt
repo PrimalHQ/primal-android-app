@@ -129,6 +129,7 @@ fun PremiumPurchaseStage(
                     internetIdentifier = "${state.primalName}@primal.net",
                     internetIdentifierBadgeSize = 24.dp,
                     fontSize = 20.sp,
+                    legendaryCustomization = state.profile.premiumDetails?.legendaryCustomization,
                 )
                 if (!state.isExtendingPremium) {
                     Text(

@@ -86,11 +86,7 @@ private fun GenericReactionListItem(
             NostrUserText(
                 displayName = item.profile.authorDisplayName,
                 internetIdentifier = item.profile.internetIdentifier,
-                customBadgeStyle = if (item.profile.premiumDetails?.legendaryCustomization?.customBadge == true) {
-                    item.profile.premiumDetails.legendaryCustomization.legendaryStyle
-                } else {
-                    null
-                },
+                legendaryCustomization = item.profile.premiumDetails?.legendaryCustomization,
             )
         },
         trailingContent = {

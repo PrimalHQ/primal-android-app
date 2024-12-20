@@ -199,11 +199,7 @@ private fun ExplorePersonListItem(
                 NostrUserText(
                     displayName = person.profile.userDisplayName,
                     internetIdentifier = person.profile.internetIdentifier,
-                    customBadgeStyle = if (person.profile.premiumDetails?.legendaryCustomization?.customBadge == true) {
-                        person.profile.premiumDetails.legendaryCustomization.legendaryStyle
-                    } else {
-                        null
-                    },
+                    legendaryCustomization = person.profile.premiumDetails?.legendaryCustomization,
                 )
                 person.profile.internetIdentifier?.let {
                     Text(

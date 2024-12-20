@@ -422,6 +422,7 @@ private fun HeaderContent(
             if (firstNotification.actionUserInternetIdentifier.isNullOrEmpty()) append(' ')
             append(appendText)
         },
+        legendaryCustomization = firstNotification.actionUserLegendaryCustomization,
     )
 }
 

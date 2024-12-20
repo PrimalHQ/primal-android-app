@@ -155,11 +155,7 @@ fun CommentRow(modifier: Modifier = Modifier, comment: CommentUi) {
                     modifier = Modifier.padding(start = 8.dp),
                     displayName = comment.authorDisplayName ?: "",
                     internetIdentifier = comment.authorInternetIdentifier,
-                    customBadgeStyle = if (comment.authorLegendaryCustomization?.customBadge == true) {
-                        comment.authorLegendaryCustomization.legendaryStyle
-                    } else {
-                        null
-                    },
+                    legendaryCustomization = comment.authorLegendaryCustomization,
                 )
                 Text(
                     text = stringResource(id = R.string.article_details_highlight_activity_commented),
