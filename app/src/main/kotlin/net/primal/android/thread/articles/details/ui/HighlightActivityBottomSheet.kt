@@ -48,29 +48,40 @@ import net.primal.android.core.compose.icons.primaliconpack.Highlight
 import net.primal.android.core.compose.icons.primaliconpack.Quote
 import net.primal.android.core.compose.icons.primaliconpack.RemoveHighlight
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.core.utils.ifNotNull
 import net.primal.android.highlights.model.CommentUi
 import net.primal.android.highlights.model.JoinedHighlightsUi
+import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.utils.Naddr
+import net.primal.android.nostr.utils.Nevent
+import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
+import net.primal.android.nostr.utils.Nip19TLV.toNeventString
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 
 internal val DARK_THEME_ACTION_BUTTON_COLOR = Color(0xFF282828)
 
 @Composable
 fun HighlightActivityBottomSheetHandler(
+    articleNaddr: Naddr?,
     selectedHighlight: JoinedHighlightsUi?,
     isHighlighted: Boolean,
     isWorking: Boolean,
     dismissSelection: () -> Unit,
     onSaveHighlightClick: () -> Unit,
     onDeleteHighlightClick: () -> Unit,
+    noteCallbacks: NoteCallbacks,
 ) {
     if (selectedHighlight != null) {
         HighlightActivityBottomSheet(
             onDismissRequest = dismissSelection,
+            articleNaddr = articleNaddr,
             selectedHighlight = selectedHighlight,
             isHighlighted = isHighlighted,
             isWorking = isWorking,
             onSaveHighlightClick = onSaveHighlightClick,
             onDeleteHighlightClick = onDeleteHighlightClick,
+            noteCallbacks = noteCallbacks,
         )
     }
 }
@@ -79,12 +90,14 @@ fun HighlightActivityBottomSheetHandler(
 @Composable
 fun HighlightActivityBottomSheet(
     modifier: Modifier = Modifier,
+    articleNaddr: Naddr?,
     selectedHighlight: JoinedHighlightsUi,
     isHighlighted: Boolean,
     isWorking: Boolean,
     onDismissRequest: () -> Unit,
     onSaveHighlightClick: () -> Unit,
     onDeleteHighlightClick: () -> Unit,
+    noteCallbacks: NoteCallbacks,
 ) {
     ModalBottomSheet(
         tonalElevation = 0.dp,
@@ -117,8 +130,30 @@ fun HighlightActivityBottomSheet(
                 }
             }
             HighlightActionButtons(
-                onQuoteClick = {},
-                onCommentClick = {},
+                onQuoteClick = {
+                    ifNotNull(
+                        noteCallbacks.onHighlightQuoteClick,
+                        selectedHighlight.highlightId,
+                        articleNaddr,
+                    ) { quoteCb, highlightId, naddr ->
+                        quoteCb(
+                            Nevent(
+                                kind = NostrEventKind.Highlight.value,
+                                userId = selectedHighlight.authors.first().pubkey,
+                                eventId = highlightId,
+                            ).toNeventString(),
+                            naddr.toNaddrString(),
+                        )
+                    }
+                },
+                onCommentClick = {
+                    articleNaddr?.let {
+                        noteCallbacks.onHighlightReplyClick?.invoke(
+                            selectedHighlight.highlightId,
+                            it.toNaddrString(),
+                        )
+                    }
+                },
                 onSaveHighlightClick = onSaveHighlightClick,
                 onDeleteHighlightClick = onDeleteHighlightClick,
                 isHighlighted = isHighlighted,
@@ -197,13 +232,11 @@ fun HighlightActionButtons(
             icon = PrimalIcons.Quote,
             onClick = onQuoteClick,
             text = stringResource(id = R.string.article_details_highlight_activity_quote),
-            isWorking = isWorking,
         )
         ActionButton(
             icon = PrimalIcons.FeedRepliesFilled,
             onClick = onCommentClick,
             text = stringResource(id = R.string.article_details_highlight_activity_comment),
-            isWorking = isWorking,
         )
         ActionButton(
             icon = if (isHighlighted) {

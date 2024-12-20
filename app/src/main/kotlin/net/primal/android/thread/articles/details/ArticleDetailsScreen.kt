@@ -218,12 +218,14 @@ private fun ArticleDetailsScreen(
     }
 
     HighlightActivityBottomSheetHandler(
+        articleNaddr = detailsState.naddr,
         selectedHighlight = detailsState.selectedHighlight,
         dismissSelection = { detailsEventPublisher(UiEvent.DismissSelectedHighlight) },
         isHighlighted = detailsState.isHighlighted,
         onSaveHighlightClick = { detailsEventPublisher(UiEvent.PublishSelectedHighlight) },
         onDeleteHighlightClick = { detailsEventPublisher(UiEvent.DeleteSelectedHighlight) },
         isWorking = detailsState.isWorking,
+        noteCallbacks = noteCallbacks,
     )
 
     if (articleState.shouldApproveBookmark && detailsState.article != null) {
