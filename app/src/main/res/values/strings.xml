@@ -896,6 +896,7 @@
 
     <string name="wallet_sats_suffix">sats</string>
     <string name="wallet_usd_suffix">USD</string>
+    <string name="wallet_usd_prefix">$</string>
     <string name="wallet_transaction_list_item_received">Received</string>
     <string name="wallet_transaction_list_item_sent">Sent</string>
     <string name="wallet_transaction_list_item_zap_received">Zap received</string>

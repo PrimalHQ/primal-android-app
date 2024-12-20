@@ -1,5 +1,12 @@
 package net.primal.android.wallet.dashboard.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import java.math.BigDecimal
 import net.primal.android.wallet.dashboard.CurrencyMode
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun WalletDashboard(
     modifier: Modifier,
@@ -24,7 +32,7 @@ fun WalletDashboard(
     onWalletAction: (WalletAction) -> Unit,
     onSwitchCurrencyMode: (currencyMode: CurrencyMode) -> Unit,
     enabled: Boolean = true,
-    currencyMode: CurrencyMode = CurrencyMode.SATOSHI,
+    currencyMode: CurrencyMode = CurrencyMode.SATS,
 ) {
     val haptic = LocalHapticFeedback.current
 
@@ -33,17 +41,35 @@ fun WalletDashboard(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        AmountText(
-            modifier = Modifier
-                .wrapContentWidth()
-                .padding(start = if (walletBalance != null) 32.dp else 0.dp)
-                .padding(bottom = 32.dp),
-            amount = walletBalance ?: BigDecimal.ZERO,
-            textSize = 48.sp,
-            currencyMode = currencyMode,
-            onSwitchCurrencyMode = onSwitchCurrencyMode,
-            exchangeBtcUsdRate = exchangeBtcUsdRate,
-        )
+        AnimatedContent(
+            modifier = modifier.fillMaxWidth(),
+            label = "Animated currency switch",
+            targetState = currencyMode,
+            transitionSpec = { (slideInVertically() + fadeIn()) togetherWith fadeOut() },
+        ) { targetCurrencyMode ->
+            if (targetCurrencyMode == CurrencyMode.FIAT) {
+                FiatAmountText(
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .padding(start = if (walletBalance != null) 32.dp else 0.dp)
+                        .padding(bottom = 32.dp)
+                        .clickable { onSwitchCurrencyMode(CurrencyMode.SATS) },
+                    amount = walletBalance ?: BigDecimal.ZERO,
+                    textSize = 48.sp,
+                    exchangeBtcUsdRate = exchangeBtcUsdRate,
+                )
+            } else {
+                BtcAmountText(
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .padding(start = if (walletBalance != null) 32.dp else 0.dp)
+                        .padding(bottom = 32.dp)
+                        .clickable { onSwitchCurrencyMode(CurrencyMode.FIAT) },
+                    amountInBtc = walletBalance ?: BigDecimal.ZERO,
+                    textSize = 48.sp,
+                )
+            }
+        }
 
         WalletActionsRow(
             modifier = Modifier.fillMaxWidth(),

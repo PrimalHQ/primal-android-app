@@ -153,7 +153,7 @@ fun WalletDashboardScreen(
     var topBarHeight by remember { mutableIntStateOf(0) }
     var topBarFooterHeight by remember { mutableIntStateOf(0) }
     val density = LocalDensity.current
-    var currencyMode by remember { mutableStateOf(CurrencyMode.SATOSHI) }
+    var currencyMode by remember { mutableStateOf(CurrencyMode.SATS) }
 
     var shouldAddFooter by remember { mutableStateOf(false) }
     LaunchedEffect(pagingItems.itemCount, listState) {
@@ -356,8 +356,8 @@ fun WalletDashboardScreen(
 }
 
 enum class CurrencyMode {
-    USD,
-    SATOSHI,
+    FIAT,
+    SATS,
 }
 
 private const val DISABLED_WALLET_ALPHA = 0.42f
