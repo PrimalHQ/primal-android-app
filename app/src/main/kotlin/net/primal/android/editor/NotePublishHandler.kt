@@ -42,12 +42,7 @@ class NotePublishHandler @Inject constructor(
         replyToPostId: String? = null,
         replyToAuthorId: String? = null,
     ): Boolean {
-        assertOnlyOneNotNull(
-            "You can have only one root event.",
-            rootArticleId,
-            rootPostId,
-            rootHighlightId,
-        )
+        assertOnlyOneNotNull(rootArticleId, rootPostId, rootHighlightId) { "You can have only one root event." }
 
         val replyPostData = replyToPostId?.let {
             withContext(dispatcherProvider.io()) {
