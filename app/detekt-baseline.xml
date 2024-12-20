@@ -109,7 +109,6 @@
     <ID>MagicNumber:PrimalDrawer.kt$0.5f</ID>
     <ID>MagicNumber:PrimalDrawerScaffold.kt$0.5f</ID>
     <ID>MatchingDeclarationName:__PrimalIcons.kt$PrimalIcons</ID>
-    <ID>MaxLineLength:LegendaryProfileCustomizationScreen.kt$legendaryCustomization = customBadge?.let { LegendaryCustomization(customBadge = it, legendaryStyle = selectedStyle) }</ID>
     <ID>ReturnCount:LnInvoiceUtils.kt$LnInvoiceUtils$private fun getAmount(invoice: String): BigDecimal</ID>
     <ID>ReturnCount:MessagesRemoteMediator.kt$MessagesRemoteMediator$override suspend fun load(loadType: LoadType, state: PagingState&lt;Int, DirectMessage&gt;): MediatorResult</ID>
     <ID>ReturnCount:NostrResources.kt$private fun String.nostrUriToBytes(): ByteArray?</ID>
