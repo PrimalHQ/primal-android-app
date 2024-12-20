@@ -135,8 +135,15 @@ class NotePublishHandler @Inject constructor(
         val rootArticleAuthorPubkeyTag = rootArticleAuthorId?.asPubkeyTag()
         val mentionPubkeyTags = content.parsePubkeyTags(marker = "mention").toSet()
 
-        return existingPubkeyTags + mentionPubkeyTags +
-            setOfNotNull(replyAuthorPubkeyTag, rootArticleAuthorPubkeyTag, replyHighlightAuthorPubkeyTag)
+        return sequenceOf(
+            existingPubkeyTags,
+            mentionPubkeyTags,
+            listOf(
+                replyAuthorPubkeyTag,
+                rootArticleAuthorPubkeyTag,
+                replyHighlightAuthorPubkeyTag,
+            ),
+        ).flatten().filterNotNull().toSet()
     }
 
     private fun buildRefinedContent(attachmentUrls: List<String>, content: String): String {
