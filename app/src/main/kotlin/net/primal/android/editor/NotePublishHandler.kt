@@ -56,9 +56,7 @@ class NotePublishHandler @Inject constructor(
         }
 
         val rootHighlightTags = if (rootHighlightId != null && rootHighlightAuthorId != null) {
-            listOf(
-                rootHighlightId.asEventIdTag(marker = "root"),
-            )
+            listOf(rootHighlightId.asEventIdTag(marker = "root"))
         } else {
             null
         }
@@ -97,8 +95,13 @@ class NotePublishHandler @Inject constructor(
         }
 
         /* Pubkey tags */
-        val pubkeyTags =
-            constructPubkeyTags(replyPostData, replyToAuthorId, rootHighlightAuthorId, rootArticleAuthorId, content)
+        val pubkeyTags = constructPubkeyTags(
+            replyPostData = replyPostData,
+            replyToAuthorId = replyToAuthorId,
+            rootHighlightAuthorId = rootHighlightAuthorId,
+            rootArticleAuthorId = rootArticleAuthorId,
+            content = content,
+        )
 
         /* Hashtag tags */
         val hashtagTags = content.parseHashtagTags().toSet()

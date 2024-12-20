@@ -21,8 +21,9 @@ data class NoteEditorArgs(
 
     companion object {
         fun List<String>.toNostrUriInNoteEditorArgs(): NoteEditorArgs {
-            val preFillContent =
-                TextFieldValue(text = this.joinToString(separator = "\n\n", prefix = "\n\n") { "nostr:$it" })
+            val preFillContent = TextFieldValue(
+                text = this.joinToString(separator = "\n\n", prefix = "\n\n") { "nostr:$it" },
+            )
             return preFillContent.asNoteEditorArgs()
         }
 
