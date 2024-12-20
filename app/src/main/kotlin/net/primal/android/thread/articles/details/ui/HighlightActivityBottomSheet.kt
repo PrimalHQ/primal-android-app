@@ -146,7 +146,14 @@ fun HighlightActivityBottomSheet(
                         )
                     }
                 },
-                onCommentClick = { noteCallbacks.onHighlightReplyClick?.invoke(selectedHighlight.highlightId) },
+                onCommentClick = {
+                    articleNaddr?.let {
+                        noteCallbacks.onHighlightReplyClick?.invoke(
+                            selectedHighlight.highlightId,
+                            it.toNaddrString(),
+                        )
+                    }
+                },
                 onSaveHighlightClick = onSaveHighlightClick,
                 onDeleteHighlightClick = onDeleteHighlightClick,
                 isHighlighted = isHighlighted,
