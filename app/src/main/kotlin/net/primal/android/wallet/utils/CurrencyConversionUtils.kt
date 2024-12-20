@@ -19,5 +19,10 @@ object CurrencyConversionUtils {
 
     fun BigDecimal.toSats(): ULong = multiply(BTC_IN_SATS.toBigDecimal()).toLong().toULong()
 
+    fun BigDecimal.toUsd(exchangeBtcUsdRate: Double?): BigDecimal {
+        val rate = exchangeBtcUsdRate ?: 0.0
+        return multiply(BigDecimal(rate))
+    }
+
     fun Double.formatAsString() = String.format(Locale.US, "%.11f", this).trimEnd('0').trimEnd('.')
 }

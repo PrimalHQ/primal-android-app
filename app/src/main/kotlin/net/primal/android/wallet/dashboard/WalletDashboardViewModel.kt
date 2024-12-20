@@ -58,6 +58,7 @@ class WalletDashboardViewModel @Inject constructor(
 
     init {
         fetchWalletBalance()
+        fetchExchangeRate()
         subscribeToEvents()
         subscribeToActiveAccount()
         subscribeToPurchases()
@@ -113,6 +114,22 @@ class WalletDashboardViewModel @Inject constructor(
                 walletRepository.fetchWalletBalance(userId = activeUserId)
             } catch (error: WssException) {
                 Timber.w(error)
+            }
+        }
+
+    private fun fetchExchangeRate() =
+        viewModelScope.launch {
+            try {
+                val btcRate = walletRepository.getExchangeRate(
+                    userId = activeAccountStore.activeUserId(),
+                )
+                setState {
+                    copy(
+                        exchangeBtcUsdRate = btcRate,
+                    )
+                }
+            } catch (error: WssException) {
+                Timber.e(error)
             }
         }
 

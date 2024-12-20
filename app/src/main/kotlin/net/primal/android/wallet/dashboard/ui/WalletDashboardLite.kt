@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.math.BigDecimal
+import net.primal.android.wallet.dashboard.CurrencyMode
 
 @Composable
 fun WalletDashboardLite(
@@ -16,19 +17,25 @@ fun WalletDashboardLite(
     walletBalance: BigDecimal?,
     actions: List<WalletAction>,
     onWalletAction: (WalletAction) -> Unit,
+    currencyMode: CurrencyMode,
+    onSwitchCurrencyMode: (currencyMode: CurrencyMode) -> Unit,
+    exchangeBtcUsdRate: Double?,
 ) {
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Bottom,
     ) {
-        BtcAmountText(
+        AmountText(
             modifier = Modifier.graphicsLayer {
                 clip = false
                 translationY = 4.dp.toPx()
             },
-            amountInBtc = walletBalance ?: BigDecimal.ZERO,
+            amount = walletBalance ?: BigDecimal.ZERO,
             textSize = 32.sp,
+            currencyMode = currencyMode,
+            onSwitchCurrencyMode = onSwitchCurrencyMode,
+            exchangeBtcUsdRate = exchangeBtcUsdRate,
         )
 
         WalletActionsRow(

@@ -149,11 +149,11 @@ fun WalletDashboardScreen(
 
     val isScrolledToTop by remember(listState) { derivedStateOf { listState.firstVisibleItemScrollOffset == 0 } }
     val dashboardExpanded by rememberSaveable(isScrolledToTop) { mutableStateOf(isScrolledToTop) }
-
     val dashboardLiteHeightDp = 80.dp
     var topBarHeight by remember { mutableIntStateOf(0) }
     var topBarFooterHeight by remember { mutableIntStateOf(0) }
     val density = LocalDensity.current
+    var currencyMode by remember { mutableStateOf(CurrencyMode.SATOSHI) }
 
     var shouldAddFooter by remember { mutableStateOf(false) }
     LaunchedEffect(pagingItems.itemCount, listState) {
@@ -229,6 +229,9 @@ fun WalletDashboardScreen(
                                             WalletAction.Receive -> onReceiveClick()
                                         }
                                     },
+                                    currencyMode = currencyMode,
+                                    onSwitchCurrencyMode = { currencyMode = it },
+                                    exchangeBtcUsdRate = state.exchangeBtcUsdRate,
                                 )
 
                                 false -> WalletDashboardLite(
@@ -246,6 +249,9 @@ fun WalletDashboardScreen(
                                             WalletAction.Receive -> onReceiveClick()
                                         }
                                     },
+                                    currencyMode = currencyMode,
+                                    onSwitchCurrencyMode = { currencyMode = it },
+                                    exchangeBtcUsdRate = state.exchangeBtcUsdRate,
                                 )
                             }
                         }
@@ -347,6 +353,11 @@ fun WalletDashboardScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
     )
+}
+
+enum class CurrencyMode {
+    USD,
+    SATOSHI,
 }
 
 private const val DISABLED_WALLET_ALPHA = 0.42f
