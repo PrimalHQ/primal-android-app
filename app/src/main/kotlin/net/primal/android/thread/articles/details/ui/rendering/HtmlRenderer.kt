@@ -15,7 +15,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.LocalPrimalTheme
-import net.primal.android.thread.articles.details.ui.handleArticleLinkClick
 import net.primal.android.user.domain.ContentAppearance
 
 @Composable

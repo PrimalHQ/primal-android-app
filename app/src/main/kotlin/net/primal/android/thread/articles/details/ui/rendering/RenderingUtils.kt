@@ -1,9 +1,5 @@
 package net.primal.android.thread.articles.details.ui.rendering
 
-import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
-import org.intellij.markdown.html.HtmlGenerator
-import org.intellij.markdown.parser.MarkdownParser
-
 private val nostrNpub1Regex = Regex("""\bnostr:npub1(\w+)\b""")
 private val nostrNote1Regex = Regex("\\b(nostr:|@)((note)1\\w+)\\b|#\\[(\\d+)]")
 
@@ -43,17 +39,43 @@ fun String.splitMarkdownByNostrUris(): List<String> {
     return chunks.filter { it.isNotBlank() }
 }
 
+fun String.splitMarkdownByTables3(): List<String> {
+    // Regular expression to match tables and non-table content
+    val tablePattern = """([^|]*\n)*(\|[^\n]*\|(?:\n\|[^\n]*\|)+)""".toRegex()
+
+    val chunks = mutableListOf<String>()
+    var lastEnd = 0
+
+    // Find all matches
+    tablePattern.findAll(this).forEach { match ->
+        // Text before the table
+        if (match.range.first > lastEnd) {
+            chunks.add(this.substring(lastEnd, match.range.first))
+        }
+        // Table match
+        chunks.add(match.value)
+        lastEnd = match.range.last + 1
+    }
+
+    // Add any remaining text after the last match
+    if (lastEnd < this.length) {
+        chunks.add(this.substring(lastEnd))
+    }
+
+    return chunks
+}
+
 fun String.splitIntoParagraphs(): List<String> {
     return this.split(Regex("\\n\\s*\\n")).map { it.trim() }
 }
 
-@Suppress("unused")
-private fun String.markdownToHtml(): String {
-    val flavour = CommonMarkFlavourDescriptor()
-    val parsedTree = MarkdownParser(flavour).buildMarkdownTreeFromString(this)
-    val htmlContent = HtmlGenerator(this, parsedTree, flavour).generateHtml()
-    return ARTICLE_BASE_HTML.replace(
-        oldValue = "{{ CONTENT }}",
-        newValue = htmlContent.substring(startIndex = 6, endIndex = htmlContent.length - 7),
-    )
-}
+// @Suppress("unused")
+// fun String.markdownToHtml(): String {
+//    val flavour = CommonMarkFlavourDescriptor()
+//    val parsedTree = MarkdownParser(flavour).buildMarkdownTreeFromString(this)
+//    val htmlContent = HtmlGenerator(this, parsedTree, flavour).generateHtml()
+//    return ARTICLE_BASE_HTML.replace(
+//        oldValue = "{{ CONTENT }}",
+//        newValue = htmlContent.substring(startIndex = 6, endIndex = htmlContent.length - 7),
+//    )
+// }

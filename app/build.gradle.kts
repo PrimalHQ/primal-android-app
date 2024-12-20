@@ -236,10 +236,18 @@ dependencies {
     implementation(libs.androidx.emoji2.emojipicker)
     implementation(libs.androidx.webkit)
 
-    implementation(libs.jetbrains.markdown)
-    implementation(libs.richtext.commonmark)
-    implementation(libs.richtext.ui)
-    implementation(libs.richtext.ui.material3)
+    implementation("io.noties.markwon:core:4.6.2")
+    implementation("io.noties.markwon:image:4.6.2")
+    implementation("io.noties.markwon:image-coil:4.6.2")
+    implementation("io.noties.markwon:inline-parser:4.6.2")
+    implementation("io.noties.markwon:ext-latex:4.6.2")
+    implementation("io.noties.markwon:ext-strikethrough:4.6.2")
+    implementation("io.noties.markwon:ext-tables:4.6.2")
+    implementation("io.noties.markwon:ext-tasklist:4.6.2")
+    implementation("io.noties.markwon:html:4.6.2")
+    implementation("io.noties.markwon:linkify:4.6.2")
+    implementation("io.noties.markwon:simple-ext:4.6.2")
+//    implementation("io.noties.markwon:syntax-highlight:4.6.2")
 
     implementation(libs.navigation.material)
 
@@ -330,4 +338,12 @@ dependencies {
     androidTestImplementation(libs.kotest.assertions.core)
     androidTestImplementation(libs.kotest.assertions.json)
     androidTestImplementation(libs.mockk.android)
+
+//    configurations {
+//        all {
+//            resolutionStrategy {
+//                force("org.commonmark:commonmark:0.21.0")
+//            }
+//        }
+//    }
 }

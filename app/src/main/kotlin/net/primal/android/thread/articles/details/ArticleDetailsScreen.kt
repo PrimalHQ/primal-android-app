@@ -103,8 +103,9 @@ import net.primal.android.thread.articles.details.ui.FloatingArticlePill
 import net.primal.android.thread.articles.details.ui.HighlightActivityBottomSheetHandler
 import net.primal.android.thread.articles.details.ui.rendering.HtmlRenderer
 import net.primal.android.thread.articles.details.ui.rendering.MarkdownRenderer
+import net.primal.android.thread.articles.details.ui.rendering.handleArticleLinkClick
+import net.primal.android.thread.articles.details.ui.rendering.rememberPrimalMarkwon
 import net.primal.android.thread.articles.details.ui.rendering.replaceProfileNostrUrisWithMarkdownLinks
-import net.primal.android.thread.articles.details.ui.rendering.splitIntoParagraphs
 import net.primal.android.thread.articles.details.ui.rendering.splitMarkdownByNostrUris
 import net.primal.android.wallet.zaps.canZap
 
@@ -162,7 +163,6 @@ private fun ArticleDetailsScreen(
         mutableStateOf(
             (detailsState.article?.content ?: "")
                 .splitMarkdownByNostrUris()
-                .flatMap { it.splitIntoParagraphs() }
                 .replaceProfileNostrUrisWithMarkdownLinks(npubToDisplayNameMap = detailsState.npubToDisplayNameMap)
                 .buildArticleRenderParts(referencedNotes = detailsState.referencedNotes),
         )
@@ -446,6 +446,16 @@ private fun ArticleContentWithComments(
     onUiError: ((UiError) -> Unit)? = null,
 ) {
     val uriHandler = LocalUriHandler.current
+    val markwon = rememberPrimalMarkwon(
+        onLinkClick = { link ->
+            link.handleArticleLinkClick(
+                onProfileClick = noteCallbacks.onProfileClick,
+                onNoteClick = noteCallbacks.onNoteClick,
+                onArticleClick = noteCallbacks.onArticleClick,
+                onUrlClick = { url -> uriHandler.openUriSafely(url) },
+            )
+        },
+    )
 
     LazyColumn(
         modifier = Modifier
@@ -486,6 +496,7 @@ private fun ArticleContentWithComments(
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 title = state.article?.title ?: "",
                 date = state.article?.publishedAt,
+                markwon = markwon,
                 cover = state.article?.coverImageCdnImage,
                 summary = state.article?.summary,
             )
@@ -544,12 +555,9 @@ private fun ArticleContentWithComments(
                             .fillMaxWidth()
                             .padding(all = 16.dp),
                         markdown = part.markdown,
+                        markwon = markwon,
                         showHighlights = showHighlights,
                         highlights = state.highlights,
-                        onProfileClick = noteCallbacks.onProfileClick,
-                        onNoteClick = noteCallbacks.onNoteClick,
-                        onArticleClick = noteCallbacks.onArticleClick,
-                        onUrlClick = { url -> uriHandler.openUriSafely(url) },
                         onHighlightClick = onHighlightClick,
                     )
                 }
