@@ -17,8 +17,9 @@ interface NoteEditorContract {
     data class UiState(
         val content: TextFieldValue = TextFieldValue(),
         val conversation: List<FeedPostUi> = emptyList(),
-        val replyToArticle: FeedArticleUi? = null,
-        val replyToHighlight: HighlightUi? = null,
+        val referencedArticle: FeedArticleUi? = null,
+        val referencedHighlight: HighlightUi? = null,
+        val isQuoting: Boolean = false,
         val publishing: Boolean = false,
         val error: NoteEditorError? = null,
         val activeAccountAvatarCdnImage: CdnImage? = null,

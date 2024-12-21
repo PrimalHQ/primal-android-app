@@ -21,6 +21,14 @@ inline fun <U, V, T> ifNotNull(
     }
 }
 
+fun assertAtMostOneNotNull(vararg args: Any?, message: () -> Any) {
+    args.sumOf { (it != null).toInt() }.apply {
+        if (this > 1) {
+            error(message = message())
+        }
+    }
+}
+
 fun assertOnlyOneNotNull(vararg args: Any?, message: () -> Any) {
     args.sumOf { (it != null).toInt() }.apply {
         if (this != 1) {

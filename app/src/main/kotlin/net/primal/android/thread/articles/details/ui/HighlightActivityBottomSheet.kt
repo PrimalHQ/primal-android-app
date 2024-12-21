@@ -149,7 +149,11 @@ fun HighlightActivityBottomSheet(
                 onCommentClick = {
                     articleNaddr?.let {
                         noteCallbacks.onHighlightReplyClick?.invoke(
-                            selectedHighlight.highlightId,
+                            Nevent(
+                                kind = NostrEventKind.Highlight.value,
+                                userId = selectedHighlight.authors.first().pubkey,
+                                eventId = selectedHighlight.highlightId,
+                            ).toNeventString(),
                             it.toNaddrString(),
                         )
                     }

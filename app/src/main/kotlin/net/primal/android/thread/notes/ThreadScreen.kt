@@ -145,7 +145,7 @@ fun ThreadScreen(
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
-    val noteEditorViewModel = noteEditorViewModel(args = NoteEditorArgs(replyToNoteId = state.highlightPostId))
+    val noteEditorViewModel = noteEditorViewModel(args = NoteEditorArgs(referencedNoteId = state.highlightPostId))
     val replyState by noteEditorViewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -238,7 +238,7 @@ fun ThreadScreen(
                     onExpandReply = { mediaUris ->
                         onExpandReply(
                             NoteEditorArgs(
-                                replyToNoteId = state.highlightPostId,
+                                referencedNoteId = state.highlightPostId,
                                 mediaUris = mediaUris.map { it.toString() },
                                 content = replyState.content.text,
                                 contentSelectionStart = replyState.content.selection.start,
