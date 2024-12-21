@@ -6,7 +6,7 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.utils.assertOnlyOneNotNull
+import net.primal.android.core.utils.assertAtMostOneNotNull
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -42,7 +42,7 @@ class NotePublishHandler @Inject constructor(
         replyToPostId: String? = null,
         replyToAuthorId: String? = null,
     ): Boolean {
-        assertOnlyOneNotNull(rootArticleId, rootPostId) { "You can have only one root event." }
+        assertAtMostOneNotNull(rootArticleId, rootPostId) { "You can have at most one root event." }
 
         val replyPostData = replyToPostId?.let {
             withContext(dispatcherProvider.io()) {

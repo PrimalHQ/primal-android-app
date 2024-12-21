@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -62,6 +63,7 @@ import androidx.compose.ui.unit.sp
 import java.util.*
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.FeedArticleListItem
+import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.core.compose.ImportPhotosIconButton
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
@@ -79,11 +81,13 @@ import net.primal.android.editor.NoteEditorContract.UiEvent
 import net.primal.android.editor.NoteEditorContract.UiState.NoteEditorError
 import net.primal.android.editor.NoteEditorViewModel
 import net.primal.android.editor.domain.NoteAttachment
+import net.primal.android.highlights.model.HighlightUi
 import net.primal.android.notes.db.toReferencedHighlight
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.notes.feed.note.ui.FeedNoteHeader
 import net.primal.android.notes.feed.note.ui.NoteContent
+import net.primal.android.notes.feed.note.ui.ReferencedArticleCard
 import net.primal.android.notes.feed.note.ui.ReferencedHighlight
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
@@ -226,34 +230,12 @@ private fun NoteEditorBox(
                 .onSizeChanged { noteEditorMaxHeightPx = it.height },
             state = editorListState,
         ) {
-            if (state.replyToHighlight != null) {
-                item(
-                    key = state.replyToHighlight.highlightId,
-                    contentType = "MentionedHighlight",
-                ) {
-                    ReferencedHighlight(
-                        modifier = Modifier.padding(all = 16.dp),
-                        highlight = state.replyToHighlight.toReferencedHighlight(),
-                        isDarkTheme = isAppInDarkPrimalTheme(),
-                        onClick = {},
-                    )
-                    PrimalDivider()
-                }
-            }
-            if (state.replyToArticle != null) {
-                item(
-                    key = state.replyToArticle.eventId,
-                    contentType = "MentionedArticle",
-                ) {
-                    Column {
-                        FeedArticleListItem(
-                            data = state.replyToArticle,
-                            modifier = Modifier.padding(all = 16.dp),
-                            enabledDropdownMenu = false,
-                        )
-                        PrimalDivider()
-                    }
-                }
+            if (!state.isQuoting) {
+                referencedHighlightAndArticleAsReply(
+                    modifier = Modifier.padding(all = 16.dp),
+                    referencedHighlight = state.referencedHighlight,
+                    referencedArticle = state.referencedArticle,
+                )
             }
 
             items(
@@ -278,15 +260,25 @@ private fun NoteEditorBox(
                 )
             }
 
-            item(key = "attachments") {
-                NoteAttachmentsLazyRow(
-                    attachments = state.attachments,
-                    onDiscard = {
-                        eventPublisher(UiEvent.DiscardNoteAttachment(attachmentId = it))
-                    },
-                    onRetryUpload = {
-                        eventPublisher(UiEvent.RetryUpload(attachmentId = it))
-                    },
+            if (state.attachments.isNotEmpty()) {
+                item(key = "attachments") {
+                    NoteAttachmentsLazyRow(
+                        attachments = state.attachments,
+                        onDiscard = {
+                            eventPublisher(UiEvent.DiscardNoteAttachment(attachmentId = it))
+                        },
+                        onRetryUpload = {
+                            eventPublisher(UiEvent.RetryUpload(attachmentId = it))
+                        },
+                    )
+                }
+            }
+
+            if (state.isQuoting) {
+                referencedHighlightAndArticleAsQuote(
+                    modifier = Modifier.padding(start = 74.dp, top = 12.dp, end = 16.dp),
+                    referencedHighlight = state.referencedHighlight,
+                    referencedArticle = state.referencedArticle,
                 )
             }
 
@@ -302,6 +294,70 @@ private fun NoteEditorBox(
             state = state,
             eventPublisher = eventPublisher,
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+private fun LazyListScope.referencedHighlightAndArticleAsReply(
+    modifier: Modifier = Modifier,
+    referencedHighlight: HighlightUi?,
+    referencedArticle: FeedArticleUi?,
+) {
+    if (referencedHighlight != null) {
+        item(
+            key = referencedHighlight.highlightId,
+            contentType = "MentionedHighlight",
+        ) {
+            ReferencedHighlight(
+                modifier = modifier,
+                highlight = referencedHighlight.toReferencedHighlight(),
+                isDarkTheme = isAppInDarkPrimalTheme(),
+                onClick = {},
+            )
+        }
+    }
+    if (referencedArticle != null) {
+        item(
+            key = referencedArticle.eventId,
+            contentType = "MentionedArticle",
+        ) {
+            Column {
+                FeedArticleListItem(
+                    data = referencedArticle,
+                    modifier = modifier,
+                    enabledDropdownMenu = false,
+                )
+                PrimalDivider()
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+private fun LazyListScope.referencedHighlightAndArticleAsQuote(
+    modifier: Modifier = Modifier,
+    referencedHighlight: HighlightUi?,
+    referencedArticle: FeedArticleUi?,
+) {
+    item(
+        key = "${referencedHighlight?.highlightId}:${referencedArticle?.articleId}",
+        contentType = "quotedContentRendered",
+    ) {
+        Column(
+            modifier = modifier,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            if (referencedHighlight != null) {
+                ReferencedHighlight(
+                    highlight = referencedHighlight.toReferencedHighlight(),
+                    isDarkTheme = isAppInDarkPrimalTheme(),
+                    onClick = {},
+                )
+            }
+            if (referencedArticle != null) {
+                ReferencedArticleCard(data = referencedArticle)
+            }
+        }
     }
 }
 

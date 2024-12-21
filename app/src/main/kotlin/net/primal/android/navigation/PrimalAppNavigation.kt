@@ -51,7 +51,6 @@ import net.primal.android.editor.di.noteEditorViewModel
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteEditorArgs.Companion.asNoteEditorArgs
 import net.primal.android.editor.domain.NoteEditorArgs.Companion.jsonAsNoteEditorArgs
-import net.primal.android.editor.domain.NoteEditorArgs.Companion.toNostrUriInNoteEditorArgs
 import net.primal.android.editor.ui.NoteEditorScreen
 import net.primal.android.explore.asearch.AdvancedSearchContract
 import net.primal.android.explore.asearch.AdvancedSearchScreen
@@ -307,30 +306,46 @@ private fun NavController.navigateToPremiumRelay() = navigate(route = "premium/m
 fun noteCallbacksHandler(navController: NavController) =
     NoteCallbacks(
         onNoteClick = { postId -> navController.navigateToThread(noteId = postId) },
-        onNoteReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(replyToNoteId = postId)) },
+        onNoteReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(referencedNoteId = postId)) },
         onNoteQuoteClick = { noteId ->
             navController.navigateToNoteEditor(
-                noteId.hexToNoteHrp().toNostrUriInNoteEditorArgs(),
+                args = NoteEditorArgs(
+                    referencedNoteId = noteId.hexToNoteHrp(),
+                    isQuoting = true,
+                ),
             )
         },
-        onHighlightReplyClick = { highlightId, articleNaddr ->
+        onHighlightReplyClick = { highlightNevent, articleNaddr ->
             navController.navigateToNoteEditor(
                 args = NoteEditorArgs(
-                    replyToHighlightId = highlightId,
-                    replyToArticleNaddr = articleNaddr,
+                    referencedHighlightNevent = highlightNevent,
+                    referencedArticleNaddr = articleNaddr,
                 ),
             )
         },
         onHighlightQuoteClick = { nevent, naddr ->
-            navController.navigateToNoteEditor(listOf(nevent, naddr).toNostrUriInNoteEditorArgs())
+            navController.navigateToNoteEditor(
+                args = NoteEditorArgs(
+                    referencedArticleNaddr = naddr,
+                    referencedHighlightNevent = nevent,
+                    isQuoting = true,
+                ),
+            )
         },
         onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr) },
         onArticleReplyClick = { naddr ->
             navController.navigateToNoteEditor(
-                NoteEditorArgs(replyToArticleNaddr = naddr),
+                NoteEditorArgs(referencedArticleNaddr = naddr),
             )
         },
-        onArticleQuoteClick = { naddr -> navController.navigateToNoteEditor(naddr.toNostrUriInNoteEditorArgs()) },
+        onArticleQuoteClick = { naddr ->
+            navController.navigateToNoteEditor(
+                args = NoteEditorArgs(
+                    referencedArticleNaddr = naddr,
+                    isQuoting = true,
+                ),
+            )
+        },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
         onHashtagClick = { hashtag ->
             navController.navigateToExploreFeed(feedSpec = buildAdvancedSearchNotesFeedSpec(query = hashtag))

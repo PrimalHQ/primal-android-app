@@ -25,7 +25,7 @@ fun noteEditorViewModel(args: NoteEditorArgs?): NoteEditorViewModel {
     ).noteEditorViewModelFactory()
 
     return viewModel(
-        key = "noteEditorViewModel/${args?.replyToNoteId}",
+        key = "noteEditorViewModel/${args?.referencedNoteId}",
         factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
