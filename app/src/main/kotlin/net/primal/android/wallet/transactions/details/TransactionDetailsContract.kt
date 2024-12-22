@@ -9,5 +9,6 @@ interface TransactionDetailsContract {
         val txData: TransactionDetailDataUi? = null,
         val feedPost: FeedPostUi? = null,
         val articlePost: FeedArticleUi? = null,
+        val currentExchangeRate: Double? = null,
     )
 }

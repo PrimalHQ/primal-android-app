@@ -73,6 +73,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.math.BigDecimal
 import java.text.NumberFormat
 import java.time.Instant
 import java.time.format.FormatStyle
@@ -108,6 +109,7 @@ import net.primal.android.wallet.domain.TxType
 import net.primal.android.wallet.transactions.details.TransactionDetailsContract.UiState
 import net.primal.android.wallet.transactions.list.TransactionIcon
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
+import net.primal.android.wallet.utils.CurrencyConversionUtils.toUsd
 import net.primal.android.wallet.walletDepositColor
 import net.primal.android.wallet.walletTransactionIconBackgroundColor
 import net.primal.android.wallet.walletWithdrawColor
@@ -189,6 +191,7 @@ fun TransactionDetailsScreen(
                     TransactionCard(
                         txData = txData,
                         onProfileClick = { profileId -> noteCallbacks.onProfileClick?.invoke(profileId) },
+                        currentExchangeRate = state.currentExchangeRate,
                     )
                 }
 
@@ -364,7 +367,11 @@ private fun TransactionDetailDataUi.typeToReadableString(useBitcoinTerm: Boolean
 }
 
 @Composable
-private fun TransactionCard(txData: TransactionDetailDataUi, onProfileClick: (String) -> Unit) {
+private fun TransactionCard(
+    txData: TransactionDetailDataUi,
+    onProfileClick: (String) -> Unit,
+    currentExchangeRate: Double?,
+) {
     val isExpandable = txData.isZap && (
         txData.txAmountInUsd != null || txData.exchangeRate != null ||
             txData.totalFeeInSats != null || txData.invoice != null
@@ -421,7 +428,7 @@ private fun TransactionCard(txData: TransactionDetailDataUi, onProfileClick: (St
         }
 
         if (expanded) {
-            TransactionExpandableDetails(txData = txData)
+            TransactionExpandableDetails(txData = txData, currentExchangeRate = currentExchangeRate)
         }
 
         if (isExpandable) {
@@ -447,7 +454,7 @@ private fun TransactionCard(txData: TransactionDetailDataUi, onProfileClick: (St
 }
 
 @Composable
-private fun TransactionExpandableDetails(txData: TransactionDetailDataUi) {
+private fun TransactionExpandableDetails(txData: TransactionDetailDataUi, currentExchangeRate: Double?) {
     val numberFormat = remember { NumberFormat.getNumberInstance().apply { maximumFractionDigits = 2 } }
 
     Column {
@@ -469,19 +476,13 @@ private fun TransactionExpandableDetails(txData: TransactionDetailDataUi) {
             value = txData.typeToReadableString(useBitcoinTerm = false),
         )
 
-        if (txData.txAmountInUsd != null || txData.exchangeRate != null) {
-            val usdAmount = txData.txAmountInUsd ?: txData.exchangeRate?.let { rate ->
-                txData.txAmountInSats.toBtc() / rate.toDouble()
-            }
-
-            numberFormat.formatSafely(usdAmount)?.let { formattedUsdAmount ->
-                PrimalDivider()
-                TransactionDetailListItem(
-                    section = stringResource(id = R.string.wallet_transaction_details_original_usd_item),
-                    value = "$$formattedUsdAmount",
-                )
-            }
-        }
+        TransactionUsdValues(
+            currentExchangeRate = currentExchangeRate,
+            amountInSats = txData.txAmountInSats,
+            exchangeRate = txData.exchangeRate,
+            numberFormat = numberFormat,
+            amountInUsd = txData.txAmountInUsd,
+        )
 
         txData.totalFeeInSats?.let { feeAmount ->
             PrimalDivider()
@@ -529,6 +530,40 @@ private fun TransactionExpandableDetails(txData: TransactionDetailDataUi) {
                 section = stringResource(id = R.string.wallet_transaction_details_details_item),
                 value = stringResource(id = R.string.wallet_transaction_details_view_on_blockchain).lowercase(),
                 valueColor = AppTheme.colorScheme.secondary,
+            )
+        }
+    }
+}
+
+@Composable
+private fun TransactionUsdValues(
+    amountInUsd: Double?,
+    exchangeRate: String?,
+    amountInSats: ULong,
+    currentExchangeRate: Double?,
+    numberFormat: NumberFormat,
+) {
+    if (amountInUsd != null || exchangeRate != null) {
+        val usdAmount = amountInUsd ?: exchangeRate?.let { rate ->
+            amountInSats.toBtc() / rate.toDouble()
+        }
+
+        val currentUsdAmount = BigDecimal.valueOf(amountInSats.toBtc())
+            .toUsd(currentExchangeRate)
+
+        numberFormat.formatSafely(usdAmount)?.let { formattedUsdAmount ->
+            PrimalDivider()
+            TransactionDetailListItem(
+                section = stringResource(id = R.string.wallet_transaction_details_original_usd_item),
+                value = "$$formattedUsdAmount",
+            )
+        }
+
+        numberFormat.formatSafely(currentUsdAmount)?.let { formattedUsdAmount ->
+            PrimalDivider()
+            TransactionDetailListItem(
+                section = stringResource(id = R.string.wallet_transaction_details_currents_usd_item),
+                value = "$$formattedUsdAmount",
             )
         }
     }

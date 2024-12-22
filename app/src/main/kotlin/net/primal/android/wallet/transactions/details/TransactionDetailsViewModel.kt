@@ -22,6 +22,7 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.premium.legend.asLegendaryCustomization
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.db.WalletTransaction
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.details.TransactionDetailsContract.UiState
@@ -31,6 +32,7 @@ import timber.log.Timber
 @HiltViewModel
 class TransactionDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    private val activeAccountStore: ActiveAccountStore,
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val walletRepository: WalletRepository,
     private val feedRepository: FeedRepository,
@@ -46,6 +48,7 @@ class TransactionDetailsViewModel @Inject constructor(
 
     init {
         loadTransaction()
+        fetchExchangeRate()
     }
 
     private fun loadTransaction() =
@@ -107,6 +110,22 @@ class TransactionDetailsViewModel @Inject constructor(
                 Timber.w(error)
             } finally {
                 setState { copy(loading = false) }
+            }
+        }
+
+    private fun fetchExchangeRate() =
+        viewModelScope.launch {
+            try {
+                val btcRate = walletRepository.getExchangeRate(
+                    userId = activeAccountStore.activeUserId(),
+                )
+                setState {
+                    copy(
+                        currentExchangeRate = btcRate,
+                    )
+                }
+            } catch (error: WssException) {
+                Timber.e(error)
             }
         }
 
