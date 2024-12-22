@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.math.BigDecimal
@@ -35,7 +36,7 @@ fun WalletDashboardLite(
         verticalAlignment = Alignment.Bottom,
     ) {
         AnimatedContent(
-            modifier = modifier.fillMaxWidth(),
+            modifier = Modifier,
             label = "Animated currency switch",
             targetState = currencyMode,
             transitionSpec = { (slideInVertically() + fadeIn()) togetherWith fadeOut() },
@@ -43,23 +44,25 @@ fun WalletDashboardLite(
             if (targetCurrencyMode == CurrencyMode.FIAT) {
                 FiatAmountText(
                     modifier = Modifier
-                        .wrapContentWidth()
-                        .padding(start = if (walletBalance != null) 32.dp else 0.dp)
-                        .padding(bottom = 32.dp)
+                        .graphicsLayer {
+                            clip = false
+                            translationY = 4.dp.toPx()
+                        }
                         .clickable { onSwitchCurrencyMode(CurrencyMode.SATS) },
                     amount = walletBalance ?: BigDecimal.ZERO,
-                    textSize = 48.sp,
+                    textSize = 32.sp,
                     exchangeBtcUsdRate = exchangeBtcUsdRate,
                 )
             } else {
                 BtcAmountText(
                     modifier = Modifier
-                        .wrapContentWidth()
-                        .padding(start = if (walletBalance != null) 32.dp else 0.dp)
-                        .padding(bottom = 32.dp)
+                        .graphicsLayer {
+                            clip = false
+                            translationY = 4.dp.toPx()
+                         }
                         .clickable { onSwitchCurrencyMode(CurrencyMode.FIAT) },
                     amountInBtc = walletBalance ?: BigDecimal.ZERO,
-                    textSize = 48.sp,
+                    textSize = 32.sp,
                 )
             }
         }

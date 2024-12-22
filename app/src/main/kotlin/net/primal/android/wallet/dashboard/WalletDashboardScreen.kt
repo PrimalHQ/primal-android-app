@@ -316,6 +316,7 @@ fun WalletDashboardScreen(
                                 .background(color = AppTheme.colorScheme.surfaceVariant)
                                 .padding(top = with(LocalDensity.current) { topBarHeight.toDp() }),
                             pagingItems = pagingItems,
+                            currencyMode = currencyMode,
                             listState = listState,
                             onProfileClick = onProfileClick,
                             onTransactionClick = onTransactionClick,
