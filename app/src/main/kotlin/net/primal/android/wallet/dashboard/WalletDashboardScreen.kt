@@ -153,7 +153,7 @@ fun WalletDashboardScreen(
     var topBarHeight by remember { mutableIntStateOf(0) }
     var topBarFooterHeight by remember { mutableIntStateOf(0) }
     val density = LocalDensity.current
-    var currencyMode by remember { mutableStateOf(CurrencyMode.SATS) }
+    var currencyMode by rememberSaveable { mutableStateOf(CurrencyMode.SATS) }
 
     var shouldAddFooter by remember { mutableStateOf(false) }
     LaunchedEffect(pagingItems.itemCount, listState) {
@@ -317,6 +317,7 @@ fun WalletDashboardScreen(
                                 .padding(top = with(LocalDensity.current) { topBarHeight.toDp() }),
                             pagingItems = pagingItems,
                             currencyMode = currencyMode,
+                            exchangeBtcUsdRate = state.exchangeBtcUsdRate,
                             listState = listState,
                             onProfileClick = onProfileClick,
                             onTransactionClick = onTransactionClick,
