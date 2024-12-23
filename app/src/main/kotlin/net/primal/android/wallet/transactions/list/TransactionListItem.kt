@@ -14,14 +14,18 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Surface
@@ -258,52 +262,56 @@ private fun TransactionTrailingContent(
     numberFormat: NumberFormat,
     exchangeBtcUsdRate: Double?,
 ) {
-    AnimatedContent(
-        modifier = Modifier.width(100.dp),
-        label = "Animated currency switch",
-        targetState = currencyMode,
-        transitionSpec = { (slideInVertically() + fadeIn()) togetherWith fadeOut() },
-    ) { targetCurrencyMode ->
-        Column(
-            horizontalAlignment = Alignment.End,
-        ) {
-            val text = if (targetCurrencyMode == CurrencyMode.FIAT) {
-                BigDecimal.valueOf(txAmountInSats.toBtc()).toUsd(exchangeBtcUsdRate)
-                    .let { numberFormat.format(it.toFloat()) }
-            } else {
-                numberFormat.format(txAmountInSats.toLong())
-            }
-            val suffix = if (targetCurrencyMode == CurrencyMode.FIAT) {
-                R.string.wallet_usd_suffix
-            } else {
-                R.string.wallet_sats_suffix
-            }
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
 
-            IconText(
-                text = text,
-                iconSize = 16.sp,
-                trailingIcon = when (txType) {
-                    TxType.DEPOSIT -> PrimalIcons.WalletReceive
-                    TxType.WITHDRAW -> PrimalIcons.WalletPay
-                },
-                trailingIconTintColor = when (txType) {
-                    TxType.DEPOSIT -> walletDepositColor
-                    TxType.WITHDRAW -> walletWithdrawColor
-                },
-                style = AppTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold,
-                color = AppTheme.colorScheme.onSurface,
-            )
+        AnimatedContent(
+            modifier = Modifier.width(50.dp),
+            label = "CurrencyContent",
+            targetState = currencyMode,
+            transitionSpec = { (slideInVertically() + fadeIn()) togetherWith fadeOut() },
+        ) { targetCurrencyMode ->
+            Column(
+                horizontalAlignment = Alignment.End,
+            ) {
+                val text = if (targetCurrencyMode == CurrencyMode.FIAT) {
+                    BigDecimal.valueOf(txAmountInSats.toBtc()).toUsd(exchangeBtcUsdRate)
+                        .let { numberFormat.format(it.toFloat()) }
+                } else {
+                    numberFormat.format(txAmountInSats.toLong())
+                }
+                val suffix = if (targetCurrencyMode == CurrencyMode.FIAT) {
+                    R.string.wallet_usd_suffix
+                } else {
+                    R.string.wallet_sats_suffix
+                }
 
-            IconText(
-                text = "${stringResource(id = suffix)} ",
-                iconSize = 16.sp,
-                trailingIcon = PrimalIcons.WalletReceive,
-                trailingIconTintColor = Color.Transparent,
-                style = AppTheme.typography.bodySmall,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-            )
+                Text(
+                    text = text,
+                    style = AppTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = AppTheme.colorScheme.onSurface,
+                )
+
+                Text(
+                    text = stringResource(id = suffix),
+                    style = AppTheme.typography.bodySmall,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                )
+            }
         }
+
+        Icon(
+            modifier = Modifier.size(16.dp),
+            imageVector = when (txType) {
+                TxType.DEPOSIT -> PrimalIcons.WalletReceive
+                TxType.WITHDRAW -> PrimalIcons.WalletPay
+            },
+            contentDescription = null,
+            tint = when (txType) {
+                TxType.DEPOSIT -> walletDepositColor
+                TxType.WITHDRAW -> walletWithdrawColor
+            }
+        )
     }
 }
 

@@ -34,11 +34,11 @@ fun WalletDashboardLite(
     ) {
         AnimatedContent(
             modifier = Modifier,
-            label = "Animated currency switch",
+            label = "CurrencyContent",
             targetState = currencyMode,
             transitionSpec = { (slideInVertically() + fadeIn()) togetherWith fadeOut() },
         ) { targetCurrencyMode ->
-            if (targetCurrencyMode == CurrencyMode.FIAT) {
+            if (targetCurrencyMode == CurrencyMode.FIAT && exchangeBtcUsdRate != null) {
                 FiatAmountText(
                     modifier = Modifier
                         .graphicsLayer {

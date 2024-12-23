@@ -35,12 +35,8 @@ fun TransactionsLazyColumn(
     onProfileClick: (String) -> Unit,
     onTransactionClick: (String) -> Unit,
     paddingValues: PaddingValues = PaddingValues(0.dp),
-    header:
-    @Composable()
-    (() -> Unit)? = null,
-    footer:
-    @Composable()
-    (() -> Unit)? = null,
+    header: (@Composable () -> Unit)? = null,
+    footer: (@Composable () -> Unit)? = null,
     currencyMode: CurrencyMode,
     exchangeBtcUsdRate: Double?,
 ) {

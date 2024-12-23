@@ -16,6 +16,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -74,6 +75,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.text.NumberFormat
 import java.time.Instant
 import java.time.format.FormatStyle
@@ -476,13 +478,15 @@ private fun TransactionExpandableDetails(txData: TransactionDetailDataUi, curren
             value = txData.typeToReadableString(useBitcoinTerm = false),
         )
 
-        TransactionUsdValues(
-            currentExchangeRate = currentExchangeRate,
-            amountInSats = txData.txAmountInSats,
-            exchangeRate = txData.exchangeRate,
-            numberFormat = numberFormat,
-            amountInUsd = txData.txAmountInUsd,
-        )
+        if (txData.txAmountInUsd != null || txData.exchangeRate != null) {
+            TransactionUsdValues(
+                currentExchangeRate = currentExchangeRate,
+                amountInSats = txData.txAmountInSats,
+                originalExchangeRate = txData.exchangeRate,
+                numberFormat = numberFormat,
+                amountInUsd = txData.txAmountInUsd,
+            )
+        }
 
         txData.totalFeeInSats?.let { feeAmount ->
             PrimalDivider()
@@ -536,36 +540,34 @@ private fun TransactionExpandableDetails(txData: TransactionDetailDataUi, curren
 }
 
 @Composable
-private fun TransactionUsdValues(
+private fun ColumnScope.TransactionUsdValues(
     amountInUsd: Double?,
-    exchangeRate: String?,
+    originalExchangeRate: String?,
     amountInSats: ULong,
     currentExchangeRate: Double?,
     numberFormat: NumberFormat,
 ) {
-    if (amountInUsd != null || exchangeRate != null) {
-        val usdAmount = amountInUsd ?: exchangeRate?.let { rate ->
-            amountInSats.toBtc() / rate.toDouble()
-        }
+    val usdAmount = amountInUsd ?: originalExchangeRate?.let { rate ->
+        amountInSats.toBtc() / rate.toDouble()
+    }
 
-        val currentUsdAmount = BigDecimal.valueOf(amountInSats.toBtc())
-            .toUsd(currentExchangeRate)
+    val currentUsdAmount = BigDecimal.valueOf(amountInSats.toBtc())
+        .toUsd(currentExchangeRate)
 
-        numberFormat.formatSafely(usdAmount)?.let { formattedUsdAmount ->
-            PrimalDivider()
-            TransactionDetailListItem(
-                section = stringResource(id = R.string.wallet_transaction_details_original_usd_item),
-                value = "$$formattedUsdAmount",
-            )
-        }
+    numberFormat.formatSafely(usdAmount)?.let { formattedUsdAmount ->
+        PrimalDivider()
+        TransactionDetailListItem(
+            section = stringResource(id = R.string.wallet_transaction_details_original_usd_item),
+            value = "$$formattedUsdAmount",
+        )
+    }
 
-        numberFormat.formatSafely(currentUsdAmount)?.let { formattedUsdAmount ->
-            PrimalDivider()
-            TransactionDetailListItem(
-                section = stringResource(id = R.string.wallet_transaction_details_currents_usd_item),
-                value = "$$formattedUsdAmount",
-            )
-        }
+    numberFormat.formatSafely(currentUsdAmount)?.let { formattedUsdAmount ->
+        PrimalDivider()
+        TransactionDetailListItem(
+            section = stringResource(id = R.string.wallet_transaction_details_currents_usd_item),
+            value = "$$formattedUsdAmount",
+        )
     }
 }
 

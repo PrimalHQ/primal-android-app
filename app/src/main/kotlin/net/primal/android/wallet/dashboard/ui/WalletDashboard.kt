@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.sp
 import java.math.BigDecimal
 import net.primal.android.wallet.dashboard.CurrencyMode
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun WalletDashboard(
     modifier: Modifier,
@@ -43,11 +42,11 @@ fun WalletDashboard(
     ) {
         AnimatedContent(
             modifier = modifier.fillMaxWidth(),
-            label = "Animated currency switch",
+            label = "CurrencyContent",
             targetState = currencyMode,
             transitionSpec = { (slideInVertically() + fadeIn()) togetherWith fadeOut() },
         ) { targetCurrencyMode ->
-            if (targetCurrencyMode == CurrencyMode.FIAT) {
+            if (targetCurrencyMode == CurrencyMode.FIAT && exchangeBtcUsdRate != null) {
                 FiatAmountText(
                     modifier = Modifier
                         .wrapContentWidth()
