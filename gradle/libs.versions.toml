@@ -10,7 +10,6 @@ camera = "1.4.1"
 compose-bom = "2024.12.01"
 compose-lottie = "6.4.0"
 compose-navigation = "2.8.5"
-compose-richtext = "1.0.0-alpha02"
 constraintlayout = "2.2.0"
 constraintlayout-compose = "1.1.0"
 coil = "2.7.0"
@@ -25,7 +24,6 @@ espresso-core = "3.6.1"
 flippable = "1.5.4"
 guava = "33.0.0-android" # do not upgrade (added with zap settings, should be removed)
 hilt = "1.2.0"
-jetbrains-markdown = "0.7.3"
 junit = "4.13.2"
 junit-android-runner = "1.2.1"
 ktlint-wrapper-plugin = "12.1.1"
@@ -36,6 +34,7 @@ kotest = "5.9.0"
 ksp = "2.0.21-1.0.25"
 ktlint_compose_rules = "0.3.17"
 lifecycle = "2.8.7"
+markwon = "4.6.2"
 material-icons = "1.7.6"
 media3-exoplayer = "1.5.0"
 mockk = "1.13.12"
@@ -95,12 +94,18 @@ androidx-emoji2 = { group = "androidx.emoji2", name = "emoji2", version.ref = "e
 androidx-emoji2-emojipicker = { group = "androidx.emoji2", name = "emoji2-emojipicker", version.ref = "emoji2" }
 flippable = { module = "com.wajahatkarim:flippable", version.ref = "flippable" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
-jetbrains-markdown = { module = "org.jetbrains:markdown", version.ref = "jetbrains-markdown" }
 
-richtext-commonmark = { module = "com.halilibo.compose-richtext:richtext-commonmark", version.ref = "compose-richtext" }
-richtext-markdown = { module = "com.halilibo.compose-richtext:richtext-markdown", version.ref = "compose-richtext" }
-richtext-ui = { module = "com.halilibo.compose-richtext:richtext-ui", version.ref = "compose-richtext" }
-richtext-ui-material3 = { module = "com.halilibo.compose-richtext:richtext-ui-material3", version.ref = "compose-richtext" }
+markwon-core = { module = "io.noties.markwon:core", version.ref = "markwon" }
+markwon-image = { module = "io.noties.markwon:image", version.ref = "markwon" }
+markwon-imagecoil = { module = "io.noties.markwon:image-coil", version.ref = "markwon" }
+markwon-inlineparser = { module = "io.noties.markwon:inline-parser", version.ref = "markwon" }
+markwon-latex = { module = "io.noties.markwon:ext-latex", version.ref = "markwon" }
+markwon-strikethrough = { module = "io.noties.markwon:ext-strikethrough", version.ref = "markwon" }
+markwon-tables = { module = "io.noties.markwon:ext-tables", version.ref = "markwon" }
+markwon-tasklist = { module = "io.noties.markwon:ext-tasklist", version.ref = "markwon" }
+markwon-html = { module = "io.noties.markwon:html", version.ref = "markwon" }
+markwon-linkify = { module = "io.noties.markwon:linkify", version.ref = "markwon" }
+markwon-simple = { module = "io.noties.markwon:simple-ext", version.ref = "markwon" }
 
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "compose-lottie" }
 navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "compose-navigation" }
@@ -166,7 +171,6 @@ secp256k1-kmp-jni-jvm = { module = "fr.acinq.secp256k1:secp256k1-kmp-jni-jvm", v
 spongycastle-core = { module = "com.madgag.spongycastle:core", version.ref = "spongycastle" }
 bitcoinj-core = { module = "org.bitcoinj:bitcoinj-core", version.ref = "bitcoinj-core" }
 lightning-kmp = { module = "fr.acinq.lightning:lightning-kmp", version = "1.6.1" }
-
 
 #Security
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "security-crypto" }
