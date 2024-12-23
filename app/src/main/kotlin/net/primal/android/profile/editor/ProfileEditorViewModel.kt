@@ -148,7 +148,7 @@ class ProfileEditorViewModel @Inject constructor(
                 }
 
                 val isActiveAccountPremium = activeAccountStore.activeUserAccount().hasPremiumMembership()
-                if (profile.hasPrimalPremiumAddresses() && !isActiveAccountPremium) {
+                if (profile.hasPrimalPremiumAddress() && !isActiveAccountPremium) {
                     setState { copy(showPremiumPaywallDialog = true) }
                 } else {
                     withContext(dispatcherProvider.io()) {
@@ -197,6 +197,5 @@ class ProfileEditorViewModel @Inject constructor(
         )
     }
 
-    private fun ProfileMetadata.hasPrimalPremiumAddresses() =
-        this.lightningAddress.isPrimalIdentifier() || this.nostrVerification.isPrimalIdentifier()
+    private fun ProfileMetadata.hasPrimalPremiumAddress() = this.nostrVerification.isPrimalIdentifier()
 }
