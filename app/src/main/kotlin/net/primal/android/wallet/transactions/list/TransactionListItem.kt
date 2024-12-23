@@ -260,10 +260,9 @@ private fun TransactionTrailingContent(
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         AnimatedContent(
-            modifier = Modifier.widthIn(min = 45.dp, max = 85.dp),
+            modifier = Modifier.widthIn(min = 45.dp),
             label = "CurrencyContent",
             targetState = currencyMode,
-            transitionSpec = { (slideInVertically() + fadeIn()) togetherWith fadeOut() },
         ) { targetCurrencyMode ->
             Column(
                 horizontalAlignment = Alignment.End,
