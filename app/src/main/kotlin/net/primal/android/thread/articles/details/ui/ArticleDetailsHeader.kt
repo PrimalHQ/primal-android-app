@@ -21,7 +21,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
-import io.noties.markwon.Markwon
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -37,11 +36,11 @@ import net.primal.android.thread.articles.details.ui.rendering.rememberPrimalMar
 fun ArticleDetailsHeader(
     title: String,
     date: Instant?,
-    markwon: Markwon,
     modifier: Modifier = Modifier,
     cover: CdnImage? = null,
     summary: String? = null,
 ) {
+    val markwon = rememberPrimalMarkwon()
     Column(
         modifier = modifier,
     ) {
@@ -113,7 +112,6 @@ fun ArticleDetailsHeader(
                     },
                 markdown = summary,
                 markwon = markwon,
-                showHighlights = false,
             )
         }
     }
@@ -136,7 +134,6 @@ private fun Instant.formatDate(): String {
 fun PreviewArticleDetailsHeader() {
     PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         Surface(modifier = Modifier.fillMaxWidth()) {
-            val markwon = rememberPrimalMarkwon { }
             ArticleDetailsHeader(
                 modifier = Modifier.fillMaxWidth(),
                 title = "Welcome to Article Header test",
@@ -147,7 +144,6 @@ fun PreviewArticleDetailsHeader() {
                         This is a short summary of this preview test.
                 """.trimIndent(),
                 date = Instant.now(),
-                markwon = markwon,
             )
         }
     }

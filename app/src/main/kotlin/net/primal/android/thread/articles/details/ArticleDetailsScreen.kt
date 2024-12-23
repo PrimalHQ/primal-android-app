@@ -447,6 +447,7 @@ private fun ArticleContentWithComments(
 ) {
     val uriHandler = LocalUriHandler.current
     val markwon = rememberPrimalMarkwon(
+        highlights = if (showHighlights) state.highlights else emptyList(),
         onLinkClick = { link ->
             link.handleArticleLinkClick(
                 onProfileClick = noteCallbacks.onProfileClick,
@@ -455,6 +456,7 @@ private fun ArticleContentWithComments(
                 onUrlClick = { url -> uriHandler.openUriSafely(url) },
             )
         },
+        onHighlightClick = onHighlightClick,
     )
 
     LazyColumn(
@@ -496,7 +498,6 @@ private fun ArticleContentWithComments(
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 title = state.article?.title ?: "",
                 date = state.article?.publishedAt,
-                markwon = markwon,
                 cover = state.article?.coverImageCdnImage,
                 summary = state.article?.summary,
             )
@@ -556,9 +557,6 @@ private fun ArticleContentWithComments(
                             .padding(all = 16.dp),
                         markdown = part.markdown,
                         markwon = markwon,
-                        showHighlights = showHighlights,
-                        highlights = state.highlights,
-                        onHighlightClick = onHighlightClick,
                     )
                 }
 
