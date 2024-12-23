@@ -84,7 +84,7 @@ fun rememberPrimalMarkwon(
             .usePlugin(StrikethroughPlugin.create())
             .usePlugin(MovementMethodPlugin.create(TableAwareMovementMethod.create()))
             .usePlugin(
-                HighlightsPlugin(
+                MarkwonHighlightsPlugin(
                     isDarkTheme = isDarkTheme,
                     highlightWords = highlightWords,
                     onWordClick = { onHighlightClick?.invoke(it) },

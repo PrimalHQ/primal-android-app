@@ -14,7 +14,7 @@ import io.noties.markwon.AbstractMarkwonPlugin
 import net.primal.android.notes.feed.note.ui.HighlightBackgroundDark
 import net.primal.android.notes.feed.note.ui.HighlightBackgroundLight
 
-class HighlightsPlugin(
+class MarkwonHighlightsPlugin(
     isDarkTheme: Boolean,
     private val highlightWords: List<String>,
     private val onWordClick: (String) -> Unit,
@@ -23,9 +23,9 @@ class HighlightsPlugin(
     private val textColor = if (isDarkTheme) Color.WHITE else Color.BLACK
 
     private val backgroundColor = if (isDarkTheme) {
-        HighlightBackgroundDark.copy(alpha = 0.675f).toArgb()
+        HighlightBackgroundDark.toArgb()
     } else {
-        HighlightBackgroundLight.copy(alpha = 0.675f).toArgb()
+        HighlightBackgroundLight.toArgb()
     }
 
     override fun afterSetText(text: TextView) {
