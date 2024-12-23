@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -38,7 +37,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,7 +45,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import java.math.BigDecimal
 import java.text.NumberFormat
 import java.time.Instant
@@ -56,7 +53,6 @@ import java.time.format.DateTimeFormatter
 import kotlin.time.Duration.Companion.seconds
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.WrappedContentWithSuffix
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -263,7 +259,6 @@ private fun TransactionTrailingContent(
     exchangeBtcUsdRate: Double?,
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-
         AnimatedContent(
             modifier = Modifier.width(50.dp),
             label = "CurrencyContent",
@@ -310,7 +305,7 @@ private fun TransactionTrailingContent(
             tint = when (txType) {
                 TxType.DEPOSIT -> walletDepositColor
                 TxType.WITHDRAW -> walletWithdrawColor
-            }
+            },
         )
     }
 }
