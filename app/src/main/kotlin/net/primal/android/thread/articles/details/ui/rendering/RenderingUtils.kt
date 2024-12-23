@@ -68,14 +68,3 @@ fun String.splitMarkdownByTables3(): List<String> {
 fun String.splitIntoParagraphs(): List<String> {
     return this.split(Regex("\\n\\s*\\n")).map { it.trim() }
 }
-
-// @Suppress("unused")
-// fun String.markdownToHtml(): String {
-//    val flavour = CommonMarkFlavourDescriptor()
-//    val parsedTree = MarkdownParser(flavour).buildMarkdownTreeFromString(this)
-//    val htmlContent = HtmlGenerator(this, parsedTree, flavour).generateHtml()
-//    return ARTICLE_BASE_HTML.replace(
-//        oldValue = "{{ CONTENT }}",
-//        newValue = htmlContent.substring(startIndex = 6, endIndex = htmlContent.length - 7),
-//    )
-// }

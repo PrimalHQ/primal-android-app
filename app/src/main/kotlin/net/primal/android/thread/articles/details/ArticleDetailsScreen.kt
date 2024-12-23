@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -101,7 +100,6 @@ import net.primal.android.thread.articles.details.ui.ArticleDetailsHeader
 import net.primal.android.thread.articles.details.ui.ArticleHashtags
 import net.primal.android.thread.articles.details.ui.FloatingArticlePill
 import net.primal.android.thread.articles.details.ui.HighlightActivityBottomSheetHandler
-import net.primal.android.thread.articles.details.ui.rendering.HtmlRenderer
 import net.primal.android.thread.articles.details.ui.rendering.MarkdownRenderer
 import net.primal.android.thread.articles.details.ui.rendering.handleArticleLinkClick
 import net.primal.android.thread.articles.details.ui.rendering.rememberPrimalMarkwon
@@ -527,28 +525,12 @@ private fun ArticleContentWithComments(
             key = { index -> "${articleParts[index]}#$index" },
             contentType = { index ->
                 when (articleParts[index]) {
-                    is ArticlePartRender.HtmlRender -> "HtmlRender"
                     is ArticlePartRender.MarkdownRender -> "MarkdownRender"
                     is ArticlePartRender.NoteRender -> "NoteRender"
                 }
             },
         ) { index ->
             when (val part = articleParts[index]) {
-                is ArticlePartRender.HtmlRender -> {
-                    HtmlRenderer(
-                        modifier = Modifier
-                            .background(color = AppTheme.colorScheme.surfaceVariant)
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .padding(horizontal = 8.dp),
-                        html = part.html,
-                        onProfileClick = noteCallbacks.onProfileClick,
-                        onNoteClick = noteCallbacks.onNoteClick,
-                        onArticleClick = noteCallbacks.onArticleClick,
-                        onUrlClick = { url -> uriHandler.openUriSafely(url) },
-                    )
-                }
-
                 is ArticlePartRender.MarkdownRender -> {
                     MarkdownRenderer(
                         modifier = Modifier
