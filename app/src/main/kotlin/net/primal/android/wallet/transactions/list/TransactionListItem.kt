@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Schedule
@@ -260,7 +260,7 @@ private fun TransactionTrailingContent(
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         AnimatedContent(
-            modifier = Modifier.width(50.dp),
+            modifier = Modifier.widthIn(min = 45.dp, max = 85.dp),
             label = "CurrencyContent",
             targetState = currencyMode,
             transitionSpec = { (slideInVertically() + fadeIn()) togetherWith fadeOut() },
