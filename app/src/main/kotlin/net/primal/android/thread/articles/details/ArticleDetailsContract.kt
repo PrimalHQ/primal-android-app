@@ -29,6 +29,7 @@ interface ArticleDetailsContract {
     sealed class ArticlePartRender {
         data class MarkdownRender(val markdown: String) : ArticlePartRender()
         data class NoteRender(val note: FeedPostUi) : ArticlePartRender()
+        data class ImageRender(val imageUrl: String) : ArticlePartRender()
     }
 
     sealed class UiEvent {

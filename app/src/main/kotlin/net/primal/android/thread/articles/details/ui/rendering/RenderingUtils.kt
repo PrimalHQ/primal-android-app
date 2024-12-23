@@ -1,5 +1,7 @@
 package net.primal.android.thread.articles.details.ui.rendering
 
+import java.net.URL
+
 private val nostrNpub1Regex = Regex("""\bnostr:npub1(\w+)\b""")
 private val nostrNote1Regex = Regex("\\b(nostr:|@)((note)1\\w+)\\b|#\\[(\\d+)]")
 
@@ -39,32 +41,30 @@ fun String.splitMarkdownByNostrUris(): List<String> {
     return chunks.filter { it.isNotBlank() }
 }
 
-fun String.splitMarkdownByTables3(): List<String> {
-    // Regular expression to match tables and non-table content
-    val tablePattern = """([^|]*\n)*(\|[^\n]*\|(?:\n\|[^\n]*\|)+)""".toRegex()
+fun String.splitMarkdownByInlineImages(): List<String> {
+    val regex = Regex("""!\[([^\]]*)\]\(([^)]+)\)""")
+    val result = mutableListOf<String>()
 
-    val chunks = mutableListOf<String>()
-    var lastEnd = 0
+    var lastEndIndex = 0
 
-    // Find all matches
-    tablePattern.findAll(this).forEach { match ->
-        // Text before the table
-        if (match.range.first > lastEnd) {
-            chunks.add(this.substring(lastEnd, match.range.first))
+    regex.findAll(this).forEach { match ->
+        if (match.range.first > lastEndIndex) {
+            result.add(this.substring(lastEndIndex, match.range.first))
         }
-        // Table match
-        chunks.add(match.value)
-        lastEnd = match.range.last + 1
+        result.add(match.groupValues[2])
+        lastEndIndex = match.range.last + 1
     }
 
-    // Add any remaining text after the last match
-    if (lastEnd < this.length) {
-        chunks.add(this.substring(lastEnd))
+    if (lastEndIndex < this.length) {
+        result.add(this.substring(lastEndIndex))
     }
 
-    return chunks
+    return result
 }
 
-fun String.splitIntoParagraphs(): List<String> {
-    return this.split(Regex("\\n\\s*\\n")).map { it.trim() }
+fun String.isValidHttpOrHttpsUrl(): Boolean {
+    return runCatching {
+        val url = URL(this)
+        url.protocol == "http" || url.protocol == "https"
+    }.getOrNull() == true
 }

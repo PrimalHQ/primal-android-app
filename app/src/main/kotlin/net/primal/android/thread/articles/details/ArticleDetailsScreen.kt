@@ -41,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
@@ -49,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
+import coil.compose.SubcomposeAsyncImage
 import java.text.NumberFormat
 import kotlinx.coroutines.launch
 import net.primal.android.R
@@ -102,8 +104,10 @@ import net.primal.android.thread.articles.details.ui.FloatingArticlePill
 import net.primal.android.thread.articles.details.ui.HighlightActivityBottomSheetHandler
 import net.primal.android.thread.articles.details.ui.rendering.MarkdownRenderer
 import net.primal.android.thread.articles.details.ui.rendering.handleArticleLinkClick
+import net.primal.android.thread.articles.details.ui.rendering.isValidHttpOrHttpsUrl
 import net.primal.android.thread.articles.details.ui.rendering.rememberPrimalMarkwon
 import net.primal.android.thread.articles.details.ui.rendering.replaceProfileNostrUrisWithMarkdownLinks
+import net.primal.android.thread.articles.details.ui.rendering.splitMarkdownByInlineImages
 import net.primal.android.thread.articles.details.ui.rendering.splitMarkdownByNostrUris
 import net.primal.android.wallet.zaps.canZap
 
@@ -161,6 +165,7 @@ private fun ArticleDetailsScreen(
         mutableStateOf(
             (detailsState.article?.content ?: "")
                 .splitMarkdownByNostrUris()
+                .flatMap { it.splitMarkdownByInlineImages() }
                 .replaceProfileNostrUrisWithMarkdownLinks(npubToDisplayNameMap = detailsState.npubToDisplayNameMap)
                 .buildArticleRenderParts(referencedNotes = detailsState.referencedNotes),
         )
@@ -527,6 +532,7 @@ private fun ArticleContentWithComments(
                 when (articleParts[index]) {
                     is ArticlePartRender.MarkdownRender -> "MarkdownRender"
                     is ArticlePartRender.NoteRender -> "NoteRender"
+                    is ArticlePartRender.ImageRender -> "ImageRender"
                 }
             },
         ) { index ->
@@ -554,6 +560,18 @@ private fun ArticleContentWithComments(
                             noteCallbacks = noteCallbacks,
                         )
                     }
+                }
+
+                is ArticlePartRender.ImageRender -> {
+                    SubcomposeAsyncImage(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .clip(AppTheme.shapes.medium),
+                        model = part.imageUrl,
+                        contentScale = ContentScale.FillWidth,
+                        contentDescription = null,
+                    )
                 }
             }
         }
@@ -731,6 +749,10 @@ private fun List<String>.buildArticleRenderParts(referencedNotes: List<FeedPostU
                 referencedNotes.find { it.postId == part.takeAsNoteHexIdOrNull() }
                     ?.let { ArticlePartRender.NoteRender(note = it) }
                     ?: ArticlePartRender.MarkdownRender(markdown = part)
+            }
+
+            part.isValidHttpOrHttpsUrl() -> {
+                ArticlePartRender.ImageRender(imageUrl = part)
             }
 
             else -> ArticlePartRender.MarkdownRender(markdown = part)
