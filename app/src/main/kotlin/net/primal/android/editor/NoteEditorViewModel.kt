@@ -261,22 +261,21 @@ class NoteEditorViewModel @AssistedInject constructor(
                 val publishedAndImported = if (args.isQuoting) {
                     notePublishHandler.publishShortTextNote(
                         userId = activeAccountStore.activeUserId(),
-                        content = _state.value.content.text.replaceUserMentionsWithUserIds(
-                            users = _state.value.taggedUsers,
-                        ).concatenateReferencedEvents(),
+                        content = _state.value.content.text
+                            .replaceUserMentionsWithUserIds(users = _state.value.taggedUsers)
+                            .concatenateReferencedEvents(),
                         attachments = _state.value.attachments,
                     )
                 } else {
                     notePublishHandler.publishShortTextNote(
                         userId = activeAccountStore.activeUserId(),
-                        content = _state.value.content.text.replaceUserMentionsWithUserIds(
-                            users = _state.value.taggedUsers,
-                        ),
+                        content = _state.value.content.text
+                            .replaceUserMentionsWithUserIds(users = _state.value.taggedUsers),
                         attachments = _state.value.attachments,
                         rootArticleEventId = article?.eventId,
                         rootArticleId = article?.articleId,
                         rootArticleAuthorId = article?.authorId,
-                        rootPostId = if (article == null) rootPost?.postId else null,
+                        rootPostId = rootPost?.postId,
                         replyToPostId = replyToPost?.postId,
                         rootHighlightId = _state.value.referencedHighlight?.highlightId,
                         rootHighlightAuthorId = _state.value.referencedHighlight?.author?.pubkey,
