@@ -102,10 +102,11 @@ fun String.asEventIdTag(relayHint: String? = null, marker: String? = null): Json
         }
     }
 
-fun String.asPubkeyTag(optional: String? = null): JsonArray =
+fun String.asPubkeyTag(relayHint: String? = null, optional: String? = null): JsonArray =
     buildJsonArray {
         add("p")
         add(this@asPubkeyTag)
+        if (relayHint != null) add(relayHint)
         if (optional != null) add(optional)
     }
 
