@@ -212,6 +212,7 @@ fun WalletDashboardScreen(
                                         .wrapContentSize(align = Alignment.Center)
                                         .padding(horizontal = 32.dp)
                                         .padding(vertical = 32.dp)
+                                        .animateContentSize()
                                         .then(
                                             if (state.primalWallet?.kycLevel == WalletKycLevel.None) {
                                                 Modifier.graphicsLayer { alpha = DISABLED_WALLET_ALPHA }
@@ -239,7 +240,8 @@ fun WalletDashboardScreen(
                                         .fillMaxWidth()
                                         .height(dashboardLiteHeightDp)
                                         .background(color = AppTheme.colorScheme.surface)
-                                        .padding(horizontal = 10.dp, vertical = 16.dp),
+                                        .padding(horizontal = 10.dp, vertical = 16.dp)
+                                        .animateContentSize(),
                                     walletBalance = state.walletBalance,
                                     actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
                                     onWalletAction = { action ->

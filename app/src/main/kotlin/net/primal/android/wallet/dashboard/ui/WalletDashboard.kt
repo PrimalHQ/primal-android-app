@@ -1,10 +1,6 @@
 package net.primal.android.wallet.dashboard.ui
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -43,7 +39,6 @@ fun WalletDashboard(
             modifier = modifier.fillMaxWidth(),
             label = "CurrencyContent",
             targetState = currencyMode,
-            transitionSpec = { (slideInVertically() + fadeIn()) togetherWith fadeOut() },
         ) { targetCurrencyMode ->
             if (targetCurrencyMode == CurrencyMode.FIAT && exchangeBtcUsdRate != null) {
                 FiatAmountText(
