@@ -22,6 +22,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.user.subscriptions.SubscriptionsManager
+import net.primal.android.wallet.UsdExchangeRateHandler
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState
 import net.primal.android.wallet.db.WalletTransaction
@@ -39,6 +40,7 @@ class WalletDashboardViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val primalBillingClient: PrimalBillingClient,
     private val subscriptionsManager: SubscriptionsManager,
+    private val usdExchangeRateHandler: UsdExchangeRateHandler,
 ) : ViewModel() {
 
     private val activeUserId = activeAccountStore.activeUserId()
@@ -58,7 +60,7 @@ class WalletDashboardViewModel @Inject constructor(
 
     init {
         fetchWalletBalance()
-        fetchExchangeRate()
+        observeUsdExchangeRate()
         subscribeToEvents()
         subscribeToActiveAccount()
         subscribeToPurchases()
@@ -117,20 +119,20 @@ class WalletDashboardViewModel @Inject constructor(
             }
         }
 
+    private fun observeUsdExchangeRate() {
+        viewModelScope.launch {
+            fetchExchangeRate()
+            usdExchangeRateHandler.usdExchangeRate.collect {
+                setState { copy(exchangeBtcUsdRate = it) }
+            }
+        }
+    }
+
     private fun fetchExchangeRate() =
         viewModelScope.launch {
-            try {
-                val btcRate = walletRepository.getExchangeRate(
-                    userId = activeAccountStore.activeUserId(),
-                )
-                setState {
-                    copy(
-                        exchangeBtcUsdRate = btcRate,
-                    )
-                }
-            } catch (error: WssException) {
-                Timber.e(error)
-            }
+            usdExchangeRateHandler.updateExchangeRate(
+                userId = activeAccountStore.activeUserId(),
+            )
         }
 
     private fun enablePrimalWallet() =
