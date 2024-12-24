@@ -1079,6 +1079,10 @@
     <string name="article_author_confirm_unfollow_text">Unfollow %1$s?</string>
     <string name="article_author_confirm_unfollow_button">Unfollow</string>
     <string name="article_author_dismiss_unfollow_button">Dismiss</string>
+    <string name="article_details_highlight_toolbar_highlight">Highlight</string>
+    <string name="article_details_highlight_toolbar_quote">Quote</string>
+    <string name="article_details_highlight_toolbar_comment">Comment</string>
+    <string name="article_details_highlight_toolbar_copy">Copy</string>
     <string name="article_details_highlight_activity_title">Highlight Activity</string>
     <string name="article_details_highlight_activity_quote">Quote</string>
     <string name="article_details_highlight_activity_comment">Comment</string>
