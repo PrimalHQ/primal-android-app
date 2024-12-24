@@ -22,10 +22,10 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.user.subscriptions.SubscriptionsManager
-import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState
 import net.primal.android.wallet.db.WalletTransaction
+import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SatsPurchase
