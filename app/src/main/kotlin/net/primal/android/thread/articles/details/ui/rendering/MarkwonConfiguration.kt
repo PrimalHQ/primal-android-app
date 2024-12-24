@@ -53,6 +53,7 @@ private fun TextUnit.toPx(density: Float): Int = (this.value * density).toInt()
 
 @Composable
 fun rememberPrimalMarkwon(
+    showHighlights: Boolean = false,
     highlights: List<JoinedHighlightsUi> = emptyList(),
     onLinkClick: ((link: String) -> Unit)? = null,
     onHighlightClick: ((highlightedText: String) -> Unit)? = null,
@@ -69,6 +70,7 @@ fun rememberPrimalMarkwon(
 
     return remember(
         onLinkClick,
+        showHighlights,
         highlights,
         onHighlightClick,
         isDarkTheme,
@@ -86,7 +88,7 @@ fun rememberPrimalMarkwon(
             .usePlugin(
                 MarkwonHighlightsPlugin(
                     isDarkTheme = isDarkTheme,
-                    highlightWords = highlightWords,
+                    highlightWords = if (showHighlights) highlightWords else emptyList(),
                     onWordClick = { onHighlightClick?.invoke(it) },
                 ),
             )

@@ -302,7 +302,6 @@ private fun ArticleDetailsScreen(
                     articleParts = articleParts,
                     listState = listState,
                     paddingValues = paddingValues,
-                    showHighlights = detailsState.showHighlights,
                     onArticleCommentClick = {
                         detailsState.naddr?.toNaddrString()?.let { noteCallbacks.onArticleReplyClick?.invoke(it) }
                     },
@@ -435,7 +434,6 @@ private fun ArticleContentWithComments(
     state: ArticleDetailsContract.UiState,
     articleParts: List<ArticlePartRender>,
     listState: LazyListState = rememberLazyListState(),
-    showHighlights: Boolean,
     paddingValues: PaddingValues,
     onArticleCommentClick: (naddr: String) -> Unit,
     onArticleHashtagClick: (hashtag: String) -> Unit,
@@ -450,7 +448,8 @@ private fun ArticleContentWithComments(
 ) {
     val uriHandler = LocalUriHandler.current
     val markwon = rememberPrimalMarkwon(
-        highlights = if (showHighlights) state.highlights else emptyList(),
+        showHighlights = state.showHighlights,
+        highlights = state.highlights,
         onLinkClick = { link ->
             link.handleArticleLinkClick(
                 onProfileClick = noteCallbacks.onProfileClick,
