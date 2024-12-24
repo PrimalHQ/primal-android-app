@@ -8,7 +8,6 @@ import io.mockk.mockkStatic
 import io.mockk.verify
 import java.lang.reflect.Method
 import java.util.UUID
-import kotlin.math.exp
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.JsonArray
@@ -20,7 +19,9 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.nostr.ext.asEventIdTag
 import net.primal.android.nostr.ext.asPubkeyTag
+import net.primal.android.nostr.ext.asReplaceableEventTag
 import net.primal.android.nostr.ext.isPubKeyTag
+import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.notes.db.PostData
 import org.junit.Rule
@@ -37,15 +38,10 @@ class NotePublishHandlerTest {
     fun `buildRefinedContent returns correct with zero attachments`() {
         val notePublisher = buildNotePublishHandler()
 
-        val buildRefinedContent = notePublisher.getPrivateMethod(
-            "buildRefinedContent",
-            List::class.java,
-            String::class.java,
-        )
-
         val expectedContent = "some content"
 
-        val actualContent = buildRefinedContent.invoke(notePublisher, emptyList<NoteAttachment>(), expectedContent)
+        val actualContent = notePublisher.getBuildRefinedContent()
+            .invoke(notePublisher, emptyList<NoteAttachment>(), expectedContent)
 
         actualContent shouldBe expectedContent
     }
@@ -54,18 +50,13 @@ class NotePublishHandlerTest {
     fun `buildRefinedContent returns correct with single attachment`() {
         val notePublisher = buildNotePublishHandler()
 
-        val buildRefinedContent = notePublisher.getPrivateMethod(
-            "buildRefinedContent",
-            List::class.java,
-            String::class.java,
-        )
-
         val attachment = buildNoteAttachment(remoteUrl = "https://primal.net")
         val content = "some content"
 
         val expectedContent = "$content\n\n${attachment.remoteUrl}\n"
 
-        val actualContent = buildRefinedContent.invoke(notePublisher, listOf<NoteAttachment>(attachment), content)
+        val actualContent = notePublisher.getBuildRefinedContent()
+            .invoke(notePublisher, listOf<NoteAttachment>(attachment), content)
 
         actualContent shouldBe expectedContent
     }
@@ -73,12 +64,6 @@ class NotePublishHandlerTest {
     @Test
     fun `buildRefinedContent returns correct with multiple attachments`() {
         val notePublisher = buildNotePublishHandler()
-
-        val buildRefinedContent = notePublisher.getPrivateMethod(
-            "buildRefinedContent",
-            List::class.java,
-            String::class.java,
-        )
 
         val attachments = listOf(
             buildNoteAttachment(remoteUrl = "https://primal.net"),
@@ -88,7 +73,8 @@ class NotePublishHandlerTest {
 
         val expectedContent = "$content\n\n${attachments[0].remoteUrl}\n${attachments[1].remoteUrl}\n"
 
-        val actualContent = buildRefinedContent.invoke(notePublisher, attachments, content)
+        val actualContent = notePublisher.getBuildRefinedContent()
+            .invoke(notePublisher, attachments, content)
 
         actualContent shouldBe expectedContent
     }
@@ -97,30 +83,20 @@ class NotePublishHandlerTest {
     fun `constructReplyTags returns null when replying post is same as root`() {
         val notePublisher = buildNotePublishHandler()
 
-        val constructReplyTags = notePublisher.getPrivateMethod(
-            "constructReplyTags",
-            String::class.java,
-            String::class.java,
-        )
-
-        constructReplyTags.invoke(notePublisher, "test", "test") shouldBe null
+        notePublisher.getConstructReplyTags()
+            .invoke(notePublisher, "test", "test") shouldBe null
     }
 
     @Test
     fun `constructReplyTags calls asEventIdTag when replying post is different then root`() {
         val notePublisher = buildNotePublishHandler()
 
-        val constructReplyTags = notePublisher.getPrivateMethod(
-            "constructReplyTags",
-            String::class.java,
-            String::class.java,
-        )
         mockkStatic(String::asEventIdTag)
 
         val replyToNoteId = "some note id"
         val rootNoteId = "some root note id"
 
-        constructReplyTags(notePublisher, replyToNoteId, rootNoteId)
+        notePublisher.getConstructReplyTags().invoke(notePublisher, replyToNoteId, rootNoteId)
 
         verify(exactly = 1) {
             replyToNoteId.asEventIdTag(marker = "reply")
@@ -130,14 +106,6 @@ class NotePublishHandlerTest {
     @Test
     fun `constructPubkeyTags returns correct set when highlight author is missing`() {
         val notePublisher = buildNotePublishHandler()
-
-        val constructPubkeyTags = notePublisher.getPrivateMethod(
-            "constructPubkeyTags",
-            PostData::class.java,
-            String::class.java,
-            String::class.java,
-            String::class.java,
-        )
 
         val replyPostData = buildPostData()
         val replyToAuthorId = "some author id"
@@ -155,13 +123,14 @@ class NotePublishHandlerTest {
         every { replyToAuthorId.asPubkeyTag() } returns replyToAuthorPubkey
         every { rootArticleAuthorId.asPubkeyTag() } returns rootArticleAuthorPubkey
 
-        val actualSet = constructPubkeyTags(
-            notePublisher,
-            replyPostData,
-            replyToAuthorId,
-            null,
-            rootArticleAuthorId,
-        )
+        val actualSet = notePublisher.getConstructPubkeyTags()
+            .invoke(
+                notePublisher,
+                replyPostData,
+                replyToAuthorId,
+                null,
+                rootArticleAuthorId,
+            )
 
         verify(exactly = 1) {
             replyToAuthorId.asPubkeyTag()
@@ -175,14 +144,6 @@ class NotePublishHandlerTest {
     @Test
     fun `constructPubkeyTags returns highlight author when both article and highlight present`() {
         val notePublisher = buildNotePublishHandler()
-
-        val constructPubkeyTags = notePublisher.getPrivateMethod(
-            "constructPubkeyTags",
-            PostData::class.java,
-            String::class.java,
-            String::class.java,
-            String::class.java,
-        )
 
         val replyPostData = buildPostData()
         val replyToAuthorId = "some author id"
@@ -203,13 +164,14 @@ class NotePublishHandlerTest {
         every { rootHighlightAuthorId.asPubkeyTag() } returns rootHighlightAuthorPubkey
         every { rootArticleAuthorId.asPubkeyTag() } returns rootArticleAuthorPubkey
 
-        val actualSet = constructPubkeyTags(
-            notePublisher,
-            replyPostData,
-            replyToAuthorId,
-            rootHighlightAuthorId,
-            rootArticleAuthorId,
-        )
+        val actualSet = notePublisher.getConstructPubkeyTags()
+            .invoke(
+                notePublisher,
+                replyPostData,
+                replyToAuthorId,
+                rootHighlightAuthorId,
+                rootArticleAuthorId,
+            )
 
         verify(exactly = 1) {
             replyToAuthorId.asPubkeyTag()
@@ -224,17 +186,9 @@ class NotePublishHandlerTest {
     fun `constructPubkeyTags keeps existing pubkey tags`() {
         val notePublisher = buildNotePublishHandler()
 
-        val constructPubkeyTags = notePublisher.getPrivateMethod(
-            "constructPubkeyTags",
-            PostData::class.java,
-            String::class.java,
-            String::class.java,
-            String::class.java,
-        )
-
         val existingTags = listOf("test".asPubkeyTag())
         val replyPostData = buildPostData(
-            tags = existingTags
+            tags = existingTags,
         )
         val replyToAuthorId = "some author id"
         val replyToAuthorPubkey = replyToAuthorId.asPubkeyTag()
@@ -246,15 +200,251 @@ class NotePublishHandlerTest {
 
         mockkStatic(JsonArray::isPubKeyTag)
 
-        val actualSet = constructPubkeyTags(
-            notePublisher,
-            replyPostData,
-            replyToAuthorId,
-            null,
-            null,
-        )
+        val actualSet = notePublisher.getConstructPubkeyTags()
+            .invoke(
+                notePublisher,
+                replyPostData,
+                replyToAuthorId,
+                null,
+                null,
+            )
 
         actualSet shouldBe expectedSet
+    }
+
+    @Test
+    fun `constructRootTags returns empty list if no root events provided`() {
+        val notePublisher = buildNotePublishHandler()
+
+        val actualTags = notePublisher.getConstructRootTags()
+            .invoke(notePublisher, null, null, null, null, null)
+
+        actualTags shouldBe emptyList<JsonArray>()
+    }
+
+    @Test
+    fun `constructRootTags returns highlight as root if only highlight available`() {
+        val notePublisher = buildNotePublishHandler()
+
+        val rootHighlightId = "someId"
+        val expectedTags = listOf(rootHighlightId.asEventIdTag(marker = "root"))
+
+        val actualTags = notePublisher.getConstructRootTags()
+            .invoke(notePublisher, rootHighlightId, null, null, null, null)
+
+        actualTags shouldBe expectedTags
+    }
+
+    @Test
+    fun `constructRootTags returns article as root if only article available`() {
+        val notePublisher = buildNotePublishHandler()
+
+        val rootArticleId = "someId"
+        val rootArticleEventId = "someEventId"
+        val rootArticleAuthorId = "someAuthorId"
+
+        val expectedTags = listOf(
+            rootArticleEventId.asEventIdTag(marker = "root"),
+            "${NostrEventKind.LongFormContent.value}:$rootArticleAuthorId:$rootArticleId"
+                .asReplaceableEventTag(marker = "root"),
+        )
+
+        val actualTags = notePublisher.getConstructRootTags()
+            .invoke(
+                notePublisher,
+                null,
+                rootArticleId,
+                rootArticleEventId,
+                rootArticleAuthorId,
+                null,
+            )
+
+        actualTags shouldBe expectedTags
+    }
+
+    @Test
+    fun `constructRootTags returns post as root if only post available`() {
+        val notePublisher = buildNotePublishHandler()
+
+        val rootPostId = "someId"
+
+        val expectedTags = listOf(rootPostId.asEventIdTag(marker = "root"))
+
+        val actualTags = notePublisher.getConstructRootTags()
+            .invoke(notePublisher, null, null, null, null, rootPostId)
+
+        actualTags shouldBe expectedTags
+    }
+
+    @Test
+    fun `constructRootTags returns highlight as root if highlight and article available`() {
+        val notePublisher = buildNotePublishHandler()
+
+        val rootHighlightId = "someHighlightId"
+        val rootArticleId = "someId"
+        val rootArticleEventId = "someEventId"
+        val rootArticleAuthorId = "someAuthorId"
+
+        val expectedTags = listOf(rootHighlightId.asEventIdTag(marker = "root"))
+
+        val actualTags = notePublisher.getConstructRootTags()
+            .invoke(
+                notePublisher,
+                rootHighlightId,
+                rootArticleId,
+                rootArticleEventId,
+                rootArticleAuthorId,
+                null,
+            )
+
+        actualTags shouldBe expectedTags
+    }
+
+    @Test
+    fun `constructRootTags returns highlight as root if highlight and post available`() {
+        val notePublisher = buildNotePublishHandler()
+
+        val rootHighlightId = "someHighlightId"
+        val rootPostId = "someId"
+
+        val expectedTags = listOf(rootHighlightId.asEventIdTag(marker = "root"))
+
+        val actualTags = notePublisher.getConstructRootTags()
+            .invoke(
+                notePublisher,
+                rootHighlightId,
+                null,
+                null,
+                null,
+                rootPostId,
+            )
+
+        actualTags shouldBe expectedTags
+    }
+
+    @Test
+    fun `constructRootTags returns article as root if article and post available`() {
+        val notePublisher = buildNotePublishHandler()
+
+        val rootPostId = "somePostId"
+        val rootArticleId = "someArticleId"
+        val rootArticleEventId = "someEventId"
+        val rootArticleAuthorId = "someAuthorId"
+
+        val expectedTags = listOf(
+            rootArticleEventId.asEventIdTag(marker = "root"),
+            "${NostrEventKind.LongFormContent.value}:$rootArticleAuthorId:$rootArticleId"
+                .asReplaceableEventTag(marker = "root"),
+        )
+
+        val actualTags = notePublisher.getConstructRootTags()
+            .invoke(
+                notePublisher,
+                null,
+                rootArticleId,
+                rootArticleEventId,
+                rootArticleAuthorId,
+                rootPostId,
+            )
+
+        actualTags shouldBe expectedTags
+    }
+
+    @Test
+    fun `constructRootTags returns highlight as root if all available`() {
+        val notePublisher = buildNotePublishHandler()
+
+        val rootHighlightId = "someHighlightId"
+        val rootPostId = "somePostId"
+        val rootArticleId = "someArticleId"
+        val rootArticleEventId = "someEventId"
+        val rootArticleAuthorId = "someAuthorId"
+
+        val expectedTags = listOf(
+            rootHighlightId.asEventIdTag(marker = "root")
+        )
+
+        val actualTags = notePublisher.getConstructRootTags()
+            .invoke(
+                notePublisher,
+                rootHighlightId,
+                rootArticleId,
+                rootArticleEventId,
+                rootArticleAuthorId,
+                rootPostId,
+            )
+
+        actualTags shouldBe expectedTags
+    }
+
+    @Test
+    fun `constructRootTags returns post as root if article is missing author data`() {
+        val notePublisher = buildNotePublishHandler()
+
+        val rootPostId = "somePostId"
+        val rootArticleId = "someArticleId"
+        val rootArticleEventId = "someEventId"
+
+        val expectedTags = listOf(
+            rootPostId.asEventIdTag(marker = "root")
+        )
+
+        val actualTags = notePublisher.getConstructRootTags()
+            .invoke(
+                notePublisher,
+                null,
+                rootArticleId,
+                rootArticleEventId,
+                null,
+                rootPostId,
+            )
+
+        actualTags shouldBe expectedTags
+    }
+
+    @Test
+    fun `constructRootTags returns post as root if article is missing event data`() {
+        val notePublisher = buildNotePublishHandler()
+
+        val rootPostId = "somePostId"
+        val rootArticleId = "someArticleId"
+        val rootArticleAuthorId = "someAuthorId"
+
+        val expectedTags = listOf(
+            rootPostId.asEventIdTag(marker = "root")
+        )
+
+        val actualTags = notePublisher.getConstructRootTags()
+            .invoke(
+                notePublisher,
+                null,
+                rootArticleId,
+                null,
+                rootArticleAuthorId,
+                rootPostId,
+            )
+
+        actualTags shouldBe expectedTags
+    }
+
+    @Test
+    fun `constructRootTags returns empty list if article is only available and is missing fields`() {
+        val notePublisher = buildNotePublishHandler()
+
+        val rootArticleId = "someArticleId"
+        val rootArticleAuthorId = "someAuthorId"
+
+        val actualTags = notePublisher.getConstructRootTags()
+            .invoke(
+                notePublisher,
+                null,
+                rootArticleId,
+                null,
+                rootArticleAuthorId,
+                null,
+            )
+
+        actualTags shouldBe emptyList<JsonArray>()
     }
 
     private fun buildNotePublishHandler(
@@ -321,8 +511,41 @@ class NotePublishHandlerTest {
         uploadError = uploadError,
     )
 
-    private fun NotePublishHandler.getPrivateMethod(name: String, vararg classParameters: Class<*>): Method {
-        val method = this.javaClass.getDeclaredMethod(name, *classParameters)
+    private fun NotePublishHandler.getConstructRootTags() =
+        this.getPrivateMethod(
+            "constructRootTags",
+            String::class.java,
+            String::class.java,
+            String::class.java,
+            String::class.java,
+            String::class.java,
+        )
+
+    private fun NotePublishHandler.getConstructPubkeyTags() =
+        this.getPrivateMethod(
+            "constructPubkeyTags",
+            PostData::class.java,
+            String::class.java,
+            String::class.java,
+            String::class.java,
+        )
+
+    private fun NotePublishHandler.getConstructReplyTags() =
+        this.getPrivateMethod(
+            "constructReplyTags",
+            String::class.java,
+            String::class.java,
+        )
+
+    private fun NotePublishHandler.getBuildRefinedContent() =
+        this.getPrivateMethod(
+            "buildRefinedContent",
+            List::class.java,
+            String::class.java,
+        )
+
+    private fun NotePublishHandler.getPrivateMethod(name: String, vararg parameterTypes: Class<*>): Method {
+        val method = this.javaClass.getDeclaredMethod(name, *parameterTypes)
         method.isAccessible = true
 
         return method
