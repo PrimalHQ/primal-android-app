@@ -249,7 +249,7 @@ class ArticleDetailsViewModel @Inject constructor(
                     setState {
                         val joinedHighlights = article.highlights.joinOnContent()
                         val selectedHighlight = selectedHighlight?.let {
-                            joinedHighlights.first { it.content == selectedHighlight.content }
+                            joinedHighlights.firstOrNull { it.content == selectedHighlight.content }
                         }
                         copy(
                             article = article.mapAsArticleDetailsUi(),
