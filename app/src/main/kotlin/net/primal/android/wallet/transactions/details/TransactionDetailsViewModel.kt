@@ -23,7 +23,7 @@ import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.wallet.UsdExchangeRateHandler
+import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.db.WalletTransaction
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.details.TransactionDetailsContract.UiState
@@ -38,7 +38,7 @@ class TransactionDetailsViewModel @Inject constructor(
     private val walletRepository: WalletRepository,
     private val feedRepository: FeedRepository,
     private val articleRepository: ArticleRepository,
-    private val usdExchangeRateHandler: UsdExchangeRateHandler,
+    private val exchangeRateHandler: ExchangeRateHandler,
 ) : ViewModel() {
 
     private val transactionId = savedStateHandle.transactionIdOrThrow
@@ -118,7 +118,7 @@ class TransactionDetailsViewModel @Inject constructor(
     private fun observeUsdExchangeRate() {
         viewModelScope.launch {
             fetchExchangeRate()
-            usdExchangeRateHandler.usdExchangeRate.collect {
+            exchangeRateHandler.usdExchangeRate.collect {
                 setState { copy(currentExchangeRate = it) }
             }
         }
@@ -126,7 +126,7 @@ class TransactionDetailsViewModel @Inject constructor(
 
     private fun fetchExchangeRate() =
         viewModelScope.launch {
-            usdExchangeRateHandler.updateExchangeRate(
+            exchangeRateHandler.updateExchangeRate(
                 userId = activeAccountStore.activeUserId(),
             )
         }

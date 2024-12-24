@@ -1,4 +1,4 @@
-package net.primal.android.wallet
+package net.primal.android.wallet.repository
 
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -6,11 +6,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.wallet.repository.WalletRepository
 import timber.log.Timber
 
 @Singleton
-class UsdExchangeRateHandler @Inject constructor(
+class ExchangeRateHandler @Inject constructor(
     private val walletRepository: WalletRepository,
 ) {
 
