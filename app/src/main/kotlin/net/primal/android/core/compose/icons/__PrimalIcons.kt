@@ -130,6 +130,7 @@ import net.primal.android.core.compose.icons.primaliconpack.UserFeedRemove
 import net.primal.android.core.compose.icons.primaliconpack.Verified
 import net.primal.android.core.compose.icons.primaliconpack.VerifiedFilled
 import net.primal.android.core.compose.icons.primaliconpack.WalletBitcoinPayment
+import net.primal.android.core.compose.icons.primaliconpack.WalletChangeCurrency
 import net.primal.android.core.compose.icons.primaliconpack.WalletError
 import net.primal.android.core.compose.icons.primaliconpack.WalletLightningPayment
 import net.primal.android.core.compose.icons.primaliconpack.WalletLightningPaymentAlt
@@ -293,6 +294,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             DrawerSignOut,
             OnboardingZapsExplained,
             Document,
+            WalletChangeCurrency,
         )
         return __PrimalIcons!!
     }

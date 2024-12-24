@@ -22,7 +22,9 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.premium.legend.asLegendaryCustomization
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.db.WalletTransaction
+import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.details.TransactionDetailsContract.UiState
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
@@ -32,9 +34,11 @@ import timber.log.Timber
 class TransactionDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val activeAccountStore: ActiveAccountStore,
     private val walletRepository: WalletRepository,
     private val feedRepository: FeedRepository,
     private val articleRepository: ArticleRepository,
+    private val exchangeRateHandler: ExchangeRateHandler,
 ) : ViewModel() {
 
     private val transactionId = savedStateHandle.transactionIdOrThrow
@@ -46,6 +50,7 @@ class TransactionDetailsViewModel @Inject constructor(
 
     init {
         loadTransaction()
+        observeUsdExchangeRate()
     }
 
     private fun loadTransaction() =
@@ -108,6 +113,22 @@ class TransactionDetailsViewModel @Inject constructor(
             } finally {
                 setState { copy(loading = false) }
             }
+        }
+
+    private fun observeUsdExchangeRate() {
+        viewModelScope.launch {
+            fetchExchangeRate()
+            exchangeRateHandler.usdExchangeRate.collect {
+                setState { copy(currentExchangeRate = it) }
+            }
+        }
+    }
+
+    private fun fetchExchangeRate() =
+        viewModelScope.launch {
+            exchangeRateHandler.updateExchangeRate(
+                userId = activeAccountStore.activeUserId(),
+            )
         }
 
     private fun WalletTransaction.mapAsTransactionDataUi() =
