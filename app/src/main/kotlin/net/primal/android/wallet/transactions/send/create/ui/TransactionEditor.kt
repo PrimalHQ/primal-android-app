@@ -25,6 +25,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -60,11 +61,14 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.detectUiDensityModeFromMaxHeight
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.Repost
 import net.primal.android.core.compose.icons.primaliconpack.WalletBitcoinPayment
 import net.primal.android.core.compose.isCompactOrLower
 import net.primal.android.core.compose.numericpad.PrimalNumericPad
 import net.primal.android.theme.AppTheme
+import net.primal.android.wallet.dashboard.CurrencyMode
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
+import net.primal.android.wallet.dashboard.ui.FiatAmountText
 import net.primal.android.wallet.numericPadContentTransformAnimation
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract
 import net.primal.android.wallet.transactions.send.create.ellipsizeLnUrl
@@ -72,6 +76,7 @@ import net.primal.android.wallet.transactions.send.create.ellipsizeOnChainAddres
 import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
+import net.primal.android.wallet.walletSwitchCurrencyColor
 
 @ExperimentalMaterial3Api
 @ExperimentalComposeUiApi
@@ -82,7 +87,7 @@ fun TransactionEditor(
     paddingValues: PaddingValues,
     eventPublisher: (CreateTransactionContract.UiEvent) -> Unit,
     onCancelClick: () -> Unit,
-) {
+    ) {
     val keyboardVisible by keyboardVisibilityAsState()
 
     var noteRecipientText by remember { mutableStateOf(state.transaction.noteRecipient ?: "") }
@@ -134,6 +139,11 @@ fun TransactionEditor(
                         isNumericPadOn = true
                     }
                 },
+                onChangeCurrencyMode = {
+                    eventPublisher(
+                        CreateTransactionContract.UiEvent.ChangeCurrencyMode(currencyMode = it)
+                    )
+                },
             )
 
             TransactionMainContent(
@@ -146,7 +156,7 @@ fun TransactionEditor(
                 onNoteSelfTextChanged = { text -> noteSelfText = text },
                 onAmountChanged = {
                     eventPublisher(
-                        CreateTransactionContract.UiEvent.AmountChanged(amountInSats = it),
+                        CreateTransactionContract.UiEvent.AmountChangedSats(amountInSats = it),
                     )
                 },
                 onMiningFeeChanged = {
@@ -315,6 +325,7 @@ private fun TransactionHeaderColumn(
     state: CreateTransactionContract.UiState,
     keyboardVisible: Boolean,
     onAmountClick: () -> Unit,
+    onChangeCurrencyMode: (currencyMode: CurrencyMode) -> Unit,
 ) {
     val verticalPadding = animateDpAsState(
         targetValue = if (keyboardVisible) {
@@ -422,32 +433,120 @@ private fun TransactionHeaderColumn(
 
         Spacer(modifier = Modifier.height(headerSpacing.value))
 
-        BtcAmountText(
-            modifier = Modifier
-                .padding(
-                    start = when (uiMode) {
-                        UiDensityMode.Normal -> 32.dp
-                        UiDensityMode.Comfortable -> 26.dp
-                        else -> 18.dp
-                    },
-                )
-                .height(
-                    when (uiMode) {
-                        UiDensityMode.Normal -> 72.dp
-                        UiDensityMode.Comfortable -> 64.dp
-                        else -> 56.dp
-                    },
-                )
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = onAmountClick,
-                ),
-            amountInBtc = state.transaction.amountSats.toLong().toBtc().toBigDecimal(),
-            textSize = 48.sp,
+        if (state.currencyMode == CurrencyMode.SATS) {
+            BtcAmountText(
+                modifier = Modifier
+                    .padding(
+                        start = when (uiMode) {
+                            UiDensityMode.Normal -> 32.dp
+                            UiDensityMode.Comfortable -> 26.dp
+                            else -> 18.dp
+                        },
+                    )
+                    .height(
+                        when (uiMode) {
+                            UiDensityMode.Normal -> 72.dp
+                            UiDensityMode.Comfortable -> 64.dp
+                            else -> 56.dp
+                        },
+                    )
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = onAmountClick,
+                    ),
+                amountInBtc = state.transaction.amountSats.toLong().toBtc().toBigDecimal(),
+                textSize = 48.sp,
+            )
+        } else {
+            FiatAmountText(
+                modifier = Modifier
+                    .padding(
+                        start = when (uiMode) {
+                            UiDensityMode.Normal -> 32.dp
+                            UiDensityMode.Comfortable -> 26.dp
+                            else -> 18.dp
+                        },
+                    )
+                    .height(
+                        when (uiMode) {
+                            UiDensityMode.Normal -> 72.dp
+                            UiDensityMode.Comfortable -> 64.dp
+                            else -> 56.dp
+                        },
+                    )
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = onAmountClick,
+                    ),
+                amount = state.transaction.amountSats.toLong().toBtc().toBigDecimal(),
+                textSize = 48.sp,
+                exchangeBtcUsdRate = 93942.69,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(5.dp))
+
+        CurrencySwitcher(
+            modifier = Modifier,
+            amount =
+            if (state.currencyMode == CurrencyMode.FIAT) {
+                state.transaction.amountSats
+            } else {
+                state.amountInUsd
+            },
+            currencyMode = state.currencyMode,
+            onChangeCurrencyMode = onChangeCurrencyMode
         )
 
         Spacer(modifier = Modifier.height(amountSpacing.value))
+    }
+}
+
+@Composable
+private fun CurrencySwitcher(
+    modifier: Modifier,
+    amount: String,
+    currencyMode: CurrencyMode,
+    onChangeCurrencyMode: (currencyMode: CurrencyMode) -> Unit,
+) {
+    Row(
+        modifier = modifier.clickable {
+            if (currencyMode == CurrencyMode.FIAT) {
+                onChangeCurrencyMode(CurrencyMode.SATS)
+            }
+            else {
+                onChangeCurrencyMode(CurrencyMode.FIAT)
+            }
+        },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        if (currencyMode != CurrencyMode.FIAT) {
+            Text(
+                text = "$ $amount USD",
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+            )
+        } else {
+            Text(
+                text = "$amount sats",
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+            )
+        }
+
+        Icon(
+            modifier = Modifier.size(16.dp),
+            imageVector = PrimalIcons.Repost,
+            contentDescription = null,
+            tint = walletSwitchCurrencyColor,
+        )
     }
 }
 

@@ -4,6 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.math.BigDecimal
+import java.math.RoundingMode
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -77,8 +79,36 @@ class CreateTransactionViewModel @Inject constructor(
                         sendTransaction(noteRecipient = event.noteRecipient, noteSelf = event.noteSelf)
                     }
 
-                    is UiEvent.AmountChanged -> {
-                        setState { copy(transaction = transaction.copy(amountSats = event.amountInSats)) }
+                    is UiEvent.AmountChangedSats -> {
+                        setState {
+                            copy(
+                                transaction = transaction.copy(amountSats = event.amountInSats),
+                                amountInUsd = BigDecimal.valueOf(event.amountInSats.toDouble())
+                                    .divide(BigDecimal.valueOf(100_000_000))
+                                    .multiply(BigDecimal.valueOf(93942.69))
+                                    .setScale(2, RoundingMode.HALF_EVEN)
+                                    .toString()
+                            )
+                        }
+                    }
+
+                    is UiEvent.AmountChangedFiat -> {
+                        setState {
+                            copy(
+                                amountInUsd = event.amountInUsd,
+                                transaction = transaction.copy(amountSats = BigDecimal.valueOf(event.amountInUsd.toDouble())
+                                    .multiply(BigDecimal.valueOf(93942.69))
+                                    .multiply(BigDecimal.valueOf(100_000_000))
+                                    .toLong()
+                                    .toString())
+                            )
+                        }
+                    }
+
+                    is UiEvent.ChangeCurrencyMode -> {
+                        setState {
+                            copy(currencyMode = event.currencyMode)
+                        }
                     }
 
                     is UiEvent.MiningFeeChanged -> {
