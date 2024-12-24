@@ -31,6 +31,7 @@ import net.primal.android.nostr.ext.nostrUriToPubkey
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nip19TLV
+import net.primal.android.nostr.utils.asATagValue
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.profile.repository.ProfileRepository
@@ -111,35 +112,52 @@ class ArticleDetailsViewModel @Inject constructor(
 
                     UiEvent.PublishSelectedHighlight -> publishSelectedHighlight()
                     UiEvent.DeleteSelectedHighlight -> removeSelectedHighlight()
+
+                    is UiEvent.CreateHighlight -> createHighlight(
+                        content = it.content,
+                        context = it.context,
+                        articleATag = naddr?.asATagValue(),
+                        articleAuthorId = naddr?.userId,
+                    )
                 }
             }
         }
 
-    private fun publishSelectedHighlight() =
-        viewModelScope.launch {
-            val selectedHighlight = _state.value.selectedHighlight
-            if (selectedHighlight == null) {
-                Timber.w("cannot enter this state without selecting a highlight.")
-                return@launch
-            }
+    private fun createHighlight(
+        content: String,
+        context: String?,
+        articleATag: String?,
+        articleAuthorId: String?,
+    ) = viewModelScope.launch {
+        setState { copy(isWorking = true) }
+        try {
+            highlightRepository.publishAndSaveHighlight(
+                userId = activeAccountStore.activeUserId(),
+                content = content,
+                referencedEventATag = articleATag,
+                referencedEventAuthorTag = articleAuthorId,
+                context = context,
+            )
 
-            setState { copy(isWorking = true) }
-            try {
-                highlightRepository.publishAndSaveHighlight(
-                    userId = activeAccountStore.activeUserId(),
-                    content = selectedHighlight.content,
-                    referencedEventATag = selectedHighlight.referencedEventATag,
-                    referencedEventAuthorTag = selectedHighlight.referencedEventAuthorId,
-                    context = selectedHighlight.context,
-                )
-
-                setState { copy(isHighlighted = true) }
-            } catch (error: NostrPublishException) {
-                Timber.w(error)
-            } finally {
-                setState { copy(isWorking = false) }
-            }
+            setState { copy(isHighlighted = true) }
+        } catch (error: NostrPublishException) {
+            Timber.w(error)
+        } finally {
+            setState { copy(isWorking = false) }
         }
+    }
+
+    private fun publishSelectedHighlight() {
+        val selectedHighlight = _state.value.selectedHighlight
+        if (selectedHighlight != null) {
+            createHighlight(
+                content = selectedHighlight.content,
+                context = selectedHighlight.context,
+                articleATag = selectedHighlight.referencedEventATag,
+                articleAuthorId = selectedHighlight.referencedEventAuthorId,
+            )
+        }
+    }
 
     private fun removeSelectedHighlight() =
         viewModelScope.launch {

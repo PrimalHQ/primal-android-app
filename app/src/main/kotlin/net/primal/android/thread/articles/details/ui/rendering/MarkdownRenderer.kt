@@ -22,6 +22,9 @@ fun MarkdownRenderer(
     markdown: String,
     markwon: Markwon,
     modifier: Modifier = Modifier,
+    onHighlight: ((content: String, context: String) -> Unit)? = null,
+    onQuoteHighlight: ((content: String, context: String) -> Unit)? = null,
+    onCommentHighlight: ((content: String, context: String) -> Unit)? = null,
 ) {
     val clipboardManager = LocalClipboardManager.current
     val menuItemLabelHighlight = stringResource(R.string.article_details_highlight_toolbar_highlight)
@@ -57,16 +60,30 @@ fun MarkdownRenderer(
 
                             override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
                                 val selectedText = text.substring(selectionStart, selectionEnd)
+
+                                val paragraphStart = text
+                                    .lastIndexOf('\n', selectionStart - 1)
+                                    .takeIf { it != -1 }?.plus(1) ?: 0
+
+                                val paragraphEnd = text
+                                    .indexOf('\n', selectionEnd)
+                                    .takeIf { it != -1 } ?: text.length
+
+                                val paragraph = text.substring(paragraphStart, paragraphEnd)
+
                                 when (item?.title) {
                                     menuItemLabelHighlight -> {
-
+                                        onHighlight?.invoke(selectedText, paragraph)
                                     }
+
                                     menuItemLabelQuote -> {
-
+                                        onQuoteHighlight?.invoke(selectedText, paragraph)
                                     }
+
                                     menuItemLabelComment -> {
-
+                                        onCommentHighlight?.invoke(selectedText, paragraph)
                                     }
+
                                     menuItemLabelCopy -> {
                                         clipboardManager.setClip(ClipEntry(ClipData.newPlainText("", selectedText)))
                                     }

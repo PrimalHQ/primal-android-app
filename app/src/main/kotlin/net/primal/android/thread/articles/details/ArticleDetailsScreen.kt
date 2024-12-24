@@ -299,6 +299,7 @@ private fun ArticleDetailsScreen(
             } else {
                 ArticleContentWithComments(
                     state = detailsState,
+                    detailsEventPublisher = detailsEventPublisher,
                     articleParts = articleParts,
                     listState = listState,
                     paddingValues = paddingValues,
@@ -309,8 +310,6 @@ private fun ArticleDetailsScreen(
                     onZapOptionsClick = { invokeZapOptionsOrShowWarning() },
                     onGoToWallet = onGoToWallet,
                     noteCallbacks = noteCallbacks,
-                    onHighlightClick = { detailsEventPublisher(UiEvent.SelectHighlight(it)) },
-                    onFollowUnfollowClick = { detailsEventPublisher(UiEvent.ToggleAuthorFollows) },
                     onPostAction = { action ->
                         when (action) {
                             FeedPostAction.Reply -> {
@@ -432,18 +431,17 @@ private fun ArticleDetailsTopAppBar(
 @Composable
 private fun ArticleContentWithComments(
     state: ArticleDetailsContract.UiState,
+    detailsEventPublisher: (UiEvent) -> Unit,
     articleParts: List<ArticlePartRender>,
     listState: LazyListState = rememberLazyListState(),
     paddingValues: PaddingValues,
     onArticleCommentClick: (naddr: String) -> Unit,
     onArticleHashtagClick: (hashtag: String) -> Unit,
     onZapOptionsClick: () -> Unit,
-    onHighlightClick: (String) -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     onPostAction: ((FeedPostAction) -> Unit)? = null,
     onPostLongPressAction: ((FeedPostAction) -> Unit)? = null,
-    onFollowUnfollowClick: (() -> Unit)? = null,
     onUiError: ((UiError) -> Unit)? = null,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -458,7 +456,9 @@ private fun ArticleContentWithComments(
                 onUrlClick = { url -> uriHandler.openUriSafely(url) },
             )
         },
-        onHighlightClick = onHighlightClick,
+        onHighlightClick = {
+            detailsEventPublisher(UiEvent.SelectHighlight(it))
+        },
     )
 
     LazyColumn(
@@ -483,7 +483,7 @@ private fun ArticleContentWithComments(
                     authorInternetIdentifier = state.article.authorInternetIdentifier,
                     authorLegendaryCustomization = state.article.authorLegendaryCustomization,
                     onAuthorAvatarClick = { noteCallbacks.onProfileClick?.invoke(state.article.authorId) },
-                    onFollowUnfollowClick = onFollowUnfollowClick,
+                    onFollowUnfollowClick = { detailsEventPublisher(UiEvent.ToggleAuthorFollows) },
                 )
                 PrimalDivider()
             }
@@ -544,6 +544,13 @@ private fun ArticleContentWithComments(
                             .padding(all = 16.dp),
                         markdown = part.markdown,
                         markwon = markwon,
+                        onHighlight = { selection, paragraph ->
+                            detailsEventPublisher(UiEvent.CreateHighlight(content = selection, context = paragraph))
+                        },
+                        onQuoteHighlight = { selection, paragraph ->
+                        },
+                        onCommentHighlight = { selection, paragraph ->
+                        },
                     )
                 }
 

@@ -66,12 +66,12 @@ fun rememberPrimalMarkwon(
     val colorScheme = AppTheme.colorScheme
     val extraColorScheme = AppTheme.extraColorScheme
 
-    val highlightWords by remember { mutableStateOf(highlights.map { it.content }) }
+    val highlightWords by remember(highlights) { mutableStateOf(highlights.map { it.content }) }
 
     return remember(
         onLinkClick,
         showHighlights,
-        highlights,
+        highlightWords,
         onHighlightClick,
         isDarkTheme,
         contentAppearance,

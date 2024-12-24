@@ -41,6 +41,7 @@ interface ArticleDetailsContract {
         data object ToggleAuthorFollows : UiEvent()
         data object ToggleHighlights : UiEvent()
         data class SelectHighlight(val content: String) : UiEvent()
+        data class CreateHighlight(val content: String, val context: String) : UiEvent()
         data object DismissSelectedHighlight : UiEvent()
         data object PublishSelectedHighlight : UiEvent()
         data object DeleteSelectedHighlight : UiEvent()
