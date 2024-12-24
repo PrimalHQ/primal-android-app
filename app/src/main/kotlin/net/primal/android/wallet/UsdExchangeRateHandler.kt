@@ -27,3 +27,5 @@ class UsdExchangeRateHandler @Inject constructor(
         }
     }
 }
+
+fun Double?.isValidExchangeRate() = this != null && this > 0
