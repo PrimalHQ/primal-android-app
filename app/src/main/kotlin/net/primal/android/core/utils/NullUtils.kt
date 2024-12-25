@@ -29,7 +29,11 @@ fun assertNotNullCount(
     message: () -> Any,
 ) {
     args.sumOf { (it != null).toInt() }.apply {
-        if (this > atMost || this <= atLeast || (exactly != null && this != exactly)) {
+        if (this > atMost || this <= atLeast) {
+            error(message = message())
+        }
+
+        if (exactly != null && this != exactly) {
             error(message = message())
         }
     }
