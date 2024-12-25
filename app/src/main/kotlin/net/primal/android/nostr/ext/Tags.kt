@@ -8,6 +8,8 @@ import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.utils.Naddr
+import net.primal.android.nostr.utils.Nip19TLV
 
 fun List<JsonArray>.findFirstEventId() = firstOrNull { it.isEventIdTag() }?.getTagValueOrNull()
 
@@ -100,10 +102,11 @@ fun String.asEventIdTag(relayHint: String? = null, marker: String? = null): Json
         }
     }
 
-fun String.asPubkeyTag(optional: String? = null): JsonArray =
+fun String.asPubkeyTag(relayHint: String? = null, optional: String? = null): JsonArray =
     buildJsonArray {
         add("p")
         add(this@asPubkeyTag)
+        if (relayHint != null) add(relayHint)
         if (optional != null) add(optional)
     }
 
@@ -112,6 +115,9 @@ fun String.asIdentifierTag(): JsonArray =
         add("d")
         add(this@asIdentifierTag)
     }
+
+fun Naddr.asReplaceableEventTag(relayHint: String? = null, marker: String? = null): JsonArray =
+    "${this.kind}:${this.userId}:${this.identifier}".asReplaceableEventTag(relayHint = relayHint, marker = marker)
 
 fun String.asReplaceableEventTag(relayHint: String? = null, marker: String? = null): JsonArray =
     buildJsonArray {
@@ -138,12 +144,17 @@ fun NoteAttachment.asIMetaTag(): JsonArray {
 }
 
 fun String.parseEventTags(marker: String? = null): List<JsonArray> {
-    val nostrUris = parseNostrUris()
+    val nostrUris = this.parseNostrUris()
     if (nostrUris.isEmpty()) return emptyList()
 
     val tags = mutableListOf<JsonArray>()
     nostrUris.forEach {
         when {
+            it.isNAddrUri() || it.isNAddr() ->
+                Nip19TLV.parseUriAsNaddrOrNull(it)?.let {
+                    tags.add(it.asReplaceableEventTag(relayHint = it.relays.firstOrNull(), marker = marker))
+                }
+
             it.isNEventUri() -> {
                 val result = it.nostrUriToNoteIdAndRelay()
                 val eventId = result.first

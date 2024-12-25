@@ -21,9 +21,19 @@ inline fun <U, V, T> ifNotNull(
     }
 }
 
-fun assertOnlyOneNotNull(vararg args: Any?, message: () -> Any) {
+fun assertNotNullCount(
+    vararg args: Any?,
+    atMost: Int = Int.MAX_VALUE,
+    atLeast: Int = Int.MIN_VALUE,
+    exactly: Int? = null,
+    message: () -> Any,
+) {
     args.sumOf { (it != null).toInt() }.apply {
-        if (this != 1) {
+        if (this > atMost || this <= atLeast) {
+            error(message = message())
+        }
+
+        if (exactly != null && this != exactly) {
             error(message = message())
         }
     }

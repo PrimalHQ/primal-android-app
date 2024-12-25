@@ -163,7 +163,7 @@ class BookmarksRepository @Inject constructor(
                     add(it.value)
                 }
             }
-            nostrPublisher.signAndPublishNostrEvent(
+            nostrPublisher.signPublishImportNostrEvent(
                 userId = userId,
                 unsignedNostrEvent = NostrUnsignedEvent(
                     pubKey = userId,

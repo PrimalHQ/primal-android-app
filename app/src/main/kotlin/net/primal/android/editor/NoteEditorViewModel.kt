@@ -33,6 +33,7 @@ import net.primal.android.attachments.repository.AttachmentsRepository
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.files.FileAnalyser
+import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.editor.NoteEditorContract.SideEffect
 import net.primal.android.editor.NoteEditorContract.UiEvent
@@ -73,11 +74,11 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val articleRepository: ArticleRepository,
 ) : ViewModel() {
 
-    private val replyToNoteId = args.replyToNoteId
-    private val replyToArticleNaddr = args.replyToArticleNaddr?.let(Nip19TLV::parseUriAsNaddrOrNull)
-    private val replyToHighlightId = args.replyToHighlightId
+    private val referencedNoteId = args.referencedNoteId
+    private val referencedArticleNaddr = args.referencedArticleNaddr?.let(Nip19TLV::parseUriAsNaddrOrNull)
+    private val referencedHighlightNevent = args.referencedHighlightNevent
 
-    private val _state = MutableStateFlow(UiState())
+    private val _state = MutableStateFlow(UiState(isQuoting = args.isQuoting))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -103,17 +104,17 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             setStateFromArgs()
 
-            if (!replyToNoteId.isNullOrEmpty()) {
-                fetchNoteThreadFromNetwork(replyToNoteId)
-                observeThreadConversation(replyToNoteId)
-                observeArticleByCommentId(replyToNoteId = replyToNoteId)
-            } else if (replyToArticleNaddr != null) {
-                fetchArticleDetailsFromNetwork(replyToArticleNaddr)
-                observeArticleByNaddr(naddr = replyToArticleNaddr)
+            if (!referencedNoteId.isNullOrEmpty()) {
+                fetchNoteThreadFromNetwork(referencedNoteId)
+                observeThreadConversation(referencedNoteId)
+                observeArticleByCommentId(replyToNoteId = referencedNoteId)
+            } else if (referencedArticleNaddr != null) {
+                fetchArticleDetailsFromNetwork(referencedArticleNaddr)
+                observeArticleByNaddr(naddr = referencedArticleNaddr)
             }
 
-            if (replyToHighlightId != null) {
-                observeHighlight(highlightId = replyToHighlightId)
+            if (referencedHighlightNevent != null) {
+                observeHighlight(highlightNevent = referencedHighlightNevent)
             }
 
             if (args.mediaUris.isNotEmpty()) {
@@ -170,12 +171,14 @@ class NoteEditorViewModel @AssistedInject constructor(
             }
         }
 
-    private fun observeHighlight(highlightId: String) =
+    private fun observeHighlight(highlightNevent: String) =
         viewModelScope.launch {
-            highlightRepository.observeHighlightById(highlightId = highlightId)
-                .collect {
-                    setState { copy(replyToHighlight = it.asHighlightUi()) }
-                }
+            Nip19TLV.parseUriAsNeventOrNull(highlightNevent)?.let {
+                highlightRepository.observeHighlightById(highlightId = it.eventId)
+                    .collect {
+                        setState { copy(referencedHighlight = it.asHighlightUi()) }
+                    }
+            }
         }
 
     private fun subscribeToActiveAccount() =
@@ -211,7 +214,7 @@ class NoteEditorViewModel @AssistedInject constructor(
             articleRepository.observeArticleByCommentId(commentNoteId = replyToNoteId)
                 .filterNotNull()
                 .collect { article ->
-                    setState { copy(replyToArticle = article.mapAsFeedArticleUi()) }
+                    setState { copy(referencedArticle = article.mapAsFeedArticleUi()) }
                 }
         }
 
@@ -220,7 +223,7 @@ class NoteEditorViewModel @AssistedInject constructor(
             articleRepository.observeArticle(articleId = naddr.identifier, articleAuthorId = naddr.userId)
                 .filterNotNull()
                 .collect { article ->
-                    setState { copy(replyToArticle = article.mapAsFeedArticleUi()) }
+                    setState { copy(referencedArticle = article.mapAsFeedArticleUi()) }
                 }
         }
 
@@ -253,26 +256,35 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             setState { copy(publishing = true) }
             try {
-                val article = _state.value.replyToArticle
+                val article = _state.value.referencedArticle
                 val rootPost = _state.value.conversation.firstOrNull()
                 val replyToPost = _state.value.conversation.lastOrNull()
-                val publishedAndImported = notePublishHandler.publishShortTextNote(
-                    userId = activeAccountStore.activeUserId(),
-                    content = _state.value.content.text.replaceUserMentionsWithUserIds(
-                        users = _state.value.taggedUsers,
-                    ),
-                    attachments = _state.value.attachments,
-                    rootArticleEventId = article?.eventId,
-                    rootArticleId = article?.articleId,
-                    rootArticleAuthorId = article?.authorId,
-                    rootPostId = if (article == null) rootPost?.postId else null,
-                    replyToPostId = replyToPost?.postId,
-                    rootHighlightId = replyToHighlightId,
-                    rootHighlightAuthorId = _state.value.replyToHighlight?.author?.pubkey,
-                    replyToAuthorId = replyToPost?.authorId,
-                )
+                val publishedAndImported = if (args.isQuoting) {
+                    notePublishHandler.publishShortTextNote(
+                        userId = activeAccountStore.activeUserId(),
+                        content = _state.value.content.text
+                            .replaceUserMentionsWithUserIds(users = _state.value.taggedUsers)
+                            .concatenateReferencedEvents(),
+                        attachments = _state.value.attachments,
+                    )
+                } else {
+                    notePublishHandler.publishShortTextNote(
+                        userId = activeAccountStore.activeUserId(),
+                        content = _state.value.content.text
+                            .replaceUserMentionsWithUserIds(users = _state.value.taggedUsers),
+                        attachments = _state.value.attachments,
+                        rootArticleEventId = article?.eventId,
+                        rootArticleId = article?.articleId,
+                        rootArticleAuthorId = article?.authorId,
+                        rootPostId = rootPost?.postId,
+                        replyToPostId = replyToPost?.postId,
+                        rootHighlightId = _state.value.referencedHighlight?.highlightId,
+                        rootHighlightAuthorId = _state.value.referencedHighlight?.author?.pubkey,
+                        replyToAuthorId = replyToPost?.authorId,
+                    )
+                }
 
-                if (replyToNoteId != null) {
+                if (referencedNoteId != null) {
                     if (publishedAndImported) {
                         fetchNoteReplies()
                     } else {
@@ -295,8 +307,8 @@ class NoteEditorViewModel @AssistedInject constructor(
         }
 
     private fun fetchNoteReplies() {
-        if (replyToNoteId != null) {
-            fetchNoteThreadFromNetwork(replyToNoteId)
+        if (referencedNoteId != null) {
+            fetchNoteThreadFromNetwork(referencedNoteId)
         }
     }
 
@@ -527,4 +539,11 @@ class NoteEditorViewModel @AssistedInject constructor(
             }
         }
     }
+
+    private fun String.concatenateReferencedEvents() =
+        this + listOfNotNull(
+            args.referencedNoteId?.hexToNoteHrp(),
+            args.referencedHighlightNevent,
+            args.referencedArticleNaddr,
+        ).joinToString(separator = " \n\n", prefix = " \n\n") { "nostr:$it" }
 }

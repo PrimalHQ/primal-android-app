@@ -1,4 +1,4 @@
-package net.primal.android.editor.ui
+package net.primal.android.editor
 
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -62,6 +63,7 @@ import androidx.compose.ui.unit.sp
 import java.util.*
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.FeedArticleListItem
+import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.core.compose.ImportPhotosIconButton
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
@@ -74,17 +76,21 @@ import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
-import net.primal.android.editor.NoteEditorContract
 import net.primal.android.editor.NoteEditorContract.UiEvent
 import net.primal.android.editor.NoteEditorContract.UiState.NoteEditorError
-import net.primal.android.editor.NoteEditorViewModel
 import net.primal.android.editor.domain.NoteAttachment
+import net.primal.android.editor.ui.NoteAttachmentPreview
+import net.primal.android.editor.ui.NoteOutlinedTextField
+import net.primal.android.editor.ui.NoteTagUserLazyColumn
+import net.primal.android.highlights.model.HighlightUi
 import net.primal.android.notes.db.toReferencedHighlight
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.notes.feed.note.ui.FeedNoteHeader
 import net.primal.android.notes.feed.note.ui.NoteContent
+import net.primal.android.notes.feed.note.ui.ReferencedArticleCard
 import net.primal.android.notes.feed.note.ui.ReferencedHighlight
+import net.primal.android.notes.feed.note.ui.ReferencedNoteCard
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 
@@ -181,7 +187,7 @@ private fun NoteEditorContract.UiState.resolvePublishNoteButtonText() =
         }
     }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@ExperimentalMaterial3Api
 @Composable
 private fun NoteEditorBox(
     state: NoteEditorContract.UiState,
@@ -194,9 +200,7 @@ private fun NoteEditorBox(
         focusRequester.requestFocus()
     }
 
-    val outlineColor = AppTheme.colorScheme.outline
     val editorListState = rememberLazyListState()
-
     var noteEditorMaxHeightPx by remember { mutableIntStateOf(0) }
     var replyNoteHeightPx by remember { mutableIntStateOf(0) }
     val replyingToPaddingTop = 8.dp
@@ -226,43 +230,12 @@ private fun NoteEditorBox(
                 .onSizeChanged { noteEditorMaxHeightPx = it.height },
             state = editorListState,
         ) {
-            if (state.replyToHighlight != null) {
-                item(
-                    key = state.replyToHighlight.highlightId,
-                    contentType = "MentionedHighlight",
-                ) {
-                    ReferencedHighlight(
-                        modifier = Modifier.padding(all = 16.dp),
-                        highlight = state.replyToHighlight.toReferencedHighlight(),
-                        isDarkTheme = isAppInDarkPrimalTheme(),
-                        onClick = {},
-                    )
-                    PrimalDivider()
-                }
-            }
-            if (state.replyToArticle != null) {
-                item(
-                    key = state.replyToArticle.eventId,
-                    contentType = "MentionedArticle",
-                ) {
-                    Column {
-                        FeedArticleListItem(
-                            data = state.replyToArticle,
-                            modifier = Modifier.padding(all = 16.dp),
-                            enabledDropdownMenu = false,
-                        )
-                        PrimalDivider()
-                    }
-                }
-            }
-
-            items(
-                items = state.conversation,
-                key = { it.postId },
-            ) {
-                ReplyToNote(
-                    replyToNote = it,
-                    connectionLineColor = outlineColor,
+            if (!state.isQuoting) {
+                referencedEventsAndConversationAsReplyTo(
+                    modifier = Modifier.padding(all = 16.dp),
+                    referencedHighlight = state.referencedHighlight,
+                    referencedArticle = state.referencedArticle,
+                    conversation = state.conversation,
                 )
             }
 
@@ -270,7 +243,7 @@ private fun NoteEditorBox(
                 NoteEditor(
                     state = state,
                     replyingToPaddingTop = replyingToPaddingTop,
-                    outlineColor = outlineColor,
+                    outlineColor = AppTheme.colorScheme.outline,
                     focusRequester = focusRequester,
                     eventPublisher = eventPublisher,
                     onReplyToNoticeHeightChanged = { replyingToNoticeHeightPx = it },
@@ -278,15 +251,28 @@ private fun NoteEditorBox(
                 )
             }
 
-            item(key = "attachments") {
-                NoteAttachmentsLazyRow(
-                    attachments = state.attachments,
-                    onDiscard = {
-                        eventPublisher(UiEvent.DiscardNoteAttachment(attachmentId = it))
-                    },
-                    onRetryUpload = {
-                        eventPublisher(UiEvent.RetryUpload(attachmentId = it))
-                    },
+            if (state.attachments.isNotEmpty()) {
+                item(key = "attachments") {
+                    NoteAttachmentsLazyRow(
+                        attachments = state.attachments,
+                        onDiscard = {
+                            eventPublisher(UiEvent.DiscardNoteAttachment(attachmentId = it))
+                        },
+                        onRetryUpload = {
+                            eventPublisher(UiEvent.RetryUpload(attachmentId = it))
+                        },
+                    )
+                }
+            }
+
+            if (state.isQuoting) {
+                referencedEventsAndConversationAsQuote(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 72.dp, end = 16.dp),
+                    referencedNote = state.conversation.lastOrNull(),
+                    referencedArticle = state.referencedArticle,
+                    referencedHighlight = state.referencedHighlight,
                 )
             }
 
@@ -305,6 +291,94 @@ private fun NoteEditorBox(
     }
 }
 
+@ExperimentalMaterial3Api
+private fun LazyListScope.referencedEventsAndConversationAsReplyTo(
+    modifier: Modifier = Modifier,
+    referencedArticle: FeedArticleUi?,
+    referencedHighlight: HighlightUi?,
+    conversation: List<FeedPostUi> = emptyList(),
+) {
+    if (referencedHighlight != null) {
+        item(
+            key = referencedHighlight.highlightId,
+            contentType = "MentionedHighlight",
+        ) {
+            ReferencedHighlight(
+                modifier = modifier,
+                highlight = referencedHighlight.toReferencedHighlight(),
+                isDarkTheme = isAppInDarkPrimalTheme(),
+                onClick = {},
+            )
+        }
+    }
+
+    if (referencedArticle != null) {
+        item(
+            key = referencedArticle.eventId,
+            contentType = "MentionedArticle",
+        ) {
+            Column {
+                FeedArticleListItem(
+                    data = referencedArticle,
+                    modifier = modifier,
+                    enabledDropdownMenu = false,
+                )
+                PrimalDivider()
+            }
+        }
+    }
+
+    if (conversation.isNotEmpty()) {
+        items(
+            items = conversation,
+            key = { it.postId },
+        ) {
+            ReplyToNote(
+                replyToNote = it,
+                connectionLineColor = AppTheme.colorScheme.outline,
+            )
+        }
+    }
+}
+
+@ExperimentalMaterial3Api
+private fun LazyListScope.referencedEventsAndConversationAsQuote(
+    modifier: Modifier = Modifier,
+    referencedNote: FeedPostUi?,
+    referencedArticle: FeedArticleUi?,
+    referencedHighlight: HighlightUi?,
+) {
+    if (referencedNote != null) {
+        item {
+            ReferencedNoteCard(
+                modifier = modifier,
+                data = referencedNote,
+                noteCallbacks = NoteCallbacks(),
+            )
+        }
+    }
+
+    if (referencedArticle != null || referencedHighlight != null) {
+        item {
+            Column(
+                modifier = modifier.padding(top = if (referencedNote != null) 8.dp else 0.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                if (referencedHighlight != null) {
+                    ReferencedHighlight(
+                        highlight = referencedHighlight.toReferencedHighlight(),
+                        isDarkTheme = isAppInDarkPrimalTheme(),
+                        onClick = {},
+                    )
+                }
+                if (referencedArticle != null) {
+                    ReferencedArticleCard(data = referencedArticle)
+                }
+            }
+        }
+    }
+}
+
 @Composable
 private fun NoteEditor(
     state: NoteEditorContract.UiState,
@@ -316,7 +390,7 @@ private fun NoteEditor(
     eventPublisher: (UiEvent) -> Unit,
 ) {
     Column {
-        if (state.isReply && state.replyToNote != null) {
+        if (state.isReply && state.replyToNote != null && !state.isQuoting) {
             ReplyingToText(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -331,7 +405,7 @@ private fun NoteEditor(
                 modifier = Modifier
                     .drawWithCache {
                         onDrawBehind {
-                            if (state.isReply) {
+                            if (state.isReply && !state.isQuoting) {
                                 drawLine(
                                     color = outlineColor,
                                     start = Offset(

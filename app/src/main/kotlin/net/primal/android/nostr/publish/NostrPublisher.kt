@@ -1,7 +1,6 @@
 package net.primal.android.nostr.publish
 
 import javax.inject.Inject
-import kotlinx.serialization.json.JsonArray
 import net.primal.android.networking.primal.api.PrimalImportApi
 import net.primal.android.networking.relays.RelaysSocketManager
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -28,16 +27,36 @@ class NostrPublisher @Inject constructor(
     }
 
     @Throws(NostrPublishException::class)
-    private suspend fun publishEvent(signedNostrEvent: NostrEvent) {
+    private suspend fun publishAndImportEvent(
+        signedNostrEvent: NostrEvent,
+        outboxRelays: List<String> = emptyList(),
+    ): Boolean {
         relaysSocketManager.publishEvent(signedNostrEvent)
-        importEvent(signedNostrEvent)
+        if (outboxRelays.isNotEmpty()) {
+            try {
+                relaysSocketManager.publishEvent(
+                    nostrEvent = signedNostrEvent,
+                    relays = outboxRelays.map { Relay(url = it, read = false, write = true) },
+                )
+            } catch (error: NostrPublishException) {
+                Timber.w("Failed to publish to outbox relays.", error)
+            }
+        }
+        return importEvent(signedNostrEvent)
     }
 
     @Throws(NostrPublishException::class)
-    suspend fun signAndPublishNostrEvent(userId: String, unsignedNostrEvent: NostrUnsignedEvent): NostrEvent {
+    suspend fun signPublishImportNostrEvent(
+        userId: String,
+        unsignedNostrEvent: NostrUnsignedEvent,
+        outboxRelays: List<String> = emptyList(),
+    ): PublishResult {
         val signedNostrEvent = nostrNotary.signNostrEvent(userId = userId, event = unsignedNostrEvent)
-        publishEvent(signedNostrEvent = signedNostrEvent)
-        return signedNostrEvent
+        val imported = publishAndImportEvent(signedNostrEvent = signedNostrEvent, outboxRelays = outboxRelays)
+        return PublishResult(
+            nostrEvent = signedNostrEvent,
+            imported = imported,
+        )
     }
 
     @Throws(NostrPublishException::class)
@@ -59,40 +78,14 @@ class NostrPublisher @Inject constructor(
             contacts = contacts,
             content = content,
         )
-        publishEvent(signedNostrEvent)
+        publishAndImportEvent(signedNostrEvent)
         return signedNostrEvent
-    }
-
-    @Throws(NostrPublishException::class)
-    suspend fun publishShortTextNote(
-        userId: String,
-        content: String,
-        tags: Set<JsonArray> = emptySet(),
-        outboxRelays: List<String> = emptyList(),
-    ): Boolean {
-        val noteEvent = nostrNotary.signShortTextNoteEvent(
-            userId = userId,
-            tags = tags.toList(),
-            noteContent = content,
-        )
-        relaysSocketManager.publishEvent(nostrEvent = noteEvent)
-        if (outboxRelays.isNotEmpty()) {
-            try {
-                relaysSocketManager.publishEvent(
-                    nostrEvent = noteEvent,
-                    relays = outboxRelays.map { Relay(url = it, read = false, write = true) },
-                )
-            } catch (error: NostrPublishException) {
-                Timber.w("Failed to publish to outbox relays.", error)
-            }
-        }
-        return importEvent(noteEvent)
     }
 
     @Throws(NostrPublishException::class)
     suspend fun setMuteList(userId: String, muteList: Set<String>): NostrEvent {
         val signedNostrEvent = nostrNotary.signMuteListNostrEvent(userId = userId, mutedUserIds = muteList)
-        publishEvent(signedNostrEvent)
+        publishAndImportEvent(signedNostrEvent)
         return signedNostrEvent
     }
 
@@ -107,7 +100,7 @@ class NostrPublisher @Inject constructor(
             receiverId = receiverId,
             encryptedContent = encryptedContent,
         )
-        publishEvent(signedNostrEvent)
+        publishAndImportEvent(signedNostrEvent)
         return signedNostrEvent
     }
 

@@ -8,30 +8,19 @@ import net.primal.android.core.serialization.json.decodeFromStringOrNull
 
 @Serializable
 data class NoteEditorArgs(
-    val replyToNoteId: String? = null,
-    val replyToArticleNaddr: String? = null,
-    val replyToHighlightId: String? = null,
+    val referencedNoteId: String? = null,
+    val referencedArticleNaddr: String? = null,
+    val referencedHighlightNevent: String? = null,
     val mediaUris: List<String> = emptyList(),
     val content: String = "",
     val contentSelectionStart: Int = 0,
     val contentSelectionEnd: Int = 0,
     val taggedUsers: List<NoteTaggedUser> = emptyList(),
+    val isQuoting: Boolean = false,
 ) {
     fun toJson(): String = NostrJson.encodeToString(this)
 
     companion object {
-        fun List<String>.toNostrUriInNoteEditorArgs(): NoteEditorArgs {
-            val preFillContent = TextFieldValue(
-                text = this.joinToString(separator = "\n\n", prefix = "\n\n") { "nostr:$it" },
-            )
-            return preFillContent.asNoteEditorArgs()
-        }
-
-        fun String.toNostrUriInNoteEditorArgs(): NoteEditorArgs {
-            val preFillContent = TextFieldValue(text = "\n\nnostr:$this")
-            return preFillContent.asNoteEditorArgs()
-        }
-
         fun String.jsonAsNoteEditorArgs(): NoteEditorArgs? {
             return NostrJson.decodeFromStringOrNull<NoteEditorArgs>(this)
         }

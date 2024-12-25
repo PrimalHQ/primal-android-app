@@ -61,7 +61,7 @@ class EventRepository @Inject constructor(
 
         try {
             statsUpdater.increaseLikeStats()
-            nostrPublisher.signAndPublishNostrEvent(
+            nostrPublisher.signPublishImportNostrEvent(
                 userId = userId,
                 unsignedNostrEvent = NostrUnsignedEvent(
                     pubKey = userId,
@@ -95,7 +95,7 @@ class EventRepository @Inject constructor(
 
         try {
             statsUpdater.increaseRepostStats()
-            nostrPublisher.signAndPublishNostrEvent(
+            nostrPublisher.signPublishImportNostrEvent(
                 userId = userId,
                 unsignedNostrEvent = NostrUnsignedEvent(
                     pubKey = userId,

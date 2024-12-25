@@ -184,7 +184,7 @@ class ProfileRepository @Inject constructor(
         tags: List<JsonArray>,
         content: String,
     ) = withContext(dispatchers.io()) {
-        val nostrEventResponse = nostrPublisher.signAndPublishNostrEvent(
+        val publishResult = nostrPublisher.signPublishImportNostrEvent(
             userId = userId,
             unsignedNostrEvent = NostrUnsignedEvent(
                 pubKey = userId,
@@ -196,7 +196,7 @@ class ProfileRepository @Inject constructor(
 
         userRepository.updateFollowList(
             userId = userId,
-            contactsUserAccount = nostrEventResponse.asUserAccountFromFollowListEvent(),
+            contactsUserAccount = publishResult.nostrEvent.asUserAccountFromFollowListEvent(),
         )
     }
 
@@ -248,7 +248,7 @@ class ProfileRepository @Inject constructor(
                 "${NostrEventKind.LongFormContent.value}:$profileId:$articleId".asReplaceableEventTag()
             }
 
-            nostrPublisher.signAndPublishNostrEvent(
+            nostrPublisher.signPublishImportNostrEvent(
                 userId = userId,
                 unsignedNostrEvent = NostrUnsignedEvent(
                     pubKey = userId,
