@@ -519,25 +519,23 @@ fun AmountWithCurrencySwitcher(
 
             Row(
                 modifier = Modifier.clickable {
-                    val newMode = if (state.currencyMode == CurrencyMode.FIAT) {
+                    val newCurrencyMode = if (state.currencyMode == CurrencyMode.FIAT) {
                         CurrencyMode.SATS
                     } else {
                         CurrencyMode.FIAT
                     }
-                    onChangeCurrencyMode(newMode)
+                    onChangeCurrencyMode(newCurrencyMode)
                 },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 val numberFormat = remember { NumberFormat.getNumberInstance() }
+
                 Text(
-                    text =
-                    if (state.currencyMode != CurrencyMode.FIAT) {
-                        stringResource(id = R.string.wallet_usd_prefix) +
-                            "${numberFormat.format(amount.toFloat()) ?: "⌛"} " +
-                            stringResource(id = R.string.wallet_usd_suffix)
+                    text = if (state.currencyMode != CurrencyMode.FIAT) {
+                        amount.formatUsd(numberFormat)
                     } else {
-                        "${numberFormat.format(amount.toLong())} ${stringResource(R.string.wallet_sats_suffix)}"
+                        amount.formatSats(numberFormat)
                     },
                     textAlign = TextAlign.Center,
                     maxLines = 1,
@@ -884,4 +882,17 @@ private fun CreateTransactionContract.UiState.resolveTransactionTitle(): String?
 @Composable
 private fun CreateTransactionContract.UiState.resolveTransactionSubtitle(): String? {
     return profileLightningAddress ?: transaction.targetOnChainAddress?.ellipsizeOnChainAddress()
+}
+
+@Composable
+fun String.formatUsd(numberFormat: NumberFormat): String {
+    val amount = this.toBigDecimalOrNull() ?: return "⌛"
+    return stringResource(id = R.string.wallet_usd_prefix) +
+        "${numberFormat.format(amount.toFloat())} " +
+        stringResource(id = R.string.wallet_usd_suffix)
+}
+
+@Composable
+fun String.formatSats(numberFormat: NumberFormat): String {
+    return "${numberFormat.format(this.toLong())} ${stringResource(R.string.wallet_sats_suffix)}"
 }
