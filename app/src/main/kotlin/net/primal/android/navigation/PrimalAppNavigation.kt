@@ -46,11 +46,11 @@ import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.findActivity
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.drawer.DrawerScreenDestination
+import net.primal.android.editor.NoteEditorScreen
 import net.primal.android.editor.di.noteEditorViewModel
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteEditorArgs.Companion.asNoteEditorArgs
 import net.primal.android.editor.domain.NoteEditorArgs.Companion.jsonAsNoteEditorArgs
-import net.primal.android.editor.NoteEditorScreen
 import net.primal.android.explore.asearch.AdvancedSearchContract
 import net.primal.android.explore.asearch.AdvancedSearchScreen
 import net.primal.android.explore.asearch.AdvancedSearchViewModel

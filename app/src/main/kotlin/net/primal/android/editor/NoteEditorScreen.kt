@@ -348,10 +348,20 @@ private fun LazyListScope.referencedEventsAndConversationAsQuote(
     referencedArticle: FeedArticleUi?,
     referencedHighlight: HighlightUi?,
 ) {
+    if (referencedNote != null) {
+        item {
+            ReferencedNoteCard(
+                modifier = modifier,
+                data = referencedNote,
+                noteCallbacks = NoteCallbacks(),
+            )
+        }
+    }
+
     if (referencedArticle != null || referencedHighlight != null) {
         item {
             Column(
-                modifier = modifier,
+                modifier = modifier.padding(top = if (referencedNote != null) 8.dp else 0.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 if (referencedHighlight != null) {
@@ -365,16 +375,6 @@ private fun LazyListScope.referencedEventsAndConversationAsQuote(
                     ReferencedArticleCard(data = referencedArticle)
                 }
             }
-        }
-    }
-
-    if (referencedNote != null) {
-        item {
-            ReferencedNoteCard(
-                modifier = modifier,
-                data = referencedNote,
-                noteCallbacks = NoteCallbacks(),
-            )
         }
     }
 }
