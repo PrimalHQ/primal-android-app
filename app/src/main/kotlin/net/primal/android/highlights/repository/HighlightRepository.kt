@@ -17,6 +17,7 @@ import net.primal.android.nostr.ext.asReplaceableEventTag
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.nostr.publish.NostrPublisher
+import net.primal.android.nostr.utils.Nevent
 
 class HighlightRepository @Inject constructor(
     private val database: PrimalDatabase,
@@ -58,8 +59,12 @@ class HighlightRepository @Inject constructor(
             ),
         )
         val highlightData = highlightNostrEvent.asHighlightData()
-
         database.highlights().upsert(highlightData)
+        Nevent(
+            kind = NostrEventKind.Highlight.value,
+            userId = highlightData.authorId,
+            eventId = highlightData.highlightId,
+        )
     }
 
     suspend fun publishDeleteHighlight(userId: String, highlightId: String) =

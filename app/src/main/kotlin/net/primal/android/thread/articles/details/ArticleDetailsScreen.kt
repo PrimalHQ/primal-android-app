@@ -30,6 +30,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -80,6 +81,7 @@ import net.primal.android.nostr.ext.isNostrUri
 import net.primal.android.nostr.ext.isNote
 import net.primal.android.nostr.ext.takeAsNoteHexIdOrNull
 import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
+import net.primal.android.nostr.utils.Nip19TLV.toNeventString
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
@@ -124,6 +126,26 @@ fun ArticleDetailsScreen(
         when (it) {
             Lifecycle.Event.ON_START -> viewModel.setEvent(UiEvent.UpdateContent)
             else -> Unit
+        }
+    }
+
+    LaunchedEffect(viewModel) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is ArticleDetailsContract.SideEffect.HighlightCreated -> {
+                    if (effect.isQuoteRequested) {
+                        noteCallbacks.onHighlightQuoteClick?.invoke(
+                            effect.highlightNevent.toNeventString(),
+                            effect.articleNaddr.toNaddrString(),
+                        )
+                    } else if (effect.isCommentRequested) {
+                        noteCallbacks.onHighlightReplyClick?.invoke(
+                            effect.highlightNevent.eventId,
+                            effect.articleNaddr.toNaddrString(),
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -545,11 +567,27 @@ private fun ArticleContentWithComments(
                         markdown = part.markdown,
                         markwon = markwon,
                         onHighlight = { selection, paragraph ->
-                            detailsEventPublisher(UiEvent.CreateHighlight(content = selection, context = paragraph))
+                            detailsEventPublisher(
+                                UiEvent.PublishHighlight(content = selection, context = paragraph),
+                            )
                         },
                         onQuoteHighlight = { selection, paragraph ->
+                            detailsEventPublisher(
+                                UiEvent.PublishHighlight(
+                                    content = selection,
+                                    context = paragraph,
+                                    isQuoteRequested = true,
+                                ),
+                            )
                         },
                         onCommentHighlight = { selection, paragraph ->
+                            detailsEventPublisher(
+                                UiEvent.PublishHighlight(
+                                    content = selection,
+                                    context = paragraph,
+                                    isCommentRequested = true,
+                                ),
+                            )
                         },
                     )
                 }
