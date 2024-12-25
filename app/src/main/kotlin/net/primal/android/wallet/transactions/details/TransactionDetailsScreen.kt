@@ -107,6 +107,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
 import net.primal.android.wallet.domain.TxState
 import net.primal.android.wallet.domain.TxType
+import net.primal.android.wallet.repository.isValidExchangeRate
 import net.primal.android.wallet.transactions.details.TransactionDetailsContract.UiState
 import net.primal.android.wallet.transactions.list.TransactionIcon
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
@@ -561,12 +562,14 @@ private fun ColumnScope.TransactionUsdValues(
         )
     }
 
-    numberFormat.formatSafely(currentUsdAmount)?.let { formattedUsdAmount ->
-        PrimalDivider()
-        TransactionDetailListItem(
-            section = stringResource(id = R.string.wallet_transaction_details_currents_usd_item),
-            value = "$$formattedUsdAmount",
-        )
+    if (currentExchangeRate.isValidExchangeRate()) {
+        numberFormat.formatSafely(currentUsdAmount)?.let { formattedUsdAmount ->
+            PrimalDivider()
+            TransactionDetailListItem(
+                section = stringResource(id = R.string.wallet_transaction_details_currents_usd_item),
+                value = "$$formattedUsdAmount",
+            )
+        }
     }
 }
 
