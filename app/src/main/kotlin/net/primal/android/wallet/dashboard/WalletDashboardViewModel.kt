@@ -25,6 +25,7 @@ import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState
 import net.primal.android.wallet.db.WalletTransaction
+import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SatsPurchase
@@ -39,6 +40,7 @@ class WalletDashboardViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val primalBillingClient: PrimalBillingClient,
     private val subscriptionsManager: SubscriptionsManager,
+    private val exchangeRateHandler: ExchangeRateHandler,
 ) : ViewModel() {
 
     private val activeUserId = activeAccountStore.activeUserId()
@@ -58,6 +60,7 @@ class WalletDashboardViewModel @Inject constructor(
 
     init {
         fetchWalletBalance()
+        observeUsdExchangeRate()
         subscribeToEvents()
         subscribeToActiveAccount()
         subscribeToPurchases()
@@ -114,6 +117,22 @@ class WalletDashboardViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.w(error)
             }
+        }
+
+    private fun observeUsdExchangeRate() {
+        viewModelScope.launch {
+            fetchExchangeRate()
+            exchangeRateHandler.usdExchangeRate.collect {
+                setState { copy(exchangeBtcUsdRate = it) }
+            }
+        }
+    }
+
+    private fun fetchExchangeRate() =
+        viewModelScope.launch {
+            exchangeRateHandler.updateExchangeRate(
+                userId = activeAccountStore.activeUserId(),
+            )
         }
 
     private fun enablePrimalWallet() =

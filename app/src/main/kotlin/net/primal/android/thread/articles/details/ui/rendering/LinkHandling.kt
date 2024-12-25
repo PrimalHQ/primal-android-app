@@ -1,4 +1,4 @@
-package net.primal.android.thread.articles.details.ui
+package net.primal.android.thread.articles.details.ui.rendering
 
 import android.net.Uri
 import net.primal.android.nostr.ext.takeAsNaddrOrNull

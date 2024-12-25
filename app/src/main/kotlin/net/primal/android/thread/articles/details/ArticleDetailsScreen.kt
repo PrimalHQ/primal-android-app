@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -31,6 +30,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
@@ -50,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
+import coil.compose.SubcomposeAsyncImage
 import java.text.NumberFormat
 import kotlinx.coroutines.launch
 import net.primal.android.R
@@ -79,6 +81,7 @@ import net.primal.android.nostr.ext.isNostrUri
 import net.primal.android.nostr.ext.isNote
 import net.primal.android.nostr.ext.takeAsNoteHexIdOrNull
 import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
+import net.primal.android.nostr.utils.Nip19TLV.toNeventString
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
@@ -101,10 +104,12 @@ import net.primal.android.thread.articles.details.ui.ArticleDetailsHeader
 import net.primal.android.thread.articles.details.ui.ArticleHashtags
 import net.primal.android.thread.articles.details.ui.FloatingArticlePill
 import net.primal.android.thread.articles.details.ui.HighlightActivityBottomSheetHandler
-import net.primal.android.thread.articles.details.ui.rendering.HtmlRenderer
 import net.primal.android.thread.articles.details.ui.rendering.MarkdownRenderer
+import net.primal.android.thread.articles.details.ui.rendering.handleArticleLinkClick
+import net.primal.android.thread.articles.details.ui.rendering.isValidHttpOrHttpsUrl
+import net.primal.android.thread.articles.details.ui.rendering.rememberPrimalMarkwon
 import net.primal.android.thread.articles.details.ui.rendering.replaceProfileNostrUrisWithMarkdownLinks
-import net.primal.android.thread.articles.details.ui.rendering.splitIntoParagraphs
+import net.primal.android.thread.articles.details.ui.rendering.splitMarkdownByInlineImages
 import net.primal.android.thread.articles.details.ui.rendering.splitMarkdownByNostrUris
 import net.primal.android.wallet.zaps.canZap
 
@@ -121,6 +126,26 @@ fun ArticleDetailsScreen(
         when (it) {
             Lifecycle.Event.ON_START -> viewModel.setEvent(UiEvent.UpdateContent)
             else -> Unit
+        }
+    }
+
+    LaunchedEffect(viewModel) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is ArticleDetailsContract.SideEffect.HighlightCreated -> {
+                    if (effect.isQuoteRequested) {
+                        noteCallbacks.onHighlightQuoteClick?.invoke(
+                            effect.highlightNevent.toNeventString(),
+                            effect.articleNaddr.toNaddrString(),
+                        )
+                    } else if (effect.isCommentRequested) {
+                        noteCallbacks.onHighlightReplyClick?.invoke(
+                            effect.highlightNevent.eventId,
+                            effect.articleNaddr.toNaddrString(),
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -162,7 +187,7 @@ private fun ArticleDetailsScreen(
         mutableStateOf(
             (detailsState.article?.content ?: "")
                 .splitMarkdownByNostrUris()
-                .flatMap { it.splitIntoParagraphs() }
+                .flatMap { it.splitMarkdownByInlineImages() }
                 .replaceProfileNostrUrisWithMarkdownLinks(npubToDisplayNameMap = detailsState.npubToDisplayNameMap)
                 .buildArticleRenderParts(referencedNotes = detailsState.referencedNotes),
         )
@@ -296,10 +321,10 @@ private fun ArticleDetailsScreen(
             } else {
                 ArticleContentWithComments(
                     state = detailsState,
+                    detailsEventPublisher = detailsEventPublisher,
                     articleParts = articleParts,
                     listState = listState,
                     paddingValues = paddingValues,
-                    showHighlights = detailsState.showHighlights,
                     onArticleCommentClick = {
                         detailsState.naddr?.toNaddrString()?.let { noteCallbacks.onArticleReplyClick?.invoke(it) }
                     },
@@ -307,8 +332,6 @@ private fun ArticleDetailsScreen(
                     onZapOptionsClick = { invokeZapOptionsOrShowWarning() },
                     onGoToWallet = onGoToWallet,
                     noteCallbacks = noteCallbacks,
-                    onHighlightClick = { detailsEventPublisher(UiEvent.SelectHighlight(it)) },
-                    onFollowUnfollowClick = { detailsEventPublisher(UiEvent.ToggleAuthorFollows) },
                     onPostAction = { action ->
                         when (action) {
                             FeedPostAction.Reply -> {
@@ -430,22 +453,35 @@ private fun ArticleDetailsTopAppBar(
 @Composable
 private fun ArticleContentWithComments(
     state: ArticleDetailsContract.UiState,
+    detailsEventPublisher: (UiEvent) -> Unit,
     articleParts: List<ArticlePartRender>,
     listState: LazyListState = rememberLazyListState(),
-    showHighlights: Boolean,
     paddingValues: PaddingValues,
     onArticleCommentClick: (naddr: String) -> Unit,
     onArticleHashtagClick: (hashtag: String) -> Unit,
     onZapOptionsClick: () -> Unit,
-    onHighlightClick: (String) -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     onPostAction: ((FeedPostAction) -> Unit)? = null,
     onPostLongPressAction: ((FeedPostAction) -> Unit)? = null,
-    onFollowUnfollowClick: (() -> Unit)? = null,
     onUiError: ((UiError) -> Unit)? = null,
 ) {
     val uriHandler = LocalUriHandler.current
+    val markwon = rememberPrimalMarkwon(
+        showHighlights = state.showHighlights,
+        highlights = state.highlights,
+        onLinkClick = { link ->
+            link.handleArticleLinkClick(
+                onProfileClick = noteCallbacks.onProfileClick,
+                onNoteClick = noteCallbacks.onNoteClick,
+                onArticleClick = noteCallbacks.onArticleClick,
+                onUrlClick = { url -> uriHandler.openUriSafely(url) },
+            )
+        },
+        onHighlightClick = {
+            detailsEventPublisher(UiEvent.SelectHighlight(it))
+        },
+    )
 
     LazyColumn(
         modifier = Modifier
@@ -469,7 +505,7 @@ private fun ArticleContentWithComments(
                     authorInternetIdentifier = state.article.authorInternetIdentifier,
                     authorLegendaryCustomization = state.article.authorLegendaryCustomization,
                     onAuthorAvatarClick = { noteCallbacks.onProfileClick?.invoke(state.article.authorId) },
-                    onFollowUnfollowClick = onFollowUnfollowClick,
+                    onFollowUnfollowClick = { detailsEventPublisher(UiEvent.ToggleAuthorFollows) },
                 )
                 PrimalDivider()
             }
@@ -515,28 +551,13 @@ private fun ArticleContentWithComments(
             key = { index -> "${articleParts[index]}#$index" },
             contentType = { index ->
                 when (articleParts[index]) {
-                    is ArticlePartRender.HtmlRender -> "HtmlRender"
                     is ArticlePartRender.MarkdownRender -> "MarkdownRender"
                     is ArticlePartRender.NoteRender -> "NoteRender"
+                    is ArticlePartRender.ImageRender -> "ImageRender"
                 }
             },
         ) { index ->
             when (val part = articleParts[index]) {
-                is ArticlePartRender.HtmlRender -> {
-                    HtmlRenderer(
-                        modifier = Modifier
-                            .background(color = AppTheme.colorScheme.surfaceVariant)
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .padding(horizontal = 8.dp),
-                        html = part.html,
-                        onProfileClick = noteCallbacks.onProfileClick,
-                        onNoteClick = noteCallbacks.onNoteClick,
-                        onArticleClick = noteCallbacks.onArticleClick,
-                        onUrlClick = { url -> uriHandler.openUriSafely(url) },
-                    )
-                }
-
                 is ArticlePartRender.MarkdownRender -> {
                     MarkdownRenderer(
                         modifier = Modifier
@@ -544,13 +565,30 @@ private fun ArticleContentWithComments(
                             .fillMaxWidth()
                             .padding(all = 16.dp),
                         markdown = part.markdown,
-                        showHighlights = showHighlights,
-                        highlights = state.highlights,
-                        onProfileClick = noteCallbacks.onProfileClick,
-                        onNoteClick = noteCallbacks.onNoteClick,
-                        onArticleClick = noteCallbacks.onArticleClick,
-                        onUrlClick = { url -> uriHandler.openUriSafely(url) },
-                        onHighlightClick = onHighlightClick,
+                        markwon = markwon,
+                        onHighlight = { selection, paragraph ->
+                            detailsEventPublisher(
+                                UiEvent.PublishHighlight(content = selection, context = paragraph),
+                            )
+                        },
+                        onQuoteHighlight = { selection, paragraph ->
+                            detailsEventPublisher(
+                                UiEvent.PublishHighlight(
+                                    content = selection,
+                                    context = paragraph,
+                                    isQuoteRequested = true,
+                                ),
+                            )
+                        },
+                        onCommentHighlight = { selection, paragraph ->
+                            detailsEventPublisher(
+                                UiEvent.PublishHighlight(
+                                    content = selection,
+                                    context = paragraph,
+                                    isCommentRequested = true,
+                                ),
+                            )
+                        },
                     )
                 }
 
@@ -566,6 +604,18 @@ private fun ArticleContentWithComments(
                             noteCallbacks = noteCallbacks,
                         )
                     }
+                }
+
+                is ArticlePartRender.ImageRender -> {
+                    SubcomposeAsyncImage(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .clip(AppTheme.shapes.medium),
+                        model = part.imageUrl,
+                        contentScale = ContentScale.FillWidth,
+                        contentDescription = null,
+                    )
                 }
             }
         }
@@ -743,6 +793,10 @@ private fun List<String>.buildArticleRenderParts(referencedNotes: List<FeedPostU
                 referencedNotes.find { it.postId == part.takeAsNoteHexIdOrNull() }
                     ?.let { ArticlePartRender.NoteRender(note = it) }
                     ?: ArticlePartRender.MarkdownRender(markdown = part)
+            }
+
+            part.isValidHttpOrHttpsUrl() -> {
+                ArticlePartRender.ImageRender(imageUrl = part)
             }
 
             else -> ArticlePartRender.MarkdownRender(markdown = part)

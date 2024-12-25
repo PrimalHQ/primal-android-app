@@ -60,8 +60,8 @@ android {
         applicationId = "net.primal.android"
         minSdk = 26
         targetSdk = 35
-        versionCode = 197
-        versionName = "2.0.29"
+        versionCode = 198
+        versionName = "2.0.30"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -232,13 +232,21 @@ dependencies {
     implementation(libs.constraintlayout)
 
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.emoji2)
     implementation(libs.androidx.emoji2.emojipicker)
     implementation(libs.androidx.webkit)
 
-    implementation(libs.jetbrains.markdown)
-    implementation(libs.richtext.commonmark)
-    implementation(libs.richtext.ui)
-    implementation(libs.richtext.ui.material3)
+    implementation(libs.markwon.core)
+    implementation(libs.markwon.image)
+    implementation(libs.markwon.imagecoil)
+    implementation(libs.markwon.inlineparser)
+    implementation(libs.markwon.latex)
+    implementation(libs.markwon.strikethrough)
+    implementation(libs.markwon.tables)
+    implementation(libs.markwon.tasklist)
+    implementation(libs.markwon.html)
+    implementation(libs.markwon.linkify)
+    implementation(libs.markwon.simple)
 
     implementation(libs.navigation.material)
 

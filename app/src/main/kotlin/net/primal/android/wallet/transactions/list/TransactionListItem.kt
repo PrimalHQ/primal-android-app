@@ -1,5 +1,6 @@
 package net.primal.android.wallet.transactions.list
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -9,13 +10,17 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Surface
@@ -28,7 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -37,7 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import java.math.BigDecimal
 import java.text.NumberFormat
 import java.time.Instant
 import java.time.ZoneId
@@ -45,7 +49,6 @@ import java.time.format.DateTimeFormatter
 import kotlin.time.Duration.Companion.seconds
 import net.primal.android.R
 import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.WrappedContentWithSuffix
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -56,8 +59,11 @@ import net.primal.android.core.compose.icons.primaliconpack.WalletReceive
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.theme.AppTheme
+import net.primal.android.wallet.dashboard.CurrencyMode
 import net.primal.android.wallet.domain.TxState
 import net.primal.android.wallet.domain.TxType
+import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
+import net.primal.android.wallet.utils.CurrencyConversionUtils.toUsd
 import net.primal.android.wallet.walletDepositColor
 import net.primal.android.wallet.walletTransactionIconBackgroundColor
 import net.primal.android.wallet.walletWithdrawColor
@@ -68,6 +74,8 @@ fun TransactionListItem(
     numberFormat: NumberFormat,
     onAvatarClick: (String) -> Unit,
     onClick: (String) -> Unit,
+    currencyMode: CurrencyMode,
+    exchangeBtcUsdRate: Double?,
 ) {
     val alphaScale by if (data.txState == TxState.CREATED || data.txState == TxState.PROCESSING) {
         val infiniteTransition = rememberInfiniteTransition(label = "PendingPulsing${data.txId}")
@@ -123,7 +131,10 @@ fun TransactionListItem(
         trailingContent = {
             TransactionTrailingContent(
                 txType = data.txType,
-                txAmountInSats = numberFormat.format(data.txAmountInSats.toLong()),
+                txAmountInSats = BigDecimal.valueOf(data.txAmountInSats.toLong()),
+                currencyMode = currencyMode,
+                numberFormat = numberFormat,
+                exchangeBtcUsdRate = exchangeBtcUsdRate,
             )
         },
     )
@@ -236,32 +247,60 @@ private fun TransactionSupportContent(
 }
 
 @Composable
-private fun TransactionTrailingContent(txAmountInSats: String, txType: TxType) {
-    Column(
-        horizontalAlignment = Alignment.End,
-    ) {
-        IconText(
-            text = txAmountInSats,
-            iconSize = 16.sp,
-            trailingIcon = when (txType) {
+private fun TransactionTrailingContent(
+    txAmountInSats: BigDecimal,
+    txType: TxType,
+    currencyMode: CurrencyMode,
+    numberFormat: NumberFormat,
+    exchangeBtcUsdRate: Double?,
+) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        AnimatedContent(
+            modifier = Modifier.widthIn(min = 45.dp),
+            label = "CurrencyContent",
+            targetState = currencyMode,
+        ) { targetCurrencyMode ->
+            Column(
+                horizontalAlignment = Alignment.End,
+            ) {
+                val text = if (targetCurrencyMode == CurrencyMode.FIAT) {
+                    BigDecimal.valueOf(txAmountInSats.toBtc()).toUsd(exchangeBtcUsdRate)
+                        .let { numberFormat.format(it.toFloat()) }
+                } else {
+                    numberFormat.format(txAmountInSats.toLong())
+                }
+                val suffix = if (targetCurrencyMode == CurrencyMode.FIAT) {
+                    R.string.wallet_usd_suffix
+                } else {
+                    R.string.wallet_sats_suffix
+                }
+
+                Text(
+                    text = text,
+                    style = AppTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = AppTheme.colorScheme.onSurface,
+                )
+
+                Text(
+                    text = stringResource(id = suffix),
+                    style = AppTheme.typography.bodySmall,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                )
+            }
+        }
+
+        Icon(
+            modifier = Modifier.size(16.dp),
+            imageVector = when (txType) {
                 TxType.DEPOSIT -> PrimalIcons.WalletReceive
                 TxType.WITHDRAW -> PrimalIcons.WalletPay
             },
-            trailingIconTintColor = when (txType) {
+            contentDescription = null,
+            tint = when (txType) {
                 TxType.DEPOSIT -> walletDepositColor
                 TxType.WITHDRAW -> walletWithdrawColor
             },
-            style = AppTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold,
-            color = AppTheme.colorScheme.onSurface,
-        )
-        IconText(
-            text = "${stringResource(id = R.string.wallet_sats_suffix)} ",
-            iconSize = 16.sp,
-            trailingIcon = PrimalIcons.WalletReceive,
-            trailingIconTintColor = Color.Transparent,
-            style = AppTheme.typography.bodySmall,
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
         )
     }
 }
@@ -407,6 +446,8 @@ fun PreviewTransactionListItem(@PreviewParameter(provider = TxDataProvider::clas
                 numberFormat = NumberFormat.getNumberInstance(),
                 onAvatarClick = {},
                 onClick = {},
+                currencyMode = CurrencyMode.SATS,
+                exchangeBtcUsdRate = 100000.0,
             )
         }
     }

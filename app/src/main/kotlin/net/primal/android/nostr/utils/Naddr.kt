@@ -34,3 +34,5 @@ fun JsonArray.aTagToNaddr(): Naddr? {
         null
     }
 }
+
+fun Naddr.asATagValue() = "${this.kind}:${this.userId}:${this.identifier}"

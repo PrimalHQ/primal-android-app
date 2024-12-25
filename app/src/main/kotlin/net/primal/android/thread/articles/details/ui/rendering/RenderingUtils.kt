@@ -1,8 +1,6 @@
 package net.primal.android.thread.articles.details.ui.rendering
 
-import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
-import org.intellij.markdown.html.HtmlGenerator
-import org.intellij.markdown.parser.MarkdownParser
+import java.net.URL
 
 private val nostrNpub1Regex = Regex("""\bnostr:npub1(\w+)\b""")
 private val nostrNote1Regex = Regex("\\b(nostr:|@)((note)1\\w+)\\b|#\\[(\\d+)]")
@@ -43,17 +41,30 @@ fun String.splitMarkdownByNostrUris(): List<String> {
     return chunks.filter { it.isNotBlank() }
 }
 
-fun String.splitIntoParagraphs(): List<String> {
-    return this.split(Regex("\\n\\s*\\n")).map { it.trim() }
+fun String.splitMarkdownByInlineImages(): List<String> {
+    val regex = Regex("""!\[([^\]]*)\]\(([^)]+)\)""")
+    val result = mutableListOf<String>()
+
+    var lastEndIndex = 0
+
+    regex.findAll(this).forEach { match ->
+        if (match.range.first > lastEndIndex) {
+            result.add(this.substring(lastEndIndex, match.range.first))
+        }
+        result.add(match.groupValues[2])
+        lastEndIndex = match.range.last + 1
+    }
+
+    if (lastEndIndex < this.length) {
+        result.add(this.substring(lastEndIndex))
+    }
+
+    return result
 }
 
-@Suppress("unused")
-private fun String.markdownToHtml(): String {
-    val flavour = CommonMarkFlavourDescriptor()
-    val parsedTree = MarkdownParser(flavour).buildMarkdownTreeFromString(this)
-    val htmlContent = HtmlGenerator(this, parsedTree, flavour).generateHtml()
-    return ARTICLE_BASE_HTML.replace(
-        oldValue = "{{ CONTENT }}",
-        newValue = htmlContent.substring(startIndex = 6, endIndex = htmlContent.length - 7),
-    )
+fun String.isValidHttpOrHttpsUrl(): Boolean {
+    return runCatching {
+        val url = URL(this)
+        url.protocol == "http" || url.protocol == "https"
+    }.getOrNull() == true
 }
