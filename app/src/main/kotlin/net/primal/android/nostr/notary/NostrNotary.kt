@@ -59,19 +59,6 @@ class NostrNotary @Inject constructor(
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
 
-    fun signShortTextNoteEvent(
-        userId: String,
-        tags: List<JsonArray>,
-        noteContent: String,
-    ): NostrEvent {
-        return NostrUnsignedEvent(
-            pubKey = userId,
-            kind = NostrEventKind.ShortTextNote.value,
-            tags = tags.toList(),
-            content = noteContent,
-        ).signOrThrow(nsec = findNsecOrThrow(userId))
-    }
-
     fun signAuthorizationNostrEvent(
         userId: String,
         description: String,

@@ -19,6 +19,7 @@ import net.primal.android.nostr.ext.parseEventTags
 import net.primal.android.nostr.ext.parseHashtagTags
 import net.primal.android.nostr.ext.parsePubkeyTags
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.notes.db.PostData
 
@@ -94,14 +95,19 @@ class NotePublishHandler @Inject constructor(
             relayHintsMap[noteId]?.let { relayUrl -> listOf(relayUrl) }
         } ?: emptyList()
 
-        return withContext(dispatcherProvider.io()) {
-            nostrPublisher.publishShortTextNote(
+        val publishResult = withContext(dispatcherProvider.io()) {
+            nostrPublisher.signPublishImportNostrEvent(
                 userId = userId,
-                content = refinedContent,
-                tags = pubkeyTags + noteTags + hashtagTags + iMetaTags,
+                unsignedNostrEvent = NostrUnsignedEvent(
+                    pubKey = userId,
+                    kind = NostrEventKind.ShortTextNote.value,
+                    tags = (pubkeyTags + noteTags + hashtagTags + iMetaTags).toList(),
+                    content = refinedContent,
+                ),
                 outboxRelays = outboxRelays,
             )
         }
+        return publishResult.imported
     }
 
     /*

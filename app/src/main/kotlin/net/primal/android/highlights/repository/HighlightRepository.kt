@@ -43,7 +43,7 @@ class HighlightRepository @Inject constructor(
         alt: String = DEFAULT_ALT_TAG,
         createdAt: Long = Instant.now().epochSecond,
     ) = withContext(dispatchers.io()) {
-        val highlightNostrEvent = nostrPublisher.signAndPublishNostrEvent(
+        val publishResult = nostrPublisher.signPublishImportNostrEvent(
             userId = userId,
             unsignedNostrEvent = NostrUnsignedEvent(
                 pubKey = userId,
@@ -58,6 +58,7 @@ class HighlightRepository @Inject constructor(
                 ),
             ),
         )
+        val highlightNostrEvent = publishResult.nostrEvent
         val highlightData = highlightNostrEvent.asHighlightData()
         database.highlights().upsert(highlightData)
         Nevent(
@@ -69,7 +70,7 @@ class HighlightRepository @Inject constructor(
 
     suspend fun publishDeleteHighlight(userId: String, highlightId: String) =
         withContext(dispatchers.io()) {
-            nostrPublisher.signAndPublishNostrEvent(
+            nostrPublisher.signPublishImportNostrEvent(
                 userId = userId,
                 unsignedNostrEvent = NostrUnsignedEvent(
                     pubKey = userId,

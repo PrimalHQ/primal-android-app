@@ -144,7 +144,7 @@ fun NoteAttachment.asIMetaTag(): JsonArray {
 }
 
 fun String.parseEventTags(marker: String? = null): List<JsonArray> {
-    val nostrUris = parseNostrUris()
+    val nostrUris = this.parseNostrUris()
     if (nostrUris.isEmpty()) return emptyList()
 
     val tags = mutableListOf<JsonArray>()

@@ -64,10 +64,12 @@ class NotePublishHandlerTest {
             )
 
             coVerify {
-                nostrPublisher.publishShortTextNote(
+                nostrPublisher.signPublishImportNostrEvent(
                     withArg { it shouldBe expectedUserId },
-                    withArg { it shouldBe expectedContent },
-                    withArg { it shouldBe expectedTags },
+                    withArg {
+                        it.content shouldBe expectedContent
+                        it.tags shouldBe expectedTags
+                    },
                 )
             }
         }
@@ -99,10 +101,12 @@ class NotePublishHandlerTest {
             )
 
             coVerify {
-                nostrPublisher.publishShortTextNote(
+                nostrPublisher.signPublishImportNostrEvent(
                     withArg { it shouldBe expectedUserId },
-                    withArg { it shouldBe expectedContent },
-                    withArg { it shouldBe expectedTags },
+                    withArg {
+                        it.content shouldBe expectedContent
+                        it.tags shouldBe expectedTags
+                    },
                 )
             }
         }
@@ -139,10 +143,12 @@ class NotePublishHandlerTest {
             )
 
             coVerify {
-                nostrPublisher.publishShortTextNote(
+                nostrPublisher.signPublishImportNostrEvent(
                     withArg { it shouldBe expectedUserId },
-                    withArg { it shouldBe expectedContent },
-                    withArg { it shouldBe expectedTags },
+                    withArg {
+                        it.content shouldBe expectedContent
+                        it.tags shouldBe expectedTags
+                    },
                 )
             }
         }
@@ -171,10 +177,12 @@ class NotePublishHandlerTest {
             )
 
             coVerify {
-                nostrPublisher.publishShortTextNote(
+                nostrPublisher.signPublishImportNostrEvent(
                     withArg { it shouldBe expectedUserId },
-                    withArg { it shouldBe expectedContent },
-                    withArg { it shouldBe expectedTags },
+                    withArg {
+                        it.content shouldBe expectedContent
+                        it.tags shouldBe expectedTags
+                    },
                 )
             }
         }
@@ -207,10 +215,12 @@ class NotePublishHandlerTest {
             )
 
             coVerify {
-                nostrPublisher.publishShortTextNote(
+                nostrPublisher.signPublishImportNostrEvent(
                     withArg { it shouldBe expectedUserId },
-                    withArg { it shouldBe expectedContent },
-                    withArg { it shouldBe expectedTags },
+                    withArg {
+                        it.content shouldBe expectedContent
+                        it.tags shouldBe expectedTags
+                    },
                 )
             }
         }
@@ -240,10 +250,12 @@ class NotePublishHandlerTest {
             )
 
             coVerify {
-                nostrPublisher.publishShortTextNote(
+                nostrPublisher.signPublishImportNostrEvent(
                     withArg { it shouldBe expectedUserId },
-                    withArg { it shouldBe expectedContent },
-                    withArg { it shouldBe expectedTags },
+                    withArg {
+                        it.content shouldBe expectedContent
+                        it.tags shouldBe expectedTags
+                    },
                 )
             }
         }
@@ -272,10 +284,12 @@ class NotePublishHandlerTest {
             )
 
             coVerify {
-                nostrPublisher.publishShortTextNote(
+                nostrPublisher.signPublishImportNostrEvent(
                     withArg { it shouldBe expectedUserId },
-                    withArg { it shouldBe expectedContent },
-                    withArg { it shouldBe expectedTags },
+                    withArg {
+                        it.content shouldBe expectedContent
+                        it.tags shouldBe expectedTags
+                    },
                 )
             }
         }
@@ -308,10 +322,12 @@ class NotePublishHandlerTest {
             )
 
             coVerify {
-                nostrPublisher.publishShortTextNote(
+                nostrPublisher.signPublishImportNostrEvent(
                     withArg { it shouldBe expectedUserId },
-                    withArg { it shouldBe expectedContent },
-                    withArg { it shouldBe expectedTags },
+                    withArg {
+                        it.content shouldBe expectedContent
+                        it.tags shouldBe expectedTags
+                    },
                 )
             }
         }
@@ -340,10 +356,12 @@ class NotePublishHandlerTest {
             )
 
             coVerify {
-                nostrPublisher.publishShortTextNote(
+                nostrPublisher.signPublishImportNostrEvent(
                     withArg { it shouldBe expectedUserId },
-                    withArg { it shouldBe expectedContent },
-                    withArg { it shouldBe expectedTags },
+                    withArg {
+                        it.content shouldBe expectedContent
+                        it.tags shouldBe expectedTags
+                    },
                 )
             }
         }
@@ -376,10 +394,12 @@ class NotePublishHandlerTest {
             )
 
             coVerify {
-                nostrPublisher.publishShortTextNote(
+                nostrPublisher.signPublishImportNostrEvent(
                     withArg { it shouldBe expectedUserId },
-                    withArg { it shouldBe expectedContent },
-                    withArg { it shouldBe expectedTags },
+                    withArg {
+                        it.content shouldBe expectedContent
+                        it.tags shouldBe expectedTags
+                    },
                 )
             }
         }
@@ -419,10 +439,12 @@ class NotePublishHandlerTest {
             )
 
             coVerify {
-                nostrPublisher.publishShortTextNote(
+                nostrPublisher.signPublishImportNostrEvent(
                     withArg { it shouldBe expectedUserId },
-                    withArg { it shouldBe expectedContent },
-                    withArg { it shouldBe expectedTags },
+                    withArg {
+                        it.content shouldBe expectedContent
+                        it.tags shouldBe expectedTags
+                    },
                 )
             }
         }
@@ -455,10 +477,12 @@ class NotePublishHandlerTest {
             )
 
             coVerify {
-                nostrPublisher.publishShortTextNote(
+                nostrPublisher.signPublishImportNostrEvent(
                     withArg { it shouldBe expectedUserId },
-                    withArg { it shouldBe expectedContent },
-                    withArg { it shouldBe expectedTags },
+                    withArg {
+                        it.content shouldBe expectedContent
+                        it.tags shouldBe expectedTags
+                    },
                 )
             }
         }
@@ -499,10 +523,12 @@ class NotePublishHandlerTest {
             )
 
             coVerify {
-                nostrPublisher.publishShortTextNote(
+                nostrPublisher.signPublishImportNostrEvent(
                     withArg { it shouldBe expectedUserId },
-                    withArg { it shouldBe expectedContent },
-                    withArg { it shouldBe expectedTags },
+                    withArg {
+                        it.content shouldBe expectedContent
+                        it.tags shouldBe expectedTags
+                    },
                 )
             }
         }
@@ -550,10 +576,12 @@ class NotePublishHandlerTest {
             )
 
             coVerify {
-                nostrPublisher.publishShortTextNote(
+                nostrPublisher.signPublishImportNostrEvent(
                     withArg { it shouldBe expectedUserId },
-                    withArg { it shouldBe expectedContent },
-                    withArg { it shouldBe expectedTags },
+                    withArg {
+                        it.content shouldBe expectedContent
+                        it.tags shouldBe expectedTags
+                    },
                 )
             }
         }
@@ -595,10 +623,12 @@ class NotePublishHandlerTest {
             )
 
             coVerify {
-                nostrPublisher.publishShortTextNote(
+                nostrPublisher.signPublishImportNostrEvent(
                     withArg { it shouldBe expectedUserId },
-                    withArg { it shouldBe expectedContent },
-                    withArg { it shouldBe expectedTags },
+                    withArg {
+                        it.content shouldBe expectedContent
+                        it.tags shouldBe expectedTags
+                    },
                 )
             }
         }
@@ -1086,13 +1116,13 @@ class NotePublishHandlerTest {
         val postDao = mockk<PostDao> {
             every { findByPostId(any()) } returns post
         }
-        val eventHints = mockk<EventRelayHintsDao> {
+        val eventHintsDao = mockk<EventRelayHintsDao> {
             coEvery { findById(any()) } returns eventHints
         }
 
         return mockk<PrimalDatabase> {
             every { posts() } returns postDao
-            every { eventHints() } returns eventHints
+            every { eventHints() } returns eventHintsDao
         }
     }
 
