@@ -70,3 +70,63 @@ fun FiatAmountText(
         }
     }
 }
+
+@Composable
+fun FiatAmountStringText(
+    modifier: Modifier,
+    amount: String?,
+    textSize: TextUnit = 42.sp,
+    amountColor: Color = Color.Unspecified,
+    currencyColor: Color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+) {
+    val numberFormat = remember { NumberFormat.getNumberInstance() }
+
+    Row(
+        modifier = modifier
+            .animateContentSize(),
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.Start,
+    ) {
+        if (amount != null) {
+            Text(
+                modifier = Modifier.padding(bottom = (textSize.value / 2 - 5).dp),
+                text = "${stringResource(id = R.string.wallet_usd_prefix)} ",
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                style = AppTheme.typography.bodyMedium,
+                fontSize = textSize / 2,
+                color = currencyColor,
+            )
+        }
+
+        val formattedNumber = amount?.let {
+            val inputString = it
+            if (inputString.contains(".")) {
+                val integerPart = inputString.substring(0, inputString.indexOf('.'))
+                val decimalPart = inputString.substring(inputString.indexOf('.'))
+                numberFormat.format(integerPart.toFloat()) + decimalPart
+            } else {
+                numberFormat.format(it.toFloat())
+            }
+        }
+
+        Text(
+            text = formattedNumber ?: "⌛",
+            textAlign = TextAlign.Center,
+            style = AppTheme.typography.displayMedium,
+            fontSize = textSize,
+            color = amountColor,
+        )
+
+        if (amount != null) {
+            Text(
+                modifier = Modifier.padding(bottom = (textSize.value / 6).dp),
+                text = " ${stringResource(id = R.string.wallet_usd_suffix)}",
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                style = AppTheme.typography.bodyMedium,
+                color = currencyColor,
+            )
+        }
+    }
+}

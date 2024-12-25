@@ -8,6 +8,8 @@ interface PrimalNumericPadContract {
     sealed class UiEvent {
         sealed class NumericInputEvent : UiEvent() {
             data class DigitInputEvent(val digit: Int) : NumericInputEvent()
+
+            data object DotInputEvent : NumericInputEvent()
             data object BackspaceEvent : NumericInputEvent()
             data object ResetAmountEvent : NumericInputEvent()
         }

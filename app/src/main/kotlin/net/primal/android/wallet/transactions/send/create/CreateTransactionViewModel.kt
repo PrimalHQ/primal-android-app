@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.math.BigDecimal
-import java.math.RoundingMode
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,11 +26,14 @@ import net.primal.android.wallet.api.model.MiningFeeTier
 import net.primal.android.wallet.api.model.WithdrawRequestBody
 import net.primal.android.wallet.domain.DraftTxStatus
 import net.primal.android.wallet.domain.SubWallet
+import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract.UiEvent
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract.UiState
 import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
 import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
+import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
+import net.primal.android.wallet.utils.CurrencyConversionUtils.fromUsdToSats
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.isLightningAddress
 import timber.log.Timber
@@ -44,6 +46,7 @@ class CreateTransactionViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val walletRepository: WalletRepository,
     private val walletTextParser: WalletTextParser,
+    private val exchangeRateHandler: ExchangeRateHandler,
 ) : ViewModel() {
 
     private val argLnbc = savedStateHandle.lnbc
@@ -58,6 +61,7 @@ class CreateTransactionViewModel @Inject constructor(
     init {
         subscribeToEvents()
         updateMiningFees()
+        observeUsdExchangeRate()
 
         if (argLnbc != null) {
             viewModelScope.launch {
@@ -71,6 +75,22 @@ class CreateTransactionViewModel @Inject constructor(
         }
     }
 
+    private fun observeUsdExchangeRate() {
+        viewModelScope.launch {
+            fetchExchangeRate()
+            exchangeRateHandler.usdExchangeRate.collect {
+                setState { copy(currentExchangeRate = it) }
+            }
+        }
+    }
+
+    private fun fetchExchangeRate() =
+        viewModelScope.launch {
+            exchangeRateHandler.updateExchangeRate(
+                userId = activeUserStore.activeUserId(),
+            )
+        }
+
     private fun subscribeToEvents() =
         viewModelScope.launch {
             events.collect { event ->
@@ -83,11 +103,9 @@ class CreateTransactionViewModel @Inject constructor(
                         setState {
                             copy(
                                 transaction = transaction.copy(amountSats = event.amountInSats),
-                                amountInUsd = BigDecimal.valueOf(event.amountInSats.toDouble())
-                                    .divide(BigDecimal.valueOf(100_000_000))
-                                    .multiply(BigDecimal.valueOf(93942.69))
-                                    .setScale(2, RoundingMode.HALF_EVEN)
-                                    .toString()
+                                amountInUsd = BigDecimal(event.amountInSats.toDouble())
+                                    .fromSatsToUsd(state.value.currentExchangeRate)
+                                    .toString(),
                             )
                         }
                     }
@@ -96,11 +114,11 @@ class CreateTransactionViewModel @Inject constructor(
                         setState {
                             copy(
                                 amountInUsd = event.amountInUsd,
-                                transaction = transaction.copy(amountSats = BigDecimal.valueOf(event.amountInUsd.toDouble())
-                                    .multiply(BigDecimal.valueOf(93942.69))
-                                    .multiply(BigDecimal.valueOf(100_000_000))
-                                    .toLong()
-                                    .toString())
+                                transaction = transaction.copy(
+                                    amountSats = BigDecimal(event.amountInUsd)
+                                        .fromUsdToSats(state.value.currentExchangeRate)
+                                        .toString(),
+                                ),
                             )
                         }
                     }

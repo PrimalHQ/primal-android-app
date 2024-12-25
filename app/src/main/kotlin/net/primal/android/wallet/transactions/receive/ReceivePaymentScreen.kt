@@ -85,6 +85,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.numericpad.PrimalNumericPad
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.theme.AppTheme
+import net.primal.android.wallet.dashboard.CurrencyMode
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
 import net.primal.android.wallet.domain.Network
 import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiState
@@ -589,6 +590,7 @@ private fun ReceivePaymentEditor(
                     modifier = Modifier.fillMaxWidth(),
                     amountInSats = amountInBtc.toSats().toString(),
                     onAmountInSatsChanged = { amountInBtc = it.toULong().toBtc().formatAsString() },
+                    currencyMode = CurrencyMode.SATS,
                 )
 
                 Row(

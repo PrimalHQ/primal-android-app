@@ -21,6 +21,7 @@ interface CreateTransactionContract {
         val profileLegendaryCustomization: LegendaryCustomization? = null,
         val currencyMode: CurrencyMode = CurrencyMode.SATS,
         val amountInUsd: String = "0",
+        val currentExchangeRate: Double? = null,
     ) {
         fun isNotInvoice() = transaction.lnInvoice == null && transaction.onChainInvoice == null
     }
