@@ -3,6 +3,9 @@ package net.primal.android.wallet.transactions.send.create.ui
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -494,18 +497,26 @@ fun AmountWithCurrencySwitcher(
         )
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        if (state.currencyMode == CurrencyMode.SATS) {
-            BtcAmountText(
-                modifier = commonModifier,
-                amountInBtc = state.transaction.amountSats.toLong().toBtc().toBigDecimal(),
-                textSize = 48.sp,
-            )
-        } else {
-            FiatAmountStringText(
-                modifier = commonModifier,
-                amount = state.amountInUsd,
-                textSize = 48.sp,
-            )
+        AnimatedContent(
+            label = "AmountText",
+            targetState = state.currencyMode,
+            transitionSpec = {
+                fadeIn() togetherWith fadeOut()
+            }
+        ) { targetCurrencyMode ->
+            if (targetCurrencyMode == CurrencyMode.SATS) {
+                BtcAmountText(
+                    modifier = commonModifier,
+                    amountInBtc = state.transaction.amountSats.toLong().toBtc().toBigDecimal(),
+                    textSize = 48.sp,
+                )
+            } else {
+                FiatAmountStringText(
+                    modifier = commonModifier,
+                    amount = state.amountInUsd,
+                    textSize = 48.sp,
+                )
+            }
         }
 
         if (state.currentExchangeRate.isValidExchangeRate()) {
