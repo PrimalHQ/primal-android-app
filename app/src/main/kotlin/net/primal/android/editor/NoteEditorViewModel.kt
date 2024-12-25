@@ -33,6 +33,7 @@ import net.primal.android.attachments.repository.AttachmentsRepository
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.files.FileAnalyser
+import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.editor.NoteEditorContract.SideEffect
 import net.primal.android.editor.NoteEditorContract.UiEvent
@@ -541,7 +542,7 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private fun String.concatenateReferencedEvents() =
         this + listOfNotNull(
-            args.referencedNoteId,
+            args.referencedNoteId?.hexToNoteHrp(),
             args.referencedHighlightNevent,
             args.referencedArticleNaddr,
         ).joinToString(separator = " \n\n", prefix = " \n\n") { "nostr:$it" }

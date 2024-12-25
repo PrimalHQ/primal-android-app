@@ -89,6 +89,7 @@ import net.primal.android.notes.feed.note.ui.FeedNoteHeader
 import net.primal.android.notes.feed.note.ui.NoteContent
 import net.primal.android.notes.feed.note.ui.ReferencedArticleCard
 import net.primal.android.notes.feed.note.ui.ReferencedHighlight
+import net.primal.android.notes.feed.note.ui.ReferencedNoteCard
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 
@@ -185,7 +186,7 @@ private fun NoteEditorContract.UiState.resolvePublishNoteButtonText() =
         }
     }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@ExperimentalMaterial3Api
 @Composable
 private fun NoteEditorBox(
     state: NoteEditorContract.UiState,
@@ -198,9 +199,7 @@ private fun NoteEditorBox(
         focusRequester.requestFocus()
     }
 
-    val outlineColor = AppTheme.colorScheme.outline
     val editorListState = rememberLazyListState()
-
     var noteEditorMaxHeightPx by remember { mutableIntStateOf(0) }
     var replyNoteHeightPx by remember { mutableIntStateOf(0) }
     val replyingToPaddingTop = 8.dp
@@ -231,20 +230,11 @@ private fun NoteEditorBox(
             state = editorListState,
         ) {
             if (!state.isQuoting) {
-                referencedHighlightAndArticleAsReply(
+                referencedEventsAndConversationAsReplyTo(
                     modifier = Modifier.padding(all = 16.dp),
                     referencedHighlight = state.referencedHighlight,
                     referencedArticle = state.referencedArticle,
-                )
-            }
-
-            items(
-                items = state.conversation,
-                key = { it.postId },
-            ) {
-                ReplyToNote(
-                    replyToNote = it,
-                    connectionLineColor = outlineColor,
+                    conversation = state.conversation,
                 )
             }
 
@@ -252,7 +242,7 @@ private fun NoteEditorBox(
                 NoteEditor(
                     state = state,
                     replyingToPaddingTop = replyingToPaddingTop,
-                    outlineColor = outlineColor,
+                    outlineColor = AppTheme.colorScheme.outline,
                     focusRequester = focusRequester,
                     eventPublisher = eventPublisher,
                     onReplyToNoticeHeightChanged = { replyingToNoticeHeightPx = it },
@@ -275,10 +265,13 @@ private fun NoteEditorBox(
             }
 
             if (state.isQuoting) {
-                referencedHighlightAndArticleAsQuote(
-                    modifier = Modifier.padding(start = 74.dp, top = 12.dp, end = 16.dp),
-                    referencedHighlight = state.referencedHighlight,
+                referencedEventsAndConversationAsQuote(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 72.dp, end = 16.dp),
+                    referencedNote = state.conversation.lastOrNull(),
                     referencedArticle = state.referencedArticle,
+                    referencedHighlight = state.referencedHighlight,
                 )
             }
 
@@ -297,11 +290,12 @@ private fun NoteEditorBox(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-private fun LazyListScope.referencedHighlightAndArticleAsReply(
+@ExperimentalMaterial3Api
+private fun LazyListScope.referencedEventsAndConversationAsReplyTo(
     modifier: Modifier = Modifier,
-    referencedHighlight: HighlightUi?,
     referencedArticle: FeedArticleUi?,
+    referencedHighlight: HighlightUi?,
+    conversation: List<FeedPostUi> = emptyList(),
 ) {
     if (referencedHighlight != null) {
         item(
@@ -316,6 +310,7 @@ private fun LazyListScope.referencedHighlightAndArticleAsReply(
             )
         }
     }
+
     if (referencedArticle != null) {
         item(
             key = referencedArticle.eventId,
@@ -331,32 +326,54 @@ private fun LazyListScope.referencedHighlightAndArticleAsReply(
             }
         }
     }
+
+    if (conversation.isNotEmpty()) {
+        items(
+            items = conversation,
+            key = { it.postId },
+        ) {
+            ReplyToNote(
+                replyToNote = it,
+                connectionLineColor = AppTheme.colorScheme.outline,
+            )
+        }
+    }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-private fun LazyListScope.referencedHighlightAndArticleAsQuote(
+@ExperimentalMaterial3Api
+private fun LazyListScope.referencedEventsAndConversationAsQuote(
     modifier: Modifier = Modifier,
-    referencedHighlight: HighlightUi?,
+    referencedNote: FeedPostUi?,
     referencedArticle: FeedArticleUi?,
+    referencedHighlight: HighlightUi?,
 ) {
-    item(
-        key = "${referencedHighlight?.highlightId}:${referencedArticle?.articleId}",
-        contentType = "quotedContentRendered",
-    ) {
-        Column(
-            modifier = modifier,
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            if (referencedHighlight != null) {
-                ReferencedHighlight(
-                    highlight = referencedHighlight.toReferencedHighlight(),
-                    isDarkTheme = isAppInDarkPrimalTheme(),
-                    onClick = {},
-                )
+    if (referencedArticle != null || referencedHighlight != null) {
+        item {
+            Column(
+                modifier = modifier,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                if (referencedHighlight != null) {
+                    ReferencedHighlight(
+                        highlight = referencedHighlight.toReferencedHighlight(),
+                        isDarkTheme = isAppInDarkPrimalTheme(),
+                        onClick = {},
+                    )
+                }
+                if (referencedArticle != null) {
+                    ReferencedArticleCard(data = referencedArticle)
+                }
             }
-            if (referencedArticle != null) {
-                ReferencedArticleCard(data = referencedArticle)
-            }
+        }
+    }
+
+    if (referencedNote != null) {
+        item {
+            ReferencedNoteCard(
+                modifier = modifier,
+                data = referencedNote,
+                noteCallbacks = NoteCallbacks(),
+            )
         }
     }
 }
@@ -372,7 +389,7 @@ private fun NoteEditor(
     eventPublisher: (UiEvent) -> Unit,
 ) {
     Column {
-        if (state.isReply && state.replyToNote != null) {
+        if (state.isReply && state.replyToNote != null && !state.isQuoting) {
             ReplyingToText(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -387,7 +404,7 @@ private fun NoteEditor(
                 modifier = Modifier
                     .drawWithCache {
                         onDrawBehind {
-                            if (state.isReply) {
+                            if (state.isReply && !state.isQuoting) {
                                 drawLine(
                                     color = outlineColor,
                                     start = Offset(

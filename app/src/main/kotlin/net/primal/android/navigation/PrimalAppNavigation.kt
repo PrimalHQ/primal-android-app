@@ -45,7 +45,6 @@ import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.findActivity
 import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.editor.di.noteEditorViewModel
 import net.primal.android.editor.domain.NoteEditorArgs
@@ -305,12 +304,12 @@ private fun NavController.navigateToPremiumRelay() = navigate(route = "premium/m
 
 fun noteCallbacksHandler(navController: NavController) =
     NoteCallbacks(
-        onNoteClick = { postId -> navController.navigateToThread(noteId = postId) },
-        onNoteReplyClick = { postId -> navController.navigateToNoteEditor(NoteEditorArgs(referencedNoteId = postId)) },
+        onNoteClick = { noteId -> navController.navigateToThread(noteId = noteId) },
+        onNoteReplyClick = { noteId -> navController.navigateToNoteEditor(NoteEditorArgs(referencedNoteId = noteId)) },
         onNoteQuoteClick = { noteId ->
             navController.navigateToNoteEditor(
                 args = NoteEditorArgs(
-                    referencedNoteId = noteId.hexToNoteHrp(),
+                    referencedNoteId = noteId,
                     isQuoting = true,
                 ),
             )
