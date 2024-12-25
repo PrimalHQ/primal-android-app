@@ -1126,6 +1126,7 @@ class NotePublishHandlerTest {
         }
     }
 
+    @Deprecated(message = "We are not going to use reflection.")
     private fun NotePublishHandler.getConstructRootTags() =
         this.getPrivateMethod(
             "constructRootTags",
@@ -1136,6 +1137,7 @@ class NotePublishHandlerTest {
             String::class.java,
         )
 
+    @Deprecated(message = "We are not going to use reflection.")
     private fun NotePublishHandler.getConstructPubkeyTags() =
         this.getPrivateMethod(
             "constructPubkeyTags",
@@ -1145,6 +1147,7 @@ class NotePublishHandlerTest {
             String::class.java,
         )
 
+    @Deprecated(message = "We are not going to use reflection.")
     private fun NotePublishHandler.getConstructReplyTags() =
         this.getPrivateMethod(
             "constructReplyTags",
@@ -1152,6 +1155,7 @@ class NotePublishHandlerTest {
             String::class.java,
         )
 
+    @Deprecated(message = "We are not going to use reflection.")
     private fun NotePublishHandler.getBuildRefinedContent() =
         this.getPrivateMethod(
             "buildRefinedContent",
@@ -1159,6 +1163,7 @@ class NotePublishHandlerTest {
             String::class.java,
         )
 
+    @Deprecated(message = "We are not going to use reflection.")
     private fun NotePublishHandler.getPrivateMethod(name: String, vararg parameterTypes: Class<*>): Method {
         val method = this.javaClass.getDeclaredMethod(name, *parameterTypes)
         method.isAccessible = true
