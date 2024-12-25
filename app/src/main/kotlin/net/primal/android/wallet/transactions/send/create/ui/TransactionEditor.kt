@@ -147,6 +147,17 @@ fun TransactionEditor(
                     if (state.isNotInvoice()) {
                         isNumericPadOn = true
                     }
+
+                    if (state.currentExchangeRate.isValidExchangeRate()) {
+                        val newCurrencyMode = if (mode == CurrencyMode.FIAT) {
+                            CurrencyMode.SATS
+                        } else {
+                            CurrencyMode.FIAT
+                        }
+                        eventPublisher(
+                            CreateTransactionContract.UiEvent.ChangeCurrencyMode(currencyMode = newCurrencyMode),
+                        )
+                    }
                 },
                 onChangeCurrencyMode = {
                     eventPublisher(
@@ -249,6 +260,7 @@ private fun TransactionMainContent(
                         state.amountInUsd
                     },
                     currencyMode = state.currencyMode,
+                    maximumUsdAmount = state.maximumUsdAmount,
                     onAmountInSatsChanged = {
                             newAmount ->
                         onAmountChanged(newAmount)
@@ -457,7 +469,7 @@ private fun TransactionHeaderColumn(
 
         Spacer(modifier = Modifier.height(headerSpacing.value))
 
-        AmountWithCurrencySwitcher(
+        TransactionAmountText(
             state = state,
             uiMode = uiMode,
             onAmountClick = onAmountClick,
@@ -469,7 +481,7 @@ private fun TransactionHeaderColumn(
 }
 
 @Composable
-fun AmountWithCurrencySwitcher(
+fun TransactionAmountText(
     state: CreateTransactionContract.UiState,
     uiMode: UiDensityMode,
     onAmountClick: () -> Unit,
@@ -502,7 +514,7 @@ fun AmountWithCurrencySwitcher(
             targetState = state.currencyMode,
             transitionSpec = {
                 fadeIn() togetherWith fadeOut()
-            }
+            },
         ) { targetCurrencyMode ->
             if (targetCurrencyMode == CurrencyMode.SATS) {
                 BtcAmountText(
@@ -522,46 +534,63 @@ fun AmountWithCurrencySwitcher(
         if (state.currentExchangeRate.isValidExchangeRate()) {
             Spacer(modifier = Modifier.height(5.dp))
 
-            val amount = if (state.currencyMode != CurrencyMode.SATS) {
-                state.transaction.amountSats
-            } else {
-                state.amountInUsd
-            }
-
-            Row(
-                modifier = Modifier.clickable {
-                    val newCurrencyMode = if (state.currencyMode == CurrencyMode.FIAT) {
-                        CurrencyMode.SATS
-                    } else {
-                        CurrencyMode.FIAT
-                    }
-                    onChangeCurrencyMode(newCurrencyMode)
-                },
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                val numberFormat = remember { NumberFormat.getNumberInstance() }
-
-                Text(
-                    text = if (state.currencyMode != CurrencyMode.FIAT) {
-                        amount.formatUsd(numberFormat)
-                    } else {
-                        amount.formatSats(numberFormat)
-                    },
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    style = AppTheme.typography.bodyMedium,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                )
-
-                Icon(
-                    modifier = Modifier.size(16.dp),
-                    imageVector = PrimalIcons.WalletChangeCurrency,
-                    contentDescription = null,
-                    tint = walletSwitchCurrencyColor,
-                )
-            }
+            TransactionAmountSubtext(
+                currencyMode = state.currencyMode,
+                amountSats = state.transaction.amountSats,
+                amountUsd = state.amountInUsd,
+                onChangeCurrencyMode = onChangeCurrencyMode,
+            )
         }
+    }
+}
+
+@Composable
+private fun TransactionAmountSubtext(
+    currencyMode: CurrencyMode,
+    amountSats: String,
+    amountUsd: String,
+    onChangeCurrencyMode: (currencyMode: CurrencyMode) -> Unit,
+) {
+    val amount = if (currencyMode != CurrencyMode.SATS) {
+        amountSats
+    } else {
+        amountUsd
+    }
+
+    Row(
+        modifier = Modifier
+            .padding(start = 16.dp)
+            .clickable {
+                val newCurrencyMode = if (currencyMode == CurrencyMode.FIAT) {
+                    CurrencyMode.SATS
+                } else {
+                    CurrencyMode.FIAT
+                }
+                onChangeCurrencyMode(newCurrencyMode)
+            },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        val numberFormat = remember { NumberFormat.getNumberInstance() }
+
+        Text(
+            text = if (currencyMode != CurrencyMode.FIAT) {
+                amount.formatUsd(numberFormat)
+            } else {
+                amount.formatSats(numberFormat)
+            },
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            style = AppTheme.typography.bodyMedium,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+        )
+
+        Icon(
+            modifier = Modifier.size(16.dp),
+            imageVector = PrimalIcons.WalletChangeCurrency,
+            contentDescription = null,
+            tint = walletSwitchCurrencyColor,
+        )
     }
 }
 

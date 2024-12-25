@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import java.math.BigDecimal
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Subtract
@@ -39,6 +40,7 @@ fun PrimalNumericPad(
     amountInSats: String,
     onAmountInSatsChanged: (String) -> Unit,
     currencyMode: CurrencyMode,
+    maximumUsdAmount: BigDecimal? = null,
 ) {
     val haptic = LocalHapticFeedback.current
     val viewModel = viewModel<PrimalNumericPadViewModel>()
@@ -57,13 +59,15 @@ fun PrimalNumericPad(
 
     val onNumberClick: (Int) -> Unit = {
         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-
+        val newAmount = BigDecimal.valueOf((amountInSats + it.toString()).toDouble())
         if (currencyMode == CurrencyMode.FIAT) {
-            val decimalPart = amountInSats.split(".")
-            val isDecimalValid = decimalPart.size != 2 || decimalPart[1].length < 2
+            if (newAmount <= maximumUsdAmount) {
+                val decimalPart = amountInSats.split(".")
+                val isDecimalValid = decimalPart.size != 2 || decimalPart[1].length < 2
 
-            if (isDecimalValid) {
-                viewModel.setEvent(NumericInputEvent.DigitInputEvent(it))
+                if (isDecimalValid) {
+                    viewModel.setEvent(NumericInputEvent.DigitInputEvent(it))
+                }
             }
         } else if (currencyMode == CurrencyMode.SATS) {
             viewModel.setEvent(NumericInputEvent.DigitInputEvent(it))
@@ -258,6 +262,7 @@ fun PreviewPrimalNumericPad() {
                 amountInSats = "0",
                 onAmountInSatsChanged = {},
                 currencyMode = CurrencyMode.SATS,
+                maximumUsdAmount = BigDecimal(94000),
             )
         }
     }

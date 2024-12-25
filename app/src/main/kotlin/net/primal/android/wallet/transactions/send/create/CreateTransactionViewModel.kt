@@ -35,8 +35,11 @@ import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
 import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.android.wallet.utils.CurrencyConversionUtils.fromUsdToSats
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
+import net.primal.android.wallet.utils.CurrencyConversionUtils.toUsd
 import net.primal.android.wallet.utils.isLightningAddress
 import timber.log.Timber
+
+private const val MAXIMUM_SATS = 99_999_990.00
 
 @HiltViewModel
 class CreateTransactionViewModel @Inject constructor(
@@ -80,6 +83,7 @@ class CreateTransactionViewModel @Inject constructor(
             fetchExchangeRate()
             exchangeRateHandler.usdExchangeRate.collect {
                 setState { copy(currentExchangeRate = it) }
+                setState { copy(maximumUsdAmount = getMaximumUsdAmount(it)) }
             }
         }
     }
@@ -90,6 +94,14 @@ class CreateTransactionViewModel @Inject constructor(
                 userId = activeUserStore.activeUserId(),
             )
         }
+
+    private fun getMaximumUsdAmount(exchangeRate: Double?): BigDecimal {
+        return (MAXIMUM_SATS)
+            .toBigDecimal()
+            .toBtc()
+            .toBigDecimal()
+            .toUsd(exchangeRate)
+    }
 
     private fun subscribeToEvents() =
         viewModelScope.launch {
@@ -105,7 +117,9 @@ class CreateTransactionViewModel @Inject constructor(
                                 transaction = transaction.copy(amountSats = event.amountInSats),
                                 amountInUsd = BigDecimal(event.amountInSats.toDouble())
                                     .fromSatsToUsd(state.value.currentExchangeRate)
-                                    .toString(),
+                                    .stripTrailingZeros()
+                                    .let { if (it.compareTo(BigDecimal.ZERO) == 0) BigDecimal.ZERO else it }
+                                    .toPlainString(),
                             )
                         }
                     }

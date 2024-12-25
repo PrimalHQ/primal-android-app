@@ -1,5 +1,6 @@
 package net.primal.android.wallet.transactions.send.create
 
+import java.math.BigDecimal
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.wallet.dashboard.CurrencyMode
@@ -22,6 +23,7 @@ interface CreateTransactionContract {
         val currencyMode: CurrencyMode = CurrencyMode.SATS,
         val amountInUsd: String = "0",
         val currentExchangeRate: Double? = null,
+        val maximumUsdAmount: BigDecimal? = null,
     ) {
         fun isNotInvoice() = transaction.lnInvoice == null && transaction.onChainInvoice == null
     }

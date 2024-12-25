@@ -79,8 +79,12 @@ class PrimalNumericPadViewModel : ViewModel() {
     private fun String.inputDigit(digit: Int): String {
         val oldValue = this
         return if (oldValue.length < MAX_INPUT_LENGTH) {
-            if (oldValue.isPositive() || oldValue == "0." || oldValue == "0.0") {
-                "$oldValue$digit"
+            if (oldValue.isPositive() || oldValue in listOf("0.", "0.0")) {
+                if (oldValue == "0.0" && digit == 0) {
+                    oldValue
+                } else {
+                    "$oldValue$digit"
+                }
             } else {
                 "$digit"
             }

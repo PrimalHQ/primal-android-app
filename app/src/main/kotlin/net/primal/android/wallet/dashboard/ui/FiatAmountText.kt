@@ -83,6 +83,7 @@ fun FiatAmountStringText(
 
     Row(
         modifier = modifier
+            .padding(end = (textSize.value / 2).dp)
             .animateContentSize(),
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.Start,
