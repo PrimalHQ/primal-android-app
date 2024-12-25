@@ -1,2 +1,3 @@
 Highlights in Reads.
+Wallet USD support.
 Stability and improvements.
