@@ -140,7 +140,7 @@ fun ArticleDetailsScreen(
                         )
                     } else if (effect.isCommentRequested) {
                         noteCallbacks.onHighlightReplyClick?.invoke(
-                            effect.highlightNevent.eventId,
+                            effect.highlightNevent.toNeventString(),
                             effect.articleNaddr.toNaddrString(),
                         )
                     }
