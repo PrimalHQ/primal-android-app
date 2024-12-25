@@ -3,6 +3,7 @@ package net.primal.android.thread.articles.details
 import net.primal.android.core.errors.UiError
 import net.primal.android.highlights.model.JoinedHighlightsUi
 import net.primal.android.nostr.utils.Naddr
+import net.primal.android.nostr.utils.Nevent
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.stats.ui.EventZapUiModel
@@ -28,8 +29,8 @@ interface ArticleDetailsContract {
 
     sealed class ArticlePartRender {
         data class MarkdownRender(val markdown: String) : ArticlePartRender()
-        data class HtmlRender(val html: String) : ArticlePartRender()
         data class NoteRender(val note: FeedPostUi) : ArticlePartRender()
+        data class ImageRender(val imageUrl: String) : ArticlePartRender()
     }
 
     sealed class UiEvent {
@@ -44,5 +45,20 @@ interface ArticleDetailsContract {
         data object DismissSelectedHighlight : UiEvent()
         data object PublishSelectedHighlight : UiEvent()
         data object DeleteSelectedHighlight : UiEvent()
+        data class PublishHighlight(
+            val content: String,
+            val context: String,
+            val isQuoteRequested: Boolean = false,
+            val isCommentRequested: Boolean = false,
+        ) : UiEvent()
+    }
+
+    sealed class SideEffect {
+        data class HighlightCreated(
+            val articleNaddr: Naddr,
+            val highlightNevent: Nevent,
+            val isQuoteRequested: Boolean = false,
+            val isCommentRequested: Boolean = false,
+        ) : SideEffect()
     }
 }

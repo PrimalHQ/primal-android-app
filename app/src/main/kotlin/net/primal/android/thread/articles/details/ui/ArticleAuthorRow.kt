@@ -72,11 +72,7 @@ fun ArticleAuthorRow(
                     fontSize = 16.sp,
                     lineHeight = 16.sp,
                 ),
-                customBadgeStyle = if (authorLegendaryCustomization?.customBadge == true) {
-                    authorLegendaryCustomization.legendaryStyle
-                } else {
-                    null
-                },
+                legendaryCustomization = authorLegendaryCustomization,
             )
 
             if (!authorInternetIdentifier.isNullOrBlank()) {

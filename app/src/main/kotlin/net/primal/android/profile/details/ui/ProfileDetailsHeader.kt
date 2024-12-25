@@ -340,8 +340,6 @@ private fun UserDisplayName(
     activeUserPremiumTier: String?,
     onPremiumBadgeClick: (tier: String) -> Unit,
 ) {
-    val hasCustomBadge = profilePremiumDetails?.legendaryCustomization?.customBadge == true
-
     Row(
         modifier = modifier.padding(top = 12.dp, bottom = 3.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -357,11 +355,7 @@ private fun UserDisplayName(
                 lineHeight = 20.sp,
                 fontWeight = FontWeight.Bold,
             ),
-            customBadgeStyle = if (hasCustomBadge) {
-                profilePremiumDetails?.legendaryCustomization?.legendaryStyle
-            } else {
-                null
-            },
+            legendaryCustomization = profilePremiumDetails?.legendaryCustomization,
         )
 
         val isPremiumBadgeClickable = activeUserPremiumTier == null ||

@@ -41,6 +41,8 @@ import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.explore.repository.ExploreRepository
+import net.primal.android.highlights.model.asHighlightUi
+import net.primal.android.highlights.repository.HighlightRepository
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.primal.upload.domain.UploadJob
@@ -65,6 +67,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val feedRepository: FeedRepository,
     private val notePublishHandler: NotePublishHandler,
     private val attachmentRepository: AttachmentsRepository,
+    private val highlightRepository: HighlightRepository,
     private val exploreRepository: ExploreRepository,
     private val profileRepository: ProfileRepository,
     private val articleRepository: ArticleRepository,
@@ -72,6 +75,7 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private val replyToNoteId = args.replyToNoteId
     private val replyToArticleNaddr = args.replyToArticleNaddr?.let(Nip19TLV::parseUriAsNaddrOrNull)
+    private val replyToHighlightId = args.replyToHighlightId
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -106,6 +110,10 @@ class NoteEditorViewModel @AssistedInject constructor(
             } else if (replyToArticleNaddr != null) {
                 fetchArticleDetailsFromNetwork(replyToArticleNaddr)
                 observeArticleByNaddr(naddr = replyToArticleNaddr)
+            }
+
+            if (replyToHighlightId != null) {
+                observeHighlight(highlightId = replyToHighlightId)
             }
 
             if (args.mediaUris.isNotEmpty()) {
@@ -160,6 +168,14 @@ class NoteEditorViewModel @AssistedInject constructor(
                     }
                 }
             }
+        }
+
+    private fun observeHighlight(highlightId: String) =
+        viewModelScope.launch {
+            highlightRepository.observeHighlightById(highlightId = highlightId)
+                .collect {
+                    setState { copy(replyToHighlight = it.asHighlightUi()) }
+                }
         }
 
     private fun subscribeToActiveAccount() =
@@ -251,6 +267,8 @@ class NoteEditorViewModel @AssistedInject constructor(
                     rootArticleAuthorId = article?.authorId,
                     rootPostId = if (article == null) rootPost?.postId else null,
                     replyToPostId = replyToPost?.postId,
+                    rootHighlightId = replyToHighlightId,
+                    rootHighlightAuthorId = _state.value.replyToHighlight?.author?.pubkey,
                     replyToAuthorId = replyToPost?.authorId,
                 )
 

@@ -1,63 +1,105 @@
 package net.primal.android.thread.articles.details.ui.rendering
 
+import android.content.ClipData
+import android.view.ActionMode
+import android.view.Menu
+import android.view.MenuItem
+import android.view.ViewGroup
+import android.widget.TextView
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.halilibo.richtext.commonmark.CommonMarkdownParseOptions
-import com.halilibo.richtext.commonmark.CommonmarkAstNodeParser
-import com.halilibo.richtext.markdown.BasicMarkdown
-import com.halilibo.richtext.ui.material3.RichText
-import net.primal.android.highlights.model.JoinedHighlightsUi
-import net.primal.android.theme.AppTheme
-import net.primal.android.thread.articles.details.ui.handleArticleLinkClick
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.viewpager.widget.ViewPager.LayoutParams
+import io.noties.markwon.Markwon
+import net.primal.android.R
 
 @Composable
 fun MarkdownRenderer(
     markdown: String,
-    showHighlights: Boolean,
+    markwon: Markwon,
     modifier: Modifier = Modifier,
-    highlights: List<JoinedHighlightsUi> = emptyList(),
-    onProfileClick: ((profileId: String) -> Unit)? = null,
-    onNoteClick: ((noteId: String) -> Unit)? = null,
-    onArticleClick: ((naddr: String) -> Unit)? = null,
-    onUrlClick: ((url: String) -> Unit)? = null,
-    onHighlightClick: ((highlightedText: String) -> Unit)? = null,
+    onHighlight: ((content: String, context: String) -> Unit)? = null,
+    onQuoteHighlight: ((content: String, context: String) -> Unit)? = null,
+    onCommentHighlight: ((content: String, context: String) -> Unit)? = null,
 ) {
-    val richTextStyle = buildPrimalRichTextStyle(
-        highlightColor = AppTheme.colorScheme.secondary,
-        codeBlockBackground = AppTheme.extraColorScheme.surfaceVariantAlt1,
-        codeBlockContent = AppTheme.colorScheme.onSurface,
-        outlineColor = AppTheme.colorScheme.outline,
-    )
-    val parser = remember(markdown) { CommonmarkAstNodeParser(CommonMarkdownParseOptions.Default) }
-    val astNode = remember(parser) { parser.parse(markdown) }
-
+    val clipboardManager = LocalClipboardManager.current
+    val menuItemLabelHighlight = stringResource(R.string.article_details_highlight_toolbar_highlight)
+    val menuItemLabelQuote = stringResource(R.string.article_details_highlight_toolbar_quote)
+    val menuItemLabelComment = stringResource(R.string.article_details_highlight_toolbar_comment)
+    val menuItemLabelCopy = stringResource(R.string.article_details_highlight_toolbar_copy)
     SelectionContainer {
-        PrimalMarkdownStylesProvider {
-            PrimalMarkdownUriHandlerProvider(
-                linkClickHandler = { url ->
-                    url.handleArticleLinkClick(
-                        onProfileClick = onProfileClick,
-                        onNoteClick = onNoteClick,
-                        onArticleClick = onArticleClick,
-                        onUrlClick = onUrlClick,
-                    )
-                },
-            ) {
-                RichText(
-                    modifier = modifier,
-                    style = richTextStyle,
-                ) {
-                    BasicMarkdown(
-                        astNode = astNode,
-                        astBlockNodeComposer = customBlockNodeComposer(
-                            highlights = if (showHighlights) highlights else emptyList(),
-                            onHighlightClick = onHighlightClick,
-                        ),
+        AndroidView(
+            modifier = modifier,
+            factory = { context ->
+                TextView(context).apply {
+                    layoutParams = ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+                    setTextIsSelectable(true)
+                    setCustomSelectionActionModeCallback(
+                        object : ActionMode.Callback {
+                            override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+                                menu?.clear()
+                                menu?.add(menuItemLabelHighlight)
+                                menu?.add(menuItemLabelQuote)
+                                menu?.add(menuItemLabelComment)
+                                menu?.add(menuItemLabelCopy)
+                                return true
+                            }
+
+                            override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+                                menu?.clear()
+                                menu?.add(menuItemLabelHighlight)
+                                menu?.add(menuItemLabelQuote)
+                                menu?.add(menuItemLabelComment)
+                                menu?.add(menuItemLabelCopy)
+                                return true
+                            }
+
+                            override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
+                                val selectedText = text.substring(selectionStart, selectionEnd)
+
+                                val paragraphStart = text
+                                    .lastIndexOf('\n', selectionStart - 1)
+                                    .takeIf { it != -1 }?.plus(1) ?: 0
+
+                                val paragraphEnd = text
+                                    .indexOf('\n', selectionEnd)
+                                    .takeIf { it != -1 } ?: text.length
+
+                                val paragraph = text.substring(paragraphStart, paragraphEnd)
+
+                                when (item?.title) {
+                                    menuItemLabelHighlight -> {
+                                        onHighlight?.invoke(selectedText, paragraph)
+                                    }
+
+                                    menuItemLabelQuote -> {
+                                        onQuoteHighlight?.invoke(selectedText, paragraph)
+                                    }
+
+                                    menuItemLabelComment -> {
+                                        onCommentHighlight?.invoke(selectedText, paragraph)
+                                    }
+
+                                    menuItemLabelCopy -> {
+                                        clipboardManager.setClip(ClipEntry(ClipData.newPlainText("", selectedText)))
+                                    }
+                                }
+                                mode?.finish()
+                                return true
+                            }
+
+                            override fun onDestroyActionMode(mode: ActionMode?) = Unit
+                        },
                     )
                 }
-            }
-        }
+            },
+            update = { textView ->
+                markwon.setMarkdown(textView, markdown)
+            },
+        )
     }
 }

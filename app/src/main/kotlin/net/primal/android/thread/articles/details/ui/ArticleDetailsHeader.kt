@@ -30,6 +30,7 @@ import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
 import net.primal.android.thread.articles.details.ui.rendering.MarkdownRenderer
+import net.primal.android.thread.articles.details.ui.rendering.rememberPrimalMarkwon
 
 @Composable
 fun ArticleDetailsHeader(
@@ -39,6 +40,7 @@ fun ArticleDetailsHeader(
     cover: CdnImage? = null,
     summary: String? = null,
 ) {
+    val markwon = rememberPrimalMarkwon()
     Column(
         modifier = modifier,
     ) {
@@ -109,7 +111,7 @@ fun ArticleDetailsHeader(
                         }
                     },
                 markdown = summary,
-                showHighlights = false,
+                markwon = markwon,
             )
         }
     }

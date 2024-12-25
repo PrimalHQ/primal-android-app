@@ -3,6 +3,7 @@ package net.primal.android.highlights.db
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface HighlightDao {
@@ -14,4 +15,7 @@ interface HighlightDao {
 
     @Query("DELETE FROM HighlightData WHERE highlightId = :highlightId")
     fun deleteById(highlightId: String)
+
+    @Query("SELECT * FROM HighlightData WHERE highlightId = :highlightId LIMIT 1")
+    fun observeById(highlightId: String): Flow<Highlight>
 }

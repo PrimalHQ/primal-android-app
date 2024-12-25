@@ -4,6 +4,8 @@ data class NoteCallbacks(
     val onNoteClick: ((noteId: String) -> Unit)? = null,
     val onNoteReplyClick: ((noteId: String) -> Unit)? = null,
     val onNoteQuoteClick: ((noteId: String) -> Unit)? = null,
+    val onHighlightReplyClick: ((highlightId: String, naddr: String) -> Unit)? = null,
+    val onHighlightQuoteClick: ((nevent: String, naddr: String) -> Unit)? = null,
     val onArticleClick: ((naddr: String) -> Unit)? = null,
     val onArticleReplyClick: ((naddr: String) -> Unit)? = null,
     val onArticleQuoteClick: ((naddr: String) -> Unit)? = null,

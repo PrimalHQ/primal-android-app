@@ -41,6 +41,7 @@ import net.primal.android.core.compose.icons.primaliconpack.PrimalBadgeTeal
 import net.primal.android.core.compose.icons.primaliconpack.Verified
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.utils.isPrimalIdentifier
+import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -57,11 +58,17 @@ fun NostrUserText(
     maxLines: Int = 1,
     internetIdentifierBadgeSize: Dp = 14.dp,
     internetIdentifierBadgeAlign: PlaceholderVerticalAlign = PlaceholderVerticalAlign.Center,
-    customBadgeStyle: LegendaryStyle? = null,
+    legendaryCustomization: LegendaryCustomization? = null,
     annotatedStringPrefixBuilder: (AnnotatedString.Builder.() -> Unit)? = null,
     annotatedStringSuffixBuilder: (AnnotatedString.Builder.() -> Unit)? = null,
 ) {
     val verifiedBadge = !internetIdentifier.isNullOrEmpty()
+
+    val customBadgeStyle = if (legendaryCustomization?.customBadge == true) {
+        legendaryCustomization.legendaryStyle
+    } else {
+        null
+    }
 
     val titleText = buildAnnotatedString {
         annotatedStringPrefixBuilder?.invoke(this)
@@ -156,6 +163,7 @@ fun PreviewNostrUserTextWithPrimalBadge() {
                 annotatedStringSuffixBuilder = {
                     append("• 42 y. ago")
                 },
+                legendaryCustomization = null,
             )
         }
     }
@@ -172,6 +180,7 @@ fun PreviewNostrUserTextWithRandomBadge() {
                 annotatedStringSuffixBuilder = {
                     append("• 42 y. ago")
                 },
+                legendaryCustomization = null,
             )
         }
     }
@@ -188,6 +197,7 @@ fun PreviewNostrUserTextWithoutBadge() {
                 annotatedStringSuffixBuilder = {
                     append(" • 42 y. ago")
                 },
+                legendaryCustomization = null,
             )
         }
     }
@@ -200,11 +210,15 @@ fun PreviewNostrUserTextWithCustomBadge() {
         Surface {
             NostrUserText(
                 displayName = "Nostr Adamus",
-                customBadgeStyle = LegendaryStyle.GOLD,
                 internetIdentifier = "legend@primal.net",
                 annotatedStringSuffixBuilder = {
                     append(" • 42 y. ago")
                 },
+                legendaryCustomization = LegendaryCustomization(
+                    customBadge = true,
+                    avatarGlow = true,
+                    legendaryStyle = LegendaryStyle.GOLD,
+                ),
             )
         }
     }

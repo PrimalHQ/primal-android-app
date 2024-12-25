@@ -175,11 +175,7 @@ private fun DrawerHeader(
                 top.linkTo(avatarRef.bottom, margin = 16.dp)
                 width = Dimension.preferredValue(220.dp)
             },
-            customBadgeStyle = if (legendaryCustomization?.customBadge == true) {
-                legendaryCustomization.legendaryStyle
-            } else {
-                null
-            },
+            legendaryCustomization = legendaryCustomization,
         )
 
         IconButton(

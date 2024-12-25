@@ -312,7 +312,7 @@ private fun ConversationListItem(
                         displayName = conversation.participantUsername,
                         internetIdentifier = conversation.participantInternetIdentifier,
                         annotatedStringSuffixBuilder = { append(suffixText) },
-                        customBadgeStyle = conversation.participantLegendaryCustomization?.legendaryStyle,
+                        legendaryCustomization = conversation.participantLegendaryCustomization,
                         style = AppTheme.typography.bodyMedium,
                     )
                 }
