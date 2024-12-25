@@ -1,4 +1,4 @@
-package net.primal.android.editor.ui
+package net.primal.android.editor
 
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -76,11 +76,12 @@ import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
-import net.primal.android.editor.NoteEditorContract
 import net.primal.android.editor.NoteEditorContract.UiEvent
 import net.primal.android.editor.NoteEditorContract.UiState.NoteEditorError
-import net.primal.android.editor.NoteEditorViewModel
 import net.primal.android.editor.domain.NoteAttachment
+import net.primal.android.editor.ui.NoteAttachmentPreview
+import net.primal.android.editor.ui.NoteOutlinedTextField
+import net.primal.android.editor.ui.NoteTagUserLazyColumn
 import net.primal.android.highlights.model.HighlightUi
 import net.primal.android.notes.db.toReferencedHighlight
 import net.primal.android.notes.feed.model.FeedPostUi
