@@ -63,10 +63,10 @@ import net.primal.android.wallet.dashboard.ui.WalletAction
 import net.primal.android.wallet.dashboard.ui.WalletCallToActionBox
 import net.primal.android.wallet.dashboard.ui.WalletDashboard
 import net.primal.android.wallet.dashboard.ui.WalletDashboardLite
+import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.domain.WalletKycLevel
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyBottomSheet
 import net.primal.android.wallet.transactions.list.TransactionsLazyColumn
-import net.primal.android.wallet.utils.CurrencyMode
 
 @Composable
 fun WalletDashboardScreen(

@@ -34,7 +34,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -72,6 +71,8 @@ import net.primal.android.core.compose.numericpad.PrimalNumericPad
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
 import net.primal.android.wallet.dashboard.ui.FiatAmountTextFromUsd
+import net.primal.android.wallet.domain.CurrencyMode
+import net.primal.android.wallet.domain.not
 import net.primal.android.wallet.numericPadContentTransformAnimation
 import net.primal.android.wallet.repository.isValidExchangeRate
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract
@@ -80,8 +81,6 @@ import net.primal.android.wallet.transactions.send.create.ellipsizeOnChainAddres
 import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
-import net.primal.android.wallet.utils.CurrencyMode
-import net.primal.android.wallet.utils.not
 
 @ExperimentalMaterial3Api
 @ExperimentalComposeUiApi
@@ -98,7 +97,6 @@ fun TransactionEditor(
     var noteRecipientText by remember { mutableStateOf(state.transaction.noteRecipient ?: "") }
     var noteSelfText by remember { mutableStateOf(state.transaction.noteSelf ?: "") }
     var isNumericPadOn by remember { mutableStateOf(state.isNotInvoice()) }
-    var mode by remember { mutableStateOf(state.currencyMode) }
     val sendPayment = {
         eventPublisher(
             CreateTransactionContract.UiEvent.SendTransaction(
@@ -107,10 +105,6 @@ fun TransactionEditor(
                 miningFeeTierId = state.resolveSelectedMiningFee()?.id,
             ),
         )
-    }
-
-    LaunchedEffect(state.currencyMode) {
-        mode = state.currencyMode
     }
 
     val density = LocalDensity.current
@@ -149,16 +143,11 @@ fun TransactionEditor(
                     }
 
                     if (state.currentExchangeRate.isValidExchangeRate()) {
-                        val newCurrencyMode = state.currencyMode.not()
+                        val newCurrencyMode = !state.currencyMode
                         eventPublisher(
                             CreateTransactionContract.UiEvent.ChangeCurrencyMode(currencyMode = newCurrencyMode),
                         )
                     }
-                },
-                onChangeCurrencyMode = {
-                    eventPublisher(
-                        CreateTransactionContract.UiEvent.ChangeCurrencyMode(currencyMode = it),
-                    )
                 },
             )
 
@@ -172,7 +161,7 @@ fun TransactionEditor(
                 onNoteSelfTextChanged = { text -> noteSelfText = text },
                 onAmountChanged = {
                     eventPublisher(
-                        CreateTransactionContract.UiEvent.AmountChanged(amount = it, currencyMode = mode),
+                        CreateTransactionContract.UiEvent.AmountChanged(amount = it),
                     )
                 },
                 onMiningFeeChanged = {
@@ -349,7 +338,6 @@ private fun TransactionHeaderColumn(
     state: CreateTransactionContract.UiState,
     keyboardVisible: Boolean,
     onAmountClick: () -> Unit,
-    onChangeCurrencyMode: (currencyMode: CurrencyMode) -> Unit,
 ) {
     val verticalPadding = animateDpAsState(
         targetValue = if (keyboardVisible) {
@@ -461,7 +449,6 @@ private fun TransactionHeaderColumn(
             state = state,
             uiMode = uiMode,
             onAmountClick = onAmountClick,
-            onChangeCurrencyMode = onChangeCurrencyMode,
         )
 
         Spacer(modifier = Modifier.height(amountSpacing.value))
@@ -473,7 +460,6 @@ fun TransactionAmountText(
     state: CreateTransactionContract.UiState,
     uiMode: UiDensityMode,
     onAmountClick: () -> Unit,
-    onChangeCurrencyMode: (currencyMode: CurrencyMode) -> Unit,
 ) {
     val sharedModifier = Modifier
         .padding(
@@ -490,13 +476,15 @@ fun TransactionAmountText(
                 else -> 56.dp
             },
         )
-        .clickable(
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable(
             interactionSource = remember { MutableInteractionSource() },
             indication = null,
             onClick = onAmountClick,
-        )
-
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        ),
+    ) {
         AnimatedContent(
             label = "AmountText",
             targetState = state.currencyMode,
@@ -529,7 +517,6 @@ fun TransactionAmountText(
                 currencyMode = state.currencyMode,
                 amountSats = state.transaction.amountSats,
                 amountUsd = state.amountInUsd,
-                onChangeCurrencyMode = onChangeCurrencyMode,
             )
         }
     }
@@ -540,7 +527,6 @@ private fun TransactionAmountSubtext(
     currencyMode: CurrencyMode,
     amountSats: String,
     amountUsd: String,
-    onChangeCurrencyMode: (currencyMode: CurrencyMode) -> Unit,
 ) {
     val amount = if (currencyMode != CurrencyMode.SATS) {
         amountSats
@@ -549,16 +535,7 @@ private fun TransactionAmountSubtext(
     }
 
     Row(
-        modifier = Modifier
-            .padding(start = 16.dp)
-            .clickable {
-                val newCurrencyMode = if (currencyMode == CurrencyMode.FIAT) {
-                    CurrencyMode.SATS
-                } else {
-                    CurrencyMode.FIAT
-                }
-                onChangeCurrencyMode(newCurrencyMode)
-            },
+        modifier = Modifier.padding(start = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {

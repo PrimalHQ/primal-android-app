@@ -3,9 +3,9 @@ package net.primal.android.wallet.transactions.send.create
 import java.math.BigDecimal
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.premium.legend.LegendaryCustomization
+import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
-import net.primal.android.wallet.utils.CurrencyMode
 
 const val MAXIMUM_SATS = 99_999_990.00
 
@@ -31,7 +31,7 @@ interface CreateTransactionContract {
     }
 
     sealed class UiEvent {
-        data class AmountChanged(val amount: String, val currencyMode: CurrencyMode) : UiEvent()
+        data class AmountChanged(val amount: String) : UiEvent()
         data class ChangeCurrencyMode(val currencyMode: CurrencyMode) : UiEvent()
         data object AmountApplied : UiEvent()
         data class MiningFeeChanged(val tierId: String) : UiEvent()

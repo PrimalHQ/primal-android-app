@@ -30,7 +30,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Subtract
 import net.primal.android.core.compose.numericpad.PrimalNumericPadContract.UiEvent.NumericInputEvent
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.utils.CurrencyMode
+import net.primal.android.wallet.domain.CurrencyMode
 
 private val PadButtonMargin = 16.dp
 
@@ -60,25 +60,28 @@ fun PrimalNumericPad(
     val onNumberClick: (Int) -> Unit = {
         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
         val newAmount = BigDecimal.valueOf((amountInSats + it.toString()).toDouble())
-        if (currencyMode == CurrencyMode.FIAT) {
-            if (newAmount <= maximumUsdAmount) {
-                val decimalPart = amountInSats.split(".")
-                val isDecimalValid = decimalPart.size != 2 || decimalPart[1].length < 2
+        when (currencyMode) {
+            CurrencyMode.FIAT -> {
+                if (newAmount <= maximumUsdAmount) {
+                    val decimalPart = amountInSats.split(".")
+                    val isDecimalValid = decimalPart.size != 2 || decimalPart[1].length < 2
 
-                if (isDecimalValid) {
-                    viewModel.setEvent(NumericInputEvent.DigitInputEvent(it))
+                    if (isDecimalValid) {
+                        viewModel.setEvent(NumericInputEvent.DigitInputEvent(it))
+                    }
                 }
             }
-        } else if (currencyMode == CurrencyMode.SATS) {
-            viewModel.setEvent(NumericInputEvent.DigitInputEvent(it))
+            CurrencyMode.SATS -> {
+                viewModel.setEvent(NumericInputEvent.DigitInputEvent(it))
+            }
         }
     }
 
     val onDotClick: () -> Unit = {
         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-
-        if (currencyMode == CurrencyMode.FIAT) {
-            viewModel.setEvent(NumericInputEvent.DotInputEvent)
+        when (currencyMode) {
+            CurrencyMode.FIAT -> viewModel.setEvent(NumericInputEvent.DotInputEvent)
+            CurrencyMode.SATS -> Unit
         }
     }
 

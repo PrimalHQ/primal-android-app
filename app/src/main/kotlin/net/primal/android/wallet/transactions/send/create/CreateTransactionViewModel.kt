@@ -24,6 +24,7 @@ import net.primal.android.scanner.analysis.WalletTextParser
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.api.model.MiningFeeTier
 import net.primal.android.wallet.api.model.WithdrawRequestBody
+import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.domain.DraftTxStatus
 import net.primal.android.wallet.domain.SubWallet
 import net.primal.android.wallet.repository.ExchangeRateHandler
@@ -36,7 +37,6 @@ import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.android.wallet.utils.CurrencyConversionUtils.fromUsdToSats
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toUsd
-import net.primal.android.wallet.utils.CurrencyMode
 import net.primal.android.wallet.utils.isLightningAddress
 import timber.log.Timber
 
@@ -110,7 +110,7 @@ class CreateTransactionViewModel @Inject constructor(
                     }
 
                     is UiEvent.AmountChanged -> {
-                        when (event.currencyMode) {
+                        when (_state.value.currencyMode) {
                             CurrencyMode.SATS -> {
                                 setState {
                                     copy(
