@@ -172,7 +172,7 @@ fun TransactionEditor(
                 onNoteSelfTextChanged = { text -> noteSelfText = text },
                 onAmountChanged = {
                     eventPublisher(
-                        CreateTransactionContract.UiEvent.AmountChangedSats(amount = it, currencyMode = mode),
+                        CreateTransactionContract.UiEvent.AmountChanged(amount = it, currencyMode = mode),
                     )
                 },
                 onMiningFeeChanged = {

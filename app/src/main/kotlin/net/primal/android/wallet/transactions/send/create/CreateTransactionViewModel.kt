@@ -109,7 +109,7 @@ class CreateTransactionViewModel @Inject constructor(
                         sendTransaction(noteRecipient = event.noteRecipient, noteSelf = event.noteSelf)
                     }
 
-                    is UiEvent.AmountChangedSats -> {
+                    is UiEvent.AmountChanged -> {
                         when (event.currencyMode) {
                             CurrencyMode.SATS -> {
                                 setState {

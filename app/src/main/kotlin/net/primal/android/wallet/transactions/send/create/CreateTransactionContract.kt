@@ -31,7 +31,7 @@ interface CreateTransactionContract {
     }
 
     sealed class UiEvent {
-        data class AmountChangedSats(val amount: String, val currencyMode: CurrencyMode) : UiEvent()
+        data class AmountChanged(val amount: String, val currencyMode: CurrencyMode) : UiEvent()
         data class ChangeCurrencyMode(val currencyMode: CurrencyMode) : UiEvent()
         data object AmountApplied : UiEvent()
         data class MiningFeeChanged(val tierId: String) : UiEvent()
