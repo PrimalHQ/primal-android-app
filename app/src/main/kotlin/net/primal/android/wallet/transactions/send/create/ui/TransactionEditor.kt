@@ -528,10 +528,13 @@ private fun TransactionAmountSubtext(
     amountSats: String,
     amountUsd: String,
 ) {
-    val amount = if (currencyMode != CurrencyMode.SATS) {
-        amountSats
-    } else {
-        amountUsd
+    val amount = when (currencyMode) {
+        CurrencyMode.FIAT -> {
+            amountSats
+        }
+        CurrencyMode.SATS -> {
+            amountUsd
+        }
     }
 
     Row(

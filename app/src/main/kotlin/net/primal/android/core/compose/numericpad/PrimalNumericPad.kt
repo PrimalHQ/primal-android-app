@@ -95,6 +95,23 @@ fun PrimalNumericPad(
         viewModel.setEvent(NumericInputEvent.ResetAmountEvent)
     }
 
+    NumericPad(
+        modifier = modifier,
+        onNumberClick = onNumberClick,
+        onDotClick = onDotClick,
+        onBackspaceClick = onBackspaceClick,
+        onBackspaceLongClick = onBackspaceLongClick,
+    )
+}
+
+@Composable
+private fun NumericPad(
+    modifier: Modifier,
+    onNumberClick: (Int) -> Unit,
+    onDotClick: () -> Unit,
+    onBackspaceClick: () -> Unit,
+    onBackspaceLongClick: () -> Unit,
+) {
     Column(
         modifier = modifier,
     ) {

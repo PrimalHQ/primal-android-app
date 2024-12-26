@@ -110,32 +110,7 @@ class CreateTransactionViewModel @Inject constructor(
                     }
 
                     is UiEvent.AmountChanged -> {
-                        when (_state.value.currencyMode) {
-                            CurrencyMode.SATS -> {
-                                setState {
-                                    copy(
-                                        transaction = transaction.copy(amountSats = event.amount),
-                                        amountInUsd = BigDecimal(event.amount.toDouble())
-                                            .fromSatsToUsd(state.value.currentExchangeRate)
-                                            .stripTrailingZeros()
-                                            .let { if (it.compareTo(BigDecimal.ZERO) == 0) BigDecimal.ZERO else it }
-                                            .toPlainString(),
-                                    )
-                                }
-                            }
-                            CurrencyMode.FIAT -> {
-                                setState {
-                                    copy(
-                                        amountInUsd = event.amount,
-                                        transaction = transaction.copy(
-                                            amountSats = BigDecimal(event.amount)
-                                                .fromUsdToSats(state.value.currentExchangeRate)
-                                                .toString(),
-                                        ),
-                                    )
-                                }
-                            }
-                        }
+                        updateAmount(amount = event.amount)
                     }
 
                     is UiEvent.ChangeCurrencyMode -> {
@@ -160,6 +135,36 @@ class CreateTransactionViewModel @Inject constructor(
                 }
             }
         }
+
+    private fun updateAmount(amount: String) {
+        when (_state.value.currencyMode) {
+            CurrencyMode.SATS -> {
+                setState {
+                    copy(
+                        transaction = transaction.copy(amountSats = amount),
+                        amountInUsd = BigDecimal(amount.toDouble())
+                            .fromSatsToUsd(state.value.currentExchangeRate)
+                            .stripTrailingZeros()
+                            .let { if (it.compareTo(BigDecimal.ZERO) == 0) BigDecimal.ZERO else it }
+                            .toPlainString(),
+                    )
+                }
+            }
+
+            CurrencyMode.FIAT -> {
+                setState {
+                    copy(
+                        amountInUsd = amount,
+                        transaction = transaction.copy(
+                            amountSats = BigDecimal(amount)
+                                .fromUsdToSats(state.value.currentExchangeRate)
+                                .toString(),
+                        ),
+                    )
+                }
+            }
+        }
+    }
 
     private fun fetchProfileData() =
         viewModelScope.launch {
