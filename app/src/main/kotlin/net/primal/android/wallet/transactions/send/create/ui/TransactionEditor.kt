@@ -70,9 +70,8 @@ import net.primal.android.core.compose.icons.primaliconpack.WalletChangeCurrency
 import net.primal.android.core.compose.isCompactOrLower
 import net.primal.android.core.compose.numericpad.PrimalNumericPad
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.dashboard.CurrencyMode
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
-import net.primal.android.wallet.dashboard.ui.FiatAmountStringText
+import net.primal.android.wallet.dashboard.ui.FiatAmountTextFromUsd
 import net.primal.android.wallet.numericPadContentTransformAnimation
 import net.primal.android.wallet.repository.isValidExchangeRate
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract
@@ -81,7 +80,8 @@ import net.primal.android.wallet.transactions.send.create.ellipsizeOnChainAddres
 import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
-import net.primal.android.wallet.walletSwitchCurrencyColor
+import net.primal.android.wallet.utils.CurrencyMode
+import net.primal.android.wallet.utils.not
 
 @ExperimentalMaterial3Api
 @ExperimentalComposeUiApi
@@ -149,11 +149,7 @@ fun TransactionEditor(
                     }
 
                     if (state.currentExchangeRate.isValidExchangeRate()) {
-                        val newCurrencyMode = if (mode == CurrencyMode.FIAT) {
-                            CurrencyMode.SATS
-                        } else {
-                            CurrencyMode.FIAT
-                        }
+                        val newCurrencyMode = state.currencyMode.not()
                         eventPublisher(
                             CreateTransactionContract.UiEvent.ChangeCurrencyMode(currencyMode = newCurrencyMode),
                         )
@@ -175,15 +171,9 @@ fun TransactionEditor(
                 noteSelfText = noteSelfText,
                 onNoteSelfTextChanged = { text -> noteSelfText = text },
                 onAmountChanged = {
-                    if (mode == CurrencyMode.SATS) {
-                        eventPublisher(
-                            CreateTransactionContract.UiEvent.AmountChangedSats(amountInSats = it),
-                        )
-                    } else {
-                        eventPublisher(
-                            CreateTransactionContract.UiEvent.AmountChangedFiat(amountInUsd = it),
-                        )
-                    }
+                    eventPublisher(
+                        CreateTransactionContract.UiEvent.AmountChangedSats(amount = it, currencyMode = mode),
+                    )
                 },
                 onMiningFeeChanged = {
                     eventPublisher(
@@ -253,16 +243,14 @@ private fun TransactionMainContent(
             ) {
                 PrimalNumericPad(
                     modifier = Modifier.fillMaxWidth(),
-                    amountInSats =
-                    if (state.currencyMode == CurrencyMode.SATS) {
+                    amountInSats = if (state.currencyMode == CurrencyMode.SATS) {
                         state.transaction.amountSats
                     } else {
                         state.amountInUsd
                     },
                     currencyMode = state.currencyMode,
                     maximumUsdAmount = state.maximumUsdAmount,
-                    onAmountInSatsChanged = {
-                            newAmount ->
+                    onAmountInSatsChanged = { newAmount ->
                         onAmountChanged(newAmount)
                     },
                 )
@@ -487,7 +475,7 @@ fun TransactionAmountText(
     onAmountClick: () -> Unit,
     onChangeCurrencyMode: (currencyMode: CurrencyMode) -> Unit,
 ) {
-    val commonModifier = Modifier
+    val sharedModifier = Modifier
         .padding(
             start = when (uiMode) {
                 UiDensityMode.Normal -> 32.dp
@@ -516,18 +504,21 @@ fun TransactionAmountText(
                 fadeIn() togetherWith fadeOut()
             },
         ) { targetCurrencyMode ->
-            if (targetCurrencyMode == CurrencyMode.SATS) {
-                BtcAmountText(
-                    modifier = commonModifier,
-                    amountInBtc = state.transaction.amountSats.toLong().toBtc().toBigDecimal(),
-                    textSize = 48.sp,
-                )
-            } else {
-                FiatAmountStringText(
-                    modifier = commonModifier,
-                    amount = state.amountInUsd,
-                    textSize = 48.sp,
-                )
+            when (targetCurrencyMode) {
+                CurrencyMode.FIAT -> {
+                    FiatAmountTextFromUsd(
+                        modifier = sharedModifier,
+                        amount = state.amountInUsd,
+                        textSize = 48.sp,
+                    )
+                }
+                CurrencyMode.SATS -> {
+                    BtcAmountText(
+                        modifier = sharedModifier,
+                        amountInBtc = state.transaction.amountSats.toLong().toBtc().toBigDecimal(),
+                        textSize = 48.sp,
+                    )
+                }
             }
         }
 
@@ -589,7 +580,7 @@ private fun TransactionAmountSubtext(
             modifier = Modifier.size(16.dp),
             imageVector = PrimalIcons.WalletChangeCurrency,
             contentDescription = null,
-            tint = walletSwitchCurrencyColor,
+            tint = AppTheme.colorScheme.tertiary,
         )
     }
 }

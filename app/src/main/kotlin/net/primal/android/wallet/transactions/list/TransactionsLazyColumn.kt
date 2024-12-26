@@ -24,7 +24,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.dashboard.CurrencyMode
+import net.primal.android.wallet.utils.CurrencyMode
 
 @ExperimentalFoundationApi
 @Composable

@@ -11,8 +11,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.math.BigDecimal
-import net.primal.android.wallet.dashboard.CurrencyMode
 import net.primal.android.wallet.repository.isValidExchangeRate
+import net.primal.android.wallet.utils.CurrencyMode
 
 @Composable
 fun WalletDashboardLite(
@@ -35,7 +35,7 @@ fun WalletDashboardLite(
             targetState = currencyMode,
         ) { targetCurrencyMode ->
             if (targetCurrencyMode == CurrencyMode.FIAT && exchangeBtcUsdRate.isValidExchangeRate()) {
-                FiatAmountText(
+                FiatAmountTextFromBtc(
                     modifier = Modifier
                         .graphicsLayer {
                             clip = false

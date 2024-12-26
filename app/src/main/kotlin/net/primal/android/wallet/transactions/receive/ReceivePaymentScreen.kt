@@ -85,7 +85,6 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.numericpad.PrimalNumericPad
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.dashboard.CurrencyMode
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
 import net.primal.android.wallet.domain.Network
 import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiState
@@ -97,6 +96,7 @@ import net.primal.android.wallet.ui.WalletTabsHeight
 import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
+import net.primal.android.wallet.utils.CurrencyMode
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable

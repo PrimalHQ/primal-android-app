@@ -36,10 +36,9 @@ import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.android.wallet.utils.CurrencyConversionUtils.fromUsdToSats
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toUsd
+import net.primal.android.wallet.utils.CurrencyMode
 import net.primal.android.wallet.utils.isLightningAddress
 import timber.log.Timber
-
-private const val MAXIMUM_SATS = 99_999_990.00
 
 @HiltViewModel
 class CreateTransactionViewModel @Inject constructor(
@@ -82,8 +81,7 @@ class CreateTransactionViewModel @Inject constructor(
         viewModelScope.launch {
             fetchExchangeRate()
             exchangeRateHandler.usdExchangeRate.collect {
-                setState { copy(currentExchangeRate = it) }
-                setState { copy(maximumUsdAmount = getMaximumUsdAmount(it)) }
+                setState { copy(currentExchangeRate = it, maximumUsdAmount = getMaximumUsdAmount(it)) }
             }
         }
     }
@@ -112,28 +110,31 @@ class CreateTransactionViewModel @Inject constructor(
                     }
 
                     is UiEvent.AmountChangedSats -> {
-                        setState {
-                            copy(
-                                transaction = transaction.copy(amountSats = event.amountInSats),
-                                amountInUsd = BigDecimal(event.amountInSats.toDouble())
-                                    .fromSatsToUsd(state.value.currentExchangeRate)
-                                    .stripTrailingZeros()
-                                    .let { if (it.compareTo(BigDecimal.ZERO) == 0) BigDecimal.ZERO else it }
-                                    .toPlainString(),
-                            )
-                        }
-                    }
-
-                    is UiEvent.AmountChangedFiat -> {
-                        setState {
-                            copy(
-                                amountInUsd = event.amountInUsd,
-                                transaction = transaction.copy(
-                                    amountSats = BigDecimal(event.amountInUsd)
-                                        .fromUsdToSats(state.value.currentExchangeRate)
-                                        .toString(),
-                                ),
-                            )
+                        when (event.currencyMode) {
+                            CurrencyMode.SATS -> {
+                                setState {
+                                    copy(
+                                        transaction = transaction.copy(amountSats = event.amount),
+                                        amountInUsd = BigDecimal(event.amount.toDouble())
+                                            .fromSatsToUsd(state.value.currentExchangeRate)
+                                            .stripTrailingZeros()
+                                            .let { if (it.compareTo(BigDecimal.ZERO) == 0) BigDecimal.ZERO else it }
+                                            .toPlainString(),
+                                    )
+                                }
+                            }
+                            CurrencyMode.FIAT -> {
+                                setState {
+                                    copy(
+                                        amountInUsd = event.amount,
+                                        transaction = transaction.copy(
+                                            amountSats = BigDecimal(event.amount)
+                                                .fromUsdToSats(state.value.currentExchangeRate)
+                                                .toString(),
+                                        ),
+                                    )
+                                }
+                            }
                         }
                     }
 
