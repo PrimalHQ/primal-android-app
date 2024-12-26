@@ -3,9 +3,12 @@ package net.primal.android.highlights.model
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.highlights.db.Highlight
+import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.utils.Nevent
 
 data class HighlightUi(
     val highlightId: String,
+    val authorId: String,
     val author: ProfileDetailsUi?,
     val content: String,
     val context: String?,
@@ -29,6 +32,7 @@ data class JoinedHighlightsUi(
 fun Highlight.asHighlightUi() =
     HighlightUi(
         highlightId = this.data.highlightId,
+        authorId = this.data.authorId,
         author = this.author?.asProfileDetailsUi(),
         content = this.data.content,
         context = this.data.context,
@@ -64,4 +68,11 @@ fun Highlight.asJoinedHighlightsUi() =
         referencedEventATag = this.data.referencedEventATag,
         referencedEventAuthorId = this.data.referencedEventAuthorId,
         context = this.data.context,
+    )
+
+fun HighlightUi.generateNevent() =
+    Nevent(
+        kind = NostrEventKind.Highlight.value,
+        eventId = this.highlightId,
+        userId = this.authorId,
     )

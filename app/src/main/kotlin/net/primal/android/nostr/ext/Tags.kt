@@ -9,7 +9,10 @@ import net.primal.android.core.utils.parseHashtags
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Naddr
+import net.primal.android.nostr.utils.Nevent
 import net.primal.android.nostr.utils.Nip19TLV
+import net.primal.android.nostr.utils.Nip19TLV.parseUriAsNeventOrNull
+import net.primal.android.nostr.utils.asATagValue
 
 fun List<JsonArray>.findFirstEventId() = firstOrNull { it.isEventIdTag() }?.getTagValueOrNull()
 
@@ -91,33 +94,51 @@ fun NostrEventKind.asKindTag(): JsonArray =
         add(this@asKindTag.value.toString())
     }
 
-fun String.asEventIdTag(relayHint: String? = null, marker: String? = null): JsonArray =
+fun String.asEventIdTag(
+    relayHint: String? = null,
+    marker: String? = null,
+    authorPubkey: String? = null,
+): JsonArray =
     buildJsonArray {
         add("e")
         add(this@asEventIdTag)
-        if (relayHint != null) add(relayHint)
-        if (marker != null) {
-            if (relayHint == null) add("")
-            add(marker)
-        }
+        add(relayHint ?: "")
+        add(marker ?: "")
+        add(authorPubkey ?: "")
     }
+
+fun Nevent.asEventTag(marker: String? = null): JsonArray =
+    this.eventId.asEventIdTag(
+        relayHint = this.relays.firstOrNull(),
+        marker = marker,
+        authorPubkey = this.userId,
+    )
 
 fun String.asPubkeyTag(relayHint: String? = null, optional: String? = null): JsonArray =
     buildJsonArray {
         add("p")
         add(this@asPubkeyTag)
-        if (relayHint != null) add(relayHint)
-        if (optional != null) add(optional)
+        add(relayHint ?: "")
+        add(optional ?: "")
     }
+
+fun Nevent.asPubkeyTag(marker: String? = null): JsonArray =
+    this.userId.asPubkeyTag(
+        relayHint = this.relays.firstOrNull(),
+        optional = marker,
+    )
+
+fun Naddr.asPubkeyTag(marker: String? = null): JsonArray =
+    this.userId.asPubkeyTag(
+        relayHint = this.relays.firstOrNull(),
+        optional = marker,
+    )
 
 fun String.asIdentifierTag(): JsonArray =
     buildJsonArray {
         add("d")
         add(this@asIdentifierTag)
     }
-
-fun Naddr.asReplaceableEventTag(relayHint: String? = null, marker: String? = null): JsonArray =
-    "${this.kind}:${this.userId}:${this.identifier}".asReplaceableEventTag(relayHint = relayHint, marker = marker)
 
 fun String.asReplaceableEventTag(relayHint: String? = null, marker: String? = null): JsonArray =
     buildJsonArray {
@@ -129,6 +150,12 @@ fun String.asReplaceableEventTag(relayHint: String? = null, marker: String? = nu
             add(marker)
         }
     }
+
+fun Naddr.asReplaceableEventTag(marker: String? = null): JsonArray =
+    this.asATagValue().asReplaceableEventTag(
+        relayHint = this.relays.firstOrNull(),
+        marker = marker,
+    )
 
 fun NoteAttachment.asIMetaTag(): JsonArray {
     require(this.remoteUrl != null)
@@ -148,33 +175,29 @@ fun String.parseEventTags(marker: String? = null): List<JsonArray> {
     if (nostrUris.isEmpty()) return emptyList()
 
     val tags = mutableListOf<JsonArray>()
-    nostrUris.forEach {
+    nostrUris.forEach { uri ->
         when {
-            it.isNAddrUri() || it.isNAddr() ->
-                Nip19TLV.parseUriAsNaddrOrNull(it)?.let {
-                    tags.add(it.asReplaceableEventTag(relayHint = it.relays.firstOrNull(), marker = marker))
+            uri.isNEventUri() -> {
+                parseUriAsNeventOrNull(uri)?.let { nevent ->
+                    tags.add(
+                        buildJsonArray {
+                            add("e")
+                            add(nevent.eventId)
+                            add(nevent.relays.firstOrNull() ?: "")
+                            add(marker ?: "")
+                            add(nevent.userId)
+                        },
+                    )
                 }
-
-            it.isNEventUri() -> {
-                val result = it.nostrUriToNoteIdAndRelay()
-                val eventId = result.first
-                val relayUrl = result.second
-                tags.add(
-                    buildJsonArray {
-                        add("e")
-                        add(eventId)
-                        add(relayUrl)
-                        if (marker != null) add(marker)
-                    },
-                )
             }
 
-            it.isNoteUri() || it.isNote() -> tags.add(
+            uri.isNoteUri() || uri.isNote() -> tags.add(
                 buildJsonArray {
                     add("e")
-                    add(it.nostrUriToNoteId())
+                    add(uri.nostrUriToNoteId())
                     add("")
-                    if (marker != null) add(marker)
+                    add(marker ?: "")
+                    add("")
                 },
             )
         }
@@ -211,6 +234,22 @@ fun String.parsePubkeyTags(marker: String? = null): List<JsonArray> {
                     if (marker != null) add(marker)
                 },
             )
+        }
+    }
+    return tags.toList()
+}
+
+fun String.parseReplaceableEventTags(marker: String? = null): List<JsonArray> {
+    val nostrUris = this.parseNostrUris()
+    if (nostrUris.isEmpty()) return emptyList()
+
+    val tags = mutableListOf<JsonArray>()
+    nostrUris.forEach { uri ->
+        when {
+            uri.isNAddrUri() || uri.isNAddr() ->
+                Nip19TLV.parseUriAsNaddrOrNull(uri)?.let {
+                    tags.add(it.asReplaceableEventTag(marker = marker))
+                }
         }
     }
     return tags.toList()

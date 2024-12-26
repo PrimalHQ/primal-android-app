@@ -26,7 +26,7 @@ class TagsTest {
             marker = expectedMarker,
         )
         actual shouldBe instanceOf(JsonArray::class)
-        actual.size shouldBe 4
+        actual.size shouldBe 5
         actual[0].jsonPrimitive.content shouldBe "e"
         actual[1].jsonPrimitive.content shouldBe eventId
         actual[2].jsonPrimitive.content shouldBe expectedRecommendedRelay
@@ -39,7 +39,7 @@ class TagsTest {
         val expectedRecommendedRelay = ""
         val actual = pubkey.asPubkeyTag(optional = expectedRecommendedRelay)
         actual shouldBe instanceOf(JsonArray::class)
-        actual.size shouldBe 3
+        actual.size shouldBe 4
         actual[0].jsonPrimitive.content shouldBe "p"
         actual[1].jsonPrimitive.content shouldBe pubkey
         actual[2].jsonPrimitive.content shouldBe expectedRecommendedRelay

@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.articles.ArticleRepository
+import net.primal.android.articles.feed.ui.generateNaddr
 import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
 import net.primal.android.attachments.repository.AttachmentsRepository
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
@@ -43,6 +44,7 @@ import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.highlights.model.asHighlightUi
+import net.primal.android.highlights.model.generateNevent
 import net.primal.android.highlights.repository.HighlightRepository
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
@@ -50,7 +52,9 @@ import net.primal.android.networking.primal.upload.domain.UploadJob
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Naddr
+import net.primal.android.nostr.utils.Nevent
 import net.primal.android.nostr.utils.Nip19TLV
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
@@ -76,7 +80,7 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private val referencedNoteId = args.referencedNoteId
     private val referencedArticleNaddr = args.referencedArticleNaddr?.let(Nip19TLV::parseUriAsNaddrOrNull)
-    private val referencedHighlightNevent = args.referencedHighlightNevent
+    private val referencedHighlightNevent = args.referencedHighlightNevent?.let(Nip19TLV::parseUriAsNeventOrNull)
 
     private val _state = MutableStateFlow(UiState(isQuoting = args.isQuoting))
     val state = _state.asStateFlow()
@@ -171,14 +175,12 @@ class NoteEditorViewModel @AssistedInject constructor(
             }
         }
 
-    private fun observeHighlight(highlightNevent: String) =
+    private fun observeHighlight(highlightNevent: Nevent) =
         viewModelScope.launch {
-            Nip19TLV.parseUriAsNeventOrNull(highlightNevent)?.let {
-                highlightRepository.observeHighlightById(highlightId = it.eventId)
-                    .collect {
-                        setState { copy(referencedHighlight = it.asHighlightUi()) }
-                    }
-            }
+            highlightRepository.observeHighlightById(highlightId = highlightNevent.eventId)
+                .collect {
+                    setState { copy(referencedHighlight = it.asHighlightUi()) }
+                }
         }
 
     private fun subscribeToActiveAccount() =
@@ -256,36 +258,45 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             setState { copy(publishing = true) }
             try {
-                val article = _state.value.referencedArticle
-                val rootPost = _state.value.conversation.firstOrNull()
-                val replyToPost = _state.value.conversation.lastOrNull()
-                val publishedAndImported = if (args.isQuoting) {
+                val noteContent = _state.value.content.text
+                    .replaceUserMentionsWithUserIds(users = _state.value.taggedUsers)
+
+                val publishResult = if (args.isQuoting) {
                     notePublishHandler.publishShortTextNote(
                         userId = activeAccountStore.activeUserId(),
-                        content = _state.value.content.text
-                            .replaceUserMentionsWithUserIds(users = _state.value.taggedUsers)
-                            .concatenateReferencedEvents(),
+                        content = noteContent.concatenateReferencedEvents(),
                         attachments = _state.value.attachments,
                     )
                 } else {
+                    val rootPost = _state.value.conversation.firstOrNull()
+                    val replyToPost = _state.value.conversation.lastOrNull()
                     notePublishHandler.publishShortTextNote(
                         userId = activeAccountStore.activeUserId(),
-                        content = _state.value.content.text
-                            .replaceUserMentionsWithUserIds(users = _state.value.taggedUsers),
+                        content = noteContent,
                         attachments = _state.value.attachments,
-                        rootArticleEventId = article?.eventId,
-                        rootArticleId = article?.articleId,
-                        rootArticleAuthorId = article?.authorId,
-                        rootPostId = rootPost?.postId,
-                        replyToPostId = replyToPost?.postId,
-                        rootHighlightId = _state.value.referencedHighlight?.highlightId,
-                        rootHighlightAuthorId = _state.value.referencedHighlight?.author?.pubkey,
-                        replyToAuthorId = replyToPost?.authorId,
+                        rootNoteNevent = rootPost?.let {
+                            Nevent(
+                                kind = NostrEventKind.ShortTextNote.value,
+                                userId = rootPost.authorId,
+                                eventId = rootPost.postId,
+                            )
+                        },
+                        replyToNoteNevent = replyToPost?.let {
+                            Nevent(
+                                kind = NostrEventKind.ShortTextNote.value,
+                                userId = replyToPost.authorId,
+                                eventId = replyToPost.postId,
+                            )
+                        },
+                        rootArticleNaddr = referencedArticleNaddr
+                            ?: _state.value.referencedArticle?.generateNaddr(),
+                        rootHighlightNevent = referencedHighlightNevent
+                            ?: _state.value.referencedHighlight?.generateNevent(),
                     )
                 }
 
                 if (referencedNoteId != null) {
-                    if (publishedAndImported) {
+                    if (publishResult.imported) {
                         fetchNoteReplies()
                     } else {
                         scheduleFetchReplies()

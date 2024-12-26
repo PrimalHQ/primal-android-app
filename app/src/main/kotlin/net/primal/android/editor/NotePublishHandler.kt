@@ -6,11 +6,10 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.utils.assertNotNullCount
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.ext.asEventIdTag
+import net.primal.android.nostr.ext.asEventTag
 import net.primal.android.nostr.ext.asIMetaTag
 import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.ext.asReplaceableEventTag
@@ -18,10 +17,13 @@ import net.primal.android.nostr.ext.isPubKeyTag
 import net.primal.android.nostr.ext.parseEventTags
 import net.primal.android.nostr.ext.parseHashtagTags
 import net.primal.android.nostr.ext.parsePubkeyTags
+import net.primal.android.nostr.ext.parseReplaceableEventTags
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.nostr.publish.NostrPublisher
-import net.primal.android.notes.db.PostData
+import net.primal.android.nostr.publish.PublishResult
+import net.primal.android.nostr.utils.Naddr
+import net.primal.android.nostr.utils.Nevent
 
 class NotePublishHandler @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
@@ -34,52 +36,37 @@ class NotePublishHandler @Inject constructor(
         userId: String,
         content: String,
         attachments: List<NoteAttachment> = emptyList(),
-        rootArticleEventId: String? = null,
-        rootArticleId: String? = null,
-        rootArticleAuthorId: String? = null,
-        rootHighlightId: String? = null,
-        rootHighlightAuthorId: String? = null,
-        rootPostId: String? = null,
-        replyToPostId: String? = null,
-        replyToAuthorId: String? = null,
-    ): Boolean {
-        assertNotNullCount(rootArticleId, rootPostId, atMost = 1) { "You can have at most one root event." }
-
-        val replyPostData = replyToPostId?.let {
-            withContext(dispatcherProvider.io()) {
-                database.posts().findByPostId(postId = it)
-            }
-        }
-
+        rootNoteNevent: Nevent? = null,
+        rootArticleNaddr: Naddr? = null,
+        rootHighlightNevent: Nevent? = null,
+        replyToNoteNevent: Nevent? = null,
+    ): PublishResult {
+        /* Event mentions from content */
         val mentionEventTags = content.parseEventTags(marker = "mention")
+        val mentionReplaceableEventTags = content.parseReplaceableEventTags(marker = "mention")
+        val allMentionedEventTags = mentionEventTags + mentionReplaceableEventTags
+
+        /* Pubkey mentions from content and referenced pub keys. */
         val mentionPubkeyTags = content.parsePubkeyTags(marker = "mention").toSet()
-
-        val rootEventTags = constructRootTags(
-            rootHighlightId = rootHighlightId,
-            rootPostId = rootPostId,
-            rootArticleId = rootArticleId,
-            rootArticleAuthorId = rootArticleAuthorId,
-            rootArticleEventId = rootArticleEventId,
+        val referencedPubkeyTags = resolveReferencedPubkeyTags(
+            rootNoteNevent = rootNoteNevent,
+            rootArticleNaddr = rootArticleNaddr,
+            rootHighlightNevent = rootHighlightNevent,
+            replyToNoteNevent = replyToNoteNevent,
         )
+        val allPubkeyTags = mentionPubkeyTags + referencedPubkeyTags
 
-        val replyEventTag = replyToPostId?.constructReplyTags(rootPostId)
-
-        val eventTags = (mentionEventTags + mentionPubkeyTags + rootEventTags + replyEventTag).filterNotNull().toSet()
-
-        val relayHintsMap = withContext(dispatcherProvider.io()) {
-            val tagNoteIds = eventTags.map { it.get(index = 1).jsonPrimitive.content }
-            val hints = database.eventHints().findById(eventIds = tagNoteIds)
-            hints.associate { it.eventId to it.relays.first() }
-        }
-
-        val noteTags = eventTags.addRelayHints(relayHintsMap = relayHintsMap)
-
-        /* Pubkey tags */
-        val pubkeyTags = constructPubkeyTags(
-            replyPostData = replyPostData,
-            replyToAuthorId = replyToAuthorId,
-            rootHighlightAuthorId = rootHighlightAuthorId,
-            rootArticleAuthorId = rootArticleAuthorId,
+        /* Reply & Root tags */
+        val replyEventTag = resolveReplyEventTag(
+            rootNote = rootNoteNevent,
+            replyTo = replyToNoteNevent,
+            rootHighlight = rootHighlightNevent,
+            rootArticle = rootArticleNaddr,
+        )
+        val rootTag = resolveRootEventTag(
+            highlight = rootHighlightNevent,
+            article = rootArticleNaddr,
+            note = rootNoteNevent,
         )
 
         /* Hashtag tags */
@@ -88,103 +75,117 @@ class NotePublishHandler @Inject constructor(
         /* iMeta tags */
         val iMetaTags = attachments.filter { it.isImageAttachment }.map { it.asIMetaTag() }
 
+        /* Relay Hints */
+        val allReferenceTags = (allMentionedEventTags + allPubkeyTags + replyEventTag + rootTag).filterNotNull().toSet()
+        val relayHintsMap = withContext(dispatcherProvider.io()) {
+            val tagNoteIds = allReferenceTags.map { it.get(index = 1).jsonPrimitive.content }
+            val hints = database.eventHints().findById(eventIds = tagNoteIds)
+            hints.associate { it.eventId to it.relays.first() }
+        }
+        val allReferenceTagsWithRelays = allReferenceTags.insertRelayHints(relayHintsMap = relayHintsMap)
+
         /* Content */
-        val refinedContent = buildRefinedContent(attachments, content)
+        val refinedContent = content.appendAttachmentUrls(attachments)
 
-        val outboxRelays = replyToPostId?.let { noteId ->
-            relayHintsMap[noteId]?.let { relayUrl -> listOf(relayUrl) }
-        } ?: emptyList()
+        return withContext(dispatcherProvider.io()) {
+            val outboxRelays = replyToNoteNevent?.eventId?.let { noteId ->
+                relayHintsMap[noteId]?.let { relayUrl -> listOf(relayUrl) }
+            } ?: emptyList()
 
-        val publishResult = withContext(dispatcherProvider.io()) {
             nostrPublisher.signPublishImportNostrEvent(
                 userId = userId,
                 unsignedNostrEvent = NostrUnsignedEvent(
                     pubKey = userId,
                     kind = NostrEventKind.ShortTextNote.value,
-                    tags = (pubkeyTags + noteTags + hashtagTags + iMetaTags).toList(),
+                    tags = (allReferenceTagsWithRelays + hashtagTags + iMetaTags).toList(),
                     content = refinedContent,
                 ),
                 outboxRelays = outboxRelays,
             )
         }
-        return publishResult.imported
     }
 
-    /*
-        Highlights and articles take precedence.
-        Highlights and articles cannot appear as nested reply chain (e.g. reply to article with article).
-        Therefore the non-null value of article or highlight references means that they are root events
-        and should be treated as such.
-     */
-    private fun constructRootTags(
-        rootHighlightId: String?,
-        rootArticleId: String?,
-        rootArticleEventId: String?,
-        rootArticleAuthorId: String?,
-        rootPostId: String?,
-    ): List<JsonArray> =
-        when {
-            (rootHighlightId != null) -> listOf(rootHighlightId.asEventIdTag(marker = "root"))
-            (rootArticleId != null && rootArticleAuthorId != null && rootArticleEventId != null) -> {
-                val tagContent = "${NostrEventKind.LongFormContent.value}:$rootArticleAuthorId:$rootArticleId"
-                listOf(
-                    rootArticleEventId.asEventIdTag(marker = "root"),
-                    tagContent.asReplaceableEventTag(marker = "root"),
-                )
+    private fun resolveRootEventTag(
+        highlight: Nevent?,
+        article: Naddr?,
+        note: Nevent?,
+    ) = when {
+        highlight != null -> highlight.asEventTag(marker = "root")
+        article != null -> article.asReplaceableEventTag(marker = "root")
+        note != null -> note.asEventTag(marker = "root")
+        else -> null
+    }
+
+    private fun resolveReplyEventTag(
+        rootNote: Nevent?,
+        rootHighlight: Nevent?,
+        rootArticle: Naddr?,
+        replyTo: Nevent?,
+    ): JsonArray? {
+        return when {
+            rootArticle != null || rootHighlight != null -> {
+                replyTo?.asEventTag(marker = "reply")
             }
 
-            else -> listOfNotNull(rootPostId?.asEventIdTag(marker = "root"))
+            replyTo?.eventId != rootNote?.eventId -> {
+                replyTo?.asEventTag(marker = "reply")
+            }
+
+            else -> null
         }
-
-    private fun constructPubkeyTags(
-        replyPostData: PostData?,
-        replyToAuthorId: String?,
-        rootHighlightAuthorId: String?,
-        rootArticleAuthorId: String?,
-    ): Set<JsonArray> {
-        val existingPubkeyTags = replyPostData?.tags?.filter { it.isPubKeyTag() }?.toSet() ?: emptySet()
-        val replyAuthorPubkeyTag = replyToAuthorId?.asPubkeyTag()
-        val replyHighlightAuthorPubkeyTag = rootHighlightAuthorId?.asPubkeyTag()
-        val rootArticleAuthorPubkeyTag = rootArticleAuthorId?.asPubkeyTag()
-
-        return sequenceOf(
-            existingPubkeyTags,
-            listOf(
-                replyAuthorPubkeyTag,
-                replyHighlightAuthorPubkeyTag ?: rootArticleAuthorPubkeyTag,
-            ),
-        ).flatten().filterNotNull().toSet()
     }
 
-    private fun buildRefinedContent(attachments: List<NoteAttachment>, content: String): String {
+    private suspend fun resolveReferencedPubkeyTags(
+        rootNoteNevent: Nevent?,
+        rootArticleNaddr: Naddr?,
+        rootHighlightNevent: Nevent?,
+        replyToNoteNevent: Nevent?,
+    ): Set<JsonArray> {
+        val replyToPostData = replyToNoteNevent?.let {
+            withContext(dispatcherProvider.io()) {
+                database.posts().findByPostId(postId = it.eventId)
+            }
+        }
+
+        val replyToExistingPubkeyTags = replyToPostData?.tags?.filter { it.isPubKeyTag() }?.toSet() ?: emptySet()
+        val replyToAuthorPubkeyTag = replyToNoteNevent?.asPubkeyTag()
+        val rootNoteAuthorPubkeyTag = rootNoteNevent?.asPubkeyTag()
+        val rootHighlightAuthorPubkeyTag = rootHighlightNevent?.asPubkeyTag()
+        val rootArticleAuthorPubkeyTag = rootArticleNaddr?.asPubkeyTag()
+
+        return sequenceOf(
+            replyToExistingPubkeyTags,
+            listOfNotNull(
+                replyToAuthorPubkeyTag,
+                rootNoteAuthorPubkeyTag,
+                rootHighlightAuthorPubkeyTag,
+                rootArticleAuthorPubkeyTag,
+            ),
+        ).flatten().toSet()
+    }
+
+    private fun String.appendAttachmentUrls(attachments: List<NoteAttachment>): String {
         val attachmentUrls = attachments.mapNotNull { it.remoteUrl }
         val refinedContent = if (attachmentUrls.isEmpty()) {
-            content
+            this
         } else {
             StringBuilder().apply {
-                append(content)
+                append(this@appendAttachmentUrls)
                 appendLine()
                 appendLine()
-                attachmentUrls.forEach {
-                    append(it)
-                    appendLine()
+                attachmentUrls.forEachIndexed { index, url ->
+                    append(url)
+                    if (index < attachmentUrls.size - 1) appendLine()
                 }
             }.toString()
         }
         return refinedContent
     }
 
-    private fun Set<JsonArray>.addRelayHints(relayHintsMap: Map<String, String>) =
+    private fun Set<JsonArray>.insertRelayHints(relayHintsMap: Map<String, String>) =
         this.map {
             val noteId = it[1].jsonPrimitive.content
             val relayHint = relayHintsMap.getOrDefault(key = noteId, defaultValue = "")
             JsonArray(it.toMutableList().apply { this[2] = JsonPrimitive(relayHint) })
-        }
-
-    private fun String?.constructReplyTags(rootPostId: String?) =
-        if (rootPostId != this) {
-            this?.asEventIdTag(marker = "reply")
-        } else {
-            null
         }
 }

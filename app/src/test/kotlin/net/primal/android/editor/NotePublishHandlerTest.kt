@@ -2,21 +2,20 @@ package net.primal.android.editor
 
 import android.net.Uri
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldEndWith
+import io.kotest.matchers.string.shouldStartWith
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.verify
-import java.lang.reflect.Method
 import java.util.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import kotlinx.datetime.Clock
 import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.db.PrimalDatabase
@@ -24,15 +23,18 @@ import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.nostr.db.EventRelayHints
 import net.primal.android.nostr.db.EventRelayHintsDao
 import net.primal.android.nostr.ext.asEventIdTag
+import net.primal.android.nostr.ext.asEventTag
 import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.ext.asReplaceableEventTag
-import net.primal.android.nostr.ext.isPubKeyTag
+import net.primal.android.nostr.ext.isATag
+import net.primal.android.nostr.ext.isEventIdTag
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nevent
 import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import net.primal.android.nostr.utils.Nip19TLV.toNeventString
+import net.primal.android.nostr.utils.asATagValue
 import net.primal.android.notes.db.PostDao
 import net.primal.android.notes.db.PostData
 import org.junit.Rule
@@ -45,113 +47,713 @@ class NotePublishHandlerTest {
     @get:Rule
     val coroutinesTestRule = CoroutinesTestRule()
 
+    private val expectedUserId = "88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079"
+
+    private fun mockkPrimalDatabase(
+        post: PostData? = null,
+        eventHints: List<EventRelayHints> = emptyList(),
+    ): PrimalDatabase {
+        val postDao = mockk<PostDao> {
+            every { findByPostId(any()) } returns post
+        }
+        val eventHintsDao = mockk<EventRelayHintsDao> {
+            coEvery { findById(any()) } returns eventHints
+        }
+
+        return mockk<PrimalDatabase> {
+            every { posts() } returns postDao
+            every { eventHints() } returns eventHintsDao
+        }
+    }
+
+    private fun buildHighlightNevent() =
+        Nevent(
+            kind = NostrEventKind.Highlight.value,
+            userId = "highlightAuthorId",
+            eventId = "highlightEventId",
+        )
+
+    private fun buildArticleNaddr() =
+        Naddr(
+            kind = NostrEventKind.LongFormContent.value,
+            userId = "articleAuthorId",
+            identifier = "articleIdentifier",
+        )
+
+    private fun buildNoteNevent(eventId: String = "noteEventId") =
+        Nevent(
+            kind = NostrEventKind.ShortTextNote.value,
+            userId = "noteAuthorID",
+            eventId = eventId,
+        )
+
+    private fun buildNotePublishHandler(
+        dispatcherProvider: CoroutineDispatcherProvider = coroutinesTestRule.dispatcherProvider,
+        nostrPublisher: NostrPublisher = mockk(),
+        database: PrimalDatabase = mockkPrimalDatabase(),
+    ) = NotePublishHandler(
+        dispatcherProvider = dispatcherProvider,
+        nostrPublisher = nostrPublisher,
+        database = database,
+    )
+
+//    private fun buildPostData(
+//        postId: String = UUID.randomUUID().toString(),
+//        authorId: String = UUID.randomUUID().toString(),
+//        createdAt: Long = Clock.System.now().epochSeconds,
+//        tags: List<JsonArray> = emptyList(),
+//        content: String = "",
+//        uris: List<String> = emptyList(),
+//        hashtags: List<String> = emptyList(),
+//        sig: String = "",
+//        raw: String = "",
+//        authorMetadataId: String? = null,
+//        replyToPostId: String? = null,
+//        replyToAuthorId: String? = null,
+//    ) = PostData(
+//        postId = postId,
+//        authorId = authorId,
+//        createdAt = createdAt,
+//        tags = tags,
+//        content = content,
+//        uris = uris,
+//        hashtags = hashtags,
+//        sig = sig,
+//        raw = raw,
+//        authorMetadataId = authorMetadataId,
+//        replyToPostId = replyToPostId,
+//        replyToAuthorId = replyToAuthorId,
+//    )
+
+    private fun buildNoteAttachment(
+        id: UUID = UUID.randomUUID(),
+        localUri: Uri = mockk(),
+        remoteUrl: String? = null,
+        mimeType: String? = null,
+        originalHash: String? = null,
+        uploadedHash: String? = null,
+        originalUploadedInBytes: Int? = null,
+        originalSizeInBytes: Int? = null,
+        uploadedSizeInBytes: Int? = null,
+        dimensionInPixels: String? = null,
+        uploadError: Throwable? = null,
+    ) = NoteAttachment(
+        id = id,
+        localUri = localUri,
+        remoteUrl = remoteUrl,
+        mimeType = mimeType,
+        originalHash = originalHash,
+        originalUploadedInBytes = originalUploadedInBytes,
+        uploadedHash = uploadedHash,
+        originalSizeInBytes = originalSizeInBytes,
+        uploadedSizeInBytes = uploadedSizeInBytes,
+        dimensionInPixels = dimensionInPixels,
+        uploadError = uploadError,
+    )
+
+    /**
+     * User Ids
+     */
+
     @Test
-    fun `publishShortTextNote publish new note`() =
+    fun publishShortTextNote_callsNostrPublisher_withGivenUserId() =
         runTest {
-            val expectedUserId = "someUserId"
-            val expectedContent = "some simple content"
-            val expectedTags = emptyList<JsonArray>()
-
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
-            val notePublisher = buildNotePublishHandler(
-                nostrPublisher = nostrPublisher,
-                database = mockkDatabase(),
-            )
+            val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
 
-            notePublisher.publishShortTextNote(
-                userId = expectedUserId,
-                content = expectedContent,
-            )
+            notePublishHandler.publishShortTextNote(userId = expectedUserId, content = "")
 
             coVerify {
                 nostrPublisher.signPublishImportNostrEvent(
                     withArg { it shouldBe expectedUserId },
+                    any(),
+                )
+            }
+        }
+
+    @Test
+    fun publishShortTextNote_authorsNostrEvent_withGivenUserId() =
+        runTest {
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
+
+            notePublishHandler.publishShortTextNote(userId = expectedUserId, content = "")
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    any(),
+                    withArg { it.pubKey shouldBe expectedUserId },
+                )
+            }
+        }
+
+    /**
+     * Content & Attachments
+     */
+
+    @Test
+    fun publishShortTextNote_publishesOriginalContent_ifNoAttachmentsGiven() =
+        runTest {
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
+
+            val givenContent = "This is note without attachments."
+            notePublishHandler.publishShortTextNote(
+                userId = expectedUserId,
+                content = givenContent,
+                attachments = emptyList(),
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    any(),
                     withArg {
-                        it.content shouldBe expectedContent
-                        it.tags shouldBe expectedTags
+                        it.content shouldBe givenContent
                     },
                 )
             }
         }
 
     @Test
-    fun `publishShortTextNote publish reply to note`() =
+    fun publishShortTextNote_appendsAttachmentUrl_toGivenContent() =
         runTest {
-            val rootPostId = "somePostId"
-            val replyToAuthorId = "someAuthorId"
-
-            val expectedUserId = "someUserId"
-            val expectedContent = "some simple content"
-            val expectedTags = listOf<JsonArray>(
-                replyToAuthorId.asPubkeyTag(),
-                rootPostId.asEventIdTag(marker = "root"),
-            )
-
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
-            val notePublisher = buildNotePublishHandler(
-                nostrPublisher = nostrPublisher,
-                database = mockkDatabase(),
-            )
+            val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
 
-            notePublisher.publishShortTextNote(
+            val givenContent = "This is note with attachments."
+            val expectedRemoteUrl = "https://m.primal.net/abc"
+            notePublishHandler.publishShortTextNote(
                 userId = expectedUserId,
-                content = expectedContent,
-                rootPostId = rootPostId,
-                replyToAuthorId = replyToAuthorId,
+                content = givenContent,
+                attachments = listOf(buildNoteAttachment(remoteUrl = expectedRemoteUrl)),
             )
 
             coVerify {
                 nostrPublisher.signPublishImportNostrEvent(
-                    withArg { it shouldBe expectedUserId },
+                    any(),
                     withArg {
-                        it.content shouldBe expectedContent
-                        it.tags shouldBe expectedTags
+                        it.content shouldStartWith givenContent
+                        it.content shouldEndWith expectedRemoteUrl
                     },
                 )
             }
         }
 
     @Test
-    fun `publishShortTextNote publish reply to reply to note`() =
+    fun publishShortTextNote_appendsAllAttachmentUrls_toGivenContent() =
         runTest {
-            val rootPostId = "somePostId"
-            val replyToPostId = "idOfTheNoteWeAreReplying"
-            val replyToAuthorId = "someAuthorId"
-
-            val expectedUserId = "someUserId"
-            val expectedContent = "some simple content"
-            val expectedTags = listOf<JsonArray>(
-                replyToAuthorId.asPubkeyTag(),
-                rootPostId.asEventIdTag(marker = "root"),
-                replyToPostId.asEventIdTag(marker = "reply"),
-            )
-
-            val replyPostData = buildPostData(postId = replyToPostId, authorId = replyToAuthorId)
-
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
-            val notePublisher = buildNotePublishHandler(
-                nostrPublisher = nostrPublisher,
-                database = mockkDatabase(post = replyPostData),
-            )
+            val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
 
-            notePublisher.publishShortTextNote(
+            val givenContent = "This is note with attachments."
+            val expectedRemoteUrl1 = "https://m.primal.net/abc"
+            val expectedAttachment1 = buildNoteAttachment(remoteUrl = expectedRemoteUrl1)
+            val expectedRemoteUrl2 = "https://m.primal.net/def"
+            val expectedAttachment2 = buildNoteAttachment(remoteUrl = expectedRemoteUrl2)
+            val expectedUrlsAppendix = "$expectedRemoteUrl1\n$expectedRemoteUrl2"
+
+            notePublishHandler.publishShortTextNote(
                 userId = expectedUserId,
-                content = expectedContent,
-                rootPostId = rootPostId,
-                replyToPostId = replyToPostId,
-                replyToAuthorId = replyToAuthorId,
+                content = givenContent,
+                attachments = listOf(expectedAttachment1, expectedAttachment2),
             )
 
             coVerify {
                 nostrPublisher.signPublishImportNostrEvent(
-                    withArg { it shouldBe expectedUserId },
+                    any(),
                     withArg {
-                        it.content shouldBe expectedContent
-                        it.tags shouldBe expectedTags
+                        it.content shouldStartWith givenContent
+                        it.content shouldEndWith expectedUrlsAppendix
                     },
                 )
             }
         }
+
+    @Test
+    fun publishShortTextNote_addsExtraLine_betweenContentAndAttachments() =
+        runTest {
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
+
+            val givenContent = "This is note with attachments."
+            notePublishHandler.publishShortTextNote(
+                userId = expectedUserId,
+                content = givenContent,
+                attachments = listOf(buildNoteAttachment(remoteUrl = "remoteUrl")),
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    any(),
+                    withArg {
+                        val appendix = it.content.substringAfter(givenContent)
+                        val breakLines = appendix.substring(startIndex = 0, endIndex = 3)
+                        breakLines[0] shouldBe '\n'
+                        breakLines[1] shouldBe '\n'
+                        breakLines[2] shouldNotBe '\n'
+                    },
+                )
+            }
+        }
+
+    @Test
+    fun publishShortTextNote_createsIMetaTag_forGivenImageAttachments() =
+        runTest {
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
+
+            val expectedAttachments = listOf(
+                buildNoteAttachment(mimeType = "image/jpeg", remoteUrl = "https://m.primal.net/abc"),
+                buildNoteAttachment(mimeType = "image/jpeg", remoteUrl = "https://m.primal.net/def"),
+            )
+
+            notePublishHandler.publishShortTextNote(
+                userId = expectedUserId,
+                content = "",
+                attachments = expectedAttachments,
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    any(),
+                    withArg {
+                        println(it.tags)
+                        val iMetaTagCount = it.tags.count { tag -> tag[0].jsonPrimitive.content == "imeta" }
+                        iMetaTagCount shouldBe expectedAttachments.size
+                    },
+                )
+            }
+        }
+
+    /**
+     * Hashtags
+     */
+
+    @Test
+    fun publishShortTextNote_createsHashtagTags_forHashtagsInContent() =
+        runTest {
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
+
+            val hashtags = listOf("#nostr", "#bicoin", "#primal")
+            notePublishHandler.publishShortTextNote(
+                userId = expectedUserId,
+                content = "Some note with hashtag $hashtags",
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    any(),
+                    withArg {
+                        val tTagCount = it.tags.count { tag -> tag[0].jsonPrimitive.content == "t" }
+                        tTagCount shouldBe hashtags.size
+                    },
+                )
+            }
+        }
+
+    @Test
+    fun publishShortTextNote_createsHashtagTags_withoutHashSymbol() =
+        runTest {
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
+
+            val hashtags = listOf("#nostr", "#bicoin", "#primal")
+            notePublishHandler.publishShortTextNote(
+                userId = expectedUserId,
+                content = "Some note with hashtag $hashtags",
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    any(),
+                    withArg { event ->
+                        val tagValues = event.tags.map { tag -> tag[1].jsonPrimitive.content }
+                        tagValues shouldBe hashtags.map { it.removePrefix("#") }
+                    },
+                )
+            }
+        }
+
+    /**
+     * Mentioned users in content.
+     */
+
+    @Test
+    fun publishShortTextNote_createsPubkeyTags_forMentionedUsers() =
+        runTest {
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
+
+            val expectedMentionedUser = listOf(
+                "nostr:npub13rxpxjc6vh65aay2eswlxejsv0f7530sf64c4arydetpckhfjpustsjeaf",
+                "nostr:npub12vkcxr0luzwp8e673v29eqjhrr7p9vqq8asav85swaepclllj09sylpugg",
+            )
+            notePublishHandler.publishShortTextNote(
+                userId = expectedUserId,
+                content = "Hey $expectedMentionedUser, how are you?",
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    any(),
+                    withArg { event ->
+                        val pubkeyTagsCount = event.tags.count { tag -> tag[0].jsonPrimitive.content == "p" }
+                        pubkeyTagsCount shouldBe expectedMentionedUser.size
+                    },
+                )
+            }
+        }
+
+    @Test
+    fun publishShortTextNote_createsPubkeyTagsForMentionedUsers_withRelayHintsIfAvailable() =
+        runTest {
+            val expectedEventHints = listOf(
+                EventRelayHints(
+                    eventId = "88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079",
+                    relays = listOf("wss://profile.relay.com"),
+                ),
+                EventRelayHints(
+                    eventId = "532d830dffe09c13e75e8b145c825718fc12b0003f61d61e9077721c7fff93cb",
+                    relays = listOf("wss://profile.primal.com"),
+                ),
+            )
+            val expectedMentionedUser = listOf(
+                "nostr:npub13rxpxjc6vh65aay2eswlxejsv0f7530sf64c4arydetpckhfjpustsjeaf",
+                "nostr:npub12vkcxr0luzwp8e673v29eqjhrr7p9vqq8asav85swaepclllj09sylpugg",
+            )
+
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublishHandler = buildNotePublishHandler(
+                nostrPublisher = nostrPublisher,
+                database = mockkPrimalDatabase(eventHints = expectedEventHints),
+            )
+
+            notePublishHandler.publishShortTextNote(
+                userId = expectedUserId,
+                content = "Hey $expectedMentionedUser, how are you?",
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    any(),
+                    withArg { event ->
+                        val pubkeyToRelayHintMap = event.tags.map { tag ->
+                            tag[1].jsonPrimitive.content to tag[2].jsonPrimitive.content
+                        }
+                        pubkeyToRelayHintMap.forEach { (pubkey, actualRelayHint) ->
+                            val expectedRelay = expectedEventHints.find { it.eventId == pubkey }?.relays?.firstOrNull()
+                            actualRelayHint shouldBe expectedRelay
+                        }
+                    },
+                )
+            }
+        }
+
+    /**
+     * Mentioned events (notes, highlights) in content.
+     */
+
+    /**
+     * Mentioned replaceable events in content.
+     */
+
+    /**
+     * Resolving proper root tag.
+     */
+
+    @Test
+    fun publishShortTextNote_createsRootTagForHighlight_evenIfRootArticleAndRootNoteArePresent() =
+        runTest {
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
+
+            val highlightNevent = buildHighlightNevent()
+            val articleNaddr = buildArticleNaddr()
+            val noteNevent = buildNoteNevent()
+
+            notePublishHandler.publishShortTextNote(
+                userId = expectedUserId,
+                content = "I'm replying to a comment on highlight.",
+                rootHighlightNevent = highlightNevent,
+                rootArticleNaddr = articleNaddr,
+                rootNoteNevent = noteNevent,
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    any(),
+                    withArg { event ->
+                        println(event)
+                        val rootTag = event.tags
+                            .filter { tag -> tag.isEventIdTag() }
+                            .find { tag -> tag[3].jsonPrimitive.content == "root" }
+                        rootTag.shouldNotBeNull()
+                        rootTag[0].jsonPrimitive.content shouldBe "e"
+                        rootTag[1].jsonPrimitive.content shouldBe highlightNevent.eventId
+                    },
+                )
+            }
+        }
+
+    @Test
+    fun publishShortTextNote_createsRootTagForArticle_evenIfRootNoteIsPresent() =
+        runTest {
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
+
+            val articleNaddr = buildArticleNaddr()
+            val noteNevent = buildNoteNevent()
+
+            notePublishHandler.publishShortTextNote(
+                userId = expectedUserId,
+                content = "I'm replying to a comment on article.",
+                rootHighlightNevent = null,
+                rootArticleNaddr = articleNaddr,
+                rootNoteNevent = noteNevent,
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    any(),
+                    withArg { event ->
+                        val rootTag = event.tags
+                            .filter { tag -> tag.isATag() }
+                            .find { tag -> tag[3].jsonPrimitive.content == "root" }
+                        rootTag.shouldNotBeNull()
+                        rootTag[0].jsonPrimitive.content shouldBe "a"
+                        rootTag[1].jsonPrimitive.content shouldBe articleNaddr.asATagValue()
+                    },
+                )
+            }
+        }
+
+    @Test
+    fun publishShortTextNote_createsRootTagForNote_ifRootNoteIsPresentAndNoOtherRootEvents() =
+        runTest {
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
+
+            val noteNevent = buildNoteNevent()
+
+            notePublishHandler.publishShortTextNote(
+                userId = expectedUserId,
+                content = "I'm replying to a root note.",
+                rootHighlightNevent = null,
+                rootArticleNaddr = null,
+                rootNoteNevent = noteNevent,
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    any(),
+                    withArg { event ->
+                        val eventTags = event.tags.filter { tag -> tag.isEventIdTag() }
+                        val rootTag = eventTags.find { tag -> tag[3].jsonPrimitive.content == "root" }
+                        rootTag.shouldNotBeNull()
+                        rootTag[0].jsonPrimitive.content shouldBe "e"
+                        rootTag[1].jsonPrimitive.content shouldBe noteNevent.eventId
+                    },
+                )
+            }
+        }
+
+    @Test
+    fun publishShortTextNote_createsRootTagForNote_ifRootNoteAndReplyToNoteAreTheSame() =
+        runTest {
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
+
+            val noteNevent = buildNoteNevent()
+
+            notePublishHandler.publishShortTextNote(
+                userId = expectedUserId,
+                content = "I'm replying to a root note.",
+                rootNoteNevent = noteNevent,
+                replyToNoteNevent = noteNevent,
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    any(),
+                    withArg { event ->
+                        println(event.tags)
+                        val eventTags = event.tags.filter { tag -> tag.isEventIdTag() }
+                        val rootTag = eventTags.find { tag -> tag[3].jsonPrimitive.content == "root" }
+                        val replyTag = eventTags.find { tag -> tag[3].jsonPrimitive.content == "reply" }
+
+                        replyTag.shouldBeNull()
+                        rootTag.shouldNotBeNull()
+                        rootTag[0].jsonPrimitive.content shouldBe "e"
+                        rootTag[1].jsonPrimitive.content shouldBe noteNevent.eventId
+                    },
+                )
+            }
+        }
+
+    /**
+     * Resolve proper reply tag.
+     */
+
+    @Test
+    fun publishShortTextNote_createsReplyTagForNote_whenRootNoteIsDifferentThanReplyToNote() =
+        runTest {
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
+
+            val rootNoteNevent = buildNoteNevent(eventId = "rootNote")
+            val replyToNoteNevent = buildNoteNevent(eventId = "replyToNote")
+
+            notePublishHandler.publishShortTextNote(
+                userId = expectedUserId,
+                content = "I'm replying to a reply to root note.",
+                rootNoteNevent = rootNoteNevent,
+                replyToNoteNevent = replyToNoteNevent,
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    any(),
+                    withArg { event ->
+                        val eventTags = event.tags.filter { tag -> tag.isEventIdTag() }
+                        val rootTag = eventTags.find { tag -> tag[3].jsonPrimitive.content == "root" }
+                        val replyTag = eventTags.find { tag -> tag[3].jsonPrimitive.content == "reply" }
+
+                        rootTag.shouldNotBeNull()
+                        rootTag[0].jsonPrimitive.content shouldBe "e"
+                        rootTag[1].jsonPrimitive.content shouldBe rootNoteNevent.eventId
+
+                        replyTag.shouldNotBeNull()
+                        replyTag[0].jsonPrimitive.content shouldBe "e"
+                        replyTag[1].jsonPrimitive.content shouldBe replyToNoteNevent.eventId
+                    },
+                )
+            }
+        }
+
+    @Test
+    fun publishShortTextNote_createsReplyTagForRootNote_whenArticleRootIsPresent() =
+        runTest {
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
+
+            val noteNevent = buildNoteNevent()
+            val rootArticleNaddr = buildArticleNaddr()
+
+            notePublishHandler.publishShortTextNote(
+                userId = expectedUserId,
+                content = "I'm replying to a reply to root note.",
+                rootNoteNevent = noteNevent,
+                replyToNoteNevent = noteNevent,
+                rootArticleNaddr = rootArticleNaddr,
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    any(),
+                    withArg { event ->
+                        val aTags = event.tags.filter { tag -> tag.isATag() }
+                        val eventTags = event.tags.filter { tag -> tag.isEventIdTag() }
+
+                        val rootATag = aTags.find { tag -> tag[3].jsonPrimitive.content == "root" }
+                        val rootEventTag = eventTags.find { tag -> tag[3].jsonPrimitive.content == "root" }
+                        val replyTag = eventTags.find { tag -> tag[3].jsonPrimitive.content == "reply" }
+
+                        rootATag.shouldNotBeNull()
+                        rootATag[0].jsonPrimitive.content shouldBe "a"
+                        rootATag[1].jsonPrimitive.content shouldBe rootArticleNaddr.asATagValue()
+
+                        rootEventTag.shouldBeNull()
+
+                        replyTag.shouldNotBeNull()
+                        replyTag[0].jsonPrimitive.content shouldBe "e"
+                        replyTag[1].jsonPrimitive.content shouldBe noteNevent.eventId
+                    },
+                )
+            }
+        }
+
+    @Test
+    fun publishShortTextNote_createsReplyTagForRootNote_whenArticleAndHighlightRootIsPresent() =
+        runTest {
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
+
+            val noteNevent = buildNoteNevent()
+            val rootArticleNaddr = buildArticleNaddr()
+            val rootHighlightNevent = buildHighlightNevent()
+
+            notePublishHandler.publishShortTextNote(
+                userId = expectedUserId,
+                content = "I'm replying to a reply to root note.",
+                rootNoteNevent = noteNevent,
+                replyToNoteNevent = noteNevent,
+                rootArticleNaddr = rootArticleNaddr,
+                rootHighlightNevent = rootHighlightNevent,
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    any(),
+                    withArg { event ->
+                        val aTags = event.tags.filter { tag -> tag.isATag() }
+                        val eventTags = event.tags.filter { tag -> tag.isEventIdTag() }
+
+                        val rootATag = aTags.find { tag -> tag[3].jsonPrimitive.content == "root" }
+                        val rootEventTag = eventTags.find { tag -> tag[3].jsonPrimitive.content == "root" }
+                        val replyTag = eventTags.find { tag -> tag[3].jsonPrimitive.content == "reply" }
+
+                        rootATag.shouldBeNull()
+
+                        rootEventTag.shouldNotBeNull()
+                        rootEventTag[0].jsonPrimitive.content shouldBe "e"
+                        rootEventTag[1].jsonPrimitive.content shouldBe rootHighlightNevent.eventId
+
+                        replyTag.shouldNotBeNull()
+                        replyTag[0].jsonPrimitive.content shouldBe "e"
+                        replyTag[1].jsonPrimitive.content shouldBe noteNevent.eventId
+                    },
+                )
+            }
+        }
+
+    /**
+     * Referenced pubkey tag testing
+     */
+
+    @Test
+    fun publishShortTextNote_copiesAllPubkeyTags_fromReplyToNote() =
+        runTest {
+        }
+//    @Test
+//    fun `constructPubkeyTags keeps existing pubkey tags`() {
+//        val notePublisher = buildNotePublishHandler()
+//
+//        val existingTags = listOf("test".asPubkeyTag())
+//        val replyPostData = buildPostData(
+//            tags = existingTags,
+//        )
+//        val replyToAuthorId = "some author id"
+//        val replyToAuthorPubkey = replyToAuthorId.asPubkeyTag()
+//
+//        val expectedSet = setOf(
+//            existingTags,
+//            listOf(replyToAuthorPubkey),
+//        ).flatten()
+//
+//        mockkStatic(JsonArray::isPubKeyTag)
+//
+//        val actualSet = notePublisher.getConstructPubkeyTags()
+//            .invoke(
+//                notePublisher,
+//                replyPostData,
+//                replyToAuthorId,
+//                null,
+//                null,
+//            )
+//
+//        actualSet shouldBe expectedSet
+//    }
 
     @Test
     fun `publishShortTextNote publish new note with single user mentioned`() =
@@ -168,7 +770,7 @@ class NotePublishHandlerTest {
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
             val notePublisher = buildNotePublishHandler(
                 nostrPublisher = nostrPublisher,
-                database = mockkDatabase(),
+                database = mockkPrimalDatabase(),
             )
 
             notePublisher.publishShortTextNote(
@@ -206,7 +808,7 @@ class NotePublishHandlerTest {
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
             val notePublisher = buildNotePublishHandler(
                 nostrPublisher = nostrPublisher,
-                database = mockkDatabase(),
+                database = mockkPrimalDatabase(),
             )
 
             notePublisher.publishShortTextNote(
@@ -241,7 +843,7 @@ class NotePublishHandlerTest {
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
             val notePublisher = buildNotePublishHandler(
                 nostrPublisher = nostrPublisher,
-                database = mockkDatabase(),
+                database = mockkPrimalDatabase(),
             )
 
             notePublisher.publishShortTextNote(
@@ -275,7 +877,7 @@ class NotePublishHandlerTest {
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
             val notePublisher = buildNotePublishHandler(
                 nostrPublisher = nostrPublisher,
-                database = mockkDatabase(),
+                database = mockkPrimalDatabase(),
             )
 
             notePublisher.publishShortTextNote(
@@ -287,6 +889,8 @@ class NotePublishHandlerTest {
                 nostrPublisher.signPublishImportNostrEvent(
                     withArg { it shouldBe expectedUserId },
                     withArg {
+                        println(expectedTags)
+                        println(it)
                         it.content shouldBe expectedContent
                         it.tags shouldBe expectedTags
                     },
@@ -313,7 +917,7 @@ class NotePublishHandlerTest {
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
             val notePublisher = buildNotePublishHandler(
                 nostrPublisher = nostrPublisher,
-                database = mockkDatabase(),
+                database = mockkPrimalDatabase(),
             )
 
             notePublisher.publishShortTextNote(
@@ -347,7 +951,7 @@ class NotePublishHandlerTest {
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
             val notePublisher = buildNotePublishHandler(
                 nostrPublisher = nostrPublisher,
-                database = mockkDatabase(),
+                database = mockkPrimalDatabase(),
             )
 
             notePublisher.publishShortTextNote(
@@ -379,13 +983,13 @@ class NotePublishHandlerTest {
             val expectedUserId = "someUserId"
             val expectedContent = "some simple content ${naddr.toNaddrString()}"
             val expectedTags = listOf<JsonArray>(
-                naddr.asReplaceableEventTag(relayHint = "", marker = "mention"),
+                naddr.asReplaceableEventTag(marker = "mention"),
             )
 
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
             val notePublisher = buildNotePublishHandler(
                 nostrPublisher = nostrPublisher,
-                database = mockkDatabase(),
+                database = mockkPrimalDatabase(),
             )
 
             notePublisher.publishShortTextNote(
@@ -423,14 +1027,14 @@ class NotePublishHandlerTest {
             val expectedUserId = "someUserId"
             val expectedContent = "some simple content ${firstNaddr.toNaddrString()} ${secondNaddr.toNaddrString()}"
             val expectedTags = listOf<JsonArray>(
-                firstNaddr.asReplaceableEventTag(relayHint = "", marker = "mention"),
-                secondNaddr.asReplaceableEventTag(relayHint = "", marker = "mention"),
+                firstNaddr.asReplaceableEventTag(marker = "mention"),
+                secondNaddr.asReplaceableEventTag(marker = "mention"),
             )
 
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
             val notePublisher = buildNotePublishHandler(
                 nostrPublisher = nostrPublisher,
-                database = mockkDatabase(),
+                database = mockkPrimalDatabase(),
             )
 
             notePublisher.publishShortTextNote(
@@ -462,13 +1066,13 @@ class NotePublishHandlerTest {
             val expectedUserId = "someUserId"
             val expectedContent = "some simple content ${naddr.toNaddrString()} ${naddr.toNaddrString()}"
             val expectedTags = listOf<JsonArray>(
-                naddr.asReplaceableEventTag(relayHint = "", marker = "mention"),
+                naddr.asReplaceableEventTag(marker = "mention"),
             )
 
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
             val notePublisher = buildNotePublishHandler(
                 nostrPublisher = nostrPublisher,
-                database = mockkDatabase(),
+                database = mockkPrimalDatabase(),
             )
 
             notePublisher.publishShortTextNote(
@@ -507,14 +1111,14 @@ class NotePublishHandlerTest {
             val expectedContent =
                 "some simple content nostr:${highlightNevent.toNeventString()} nostr:${naddr.toNaddrString()}"
             val expectedTags = listOf<JsonArray>(
-                highlightNevent.eventId.asEventIdTag(relayHint = "", marker = "mention"),
-                naddr.asReplaceableEventTag(relayHint = "", marker = "mention"),
+                highlightNevent.asEventTag(marker = "mention"),
+                naddr.asReplaceableEventTag(marker = "mention"),
             )
 
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
             val notePublisher = buildNotePublishHandler(
                 nostrPublisher = nostrPublisher,
-                database = mockkDatabase(),
+                database = mockkPrimalDatabase(),
             )
 
             notePublisher.publishShortTextNote(
@@ -559,15 +1163,15 @@ class NotePublishHandlerTest {
                 " nostr:${firstHighlightNevent.toNeventString()}" +
                 " nostr:${secondHighlightNevent.toNeventString()} nostr:${naddr.toNaddrString()}"
             val expectedTags = listOf<JsonArray>(
-                firstHighlightNevent.eventId.asEventIdTag(marker = "mention"),
-                secondHighlightNevent.eventId.asEventIdTag(marker = "mention"),
-                naddr.asReplaceableEventTag(relayHint = "", marker = "mention"),
+                firstHighlightNevent.asEventTag(marker = "mention"),
+                secondHighlightNevent.asEventTag(marker = "mention"),
+                naddr.asReplaceableEventTag(marker = "mention"),
             )
 
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
             val notePublisher = buildNotePublishHandler(
                 nostrPublisher = nostrPublisher,
-                database = mockkDatabase(),
+                database = mockkPrimalDatabase(),
             )
 
             notePublisher.publishShortTextNote(
@@ -607,14 +1211,14 @@ class NotePublishHandlerTest {
                 "some simple content nostr:${highlightNevent.toNeventString()} " +
                     "nostr:${highlightNevent.toNeventString()} ${naddr.toNaddrString()}"
             val expectedTags = listOf<JsonArray>(
-                highlightNevent.eventId.asEventIdTag(marker = "mention"),
-                naddr.asReplaceableEventTag(relayHint = "", marker = "mention"),
+                highlightNevent.asEventTag(marker = "mention"),
+                naddr.asReplaceableEventTag(marker = "mention"),
             )
 
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
             val notePublisher = buildNotePublishHandler(
                 nostrPublisher = nostrPublisher,
-                database = mockkDatabase(),
+                database = mockkPrimalDatabase(),
             )
 
             notePublisher.publishShortTextNote(
@@ -632,542 +1236,4 @@ class NotePublishHandlerTest {
                 )
             }
         }
-
-    @Test
-    fun `buildRefinedContent returns correct with zero attachments`() {
-        val notePublisher = buildNotePublishHandler()
-
-        val expectedContent = "some content"
-
-        val actualContent = notePublisher.getBuildRefinedContent()
-            .invoke(notePublisher, emptyList<NoteAttachment>(), expectedContent)
-
-        actualContent shouldBe expectedContent
-    }
-
-    @Test
-    fun `buildRefinedContent returns correct with single attachment`() {
-        val notePublisher = buildNotePublishHandler()
-
-        val attachment = buildNoteAttachment(remoteUrl = "https://primal.net")
-        val content = "some content"
-
-        val expectedContent = "$content\n\n${attachment.remoteUrl}\n"
-
-        val actualContent = notePublisher.getBuildRefinedContent()
-            .invoke(notePublisher, listOf<NoteAttachment>(attachment), content)
-
-        actualContent shouldBe expectedContent
-    }
-
-    @Test
-    fun `buildRefinedContent returns correct with multiple attachments`() {
-        val notePublisher = buildNotePublishHandler()
-
-        val attachments = listOf(
-            buildNoteAttachment(remoteUrl = "https://primal.net"),
-            buildNoteAttachment(remoteUrl = "https://primal.net/somemedia"),
-        )
-        val content = "some content"
-
-        val expectedContent = "$content\n\n${attachments[0].remoteUrl}\n${attachments[1].remoteUrl}\n"
-
-        val actualContent = notePublisher.getBuildRefinedContent()
-            .invoke(notePublisher, attachments, content)
-
-        actualContent shouldBe expectedContent
-    }
-
-    @Test
-    fun `constructReplyTags returns null when replying post is same as root`() {
-        val notePublisher = buildNotePublishHandler()
-
-        notePublisher.getConstructReplyTags()
-            .invoke(notePublisher, "test", "test").shouldBeNull()
-    }
-
-    @Test
-    fun `constructReplyTags calls asEventIdTag when replying post is different then root`() {
-        val notePublisher = buildNotePublishHandler()
-
-        mockkStatic(String::asEventIdTag)
-
-        val replyToNoteId = "some note id"
-        val rootNoteId = "some root note id"
-
-        notePublisher.getConstructReplyTags().invoke(notePublisher, replyToNoteId, rootNoteId)
-
-        verify(exactly = 1) {
-            replyToNoteId.asEventIdTag(marker = "reply")
-        }
-    }
-
-    @Test
-    fun `constructPubkeyTags returns correct set when highlight author is missing`() {
-        val notePublisher = buildNotePublishHandler()
-
-        val replyPostData = buildPostData()
-        val replyToAuthorId = "some author id"
-        val rootArticleAuthorId = "some article author id"
-
-        val replyToAuthorPubkey = buildJsonArray { add(JsonPrimitive(replyToAuthorId)) }
-        val rootArticleAuthorPubkey = buildJsonArray { add(JsonPrimitive(rootArticleAuthorId)) }
-
-        val expectedSet = setOf(
-            replyToAuthorPubkey,
-            rootArticleAuthorPubkey,
-        )
-
-        mockkStatic(String::asPubkeyTag)
-        every { replyToAuthorId.asPubkeyTag() } returns replyToAuthorPubkey
-        every { rootArticleAuthorId.asPubkeyTag() } returns rootArticleAuthorPubkey
-
-        val actualSet = notePublisher.getConstructPubkeyTags()
-            .invoke(
-                notePublisher,
-                replyPostData,
-                replyToAuthorId,
-                null,
-                rootArticleAuthorId,
-            )
-
-        verify(exactly = 1) {
-            replyToAuthorId.asPubkeyTag()
-            rootArticleAuthorId.asPubkeyTag()
-        }
-
-        actualSet shouldBe expectedSet
-    }
-
-    @Test
-    fun `constructPubkeyTags returns highlight author when both article and highlight present`() {
-        val notePublisher = buildNotePublishHandler()
-
-        val replyPostData = buildPostData()
-        val replyToAuthorId = "some author id"
-        val rootHighlightAuthorId = "some highlight author id"
-        val rootArticleAuthorId = "some article author id"
-
-        val replyToAuthorPubkey = buildJsonArray { add(JsonPrimitive(replyToAuthorId)) }
-        val rootHighlightAuthorPubkey = buildJsonArray { add(JsonPrimitive(rootHighlightAuthorId)) }
-        val rootArticleAuthorPubkey = buildJsonArray { add(JsonPrimitive(rootArticleAuthorId)) }
-
-        val expectedSet = setOf(
-            replyToAuthorPubkey,
-            rootHighlightAuthorPubkey,
-        )
-
-        mockkStatic(String::asPubkeyTag)
-        every { replyToAuthorId.asPubkeyTag() } returns replyToAuthorPubkey
-        every { rootHighlightAuthorId.asPubkeyTag() } returns rootHighlightAuthorPubkey
-        every { rootArticleAuthorId.asPubkeyTag() } returns rootArticleAuthorPubkey
-
-        val actualSet = notePublisher.getConstructPubkeyTags()
-            .invoke(
-                notePublisher,
-                replyPostData,
-                replyToAuthorId,
-                rootHighlightAuthorId,
-                rootArticleAuthorId,
-            )
-
-        verify(exactly = 1) {
-            replyToAuthorId.asPubkeyTag()
-            rootHighlightAuthorId.asPubkeyTag()
-            rootArticleAuthorId.asPubkeyTag()
-        }
-
-        actualSet shouldBe expectedSet
-    }
-
-    @Test
-    fun `constructPubkeyTags keeps existing pubkey tags`() {
-        val notePublisher = buildNotePublishHandler()
-
-        val existingTags = listOf("test".asPubkeyTag())
-        val replyPostData = buildPostData(
-            tags = existingTags,
-        )
-        val replyToAuthorId = "some author id"
-        val replyToAuthorPubkey = replyToAuthorId.asPubkeyTag()
-
-        val expectedSet = setOf(
-            existingTags,
-            listOf(replyToAuthorPubkey),
-        ).flatten()
-
-        mockkStatic(JsonArray::isPubKeyTag)
-
-        val actualSet = notePublisher.getConstructPubkeyTags()
-            .invoke(
-                notePublisher,
-                replyPostData,
-                replyToAuthorId,
-                null,
-                null,
-            )
-
-        actualSet shouldBe expectedSet
-    }
-
-    @Test
-    fun `constructRootTags returns empty list if no root events provided`() {
-        val notePublisher = buildNotePublishHandler()
-
-        val actualTags = notePublisher.getConstructRootTags()
-            .invoke(notePublisher, null, null, null, null, null)
-
-        actualTags shouldBe emptyList<JsonArray>()
-    }
-
-    @Test
-    fun `constructRootTags returns highlight as root if only highlight available`() {
-        val notePublisher = buildNotePublishHandler()
-
-        val rootHighlightId = "someId"
-        val expectedTags = listOf(rootHighlightId.asEventIdTag(marker = "root"))
-
-        val actualTags = notePublisher.getConstructRootTags()
-            .invoke(notePublisher, rootHighlightId, null, null, null, null)
-
-        actualTags shouldBe expectedTags
-    }
-
-    @Test
-    fun `constructRootTags returns article as root if only article available`() {
-        val notePublisher = buildNotePublishHandler()
-
-        val rootArticleId = "someId"
-        val rootArticleEventId = "someEventId"
-        val rootArticleAuthorId = "someAuthorId"
-
-        val expectedTags = listOf(
-            rootArticleEventId.asEventIdTag(marker = "root"),
-            "${NostrEventKind.LongFormContent.value}:$rootArticleAuthorId:$rootArticleId"
-                .asReplaceableEventTag(marker = "root"),
-        )
-
-        val actualTags = notePublisher.getConstructRootTags()
-            .invoke(
-                notePublisher,
-                null,
-                rootArticleId,
-                rootArticleEventId,
-                rootArticleAuthorId,
-                null,
-            )
-
-        actualTags shouldBe expectedTags
-    }
-
-    @Test
-    fun `constructRootTags returns post as root if only post available`() {
-        val notePublisher = buildNotePublishHandler()
-
-        val rootPostId = "someId"
-
-        val expectedTags = listOf(rootPostId.asEventIdTag(marker = "root"))
-
-        val actualTags = notePublisher.getConstructRootTags()
-            .invoke(notePublisher, null, null, null, null, rootPostId)
-
-        actualTags shouldBe expectedTags
-    }
-
-    @Test
-    fun `constructRootTags returns highlight as root if highlight and article available`() {
-        val notePublisher = buildNotePublishHandler()
-
-        val rootHighlightId = "someHighlightId"
-        val rootArticleId = "someId"
-        val rootArticleEventId = "someEventId"
-        val rootArticleAuthorId = "someAuthorId"
-
-        val expectedTags = listOf(rootHighlightId.asEventIdTag(marker = "root"))
-
-        val actualTags = notePublisher.getConstructRootTags()
-            .invoke(
-                notePublisher,
-                rootHighlightId,
-                rootArticleId,
-                rootArticleEventId,
-                rootArticleAuthorId,
-                null,
-            )
-
-        actualTags shouldBe expectedTags
-    }
-
-    @Test
-    fun `constructRootTags returns highlight as root if highlight and post available`() {
-        val notePublisher = buildNotePublishHandler()
-
-        val rootHighlightId = "someHighlightId"
-        val rootPostId = "someId"
-
-        val expectedTags = listOf(rootHighlightId.asEventIdTag(marker = "root"))
-
-        val actualTags = notePublisher.getConstructRootTags()
-            .invoke(
-                notePublisher,
-                rootHighlightId,
-                null,
-                null,
-                null,
-                rootPostId,
-            )
-
-        actualTags shouldBe expectedTags
-    }
-
-    @Test
-    fun `constructRootTags returns article as root if article and post available`() {
-        val notePublisher = buildNotePublishHandler()
-
-        val rootPostId = "somePostId"
-        val rootArticleId = "someArticleId"
-        val rootArticleEventId = "someEventId"
-        val rootArticleAuthorId = "someAuthorId"
-
-        val expectedTags = listOf(
-            rootArticleEventId.asEventIdTag(marker = "root"),
-            "${NostrEventKind.LongFormContent.value}:$rootArticleAuthorId:$rootArticleId"
-                .asReplaceableEventTag(marker = "root"),
-        )
-
-        val actualTags = notePublisher.getConstructRootTags()
-            .invoke(
-                notePublisher,
-                null,
-                rootArticleId,
-                rootArticleEventId,
-                rootArticleAuthorId,
-                rootPostId,
-            )
-
-        actualTags shouldBe expectedTags
-    }
-
-    @Test
-    fun `constructRootTags returns highlight as root if all available`() {
-        val notePublisher = buildNotePublishHandler()
-
-        val rootHighlightId = "someHighlightId"
-        val rootPostId = "somePostId"
-        val rootArticleId = "someArticleId"
-        val rootArticleEventId = "someEventId"
-        val rootArticleAuthorId = "someAuthorId"
-
-        val expectedTags = listOf(
-            rootHighlightId.asEventIdTag(marker = "root"),
-        )
-
-        val actualTags = notePublisher.getConstructRootTags()
-            .invoke(
-                notePublisher,
-                rootHighlightId,
-                rootArticleId,
-                rootArticleEventId,
-                rootArticleAuthorId,
-                rootPostId,
-            )
-
-        actualTags shouldBe expectedTags
-    }
-
-    @Test
-    fun `constructRootTags returns post as root if article is missing author data`() {
-        val notePublisher = buildNotePublishHandler()
-
-        val rootPostId = "somePostId"
-        val rootArticleId = "someArticleId"
-        val rootArticleEventId = "someEventId"
-
-        val expectedTags = listOf(
-            rootPostId.asEventIdTag(marker = "root"),
-        )
-
-        val actualTags = notePublisher.getConstructRootTags()
-            .invoke(
-                notePublisher,
-                null,
-                rootArticleId,
-                rootArticleEventId,
-                null,
-                rootPostId,
-            )
-
-        actualTags shouldBe expectedTags
-    }
-
-    @Test
-    fun `constructRootTags returns post as root if article is missing event data`() {
-        val notePublisher = buildNotePublishHandler()
-
-        val rootPostId = "somePostId"
-        val rootArticleId = "someArticleId"
-        val rootArticleAuthorId = "someAuthorId"
-
-        val expectedTags = listOf(
-            rootPostId.asEventIdTag(marker = "root"),
-        )
-
-        val actualTags = notePublisher.getConstructRootTags()
-            .invoke(
-                notePublisher,
-                null,
-                rootArticleId,
-                null,
-                rootArticleAuthorId,
-                rootPostId,
-            )
-
-        actualTags shouldBe expectedTags
-    }
-
-    @Test
-    fun `constructRootTags returns empty list if article is only available and is missing fields`() {
-        val notePublisher = buildNotePublishHandler()
-
-        val rootArticleId = "someArticleId"
-        val rootArticleAuthorId = "someAuthorId"
-
-        val actualTags = notePublisher.getConstructRootTags()
-            .invoke(
-                notePublisher,
-                null,
-                rootArticleId,
-                null,
-                rootArticleAuthorId,
-                null,
-            )
-
-        actualTags shouldBe emptyList<JsonArray>()
-    }
-
-    private fun buildNotePublishHandler(
-        dispatcherProvider: CoroutineDispatcherProvider = coroutinesTestRule.dispatcherProvider,
-        nostrPublisher: NostrPublisher = mockk(),
-        database: PrimalDatabase = mockk(),
-    ) = NotePublishHandler(
-        dispatcherProvider = dispatcherProvider,
-        nostrPublisher = nostrPublisher,
-        database = database,
-    )
-
-    private fun buildPostData(
-        postId: String = UUID.randomUUID().toString(),
-        authorId: String = UUID.randomUUID().toString(),
-        createdAt: Long = Clock.System.now().epochSeconds,
-        tags: List<JsonArray> = emptyList(),
-        content: String = "",
-        uris: List<String> = emptyList(),
-        hashtags: List<String> = emptyList(),
-        sig: String = "",
-        raw: String = "",
-        authorMetadataId: String? = null,
-        replyToPostId: String? = null,
-        replyToAuthorId: String? = null,
-    ) = PostData(
-        postId = postId,
-        authorId = authorId,
-        createdAt = createdAt,
-        tags = tags,
-        content = content,
-        uris = uris,
-        hashtags = hashtags,
-        sig = sig,
-        raw = raw,
-        authorMetadataId = authorMetadataId,
-        replyToPostId = replyToPostId,
-        replyToAuthorId = replyToAuthorId,
-    )
-
-    private fun buildNoteAttachment(
-        id: UUID = UUID.randomUUID(),
-        localUri: Uri = mockk(),
-        remoteUrl: String? = null,
-        mimeType: String? = null,
-        originalHash: String? = null,
-        uploadedHash: String? = null,
-        originalUploadedInBytes: Int? = null,
-        originalSizeInBytes: Int? = null,
-        uploadedSizeInBytes: Int? = null,
-        dimensionInPixels: String? = null,
-        uploadError: Throwable? = null,
-    ) = NoteAttachment(
-        id = id,
-        localUri = localUri,
-        remoteUrl = remoteUrl,
-        mimeType = mimeType,
-        originalHash = originalHash,
-        originalUploadedInBytes = originalUploadedInBytes,
-        uploadedHash = uploadedHash,
-        originalSizeInBytes = originalSizeInBytes,
-        uploadedSizeInBytes = uploadedSizeInBytes,
-        dimensionInPixels = dimensionInPixels,
-        uploadError = uploadError,
-    )
-
-    private fun mockkDatabase(
-        post: PostData? = null,
-        eventHints: List<EventRelayHints> = emptyList(),
-    ): PrimalDatabase {
-        val postDao = mockk<PostDao> {
-            every { findByPostId(any()) } returns post
-        }
-        val eventHintsDao = mockk<EventRelayHintsDao> {
-            coEvery { findById(any()) } returns eventHints
-        }
-
-        return mockk<PrimalDatabase> {
-            every { posts() } returns postDao
-            every { eventHints() } returns eventHintsDao
-        }
-    }
-
-    @Deprecated(message = "We are not going to use reflection.")
-    private fun NotePublishHandler.getConstructRootTags() =
-        this.getPrivateMethod(
-            "constructRootTags",
-            String::class.java,
-            String::class.java,
-            String::class.java,
-            String::class.java,
-            String::class.java,
-        )
-
-    @Deprecated(message = "We are not going to use reflection.")
-    private fun NotePublishHandler.getConstructPubkeyTags() =
-        this.getPrivateMethod(
-            "constructPubkeyTags",
-            PostData::class.java,
-            String::class.java,
-            String::class.java,
-            String::class.java,
-        )
-
-    @Deprecated(message = "We are not going to use reflection.")
-    private fun NotePublishHandler.getConstructReplyTags() =
-        this.getPrivateMethod(
-            "constructReplyTags",
-            String::class.java,
-            String::class.java,
-        )
-
-    @Deprecated(message = "We are not going to use reflection.")
-    private fun NotePublishHandler.getBuildRefinedContent() =
-        this.getPrivateMethod(
-            "buildRefinedContent",
-            List::class.java,
-            String::class.java,
-        )
-
-    @Deprecated(message = "We are not going to use reflection.")
-    private fun NotePublishHandler.getPrivateMethod(name: String, vararg parameterTypes: Class<*>): Method {
-        val method = this.javaClass.getDeclaredMethod(name, *parameterTypes)
-        method.isAccessible = true
-
-        return method
-    }
 }
