@@ -81,7 +81,23 @@ class CreateTransactionViewModel @Inject constructor(
         viewModelScope.launch {
             fetchExchangeRate()
             exchangeRateHandler.usdExchangeRate.collect {
-                setState { copy(currentExchangeRate = it, maximumUsdAmount = getMaximumUsdAmount(it)) }
+                setState {
+                    copy(
+                        currentExchangeRate = it,
+                        maximumUsdAmount = getMaximumUsdAmount(it),
+                        amountInUsd = _state.value.transaction.amountSats
+                            .toDouble()
+                            .toBigDecimal()
+                            .fromSatsToUsd(it)
+                            .let { amount ->
+                                if (amount.compareTo(BigDecimal.ZERO) == 0) {
+                                    "0"
+                                } else {
+                                    amount.toString()
+                                }
+                            },
+                    )
+                }
             }
         }
     }
