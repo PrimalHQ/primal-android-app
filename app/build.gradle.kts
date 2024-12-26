@@ -60,8 +60,8 @@ android {
         applicationId = "net.primal.android"
         minSdk = 26
         targetSdk = 35
-        versionCode = 199
-        versionName = "2.0.31"
+        versionCode = 200
+        versionName = "2.0.32"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
