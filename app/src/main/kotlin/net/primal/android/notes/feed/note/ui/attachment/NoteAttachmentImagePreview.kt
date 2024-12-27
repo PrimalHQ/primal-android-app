@@ -25,6 +25,7 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun NoteAttachmentImagePreview(
     attachment: NoteAttachmentUi,
+    blossoms: List<String>,
     maxWidth: Dp,
     modifier: Modifier = Modifier,
 ) {

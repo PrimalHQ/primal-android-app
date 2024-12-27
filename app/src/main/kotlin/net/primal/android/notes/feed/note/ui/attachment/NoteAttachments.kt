@@ -16,6 +16,7 @@ import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
 fun NoteAttachments(
     modifier: Modifier = Modifier,
     attachments: List<NoteAttachmentUi>,
+    blossoms: List<String>,
     onUrlClick: ((mediaUrl: String) -> Unit)? = null,
     onMediaClick: ((MediaClickEvent) -> Unit)? = null,
 ) {
@@ -26,6 +27,7 @@ fun NoteAttachments(
             NoteMediaAttachmentsHorizontalPager(
                 modifier = modifier,
                 mediaAttachments = mediaAttachments,
+                blossoms = blossoms,
                 onMediaClick = {
                     when (it.noteAttachmentType) {
                         NoteAttachmentType.Image, NoteAttachmentType.Video -> onMediaClick?.invoke(it)

@@ -13,6 +13,7 @@ import net.primal.android.nostr.ext.flatMapNotNullAsLinkPreviewResource
 import net.primal.android.nostr.ext.flatMapNotNullAsVideoThumbnailsMap
 import net.primal.android.nostr.ext.flatMapPostsAsNoteNostrUriPO
 import net.primal.android.nostr.ext.mapAsEventZapDO
+import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.android.nostr.ext.mapAsPostDataPO
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.mapNotNullAsArticleDataPO
@@ -51,11 +52,14 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
     val primalPremiumInfo = this.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
     val primalLegendProfiles = this.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
 
+    val blossomServers = this.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
+
     val profiles = metadata.mapAsProfileDataPO(
         cdnResources = cdnResources,
         primalUserNames = primalUserNames,
         primalPremiumInfo = primalPremiumInfo,
         primalLegendProfiles = primalLegendProfiles,
+        blossomServers = blossomServers,
     )
     val profileIdToProfileDataMap = profiles.asMapByKey { it.ownerId }
 

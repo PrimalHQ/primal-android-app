@@ -23,12 +23,14 @@ fun List<NostrEvent>.mapAsProfileDataPO(
     primalUserNames: Map<String, String>,
     primalPremiumInfo: Map<String, ContentProfilePremiumInfo>,
     primalLegendProfiles: Map<String, PrimalLegendProfile>,
+    blossomServers: Map<String, List<String>> = emptyMap(),
 ) = map { nostrEvent ->
     nostrEvent.asProfileDataPO(
         cdnResources = cdnResources.asMapByKey { it.url },
         primalUserNames = primalUserNames,
         primalPremiumInfo = primalPremiumInfo,
         primalLegendProfiles = primalLegendProfiles,
+        blossomServers = blossomServers,
 
     )
 }
@@ -38,12 +40,14 @@ fun List<NostrEvent>.mapAsProfileDataPO(
     primalUserNames: Map<String, String>,
     primalPremiumInfo: Map<String, ContentProfilePremiumInfo>,
     primalLegendProfiles: Map<String, PrimalLegendProfile>,
+    blossomServers: Map<String, List<String>> = emptyMap(),
 ) = map {
     it.asProfileDataPO(
         cdnResources = cdnResources,
         primalUserNames = primalUserNames,
         primalPremiumInfo = primalPremiumInfo,
         primalLegendProfiles = primalLegendProfiles,
+        blossomServers = blossomServers,
     )
 }
 
@@ -52,9 +56,11 @@ fun NostrEvent.asProfileDataPO(
     primalUserNames: Map<String, String>,
     primalPremiumInfo: Map<String, ContentProfilePremiumInfo>,
     primalLegendProfiles: Map<String, PrimalLegendProfile>,
+    blossomServers: Map<String, List<String>> = emptyMap(),
 ): ProfileData {
     val metadata = NostrJson.decodeFromStringOrNull<ContentMetadata>(this.content)
     val premiumInfo = primalPremiumInfo[this.pubKey]
+    val blossoms = blossomServers[this.pubKey]
     return ProfileData(
         eventId = this.id,
         ownerId = this.pubKey,
@@ -89,5 +95,6 @@ fun NostrEvent.asProfileDataPO(
             expiresAt = premiumInfo?.expiresAt,
             legendProfile = primalLegendProfiles[this.pubKey],
         ),
+        blossoms = blossoms ?: emptyList(),
     )
 }

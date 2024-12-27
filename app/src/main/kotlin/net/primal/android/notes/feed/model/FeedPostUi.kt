@@ -35,6 +35,7 @@ data class FeedPostUi(
     val isBookmarked: Boolean = false,
     val eventZaps: List<EventZapUiModel> = emptyList(),
     val authorLegendaryCustomization: LegendaryCustomization? = null,
+    val authorBlossoms: List<String> = emptyList(),
 )
 
 fun FeedPost.asFeedPostUi(): FeedPostUi {
@@ -61,5 +62,6 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
             .map { it.asEventZapUiModel() }
             .sortedWith(EventZapUiModel.DefaultComparator),
         authorLegendaryCustomization = this.author?.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
+        authorBlossoms = this.author?.blossoms ?: emptyList(),
     )
 }
