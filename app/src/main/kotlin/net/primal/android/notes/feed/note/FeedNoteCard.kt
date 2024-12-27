@@ -254,7 +254,7 @@ private fun FeedNoteCard(
         colors = colors,
         drawLineAboveAvatar = drawLineAboveAvatar,
         drawLineBelowAvatar = drawLineBelowAvatar,
-        lineOffsetX = (avatarSizeDp / 2) + avatarPaddingDp + notePaddingDp,
+        lineOffsetX = (avatarSizeDp / 2) + avatarPaddingDp + notePaddingDp + 2.dp,
     ) {
         Box(
             modifier = Modifier.padding(all = notePaddingDp),
