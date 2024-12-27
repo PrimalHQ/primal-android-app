@@ -317,7 +317,6 @@ class NotePublishHandlerTest {
                 nostrPublisher.signPublishImportNostrEvent(
                     any(),
                     withArg {
-                        println(it.tags)
                         val iMetaTagCount = it.tags.count { tag -> tag[0].jsonPrimitive.content == "imeta" }
                         iMetaTagCount shouldBe expectedAttachments.size
                     },
@@ -484,10 +483,11 @@ class NotePublishHandlerTest {
                 nostrPublisher.signPublishImportNostrEvent(
                     any(),
                     withArg { event ->
-                        println(event)
-                        val rootTag = event.tags
-                            .filter { tag -> tag.isEventIdTag() }
-                            .find { tag -> tag[3].jsonPrimitive.content == "root" }
+                        val eventsTag = event.tags.filter { tag -> tag.isEventIdTag() }
+                        val rootTagsCount = eventsTag.count { tag -> tag[3].jsonPrimitive.content == "root" }
+                        rootTagsCount shouldBe 1
+
+                        val rootTag = eventsTag.find { tag -> tag[3].jsonPrimitive.content == "root" }
                         rootTag.shouldNotBeNull()
                         rootTag[0].jsonPrimitive.content shouldBe "e"
                         rootTag[1].jsonPrimitive.content shouldBe highlightNevent.eventId
@@ -517,9 +517,12 @@ class NotePublishHandlerTest {
                 nostrPublisher.signPublishImportNostrEvent(
                     any(),
                     withArg { event ->
-                        val rootTag = event.tags
-                            .filter { tag -> tag.isATag() }
-                            .find { tag -> tag[3].jsonPrimitive.content == "root" }
+                        println(event.tags)
+                        val replaceableEventsTags = event.tags.filter { tag -> tag.isATag() }
+                        val rootTagCount = replaceableEventsTags.count { tag -> tag[3].jsonPrimitive.content == "root" }
+                        rootTagCount shouldBe 1
+
+                        val rootTag = replaceableEventsTags.find { tag -> tag[3].jsonPrimitive.content == "root" }
                         rootTag.shouldNotBeNull()
                         rootTag[0].jsonPrimitive.content shouldBe "a"
                         rootTag[1].jsonPrimitive.content shouldBe articleNaddr.asATagValue()
@@ -548,8 +551,11 @@ class NotePublishHandlerTest {
                 nostrPublisher.signPublishImportNostrEvent(
                     any(),
                     withArg { event ->
-                        val eventTags = event.tags.filter { tag -> tag.isEventIdTag() }
-                        val rootTag = eventTags.find { tag -> tag[3].jsonPrimitive.content == "root" }
+                        val eventsTag = event.tags.filter { tag -> tag.isEventIdTag() }
+                        val rootTagsCount = eventsTag.count { tag -> tag[3].jsonPrimitive.content == "root" }
+                        rootTagsCount shouldBe 1
+
+                        val rootTag = eventsTag.find { tag -> tag[3].jsonPrimitive.content == "root" }
                         rootTag.shouldNotBeNull()
                         rootTag[0].jsonPrimitive.content shouldBe "e"
                         rootTag[1].jsonPrimitive.content shouldBe noteNevent.eventId
@@ -577,8 +583,11 @@ class NotePublishHandlerTest {
                 nostrPublisher.signPublishImportNostrEvent(
                     any(),
                     withArg { event ->
-                        println(event.tags)
                         val eventTags = event.tags.filter { tag -> tag.isEventIdTag() }
+
+                        val rootTagsCount = eventTags.count { tag -> tag[3].jsonPrimitive.content == "root" }
+                        rootTagsCount shouldBe 1
+
                         val rootTag = eventTags.find { tag -> tag[3].jsonPrimitive.content == "root" }
                         val replyTag = eventTags.find { tag -> tag[3].jsonPrimitive.content == "reply" }
 
@@ -616,6 +625,12 @@ class NotePublishHandlerTest {
                     any(),
                     withArg { event ->
                         val eventTags = event.tags.filter { tag -> tag.isEventIdTag() }
+
+                        val rootTagsCount = eventTags.count { tag -> tag[3].jsonPrimitive.content == "root" }
+                        rootTagsCount shouldBe 1
+                        val replyTagsCount = eventTags.count { tag -> tag[3].jsonPrimitive.content == "reply" }
+                        replyTagsCount shouldBe 1
+
                         val rootTag = eventTags.find { tag -> tag[3].jsonPrimitive.content == "root" }
                         val replyTag = eventTags.find { tag -> tag[3].jsonPrimitive.content == "reply" }
 
@@ -654,6 +669,11 @@ class NotePublishHandlerTest {
                     withArg { event ->
                         val aTags = event.tags.filter { tag -> tag.isATag() }
                         val eventTags = event.tags.filter { tag -> tag.isEventIdTag() }
+
+                        val rootTagsCount = aTags.count { tag -> tag[3].jsonPrimitive.content == "root" }
+                        rootTagsCount shouldBe 1
+                        val replyTagsCount = eventTags.count { tag -> tag[3].jsonPrimitive.content == "reply" }
+                        replyTagsCount shouldBe 1
 
                         val rootATag = aTags.find { tag -> tag[3].jsonPrimitive.content == "root" }
                         val rootEventTag = eventTags.find { tag -> tag[3].jsonPrimitive.content == "root" }
@@ -698,6 +718,11 @@ class NotePublishHandlerTest {
                     withArg { event ->
                         val aTags = event.tags.filter { tag -> tag.isATag() }
                         val eventTags = event.tags.filter { tag -> tag.isEventIdTag() }
+
+                        val rootTagsCount = eventTags.count { tag -> tag[3].jsonPrimitive.content == "root" }
+                        rootTagsCount shouldBe 1
+                        val replyTagsCount = eventTags.count { tag -> tag[3].jsonPrimitive.content == "reply" }
+                        replyTagsCount shouldBe 1
 
                         val rootATag = aTags.find { tag -> tag[3].jsonPrimitive.content == "root" }
                         val rootEventTag = eventTags.find { tag -> tag[3].jsonPrimitive.content == "root" }
@@ -764,7 +789,7 @@ class NotePublishHandlerTest {
             val expectedUserId = "someUserId"
             val expectedContent = "some simple content $mentionedUserNpub"
             val expectedTags = listOf<JsonArray>(
-                mentionedUserId.asPubkeyTag(relayHint = "", optional = "mention"),
+                mentionedUserId.asPubkeyTag(optional = "mention"),
             )
 
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
@@ -801,8 +826,8 @@ class NotePublishHandlerTest {
             val expectedUserId = "someUserId"
             val expectedContent = "some simple content $firstMentionedUserNpub $secondMentionedUserNpub"
             val expectedTags = listOf<JsonArray>(
-                firstMentionedUserId.asPubkeyTag(relayHint = "", optional = "mention"),
-                secondMentionedUserId.asPubkeyTag(relayHint = "", optional = "mention"),
+                firstMentionedUserId.asPubkeyTag(optional = "mention"),
+                secondMentionedUserId.asPubkeyTag(optional = "mention"),
             )
 
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
@@ -837,7 +862,7 @@ class NotePublishHandlerTest {
             val expectedUserId = "someUserId"
             val expectedContent = "some simple content $mentionedUserNpub $mentionedUserNpub"
             val expectedTags = listOf<JsonArray>(
-                mentionedUserId.asPubkeyTag(relayHint = "", optional = "mention"),
+                mentionedUserId.asPubkeyTag(optional = "mention"),
             )
 
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
@@ -871,7 +896,7 @@ class NotePublishHandlerTest {
             val expectedUserId = "someUserId"
             val expectedContent = "some simple content $quotedNoteUri"
             val expectedTags = listOf<JsonArray>(
-                quotedNoteId.asEventIdTag(relayHint = "", marker = "mention"),
+                quotedNoteId.asEventIdTag(marker = "mention"),
             )
 
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
@@ -889,8 +914,6 @@ class NotePublishHandlerTest {
                 nostrPublisher.signPublishImportNostrEvent(
                     withArg { it shouldBe expectedUserId },
                     withArg {
-                        println(expectedTags)
-                        println(it)
                         it.content shouldBe expectedContent
                         it.tags shouldBe expectedTags
                     },
@@ -910,8 +933,8 @@ class NotePublishHandlerTest {
             val expectedUserId = "someUserId"
             val expectedContent = "some simple content $firstQuotedNoteUri $secondQuotedNoteUri"
             val expectedTags = listOf<JsonArray>(
-                firstQuotedNoteId.asEventIdTag(relayHint = "", marker = "mention"),
-                secondQuotedNoteId.asEventIdTag(relayHint = "", marker = "mention"),
+                firstQuotedNoteId.asEventIdTag(marker = "mention"),
+                secondQuotedNoteId.asEventIdTag(marker = "mention"),
             )
 
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
@@ -945,7 +968,7 @@ class NotePublishHandlerTest {
             val expectedUserId = "someUserId"
             val expectedContent = "some simple content $quotedNoteUri $quotedNoteUri"
             val expectedTags = listOf<JsonArray>(
-                quotedNoteId.asEventIdTag(relayHint = "", marker = "mention"),
+                quotedNoteId.asEventIdTag(marker = "mention"),
             )
 
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)

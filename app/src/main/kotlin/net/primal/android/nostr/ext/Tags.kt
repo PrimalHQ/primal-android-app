@@ -144,11 +144,8 @@ fun String.asReplaceableEventTag(relayHint: String? = null, marker: String? = nu
     buildJsonArray {
         add("a")
         add(this@asReplaceableEventTag)
-        if (relayHint != null) add(relayHint)
-        if (marker != null) {
-            if (relayHint == null) add("")
-            add(marker)
-        }
+        add(relayHint ?: "")
+        add(marker ?: "")
     }
 
 fun Naddr.asReplaceableEventTag(marker: String? = null): JsonArray =
@@ -221,7 +218,7 @@ fun String.parsePubkeyTags(marker: String? = null): List<JsonArray> {
                         add("p")
                         add(pubkey)
                         add(relayUrl)
-                        if (marker != null) add(marker)
+                        add(marker ?: "")
                     },
                 )
             }
@@ -231,7 +228,7 @@ fun String.parsePubkeyTags(marker: String? = null): List<JsonArray> {
                     add("p")
                     add(it.nostrUriToPubkey())
                     add("")
-                    if (marker != null) add(marker)
+                    add(marker ?: "")
                 },
             )
         }
