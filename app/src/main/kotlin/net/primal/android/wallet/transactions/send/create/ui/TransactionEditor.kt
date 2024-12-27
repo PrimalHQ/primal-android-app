@@ -3,13 +3,9 @@ package net.primal.android.wallet.transactions.send.create.ui
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -67,8 +63,6 @@ import net.primal.android.core.compose.icons.primaliconpack.WalletBitcoinPayment
 import net.primal.android.core.compose.isCompactOrLower
 import net.primal.android.core.compose.numericpad.PrimalNumericPad
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.dashboard.ui.BtcAmountText
-import net.primal.android.wallet.dashboard.ui.FiatAmountTextFromUsd
 import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.domain.not
 import net.primal.android.wallet.numericPadContentTransformAnimation
@@ -77,7 +71,6 @@ import net.primal.android.wallet.transactions.send.create.CreateTransactionContr
 import net.primal.android.wallet.transactions.send.create.ellipsizeLnUrl
 import net.primal.android.wallet.transactions.send.create.ellipsizeOnChainAddress
 import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
-import net.primal.android.wallet.ui.TransactionAmountSubtext
 import net.primal.android.wallet.ui.TransactionAmountText
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats

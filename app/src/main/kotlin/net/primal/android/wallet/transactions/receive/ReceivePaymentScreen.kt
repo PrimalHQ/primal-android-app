@@ -234,10 +234,11 @@ private fun ReceiveContent(
                     currencyMode = state.currencyMode,
                     currentExchangeRate = state.currentExchangeRate,
                     maximumUsdAmount = state.maximumUsdAmount,
-                    onApplyChanges = { amountInBtc, comment ->
+                    onApplyChanges = { amountInBtc, amountInUsd, comment ->
                         eventPublisher(
                             ReceivePaymentContract.UiEvent.CreateInvoice(
                                 amountInBtc = amountInBtc,
+                                amountInUsd = amountInUsd,
                                 comment = comment,
                             ),
                         )
@@ -521,7 +522,7 @@ private fun ReceivePaymentEditor(
     currentExchangeRate: Double?,
     maximumUsdAmount: BigDecimal?,
     applying: Boolean,
-    onApplyChanges: (String, String?) -> Unit,
+    onApplyChanges: (String, String, String?) -> Unit,
     onCancel: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -629,6 +630,7 @@ private fun ReceivePaymentEditor(
                 TransactionActionRow(
                     applying = applying,
                     amountInBtc = amountInBtc,
+                    amountInUsd = amountInUsd,
                     comment = comment,
                     onApplyChanges = onApplyChanges,
                     onCancel = onCancel,
@@ -643,7 +645,8 @@ private fun TransactionActionRow(
     onCancel: () -> Unit,
     applying: Boolean,
     amountInBtc: String,
-    onApplyChanges: (String, String?) -> Unit,
+    amountInUsd: String,
+    onApplyChanges: (String, String, String?) -> Unit,
     comment: String,
 ) {
     Row(
@@ -670,7 +673,7 @@ private fun TransactionActionRow(
             enabled = !applying && amountInBtc.toBigDecimal() > BigDecimal.ZERO,
             text = stringResource(id = R.string.wallet_receive_transaction_apply_numeric_pad_button),
             onClick = {
-                onApplyChanges(amountInBtc, comment.ifEmpty { null })
+                onApplyChanges(amountInBtc, amountInUsd, comment.ifEmpty { null })
             },
         )
     }

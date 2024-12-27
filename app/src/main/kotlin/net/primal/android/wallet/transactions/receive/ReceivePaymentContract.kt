@@ -31,7 +31,7 @@ interface ReceivePaymentContract {
     sealed class UiEvent {
         data object OpenInvoiceCreation : UiEvent()
         data object CancelInvoiceCreation : UiEvent()
-        data class CreateInvoice(val amountInBtc: String, val comment: String?) : UiEvent()
+        data class CreateInvoice(val amountInBtc: String, val amountInUsd: String, val comment: String?) : UiEvent()
         data class ChangeNetwork(val network: Network) : UiEvent()
         data object DismissError : UiEvent()
     }

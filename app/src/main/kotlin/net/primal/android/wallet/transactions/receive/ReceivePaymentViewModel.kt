@@ -3,6 +3,7 @@ package net.primal.android.wallet.transactions.receive
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import fr.acinq.bitcoin.toSatoshi
 import java.math.BigDecimal
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -21,7 +22,9 @@ import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiS
 import net.primal.android.wallet.transactions.receive.model.PaymentDetails
 import net.primal.android.wallet.transactions.receive.tabs.ReceivePaymentTab
 import net.primal.android.wallet.transactions.send.create.MAXIMUM_SATS
+import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
+import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toUsd
 import timber.log.Timber
 
@@ -56,7 +59,11 @@ class ReceivePaymentViewModel @Inject constructor(
                 when (it) {
                     UiEvent.OpenInvoiceCreation -> setState { copy(editMode = true) }
                     UiEvent.CancelInvoiceCreation -> setState { copy(editMode = false) }
-                    is UiEvent.CreateInvoice -> createInvoice(amountInBtc = it.amountInBtc, comment = it.comment)
+                    is UiEvent.CreateInvoice -> createInvoice(
+                        amountInBtc = it.amountInBtc,
+                        amountInUsd = it.amountInUsd,
+                        comment = it.comment,
+                    )
                     UiEvent.DismissError -> setState { copy(error = null) }
                     is UiEvent.ChangeNetwork -> changeNetwork(network = it.network)
                 }
@@ -124,7 +131,7 @@ class ReceivePaymentViewModel @Inject constructor(
             }
         }
 
-    private fun createInvoice(amountInBtc: String, comment: String?) =
+    private fun createInvoice(amountInBtc: String, amountInUsd: String, comment: String?) =
         viewModelScope.launch {
             setState { copy(creatingInvoice = true) }
             try {
@@ -139,6 +146,7 @@ class ReceivePaymentViewModel @Inject constructor(
                         editMode = false,
                         paymentDetails = PaymentDetails(
                             amountInBtc = amountInBtc,
+                            amountInUsd = amountInUsd,
                             comment = comment,
                         ),
                         lightningNetworkDetails = this.lightningNetworkDetails.copy(
