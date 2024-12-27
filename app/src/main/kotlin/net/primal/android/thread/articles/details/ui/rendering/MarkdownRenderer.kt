@@ -6,7 +6,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ClipEntry
@@ -31,75 +30,73 @@ fun MarkdownRenderer(
     val menuItemLabelQuote = stringResource(R.string.article_details_highlight_toolbar_quote)
     val menuItemLabelComment = stringResource(R.string.article_details_highlight_toolbar_comment)
     val menuItemLabelCopy = stringResource(R.string.article_details_highlight_toolbar_copy)
-    SelectionContainer {
-        AndroidView(
-            modifier = modifier,
-            factory = { context ->
-                TextView(context).apply {
-                    layoutParams = ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
-                    setTextIsSelectable(true)
-                    setCustomSelectionActionModeCallback(
-                        object : ActionMode.Callback {
-                            override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-                                menu?.clear()
-                                menu?.add(menuItemLabelHighlight)
-                                menu?.add(menuItemLabelQuote)
-                                menu?.add(menuItemLabelComment)
-                                menu?.add(menuItemLabelCopy)
-                                return true
-                            }
+    AndroidView(
+        modifier = modifier,
+        factory = { context ->
+            TextView(context).apply {
+                layoutParams = ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+                setTextIsSelectable(true)
+                setCustomSelectionActionModeCallback(
+                    object : ActionMode.Callback {
+                        override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+                            menu?.clear()
+                            menu?.add(menuItemLabelHighlight)
+                            menu?.add(menuItemLabelQuote)
+                            menu?.add(menuItemLabelComment)
+                            menu?.add(menuItemLabelCopy)
+                            return true
+                        }
 
-                            override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-                                menu?.clear()
-                                menu?.add(menuItemLabelHighlight)
-                                menu?.add(menuItemLabelQuote)
-                                menu?.add(menuItemLabelComment)
-                                menu?.add(menuItemLabelCopy)
-                                return true
-                            }
+                        override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+                            menu?.clear()
+                            menu?.add(menuItemLabelHighlight)
+                            menu?.add(menuItemLabelQuote)
+                            menu?.add(menuItemLabelComment)
+                            menu?.add(menuItemLabelCopy)
+                            return true
+                        }
 
-                            override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
-                                val selectedText = text.substring(selectionStart, selectionEnd)
+                        override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
+                            val selectedText = text.substring(selectionStart, selectionEnd)
 
-                                val paragraphStart = text
-                                    .lastIndexOf('\n', selectionStart - 1)
-                                    .takeIf { it != -1 }?.plus(1) ?: 0
+                            val paragraphStart = text
+                                .lastIndexOf('\n', selectionStart - 1)
+                                .takeIf { it != -1 }?.plus(1) ?: 0
 
-                                val paragraphEnd = text
-                                    .indexOf('\n', selectionEnd)
-                                    .takeIf { it != -1 } ?: text.length
+                            val paragraphEnd = text
+                                .indexOf('\n', selectionEnd)
+                                .takeIf { it != -1 } ?: text.length
 
-                                val paragraph = text.substring(paragraphStart, paragraphEnd)
+                            val paragraph = text.substring(paragraphStart, paragraphEnd)
 
-                                when (item?.title) {
-                                    menuItemLabelHighlight -> {
-                                        onHighlight?.invoke(selectedText, paragraph)
-                                    }
-
-                                    menuItemLabelQuote -> {
-                                        onQuoteHighlight?.invoke(selectedText, paragraph)
-                                    }
-
-                                    menuItemLabelComment -> {
-                                        onCommentHighlight?.invoke(selectedText, paragraph)
-                                    }
-
-                                    menuItemLabelCopy -> {
-                                        clipboardManager.setClip(ClipEntry(ClipData.newPlainText("", selectedText)))
-                                    }
+                            when (item?.title) {
+                                menuItemLabelHighlight -> {
+                                    onHighlight?.invoke(selectedText, paragraph)
                                 }
-                                mode?.finish()
-                                return true
-                            }
 
-                            override fun onDestroyActionMode(mode: ActionMode?) = Unit
-                        },
-                    )
-                }
-            },
-            update = { textView ->
-                markwon.setMarkdown(textView, markdown)
-            },
-        )
-    }
+                                menuItemLabelQuote -> {
+                                    onQuoteHighlight?.invoke(selectedText, paragraph)
+                                }
+
+                                menuItemLabelComment -> {
+                                    onCommentHighlight?.invoke(selectedText, paragraph)
+                                }
+
+                                menuItemLabelCopy -> {
+                                    clipboardManager.setClip(ClipEntry(ClipData.newPlainText("", selectedText)))
+                                }
+                            }
+                            mode?.finish()
+                            return true
+                        }
+
+                        override fun onDestroyActionMode(mode: ActionMode?) = Unit
+                    },
+                )
+            }
+        },
+        update = { textView ->
+            markwon.setMarkdown(textView, markdown)
+        },
+    )
 }
