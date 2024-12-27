@@ -10,6 +10,7 @@ import net.primal.android.nostr.ext.asHighlightData
 import net.primal.android.nostr.ext.flatMapAsEventHintsPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsEventZapDO
+import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.mapNotNullAsEventStatsPO
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
@@ -24,11 +25,14 @@ suspend fun ArticleHighlightsResponse.persistToDatabaseAsTransaction(database: P
     val primalPremiumInfo = this.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
     val primalLegendProfiles = this.legendProfiles.parseAndMapPrimalLegendProfiles()
 
+    val blossomServers = this.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
+
     val profiles = this.profileMetadatas.mapAsProfileDataPO(
         cdnResources = cdnResources,
         primalUserNames = primalUserNames,
         primalPremiumInfo = primalPremiumInfo,
         primalLegendProfiles = primalLegendProfiles,
+        blossomServers = blossomServers,
     )
 
     val highlights = this.highlights.map { it.asHighlightData() }

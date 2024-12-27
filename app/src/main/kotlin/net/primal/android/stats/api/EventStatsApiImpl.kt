@@ -37,6 +37,7 @@ class EventStatsApiImpl @Inject constructor(
             primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
             primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
             primalPremiumInfo = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
+            blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
         )
     }
 
@@ -57,6 +58,7 @@ class EventStatsApiImpl @Inject constructor(
             primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
             primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
             primalPremiumInfo = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
+            blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
         )
     }
 }

@@ -11,6 +11,7 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
+import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
@@ -79,12 +80,14 @@ class MutedUserRepository @Inject constructor(
         val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
         val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
         val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+        val blossomServers = response.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
         val profileData = response.metadataEvents.map {
             it.asProfileDataPO(
                 cdnResources = cdnResources,
                 primalUserNames = primalUserNames,
                 primalPremiumInfo = primalPremiumInfo,
                 primalLegendProfiles = primalLegendProfiles,
+                blossomServers = blossomServers,
             )
         }
 

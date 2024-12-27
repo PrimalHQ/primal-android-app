@@ -19,4 +19,5 @@ data class ArticleHighlightsResponse(
     val zaps: List<NostrEvent>,
     val primalLongFormContentWordsCount: List<PrimalEvent>,
     val referencedEvents: List<PrimalEvent>,
+    val blossomServers: List<NostrEvent>,
 )

@@ -19,6 +19,7 @@ import net.primal.android.nostr.ext.asEventStatsPO
 import net.primal.android.nostr.ext.asEventUserStatsPO
 import net.primal.android.nostr.ext.findFirstIdentifier
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
+import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
@@ -162,13 +163,14 @@ class FeedsRepository @Inject constructor(
         val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
         val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
         val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
-
         val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+        val blossomServers = response.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
         val profiles = response.userMetadata.mapAsProfileDataPO(
             cdnResources = cdnResources,
             primalUserNames = primalUserNames,
             primalPremiumInfo = primalPremiumInfo,
             primalLegendProfiles = primalLegendProfiles,
+            blossomServers = blossomServers,
         ).distinctBy { it.ownerId }
         val profileScores = response.userScores.map { it.takeContentAsPrimalUserScoresOrNull() }
             .fold(emptyMap<String, Float>()) { acc, map -> acc + map }

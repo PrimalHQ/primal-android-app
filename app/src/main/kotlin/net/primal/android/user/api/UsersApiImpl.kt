@@ -40,6 +40,7 @@ class UsersApiImpl @Inject constructor(
             primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
             primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
             primalPremiumInfo = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
+            blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
         )
     }
 
@@ -127,6 +128,7 @@ class UsersApiImpl @Inject constructor(
             primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
             primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
             primalPremiumInfo = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
+            blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
         )
     }
 
@@ -146,6 +148,7 @@ class UsersApiImpl @Inject constructor(
             primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
             primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
             primalPremiumInfo = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
+            blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
         )
     }
 

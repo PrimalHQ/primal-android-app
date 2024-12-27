@@ -14,4 +14,5 @@ data class TrendingPeopleResponse(
     val primalUserNames: PrimalEvent? = null,
     val primalLegendProfiles: PrimalEvent? = null,
     val primalPremiumInfo: PrimalEvent? = null,
+    val blossomServers: List<NostrEvent> = emptyList(),
 )

@@ -13,6 +13,7 @@ import net.primal.android.nostr.ext.extractProfileId
 import net.primal.android.nostr.ext.flatMapMessagesAsNostrResourcePO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.isNostrUri
+import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.android.nostr.ext.mapAsMessageDataPO
 import net.primal.android.nostr.ext.mapAsPostDataPO
 import net.primal.android.nostr.ext.mapAsProfileDataPO
@@ -43,6 +44,7 @@ class MessagesProcessor @Inject constructor(
         primalUserNames: PrimalEvent?,
         primalPremiumInfo: PrimalEvent?,
         primalLegendProfiles: PrimalEvent?,
+        blossomServerEvents: List<NostrEvent>?,
     ) {
         val messageDataList = messages.mapAsMessageDataPO(
             userId = userId,
@@ -56,6 +58,7 @@ class MessagesProcessor @Inject constructor(
         val primalPremiumInfoMap = primalPremiumInfo.parseAndMapPrimalPremiumInfo()
         val primalLegendProfilesMap = primalLegendProfiles.parseAndMapPrimalLegendProfiles()
         val attachments = messageDataList.flatMapMessagesAsNoteAttachmentPO()
+        val blossomServers = blossomServerEvents?.mapAsMapPubkeyToListOfBlossomServers() ?: emptyMap()
 
         database.withTransaction {
             database.profiles().insertOrUpdateAll(
@@ -64,6 +67,7 @@ class MessagesProcessor @Inject constructor(
                     primalUserNames = primalUserNamesMap,
                     primalPremiumInfo = primalPremiumInfoMap,
                     primalLegendProfiles = primalLegendProfilesMap,
+                    blossomServers = blossomServers,
                 ),
             )
             database.messages().upsertAll(data = messageDataList)
@@ -112,11 +116,13 @@ class MessagesProcessor @Inject constructor(
                 val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
                 val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
                 val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+                val blossomServers = response.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
                 val profiles = response.metadataEvents.mapAsProfileDataPO(
                     cdnResources = cdnResources,
                     primalUserNames = primalUserNames,
                     primalPremiumInfo = primalPremiumInfo,
                     primalLegendProfiles = primalLegendProfiles,
+                    blossomServers = blossomServers,
                 )
                 database.profiles().insertOrUpdateAll(data = profiles)
                 profiles

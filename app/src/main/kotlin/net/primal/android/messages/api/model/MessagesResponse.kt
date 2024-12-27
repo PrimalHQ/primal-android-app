@@ -9,6 +9,7 @@ data class MessagesResponse(
     val paging: ContentPrimalPaging? = null,
     val profileMetadata: List<NostrEvent> = emptyList(),
     val cdnResources: List<PrimalEvent> = emptyList(),
+    val blossomServers: List<NostrEvent> = emptyList(),
     val primalUserNames: PrimalEvent? = null,
     val primalLegendProfiles: PrimalEvent? = null,
     val primalPremiumInfo: PrimalEvent? = null,

@@ -28,6 +28,7 @@ import net.primal.android.feeds.domain.supportsUpwardsNotesPagination
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.findFirstEventId
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
+import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
@@ -180,11 +181,13 @@ class NoteFeedViewModel @AssistedInject constructor(
         val primalUserNames = this.primalUserNames.parseAndMapPrimalUserNames()
         val primalPremiumInfo = this.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
         val primalLegendProfiles = this.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
+        val blossomServers = this.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
         val profiles = this.metadata.mapAsProfileDataPO(
             cdnResources = cdnResources,
             primalUserNames = primalUserNames,
             primalPremiumInfo = primalPremiumInfo,
             primalLegendProfiles = primalLegendProfiles,
+            blossomServers = blossomServers,
         )
         val avatarCdnImagesAndLegendaryCustomizations = allNotes
             .mapNotNull { note -> profiles.find { it.ownerId == note.pubKey } }

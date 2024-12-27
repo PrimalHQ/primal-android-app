@@ -84,6 +84,7 @@ class MessageRepository @Inject constructor(
                     primalUserNames = response.primalUserNames,
                     primalPremiumInfo = response.primalPremiumInfo,
                     primalLegendProfiles = response.primalLegendProfiles,
+                    blossomServerEvents = response.blossomServers,
                 )
                 database.messageConversations().upsertAll(data = messageConversation)
             }
@@ -118,6 +119,7 @@ class MessageRepository @Inject constructor(
                 primalUserNames = response.primalUserNames,
                 primalPremiumInfo = response.primalPremiumInfo,
                 primalLegendProfiles = response.primalLegendProfiles,
+                blossomServerEvents = response.blossomServers,
             )
         }
     }
@@ -168,6 +170,7 @@ class MessageRepository @Inject constructor(
                 primalUserNames = null,
                 primalPremiumInfo = null,
                 primalLegendProfiles = null,
+                blossomServerEvents = emptyList(),
             )
         }
     }

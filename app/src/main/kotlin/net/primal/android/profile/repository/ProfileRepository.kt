@@ -19,6 +19,7 @@ import net.primal.android.nostr.ext.asProfileStatsPO
 import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.ext.asReplaceableEventTag
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
+import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
@@ -71,11 +72,13 @@ class ProfileRepository @Inject constructor(
             val primalPremiumInfo = users.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
             val primalLegendProfiles = users.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
             val cdnResources = users.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+            val blossomServers = users.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
             val profiles = users.metadataEvents.mapAsProfileDataPO(
                 cdnResources = cdnResources,
                 primalUserNames = primalUserNames,
                 primalPremiumInfo = primalPremiumInfo,
                 primalLegendProfiles = primalLegendProfiles,
+                blossomServers = blossomServers,
             )
             database.profiles().insertOrUpdateAll(data = profiles)
             profiles
@@ -96,11 +99,13 @@ class ProfileRepository @Inject constructor(
             val primalUserName = response.primalUserNames.parseAndMapPrimalUserNames()
             val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
             val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
+            val blossomServers = response.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
             val profileMetadata = response.metadata?.asProfileDataPO(
                 cdnResources = cdnResources,
                 primalUserNames = primalUserName,
                 primalPremiumInfo = primalPremiumInfo,
                 primalLegendProfiles = primalLegendProfiles,
+                blossomServers = blossomServers,
             )
             val profileStats = response.profileStats?.asProfileStatsPO()
 
@@ -207,11 +212,13 @@ class ProfileRepository @Inject constructor(
             val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
             val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
             val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+            val blossomServers = response.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
             val profiles = response.contactsMetadata.mapAsProfileDataPO(
                 cdnResources = cdnResources,
                 primalUserNames = primalUserNames,
                 primalPremiumInfo = primalPremiumInfo,
                 primalLegendProfiles = primalLegendProfiles,
+                blossomServers = blossomServers,
             )
             val followersCountsMap = response.followerCounts?.takeContentAsPrimalUserFollowersCountsOrNull()
 

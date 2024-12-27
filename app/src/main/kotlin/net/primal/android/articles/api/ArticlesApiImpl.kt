@@ -46,6 +46,7 @@ class ArticlesApiImpl @Inject constructor(
             primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
             primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
             primalPremiumInfo = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
+            blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
         )
     }
 
@@ -76,6 +77,7 @@ class ArticlesApiImpl @Inject constructor(
             primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
             primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
             primalPremiumInfo = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
+            blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
         )
     }
 
@@ -103,6 +105,7 @@ class ArticlesApiImpl @Inject constructor(
             ),
             referencedEvents = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalReferencedEvent),
             highlightComments = queryResult.filterNostrEvents(kind = NostrEventKind.ShortTextNote),
+            blossomServers = queryResult.filterNostrEvents(kind = NostrEventKind.BlossomServerList),
         )
     }
 }

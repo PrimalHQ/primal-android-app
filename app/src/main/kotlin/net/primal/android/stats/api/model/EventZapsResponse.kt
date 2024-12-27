@@ -10,6 +10,7 @@ data class EventZapsResponse(
     val profiles: List<NostrEvent>,
     val userScores: PrimalEvent?,
     val cdnResources: List<PrimalEvent>,
+    val blossomServers: List<NostrEvent> = emptyList(),
     val primalUserNames: PrimalEvent? = null,
     val primalLegendProfiles: PrimalEvent? = null,
     val primalPremiumInfo: PrimalEvent? = null,

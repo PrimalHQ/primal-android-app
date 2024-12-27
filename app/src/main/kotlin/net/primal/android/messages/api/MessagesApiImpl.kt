@@ -46,6 +46,7 @@ class MessagesApiImpl @Inject constructor(
             primalUserNames = response.findPrimalEvent(NostrEventKind.PrimalUserNames),
             primalLegendProfiles = response.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
             primalPremiumInfo = response.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
+            blossomServers = response.filterNostrEvents(NostrEventKind.BlossomServerList),
         )
     }
 
