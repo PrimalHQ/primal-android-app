@@ -10,8 +10,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,7 +28,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -75,7 +72,6 @@ import com.github.alexzhirkevich.customqrgenerator.vector.style.QrVectorPixelSha
 import com.wajahatkarim.flippable.Flippable
 import com.wajahatkarim.flippable.rememberFlipController
 import java.math.BigDecimal
-import java.text.NumberFormat
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
@@ -86,12 +82,10 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.core.compose.icons.primaliconpack.WalletChangeCurrency
 import net.primal.android.core.compose.numericpad.PrimalNumericPad
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
-import net.primal.android.wallet.dashboard.ui.FiatAmountTextFromUsd
 import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.domain.Network
 import net.primal.android.wallet.domain.not
@@ -100,8 +94,7 @@ import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiS
 import net.primal.android.wallet.transactions.receive.model.NetworkDetails
 import net.primal.android.wallet.transactions.receive.model.PaymentDetails
 import net.primal.android.wallet.transactions.receive.tabs.ReceivePaymentTab
-import net.primal.android.wallet.transactions.send.create.ui.formatSats
-import net.primal.android.wallet.transactions.send.create.ui.formatUsd
+import net.primal.android.wallet.ui.TransactionAmountText
 import net.primal.android.wallet.ui.WalletTabsBar
 import net.primal.android.wallet.ui.WalletTabsHeight
 import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
@@ -559,7 +552,11 @@ private fun ReceivePaymentEditor(
                 amountInUsd = amountInUsd,
                 currentExchangeRate = currentExchangeRate,
                 currentCurrencyMode = currentCurrencyMode,
-                onChangeCurrencyMode = { currentCurrencyMode = it },
+                onAmountClick = {
+                    if (currentExchangeRate.isValidExchangeRate()) {
+                        currentCurrencyMode = !currentCurrencyMode
+                    }
+                 },
             )
 
             Spacer(modifier = Modifier.height(48.dp))
@@ -675,101 +672,6 @@ private fun TransactionActionRow(
             onClick = {
                 onApplyChanges(amountInBtc, comment.ifEmpty { null })
             },
-        )
-    }
-}
-
-@Composable
-private fun TransactionAmountText(
-    currentExchangeRate: Double?,
-    currentCurrencyMode: CurrencyMode,
-    amountInBtc: String,
-    amountInUsd: String,
-    onChangeCurrencyMode: (CurrencyMode) -> Unit,
-) {
-    Column(
-        modifier = Modifier.clickable(
-            interactionSource = remember { MutableInteractionSource() },
-            indication = null,
-            onClick = {
-                if (currentExchangeRate.isValidExchangeRate()) {
-                    onChangeCurrencyMode(!currentCurrencyMode)
-                }
-            },
-        ),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        when (currentCurrencyMode) {
-            CurrencyMode.SATS -> {
-                BtcAmountText(
-                    modifier = Modifier
-                        .padding(start = 32.dp)
-                        .height(72.dp),
-                    amountInBtc = amountInBtc.toBigDecimal(),
-                    textSize = 48.sp,
-                )
-            }
-
-            CurrencyMode.FIAT -> {
-                FiatAmountTextFromUsd(
-                    modifier = Modifier
-                        .padding(start = 32.dp)
-                        .height(72.dp),
-                    amount = amountInUsd,
-                    textSize = 48.sp,
-                )
-            }
-        }
-
-        if (currentExchangeRate.isValidExchangeRate()) {
-            TransactionAmountSubtext(
-                currencyMode = currentCurrencyMode,
-                amountSats = amountInBtc.toSats().toString(),
-                amountUsd = amountInUsd,
-            )
-        }
-    }
-}
-
-@Composable
-private fun TransactionAmountSubtext(
-    currencyMode: CurrencyMode,
-    amountSats: String,
-    amountUsd: String,
-) {
-    val amount = when (currencyMode) {
-        CurrencyMode.FIAT -> {
-            amountSats
-        }
-        CurrencyMode.SATS -> {
-            amountUsd
-        }
-    }
-
-    Row(
-        modifier = Modifier.padding(start = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        val numberFormat = remember { NumberFormat.getNumberInstance() }
-
-        Text(
-            text = if (currencyMode != CurrencyMode.FIAT) {
-                amount.formatUsd(numberFormat)
-            } else {
-                amount.formatSats(numberFormat)
-            },
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            style = AppTheme.typography.bodyMedium,
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-        )
-
-        Icon(
-            modifier = Modifier.size(16.dp),
-            imageVector = PrimalIcons.WalletChangeCurrency,
-            contentDescription = null,
-            tint = AppTheme.colorScheme.tertiary,
         )
     }
 }
