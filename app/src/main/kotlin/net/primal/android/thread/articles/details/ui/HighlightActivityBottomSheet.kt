@@ -17,6 +17,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -62,32 +63,7 @@ import net.primal.android.theme.AppTheme
 internal val DARK_THEME_ACTION_BUTTON_COLOR = Color(0xFF282828)
 
 @Composable
-fun HighlightActivityBottomSheetHandler(
-    articleNaddr: Naddr?,
-    selectedHighlight: JoinedHighlightsUi?,
-    isHighlighted: Boolean,
-    isWorking: Boolean,
-    dismissSelection: () -> Unit,
-    onSaveHighlightClick: () -> Unit,
-    onDeleteHighlightClick: () -> Unit,
-    noteCallbacks: NoteCallbacks,
-) {
-    if (selectedHighlight != null) {
-        HighlightActivityBottomSheet(
-            onDismissRequest = dismissSelection,
-            articleNaddr = articleNaddr,
-            selectedHighlight = selectedHighlight,
-            isHighlighted = isHighlighted,
-            isWorking = isWorking,
-            onSaveHighlightClick = onSaveHighlightClick,
-            onDeleteHighlightClick = onDeleteHighlightClick,
-            noteCallbacks = noteCallbacks,
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
+@ExperimentalMaterial3Api
 fun HighlightActivityBottomSheet(
     modifier: Modifier = Modifier,
     articleNaddr: Naddr?,
@@ -98,13 +74,14 @@ fun HighlightActivityBottomSheet(
     onSaveHighlightClick: () -> Unit,
     onDeleteHighlightClick: () -> Unit,
     noteCallbacks: NoteCallbacks,
+    sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
 ) {
     ModalBottomSheet(
         tonalElevation = 0.dp,
         modifier = modifier.statusBarsPadding(),
         onDismissRequest = onDismissRequest,
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        sheetState = sheetState,
     ) {
         Column {
             PrimalTopAppBar(

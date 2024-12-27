@@ -29,6 +29,7 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -103,7 +105,7 @@ import net.primal.android.thread.articles.details.ui.ArticleAuthorRow
 import net.primal.android.thread.articles.details.ui.ArticleDetailsHeader
 import net.primal.android.thread.articles.details.ui.ArticleHashtags
 import net.primal.android.thread.articles.details.ui.FloatingArticlePill
-import net.primal.android.thread.articles.details.ui.HighlightActivityBottomSheetHandler
+import net.primal.android.thread.articles.details.ui.HighlightActivityBottomSheet
 import net.primal.android.thread.articles.details.ui.rendering.MarkdownRenderer
 import net.primal.android.thread.articles.details.ui.rendering.handleArticleLinkClick
 import net.primal.android.thread.articles.details.ui.rendering.isValidHttpOrHttpsUrl
@@ -242,16 +244,22 @@ private fun ArticleDetailsScreen(
         )
     }
 
-    HighlightActivityBottomSheetHandler(
-        articleNaddr = detailsState.naddr,
-        selectedHighlight = detailsState.selectedHighlight,
-        dismissSelection = { detailsEventPublisher(UiEvent.DismissSelectedHighlight) },
-        isHighlighted = detailsState.isHighlighted,
-        onSaveHighlightClick = { detailsEventPublisher(UiEvent.PublishSelectedHighlight) },
-        onDeleteHighlightClick = { detailsEventPublisher(UiEvent.DeleteSelectedHighlight) },
-        isWorking = detailsState.isWorking,
-        noteCallbacks = noteCallbacks,
-    )
+    var isHighlightActivityBottomSheetVisible by rememberSaveable { mutableStateOf(false) }
+    if (isHighlightActivityBottomSheetVisible && detailsState.selectedHighlight != null) {
+        HighlightActivityBottomSheet(
+            onDismissRequest = {
+                isHighlightActivityBottomSheetVisible = false
+                detailsEventPublisher(UiEvent.DismissSelectedHighlight)
+            },
+            articleNaddr = detailsState.naddr,
+            selectedHighlight = detailsState.selectedHighlight,
+            isHighlighted = detailsState.isHighlighted,
+            isWorking = detailsState.isWorking,
+            onSaveHighlightClick = { detailsEventPublisher(UiEvent.PublishSelectedHighlight) },
+            onDeleteHighlightClick = { detailsEventPublisher(UiEvent.DeleteSelectedHighlight) },
+            noteCallbacks = noteCallbacks,
+        )
+    }
 
     if (articleState.shouldApproveBookmark && detailsState.article != null) {
         ApproveBookmarkAlertDialog(
@@ -329,6 +337,10 @@ private fun ArticleDetailsScreen(
                         detailsState.naddr?.toNaddrString()?.let { noteCallbacks.onArticleReplyClick?.invoke(it) }
                     },
                     onArticleHashtagClick = onArticleHashtagClick,
+                    onHighlightClick = {
+                        detailsEventPublisher(UiEvent.SelectHighlight(it))
+                        isHighlightActivityBottomSheetVisible = true
+                    },
                     onZapOptionsClick = { invokeZapOptionsOrShowWarning() },
                     onGoToWallet = onGoToWallet,
                     noteCallbacks = noteCallbacks,
@@ -459,6 +471,7 @@ private fun ArticleContentWithComments(
     paddingValues: PaddingValues,
     onArticleCommentClick: (naddr: String) -> Unit,
     onArticleHashtagClick: (hashtag: String) -> Unit,
+    onHighlightClick: (String) -> Unit,
     onZapOptionsClick: () -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
@@ -478,9 +491,7 @@ private fun ArticleContentWithComments(
                 onUrlClick = { url -> uriHandler.openUriSafely(url) },
             )
         },
-        onHighlightClick = {
-            detailsEventPublisher(UiEvent.SelectHighlight(it))
-        },
+        onHighlightClick = onHighlightClick,
     )
 
     LazyColumn(
