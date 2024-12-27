@@ -212,7 +212,7 @@ fun WalletDashboardScreen(
                                     modifier = Modifier
                                         .wrapContentSize(align = Alignment.Center)
                                         .padding(horizontal = 32.dp)
-                                        .padding(vertical = 32.dp)
+                                        .padding(top = 16.dp, bottom = 24.dp)
                                         .animateContentSize()
                                         .then(
                                             if (state.primalWallet?.kycLevel == WalletKycLevel.None) {
