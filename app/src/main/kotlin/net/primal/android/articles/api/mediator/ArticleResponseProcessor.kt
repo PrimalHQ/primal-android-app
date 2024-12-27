@@ -9,6 +9,7 @@ import net.primal.android.nostr.ext.flatMapAsEventHintsPO
 import net.primal.android.nostr.ext.flatMapAsWordCount
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsEventZapDO
+import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.android.nostr.ext.mapAsPostDataPO
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.mapNotNullAsArticleDataPO
@@ -30,11 +31,14 @@ suspend fun ArticleResponse.persistToDatabaseAsTransaction(userId: String, datab
     val primalPremiumInfo = this.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
     val primalLegendProfiles = this.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
 
+    val blossomServers = this.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
+
     val profiles = this.metadata.mapAsProfileDataPO(
         cdnResources = cdnResources,
         primalUserNames = primalUserNames,
         primalPremiumInfo = primalPremiumInfo,
         primalLegendProfiles = primalLegendProfiles,
+        blossomServers = blossomServers,
     )
     val referencedNotes = this.referencedEvents.mapNotNullAsPostDataPO()
 

@@ -25,4 +25,5 @@ data class ProfileData(
     val aboutHashtags: List<String> = emptyList(),
     val primalName: String? = null,
     val primalPremiumInfo: PrimalPremiumInfo? = null,
+    val blossoms: List<String> = emptyList(),
 )

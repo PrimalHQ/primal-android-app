@@ -17,6 +17,7 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.asEventIdTag
 import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
+import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
@@ -129,11 +130,13 @@ class EventRepository @Inject constructor(
             val primalNames = response.primalUserNames.parseAndMapPrimalUserNames()
             val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
             val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
+            val blossomServers = response.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
             val profiles = response.profiles.mapAsProfileDataPO(
                 cdnResources = cdnResources,
                 primalUserNames = primalNames,
                 primalPremiumInfo = primalPremiumInfo,
                 primalLegendProfiles = primalLegendProfiles,
+                blossomServers = blossomServers,
             )
             database.withTransaction {
                 database.profiles().insertOrUpdateAll(data = profiles)

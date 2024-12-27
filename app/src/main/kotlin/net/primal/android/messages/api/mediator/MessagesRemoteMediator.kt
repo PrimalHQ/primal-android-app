@@ -89,6 +89,7 @@ class MessagesRemoteMediator(
                 primalUserNames = response.primalUserNames,
                 primalPremiumInfo = response.primalPremiumInfo,
                 primalLegendProfiles = response.primalLegendProfiles,
+                blossomServerEvents = response.blossomServers,
             )
         }
 

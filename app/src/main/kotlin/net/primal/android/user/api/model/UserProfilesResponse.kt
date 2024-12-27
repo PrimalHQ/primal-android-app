@@ -8,6 +8,7 @@ import net.primal.android.nostr.model.primal.PrimalEvent
 data class UserProfilesResponse(
     val metadataEvents: List<NostrEvent> = emptyList(),
     val cdnResources: List<PrimalEvent> = emptyList(),
+    val blossomServers: List<NostrEvent> = emptyList(),
     val userScores: PrimalEvent? = null,
     val primalUserNames: PrimalEvent? = null,
     val primalLegendProfiles: PrimalEvent? = null,

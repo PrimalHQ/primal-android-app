@@ -158,6 +158,7 @@ class UserRepository @Inject constructor(
             primalUserNames = emptyMap(),
             primalPremiumInfo = emptyMap(),
             primalLegendProfiles = emptyMap(),
+            blossomServers = emptyMap(),
         )
         database.profiles().insertOrUpdateAll(data = listOf(profileData))
 

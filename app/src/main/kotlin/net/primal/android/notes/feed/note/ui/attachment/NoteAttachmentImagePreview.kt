@@ -7,6 +7,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -25,37 +29,59 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun NoteAttachmentImagePreview(
     attachment: NoteAttachmentUi,
+    blossoms: List<String>,
     maxWidth: Dp,
     modifier: Modifier = Modifier,
 ) {
-    val imageSource = when (attachment.type) {
+    val cdnImageSource = when (attachment.type) {
         NoteAttachmentType.Image -> {
             val maxWidthPx = with(LocalDensity.current) { maxWidth.roundToPx() }
             val variant = attachment.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
-            variant?.mediaUrl ?: attachment.url
+            variant?.mediaUrl
         }
         else -> attachment.thumbnailUrl
     }
 
-    SubcomposeAsyncImage(
-        model = imageSource,
-        modifier = modifier,
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        loading = { NoteImageLoadingPlaceholder() },
-        error = {
-            SubcomposeAsyncImage(
-                model = attachment.url,
-                modifier = modifier,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                loading = { NoteImageLoadingPlaceholder() },
-                error = {
-                    NoteImageErrorImage()
-                },
-            )
-        },
-    )
+    val blossomUrls = resolveBlossomUrls(originalUrl = attachment.url, blossoms = blossoms)
+    val imageUrls = ((listOfNotNull(cdnImageSource, attachment.url) + blossomUrls)).distinct()
+
+    var currentUrlIndex by remember { mutableIntStateOf(0) }
+    val currentUrl = imageUrls.getOrNull(currentUrlIndex)
+
+    if (currentUrl != null) {
+        SubcomposeAsyncImage(
+            model = currentUrl,
+            modifier = modifier,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            loading = { NoteImageLoadingPlaceholder() },
+            error = { currentUrlIndex += 1 },
+        )
+    } else {
+        NoteImageErrorImage(
+            modifier = modifier,
+        )
+    }
+}
+
+private fun resolveBlossomUrls(originalUrl: String, blossoms: List<String>): List<String> {
+    val fileName = originalUrl.extractFileHashNameFromUrl()
+    return blossoms.map { blossomUrl ->
+        "${blossomUrl.ensureEndsWithSlash()}$fileName"
+    }
+}
+
+private fun String.extractFileHashNameFromUrl(): String? {
+    val hashStartIndex = this.lastIndexOf('/') + 1
+    return if (hashStartIndex != -1 && hashStartIndex < this.length) {
+        this.substring(hashStartIndex)
+    } else {
+        null
+    }
+}
+
+private fun String.ensureEndsWithSlash(): String {
+    return if (this.endsWith("/")) this else "$this/"
 }
 
 @Composable
@@ -74,9 +100,9 @@ fun NoteImageLoadingPlaceholder() {
 }
 
 @Composable
-fun NoteImageErrorImage() {
+fun NoteImageErrorImage(modifier: Modifier) {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
         Icon(

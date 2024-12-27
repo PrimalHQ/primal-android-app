@@ -28,6 +28,7 @@ import net.primal.android.theme.AppTheme
 fun NoteMediaAttachmentsHorizontalPager(
     modifier: Modifier = Modifier,
     onMediaClick: (MediaClickEvent) -> Unit,
+    blossoms: List<String>,
     mediaAttachments: List<NoteAttachmentUi> = emptyList(),
 ) {
     BoxWithConstraints(modifier = modifier) {
@@ -40,6 +41,7 @@ fun NoteMediaAttachmentsHorizontalPager(
             val attachment = mediaAttachments.first()
             NoteMediaAttachment(
                 attachment = attachment,
+                blossoms = blossoms,
                 imageSizeDp = imageSizeDp,
                 onClick = { positionMs ->
                     onMediaClick(
@@ -57,6 +59,7 @@ fun NoteMediaAttachmentsHorizontalPager(
                 val attachment = mediaAttachments[it]
                 NoteMediaAttachment(
                     attachment = attachment,
+                    blossoms = blossoms,
                     imageSizeDp = imageSizeDp,
                     onClick = { positionMs ->
                         onMediaClick(
@@ -95,6 +98,7 @@ fun NoteMediaAttachmentsHorizontalPager(
 @Composable
 private fun NoteMediaAttachment(
     attachment: NoteAttachmentUi,
+    blossoms: List<String>,
     imageSizeDp: DpSize,
     onClick: (positionMs: Long) -> Unit,
 ) {
@@ -118,6 +122,7 @@ private fun NoteMediaAttachment(
             else -> {
                 NoteAttachmentImagePreview(
                     attachment = attachment,
+                    blossoms = blossoms,
                     maxWidth = this.maxWidth,
                     modifier = Modifier
                         .width(imageSizeDp.width)

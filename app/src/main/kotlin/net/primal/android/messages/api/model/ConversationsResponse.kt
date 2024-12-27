@@ -9,6 +9,7 @@ data class ConversationsResponse(
     val messages: List<NostrEvent>,
     val profileMetadata: List<NostrEvent>,
     val cdnResources: List<PrimalEvent>,
+    val blossomServers: List<NostrEvent>,
     val primalUserNames: PrimalEvent? = null,
     val primalLegendProfiles: PrimalEvent? = null,
     val primalPremiumInfo: PrimalEvent? = null,

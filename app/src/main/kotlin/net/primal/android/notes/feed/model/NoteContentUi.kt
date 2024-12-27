@@ -13,6 +13,7 @@ data class NoteContentUi(
     val nostrUris: List<NoteNostrUriUi> = emptyList(),
     val hashtags: List<String> = emptyList(),
     val invoices: List<String> = emptyList(),
+    val blossoms: List<String> = emptyList(),
 )
 
 fun FeedPostUi.toNoteContentUi(): NoteContentUi {
@@ -25,6 +26,7 @@ fun FeedPostUi.toNoteContentUi(): NoteContentUi {
         nostrUris = this.nostrUris,
         hashtags = this.hashtags,
         invoices = invoices,
+        blossoms = this.authorBlossoms,
     )
 }
 
@@ -38,6 +40,7 @@ fun ChatMessageUi.toNoteContentUi(): NoteContentUi {
         nostrUris = this.nostrUris,
         hashtags = this.hashtags,
         invoices = invoices,
+        blossoms = emptyList(),
     )
 }
 
@@ -48,6 +51,7 @@ fun PostData.toNoteContentUi(nostrUris: List<NoteNostrUriUi> = emptyList()): Not
         nostrUris = nostrUris,
         hashtags = this.hashtags,
         invoices = emptyList(),
+        blossoms = emptyList(),
     )
 }
 

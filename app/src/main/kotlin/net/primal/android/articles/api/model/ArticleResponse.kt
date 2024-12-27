@@ -23,4 +23,5 @@ data class ArticleResponse(
     val primalUserNames: PrimalEvent?,
     val primalLegendProfiles: PrimalEvent?,
     val primalPremiumInfo: PrimalEvent?,
+    val blossomServers: List<NostrEvent>,
 )

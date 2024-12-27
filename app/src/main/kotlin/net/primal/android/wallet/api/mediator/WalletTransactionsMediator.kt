@@ -13,6 +13,7 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
+import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.android.nostr.ext.mapAsWalletTransactionPO
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
@@ -114,12 +115,14 @@ class WalletTransactionsMediator(
             val primalPremiumInfo = profilesResponse.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
             val primalLegendProfiles = profilesResponse.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
             val cdnResources = profilesResponse.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+            val blossomServers = profilesResponse.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
             val profiles = profilesResponse.metadataEvents.map {
                 it.asProfileDataPO(
                     cdnResources = cdnResources,
                     primalUserNames = primalUserNames,
                     primalPremiumInfo = primalPremiumInfo,
                     primalLegendProfiles = primalLegendProfiles,
+                    blossomServers = blossomServers,
                 )
             }
 
