@@ -203,6 +203,7 @@ private fun NoteEditorBox(
     val editorListState = rememberLazyListState()
     var noteEditorMaxHeightPx by remember { mutableIntStateOf(0) }
     var replyNoteHeightPx by remember { mutableIntStateOf(0) }
+    var quotedEventHeightPx by remember { mutableIntStateOf(0) }
     val replyingToPaddingTop = 8.dp
     var replyingToNoticeHeightPx by remember { mutableIntStateOf(0) }
 
@@ -212,7 +213,7 @@ private fun NoteEditorBox(
         with(density) {
             val replyHeight = replyNoteHeightPx.toDp() + replyingToNoticeHeightPx.toDp() + replyingToPaddingTop
             val noteEditorMaxHeight = noteEditorMaxHeightPx.toDp()
-            noteEditorMaxHeight - replyHeight - attachmentsHeightDp
+            noteEditorMaxHeight - replyHeight - attachmentsHeightDp - quotedEventHeightPx.toDp()
         }
     } else {
         0.dp
@@ -251,28 +252,32 @@ private fun NoteEditorBox(
                 )
             }
 
-            if (state.attachments.isNotEmpty()) {
-                item(key = "attachments") {
-                    NoteAttachmentsLazyRow(
-                        attachments = state.attachments,
-                        onDiscard = {
-                            eventPublisher(UiEvent.DiscardNoteAttachment(attachmentId = it))
-                        },
-                        onRetryUpload = {
-                            eventPublisher(UiEvent.RetryUpload(attachmentId = it))
-                        },
+            if (state.isQuoting) {
+                item {
+                    ReferencedEventsAndConversationAsQuote(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 68.dp, end = 16.dp, bottom = 8.dp)
+                            .onSizeChanged { quotedEventHeightPx = it.height },
+                        referencedNote = state.conversation.lastOrNull(),
+                        referencedArticle = state.referencedArticle,
+                        referencedHighlight = state.referencedHighlight,
                     )
                 }
             }
 
-            if (state.isQuoting) {
-                referencedEventsAndConversationAsQuote(
+            item(key = "attachments") {
+                NoteAttachmentsLazyRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 72.dp, end = 16.dp),
-                    referencedNote = state.conversation.lastOrNull(),
-                    referencedArticle = state.referencedArticle,
-                    referencedHighlight = state.referencedHighlight,
+                        .height(attachmentsHeightDp),
+                    attachments = state.attachments,
+                    onDiscard = {
+                        eventPublisher(UiEvent.DiscardNoteAttachment(attachmentId = it))
+                    },
+                    onRetryUpload = {
+                        eventPublisher(UiEvent.RetryUpload(attachmentId = it))
+                    },
                 )
             }
 
@@ -342,24 +347,23 @@ private fun LazyListScope.referencedEventsAndConversationAsReplyTo(
 }
 
 @ExperimentalMaterial3Api
-private fun LazyListScope.referencedEventsAndConversationAsQuote(
+@Composable
+private fun ReferencedEventsAndConversationAsQuote(
     modifier: Modifier = Modifier,
     referencedNote: FeedPostUi?,
     referencedArticle: FeedArticleUi?,
     referencedHighlight: HighlightUi?,
 ) {
-    if (referencedNote != null) {
-        item {
+    Column {
+        if (referencedNote != null) {
             ReferencedNoteCard(
                 modifier = modifier,
                 data = referencedNote,
                 noteCallbacks = NoteCallbacks(),
             )
         }
-    }
 
-    if (referencedArticle != null || referencedHighlight != null) {
-        item {
+        if (referencedArticle != null || referencedHighlight != null) {
             Column(
                 modifier = modifier.padding(top = if (referencedNote != null) 8.dp else 0.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -508,14 +512,13 @@ private fun NoteEditorFooter(
 
 @Composable
 private fun NoteAttachmentsLazyRow(
+    modifier: Modifier,
     attachments: List<NoteAttachment>,
     onDiscard: (UUID) -> Unit,
     onRetryUpload: (UUID) -> Unit,
 ) {
     LazyRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(attachmentsHeightDp),
+        modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         item {
