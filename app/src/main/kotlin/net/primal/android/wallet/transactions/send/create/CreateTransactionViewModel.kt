@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.authorNameUiFriendly
+import net.primal.android.core.utils.getMaximumUsdAmount
 import net.primal.android.navigation.draftTransaction
 import net.primal.android.navigation.lnbc
 import net.primal.android.networking.sockets.errors.WssException
@@ -36,7 +37,6 @@ import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
 import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.android.wallet.utils.CurrencyConversionUtils.fromUsdToSats
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toUsd
 import net.primal.android.wallet.utils.isLightningAddress
 import timber.log.Timber
 
@@ -85,9 +85,7 @@ class CreateTransactionViewModel @Inject constructor(
                     copy(
                         currentExchangeRate = it,
                         maximumUsdAmount = getMaximumUsdAmount(it),
-                        amountInUsd = _state.value.transaction.amountSats
-                            .toDouble()
-                            .toBigDecimal()
+                        amountInUsd = BigDecimal(_state.value.transaction.amountSats)
                             .fromSatsToUsd(it)
                             .let { amount ->
                                 if (amount.compareTo(BigDecimal.ZERO) == 0) {
@@ -108,14 +106,6 @@ class CreateTransactionViewModel @Inject constructor(
                 userId = activeUserStore.activeUserId(),
             )
         }
-
-    private fun getMaximumUsdAmount(exchangeRate: Double?): BigDecimal {
-        return (MAXIMUM_SATS)
-            .toBigDecimal()
-            .toBtc()
-            .toBigDecimal()
-            .toUsd(exchangeRate)
-    }
 
     private fun subscribeToEvents() =
         viewModelScope.launch {

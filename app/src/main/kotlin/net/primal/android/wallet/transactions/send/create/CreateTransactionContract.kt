@@ -7,8 +7,6 @@ import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
 
-const val MAXIMUM_SATS = 99_999_990.00
-
 interface CreateTransactionContract {
 
     data class UiState(

@@ -557,7 +557,7 @@ private fun ReceivePaymentEditor(
                     if (currentExchangeRate.isValidExchangeRate()) {
                         currentCurrencyMode = !currentCurrencyMode
                     }
-                 },
+                },
             )
 
             Spacer(modifier = Modifier.height(48.dp))

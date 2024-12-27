@@ -3,14 +3,13 @@ package net.primal.android.wallet.transactions.receive
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import fr.acinq.bitcoin.toSatoshi
-import java.math.BigDecimal
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.core.utils.getMaximumUsdAmount
 import net.primal.android.navigation.asUrlEncoded
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -21,11 +20,6 @@ import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiE
 import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiState
 import net.primal.android.wallet.transactions.receive.model.PaymentDetails
 import net.primal.android.wallet.transactions.receive.tabs.ReceivePaymentTab
-import net.primal.android.wallet.transactions.send.create.MAXIMUM_SATS
-import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toUsd
 import timber.log.Timber
 
 @HiltViewModel
@@ -108,14 +102,6 @@ class ReceivePaymentViewModel @Inject constructor(
             )
         }
 
-    private fun getMaximumUsdAmount(exchangeRate: Double?): BigDecimal {
-        return (MAXIMUM_SATS)
-            .toBigDecimal()
-            .toBtc()
-            .toBigDecimal()
-            .toUsd(exchangeRate)
-    }
-
     private fun fetchOnChainAddress() =
         viewModelScope.launch {
             setState { copy(loading = true) }
@@ -131,41 +117,44 @@ class ReceivePaymentViewModel @Inject constructor(
             }
         }
 
-    private fun createInvoice(amountInBtc: String, amountInUsd: String, comment: String?) =
-        viewModelScope.launch {
-            setState { copy(creatingInvoice = true) }
-            try {
-                val response = walletRepository.createLightningInvoice(
-                    userId = activeAccountStore.activeUserId(),
-                    amountInBtc = amountInBtc,
-                    comment = comment,
-                )
+    private fun createInvoice(
+        amountInBtc: String,
+        amountInUsd: String,
+        comment: String?,
+    ) = viewModelScope.launch {
+        setState { copy(creatingInvoice = true) }
+        try {
+            val response = walletRepository.createLightningInvoice(
+                userId = activeAccountStore.activeUserId(),
+                amountInBtc = amountInBtc,
+                comment = comment,
+            )
 
-                setState {
-                    copy(
-                        editMode = false,
-                        paymentDetails = PaymentDetails(
-                            amountInBtc = amountInBtc,
-                            amountInUsd = amountInUsd,
-                            comment = comment,
-                        ),
-                        lightningNetworkDetails = this.lightningNetworkDetails.copy(
-                            invoice = response.lnInvoice,
-                        ),
-                        bitcoinNetworkDetails = this.bitcoinNetworkDetails.copy(
-                            invoice = "bitcoin:${this.bitcoinNetworkDetails.address}?amount=$amountInBtc".let {
-                                if (!comment.isNullOrEmpty()) "$it&label=${comment.asUrlEncoded()}" else it
-                            },
-                        ),
-                    )
-                }
-            } catch (error: WssException) {
-                Timber.w(error)
-                setState { copy(error = UiState.ReceivePaymentError.FailedToCreateLightningInvoice(cause = error)) }
-            } finally {
-                setState { copy(creatingInvoice = false) }
+            setState {
+                copy(
+                    editMode = false,
+                    paymentDetails = PaymentDetails(
+                        amountInBtc = amountInBtc,
+                        amountInUsd = amountInUsd,
+                        comment = comment,
+                    ),
+                    lightningNetworkDetails = this.lightningNetworkDetails.copy(
+                        invoice = response.lnInvoice,
+                    ),
+                    bitcoinNetworkDetails = this.bitcoinNetworkDetails.copy(
+                        invoice = "bitcoin:${this.bitcoinNetworkDetails.address}?amount=$amountInBtc".let {
+                            if (!comment.isNullOrEmpty()) "$it&label=${comment.asUrlEncoded()}" else it
+                        },
+                    ),
+                )
             }
+        } catch (error: WssException) {
+            Timber.w(error)
+            setState { copy(error = UiState.ReceivePaymentError.FailedToCreateLightningInvoice(cause = error)) }
+        } finally {
+            setState { copy(creatingInvoice = false) }
         }
+    }
 
     private fun changeNetwork(network: Network) =
         viewModelScope.launch {
