@@ -23,12 +23,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import java.math.BigDecimal
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Subtract
 import net.primal.android.core.compose.numericpad.PrimalNumericPadContract.UiEvent.NumericInputEvent
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
+import net.primal.android.wallet.domain.CurrencyMode
 
 private val PadButtonMargin = 16.dp
 
@@ -37,6 +39,8 @@ fun PrimalNumericPad(
     modifier: Modifier = Modifier,
     amountInSats: String,
     onAmountInSatsChanged: (String) -> Unit,
+    currencyMode: CurrencyMode,
+    maximumUsdAmount: BigDecimal? = null,
 ) {
     val haptic = LocalHapticFeedback.current
     val viewModel = viewModel<PrimalNumericPadViewModel>()
@@ -55,11 +59,30 @@ fun PrimalNumericPad(
 
     val onNumberClick: (Int) -> Unit = {
         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-        viewModel.setEvent(NumericInputEvent.DigitInputEvent(it))
+        val newAmount = BigDecimal.valueOf((amountInSats + it.toString()).toDouble())
+        when (currencyMode) {
+            CurrencyMode.FIAT -> {
+                if (newAmount <= maximumUsdAmount) {
+                    val decimalPart = amountInSats.split(".")
+                    val isDecimalValid = decimalPart.size != 2 || decimalPart[1].length < 2
+
+                    if (isDecimalValid) {
+                        viewModel.setEvent(NumericInputEvent.DigitInputEvent(it))
+                    }
+                }
+            }
+            CurrencyMode.SATS -> {
+                viewModel.setEvent(NumericInputEvent.DigitInputEvent(it))
+            }
+        }
     }
 
     val onDotClick: () -> Unit = {
         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+        when (currencyMode) {
+            CurrencyMode.FIAT -> viewModel.setEvent(NumericInputEvent.DotInputEvent)
+            CurrencyMode.SATS -> Unit
+        }
     }
 
     val onBackspaceClick: () -> Unit = {
@@ -72,6 +95,23 @@ fun PrimalNumericPad(
         viewModel.setEvent(NumericInputEvent.ResetAmountEvent)
     }
 
+    NumericPad(
+        modifier = modifier,
+        onNumberClick = onNumberClick,
+        onDotClick = onDotClick,
+        onBackspaceClick = onBackspaceClick,
+        onBackspaceLongClick = onBackspaceLongClick,
+    )
+}
+
+@Composable
+private fun NumericPad(
+    modifier: Modifier,
+    onNumberClick: (Int) -> Unit,
+    onDotClick: () -> Unit,
+    onBackspaceClick: () -> Unit,
+    onBackspaceLongClick: () -> Unit,
+) {
     Column(
         modifier = modifier,
     ) {
@@ -241,6 +281,8 @@ fun PreviewPrimalNumericPad() {
             PrimalNumericPad(
                 amountInSats = "0",
                 onAmountInSatsChanged = {},
+                currencyMode = CurrencyMode.SATS,
+                maximumUsdAmount = BigDecimal(94000),
             )
         }
     }

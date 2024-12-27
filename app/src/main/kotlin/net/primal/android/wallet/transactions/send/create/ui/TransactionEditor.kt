@@ -6,7 +6,6 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,12 +63,15 @@ import net.primal.android.core.compose.icons.primaliconpack.WalletBitcoinPayment
 import net.primal.android.core.compose.isCompactOrLower
 import net.primal.android.core.compose.numericpad.PrimalNumericPad
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.dashboard.ui.BtcAmountText
+import net.primal.android.wallet.domain.CurrencyMode
+import net.primal.android.wallet.domain.not
 import net.primal.android.wallet.numericPadContentTransformAnimation
+import net.primal.android.wallet.repository.isValidExchangeRate
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract
 import net.primal.android.wallet.transactions.send.create.ellipsizeLnUrl
 import net.primal.android.wallet.transactions.send.create.ellipsizeOnChainAddress
 import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
+import net.primal.android.wallet.ui.TransactionAmountText
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 
@@ -88,7 +90,6 @@ fun TransactionEditor(
     var noteRecipientText by remember { mutableStateOf(state.transaction.noteRecipient ?: "") }
     var noteSelfText by remember { mutableStateOf(state.transaction.noteSelf ?: "") }
     var isNumericPadOn by remember { mutableStateOf(state.isNotInvoice()) }
-
     val sendPayment = {
         eventPublisher(
             CreateTransactionContract.UiEvent.SendTransaction(
@@ -133,6 +134,13 @@ fun TransactionEditor(
                     if (state.isNotInvoice()) {
                         isNumericPadOn = true
                     }
+
+                    if (state.currentExchangeRate.isValidExchangeRate()) {
+                        val newCurrencyMode = !state.currencyMode
+                        eventPublisher(
+                            CreateTransactionContract.UiEvent.ChangeCurrencyMode(currencyMode = newCurrencyMode),
+                        )
+                    }
                 },
             )
 
@@ -146,7 +154,7 @@ fun TransactionEditor(
                 onNoteSelfTextChanged = { text -> noteSelfText = text },
                 onAmountChanged = {
                     eventPublisher(
-                        CreateTransactionContract.UiEvent.AmountChanged(amountInSats = it),
+                        CreateTransactionContract.UiEvent.AmountChanged(amount = it),
                     )
                 },
                 onMiningFeeChanged = {
@@ -217,8 +225,16 @@ private fun TransactionMainContent(
             ) {
                 PrimalNumericPad(
                     modifier = Modifier.fillMaxWidth(),
-                    amountInSats = state.transaction.amountSats,
-                    onAmountInSatsChanged = { newAmount -> onAmountChanged(newAmount) },
+                    amountInSats = if (state.currencyMode == CurrencyMode.SATS) {
+                        state.transaction.amountSats
+                    } else {
+                        state.amountInUsd
+                    },
+                    currencyMode = state.currencyMode,
+                    maximumUsdAmount = state.maximumUsdAmount,
+                    onAmountInSatsChanged = { newAmount ->
+                        onAmountChanged(newAmount)
+                    },
                 )
             }
 
@@ -422,29 +438,12 @@ private fun TransactionHeaderColumn(
 
         Spacer(modifier = Modifier.height(headerSpacing.value))
 
-        BtcAmountText(
-            modifier = Modifier
-                .padding(
-                    start = when (uiMode) {
-                        UiDensityMode.Normal -> 32.dp
-                        UiDensityMode.Comfortable -> 26.dp
-                        else -> 18.dp
-                    },
-                )
-                .height(
-                    when (uiMode) {
-                        UiDensityMode.Normal -> 72.dp
-                        UiDensityMode.Comfortable -> 64.dp
-                        else -> 56.dp
-                    },
-                )
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = onAmountClick,
-                ),
-            amountInBtc = state.transaction.amountSats.toLong().toBtc().toBigDecimal(),
-            textSize = 48.sp,
+        TransactionAmountText(
+            amountInBtc = state.transaction.amountSats.toULong().toBtc().toString(),
+            amountInUsd = state.amountInUsd,
+            currentExchangeRate = state.currentExchangeRate,
+            currentCurrencyMode = state.currencyMode,
+            onAmountClick = onAmountClick,
         )
 
         Spacer(modifier = Modifier.height(amountSpacing.value))
@@ -779,4 +778,17 @@ private fun CreateTransactionContract.UiState.resolveTransactionTitle(): String?
 @Composable
 private fun CreateTransactionContract.UiState.resolveTransactionSubtitle(): String? {
     return profileLightningAddress ?: transaction.targetOnChainAddress?.ellipsizeOnChainAddress()
+}
+
+@Composable
+fun String.formatUsd(numberFormat: NumberFormat): String {
+    val amount = this.toBigDecimalOrNull() ?: return "⌛"
+    return stringResource(id = R.string.wallet_usd_prefix) +
+        "${numberFormat.format(amount.toFloat())} " +
+        stringResource(id = R.string.wallet_usd_suffix)
+}
+
+@Composable
+fun String.formatSats(numberFormat: NumberFormat): String {
+    return "${numberFormat.format(this.toLong())} ${stringResource(R.string.wallet_sats_suffix)}"
 }

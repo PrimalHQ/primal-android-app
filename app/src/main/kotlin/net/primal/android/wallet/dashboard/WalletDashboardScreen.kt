@@ -63,6 +63,7 @@ import net.primal.android.wallet.dashboard.ui.WalletAction
 import net.primal.android.wallet.dashboard.ui.WalletCallToActionBox
 import net.primal.android.wallet.dashboard.ui.WalletDashboard
 import net.primal.android.wallet.dashboard.ui.WalletDashboardLite
+import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.domain.WalletKycLevel
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyBottomSheet
 import net.primal.android.wallet.transactions.list.TransactionsLazyColumn
@@ -357,11 +358,6 @@ fun WalletDashboardScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
     )
-}
-
-enum class CurrencyMode {
-    FIAT,
-    SATS,
 }
 
 private const val DISABLED_WALLET_ALPHA = 0.42f

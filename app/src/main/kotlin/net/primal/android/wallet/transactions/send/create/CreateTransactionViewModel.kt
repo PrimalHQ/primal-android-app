@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.math.BigDecimal
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,6 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.authorNameUiFriendly
+import net.primal.android.core.utils.getMaximumUsdAmount
 import net.primal.android.navigation.draftTransaction
 import net.primal.android.navigation.lnbc
 import net.primal.android.networking.sockets.errors.WssException
@@ -23,13 +25,17 @@ import net.primal.android.scanner.analysis.WalletTextParser
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.api.model.MiningFeeTier
 import net.primal.android.wallet.api.model.WithdrawRequestBody
+import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.domain.DraftTxStatus
 import net.primal.android.wallet.domain.SubWallet
+import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract.UiEvent
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract.UiState
 import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
 import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
+import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
+import net.primal.android.wallet.utils.CurrencyConversionUtils.fromUsdToSats
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.isLightningAddress
 import timber.log.Timber
@@ -42,6 +48,7 @@ class CreateTransactionViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val walletRepository: WalletRepository,
     private val walletTextParser: WalletTextParser,
+    private val exchangeRateHandler: ExchangeRateHandler,
 ) : ViewModel() {
 
     private val argLnbc = savedStateHandle.lnbc
@@ -56,6 +63,7 @@ class CreateTransactionViewModel @Inject constructor(
     init {
         subscribeToEvents()
         updateMiningFees()
+        observeUsdExchangeRate()
 
         if (argLnbc != null) {
             viewModelScope.launch {
@@ -69,6 +77,36 @@ class CreateTransactionViewModel @Inject constructor(
         }
     }
 
+    private fun observeUsdExchangeRate() {
+        viewModelScope.launch {
+            fetchExchangeRate()
+            exchangeRateHandler.usdExchangeRate.collect {
+                setState {
+                    copy(
+                        currentExchangeRate = it,
+                        maximumUsdAmount = getMaximumUsdAmount(it),
+                        amountInUsd = BigDecimal(_state.value.transaction.amountSats)
+                            .fromSatsToUsd(it)
+                            .let { amount ->
+                                if (amount.compareTo(BigDecimal.ZERO) == 0) {
+                                    "0"
+                                } else {
+                                    amount.toString()
+                                }
+                            },
+                    )
+                }
+            }
+        }
+    }
+
+    private fun fetchExchangeRate() =
+        viewModelScope.launch {
+            exchangeRateHandler.updateExchangeRate(
+                userId = activeUserStore.activeUserId(),
+            )
+        }
+
     private fun subscribeToEvents() =
         viewModelScope.launch {
             events.collect { event ->
@@ -78,7 +116,13 @@ class CreateTransactionViewModel @Inject constructor(
                     }
 
                     is UiEvent.AmountChanged -> {
-                        setState { copy(transaction = transaction.copy(amountSats = event.amountInSats)) }
+                        updateAmount(amount = event.amount)
+                    }
+
+                    is UiEvent.ChangeCurrencyMode -> {
+                        setState {
+                            copy(currencyMode = event.currencyMode)
+                        }
                     }
 
                     is UiEvent.MiningFeeChanged -> {
@@ -97,6 +141,36 @@ class CreateTransactionViewModel @Inject constructor(
                 }
             }
         }
+
+    private fun updateAmount(amount: String) {
+        when (_state.value.currencyMode) {
+            CurrencyMode.SATS -> {
+                setState {
+                    copy(
+                        transaction = transaction.copy(amountSats = amount),
+                        amountInUsd = BigDecimal(amount.toDouble())
+                            .fromSatsToUsd(state.value.currentExchangeRate)
+                            .stripTrailingZeros()
+                            .let { if (it.compareTo(BigDecimal.ZERO) == 0) BigDecimal.ZERO else it }
+                            .toPlainString(),
+                    )
+                }
+            }
+
+            CurrencyMode.FIAT -> {
+                setState {
+                    copy(
+                        amountInUsd = amount,
+                        transaction = transaction.copy(
+                            amountSats = BigDecimal(amount)
+                                .fromUsdToSats(state.value.currentExchangeRate)
+                                .toString(),
+                        ),
+                    )
+                }
+            }
+        }
+    }
 
     private fun fetchProfileData() =
         viewModelScope.launch {

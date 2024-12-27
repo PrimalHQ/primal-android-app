@@ -86,14 +86,20 @@ import net.primal.android.core.compose.numericpad.PrimalNumericPad
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
+import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.domain.Network
+import net.primal.android.wallet.domain.not
+import net.primal.android.wallet.repository.isValidExchangeRate
 import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiState
 import net.primal.android.wallet.transactions.receive.model.NetworkDetails
 import net.primal.android.wallet.transactions.receive.model.PaymentDetails
 import net.primal.android.wallet.transactions.receive.tabs.ReceivePaymentTab
+import net.primal.android.wallet.ui.TransactionAmountText
 import net.primal.android.wallet.ui.WalletTabsBar
 import net.primal.android.wallet.ui.WalletTabsHeight
 import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
+import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
+import net.primal.android.wallet.utils.CurrencyConversionUtils.fromUsdToSats
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 
@@ -225,10 +231,14 @@ private fun ReceiveContent(
                     paymentDetails = state.paymentDetails,
                     applying = state.creatingInvoice,
                     onCancel = onCancel,
-                    onApplyChanges = { amountInBtc, comment ->
+                    currencyMode = state.currencyMode,
+                    currentExchangeRate = state.currentExchangeRate,
+                    maximumUsdAmount = state.maximumUsdAmount,
+                    onApplyChanges = { amountInBtc, amountInUsd, comment ->
                         eventPublisher(
                             ReceivePaymentContract.UiEvent.CreateInvoice(
                                 amountInBtc = amountInBtc,
+                                amountInUsd = amountInUsd,
                                 comment = comment,
                             ),
                         )
@@ -508,14 +518,19 @@ private fun TwoLineText(
 private fun ReceivePaymentEditor(
     paddingValues: PaddingValues,
     paymentDetails: PaymentDetails,
+    currencyMode: CurrencyMode,
+    currentExchangeRate: Double?,
+    maximumUsdAmount: BigDecimal?,
     applying: Boolean,
-    onApplyChanges: (String, String?) -> Unit,
+    onApplyChanges: (String, String, String?) -> Unit,
     onCancel: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val keyboardVisible by keyboardVisibilityAsState()
 
     var amountInBtc by remember(paymentDetails) { mutableStateOf(paymentDetails.amountInBtc ?: "0") }
+    var amountInUsd by remember(paymentDetails) { mutableStateOf(paymentDetails.amountInUsd ?: "0") }
+    var currentCurrencyMode by remember { mutableStateOf(currencyMode) }
     var comment by remember(paymentDetails) { mutableStateOf(paymentDetails.comment ?: "") }
 
     Column(
@@ -533,12 +548,16 @@ private fun ReceivePaymentEditor(
         ) {
             Spacer(modifier = Modifier.height(32.dp))
 
-            BtcAmountText(
-                modifier = Modifier
-                    .padding(start = 32.dp)
-                    .height(72.dp),
-                amountInBtc = amountInBtc.toBigDecimal(),
-                textSize = 48.sp,
+            TransactionAmountText(
+                amountInBtc = amountInBtc,
+                amountInUsd = amountInUsd,
+                currentExchangeRate = currentExchangeRate,
+                currentCurrencyMode = currentCurrencyMode,
+                onAmountClick = {
+                    if (currentExchangeRate.isValidExchangeRate()) {
+                        currentCurrencyMode = !currentCurrencyMode
+                    }
+                },
             )
 
             Spacer(modifier = Modifier.height(48.dp))
@@ -587,39 +606,90 @@ private fun ReceivePaymentEditor(
             ) {
                 PrimalNumericPad(
                     modifier = Modifier.fillMaxWidth(),
-                    amountInSats = amountInBtc.toSats().toString(),
-                    onAmountInSatsChanged = { amountInBtc = it.toULong().toBtc().formatAsString() },
+                    amountInSats = if (currentCurrencyMode == CurrencyMode.SATS) {
+                        amountInBtc.toSats().toString()
+                    } else {
+                        amountInUsd
+                    },
+                    onAmountInSatsChanged = {
+                        when (currentCurrencyMode) {
+                            CurrencyMode.SATS -> {
+                                amountInBtc = it.toULong().toBtc().formatAsString()
+                                amountInUsd = calculateUsdFromBtc(amountInBtc, currentExchangeRate)
+                            }
+                            CurrencyMode.FIAT -> {
+                                amountInUsd = it
+                                amountInBtc = calculateBtcFromUsd(amountInUsd, currentExchangeRate)
+                            }
+                        }
+                    },
+                    currencyMode = currentCurrencyMode,
+                    maximumUsdAmount = maximumUsdAmount,
                 )
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 32.dp, top = 48.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    PrimalLoadingButton(
-                        modifier = Modifier.weight(1f),
-                        text = stringResource(id = R.string.wallet_receive_transaction_cancel_numeric_pad_button),
-                        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                        contentColor = AppTheme.colorScheme.onSurface,
-                        onClick = onCancel,
-                    )
-
-                    Spacer(
-                        modifier = Modifier.width(16.dp),
-                    )
-
-                    PrimalLoadingButton(
-                        modifier = Modifier.weight(1f),
-                        loading = applying,
-                        enabled = !applying && amountInBtc.toBigDecimal() > BigDecimal.ZERO,
-                        text = stringResource(id = R.string.wallet_receive_transaction_apply_numeric_pad_button),
-                        onClick = {
-                            onApplyChanges(amountInBtc, comment.ifEmpty { null })
-                        },
-                    )
-                }
+                TransactionActionRow(
+                    applying = applying,
+                    amountInBtc = amountInBtc,
+                    amountInUsd = amountInUsd,
+                    comment = comment,
+                    onApplyChanges = onApplyChanges,
+                    onCancel = onCancel,
+                )
             }
         }
     }
+}
+
+@Composable
+private fun TransactionActionRow(
+    onCancel: () -> Unit,
+    applying: Boolean,
+    amountInBtc: String,
+    amountInUsd: String,
+    onApplyChanges: (String, String, String?) -> Unit,
+    comment: String,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 32.dp, top = 48.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        PrimalLoadingButton(
+            modifier = Modifier.weight(1f),
+            text = stringResource(id = R.string.wallet_receive_transaction_cancel_numeric_pad_button),
+            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+            contentColor = AppTheme.colorScheme.onSurface,
+            onClick = onCancel,
+        )
+
+        Spacer(
+            modifier = Modifier.width(16.dp),
+        )
+
+        PrimalLoadingButton(
+            modifier = Modifier.weight(1f),
+            loading = applying,
+            enabled = !applying && amountInBtc.toBigDecimal() > BigDecimal.ZERO,
+            text = stringResource(id = R.string.wallet_receive_transaction_apply_numeric_pad_button),
+            onClick = {
+                onApplyChanges(amountInBtc, amountInUsd, comment.ifEmpty { null })
+            },
+        )
+    }
+}
+
+private fun calculateUsdFromBtc(btc: String, currentExchangeRate: Double?): String {
+    return BigDecimal(btc.toSats().toDouble())
+        .fromSatsToUsd(currentExchangeRate)
+        .stripTrailingZeros()
+        .let { value -> if (value.compareTo(BigDecimal.ZERO) == 0) BigDecimal.ZERO else value }
+        .toPlainString()
+}
+
+private fun calculateBtcFromUsd(usd: String, currentExchangeRate: Double?): String {
+    return BigDecimal(usd)
+        .fromUsdToSats(currentExchangeRate)
+        .toBtc()
+        .formatAsString()
 }

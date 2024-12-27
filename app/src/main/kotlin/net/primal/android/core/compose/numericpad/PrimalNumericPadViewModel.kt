@@ -47,6 +47,7 @@ class PrimalNumericPadViewModel : ViewModel() {
             val newValue = when (event) {
                 NumericInputEvent.BackspaceEvent -> this.amountInSats.backspace()
                 is NumericInputEvent.DigitInputEvent -> this.amountInSats.inputDigit(event.digit)
+                NumericInputEvent.DotInputEvent -> this.amountInSats.inputDot()
                 NumericInputEvent.ResetAmountEvent -> "0"
             }
             copy(amountInSats = newValue)
@@ -62,11 +63,28 @@ class PrimalNumericPadViewModel : ViewModel() {
         }
     }
 
+    private fun String.inputDot(): String {
+        val oldValue = this
+        return if (oldValue.length < MAX_INPUT_LENGTH) {
+            return if (this.contains(".")) {
+                oldValue
+            } else {
+                "$oldValue."
+            }
+        } else {
+            oldValue
+        }
+    }
+
     private fun String.inputDigit(digit: Int): String {
         val oldValue = this
         return if (oldValue.length < MAX_INPUT_LENGTH) {
-            if (oldValue.isPositive()) {
-                "$oldValue$digit"
+            if (oldValue.isPositive() || oldValue in listOf("0.", "0.0")) {
+                if (oldValue == "0.0" && digit == 0) {
+                    oldValue
+                } else {
+                    "$oldValue$digit"
+                }
             } else {
                 "$digit"
             }
