@@ -643,6 +643,6 @@ private fun NewPostPublishErrorHandler(error: NoteEditorError?, snackbarHostStat
 }
 
 private val avatarSizeDp = 42.dp
-private val connectionLineOffsetXDp = 36.dp
+private val connectionLineOffsetXDp = 40.dp
 private val attachmentsHeightDp = 160.dp
 private val avatarsColumnWidthDp = avatarSizeDp + 24.dp
