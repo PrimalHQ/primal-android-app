@@ -3,6 +3,7 @@ package net.primal.android.wallet.transactions.receive
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.math.BigDecimal
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,17 +14,23 @@ import net.primal.android.navigation.asUrlEncoded
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.domain.Network
+import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiEvent
 import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiState
 import net.primal.android.wallet.transactions.receive.model.PaymentDetails
 import net.primal.android.wallet.transactions.receive.tabs.ReceivePaymentTab
+import net.primal.android.wallet.transactions.send.create.MAXIMUM_SATS
+import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
+import net.primal.android.wallet.utils.CurrencyConversionUtils.toUsd
 import timber.log.Timber
 
 @HiltViewModel
 class ReceivePaymentViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val walletRepository: WalletRepository,
+    private val exchangeRateHandler: ExchangeRateHandler,
+    private val activeUserStore: ActiveAccountStore,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState(initialTab = ReceivePaymentTab.Lightning))
@@ -40,6 +47,7 @@ class ReceivePaymentViewModel @Inject constructor(
         fetchOnChainAddress()
         observeEvents()
         observeActiveAccount()
+        observeUsdExchangeRate()
     }
 
     private fun observeEvents() =
@@ -72,6 +80,34 @@ class ReceivePaymentViewModel @Inject constructor(
                     }
                 }
         }
+
+    private fun observeUsdExchangeRate() =
+        viewModelScope.launch {
+            fetchExchangeRate()
+            exchangeRateHandler.usdExchangeRate.collect {
+                setState {
+                    copy(
+                        currentExchangeRate = it,
+                        maximumUsdAmount = getMaximumUsdAmount(it),
+                    )
+                }
+            }
+        }
+
+    private fun fetchExchangeRate() =
+        viewModelScope.launch {
+            exchangeRateHandler.updateExchangeRate(
+                userId = activeUserStore.activeUserId(),
+            )
+        }
+
+    private fun getMaximumUsdAmount(exchangeRate: Double?): BigDecimal {
+        return (MAXIMUM_SATS)
+            .toBigDecimal()
+            .toBtc()
+            .toBigDecimal()
+            .toUsd(exchangeRate)
+    }
 
     private fun fetchOnChainAddress() =
         viewModelScope.launch {

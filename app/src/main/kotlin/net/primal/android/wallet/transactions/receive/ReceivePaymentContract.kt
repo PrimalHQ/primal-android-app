@@ -1,5 +1,7 @@
 package net.primal.android.wallet.transactions.receive
 
+import java.math.BigDecimal
+import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.domain.Network
 import net.primal.android.wallet.transactions.receive.model.NetworkDetails
 import net.primal.android.wallet.transactions.receive.model.PaymentDetails
@@ -16,6 +18,9 @@ interface ReceivePaymentContract {
         val lightningNetworkDetails: NetworkDetails = NetworkDetails(network = Network.Lightning),
         val bitcoinNetworkDetails: NetworkDetails = NetworkDetails(network = Network.Bitcoin),
         val paymentDetails: PaymentDetails = PaymentDetails(),
+        val currentExchangeRate: Double? = null,
+        val maximumUsdAmount: BigDecimal? = null,
+        val currencyMode: CurrencyMode = CurrencyMode.SATS,
         val error: ReceivePaymentError? = null,
     ) {
         sealed class ReceivePaymentError {
