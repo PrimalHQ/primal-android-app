@@ -40,14 +40,23 @@ suspend fun ArticleResponse.persistToDatabaseAsTransaction(userId: String, datab
         primalLegendProfiles = primalLegendProfiles,
         blossomServers = blossomServers,
     )
-    val referencedNotes = this.referencedEvents.mapNotNullAsPostDataPO()
-
-    val allNotes = this.notes.mapAsPostDataPO(referencedPosts = referencedNotes)
     val allArticles = this.articles.mapNotNullAsArticleDataPO(
         wordsCountMap = wordsCountMap,
         cdnResources = cdnResources,
     )
     val referencedHighlights = this.referencedEvents.mapReferencedEventsAsHighlightDataPO()
+    val referencedPostsWithoutReplyTo = referencedEvents.mapNotNullAsPostDataPO()
+    val referencedPostsWithReplyTo = referencedEvents.mapNotNullAsPostDataPO(
+        referencedPosts = referencedPostsWithoutReplyTo,
+        referencedArticles = allArticles,
+        referencedHighlights = referencedHighlights,
+    )
+
+    val allNotes = this.notes.mapAsPostDataPO(
+        referencedPosts = referencedPostsWithReplyTo,
+        referencedArticles = allArticles,
+        referencedHighlights = referencedHighlights,
+    )
 
     val eventZaps = this.zaps.mapAsEventZapDO(profilesMap = profiles.associateBy { it.ownerId })
     val eventStats = this.primalEventStats.mapNotNullAsEventStatsPO()
@@ -55,7 +64,7 @@ suspend fun ArticleResponse.persistToDatabaseAsTransaction(userId: String, datab
 
     database.withTransaction {
         database.profiles().insertOrUpdateAll(data = profiles)
-        database.posts().upsertAll(data = allNotes + referencedNotes)
+        database.posts().upsertAll(data = allNotes + referencedPostsWithReplyTo)
         database.articles().upsertAll(list = allArticles)
         database.eventStats().upsertAll(data = eventStats)
         database.eventUserStats().upsertAll(data = eventUserStats)
@@ -76,7 +85,7 @@ suspend fun ArticleResponse.persistArticleCommentsToDatabase(
     database: PrimalDatabase,
 ) {
     val referencedNotes = this.referencedEvents.mapNotNullAsPostDataPO()
-    val comments = this.notes.mapAsPostDataPO(referencedPosts = referencedNotes)
+    val comments = this.notes.mapAsPostDataPO(referencedPosts = referencedNotes, emptyList(), emptyList())
 
     database.withTransaction {
         database.threadConversations().connectArticleWithComment(
