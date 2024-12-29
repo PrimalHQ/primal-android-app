@@ -169,101 +169,55 @@ fun NoteAttachment.asIMetaTag(): JsonArray {
     }
 }
 
-fun String.parseEventTags(marker: String? = null): List<JsonArray> {
-    val nostrUris = this.parseNostrUris()
-    if (nostrUris.isEmpty()) return emptyList()
+fun String.parseEventTags(marker: String? = null): Set<JsonArray> =
+    this.parseNostrUris()
+        .map { uri ->
+            when {
+                uri.isNEventUri() || uri.isNEvent() ->
+                    parseUriAsNeventOrNull(uri)?.asEventTag(marker = marker)
 
-    val tags = mutableListOf<JsonArray>()
-    nostrUris.forEach { uri ->
-        when {
-            uri.isNEventUri() -> {
-                parseUriAsNeventOrNull(uri)?.let { nevent ->
-                    tags.add(
-                        buildJsonArray {
-                            add("e")
-                            add(nevent.eventId)
-                            add(nevent.relays.firstOrNull() ?: "")
-                            add(marker ?: "")
-                            add(nevent.userId)
-                        },
-                    )
-                }
+                uri.isNoteUri() || uri.isNote() ->
+                    uri.nostrUriToNoteId()?.asEventIdTag(marker = marker)
+
+                else -> null
             }
+        }.filterNotNull().toSet()
 
-            uri.isNoteUri() || uri.isNote() -> tags.add(
-                buildJsonArray {
-                    add("e")
-                    add(uri.nostrUriToNoteId())
-                    add("")
-                    add(marker ?: "")
-                    add("")
-                },
-            )
-        }
-    }
-    return tags.toList()
-}
 
-fun String.parsePubkeyTags(marker: String? = null): List<JsonArray> {
-    val nostrUris = parseNostrUris()
-    if (nostrUris.isEmpty()) return emptyList()
-
-    val tags = mutableListOf<JsonArray>()
-    nostrUris.forEach {
-        when {
-            it.isNProfileUri() || it.isNProfile() -> {
-                val result = it.nostrUriToPubkeyAndRelay()
-                val pubkey = result.first
-                val relayUrl = result.second
-                tags.add(
-                    buildJsonArray {
-                        add("p")
-                        add(pubkey)
-                        add(relayUrl)
-                        add(marker ?: "")
-                    },
-                )
-            }
-
-            it.isNPubUri() || it.isNPub() -> tags.add(
-                buildJsonArray {
-                    add("p")
-                    add(it.nostrUriToPubkey())
-                    add("")
-                    add(marker ?: "")
-                },
-            )
-        }
-    }
-    return tags.toList()
-}
-
-fun String.parseReplaceableEventTags(marker: String? = null): List<JsonArray> {
-    val nostrUris = this.parseNostrUris()
-    if (nostrUris.isEmpty()) return emptyList()
-
-    val tags = mutableListOf<JsonArray>()
-    nostrUris.forEach { uri ->
-        when {
-            uri.isNAddrUri() || uri.isNAddr() ->
-                Nip19TLV.parseUriAsNaddrOrNull(uri)?.let {
-                    tags.add(it.asReplaceableEventTag(marker = marker))
+fun String.parsePubkeyTags(marker: String? = null): Set<JsonArray> =
+    parseNostrUris()
+        .map {
+            when {
+                it.isNProfileUri() || it.isNProfile() -> {
+                    val result = it.nostrUriToPubkeyAndRelay()
+                    val pubkey = result.first
+                    val relayUrl = result.second
+                    pubkey?.asPubkeyTag(relayHint = relayUrl, optional = marker)
                 }
-        }
-    }
-    return tags.toList()
-}
 
-fun String.parseHashtagTags(): List<JsonArray> {
-    val hashtags = parseHashtags()
-    val tags = mutableListOf<JsonArray>()
-    hashtags.forEach {
-        tags.add(
+                it.isNPubUri() || it.isNPub() ->
+                    it.nostrUriToPubkey()?.asPubkeyTag(optional = marker)
+
+                else -> null
+            }
+        }.filterNotNull().toSet()
+
+fun String.parseReplaceableEventTags(marker: String? = null): Set<JsonArray> =
+    this.parseNostrUris()
+        .map { uri ->
+            when {
+                uri.isNAddrUri() || uri.isNAddr() ->
+                    Nip19TLV.parseUriAsNaddrOrNull(uri)?.asReplaceableEventTag(marker = marker)
+
+                else -> null
+            }
+        }.filterNotNull().toSet()
+
+fun String.parseHashtagTags(): List<JsonArray> =
+    parseHashtags()
+        .map {
             buildJsonArray {
                 add("t")
                 add(it.removePrefix("#"))
-            },
-        )
-    }
-    return tags.toList()
-}
+            }
+        }
