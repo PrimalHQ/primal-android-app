@@ -19,6 +19,7 @@ import net.primal.android.nostr.utils.asATagValue
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@Suppress("LargeClass")
 @RunWith(AndroidJUnit4::class)
 class TagsTest {
 

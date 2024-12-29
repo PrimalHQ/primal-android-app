@@ -183,7 +183,6 @@ fun String.parseEventTags(marker: String? = null): Set<JsonArray> =
             }
         }.filterNotNull().toSet()
 
-
 fun String.parsePubkeyTags(marker: String? = null): Set<JsonArray> =
     parseNostrUris()
         .map {
