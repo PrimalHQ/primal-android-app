@@ -19,6 +19,7 @@ import net.primal.android.messages.db.DirectMessageData
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Naddr
+import net.primal.android.nostr.utils.Nevent
 import net.primal.android.nostr.utils.Nip19TLV
 import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import net.primal.android.notes.db.PostData
@@ -173,6 +174,14 @@ fun String.extractEventId(): String? {
         }
     }
 }
+
+fun PostData.toNevent() =
+    Nevent(
+        userId = this.authorId,
+        eventId = this.postId,
+        kind = NostrEventKind.ShortTextNote.value,
+        relays = emptyList(),
+    )
 
 private fun String.extract(parser: (bechPrefix: String?, key: String?) -> String?): String? {
     val matcher = nostrUriRegexPattern.matcher(this)

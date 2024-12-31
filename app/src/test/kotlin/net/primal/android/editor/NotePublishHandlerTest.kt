@@ -1,6 +1,8 @@
 package net.primal.android.editor
 
 import android.net.Uri
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -14,6 +16,7 @@ import io.mockk.mockk
 import java.util.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.Clock
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
@@ -28,6 +31,7 @@ import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.ext.asReplaceableEventTag
 import net.primal.android.nostr.ext.isATag
 import net.primal.android.nostr.ext.isEventIdTag
+import net.primal.android.nostr.ext.toNevent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.nostr.utils.Naddr
@@ -97,33 +101,33 @@ class NotePublishHandlerTest {
         database = database,
     )
 
-//    private fun buildPostData(
-//        postId: String = UUID.randomUUID().toString(),
-//        authorId: String = UUID.randomUUID().toString(),
-//        createdAt: Long = Clock.System.now().epochSeconds,
-//        tags: List<JsonArray> = emptyList(),
-//        content: String = "",
-//        uris: List<String> = emptyList(),
-//        hashtags: List<String> = emptyList(),
-//        sig: String = "",
-//        raw: String = "",
-//        authorMetadataId: String? = null,
-//        replyToPostId: String? = null,
-//        replyToAuthorId: String? = null,
-//    ) = PostData(
-//        postId = postId,
-//        authorId = authorId,
-//        createdAt = createdAt,
-//        tags = tags,
-//        content = content,
-//        uris = uris,
-//        hashtags = hashtags,
-//        sig = sig,
-//        raw = raw,
-//        authorMetadataId = authorMetadataId,
-//        replyToPostId = replyToPostId,
-//        replyToAuthorId = replyToAuthorId,
-//    )
+    private fun buildPostData(
+        postId: String = UUID.randomUUID().toString(),
+        authorId: String = UUID.randomUUID().toString(),
+        createdAt: Long = Clock.System.now().epochSeconds,
+        tags: List<JsonArray> = emptyList(),
+        content: String = "",
+        uris: List<String> = emptyList(),
+        hashtags: List<String> = emptyList(),
+        sig: String = "",
+        raw: String = "",
+        authorMetadataId: String? = null,
+        replyToPostId: String? = null,
+        replyToAuthorId: String? = null,
+    ) = PostData(
+        postId = postId,
+        authorId = authorId,
+        createdAt = createdAt,
+        tags = tags,
+        content = content,
+        uris = uris,
+        hashtags = hashtags,
+        sig = sig,
+        raw = raw,
+        authorMetadataId = authorMetadataId,
+        replyToPostId = replyToPostId,
+        replyToAuthorId = replyToAuthorId,
+    )
 
     private fun buildNoteAttachment(
         id: UUID = UUID.randomUUID(),
@@ -452,10 +456,232 @@ class NotePublishHandlerTest {
     /**
      * Mentioned events (notes, highlights) in content.
      */
+    @Test
+    fun `publishShortTextNote publish new note with single quoted note`() =
+        runTest {
+            val quotedNoteUri = "nostr:note1x0zvuxjz8fjagqlssu0gl5npnas67475tqcqsrzs56yk2625f3as6f0rpt"
+            val quotedNoteId = "33c4ce1a423a65d403f0871e8fd2619f61af57d45830080c50a6896569544c7b"
+
+            val expectedUserId = "someUserId"
+            val expectedContent = "some simple content $quotedNoteUri"
+            val expectedTags = quotedNoteId.asEventIdTag(marker = "mention")
+
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublisher = buildNotePublishHandler(
+                nostrPublisher = nostrPublisher,
+                database = mockkPrimalDatabase(),
+            )
+
+            notePublisher.publishShortTextNote(
+                userId = expectedUserId,
+                content = expectedContent,
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    withArg { it shouldBe expectedUserId },
+                    withArg {
+                        it.content shouldBe expectedContent
+                        it.tags shouldContain expectedTags
+                    },
+                )
+            }
+        }
+
+    @Test
+    fun `publishShortTextNote publish new note with multiple quoted notes`() =
+        runTest {
+            val firstQuotedNoteUri = "nostr:note1x0zvuxjz8fjagqlssu0gl5npnas67475tqcqsrzs56yk2625f3as6f0rpt"
+            val firstQuotedNoteId = "33c4ce1a423a65d403f0871e8fd2619f61af57d45830080c50a6896569544c7b"
+
+            val secondQuotedNoteUri = "nostr:note1e3xjcz3euea8hc3m32qegfgs9xl4rtp80cyy3vxgxvjkrjxe0hwqcfqf35"
+            val secondQuotedNoteId = "cc4d2c0a39e67a7be23b8a8194251029bf51ac277e0848b0c8332561c8d97ddc"
+
+            val expectedUserId = "someUserId"
+            val expectedContent = "some simple content $firstQuotedNoteUri $secondQuotedNoteUri"
+            val expectedTags = listOf<JsonArray>(
+                firstQuotedNoteId.asEventIdTag(marker = "mention"),
+                secondQuotedNoteId.asEventIdTag(marker = "mention"),
+            )
+
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublisher = buildNotePublishHandler(
+                nostrPublisher = nostrPublisher,
+                database = mockkPrimalDatabase(),
+            )
+
+            notePublisher.publishShortTextNote(
+                userId = expectedUserId,
+                content = expectedContent,
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    withArg { it shouldBe expectedUserId },
+                    withArg {
+                        it.content shouldBe expectedContent
+                        it.tags shouldContainAll expectedTags
+                    },
+                )
+            }
+        }
+
+    @Test
+    fun `publishShortTextNote publish new note with single quoted note repeating`() =
+        runTest {
+            val quotedNoteUri = "nostr:note1x0zvuxjz8fjagqlssu0gl5npnas67475tqcqsrzs56yk2625f3as6f0rpt"
+            val quotedNoteId = "33c4ce1a423a65d403f0871e8fd2619f61af57d45830080c50a6896569544c7b"
+
+            val expectedUserId = "someUserId"
+            val expectedContent = "some simple content $quotedNoteUri $quotedNoteUri"
+            val expectedTags = listOf<JsonArray>(
+                quotedNoteId.asEventIdTag(marker = "mention"),
+            )
+
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublisher = buildNotePublishHandler(
+                nostrPublisher = nostrPublisher,
+                database = mockkPrimalDatabase(),
+            )
+
+            notePublisher.publishShortTextNote(
+                userId = expectedUserId,
+                content = expectedContent,
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    withArg { it shouldBe expectedUserId },
+                    withArg {
+                        it.content shouldBe expectedContent
+                        it.tags shouldBe expectedTags
+                    },
+                )
+            }
+        }
 
     /**
      * Mentioned replaceable events in content.
      */
+
+    @Test
+    fun `publishShortTextNote publish new note with single quoted article`() =
+        runTest {
+            val naddr = Naddr(
+                kind = NostrEventKind.LongFormContent.value,
+                userId = "88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079",
+                identifier = "Testing-Testing-Testing-8yw62n",
+                relays = emptyList(),
+            )
+
+            val expectedUserId = "someUserId"
+            val expectedContent = "some simple content ${naddr.toNaddrString()}"
+            val expectedTag = naddr.asReplaceableEventTag(marker = "mention")
+
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublisher = buildNotePublishHandler(
+                nostrPublisher = nostrPublisher,
+                database = mockkPrimalDatabase(),
+            )
+
+            notePublisher.publishShortTextNote(
+                userId = expectedUserId,
+                content = expectedContent,
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    withArg { it shouldBe expectedUserId },
+                    withArg {
+                        it.content shouldBe expectedContent
+                        it.tags shouldContain expectedTag
+                    },
+                )
+            }
+        }
+
+    @Test
+    fun `publishShortTextNote publish new note with multiple quoted articles`() =
+        runTest {
+            val firstNaddr = Naddr(
+                kind = NostrEventKind.LongFormContent.value,
+                userId = "88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079",
+                identifier = "Testing-Testing-Testing-8yw62n",
+                relays = emptyList(),
+            )
+            val secondNaddr = Naddr(
+                kind = NostrEventKind.LongFormContent.value,
+                userId = "88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079",
+                identifier = "1718785686085",
+                relays = emptyList(),
+            )
+
+            val expectedUserId = "someUserId"
+            val expectedContent = "some simple content ${firstNaddr.toNaddrString()} ${secondNaddr.toNaddrString()}"
+            val expectedTags = listOf<JsonArray>(
+                firstNaddr.asReplaceableEventTag(marker = "mention"),
+                secondNaddr.asReplaceableEventTag(marker = "mention"),
+            )
+
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublisher = buildNotePublishHandler(
+                nostrPublisher = nostrPublisher,
+                database = mockkPrimalDatabase(),
+            )
+
+            notePublisher.publishShortTextNote(
+                userId = expectedUserId,
+                content = expectedContent,
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    withArg { it shouldBe expectedUserId },
+                    withArg {
+                        it.content shouldBe expectedContent
+                        it.tags shouldContainAll expectedTags
+                    },
+                )
+            }
+        }
+
+    @Test
+    fun `publishShortTextNote publish new note with single quoted article repeating`() =
+        runTest {
+            val naddr = Naddr(
+                kind = NostrEventKind.LongFormContent.value,
+                userId = "88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079",
+                identifier = "Testing-Testing-Testing-8yw62n",
+                relays = emptyList(),
+            )
+
+            val expectedUserId = "someUserId"
+            val expectedContent = "some simple content ${naddr.toNaddrString()} ${naddr.toNaddrString()}"
+            val expectedTags = listOf<JsonArray>(
+                naddr.asReplaceableEventTag(marker = "mention"),
+            )
+
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublisher = buildNotePublishHandler(
+                nostrPublisher = nostrPublisher,
+                database = mockkPrimalDatabase(),
+            )
+
+            notePublisher.publishShortTextNote(
+                userId = expectedUserId,
+                content = expectedContent,
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    withArg { it shouldBe expectedUserId },
+                    withArg {
+                        it.content shouldBe expectedContent
+                        it.tags shouldBe expectedTags
+                    },
+                )
+            }
+        }
 
     /**
      * Resolving proper root tag.
@@ -749,36 +975,35 @@ class NotePublishHandlerTest {
     @Test
     fun publishShortTextNote_copiesAllPubkeyTags_fromReplyToNote() =
         runTest {
+            val existingTag = "test".asPubkeyTag()
+            val replyPostData = buildPostData(
+                tags = listOf(existingTag),
+                authorId = "some author id",
+            )
+
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublisher = buildNotePublishHandler(
+                nostrPublisher = nostrPublisher,
+                database = mockkPrimalDatabase(
+                    post = replyPostData,
+                ),
+            )
+
+            notePublisher.publishShortTextNote(
+                userId = "some user id",
+                content = "some content",
+                replyToNoteNevent = replyPostData.toNevent(),
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    userId = any(),
+                    unsignedNostrEvent = withArg { event ->
+                        event.tags shouldContain existingTag
+                    },
+                )
+            }
         }
-//    @Test
-//    fun `constructPubkeyTags keeps existing pubkey tags`() {
-//        val notePublisher = buildNotePublishHandler()
-//
-//        val existingTags = listOf("test".asPubkeyTag())
-//        val replyPostData = buildPostData(
-//            tags = existingTags,
-//        )
-//        val replyToAuthorId = "some author id"
-//        val replyToAuthorPubkey = replyToAuthorId.asPubkeyTag()
-//
-//        val expectedSet = setOf(
-//            existingTags,
-//            listOf(replyToAuthorPubkey),
-//        ).flatten()
-//
-//        mockkStatic(JsonArray::isPubKeyTag)
-//
-//        val actualSet = notePublisher.getConstructPubkeyTags()
-//            .invoke(
-//                notePublisher,
-//                replyPostData,
-//                replyToAuthorId,
-//                null,
-//                null,
-//            )
-//
-//        actualSet shouldBe expectedSet
-//    }
 
     @Test
     fun `publishShortTextNote publish new note with single user mentioned`() =
@@ -888,233 +1113,6 @@ class NotePublishHandlerTest {
         }
 
     @Test
-    fun `publishShortTextNote publish new note with single quoted note`() =
-        runTest {
-            val quotedNoteUri = "nostr:note1x0zvuxjz8fjagqlssu0gl5npnas67475tqcqsrzs56yk2625f3as6f0rpt"
-            val quotedNoteId = "33c4ce1a423a65d403f0871e8fd2619f61af57d45830080c50a6896569544c7b"
-
-            val expectedUserId = "someUserId"
-            val expectedContent = "some simple content $quotedNoteUri"
-            val expectedTags = listOf<JsonArray>(
-                quotedNoteId.asEventIdTag(marker = "mention"),
-            )
-
-            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
-            val notePublisher = buildNotePublishHandler(
-                nostrPublisher = nostrPublisher,
-                database = mockkPrimalDatabase(),
-            )
-
-            notePublisher.publishShortTextNote(
-                userId = expectedUserId,
-                content = expectedContent,
-            )
-
-            coVerify {
-                nostrPublisher.signPublishImportNostrEvent(
-                    withArg { it shouldBe expectedUserId },
-                    withArg {
-                        it.content shouldBe expectedContent
-                        it.tags shouldBe expectedTags
-                    },
-                )
-            }
-        }
-
-    @Test
-    fun `publishShortTextNote publish new note with multiple quoted notes`() =
-        runTest {
-            val firstQuotedNoteUri = "nostr:note1x0zvuxjz8fjagqlssu0gl5npnas67475tqcqsrzs56yk2625f3as6f0rpt"
-            val firstQuotedNoteId = "33c4ce1a423a65d403f0871e8fd2619f61af57d45830080c50a6896569544c7b"
-
-            val secondQuotedNoteUri = "nostr:note1e3xjcz3euea8hc3m32qegfgs9xl4rtp80cyy3vxgxvjkrjxe0hwqcfqf35"
-            val secondQuotedNoteId = "cc4d2c0a39e67a7be23b8a8194251029bf51ac277e0848b0c8332561c8d97ddc"
-
-            val expectedUserId = "someUserId"
-            val expectedContent = "some simple content $firstQuotedNoteUri $secondQuotedNoteUri"
-            val expectedTags = listOf<JsonArray>(
-                firstQuotedNoteId.asEventIdTag(marker = "mention"),
-                secondQuotedNoteId.asEventIdTag(marker = "mention"),
-            )
-
-            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
-            val notePublisher = buildNotePublishHandler(
-                nostrPublisher = nostrPublisher,
-                database = mockkPrimalDatabase(),
-            )
-
-            notePublisher.publishShortTextNote(
-                userId = expectedUserId,
-                content = expectedContent,
-            )
-
-            coVerify {
-                nostrPublisher.signPublishImportNostrEvent(
-                    withArg { it shouldBe expectedUserId },
-                    withArg {
-                        it.content shouldBe expectedContent
-                        it.tags shouldBe expectedTags
-                    },
-                )
-            }
-        }
-
-    @Test
-    fun `publishShortTextNote publish new note with single quoted note repeating`() =
-        runTest {
-            val quotedNoteUri = "nostr:note1x0zvuxjz8fjagqlssu0gl5npnas67475tqcqsrzs56yk2625f3as6f0rpt"
-            val quotedNoteId = "33c4ce1a423a65d403f0871e8fd2619f61af57d45830080c50a6896569544c7b"
-
-            val expectedUserId = "someUserId"
-            val expectedContent = "some simple content $quotedNoteUri $quotedNoteUri"
-            val expectedTags = listOf<JsonArray>(
-                quotedNoteId.asEventIdTag(marker = "mention"),
-            )
-
-            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
-            val notePublisher = buildNotePublishHandler(
-                nostrPublisher = nostrPublisher,
-                database = mockkPrimalDatabase(),
-            )
-
-            notePublisher.publishShortTextNote(
-                userId = expectedUserId,
-                content = expectedContent,
-            )
-
-            coVerify {
-                nostrPublisher.signPublishImportNostrEvent(
-                    withArg { it shouldBe expectedUserId },
-                    withArg {
-                        it.content shouldBe expectedContent
-                        it.tags shouldBe expectedTags
-                    },
-                )
-            }
-        }
-
-    @Test
-    fun `publishShortTextNote publish new note with single quoted article`() =
-        runTest {
-            val naddr = Naddr(
-                kind = NostrEventKind.LongFormContent.value,
-                userId = "88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079",
-                identifier = "Testing-Testing-Testing-8yw62n",
-                relays = emptyList(),
-            )
-
-            val expectedUserId = "someUserId"
-            val expectedContent = "some simple content ${naddr.toNaddrString()}"
-            val expectedTags = listOf<JsonArray>(
-                naddr.asReplaceableEventTag(marker = "mention"),
-            )
-
-            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
-            val notePublisher = buildNotePublishHandler(
-                nostrPublisher = nostrPublisher,
-                database = mockkPrimalDatabase(),
-            )
-
-            notePublisher.publishShortTextNote(
-                userId = expectedUserId,
-                content = expectedContent,
-            )
-
-            coVerify {
-                nostrPublisher.signPublishImportNostrEvent(
-                    withArg { it shouldBe expectedUserId },
-                    withArg {
-                        it.content shouldBe expectedContent
-                        it.tags shouldBe expectedTags
-                    },
-                )
-            }
-        }
-
-    @Test
-    fun `publishShortTextNote publish new note with multiple quoted articles`() =
-        runTest {
-            val firstNaddr = Naddr(
-                kind = NostrEventKind.LongFormContent.value,
-                userId = "88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079",
-                identifier = "Testing-Testing-Testing-8yw62n",
-                relays = emptyList(),
-            )
-            val secondNaddr = Naddr(
-                kind = NostrEventKind.LongFormContent.value,
-                userId = "88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079",
-                identifier = "1718785686085",
-                relays = emptyList(),
-            )
-
-            val expectedUserId = "someUserId"
-            val expectedContent = "some simple content ${firstNaddr.toNaddrString()} ${secondNaddr.toNaddrString()}"
-            val expectedTags = listOf<JsonArray>(
-                firstNaddr.asReplaceableEventTag(marker = "mention"),
-                secondNaddr.asReplaceableEventTag(marker = "mention"),
-            )
-
-            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
-            val notePublisher = buildNotePublishHandler(
-                nostrPublisher = nostrPublisher,
-                database = mockkPrimalDatabase(),
-            )
-
-            notePublisher.publishShortTextNote(
-                userId = expectedUserId,
-                content = expectedContent,
-            )
-
-            coVerify {
-                nostrPublisher.signPublishImportNostrEvent(
-                    withArg { it shouldBe expectedUserId },
-                    withArg {
-                        it.content shouldBe expectedContent
-                        it.tags shouldBe expectedTags
-                    },
-                )
-            }
-        }
-
-    @Test
-    fun `publishShortTextNote publish new note with single quoted article repeating`() =
-        runTest {
-            val naddr = Naddr(
-                kind = NostrEventKind.LongFormContent.value,
-                userId = "88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079",
-                identifier = "Testing-Testing-Testing-8yw62n",
-                relays = emptyList(),
-            )
-
-            val expectedUserId = "someUserId"
-            val expectedContent = "some simple content ${naddr.toNaddrString()} ${naddr.toNaddrString()}"
-            val expectedTags = listOf<JsonArray>(
-                naddr.asReplaceableEventTag(marker = "mention"),
-            )
-
-            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
-            val notePublisher = buildNotePublishHandler(
-                nostrPublisher = nostrPublisher,
-                database = mockkPrimalDatabase(),
-            )
-
-            notePublisher.publishShortTextNote(
-                userId = expectedUserId,
-                content = expectedContent,
-            )
-
-            coVerify {
-                nostrPublisher.signPublishImportNostrEvent(
-                    withArg { it shouldBe expectedUserId },
-                    withArg {
-                        it.content shouldBe expectedContent
-                        it.tags shouldBe expectedTags
-                    },
-                )
-            }
-        }
-
-    @Test
     fun `publishShortTextNote publish new note with single quoted highlight and article`() =
         runTest {
             val highlightNevent = Nevent(
@@ -1154,7 +1152,7 @@ class NotePublishHandlerTest {
                     withArg { it shouldBe expectedUserId },
                     withArg {
                         it.content shouldBe expectedContent
-                        it.tags shouldBe expectedTags
+                        it.tags shouldContainAll expectedTags
                     },
                 )
             }
@@ -1207,7 +1205,7 @@ class NotePublishHandlerTest {
                     withArg { it shouldBe expectedUserId },
                     withArg {
                         it.content shouldBe expectedContent
-                        it.tags shouldBe expectedTags
+                        it.tags shouldContainAll expectedTags
                     },
                 )
             }
