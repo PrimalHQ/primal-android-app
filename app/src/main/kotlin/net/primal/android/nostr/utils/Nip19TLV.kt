@@ -40,13 +40,7 @@ object Nip19TLV {
         return result
     }
 
-    private fun String.cleanNostrScheme(): String {
-        return if (this.startsWith("nostr:")) {
-            this.removePrefix("nostr:")
-        } else {
-            this
-        }
-    }
+    private fun String.cleanNostrScheme(): String = this.removePrefix("nostr:")
 
     fun parseUriAsNeventOrNull(neventUri: String): Nevent? =
         runCatching {
