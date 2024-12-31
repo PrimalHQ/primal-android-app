@@ -92,7 +92,11 @@ class MessagesProcessor @Inject constructor(
                 val referencedPostsWithReplies = response.referencedEvents.mapNotNullAsPostDataPO(
                     referencedPostsWithoutReplies,
                 )
-                response.posts.mapAsPostDataPO(referencedPosts = referencedPostsWithReplies)
+                response.posts.mapAsPostDataPO(
+                    referencedPosts = referencedPostsWithReplies,
+                    referencedArticles = emptyList(),
+                    referencedHighlights = emptyList(),
+                )
             } catch (error: WssException) {
                 Timber.w(error)
                 emptyList()

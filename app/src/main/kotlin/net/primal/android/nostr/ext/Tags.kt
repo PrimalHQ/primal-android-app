@@ -72,6 +72,8 @@ fun JsonArray.isServerTag() = getOrNull(0)?.jsonPrimitive?.content == "server"
 
 fun JsonArray.getTagValueOrNull() = getOrNull(1)?.jsonPrimitive?.content
 
+fun JsonArray.getPubkeyFromReplyOrRootTag() = getOrNull(4)?.jsonPrimitive?.content
+
 fun JsonArray.hasMentionMarker() = contains(JsonPrimitive("mention"))
 
 fun JsonArray.hasReplyMarker() = contains(JsonPrimitive("reply"))
