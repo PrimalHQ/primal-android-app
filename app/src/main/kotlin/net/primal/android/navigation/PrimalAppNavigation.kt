@@ -7,8 +7,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
@@ -125,6 +127,7 @@ import net.primal.android.profile.qr.ProfileQrCodeViewModel
 import net.primal.android.profile.qr.ui.ProfileQrCodeViewerScreen
 import net.primal.android.stats.reactions.ReactionsViewModel
 import net.primal.android.stats.reactions.ui.ReactionsScreen
+import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.thread.articles.details.ArticleDetailsScreen
@@ -427,6 +430,7 @@ fun SharedTransitionScope.PrimalAppNavigation() {
     }
 
     NavHost(
+        modifier = Modifier.background(AppTheme.colorScheme.background),
         navController = navController,
         startDestination = "splash",
     ) {
@@ -832,7 +836,7 @@ private fun NavGraphBuilder.home(
     enterTransition = { null },
     exitTransition = {
         when {
-            targetState.destination.route.isMainScreenRoute() -> null
+            targetState.destination.route.isMainScreenRoute() -> mainScreenOut
             else -> primalScaleOut
         }
     },
@@ -844,7 +848,7 @@ private fun NavGraphBuilder.home(
     },
     popExitTransition = {
         when {
-            targetState.destination.route.isMainScreenRoute() -> null
+            targetState.destination.route.isMainScreenRoute() -> mainScreenOut
             else -> primalScaleOut
         }
     },
@@ -874,7 +878,7 @@ private fun NavGraphBuilder.reads(
     enterTransition = { null },
     exitTransition = {
         when {
-            targetState.destination.route.isMainScreenRoute() -> null
+            targetState.destination.route.isMainScreenRoute() -> mainScreenOut
             else -> primalScaleOut
         }
     },
@@ -886,7 +890,7 @@ private fun NavGraphBuilder.reads(
     },
     popExitTransition = {
         when {
-            targetState.destination.route.isMainScreenRoute() -> null
+            targetState.destination.route.isMainScreenRoute() -> mainScreenOut
             else -> primalScaleOut
         }
     },
@@ -936,7 +940,7 @@ private fun NavGraphBuilder.explore(
     enterTransition = { null },
     exitTransition = {
         when {
-            targetState.destination.route.isMainScreenRoute() -> null
+            targetState.destination.route.isMainScreenRoute() -> mainScreenOut
             else -> primalScaleOut
         }
     },
@@ -948,7 +952,7 @@ private fun NavGraphBuilder.explore(
     },
     popExitTransition = {
         when {
-            targetState.destination.route.isMainScreenRoute() -> null
+            targetState.destination.route.isMainScreenRoute() -> mainScreenOut
             else -> primalScaleOut
         }
     },
@@ -1464,7 +1468,7 @@ private fun NavGraphBuilder.notifications(
     enterTransition = { null },
     exitTransition = {
         when {
-            targetState.destination.route.isMainScreenRoute() -> null
+            targetState.destination.route.isMainScreenRoute() -> mainScreenOut
             else -> primalScaleOut
         }
     },
@@ -1476,7 +1480,7 @@ private fun NavGraphBuilder.notifications(
     },
     popExitTransition = {
         when {
-            targetState.destination.route.isMainScreenRoute() -> null
+            targetState.destination.route.isMainScreenRoute() -> mainScreenOut
             else -> primalScaleOut
         }
     },
@@ -1609,7 +1613,7 @@ private fun NavGraphBuilder.mediaItem(
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = this@composable,
 
-        )
+            )
     }
 }
 
