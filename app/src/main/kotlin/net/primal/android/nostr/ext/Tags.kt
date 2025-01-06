@@ -183,42 +183,39 @@ fun String.parseEventTags(marker: String? = null): Set<JsonArray> =
     }.toSet()
 
 fun String.parsePubkeyTags(marker: String? = null): Set<JsonArray> =
-    parseNostrUris()
-        .map {
-            when {
-                it.isNProfileUri() || it.isNProfile() -> {
-                    val result = it.nostrUriToPubkeyAndRelay()
-                    val pubkey = result.first
-                    val relayUrl = result.second
-                    pubkey?.asPubkeyTag(relayHint = relayUrl, optional = marker)
-                }
-
-                it.isNPubUri() || it.isNPub() ->
-                    it.nostrUriToPubkey()?.asPubkeyTag(optional = marker)
-
-                else -> null
+    parseNostrUris().mapNotNull {
+        when {
+            it.isNProfileUri() || it.isNProfile() -> {
+                val result = it.nostrUriToPubkeyAndRelay()
+                val pubkey = result.first
+                val relayUrl = result.second
+                pubkey?.asPubkeyTag(relayHint = relayUrl, optional = marker)
             }
-        }.filterNotNull().toSet()
+
+            it.isNPubUri() || it.isNPub() ->
+                it.nostrUriToPubkey()?.asPubkeyTag(optional = marker)
+
+            else -> null
+        }
+    }.toSet()
 
 fun String.parseReplaceableEventTags(marker: String? = null): Set<JsonArray> =
-    this.parseNostrUris()
-        .map { uri ->
-            when {
-                uri.isNAddrUri() || uri.isNAddr() ->
-                    Nip19TLV.parseUriAsNaddrOrNull(uri)?.asReplaceableEventTag(marker = marker)
+    this.parseNostrUris().mapNotNull { uri ->
+        when {
+            uri.isNAddrUri() || uri.isNAddr() ->
+                Nip19TLV.parseUriAsNaddrOrNull(uri)?.asReplaceableEventTag(marker = marker)
 
-                else -> null
-            }
-        }.filterNotNull().toSet()
+            else -> null
+        }
+    }.toSet()
 
 fun String.parseHashtagTags(): List<JsonArray> =
-    parseHashtags()
-        .map {
-            buildJsonArray {
-                add("t")
-                add(it.removePrefix("#"))
-            }
+    parseHashtags().map {
+        buildJsonArray {
+            add("t")
+            add(it.removePrefix("#"))
         }
+    }
 
 fun JsonArray.removeTrailingEmptyStrings(): JsonArray {
     val trimmedArray = this.toMutableList().apply {
