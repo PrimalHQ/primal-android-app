@@ -57,7 +57,7 @@ class TagsTest {
     }
 
     @Test
-    fun `asEventIdTag returns proper JsonArray tag if optional args null`() {
+    fun `asEventIdTag returns proper JsonArray tag if optional args are null`() {
         val eventId = "eventId"
         val actual = eventId.asEventIdTag(
             relayHint = null,
@@ -73,7 +73,7 @@ class TagsTest {
     @Test
     fun `asEventIdTag returns proper JsonArray tag`() {
         val eventId = "eventId"
-        val expectedRecommendedRelay = ""
+        val expectedRecommendedRelay = "wss://relay.primal.net"
         val expectedMarker = "root"
         val expectedAuthorId = "authorId"
 
@@ -92,6 +92,59 @@ class TagsTest {
     }
 
     @Test
+    fun `asEventIdTag returns proper JsonArray tag with optional relay only`() {
+        val eventId = "eventId"
+        val expectedRecommendedRelay = "wss://relay.primal.net"
+
+        val actual = eventId.asEventIdTag(
+            relayHint = expectedRecommendedRelay,
+            marker = null,
+            authorPubkey = null,
+        )
+        actual shouldBe instanceOf(JsonArray::class)
+        actual.size shouldBe 3
+        actual[0].jsonPrimitive.content shouldBe "e"
+        actual[1].jsonPrimitive.content shouldBe eventId
+        actual[2].jsonPrimitive.content shouldBe expectedRecommendedRelay
+    }
+
+    @Test
+    fun `asEventIdTag returns proper JsonArray tag with optional marker only`() {
+        val eventId = "eventId"
+        val expectedMarker = "root"
+
+        val actual = eventId.asEventIdTag(
+            relayHint = null,
+            marker = expectedMarker,
+        )
+        actual shouldBe instanceOf(JsonArray::class)
+        actual.size shouldBe 4
+        actual[0].jsonPrimitive.content shouldBe "e"
+        actual[1].jsonPrimitive.content shouldBe eventId
+        actual[2].jsonPrimitive.content shouldBe ""
+        actual[3].jsonPrimitive.content shouldBe expectedMarker
+    }
+
+    @Test
+    fun `asEventIdTag returns proper JsonArray tag with optional authorId only`() {
+        val eventId = "eventId"
+        val expectedAuthorId = "authorId"
+
+        val actual = eventId.asEventIdTag(
+            relayHint = null,
+            marker = null,
+            authorPubkey = expectedAuthorId,
+        )
+        actual shouldBe instanceOf(JsonArray::class)
+        actual.size shouldBe 5
+        actual[0].jsonPrimitive.content shouldBe "e"
+        actual[1].jsonPrimitive.content shouldBe eventId
+        actual[2].jsonPrimitive.content shouldBe ""
+        actual[3].jsonPrimitive.content shouldBe ""
+        actual[4].jsonPrimitive.content shouldBe expectedAuthorId
+    }
+
+    @Test
     fun `NeventasEventTag returns proper JsonArray tag`() {
         val nevent = Nevent(
             userId = "userId",
@@ -99,8 +152,6 @@ class TagsTest {
             kind = NostrEventKind.Highlight.value,
             relays = listOf("relay"),
         )
-        val expectedMarker = ""
-
         val actual = nevent.asEventTag(marker = null)
 
         actual shouldBe instanceOf(JsonArray::class)
@@ -108,7 +159,7 @@ class TagsTest {
         actual[0].jsonPrimitive.content shouldBe "e"
         actual[1].jsonPrimitive.content shouldBe nevent.eventId
         actual[2].jsonPrimitive.content shouldBe nevent.relays[0]
-        actual[3].jsonPrimitive.content shouldBe expectedMarker
+        actual[3].jsonPrimitive.content shouldBe ""
         actual[4].jsonPrimitive.content shouldBe nevent.userId
     }
 
@@ -120,8 +171,6 @@ class TagsTest {
             kind = NostrEventKind.Highlight.value,
             relays = emptyList(),
         )
-        val expectedMarker = ""
-        val expectedRelay = ""
 
         val actual = nevent.asEventTag(marker = null)
 
@@ -129,15 +178,15 @@ class TagsTest {
         actual.size shouldBe 5
         actual[0].jsonPrimitive.content shouldBe "e"
         actual[1].jsonPrimitive.content shouldBe nevent.eventId
-        actual[2].jsonPrimitive.content shouldBe expectedRelay
-        actual[3].jsonPrimitive.content shouldBe expectedMarker
+        actual[2].jsonPrimitive.content shouldBe ""
+        actual[3].jsonPrimitive.content shouldBe ""
         actual[4].jsonPrimitive.content shouldBe nevent.userId
     }
 
     @Test
-    fun `asPubkeyTag returns proper JsonArray tag`() {
+    fun `asPubkeyTag returns proper JsonArray tag with given relay and marker`() {
         val pubkey = "myPubkey"
-        val expectedRecommendedRelay = "relay"
+        val expectedRecommendedRelay = "wss://relay.primal.net"
         val expectedOptional = "marker"
         val actual = pubkey.asPubkeyTag(
             relayHint = expectedRecommendedRelay,
@@ -152,7 +201,38 @@ class TagsTest {
     }
 
     @Test
-    fun `asPubkeyTag returns proper JsonArray tag if optional args null`() {
+    fun `asPubkeyTag returns proper JsonArray tag with given relay only`() {
+        val pubkey = "myPubkey"
+        val expectedRecommendedRelay = "wss://relay.primal.net"
+        val actual = pubkey.asPubkeyTag(
+            relayHint = expectedRecommendedRelay,
+            optional = null,
+        )
+        actual shouldBe instanceOf(JsonArray::class)
+        actual.size shouldBe 3
+        actual[0].jsonPrimitive.content shouldBe "p"
+        actual[1].jsonPrimitive.content shouldBe pubkey
+        actual[2].jsonPrimitive.content shouldBe expectedRecommendedRelay
+    }
+
+    @Test
+    fun `asPubkeyTag returns proper JsonArray tag with given marker only`() {
+        val pubkey = "myPubkey"
+        val expectedOptional = "marker"
+        val actual = pubkey.asPubkeyTag(
+            relayHint = null,
+            optional = expectedOptional,
+        )
+        actual shouldBe instanceOf(JsonArray::class)
+        actual.size shouldBe 4
+        actual[0].jsonPrimitive.content shouldBe "p"
+        actual[1].jsonPrimitive.content shouldBe pubkey
+        actual[2].jsonPrimitive.content shouldBe ""
+        actual[3].jsonPrimitive.content shouldBe expectedOptional
+    }
+
+    @Test
+    fun `asPubkeyTag returns proper JsonArray tag if optional args are null`() {
         val pubkey = "myPubkey"
         val actual = pubkey.asPubkeyTag(
             relayHint = null,
@@ -170,9 +250,9 @@ class TagsTest {
             userId = "userId",
             eventId = "eventId",
             kind = NostrEventKind.Highlight.value,
-            relays = listOf("relay"),
+            relays = listOf("wss://relay.primal.net"),
         )
-        val expectedRecommendedRelay = "relay"
+        val expectedRecommendedRelay = "wss://relay.primal.net"
         val expectedOptional = "marker"
         val actual = nevent.asPubkeyTag(
             marker = expectedOptional,
@@ -208,9 +288,9 @@ class TagsTest {
             userId = "userId",
             identifier = "identifier",
             kind = NostrEventKind.LongFormContent.value,
-            relays = listOf("relay"),
+            relays = listOf("wss://relay.primal.net"),
         )
-        val expectedRecommendedRelay = "relay"
+        val expectedRecommendedRelay = "wss://relay.primal.net"
         val expectedOptional = "marker"
         val actual = naddr.asPubkeyTag(
             marker = expectedOptional,
@@ -253,7 +333,7 @@ class TagsTest {
     @Test
     fun `asReplaceableEventTag returns proper JsonArray tag`() {
         val identifier = "identifier"
-        val expectedRelayHint = "relay"
+        val expectedRelayHint = "wss://relay.primal.net"
         val expectedMarker = "marker"
 
         val actual = identifier.asReplaceableEventTag(
@@ -289,9 +369,9 @@ class TagsTest {
             userId = "userId",
             identifier = "identifier",
             kind = NostrEventKind.LongFormContent.value,
-            relays = listOf("relay"),
+            relays = listOf("wss://relay.primal.net"),
         )
-        val expectedRelayHint = "relay"
+        val expectedRelayHint = "wss://relay.primal.net"
         val expectedMarker = "marker"
 
         val actual = naddr.asReplaceableEventTag(
