@@ -107,7 +107,7 @@ fun String.asEventIdTag(
         add(relayHint ?: "")
         add(marker ?: "")
         add(authorPubkey ?: "")
-    }
+    }.removeTrailingEmptyStrings()
 
 fun Nevent.asEventTag(marker: String? = null): JsonArray =
     this.eventId.asEventIdTag(
@@ -122,7 +122,7 @@ fun String.asPubkeyTag(relayHint: String? = null, optional: String? = null): Jso
         add(this@asPubkeyTag)
         add(relayHint ?: "")
         add(optional ?: "")
-    }
+    }.removeTrailingEmptyStrings()
 
 fun Nevent.asPubkeyTag(marker: String? = null): JsonArray =
     this.userId.asPubkeyTag(
@@ -148,7 +148,7 @@ fun String.asReplaceableEventTag(relayHint: String? = null, marker: String? = nu
         add(this@asReplaceableEventTag)
         add(relayHint ?: "")
         add(marker ?: "")
-    }
+    }.removeTrailingEmptyStrings()
 
 fun Naddr.asReplaceableEventTag(marker: String? = null): JsonArray =
     this.asATagValue().asReplaceableEventTag(
@@ -170,18 +170,17 @@ fun NoteAttachment.asIMetaTag(): JsonArray {
 }
 
 fun String.parseEventTags(marker: String? = null): Set<JsonArray> =
-    this.parseNostrUris()
-        .map { uri ->
-            when {
-                uri.isNEventUri() || uri.isNEvent() ->
-                    parseUriAsNeventOrNull(uri)?.asEventTag(marker = marker)
+    this.parseNostrUris().mapNotNull { uri ->
+        when {
+            uri.isNEventUri() || uri.isNEvent() ->
+                parseUriAsNeventOrNull(uri)?.asEventTag(marker = marker)
 
-                uri.isNoteUri() || uri.isNote() ->
-                    uri.nostrUriToNoteId()?.asEventIdTag(marker = marker)
+            uri.isNoteUri() || uri.isNote() ->
+                uri.nostrUriToNoteId()?.asEventIdTag(marker = marker)
 
-                else -> null
-            }
-        }.filterNotNull().toSet()
+            else -> null
+        }
+    }.toSet()
 
 fun String.parsePubkeyTags(marker: String? = null): Set<JsonArray> =
     parseNostrUris()
@@ -220,3 +219,17 @@ fun String.parseHashtagTags(): List<JsonArray> =
                 add(it.removePrefix("#"))
             }
         }
+
+fun JsonArray.removeTrailingEmptyStrings(): JsonArray {
+    val trimmedArray = this.toMutableList().apply {
+        while (isNotEmpty() && last() == JsonPrimitive("")) {
+            removeAt(lastIndex)
+        }
+    }
+
+    return if (trimmedArray.size != this.size) {
+        JsonArray(trimmedArray)
+    } else {
+        this
+    }
+}
