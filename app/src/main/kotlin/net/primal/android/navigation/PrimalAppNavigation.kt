@@ -1613,7 +1613,7 @@ private fun NavGraphBuilder.mediaItem(
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = this@composable,
 
-            )
+        )
     }
 }
 
