@@ -86,7 +86,7 @@ fun NotificationsScreen(
 
     DisposableLifecycleObserverEffect(viewModel) {
         when (it) {
-            Lifecycle.Event.ON_DESTROY -> viewModel.setEvent(
+            Lifecycle.Event.ON_STOP -> viewModel.setEvent(
                 NotificationsContract.UiEvent.NotificationsSeen,
             )
 
