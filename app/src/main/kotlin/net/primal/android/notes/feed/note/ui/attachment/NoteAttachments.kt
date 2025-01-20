@@ -41,7 +41,7 @@ fun NoteAttachments(
             when (attachment.type) {
                 NoteAttachmentType.YouTube,
                 NoteAttachmentType.Rumble,
-                    -> {
+                -> {
                     val thumbnailImageSizeDp = findImageSize(attachment = attachment)
                     NoteVideoLinkPreview(
                         url = attachment.url,
