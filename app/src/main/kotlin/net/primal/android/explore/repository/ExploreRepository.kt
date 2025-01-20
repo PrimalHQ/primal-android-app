@@ -69,7 +69,12 @@ class ExploreRepository @Inject constructor(
 
             val eventZaps = response.nostrZapEvents.mapAsEventZapDO(profilesMap = profilesMap)
 
-            val notes = response.noteEvents.mapAsPostDataPO(referencedPosts = emptyList())
+            val notes = response.noteEvents.mapAsPostDataPO(
+                referencedPosts = emptyList(),
+                referencedArticles = emptyList(),
+                referencedHighlights = emptyList(),
+            )
+
             val nostrUris = notes.flatMapPostsAsNoteNostrUriPO(
                 eventIdToNostrEvent = emptyMap(),
                 postIdToPostDataMap = emptyMap(),

@@ -37,16 +37,22 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
     val linkPreviews = primalLinkPreviews.flatMapNotNullAsLinkPreviewResource().asMapByKey { it.url }
     val eventHints = this.primalRelayHints.flatMapAsEventHintsPO()
 
-    val referencedPostsWithoutReplyTo = referencedEvents.mapNotNullAsPostDataPO()
-    val referencedPostsWithReplyTo = referencedEvents.mapNotNullAsPostDataPO(
-        referencedPosts = referencedPostsWithoutReplyTo,
-    )
-    val feedPosts = posts.mapAsPostDataPO(referencedPosts = referencedPostsWithReplyTo)
-
     val articles = this.articles.mapNotNullAsArticleDataPO(cdnResources = cdnResources)
     val referencedArticles = this.referencedEvents.mapReferencedEventsAsArticleDataPO(cdnResources = cdnResources)
     val referencedHighlights = this.referencedEvents.mapReferencedEventsAsHighlightDataPO()
     val allArticles = articles + referencedArticles
+
+    val referencedPostsWithoutReplyTo = referencedEvents.mapNotNullAsPostDataPO()
+    val referencedPostsWithReplyTo = referencedEvents.mapNotNullAsPostDataPO(
+        referencedPosts = referencedPostsWithoutReplyTo,
+        referencedArticles = allArticles,
+        referencedHighlights = referencedHighlights,
+    )
+    val feedPosts = posts.mapAsPostDataPO(
+        referencedPosts = referencedPostsWithReplyTo,
+        referencedArticles = allArticles,
+        referencedHighlights = referencedHighlights,
+    )
 
     val primalUserNames = this.primalUserNames.parseAndMapPrimalUserNames()
     val primalPremiumInfo = this.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
