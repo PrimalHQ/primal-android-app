@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -28,6 +29,8 @@ import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWor
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.isEmpty
+import net.primal.android.core.ext.openUriSafely
+import net.primal.android.core.utils.parseUris
 import net.primal.android.core.utils.shortened
 import net.primal.android.stats.reactions.ReactionsContract
 import net.primal.android.stats.ui.EventZapUiModel
@@ -74,9 +77,19 @@ fun ReactionsZapsLazyColumn(
 
 @Composable
 private fun NoteZapListItem(data: EventZapUiModel, onProfileClick: (profileId: String) -> Unit) {
+    val localUriHandler = LocalUriHandler.current
+
     Column {
         ListItem(
-            modifier = Modifier.clickable { onProfileClick(data.zapperId) },
+            modifier = Modifier.clickable {
+                val messageUris = data.message?.parseUris()
+
+                if (messageUris?.isNotEmpty() == true) {
+                    localUriHandler.openUriSafely(messageUris[0])
+                } else {
+                    onProfileClick(data.zapperId)
+                }
+            },
             colors = ListItemDefaults.colors(
                 containerColor = AppTheme.colorScheme.surfaceVariant,
             ),
