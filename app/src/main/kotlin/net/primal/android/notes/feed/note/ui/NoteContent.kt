@@ -423,20 +423,25 @@ private fun AnnotatedString.Builder.addProfileAnnotation(
     highlightColor: Color,
 ) {
     val displayHandle = referencedUser.displayUsername
-    val startIndex = content.indexOf(displayHandle)
-    if (startIndex >= 0) {
+    var startIndex = content.indexOf(displayHandle)
+
+    while (startIndex >= 0) {
         val endIndex = startIndex + displayHandle.length
+
         addStyle(
             style = SpanStyle(color = highlightColor),
             start = startIndex,
             end = endIndex,
         )
+
         addStringAnnotation(
             tag = PROFILE_ID_ANNOTATION_TAG,
             annotation = referencedUser.userId,
             start = startIndex,
             end = endIndex,
         )
+
+        startIndex = content.indexOf(displayHandle, startIndex + 1)
     }
 }
 
