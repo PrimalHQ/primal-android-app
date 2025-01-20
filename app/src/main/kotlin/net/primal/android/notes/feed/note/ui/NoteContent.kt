@@ -609,6 +609,7 @@ fun PreviewPostUnknownReferencedEventWithoutAlt() {
 
 @Preview
 @Composable
+@Suppress("LongMethod")
 fun PreviewPostContentWithReferencedPost() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         Surface {
