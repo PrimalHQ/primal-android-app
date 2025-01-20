@@ -44,5 +44,4 @@ fun List<NostrEvent>.mapAsEventZapDO(profilesMap: Map<String, ProfileData>) =
         )
     }
 
-private fun NostrEvent.extractZapRequestOrNull() =
-    NostrJson.decodeFromStringOrNull<NostrEvent>(tags.findFirstZapRequest())
+fun NostrEvent.extractZapRequestOrNull() = NostrJson.decodeFromStringOrNull<NostrEvent>(tags.findFirstZapRequest())

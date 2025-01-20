@@ -9,6 +9,7 @@ import net.primal.android.notes.db.ReferencedArticle
 import net.primal.android.notes.db.ReferencedHighlight
 import net.primal.android.notes.db.ReferencedNote
 import net.primal.android.notes.db.ReferencedUser
+import net.primal.android.notes.db.ReferencedZap
 
 @Entity(
     primaryKeys = ["noteId", "uri"],
@@ -23,4 +24,5 @@ data class NoteNostrUri(
     @Embedded(prefix = "refNote_") val referencedNote: ReferencedNote? = null,
     @Embedded(prefix = "refArticle_") val referencedArticle: ReferencedArticle? = null,
     @Embedded(prefix = "refUser_") val referencedUser: ReferencedUser? = null,
+    @Embedded(prefix = "refZap_") val referencedZap: ReferencedZap? = null,
 )

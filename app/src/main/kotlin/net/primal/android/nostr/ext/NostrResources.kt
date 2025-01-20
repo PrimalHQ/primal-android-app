@@ -27,7 +27,9 @@ import net.primal.android.notes.db.ReferencedArticle
 import net.primal.android.notes.db.ReferencedHighlight
 import net.primal.android.notes.db.ReferencedNote
 import net.primal.android.notes.db.ReferencedUser
+import net.primal.android.notes.db.ReferencedZap
 import net.primal.android.profile.db.ProfileData
+import net.primal.android.wallet.utils.LnInvoiceUtils
 import timber.log.Timber
 
 private const val NOSTR = "nostr:"
@@ -301,20 +303,18 @@ fun List<String>.mapAsNoteNostrUriPO(
     val refHighlightText = referencedNostrEvent?.content
     val refHighlightATag = referencedNostrEvent?.tags?.firstOrNull { it.isATag() }
 
-    val type = if (refUserProfileId != null) {
-        NostrUriType.Profile
-    } else if (refNote != null && refPostAuthor != null) {
-        NostrUriType.Note
-    } else if (refNaddr?.kind == NostrEventKind.LongFormContent.value &&
-        refArticle != null && refArticleAuthor != null
-    ) {
-        NostrUriType.Article
-    } else if (referencedNostrEvent?.kind == NostrEventKind.Highlight.value &&
-        refHighlightText?.isNotEmpty() == true && refHighlightATag != null
-    ) {
-        NostrUriType.Highlight
-    } else {
-        NostrUriType.Unsupported
+    val type = when {
+        refUserProfileId != null -> NostrUriType.Profile
+        refNote != null && refPostAuthor != null -> NostrUriType.Note
+        refNaddr?.kind == NostrEventKind.LongFormContent.value &&
+            refArticle != null && refArticleAuthor != null -> NostrUriType.Article
+
+        referencedNostrEvent?.kind == NostrEventKind.Highlight.value &&
+            refHighlightText?.isNotEmpty() == true && refHighlightATag != null -> NostrUriType.Highlight
+
+        referencedNostrEvent?.kind == NostrEventKind.Zap.value -> NostrUriType.Zap
+
+        else -> NostrUriType.Unsupported
     }
 
     NoteNostrUri(
@@ -335,6 +335,7 @@ fun List<String>.mapAsNoteNostrUriPO(
             profileIdToProfileDataMap = profileIdToProfileDataMap,
         ),
         referencedArticle = takeAsReferencedArticleOrNull(refNaddr, refArticle, refArticleAuthor),
+        referencedZap = takeAsReferencedZapOrNull(referencedNostrEvent, profileIdToProfileDataMap),
         referencedHighlight = takeAsReferencedHighlightOrNull(
             uri = link,
             highlight = refHighlightText,
@@ -440,4 +441,35 @@ private fun takeAsReferencedHighlightOrNull(
     )
 } else {
     null
+}
+
+private fun takeAsReferencedZapOrNull(event: NostrEvent?, profilesMap: Map<String, ProfileData>): ReferencedZap? {
+    val zapRequest = event?.extractZapRequestOrNull()
+
+    val receiverId = event?.tags?.findFirstProfileId()
+
+    val senderId = zapRequest?.pubKey
+
+    val noteId = event?.tags?.findFirstEventId()
+        ?: zapRequest?.tags?.findFirstEventId()
+
+    val amountInSats = (event?.tags?.findFirstBolt11() ?: zapRequest?.tags?.findFirstZapAmount())
+        ?.let(LnInvoiceUtils::getAmountInSats)
+
+    if (receiverId == null || senderId == null || amountInSats == null) return null
+
+    val sender = profilesMap[senderId]
+    val receiver = profilesMap[receiverId]
+    return ReferencedZap(
+        senderId = senderId,
+        senderAvatarCdnImage = sender?.avatarCdnImage,
+        senderPrimalLegendProfile = sender?.primalPremiumInfo?.legendProfile,
+        receiverId = receiverId,
+        receiverDisplayName = receiver?.displayName ?: receiver?.handle,
+        receiverAvatarCdnImage = receiver?.avatarCdnImage,
+        receiverPrimalLegendProfile = receiver?.primalPremiumInfo?.legendProfile,
+        amountInSats = amountInSats.toDouble(),
+        message = zapRequest.content,
+        zappedEventId = noteId,
+    )
 }

@@ -6,6 +6,7 @@ import net.primal.android.notes.db.ReferencedArticle
 import net.primal.android.notes.db.ReferencedHighlight
 import net.primal.android.notes.db.ReferencedNote
 import net.primal.android.notes.db.ReferencedUser
+import net.primal.android.notes.db.ReferencedZap
 
 data class NoteNostrUriUi(
     val uri: String,
@@ -15,6 +16,7 @@ data class NoteNostrUriUi(
     val referencedNote: ReferencedNote?,
     val referencedArticle: ReferencedArticle?,
     val referencedUser: ReferencedUser?,
+    val referencedZap: ReferencedZap?,
 )
 
 fun NoteNostrUri.asNoteNostrUriUi() =
@@ -26,4 +28,5 @@ fun NoteNostrUri.asNoteNostrUriUi() =
         referencedNote = this.referencedNote,
         referencedArticle = this.referencedArticle,
         referencedUser = this.referencedUser,
+        referencedZap = referencedZap,
     )
