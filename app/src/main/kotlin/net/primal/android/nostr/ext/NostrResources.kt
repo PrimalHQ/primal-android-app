@@ -30,7 +30,6 @@ import net.primal.android.notes.db.ReferencedUser
 import net.primal.android.notes.db.ReferencedZap
 import net.primal.android.profile.db.ProfileData
 import net.primal.android.wallet.utils.LnInvoiceUtils
-import net.primal.android.wallet.utils.LnInvoiceUtils.getAmountInSats
 import timber.log.Timber
 
 private const val NOSTR = "nostr:"
@@ -448,17 +447,16 @@ private fun takeAsReferencedZapOrNull(event: NostrEvent?, profilesMap: Map<Strin
     val zapRequest = event?.extractZapRequestOrNull()
 
     val receiverId = event?.tags?.findFirstProfileId()
-        ?: return null
 
     val senderId = zapRequest?.pubKey
-        ?: return null
 
-    val noteId = event.tags.findFirstEventId()
-        ?: zapRequest.tags.findFirstEventId()
+    val noteId = event?.tags?.findFirstEventId()
+        ?: zapRequest?.tags?.findFirstEventId()
 
-    val amountInSats = (event.tags.findFirstBolt11() ?: zapRequest.tags.findFirstZapAmount())
+    val amountInSats = (event?.tags?.findFirstBolt11() ?: zapRequest?.tags?.findFirstZapAmount())
         ?.let(LnInvoiceUtils::getAmountInSats)
-        ?: return null
+
+    if (receiverId == null || senderId == null || amountInSats == null) return null
 
     val sender = profilesMap[senderId]
     val receiver = profilesMap[receiverId]
