@@ -35,6 +35,7 @@ fun List<NostrEvent>.mapAsEventZapDO(profilesMap: Map<String, ProfileData>) =
             zapSenderHandle = profile?.handle,
             zapSenderInternetIdentifier = profile?.internetIdentifier,
             zapSenderAvatarCdnImage = profile?.avatarCdnImage,
+            zapSenderPrimalLegendProfile = profile?.primalPremiumInfo?.legendProfile,
             zapReceiverId = receiverId,
             zapRequestAt = zapRequest.createdAt,
             zapReceiptAt = zapReceipt.createdAt,

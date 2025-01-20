@@ -61,6 +61,7 @@ class EventStatsUpdater(
                     zapSenderHandle = zapSender?.handle,
                     zapSenderDisplayName = zapSender?.displayName,
                     zapSenderInternetIdentifier = zapSender?.internetIdentifier,
+                    zapSenderPrimalLegendProfile = zapSender?.primalPremiumInfo?.legendProfile,
                     amountInBtc = amountInSats.toBtc(),
                     message = zapComment,
                 ),
