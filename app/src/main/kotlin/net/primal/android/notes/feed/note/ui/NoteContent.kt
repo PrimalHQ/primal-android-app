@@ -337,18 +337,12 @@ fun renderContentAsAnnotatedString(
     val mentionedUsers = data.nostrUris.filter(type = NostrUriType.Profile)
     val unhandledNostrAddressUris = data.nostrUris.filterUnhandledNostrAddressUris()
 
-    val shouldDeleteLinks = mediaAttachments.isEmpty() && linkAttachments.size == 1 &&
-        linkAttachments.first().let { singleLink ->
-            data.content.trim().endsWith(singleLink.url) &&
-                (!singleLink.title.isNullOrBlank() || !singleLink.description.isNullOrBlank())
-        }
-
     val refinedContent = data.content
         .cleanNostrUris()
         .replaceNostrProfileUrisWithHandles(resources = mentionedUsers)
         .remove(texts = mediaAttachments.map { it.url })
         .remove(texts = if (!shouldKeepNostrNoteUris) data.nostrUris.map { it.uri } else emptyList())
-        .remove(texts = if (shouldDeleteLinks) linkAttachments.map { it.url } else emptyList())
+        .remove(texts = linkAttachments.map { it.url })
         .remove(texts = data.invoices)
         .clearParsedPrimalLinks()
         .limitLineBreaks(maxBreaks = 2)
