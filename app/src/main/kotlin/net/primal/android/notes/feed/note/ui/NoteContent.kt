@@ -269,6 +269,16 @@ fun NoteContent(
             )
         }
 
+        val referencedZaps = data.nostrUris.filter(type = NostrUriType.Zap)
+        referencedZaps.forEach {
+            it.referencedZap?.let {
+                ReferencedZapRow(
+                    referencedZap = it,
+                    noteCallbacks = noteCallbacks,
+                )
+            }
+        }
+
         val genericEvents = data.nostrUris.filter(type = NostrUriType.Unsupported)
         if (genericEvents.isNotEmpty()) {
             genericEvents.forEachIndexed { index, nostrUriUi ->
@@ -514,6 +524,7 @@ fun PreviewPostContent() {
                             ),
                             referencedArticle = null,
                             referencedHighlight = null,
+                            referencedZap = null,
                         ),
                     ),
                     hashtags = listOf("#nostr"),
@@ -547,6 +558,7 @@ fun PreviewPostUnknownReferencedEventWithAlt() {
                             referencedUser = null,
                             referencedArticle = null,
                             referencedHighlight = null,
+                            referencedZap = null,
                         ),
                     ),
                     hashtags = listOf("#nostr"),
@@ -580,6 +592,7 @@ fun PreviewPostUnknownReferencedEventWithoutAlt() {
                             referencedUser = null,
                             referencedArticle = null,
                             referencedHighlight = null,
+                            referencedZap = null,
                         ),
                     ),
                     hashtags = listOf("#nostr"),
@@ -633,6 +646,7 @@ fun PreviewPostContentWithReferencedPost() {
                             referencedArticle = null,
                             referencedEventAlt = null,
                             referencedHighlight = null,
+                            referencedZap = null,
                         ),
                         NoteNostrUriUi(
                             uri = "nostr:referenced2Post",
@@ -654,6 +668,7 @@ fun PreviewPostContentWithReferencedPost() {
                             referencedArticle = null,
                             referencedEventAlt = null,
                             referencedHighlight = null,
+                            referencedZap = null,
                         ),
                     ),
                     hashtags = listOf("#nostr"),
