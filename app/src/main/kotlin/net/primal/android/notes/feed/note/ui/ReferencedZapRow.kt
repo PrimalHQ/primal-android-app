@@ -89,10 +89,7 @@ fun ReferencedZapRow(
 }
 
 @Composable
-fun ZapAmountAndMessageColumn(
-    amountInSats: Double,
-    message: String?,
-) {
+fun ZapAmountAndMessageColumn(amountInSats: Double, message: String?) {
     val numberFormat = NumberFormat.getNumberInstance()
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -128,7 +125,6 @@ fun ZapAmountAndMessageColumn(
         }
     }
 }
-
 
 @Preview
 @Composable
