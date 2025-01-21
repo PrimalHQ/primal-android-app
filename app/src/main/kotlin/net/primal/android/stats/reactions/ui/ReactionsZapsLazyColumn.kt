@@ -82,10 +82,10 @@ private fun NoteZapListItem(data: EventZapUiModel, onProfileClick: (profileId: S
     Column {
         ListItem(
             modifier = Modifier.clickable {
-                val messageUris = data.message?.parseUris()
+                val messageUris = data.message?.parseUris(includeNostrUris = false)
 
                 if (messageUris?.isNotEmpty() == true) {
-                    localUriHandler.openUriSafely(messageUris[0])
+                    localUriHandler.openUriSafely(messageUris.first())
                 } else {
                     onProfileClick(data.zapperId)
                 }

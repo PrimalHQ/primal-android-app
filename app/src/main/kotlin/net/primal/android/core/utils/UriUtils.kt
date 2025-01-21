@@ -9,16 +9,20 @@ import net.primal.android.nostr.ext.detectUrls
 import net.primal.android.nostr.ext.parseNostrUris
 import timber.log.Timber
 
-fun String.parseUris(): List<String> {
+fun String.parseUris(includeNostrUris: Boolean = true): List<String> {
     val urlDetector = UrlDetector(this, UrlDetectorOptions.JSON)
     val libUrls = urlDetector.detect()
         .filterInvalidTLDs()
         .map { it.originalUrl }
     val customUrls = this.detectUrls()
     val mergedUrls = mergeUrls(emptyList(), customUrls)
-    val nostr = this.parseNostrUris()
 
-    return nostr + mergedUrls
+    return if (includeNostrUris) {
+        val nostr = this.parseNostrUris()
+        nostr + mergedUrls
+    } else {
+        mergedUrls
+    }
 }
 
 fun mergeUrls(libUrls: List<String>, customUrls: List<String>): List<String> {
