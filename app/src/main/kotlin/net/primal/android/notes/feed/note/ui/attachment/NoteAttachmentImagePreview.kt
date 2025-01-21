@@ -100,7 +100,7 @@ fun NoteImageLoadingPlaceholder() {
 }
 
 @Composable
-fun NoteImageErrorImage(modifier: Modifier) {
+fun NoteImageErrorImage(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center,

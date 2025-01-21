@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
 import net.primal.android.core.compose.attachment.model.isMediaAttachment
+import net.primal.android.notes.feed.note.ui.NoteAudioLinkPreview
 import net.primal.android.notes.feed.note.ui.NoteLinkPreview
 import net.primal.android.notes.feed.note.ui.NoteVideoLinkPreview
 import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
@@ -54,6 +55,18 @@ fun NoteAttachments(
                         } else {
                             null
                         },
+                    )
+                }
+
+                NoteAttachmentType.Spotify,
+                NoteAttachmentType.Tidal,
+                -> {
+                    NoteAudioLinkPreview(
+                        url = attachment.url,
+                        title = attachment.title,
+                        description = attachment.description,
+                        thumbnailUrl = attachment.thumbnailUrl,
+                        attachmentType = attachment.type,
                     )
                 }
 
