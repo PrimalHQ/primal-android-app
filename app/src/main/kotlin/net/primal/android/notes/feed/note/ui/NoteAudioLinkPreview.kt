@@ -21,11 +21,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
+import net.primal.android.R
 import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -99,7 +101,7 @@ private fun AudioInfoColumn(
         when (attachmentType) {
             NoteAttachmentType.Spotify -> SpotifyRow(modifier = Modifier.padding(top = 4.dp))
             NoteAttachmentType.Tidal -> TidalRow(modifier = Modifier.padding(top = 4.dp))
-            else -> null
+            else -> Unit
         }
 
         TitleDescriptionColumn(
@@ -127,7 +129,7 @@ private fun AudioInfoColumn(
                     tint = AppTheme.colorScheme.surfaceVariant,
                 )
                 Text(
-                    text = "Play",
+                    text = stringResource(R.string.feed_note_render_play_button),
                     style = AppTheme.typography.bodySmall,
                     fontWeight = FontWeight.SemiBold,
                     color = AppTheme.colorScheme.surfaceVariant,
@@ -197,7 +199,12 @@ private fun TidalRow(modifier: Modifier = Modifier) {
         TIDAL_LIGHT_TINT
     }
 
-    IconDomainRow(modifier = modifier, imageVector = PrimalIcons.TidalLogo, tint = tint, text = "tidal.com")
+    IconDomainRow(
+        modifier = modifier,
+        imageVector = PrimalIcons.TidalLogo,
+        tint = tint,
+        text = "tidal.com",
+    )
 }
 
 @Composable

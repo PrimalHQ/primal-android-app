@@ -1096,4 +1096,6 @@
         <item quantity="one">and 1 other highlighted</item>
         <item quantity="other">and %1$s others highlighted</item>
     </plurals>
+
+    <string name="feed_note_render_play_button">Play</string>
 </resources>
