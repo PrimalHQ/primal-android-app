@@ -17,16 +17,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.notes.db.ReferencedZap
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.theme.AppTheme
+import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
 fun ReferencedZapRow(
@@ -126,6 +129,95 @@ fun ZapAmountAndMessageColumn(
     }
 }
 
+
+@Preview
+@Composable
+fun PreviewMessageAndDisplayName() {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+        ReferencedZapRow(
+            modifier = Modifier.width(300.dp),
+            noteCallbacks = NoteCallbacks(),
+            referencedZap = ReferencedZap(
+                senderId = "",
+                senderAvatarCdnImage = null,
+                senderPrimalLegendProfile = null,
+                receiverId = "",
+                receiverDisplayName = "qauser",
+                receiverAvatarCdnImage = null,
+                receiverPrimalLegendProfile = null,
+                zappedEventId = null,
+                amountInSats = 1000.0,
+                message = "Onwards!",
+            ),
+        )
+    }
+}
+
+@Preview
+@Composable
+fun PreviewNoMessageAndDisplayName() {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+        ReferencedZapRow(
+            modifier = Modifier.width(300.dp),
+            noteCallbacks = NoteCallbacks(),
+            referencedZap = ReferencedZap(
+                senderId = "",
+                senderAvatarCdnImage = null,
+                senderPrimalLegendProfile = null,
+                receiverId = "",
+                receiverDisplayName = "qauser",
+                receiverAvatarCdnImage = null,
+                receiverPrimalLegendProfile = null,
+                zappedEventId = null,
+                amountInSats = 1000.0,
+                message = null,
+            ),
+        )
+    }
+}
+
+@Preview
+@Composable
+fun PreviewNoMessageAndNoDisplayName() {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+        ReferencedZapRow(
+            modifier = Modifier.width(300.dp),
+            noteCallbacks = NoteCallbacks(),
+            referencedZap = ReferencedZap(
+                senderId = "",
+                senderAvatarCdnImage = null,
+                senderPrimalLegendProfile = null,
+                receiverId = "",
+                receiverDisplayName = null,
+                receiverAvatarCdnImage = null,
+                receiverPrimalLegendProfile = null,
+                zappedEventId = null,
+                amountInSats = 1000.0,
+                message = null,
+            ),
+        )
+    }
+}
+
+@Preview
+@Composable
+fun PreviewMessageAndNoDisplayName() {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+        ReferencedZapRow(
+            modifier = Modifier.width(300.dp),
+            noteCallbacks = NoteCallbacks(),
+            referencedZap = ReferencedZap(
+                senderId = "",
+                senderAvatarCdnImage = null,
+                senderPrimalLegendProfile = null,
+                receiverId = "",
+                receiverDisplayName = null,
+                receiverAvatarCdnImage = null,
+                receiverPrimalLegendProfile = null,
+                zappedEventId = null,
+                amountInSats = 1000.0,
+                message = "Onwards!",
+            ),
         )
     }
 }
