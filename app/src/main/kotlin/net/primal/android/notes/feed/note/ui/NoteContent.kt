@@ -460,20 +460,24 @@ private fun AnnotatedString.Builder.addUrlAnnotation(
     content: String,
     highlightColor: Color,
 ) {
-    val startIndex = content.indexOf(url)
-    if (startIndex >= 0) {
+    var startIndex = content.indexOf(url)
+
+    while (startIndex >= 0) {
         val endIndex = startIndex + url.length
         addStyle(
             style = SpanStyle(color = highlightColor),
             start = startIndex,
             end = endIndex,
         )
+
         addStringAnnotation(
             tag = URL_ANNOTATION_TAG,
             annotation = url,
             start = startIndex,
             end = endIndex,
         )
+
+        startIndex = content.indexOf(url, startIndex + 1)
     }
 }
 

@@ -66,6 +66,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -85,6 +87,7 @@ import net.primal.android.R
 import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.articles.feed.ui.generateNaddrString
 import net.primal.android.core.compose.IconText
+import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -97,6 +100,7 @@ import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.core.utils.formatToDefaultDateTimeFormat
+import net.primal.android.core.utils.parseUris
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.notes.feed.note.ui.FeedNoteHeader
@@ -116,6 +120,8 @@ import net.primal.android.wallet.walletDepositColor
 import net.primal.android.wallet.walletTransactionIconBackgroundColor
 import net.primal.android.wallet.walletWithdrawColor
 import timber.log.Timber
+
+private const val URL_ANNOTATION_TAG = "url"
 
 @Composable
 fun TransactionDetailsScreen(
@@ -378,7 +384,6 @@ private fun TransactionCard(
         txData.txAmountInUsd != null || txData.exchangeRate != null ||
             txData.totalFeeInSats != null || txData.invoice != null
         )
-
     var expanded by remember { mutableStateOf(!txData.isZap) }
 
     Card(
@@ -419,14 +424,7 @@ private fun TransactionCard(
         }
 
         txData.txNote?.ifEmpty { null }?.let { note ->
-            Text(
-                text = note,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .padding(bottom = 12.dp),
-                color = AppTheme.colorScheme.onPrimary,
-                style = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp),
-            )
+            TransactionNoteText(note = note)
         }
 
         if (expanded) {
@@ -452,6 +450,70 @@ private fun TransactionCard(
                 trailingIconTintColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
             )
         }
+    }
+}
+
+@Composable
+private fun TransactionNoteText(note: String) {
+    val contentText = refineContentAsAnnotatedString(note)
+    val localUriHandler = LocalUriHandler.current
+
+    PrimalClickableText(
+        text = contentText,
+        modifier = Modifier
+            .padding(horizontal = 12.dp)
+            .padding(bottom = 12.dp),
+        style = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp),
+        onClick = { position, offset ->
+            val annotation = contentText.getStringAnnotations(
+                start = position,
+                end = position,
+            ).firstOrNull()
+
+            if (annotation?.tag == URL_ANNOTATION_TAG) {
+                localUriHandler.openUriSafely(annotation.item)
+            }
+        },
+    )
+}
+
+@Composable
+private fun refineContentAsAnnotatedString(content: String): AnnotatedString {
+    val uriLinks = content.parseUris()
+    val refinedContent = content.trim()
+
+    return buildAnnotatedString {
+        append(refinedContent)
+
+        uriLinks.forEach { url ->
+            addUrlAnnotation(url, refinedContent, AppTheme.colorScheme.secondary)
+        }
+    }
+}
+
+private fun AnnotatedString.Builder.addUrlAnnotation(
+    url: String,
+    content: String,
+    highlightColor: Color,
+) {
+    var startIndex = content.indexOf(url)
+
+    while (startIndex >= 0) {
+        val endIndex = startIndex + url.length
+        addStyle(
+            style = SpanStyle(color = highlightColor),
+            start = startIndex,
+            end = endIndex,
+        )
+
+        addStringAnnotation(
+            tag = URL_ANNOTATION_TAG,
+            annotation = url,
+            start = startIndex,
+            end = endIndex,
+        )
+
+        startIndex = content.indexOf(url, startIndex + 1)
     }
 }
 
