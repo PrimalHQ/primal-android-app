@@ -20,7 +20,7 @@ public val PrimalIcons.Play: ImageVector
         _play = Builder(name = "Play", defaultWidth = 33.0.dp, defaultHeight = 36.0.dp,
                 viewportWidth = 33.0f, viewportHeight = 36.0f).apply {
             group {
-                path(fill = SolidColor(Color(0xFFffffff)), stroke = null, fillAlpha = 0.8f,
+                path(fill = SolidColor(Color(0xFFffffff)), stroke = null, fillAlpha = 1f,
                         strokeLineWidth = 0.0f, strokeLineCap = Butt, strokeLineJoin = Miter,
                         strokeLineMiter = 4.0f, pathFillType = NonZero) {
                     moveTo(0.0f, 2.4687f)

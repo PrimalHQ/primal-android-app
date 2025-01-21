@@ -31,6 +31,7 @@ import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.utils.extractTLD
+import net.primal.android.notes.feed.note.ui.attachment.NoteImageErrorImage
 import net.primal.android.notes.feed.note.ui.attachment.NoteImageLoadingPlaceholder
 import net.primal.android.notes.feed.note.ui.attachment.PlayButton
 import net.primal.android.theme.AppTheme
@@ -72,6 +73,7 @@ fun NoteVideoLinkPreview(
                     contentDescription = null,
                     contentScale = ContentScale.FillHeight,
                     loading = { NoteImageLoadingPlaceholder() },
+                    error = { NoteImageErrorImage() },
                 )
 
                 PlayButton(
