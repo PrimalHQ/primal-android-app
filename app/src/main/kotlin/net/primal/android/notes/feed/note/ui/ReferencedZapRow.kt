@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -17,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -37,55 +39,93 @@ fun ReferencedZapRow(
             .fillMaxWidth()
             .clip(RoundedCornerShape(percent = 100))
             .background(AppTheme.extraColorScheme.surfaceVariantAlt3)
-            .padding(8.dp)
-            .clip(RoundedCornerShape(percent = 100))
-            .background(AppTheme.colorScheme.surfaceVariant),
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .padding(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.Start),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        UniversalAvatarThumbnail(
-            avatarCdnImage = referencedZap.senderAvatarCdnImage,
-            legendaryCustomization = referencedZap.senderPrimalLegendProfile?.asLegendaryCustomization(),
-            onClick = { noteCallbacks.onProfileClick?.invoke(referencedZap.senderId) },
-        )
-
-        val numberFormat = NumberFormat.getNumberInstance()
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically),
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .clip(RoundedCornerShape(percent = 100))
+                .background(AppTheme.colorScheme.surfaceVariant),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Icon(
-                    imageVector = PrimalIcons.LightningBoltFilled,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = AppTheme.colorScheme.onPrimary,
-                )
-                Text(
-                    text = numberFormat.format(referencedZap.amountInSats.toLong()),
-                    fontWeight = FontWeight.ExtraBold,
-                    style = AppTheme.typography.bodyMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            if (referencedZap.message != null && referencedZap.message.isNotEmpty()) {
-                Text(
-                    text = referencedZap.message,
-                    style = AppTheme.typography.bodySmall,
-                    maxLines = 1,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
+            UniversalAvatarThumbnail(
+                avatarSize = 36.dp,
+                avatarCdnImage = referencedZap.senderAvatarCdnImage,
+                legendaryCustomization = referencedZap.senderPrimalLegendProfile?.asLegendaryCustomization(),
+                onClick = { noteCallbacks.onProfileClick?.invoke(referencedZap.senderId) },
+            )
+
+            ZapAmountAndMessageColumn(
+                amountInSats = referencedZap.amountInSats,
+                message = referencedZap.message,
+            )
+
+            UniversalAvatarThumbnail(
+                avatarSize = 36.dp,
+                avatarCdnImage = referencedZap.receiverAvatarCdnImage,
+                legendaryCustomization = referencedZap.receiverPrimalLegendProfile?.asLegendaryCustomization(),
+                onClick = { noteCallbacks.onProfileClick?.invoke(referencedZap.receiverId) },
+            )
         }
 
-        UniversalAvatarThumbnail(
-            avatarCdnImage = referencedZap.receiverAvatarCdnImage,
-            legendaryCustomization = referencedZap.receiverPrimalLegendProfile?.asLegendaryCustomization(),
-            onClick = { noteCallbacks.onProfileClick?.invoke(referencedZap.receiverId) },
+        if (referencedZap.receiverDisplayName != null) {
+            Text(
+                modifier = Modifier.padding(end = 8.dp),
+                text = referencedZap.receiverDisplayName,
+                style = AppTheme.typography.bodySmall,
+                fontSize = 14.sp,
+                maxLines = 1,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
+}
+
+@Composable
+fun ZapAmountAndMessageColumn(
+    amountInSats: Double,
+    message: String?,
+) {
+    val numberFormat = NumberFormat.getNumberInstance()
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = PrimalIcons.LightningBoltFilled,
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+                tint = AppTheme.colorScheme.onPrimary,
+            )
+            Text(
+                text = numberFormat.format(amountInSats.toLong()),
+                fontWeight = FontWeight.ExtraBold,
+                style = AppTheme.typography.bodySmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                color = AppTheme.colorScheme.onPrimary,
+            )
+        }
+        if (message != null && message.isNotEmpty()) {
+            Text(
+                text = message,
+                style = AppTheme.typography.bodySmall,
+                fontSize = 12.sp,
+                maxLines = 1,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
+}
+
         )
     }
 }
