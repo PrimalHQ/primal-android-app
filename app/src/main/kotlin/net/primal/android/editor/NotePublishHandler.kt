@@ -188,10 +188,12 @@ class NotePublishHandler @Inject constructor(
             val relayHint = relayHintsMap.getOrDefault(key = noteId, defaultValue = "")
             JsonArray(
                 it.toMutableList().apply {
-                    if (this.size > 2) {
-                        this[2] = JsonPrimitive(relayHint)
-                    } else {
-                        add(index = 2, JsonPrimitive(relayHint))
+                    if (relayHint.isNotEmpty()) {
+                        if (this.size > 2) {
+                            this[2] = JsonPrimitive(relayHint)
+                        } else {
+                            add(index = 2, JsonPrimitive(relayHint))
+                        }
                     }
                 },
             )

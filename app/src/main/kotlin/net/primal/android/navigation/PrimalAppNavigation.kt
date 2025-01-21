@@ -1,5 +1,6 @@
 package net.primal.android.navigation
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -11,7 +12,6 @@ import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
@@ -27,7 +27,6 @@ import androidx.navigation.navOptions
 import java.net.URLEncoder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.encodeToString
 import net.primal.android.articles.reads.ReadsScreen
 import net.primal.android.articles.reads.ReadsViewModel
 import net.primal.android.attachments.gallery.MediaGalleryScreen
@@ -45,7 +44,6 @@ import net.primal.android.bookmarks.list.BookmarksViewModel
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
-import net.primal.android.core.compose.findActivity
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.editor.NoteEditorScreen
@@ -400,16 +398,13 @@ fun SharedTransitionScope.PrimalAppNavigation() {
     }
 
     val splashViewModel: SplashViewModel = hiltViewModel()
-    val context = LocalContext.current
+    val activity = LocalActivity.current
     LaunchedEffect(navController, splashViewModel) {
         splashViewModel.effect.collect {
             when (it) {
                 SplashContract.SideEffect.NoActiveAccount -> navController.navigateToWelcome()
                 is SplashContract.SideEffect.ActiveAccount -> {
-                    val activity = context.findActivity()
-
                     val url = activity?.intent?.data?.toString()?.ifBlank { null }
-
                     when (url.handleDeeplink()) {
                         is DeepLink.Profile, is DeepLink.Note, null -> {
                             navController.navigateToHome()
