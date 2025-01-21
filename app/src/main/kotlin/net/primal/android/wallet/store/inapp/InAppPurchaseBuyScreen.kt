@@ -2,6 +2,7 @@ package net.primal.android.wallet.store.inapp
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -42,7 +43,6 @@ import kotlinx.coroutines.withContext
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.button.PrimalFilledButton
-import net.primal.android.core.compose.findActivity
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.store.domain.SatsPurchaseQuote
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
@@ -94,7 +94,7 @@ fun InAppPurchaseBuyBottomSheet(
     eventPublisher: (InAppPurchaseBuyContract.UiEvent) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val activity = LocalContext.current.findActivity()
+    val activity = LocalActivity.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(

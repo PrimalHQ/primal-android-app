@@ -7,5 +7,7 @@ enum class NoteAttachmentType {
     Pdf,
     YouTube,
     Rumble,
+    Spotify,
+    Tidal,
     Other,
 }

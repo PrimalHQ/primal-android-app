@@ -1,8 +1,7 @@
 package net.primal.android.editor.di
 
-import android.app.Activity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -19,9 +18,11 @@ interface NoteEditorViewModelFactory {
 
 @Composable
 fun noteEditorViewModel(args: NoteEditorArgs?): NoteEditorViewModel {
+    val activity = LocalActivity.current
+    checkNotNull(activity)
     val factory = EntryPointAccessors.fromActivity(
-        LocalContext.current as Activity,
-        ViewModelFactoryProvider::class.java,
+        activity = activity,
+        entryPoint = ViewModelFactoryProvider::class.java,
     ).noteEditorViewModelFactory()
 
     return viewModel(
