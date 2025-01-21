@@ -480,8 +480,7 @@ private fun TransactionNoteText(note: String) {
 @Composable
 private fun refineContentAsAnnotatedString(content: String): AnnotatedString {
     val uriLinks = content.parseUris()
-    val refinedContent = content
-        .trim()
+    val refinedContent = content.trim()
 
     return buildAnnotatedString {
         append(refinedContent)
