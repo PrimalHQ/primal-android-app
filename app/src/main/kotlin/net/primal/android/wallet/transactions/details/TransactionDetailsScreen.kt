@@ -64,7 +64,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -466,11 +465,14 @@ private fun TransactionNoteText(note: String) {
             .padding(bottom = 12.dp),
         style = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp),
         onClick = { position, offset ->
-            handleContentClicked(
-                contentText = contentText,
-                position = position,
-                localUriHandler = localUriHandler,
-            )
+            val annotation = contentText.getStringAnnotations(
+                start = position,
+                end = position,
+            ).firstOrNull()
+
+            if (annotation?.tag == URL_ANNOTATION_TAG) {
+                localUriHandler.openUriSafely(annotation.item)
+            }
         },
     )
 }
@@ -478,7 +480,6 @@ private fun TransactionNoteText(note: String) {
 @Composable
 private fun refineContentAsAnnotatedString(content: String): AnnotatedString {
     val uriLinks = content.parseUris()
-
     val refinedContent = content
         .trim()
 
@@ -488,21 +489,6 @@ private fun refineContentAsAnnotatedString(content: String): AnnotatedString {
         uriLinks.forEach { url ->
             addUrlAnnotation(url, refinedContent, AppTheme.colorScheme.secondary)
         }
-    }
-}
-
-private fun handleContentClicked(
-    contentText: AnnotatedString,
-    position: Int,
-    localUriHandler: UriHandler,
-) {
-    val annotation = contentText.getStringAnnotations(
-        start = position,
-        end = position,
-    ).firstOrNull()
-
-    if (annotation?.tag == URL_ANNOTATION_TAG) {
-        localUriHandler.openUriSafely(annotation.item)
     }
 }
 
