@@ -386,7 +386,9 @@ private fun ThreadLazyColumn(
                     contentFooter = {
                         if (highlighted) {
                             Column(
-                                modifier = Modifier.padding(horizontal = 10.dp),
+                                modifier = Modifier
+                                    .padding(top = 8.dp)
+                                    .padding(horizontal = 10.dp),
                             ) {
                                 if (item.eventZaps.isNotEmpty()) {
                                     ThreadNoteTopZapsSection(

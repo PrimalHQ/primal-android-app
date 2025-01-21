@@ -21,57 +21,54 @@ fun NoteAttachments(
     onMediaClick: ((MediaClickEvent) -> Unit)? = null,
 ) {
     val mediaAttachments = attachments.filter { it.isMediaAttachment() }
-    val linkAttachments = attachments.filterNot { it.isMediaAttachment() }
-    when {
-        mediaAttachments.isNotEmpty() -> {
-            NoteMediaAttachmentsHorizontalPager(
-                modifier = modifier,
-                mediaAttachments = mediaAttachments,
-                blossoms = blossoms,
-                onMediaClick = {
-                    when (it.noteAttachmentType) {
-                        NoteAttachmentType.Image, NoteAttachmentType.Video -> onMediaClick?.invoke(it)
-                        else -> onUrlClick?.invoke(it.mediaUrl)
-                    }
-                },
-            )
-        }
+    if (mediaAttachments.isNotEmpty()) {
+        NoteMediaAttachmentsHorizontalPager(
+            modifier = modifier,
+            mediaAttachments = mediaAttachments,
+            blossoms = blossoms,
+            onMediaClick = {
+                when (it.noteAttachmentType) {
+                    NoteAttachmentType.Image, NoteAttachmentType.Video -> onMediaClick?.invoke(it)
+                    else -> onUrlClick?.invoke(it.mediaUrl)
+                }
+            },
+        )
+    }
 
-        linkAttachments.size == 1 -> {
-            BoxWithConstraints(modifier = modifier) {
-                val attachment = linkAttachments.first()
-                when (attachment.type) {
-                    NoteAttachmentType.YouTube,
-                    NoteAttachmentType.Rumble,
-                    -> {
-                        val thumbnailImageSizeDp = findImageSize(attachment = attachment)
-                        NoteVideoLinkPreview(
+    val linkAttachments = attachments.filterNot { it.isMediaAttachment() }
+    linkAttachments.forEach { attachment ->
+        BoxWithConstraints(modifier = modifier) {
+            when (attachment.type) {
+                NoteAttachmentType.YouTube,
+                NoteAttachmentType.Rumble,
+                -> {
+                    val thumbnailImageSizeDp = findImageSize(attachment = attachment)
+                    NoteVideoLinkPreview(
+                        url = attachment.url,
+                        title = attachment.title,
+                        thumbnailUrl = attachment.thumbnailUrl,
+                        thumbnailImageSize = thumbnailImageSizeDp,
+                        type = attachment.type,
+                        onClick = if (onUrlClick != null) {
+                            { onUrlClick.invoke(attachment.url) }
+                        } else {
+                            null
+                        },
+                    )
+                }
+
+                else -> {
+                    if (!attachment.title.isNullOrBlank()) {
+                        NoteLinkPreview(
                             url = attachment.url,
                             title = attachment.title,
                             thumbnailUrl = attachment.thumbnailUrl,
-                            thumbnailImageSize = thumbnailImageSizeDp,
-                            type = attachment.type,
                             onClick = if (onUrlClick != null) {
                                 { onUrlClick.invoke(attachment.url) }
                             } else {
                                 null
                             },
                         )
-                    }
-
-                    else -> {
-                        if (!attachment.title.isNullOrBlank()) {
-                            NoteLinkPreview(
-                                url = attachment.url,
-                                title = attachment.title,
-                                thumbnailUrl = attachment.thumbnailUrl,
-                                onClick = if (onUrlClick != null) {
-                                    { onUrlClick.invoke(attachment.url) }
-                                } else {
-                                    null
-                                },
-                            )
-                        }
                     }
                 }
             }

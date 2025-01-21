@@ -269,6 +269,16 @@ fun NoteContent(
             )
         }
 
+        val referencedZaps = data.nostrUris.filter(type = NostrUriType.Zap)
+        referencedZaps.forEach {
+            it.referencedZap?.let {
+                ReferencedZapRow(
+                    referencedZap = it,
+                    noteCallbacks = noteCallbacks,
+                )
+            }
+        }
+
         val genericEvents = data.nostrUris.filter(type = NostrUriType.Unsupported)
         if (genericEvents.isNotEmpty()) {
             genericEvents.forEachIndexed { index, nostrUriUi ->
@@ -337,18 +347,12 @@ fun renderContentAsAnnotatedString(
     val mentionedUsers = data.nostrUris.filter(type = NostrUriType.Profile)
     val unhandledNostrAddressUris = data.nostrUris.filterUnhandledNostrAddressUris()
 
-    val shouldDeleteLinks = mediaAttachments.isEmpty() && linkAttachments.size == 1 &&
-        linkAttachments.first().let { singleLink ->
-            data.content.trim().endsWith(singleLink.url) &&
-                (!singleLink.title.isNullOrBlank() || !singleLink.description.isNullOrBlank())
-        }
-
     val refinedContent = data.content
         .cleanNostrUris()
         .replaceNostrProfileUrisWithHandles(resources = mentionedUsers)
         .remove(texts = mediaAttachments.map { it.url })
         .remove(texts = if (!shouldKeepNostrNoteUris) data.nostrUris.map { it.uri } else emptyList())
-        .remove(texts = if (shouldDeleteLinks) linkAttachments.map { it.url } else emptyList())
+        .remove(texts = linkAttachments.map { it.url })
         .remove(texts = data.invoices)
         .clearParsedPrimalLinks()
         .limitLineBreaks(maxBreaks = 2)
@@ -429,20 +433,25 @@ private fun AnnotatedString.Builder.addProfileAnnotation(
     highlightColor: Color,
 ) {
     val displayHandle = referencedUser.displayUsername
-    val startIndex = content.indexOf(displayHandle)
-    if (startIndex >= 0) {
+    var startIndex = content.indexOf(displayHandle)
+
+    while (startIndex >= 0) {
         val endIndex = startIndex + displayHandle.length
+
         addStyle(
             style = SpanStyle(color = highlightColor),
             start = startIndex,
             end = endIndex,
         )
+
         addStringAnnotation(
             tag = PROFILE_ID_ANNOTATION_TAG,
             annotation = referencedUser.userId,
             start = startIndex,
             end = endIndex,
         )
+
+        startIndex = content.indexOf(displayHandle, startIndex + 1)
     }
 }
 
@@ -514,6 +523,7 @@ fun PreviewPostContent() {
                             ),
                             referencedArticle = null,
                             referencedHighlight = null,
+                            referencedZap = null,
                         ),
                     ),
                     hashtags = listOf("#nostr"),
@@ -547,6 +557,7 @@ fun PreviewPostUnknownReferencedEventWithAlt() {
                             referencedUser = null,
                             referencedArticle = null,
                             referencedHighlight = null,
+                            referencedZap = null,
                         ),
                     ),
                     hashtags = listOf("#nostr"),
@@ -580,6 +591,7 @@ fun PreviewPostUnknownReferencedEventWithoutAlt() {
                             referencedUser = null,
                             referencedArticle = null,
                             referencedHighlight = null,
+                            referencedZap = null,
                         ),
                     ),
                     hashtags = listOf("#nostr"),
@@ -596,6 +608,7 @@ fun PreviewPostUnknownReferencedEventWithoutAlt() {
 
 @Preview
 @Composable
+@Suppress("LongMethod")
 fun PreviewPostContentWithReferencedPost() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         Surface {
@@ -633,6 +646,7 @@ fun PreviewPostContentWithReferencedPost() {
                             referencedArticle = null,
                             referencedEventAlt = null,
                             referencedHighlight = null,
+                            referencedZap = null,
                         ),
                         NoteNostrUriUi(
                             uri = "nostr:referenced2Post",
@@ -654,6 +668,7 @@ fun PreviewPostContentWithReferencedPost() {
                             referencedArticle = null,
                             referencedEventAlt = null,
                             referencedHighlight = null,
+                            referencedZap = null,
                         ),
                     ),
                     hashtags = listOf("#nostr"),

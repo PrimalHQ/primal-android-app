@@ -1,5 +1,6 @@
 package net.primal.android.premium.buying.purchase
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,7 +28,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
@@ -45,7 +45,6 @@ import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalFilledButton
-import net.primal.android.core.compose.findActivity
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.utils.isGoogleBuild
@@ -65,7 +64,7 @@ fun PremiumPurchaseStage(
     eventPublisher: (PremiumBuyingContract.UiEvent) -> Unit,
 ) {
     val uiScope = rememberCoroutineScope()
-    val activity = LocalContext.current.findActivity()
+    val activity = LocalActivity.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var promoCodeBottomSheetVisibility by remember { mutableStateOf(false) }
     LaunchedEffect(state.promoCodeValidity) {
