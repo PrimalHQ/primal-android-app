@@ -74,7 +74,7 @@ import net.primal.android.messages.conversation.MessageConversationListViewModel
 import net.primal.android.messages.conversation.MessageListScreen
 import net.primal.android.messages.conversation.create.NewConversationScreen
 import net.primal.android.navigation.deeplinking.DeepLink
-import net.primal.android.navigation.deeplinking.ext.handleDeeplink
+import net.primal.android.navigation.deeplinking.ext.parseDeepLinkOrNull
 import net.primal.android.navigation.splash.SplashContract
 import net.primal.android.navigation.splash.SplashScreen
 import net.primal.android.navigation.splash.SplashViewModel
@@ -405,9 +405,14 @@ fun SharedTransitionScope.PrimalAppNavigation() {
                 SplashContract.SideEffect.NoActiveAccount -> navController.navigateToWelcome()
                 is SplashContract.SideEffect.ActiveAccount -> {
                     val url = activity?.intent?.data?.toString()?.ifBlank { null }
-                    when (url.handleDeeplink()) {
-                        is DeepLink.Profile, is DeepLink.Note, null -> {
-                            navController.navigateToHome()
+                    when (val deepLink = url?.parseDeepLinkOrNull()) {
+                        is DeepLink.Note -> {
+                            navController.popBackStack()
+                            navController.navigateToThread(noteId = deepLink.noteId)
+                        }
+                        is DeepLink.Profile -> {
+                            navController.popBackStack()
+                            navController.navigateToProfile(profileId = deepLink.pubkey)
                         }
 
                         is DeepLink.NostrWalletConnect -> {
@@ -418,6 +423,8 @@ fun SharedTransitionScope.PrimalAppNavigation() {
                                 },
                             )
                         }
+
+                        null -> navController.navigateToHome()
                     }
                 }
             }
