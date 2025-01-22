@@ -32,6 +32,7 @@ import net.primal.android.core.compose.attachment.model.isMediaAttachment
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Document
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.compose.zaps.CompactZapItem
 import net.primal.android.core.utils.TextMatch
 import net.primal.android.core.utils.TextMatcher
 import net.primal.android.nostr.ext.cleanNostrUris
@@ -271,9 +272,17 @@ fun NoteContent(
 
         val referencedZaps = data.nostrUris.filter(type = NostrUriType.Zap)
         referencedZaps.forEach {
-            it.referencedZap?.let {
-                ReferencedZapRow(
-                    referencedZap = it,
+            it.referencedZap?.let { zap ->
+                CompactZapItem(
+                    senderId = zap.senderId,
+                    senderAvatarCdnImage = zap.senderAvatarCdnImage,
+                    senderPrimalLegendProfile = zap.senderPrimalLegendProfile,
+                    receiverId = zap.receiverId,
+                    receiverDisplayName = zap.receiverDisplayName,
+                    receiverAvatarCdnImage = zap.receiverAvatarCdnImage,
+                    receiverPrimalLegendProfile = zap.receiverPrimalLegendProfile,
+                    amountInSats = zap.amountInSats,
+                    message = zap.message,
                     noteCallbacks = noteCallbacks,
                 )
             }

@@ -1,4 +1,4 @@
-package net.primal.android.notes.feed.note.ui
+package net.primal.android.core.compose.zaps
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -21,21 +21,30 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
+import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.notes.db.ReferencedZap
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.asLegendaryCustomization
+import net.primal.android.profile.domain.PrimalLegendProfile
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
-fun ReferencedZapRow(
+fun CompactZapItem(
     modifier: Modifier = Modifier,
-    referencedZap: ReferencedZap,
     noteCallbacks: NoteCallbacks,
+    senderId: String,
+    receiverId: String,
+    amountInSats: Double,
+    message: String?,
+    senderAvatarCdnImage: CdnImage? = null,
+    senderPrimalLegendProfile: PrimalLegendProfile? = null,
+    receiverDisplayName: String?,
+    receiverAvatarCdnImage: CdnImage? = null,
+    receiverPrimalLegendProfile: PrimalLegendProfile? = null,
 ) {
     Row(
         modifier = modifier
@@ -56,28 +65,28 @@ fun ReferencedZapRow(
         ) {
             UniversalAvatarThumbnail(
                 avatarSize = 36.dp,
-                avatarCdnImage = referencedZap.senderAvatarCdnImage,
-                legendaryCustomization = referencedZap.senderPrimalLegendProfile?.asLegendaryCustomization(),
-                onClick = { noteCallbacks.onProfileClick?.invoke(referencedZap.senderId) },
+                avatarCdnImage = senderAvatarCdnImage,
+                legendaryCustomization = senderPrimalLegendProfile?.asLegendaryCustomization(),
+                onClick = { noteCallbacks.onProfileClick?.invoke(senderId) },
             )
 
             ZapAmountAndMessageColumn(
-                amountInSats = referencedZap.amountInSats,
-                message = referencedZap.message,
+                amountInSats = amountInSats,
+                message = message,
             )
 
             UniversalAvatarThumbnail(
                 avatarSize = 36.dp,
-                avatarCdnImage = referencedZap.receiverAvatarCdnImage,
-                legendaryCustomization = referencedZap.receiverPrimalLegendProfile?.asLegendaryCustomization(),
-                onClick = { noteCallbacks.onProfileClick?.invoke(referencedZap.receiverId) },
+                avatarCdnImage = receiverAvatarCdnImage,
+                legendaryCustomization = receiverPrimalLegendProfile?.asLegendaryCustomization(),
+                onClick = { noteCallbacks.onProfileClick?.invoke(receiverId) },
             )
         }
 
-        if (referencedZap.receiverDisplayName != null) {
+        if (receiverDisplayName != null) {
             Text(
                 modifier = Modifier.padding(end = 8.dp),
-                text = referencedZap.receiverDisplayName,
+                text = receiverDisplayName,
                 style = AppTheme.typography.bodySmall,
                 fontSize = 14.sp,
                 maxLines = 1,
@@ -130,21 +139,18 @@ fun ZapAmountAndMessageColumn(amountInSats: Double, message: String?) {
 @Composable
 fun PreviewMessageAndDisplayName() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
-        ReferencedZapRow(
+        CompactZapItem(
             modifier = Modifier.width(300.dp),
             noteCallbacks = NoteCallbacks(),
-            referencedZap = ReferencedZap(
-                senderId = "",
-                senderAvatarCdnImage = null,
-                senderPrimalLegendProfile = null,
-                receiverId = "",
-                receiverDisplayName = "qauser",
-                receiverAvatarCdnImage = null,
-                receiverPrimalLegendProfile = null,
-                zappedEventId = null,
-                amountInSats = 1000.0,
-                message = "Onwards!",
-            ),
+            senderId = "",
+            senderAvatarCdnImage = null,
+            senderPrimalLegendProfile = null,
+            receiverId = "",
+            receiverDisplayName = "qauser",
+            receiverAvatarCdnImage = null,
+            receiverPrimalLegendProfile = null,
+            amountInSats = 1000.0,
+            message = "Onwards!",
         )
     }
 }
@@ -153,21 +159,18 @@ fun PreviewMessageAndDisplayName() {
 @Composable
 fun PreviewNoMessageAndDisplayName() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
-        ReferencedZapRow(
+        CompactZapItem(
             modifier = Modifier.width(300.dp),
             noteCallbacks = NoteCallbacks(),
-            referencedZap = ReferencedZap(
-                senderId = "",
-                senderAvatarCdnImage = null,
-                senderPrimalLegendProfile = null,
-                receiverId = "",
-                receiverDisplayName = "qauser",
-                receiverAvatarCdnImage = null,
-                receiverPrimalLegendProfile = null,
-                zappedEventId = null,
-                amountInSats = 1000.0,
-                message = null,
-            ),
+            senderId = "",
+            senderAvatarCdnImage = null,
+            senderPrimalLegendProfile = null,
+            receiverId = "",
+            receiverDisplayName = "qauser",
+            receiverAvatarCdnImage = null,
+            receiverPrimalLegendProfile = null,
+            amountInSats = 1000.0,
+            message = null,
         )
     }
 }
@@ -176,21 +179,18 @@ fun PreviewNoMessageAndDisplayName() {
 @Composable
 fun PreviewNoMessageAndNoDisplayName() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
-        ReferencedZapRow(
+        CompactZapItem(
             modifier = Modifier.width(300.dp),
             noteCallbacks = NoteCallbacks(),
-            referencedZap = ReferencedZap(
-                senderId = "",
-                senderAvatarCdnImage = null,
-                senderPrimalLegendProfile = null,
-                receiverId = "",
-                receiverDisplayName = null,
-                receiverAvatarCdnImage = null,
-                receiverPrimalLegendProfile = null,
-                zappedEventId = null,
-                amountInSats = 1000.0,
-                message = null,
-            ),
+            senderId = "",
+            senderAvatarCdnImage = null,
+            senderPrimalLegendProfile = null,
+            receiverId = "",
+            receiverDisplayName = null,
+            receiverAvatarCdnImage = null,
+            receiverPrimalLegendProfile = null,
+            amountInSats = 1000.0,
+            message = null,
         )
     }
 }
@@ -199,21 +199,18 @@ fun PreviewNoMessageAndNoDisplayName() {
 @Composable
 fun PreviewMessageAndNoDisplayName() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
-        ReferencedZapRow(
+        CompactZapItem(
             modifier = Modifier.width(300.dp),
             noteCallbacks = NoteCallbacks(),
-            referencedZap = ReferencedZap(
-                senderId = "",
-                senderAvatarCdnImage = null,
-                senderPrimalLegendProfile = null,
-                receiverId = "",
-                receiverDisplayName = null,
-                receiverAvatarCdnImage = null,
-                receiverPrimalLegendProfile = null,
-                zappedEventId = null,
-                amountInSats = 1000.0,
-                message = "Onwards!",
-            ),
+            senderId = "",
+            senderAvatarCdnImage = null,
+            senderPrimalLegendProfile = null,
+            receiverId = "",
+            receiverDisplayName = null,
+            receiverAvatarCdnImage = null,
+            receiverPrimalLegendProfile = null,
+            amountInSats = 1000.0,
+            message = "Onwards!",
         )
     }
 }
