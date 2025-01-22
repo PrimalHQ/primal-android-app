@@ -37,7 +37,6 @@ import net.primal.android.core.compose.zaps.CompactZapItem
 import net.primal.android.core.compose.zaps.ZapItem
 import net.primal.android.core.utils.TextMatch
 import net.primal.android.core.utils.TextMatcher
-import net.primal.android.core.utils.ifNotNull
 import net.primal.android.nostr.ext.cleanNostrUris
 import net.primal.android.notes.db.ReferencedNote
 import net.primal.android.notes.db.ReferencedUser

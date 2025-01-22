@@ -18,8 +18,6 @@ import net.primal.android.R
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.zaps.ZapItem
-import net.primal.android.notes.feed.model.NoteContentUi
-import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 

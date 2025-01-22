@@ -34,7 +34,6 @@ import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 
-
 @Composable
 fun ZapItem(
     senderId: String?,
@@ -201,4 +200,3 @@ private fun ZapHeader(
         }
     }
 }
-
