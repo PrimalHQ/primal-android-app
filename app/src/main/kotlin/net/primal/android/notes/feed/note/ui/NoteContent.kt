@@ -23,6 +23,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import java.time.Instant
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
@@ -33,16 +34,20 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Document
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.zaps.CompactZapItem
+import net.primal.android.core.compose.zaps.ZapItem
 import net.primal.android.core.utils.TextMatch
 import net.primal.android.core.utils.TextMatcher
+import net.primal.android.core.utils.ifNotNull
 import net.primal.android.nostr.ext.cleanNostrUris
 import net.primal.android.notes.db.ReferencedNote
 import net.primal.android.notes.db.ReferencedUser
 import net.primal.android.notes.feed.model.NoteContentUi
 import net.primal.android.notes.feed.model.NoteNostrUriUi
+import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.notes.feed.note.ui.attachment.NoteAttachments
 import net.primal.android.notes.feed.note.ui.events.InvoicePayClickEvent
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
+import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -273,18 +278,40 @@ fun NoteContent(
         val referencedZaps = data.nostrUris.filter(type = NostrUriType.Zap)
         referencedZaps.forEach {
             it.referencedZap?.let { zap ->
-                CompactZapItem(
-                    senderId = zap.senderId,
-                    senderAvatarCdnImage = zap.senderAvatarCdnImage,
-                    senderPrimalLegendProfile = zap.senderPrimalLegendProfile,
-                    receiverId = zap.receiverId,
-                    receiverDisplayName = zap.receiverDisplayName,
-                    receiverAvatarCdnImage = zap.receiverAvatarCdnImage,
-                    receiverPrimalLegendProfile = zap.receiverPrimalLegendProfile,
-                    amountInSats = zap.amountInSats,
-                    message = zap.message,
-                    noteCallbacks = noteCallbacks,
-                )
+                if (zap.zappedEventId != null && zap.zappedEventContent?.isNotEmpty() == true) {
+                    ZapItem(
+                        senderId = zap.senderId,
+                        receiverId = zap.receiverId,
+                        noteContentUi = NoteContentUi(
+                            noteId = zap.zappedEventId,
+                            content = zap.zappedEventContent,
+                            nostrUris = zap.zappedEventNostrUris.map { it.asNoteNostrUriUi() },
+                            hashtags = zap.zappedEventHashtags,
+                        ),
+                        amountInSats = zap.amountInSats.toULong(),
+                        createdAt = Instant.ofEpochSecond(zap.createdAt),
+                        noteCallbacks = noteCallbacks,
+                        message = zap.message,
+                        senderAvatarCdnImage = zap.senderAvatarCdnImage,
+                        senderLegendaryCustomization = zap.senderPrimalLegendProfile?.asLegendaryCustomization(),
+                        receiverDisplayName = zap.receiverDisplayName,
+                        receiverAvatarCdnImage = zap.receiverAvatarCdnImage,
+                        receiverLegendaryCustomization = zap.senderPrimalLegendProfile?.asLegendaryCustomization(),
+                    )
+                } else {
+                    CompactZapItem(
+                        senderId = zap.senderId,
+                        senderAvatarCdnImage = zap.senderAvatarCdnImage,
+                        senderPrimalLegendProfile = zap.senderPrimalLegendProfile,
+                        receiverId = zap.receiverId,
+                        receiverDisplayName = zap.receiverDisplayName,
+                        receiverAvatarCdnImage = zap.receiverAvatarCdnImage,
+                        receiverPrimalLegendProfile = zap.receiverPrimalLegendProfile,
+                        amountInSats = zap.amountInSats,
+                        message = zap.message,
+                        noteCallbacks = noteCallbacks,
+                    )
+                }
             }
         }
 
