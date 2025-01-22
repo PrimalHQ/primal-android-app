@@ -21,7 +21,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -36,7 +35,6 @@ import net.primal.android.core.compose.icons.primaliconpack.Play
 import net.primal.android.core.compose.icons.primaliconpack.SpotifyLogoDark
 import net.primal.android.core.compose.icons.primaliconpack.SpotifyLogoLight
 import net.primal.android.core.compose.icons.primaliconpack.TidalLogo
-import net.primal.android.core.ext.openUriSafely
 import net.primal.android.notes.feed.note.ui.attachment.NoteImageErrorImage
 import net.primal.android.notes.feed.note.ui.attachment.NoteImageLoadingPlaceholder
 import net.primal.android.theme.AppTheme
@@ -47,13 +45,12 @@ val TIDAL_LIGHT_TINT = Color(0xFF111111)
 @Composable
 fun NoteAudioLinkPreview(
     modifier: Modifier = Modifier,
-    url: String,
     title: String?,
     description: String?,
     thumbnailUrl: String?,
     attachmentType: NoteAttachmentType,
+    onPlayClick: () -> Unit,
 ) {
-    val uriHandler = LocalUriHandler.current
     Row(
         modifier = modifier
             .clip(AppTheme.shapes.small)
@@ -78,17 +75,15 @@ fun NoteAudioLinkPreview(
             error = { NoteImageErrorImage() },
         )
 
-        if (title != null) {
-            AudioInfoColumn(
-                modifier = Modifier
-                    .height(150.dp)
-                    .padding(vertical = 12.dp),
-                title = title,
-                description = description,
-                attachmentType = attachmentType,
-                onPlayClick = { uriHandler.openUriSafely(url) },
-            )
-        }
+        AudioInfoColumn(
+            modifier = Modifier
+                .height(150.dp)
+                .padding(vertical = 12.dp),
+            title = title ?: stringResource(R.string.feed_note_render_unknown_audio_title),
+            description = description,
+            attachmentType = attachmentType,
+            onPlayClick = onPlayClick,
+        )
     }
 }
 

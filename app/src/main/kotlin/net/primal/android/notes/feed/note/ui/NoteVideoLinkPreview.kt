@@ -43,11 +43,12 @@ fun NoteVideoLinkPreview(
     thumbnailUrl: String?,
     thumbnailImageSize: DpSize,
     type: NoteAttachmentType,
+    modifier: Modifier = Modifier,
+    loading: Boolean = false,
     onClick: (() -> Unit)? = null,
 ) {
     Column(
-        modifier = Modifier
-            .padding(top = 4.dp, bottom = 8.dp)
+        modifier = modifier
             .background(
                 color = AppTheme.extraColorScheme.surfaceVariantAlt3,
                 shape = AppTheme.shapes.small,
@@ -55,63 +56,20 @@ fun NoteVideoLinkPreview(
             .clickable(enabled = onClick != null, onClick = { onClick?.invoke() }),
     ) {
         if (thumbnailUrl != null) {
-            Box(
-                contentAlignment = Alignment.Center,
-            ) {
-                SubcomposeAsyncImage(
-                    model = thumbnailUrl,
-                    modifier = Modifier
-                        .clip(
-                            shape = AppTheme.shapes.small.copy(
-                                bottomStart = CornerSize(0.dp),
-                                bottomEnd = CornerSize(0.dp),
-                            ),
-                        )
-                        .width(thumbnailImageSize.width)
-                        .height(thumbnailImageSize.height),
-                    contentDescription = null,
-                    contentScale = ContentScale.FillHeight,
-                    loading = { NoteImageLoadingPlaceholder() },
-                )
-
-                PlayButton(
-                    onClick = { onClick?.invoke() },
-                )
-            }
+            VideoThumbnailImage(
+                thumbnailUrl = thumbnailUrl,
+                thumbnailImageSize = thumbnailImageSize,
+                loading = loading,
+                onClick = onClick,
+            )
         }
 
         val tld = url.extractTLD()
         if (tld != null) {
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 16.dp, bottom = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                val iconResId = when (type) {
-                    NoteAttachmentType.YouTube -> R.drawable.youtube_logo
-                    NoteAttachmentType.Rumble -> R.drawable.rumble_logo
-                    else -> null
-                }
-                if (iconResId != null) {
-                    Image(
-                        modifier = Modifier
-                            .padding(end = 8.dp)
-                            .size(18.dp),
-                        painter = painterResource(iconResId),
-                        contentDescription = null,
-                    )
-                }
-                IconText(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    text = tld,
-                    maxLines = 1,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                    style = AppTheme.typography.bodyMedium,
-                )
-            }
+            TopLevelDomainText(
+                text = tld,
+                type = type,
+            )
         }
 
         if (title != null) {
@@ -129,6 +87,73 @@ fun NoteVideoLinkPreview(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+@Composable
+private fun VideoThumbnailImage(
+    thumbnailUrl: String?,
+    thumbnailImageSize: DpSize,
+    loading: Boolean,
+    onClick: (() -> Unit)?,
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+    ) {
+        SubcomposeAsyncImage(
+            model = thumbnailUrl,
+            modifier = Modifier
+                .clip(
+                    shape = AppTheme.shapes.small.copy(
+                        bottomStart = CornerSize(0.dp),
+                        bottomEnd = CornerSize(0.dp),
+                    ),
+                )
+                .width(thumbnailImageSize.width)
+                .height(thumbnailImageSize.height),
+            contentDescription = null,
+            contentScale = ContentScale.FillHeight,
+            loading = { NoteImageLoadingPlaceholder() },
+        )
+
+        PlayButton(
+            loading = loading,
+            onClick = onClick,
+        )
+    }
+}
+
+@Composable
+private fun TopLevelDomainText(text: String, type: NoteAttachmentType) {
+    Row(
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .padding(top = 16.dp, bottom = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        val iconResId = when (type) {
+            NoteAttachmentType.YouTube -> R.drawable.youtube_logo
+            NoteAttachmentType.Rumble -> R.drawable.rumble_logo
+            else -> null
+        }
+        if (iconResId != null) {
+            Image(
+                modifier = Modifier
+                    .padding(end = 8.dp)
+                    .size(18.dp),
+                painter = painterResource(iconResId),
+                contentDescription = null,
+            )
+        }
+        IconText(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
+            text = text,
+            maxLines = 1,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+            style = AppTheme.typography.bodyMedium,
+        )
     }
 }
 
