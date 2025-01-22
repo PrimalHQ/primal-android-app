@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -56,8 +57,7 @@ fun NoteAudioLinkPreview(
     Row(
         modifier = modifier
             .clip(AppTheme.shapes.small)
-            .background(AppTheme.extraColorScheme.surfaceVariantAlt3)
-            .padding(12.dp),
+            .background(AppTheme.extraColorScheme.surfaceVariantAlt3),
         horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -66,7 +66,12 @@ fun NoteAudioLinkPreview(
             modifier = Modifier
                 .size(150.dp)
                 .aspectRatio(1f)
-                .clip(shape = AppTheme.shapes.small),
+                .clip(
+                    shape = AppTheme.shapes.small.copy(
+                        topEnd = CornerSize(0.dp),
+                        bottomEnd = CornerSize(0.dp),
+                    ),
+                ),
             contentDescription = null,
             contentScale = ContentScale.FillHeight,
             loading = { NoteImageLoadingPlaceholder() },
@@ -75,7 +80,9 @@ fun NoteAudioLinkPreview(
 
         if (title != null) {
             AudioInfoColumn(
-                modifier = Modifier.height(150.dp),
+                modifier = Modifier
+                    .height(150.dp)
+                    .padding(vertical = 12.dp),
                 title = title,
                 description = description,
                 attachmentType = attachmentType,
@@ -153,7 +160,7 @@ private fun TitleDescriptionColumn(
         Text(
             text = title,
             style = AppTheme.typography.bodyMedium,
-            fontSize = 14.sp,
+            fontSize = 16.sp,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             color = AppTheme.colorScheme.onPrimary,
