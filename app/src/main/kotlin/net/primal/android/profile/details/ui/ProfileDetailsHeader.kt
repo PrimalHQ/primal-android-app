@@ -70,7 +70,7 @@ fun ProfileDetailsHeader(
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onPremiumBadgeClick: (tier: String) -> Unit,
+    onPremiumBadgeClick: (tier: String, profileId: String) -> Unit,
 ) {
     ProfileHeaderDetails(
         state = state,
@@ -122,7 +122,7 @@ private fun ProfileHeaderDetails(
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onPremiumBadgeClick: (tier: String) -> Unit,
+    onPremiumBadgeClick: (tier: String, profileId: String) -> Unit,
 ) {
     val localUriHandler = LocalUriHandler.current
 
@@ -150,6 +150,7 @@ private fun ProfileHeaderDetails(
         )
 
         UserDisplayName(
+            profileId = state.profileId,
             displayName = state.profileDetails?.authorDisplayName ?: state.profileId.asEllipsizedNpub(),
             internetIdentifier = state.profileDetails?.internetIdentifier,
             profilePremiumDetails = state.profileDetails?.premiumDetails,
@@ -334,11 +335,12 @@ private fun ProfileFollowIndicators(
 @Composable
 private fun UserDisplayName(
     modifier: Modifier = Modifier,
+    profileId: String,
     displayName: String,
     internetIdentifier: String?,
     profilePremiumDetails: PremiumProfileDataUi?,
     activeUserPremiumTier: String?,
-    onPremiumBadgeClick: (tier: String) -> Unit,
+    onPremiumBadgeClick: (tier: String, profileId: String) -> Unit,
 ) {
     Row(
         modifier = modifier.padding(top = 12.dp, bottom = 3.dp),
@@ -365,7 +367,7 @@ private fun UserDisplayName(
         if (profilePremiumDetails?.shouldShowPremiumBadge() == true) {
             ProfilePremiumBadge(
                 modifier = if (isPremiumBadgeClickable && profilePremiumDetails.tier != null) {
-                    Modifier.clickable { onPremiumBadgeClick(profilePremiumDetails.tier) }
+                    Modifier.clickable { onPremiumBadgeClick(profilePremiumDetails.tier, profileId) }
                 } else {
                     Modifier
                 },
@@ -378,7 +380,7 @@ private fun UserDisplayName(
 }
 
 @Composable
-private fun ProfilePremiumBadge(
+fun ProfilePremiumBadge(
     modifier: Modifier = Modifier,
     firstCohort: String,
     secondCohort: String,
@@ -506,7 +508,7 @@ private fun PreviewProfileHeaderDetails() {
                 onFollowsClick = { _, _ -> },
                 onProfileClick = {},
                 onHashtagClick = {},
-                onPremiumBadgeClick = {},
+                onPremiumBadgeClick = { _, _ -> },
             )
         }
     }
