@@ -93,7 +93,7 @@ import net.primal.android.wallet.db.WalletTransactionData
         ArticleFeedCrossRef::class,
         HighlightData::class,
     ],
-    version = 53,
+    version = 54,
     exportSchema = true,
 )
 @TypeConverters(
