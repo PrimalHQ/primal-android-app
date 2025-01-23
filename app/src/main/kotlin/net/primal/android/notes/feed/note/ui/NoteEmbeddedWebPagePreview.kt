@@ -85,5 +85,15 @@ fun NoteEmbeddedWebPagePreview(
                 loadUrl(url)
             }
         },
+        onReset = { webView -> webView.release() },
+        onRelease = { webView -> webView.release() },
     )
+}
+
+private fun WebView.release() {
+    this.stopLoading()
+    this.clearHistory()
+    this.clearCache(true)
+    this.loadUrl("about:blank")
+    this.destroy()
 }
