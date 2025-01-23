@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -37,9 +36,6 @@ import net.primal.android.core.compose.icons.primaliconpack.Play
 import net.primal.android.notes.feed.note.ui.attachment.NoteImageErrorImage
 import net.primal.android.notes.feed.note.ui.attachment.NoteImageLoadingPlaceholder
 import net.primal.android.theme.AppTheme
-
-val TIDAL_DARK_TINT = Color(0xFFD9D9D9)
-val TIDAL_LIGHT_TINT = Color(0xFF111111)
 
 @Composable
 fun NoteAudioLinkPreview(

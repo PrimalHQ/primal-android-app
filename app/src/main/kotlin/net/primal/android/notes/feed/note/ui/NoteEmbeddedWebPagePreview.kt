@@ -21,12 +21,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.primal.android.core.ext.openUriSafely
 
-enum class EmbeddedWebPageState {
-    Idle,
-    Initializing,
-    Ready,
-}
-
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun NoteEmbeddedWebPagePreview(
@@ -96,4 +90,10 @@ private fun WebView.release() {
     this.clearCache(true)
     this.loadUrl("about:blank")
     this.destroy()
+}
+
+enum class EmbeddedWebPageState {
+    Idle,
+    Initializing,
+    Ready,
 }

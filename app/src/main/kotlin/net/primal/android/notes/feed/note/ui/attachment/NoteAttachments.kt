@@ -97,20 +97,18 @@ fun NoteAttachments(
                     )
                 }
 
-                else -> {
-                    if (!attachment.title.isNullOrBlank()) {
-                        NoteLinkPreview(
-                            modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
-                            url = attachment.url,
-                            title = attachment.title,
-                            thumbnailUrl = attachment.thumbnailUrl,
-                            onClick = if (onUrlClick != null) {
-                                { onUrlClick.invoke(attachment.url) }
-                            } else {
-                                null
-                            },
-                        )
-                    }
+                else -> if (!attachment.title.isNullOrBlank()) {
+                    NoteLinkPreview(
+                        modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
+                        url = attachment.url,
+                        title = attachment.title,
+                        thumbnailUrl = attachment.thumbnailUrl,
+                        onClick = if (onUrlClick != null) {
+                            { onUrlClick.invoke(attachment.url) }
+                        } else {
+                            null
+                        },
+                    )
                 }
             }
         }

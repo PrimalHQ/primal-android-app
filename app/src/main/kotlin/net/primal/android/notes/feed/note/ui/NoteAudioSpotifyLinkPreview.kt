@@ -1,7 +1,6 @@
 package net.primal.android.notes.feed.note.ui
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -21,30 +20,21 @@ import kotlin.time.Duration.Companion.milliseconds
 import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.theme.AppTheme
 
-private fun String.convertToSpotifyEmbedUrl(): String? {
-    return try {
+private fun String.convertToSpotifyEmbedUrl(): String? =
+    runCatching {
         val urlComponents = URL(this)
-        val path = urlComponents.path ?: run {
-            println("Unable to parse Spotify URL path")
-            return null
+        val pathComponents = urlComponents.path
+            ?.split("/")
+            ?.filter { it.isNotBlank() }
+
+        return if (pathComponents != null && pathComponents.size >= 2) {
+            val type = pathComponents[0]
+            val id = pathComponents[1]
+            "https://open.spotify.com/embed/$type/$id?autoplay=1"
+        } else {
+            ""
         }
-
-        // Split the path to extract type and ID
-        val pathComponents = path.split("/").filter { it.isNotBlank() }
-        if (pathComponents.size < 2) {
-            println("Invalid Spotify URL path components")
-            return null
-        }
-
-        val type = pathComponents[0]
-        val id = pathComponents[1]
-
-        return "https://open.spotify.com/embed/$type/$id?autoplay=1"
-    } catch (e: Exception) {
-        println("Invalid Spotify URL: ${e.message}")
-        null
-    }
-}
+    }.getOrNull()
 
 @Composable
 fun NoteAudioSpotifyLinkPreview(
