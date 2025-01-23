@@ -85,6 +85,7 @@ fun NoteAudioSpotifyLinkPreview(
                 description = description,
                 thumbnailUrl = thumbnailUrl,
                 attachmentType = NoteAttachmentType.Spotify,
+                loading = embeddedWebState == EmbeddedWebPageState.Initializing,
                 onPlayClick = {
                     if (embedUrl != null) {
                         embeddedWebState = EmbeddedWebPageState.Initializing

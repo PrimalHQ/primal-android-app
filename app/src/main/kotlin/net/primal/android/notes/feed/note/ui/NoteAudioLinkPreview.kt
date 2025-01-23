@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,6 +50,7 @@ fun NoteAudioLinkPreview(
     thumbnailUrl: String?,
     attachmentType: NoteAttachmentType,
     onPlayClick: () -> Unit,
+    loading: Boolean = false,
 ) {
     Row(
         modifier = modifier
@@ -83,6 +85,7 @@ fun NoteAudioLinkPreview(
             description = description,
             attachmentType = attachmentType,
             onPlayClick = onPlayClick,
+            loading = loading,
         )
     }
 }
@@ -93,6 +96,7 @@ private fun AudioInfoColumn(
     title: String,
     description: String?,
     attachmentType: NoteAttachmentType,
+    loading: Boolean,
     onPlayClick: () -> Unit,
 ) {
     Column(
@@ -112,30 +116,39 @@ private fun AudioInfoColumn(
         )
 
         Button(
+            modifier = Modifier.size(width = 72.dp, height = 32.dp),
             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-            modifier = Modifier.height(32.dp),
+            enabled = !loading,
             onClick = onPlayClick,
             colors = ButtonDefaults.buttonColors(
                 containerColor = AppTheme.colorScheme.onPrimary,
                 contentColor = AppTheme.colorScheme.surfaceVariant,
             ),
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.Top,
-            ) {
-                Icon(
+            if (loading) {
+                CircularProgressIndicator(
                     modifier = Modifier.size(12.dp),
-                    imageVector = PrimalIcons.Play,
-                    contentDescription = null,
-                    tint = AppTheme.colorScheme.surfaceVariant,
+                    strokeWidth = 2.dp,
+                    color = AppTheme.colorScheme.onSurface,
                 )
-                Text(
-                    text = stringResource(R.string.feed_note_render_play_button),
-                    style = AppTheme.typography.bodySmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = AppTheme.colorScheme.surfaceVariant,
-                )
+            } else {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                    verticalAlignment = Alignment.Top,
+                ) {
+                    Icon(
+                        modifier = Modifier.size(12.dp),
+                        imageVector = PrimalIcons.Play,
+                        contentDescription = null,
+                        tint = AppTheme.colorScheme.surfaceVariant,
+                    )
+                    Text(
+                        text = stringResource(R.string.feed_note_render_play_button),
+                        style = AppTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = AppTheme.colorScheme.surfaceVariant,
+                    )
+                }
             }
         }
     }
