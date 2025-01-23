@@ -35,7 +35,7 @@ import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun ZapItem(
+fun ReferencedNoteZap(
     senderId: String?,
     receiverId: String?,
     noteContentUi: NoteContentUi,

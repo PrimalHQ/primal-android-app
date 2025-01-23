@@ -17,7 +17,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import net.primal.android.R
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.ListNoContent
-import net.primal.android.core.compose.zaps.ZapItem
+import net.primal.android.core.compose.zaps.ReferencedNoteZap
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 
@@ -74,7 +74,7 @@ private fun ExploreZaps(
             ) {
                 item { Spacer(modifier = Modifier.height(4.dp)) }
                 items(items = state.zaps) { item ->
-                    ZapItem(
+                    ReferencedNoteZap(
                         senderId = item.sender?.pubkey,
                         receiverId = item.receiver?.pubkey,
                         noteContentUi = item.noteContentUi,

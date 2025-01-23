@@ -33,8 +33,8 @@ import net.primal.android.core.compose.attachment.model.isMediaAttachment
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Document
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.core.compose.zaps.CompactZapItem
-import net.primal.android.core.compose.zaps.ZapItem
+import net.primal.android.core.compose.zaps.ReferencedNoteZap
+import net.primal.android.core.compose.zaps.ReferencedZap
 import net.primal.android.core.utils.TextMatch
 import net.primal.android.core.utils.TextMatcher
 import net.primal.android.nostr.ext.cleanNostrUris
@@ -275,10 +275,11 @@ fun NoteContent(
         }
 
         val referencedZaps = data.nostrUris.filter(type = NostrUriType.Zap)
-        referencedZaps.forEach {
-            it.referencedZap?.let { zap ->
+        referencedZaps
+            .mapNotNull { it.referencedZap }
+            .forEach { zap ->
                 if (zap.zappedEventId != null && zap.zappedEventContent?.isNotEmpty() == true) {
-                    ZapItem(
+                    ReferencedNoteZap(
                         senderId = zap.senderId,
                         receiverId = zap.receiverId,
                         noteContentUi = NoteContentUi(
@@ -298,7 +299,7 @@ fun NoteContent(
                         receiverLegendaryCustomization = zap.senderPrimalLegendProfile?.asLegendaryCustomization(),
                     )
                 } else {
-                    CompactZapItem(
+                    ReferencedZap(
                         senderId = zap.senderId,
                         senderAvatarCdnImage = zap.senderAvatarCdnImage,
                         senderPrimalLegendProfile = zap.senderPrimalLegendProfile,
@@ -312,7 +313,6 @@ fun NoteContent(
                     )
                 }
             }
-        }
 
         val genericEvents = data.nostrUris.filter(type = NostrUriType.Unsupported)
         if (genericEvents.isNotEmpty()) {

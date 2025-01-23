@@ -33,7 +33,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
-fun CompactZapItem(
+fun ReferencedZap(
     modifier: Modifier = Modifier,
     noteCallbacks: NoteCallbacks,
     senderId: String,
@@ -139,7 +139,7 @@ fun ZapAmountAndMessageColumn(amountInSats: Double, message: String?) {
 @Composable
 fun PreviewMessageAndDisplayName() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
-        CompactZapItem(
+        ReferencedZap(
             modifier = Modifier.width(300.dp),
             noteCallbacks = NoteCallbacks(),
             senderId = "",
@@ -159,7 +159,7 @@ fun PreviewMessageAndDisplayName() {
 @Composable
 fun PreviewNoMessageAndDisplayName() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
-        CompactZapItem(
+        ReferencedZap(
             modifier = Modifier.width(300.dp),
             noteCallbacks = NoteCallbacks(),
             senderId = "",
@@ -179,7 +179,7 @@ fun PreviewNoMessageAndDisplayName() {
 @Composable
 fun PreviewNoMessageAndNoDisplayName() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
-        CompactZapItem(
+        ReferencedZap(
             modifier = Modifier.width(300.dp),
             noteCallbacks = NoteCallbacks(),
             senderId = "",
@@ -199,7 +199,7 @@ fun PreviewNoMessageAndNoDisplayName() {
 @Composable
 fun PreviewMessageAndNoDisplayName() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
-        CompactZapItem(
+        ReferencedZap(
             modifier = Modifier.width(300.dp),
             noteCallbacks = NoteCallbacks(),
             senderId = "",
