@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -53,16 +52,16 @@ fun NoteAudioLinkPreview(
 ) {
     Row(
         modifier = modifier
-            .clip(AppTheme.shapes.small)
-            .background(AppTheme.extraColorScheme.surfaceVariantAlt3),
-        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+            .background(
+                color = AppTheme.extraColorScheme.surfaceVariantAlt3,
+                shape = AppTheme.shapes.small,
+            ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         SubcomposeAsyncImage(
             model = thumbnailUrl,
             modifier = Modifier
                 .size(150.dp)
-                .aspectRatio(1f)
                 .clip(
                     shape = AppTheme.shapes.small.copy(
                         topEnd = CornerSize(0.dp),
@@ -78,6 +77,7 @@ fun NoteAudioLinkPreview(
         AudioInfoColumn(
             modifier = Modifier
                 .height(150.dp)
+                .padding(start = 10.dp)
                 .padding(vertical = 12.dp),
             title = title ?: stringResource(R.string.feed_note_render_unknown_audio_title),
             description = description,

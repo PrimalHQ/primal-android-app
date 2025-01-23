@@ -61,7 +61,7 @@ fun NoteAudioTidalLinkPreview(
                 title = title,
                 description = description,
                 thumbnailUrl = thumbnailUrl,
-                attachmentType = NoteAttachmentType.Spotify,
+                attachmentType = NoteAttachmentType.Tidal,
                 onPlayClick = { embeddedWebState = EmbeddedWebPageState.Initializing },
             )
         }
