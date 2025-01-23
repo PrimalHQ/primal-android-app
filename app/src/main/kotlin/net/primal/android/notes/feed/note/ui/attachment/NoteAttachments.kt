@@ -60,7 +60,6 @@ fun NoteAttachments(
                 NoteAttachmentType.Rumble -> {
                     NoteVideoLinkPreview(
                         modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
-                        url = attachment.url,
                         title = attachment.title,
                         thumbnailUrl = attachment.thumbnailUrl,
                         thumbnailImageSize = thumbnailImageSizeDp,
@@ -75,7 +74,9 @@ fun NoteAttachments(
 
                 NoteAttachmentType.Spotify -> {
                     NoteAudioSpotifyLinkPreview(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp, bottom = 8.dp),
                         url = attachment.url,
                         title = attachment.title,
                         description = attachment.description,
@@ -86,7 +87,9 @@ fun NoteAttachments(
 
                 NoteAttachmentType.Tidal -> {
                     NoteAudioTidalLinkPreview(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp, bottom = 8.dp),
                         url = attachment.url,
                         title = attachment.title,
                         description = attachment.description,
@@ -97,6 +100,7 @@ fun NoteAttachments(
                 else -> {
                     if (!attachment.title.isNullOrBlank()) {
                         NoteLinkPreview(
+                            modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
                             url = attachment.url,
                             title = attachment.title,
                             thumbnailUrl = attachment.thumbnailUrl,

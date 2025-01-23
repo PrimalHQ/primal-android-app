@@ -1,16 +1,13 @@
 package net.primal.android.notes.feed.note.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CornerSize
@@ -20,17 +17,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
-import net.primal.android.R
 import net.primal.android.attachments.domain.NoteAttachmentType
-import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.core.utils.extractTLD
 import net.primal.android.notes.feed.note.ui.attachment.NoteImageLoadingPlaceholder
 import net.primal.android.notes.feed.note.ui.attachment.PlayButton
 import net.primal.android.theme.AppTheme
@@ -38,7 +31,6 @@ import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
 fun NoteVideoLinkPreview(
-    url: String,
     title: String?,
     thumbnailUrl: String?,
     thumbnailImageSize: DpSize,
@@ -64,13 +56,12 @@ fun NoteVideoLinkPreview(
             )
         }
 
-        val tld = url.extractTLD()
-        if (tld != null) {
-            TopLevelDomainText(
-                text = tld,
-                type = type,
-            )
-        }
+        TopLevelDomainText(
+            Modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 16.dp, bottom = 12.dp),
+            attachmentType = type,
+        )
 
         if (title != null) {
             Text(
@@ -123,40 +114,6 @@ private fun VideoThumbnailImage(
     }
 }
 
-@Composable
-private fun TopLevelDomainText(text: String, type: NoteAttachmentType) {
-    Row(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .padding(top = 16.dp, bottom = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        val iconResId = when (type) {
-            NoteAttachmentType.YouTube -> R.drawable.youtube_logo
-            NoteAttachmentType.Rumble -> R.drawable.rumble_logo
-            else -> null
-        }
-        if (iconResId != null) {
-            Image(
-                modifier = Modifier
-                    .padding(end = 8.dp)
-                    .size(18.dp),
-                painter = painterResource(iconResId),
-                contentDescription = null,
-            )
-        }
-        IconText(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight(),
-            text = text,
-            maxLines = 1,
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-            style = AppTheme.typography.bodyMedium,
-        )
-    }
-}
-
 @Preview
 @Composable
 private fun PreviewNoteVideoLinkPreview() {
@@ -164,7 +121,6 @@ private fun PreviewNoteVideoLinkPreview() {
         primalTheme = PrimalTheme.Sunrise,
     ) {
         NoteVideoLinkPreview(
-            url = "https://action.aclu.org",
             title = "Stop Mass Warrantless Surveillance: End Section 70",
             thumbnailUrl = "",
             type = NoteAttachmentType.YouTube,

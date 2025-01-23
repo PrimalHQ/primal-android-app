@@ -55,7 +55,6 @@ fun NoteYouTubeLinkPreview(
                         previewSize = DpSize(width = it.width.toDp(), height = it.height.toDp())
                     }
                 },
-                url = url,
                 title = title,
                 thumbnailUrl = thumbnailUrl,
                 thumbnailImageSize = thumbnailImageSizeDp,

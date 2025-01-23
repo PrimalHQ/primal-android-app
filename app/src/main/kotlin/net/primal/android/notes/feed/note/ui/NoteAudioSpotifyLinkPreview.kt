@@ -1,5 +1,7 @@
 package net.primal.android.notes.feed.note.ui
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -56,7 +58,7 @@ fun NoteAudioSpotifyLinkPreview(
     val density = LocalDensity.current
     val embedUrl = url.convertToSpotifyEmbedUrl()
 
-    Box(modifier = modifier) {
+    Box(modifier = modifier.animateContentSize()) {
         var embeddedWebState by remember { mutableStateOf(EmbeddedWebPageState.Idle) }
         var previewSize by remember { mutableStateOf(DpSize(width = 0.dp, height = 0.dp)) }
 
@@ -65,7 +67,12 @@ fun NoteAudioSpotifyLinkPreview(
                 NoteEmbeddedWebPagePreview(
                     modifier = Modifier
                         .clip(AppTheme.shapes.medium)
-                        .size(size = previewSize),
+                        .size(size = previewSize)
+                        .border(
+                            width = 0.5.dp,
+                            color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                            shape = AppTheme.shapes.medium,
+                        ),
                     url = embedUrl,
                     state = embeddedWebState,
                     onPageLoaded = { embeddedWebState = EmbeddedWebPageState.Ready },

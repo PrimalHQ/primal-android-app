@@ -123,10 +123,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Send
 import net.primal.android.core.compose.icons.primaliconpack.Settings
 import net.primal.android.core.compose.icons.primaliconpack.SettingsFilled
 import net.primal.android.core.compose.icons.primaliconpack.Share
-import net.primal.android.core.compose.icons.primaliconpack.SpotifyLogoDark
-import net.primal.android.core.compose.icons.primaliconpack.SpotifyLogoLight
 import net.primal.android.core.compose.icons.primaliconpack.Subtract
-import net.primal.android.core.compose.icons.primaliconpack.TidalLogo
 import net.primal.android.core.compose.icons.primaliconpack.Unmute
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedRemove
@@ -298,9 +295,6 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             OnboardingZapsExplained,
             Document,
             WalletChangeCurrency,
-            SpotifyLogoLight,
-            SpotifyLogoDark,
-            TidalLogo,
         )
         return __PrimalIcons!!
     }
