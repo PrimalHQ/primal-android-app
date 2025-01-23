@@ -67,12 +67,7 @@ fun NoteAudioSpotifyLinkPreview(
                 NoteEmbeddedWebPagePreview(
                     modifier = Modifier
                         .clip(AppTheme.shapes.medium)
-                        .size(size = previewSize)
-                        .border(
-                            width = 0.5.dp,
-                            color = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                            shape = AppTheme.shapes.medium,
-                        ),
+                        .size(size = previewSize),
                     url = embedUrl,
                     state = embeddedWebState,
                     onPageLoaded = { embeddedWebState = EmbeddedWebPageState.Ready },

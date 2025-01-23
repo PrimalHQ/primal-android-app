@@ -42,7 +42,7 @@ fun NoteEmbeddedWebPagePreview(
 
     val visibleAlpha by animateFloatAsState(
         targetValue = if (state == EmbeddedWebPageState.Ready) 1.0f else 0.0f,
-        animationSpec = tween(durationMillis = 2_000),
+        animationSpec = tween(durationMillis = 1_000),
     )
 
     AndroidView(
