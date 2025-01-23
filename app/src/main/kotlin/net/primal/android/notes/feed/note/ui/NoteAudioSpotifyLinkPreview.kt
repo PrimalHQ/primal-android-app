@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import java.net.URL
+import kotlin.time.Duration.Companion.milliseconds
 import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.theme.AppTheme
 
@@ -67,7 +68,8 @@ fun NoteAudioSpotifyLinkPreview(
                         .size(size = previewSize),
                     url = embedUrl,
                     state = embeddedWebState,
-                    onStateChanged = { embeddedWebState = it },
+                    onPageLoaded = { embeddedWebState = EmbeddedWebPageState.Ready },
+                    pageLoadedReadyDelayMillis = 200.milliseconds.inWholeMilliseconds,
                 )
             }
         }

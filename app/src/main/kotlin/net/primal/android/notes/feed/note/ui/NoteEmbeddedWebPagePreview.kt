@@ -32,7 +32,7 @@ fun NoteEmbeddedWebPagePreview(
     modifier: Modifier,
     url: String,
     state: EmbeddedWebPageState,
-    onStateChanged: (EmbeddedWebPageState) -> Unit,
+    onPageLoaded: () -> Unit,
     pageLoadedReadyDelayMillis: Long = 0,
 ) {
     val scope = rememberCoroutineScope()
@@ -73,7 +73,7 @@ fun NoteEmbeddedWebPagePreview(
                     override fun onPageFinished(view: WebView?, url: String?) {
                         scope.launch {
                             delay(pageLoadedReadyDelayMillis)
-                            onStateChanged(EmbeddedWebPageState.Ready)
+                            onPageLoaded()
                         }
                     }
                 }

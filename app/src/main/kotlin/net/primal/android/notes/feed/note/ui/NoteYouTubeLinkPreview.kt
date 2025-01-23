@@ -42,7 +42,7 @@ fun NoteYouTubeLinkPreview(
                         .clip(AppTheme.shapes.small),
                     url = "https://www.youtube.com/embed/$youTubeVideoId?autoplay=1&fs=0&iv_load_policy=3&loop=1",
                     state = embeddedWebState,
-                    onStateChanged = { embeddedWebState = it },
+                    onPageLoaded = { embeddedWebState = EmbeddedWebPageState.Ready },
                     pageLoadedReadyDelayMillis = 400.milliseconds.inWholeMilliseconds,
                 )
             }
