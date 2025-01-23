@@ -48,6 +48,7 @@ fun NoteAudioTidalLinkPreview(
                 state = embeddedWebState,
                 onPageLoaded = { embeddedWebState = EmbeddedWebPageState.Ready },
                 pageLoadedReadyDelayMillis = 200.milliseconds.inWholeMilliseconds,
+                domStorageEnabled = true,
             )
         }
 

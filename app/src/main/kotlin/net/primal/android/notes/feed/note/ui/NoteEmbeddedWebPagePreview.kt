@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.animation.core.animateFloatAsState
@@ -34,6 +35,7 @@ fun NoteEmbeddedWebPagePreview(
     state: EmbeddedWebPageState,
     onPageLoaded: () -> Unit,
     pageLoadedReadyDelayMillis: Long = 0,
+    domStorageEnabled: Boolean = false,
 ) {
     val scope = rememberCoroutineScope()
     val uriHandler = LocalUriHandler.current
@@ -53,9 +55,11 @@ fun NoteEmbeddedWebPagePreview(
                 )
                 settings.apply {
                     javaScriptEnabled = true
+                    this.domStorageEnabled = domStorageEnabled
                     mediaPlaybackRequiresUserGesture = false
                     allowFileAccess = false
                     allowContentAccess = false
+                    mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
                 }
 
                 webChromeClient = object : WebChromeClient() {
@@ -83,42 +87,3 @@ fun NoteEmbeddedWebPagePreview(
         },
     )
 }
-
-// @Composable
-// fun NoteEmbeddedWebPagePreview(
-//    modifier: Modifier,
-//    url: String,
-//    preview: @Composable () -> Unit,
-// ) {
-//    val density = LocalDensity.current
-//
-//    Box(modifier = modifier) {
-//        var embeddedWebState by remember { mutableStateOf(EmbeddedWebPageState.Idle) }
-//        var previewSize by remember { mutableStateOf(DpSize(width = 0.dp, height = 0.dp)) }
-//
-//        if (embeddedWebState == EmbeddedWebPageState.Ready || embeddedWebState == EmbeddedWebPageState.Initializing) {
-//            NoteEmbeddedWebPagePreview(
-//                modifier = Modifier.size(size = previewSize),
-//                url = url,
-//                state = embeddedWebState,
-//                onStateChanged = { embeddedWebState = it },
-//            )
-//        }
-//
-//        if (embeddedWebState == EmbeddedWebPageState.Idle || embeddedWebState == EmbeddedWebPageState.Initializing) {
-//            Box(
-//                modifier = Modifier
-//                    .onSizeChanged {
-//                        with(density) {
-//                            previewSize = DpSize(width = it.width.toDp(), height = it.height.toDp())
-//                        }
-//                    }
-//                    .clickable {
-//                        embeddedWebState = EmbeddedWebPageState.Initializing
-//                    },
-//            ) {
-//                preview()
-//            }
-//        }
-//    }
-// }
