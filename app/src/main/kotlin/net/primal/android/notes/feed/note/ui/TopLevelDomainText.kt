@@ -24,8 +24,8 @@ fun TopLevelDomainText(modifier: Modifier, attachmentType: NoteAttachmentType) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         val iconResId = when (attachmentType) {
-            NoteAttachmentType.YouTube -> R.drawable.youtube_logo
-            NoteAttachmentType.Rumble -> R.drawable.rumble_logo
+            NoteAttachmentType.YouTube -> R.drawable.logo_youtube
+            NoteAttachmentType.Rumble -> R.drawable.logo_rumble
             NoteAttachmentType.Spotify -> R.drawable.logo_spotify
             NoteAttachmentType.Tidal -> if (isAppInDarkPrimalTheme()) {
                 R.drawable.logo_tidal_dark
