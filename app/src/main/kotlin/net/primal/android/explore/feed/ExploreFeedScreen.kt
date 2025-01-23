@@ -221,6 +221,7 @@ private fun ExploreNoteFeed(
                 onGoToWallet = onGoToWallet,
                 contentPadding = contentPadding,
                 onUiError = onUiError,
+                showTopZaps = true,
             )
         }
 

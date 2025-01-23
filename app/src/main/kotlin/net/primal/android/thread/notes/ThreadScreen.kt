@@ -384,23 +384,23 @@ private fun ThreadLazyColumn(
                     ),
                     onGoToWallet = onGoToWallet,
                     contentFooter = {
-                        if (highlighted) {
-                            Column(
-                                modifier = Modifier
-                                    .padding(top = 8.dp)
-                                    .padding(horizontal = 10.dp),
-                            ) {
-                                if (item.eventZaps.isNotEmpty()) {
-                                    ThreadNoteTopZapsSection(
-                                        zaps = item.eventZaps,
-                                        onClick = if (noteCallbacks.onEventReactionsClick != null) {
-                                            { noteCallbacks.onEventReactionsClick.invoke(item.postId) }
-                                        } else {
-                                            null
-                                        },
-                                    )
-                                }
+                        Column(
+                            modifier = Modifier
+                                .padding(top = 8.dp)
+                                .padding(horizontal = 10.dp),
+                        ) {
+                            if (item.eventZaps.isNotEmpty()) {
+                                ThreadNoteTopZapsSection(
+                                    zaps = item.eventZaps,
+                                    onClick = if (noteCallbacks.onEventReactionsClick != null) {
+                                        { noteCallbacks.onEventReactionsClick.invoke(item.postId) }
+                                    } else {
+                                        null
+                                    },
+                                )
+                            }
 
+                            if (highlighted) {
                                 val date = item.timestamp.formatToDefaultDateFormat(FormatStyle.FULL)
                                 val time = item.timestamp.formatToDefaultTimeFormat(FormatStyle.SHORT)
                                 Text(

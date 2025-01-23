@@ -487,6 +487,7 @@ fun ProfileDetailsScreen(
                                             onGoToWallet = onGoToWallet,
                                             pollingEnabled = false,
                                             pullToRefreshEnabled = false,
+                                            showTopZaps = true,
                                             onUiError = { uiError ->
                                                 uiScope.launch {
                                                     snackbarHostState.showSnackbar(
