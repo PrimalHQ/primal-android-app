@@ -1,4 +1,1 @@
-Highlights in Reads.
-Wallet USD support.
-Blossom support in feeds.
 Stability and improvements.

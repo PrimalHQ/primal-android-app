@@ -1,5 +1,4 @@
-## Changes
-- Preview of Primal legend cards 
+## Changes 
 - Keep urls in notes if link preview are not shown
 - Limit to 2 note attachments if note is note is not opened
 - Add immersive mode in embedded player full screen
