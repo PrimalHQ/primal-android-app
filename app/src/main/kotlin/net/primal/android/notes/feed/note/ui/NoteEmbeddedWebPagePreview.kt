@@ -8,15 +8,11 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
@@ -29,10 +25,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.primal.android.core.ext.openUriSafely
@@ -53,11 +51,19 @@ fun NoteEmbeddedWebPagePreview(
     val uriHandler = LocalUriHandler.current
 
     var fullScreenDialogOpen by remember { mutableStateOf(false) }
-    val fullScreenView = remember { mutableStateOf<View?>(null) }
-    val fullScreenCallback = remember { mutableStateOf<WebChromeClient.CustomViewCallback?>(null) }
+    var fullScreenView by remember { mutableStateOf<View?>(null) }
+    var fullScreenCallback by remember { mutableStateOf<WebChromeClient.CustomViewCallback?>(null) }
 
+    val activity = LocalActivity.current
     val context = LocalContext.current
     val webView = remember { WebView(context) }
+
+    val localView = LocalView.current
+    val windowInsetsController = if (activity != null) {
+        remember { WindowCompat.getInsetsController(activity.window, localView) }
+    } else {
+        null
+    }
 
     val visibleAlpha by animateFloatAsState(
         targetValue = if (state == EmbeddedWebPageState.Ready) 1.0f else 0.0f,
@@ -85,18 +91,20 @@ fun NoteEmbeddedWebPagePreview(
                     webChromeClient = object : WebChromeClient() {
                         override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
                             if (view != null && callback != null) {
-                                fullScreenView.value = view
-                                fullScreenCallback.value = callback
+                                fullScreenView = view
+                                fullScreenCallback = callback
                                 fullScreenDialogOpen = true
                                 webView.forceVideoPlaying()
+                                windowInsetsController?.hide(WindowInsetsCompat.Type.systemBars())
                             }
                         }
 
                         override fun onHideCustomView() {
-                            fullScreenView.value = null
-                            fullScreenCallback.value = null
+                            fullScreenView = null
+                            fullScreenCallback = null
                             fullScreenDialogOpen = false
                             webView.forceVideoPausing()
+                            windowInsetsController?.show(WindowInsetsCompat.Type.systemBars())
                         }
                     }
                 }
@@ -122,37 +130,25 @@ fun NoteEmbeddedWebPagePreview(
         onRelease = { it.release() },
     )
 
-    if (fullScreenDialogOpen) {
-        val insets = WindowInsets.systemBars
-        val navigationBarHeight = insets.getBottom(LocalDensity.current)
-
+    val fullScreenWebPlayerView = fullScreenView
+    if (fullScreenDialogOpen && fullScreenWebPlayerView != null) {
         BasicAlertDialog(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black)
-                .windowInsetsPadding(WindowInsets.navigationBars)
-                .padding(
-                    bottom = with(LocalDensity.current) { navigationBarHeight.toDp() },
-                ),
+                .background(Color.Black),
             onDismissRequest = {
-                fullScreenCallback.value?.onCustomViewHidden()
+                fullScreenCallback?.onCustomViewHidden()
                 fullScreenDialogOpen = false
             },
             properties = DialogProperties(usePlatformDefaultWidth = false),
         ) {
-            fullScreenView.value?.let { fullScreenView ->
-                AndroidView(
-                    modifier = Modifier
-                        .windowInsetsPadding(WindowInsets.navigationBars)
-                        .padding(
-                            bottom = with(LocalDensity.current) { navigationBarHeight.toDp() },
-                        ),
-                    factory = {
-                        webView.forceVideoPlaying()
-                        fullScreenView
-                    },
-                )
-            }
+            AndroidView(
+                modifier = Modifier.fillMaxSize(),
+                factory = {
+                    webView.forceVideoPlaying()
+                    fullScreenWebPlayerView
+                },
+            )
         }
     }
 }
