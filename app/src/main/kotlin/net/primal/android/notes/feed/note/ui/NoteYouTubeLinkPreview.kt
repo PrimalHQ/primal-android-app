@@ -40,7 +40,8 @@ fun NoteYouTubeLinkPreview(
                     modifier = Modifier
                         .size(size = previewSize)
                         .clip(AppTheme.shapes.small),
-                    url = "https://www.youtube.com/embed/$youTubeVideoId?autoplay=1&fs=0&iv_load_policy=3&loop=1",
+                    url = "https://www.youtube.com/embed/$youTubeVideoId?autoplay=1&fs=1&iv_load_policy=3&loop=1",
+                    fullScreenSupported = true,
                     state = embeddedWebState,
                     onPageLoaded = { embeddedWebState = EmbeddedWebPageState.Ready },
                     pageLoadedReadyDelayMillis = 400.milliseconds.inWholeMilliseconds,
