@@ -12,7 +12,6 @@ import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
@@ -93,8 +92,6 @@ import net.primal.android.premium.info.PREMIUM_MORE_INFO_FAQ_TAB_INDEX
 import net.primal.android.premium.info.PremiumMoreInfoScreen
 import net.primal.android.premium.legend.become.PremiumBecomeLegendScreen
 import net.primal.android.premium.legend.become.PremiumBecomeLegendViewModel
-import net.primal.android.premium.legend.card.LegendCardScreen
-import net.primal.android.premium.legend.card.LegendCardViewModel
 import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationScreen
 import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationViewModel
 import net.primal.android.premium.manage.PremiumManageContract
@@ -298,9 +295,6 @@ private fun NavController.navigateToPremiumBuyPrimalLegend(fromOrigin: String? =
 }
 
 private fun NavController.navigateToPremiumLegendaryProfile() = navigate(route = "premium/legend/profile")
-private fun NavController.navigateToPremiumLegendCard(profileId: String) =
-    navigate(route = "premium/legend/card/$profileId")
-
 private fun NavController.navigateToPremiumManage() = navigate(route = "premium/manage")
 private fun NavController.navigateToPremiumMediaManagement() = navigate(route = "premium/manage/media")
 private fun NavController.navigateToPremiumContactList() = navigate(route = "premium/manage/contacts")
@@ -566,16 +560,6 @@ fun SharedTransitionScope.PrimalAppNavigation() {
         )
 
         premiumLegendaryProfile(route = "premium/legend/profile", navController = navController)
-
-        premiumLegendCard(
-            route = "premium/legend/card/{$PROFILE_ID}",
-            arguments = listOf(
-                navArgument(PROFILE_ID) {
-                    type = NavType.StringType
-                },
-            ),
-            navController = navController,
-        )
 
         premiumManage(route = "premium/manage", navController = navController)
 
@@ -1228,30 +1212,6 @@ private fun NavGraphBuilder.premiumLegendaryProfile(route: String, navController
         )
     }
 
-private fun NavGraphBuilder.premiumLegendCard(
-    route: String,
-    arguments: List<NamedNavArgument>,
-    navController: NavController,
-) = dialog(
-    route = route,
-    arguments = arguments,
-    dialogProperties = DialogProperties(usePlatformDefaultWidth = false),
-) {
-    val viewModel = hiltViewModel<LegendCardViewModel>()
-
-    ApplyEdgeToEdge()
-    LockToOrientationPortrait()
-
-    LegendCardScreen(
-        viewModel = viewModel,
-        onBackClick = { navController.navigateUp() },
-        onSeeOtherLegendsClick = {},
-        onBecomeLegendClick = {
-            navController.navigateToPremiumBuyPrimalLegend(fromOrigin = FROM_ORIGIN_PREMIUM_BADGE)
-        },
-    )
-}
-
 private fun NavGraphBuilder.premiumManage(route: String, navController: NavController) =
     composable(
         route = route,
@@ -1685,9 +1645,9 @@ private fun NavGraphBuilder.profile(
         onMediaItemClick = { navController.navigateToMediaItem(it) },
         onGoToWallet = { navController.navigateToWallet() },
         onSearchClick = { navController.navigateToAdvancedSearch(initialPostedBy = listOf(it)) },
-        onPremiumBadgeClick = { premiumTier, profileId ->
+        onPremiumBadgeClick = { premiumTier ->
             if (premiumTier.isPrimalLegendTier()) {
-                navController.navigateToPremiumLegendCard(profileId = profileId)
+                navController.navigateToPremiumBuyPrimalLegend(fromOrigin = FROM_ORIGIN_PREMIUM_BADGE)
             } else if (premiumTier.isPremiumTier()) {
                 navController.navigateToPremiumBuying(fromOrigin = FROM_ORIGIN_PREMIUM_BADGE)
             }
