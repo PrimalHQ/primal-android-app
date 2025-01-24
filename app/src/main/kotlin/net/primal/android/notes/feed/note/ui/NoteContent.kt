@@ -244,7 +244,7 @@ fun NoteContent(
                     .fillMaxWidth()
                     .padding(top = if (contentText.isEmpty()) 4.dp else 6.dp)
                     .heightIn(min = 0.dp, max = 500.dp),
-                attachments = data.attachments,
+                attachments = if (expanded) data.attachments else data.attachments.take(n = 2),
                 blossoms = data.blossoms,
                 onUrlClick = onUrlClick,
                 onMediaClick = noteCallbacks.onMediaClick,
