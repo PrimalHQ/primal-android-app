@@ -388,7 +388,7 @@ fun renderContentAsAnnotatedString(
         .replaceNostrProfileUrisWithHandles(resources = mentionedUsers)
         .remove(texts = mediaAttachments.map { it.url })
         .remove(texts = if (!shouldKeepNostrNoteUris) data.nostrUris.map { it.uri } else emptyList())
-        .remove(texts = linkAttachments.map { it.url })
+        .remove(texts = linkAttachments.filter { it.title?.isNotEmpty() == true }.map { it.url })
         .remove(texts = data.invoices)
         .clearParsedPrimalLinks()
         .limitLineBreaks(maxBreaks = 2)
