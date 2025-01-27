@@ -3,7 +3,8 @@ package net.primal.android.premium.legend.card
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationState
-import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.EaseInOutQuart
+import androidx.compose.animation.core.EaseOutSine
 import androidx.compose.animation.core.animateTo
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -20,7 +21,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
@@ -35,16 +35,19 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -67,7 +70,7 @@ import net.primal.android.profile.details.ui.model.shouldShowPremiumBadge
 import net.primal.android.theme.AppTheme
 
 private val TOP_ICON_COLOR = Color(0xFF1E1E1E)
-private val EaseInOutQuart = CubicBezierEasing(0.76f, 0f, 0.24f, 1f)
+private val GLOW_RECT_COLOR = Color(0xFFCCCCCC)
 
 @Composable
 fun LegendCardScreen(
@@ -96,19 +99,30 @@ fun LegendCardScreen(
     onSeeOtherLegendsClick: () -> Unit,
     onBecomeLegendClick: () -> Unit,
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val animationProgress = remember { AnimationState(initialValue = 0f) }
+    val glowProgress = remember { AnimationState(initialValue = 0f) }
     LaunchedEffect(Unit) {
-        coroutineScope.launch {
+        launch {
             animationProgress.animateTo(
                 targetValue = 1f,
                 animationSpec = tween(
-                    durationMillis = 650,
+                    durationMillis = 667,
                     delayMillis = 250,
                     easing = EaseInOutQuart,
                 ),
             )
         }
+        launch {
+            glowProgress.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(
+                    durationMillis = 667,
+                    delayMillis = 750,
+                    easing = EaseOutSine,
+                ),
+            )
+        }
+
     }
     Box(
         modifier = Modifier
@@ -157,6 +171,18 @@ fun LegendCardScreen(
                         brush = brush,
                     )
                 }
+            }
+            .drawWithContent {
+                drawContent()
+                rotate(degrees = 45f) {
+                    drawRect(
+                        topLeft = Offset(x = -440f, y = 1740f - glowProgress.value * 2180f),
+                        alpha = .05f + glowProgress.value * .25f,
+                        color = GLOW_RECT_COLOR,
+                        size = Size(width = 2000f, height = 300f),
+                    )
+                }
+
             }
             .padding(bottom = 16.dp)
             .padding(4.dp),
