@@ -23,6 +23,7 @@ fun NoteAttachments(
     modifier: Modifier = Modifier,
     attachments: List<NoteAttachmentUi>,
     blossoms: List<String>,
+    expanded: Boolean,
     onUrlClick: ((mediaUrl: String) -> Unit)? = null,
     onMediaClick: ((MediaClickEvent) -> Unit)? = null,
 ) {
@@ -41,7 +42,9 @@ fun NoteAttachments(
         )
     }
 
-    val linkAttachments = attachments.filterNot { it.isMediaAttachment() }
+    val linkAttachments = attachments
+        .filterNot { it.isMediaAttachment() }
+        .take(n = if (!expanded) 2 else Int.MAX_VALUE)
     linkAttachments.forEach { attachment ->
         BoxWithConstraints(modifier = modifier) {
             val thumbnailImageSizeDp = findImageSize(attachment = attachment)
