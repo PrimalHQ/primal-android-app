@@ -690,12 +690,22 @@
     <string name="settings_wallet_max_wallet_balance">Max wallet balance</string>
     <string name="settings_wallet_max_wallet_balance_hint">Primal Wallet is a transactional wallet, designed for handling small amounts. We recommend self custody for larger amounts.</string>
     <string name="settings_wallet_hide_transactions_below">Hide transactions below</string>
+    <string name="settings_wallet_header_app">App</string>
+    <string name="settings_wallet_header_daily_budget">Daily Budget</string>
+    <string name="settings_wallet_header_revoke">Revoke</string>
+    <string name="settings_wallet_connected_apps">CONNECTED APPS</string>
+    <string name="settings_wallet_no_connected_apps">There are no apps connected to Primal Wallet</string>
+    <string name="settings_wallet_connected_apps_hint">You can connect your Primal Wallet to other Nostr apps via Nostr Wallet Connect to enable zapping and payments. </string>
+    <string name="settings_wallet_connected_apps_hint_button">\n\nCreate a new wallet connection</string>
     <string name="settings_wallet_hide_transactions_below_hint">You can choose to hide small transactions to avoid spam in your transaction list</string>
     <string name="settings_wallet_hide_transactions_below_edit_title">Edit amount</string>
     <string name="settings_wallet_ln_address">Nostr lightning address</string>
     <string name="settings_wallet_start_in_wallet">Start in wallet</string>
     <string name="settings_wallet_start_in_wallet_hint">Open the wallet when Primal starts</string>
     <string name="settings_wallet_save">Save</string>
+    <string name="settings_new_wallet_connection_title">New Wallet Connection</string>
+    <string name="settings_new_wallet_app_name_input_header">Name of the app you wish to connect: </string>
+    <string name="settings_new_wallet_create_new_connection_button">Create Wallet Connection</string>
 
     <string name="settings_wallet_nwc_qr_code_scan_title">Connect NWC Wallet</string>
     <string name="settings_wallet_nwc_qr_code_scan_hint">Scan the NWC\nconnection QR code</string>

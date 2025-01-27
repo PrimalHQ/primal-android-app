@@ -6,20 +6,26 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -37,14 +43,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -59,6 +69,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.settings.SettingsItem
 import net.primal.android.settings.wallet.WalletSettingsContract.UiEvent
+import net.primal.android.settings.wallet.model.ConnectedAppUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.domain.NostrWalletConnect
@@ -66,12 +77,15 @@ import net.primal.android.user.domain.NostrWalletKeypair
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 
+private val errorColor = Color(0xFFFE3D2F)
+
 @Composable
 fun WalletSettingsScreen(
     viewModel: WalletSettingsViewModel,
     onClose: () -> Unit,
     onEditProfileClick: () -> Unit,
     onOtherConnectClick: () -> Unit,
+    onCreateNewWalletConnection: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -80,6 +94,7 @@ fun WalletSettingsScreen(
         onClose = onClose,
         onEditProfileClick = onEditProfileClick,
         onOtherConnectClick = onOtherConnectClick,
+        onCreateNewWalletConnection = onCreateNewWalletConnection,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -91,6 +106,7 @@ fun WalletSettingsScreen(
     onClose: () -> Unit,
     onEditProfileClick: () -> Unit,
     onOtherConnectClick: () -> Unit,
+    onCreateNewWalletConnection: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val scrollState = rememberScrollState()
@@ -160,9 +176,207 @@ fun WalletSettingsScreen(
                     lightningAddress = state.userLightningAddress,
                     onEditProfileClick = onEditProfileClick,
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                ConnectedAppsSettings(
+                    connectedAppUis = listOf(
+                        ConnectedAppUi(
+                            id = "1",
+                            appName = "Olas",
+                            dailyBudget = "10.000 sats",
+                        ),
+                    ),
+                    onRevokeConnectedApp = {},
+                    onCreateNewWalletConnection = onCreateNewWalletConnection,
+                )
             }
         },
     )
+}
+
+@Composable
+private fun ConnectedAppsSettings(
+    connectedAppUis: List<ConnectedAppUi>,
+    onRevokeConnectedApp: () -> Unit,
+    onCreateNewWalletConnection: () -> Unit,
+) {
+    ListItem(
+        headlineContent = {
+            Text(
+                text = stringResource(id = R.string.settings_wallet_connected_apps),
+                style = AppTheme.typography.bodyLarge,
+                color = AppTheme.colorScheme.onPrimary,
+                textAlign = TextAlign.Left,
+                fontWeight = FontWeight.Bold,
+            )
+        },
+    )
+
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .background(
+                color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                shape = RoundedCornerShape(8.dp),
+            ),
+    ) {
+        ConnectedAppsHeader()
+
+        HorizontalDivider(thickness = 1.dp)
+
+        if (connectedAppUis.isEmpty()) {
+            Text(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 21.dp)
+                    .align(Alignment.CenterHorizontally),
+                text = stringResource(id = R.string.settings_wallet_no_connected_apps),
+                style = AppTheme.typography.titleMedium,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center,
+            )
+        } else {
+            connectedAppUis.forEachIndexed { index, app ->
+                val isLastItem = index == connectedAppUis.lastIndex
+
+                ConnectedAppItem(
+                    isLastItem = isLastItem,
+                    appName = app.appName,
+                    budget = app.dailyBudget,
+                    canRevoke = app.canRevoke,
+                    onRevokeConnectedApp = onRevokeConnectedApp,
+                )
+
+                if (!isLastItem) {
+                    HorizontalDivider(thickness = 1.dp)
+                }
+            }
+        }
+    }
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    ConnectedAppsHint(
+        createNewWalletConnection = onCreateNewWalletConnection,
+    )
+}
+
+@Composable
+private fun ConnectedAppsHeader() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = stringResource(id = R.string.settings_wallet_header_app),
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.weight(1f),
+            textAlign = TextAlign.Left,
+        )
+        Text(
+            text = stringResource(id = R.string.settings_wallet_header_daily_budget),
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.weight(1f),
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            text = stringResource(id = R.string.settings_wallet_header_revoke),
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.weight(1f),
+            textAlign = TextAlign.Right,
+        )
+    }
+}
+
+@Composable
+private fun ConnectedAppItem(
+    isLastItem: Boolean,
+    appName: String,
+    budget: String,
+    canRevoke: Boolean,
+    onRevokeConnectedApp: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .background(
+                color = AppTheme.extraColorScheme.surfaceVariantAlt3,
+                shape = if (isLastItem) {
+                    RoundedCornerShape(
+                        bottomStart = 8.dp,
+                        bottomEnd = 8.dp,
+                    )
+                } else {
+                    RoundedCornerShape(0.dp)
+                },
+            )
+            .padding(horizontal = 16.dp)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(text = appName, modifier = Modifier.weight(1f))
+        Text(text = budget, modifier = Modifier.weight(1f))
+
+        if (canRevoke) {
+            Row(
+                modifier = Modifier.weight(1f),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                IconButton(
+                    modifier = Modifier.offset(x = 7.dp),
+                    onClick = onRevokeConnectedApp,
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(color = errorColor),
+                        imageVector = Icons.Default.Remove,
+                        contentDescription = null,
+                        tint = Color.White,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ConnectedAppsHint(createNewWalletConnection: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+    ) {
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 2.dp)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = createNewWalletConnection,
+                ),
+            text = buildAnnotatedString {
+                append(stringResource(id = R.string.settings_wallet_connected_apps_hint))
+                append(
+                    AnnotatedString(
+                        text = stringResource(id = R.string.settings_wallet_connected_apps_hint_button),
+                        spanStyle = SpanStyle(
+                            color = AppTheme.colorScheme.secondary,
+                            fontStyle = AppTheme.typography.bodySmall.fontStyle,
+                            fontWeight = FontWeight.SemiBold,
+
+                        ),
+                    ),
+                )
+            },
+            style = AppTheme.typography.bodySmall,
+        )
+    }
 }
 
 @Composable
@@ -433,6 +647,7 @@ private fun PreviewSettingsWalletScreen(
             onClose = {},
             onEditProfileClick = {},
             onOtherConnectClick = {},
+            onCreateNewWalletConnection = {},
             eventPublisher = {},
         )
     }
