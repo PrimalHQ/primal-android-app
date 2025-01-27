@@ -360,13 +360,9 @@ private fun UserDisplayName(
             legendaryCustomization = profilePremiumDetails?.legendaryCustomization,
         )
 
-        val isPremiumBadgeClickable = activeUserPremiumTier == null ||
-            activeUserPremiumTier.isPremiumFreeTier() ||
-            (activeUserPremiumTier.isPremiumTier() && profilePremiumDetails?.tier.isPrimalLegendTier())
-
         if (profilePremiumDetails?.shouldShowPremiumBadge() == true) {
             ProfilePremiumBadge(
-                modifier = if (isPremiumBadgeClickable && profilePremiumDetails.tier != null) {
+                modifier = if (profilePremiumDetails.tier != null) {
                     Modifier.clickable { onPremiumBadgeClick(profilePremiumDetails.tier, profileId) }
                 } else {
                     Modifier
