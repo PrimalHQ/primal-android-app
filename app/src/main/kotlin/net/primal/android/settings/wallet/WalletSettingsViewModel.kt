@@ -23,6 +23,7 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.api.model.PrimalNwcConnectionInfo
 import net.primal.android.wallet.repository.NwcWalletRepository
 import net.primal.android.wallet.repository.WalletRepository
+import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 import timber.log.Timber
 
 @HiltViewModel
@@ -164,8 +165,12 @@ class WalletSettingsViewModel @Inject constructor(
         return ConnectedAppUi(
             nwcPubkey = nwcPubkey,
             appName = appName,
-            dailyBudget = dailyBudget ?: "no limit",
-            canRevoke = true,
+            dailyBudget =
+            if (dailyBudget?.isNotBlank() == true) {
+                dailyBudget.toSats().toLong().let { "%,d".format(it) }
+            } else {
+                "no limit"
+            },
         )
     }
 }

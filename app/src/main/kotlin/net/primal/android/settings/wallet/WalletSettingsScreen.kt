@@ -76,7 +76,6 @@ import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.NostrWalletKeypair
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
-import timber.log.Timber
 
 private val errorColor = Color(0xFFFE3D2F)
 
@@ -235,7 +234,6 @@ private fun ConnectedAppsSettings(
                 textAlign = TextAlign.Center,
             )
         } else {
-            Timber.i("Vodavoda: ${connectedAppUis.count()}")
             connectedAppUis.forEachIndexed { index, app ->
                 val isLastItem = index == connectedAppUis.lastIndex
 
@@ -340,7 +338,7 @@ private fun ConnectedAppItem(
             maxLines = 1,
             modifier = Modifier.weight(1f),
         )
-        Text(text = budget, modifier = Modifier.weight(1f))
+        Text(text = budget, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
 
         if (canRevoke) {
             Row(
