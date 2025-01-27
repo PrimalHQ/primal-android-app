@@ -14,7 +14,6 @@ import net.primal.android.wallet.api.model.EmptyRequestBody
 import net.primal.android.wallet.api.model.NwcRevokeConnectionRequestBody
 import net.primal.android.wallet.api.model.PrimalNwcConnectionInfo
 import net.primal.android.wallet.api.model.WalletOperationVerb
-import timber.log.Timber
 
 class NwcPrimalWalletApiImpl @Inject constructor(
     @PrimalWalletApiClient private val primalApiClient: PrimalApiClient,
@@ -33,8 +32,6 @@ class NwcPrimalWalletApiImpl @Inject constructor(
                 ),
             ),
         )
-
-        Timber.i("Here: $queryResult")
         val info = queryResult.findPrimalEvent(NostrEventKind.PrimalWalletNwcConnectionList)
             ?: throw WssException("Event with kind 10000321 not found.")
 

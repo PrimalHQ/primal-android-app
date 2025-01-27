@@ -76,8 +76,10 @@ import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.NostrWalletKeypair
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
+import timber.log.Timber
 
 private val errorColor = Color(0xFFFE3D2F)
+const val stringMaximumLength = 10
 
 @Composable
 fun WalletSettingsScreen(
@@ -181,7 +183,7 @@ fun WalletSettingsScreen(
 
                 ConnectedAppsSettings(
                     connectedAppUis = state.connectedApps,
-                    onRevokeConnectedApp = {},
+                    onRevokeConnectedApp = { eventPublisher(UiEvent.RevokeConnection(it)) },
                     onCreateNewWalletConnection = onCreateNewWalletConnection,
                 )
             }
@@ -192,9 +194,12 @@ fun WalletSettingsScreen(
 @Composable
 private fun ConnectedAppsSettings(
     connectedAppUis: List<ConnectedAppUi>,
-    onRevokeConnectedApp: () -> Unit,
+    onRevokeConnectedApp: (nwcPubkey: String) -> Unit,
     onCreateNewWalletConnection: () -> Unit,
 ) {
+    var revokeDialogVisible by remember { mutableStateOf(false) }
+    var revokeNwcPubkey by remember { mutableStateOf("") }
+
     ListItem(
         headlineContent = {
             Text(
@@ -231,6 +236,7 @@ private fun ConnectedAppsSettings(
                 textAlign = TextAlign.Center,
             )
         } else {
+            Timber.i("Vodavoda: ${connectedAppUis.count()}")
             connectedAppUis.forEachIndexed { index, app ->
                 val isLastItem = index == connectedAppUis.lastIndex
 
@@ -239,7 +245,10 @@ private fun ConnectedAppsSettings(
                     appName = app.appName,
                     budget = app.dailyBudget,
                     canRevoke = app.canRevoke,
-                    onRevokeConnectedApp = onRevokeConnectedApp,
+                    onRevokeConnectedApp = {
+                        revokeDialogVisible = true
+                        revokeNwcPubkey = app.nwcPubkey
+                    },
                 )
 
                 if (!isLastItem) {
@@ -254,6 +263,21 @@ private fun ConnectedAppsSettings(
     ConnectedAppsHint(
         createNewWalletConnection = onCreateNewWalletConnection,
     )
+
+    if (revokeDialogVisible) {
+        ConfirmRevokeAlertDialog(
+            onDismissRequest = {
+                revokeDialogVisible = false
+                revokeNwcPubkey = ""
+            },
+            onConfirmation = {
+                revokeDialogVisible = false
+                onRevokeConnectedApp(revokeNwcPubkey)
+            },
+            dialogTitle = stringResource(id = R.string.settings_wallet_revoke_connected_apps_dialog_title),
+            dialogText = stringResource(id = R.string.settings_wallet_revoke_connected_apps_dialog_text),
+        )
+    }
 }
 
 @Composable
@@ -314,8 +338,8 @@ private fun ConnectedAppItem(
     ) {
         Text(
             text =
-            if (appName.length > 10) {
-                "${appName.take(10)}..."
+            if (appName.length > stringMaximumLength) {
+                "${appName.take(stringMaximumLength)}..."
             } else {
                 appName
             },
@@ -379,6 +403,45 @@ private fun ConnectedAppsHint(createNewWalletConnection: () -> Unit) {
             style = AppTheme.typography.bodySmall,
         )
     }
+}
+
+@Composable
+private fun ConfirmRevokeAlertDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit,
+    dialogTitle: String? = null,
+    dialogText: String? = null,
+) {
+    AlertDialog(
+        containerColor = AppTheme.colorScheme.surfaceVariant,
+        title = {
+            if (dialogTitle != null) {
+                Text(text = dialogTitle)
+            }
+        },
+        text = {
+            if (dialogText != null) {
+                Text(text = dialogText)
+            }
+        },
+        onDismissRequest = {
+            onDismissRequest()
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirmation() },
+            ) {
+                Text(text = stringResource(id = R.string.feed_list_dialog_confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = { onDismissRequest() },
+            ) {
+                Text(text = stringResource(id = R.string.feed_list_dialog_dismiss))
+            }
+        },
+    )
 }
 
 @Composable

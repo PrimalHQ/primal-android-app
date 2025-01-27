@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.navigation.nwcUrl
 import net.primal.android.networking.sockets.errors.WssException
@@ -22,6 +21,7 @@ import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.domain.parseNWCUrl
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.api.model.PrimalNwcConnectionInfo
+import net.primal.android.wallet.repository.NwcWalletRepository
 import net.primal.android.wallet.repository.WalletRepository
 import timber.log.Timber
 
@@ -32,6 +32,7 @@ class WalletSettingsViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val userRepository: UserRepository,
     private val walletRepository: WalletRepository,
+    private val nwcWalletRepository: NwcWalletRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(WalletSettingsContract.UiState())
@@ -58,10 +59,12 @@ class WalletSettingsViewModel @Inject constructor(
     private fun fetchWalletConnections() =
         viewModelScope.launch {
             try {
-                val response : List<PrimalNwcConnectionInfo> = walletRepository.getConnections(userId = activeAccountStore.activeUserId())
+                val response: List<PrimalNwcConnectionInfo> = nwcWalletRepository.getConnections(
+                    userId = activeAccountStore.activeUserId(),
+                )
                 setState { copy(connectedApps = response.map { it.mapAsConnectedAppUi() }) }
             } catch (error: WssException) {
-                Timber.w("Here: $error")
+                Timber.w(error)
             }
         }
 
@@ -75,6 +78,14 @@ class WalletSettingsViewModel @Inject constructor(
                     }
                     is WalletSettingsContract.UiEvent.UpdateMinTransactionAmount -> {
                         updateSpamThresholdAmount(amountInSats = it.amountInSats)
+                    }
+                    is WalletSettingsContract.UiEvent.RevokeConnection -> {
+                        val nwcPubKey = it.nwcPubkey
+                        val updatedConnections = state.value.connectedApps.filterNot { it.nwcPubkey == nwcPubKey }
+
+                        setState { copy(connectedApps = updatedConnections) }
+
+                        nwcWalletRepository.revokeConnection(activeAccountStore.activeUserId(), nwcPubKey)
                     }
                 }
             }
@@ -151,10 +162,10 @@ class WalletSettingsViewModel @Inject constructor(
 
     private fun PrimalNwcConnectionInfo.mapAsConnectedAppUi(): ConnectedAppUi {
         return ConnectedAppUi(
-            id = appName,
+            nwcPubkey = nwcPubkey,
             appName = appName,
             dailyBudget = dailyBudget ?: "no limit",
-            canRevoke = true
+            canRevoke = true,
         )
     }
 }

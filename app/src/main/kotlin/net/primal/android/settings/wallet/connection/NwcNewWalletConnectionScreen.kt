@@ -75,7 +75,6 @@ private fun NwcNewWalletConnectionScreen(
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-
                 WalletConnectionHeader()
 
                 Column {

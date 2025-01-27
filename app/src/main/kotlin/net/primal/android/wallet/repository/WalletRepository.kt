@@ -12,7 +12,6 @@ import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.PrimalWallet
 import net.primal.android.user.repository.UserRepository
-import net.primal.android.wallet.api.NwcPrimalWalletApi
 import net.primal.android.wallet.api.WalletApi
 import net.primal.android.wallet.api.mediator.WalletTransactionsMediator
 import net.primal.android.wallet.api.model.DepositRequestBody
@@ -23,7 +22,6 @@ import net.primal.android.wallet.api.model.MiningFeeTier
 import net.primal.android.wallet.api.model.OnChainAddressResponse
 import net.primal.android.wallet.api.model.ParsedLnInvoiceResponse
 import net.primal.android.wallet.api.model.ParsedLnUrlResponse
-import net.primal.android.wallet.api.model.PrimalNwcConnectionInfo
 import net.primal.android.wallet.api.model.WithdrawRequestBody
 import net.primal.android.wallet.db.WalletTransaction
 import net.primal.android.wallet.domain.Network
@@ -35,7 +33,6 @@ class WalletRepository @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val accountsStore: UserAccountsStore,
     private val walletApi: WalletApi,
-    private val nwcPrimalWalletApi: NwcPrimalWalletApi,
     private val usersApi: UsersApi,
     private val database: PrimalDatabase,
     private val userRepository: UserRepository,
@@ -56,10 +53,6 @@ class WalletRepository @Inject constructor(
 
     suspend fun activateWallet(userId: String, code: String): String {
         return walletApi.activateWallet(userId, code)
-    }
-
-    suspend fun getConnections(userId: String) : List<PrimalNwcConnectionInfo> {
-        return nwcPrimalWalletApi.getConnections(userId)
     }
 
     suspend fun requestActivationCodeToEmail(userId: String, body: GetActivationCodeRequestBody) {
