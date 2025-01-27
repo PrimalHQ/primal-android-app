@@ -3,6 +3,7 @@ package net.primal.android.premium.legend.card
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationState
+import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.EaseInOutQuart
 import androidx.compose.animation.core.EaseOutSine
 import androidx.compose.animation.core.animateTo
@@ -13,6 +14,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,6 +50,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.font.FontWeight
@@ -71,6 +76,9 @@ import net.primal.android.theme.AppTheme
 
 private val TOP_ICON_COLOR = Color(0xFF1E1E1E)
 private val GLOW_RECT_COLOR = Color(0xFFCCCCCC)
+
+private const val AVATAR_START_ROTATION = -45f
+private const val AVATAR_END_ROTATION = 0f
 
 @Composable
 fun LegendCardScreen(
@@ -130,57 +138,19 @@ fun LegendCardScreen(
             .clip(AppTheme.shapes.medium)
             .background(AppTheme.extraColorScheme.surfaceVariantAlt1)
             .drawBehind {
-                val topStart = Path().apply {
-                    moveTo(0f, animationProgress.value * size.height * 0.30f)
-                    lineTo(animationProgress.value * size.height * 0.30f, 0f)
-                    lineTo(-10f, 0f)
-                    close()
-                }
-
-                val bottomStart = Path().apply {
-                    moveTo(
-                        0f,
-                        size.height * 0.70f + (1 - animationProgress.value) * size.height * .3f,
-                    )
-                    lineTo(0f, size.height)
-                    lineTo(animationProgress.value * size.height * 0.30f, size.height)
-                    close()
-                }
-
-                val topEnd = Path().apply {
-                    moveTo(size.width - 10f - animationProgress.value * size.width, 0f)
-                    lineTo(size.width, 0f)
-                    lineTo(size.width, animationProgress.value * size.height * .45f)
-                    close()
-                }
+                val (topStart, bottomStart, topEnd) = makeEdgePaths(
+                    animationProgress = animationProgress,
+                )
 
                 state.profile?.premiumDetails?.legendaryCustomization?.legendaryStyle?.simpleBrush?.let { brush ->
-                    drawPath(
-                        alpha = 0.25f,
-                        path = topStart,
-                        brush = brush,
-                    )
-                    drawPath(
-                        alpha = 0.25f,
-                        path = bottomStart,
-                        brush = brush,
-                    )
-                    drawPath(
-                        path = topEnd,
-                        brush = brush,
-                    )
+                    drawPath(alpha = 0.25f, path = topStart, brush = brush)
+                    drawPath(alpha = 0.25f, path = bottomStart, brush = brush)
+                    drawPath(path = topEnd, brush = brush)
                 }
             }
             .drawWithContent {
                 drawContent()
-                rotate(degrees = 45f) {
-                    drawRect(
-                        topLeft = Offset(x = -440f, y = 1740f - glowProgress.value * 2180f),
-                        alpha = .05f + glowProgress.value * .25f,
-                        color = GLOW_RECT_COLOR,
-                        size = Size(width = 2000f, height = 300f),
-                    )
-                }
+                drawGlowRectangle(glowProgress = glowProgress)
             }
             .padding(bottom = 16.dp)
             .padding(4.dp),
@@ -199,14 +169,8 @@ fun LegendCardScreen(
             }
 
             state.profile?.let { profile ->
-                ProfileSummary(
-                    profile = profile,
-                )
-
-                LegendDescription(
-                    modifier = Modifier.padding(vertical = 16.dp),
-                    profile = profile,
-                )
+                ProfileSummary(profile = profile)
+                LegendDescription(modifier = Modifier.padding(vertical = 16.dp))
             }
 
             state.profile?.premiumDetails?.legendaryCustomization?.let { legendaryCustomization ->
@@ -241,20 +205,7 @@ private fun ButtonsColumn(
     ) {
         AnimatedVisibility(
             visible = showContent.value,
-            enter = fadeIn(
-                animationSpec = tween(
-                    durationMillis = 667,
-                    delayMillis = 583,
-                    easing = EaseInOutQuart,
-                ),
-            ) + slideInVertically(
-                initialOffsetY = { it / 2 },
-                animationSpec = tween(
-                    durationMillis = 667,
-                    delayMillis = 583,
-                    easing = EaseInOutQuart,
-                ),
-            ),
+            enter = makeEnterTransition(delayMillis = 583),
         ) {
             TextButton(
                 modifier = Modifier.fillMaxWidth(),
@@ -271,27 +222,15 @@ private fun ButtonsColumn(
         }
         AnimatedVisibility(
             visible = showContent.value,
-            enter = fadeIn(
-                animationSpec = tween(
-                    durationMillis = 667,
-                    delayMillis = 667,
-                    easing = EaseInOutQuart,
-                ),
-            ) + slideInVertically(
-                initialOffsetY = { it / 2 },
-                animationSpec = tween(
-                    durationMillis = 667,
-                    delayMillis = 667,
-                    easing = EaseInOutQuart,
-                ),
-            ),
+            enter = makeEnterTransition(delayMillis = 667),
         ) {
             Button(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = onBecomeLegendClick,
                 contentPadding = PaddingValues(vertical = 16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = legendaryCustomization.legendaryStyle.resolveNoCustomizationAndNull(),
+                    containerColor = legendaryCustomization.legendaryStyle
+                        .resolveNoCustomizationAndNull(),
                     contentColor = legendaryCustomization.legendaryStyle.resolveButtonColor(),
                 ),
             ) {
@@ -306,8 +245,55 @@ private fun ButtonsColumn(
     }
 }
 
+private fun ContentDrawScope.drawGlowRectangle(glowProgress: AnimationState<Float, AnimationVector1D>) =
+    rotate(degrees = 45f) {
+        drawRect(
+            topLeft = Offset(x = -440f, y = 1740f - glowProgress.value * 2180f),
+            alpha = .05f + glowProgress.value * .25f,
+            color = GLOW_RECT_COLOR,
+            size = Size(width = 2000f, height = 300f),
+        )
+    }
+
+@Suppress("MagicNumber")
+private fun DrawScope.makeEdgePaths(
+    animationProgress: AnimationState<Float, AnimationVector1D>,
+): Triple<Path, Path, Path> {
+    val topStart = Path().apply {
+        moveTo(0f, animationProgress.value * size.height * 0.30f)
+        lineTo(animationProgress.value * size.height * 0.30f, 0f)
+        lineTo(-10f, 0f)
+        close()
+    }
+
+    val bottomStart = Path().apply {
+        moveTo(
+            x = 0f,
+            y = size.height * 0.70f + (1 - animationProgress.value) * size.height * .3f,
+        )
+        lineTo(0f, size.height)
+        lineTo(animationProgress.value * size.height * 0.30f, size.height)
+        close()
+    }
+
+    val topEnd = Path().apply {
+        moveTo(size.width - 10f - animationProgress.value * size.width, 0f)
+        lineTo(size.width, 0f)
+        lineTo(size.width, animationProgress.value * size.height * .45f)
+        close()
+    }
+
+    return Triple(topStart, bottomStart, topEnd)
+}
+
 private fun LegendaryStyle?.resolveNoCustomizationAndNull(): Color =
-    run { if (this == null || this == LegendaryStyle.NO_CUSTOMIZATION) Color.Unspecified else this.color }
+    run {
+        if (this == null || this == LegendaryStyle.NO_CUSTOMIZATION) {
+            Color.Unspecified
+        } else {
+            this.color
+        }
+    }
 
 private fun LegendaryStyle?.resolveButtonColor(): Color =
     when (this) {
@@ -321,7 +307,7 @@ private fun LegendaryStyle?.resolveButtonColor(): Color =
     }
 
 @Composable
-private fun LegendDescription(modifier: Modifier = Modifier, profile: ProfileDetailsUi) {
+private fun LegendDescription(modifier: Modifier = Modifier) {
     var showContent = remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         showContent.value = true
@@ -329,20 +315,7 @@ private fun LegendDescription(modifier: Modifier = Modifier, profile: ProfileDet
 
     AnimatedVisibility(
         visible = showContent.value,
-        enter = fadeIn(
-            animationSpec = tween(
-                durationMillis = 667,
-                delayMillis = 583,
-                easing = EaseInOutQuart,
-            ),
-        ) + slideInVertically(
-            initialOffsetY = { it / 2 },
-            animationSpec = tween(
-                durationMillis = 667,
-                delayMillis = 583,
-                easing = EaseInOutQuart,
-            ),
-        ),
+        enter = makeEnterTransition(delayMillis = 583),
     ) {
         Column(
             modifier = modifier.fillMaxWidth(),
@@ -357,7 +330,8 @@ private fun LegendDescription(modifier: Modifier = Modifier, profile: ProfileDet
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
-                text = "Legend status is awarded to users who\nmade a significant contribution to\nNostr or Primal",
+                text = "Legend status is awarded to users who\n" +
+                    "made a significant contribution to\nNostr or Primal",
                 style = AppTheme.typography.bodyMedium,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 fontSize = 14.sp,
@@ -369,13 +343,13 @@ private fun LegendDescription(modifier: Modifier = Modifier, profile: ProfileDet
 
 @Composable
 private fun ProfileSummary(modifier: Modifier = Modifier, profile: ProfileDetailsUi) {
-    val avatarRotation = remember { Animatable(-45f) }
+    val avatarRotation = remember { Animatable(AVATAR_START_ROTATION) }
     val avatarSizeAndAlphaProgress = remember { Animatable(0f) }
     var showContent = remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         launch {
             avatarRotation.animateTo(
-                targetValue = 0f,
+                targetValue = AVATAR_END_ROTATION,
                 animationSpec = tween(
                     durationMillis = 650,
                     delayMillis = 250,
@@ -417,56 +391,12 @@ private fun ProfileSummary(modifier: Modifier = Modifier, profile: ProfileDetail
             )
         }
         Spacer(modifier = Modifier.height(10.dp))
-        AnimatedVisibility(
-            visible = showContent.value,
-            enter = fadeIn(
-                animationSpec = tween(
-                    durationMillis = 667,
-                    delayMillis = 333,
-                    easing = EaseInOutQuart,
-                ),
-            ) + slideInVertically(
-                initialOffsetY = { it },
-                animationSpec = tween(
-                    durationMillis = 667,
-                    delayMillis = 333,
-                    easing = EaseInOutQuart,
-                ),
-            ),
-        ) {
-            Box {
-                NostrUserText(
-                    displayName = profile.authorDisplayName,
-                    internetIdentifier = profile.internetIdentifier,
-                    internetIdentifierBadgeSize = 26.dp,
-                    internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
-                    style = AppTheme.typography.titleLarge.copy(
-                        fontSize = 22.sp,
-                        lineHeight = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                    ),
-                    legendaryCustomization = profile.premiumDetails?.legendaryCustomization,
-                )
-            }
-        }
+        AnimatedDisplayName(showContent = showContent, profile = profile)
 
         profile.internetIdentifier?.let { internetIdentifier ->
             AnimatedVisibility(
                 visible = showContent.value,
-                enter = fadeIn(
-                    animationSpec = tween(
-                        durationMillis = 667,
-                        delayMillis = 416,
-                        easing = EaseInOutQuart,
-                    ),
-                ) + slideInVertically(
-                    initialOffsetY = { it },
-                    animationSpec = tween(
-                        durationMillis = 667,
-                        delayMillis = 416,
-                        easing = EaseInOutQuart,
-                    ),
-                ) + fadeIn(),
+                enter = makeEnterTransition(delayMillis = 416),
             ) {
                 Text(
                     modifier = Modifier,
@@ -481,20 +411,7 @@ private fun ProfileSummary(modifier: Modifier = Modifier, profile: ProfileDetail
         if (profile.premiumDetails?.shouldShowPremiumBadge() == true) {
             AnimatedVisibility(
                 visible = showContent.value,
-                enter = fadeIn(
-                    animationSpec = tween(
-                        durationMillis = 667,
-                        delayMillis = 500,
-                        easing = EaseInOutQuart,
-                    ),
-                ) + slideInVertically(
-                    initialOffsetY = { it },
-                    animationSpec = tween(
-                        durationMillis = 667,
-                        delayMillis = 500,
-                        easing = EaseInOutQuart,
-                    ),
-                ) + fadeIn(),
+                enter = makeEnterTransition(delayMillis = 500),
             ) {
                 ProfilePremiumBadge(
                     firstCohort = profile.premiumDetails.cohort1 ?: "",
@@ -505,6 +422,45 @@ private fun ProfileSummary(modifier: Modifier = Modifier, profile: ProfileDetail
         }
     }
 }
+
+@Composable
+private fun ColumnScope.AnimatedDisplayName(showContent: MutableState<Boolean>, profile: ProfileDetailsUi) {
+    AnimatedVisibility(
+        visible = showContent.value,
+        enter = makeEnterTransition(delayMillis = 333),
+    ) {
+        Box {
+            NostrUserText(
+                displayName = profile.authorDisplayName,
+                internetIdentifier = profile.internetIdentifier,
+                internetIdentifierBadgeSize = 26.dp,
+                internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
+                style = AppTheme.typography.titleLarge.copy(
+                    fontSize = 22.sp,
+                    lineHeight = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                ),
+                legendaryCustomization = profile.premiumDetails?.legendaryCustomization,
+            )
+        }
+    }
+}
+
+private fun makeEnterTransition(delayMillis: Int, durationMillis: Int = 667) =
+    fadeIn(
+        animationSpec = tween(
+            durationMillis = durationMillis,
+            delayMillis = delayMillis,
+            easing = EaseInOutQuart,
+        ),
+    ) + slideInVertically(
+        initialOffsetY = { it },
+        animationSpec = tween(
+            durationMillis = durationMillis,
+            delayMillis = delayMillis,
+            easing = EaseInOutQuart,
+        ),
+    )
 
 @Composable
 private fun OptionsDropdownMenu(
