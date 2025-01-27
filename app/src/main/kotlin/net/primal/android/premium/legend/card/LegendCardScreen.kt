@@ -122,7 +122,6 @@ fun LegendCardScreen(
                 ),
             )
         }
-
     }
     Box(
         modifier = Modifier
@@ -141,7 +140,7 @@ fun LegendCardScreen(
                 val bottomStart = Path().apply {
                     moveTo(
                         0f,
-                        size.height * 0.70f + (1 - animationProgress.value) * size.height * .3f
+                        size.height * 0.70f + (1 - animationProgress.value) * size.height * .3f,
                     )
                     lineTo(0f, size.height)
                     lineTo(animationProgress.value * size.height * 0.30f, size.height)
@@ -182,7 +181,6 @@ fun LegendCardScreen(
                         size = Size(width = 2000f, height = 300f),
                     )
                 }
-
             }
             .padding(bottom = 16.dp)
             .padding(4.dp),
@@ -315,11 +313,11 @@ private fun LegendaryStyle?.resolveButtonColor(): Color =
     when (this) {
         LegendaryStyle.NO_CUSTOMIZATION, LegendaryStyle.GOLD, LegendaryStyle.AQUA,
         LegendaryStyle.SILVER, LegendaryStyle.TEAL, LegendaryStyle.BROWN, null,
-            -> Color.Black
+        -> Color.Black
 
         LegendaryStyle.PURPLE, LegendaryStyle.PURPLE_HAZE,
         LegendaryStyle.BLUE, LegendaryStyle.SUN_FIRE,
-            -> Color.White
+        -> Color.White
     }
 
 @Composable
@@ -543,7 +541,6 @@ private fun OptionsDropdownMenu(
                 text = "Legend settings",
                 onClick = onLegendSettingsClick,
             )
-
         }
     }
 }

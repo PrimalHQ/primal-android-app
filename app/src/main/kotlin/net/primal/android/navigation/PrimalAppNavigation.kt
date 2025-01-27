@@ -1251,7 +1251,7 @@ private fun NavGraphBuilder.premiumLegendCard(
         },
         onLegendSettingsClick = {
             navController.navigateToPremiumLegendaryProfile()
-        }
+        },
     )
 }
 
