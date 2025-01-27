@@ -151,7 +151,6 @@ private fun ProfileHeaderDetails(
             displayName = state.profileDetails?.authorDisplayName ?: state.profileId.asEllipsizedNpub(),
             internetIdentifier = state.profileDetails?.internetIdentifier,
             profilePremiumDetails = state.profileDetails?.premiumDetails,
-            activeUserPremiumTier = state.activeUserPremiumTier,
             onPremiumBadgeClick = onPremiumBadgeClick,
         )
 
@@ -336,7 +335,6 @@ private fun UserDisplayName(
     displayName: String,
     internetIdentifier: String?,
     profilePremiumDetails: PremiumProfileDataUi?,
-    activeUserPremiumTier: String?,
     onPremiumBadgeClick: (tier: String, profileId: String) -> Unit,
 ) {
     Row(
