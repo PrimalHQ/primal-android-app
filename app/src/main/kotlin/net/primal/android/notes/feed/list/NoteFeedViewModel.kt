@@ -223,7 +223,7 @@ class NoteFeedViewModel @AssistedInject constructor(
                     response = latestFeed,
                 )
 
-                delay(100.milliseconds)
+                delay(130.milliseconds)
                 setState { copy(syncStats = FeedPostsSyncStats(), shouldAnimateScrollToTop = true) }
 
                 viewModelScope.launch {
