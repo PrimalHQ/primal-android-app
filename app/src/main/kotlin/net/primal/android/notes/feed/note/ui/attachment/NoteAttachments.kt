@@ -42,77 +42,90 @@ fun NoteAttachments(
         )
     }
 
-    val linkAttachments = attachments
+    attachments
         .filterNot { it.isMediaAttachment() }
         .take(n = if (!expanded) 2 else Int.MAX_VALUE)
-    linkAttachments.forEach { attachment ->
-        BoxWithConstraints(modifier = modifier) {
-            val thumbnailImageSizeDp = findImageSize(attachment = attachment)
-            when (attachment.type) {
-                NoteAttachmentType.YouTube -> {
-                    NoteYouTubeLinkPreview(
-                        modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
-                        url = attachment.url,
-                        title = attachment.title,
-                        thumbnailUrl = attachment.thumbnailUrl,
-                        thumbnailImageSizeDp = thumbnailImageSizeDp,
-                        onClick = { onUrlClick?.invoke(attachment.url) },
-                    )
-                }
+        .forEach { attachment ->
+            NoteLinkAttachment(
+                modifier = modifier,
+                attachment = attachment,
+                onUrlClick = onUrlClick,
+            )
+        }
+}
 
-                NoteAttachmentType.Rumble -> {
-                    NoteVideoLinkPreview(
-                        modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
-                        title = attachment.title,
-                        thumbnailUrl = attachment.thumbnailUrl,
-                        thumbnailImageSize = thumbnailImageSizeDp,
-                        type = attachment.type,
-                        onClick = if (onUrlClick != null) {
-                            { onUrlClick(attachment.url) }
-                        } else {
-                            null
-                        },
-                    )
-                }
+@Composable
+private fun NoteLinkAttachment(
+    modifier: Modifier,
+    attachment: NoteAttachmentUi,
+    onUrlClick: ((mediaUrl: String) -> Unit)?,
+) {
+    BoxWithConstraints(modifier = modifier) {
+        val thumbnailImageSizeDp = findImageSize(attachment = attachment)
+        when (attachment.type) {
+            NoteAttachmentType.YouTube -> {
+                NoteYouTubeLinkPreview(
+                    modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
+                    url = attachment.url,
+                    title = attachment.title,
+                    thumbnailUrl = attachment.thumbnailUrl,
+                    thumbnailImageSizeDp = thumbnailImageSizeDp,
+                    onClick = { onUrlClick?.invoke(attachment.url) },
+                )
+            }
 
-                NoteAttachmentType.Spotify -> {
-                    NoteAudioSpotifyLinkPreview(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 4.dp, bottom = 8.dp),
-                        url = attachment.url,
-                        title = attachment.title,
-                        description = attachment.description,
-                        thumbnailUrl = attachment.thumbnailUrl,
-                        onPlayClick = { onUrlClick?.invoke(attachment.url) },
-                    )
-                }
+            NoteAttachmentType.Rumble -> {
+                NoteVideoLinkPreview(
+                    modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
+                    title = attachment.title,
+                    thumbnailUrl = attachment.thumbnailUrl,
+                    thumbnailImageSize = thumbnailImageSizeDp,
+                    type = attachment.type,
+                    onClick = if (onUrlClick != null) {
+                        { onUrlClick(attachment.url) }
+                    } else {
+                        null
+                    },
+                )
+            }
 
-                NoteAttachmentType.Tidal -> {
-                    NoteAudioTidalLinkPreview(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 4.dp, bottom = 8.dp),
-                        url = attachment.url,
-                        title = attachment.title,
-                        description = attachment.description,
-                        thumbnailUrl = attachment.thumbnailUrl,
-                    )
-                }
+            NoteAttachmentType.Spotify -> {
+                NoteAudioSpotifyLinkPreview(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp, bottom = 8.dp),
+                    url = attachment.url,
+                    title = attachment.title,
+                    description = attachment.description,
+                    thumbnailUrl = attachment.thumbnailUrl,
+                    onPlayClick = { onUrlClick?.invoke(attachment.url) },
+                )
+            }
 
-                else -> if (!attachment.title.isNullOrBlank()) {
-                    NoteLinkPreview(
-                        modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
-                        url = attachment.url,
-                        title = attachment.title,
-                        thumbnailUrl = attachment.thumbnailUrl,
-                        onClick = if (onUrlClick != null) {
-                            { onUrlClick.invoke(attachment.url) }
-                        } else {
-                            null
-                        },
-                    )
-                }
+            NoteAttachmentType.Tidal -> {
+                NoteAudioTidalLinkPreview(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp, bottom = 8.dp),
+                    url = attachment.url,
+                    title = attachment.title,
+                    description = attachment.description,
+                    thumbnailUrl = attachment.thumbnailUrl,
+                )
+            }
+
+            else -> if (!attachment.title.isNullOrBlank()) {
+                NoteLinkPreview(
+                    modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
+                    url = attachment.url,
+                    title = attachment.title,
+                    thumbnailUrl = attachment.thumbnailUrl,
+                    onClick = if (onUrlClick != null) {
+                        { onUrlClick.invoke(attachment.url) }
+                    } else {
+                        null
+                    },
+                )
             }
         }
     }
