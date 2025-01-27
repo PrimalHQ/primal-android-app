@@ -79,7 +79,6 @@ import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 import timber.log.Timber
 
 private val errorColor = Color(0xFFFE3D2F)
-const val stringMaximumLength = 10
 
 @Composable
 fun WalletSettingsScreen(
@@ -337,12 +336,8 @@ private fun ConnectedAppItem(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text =
-            if (appName.length > stringMaximumLength) {
-                "${appName.take(stringMaximumLength)}..."
-            } else {
-                appName
-            },
+            text = appName,
+            maxLines = 1,
             modifier = Modifier.weight(1f),
         )
         Text(text = budget, modifier = Modifier.weight(1f))
