@@ -180,13 +180,7 @@ fun WalletSettingsScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 ConnectedAppsSettings(
-                    connectedAppUis = listOf(
-                        ConnectedAppUi(
-                            id = "1",
-                            appName = "Olas",
-                            dailyBudget = "10.000 sats",
-                        ),
-                    ),
+                    connectedAppUis = state.connectedApps,
                     onRevokeConnectedApp = {},
                     onCreateNewWalletConnection = onCreateNewWalletConnection,
                 )
@@ -318,7 +312,15 @@ private fun ConnectedAppItem(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(text = appName, modifier = Modifier.weight(1f))
+        Text(
+            text =
+            if (appName.length > 10) {
+                "${appName.take(10)}..."
+            } else {
+                appName
+            },
+            modifier = Modifier.weight(1f),
+        )
         Text(text = budget, modifier = Modifier.weight(1f))
 
         if (canRevoke) {

@@ -11,13 +11,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.navigation.nwcUrl
+import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.settings.wallet.model.ConnectedAppUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.NWCParseException
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.domain.parseNWCUrl
 import net.primal.android.user.repository.UserRepository
+import net.primal.android.wallet.api.model.PrimalNwcConnectionInfo
 import net.primal.android.wallet.repository.WalletRepository
 import timber.log.Timber
 
@@ -47,8 +51,19 @@ class WalletSettingsViewModel @Inject constructor(
             observeUserAccount()
         }
 
+        fetchWalletConnections()
         observeEvents()
     }
+
+    private fun fetchWalletConnections() =
+        viewModelScope.launch {
+            try {
+                val response : List<PrimalNwcConnectionInfo> = walletRepository.getConnections(userId = activeAccountStore.activeUserId())
+                setState { copy(connectedApps = response.map { it.mapAsConnectedAppUi() }) }
+            } catch (error: WssException) {
+                Timber.w("Here: $error")
+            }
+        }
 
     private fun observeEvents() =
         viewModelScope.launch {
@@ -133,4 +148,13 @@ class WalletSettingsViewModel @Inject constructor(
                 walletRepository.deleteAllTransactions()
             }
         }
+
+    private fun PrimalNwcConnectionInfo.mapAsConnectedAppUi(): ConnectedAppUi {
+        return ConnectedAppUi(
+            id = appName,
+            appName = appName,
+            dailyBudget = dailyBudget ?: "no limit",
+            canRevoke = true
+        )
+    }
 }
