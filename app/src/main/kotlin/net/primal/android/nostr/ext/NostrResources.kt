@@ -335,7 +335,16 @@ fun List<String>.mapAsNoteNostrUriPO(
             profileIdToProfileDataMap = profileIdToProfileDataMap,
         ),
         referencedArticle = takeAsReferencedArticleOrNull(refNaddr, refArticle, refArticleAuthor),
-        referencedZap = takeAsReferencedZapOrNull(referencedNostrEvent, profileIdToProfileDataMap),
+        referencedZap = takeAsReferencedZapOrNull(
+            event = referencedNostrEvent,
+            profilesMap = profileIdToProfileDataMap,
+            postsMap = postIdToPostDataMap,
+            cdnResourcesMap = cdnResources,
+            linkPreviewsMap = linkPreviews,
+            nostrEventsMap = eventIdToNostrEvent,
+            videoThumbnailsMap = videoThumbnails,
+            articlesMap = articleIdToArticle,
+        ),
         referencedHighlight = takeAsReferencedHighlightOrNull(
             uri = link,
             highlight = refHighlightText,
@@ -443,7 +452,16 @@ private fun takeAsReferencedHighlightOrNull(
     null
 }
 
-private fun takeAsReferencedZapOrNull(event: NostrEvent?, profilesMap: Map<String, ProfileData>): ReferencedZap? {
+private fun takeAsReferencedZapOrNull(
+    event: NostrEvent?,
+    profilesMap: Map<String, ProfileData>,
+    postsMap: Map<String, PostData>,
+    cdnResourcesMap: Map<String, CdnResource>,
+    linkPreviewsMap: Map<String, LinkPreviewData>,
+    nostrEventsMap: Map<String, NostrEvent>,
+    videoThumbnailsMap: Map<String, String>,
+    articlesMap: Map<String, ArticleData>,
+): ReferencedZap? {
     val zapRequest = event?.extractZapRequestOrNull()
 
     val receiverId = event?.tags?.findFirstProfileId()
@@ -458,6 +476,18 @@ private fun takeAsReferencedZapOrNull(event: NostrEvent?, profilesMap: Map<Strin
 
     if (receiverId == null || senderId == null || amountInSats == null) return null
 
+    val zappedPost = postsMap[noteId]
+
+    val nostrUris = listOfNotNull(zappedPost).flatMapPostsAsNoteNostrUriPO(
+        eventIdToNostrEvent = nostrEventsMap,
+        postIdToPostDataMap = postsMap,
+        articleIdToArticle = articlesMap,
+        profileIdToProfileDataMap = profilesMap,
+        cdnResources = cdnResourcesMap,
+        videoThumbnails = videoThumbnailsMap,
+        linkPreviews = linkPreviewsMap,
+    )
+
     val sender = profilesMap[senderId]
     val receiver = profilesMap[receiverId]
     return ReferencedZap(
@@ -471,5 +501,9 @@ private fun takeAsReferencedZapOrNull(event: NostrEvent?, profilesMap: Map<Strin
         amountInSats = amountInSats.toDouble(),
         message = zapRequest.content,
         zappedEventId = noteId,
+        zappedEventContent = zappedPost?.content,
+        zappedEventNostrUris = nostrUris,
+        zappedEventHashtags = zappedPost?.hashtags ?: emptyList(),
+        createdAt = event.createdAt,
     )
 }

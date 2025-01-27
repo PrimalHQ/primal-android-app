@@ -52,6 +52,7 @@ fun DvmHeaderAndFeedList(
                     previewMode = true,
                     pullToRefreshEnabled = false,
                     pollingEnabled = false,
+                    showTopZaps = true,
                     header = {
                         DvmFeedListItem(
                             data = dvmFeed,

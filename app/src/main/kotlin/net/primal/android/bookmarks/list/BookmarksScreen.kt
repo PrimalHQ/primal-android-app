@@ -113,6 +113,7 @@ private fun BookmarksScreen(
                     onGoToWallet = onGoToWallet,
                     pollingEnabled = false,
                     pullToRefreshEnabled = false,
+                    showTopZaps = true,
                     noContentText = stringResource(R.string.bookmarks_no_content),
                     onUiError = { uiError ->
                         uiScope.launch {

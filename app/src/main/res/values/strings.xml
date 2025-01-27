@@ -1109,5 +1109,6 @@
         <item quantity="other">and %1$s others highlighted</item>
     </plurals>
 
+    <string name="feed_note_render_unknown_audio_title">Unknown title</string>
     <string name="feed_note_render_play_button">Play</string>
 </resources>
