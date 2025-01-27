@@ -4,10 +4,13 @@ import java.time.Instant
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
 import net.primal.android.core.compose.attachment.model.asNoteAttachmentUi
+import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.core.utils.usernameUiFriendly
+import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.notes.db.FeedPost
 import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.premium.legend.asLegendaryCustomization
@@ -23,6 +26,7 @@ data class FeedPostUi(
     val content: String,
     val stats: EventStatsUi,
     val rawNostrEventJson: String,
+    val rawKind: Int? = NostrJson.decodeFromStringOrNull<NostrEvent>(rawNostrEventJson)?.kind,
     val repostId: String? = null,
     val repostAuthorId: String? = null,
     val repostAuthorName: String? = null,

@@ -26,6 +26,7 @@ data class ReferencedNote(
     val authorLegendProfile: PrimalLegendProfile?,
     val attachments: List<NoteAttachment>,
     val nostrUris: List<NoteNostrUri>,
+    val raw: String,
 )
 
 fun ReferencedNote.asFeedPostUi() =
@@ -46,6 +47,6 @@ fun ReferencedNote.asFeedPostUi() =
         content = this.content,
         stats = EventStatsUi(),
         hashtags = this.content.parseHashtags(),
-        rawNostrEventJson = "",
+        rawNostrEventJson = this.raw,
         replyToAuthorHandle = null,
     )

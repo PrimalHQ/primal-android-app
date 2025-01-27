@@ -59,7 +59,7 @@ object Nip19TLV {
         val kind = tlv[Type.KIND.id]?.first()?.let {
             toInt32(it)
         }
-        return if (eventId != null && profileId != null && kind != null) {
+        return if (eventId != null && profileId != null) {
             Nevent(
                 kind = kind,
                 eventId = eventId,
@@ -117,7 +117,9 @@ object Nip19TLV {
         tlv.addAll(this.userId.constructAuthorBytes())
 
         // Add KIND type
-        tlv.addAll(this.kind.constructKindBytes())
+        if (this.kind != null) {
+            tlv.addAll(this.kind.constructKindBytes())
+        }
 
         return Bech32.encodeBytes(
             hrp = "nevent",
