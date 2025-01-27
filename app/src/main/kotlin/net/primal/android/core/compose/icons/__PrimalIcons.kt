@@ -97,6 +97,7 @@ import net.primal.android.core.compose.icons.primaliconpack.NostrichFilled
 import net.primal.android.core.compose.icons.primaliconpack.Notifications
 import net.primal.android.core.compose.icons.primaliconpack.NotificationsFilled
 import net.primal.android.core.compose.icons.primaliconpack.Notrich
+import net.primal.android.core.compose.icons.primaliconpack.NwcExternalAppForeground
 import net.primal.android.core.compose.icons.primaliconpack.OnboardingZapsExplained
 import net.primal.android.core.compose.icons.primaliconpack.Paste
 import net.primal.android.core.compose.icons.primaliconpack.PhotoFromGallery
@@ -123,10 +124,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Send
 import net.primal.android.core.compose.icons.primaliconpack.Settings
 import net.primal.android.core.compose.icons.primaliconpack.SettingsFilled
 import net.primal.android.core.compose.icons.primaliconpack.Share
-import net.primal.android.core.compose.icons.primaliconpack.SpotifyLogoDark
-import net.primal.android.core.compose.icons.primaliconpack.SpotifyLogoLight
 import net.primal.android.core.compose.icons.primaliconpack.Subtract
-import net.primal.android.core.compose.icons.primaliconpack.TidalLogo
 import net.primal.android.core.compose.icons.primaliconpack.Unmute
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedRemove
@@ -298,9 +296,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             OnboardingZapsExplained,
             Document,
             WalletChangeCurrency,
-            SpotifyLogoLight,
-            SpotifyLogoDark,
-            TidalLogo,
+            NwcExternalAppForeground,
         )
         return __PrimalIcons!!
     }
