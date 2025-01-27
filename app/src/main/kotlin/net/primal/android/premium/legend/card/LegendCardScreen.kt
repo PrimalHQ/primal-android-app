@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
@@ -31,9 +32,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -50,6 +53,11 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.UniversalAvatarThumbnail
+import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
+import net.primal.android.core.compose.dropdown.DropdownPrimalMenuItem
+import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.More
+import net.primal.android.core.compose.icons.primaliconpack.Settings
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.premium.legend.LegendaryCustomization
@@ -65,6 +73,7 @@ private val EaseInOutQuart = CubicBezierEasing(0.76f, 0f, 0.24f, 1f)
 fun LegendCardScreen(
     viewModel: LegendCardViewModel,
     onBackClick: () -> Unit,
+    onLegendSettingsClick: () -> Unit,
     onSeeOtherLegendsClick: () -> Unit,
     onBecomeLegendClick: () -> Unit,
 ) {
@@ -73,6 +82,7 @@ fun LegendCardScreen(
     LegendCardScreen(
         state = uiState.value,
         onBackClick = onBackClick,
+        onLegendSettingsClick = onLegendSettingsClick,
         onSeeOtherLegendsClick = onSeeOtherLegendsClick,
         onBecomeLegendClick = onBecomeLegendClick,
     )
@@ -82,6 +92,7 @@ fun LegendCardScreen(
 fun LegendCardScreen(
     state: LegendCardContract.UiState,
     onBackClick: () -> Unit,
+    onLegendSettingsClick: () -> Unit,
     onSeeOtherLegendsClick: () -> Unit,
     onBecomeLegendClick: () -> Unit,
 ) {
@@ -114,7 +125,10 @@ fun LegendCardScreen(
                 }
 
                 val bottomStart = Path().apply {
-                    moveTo(0f, size.height * 0.70f + (1 - animationProgress.value) * size.height * .3f)
+                    moveTo(
+                        0f,
+                        size.height * 0.70f + (1 - animationProgress.value) * size.height * .3f
+                    )
                     lineTo(0f, size.height)
                     lineTo(animationProgress.value * size.height * 0.30f, size.height)
                     close()
@@ -151,7 +165,14 @@ fun LegendCardScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(28.dp, Alignment.CenterVertically),
         ) {
-            OptionsMenu(onDismissRequest = onBackClick)
+            if (state.isActiveAccountCard) {
+                OptionsDropdownMenu(
+                    onBackClick = onBackClick,
+                    onLegendSettingsClick = onLegendSettingsClick,
+                )
+            } else {
+                CloseButtonRow(onDismissRequest = onBackClick)
+            }
 
             state.profile?.let { profile ->
                 ProfileSummary(
@@ -268,11 +289,11 @@ private fun LegendaryStyle?.resolveButtonColor(): Color =
     when (this) {
         LegendaryStyle.NO_CUSTOMIZATION, LegendaryStyle.GOLD, LegendaryStyle.AQUA,
         LegendaryStyle.SILVER, LegendaryStyle.TEAL, LegendaryStyle.BROWN, null,
-        -> Color.Black
+            -> Color.Black
 
         LegendaryStyle.PURPLE, LegendaryStyle.PURPLE_HAZE,
         LegendaryStyle.BLUE, LegendaryStyle.SUN_FIRE,
-        -> Color.White
+            -> Color.White
     }
 
 @Composable
@@ -363,7 +384,9 @@ private fun ProfileSummary(modifier: Modifier = Modifier, profile: ProfileDetail
             contentAlignment = Alignment.Center,
         ) {
             UniversalAvatarThumbnail(
-                modifier = Modifier.alpha(avatarSizeAndAlphaProgress.value).rotate(avatarRotation.value),
+                modifier = Modifier
+                    .alpha(avatarSizeAndAlphaProgress.value)
+                    .rotate(avatarRotation.value),
                 avatarSize = (avatarSizeAndAlphaProgress.value * 100).dp,
                 avatarCdnImage = profile.avatarCdnImage,
                 legendaryCustomization = profile.premiumDetails?.legendaryCustomization,
@@ -460,7 +483,47 @@ private fun ProfileSummary(modifier: Modifier = Modifier, profile: ProfileDetail
 }
 
 @Composable
-private fun OptionsMenu(modifier: Modifier = Modifier, onDismissRequest: () -> Unit) {
+private fun OptionsDropdownMenu(
+    modifier: Modifier = Modifier,
+    onBackClick: () -> Unit,
+    onLegendSettingsClick: () -> Unit,
+) {
+    var menuVisible by remember { mutableStateOf(false) }
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentSize(align = Alignment.CenterEnd),
+    ) {
+        IconButton(
+            onClick = { menuVisible = !menuVisible },
+        ) {
+            Icon(
+                imageVector = PrimalIcons.More,
+                contentDescription = null,
+                tint = TOP_ICON_COLOR,
+            )
+        }
+        DropdownPrimalMenu(
+            expanded = menuVisible,
+            onDismissRequest = { menuVisible = false },
+        ) {
+            DropdownPrimalMenuItem(
+                trailingIconVector = Icons.Default.Close,
+                text = "Close",
+                onClick = onBackClick,
+            )
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.Settings,
+                text = "Legend settings",
+                onClick = onLegendSettingsClick,
+            )
+
+        }
+    }
+}
+
+@Composable
+private fun CloseButtonRow(modifier: Modifier = Modifier, onDismissRequest: () -> Unit) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.End,

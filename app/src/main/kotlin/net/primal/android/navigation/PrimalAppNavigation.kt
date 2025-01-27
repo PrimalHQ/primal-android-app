@@ -1249,6 +1249,9 @@ private fun NavGraphBuilder.premiumLegendCard(
         onBecomeLegendClick = {
             navController.navigateToPremiumBuyPrimalLegend(fromOrigin = FROM_ORIGIN_PREMIUM_BADGE)
         },
+        onLegendSettingsClick = {
+            navController.navigateToPremiumLegendaryProfile()
+        }
     )
 }
 
