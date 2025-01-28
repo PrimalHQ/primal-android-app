@@ -70,14 +70,19 @@ import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.icons.primaliconpack.Settings
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.utils.formatNip05Identifier
+import net.primal.android.core.utils.formatToDefaultDateFormat
 import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.profile.details.ui.ProfilePremiumBadge
 import net.primal.android.profile.details.ui.model.shouldShowPremiumBadge
 import net.primal.android.theme.AppTheme
+import java.time.Instant
+import java.time.format.FormatStyle
 
 private val TOP_ICON_COLOR = Color(0xFF1E1E1E)
 private val GLOW_RECT_COLOR = Color(0xFFCCCCCC)
+
+private const val PRIMAL_2_0_RELEASE_DATE_IN_SECONDS = 1732147200L
 
 private const val AVATAR_START_ROTATION = -45f
 private const val AVATAR_END_ROTATION = 0f
@@ -145,7 +150,10 @@ fun LegendCardScreen(
 
             state.profile?.let { profile ->
                 ProfileSummary(profile = profile)
-                LegendDescription(modifier = Modifier.padding(vertical = 16.dp))
+                LegendDescription(
+                    modifier = Modifier.padding(vertical = 16.dp),
+                    profile = profile,
+                )
             }
 
             state.profile?.premiumDetails?.legendaryCustomization?.let { legendaryCustomization ->
@@ -309,11 +317,13 @@ private fun LegendaryStyle?.resolveButtonColor(): Color =
     }
 
 @Composable
-private fun LegendDescription(modifier: Modifier = Modifier) {
+private fun LegendDescription(modifier: Modifier = Modifier, profile: ProfileDetailsUi) {
     var showContent by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        showContent = true
-    }
+    LaunchedEffect(Unit) { showContent = true }
+
+    val legendSince = profile.premiumDetails?.legendaryCustomization?.legendSince?.let {
+        Instant.ofEpochSecond(it)
+    } ?: Instant.ofEpochSecond(PRIMAL_2_0_RELEASE_DATE_IN_SECONDS)
 
     AnimatedVisibility(
         visible = showContent,
@@ -325,15 +335,15 @@ private fun LegendDescription(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         ) {
             Text(
-                text = "Legend since December 21, 2024",
+                text = stringResource(id = R.string.premium_legend_card_legend_since) + " "
+                        + legendSince.formatToDefaultDateFormat(FormatStyle.LONG),
                 style = AppTheme.typography.bodyMedium,
                 color = AppTheme.colorScheme.onPrimary,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
-                text = "Legend status is awarded to users who\n" +
-                        "made a significant contribution to\nNostr or Primal",
+                text = profile.premiumDetails?.legendaryCustomization?.currentShoutout ?: "",
                 style = AppTheme.typography.bodyMedium,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 fontSize = 14.sp,
