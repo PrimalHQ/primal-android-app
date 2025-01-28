@@ -40,14 +40,14 @@ private val ThumbnailHeight = 90.dp
 
 @Composable
 fun NoteLinkPreview(
+    modifier: Modifier,
     url: String,
     title: String?,
     thumbnailUrl: String?,
     onClick: (() -> Unit)? = null,
 ) {
     Row(
-        modifier = Modifier
-            .padding(top = 4.dp, bottom = 8.dp)
+        modifier = modifier
             .height(height = ThumbnailHeight)
             .background(color = AppTheme.extraColorScheme.surfaceVariantAlt3, shape = AppTheme.shapes.small)
             .border(width = 0.5.dp, color = AppTheme.extraColorScheme.surfaceVariantAlt1, shape = AppTheme.shapes.small)
@@ -149,6 +149,7 @@ private fun PreviewNoteLinkPreview() {
         primalTheme = PrimalTheme.Sunrise,
     ) {
         NoteLinkPreview(
+            modifier = Modifier,
             url = "https://action.aclu.org",
             title = "Stop Mass Warrantless Surveillance: End Section 70",
             thumbnailUrl = null,

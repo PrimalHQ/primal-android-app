@@ -14,6 +14,7 @@ enum class NostrEventKind(val value: Int) {
     Reaction(value = 7),
     BadgeAward(value = 8),
     GenericRepost(value = 16),
+    PictureNote(value = 20),
     ChannelCreation(value = 40),
     ChannelMetadata(value = 41),
     ChannelMessage(value = 42),

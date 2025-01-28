@@ -64,6 +64,8 @@ fun JsonArray.isSummaryTag() = getOrNull(0)?.jsonPrimitive?.content == "summary"
 
 fun JsonArray.isImageTag() = getOrNull(0)?.jsonPrimitive?.content == "image"
 
+fun JsonArray.isIMetaTag() = getOrNull(0)?.jsonPrimitive?.content == "imeta"
+
 fun JsonArray.isAltTag() = getOrNull(0)?.jsonPrimitive?.content == "alt"
 
 fun JsonArray.isPublishedAtTag() = getOrNull(0)?.jsonPrimitive?.content == "published_at"

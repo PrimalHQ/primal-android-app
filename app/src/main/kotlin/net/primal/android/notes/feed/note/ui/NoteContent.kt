@@ -241,10 +241,12 @@ fun NoteContent(
         if (data.attachments.isNotEmpty()) {
             NoteAttachments(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(top = if (contentText.isEmpty()) 4.dp else 6.dp)
                     .heightIn(min = 0.dp, max = 500.dp),
                 attachments = data.attachments,
                 blossoms = data.blossoms,
+                expanded = expanded,
                 onUrlClick = onUrlClick,
                 onMediaClick = noteCallbacks.onMediaClick,
             )
@@ -387,7 +389,7 @@ fun renderContentAsAnnotatedString(
         .replaceNostrProfileUrisWithHandles(resources = mentionedUsers)
         .remove(texts = mediaAttachments.map { it.url })
         .remove(texts = if (!shouldKeepNostrNoteUris) data.nostrUris.map { it.uri } else emptyList())
-        .remove(texts = linkAttachments.map { it.url })
+        .remove(texts = linkAttachments.filter { it.title?.isNotEmpty() == true }.map { it.url })
         .remove(texts = data.invoices)
         .clearParsedPrimalLinks()
         .limitLineBreaks(maxBreaks = 2)
@@ -680,6 +682,7 @@ fun PreviewPostContentWithReferencedPost() {
                                 attachments = emptyList(),
                                 nostrUris = emptyList(),
                                 authorLegendProfile = null,
+                                raw = "",
                             ),
                             referencedUser = null,
                             referencedArticle = null,
@@ -702,6 +705,7 @@ fun PreviewPostContentWithReferencedPost() {
                                 attachments = emptyList(),
                                 nostrUris = emptyList(),
                                 authorLegendProfile = null,
+                                raw = "",
                             ),
                             referencedUser = null,
                             referencedArticle = null,

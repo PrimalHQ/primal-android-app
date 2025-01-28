@@ -1,3 +1,17 @@
-## Fixes
-- Fix notifications not marked as seen;
-- Fix deprecated warning when using LocalLifecycleOwner;
+## Changes 
+- Keep urls in notes if link preview are not shown
+- Limit to 2 note attachments if note is note is not opened
+- Add immersive mode in embedded player full screen
+- Implement embedded web player for YouTube, Spotify and Tidal (#285)
+- Implement rendering referenced note zaps  (#283)
+- Implement top zaps in all note feeds (incl. thread screen) (#282)
+- Implement Spotify and Tidal link previews (#280)
+- Implement zap links clickable in wallet tx details (#281)
+- Implement clickable urls in zaps tab in Note Reactions Screen (#277)
+- Implement rendering referenced zap events in note's content (#279)
+- Fix repeating mentions not colored in note's content (#278)
+- Fix to skip inserting empty relay hints when posting notes
+- Implement rendering all link previews and media attachments
+- Fix legend rings not shown in top zaps & reactions
+- Fix reply to author id null on replies to highlight or article (#268)
+- Fix notifications not marked as seen

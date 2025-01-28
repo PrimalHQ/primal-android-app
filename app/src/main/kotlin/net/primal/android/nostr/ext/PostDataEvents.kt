@@ -1,6 +1,6 @@
 package net.primal.android.nostr.ext
 
-import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.articles.db.ArticleData
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.toJsonObject
@@ -20,7 +20,7 @@ fun List<NostrEvent>.mapAsPostDataPO(
     val referencedPostsMap = referencedPosts.associateBy { it.postId }
     val referencedArticlesMap = referencedArticles.associateBy { it.articleId }
     val referencedHighlightsMap = referencedHighlights.associateBy { it.highlightId }
-    return map { it.asPost(referencedPostsMap, referencedArticlesMap, referencedHighlightsMap) }
+    return map { it.shortTextNoteAsPost(referencedPostsMap, referencedArticlesMap, referencedHighlightsMap) }
 }
 
 fun List<PrimalEvent>.mapNotNullAsPostDataPO(
@@ -32,18 +32,24 @@ fun List<PrimalEvent>.mapNotNullAsPostDataPO(
     val referencedArticlesMap = referencedArticles.associateBy { it.articleId }
     val referencedHighlightsMap = referencedHighlights.associateBy { it.highlightId }
 
-    return this.mapNotNull { it.takeContentOrNull<NostrEvent>() }
+    val notes = this.mapNotNull { it.takeContentOrNull<NostrEvent>() }
         .filter { event -> event.kind == NostrEventKind.ShortTextNote.value }
         .map {
-            it.asPost(
+            it.shortTextNoteAsPost(
                 referencedPostsMap = referencedPostsMap,
                 referencedArticlesMap = referencedArticlesMap,
                 referencedHighlightsMap = referencedHighlightsMap,
             )
         }
+
+    val pictures = this.mapNotNull { it.takeContentOrNull<NostrEvent>() }
+        .filter { event -> event.kind == NostrEventKind.PictureNote.value }
+        .map { it.pictureNoteAsPost() }
+
+    return notes + pictures
 }
 
-fun NostrEvent.asPost(
+private fun NostrEvent.shortTextNoteAsPost(
     referencedPostsMap: Map<String, PostData>,
     referencedArticlesMap: Map<String, ArticleData>,
     referencedHighlightsMap: Map<String, HighlightData>,
@@ -70,5 +76,24 @@ fun NostrEvent.asPost(
         raw = NostrJson.encodeToString(this.toJsonObject()),
         replyToPostId = replyToPostId,
         replyToAuthorId = replyToAuthorId,
+    )
+}
+
+private fun NostrEvent.pictureNoteAsPost(): PostData {
+    val iMetaTags = this.tags.filter { it.isIMetaTag() }
+    val imageUrls = iMetaTags.mapNotNull { it.getOrNull(1)?.jsonPrimitive?.content?.split(" ")?.lastOrNull() }
+    val content = imageUrls.joinToString("\n")
+    return PostData(
+        postId = this.id,
+        authorId = this.pubKey,
+        createdAt = this.createdAt,
+        tags = this.tags,
+        content = content,
+        uris = content.parseUris(),
+        hashtags = emptyList(),
+        sig = this.sig,
+        raw = NostrJson.encodeToString(this.toJsonObject()),
+        replyToPostId = null,
+        replyToAuthorId = null,
     )
 }

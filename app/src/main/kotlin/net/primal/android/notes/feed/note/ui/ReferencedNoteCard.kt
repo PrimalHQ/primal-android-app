@@ -17,6 +17,7 @@ import java.time.temporal.ChronoUnit
 import kotlin.time.Duration.Companion.minutes
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.toNoteContentUi
@@ -36,7 +37,7 @@ fun ReferencedNoteCard(
         modifier = modifier
             .wrapContentHeight()
             .clickable(
-                enabled = noteCallbacks.onNoteClick != null,
+                enabled = noteCallbacks.onNoteClick != null && data.rawKind == NostrEventKind.ShortTextNote.value,
                 onClick = { noteCallbacks.onNoteClick?.invoke(data.postId) },
             ),
         colors = colors,

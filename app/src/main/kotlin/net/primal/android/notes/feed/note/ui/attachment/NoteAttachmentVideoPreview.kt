@@ -31,6 +31,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import coil.compose.SubcomposeAsyncImage
 import net.primal.android.LocalContentDisplaySettings
+import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Mute
@@ -171,23 +172,29 @@ private fun VideoThumbnailImagePreview(
 }
 
 @Composable
-fun PlayButton(onClick: () -> Unit) {
+fun PlayButton(loading: Boolean = false, onClick: (() -> Unit)? = null) {
     Box(
         modifier = Modifier
             .size(64.dp)
             .background(color = Color.Black.copy(alpha = 0.42f), shape = CircleShape)
             .clip(CircleShape)
-            .clickable { onClick() },
+            .clickable(enabled = onClick != null, onClick = { onClick?.invoke() }),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(
-            modifier = Modifier
-                .size(32.dp)
-                .padding(start = 6.dp),
-            imageVector = PrimalIcons.Play,
-            contentDescription = null,
-            tint = Color.White,
-        )
+        if (loading) {
+            PrimalLoadingSpinner(
+                size = 42.dp,
+            )
+        } else {
+            Icon(
+                modifier = Modifier
+                    .size(32.dp)
+                    .padding(start = 6.dp),
+                imageVector = PrimalIcons.Play,
+                contentDescription = null,
+                tint = Color.White,
+            )
+        }
     }
 }
 

@@ -389,6 +389,7 @@ private fun takeAsReferencedNoteOrNull(
             linkPreviews = linkPreviews,
             videoThumbnails = videoThumbnails,
         ),
+        raw = refNote.raw,
     )
 } else {
     null
