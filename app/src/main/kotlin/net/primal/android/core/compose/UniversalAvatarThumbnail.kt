@@ -49,7 +49,7 @@ fun UniversalAvatarThumbnail(
         legendaryCustomization.legendaryStyle != LegendaryStyle.NO_CUSTOMIZATION
 
     val borderBrush = if (hasLegendBorder) {
-        legendaryCustomization?.legendaryStyle?.brush
+        legendaryCustomization?.legendaryStyle?.primaryBrush
     } else {
         null
     }

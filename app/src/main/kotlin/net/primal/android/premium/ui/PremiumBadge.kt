@@ -30,7 +30,7 @@ fun PremiumBadge(
             .clip(AppTheme.shapes.extraLarge)
             .background(
                 brush = if (legendaryStyle != LegendaryStyle.NO_CUSTOMIZATION) {
-                    legendaryStyle.brush
+                    legendaryStyle.primaryBrush
                 } else {
                     Brush.linearGradient(listOf(AppTheme.colorScheme.tertiary, AppTheme.colorScheme.tertiary))
                 },

@@ -143,7 +143,7 @@ fun LegendCardScreen(
                     animationProgress = animationProgress,
                 )
 
-                state.profile?.premiumDetails?.legendaryCustomization?.legendaryStyle?.simpleBrush?.let { brush ->
+                state.profile?.premiumDetails?.legendaryCustomization?.legendaryStyle?.secondaryBrush?.let { brush ->
                     drawPath(alpha = 0.25f, path = topStart, brush = brush)
                     drawPath(alpha = 0.25f, path = bottomStart, brush = brush)
                     drawPath(path = topEnd, brush = brush)

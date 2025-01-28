@@ -387,7 +387,7 @@ fun ProfilePremiumBadge(
             .clip(AppTheme.shapes.extraLarge)
             .background(
                 brush = if (legendaryStyle != null && legendaryStyle != LegendaryStyle.NO_CUSTOMIZATION) {
-                    legendaryStyle.brush
+                    legendaryStyle.primaryBrush
                 } else {
                     Brush.linearGradient(listOf(AppTheme.colorScheme.tertiary, AppTheme.colorScheme.tertiary))
                 },
