@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,7 +26,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -66,6 +65,7 @@ import androidx.core.text.isDigitsOnly
 import java.text.NumberFormat
 import java.util.*
 import net.primal.android.R
+import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -185,7 +185,8 @@ fun WalletSettingsScreen(
                     nwcConnectionInfos = state.nwcConnectionsInfo,
                     onRevokeConnectedApp = { eventPublisher(UiEvent.RevokeConnection(it)) },
                     onCreateNewWalletConnection = onCreateNewWalletConnection,
-                    connectionsLoading = state.connectionsLoading,
+                    connectionsState = state.connectionsState,
+                    onRetryFetchingConnections = { eventPublisher(UiEvent.RetryConnectionsFetch) },
                 )
             }
         },
@@ -194,15 +195,19 @@ fun WalletSettingsScreen(
 
 @Composable
 private fun ConnectedAppsSettings(
-    connectionsLoading: Boolean,
     nwcConnectionInfos: List<NwcConnectionInfo>,
+    connectionsState: WalletSettingsContract.ConnectionsState,
     onRevokeConnectedApp: (nwcPubkey: String) -> Unit,
     onCreateNewWalletConnection: () -> Unit,
+    onRetryFetchingConnections: () -> Unit,
 ) {
     var revokeDialogVisible by remember { mutableStateOf(false) }
     var revokeNwcPubkey by remember { mutableStateOf("") }
 
     ListItem(
+        colors = ListItemDefaults.colors(
+            containerColor = AppTheme.colorScheme.surfaceVariant,
+        ),
         headlineContent = {
             Text(
                 text = stringResource(id = R.string.settings_wallet_connected_apps).uppercase(Locale.getDefault()),
@@ -225,49 +230,64 @@ private fun ConnectedAppsSettings(
         ConnectedAppsHeader()
 
         HorizontalDivider(thickness = 1.dp)
-        if (connectionsLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 21.dp)
-                    .size(12.dp)
-                    .align(Alignment.CenterHorizontally),
-                strokeWidth = 2.dp,
-                color = AppTheme.colorScheme.onSurface,
-            )
-        } else {
-            if (nwcConnectionInfos.isEmpty()) {
-                Text(
+
+        when (connectionsState) {
+            WalletSettingsContract.ConnectionsState.Loading -> {
+                Box(modifier = Modifier.height(48.dp)) {
+                    PrimalLoadingSpinner(size = 32.dp)
+                }
+            }
+
+            WalletSettingsContract.ConnectionsState.Error -> {
+                Box(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 21.dp)
-                        .align(Alignment.CenterHorizontally),
-                    text = stringResource(id = R.string.settings_wallet_no_connected_apps),
-                    style = AppTheme.typography.titleMedium,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                    fontWeight = FontWeight.Medium,
-                    textAlign = TextAlign.Center,
-                )
-            } else {
-                nwcConnectionInfos.forEachIndexed { index, app ->
-                    val isLastItem = index == nwcConnectionInfos.lastIndex
+                        .fillMaxWidth()
+                        .height(48.dp),
+                ) {
+                    TextButton(onClick = onRetryFetchingConnections) {
+                        Text(
+                            text = stringResource(id = R.string.settings_new_wallet_connection_retry).uppercase(),
+                        )
+                    }
+                }
+            }
 
-                    ConnectedAppItem(
-                        isLastItem = isLastItem,
-                        appName = app.appName,
-                        budget =
-                        if (app.dailyBudget?.isNotBlank() == true) {
-                            app.dailyBudget.toSats().toLong().let { "%,d".format(it) }
-                        } else {
-                            stringResource(id = R.string.settings_wallet_no_limit)
-                        },
-                        canRevoke = app.canRevoke,
-                        onRevokeConnectedApp = {
-                            revokeDialogVisible = true
-                            revokeNwcPubkey = app.nwcPubkey
-                        },
-                    )
+            WalletSettingsContract.ConnectionsState.Loaded -> {
+                if (nwcConnectionInfos.isEmpty()) {
+                    Box(modifier = Modifier.height(48.dp)) {
+                        Text(
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .align(Alignment.Center),
+                            text = stringResource(id = R.string.settings_wallet_no_connected_apps),
+                            style = AppTheme.typography.titleMedium,
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                            fontWeight = FontWeight.Medium,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                } else {
+                    nwcConnectionInfos.forEachIndexed { index, app ->
+                        val isLastItem = index == nwcConnectionInfos.lastIndex
 
-                    if (!isLastItem) {
-                        HorizontalDivider(thickness = 1.dp)
+                        ConnectedAppItem(
+                            isLastItem = isLastItem,
+                            appName = app.appName,
+                            budget = if (app.dailyBudget?.isNotBlank() == true) {
+                                app.dailyBudget.toSats().toLong().let { "%,d".format(it) }
+                            } else {
+                                stringResource(id = R.string.settings_wallet_no_limit)
+                            },
+                            canRevoke = app.canRevoke,
+                            onRevokeConnectedApp = {
+                                revokeDialogVisible = true
+                                revokeNwcPubkey = app.nwcPubkey
+                            },
+                        )
+
+                        if (!isLastItem) {
+                            HorizontalDivider(thickness = 1.dp)
+                        }
                     }
                 }
             }
@@ -722,7 +742,7 @@ private fun PreviewSettingsWalletScreen(
     @PreviewParameter(WalletUiStateProvider::class)
     state: WalletSettingsContract.UiState,
 ) {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
         WalletSettingsScreen(
             state = state,
             onClose = {},

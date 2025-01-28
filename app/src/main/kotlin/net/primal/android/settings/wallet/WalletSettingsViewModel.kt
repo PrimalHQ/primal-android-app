@@ -59,18 +59,17 @@ class WalletSettingsViewModel @Inject constructor(
     private fun fetchWalletConnections() =
         viewModelScope.launch {
             try {
-                setState { copy(connectionsLoading = true) }
-                val response: List<PrimalNwcConnectionInfo> = nwcWalletRepository.getConnections(
-                    userId = activeAccountStore.activeUserId(),
-                )
+                setState { copy(connectionsState = WalletSettingsContract.ConnectionsState.Loading) }
+                val response = nwcWalletRepository.getConnections(userId = activeAccountStore.activeUserId())
                 setState {
                     copy(
                         nwcConnectionsInfo = response.map { it.mapAsConnectedAppUi() },
-                        connectionsLoading = false,
+                        connectionsState = WalletSettingsContract.ConnectionsState.Loaded,
                     )
                 }
             } catch (error: WssException) {
                 Timber.w(error)
+                setState { copy(connectionsState = WalletSettingsContract.ConnectionsState.Error) }
             }
         }
 
@@ -82,9 +81,11 @@ class WalletSettingsViewModel @Inject constructor(
                     is WalletSettingsContract.UiEvent.UpdateWalletPreference -> {
                         updateWalletPreference(walletPreference = it.walletPreference)
                     }
+
                     is WalletSettingsContract.UiEvent.UpdateMinTransactionAmount -> {
                         updateSpamThresholdAmount(amountInSats = it.amountInSats)
                     }
+
                     is WalletSettingsContract.UiEvent.RevokeConnection -> {
                         val nwcPubKey = it.nwcPubkey
                         val updatedConnections = state.value.nwcConnectionsInfo.filterNot { it.nwcPubkey == nwcPubKey }
@@ -98,6 +99,8 @@ class WalletSettingsViewModel @Inject constructor(
                             }
                         }
                     }
+
+                    WalletSettingsContract.UiEvent.RetryConnectionsFetch -> fetchWalletConnections()
                 }
             }
         }

@@ -12,13 +12,20 @@ interface WalletSettingsContract {
         val maxWalletBalanceInBtc: String? = null,
         val spamThresholdAmountInSats: Long? = null,
         val nwcConnectionsInfo: List<NwcConnectionInfo> = emptyList(),
-        val connectionsLoading: Boolean = false,
+        val connectionsState: ConnectionsState = ConnectionsState.Loading,
     )
 
     sealed class UiEvent {
         data object DisconnectWallet : UiEvent()
+        data object RetryConnectionsFetch : UiEvent()
         data class RevokeConnection(val nwcPubkey: String) : UiEvent()
         data class UpdateWalletPreference(val walletPreference: WalletPreference) : UiEvent()
         data class UpdateMinTransactionAmount(val amountInSats: Long) : UiEvent()
+    }
+
+    enum class ConnectionsState {
+        Loading,
+        Error,
+        Loaded,
     }
 }
