@@ -6,6 +6,7 @@ import net.primal.android.premium.api.model.LegendPaymentInstructionsResponse
 import net.primal.android.premium.api.model.MembershipStatusResponse
 import net.primal.android.premium.api.model.NameAvailableResponse
 import net.primal.android.premium.api.model.PurchaseMembershipRequest
+import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
 import net.primal.android.premium.domain.PremiumPurchaseOrder
 import net.primal.android.profile.domain.PrimalLegendProfile
 
@@ -32,7 +33,7 @@ interface PremiumApi {
 
     suspend fun getOrdersHistory(userId: String): List<PremiumPurchaseOrder>
 
-    suspend fun updateLegendProfile(userId: String, profile: PrimalLegendProfile)
+    suspend fun updateLegendProfile(userId: String, updateProfileRequest: UpdatePrimalLegendProfileRequest)
 
     suspend fun getRecoveryContactsList(userId: String): List<NostrEvent>
 }

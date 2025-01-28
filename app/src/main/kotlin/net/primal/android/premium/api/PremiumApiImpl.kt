@@ -1,7 +1,6 @@
 package net.primal.android.premium.api
 
 import javax.inject.Inject
-import kotlinx.serialization.encodeToString
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
@@ -25,6 +24,7 @@ import net.primal.android.premium.api.model.NameAvailableRequest
 import net.primal.android.premium.api.model.NameAvailableResponse
 import net.primal.android.premium.api.model.PurchaseMembershipRequest
 import net.primal.android.premium.api.model.ShowSupportUsResponse
+import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
 import net.primal.android.premium.domain.PremiumPurchaseOrder
 import net.primal.android.profile.domain.PrimalLegendProfile
 import net.primal.android.settings.api.model.AppSpecificDataRequest
@@ -206,7 +206,7 @@ class PremiumApiImpl @Inject constructor(
             ?: throw WssException("Missing event or invalid content.")
     }
 
-    override suspend fun updateLegendProfile(userId: String, profile: PrimalLegendProfile) {
+    override suspend fun updateLegendProfile(userId: String, updateProfileRequest: UpdatePrimalLegendProfileRequest) {
         primalWalletApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.WALLET_MEMBERSHIP_LEGEND_CUSTOMIZATION,
@@ -214,7 +214,7 @@ class PremiumApiImpl @Inject constructor(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
                             userId = userId,
-                            content = NostrJson.encodeToString(profile),
+                            content = NostrJson.encodeToString(updateProfileRequest),
                         ),
                     ),
                 ),

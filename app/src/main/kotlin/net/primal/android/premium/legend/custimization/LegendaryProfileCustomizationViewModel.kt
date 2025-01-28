@@ -66,11 +66,9 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
             try {
                 premiumRepository.updateLegendProfile(
                     userId = activeAccountStore.activeUserId(),
-                    profile = PrimalLegendProfile(
-                        avatarGlow = event.avatarGlow,
-                        customBadge = event.customBadge,
-                        styleId = event.style.id,
-                    ),
+                    styleId = event.style.id,
+                    avatarGlow = event.avatarGlow,
+                    customBadge = event.customBadge,
                 )
                 userRepository.fetchAndUpdateUserAccount(userId = activeAccountStore.activeUserId())
                 setEffect(SideEffect.CustomizationSaved)
