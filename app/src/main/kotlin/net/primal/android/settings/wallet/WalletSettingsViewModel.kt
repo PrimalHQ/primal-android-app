@@ -59,10 +59,16 @@ class WalletSettingsViewModel @Inject constructor(
     private fun fetchWalletConnections() =
         viewModelScope.launch {
             try {
+                setState { copy(connectionsLoading = true) }
                 val response: List<PrimalNwcConnectionInfo> = nwcWalletRepository.getConnections(
                     userId = activeAccountStore.activeUserId(),
                 )
-                setState { copy(nwcConnectionsInfo = response.map { it.mapAsConnectedAppUi() }) }
+                setState {
+                    copy(
+                        nwcConnectionsInfo = response.map { it.mapAsConnectedAppUi() },
+                        connectionsLoading = false,
+                    )
+                }
             } catch (error: WssException) {
                 Timber.w(error)
             }

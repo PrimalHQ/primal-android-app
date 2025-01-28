@@ -64,6 +64,7 @@ import androidx.core.text.isDigitsOnly
 import java.text.NumberFormat
 import java.util.*
 import net.primal.android.R
+import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -183,6 +184,7 @@ fun WalletSettingsScreen(
                     nwcConnectionInfos = state.nwcConnectionsInfo,
                     onRevokeConnectedApp = { eventPublisher(UiEvent.RevokeConnection(it)) },
                     onCreateNewWalletConnection = onCreateNewWalletConnection,
+                    connectionsLoading = state.connectionsLoading,
                 )
             }
         },
@@ -191,6 +193,7 @@ fun WalletSettingsScreen(
 
 @Composable
 private fun ConnectedAppsSettings(
+    connectionsLoading: Boolean,
     nwcConnectionInfos: List<NwcConnectionInfo>,
     onRevokeConnectedApp: (nwcPubkey: String) -> Unit,
     onCreateNewWalletConnection: () -> Unit,
@@ -221,40 +224,43 @@ private fun ConnectedAppsSettings(
         ConnectedAppsHeader()
 
         HorizontalDivider(thickness = 1.dp)
-
-        if (nwcConnectionInfos.isEmpty()) {
-            Text(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 21.dp)
-                    .align(Alignment.CenterHorizontally),
-                text = stringResource(id = R.string.settings_wallet_no_connected_apps),
-                style = AppTheme.typography.titleMedium,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center,
-            )
+        if (connectionsLoading) {
+            PrimalLoadingSpinner()
         } else {
-            nwcConnectionInfos.forEachIndexed { index, app ->
-                val isLastItem = index == nwcConnectionInfos.lastIndex
-
-                ConnectedAppItem(
-                    isLastItem = isLastItem,
-                    appName = app.appName,
-                    budget =
-                    if (app.dailyBudget?.isNotBlank() == true) {
-                        app.dailyBudget.toSats().toLong().let { "%,d".format(it) }
-                    } else {
-                        stringResource(id = R.string.settings_wallet_no_limit)
-                    },
-                    canRevoke = app.canRevoke,
-                    onRevokeConnectedApp = {
-                        revokeDialogVisible = true
-                        revokeNwcPubkey = app.nwcPubkey
-                    },
+            if (nwcConnectionInfos.isEmpty()) {
+                Text(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 21.dp)
+                        .align(Alignment.CenterHorizontally),
+                    text = stringResource(id = R.string.settings_wallet_no_connected_apps),
+                    style = AppTheme.typography.titleMedium,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                    fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center,
                 )
+            } else {
+                nwcConnectionInfos.forEachIndexed { index, app ->
+                    val isLastItem = index == nwcConnectionInfos.lastIndex
 
-                if (!isLastItem) {
-                    HorizontalDivider(thickness = 1.dp)
+                    ConnectedAppItem(
+                        isLastItem = isLastItem,
+                        appName = app.appName,
+                        budget =
+                        if (app.dailyBudget?.isNotBlank() == true) {
+                            app.dailyBudget.toSats().toLong().let { "%,d".format(it) }
+                        } else {
+                            stringResource(id = R.string.settings_wallet_no_limit)
+                        },
+                        canRevoke = app.canRevoke,
+                        onRevokeConnectedApp = {
+                            revokeDialogVisible = true
+                            revokeNwcPubkey = app.nwcPubkey
+                        },
+                    )
+
+                    if (!isLastItem) {
+                        HorizontalDivider(thickness = 1.dp)
+                    }
                 }
             }
         }
