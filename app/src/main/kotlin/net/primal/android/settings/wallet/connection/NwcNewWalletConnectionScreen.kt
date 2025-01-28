@@ -9,12 +9,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Link
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -23,6 +23,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -33,7 +38,11 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.NwcExternalAppConnection
+import net.primal.android.core.compose.icons.primaliconpack.NwcExternalAppForeground
 import net.primal.android.theme.AppTheme
+
+private val IconBackgroundColor = Color(0xFFE5E5E5)
 
 @Composable
 fun NwcNewWalletConnectionScreen(viewModel: NwcNewWalletConnectionViewModel, onClose: () -> Unit) {
@@ -161,24 +170,46 @@ private fun WalletConnectionHeader(modifier: Modifier = Modifier) {
             Icon(
                 painter = painterResource(id = R.drawable.primal_wave_logo_summer),
                 contentDescription = "Primal Wallet",
-                modifier = Modifier.size(64.dp),
+                modifier = Modifier
+                    .clip(RoundedCornerShape(9.dp))
+                    .background(IconBackgroundColor)
+                    .padding(17.dp)
+                    .size(54.dp),
+                tint = Color.Unspecified,
             )
-            Text(modifier = Modifier.padding(top = 11.dp), text = "Primal Wallet")
+
+            Text(modifier = Modifier.padding(top = 13.dp), text = "Primal Wallet")
         }
 
         Icon(
-            imageVector = Icons.Default.Link,
+            imageVector = PrimalIcons.NwcExternalAppConnection,
             contentDescription = "Connection",
-            modifier = Modifier.size(42.dp),
+            modifier = Modifier
+                .offset(y = (-13).dp)
+                .drawWithContent {
+                    drawContent()
+                    val gradient = Brush.horizontalGradient(
+                        colors = listOf(Color.Transparent, Color.Black, Color.Black, Color.Transparent),
+                        startX = 0f,
+                        endX = size.width,
+                    )
+                    drawRect(gradient, blendMode = BlendMode.DstIn)
+                },
         )
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
-                painter = painterResource(id = R.drawable.primal_wave_logo_winter),
+                modifier = Modifier
+                    .clip(RoundedCornerShape(9.dp))
+                    .background(IconBackgroundColor)
+                    .padding(21.dp)
+                    .size(54.dp),
+                imageVector = PrimalIcons.NwcExternalAppForeground,
                 contentDescription = "External App",
-                modifier = Modifier.size(64.dp),
+                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
             )
-            Text(modifier = Modifier.padding(top = 11.dp), text = "External App")
+
+            Text(modifier = Modifier.padding(top = 13.dp), text = "External App")
         }
     }
 }
