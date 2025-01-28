@@ -195,10 +195,8 @@ private fun ButtonsColumn(
     onBecomeLegendClick: () -> Unit,
     legendaryCustomization: LegendaryCustomization,
 ) {
-    var showContent = remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        showContent.value = true
-    }
+    var showContent by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { showContent = true }
 
     Column(
         modifier = modifier
@@ -208,7 +206,7 @@ private fun ButtonsColumn(
         verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
     ) {
         AnimatedVisibility(
-            visible = showContent.value,
+            visible = showContent,
             enter = makeEnterTransition(delayMillis = 583),
         ) {
             TextButton(
@@ -225,7 +223,7 @@ private fun ButtonsColumn(
             }
         }
         AnimatedVisibility(
-            visible = showContent.value,
+            visible = showContent,
             enter = makeEnterTransition(delayMillis = 667),
         ) {
             Button(
