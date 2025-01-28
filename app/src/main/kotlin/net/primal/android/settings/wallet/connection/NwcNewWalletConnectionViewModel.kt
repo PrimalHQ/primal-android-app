@@ -29,13 +29,19 @@ class NwcNewWalletConnectionViewModel @Inject constructor() : ViewModel() {
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is NwcNewWalletConnectionContract.UiEvent.AppNameChangedEvent -> setState {
+                    is NwcNewWalletConnectionContract.UiEvent.AppNameChanged -> setState {
                         copy(
                             appName = it.appName,
                         )
                     }
 
                     NwcNewWalletConnectionContract.UiEvent.CreateWalletConnection -> {
+                    }
+
+                    is NwcNewWalletConnectionContract.UiEvent.DailyBudgetChanged -> setState {
+                        copy(
+                            dailyBudget = it.dailyBudget,
+                        )
                     }
                 }
             }

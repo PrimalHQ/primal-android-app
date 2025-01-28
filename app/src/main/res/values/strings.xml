@@ -708,7 +708,11 @@
     <string name="settings_wallet_save">Save</string>
     <string name="settings_new_wallet_connection_title">New Wallet Connection</string>
     <string name="settings_new_wallet_app_name_input_header">Name of the app you wish to connect: </string>
+    <string name="settings_new_wallet_app_cancel">Cancel</string>
+    <string name="settings_new_wallet_app_revoke_label">You can revoke access at any time in your Primal Wallet settings.</string>
     <string name="settings_new_wallet_create_new_connection_button">Create Wallet Connection</string>
+    <string name="settings_new_wallet_bottom_sheet_pick_daily_budget_title">Pick maximum daily budget</string>
+    <string name="settings_new_wallet_bottom_sheet_pick_daily_budget_save">Save</string>
 
     <string name="settings_wallet_nwc_qr_code_scan_title">Connect NWC Wallet</string>
     <string name="settings_wallet_nwc_qr_code_scan_hint">Scan the NWC\nconnection QR code</string>

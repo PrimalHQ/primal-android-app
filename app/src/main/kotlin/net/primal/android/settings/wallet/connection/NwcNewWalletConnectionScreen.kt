@@ -1,9 +1,15 @@
 package net.primal.android.settings.wallet.connection
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,15 +18,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,6 +43,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalOutlinedTextField
@@ -72,52 +89,125 @@ private fun NwcNewWalletConnectionScreen(
             )
         },
         content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .background(color = AppTheme.colorScheme.surfaceVariant)
-                    .fillMaxSize()
-                    .verticalScroll(scrollState)
-                    .padding(paddingValues),
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                WalletConnectionHeader()
-
-                Column {
-                    PrimalOutlinedTextField(
-                        header = stringResource(id = R.string.settings_new_wallet_app_name_input_header),
-                        value = state.appName,
-                        onValueChange = {
-                            eventPublisher(NwcNewWalletConnectionContract.UiEvent.AppNameChangedEvent(it))
-                        },
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    PrimalOutlinedTextField(
-                        header = "Daily budget:",
-                        value = state.appName,
-                        onValueChange = {
-                            eventPublisher(NwcNewWalletConnectionContract.UiEvent.AppNameChangedEvent(it))
-                        },
+            AnimatedContent(
+                targetState = state.secret,
+                transitionSpec = { slideInVertically() togetherWith slideOutVertically() },
+            ) { targetSecretState ->
+                if (targetSecretState == null) {
+                    WalletConnectionEditor(
+                        scrollState = scrollState,
+                        paddingValues = paddingValues,
+                        state = state,
+                        eventPublisher = eventPublisher,
+                        onClose = onClose,
                     )
                 }
-
-                CreateNewConnectionButton(
-                    loading = state.loading,
-                    onCreateNewConnection = {
-                        eventPublisher(NwcNewWalletConnectionContract.UiEvent.CreateWalletConnection)
-                    },
-                    onClose = onClose,
-                )
             }
         },
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun WalletConnectionEditor(
+    scrollState: ScrollState,
+    paddingValues: PaddingValues,
+    state: NwcNewWalletConnectionContract.UiState,
+    eventPublisher: (NwcNewWalletConnectionContract.UiEvent) -> Unit,
+    onClose: () -> Unit,
+) {
+    var showDailyBudgetBottomSheet by rememberSaveable { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .background(color = AppTheme.colorScheme.surfaceVariant)
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+            .padding(paddingValues),
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        WalletConnectionHeader()
+
+        Column {
+            PrimalOutlinedTextField(
+                header = stringResource(id = R.string.settings_new_wallet_app_name_input_header),
+                value = state.appName,
+                onValueChange = {
+                    eventPublisher(NwcNewWalletConnectionContract.UiEvent.AppNameChanged(it))
+                },
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            ListItem(
+                modifier = Modifier
+                    .padding(horizontal = 32.dp)
+                    .clickable { showDailyBudgetBottomSheet = true }
+                    .clip(RoundedCornerShape(12.dp)),
+                colors = ListItemDefaults.colors(
+                    containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                ),
+                headlineContent = {
+                    Text(text = stringResource(id = R.string.settings_wallet_header_daily_budget))
+                },
+                trailingContent = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (state.dailyBudget?.isNotBlank() == true) {
+                            Text(
+                                text = state.dailyBudget.toLong().let {
+                                    "%,d ${stringResource(id = R.string.wallet_sats_suffix)}".format(it)
+                                },
+                                style = AppTheme.typography.bodyMedium,
+                            )
+                        } else {
+                            Text(
+                                text = stringResource(id = R.string.settings_wallet_no_limit),
+                                style = AppTheme.typography.bodyMedium,
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(15.dp))
+
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos, contentDescription = null)
+                    }
+                },
+            )
+
+            if (showDailyBudgetBottomSheet) {
+                NwcDailyBudgetBottomSheet(
+                    initialDailyBudget = state.dailyBudget,
+                    onDismissRequest = { showDailyBudgetBottomSheet = false },
+                    onBudgetSelected = { dailyBudget ->
+                        eventPublisher(NwcNewWalletConnectionContract.UiEvent.DailyBudgetChanged(dailyBudget))
+                    },
+                )
+            }
+
+            Spacer(modifier = Modifier.height(21.dp))
+
+            Text(
+                modifier = Modifier.padding(horizontal = 21.dp),
+                text = stringResource(id = R.string.settings_new_wallet_app_revoke_label),
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                style = AppTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
+            )
+        }
+
+        CreateNewConnectionButton(
+            creatingSecret = state.creatingSecret,
+            onCreateNewConnection = {
+                eventPublisher(NwcNewWalletConnectionContract.UiEvent.CreateWalletConnection)
+            },
+            onClose = onClose,
+        )
+    }
+}
+
 @Composable
 private fun CreateNewConnectionButton(
-    loading: Boolean,
+    creatingSecret: Boolean,
     onCreateNewConnection: () -> Unit,
     onClose: () -> Unit,
 ) {
@@ -129,13 +219,12 @@ private fun CreateNewConnectionButton(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(86.dp)
                 .padding(horizontal = 32.dp),
         ) {
             PrimalLoadingButton(
                 text = stringResource(id = R.string.settings_new_wallet_create_new_connection_button),
-                enabled = !loading,
-                loading = loading,
+                enabled = !creatingSecret,
+                loading = creatingSecret,
                 onClick = {
                     keyboardController?.hide()
                     onCreateNewConnection()
@@ -149,7 +238,8 @@ private fun CreateNewConnectionButton(
 
         Text(
             modifier = Modifier.clickable { onClose() },
-            text = "Cancel",
+            text = stringResource(id = R.string.settings_new_wallet_app_cancel),
+            fontWeight = FontWeight.SemiBold,
         )
 
         Spacer(modifier = Modifier.height(7.dp))
