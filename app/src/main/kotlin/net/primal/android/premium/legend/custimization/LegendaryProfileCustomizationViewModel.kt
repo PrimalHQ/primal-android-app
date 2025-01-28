@@ -17,7 +17,6 @@ import net.primal.android.premium.legend.custimization.LegendaryProfileCustomiza
 import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationContract.UiEvent
 import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationContract.UiState
 import net.primal.android.premium.repository.PremiumRepository
-import net.primal.android.profile.domain.PrimalLegendProfile
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository

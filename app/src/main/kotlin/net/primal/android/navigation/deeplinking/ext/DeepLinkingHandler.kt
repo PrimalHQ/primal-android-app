@@ -22,11 +22,12 @@ fun String.parseDeepLinkOrNull(): DeepLink? =
         else -> null
     }
 
-private fun String.resolveNoteId(): String? = when {
-    this.startsWith("note1") -> runCatching { bech32ToHexOrThrow() }.getOrNull()
-    this.startsWith("nevent1") -> Nip19TLV.parseUriAsNeventOrNull(this)?.eventId
-    else -> this
-}
+private fun String.resolveNoteId(): String? =
+    when {
+        this.startsWith("note1") -> runCatching { bech32ToHexOrThrow() }.getOrNull()
+        this.startsWith("nevent1") -> Nip19TLV.parseUriAsNeventOrNull(this)?.eventId
+        else -> this
+    }
 
 private fun String.isNostrWalletConnectSchemaAndUrl(): Boolean =
     (this.startsWith(NOSTR_WALLET_CONNECT_SCHEMA) || this.startsWith(NOSTR_WALLET_CONNECT_ALT_SCHEMA)) &&

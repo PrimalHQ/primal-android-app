@@ -59,6 +59,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.time.Instant
+import java.time.format.FormatStyle
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.NostrUserText
@@ -76,8 +78,6 @@ import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.profile.details.ui.ProfilePremiumBadge
 import net.primal.android.profile.details.ui.model.shouldShowPremiumBadge
 import net.primal.android.theme.AppTheme
-import java.time.Instant
-import java.time.format.FormatStyle
 
 private val TOP_ICON_COLOR = Color(0xFF1E1E1E)
 private val GLOW_RECT_COLOR = Color(0xFFCCCCCC)
@@ -167,17 +167,15 @@ fun LegendCardScreen(
     }
 }
 
-private suspend fun AnimationState<Float, AnimationVector1D>.startAnimation(
-    delayMillis: Int,
-    easing: Easing,
-) = animateTo(
-    targetValue = 1f,
-    animationSpec = tween(
-        durationMillis = 667,
-        delayMillis = delayMillis,
-        easing = easing,
-    ),
-)
+private suspend fun AnimationState<Float, AnimationVector1D>.startAnimation(delayMillis: Int, easing: Easing) =
+    animateTo(
+        targetValue = 1f,
+        animationSpec = tween(
+            durationMillis = 667,
+            delayMillis = delayMillis,
+            easing = easing,
+        ),
+    )
 
 private fun Modifier.drawAnimatedBackgroundAndGlow(
     brush: Brush?,
@@ -309,11 +307,11 @@ private fun LegendaryStyle?.resolveButtonColor(): Color =
     when (this) {
         LegendaryStyle.NO_CUSTOMIZATION, LegendaryStyle.GOLD, LegendaryStyle.AQUA,
         LegendaryStyle.SILVER, LegendaryStyle.TEAL, LegendaryStyle.BROWN, null,
-            -> Color.Black
+        -> Color.Black
 
         LegendaryStyle.PURPLE, LegendaryStyle.PURPLE_HAZE,
         LegendaryStyle.BLUE, LegendaryStyle.SUN_FIRE,
-            -> Color.White
+        -> Color.White
     }
 
 @Composable
@@ -335,8 +333,8 @@ private fun LegendDescription(modifier: Modifier = Modifier, profile: ProfileDet
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         ) {
             Text(
-                text = stringResource(id = R.string.premium_legend_card_legend_since) + " "
-                        + legendSince.formatToDefaultDateFormat(FormatStyle.LONG),
+                text = stringResource(id = R.string.premium_legend_card_legend_since) + " " +
+                    legendSince.formatToDefaultDateFormat(FormatStyle.LONG),
                 style = AppTheme.typography.bodyMedium,
                 color = AppTheme.colorScheme.onPrimary,
                 fontSize = 15.sp,

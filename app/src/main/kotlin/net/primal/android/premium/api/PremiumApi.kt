@@ -8,7 +8,6 @@ import net.primal.android.premium.api.model.NameAvailableResponse
 import net.primal.android.premium.api.model.PurchaseMembershipRequest
 import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
 import net.primal.android.premium.domain.PremiumPurchaseOrder
-import net.primal.android.profile.domain.PrimalLegendProfile
 
 interface PremiumApi {
 
