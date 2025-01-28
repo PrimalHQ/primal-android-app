@@ -14,7 +14,7 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.navigation.nwcUrl
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.settings.wallet.model.ConnectedAppUi
+import net.primal.android.settings.wallet.model.NwcConnectionInfo
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.NWCParseException
 import net.primal.android.user.domain.WalletPreference
@@ -23,7 +23,6 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.api.model.PrimalNwcConnectionInfo
 import net.primal.android.wallet.repository.NwcWalletRepository
 import net.primal.android.wallet.repository.WalletRepository
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 import timber.log.Timber
 
 @HiltViewModel
@@ -63,7 +62,7 @@ class WalletSettingsViewModel @Inject constructor(
                 val response: List<PrimalNwcConnectionInfo> = nwcWalletRepository.getConnections(
                     userId = activeAccountStore.activeUserId(),
                 )
-                setState { copy(connectedApps = response.map { it.mapAsConnectedAppUi() }) }
+                setState { copy(nwcConnectionsInfo = response.map { it.mapAsConnectedAppUi() }) }
             } catch (error: WssException) {
                 Timber.w(error)
             }
@@ -82,11 +81,16 @@ class WalletSettingsViewModel @Inject constructor(
                     }
                     is WalletSettingsContract.UiEvent.RevokeConnection -> {
                         val nwcPubKey = it.nwcPubkey
-                        val updatedConnections = state.value.connectedApps.filterNot { it.nwcPubkey == nwcPubKey }
+                        val updatedConnections = state.value.nwcConnectionsInfo.filterNot { it.nwcPubkey == nwcPubKey }
 
-                        setState { copy(connectedApps = updatedConnections) }
-
-                        nwcWalletRepository.revokeConnection(activeAccountStore.activeUserId(), nwcPubKey)
+                        viewModelScope.launch {
+                            try {
+                                setState { copy(nwcConnectionsInfo = updatedConnections) }
+                                nwcWalletRepository.revokeConnection(activeAccountStore.activeUserId(), nwcPubKey)
+                            } catch (error: WssException) {
+                                Timber.w(error)
+                            }
+                        }
                     }
                 }
             }
@@ -161,16 +165,11 @@ class WalletSettingsViewModel @Inject constructor(
             }
         }
 
-    private fun PrimalNwcConnectionInfo.mapAsConnectedAppUi(): ConnectedAppUi {
-        return ConnectedAppUi(
+    private fun PrimalNwcConnectionInfo.mapAsConnectedAppUi(): NwcConnectionInfo {
+        return NwcConnectionInfo(
             nwcPubkey = nwcPubkey,
             appName = appName,
-            dailyBudget =
-            if (dailyBudget?.isNotBlank() == true) {
-                dailyBudget.toSats().toLong().let { "%,d".format(it) }
-            } else {
-                "no limit"
-            },
+            dailyBudget = dailyBudget,
         )
     }
 }

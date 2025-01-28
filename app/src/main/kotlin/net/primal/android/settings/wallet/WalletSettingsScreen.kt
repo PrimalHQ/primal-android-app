@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -61,6 +62,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
 import java.text.NumberFormat
+import java.util.*
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -69,15 +71,13 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.settings.SettingsItem
 import net.primal.android.settings.wallet.WalletSettingsContract.UiEvent
-import net.primal.android.settings.wallet.model.ConnectedAppUi
+import net.primal.android.settings.wallet.model.NwcConnectionInfo
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.NostrWalletKeypair
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
-
-private val errorColor = Color(0xFFFE3D2F)
 
 @Composable
 fun WalletSettingsScreen(
@@ -180,7 +180,7 @@ fun WalletSettingsScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 ConnectedAppsSettings(
-                    connectedAppUis = state.connectedApps,
+                    nwcConnectionInfos = state.nwcConnectionsInfo,
                     onRevokeConnectedApp = { eventPublisher(UiEvent.RevokeConnection(it)) },
                     onCreateNewWalletConnection = onCreateNewWalletConnection,
                 )
@@ -191,7 +191,7 @@ fun WalletSettingsScreen(
 
 @Composable
 private fun ConnectedAppsSettings(
-    connectedAppUis: List<ConnectedAppUi>,
+    nwcConnectionInfos: List<NwcConnectionInfo>,
     onRevokeConnectedApp: (nwcPubkey: String) -> Unit,
     onCreateNewWalletConnection: () -> Unit,
 ) {
@@ -201,10 +201,10 @@ private fun ConnectedAppsSettings(
     ListItem(
         headlineContent = {
             Text(
-                text = stringResource(id = R.string.settings_wallet_connected_apps),
+                text = stringResource(id = R.string.settings_wallet_connected_apps).uppercase(Locale.getDefault()),
                 style = AppTheme.typography.bodyLarge,
                 color = AppTheme.colorScheme.onPrimary,
-                textAlign = TextAlign.Left,
+                textAlign = TextAlign.Start,
                 fontWeight = FontWeight.Bold,
             )
         },
@@ -222,7 +222,7 @@ private fun ConnectedAppsSettings(
 
         HorizontalDivider(thickness = 1.dp)
 
-        if (connectedAppUis.isEmpty()) {
+        if (nwcConnectionInfos.isEmpty()) {
             Text(
                 modifier = Modifier
                     .padding(horizontal = 16.dp, vertical = 21.dp)
@@ -234,13 +234,18 @@ private fun ConnectedAppsSettings(
                 textAlign = TextAlign.Center,
             )
         } else {
-            connectedAppUis.forEachIndexed { index, app ->
-                val isLastItem = index == connectedAppUis.lastIndex
+            nwcConnectionInfos.forEachIndexed { index, app ->
+                val isLastItem = index == nwcConnectionInfos.lastIndex
 
                 ConnectedAppItem(
                     isLastItem = isLastItem,
                     appName = app.appName,
-                    budget = app.dailyBudget,
+                    budget =
+                    if (app.dailyBudget?.isNotBlank() == true) {
+                        app.dailyBudget.toSats().toLong().let { "%,d".format(it) }
+                    } else {
+                        stringResource(id = R.string.settings_wallet_no_limit)
+                    },
                     canRevoke = app.canRevoke,
                     onRevokeConnectedApp = {
                         revokeDialogVisible = true
@@ -307,6 +312,8 @@ private fun ConnectedAppsHeader() {
     }
 }
 
+private val errorColor = Color(0xFFFE3D2F)
+
 @Composable
 private fun ConnectedAppItem(
     isLastItem: Boolean,
@@ -371,30 +378,32 @@ private fun ConnectedAppsHint(createNewWalletConnection: () -> Unit) {
             .padding(horizontal = 16.dp),
     ) {
         Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 2.dp)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = createNewWalletConnection,
-                ),
-            text = buildAnnotatedString {
-                append(stringResource(id = R.string.settings_wallet_connected_apps_hint))
-                append(
-                    AnnotatedString(
-                        text = stringResource(id = R.string.settings_wallet_connected_apps_hint_button),
-                        spanStyle = SpanStyle(
-                            color = AppTheme.colorScheme.secondary,
-                            fontStyle = AppTheme.typography.bodySmall.fontStyle,
-                            fontWeight = FontWeight.SemiBold,
-
-                        ),
-                    ),
-                )
-            },
+            modifier = Modifier.fillMaxWidth(),
+            text = stringResource(id = R.string.settings_wallet_connected_apps_hint),
             style = AppTheme.typography.bodySmall,
         )
+
+        TextButton(
+            onClick = createNewWalletConnection,
+            contentPadding = PaddingValues(0.dp),
+            shape = AppTheme.shapes.small,
+        ) {
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = createNewWalletConnection,
+                    ),
+                text = stringResource(id = R.string.settings_wallet_connected_apps_hint_button),
+                style = AppTheme.typography.bodyMedium.copy(
+                    color = AppTheme.colorScheme.secondary,
+                    fontStyle = AppTheme.typography.bodyMedium.fontStyle,
+                    fontWeight = FontWeight.SemiBold,
+                ),
+            )
+        }
     }
 }
 

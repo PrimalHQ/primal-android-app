@@ -9,14 +9,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.settings.wallet.connection.NwcNewWalletConnectionContract.UiState
 
 @HiltViewModel
 class NwcNewWalletConnectionViewModel @Inject constructor() : ViewModel() {
 
-    private val _state = MutableStateFlow(NwcNewWalletConnectionContract.UiState())
+    private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
-    private fun setState(reducer: NwcNewWalletConnectionContract.UiState.() -> NwcNewWalletConnectionContract.UiState) =
-        _state.getAndUpdate(reducer)
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
 
     private val events = MutableSharedFlow<NwcNewWalletConnectionContract.UiEvent>()
     fun setEvent(event: NwcNewWalletConnectionContract.UiEvent) = viewModelScope.launch { events.emit(event) }

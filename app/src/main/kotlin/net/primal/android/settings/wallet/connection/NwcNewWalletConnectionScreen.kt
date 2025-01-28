@@ -24,9 +24,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -184,17 +181,7 @@ private fun WalletConnectionHeader(modifier: Modifier = Modifier) {
         Icon(
             imageVector = PrimalIcons.NwcExternalAppConnection,
             contentDescription = "Connection",
-            modifier = Modifier
-                .offset(y = (-13).dp)
-                .drawWithContent {
-                    drawContent()
-                    val gradient = Brush.horizontalGradient(
-                        colors = listOf(Color.Transparent, Color.Black, Color.Black, Color.Transparent),
-                        startX = 0f,
-                        endX = size.width,
-                    )
-                    drawRect(gradient, blendMode = BlendMode.DstIn)
-                },
+            modifier = Modifier.offset(y = (-13).dp),
         )
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {

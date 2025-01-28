@@ -693,10 +693,11 @@
     <string name="settings_wallet_header_app">App</string>
     <string name="settings_wallet_header_daily_budget">Daily Budget</string>
     <string name="settings_wallet_header_revoke">Revoke</string>
-    <string name="settings_wallet_connected_apps">CONNECTED APPS</string>
+    <string name="settings_wallet_connected_apps">Connected Apps</string>
     <string name="settings_wallet_revoke_connected_apps_dialog_title">Revoke Connection</string>
     <string name="settings_wallet_revoke_connected_apps_dialog_text">Are you sure you want to revoke this wallet connection?</string>
     <string name="settings_wallet_no_connected_apps">There are no apps connected to Primal Wallet</string>
+    <string name="settings_wallet_no_limit">no limit</string>
     <string name="settings_wallet_connected_apps_hint">You can connect your Primal Wallet to other Nostr apps via Nostr Wallet Connect to enable zapping and payments. </string>
     <string name="settings_wallet_connected_apps_hint_button">\n\nCreate a new wallet connection</string>
     <string name="settings_wallet_hide_transactions_below_hint">You can choose to hide small transactions to avoid spam in your transaction list</string>
