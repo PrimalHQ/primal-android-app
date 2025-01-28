@@ -255,11 +255,10 @@ private fun WalletConnectionHeader(modifier: Modifier = Modifier) {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
-                painter = painterResource(id = R.drawable.primal_wave_logo_summer),
+                painter = painterResource(id = R.drawable.primal_nwc_logo),
                 contentDescription = "Primal Wallet",
                 modifier = Modifier
                     .clip(RoundedCornerShape(9.dp))
-                    .background(IconBackgroundColor)
                     .padding(17.dp)
                     .size(54.dp),
                 tint = Color.Unspecified,
@@ -269,9 +268,10 @@ private fun WalletConnectionHeader(modifier: Modifier = Modifier) {
         }
 
         Icon(
+            modifier = Modifier.offset(y = (-13).dp),
             imageVector = PrimalIcons.NwcExternalAppConnection,
             contentDescription = "Connection",
-            modifier = Modifier.offset(y = (-13).dp),
+            tint = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
         )
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -283,7 +283,7 @@ private fun WalletConnectionHeader(modifier: Modifier = Modifier) {
                     .size(54.dp),
                 imageVector = PrimalIcons.NwcExternalAppForeground,
                 contentDescription = "External App",
-                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
             )
 
             Text(modifier = Modifier.padding(top = 13.dp), text = "External App")
