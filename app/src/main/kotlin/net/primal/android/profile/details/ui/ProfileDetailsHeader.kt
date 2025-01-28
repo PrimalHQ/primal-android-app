@@ -47,9 +47,6 @@ import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.premium.legend.LegendaryStyle
-import net.primal.android.premium.utils.isPremiumFreeTier
-import net.primal.android.premium.utils.isPremiumTier
-import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.details.ui.model.PremiumProfileDataUi
 import net.primal.android.profile.details.ui.model.shouldShowPremiumBadge
@@ -70,7 +67,7 @@ fun ProfileDetailsHeader(
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onPremiumBadgeClick: (tier: String) -> Unit,
+    onPremiumBadgeClick: (tier: String, profileId: String) -> Unit,
 ) {
     ProfileHeaderDetails(
         state = state,
@@ -122,7 +119,7 @@ private fun ProfileHeaderDetails(
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
     onProfileClick: (String) -> Unit,
     onHashtagClick: (String) -> Unit,
-    onPremiumBadgeClick: (tier: String) -> Unit,
+    onPremiumBadgeClick: (tier: String, profileId: String) -> Unit,
 ) {
     val localUriHandler = LocalUriHandler.current
 
@@ -150,10 +147,10 @@ private fun ProfileHeaderDetails(
         )
 
         UserDisplayName(
+            profileId = state.profileId,
             displayName = state.profileDetails?.authorDisplayName ?: state.profileId.asEllipsizedNpub(),
             internetIdentifier = state.profileDetails?.internetIdentifier,
             profilePremiumDetails = state.profileDetails?.premiumDetails,
-            activeUserPremiumTier = state.activeUserPremiumTier,
             onPremiumBadgeClick = onPremiumBadgeClick,
         )
 
@@ -334,11 +331,11 @@ private fun ProfileFollowIndicators(
 @Composable
 private fun UserDisplayName(
     modifier: Modifier = Modifier,
+    profileId: String,
     displayName: String,
     internetIdentifier: String?,
     profilePremiumDetails: PremiumProfileDataUi?,
-    activeUserPremiumTier: String?,
-    onPremiumBadgeClick: (tier: String) -> Unit,
+    onPremiumBadgeClick: (tier: String, profileId: String) -> Unit,
 ) {
     Row(
         modifier = modifier.padding(top = 12.dp, bottom = 3.dp),
@@ -358,14 +355,10 @@ private fun UserDisplayName(
             legendaryCustomization = profilePremiumDetails?.legendaryCustomization,
         )
 
-        val isPremiumBadgeClickable = activeUserPremiumTier == null ||
-            activeUserPremiumTier.isPremiumFreeTier() ||
-            (activeUserPremiumTier.isPremiumTier() && profilePremiumDetails?.tier.isPrimalLegendTier())
-
         if (profilePremiumDetails?.shouldShowPremiumBadge() == true) {
             ProfilePremiumBadge(
-                modifier = if (isPremiumBadgeClickable && profilePremiumDetails.tier != null) {
-                    Modifier.clickable { onPremiumBadgeClick(profilePremiumDetails.tier) }
+                modifier = if (profilePremiumDetails.tier != null) {
+                    Modifier.clickable { onPremiumBadgeClick(profilePremiumDetails.tier, profileId) }
                 } else {
                     Modifier
                 },
@@ -378,7 +371,7 @@ private fun UserDisplayName(
 }
 
 @Composable
-private fun ProfilePremiumBadge(
+fun ProfilePremiumBadge(
     modifier: Modifier = Modifier,
     firstCohort: String,
     secondCohort: String,
@@ -394,7 +387,7 @@ private fun ProfilePremiumBadge(
             .clip(AppTheme.shapes.extraLarge)
             .background(
                 brush = if (legendaryStyle != null && legendaryStyle != LegendaryStyle.NO_CUSTOMIZATION) {
-                    legendaryStyle.brush
+                    legendaryStyle.primaryBrush
                 } else {
                     Brush.linearGradient(listOf(AppTheme.colorScheme.tertiary, AppTheme.colorScheme.tertiary))
                 },
@@ -506,7 +499,7 @@ private fun PreviewProfileHeaderDetails() {
                 onFollowsClick = { _, _ -> },
                 onProfileClick = {},
                 onHashtagClick = {},
-                onPremiumBadgeClick = {},
+                onPremiumBadgeClick = { _, _ -> },
             )
         }
     }

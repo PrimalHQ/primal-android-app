@@ -8,8 +8,8 @@ import net.primal.android.premium.api.PremiumApi
 import net.primal.android.premium.api.model.CancelMembershipRequest
 import net.primal.android.premium.api.model.MembershipStatusResponse
 import net.primal.android.premium.api.model.PurchaseMembershipRequest
+import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
 import net.primal.android.premium.domain.PremiumMembership
-import net.primal.android.profile.domain.PrimalLegendProfile
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
 
@@ -97,10 +97,21 @@ class PremiumRepository @Inject constructor(
             premiumApi.getOrdersHistory(userId = userId)
         }
 
-    suspend fun updateLegendProfile(userId: String, profile: PrimalLegendProfile) =
-        withContext(dispatchers.io()) {
-            premiumApi.updateLegendProfile(userId = userId, profile = profile)
-        }
+    suspend fun updateLegendProfile(
+        userId: String,
+        styleId: String,
+        customBadge: Boolean,
+        avatarGlow: Boolean,
+    ) = withContext(dispatchers.io()) {
+        premiumApi.updateLegendProfile(
+            userId = userId,
+            updateProfileRequest = UpdatePrimalLegendProfileRequest(
+                styleId = styleId,
+                customBadge = customBadge,
+                avatarGlow = avatarGlow,
+            ),
+        )
+    }
 
     suspend fun fetchRecoveryContactsList(userId: String) =
         withContext(dispatchers.io()) {

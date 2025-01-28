@@ -300,7 +300,7 @@ private fun LegendaryStyleColorBox(
     ) {
         Box(
             modifier = Modifier
-                .background(brush = previewStyle.brush, shape = CircleShape)
+                .background(brush = previewStyle.primaryBrush, shape = CircleShape)
                 .size(36.dp),
             contentAlignment = Alignment.Center,
         ) {
