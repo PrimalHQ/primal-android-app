@@ -6,6 +6,7 @@ import androidx.compose.animation.core.AnimationState
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.EaseInOutQuart
 import androidx.compose.animation.core.EaseOutSine
+import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.animateTo
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -42,11 +43,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
@@ -111,48 +112,21 @@ fun LegendCardScreen(
     val animationProgress = remember { AnimationState(initialValue = 0f) }
     val glowProgress = remember { AnimationState(initialValue = 0f) }
     LaunchedEffect(Unit) {
-        launch {
-            animationProgress.animateTo(
-                targetValue = 1f,
-                animationSpec = tween(
-                    durationMillis = 667,
-                    delayMillis = 250,
-                    easing = EaseInOutQuart,
-                ),
-            )
-        }
-        launch {
-            glowProgress.animateTo(
-                targetValue = 1f,
-                animationSpec = tween(
-                    durationMillis = 667,
-                    delayMillis = 750,
-                    easing = EaseOutSine,
-                ),
-            )
-        }
+        launch { animationProgress.startAnimation(delayMillis = 250, easing = EaseInOutQuart) }
+        launch { glowProgress.startAnimation(delayMillis = 750, easing = EaseOutSine) }
     }
+
     Box(
         modifier = Modifier
             .padding(20.dp)
             .fillMaxWidth()
             .clip(AppTheme.shapes.medium)
             .background(AppTheme.extraColorScheme.surfaceVariantAlt1)
-            .drawBehind {
-                val (topStart, bottomStart, topEnd) = makeEdgePaths(
-                    animationProgress = animationProgress,
-                )
-
-                state.profile?.premiumDetails?.legendaryCustomization?.legendaryStyle?.secondaryBrush?.let { brush ->
-                    drawPath(alpha = 0.25f, path = topStart, brush = brush)
-                    drawPath(alpha = 0.25f, path = bottomStart, brush = brush)
-                    drawPath(path = topEnd, brush = brush)
-                }
-            }
-            .drawWithContent {
-                drawContent()
-                drawGlowRectangle(glowProgress = glowProgress)
-            }
+            .drawAnimatedBackgroundAndGlow(
+                brush = state.profile?.premiumDetails?.legendaryCustomization?.legendaryStyle?.secondaryBrush,
+                backgroundProgress = animationProgress,
+                glowProgress = glowProgress,
+            )
             .padding(bottom = 16.dp)
             .padding(4.dp),
     ) {
@@ -183,6 +157,35 @@ fun LegendCardScreen(
             }
         }
     }
+}
+
+private suspend fun AnimationState<Float, AnimationVector1D>.startAnimation(
+    delayMillis: Int,
+    easing: Easing,
+) = animateTo(
+    targetValue = 1f,
+    animationSpec = tween(
+        durationMillis = 667,
+        delayMillis = delayMillis,
+        easing = easing,
+    ),
+)
+
+private fun Modifier.drawAnimatedBackgroundAndGlow(
+    brush: Brush?,
+    backgroundProgress: AnimationState<Float, AnimationVector1D>,
+    glowProgress: AnimationState<Float, AnimationVector1D>,
+) = drawWithContent {
+    val (topStart, bottomStart, topEnd) = makeEdgePaths(animationProgress = backgroundProgress)
+
+    brush?.let {
+        drawPath(alpha = 0.25f, path = topStart, brush = brush)
+        drawPath(alpha = 0.25f, path = bottomStart, brush = brush)
+        drawPath(path = topEnd, brush = brush)
+    }
+
+    drawContent()
+    drawGlowRectangle(glowProgress = glowProgress)
 }
 
 @Composable
@@ -300,11 +303,11 @@ private fun LegendaryStyle?.resolveButtonColor(): Color =
     when (this) {
         LegendaryStyle.NO_CUSTOMIZATION, LegendaryStyle.GOLD, LegendaryStyle.AQUA,
         LegendaryStyle.SILVER, LegendaryStyle.TEAL, LegendaryStyle.BROWN, null,
-        -> Color.Black
+            -> Color.Black
 
         LegendaryStyle.PURPLE, LegendaryStyle.PURPLE_HAZE,
         LegendaryStyle.BLUE, LegendaryStyle.SUN_FIRE,
-        -> Color.White
+            -> Color.White
     }
 
 @Composable
@@ -332,7 +335,7 @@ private fun LegendDescription(modifier: Modifier = Modifier) {
             )
             Text(
                 text = "Legend status is awarded to users who\n" +
-                    "made a significant contribution to\nNostr or Primal",
+                        "made a significant contribution to\nNostr or Primal",
                 style = AppTheme.typography.bodyMedium,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 fontSize = 14.sp,
