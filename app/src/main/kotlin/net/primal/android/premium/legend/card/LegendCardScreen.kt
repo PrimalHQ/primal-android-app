@@ -33,7 +33,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,12 +52,14 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import net.primal.android.R
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
@@ -213,7 +214,7 @@ private fun ButtonsColumn(
                 contentPadding = PaddingValues(vertical = 16.dp),
             ) {
                 Text(
-                    text = "See other Legends",
+                    text = stringResource(id = R.string.premium_legend_card_button_see_other),
                     style = AppTheme.typography.bodyMedium,
                     color = legendaryCustomization.legendaryStyle.resolveNoCustomizationAndNull(),
                     fontSize = 16.sp,
@@ -235,7 +236,7 @@ private fun ButtonsColumn(
                 ),
             ) {
                 Text(
-                    text = "Become a Legend",
+                    text = stringResource(id = R.string.premium_legend_card_button_become_a_legend),
                     style = AppTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp,
@@ -489,12 +490,12 @@ private fun OptionsDropdownMenu(
         ) {
             DropdownPrimalMenuItem(
                 trailingIconVector = Icons.Default.Close,
-                text = "Close",
+                text = stringResource(id = R.string.premium_legend_card_dropdown_close),
                 onClick = onBackClick,
             )
             DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.Settings,
-                text = "Legend settings",
+                text = stringResource(id = R.string.premium_legend_card_dropdown_legend_settings),
                 onClick = onLegendSettingsClick,
             )
         }
