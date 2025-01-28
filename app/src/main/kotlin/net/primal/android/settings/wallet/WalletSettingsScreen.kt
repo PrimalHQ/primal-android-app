@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -64,7 +66,6 @@ import androidx.core.text.isDigitsOnly
 import java.text.NumberFormat
 import java.util.*
 import net.primal.android.R
-import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -225,7 +226,14 @@ private fun ConnectedAppsSettings(
 
         HorizontalDivider(thickness = 1.dp)
         if (connectionsLoading) {
-            PrimalLoadingSpinner()
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 21.dp)
+                    .size(12.dp)
+                    .align(Alignment.CenterHorizontally),
+                strokeWidth = 2.dp,
+                color = AppTheme.colorScheme.onSurface,
+            )
         } else {
             if (nwcConnectionInfos.isEmpty()) {
                 Text(
