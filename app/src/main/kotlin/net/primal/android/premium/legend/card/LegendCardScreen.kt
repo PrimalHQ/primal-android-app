@@ -308,13 +308,13 @@ private fun LegendaryStyle?.resolveButtonColor(): Color =
 
 @Composable
 private fun LegendDescription(modifier: Modifier = Modifier) {
-    var showContent = remember { mutableStateOf(false) }
+    var showContent by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        showContent.value = true
+        showContent = true
     }
 
     AnimatedVisibility(
-        visible = showContent.value,
+        visible = showContent,
         enter = makeEnterTransition(delayMillis = 583),
     ) {
         Column(
@@ -345,7 +345,7 @@ private fun LegendDescription(modifier: Modifier = Modifier) {
 private fun ProfileSummary(modifier: Modifier = Modifier, profile: ProfileDetailsUi) {
     val avatarRotation = remember { Animatable(AVATAR_START_ROTATION) }
     val avatarSizeAndAlphaProgress = remember { Animatable(0f) }
-    var showContent = remember { mutableStateOf(false) }
+    var showContent by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         launch {
             avatarRotation.animateTo(
@@ -367,7 +367,7 @@ private fun ProfileSummary(modifier: Modifier = Modifier, profile: ProfileDetail
                 ),
             )
         }
-        showContent.value = true
+        showContent = true
     }
 
     Column(
@@ -395,7 +395,7 @@ private fun ProfileSummary(modifier: Modifier = Modifier, profile: ProfileDetail
 
         profile.internetIdentifier?.let { internetIdentifier ->
             AnimatedVisibility(
-                visible = showContent.value,
+                visible = showContent,
                 enter = makeEnterTransition(delayMillis = 416),
             ) {
                 Text(
@@ -410,7 +410,7 @@ private fun ProfileSummary(modifier: Modifier = Modifier, profile: ProfileDetail
         }
         if (profile.premiumDetails?.shouldShowPremiumBadge() == true) {
             AnimatedVisibility(
-                visible = showContent.value,
+                visible = showContent,
                 enter = makeEnterTransition(delayMillis = 500),
             ) {
                 ProfilePremiumBadge(
@@ -424,9 +424,9 @@ private fun ProfileSummary(modifier: Modifier = Modifier, profile: ProfileDetail
 }
 
 @Composable
-private fun ColumnScope.AnimatedDisplayName(showContent: MutableState<Boolean>, profile: ProfileDetailsUi) {
+private fun ColumnScope.AnimatedDisplayName(showContent: Boolean, profile: ProfileDetailsUi) {
     AnimatedVisibility(
-        visible = showContent.value,
+        visible = showContent,
         enter = makeEnterTransition(delayMillis = 333),
     ) {
         Box {
