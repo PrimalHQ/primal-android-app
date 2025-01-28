@@ -14,6 +14,8 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.navigation.nwcUrl
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.settings.wallet.WalletSettingsContract.UiEvent
+import net.primal.android.settings.wallet.WalletSettingsContract.UiState
 import net.primal.android.settings.wallet.model.NwcConnectionInfo
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.NWCParseException
@@ -35,14 +37,12 @@ class WalletSettingsViewModel @Inject constructor(
     private val nwcWalletRepository: NwcWalletRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(WalletSettingsContract.UiState())
+    private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
-    private fun setState(reducer: WalletSettingsContract.UiState.() -> WalletSettingsContract.UiState) {
-        _state.getAndUpdate { it.reducer() }
-    }
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
-    private val events: MutableSharedFlow<WalletSettingsContract.UiEvent> = MutableSharedFlow()
-    fun setEvent(event: WalletSettingsContract.UiEvent) = viewModelScope.launch { events.emit(event) }
+    private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
+    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
         val nwcConnectionUrl = savedStateHandle.nwcUrl
@@ -77,31 +77,33 @@ class WalletSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is WalletSettingsContract.UiEvent.DisconnectWallet -> disconnectWallet()
-                    is WalletSettingsContract.UiEvent.UpdateWalletPreference -> {
+                    is UiEvent.DisconnectWallet -> disconnectWallet()
+                    is UiEvent.UpdateWalletPreference -> {
                         updateWalletPreference(walletPreference = it.walletPreference)
                     }
 
-                    is WalletSettingsContract.UiEvent.UpdateMinTransactionAmount -> {
+                    is UiEvent.UpdateMinTransactionAmount -> {
                         updateSpamThresholdAmount(amountInSats = it.amountInSats)
                     }
 
-                    is WalletSettingsContract.UiEvent.RevokeConnection -> {
-                        val nwcPubKey = it.nwcPubkey
-                        val updatedConnections = state.value.nwcConnectionsInfo.filterNot { it.nwcPubkey == nwcPubKey }
-
-                        viewModelScope.launch {
-                            try {
-                                setState { copy(nwcConnectionsInfo = updatedConnections) }
-                                nwcWalletRepository.revokeConnection(activeAccountStore.activeUserId(), nwcPubKey)
-                            } catch (error: WssException) {
-                                Timber.w(error)
-                            }
-                        }
+                    is UiEvent.RevokeConnection -> {
+                        revokeNwcConnection(nwcPubkey = it.nwcPubkey)
                     }
 
-                    WalletSettingsContract.UiEvent.RetryConnectionsFetch -> fetchWalletConnections()
+                    UiEvent.RetryConnectionsFetch -> fetchWalletConnections()
                 }
+            }
+        }
+
+    private fun revokeNwcConnection(nwcPubkey: String) =
+        viewModelScope.launch {
+            val nwcConnections = state.value.nwcConnectionsInfo
+            try {
+                val updatedConnections = nwcConnections.filterNot { it.nwcPubkey == nwcPubkey }
+                setState { copy(nwcConnectionsInfo = updatedConnections) }
+                nwcWalletRepository.revokeConnection(activeAccountStore.activeUserId(), nwcPubkey)
+            } catch (error: WssException) {
+                setState { copy(nwcConnectionsInfo = nwcConnections) }
             }
         }
 
