@@ -1,66 +1,33 @@
 package net.primal.android.navigation.deeplinking.ext
 
-import net.primal.android.core.utils.isValidNostrPublicKey
 import net.primal.android.crypto.bech32ToHexOrThrow
 import net.primal.android.navigation.deeplinking.DeepLink
-import net.primal.android.user.domain.NWCParseException
+import net.primal.android.nostr.utils.Nip19TLV
 import net.primal.android.user.domain.isNwcUrl
 import net.primal.android.user.domain.parseNWCUrl
 
-private const val PRIMAL_SCHEMA = "primal://"
-private const val PRIMAL_NOTE_SCHEMA = "${PRIMAL_SCHEMA}e/"
-private const val PRIMAL_PROFILE_SCHEMA = "${PRIMAL_SCHEMA}p/"
+private val PRIMAL_NOTE_REGEX = Regex("https://.*primal.net/e/")
 
 private const val NOSTR_WALLET_CONNECT_SCHEMA = "nostr+walletconnect://"
 private const val NOSTR_WALLET_CONNECT_ALT_SCHEMA = "nostrwalletconnect://"
 
-fun String?.handleDeeplink(): DeepLink? {
-    if (this == null) return null
+fun String.parseDeepLinkOrNull(): DeepLink? =
+    when {
+        PRIMAL_NOTE_REGEX.containsMatchIn(this) ->
+            PRIMAL_NOTE_REGEX.replace(this, "").resolveNoteId()?.let { DeepLink.Note(it) }
 
-    return when {
-        canHandlePrimalSchema() -> handlePrimalSchema()
-        canHandleNostrWalletConnectSchema() -> handleNostrWalletConnectSchema()
+        isNostrWalletConnectSchemaAndUrl() ->
+            runCatching { DeepLink.NostrWalletConnect(nwc = this.parseNWCUrl()) }.getOrNull()
+
         else -> null
     }
+
+private fun String.resolveNoteId(): String? = when {
+    this.startsWith("note1") -> runCatching { bech32ToHexOrThrow() }.getOrNull()
+    this.startsWith("nevent1") -> Nip19TLV.parseUriAsNeventOrNull(this)?.eventId
+    else -> this
 }
 
-private fun String.canHandleNostrWalletConnectSchema(): Boolean {
-    return (this.startsWith(NOSTR_WALLET_CONNECT_SCHEMA) || this.startsWith(NOSTR_WALLET_CONNECT_ALT_SCHEMA)) &&
+private fun String.isNostrWalletConnectSchemaAndUrl(): Boolean =
+    (this.startsWith(NOSTR_WALLET_CONNECT_SCHEMA) || this.startsWith(NOSTR_WALLET_CONNECT_ALT_SCHEMA)) &&
         this.isNwcUrl()
-}
-
-private fun String.canHandlePrimalSchema(): Boolean = startsWith(PRIMAL_SCHEMA)
-
-private fun String.handlePrimalSchema(): DeepLink? {
-    return when {
-        startsWith(PRIMAL_PROFILE_SCHEMA) -> {
-            val bechEncodedPubkey = replace(PRIMAL_PROFILE_SCHEMA, "")
-
-            if (!bechEncodedPubkey.isValidNostrPublicKey()) {
-                return null
-            }
-
-            DeepLink.Profile(bechEncodedPubkey.bech32ToHexOrThrow())
-        }
-
-        startsWith(PRIMAL_NOTE_SCHEMA) -> {
-            val bechEncodedNoteId = replace(PRIMAL_NOTE_SCHEMA, "")
-
-            val noteId = bechEncodedNoteId.bech32ToHexOrThrow()
-
-            DeepLink.Note(noteId)
-        }
-
-        else -> {
-            handleNostrWalletConnectSchema()
-        }
-    }
-}
-
-private fun String.handleNostrWalletConnectSchema(): DeepLink? {
-    return try {
-        DeepLink.NostrWalletConnect(nwc = this.parseNWCUrl())
-    } catch (error: NWCParseException) {
-        null
-    }
-}

@@ -45,8 +45,33 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter
+                android:autoVerify="true"
+                android:label="Primal Note">
+                <action android:name="android.intent.action.VIEW" />
 
-            <intent-filter android:label="Primal">
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="primal.net"
+                    android:pathPrefix="/e/"
+                    android:scheme="https" />
+            </intent-filter>
+            <intent-filter
+                android:autoVerify="true"
+                android:label="Dev Primal Note">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="dev.primal.net"
+                    android:pathPrefix="/e/"
+                    android:scheme="https" />
+            </intent-filter>
+            <intent-filter android:label="Wallet Connect">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -54,7 +79,6 @@
 
                 <data android:scheme="nostr+walletconnect" />
                 <data android:scheme="nostrwalletconnect" />
-                <data android:scheme="primal" />
             </intent-filter>
         </activity>
 
