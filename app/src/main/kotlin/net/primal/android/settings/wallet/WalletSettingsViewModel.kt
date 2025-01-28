@@ -10,8 +10,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.navigation.nwcUrl
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.settings.wallet.WalletSettingsContract.UiEvent
@@ -30,7 +28,6 @@ import timber.log.Timber
 @HiltViewModel
 class WalletSettingsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val userRepository: UserRepository,
     private val walletRepository: WalletRepository,
@@ -128,12 +125,10 @@ class WalletSettingsViewModel @Inject constructor(
                 val nostrWalletConnect = nwcUrl.parseNWCUrl()
                 val lightningAddress = activeAccountStore.activeUserAccount().lightningAddress
 
-                withContext(dispatcherProvider.io()) {
-                    userRepository.connectNostrWallet(
-                        userId = activeAccountStore.activeUserId(),
-                        nostrWalletConnect = nostrWalletConnect,
-                    )
-                }
+                userRepository.connectNostrWallet(
+                    userId = activeAccountStore.activeUserId(),
+                    nostrWalletConnect = nostrWalletConnect,
+                )
 
                 setState {
                     copy(
@@ -148,9 +143,7 @@ class WalletSettingsViewModel @Inject constructor(
         }
 
     private suspend fun disconnectWallet() {
-        withContext(dispatcherProvider.io()) {
-            userRepository.disconnectNostrWallet(userId = activeAccountStore.activeUserId())
-        }
+        userRepository.disconnectNostrWallet(userId = activeAccountStore.activeUserId())
         setState {
             copy(
                 wallet = null,
@@ -171,9 +164,7 @@ class WalletSettingsViewModel @Inject constructor(
             userRepository.updatePrimalWalletSettings(userId = activeAccountStore.activeUserId()) {
                 this.copy(spamThresholdAmountInSats = amountInSats)
             }
-            withContext(dispatcherProvider.io()) {
-                walletRepository.deleteAllTransactions()
-            }
+            walletRepository.deleteAllTransactions()
         }
 
     private fun PrimalNwcConnectionInfo.mapAsConnectedAppUi(): NwcConnectionInfo {

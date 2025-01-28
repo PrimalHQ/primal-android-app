@@ -70,20 +70,24 @@ class UserRepository @Inject constructor(
     }
 
     suspend fun connectNostrWallet(userId: String, nostrWalletConnect: NostrWalletConnect) {
-        database.relays().upsertAll(
-            relays = nostrWalletConnect.relays.map {
-                Relay(userId = userId, kind = RelayKind.NwcRelay, url = it, read = false, write = true)
-            },
-        )
-        accountsStore.getAndUpdateAccount(userId = userId) {
-            copy(nostrWallet = nostrWalletConnect)
+        withContext(dispatchers.io()) {
+            database.relays().upsertAll(
+                relays = nostrWalletConnect.relays.map {
+                    Relay(userId = userId, kind = RelayKind.NwcRelay, url = it, read = false, write = true)
+                },
+            )
+            accountsStore.getAndUpdateAccount(userId = userId) {
+                copy(nostrWallet = nostrWalletConnect)
+            }
         }
     }
 
     suspend fun disconnectNostrWallet(userId: String) {
-        database.relays().deleteAll(userId = userId, kind = RelayKind.NwcRelay)
-        accountsStore.getAndUpdateAccount(userId = userId) {
-            copy(nostrWallet = null)
+        withContext(dispatchers.io()) {
+            database.relays().deleteAll(userId = userId, kind = RelayKind.NwcRelay)
+            accountsStore.getAndUpdateAccount(userId = userId) {
+                copy(nostrWallet = null)
+            }
         }
     }
 
