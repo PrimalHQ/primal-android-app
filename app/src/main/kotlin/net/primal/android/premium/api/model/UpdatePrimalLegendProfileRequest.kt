@@ -1,7 +1,11 @@
 package net.primal.android.premium.api.model
 
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class UpdatePrimalLegendProfileRequest(
-    val styleId: String,
-    val customBadge: Boolean,
-    val avatarGlow: Boolean,
+    @SerialName("style") val styleId: String,
+    @SerialName("custom_badge") val customBadge: Boolean,
+    @SerialName("avatar_glow") val avatarGlow: Boolean,
 )
