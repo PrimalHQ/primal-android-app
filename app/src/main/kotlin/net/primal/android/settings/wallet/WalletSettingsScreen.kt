@@ -61,6 +61,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.core.text.isDigitsOnly
 import java.text.NumberFormat
 import java.util.*
@@ -274,7 +275,7 @@ private fun ConnectedAppsSettings(
                             isLastItem = isLastItem,
                             appName = app.appName,
                             budget = if (app.dailyBudget?.isNotBlank() == true) {
-                                app.dailyBudget.toSats().toLong().let { "%,d".format(it) }
+                                app.dailyBudget.toSats().toLong().let { "%,d sats".format(it) }
                             } else {
                                 stringResource(id = R.string.settings_wallet_no_limit)
                             },
@@ -329,19 +330,19 @@ private fun ConnectedAppsHeader() {
             text = stringResource(id = R.string.settings_wallet_header_app),
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f),
-            textAlign = TextAlign.Left,
+            textAlign = TextAlign.Start,
         )
         Text(
             text = stringResource(id = R.string.settings_wallet_header_daily_budget),
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.weight(1f),
-            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1.1f),
+            textAlign = TextAlign.Start,
         )
         Text(
             text = stringResource(id = R.string.settings_wallet_header_revoke),
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f),
-            textAlign = TextAlign.Right,
+            textAlign = TextAlign.End,
         )
     }
 }
@@ -375,11 +376,17 @@ private fun ConnectedAppItem(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
+            modifier = Modifier.weight(1f),
             text = appName,
             maxLines = 1,
-            modifier = Modifier.weight(1f),
+            textAlign = TextAlign.Start,
         )
-        Text(text = budget, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+        Text(
+            modifier = Modifier.weight(1.1f),
+            text = budget,
+            maxLines = 1,
+            textAlign = TextAlign.Start,
+        )
 
         if (canRevoke) {
             Row(
