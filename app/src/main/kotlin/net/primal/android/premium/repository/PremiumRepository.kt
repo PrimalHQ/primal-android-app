@@ -3,9 +3,17 @@ package net.primal.android.premium.repository
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.core.ext.asMapByKey
 import net.primal.android.networking.primal.retryNetworkCall
+import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
+import net.primal.android.nostr.ext.mapAsProfileDataPO
+import net.primal.android.nostr.ext.parseAndFoldPrimalLegendProfiles
+import net.primal.android.nostr.ext.parseAndFoldPrimalPremiumInfo
+import net.primal.android.nostr.ext.parseAndFoldPrimalUserNames
+import net.primal.android.nostr.ext.parseAndMapAsLeaderboardEntries
 import net.primal.android.premium.api.PremiumApi
 import net.primal.android.premium.api.model.CancelMembershipRequest
+import net.primal.android.premium.api.model.LeaderboardOrderBy
 import net.primal.android.premium.api.model.MembershipStatusResponse
 import net.primal.android.premium.api.model.PurchaseMembershipRequest
 import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
@@ -71,6 +79,27 @@ class PremiumRepository @Inject constructor(
             }
         }
     }
+
+    suspend fun fetchLegendLeaderboard(orderBy: LeaderboardOrderBy, limit: Int = 1000) =
+        withContext(dispatchers.io()) {
+            val response = premiumApi.getLegendLeaderboard(orderBy = orderBy, limit = limit)
+
+            val primalUserNames = response.primalUsernames.parseAndFoldPrimalUserNames()
+            val primalPremiumInfo = response.primalPremiumInfoEvents.parseAndFoldPrimalPremiumInfo()
+            val primalLegendProfiles = response.primalLegendProfiles.parseAndFoldPrimalLegendProfiles()
+            val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+            val profiles = response.profileMetadatas.mapAsProfileDataPO(
+                cdnResources = cdnResources,
+                primalUserNames = primalUserNames,
+                primalPremiumInfo = primalPremiumInfo,
+                primalLegendProfiles = primalLegendProfiles,
+                blossomServers = emptyMap(),
+            )
+
+            response.orderedLegendLeaderboardEvent.parseAndMapAsLeaderboardEntries(
+                profiles = profiles.asMapByKey { it.ownerId },
+            )
+        }
 
     suspend fun cancelSubscription(userId: String, purchaseJson: String) {
         withContext(dispatchers.io()) {

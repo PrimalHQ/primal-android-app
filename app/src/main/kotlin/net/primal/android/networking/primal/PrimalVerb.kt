@@ -63,5 +63,6 @@ enum class PrimalVerb(val identifier: String) {
     MEMBERSHIP_CONTENT_BROADCAST_START("membership_content_rebroadcast_start"),
     MEMBERSHIP_CONTENT_BROADCAST_CANCEL("membership_content_rebroadcast_cancel"),
     MEMBERSHIP_CONTENT_BROADCAST_STATUS("membership_content_rebroadcast_status"),
+    MEMBERSHIP_LEGENDS_LEADERBOARD("membership_legends_leaderboard"),
     MEMBERSHIP_MONITOR_CONTENT_BROADCAST_STATUS("rebroadcasting_status"),
 }

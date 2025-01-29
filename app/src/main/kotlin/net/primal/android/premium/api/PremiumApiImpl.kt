@@ -17,6 +17,9 @@ import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.premium.api.model.CancelMembershipRequest
 import net.primal.android.premium.api.model.ChangeNameRequest
+import net.primal.android.premium.api.model.LeaderboardOrderBy
+import net.primal.android.premium.api.model.LegendLeaderboardRequest
+import net.primal.android.premium.api.model.LegendLeaderboardResponse
 import net.primal.android.premium.api.model.LegendPaymentInstructionsResponse
 import net.primal.android.premium.api.model.MembershipProductsRequest
 import net.primal.android.premium.api.model.MembershipStatusResponse
@@ -218,6 +221,34 @@ class PremiumApiImpl @Inject constructor(
                     ),
                 ),
             ),
+        )
+    }
+
+    override suspend fun getLegendLeaderboard(
+        orderBy: LeaderboardOrderBy,
+        limit: Int,
+    ): LegendLeaderboardResponse {
+        val queryResult = primalCacheApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.MEMBERSHIP_LEGENDS_LEADERBOARD,
+                optionsJson = NostrJsonEncodeDefaults.encodeToString(
+                    LegendLeaderboardRequest(
+                        orderBy = orderBy,
+                        limit = limit,
+                    ),
+                ),
+            ),
+        )
+
+        return LegendLeaderboardResponse(
+            orderedLegendLeaderboardEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendLeaderboard),
+            primalPremiumInfoEvents = queryResult.filterPrimalEvents(NostrEventKind.PrimalPremiumInfo),
+            primalLegendProfiles = queryResult.filterPrimalEvents(NostrEventKind.PrimalLegendProfiles),
+            primalUsernames = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserNames),
+            cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
+            userFollowersCounts = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserFollowersCounts),
+            userScores = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserScores),
+            profileMetadatas = queryResult.filterNostrEvents(NostrEventKind.Metadata),
         )
     }
 

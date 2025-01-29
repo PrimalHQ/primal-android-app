@@ -8,8 +8,20 @@ import net.primal.android.nostr.model.primal.content.ContentProfilePremiumInfo
 import net.primal.android.nostr.model.primal.content.ContentUserProfileStats
 import net.primal.android.profile.db.ProfileStats
 import net.primal.android.profile.domain.PrimalLegendProfile
+import net.primal.android.profile.domain.PrimalPremiumInfo
 
 fun List<PrimalEvent>.mapNotNullAsProfileStatsPO() = mapNotNull { it.asProfileStatsPO() }
+
+fun List<PrimalEvent>.parseAndFoldPrimalUserNames() =
+    map { it.parseAndMapPrimalUserNames() }.fold(emptyMap<String, String>()) { acc, curr -> acc + curr }
+
+fun List<PrimalEvent>.parseAndFoldPrimalPremiumInfo() =
+    map { it.parseAndMapPrimalPremiumInfo() }
+        .fold(emptyMap<String, ContentProfilePremiumInfo>()) { acc, curr -> acc + curr }
+
+fun List<PrimalEvent>.parseAndFoldPrimalLegendProfiles() =
+    map { it.parseAndMapPrimalLegendProfiles() }
+        .fold(emptyMap<String, PrimalLegendProfile>()) { acc, curr -> acc + curr }
 
 fun PrimalEvent.asProfileStatsPO(): ProfileStats? {
     val content = takeContentAsUserProfileStatsOrNull() ?: return null
