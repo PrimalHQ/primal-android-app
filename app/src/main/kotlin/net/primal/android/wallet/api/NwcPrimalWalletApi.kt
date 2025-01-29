@@ -1,6 +1,6 @@
 package net.primal.android.wallet.api
 
-import net.primal.android.wallet.api.model.NewNwcConnectionInfo
+import net.primal.android.wallet.api.model.NwcConnectionCreatedResponse
 import net.primal.android.wallet.api.model.PrimalNwcConnectionInfo
 
 interface NwcPrimalWalletApi {
@@ -13,5 +13,5 @@ interface NwcPrimalWalletApi {
         userId: String,
         appName: String,
         dailyBudgetBtc: String?,
-    ): NewNwcConnectionInfo
+    ): NwcConnectionCreatedResponse
 }

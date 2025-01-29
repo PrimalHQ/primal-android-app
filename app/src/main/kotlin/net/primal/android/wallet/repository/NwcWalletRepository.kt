@@ -4,7 +4,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.wallet.api.NwcPrimalWalletApi
-import net.primal.android.wallet.api.model.NewNwcConnectionInfo
+import net.primal.android.wallet.api.model.NwcConnectionCreatedResponse
 import net.primal.android.wallet.api.model.PrimalNwcConnectionInfo
 
 class NwcWalletRepository @Inject constructor(
@@ -22,7 +22,7 @@ class NwcWalletRepository @Inject constructor(
         userId: String,
         appName: String,
         dailyBudget: String?,
-    ): NewNwcConnectionInfo {
+    ): NwcConnectionCreatedResponse {
         return withContext(dispatcherProvider.io()) {
             nwcPrimalWalletApi.createNewWalletConnection(
                 userId = userId,

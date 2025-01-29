@@ -210,7 +210,9 @@ private fun ConnectedAppsSettings(
         ),
         headlineContent = {
             Text(
-                text = stringResource(id = R.string.settings_wallet_connected_apps).uppercase(Locale.getDefault()),
+                text = stringResource(
+                    id = R.string.settings_wallet_nwc_connections_connected_apps,
+                ).uppercase(Locale.getDefault()),
                 style = AppTheme.typography.bodyLarge,
                 color = AppTheme.colorScheme.onPrimary,
                 textAlign = TextAlign.Start,
@@ -256,8 +258,8 @@ private fun ConnectedAppsSettings(
                 revokeDialogVisible = false
                 onRevokeConnectedApp(revokeNwcPubkey)
             },
-            dialogTitle = stringResource(id = R.string.settings_wallet_revoke_connected_apps_dialog_title),
-            dialogText = stringResource(id = R.string.settings_wallet_revoke_connected_apps_dialog_text),
+            dialogTitle = stringResource(id = R.string.settings_wallet_nwc_connections_revoke_connection_dialog_title),
+            dialogText = stringResource(id = R.string.settings_wallet_nwc_connections_revoke_connection_dialog_text),
         )
     }
 }
@@ -298,7 +300,7 @@ private fun ConnectedAppsContent(
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
                             .align(Alignment.Center),
-                        text = stringResource(id = R.string.settings_wallet_no_connected_apps),
+                        text = stringResource(id = R.string.settings_wallet_nwc_connections_no_connected_apps),
                         style = AppTheme.typography.titleMedium,
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                         fontWeight = FontWeight.Medium,
@@ -315,7 +317,7 @@ private fun ConnectedAppsContent(
                         budget = if (app.dailyBudget?.isNotBlank() == true) {
                             app.dailyBudget.toSats().toLong().let { "%,d sats".format(it) }
                         } else {
-                            stringResource(id = R.string.settings_wallet_no_limit)
+                            stringResource(id = R.string.settings_wallet_nwc_connection_daily_budget_no_limit)
                         },
                         canRevoke = app.canRevoke,
                         onRevokeConnectedApp = {
@@ -345,19 +347,19 @@ private fun ConnectedAppsHeader() {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = stringResource(id = R.string.settings_wallet_header_app),
+            text = stringResource(id = R.string.settings_wallet_nwc_connections_header_app),
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f),
             textAlign = TextAlign.Start,
         )
         Text(
-            text = stringResource(id = R.string.settings_wallet_header_daily_budget),
+            text = stringResource(id = R.string.settings_wallet_nwc_connections_header_daily_budget),
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(WEIGHT_DAILY_BUDGET),
             textAlign = TextAlign.Start,
         )
         Text(
-            text = stringResource(id = R.string.settings_wallet_header_revoke),
+            text = stringResource(id = R.string.settings_wallet_nwc_connections_header_revoke),
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f),
             textAlign = TextAlign.End,
@@ -438,7 +440,7 @@ private fun ConnectedAppsHint(createNewWalletConnection: () -> Unit) {
     ) {
         Text(
             modifier = Modifier.fillMaxWidth(),
-            text = stringResource(id = R.string.settings_wallet_connected_apps_hint),
+            text = stringResource(id = R.string.settings_wallet_nwc_connections_hint),
             style = AppTheme.typography.bodySmall,
         )
 
@@ -455,7 +457,7 @@ private fun ConnectedAppsHint(createNewWalletConnection: () -> Unit) {
                         indication = null,
                         onClick = createNewWalletConnection,
                     ),
-                text = stringResource(id = R.string.settings_wallet_connected_apps_hint_button),
+                text = stringResource(id = R.string.settings_wallet_nwc_connections_create_new_text_button),
                 style = AppTheme.typography.bodyMedium.copy(
                     color = AppTheme.colorScheme.secondary,
                     fontStyle = AppTheme.typography.bodyMedium.fontStyle,

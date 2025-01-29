@@ -39,16 +39,11 @@ class NwcNewWalletConnectionViewModel @Inject constructor(
             events.collect {
                 when (it) {
                     is NwcNewWalletConnectionContract.UiEvent.AppNameChanged -> setState {
-                        copy(
-                            appName = it.appName,
-                            appNameInputError = false,
-                        )
+                        copy(appName = it.appName)
                     }
 
                     NwcNewWalletConnectionContract.UiEvent.CreateWalletConnection -> {
-                        if (state.value.appName.isEmpty()) {
-                            setState { copy(appNameInputError = true) }
-                        } else {
+                        if (state.value.appName.isNotEmpty()) {
                             createNewWalletConnection(
                                 appName = state.value.appName,
                                 dailyBudget = state.value.dailyBudget,
@@ -57,9 +52,7 @@ class NwcNewWalletConnectionViewModel @Inject constructor(
                     }
 
                     is NwcNewWalletConnectionContract.UiEvent.DailyBudgetChanged -> setState {
-                        copy(
-                            dailyBudget = it.dailyBudget,
-                        )
+                        copy(dailyBudget = it.dailyBudget)
                     }
                 }
             }
@@ -69,7 +62,7 @@ class NwcNewWalletConnectionViewModel @Inject constructor(
     private fun createNewWalletConnection(appName: String, dailyBudget: String?) =
         viewModelScope.launch {
             try {
-                setState { copy(appNameInputError = false, creatingSecret = true) }
+                setState { copy(creatingSecret = true) }
 
                 val dailyBudgetBtc = dailyBudget?.toLong()?.toBtc()
 
@@ -87,7 +80,7 @@ class NwcNewWalletConnectionViewModel @Inject constructor(
 
                 setState {
                     copy(
-                        secret = response.nwcPubkey,
+                        secret = response.nwcConnectionUri,
                         nwcConnectionUri = response.nwcConnectionUri,
                         creatingSecret = false,
                     )

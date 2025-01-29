@@ -61,7 +61,7 @@ fun NwcDailyBudgetBottomSheet(
     ) {
         CenterAlignedTopAppBar(
             title = {
-                Text(text = stringResource(id = R.string.settings_wallet_header_daily_budget))
+                Text(text = stringResource(id = R.string.settings_wallet_nwc_connections_header_daily_budget))
             },
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                 containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
@@ -108,7 +108,9 @@ fun NwcDailyBudgetBottomSheet(
                 },
             ) {
                 Text(
-                    text = stringResource(id = R.string.settings_new_wallet_bottom_sheet_pick_daily_budget_save),
+                    text = stringResource(
+                        id = R.string.settings_wallet_new_nwc_connection_bottom_sheet_pick_daily_budget_save,
+                    ),
                     fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Center,
                 )
