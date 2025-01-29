@@ -5,7 +5,7 @@ interface NwcNewWalletConnectionContract {
         val creatingSecret: Boolean = false,
         val appName: String = "",
         val secret: String? = null,
-        val dailyBudget: String? = null,
+        val dailyBudget: String? = "10000",
     )
 
     sealed class UiEvent {
