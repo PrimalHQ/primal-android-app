@@ -259,8 +259,7 @@ private fun WalletConnectionHeader(modifier: Modifier = Modifier) {
                 contentDescription = "Primal Wallet",
                 modifier = Modifier
                     .clip(RoundedCornerShape(9.dp))
-                    .padding(17.dp)
-                    .size(54.dp),
+                    .size(99.dp),
                 tint = Color.Unspecified,
             )
 
