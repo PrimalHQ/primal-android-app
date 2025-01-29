@@ -61,7 +61,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.core.text.isDigitsOnly
 import java.text.NumberFormat
 import java.util.*
@@ -232,67 +231,13 @@ private fun ConnectedAppsSettings(
 
         HorizontalDivider(thickness = 1.dp)
 
-        when (connectionsState) {
-            WalletSettingsContract.ConnectionsState.Loading -> {
-                Box(modifier = Modifier.height(48.dp)) {
-                    PrimalLoadingSpinner(size = 32.dp)
-                }
-            }
-
-            WalletSettingsContract.ConnectionsState.Error -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                ) {
-                    TextButton(onClick = onRetryFetchingConnections) {
-                        Text(
-                            text = stringResource(id = R.string.settings_new_wallet_connection_retry).uppercase(),
-                        )
-                    }
-                }
-            }
-
-            WalletSettingsContract.ConnectionsState.Loaded -> {
-                if (nwcConnectionInfos.isEmpty()) {
-                    Box(modifier = Modifier.height(48.dp)) {
-                        Text(
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp)
-                                .align(Alignment.Center),
-                            text = stringResource(id = R.string.settings_wallet_no_connected_apps),
-                            style = AppTheme.typography.titleMedium,
-                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                            fontWeight = FontWeight.Medium,
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-                } else {
-                    nwcConnectionInfos.forEachIndexed { index, app ->
-                        val isLastItem = index == nwcConnectionInfos.lastIndex
-
-                        ConnectedAppItem(
-                            isLastItem = isLastItem,
-                            appName = app.appName,
-                            budget = if (app.dailyBudget?.isNotBlank() == true) {
-                                app.dailyBudget.toSats().toLong().let { "%,d sats".format(it) }
-                            } else {
-                                stringResource(id = R.string.settings_wallet_no_limit)
-                            },
-                            canRevoke = app.canRevoke,
-                            onRevokeConnectedApp = {
-                                revokeDialogVisible = true
-                                revokeNwcPubkey = app.nwcPubkey
-                            },
-                        )
-
-                        if (!isLastItem) {
-                            HorizontalDivider(thickness = 1.dp)
-                        }
-                    }
-                }
-            }
-        }
+        ConnectedAppsContent(
+            connectionsState = connectionsState,
+            nwcConnectionInfos = nwcConnectionInfos,
+            onRetryFetchingConnections = onRetryFetchingConnections,
+            onRevokeDialogVisibilityChange = { revokeDialogVisible = it },
+            onRevokeNwcPubkeyChange = { revokeNwcPubkey = it },
+        )
     }
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -318,6 +263,79 @@ private fun ConnectedAppsSettings(
 }
 
 @Composable
+private fun ConnectedAppsContent(
+    connectionsState: WalletSettingsContract.ConnectionsState,
+    onRetryFetchingConnections: () -> Unit,
+    nwcConnectionInfos: List<NwcConnectionInfo>,
+    onRevokeDialogVisibilityChange: (Boolean) -> Unit,
+    onRevokeNwcPubkeyChange: (String) -> Unit,
+) {
+    when (connectionsState) {
+        WalletSettingsContract.ConnectionsState.Loading -> {
+            Box(modifier = Modifier.height(48.dp)) {
+                PrimalLoadingSpinner(size = 32.dp)
+            }
+        }
+
+        WalletSettingsContract.ConnectionsState.Error -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+            ) {
+                TextButton(onClick = onRetryFetchingConnections) {
+                    Text(
+                        text = stringResource(id = R.string.settings_new_wallet_connection_retry).uppercase(),
+                    )
+                }
+            }
+        }
+
+        WalletSettingsContract.ConnectionsState.Loaded -> {
+            if (nwcConnectionInfos.isEmpty()) {
+                Box(modifier = Modifier.height(48.dp)) {
+                    Text(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .align(Alignment.Center),
+                        text = stringResource(id = R.string.settings_wallet_no_connected_apps),
+                        style = AppTheme.typography.titleMedium,
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                        fontWeight = FontWeight.Medium,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            } else {
+                nwcConnectionInfos.forEachIndexed { index, app ->
+                    val isLastItem = index == nwcConnectionInfos.lastIndex
+
+                    ConnectedAppItem(
+                        isLastItem = isLastItem,
+                        appName = app.appName,
+                        budget = if (app.dailyBudget?.isNotBlank() == true) {
+                            app.dailyBudget.toSats().toLong().let { "%,d sats".format(it) }
+                        } else {
+                            stringResource(id = R.string.settings_wallet_no_limit)
+                        },
+                        canRevoke = app.canRevoke,
+                        onRevokeConnectedApp = {
+                            onRevokeDialogVisibilityChange(true)
+                            onRevokeNwcPubkeyChange(app.nwcPubkey)
+                        },
+                    )
+
+                    if (!isLastItem) {
+                        HorizontalDivider(thickness = 1.dp)
+                    }
+                }
+            }
+        }
+    }
+}
+
+private const val WEIGHT_DAILY_BUDGET = 1.1f
+
+@Composable
 private fun ConnectedAppsHeader() {
     Row(
         modifier = Modifier
@@ -335,7 +353,7 @@ private fun ConnectedAppsHeader() {
         Text(
             text = stringResource(id = R.string.settings_wallet_header_daily_budget),
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.weight(1.1f),
+            modifier = Modifier.weight(WEIGHT_DAILY_BUDGET),
             textAlign = TextAlign.Start,
         )
         Text(
@@ -382,7 +400,7 @@ private fun ConnectedAppItem(
             textAlign = TextAlign.Start,
         )
         Text(
-            modifier = Modifier.weight(1.1f),
+            modifier = Modifier.weight(WEIGHT_DAILY_BUDGET),
             text = budget,
             maxLines = 1,
             textAlign = TextAlign.Start,

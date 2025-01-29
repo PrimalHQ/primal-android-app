@@ -100,6 +100,7 @@ enum class NostrEventKind(val value: Int) {
     PrimalWalletMiningFees(value = 10_000_315),
     PrimalWalletOnChainAddress(value = 10_000_316),
     PrimalWalletUpdatedAt(value = 10_000_317),
+    PrimalWalletNewNwcConnection(value = 10_000_319),
     PrimalWalletNwcConnectionList(value = 10_000_321),
     PrimalMembershipNameAvailable(value = 10_000_600),
     PrimalMembershipLegendPaymentInstructions(value = 10_000_601),

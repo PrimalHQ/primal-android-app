@@ -56,8 +56,6 @@ import net.primal.android.core.compose.icons.primaliconpack.NwcExternalAppConnec
 import net.primal.android.core.compose.icons.primaliconpack.NwcExternalAppForeground
 import net.primal.android.theme.AppTheme
 
-private val IconBackgroundColor = Color(0xFFE5E5E5)
-
 @Composable
 fun NwcNewWalletConnectionScreen(viewModel: NwcNewWalletConnectionViewModel, onClose: () -> Unit) {
     val state = viewModel.state.collectAsState()
@@ -133,9 +131,8 @@ private fun WalletConnectionEditor(
             PrimalOutlinedTextField(
                 header = stringResource(id = R.string.settings_new_wallet_app_name_input_header),
                 value = state.appName,
-                onValueChange = {
-                    eventPublisher(NwcNewWalletConnectionContract.UiEvent.AppNameChanged(it))
-                },
+                onValueChange = { eventPublisher(NwcNewWalletConnectionContract.UiEvent.AppNameChanged(it)) },
+                isError = state.appNameInputError,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -245,6 +242,8 @@ private fun CreateNewConnectionButton(
         Spacer(modifier = Modifier.height(7.dp))
     }
 }
+
+private val IconBackgroundColor = Color(0xFFE5E5E5)
 
 @Composable
 private fun WalletConnectionHeader(modifier: Modifier = Modifier) {

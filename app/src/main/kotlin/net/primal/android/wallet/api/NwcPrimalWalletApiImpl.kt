@@ -11,6 +11,8 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.wallet.api.model.EmptyRequestBody
+import net.primal.android.wallet.api.model.NewNwcConnectionInfo
+import net.primal.android.wallet.api.model.NwcCreateNewConnectionRequestBody
 import net.primal.android.wallet.api.model.NwcRevokeConnectionRequestBody
 import net.primal.android.wallet.api.model.PrimalNwcConnectionInfo
 import net.primal.android.wallet.api.model.WalletOperationVerb
@@ -51,5 +53,29 @@ class NwcPrimalWalletApiImpl @Inject constructor(
                 ),
             ),
         )
+    }
+
+    override suspend fun createNewWalletConnection(
+        userId: String,
+        appName: String,
+        dailyBudgetBtc: String?,
+    ): NewNwcConnectionInfo {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.WALLET,
+                optionsJson = buildWalletOptionsJson(
+                    userId = userId,
+                    walletVerb = WalletOperationVerb.NWC_CREATE_NEW_CONNECTION,
+                    requestBody = NwcCreateNewConnectionRequestBody(appName = appName, dailyBudgetBtc = dailyBudgetBtc),
+                    nostrNotary = nostrNotary,
+                ),
+            ),
+        )
+
+        val info = queryResult.findPrimalEvent(NostrEventKind.PrimalWalletNewNwcConnection)
+            ?: throw WssException("Event with kind 10000319 not found.")
+
+        return NostrJson.decodeFromStringOrNull<NewNwcConnectionInfo>(info.content)
+            ?: throw WssException("Invalid event with kind 10000319.")
     }
 }

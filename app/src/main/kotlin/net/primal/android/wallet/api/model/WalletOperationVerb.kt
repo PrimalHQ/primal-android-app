@@ -17,4 +17,5 @@ enum class WalletOperationVerb(val identifier: String) {
     ONCHAIN_PAYMENT_TIERS("onchain_payment_tiers"),
     NWC_CONNECTIONS("nwc_connections"),
     NWC_REVOKE_CONNECTION("nwc_revoke"),
+    NWC_CREATE_NEW_CONNECTION("nwc_connect"),
 }

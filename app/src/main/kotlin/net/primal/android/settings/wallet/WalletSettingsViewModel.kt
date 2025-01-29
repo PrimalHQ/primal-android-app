@@ -100,6 +100,7 @@ class WalletSettingsViewModel @Inject constructor(
                 setState { copy(nwcConnectionsInfo = updatedConnections) }
                 nwcWalletRepository.revokeConnection(activeAccountStore.activeUserId(), nwcPubkey)
             } catch (error: WssException) {
+                Timber.w(error)
                 setState { copy(nwcConnectionsInfo = nwcConnections) }
             }
         }
