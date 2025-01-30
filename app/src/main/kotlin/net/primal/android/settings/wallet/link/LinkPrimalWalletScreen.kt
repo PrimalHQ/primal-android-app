@@ -46,13 +46,7 @@ import net.primal.android.settings.wallet.connection.NewWalletConnectionFooter
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun LinkPrimalWalletScreen(
-    viewModel: LinkPrimalWalletViewModel,
-    callback: String,
-    appName: String?,
-    appIcon: String?,
-    onClose: () -> Unit,
-) {
+fun LinkPrimalWalletScreen(viewModel: LinkPrimalWalletViewModel, onClose: () -> Unit) {
     val state = viewModel.state.collectAsState()
 
     LinkPrimalWalletScreen(

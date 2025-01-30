@@ -77,6 +77,16 @@ const val NOTE_EDITOR_ARGS = "preFillContent"
 const val NWC_URL = "nwcUrl"
 inline val SavedStateHandle.nwcUrl: String? get() = get(NWC_URL)
 
+const val APP_NAME = "appName"
+inline val SavedStateHandle.appName: String? get() = get(APP_NAME)
+
+const val APP_ICON = "appIcon"
+inline val SavedStateHandle.appIcon: String? get() = get(APP_ICON)
+
+const val CALLBACK = "callback"
+inline val SavedStateHandle.callback: String
+    get() = get(CALLBACK) ?: throw IllegalArgumentException("Missing required $CALLBACK argument.")
+
 const val MEDIA_URL = "mediaUrl"
 inline val SavedStateHandle.mediaUrl: String? get() = get(MEDIA_URL)
 inline val SavedStateHandle.mediaUrlOrThrow: String
