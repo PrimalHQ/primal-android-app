@@ -59,12 +59,12 @@ class NwcNewWalletConnectionViewModel @Inject constructor(
         }
     }
 
-    private fun createNewWalletConnection(appName: String, dailyBudget: String?) =
+    private fun createNewWalletConnection(appName: String, dailyBudget: Long?) =
         viewModelScope.launch {
             try {
                 setState { copy(creatingSecret = true) }
 
-                val dailyBudgetBtc = dailyBudget?.toLong()?.toBtc()
+                val dailyBudgetBtc = dailyBudget?.toBtc()
 
                 val formattedDailyBudgetBtc = dailyBudgetBtc?.let {
                     BigDecimal(it.toString())

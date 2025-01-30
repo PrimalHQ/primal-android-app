@@ -249,7 +249,7 @@ private fun WalletConnectionEditor(
                 },
                 trailingContent = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (state.dailyBudget?.isNotBlank() == true) {
+                        if (state.dailyBudget != null) {
                             Text(
                                 text = state.dailyBudget.toLong().let {
                                     "%,d ${stringResource(id = R.string.wallet_sats_suffix)}".format(it)

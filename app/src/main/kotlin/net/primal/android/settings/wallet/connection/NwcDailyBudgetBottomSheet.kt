@@ -38,16 +38,15 @@ import net.primal.android.theme.AppTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NwcDailyBudgetBottomSheet(
-    initialDailyBudget: String?,
+    initialDailyBudget: Long?,
     onDismissRequest: () -> Unit,
-    onBudgetSelected: (String?) -> Unit,
+    onBudgetSelected: (Long?) -> Unit,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-    budgetOptions: List<String>,
+    budgetOptions: List<Long?>,
 ) {
     val scope = rememberCoroutineScope()
 
-    val initialSelection = initialDailyBudget?.takeIf { it != "no limit" }
-    val selectedBudget = remember { mutableStateOf(initialSelection) }
+    val selectedBudget = remember { mutableStateOf(initialDailyBudget) }
 
     ModalBottomSheet(
         modifier = Modifier.statusBarsPadding(),
@@ -76,8 +75,8 @@ fun NwcDailyBudgetBottomSheet(
             budgetOptions.forEach { option ->
                 BudgetOptionRow(
                     option = option,
-                    isSelected = selectedBudget.value == (option.takeIf { it != "no limit" }),
-                    onSelect = { selectedBudget.value = option.takeIf { it != "no limit" } },
+                    isSelected = selectedBudget.value == option,
+                    onSelect = { selectedBudget.value = option },
                 )
             }
 
@@ -119,7 +118,7 @@ fun NwcDailyBudgetBottomSheet(
 
 @Composable
 fun BudgetOptionRow(
-    option: String,
+    option: Long?,
     isSelected: Boolean,
     onSelect: () -> Unit,
 ) {
@@ -131,7 +130,8 @@ fun BudgetOptionRow(
         headlineContent = {
             Text(
                 modifier = Modifier.padding(start = 16.dp),
-                text = option.toIntOrNull()?.let { "%,d sats".format(it) } ?: option,
+                text = option?.let { "%,d sats".format(it) }
+                    ?: stringResource(id = R.string.settings_wallet_nwc_connection_daily_budget_no_limit),
                 style = AppTheme.typography.bodyMedium,
             )
         },

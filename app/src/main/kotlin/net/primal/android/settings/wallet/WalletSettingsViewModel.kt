@@ -86,7 +86,6 @@ class WalletSettingsViewModel @Inject constructor(
                         revokeNwcConnection(nwcPubkey = it.nwcPubkey)
                     }
 
-                    UiEvent.RetryConnectionsFetch -> fetchWalletConnections()
                     UiEvent.RequestFetchWalletConnections -> fetchWalletConnections()
                 }
             }

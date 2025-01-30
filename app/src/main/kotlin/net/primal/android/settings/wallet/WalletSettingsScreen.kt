@@ -191,7 +191,7 @@ fun WalletSettingsScreen(
                     onRevokeConnectedApp = { eventPublisher(UiEvent.RevokeConnection(it)) },
                     onCreateNewWalletConnection = onCreateNewWalletConnection,
                     connectionsState = state.connectionsState,
-                    onRetryFetchingConnections = { eventPublisher(UiEvent.RetryConnectionsFetch) },
+                    onRetryFetchingConnections = { eventPublisher(UiEvent.RequestFetchWalletConnections) },
                 )
             }
         },
