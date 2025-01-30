@@ -8,6 +8,7 @@ interface LinkPrimalWalletContract {
     data class UiState(
         val creatingSecret: Boolean = false,
         val secret: String? = null,
+        val nwcConnectionUri: String? = null,
         val dailyBudget: Long? = 10_000,
         val appName: String? = null,
         val appIcon: String? = null,
@@ -16,5 +17,10 @@ interface LinkPrimalWalletContract {
 
     sealed class UiEvent {
         data class DailyBudgetChanged(val dailyBudget: Long?) : UiEvent()
+        data object CreateWalletConnection : UiEvent()
+    }
+
+    sealed class SideEffect {
+        data class UriReceived(val nwcConnectionUri: String?) : SideEffect()
     }
 }

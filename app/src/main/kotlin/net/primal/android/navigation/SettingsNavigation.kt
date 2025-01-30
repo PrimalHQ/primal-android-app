@@ -40,7 +40,8 @@ private fun NavController.navigateToAccountSettings() = navigate(route = "accoun
 private fun NavController.navigateToNetworkSettings() = navigate(route = "network")
 private fun NavController.navigateToWalletSettings() = navigate(route = "wallet_settings")
 private fun NavController.navigateToWalletScanNwcUrl() = navigate(route = "wallet_settings/scanNwcUrl")
-private fun NavController.navigateToNewWalletConnection() = navigate(route = "wallet_settings/newWalletConnection")
+
+// private fun NavController.navigateToNewWalletConnection() = navigate(route = "wallet_settings/newWalletConnection")
 private fun NavController.navigateToAppearanceSettings() = navigate(route = "appearance_settings")
 private fun NavController.navigateToContentDisplaySettings() = navigate(route = "content_display")
 fun NavController.navigateToNotificationsSettings() = navigate(route = "notifications_settings")
@@ -188,10 +189,11 @@ private fun NavGraphBuilder.wallet(
         onEditProfileClick = { navController.navigateToProfileEditor() },
         onOtherConnectClick = { navController.navigateToWalletScanNwcUrl() },
         onCreateNewWalletConnection = {
+//            navController.navigateToNewWalletConnection()
             navController.navigateToLinkPrimalWallet(
                 callback = "callback",
-                appName = "facebook",
-                appIcon = "https://cdn1.iconfinder.com/data/icons/logotypes/32/square-facebook-512.png",
+                appName = "placeholder",
+                appIcon = "",
             )
         },
     )

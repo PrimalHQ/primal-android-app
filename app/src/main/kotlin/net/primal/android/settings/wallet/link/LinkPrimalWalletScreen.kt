@@ -18,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,11 +44,25 @@ import net.primal.android.core.compose.icons.primaliconpack.NwcExternalAppForegr
 import net.primal.android.notes.feed.note.ui.attachment.NoteImageLoadingPlaceholder
 import net.primal.android.settings.wallet.connection.DailyBudgetBottomSheet
 import net.primal.android.settings.wallet.connection.NewWalletConnectionFooter
+import net.primal.android.settings.wallet.link.LinkPrimalWalletContract.SideEffect
+import net.primal.android.settings.wallet.link.LinkPrimalWalletContract.UiEvent
+import net.primal.android.settings.wallet.link.LinkPrimalWalletContract.UiState
 import net.primal.android.theme.AppTheme
+import timber.log.Timber
 
 @Composable
 fun LinkPrimalWalletScreen(viewModel: LinkPrimalWalletViewModel, onClose: () -> Unit) {
     val state = viewModel.state.collectAsState()
+
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collect {
+            when (it) {
+                is SideEffect.UriReceived -> {
+                    Timber.i("NewUri: ${it.nwcConnectionUri}")
+                }
+            }
+        }
+    }
 
     LinkPrimalWalletScreen(
         eventPublisher = { viewModel.setEvent(it) },
@@ -59,8 +74,8 @@ fun LinkPrimalWalletScreen(viewModel: LinkPrimalWalletViewModel, onClose: () -> 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LinkPrimalWalletScreen(
-    eventPublisher: (LinkPrimalWalletContract.UiEvent) -> Unit,
-    state: LinkPrimalWalletContract.UiState,
+    eventPublisher: (UiEvent) -> Unit,
+    state: UiState,
     onClose: () -> Unit,
 ) {
     Scaffold(
@@ -97,7 +112,9 @@ private fun LinkPrimalWalletScreen(
                     primaryButtonText = stringResource(
                         id = R.string.settings_wallet_link_give_wallet_access,
                     ),
-                    onPrimaryButtonClick = onClose,
+                    onPrimaryButtonClick = {
+                        eventPublisher(UiEvent.CreateWalletConnection)
+                    },
                     secondaryButtonText = stringResource(
                         id = R.string.settings_wallet_new_nwc_connection_cancel_button,
                     ),
@@ -112,8 +129,8 @@ private fun LinkPrimalWalletScreen(
 @Composable
 private fun WalletConnectionEditor(
     modifier: Modifier,
-    eventPublisher: (LinkPrimalWalletContract.UiEvent) -> Unit,
-    state: LinkPrimalWalletContract.UiState,
+    eventPublisher: (UiEvent) -> Unit,
+    state: UiState,
 ) {
     var showDailyBudgetBottomSheet by rememberSaveable { mutableStateOf(false) }
 
@@ -122,7 +139,7 @@ private fun WalletConnectionEditor(
             initialDailyBudget = state.dailyBudget,
             onDismissRequest = { showDailyBudgetBottomSheet = false },
             onBudgetSelected = { dailyBudget ->
-                eventPublisher(LinkPrimalWalletContract.UiEvent.DailyBudgetChanged(dailyBudget))
+                eventPublisher(UiEvent.DailyBudgetChanged(dailyBudget))
             },
             budgetOptions = LinkPrimalWalletContract.budgetOptions,
         )
@@ -182,11 +199,11 @@ private fun WalletConnectionEditorHeader(
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
-                painter = painterResource(id = R.drawable.primal_nwc_logo),
-                contentDescription = stringResource(id = R.string.settings_wallet_nwc_primal_wallet),
                 modifier = Modifier
                     .clip(AppTheme.shapes.small)
                     .size(99.dp),
+                painter = painterResource(id = R.drawable.primal_nwc_logo),
+                contentDescription = stringResource(id = R.string.settings_wallet_nwc_primal_wallet),
                 tint = Color.Unspecified,
             )
 
