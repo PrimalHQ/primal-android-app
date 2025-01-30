@@ -65,6 +65,7 @@ import androidx.core.text.isDigitsOnly
 import java.text.NumberFormat
 import java.util.*
 import net.primal.android.R
+import net.primal.android.core.compose.DeleteListItemImage
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -417,14 +418,7 @@ private fun ConnectedAppItem(
                     modifier = Modifier.offset(x = 7.dp),
                     onClick = onRevokeConnectedApp,
                 ) {
-                    Icon(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(color = errorColor),
-                        imageVector = Icons.Default.Remove,
-                        contentDescription = null,
-                        tint = Color.White,
-                    )
+                    DeleteListItemImage()
                 }
             }
         }
