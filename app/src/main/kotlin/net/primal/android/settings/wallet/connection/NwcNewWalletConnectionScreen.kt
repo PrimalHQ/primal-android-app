@@ -90,7 +90,6 @@ private fun NwcNewWalletConnectionScreen(
     onClose: () -> Unit,
 ) {
     Scaffold(
-        modifier = Modifier.navigationBarsPadding(),
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.settings_wallet_new_nwc_connection_title),
@@ -172,6 +171,7 @@ private fun NewWalletConnectionFooter(
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Column(
+        modifier = Modifier.navigationBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         PrimalLoadingButton(
