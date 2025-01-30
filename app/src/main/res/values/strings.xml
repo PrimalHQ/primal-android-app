@@ -708,13 +708,14 @@
     <string name="settings_wallet_nwc_connection_daily_budget_no_limit">no limit</string>
     <string name="settings_wallet_nwc_connections_hint">You can connect your Primal Wallet to other Nostr apps via Nostr Wallet Connect to enable zapping and payments. </string>
     <string name="settings_wallet_nwc_connections_create_new_text_button">Create a new wallet connection</string>
+    <string name="settings_wallet_nwc_connections_retry">Retry</string>
+    <string name="settings_wallet_nwc_connections_error_unable_to_load_apps">Unable to load apps.</string>
     <string name="settings_wallet_hide_transactions_below_hint">You can choose to hide small transactions to avoid spam in your transaction list</string>
     <string name="settings_wallet_hide_transactions_below_edit_title">Edit amount</string>
     <string name="settings_wallet_ln_address">Nostr lightning address</string>
     <string name="settings_wallet_start_in_wallet">Start in wallet</string>
     <string name="settings_wallet_start_in_wallet_hint">Open the wallet when Primal starts</string>
     <string name="settings_wallet_save">Save</string>
-    <string name="settings_new_wallet_connection_retry">Retry</string>
     <string name="settings_wallet_new_nwc_connection_title">New Wallet Connection</string>
     <string name="settings_wallet_new_nwc_connection_app_name_input_header">Name of the app you wish to connect:</string>
     <string name="settings_wallet_new_nwc_connection_hint">You can revoke access at any time in your Primal Wallet settings.</string>

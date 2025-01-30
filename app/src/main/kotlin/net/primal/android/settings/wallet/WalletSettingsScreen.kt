@@ -285,14 +285,22 @@ private fun ConnectedAppsContent(
         }
 
         WalletSettingsContract.ConnectionsState.Error -> {
-            Box(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
+                Text(
+                    text = stringResource(R.string.settings_wallet_nwc_connections_error_unable_to_load_apps),
+                    style = AppTheme.typography.titleMedium,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                    fontWeight = FontWeight.Medium,
+                )
                 TextButton(onClick = onRetryFetchingConnections) {
                     Text(
-                        text = stringResource(id = R.string.settings_new_wallet_connection_retry).uppercase(),
+                        text = stringResource(id = R.string.settings_wallet_nwc_connections_retry),
                     )
                 }
             }
