@@ -18,6 +18,7 @@ interface WalletSettingsContract {
     sealed class UiEvent {
         data object DisconnectWallet : UiEvent()
         data object RetryConnectionsFetch : UiEvent()
+        data object RequestFetchWalletConnections : UiEvent()
         data class RevokeConnection(val nwcPubkey: String) : UiEvent()
         data class UpdateWalletPreference(val walletPreference: WalletPreference) : UiEvent()
         data class UpdateMinTransactionAmount(val amountInSats: Long) : UiEvent()

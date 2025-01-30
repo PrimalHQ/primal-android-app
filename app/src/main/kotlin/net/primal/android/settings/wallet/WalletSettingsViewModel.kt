@@ -49,7 +49,6 @@ class WalletSettingsViewModel @Inject constructor(
             observeUserAccount()
         }
 
-        fetchWalletConnections()
         observeEvents()
     }
 
@@ -88,6 +87,7 @@ class WalletSettingsViewModel @Inject constructor(
                     }
 
                     UiEvent.RetryConnectionsFetch -> fetchWalletConnections()
+                    UiEvent.RequestFetchWalletConnections -> fetchWalletConnections()
                 }
             }
         }

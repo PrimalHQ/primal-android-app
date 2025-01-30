@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
@@ -241,7 +240,7 @@ private fun WalletConnectionEditor(
                 modifier = Modifier
                     .padding(horizontal = 32.dp)
                     .clickable { showDailyBudgetBottomSheet = true }
-                    .clip(RoundedCornerShape(12.dp)),
+                    .clip(AppTheme.shapes.small),
                 colors = ListItemDefaults.colors(
                     containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
                 ),
@@ -309,7 +308,7 @@ private fun WalletConnectionEditorHeader(modifier: Modifier = Modifier) {
                 painter = painterResource(id = R.drawable.primal_nwc_logo),
                 contentDescription = stringResource(id = R.string.settings_wallet_nwc_primal_wallet),
                 modifier = Modifier
-                    .clip(RoundedCornerShape(9.dp))
+                    .clip(AppTheme.shapes.small)
                     .size(99.dp),
                 tint = Color.Unspecified,
             )
@@ -330,7 +329,7 @@ private fun WalletConnectionEditorHeader(modifier: Modifier = Modifier) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(9.dp))
+                    .clip(AppTheme.shapes.small)
                     .background(color = Color(color = 0xFFE5E5E5))
                     .padding(21.dp)
                     .size(54.dp),

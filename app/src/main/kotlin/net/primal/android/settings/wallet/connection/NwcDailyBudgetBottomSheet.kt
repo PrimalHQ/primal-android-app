@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -128,7 +127,7 @@ fun BudgetOptionRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onSelect)
-            .clip(RoundedCornerShape(12.dp)),
+            .clip(AppTheme.shapes.small),
         headlineContent = {
             Text(
                 modifier = Modifier.padding(start = 16.dp),
