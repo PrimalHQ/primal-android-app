@@ -32,7 +32,8 @@ class LinkPrimalWalletViewModel @Inject constructor(
     private val nwcWalletRepository: NwcWalletRepository,
 ) : ViewModel() {
 
-    private val appName: String = savedStateHandle.appName ?: "External app"
+    private val appName: String = savedStateHandle.appName?.takeIf { it.isNotEmpty() }
+        ?: LinkPrimalWalletContract.DEFAULT_APP_NAME
     private val appIcon: String? = savedStateHandle.appIcon
     private val callback: String = savedStateHandle.callback
 
@@ -92,7 +93,6 @@ class LinkPrimalWalletViewModel @Inject constructor(
 
                 setState {
                     copy(
-                        secret = response.nwcConnectionUri,
                         nwcConnectionUri = response.nwcConnectionUri,
                         creatingSecret = false,
                     )

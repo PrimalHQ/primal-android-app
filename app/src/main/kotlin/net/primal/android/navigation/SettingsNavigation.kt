@@ -91,17 +91,18 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
             navController = navController,
         )
         linkPrimalWallet(
-            route = "wallet_settings/linkPrimalWallet?appName={$APP_NAME}&appIcon={$APP_ICON}&callback={$CALLBACK}",
+            route = "wallet_settings/linkPrimalWallet?appName={$NWC_APP_NAME}" +
+                "&appIcon={$NWC_APP_ICON}&callback={$NWC_CALLBACK}",
             arguments = listOf(
-                navArgument(APP_NAME) {
+                navArgument(NWC_APP_NAME) {
                     type = NavType.StringType
                     nullable = true
                 },
-                navArgument(APP_ICON) {
+                navArgument(NWC_APP_ICON) {
                     type = NavType.StringType
                     nullable = true
                 },
-                navArgument(CALLBACK) {
+                navArgument(NWC_CALLBACK) {
                     type = NavType.StringType
                 },
             ),
@@ -192,8 +193,6 @@ private fun NavGraphBuilder.wallet(
 //            navController.navigateToNewWalletConnection()
             navController.navigateToLinkPrimalWallet(
                 callback = "callback",
-                appName = "placeholder",
-                appIcon = "",
             )
         },
     )

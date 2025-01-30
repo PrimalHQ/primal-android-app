@@ -2,12 +2,11 @@ package net.primal.android.settings.wallet.link
 
 interface LinkPrimalWalletContract {
     companion object {
-        val budgetOptions: List<Long?> = listOf(1000, 10_000, 100_000, 1_000_000, null)
+        const val DEFAULT_APP_NAME: String = "External app"
     }
 
     data class UiState(
         val creatingSecret: Boolean = false,
-        val secret: String? = null,
         val nwcConnectionUri: String? = null,
         val dailyBudget: Long? = 10_000,
         val appName: String? = null,

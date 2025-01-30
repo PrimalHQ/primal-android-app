@@ -729,7 +729,7 @@
     <string name="settings_wallet_new_nwc_connection_connection_created_text">Connection created</string>
     <string name="settings_wallet_link_primal_wallet_title">Link Primal Wallet</string>
     <string name="settings_wallet_link_external_app_request">An external app “%1$s” is requesting access to your Primal Wallet. If you wish to allow this, click “Give Wallet Access” below.</string>
-    <string name="settings_wallet_link_give_wallet_access">Give Wallet Access</string>
+    <string name="settings_wallet_link_give_wallet_access_button">Give Wallet Access</string>
 
     <string name="settings_wallet_nwc_qr_code_scan_title">Connect NWC Wallet</string>
     <string name="settings_wallet_nwc_qr_code_scan_hint">Scan the NWC\nconnection QR code</string>

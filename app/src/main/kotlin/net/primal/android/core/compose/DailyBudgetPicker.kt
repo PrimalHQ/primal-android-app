@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.theme.AppTheme
 
@@ -38,7 +39,7 @@ fun DailyBudgetPicker(
             Text(
                 modifier = Modifier.padding(top = 3.dp),
                 text = stringResource(id = R.string.settings_wallet_nwc_connections_header_daily_budget),
-                style = AppTheme.typography.bodyLarge,
+                style = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp),
             )
         },
         trailingContent = {
@@ -49,14 +50,14 @@ fun DailyBudgetPicker(
                         text = dailyBudget.toLong().let {
                             "%,d ${stringResource(id = R.string.wallet_sats_suffix)}".format(it)
                         },
-                        style = AppTheme.typography.bodyLarge,
+                        style = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp),
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                     )
                 } else {
                     Text(
                         modifier = Modifier.padding(top = 3.dp),
                         text = stringResource(id = R.string.settings_wallet_nwc_connection_daily_budget_no_limit),
-                        style = AppTheme.typography.bodyLarge,
+                        style = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp),
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                     )
                 }
