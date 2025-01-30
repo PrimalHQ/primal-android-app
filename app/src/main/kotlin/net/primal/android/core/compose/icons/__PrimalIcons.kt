@@ -97,6 +97,8 @@ import net.primal.android.core.compose.icons.primaliconpack.NostrichFilled
 import net.primal.android.core.compose.icons.primaliconpack.Notifications
 import net.primal.android.core.compose.icons.primaliconpack.NotificationsFilled
 import net.primal.android.core.compose.icons.primaliconpack.Notrich
+import net.primal.android.core.compose.icons.primaliconpack.NwcExternalAppConnection
+import net.primal.android.core.compose.icons.primaliconpack.NwcExternalAppForeground
 import net.primal.android.core.compose.icons.primaliconpack.OnboardingZapsExplained
 import net.primal.android.core.compose.icons.primaliconpack.Paste
 import net.primal.android.core.compose.icons.primaliconpack.PhotoFromGallery
@@ -295,6 +297,8 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             OnboardingZapsExplained,
             Document,
             WalletChangeCurrency,
+            NwcExternalAppForeground,
+            NwcExternalAppConnection,
         )
         return __PrimalIcons!!
     }

@@ -1,16 +1,9 @@
 package net.primal.android.wallet.api
 
 import javax.inject.Inject
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.add
-import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.encodeToJsonElement
-import kotlinx.serialization.json.jsonObject
 import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.networking.di.PrimalWalletApiClient
 import net.primal.android.networking.primal.PrimalApiClient
@@ -46,9 +39,7 @@ import net.primal.android.wallet.api.model.ParsedLnUrlResponse
 import net.primal.android.wallet.api.model.TransactionsRequestBody
 import net.primal.android.wallet.api.model.TransactionsResponse
 import net.primal.android.wallet.api.model.UserWalletInfoRequestBody
-import net.primal.android.wallet.api.model.WalletOperationRequestBody
 import net.primal.android.wallet.api.model.WalletOperationVerb
-import net.primal.android.wallet.api.model.WalletRequestBody
 import net.primal.android.wallet.api.model.WalletUserInfoResponse
 import net.primal.android.wallet.api.model.WithdrawRequestBody
 import net.primal.android.wallet.domain.SubWallet
@@ -67,6 +58,7 @@ class WalletApiImpl @Inject constructor(
                     userId = userId,
                     walletVerb = WalletOperationVerb.IS_USER,
                     requestBody = IsWalletUserRequestBody(userId),
+                    nostrNotary = nostrNotary,
                 ),
             ),
         )
@@ -83,6 +75,7 @@ class WalletApiImpl @Inject constructor(
                     userId = userId,
                     walletVerb = WalletOperationVerb.USER_INFO,
                     requestBody = UserWalletInfoRequestBody(userId),
+                    nostrNotary = nostrNotary,
                 ),
             ),
         )
@@ -100,6 +93,7 @@ class WalletApiImpl @Inject constructor(
                     userId = userId,
                     walletVerb = WalletOperationVerb.GET_ACTIVATION_CODE,
                     requestBody = body,
+                    nostrNotary = nostrNotary,
                 ),
             ),
         )
@@ -113,6 +107,7 @@ class WalletApiImpl @Inject constructor(
                     userId = userId,
                     walletVerb = WalletOperationVerb.ACTIVATE,
                     requestBody = ActivateWalletRequestBody(code),
+                    nostrNotary = nostrNotary,
                 ),
             ),
         )
@@ -130,6 +125,7 @@ class WalletApiImpl @Inject constructor(
                     userId = userId,
                     walletVerb = WalletOperationVerb.BALANCE,
                     requestBody = BalanceRequestBody(subWallet = SubWallet.Open),
+                    nostrNotary = nostrNotary,
                 ),
             ),
         )
@@ -147,6 +143,7 @@ class WalletApiImpl @Inject constructor(
                     userId = userId,
                     walletVerb = WalletOperationVerb.WITHDRAW,
                     requestBody = body,
+                    nostrNotary = nostrNotary,
                 ),
             ),
         )
@@ -160,6 +157,7 @@ class WalletApiImpl @Inject constructor(
                     userId = userId,
                     walletVerb = WalletOperationVerb.DEPOSIT,
                     requestBody = body,
+                    nostrNotary = nostrNotary,
                 ),
             ),
         )
@@ -177,6 +175,7 @@ class WalletApiImpl @Inject constructor(
                     userId = userId,
                     walletVerb = WalletOperationVerb.DEPOSIT,
                     requestBody = body,
+                    nostrNotary = nostrNotary,
                 ),
             ),
         )
@@ -194,6 +193,7 @@ class WalletApiImpl @Inject constructor(
                     userId = userId,
                     walletVerb = WalletOperationVerb.TRANSACTIONS,
                     requestBody = body,
+                    nostrNotary = nostrNotary,
                 ),
             ),
         )
@@ -237,6 +237,7 @@ class WalletApiImpl @Inject constructor(
                         platform = "android",
                         quoteId = previousQuoteId,
                     ),
+                    nostrNotary = nostrNotary,
                 ),
             ),
         )
@@ -258,6 +259,7 @@ class WalletApiImpl @Inject constructor(
                     userId = userId,
                     walletVerb = WalletOperationVerb.IN_APP_PURCHASE,
                     requestBody = InAppPurchaseRequestBody(purchaseToken = purchaseToken, quoteId = quoteId),
+                    nostrNotary = nostrNotary,
                 ),
             ),
         )
@@ -271,6 +273,7 @@ class WalletApiImpl @Inject constructor(
                     userId = userId,
                     walletVerb = WalletOperationVerb.PARSE_LNURL,
                     requestBody = ParseLnUrlRequestBody(lnurl = lnurl),
+                    nostrNotary = nostrNotary,
                 ),
             ),
         )
@@ -288,6 +291,7 @@ class WalletApiImpl @Inject constructor(
                     userId = userId,
                     walletVerb = WalletOperationVerb.PARSE_LNINVOICE,
                     requestBody = ParseLnInvoiceRequestBody(lnbc = lnbc),
+                    nostrNotary = nostrNotary,
                 ),
             ),
         )
@@ -309,6 +313,7 @@ class WalletApiImpl @Inject constructor(
                     userId = userId,
                     walletVerb = WalletOperationVerb.ONCHAIN_PAYMENT_TIERS,
                     requestBody = MiningFeesRequestBody(btcAddress = onChainAddress, amountInBtc = amountInBtc),
+                    nostrNotary = nostrNotary,
                 ),
             ),
         )
@@ -317,29 +322,6 @@ class WalletApiImpl @Inject constructor(
             ?.takeContentOrNull<List<MiningFeeTier>>()
             ?: throw WssException("Missing or invalid content in response.")
     }
-
-    private fun buildWalletOptionsJson(
-        userId: String,
-        walletVerb: WalletOperationVerb,
-        requestBody: WalletOperationRequestBody,
-    ): String =
-        NostrJsonEncodeDefaults.encodeToString(
-            WalletRequestBody(
-                event = nostrNotary.signPrimalWalletOperationNostrEvent(
-                    userId = userId,
-                    content = buildJsonArray {
-                        add(walletVerb.identifier)
-                        add(
-                            NostrJson.encodeToJsonElement(requestBody).let {
-                                val map = it.jsonObject.toMutableMap()
-                                map.remove("type")
-                                JsonObject(map)
-                            },
-                        )
-                    }.toString(),
-                ),
-            ),
-        )
 
     private fun PrimalEvent?.toUserWalletInfoResponseOrThrow(): WalletUserInfoResponse {
         val content = takeContentOrNull<WalletUserInfoContent>()
@@ -364,6 +346,7 @@ class WalletApiImpl @Inject constructor(
                     userId = userId,
                     walletVerb = WalletOperationVerb.EXCHANGE_RATE,
                     requestBody = ExchangeRateRequestBody,
+                    nostrNotary = nostrNotary,
                 ),
             ),
         )

@@ -686,6 +686,8 @@
     <string name="settings_wallet_use_primal_wallet">Use Primal wallet</string>
     <string name="settings_wallet_use_primal_wallet_hint">Alternatively you can connect to an external lightning wallet via Nostr Wallet Connect</string>
     <string name="settings_wallet_nwc_header_not_connected">Connect a Wallet</string>
+    <string name="settings_wallet_nwc_primal_wallet">Primal Wallet</string>
+    <string name="settings_wallet_nwc_external_app">External App</string>
     <string name="settings_wallet_nwc_header_connected">Wallet Connected</string>
     <string name="settings_wallet_nwc_connect_alby_wallet">Connect Alby Wallet</string>
     <string name="settings_wallet_nwc_connect_other_wallet">Connect Other Wallet</string>
@@ -696,12 +698,35 @@
     <string name="settings_wallet_max_wallet_balance">Max wallet balance</string>
     <string name="settings_wallet_max_wallet_balance_hint">Primal Wallet is a transactional wallet, designed for handling small amounts. We recommend self custody for larger amounts.</string>
     <string name="settings_wallet_hide_transactions_below">Hide transactions below</string>
+    <string name="settings_wallet_nwc_connections_header_app">App</string>
+    <string name="settings_wallet_nwc_connections_header_daily_budget">Daily Budget</string>
+    <string name="settings_wallet_nwc_connections_header_revoke">Revoke</string>
+    <string name="settings_wallet_nwc_connections_connected_apps">Connected Apps</string>
+    <string name="settings_wallet_nwc_connections_revoke_connection_dialog_title">Revoke Connection</string>
+    <string name="settings_wallet_nwc_connections_revoke_connection_dialog_text">Are you sure you want to revoke this wallet connection?</string>
+    <string name="settings_wallet_nwc_connections_no_connected_apps">There are no apps connected to Primal Wallet</string>
+    <string name="settings_wallet_nwc_connection_daily_budget_no_limit">no limit</string>
+    <string name="settings_wallet_nwc_connections_hint">You can connect your Primal Wallet to other Nostr apps via Nostr Wallet Connect to enable zapping and payments. </string>
+    <string name="settings_wallet_nwc_connections_create_new_text_button">Create a new wallet connection</string>
     <string name="settings_wallet_hide_transactions_below_hint">You can choose to hide small transactions to avoid spam in your transaction list</string>
     <string name="settings_wallet_hide_transactions_below_edit_title">Edit amount</string>
     <string name="settings_wallet_ln_address">Nostr lightning address</string>
     <string name="settings_wallet_start_in_wallet">Start in wallet</string>
     <string name="settings_wallet_start_in_wallet_hint">Open the wallet when Primal starts</string>
     <string name="settings_wallet_save">Save</string>
+    <string name="settings_new_wallet_connection_retry">Retry</string>
+    <string name="settings_wallet_new_nwc_connection_title">New Wallet Connection</string>
+    <string name="settings_wallet_new_nwc_connection_app_name_input_header">Name of the app you wish to connect:</string>
+    <string name="settings_wallet_new_nwc_connection_hint">You can revoke access at any time in your Primal Wallet settings.</string>
+    <string name="settings_wallet_new_nwc_connection_create_new_connection_button">Create Wallet Connection</string>
+    <string name="settings_wallet_new_nwc_connection_cancel_button">Cancel</string>
+    <string name="settings_wallet_new_nwc_connection_bottom_sheet_pick_daily_budget_title">Pick maximum daily budget</string>
+    <string name="settings_wallet_new_nwc_connection_bottom_sheet_pick_daily_budget_save">Save</string>
+    <string name="settings_wallet_new_nwc_connection_secret_hint">This is your Nostr Wallet Connect string. You can paste it into the app you wish to connect your wallet to.</string>
+    <string name="settings_wallet_new_nwc_connection_copy_nwc_string_button">Copy NWC String</string>
+    <string name="settings_wallet_new_nwc_connection_done_button">Done</string>
+    <string name="settings_wallet_new_nwc_connection_connection_created_text">Connection created</string>
+
 
     <string name="settings_wallet_nwc_qr_code_scan_title">Connect NWC Wallet</string>
     <string name="settings_wallet_nwc_qr_code_scan_hint">Scan the NWC\nconnection QR code</string>
