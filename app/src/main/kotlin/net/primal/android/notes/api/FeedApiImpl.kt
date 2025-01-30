@@ -1,14 +1,13 @@
 package net.primal.android.notes.api
 
 import javax.inject.Inject
-import kotlinx.serialization.encodeToString
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
-import net.primal.android.networking.primal.PrimalVerb.NOTES
+import net.primal.android.networking.primal.PrimalVerb.EVENTS
 import net.primal.android.networking.primal.PrimalVerb.THREAD_VIEW
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.notes.api.model.FeedBySpecRequestBody
@@ -33,7 +32,7 @@ class FeedApiImpl @Inject constructor(
                 NostrJson.decodeFromStringOrNull(it?.content)
             },
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
-            posts = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
+            notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
             articles = emptyList(),
             reposts = queryResult.filterNostrEvents(NostrEventKind.ShortTextNoteRepost),
             zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
@@ -47,6 +46,8 @@ class FeedApiImpl @Inject constructor(
             primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
             primalPremiumInfo = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
             blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
+            genericReposts = queryResult.filterNostrEvents(NostrEventKind.GenericRepost),
+            pictureNotes = queryResult.filterNostrEvents(NostrEventKind.PictureNote),
         )
     }
 
@@ -63,7 +64,7 @@ class FeedApiImpl @Inject constructor(
                 NostrJson.decodeFromStringOrNull(it?.content)
             },
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
-            posts = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
+            notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
             articles = queryResult.filterNostrEvents(NostrEventKind.LongFormContent),
             reposts = emptyList(),
             zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
@@ -77,13 +78,15 @@ class FeedApiImpl @Inject constructor(
             primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
             primalPremiumInfo = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
             blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
+            genericReposts = emptyList(),
+            pictureNotes = queryResult.filterNostrEvents(NostrEventKind.PictureNote),
         )
     }
 
     override suspend fun getNotes(noteIds: Set<String>, extendedResponse: Boolean): FeedResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = NOTES,
+                primalVerb = EVENTS,
                 optionsJson = NostrJson.encodeToString(
                     NotesRequestBody(noteIds = noteIds.toList(), extendedResponse = true),
                 ),
@@ -93,7 +96,7 @@ class FeedApiImpl @Inject constructor(
         return FeedResponse(
             paging = null,
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
-            posts = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
+            notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
             articles = queryResult.filterNostrEvents(NostrEventKind.LongFormContent),
             reposts = emptyList(),
             zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
@@ -107,6 +110,8 @@ class FeedApiImpl @Inject constructor(
             primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
             primalPremiumInfo = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
             blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
+            genericReposts = emptyList(),
+            pictureNotes = queryResult.filterNostrEvents(NostrEventKind.PictureNote),
         )
     }
 }

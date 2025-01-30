@@ -48,7 +48,7 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
         referencedArticles = allArticles,
         referencedHighlights = referencedHighlights,
     )
-    val feedPosts = posts.mapAsPostDataPO(
+    val feedPosts = notes.mapAsPostDataPO(
         referencedPosts = referencedPostsWithReplyTo,
         referencedArticles = allArticles,
         referencedHighlights = referencedHighlights,
@@ -123,7 +123,7 @@ suspend fun FeedResponse.persistNoteRepliesAndArticleCommentsToDatabase(noteId: 
 
     database.withTransaction {
         database.threadConversations().connectNoteWithReply(
-            data = posts.map {
+            data = notes.map {
                 NoteConversationCrossRef(
                     noteId = noteId,
                     replyNoteId = it.id,

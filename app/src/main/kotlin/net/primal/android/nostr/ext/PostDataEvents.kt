@@ -32,7 +32,8 @@ fun List<PrimalEvent>.mapNotNullAsPostDataPO(
     val referencedArticlesMap = referencedArticles.associateBy { it.articleId }
     val referencedHighlightsMap = referencedHighlights.associateBy { it.highlightId }
 
-    val notes = this.mapNotNull { it.takeContentOrNull<NostrEvent>() }
+    val events = this.mapNotNull { it.takeContentOrNull<NostrEvent>() }
+    val notes = events
         .filter { event -> event.kind == NostrEventKind.ShortTextNote.value }
         .map {
             it.shortTextNoteAsPost(
@@ -42,7 +43,7 @@ fun List<PrimalEvent>.mapNotNullAsPostDataPO(
             )
         }
 
-    val pictures = this.mapNotNull { it.takeContentOrNull<NostrEvent>() }
+    val pictures = events
         .filter { event -> event.kind == NostrEventKind.PictureNote.value }
         .map { it.pictureNoteAsPost() }
 

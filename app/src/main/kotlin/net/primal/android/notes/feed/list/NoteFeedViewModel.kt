@@ -165,8 +165,7 @@ class NoteFeedViewModel @AssistedInject constructor(
                 }
             }
 
-        val notes = this.posts
-            .map { it.createdAt to it }
+        val notes = this.notes.map { it.createdAt to it }
 
         val allNotes = (repostedNotes + notes)
             .asSequence()

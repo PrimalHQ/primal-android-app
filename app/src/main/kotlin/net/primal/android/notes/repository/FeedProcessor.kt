@@ -27,7 +27,7 @@ class FeedProcessor(
             }
 
             response.persistToDatabaseAsTransaction(userId = userId, database = database)
-            val feedEvents = response.posts + response.reposts
+            val feedEvents = response.notes + response.reposts
             feedEvents.processRemoteKeys(pagingEvent)
             feedEvents.processFeedConnections()
         }

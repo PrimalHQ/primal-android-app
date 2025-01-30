@@ -92,7 +92,7 @@ class MessagesProcessor @Inject constructor(
                 val referencedPostsWithReplies = response.referencedEvents.mapNotNullAsPostDataPO(
                     referencedPostsWithoutReplies,
                 )
-                response.posts.mapAsPostDataPO(
+                response.notes.mapAsPostDataPO(
                     referencedPosts = referencedPostsWithReplies,
                     referencedArticles = emptyList(),
                     referencedHighlights = emptyList(),

@@ -7,7 +7,7 @@ import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
 data class FeedResponse(
     val paging: ContentPrimalPaging?,
     val metadata: List<NostrEvent>,
-    val posts: List<NostrEvent>,
+    val notes: List<NostrEvent>,
     val articles: List<NostrEvent>,
     val reposts: List<NostrEvent>,
     val zaps: List<NostrEvent>,
@@ -21,4 +21,6 @@ data class FeedResponse(
     val primalUserNames: PrimalEvent? = null,
     val primalLegendProfiles: PrimalEvent? = null,
     val primalPremiumInfo: PrimalEvent? = null,
+    val genericReposts: List<NostrEvent> = emptyList(),
+    val pictureNotes: List<NostrEvent> = emptyList(),
 )

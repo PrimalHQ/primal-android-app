@@ -115,7 +115,7 @@ class NotificationsRemoteMediator(
             FeedResponse(
                 paging = null,
                 metadata = response.metadata,
-                posts = response.notes,
+                notes = response.notes,
                 articles = emptyList(),
                 reposts = emptyList(),
                 zaps = emptyList(),
