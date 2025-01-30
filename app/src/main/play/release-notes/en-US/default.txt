@@ -1,1 +1,4 @@
-Stability and improvements.
+- Feed rendering improvements.
+- Wallet NWC support.
+- Legends overhaul.
+- Stability and improvements.
