@@ -280,6 +280,7 @@ private fun WalletConnectionEditor(
                     onBudgetSelected = { dailyBudget ->
                         eventPublisher(NwcNewWalletConnectionContract.UiEvent.DailyBudgetChanged(dailyBudget))
                     },
+                    budgetOptions = NwcNewWalletConnectionContract.budgetOptions,
                 )
             }
 

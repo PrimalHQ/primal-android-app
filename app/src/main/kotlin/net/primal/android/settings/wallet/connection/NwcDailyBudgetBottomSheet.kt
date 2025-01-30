@@ -43,10 +43,9 @@ fun NwcDailyBudgetBottomSheet(
     onDismissRequest: () -> Unit,
     onBudgetSelected: (String?) -> Unit,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    budgetOptions: List<String>,
 ) {
     val scope = rememberCoroutineScope()
-
-    val budgetOptions = listOf("1000", "10000", "100000", "1000000", "no limit")
 
     val initialSelection = initialDailyBudget?.takeIf { it != "no limit" }
     val selectedBudget = remember { mutableStateOf(initialSelection) }

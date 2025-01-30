@@ -1,6 +1,10 @@
 package net.primal.android.settings.wallet.connection
 
 interface NwcNewWalletConnectionContract {
+    companion object {
+        val budgetOptions = listOf("1000", "10000", "100000", "1000000", "no limit")
+    }
+
     data class UiState(
         val creatingSecret: Boolean = false,
         val appName: String = "",
