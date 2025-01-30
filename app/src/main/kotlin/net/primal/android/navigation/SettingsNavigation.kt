@@ -193,6 +193,16 @@ private fun NavGraphBuilder.newWalletConnection(route: String, navController: Na
             viewModel = viewModel,
             onClose = { navController.popBackStack() },
         )
+
+//        val viewModel = hiltViewModel<LinkPrimalWalletViewModel>()
+//        LockToOrientationPortrait()
+//        LinkPrimalWalletScreen(
+//            viewModel = viewModel,
+//            callback = "",
+//            appName = "",
+//            appIcon = "",
+//            onClose = { navController.navigateUp() },
+//        )
     }
 
 private fun NavGraphBuilder.notifications(route: String, navController: NavController) =

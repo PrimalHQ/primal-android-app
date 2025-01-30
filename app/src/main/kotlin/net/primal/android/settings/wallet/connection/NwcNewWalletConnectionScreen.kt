@@ -3,7 +3,6 @@ package net.primal.android.settings.wallet.connection
 import android.graphics.drawable.Drawable
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,12 +20,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -62,6 +58,7 @@ import com.github.alexzhirkevich.customqrgenerator.vector.style.QrVectorColor
 import com.github.alexzhirkevich.customqrgenerator.vector.style.QrVectorFrameShape
 import com.github.alexzhirkevich.customqrgenerator.vector.style.QrVectorPixelShape
 import net.primal.android.R
+import net.primal.android.core.compose.DailyBudgetPicker
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalOutlinedTextField
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -160,7 +157,7 @@ private fun NwcNewWalletConnectionScreen(
 }
 
 @Composable
-private fun NewWalletConnectionFooter(
+fun NewWalletConnectionFooter(
     primaryButtonText: String,
     onPrimaryButtonClick: () -> Unit,
     secondaryButtonText: String,
@@ -212,6 +209,17 @@ private fun WalletConnectionEditor(
 ) {
     var showDailyBudgetBottomSheet by rememberSaveable { mutableStateOf(false) }
 
+    if (showDailyBudgetBottomSheet) {
+        DailyBudgetBottomSheet(
+            initialDailyBudget = state.dailyBudget,
+            onDismissRequest = { showDailyBudgetBottomSheet = false },
+            onBudgetSelected = { dailyBudget ->
+                eventPublisher(NwcNewWalletConnectionContract.UiEvent.DailyBudgetChanged(dailyBudget))
+            },
+            budgetOptions = NwcNewWalletConnectionContract.budgetOptions,
+        )
+    }
+
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.SpaceEvenly,
@@ -226,7 +234,7 @@ private fun WalletConnectionEditor(
                 modifier = Modifier.padding(horizontal = 32.dp),
                 text = stringResource(id = R.string.settings_wallet_new_nwc_connection_app_name_input_header),
                 color = AppTheme.colorScheme.onPrimary,
-                style = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp),
+                style = AppTheme.typography.bodyLarge,
             )
             PrimalOutlinedTextField(
                 header = null,
@@ -236,52 +244,10 @@ private fun WalletConnectionEditor(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            ListItem(
-                modifier = Modifier
-                    .padding(horizontal = 32.dp)
-                    .clickable { showDailyBudgetBottomSheet = true }
-                    .clip(AppTheme.shapes.small),
-                colors = ListItemDefaults.colors(
-                    containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                ),
-                headlineContent = {
-                    Text(text = stringResource(id = R.string.settings_wallet_nwc_connections_header_daily_budget))
-                },
-                trailingContent = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (state.dailyBudget != null) {
-                            Text(
-                                text = state.dailyBudget.toLong().let {
-                                    "%,d ${stringResource(id = R.string.wallet_sats_suffix)}".format(it)
-                                },
-                                style = AppTheme.typography.bodyMedium,
-                            )
-                        } else {
-                            Text(
-                                text = stringResource(
-                                    id = R.string.settings_wallet_nwc_connection_daily_budget_no_limit,
-                                ),
-                                style = AppTheme.typography.bodyMedium,
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(15.dp))
-
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos, contentDescription = null)
-                    }
-                },
+            DailyBudgetPicker(
+                dailyBudget = state.dailyBudget,
+                onChangeDailyBudgetBottomSheetVisibility = { showDailyBudgetBottomSheet = it },
             )
-
-            if (showDailyBudgetBottomSheet) {
-                NwcDailyBudgetBottomSheet(
-                    initialDailyBudget = state.dailyBudget,
-                    onDismissRequest = { showDailyBudgetBottomSheet = false },
-                    onBudgetSelected = { dailyBudget ->
-                        eventPublisher(NwcNewWalletConnectionContract.UiEvent.DailyBudgetChanged(dailyBudget))
-                    },
-                    budgetOptions = NwcNewWalletConnectionContract.budgetOptions,
-                )
-            }
 
             Spacer(modifier = Modifier.height(21.dp))
 
@@ -289,7 +255,7 @@ private fun WalletConnectionEditor(
                 modifier = Modifier.padding(horizontal = 21.dp),
                 text = stringResource(id = R.string.settings_wallet_new_nwc_connection_hint),
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-                style = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp),
+                style = AppTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
             )
         }
@@ -323,7 +289,7 @@ private fun WalletConnectionEditorHeader(modifier: Modifier = Modifier) {
             modifier = Modifier.offset(y = (-13).dp),
             imageVector = PrimalIcons.NwcExternalAppConnection,
             contentDescription = "Connection",
-            tint = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+            tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
         )
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {

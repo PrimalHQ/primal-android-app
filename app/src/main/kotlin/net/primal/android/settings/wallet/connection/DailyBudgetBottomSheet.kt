@@ -37,7 +37,7 @@ import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NwcDailyBudgetBottomSheet(
+fun DailyBudgetBottomSheet(
     initialDailyBudget: Long?,
     onDismissRequest: () -> Unit,
     onBudgetSelected: (Long?) -> Unit,
