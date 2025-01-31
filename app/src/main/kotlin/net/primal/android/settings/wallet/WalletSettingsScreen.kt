@@ -192,6 +192,7 @@ fun WalletSettingsScreen(
                     onCreateNewWalletConnection = onCreateNewWalletConnection,
                     connectionsState = state.connectionsState,
                     onRetryFetchingConnections = { eventPublisher(UiEvent.RequestFetchWalletConnections) },
+                    isPrimalWalletActivated = state.isPrimalWalletActivated,
                 )
             }
         },
@@ -201,6 +202,7 @@ fun WalletSettingsScreen(
 @Composable
 private fun ConnectedAppsSettings(
     nwcConnectionInfos: List<NwcConnectionInfo>,
+    isPrimalWalletActivated: Boolean,
     connectionsState: WalletSettingsContract.ConnectionsState,
     onRevokeConnectedApp: (nwcPubkey: String) -> Unit,
     onCreateNewWalletConnection: () -> Unit,
@@ -244,14 +246,15 @@ private fun ConnectedAppsSettings(
             onRetryFetchingConnections = onRetryFetchingConnections,
             onRevokeDialogVisibilityChange = { revokeDialogVisible = it },
             onRevokeNwcPubkeyChange = { revokeNwcPubkey = it },
+            isPrimalWalletActivated = isPrimalWalletActivated,
         )
     }
 
     Spacer(modifier = Modifier.height(16.dp))
 
     ConnectedAppsHint(
+        isPrimalWalletActivated = isPrimalWalletActivated,
         createNewWalletConnection = onCreateNewWalletConnection,
-        connectionsState = connectionsState,
     )
 
     if (revokeDialogVisible) {
@@ -273,6 +276,7 @@ private fun ConnectedAppsSettings(
 @Composable
 private fun ConnectedAppsContent(
     connectionsState: WalletSettingsContract.ConnectionsState,
+    isPrimalWalletActivated: Boolean,
     onRetryFetchingConnections: () -> Unit,
     nwcConnectionInfos: List<NwcConnectionInfo>,
     onRevokeDialogVisibilityChange: (Boolean) -> Unit,
@@ -285,38 +289,31 @@ private fun ConnectedAppsContent(
             }
         }
 
-        WalletSettingsContract.ConnectionsState.NetworkError -> {
+        WalletSettingsContract.ConnectionsState.Error -> {
             Row(
-                modifier = Modifier.fillMaxWidth().height(48.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = stringResource(R.string.settings_wallet_nwc_connections_error_unable_to_load_apps),
+                    text = when (isPrimalWalletActivated) {
+                        true -> stringResource(R.string.settings_wallet_nwc_connections_error_unable_to_load_apps)
+                        else -> stringResource(R.string.settings_wallet_nwc_connections_error_wallet_not_activated)
+                    },
                     style = AppTheme.typography.titleMedium,
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                     fontWeight = FontWeight.Medium,
                 )
-                TextButton(onClick = onRetryFetchingConnections) {
-                    Text(
-                        text = stringResource(id = R.string.settings_wallet_nwc_connections_retry),
-                    )
-                }
-            }
-        }
 
-        WalletSettingsContract.ConnectionsState.WalletNotActivatedError -> {
-            Row(
-                modifier = Modifier.fillMaxWidth().height(48.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = stringResource(R.string.settings_wallet_nwc_connections_error_wallet_not_activated),
-                    style = AppTheme.typography.titleMedium,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                    fontWeight = FontWeight.Medium,
-                )
+                if (isPrimalWalletActivated) {
+                    TextButton(onClick = onRetryFetchingConnections) {
+                        Text(
+                            text = stringResource(id = R.string.settings_wallet_nwc_connections_retry),
+                        )
+                    }
+                }
             }
         }
 
@@ -450,10 +447,7 @@ private fun ConnectedAppItem(
 }
 
 @Composable
-private fun ConnectedAppsHint(
-    createNewWalletConnection: () -> Unit,
-    connectionsState: WalletSettingsContract.ConnectionsState,
-) {
+private fun ConnectedAppsHint(isPrimalWalletActivated: Boolean, createNewWalletConnection: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -465,7 +459,7 @@ private fun ConnectedAppsHint(
             style = AppTheme.typography.bodySmall,
         )
 
-        if (connectionsState != WalletSettingsContract.ConnectionsState.WalletNotActivatedError) {
+        if (isPrimalWalletActivated) {
             TextButton(
                 onClick = createNewWalletConnection,
                 contentPadding = PaddingValues(0.dp),
