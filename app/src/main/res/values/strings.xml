@@ -710,6 +710,7 @@
     <string name="settings_wallet_nwc_connections_create_new_text_button">Create a new wallet connection</string>
     <string name="settings_wallet_nwc_connections_retry">Retry</string>
     <string name="settings_wallet_nwc_connections_error_unable_to_load_apps">Unable to load apps.</string>
+    <string name="settings_wallet_nwc_connections_error_wallet_not_activated">Primal wallet needs to be activated first.</string>
     <string name="settings_wallet_hide_transactions_below_hint">You can choose to hide small transactions to avoid spam in your transaction list</string>
     <string name="settings_wallet_hide_transactions_below_edit_title">Edit amount</string>
     <string name="settings_wallet_ln_address">Nostr lightning address</string>

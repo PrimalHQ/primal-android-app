@@ -21,6 +21,7 @@ import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.domain.parseNWCUrl
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.api.model.PrimalNwcConnectionInfo
+import net.primal.android.wallet.domain.WalletKycLevel
 import net.primal.android.wallet.repository.NwcWalletRepository
 import net.primal.android.wallet.repository.WalletRepository
 import timber.log.Timber
@@ -55,17 +56,26 @@ class WalletSettingsViewModel @Inject constructor(
     private fun fetchWalletConnections() =
         viewModelScope.launch {
             try {
-                setState { copy(connectionsState = WalletSettingsContract.ConnectionsState.Loading) }
-                val response = nwcWalletRepository.getConnections(userId = activeAccountStore.activeUserId())
-                setState {
-                    copy(
-                        nwcConnectionsInfo = response.map { it.mapAsConnectedAppUi() },
-                        connectionsState = WalletSettingsContract.ConnectionsState.Loaded,
-                    )
+                activeAccountStore.activeUserAccount.collect { userAccount ->
+                    if (userAccount.primalWallet == null || userAccount.primalWallet.kycLevel == WalletKycLevel.None) {
+                        setState {
+                            copy(connectionsState = WalletSettingsContract.ConnectionsState.WalletNotActivatedError)
+                        }
+                        return@collect
+                    }
+
+                    setState { copy(connectionsState = WalletSettingsContract.ConnectionsState.Loading) }
+                    val response = nwcWalletRepository.getConnections(userId = activeAccountStore.activeUserId())
+                    setState {
+                        copy(
+                            nwcConnectionsInfo = response.map { it.mapAsConnectedAppUi() },
+                            connectionsState = WalletSettingsContract.ConnectionsState.Loaded,
+                        )
+                    }
                 }
             } catch (error: WssException) {
                 Timber.w(error)
-                setState { copy(connectionsState = WalletSettingsContract.ConnectionsState.Error) }
+                setState { copy(connectionsState = WalletSettingsContract.ConnectionsState.NetworkError) }
             }
         }
 

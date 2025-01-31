@@ -25,7 +25,8 @@ interface WalletSettingsContract {
 
     enum class ConnectionsState {
         Loading,
-        Error,
+        WalletNotActivatedError,
+        NetworkError,
         Loaded,
     }
 }
