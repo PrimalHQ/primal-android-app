@@ -99,21 +99,11 @@ class PremiumRepository @Inject constructor(
 
     suspend fun updateLegendProfile(
         userId: String,
-        styleId: String?,
-        customBadge: Boolean?,
-        avatarGlow: Boolean?,
-        inLeaderboard: Boolean?,
-        editedShoutout: String?,
+        updateProfileRequest: UpdatePrimalLegendProfileRequest,
     ) = withContext(dispatchers.io()) {
         premiumApi.updateLegendProfile(
             userId = userId,
-            updateProfileRequest = UpdatePrimalLegendProfileRequest(
-                styleId = styleId,
-                customBadge = customBadge,
-                avatarGlow = avatarGlow,
-                inLeaderboard = inLeaderboard,
-                editedShoutout = editedShoutout,
-            ),
+            updateProfileRequest = updateProfileRequest,
         )
     }
 

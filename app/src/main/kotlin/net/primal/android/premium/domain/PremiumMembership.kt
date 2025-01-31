@@ -1,7 +1,6 @@
 package net.primal.android.premium.domain
 
 import kotlinx.datetime.Clock
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable

@@ -343,7 +343,6 @@ private fun EditsInReviewBadge(modifier: Modifier = Modifier) {
         textAlign = TextAlign.Center,
         fontSize = 13.sp,
     )
-
 }
 
 @Composable
@@ -505,7 +504,6 @@ private fun SwitchSettings(
             checked = appearInLeaderboard,
             onCheckedChange = onAppearInLeaderboardChanged,
         )
-
     }
 }
 

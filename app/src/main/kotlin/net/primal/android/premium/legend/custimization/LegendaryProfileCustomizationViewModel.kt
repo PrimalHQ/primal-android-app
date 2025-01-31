@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
 import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationContract.UiEvent
 import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationContract.UiState
@@ -58,11 +59,13 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
             try {
                 premiumRepository.updateLegendProfile(
                     userId = activeAccountStore.activeUserId(),
-                    styleId = event.style?.id,
-                    avatarGlow = event.avatarGlow,
-                    customBadge = event.customBadge,
-                    inLeaderboard = event.inLeaderboard,
-                    editedShoutout = event.editedShoutout,
+                    updateProfileRequest = UpdatePrimalLegendProfileRequest(
+                        styleId = event.style?.id,
+                        avatarGlow = event.avatarGlow,
+                        customBadge = event.customBadge,
+                        inLeaderboard = event.inLeaderboard,
+                        editedShoutout = event.editedShoutout,
+                    ),
                 )
                 userRepository.fetchAndUpdateUserAccount(userId = activeAccountStore.activeUserId())
             } catch (error: WssException) {
