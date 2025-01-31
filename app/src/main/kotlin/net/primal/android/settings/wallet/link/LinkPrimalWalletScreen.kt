@@ -27,10 +27,10 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.DailyBudgetPicker
 import net.primal.android.core.compose.PrimalTopAppBar
-import net.primal.android.core.compose.WalletConnectionEditorHeader
-import net.primal.android.core.compose.WalletConnectionFooter
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.settings.wallet.WalletConnectionEditorHeader
+import net.primal.android.settings.wallet.WalletConnectionFooter
 import net.primal.android.settings.wallet.budgetOptions
 import net.primal.android.settings.wallet.connection.DailyBudgetBottomSheet
 import net.primal.android.settings.wallet.link.LinkPrimalWalletContract.SideEffect

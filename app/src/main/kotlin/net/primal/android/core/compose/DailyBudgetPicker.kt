@@ -23,9 +23,9 @@ import net.primal.android.theme.AppTheme
 
 @Composable
 fun DailyBudgetPicker(
-    modifier: Modifier = Modifier,
-    dailyBudget: Long?,
     onChangeDailyBudgetBottomSheetVisibility: (bottomSheetVisible: Boolean) -> Unit,
+    dailyBudget: Long?,
+    modifier: Modifier = Modifier,
 ) {
     ListItem(
         modifier = modifier

@@ -17,6 +17,7 @@ import net.primal.android.navigation.appIcon
 import net.primal.android.navigation.appName
 import net.primal.android.navigation.callback
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.settings.wallet.link.LinkPrimalWalletContract.Companion.DEFAULT_APP_NAME
 import net.primal.android.settings.wallet.link.LinkPrimalWalletContract.SideEffect
 import net.primal.android.settings.wallet.link.LinkPrimalWalletContract.UiEvent
 import net.primal.android.settings.wallet.link.LinkPrimalWalletContract.UiState
@@ -87,7 +88,7 @@ class LinkPrimalWalletViewModel @Inject constructor(
 
                 val response = nwcWalletRepository.createNewWalletConnection(
                     userId = activeAccountStore.activeUserId(),
-                    appName = state.value.appName ?: "External app",
+                    appName = state.value.appName ?: DEFAULT_APP_NAME,
                     dailyBudget = formattedDailyBudgetBtc,
                 )
 
