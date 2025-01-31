@@ -8,4 +8,8 @@ interface LegendLeaderboardContract {
         val leaderboardEntries: Map<LeaderboardOrderBy, List<LegendLeaderboardEntry>> = emptyMap(),
         val loading: Boolean = true,
     )
+
+    sealed class UiEvent {
+        data class FetchLeaderboardByOrder(val orderBy: LeaderboardOrderBy) : UiEvent()
+    }
 }

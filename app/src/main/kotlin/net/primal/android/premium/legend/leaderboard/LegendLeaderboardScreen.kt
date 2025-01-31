@@ -13,14 +13,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.R
+import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -44,6 +48,7 @@ fun LegendLeaderboardScreen(
 
     LegendLeaderboardScreen(
         state = uiState.value,
+        eventPublisher = viewModel::setEvent,
         onBackClick = onBackClick,
         onProfileClick = onProfileClick,
         onAboutLegendsClick = onAboutLegendsClick,
@@ -54,11 +59,17 @@ fun LegendLeaderboardScreen(
 @Composable
 fun LegendLeaderboardScreen(
     state: LegendLeaderboardContract.UiState,
+    eventPublisher: (LegendLeaderboardContract.UiEvent) -> Unit,
     onBackClick: () -> Unit,
     onAboutLegendsClick: () -> Unit,
     onProfileClick: (String) -> Unit,
 ) {
     val pagerState = rememberPagerState { PAGE_COUNT }
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }.collect {
+            eventPublisher(LegendLeaderboardContract.UiEvent.FetchLeaderboardByOrder(it.resolveOrderBy()))
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -73,13 +84,21 @@ fun LegendLeaderboardScreen(
             contentPadding = paddingValues,
             state = pagerState,
         ) { currentPage ->
-            LazyColumn {
-                val entries = state.leaderboardEntries[currentPage.resolveOrderBy()] ?: emptyList()
-                itemsIndexed(
-                    items = entries,
-                    key = { index, item -> item.userId },
-                ) { index, entry ->
-                    LegendLeaderboardItem(item = entry, index = index + 1, onClick = { onProfileClick(entry.userId) })
+            val entries = state.leaderboardEntries[currentPage.resolveOrderBy()] ?: emptyList()
+            if (state.loading && entries.isEmpty()) {
+                HeightAdjustableLoadingLazyListPlaceholder(height = 80.dp)
+            } else {
+                LazyColumn {
+                    itemsIndexed(
+                        items = entries,
+                        key = { index, item -> item.userId },
+                    ) { index, entry ->
+                        LegendLeaderboardItem(
+                            item = entry,
+                            index = index + 1,
+                            onClick = { onProfileClick(entry.userId) },
+                        )
+                    }
                 }
             }
         }
