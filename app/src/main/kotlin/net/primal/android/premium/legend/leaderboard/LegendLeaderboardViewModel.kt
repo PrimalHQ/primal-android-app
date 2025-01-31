@@ -29,7 +29,6 @@ class LegendLeaderboardViewModel @Inject constructor(
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
-        fetchLeaderboardByOrder(orderBy = LeaderboardOrderBy.LastDonation)
         observeEvents()
     }
 
@@ -37,7 +36,11 @@ class LegendLeaderboardViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.FetchLeaderboardByOrder -> fetchLeaderboardByOrder(it.orderBy)
+                    is UiEvent.FetchLeaderboardByOrder -> {
+                        if (state.value.leaderboardEntries[it.orderBy].isNullOrEmpty()) {
+                            fetchLeaderboardByOrder(it.orderBy)
+                        }
+                    }
                 }
             }
         }
@@ -46,10 +49,6 @@ class LegendLeaderboardViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(loading = true) }
             try {
-                if (!state.value.leaderboardEntries[orderBy].isNullOrEmpty()) {
-                    return@launch
-                }
-
                 val entries = premiumRepository.fetchLegendLeaderboard(orderBy = orderBy)
                 setState { copy(leaderboardEntries = leaderboardEntries + (orderBy to entries)) }
             } catch (error: WssException) {
