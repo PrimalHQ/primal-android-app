@@ -287,9 +287,7 @@ private fun ConnectedAppsContent(
 
         WalletSettingsContract.ConnectionsState.NetworkError -> {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
+                modifier = Modifier.fillMaxWidth().height(48.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -309,9 +307,7 @@ private fun ConnectedAppsContent(
 
         WalletSettingsContract.ConnectionsState.WalletNotActivatedError -> {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
+                modifier = Modifier.fillMaxWidth().height(48.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
