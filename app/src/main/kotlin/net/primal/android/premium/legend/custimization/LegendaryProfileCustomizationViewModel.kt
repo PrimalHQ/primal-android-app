@@ -11,10 +11,10 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
-import net.primal.android.premium.legend.LegendaryCustomization
-import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationContract.UiEvent
 import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationContract.UiState
+import net.primal.android.premium.legend.domain.LegendaryCustomization
+import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
