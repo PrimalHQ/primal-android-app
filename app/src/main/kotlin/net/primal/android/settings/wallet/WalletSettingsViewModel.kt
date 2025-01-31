@@ -21,6 +21,7 @@ import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.domain.parseNWCUrl
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.api.model.PrimalNwcConnectionInfo
+import net.primal.android.wallet.domain.WalletKycLevel
 import net.primal.android.wallet.repository.NwcWalletRepository
 import net.primal.android.wallet.repository.WalletRepository
 import timber.log.Timber
@@ -50,7 +51,16 @@ class WalletSettingsViewModel @Inject constructor(
         }
 
         observeEvents()
+        observeActiveUserAccount()
     }
+
+    private fun observeActiveUserAccount() =
+        viewModelScope.launch {
+            activeAccountStore.activeUserAccount.collect {
+                val isWalletActivated = it.primalWallet != null && it.primalWallet.kycLevel != WalletKycLevel.None
+                setState { copy(isPrimalWalletActivated = isWalletActivated) }
+            }
+        }
 
     private fun fetchWalletConnections() =
         viewModelScope.launch {

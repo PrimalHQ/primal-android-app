@@ -13,6 +13,7 @@ interface WalletSettingsContract {
         val spamThresholdAmountInSats: Long? = null,
         val nwcConnectionsInfo: List<NwcConnectionInfo> = emptyList(),
         val connectionsState: ConnectionsState = ConnectionsState.Loading,
+        val isPrimalWalletActivated: Boolean = false,
     )
 
     sealed class UiEvent {
