@@ -20,7 +20,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.R
@@ -117,7 +116,6 @@ private fun LeaderboardTopAppBar(
     Column {
         PrimalTopAppBar(
             title = stringResource(id = R.string.legend_leaderboard_title),
-            titleFontWeight = FontWeight.Normal,
             navigationIcon = PrimalIcons.ArrowBack,
             onNavigationIconClick = onBackClick,
             showDivider = false,
