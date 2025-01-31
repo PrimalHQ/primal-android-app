@@ -97,15 +97,13 @@ class PremiumRepository @Inject constructor(
             premiumApi.getOrdersHistory(userId = userId)
         }
 
-    suspend fun updateLegendProfile(
-        userId: String,
-        updateProfileRequest: UpdatePrimalLegendProfileRequest,
-    ) = withContext(dispatchers.io()) {
-        premiumApi.updateLegendProfile(
-            userId = userId,
-            updateProfileRequest = updateProfileRequest,
-        )
-    }
+    suspend fun updateLegendProfile(userId: String, updateProfileRequest: UpdatePrimalLegendProfileRequest) =
+        withContext(dispatchers.io()) {
+            premiumApi.updateLegendProfile(
+                userId = userId,
+                updateProfileRequest = updateProfileRequest,
+            )
+        }
 
     suspend fun fetchRecoveryContactsList(userId: String) =
         withContext(dispatchers.io()) {
