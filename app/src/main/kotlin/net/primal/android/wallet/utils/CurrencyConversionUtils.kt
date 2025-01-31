@@ -5,6 +5,7 @@ import java.math.MathContext
 import java.math.RoundingMode
 import java.util.*
 
+@Suppress("TooManyFunctions")
 @SuppressWarnings("ImplicitDefaultLocale")
 object CurrencyConversionUtils {
     private const val BTC_IN_SATS = 100_000_000.00
