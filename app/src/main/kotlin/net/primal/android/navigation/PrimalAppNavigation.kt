@@ -1268,6 +1268,10 @@ private fun NavGraphBuilder.premiumLegendCard(
 private fun NavGraphBuilder.premiumLegendLeaderboard(route: String, navController: NavController) =
     composable(
         route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
         val viewModel = hiltViewModel<LegendLeaderboardViewModel>()
 
