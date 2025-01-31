@@ -26,6 +26,7 @@ import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.utils.formatToDefaultDateFormat
+import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.premium.legend.model.LegendLeaderboardEntry
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
@@ -37,7 +38,6 @@ fun LegendLeaderboardItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val numberFormat = remember { NumberFormat.getNumberInstance() }
     val legendSince = item.legendaryCustomization?.legendSince?.let {
         Instant.ofEpochSecond(item.legendaryCustomization.legendSince)
     }
@@ -69,30 +69,12 @@ fun LegendLeaderboardItem(
             }
         },
         headlineContent = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                item.displayName?.let {
-                    NostrUserText(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(end = 4.dp),
-                        displayName = item.displayName,
-                        internetIdentifier = item.internetIdentifier,
-                        internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
-                        legendaryCustomization = item.legendaryCustomization,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-                Text(
-                    text = numberFormat.format(item.donatedBtc.toSats()),
-                    fontWeight = FontWeight.Bold,
-                    style = AppTheme.typography.bodyMedium,
-                )
-            }
+            DisplayNameAndSatsDonatedRow(
+                displayName = item.displayName,
+                internetIdentifier = item.internetIdentifier,
+                legendaryCustomization = item.legendaryCustomization,
+                satsDonated = item.donatedBtc.toSats(),
+            )
         },
         supportingContent = {
             Row(
@@ -119,3 +101,37 @@ fun LegendLeaderboardItem(
     PrimalDivider()
 }
 
+@Composable
+private fun DisplayNameAndSatsDonatedRow(
+    displayName: String?,
+    internetIdentifier: String?,
+    legendaryCustomization: LegendaryCustomization?,
+    satsDonated: Double,
+) {
+    val numberFormat = remember { NumberFormat.getNumberInstance() }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        displayName?.let {
+            NostrUserText(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 4.dp),
+                displayName = displayName,
+                internetIdentifier = internetIdentifier,
+                internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
+                legendaryCustomization = legendaryCustomization,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Text(
+            text = numberFormat.format(satsDonated),
+            fontWeight = FontWeight.Bold,
+            style = AppTheme.typography.bodyMedium,
+        )
+    }
+}
