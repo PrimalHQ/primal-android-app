@@ -80,16 +80,16 @@ fun LegendLeaderboardItem(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = if (legendSince == null) Arrangement.End else Arrangement.SpaceBetween,
             ) {
-                Text(
-                    text = legendSince?.let {
-                        stringResource(id = R.string.legend_leaderboard_since) + ": " +
-                            legendSince.formatToDefaultDateFormat(FormatStyle.MEDIUM)
-                    } ?: "",
-                    style = AppTheme.typography.bodySmall,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                )
+                legendSince?.let {
+                    Text(
+                        text = stringResource(id = R.string.legend_leaderboard_since) + ": " +
+                            legendSince.formatToDefaultDateFormat(FormatStyle.MEDIUM),
+                        style = AppTheme.typography.bodySmall,
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                    )
+                }
                 Text(
                     text = stringResource(id = R.string.legend_leaderboard_sats),
                     style = AppTheme.typography.bodySmall,
