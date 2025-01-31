@@ -1,4 +1,4 @@
-package net.primal.android.settings.wallet
+package net.primal.android.settings.wallet.settings.ui
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -37,6 +37,8 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.settings.wallet.settings.WalletSettingsContract
+import net.primal.android.settings.wallet.settings.WalletUiStateProvider
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.domain.NostrWalletConnect

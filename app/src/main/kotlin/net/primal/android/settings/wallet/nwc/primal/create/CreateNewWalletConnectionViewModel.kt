@@ -1,4 +1,4 @@
-package net.primal.android.settings.wallet.connection
+package net.primal.android.settings.wallet.nwc.primal.create
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,14 +11,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.settings.wallet.connection.NwcNewWalletConnectionContract.UiState
+import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiEvent
+import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.repository.NwcWalletRepository
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import timber.log.Timber
 
 @HiltViewModel
-class NwcNewWalletConnectionViewModel @Inject constructor(
+class CreateNewWalletConnectionViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val nwcWalletRepository: NwcWalletRepository,
 ) : ViewModel() {
@@ -27,8 +28,8 @@ class NwcNewWalletConnectionViewModel @Inject constructor(
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
 
-    private val events = MutableSharedFlow<NwcNewWalletConnectionContract.UiEvent>()
-    fun setEvent(event: NwcNewWalletConnectionContract.UiEvent) = viewModelScope.launch { events.emit(event) }
+    private val events = MutableSharedFlow<UiEvent>()
+    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
         observeEvents()
@@ -38,11 +39,11 @@ class NwcNewWalletConnectionViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is NwcNewWalletConnectionContract.UiEvent.AppNameChanged -> setState {
+                    is UiEvent.AppNameChanged -> setState {
                         copy(appName = it.appName)
                     }
 
-                    NwcNewWalletConnectionContract.UiEvent.CreateWalletConnection -> {
+                    UiEvent.CreateWalletConnection -> {
                         if (state.value.appName.isNotEmpty()) {
                             createNewWalletConnection(
                                 appName = state.value.appName,
@@ -51,7 +52,7 @@ class NwcNewWalletConnectionViewModel @Inject constructor(
                         }
                     }
 
-                    is NwcNewWalletConnectionContract.UiEvent.DailyBudgetChanged -> setState {
+                    is UiEvent.DailyBudgetChanged -> setState {
                         copy(dailyBudget = it.dailyBudget)
                     }
                 }
@@ -80,7 +81,6 @@ class NwcNewWalletConnectionViewModel @Inject constructor(
 
                 setState {
                     copy(
-                        secret = response.nwcConnectionUri,
                         nwcConnectionUri = response.nwcConnectionUri,
                         creatingSecret = false,
                     )

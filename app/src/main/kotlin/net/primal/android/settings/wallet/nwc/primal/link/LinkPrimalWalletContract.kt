@@ -1,14 +1,12 @@
-package net.primal.android.settings.wallet.link
+package net.primal.android.settings.wallet.nwc.primal.link
+
+import net.primal.android.settings.wallet.nwc.primal.PrimalNwcDefaults
 
 interface LinkPrimalWalletContract {
-    companion object {
-        const val DEFAULT_APP_NAME: String = "External app"
-    }
-
     data class UiState(
         val creatingSecret: Boolean = false,
         val nwcConnectionUri: String? = null,
-        val dailyBudget: Long? = 10_000,
+        val dailyBudget: Long? = PrimalNwcDefaults.DEFAULT_DAILY_BUDGET,
         val appName: String? = null,
         val appIcon: String? = null,
         val callback: String = "",
@@ -20,6 +18,6 @@ interface LinkPrimalWalletContract {
     }
 
     sealed class SideEffect {
-        data class UriReceived(val nwcConnectionUri: String?) : SideEffect()
+        data class UriReceived(val callbackUri: String) : SideEffect()
     }
 }

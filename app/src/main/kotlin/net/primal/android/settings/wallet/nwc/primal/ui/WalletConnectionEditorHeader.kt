@@ -1,6 +1,7 @@
-package net.primal.android.settings.wallet
+package net.primal.android.settings.wallet.nwc.primal.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -77,7 +78,8 @@ fun WalletConnectionEditorHeader(
                     model = appIcon,
                     modifier = Modifier
                         .clip(AppTheme.shapes.medium)
-                        .size(99.dp),
+                        .size(99.dp)
+                        .border(width = 0.5.dp, shape = AppTheme.shapes.medium, color = AppTheme.colorScheme.outline),
                     contentDescription = null,
                     contentScale = ContentScale.FillHeight,
                     loading = { NoteImageLoadingPlaceholder() },
