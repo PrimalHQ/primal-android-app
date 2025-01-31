@@ -176,15 +176,16 @@ private fun LegendaryProfileCustomizationScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
-                avatarRing = state.avatarLegendaryCustomization.avatarGlow == true,
+                avatarRing = state.avatarLegendaryCustomization.avatarGlow,
                 onAvatarRingChanged = { eventPublisher(UiEvent.ApplyCustomization(avatarGlow = it)) },
-                customBadge = state.avatarLegendaryCustomization.customBadge == true,
+                customBadge = state.avatarLegendaryCustomization.customBadge,
                 onCustomBadgeChanged = { eventPublisher(UiEvent.ApplyCustomization(customBadge = it)) },
                 appearInLeaderboard = state.avatarLegendaryCustomization.inLeaderboard == true,
                 onAppearInLeaderboardChanged = { eventPublisher(UiEvent.ApplyCustomization(inLeaderboard = it)) },
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+
             LegendCardShoutout(
                 modifier = Modifier
                     .fillMaxWidth()
