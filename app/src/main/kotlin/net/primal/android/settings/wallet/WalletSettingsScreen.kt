@@ -300,7 +300,7 @@ private fun ConnectedAppsContent(
                 Text(
                     text = when (isPrimalWalletActivated) {
                         true -> stringResource(R.string.settings_wallet_nwc_connections_error_unable_to_load_apps)
-                        else -> stringResource(R.string.settings_wallet_nwc_connections_error_wallet_not_activated)
+                        else -> stringResource(R.string.settings_wallet_nwc_connections_wallet_not_activated)
                     },
                     style = AppTheme.typography.titleMedium,
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
