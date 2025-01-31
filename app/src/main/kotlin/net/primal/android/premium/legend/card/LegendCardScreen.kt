@@ -90,7 +90,7 @@ private const val AVATAR_END_ROTATION = 0f
 @Composable
 fun LegendCardScreen(
     viewModel: LegendCardViewModel,
-    onBackClick: () -> Unit,
+    onClose: () -> Unit,
     onLegendSettingsClick: () -> Unit,
     onSeeOtherLegendsClick: () -> Unit,
     onBecomeLegendClick: () -> Unit,
@@ -99,7 +99,7 @@ fun LegendCardScreen(
 
     LegendCardScreen(
         state = uiState.value,
-        onBackClick = onBackClick,
+        onClose = onClose,
         onLegendSettingsClick = onLegendSettingsClick,
         onSeeOtherLegendsClick = onSeeOtherLegendsClick,
         onBecomeLegendClick = onBecomeLegendClick,
@@ -109,7 +109,7 @@ fun LegendCardScreen(
 @Composable
 fun LegendCardScreen(
     state: LegendCardContract.UiState,
-    onBackClick: () -> Unit,
+    onClose: () -> Unit,
     onLegendSettingsClick: () -> Unit,
     onSeeOtherLegendsClick: () -> Unit,
     onBecomeLegendClick: () -> Unit,
@@ -141,11 +141,11 @@ fun LegendCardScreen(
         ) {
             if (state.isActiveAccountCard) {
                 OptionsDropdownMenu(
-                    onBackClick = onBackClick,
+                    onBackClick = onClose,
                     onLegendSettingsClick = onLegendSettingsClick,
                 )
             } else {
-                CloseButtonRow(onDismissRequest = onBackClick)
+                CloseButtonRow(onDismissRequest = onClose)
             }
 
             state.profile?.let { profile ->

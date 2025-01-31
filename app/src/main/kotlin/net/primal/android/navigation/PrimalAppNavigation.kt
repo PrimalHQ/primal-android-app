@@ -1256,7 +1256,7 @@ private fun NavGraphBuilder.premiumLegendCard(
 
     LegendCardScreen(
         viewModel = viewModel,
-        onBackClick = { navController.navigateUp() },
+        onClose = { navController.navigateUp() },
         onSeeOtherLegendsClick = { navController.navigateToPremiumLegendLeaderboard() },
         onBecomeLegendClick = {
             navController.navigateToPremiumBuyPrimalLegend(fromOrigin = FROM_ORIGIN_PREMIUM_BADGE)
@@ -1280,7 +1280,7 @@ private fun NavGraphBuilder.premiumLegendLeaderboard(route: String, navControlle
 
         LegendLeaderboardScreen(
             viewModel = viewModel,
-            onBackClick = { navController.navigateUp() },
+            onClose = { navController.navigateUp() },
             onProfileClick = { navController.navigateToProfile(profileId = it) },
             onAboutLegendsClick = {},
         )

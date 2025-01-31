@@ -40,7 +40,7 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun LegendLeaderboardScreen(
     viewModel: LegendLeaderboardViewModel,
-    onBackClick: () -> Unit,
+    onClose: () -> Unit,
     onProfileClick: (String) -> Unit,
     onAboutLegendsClick: () -> Unit,
 ) {
@@ -49,7 +49,7 @@ fun LegendLeaderboardScreen(
     LegendLeaderboardScreen(
         state = uiState.value,
         eventPublisher = viewModel::setEvent,
-        onBackClick = onBackClick,
+        onClose = onClose,
         onProfileClick = onProfileClick,
         onAboutLegendsClick = onAboutLegendsClick,
     )
@@ -60,7 +60,7 @@ fun LegendLeaderboardScreen(
 fun LegendLeaderboardScreen(
     state: LegendLeaderboardContract.UiState,
     eventPublisher: (LegendLeaderboardContract.UiEvent) -> Unit,
-    onBackClick: () -> Unit,
+    onClose: () -> Unit,
     onAboutLegendsClick: () -> Unit,
     onProfileClick: (String) -> Unit,
 ) {
@@ -74,7 +74,7 @@ fun LegendLeaderboardScreen(
     Scaffold(
         topBar = {
             LeaderboardTopAppBar(
-                onBackClick = onBackClick,
+                onBackClick = onClose,
                 pagerState = pagerState,
                 onAboutLegendsClick = onAboutLegendsClick,
             )
