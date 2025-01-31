@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import java.time.Year
 import net.primal.android.R
 import net.primal.android.core.compose.NostrUserText
+import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalSliderThumb
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.UniversalAvatarThumbnail
@@ -118,15 +119,23 @@ fun BecomeLegendAmountStage(
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            if (state.arePaymentInstructionsAvailable() || state.isFetchingPaymentInstructions) {
-                SelectAmountSlider(
-                    state = state,
-                    eventPublisher = eventPublisher,
-                )
-            } else {
-                NoPaymentInstructionsColumn(
-                    onRetryClick = { eventPublisher(PremiumBecomeLegendContract.UiEvent.FetchPaymentInstructions) },
-                )
+            Column(
+                modifier = Modifier.height(200.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                if (state.arePaymentInstructionsAvailable()) {
+                    SelectAmountSlider(
+                        state = state,
+                        eventPublisher = eventPublisher,
+                    )
+                } else if (state.isFetchingPaymentInstructions) {
+                    PrimalLoadingSpinner()
+                } else {
+                    NoPaymentInstructionsColumn(
+                        onRetryClick = { eventPublisher(PremiumBecomeLegendContract.UiEvent.FetchPaymentInstructions) },
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(48.dp))
