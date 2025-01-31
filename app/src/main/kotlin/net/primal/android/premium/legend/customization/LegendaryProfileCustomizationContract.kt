@@ -1,4 +1,4 @@
-package net.primal.android.premium.legend.custimization
+package net.primal.android.premium.legend.customization
 
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.premium.domain.PremiumMembership
@@ -10,19 +10,19 @@ interface LegendaryProfileCustomizationContract {
     data class UiState(
         val avatarCdnImage: CdnImage? = null,
         val membership: PremiumMembership? = null,
-        val avatarLegendaryCustomization: LegendaryCustomization? = null,
+        val avatarLegendaryCustomization: LegendaryCustomization = LegendaryCustomization(),
         val applyingChanges: Boolean = false,
-    )
+    ) {
+        fun computeShoutout() = membership?.editedShoutout ?: avatarLegendaryCustomization.currentShoutout ?: ""
+    }
 
     sealed class UiEvent {
         data class ApplyCustomization(
-            val customBadge: Boolean,
-            val avatarGlow: Boolean,
-            val style: LegendaryStyle,
+            val customBadge: Boolean? = null,
+            val avatarGlow: Boolean? = null,
+            val inLeaderboard: Boolean? = null,
+            val style: LegendaryStyle? = null,
+            val editedShoutout: String? = null,
         ) : UiEvent()
-    }
-
-    sealed class SideEffect {
-        data object CustomizationSaved : SideEffect()
     }
 }

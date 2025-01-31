@@ -317,9 +317,16 @@
     <string name="premium_support_primal_become_a_legend_button_text">Become a Legend Now</string>
 
     <string name="premium_legend_profile_customization">Legendary Profile</string>
-    <string name="premium_legend_profile_customization_notice">Don’t want to stand out?\nIf you disable the custom badge and avatar ring,\nyour profile will look like any other profile on  Primal.</string>
+    <string name="premium_legend_profile_customization_card_shoutout">Legend Card Shoutout</string>
+    <string name="premium_legend_profile_customization_notice">Legend cards contain a personalized shoutout from\nPrimal to all our legends.</string>
+    <string name="premium_legend_profile_customization_notice_in_review">Your edits have been sent to primal for review. The\nupdated content should be live soon.</string>
+    <string name="premium_legend_profile_customization_suggest_edits">suggest edits</string>
+    <string name="premium_legend_profile_customization_edits_under_review">Edits under review</string>
+    <string name="premium_legend_profile_customization_cancel">Cancel</string>
+    <string name="premium_legend_profile_customization_send">Send</string>
     <string name="premium_legend_profile_custom_badge">Custom badge</string>
     <string name="premium_legend_profile_avatar_ring">Avatar ring</string>
+    <string name="premium_legend_profile_appear_in_leaderboard">Appear in leaderboard</string>
     <string name="premium_legend_profile_apply_button">Apply</string>
 
     <string name="premium_legend_card_legend_since">Legend since</string>

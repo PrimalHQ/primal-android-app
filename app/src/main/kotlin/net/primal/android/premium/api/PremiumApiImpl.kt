@@ -3,6 +3,7 @@ package net.primal.android.premium.api
 import javax.inject.Inject
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
+import net.primal.android.core.serialization.json.NostrJsonImplicitNulls
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.di.PrimalWalletApiClient
@@ -216,7 +217,7 @@ class PremiumApiImpl @Inject constructor(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
                             userId = userId,
-                            content = NostrJson.encodeToString(updateProfileRequest),
+                            content = NostrJsonImplicitNulls.encodeToString(updateProfileRequest),
                         ),
                     ),
                 ),

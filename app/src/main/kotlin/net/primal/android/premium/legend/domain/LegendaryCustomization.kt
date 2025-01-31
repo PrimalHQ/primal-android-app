@@ -8,6 +8,7 @@ data class LegendaryCustomization(
     val legendaryStyle: LegendaryStyle? = null,
     val legendSince: Long? = null,
     val currentShoutout: String? = null,
+    val inLeaderboard: Boolean? = null,
 )
 
 fun PrimalLegendProfile.asLegendaryCustomization() =
@@ -17,4 +18,5 @@ fun PrimalLegendProfile.asLegendaryCustomization() =
         legendaryStyle = LegendaryStyle.valueById(id = styleId),
         legendSince = legendSince,
         currentShoutout = currentShoutout,
+        inLeaderboard = inLeaderboard,
     )

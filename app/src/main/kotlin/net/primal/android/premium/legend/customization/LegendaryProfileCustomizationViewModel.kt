@@ -1,20 +1,19 @@
-package net.primal.android.premium.legend.custimization
+package net.primal.android.premium.legend.customization
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationContract.SideEffect
-import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationContract.UiEvent
-import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationContract.UiState
+import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
+import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationContract.UiEvent
+import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationContract.UiState
+import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.profile.repository.ProfileRepository
@@ -37,10 +36,6 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
-    private val _effect: Channel<SideEffect> = Channel()
-    val effect = _effect.receiveAsFlow()
-    private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effect.send(effect) }
-
     init {
         observeActiveAccount()
         observeProfile()
@@ -61,19 +56,23 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
     private fun applyCustomization(event: UiEvent.ApplyCustomization) {
         viewModelScope.launch {
             setState { copy(applyingChanges = true) }
+            event.optimisticallyUpdateCustomization()
 
             try {
                 premiumRepository.updateLegendProfile(
                     userId = activeAccountStore.activeUserId(),
-                    styleId = event.style.id,
-                    avatarGlow = event.avatarGlow,
-                    customBadge = event.customBadge,
+                    updateProfileRequest = UpdatePrimalLegendProfileRequest(
+                        styleId = event.style?.id,
+                        avatarGlow = event.avatarGlow,
+                        customBadge = event.customBadge,
+                        inLeaderboard = event.inLeaderboard,
+                        editedShoutout = event.editedShoutout,
+                    ),
                 )
-                userRepository.fetchAndUpdateUserAccount(userId = activeAccountStore.activeUserId())
-                setEffect(SideEffect.CustomizationSaved)
             } catch (error: WssException) {
                 Timber.e(error)
             } finally {
+                runCatching { userRepository.fetchAndUpdateUserAccount(userId = activeAccountStore.activeUserId()) }
                 setState { copy(applyingChanges = false) }
             }
         }
@@ -97,7 +96,7 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
                 setState {
                     copy(
                         avatarLegendaryCustomization = it.metadata?.primalPremiumInfo
-                            ?.legendProfile?.asLegendaryCustomization(),
+                            ?.legendProfile?.asLegendaryCustomization() ?: LegendaryCustomization(),
                     )
                 }
             }
@@ -107,6 +106,20 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
     private fun requestProfileUpdate() {
         viewModelScope.launch {
             profileRepository.requestProfileUpdate(profileId = activeAccountStore.activeUserId())
+        }
+    }
+
+    private fun UiEvent.ApplyCustomization.optimisticallyUpdateCustomization() {
+        val data = this
+        setState {
+            copy(
+                avatarLegendaryCustomization = avatarLegendaryCustomization.copy(
+                    avatarGlow = data.avatarGlow ?: avatarLegendaryCustomization.avatarGlow,
+                    customBadge = data.customBadge ?: avatarLegendaryCustomization.customBadge,
+                    legendaryStyle = data.style ?: avatarLegendaryCustomization.legendaryStyle,
+                    inLeaderboard = data.inLeaderboard ?: avatarLegendaryCustomization.inLeaderboard,
+                ),
+            )
         }
     }
 }
