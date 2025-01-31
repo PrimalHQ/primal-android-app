@@ -1,4 +1,4 @@
-package net.primal.android.settings.wallet.connection
+package net.primal.android.settings.wallet.nwc.primal.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -37,12 +37,12 @@ import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NwcDailyBudgetBottomSheet(
+fun DailyBudgetBottomSheet(
     initialDailyBudget: Long?,
+    budgetOptions: List<Long?>,
     onDismissRequest: () -> Unit,
     onBudgetSelected: (Long?) -> Unit,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-    budgetOptions: List<Long?>,
 ) {
     val scope = rememberCoroutineScope()
 

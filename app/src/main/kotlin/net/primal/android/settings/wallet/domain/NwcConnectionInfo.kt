@@ -1,4 +1,4 @@
-package net.primal.android.settings.wallet.model
+package net.primal.android.settings.wallet.domain
 
 data class NwcConnectionInfo(
     val nwcPubkey: String,

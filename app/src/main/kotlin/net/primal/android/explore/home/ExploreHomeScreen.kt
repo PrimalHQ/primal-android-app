@@ -77,7 +77,7 @@ import net.primal.android.explore.home.zaps.ExploreZaps
 import net.primal.android.feeds.domain.exploreMediaFeedSpec
 import net.primal.android.notes.feed.grid.MediaFeedGrid
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
-import net.primal.android.premium.legend.LegendaryCustomization
+import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 

@@ -1,6 +1,6 @@
-package net.primal.android.settings.wallet
+package net.primal.android.settings.wallet.settings
 
-import net.primal.android.settings.wallet.model.NwcConnectionInfo
+import net.primal.android.settings.wallet.domain.NwcConnectionInfo
 import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.WalletPreference
 
@@ -13,6 +13,7 @@ interface WalletSettingsContract {
         val spamThresholdAmountInSats: Long? = null,
         val nwcConnectionsInfo: List<NwcConnectionInfo> = emptyList(),
         val connectionsState: ConnectionsState = ConnectionsState.Loading,
+        val isPrimalWalletActivated: Boolean = false,
     )
 
     sealed class UiEvent {

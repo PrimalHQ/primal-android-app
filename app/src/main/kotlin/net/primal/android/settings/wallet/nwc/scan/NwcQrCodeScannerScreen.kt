@@ -1,4 +1,4 @@
-package net.primal.android.settings.wallet.nwc
+package net.primal.android.settings.wallet.nwc.scan
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
@@ -31,7 +31,7 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.profile.qr.ui.ProfileQrCodeScanner
-import net.primal.android.settings.wallet.nwc.NwcQrCodeScannerContract.UiEvent
+import net.primal.android.settings.wallet.nwc.scan.NwcQrCodeScannerContract.UiEvent
 import net.primal.android.theme.AppTheme
 
 @Composable

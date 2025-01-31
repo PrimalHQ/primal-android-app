@@ -2,7 +2,7 @@ package net.primal.android.feeds.dvm.ui
 
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.feeds.domain.DvmFeed
-import net.primal.android.premium.legend.LegendaryCustomization
+import net.primal.android.premium.legend.domain.LegendaryCustomization
 
 data class DvmFeedUi(
     val data: DvmFeed,

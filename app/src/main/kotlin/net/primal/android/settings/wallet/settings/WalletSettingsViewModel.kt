@@ -1,4 +1,4 @@
-package net.primal.android.settings.wallet
+package net.primal.android.settings.wallet.settings
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -12,15 +12,16 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.navigation.nwcUrl
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.settings.wallet.WalletSettingsContract.UiEvent
-import net.primal.android.settings.wallet.WalletSettingsContract.UiState
-import net.primal.android.settings.wallet.model.NwcConnectionInfo
+import net.primal.android.settings.wallet.domain.NwcConnectionInfo
+import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEvent
+import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.NWCParseException
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.domain.parseNWCUrl
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.api.model.PrimalNwcConnectionInfo
+import net.primal.android.wallet.domain.WalletKycLevel
 import net.primal.android.wallet.repository.NwcWalletRepository
 import net.primal.android.wallet.repository.WalletRepository
 import timber.log.Timber
@@ -50,7 +51,16 @@ class WalletSettingsViewModel @Inject constructor(
         }
 
         observeEvents()
+        observeActiveUserAccount()
     }
+
+    private fun observeActiveUserAccount() =
+        viewModelScope.launch {
+            activeAccountStore.activeUserAccount.collect {
+                val isWalletActivated = it.primalWallet != null && it.primalWallet.kycLevel != WalletKycLevel.None
+                setState { copy(isPrimalWalletActivated = isWalletActivated) }
+            }
+        }
 
     private fun fetchWalletConnections() =
         viewModelScope.launch {

@@ -315,7 +315,7 @@
     <string name="premium_support_primal_become_a_legend_title">Become a Legend</string>
     <string name="premium_support_primal_become_a_legend_description">Donate $1.000 or more to gain permanent membership and exclusive perks!</string>
     <string name="premium_support_primal_become_a_legend_button_text">Become a Legend Now</string>
-    
+
     <string name="premium_legend_profile_customization">Legendary Profile</string>
     <string name="premium_legend_profile_customization_card_shoutout">Legend Card Shoutout</string>
     <string name="premium_legend_profile_customization_notice">Legend cards contain a personalized shoutout from\nPrimal to all our legends.</string>
@@ -334,6 +334,15 @@
     <string name="premium_legend_card_button_become_a_legend">Become a Legend</string>
     <string name="premium_legend_card_dropdown_close">Close</string>
     <string name="premium_legend_card_dropdown_legend_settings">Legend settings</string>
+
+    <string name="premium_legend_leaderboard_title">Primal Legends</string>
+    <string name="premium_legend_leaderboard_latest_tab">Latest</string>
+    <string name="premium_legend_leaderboard_contribution_tab">Contribution</string>
+    <string name="premium_legend_leaderboard_about_legends">About Legends</string>
+    <string name="premium_legend_leaderboard_since">Since</string>
+    <string name="premium_legend_leaderboard_sats">sats</string>
+    <string name="premium_legend_leaderboard_no_content">Unable to load leaderboard.\nPlease try again.</string>
+
 
     <string name="feed_reposted_suffix">reposted</string>
     <string name="feed_see_more">See more…</string>
@@ -670,7 +679,7 @@
     <string name="media_gallery_toast_file_saved">File saved.</string>
     <string name="media_gallery_retry_save">Retry</string>
     <string name="media_gallery_error_photo_not_saved">Unable to save photo. Please try again.</string>
-    
+
     <string name="media_item_saved">Media saved.</string>
     <string name="media_item_error_on_save_message">Unable to save media. Please try again.</string>
     <string name="media_item_error_on_save_try_again">Retry</string>
@@ -717,6 +726,7 @@
     <string name="settings_wallet_nwc_connections_create_new_text_button">Create a new wallet connection</string>
     <string name="settings_wallet_nwc_connections_retry">Retry</string>
     <string name="settings_wallet_nwc_connections_error_unable_to_load_apps">Unable to load apps.</string>
+    <string name="settings_wallet_nwc_connections_wallet_not_activated">Primal wallet needs to be activated first.</string>
     <string name="settings_wallet_hide_transactions_below_hint">You can choose to hide small transactions to avoid spam in your transaction list</string>
     <string name="settings_wallet_hide_transactions_below_edit_title">Edit amount</string>
     <string name="settings_wallet_ln_address">Nostr lightning address</string>
@@ -734,7 +744,9 @@
     <string name="settings_wallet_new_nwc_connection_copy_nwc_string_button">Copy NWC String</string>
     <string name="settings_wallet_new_nwc_connection_done_button">Done</string>
     <string name="settings_wallet_new_nwc_connection_connection_created_text">Connection created</string>
-
+    <string name="settings_wallet_link_primal_wallet_title">Link Primal Wallet</string>
+    <string name="settings_wallet_link_external_app_request">An external app “%1$s” is requesting access to your Primal Wallet. If you wish to allow this, click “Give Wallet Access” below.</string>
+    <string name="settings_wallet_link_give_wallet_access_button">Give Wallet Access</string>
 
     <string name="settings_wallet_nwc_qr_code_scan_title">Connect NWC Wallet</string>
     <string name="settings_wallet_nwc_qr_code_scan_hint">Scan the NWC\nconnection QR code</string>

@@ -2,6 +2,8 @@ package net.primal.android.premium.api
 
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.premium.api.model.CancelMembershipRequest
+import net.primal.android.premium.api.model.LeaderboardOrderBy
+import net.primal.android.premium.api.model.LegendLeaderboardResponse
 import net.primal.android.premium.api.model.LegendPaymentInstructionsResponse
 import net.primal.android.premium.api.model.MembershipStatusResponse
 import net.primal.android.premium.api.model.NameAvailableResponse
@@ -33,6 +35,8 @@ interface PremiumApi {
     suspend fun getOrdersHistory(userId: String): List<PremiumPurchaseOrder>
 
     suspend fun updateLegendProfile(userId: String, updateProfileRequest: UpdatePrimalLegendProfileRequest)
+
+    suspend fun getLegendLeaderboard(orderBy: LeaderboardOrderBy, limit: Int = 1000): LegendLeaderboardResponse
 
     suspend fun getRecoveryContactsList(userId: String): List<NostrEvent>
 }

@@ -1,4 +1,4 @@
-package net.primal.android.settings.wallet.nwc
+package net.primal.android.settings.wallet.nwc.scan
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

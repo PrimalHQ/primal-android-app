@@ -10,7 +10,7 @@ import net.primal.android.core.utils.parseHashtags
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
-import net.primal.android.premium.legend.asLegendaryCustomization
+import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.profile.domain.PrimalLegendProfile
 
 @Serializable
