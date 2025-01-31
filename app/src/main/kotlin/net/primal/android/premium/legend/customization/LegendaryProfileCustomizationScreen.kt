@@ -1,4 +1,4 @@
-package net.primal.android.premium.legend.custimization
+package net.primal.android.premium.legend.customization
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -62,7 +62,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.LegendaryProfileNoCustomization
 import net.primal.android.premium.domain.PremiumMembership
-import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationContract.UiEvent
+import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationContract.UiEvent
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.premium.ui.PremiumBadge

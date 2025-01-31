@@ -1,4 +1,4 @@
-package net.primal.android.premium.legend.custimization
+package net.primal.android.premium.legend.customization
 
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.premium.domain.PremiumMembership

@@ -95,8 +95,8 @@ import net.primal.android.premium.legend.become.PremiumBecomeLegendScreen
 import net.primal.android.premium.legend.become.PremiumBecomeLegendViewModel
 import net.primal.android.premium.legend.card.LegendCardScreen
 import net.primal.android.premium.legend.card.LegendCardViewModel
-import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationScreen
-import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationViewModel
+import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationScreen
+import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationViewModel
 import net.primal.android.premium.legend.leaderboard.LegendLeaderboardScreen
 import net.primal.android.premium.legend.leaderboard.LegendLeaderboardViewModel
 import net.primal.android.premium.manage.PremiumManageContract

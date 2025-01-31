@@ -1,4 +1,4 @@
-package net.primal.android.premium.legend.custimization
+package net.primal.android.premium.legend.customization
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
-import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationContract.UiEvent
-import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationContract.UiState
+import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationContract.UiEvent
+import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationContract.UiState
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.repository.PremiumRepository
