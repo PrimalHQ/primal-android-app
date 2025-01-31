@@ -8,8 +8,8 @@ import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.notes.feed.model.EventStatsUi
-import net.primal.android.premium.legend.LegendaryCustomization
-import net.primal.android.premium.legend.asLegendaryCustomization
+import net.primal.android.premium.legend.domain.LegendaryCustomization
+import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.stats.ui.EventZapUiModel
 import net.primal.android.stats.ui.asEventZapUiModel
 

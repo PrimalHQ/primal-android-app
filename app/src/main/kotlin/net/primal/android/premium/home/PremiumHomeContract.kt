@@ -3,7 +3,7 @@ package net.primal.android.premium.home
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.premium.domain.MembershipError
 import net.primal.android.premium.domain.PremiumMembership
-import net.primal.android.premium.legend.LegendaryCustomization
+import net.primal.android.premium.legend.domain.LegendaryCustomization
 
 interface PremiumHomeContract {
 

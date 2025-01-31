@@ -45,8 +45,8 @@ import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.formatNip05Identifier
-import net.primal.android.premium.legend.LegendaryCustomization
-import net.primal.android.premium.legend.LegendaryStyle
+import net.primal.android.premium.legend.domain.LegendaryCustomization
+import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.details.ui.model.PremiumProfileDataUi
 import net.primal.android.profile.details.ui.model.shouldShowPremiumBadge

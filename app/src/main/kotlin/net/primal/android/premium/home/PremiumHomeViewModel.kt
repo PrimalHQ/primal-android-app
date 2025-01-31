@@ -14,7 +14,7 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.domain.MembershipError
 import net.primal.android.premium.home.PremiumHomeContract.UiEvent
 import net.primal.android.premium.home.PremiumHomeContract.UiState
-import net.primal.android.premium.legend.asLegendaryCustomization
+import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.repository.ProfileRepository

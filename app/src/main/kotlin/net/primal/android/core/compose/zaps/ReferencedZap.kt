@@ -27,7 +27,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
-import net.primal.android.premium.legend.asLegendaryCustomization
+import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.profile.domain.PrimalLegendProfile
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme

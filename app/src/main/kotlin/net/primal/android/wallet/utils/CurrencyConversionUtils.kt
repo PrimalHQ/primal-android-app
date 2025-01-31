@@ -5,6 +5,7 @@ import java.math.MathContext
 import java.math.RoundingMode
 import java.util.*
 
+@Suppress("TooManyFunctions")
 @SuppressWarnings("ImplicitDefaultLocale")
 object CurrencyConversionUtils {
     private const val BTC_IN_SATS = 100_000_000.00
@@ -16,6 +17,14 @@ object CurrencyConversionUtils {
     fun Long.toBtc() = this.toULong().toBtc()
 
     fun BigDecimal.toBtc() = this.toLong().toBtc()
+
+    fun Double.toSats() = this * BTC_IN_SATS
+
+    fun ULong.toSats() = this.toDouble().toSats()
+
+    fun Int.toSats() = this.toDouble().toSats()
+
+    fun Long.toSats() = this.toDouble().toSats()
 
     fun String.toSats(): ULong = this.toBigDecimal().toSats()
 

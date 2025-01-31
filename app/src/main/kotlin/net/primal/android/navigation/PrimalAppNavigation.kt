@@ -97,6 +97,8 @@ import net.primal.android.premium.legend.card.LegendCardScreen
 import net.primal.android.premium.legend.card.LegendCardViewModel
 import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationScreen
 import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationViewModel
+import net.primal.android.premium.legend.leaderboard.LegendLeaderboardScreen
+import net.primal.android.premium.legend.leaderboard.LegendLeaderboardViewModel
 import net.primal.android.premium.manage.PremiumManageContract
 import net.primal.android.premium.manage.PremiumManageScreen
 import net.primal.android.premium.manage.PremiumManageViewModel
@@ -300,6 +302,7 @@ private fun NavController.navigateToPremiumBuyPrimalLegend(fromOrigin: String? =
 private fun NavController.navigateToPremiumLegendaryProfile() = navigate(route = "premium/legend/profile")
 private fun NavController.navigateToPremiumLegendCard(profileId: String) =
     navigate(route = "premium/legend/card/$profileId")
+private fun NavController.navigateToPremiumLegendLeaderboard() = navigate(route = "premium/legend/leaderboard")
 
 private fun NavController.navigateToPremiumManage() = navigate(route = "premium/manage")
 private fun NavController.navigateToPremiumMediaManagement() = navigate(route = "premium/manage/media")
@@ -593,6 +596,8 @@ fun SharedTransitionScope.PrimalAppNavigation() {
             ),
             navController = navController,
         )
+
+        premiumLegendLeaderboard(route = "premium/legend/leaderboard", navController = navController)
 
         premiumManage(route = "premium/manage", navController = navController)
 
@@ -1261,16 +1266,35 @@ private fun NavGraphBuilder.premiumLegendCard(
 
     LegendCardScreen(
         viewModel = viewModel,
-        onBackClick = { navController.navigateUp() },
-        onSeeOtherLegendsClick = {},
+        onClose = { navController.navigateUp() },
+        onSeeOtherLegendsClick = { navController.navigateToPremiumLegendLeaderboard() },
         onBecomeLegendClick = {
             navController.navigateToPremiumBuyPrimalLegend(fromOrigin = FROM_ORIGIN_PREMIUM_BADGE)
         },
-        onLegendSettingsClick = {
-            navController.navigateToPremiumLegendaryProfile()
-        },
+        onLegendSettingsClick = { navController.navigateToPremiumLegendaryProfile() },
     )
 }
+
+private fun NavGraphBuilder.premiumLegendLeaderboard(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        val viewModel = hiltViewModel<LegendLeaderboardViewModel>()
+
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+
+        LegendLeaderboardScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+            onProfileClick = { navController.navigateToProfile(profileId = it) },
+            onAboutLegendsClick = {},
+        )
+    }
 
 private fun NavGraphBuilder.premiumManage(route: String, navController: NavController) =
     composable(

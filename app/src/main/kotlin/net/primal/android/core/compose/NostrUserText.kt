@@ -41,8 +41,8 @@ import net.primal.android.core.compose.icons.primaliconpack.PrimalBadgeTeal
 import net.primal.android.core.compose.icons.primaliconpack.Verified
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.utils.isPrimalIdentifier
-import net.primal.android.premium.legend.LegendaryCustomization
-import net.primal.android.premium.legend.LegendaryStyle
+import net.primal.android.premium.legend.domain.LegendaryCustomization
+import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 

@@ -40,12 +40,12 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.premium.legend.LegendaryCustomization
-import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.premium.legend.become.BecomeLegendBottomBarButton
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.UiState
 import net.primal.android.premium.legend.become.PrimalLegendAmount
+import net.primal.android.premium.legend.domain.LegendaryCustomization
+import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.premium.ui.PremiumBadge
 import net.primal.android.theme.AppTheme
 

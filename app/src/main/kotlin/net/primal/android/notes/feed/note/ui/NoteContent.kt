@@ -46,7 +46,7 @@ import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.notes.feed.note.ui.attachment.NoteAttachments
 import net.primal.android.notes.feed.note.ui.events.InvoicePayClickEvent
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
-import net.primal.android.premium.legend.asLegendaryCustomization
+import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 

@@ -4,8 +4,8 @@ import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.core.utils.usernameUiFriendly
-import net.primal.android.premium.legend.LegendaryCustomization
-import net.primal.android.premium.legend.asLegendaryCustomization
+import net.primal.android.premium.legend.domain.LegendaryCustomization
+import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.stats.db.EventZap
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 

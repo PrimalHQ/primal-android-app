@@ -29,11 +29,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.premium.legend.LegendaryCustomization
+import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -42,6 +43,7 @@ import net.primal.android.theme.AppTheme
 fun PrimalTopAppBar(
     modifier: Modifier = Modifier,
     title: String = "",
+    titleFontWeight: FontWeight? = null,
     subtitle: String? = null,
     titleTrailingIcon: ImageVector? = null,
     textColor: Color = LocalContentColor.current,
@@ -121,6 +123,7 @@ fun PrimalTopAppBar(
                                 Modifier
                             }
                         },
+                        fontWeight = titleFontWeight,
                         textAlign = TextAlign.Center,
                         text = title,
                         color = textColor,

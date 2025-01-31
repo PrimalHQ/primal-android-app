@@ -1,8 +1,8 @@
 package net.primal.android.profile.details.ui.model
 
 import kotlinx.datetime.Clock
-import net.primal.android.premium.legend.LegendaryCustomization
-import net.primal.android.premium.legend.LegendaryStyle
+import net.primal.android.premium.legend.domain.LegendaryCustomization
+import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.premium.utils.isPremiumTier
 import net.primal.android.premium.utils.isPrimalLegendTier
 
