@@ -1,12 +1,12 @@
 package net.primal.android.premium.legend.leaderboard
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -17,7 +17,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import kotlinx.coroutines.launch
+import net.primal.android.R
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -25,8 +29,9 @@ import net.primal.android.premium.api.model.LeaderboardOrderBy
 import net.primal.android.premium.legend.leaderboard.ui.CONTRIBUTION_INDEX
 import net.primal.android.premium.legend.leaderboard.ui.LATEST_INDEX
 import net.primal.android.premium.legend.leaderboard.ui.LeaderboardTabs
+import net.primal.android.premium.legend.leaderboard.ui.LegendLeaderboardItem
 import net.primal.android.premium.legend.leaderboard.ui.PAGE_COUNT
-import net.primal.android.premium.legend.model.LegendLeaderboardEntry
+import net.primal.android.theme.AppTheme
 
 @Composable
 fun LegendLeaderboardScreen(
@@ -53,56 +58,28 @@ fun LegendLeaderboardScreen(
     onAboutLegendsClick: () -> Unit,
     onProfileClick: (String) -> Unit,
 ) {
+    val pagerState = rememberPagerState { PAGE_COUNT }
+
     Scaffold(
         topBar = {
-            PrimalTopAppBar(
-                title = "Primal Legends",
-                navigationIcon = PrimalIcons.ArrowBack,
-                onNavigationIconClick = onBackClick,
-                showDivider = false,
+            LeaderboardTopAppBar(
+                onBackClick = onBackClick,
+                pagerState = pagerState,
+                onAboutLegendsClick = onAboutLegendsClick,
             )
         },
     ) { paddingValues ->
-        val coroutineScope = rememberCoroutineScope()
-        val pagerState = rememberPagerState { PAGE_COUNT }
-
-        Row(
-            modifier = Modifier.padding(paddingValues),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            LeaderboardTabs(
-                selectedTabIndex = pagerState.currentPage,
-                onLatestClick = {
-                    coroutineScope.launch { pagerState.animateScrollToPage(page = LATEST_INDEX) }
-                },
-                onContributionClick = {
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(page = CONTRIBUTION_INDEX)
-                    }
-                },
-            )
-
-            TextButton(
-                modifier = Modifier.weight(1f),
-                onClick = onAboutLegendsClick,
-            ) {
-                Text(text = "About Legends")
-            }
-        }
-
         HorizontalPager(
+            contentPadding = paddingValues,
             state = pagerState,
         ) { currentPage ->
             LazyColumn {
                 val entries = state.leaderboardEntries[currentPage.resolveOrderBy()] ?: emptyList()
-                items(
+                itemsIndexed(
                     items = entries,
-                    key = { it.userId },
-                ) { entry ->
-                    LegendLeaderboardItem(
-                        item = entry,
-                    )
+                    key = { index, item -> item.userId },
+                ) { index, entry ->
+                    LegendLeaderboardItem(item = entry, index = index + 1, onClick = { onProfileClick(entry.userId) })
                 }
             }
         }
@@ -110,12 +87,47 @@ fun LegendLeaderboardScreen(
 }
 
 @Composable
-fun LegendLeaderboardItem(
-    modifier: Modifier = Modifier,
-    item: LegendLeaderboardEntry,
+@OptIn(ExperimentalMaterial3Api::class)
+private fun LeaderboardTopAppBar(
+    onBackClick: () -> Unit,
+    pagerState: PagerState,
+    onAboutLegendsClick: () -> Unit,
 ) {
-    Text(text = item.displayName ?: "no")
+    val coroutineScope = rememberCoroutineScope()
 
+    Column {
+        PrimalTopAppBar(
+            title = stringResource(id = R.string.legend_leaderboard_title),
+            titleFontWeight = FontWeight.Normal,
+            navigationIcon = PrimalIcons.ArrowBack,
+            onNavigationIconClick = onBackClick,
+            showDivider = false,
+        )
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            LeaderboardTabs(
+                modifier = Modifier.weight(1f),
+                selectedTabIndex = pagerState.currentPage,
+                onLatestClick = { coroutineScope.launch { pagerState.animateScrollToPage(page = LATEST_INDEX) } },
+                onContributionClick = {
+                    coroutineScope.launch { pagerState.animateScrollToPage(page = CONTRIBUTION_INDEX) }
+                },
+            )
+
+            TextButton(
+                onClick = onAboutLegendsClick,
+            ) {
+                Text(
+                    text = stringResource(id = R.string.legend_leaderboard_about_legends),
+                    style = AppTheme.typography.bodySmall,
+                )
+            }
+        }
+
+        PrimalDivider()
+    }
 }
 
 private fun Int.resolveOrderBy() =
