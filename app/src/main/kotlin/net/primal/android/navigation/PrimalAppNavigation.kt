@@ -75,7 +75,7 @@ import net.primal.android.messages.conversation.MessageConversationListViewModel
 import net.primal.android.messages.conversation.MessageListScreen
 import net.primal.android.messages.conversation.create.NewConversationScreen
 import net.primal.android.navigation.deeplinking.DeepLink
-import net.primal.android.navigation.deeplinking.ext.parseDeepLinkOrNull
+import net.primal.android.navigation.deeplinking.parseDeepLinkOrNull
 import net.primal.android.navigation.splash.SplashContract
 import net.primal.android.navigation.splash.SplashScreen
 import net.primal.android.navigation.splash.SplashViewModel
@@ -416,6 +416,7 @@ fun SharedTransitionScope.PrimalAppNavigation() {
                             navController.popBackStack()
                             navController.navigateToThread(noteId = deepLink.noteId)
                         }
+
                         is DeepLink.Profile -> {
                             navController.popBackStack()
                             navController.navigateToProfile(profileId = deepLink.pubkey)
@@ -427,6 +428,15 @@ fun SharedTransitionScope.PrimalAppNavigation() {
                                 nwcUrl = withContext(Dispatchers.IO) {
                                     URLEncoder.encode(url, Charsets.UTF_8.name())
                                 },
+                            )
+                        }
+
+                        is DeepLink.PrimalNWC -> {
+                            navController.popBackStack()
+                            navController.navigateToLinkPrimalWallet(
+                                callback = deepLink.primalWalletNwc.callback,
+                                appName = deepLink.primalWalletNwc.appName,
+                                appIcon = deepLink.primalWalletNwc.appIcon,
                             )
                         }
 

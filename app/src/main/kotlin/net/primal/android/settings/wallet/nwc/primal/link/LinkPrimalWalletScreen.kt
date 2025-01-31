@@ -1,4 +1,4 @@
-package net.primal.android.settings.wallet.link
+package net.primal.android.settings.wallet.nwc.primal.link
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -21,33 +21,42 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.DailyBudgetPicker
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.settings.wallet.WalletConnectionEditorHeader
-import net.primal.android.settings.wallet.WalletConnectionFooter
-import net.primal.android.settings.wallet.budgetOptions
-import net.primal.android.settings.wallet.connection.DailyBudgetBottomSheet
-import net.primal.android.settings.wallet.link.LinkPrimalWalletContract.SideEffect
-import net.primal.android.settings.wallet.link.LinkPrimalWalletContract.UiEvent
-import net.primal.android.settings.wallet.link.LinkPrimalWalletContract.UiState
+import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.ext.openUriSafely
+import net.primal.android.settings.wallet.nwc.primal.PrimalNwcDefaults
+import net.primal.android.settings.wallet.nwc.primal.link.LinkPrimalWalletContract.SideEffect
+import net.primal.android.settings.wallet.nwc.primal.link.LinkPrimalWalletContract.UiEvent
+import net.primal.android.settings.wallet.nwc.primal.link.LinkPrimalWalletContract.UiState
+import net.primal.android.settings.wallet.nwc.primal.ui.DailyBudgetBottomSheet
+import net.primal.android.settings.wallet.nwc.primal.ui.WalletConnectionEditorHeader
+import net.primal.android.settings.wallet.nwc.primal.ui.WalletConnectionFooter
 import net.primal.android.theme.AppTheme
-import timber.log.Timber
+import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
-fun LinkPrimalWalletScreen(viewModel: LinkPrimalWalletViewModel, onClose: () -> Unit) {
+fun LinkPrimalWalletScreen(viewModel: LinkPrimalWalletViewModel, onDismiss: () -> Unit) {
     val state = viewModel.state.collectAsState()
 
+    val uriHandler = LocalUriHandler.current
     LaunchedEffect(viewModel) {
         viewModel.effects.collect {
             when (it) {
                 is SideEffect.UriReceived -> {
-                    Timber.i("NewUri: ${it.nwcConnectionUri}")
+                    onDismiss()
+                    uriHandler.openUriSafely(it.callbackUri)
                 }
             }
         }
@@ -56,7 +65,7 @@ fun LinkPrimalWalletScreen(viewModel: LinkPrimalWalletViewModel, onClose: () -> 
     LinkPrimalWalletScreen(
         eventPublisher = { viewModel.setEvent(it) },
         state = state.value,
-        onClose = onClose,
+        onClose = onDismiss,
     )
 }
 
@@ -122,7 +131,7 @@ private fun WalletConnectionEditor(
             onBudgetSelected = { dailyBudget ->
                 eventPublisher(UiEvent.DailyBudgetChanged(dailyBudget))
             },
-            budgetOptions = budgetOptions,
+            budgetOptions = PrimalNwcDefaults.ALL_BUDGET_OPTIONS,
         )
     }
 
@@ -138,12 +147,15 @@ private fun WalletConnectionEditor(
 
         Column {
             Text(
-                modifier = Modifier.padding(horizontal = 21.dp),
+                modifier = Modifier.padding(horizontal = 34.dp),
                 text = stringResource(
                     id = R.string.settings_wallet_link_external_app_request,
                     state.appName ?: stringResource(id = R.string.settings_wallet_nwc_external_app),
                 ),
-                style = AppTheme.typography.bodyLarge,
+                style = AppTheme.typography.bodyMedium.copy(
+                    fontSize = 16.sp,
+                    lineHeight = 23.sp,
+                ),
                 textAlign = TextAlign.Center,
             )
 
@@ -157,12 +169,37 @@ private fun WalletConnectionEditor(
             Spacer(modifier = Modifier.height(21.dp))
 
             Text(
-                modifier = Modifier.padding(horizontal = 21.dp),
+                modifier = Modifier.padding(horizontal = 48.dp),
                 text = stringResource(id = R.string.settings_wallet_new_nwc_connection_hint),
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-                style = AppTheme.typography.bodyLarge,
+                style = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp, lineHeight = 23.sp),
                 textAlign = TextAlign.Center,
             )
         }
+    }
+}
+
+class LinkPrimalWalletUiStateProvider : PreviewParameterProvider<UiState> {
+    override val values: Sequence<UiState>
+        get() = sequenceOf(
+            UiState(),
+            UiState(creatingSecret = true),
+        )
+}
+
+@Preview
+@Composable
+private fun PreviewCreateNewWalletConnectionScreen(
+    @PreviewParameter(LinkPrimalWalletUiStateProvider::class)
+    state: UiState,
+) {
+    PrimalPreview(
+        primalTheme = PrimalTheme.Sunset,
+    ) {
+        LinkPrimalWalletScreen(
+            state = state,
+            eventPublisher = {},
+            onClose = {},
+        )
     }
 }

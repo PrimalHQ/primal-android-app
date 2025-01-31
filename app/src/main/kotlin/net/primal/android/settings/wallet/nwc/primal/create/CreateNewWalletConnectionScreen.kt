@@ -1,4 +1,4 @@
-package net.primal.android.settings.wallet.connection
+package net.primal.android.settings.wallet.nwc.primal.create
 
 import android.graphics.drawable.Drawable
 import androidx.compose.animation.AnimatedContent
@@ -41,6 +41,9 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.alexzhirkevich.customqrgenerator.QrData
@@ -57,15 +60,18 @@ import net.primal.android.core.compose.PrimalOutlinedTextField
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.settings.wallet.WalletConnectionEditorHeader
-import net.primal.android.settings.wallet.WalletConnectionFooter
-import net.primal.android.settings.wallet.budgetOptions
+import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.settings.wallet.nwc.primal.PrimalNwcDefaults
+import net.primal.android.settings.wallet.nwc.primal.ui.DailyBudgetBottomSheet
+import net.primal.android.settings.wallet.nwc.primal.ui.WalletConnectionEditorHeader
+import net.primal.android.settings.wallet.nwc.primal.ui.WalletConnectionFooter
 import net.primal.android.theme.AppTheme
+import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
-fun NwcNewWalletConnectionScreen(viewModel: NwcNewWalletConnectionViewModel, onClose: () -> Unit) {
+fun CreateNewWalletConnectionScreen(viewModel: CreateNewWalletConnectionViewModel, onClose: () -> Unit) {
     val state = viewModel.state.collectAsState()
-    NwcNewWalletConnectionScreen(
+    CreateNewWalletConnectionScreen(
         eventPublisher = { viewModel.setEvent(it) },
         state = state.value,
         onClose = onClose,
@@ -74,9 +80,9 @@ fun NwcNewWalletConnectionScreen(viewModel: NwcNewWalletConnectionViewModel, onC
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun NwcNewWalletConnectionScreen(
-    eventPublisher: (NwcNewWalletConnectionContract.UiEvent) -> Unit,
-    state: NwcNewWalletConnectionContract.UiState,
+private fun CreateNewWalletConnectionScreen(
+    state: CreateNewWalletConnectionContract.UiState,
+    eventPublisher: (CreateNewWalletConnectionContract.UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
     Scaffold(
@@ -89,7 +95,7 @@ private fun NwcNewWalletConnectionScreen(
             )
         },
         content = { paddingValues ->
-            AnimatedContent(targetState = state.secret) { secret ->
+            AnimatedContent(targetState = state.nwcConnectionUri) { secret ->
                 when (secret) {
                     null -> {
                         WalletConnectionEditor(
@@ -118,7 +124,7 @@ private fun NwcNewWalletConnectionScreen(
         },
         bottomBar = {
             val clipboard = LocalClipboardManager.current
-            when (state.secret) {
+            when (state.nwcConnectionUri) {
                 null -> WalletConnectionFooter(
                     loading = state.creatingSecret,
                     enabled = !state.creatingSecret && state.appName.isNotEmpty(),
@@ -126,7 +132,7 @@ private fun NwcNewWalletConnectionScreen(
                         id = R.string.settings_wallet_new_nwc_connection_create_new_connection_button,
                     ),
                     onPrimaryButtonClick = {
-                        eventPublisher(NwcNewWalletConnectionContract.UiEvent.CreateWalletConnection)
+                        eventPublisher(CreateNewWalletConnectionContract.UiEvent.CreateWalletConnection)
                     },
                     secondaryButtonText = stringResource(
                         id = R.string.settings_wallet_new_nwc_connection_cancel_button,
@@ -139,7 +145,7 @@ private fun NwcNewWalletConnectionScreen(
                         id = R.string.settings_wallet_new_nwc_connection_copy_nwc_string_button,
                     ),
                     onPrimaryButtonClick = {
-                        clipboard.setText(AnnotatedString(text = state.secret))
+                        clipboard.setText(AnnotatedString(text = state.nwcConnectionUri))
                     },
                     secondaryButtonText = stringResource(id = R.string.settings_wallet_new_nwc_connection_done_button),
                     onSecondaryButtonClick = onClose,
@@ -153,8 +159,8 @@ private fun NwcNewWalletConnectionScreen(
 @Composable
 private fun WalletConnectionEditor(
     modifier: Modifier,
-    state: NwcNewWalletConnectionContract.UiState,
-    eventPublisher: (NwcNewWalletConnectionContract.UiEvent) -> Unit,
+    state: CreateNewWalletConnectionContract.UiState,
+    eventPublisher: (CreateNewWalletConnectionContract.UiEvent) -> Unit,
 ) {
     var showDailyBudgetBottomSheet by rememberSaveable { mutableStateOf(false) }
 
@@ -163,9 +169,9 @@ private fun WalletConnectionEditor(
             initialDailyBudget = state.dailyBudget,
             onDismissRequest = { showDailyBudgetBottomSheet = false },
             onBudgetSelected = { dailyBudget ->
-                eventPublisher(NwcNewWalletConnectionContract.UiEvent.DailyBudgetChanged(dailyBudget))
+                eventPublisher(CreateNewWalletConnectionContract.UiEvent.DailyBudgetChanged(dailyBudget))
             },
-            budgetOptions = budgetOptions,
+            budgetOptions = PrimalNwcDefaults.ALL_BUDGET_OPTIONS,
         )
     }
 
@@ -178,15 +184,21 @@ private fun WalletConnectionEditor(
 
         Column {
             Text(
-                modifier = Modifier.padding(horizontal = 32.dp),
+                modifier = Modifier.padding(horizontal = 34.dp),
                 text = stringResource(id = R.string.settings_wallet_new_nwc_connection_app_name_input_header),
                 color = AppTheme.colorScheme.onPrimary,
-                style = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp),
+                style = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp, lineHeight = 23.sp),
             )
             PrimalOutlinedTextField(
                 header = null,
                 value = state.appName,
-                onValueChange = { eventPublisher(NwcNewWalletConnectionContract.UiEvent.AppNameChanged(it)) },
+                onValueChange = {
+                    eventPublisher(
+                        CreateNewWalletConnectionContract.UiEvent.AppNameChanged(
+                            it,
+                        ),
+                    )
+                },
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -199,10 +211,10 @@ private fun WalletConnectionEditor(
             Spacer(modifier = Modifier.height(21.dp))
 
             Text(
-                modifier = Modifier.padding(horizontal = 21.dp),
+                modifier = Modifier.padding(horizontal = 48.dp),
                 text = stringResource(id = R.string.settings_wallet_new_nwc_connection_hint),
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-                style = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp),
+                style = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp, lineHeight = 23.sp),
                 textAlign = TextAlign.Center,
             )
         }
@@ -329,5 +341,37 @@ private fun rememberQrCodeDrawable(text: String): Drawable {
             }
         }
         QrCodeDrawable(data, options)
+    }
+}
+
+class CreateNewWalletConnectionUiStateProvider : PreviewParameterProvider<CreateNewWalletConnectionContract.UiState> {
+    override val values: Sequence<CreateNewWalletConnectionContract.UiState>
+        get() = sequenceOf(
+            CreateNewWalletConnectionContract.UiState(),
+            CreateNewWalletConnectionContract.UiState(
+                nwcConnectionUri = "nostr+walletconnect://1291af9c1125151f7a59636432c6e06a7a2515" +
+                    "15b27c0f20f61f3734e52relay=wss%3A%2F%2Fnwc.primal.net%2Fb9PwCaYmNOVBl13" +
+                    "&secret=f4d681f07f51783708ef1b331225c5s1js0jns8f10391f2074e8333741m",
+            ),
+            CreateNewWalletConnectionContract.UiState(
+                creatingSecret = true,
+            ),
+        )
+}
+
+@Preview
+@Composable
+private fun PreviewCreateNewWalletConnectionScreen(
+    @PreviewParameter(CreateNewWalletConnectionUiStateProvider::class)
+    state: CreateNewWalletConnectionContract.UiState,
+) {
+    PrimalPreview(
+        primalTheme = PrimalTheme.Sunset,
+    ) {
+        CreateNewWalletConnectionScreen(
+            state = state,
+            eventPublisher = {},
+            onClose = {},
+        )
     }
 }

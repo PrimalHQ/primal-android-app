@@ -1,4 +1,4 @@
-package net.primal.android.settings.wallet
+package net.primal.android.settings.wallet.settings
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -12,9 +12,9 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.navigation.nwcUrl
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.settings.wallet.WalletSettingsContract.UiEvent
-import net.primal.android.settings.wallet.WalletSettingsContract.UiState
-import net.primal.android.settings.wallet.model.NwcConnectionInfo
+import net.primal.android.settings.wallet.domain.NwcConnectionInfo
+import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEvent
+import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.NWCParseException
 import net.primal.android.user.domain.WalletPreference

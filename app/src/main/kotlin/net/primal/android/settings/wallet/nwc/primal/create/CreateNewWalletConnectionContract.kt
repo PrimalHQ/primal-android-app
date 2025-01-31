@@ -1,12 +1,13 @@
-package net.primal.android.settings.wallet.connection
+package net.primal.android.settings.wallet.nwc.primal.create
 
-interface NwcNewWalletConnectionContract {
+import net.primal.android.settings.wallet.nwc.primal.PrimalNwcDefaults
+
+interface CreateNewWalletConnectionContract {
     data class UiState(
         val creatingSecret: Boolean = false,
         val appName: String = "",
-        val secret: String? = null,
         val nwcConnectionUri: String? = null,
-        val dailyBudget: Long? = 10_000,
+        val dailyBudget: Long? = PrimalNwcDefaults.DEFAULT_DAILY_BUDGET,
     )
 
     sealed class UiEvent {
@@ -14,6 +15,4 @@ interface NwcNewWalletConnectionContract {
         data class DailyBudgetChanged(val dailyBudget: Long?) : UiEvent()
         data object CreateWalletConnection : UiEvent()
     }
-
-    sealed class SideEffect
 }

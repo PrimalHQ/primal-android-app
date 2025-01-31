@@ -1,4 +1,4 @@
-package net.primal.android.settings.wallet
+package net.primal.android.settings.wallet.nwc.primal.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer

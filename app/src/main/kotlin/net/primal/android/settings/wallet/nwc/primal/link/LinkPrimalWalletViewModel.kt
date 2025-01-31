@@ -1,10 +1,12 @@
-package net.primal.android.settings.wallet.link
+package net.primal.android.settings.wallet.nwc.primal.link
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.math.BigDecimal
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -17,10 +19,10 @@ import net.primal.android.navigation.appIcon
 import net.primal.android.navigation.appName
 import net.primal.android.navigation.callback
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.settings.wallet.link.LinkPrimalWalletContract.Companion.DEFAULT_APP_NAME
-import net.primal.android.settings.wallet.link.LinkPrimalWalletContract.SideEffect
-import net.primal.android.settings.wallet.link.LinkPrimalWalletContract.UiEvent
-import net.primal.android.settings.wallet.link.LinkPrimalWalletContract.UiState
+import net.primal.android.settings.wallet.nwc.primal.PrimalNwcDefaults.DEFAULT_APP_NAME
+import net.primal.android.settings.wallet.nwc.primal.link.LinkPrimalWalletContract.SideEffect
+import net.primal.android.settings.wallet.nwc.primal.link.LinkPrimalWalletContract.UiEvent
+import net.primal.android.settings.wallet.nwc.primal.link.LinkPrimalWalletContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.repository.NwcWalletRepository
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
@@ -33,8 +35,7 @@ class LinkPrimalWalletViewModel @Inject constructor(
     private val nwcWalletRepository: NwcWalletRepository,
 ) : ViewModel() {
 
-    private val appName: String = savedStateHandle.appName?.takeIf { it.isNotEmpty() }
-        ?: LinkPrimalWalletContract.DEFAULT_APP_NAME
+    private val appName: String = savedStateHandle.appName?.takeIf { it.isNotEmpty() } ?: DEFAULT_APP_NAME
     private val appIcon: String? = savedStateHandle.appIcon
     private val callback: String = savedStateHandle.callback
 
@@ -99,10 +100,19 @@ class LinkPrimalWalletViewModel @Inject constructor(
                     )
                 }
 
-                setEffect(SideEffect.UriReceived(nwcConnectionUri = response.nwcConnectionUri))
+                setEffect(
+                    SideEffect.UriReceived(
+                        callbackUri = "$callback?value=${response.nwcConnectionUri.urlEncode()}",
+                    ),
+                )
             } catch (error: WssException) {
                 setState { copy(creatingSecret = false) }
                 Timber.w(error)
             }
         }
+
+    private fun String.urlEncode(): String =
+        runCatching {
+            URLEncoder.encode(this, StandardCharsets.UTF_8.toString())
+        }.getOrNull() ?: this
 }
