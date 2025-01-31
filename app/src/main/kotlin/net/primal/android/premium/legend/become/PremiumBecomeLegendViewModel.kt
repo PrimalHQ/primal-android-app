@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.encodeToString
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.navigation.FROM_ORIGIN_PREMIUM_BADGE
 import net.primal.android.navigation.buyingPremiumFromOrigin
