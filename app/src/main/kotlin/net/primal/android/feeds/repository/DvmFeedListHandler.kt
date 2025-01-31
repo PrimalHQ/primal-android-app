@@ -8,7 +8,7 @@ import net.primal.android.core.ext.asMapByKey
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.dvm.ui.DvmFeedUi
 import net.primal.android.networking.primal.retryNetworkCall
-import net.primal.android.premium.legend.asLegendaryCustomization
+import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.stats.repository.EventRepository
 

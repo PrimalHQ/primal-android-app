@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
-import net.primal.android.premium.legend.asLegendaryCustomization
+import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.theme.active.ActiveThemeStore
 import net.primal.android.theme.domain.PrimalTheme

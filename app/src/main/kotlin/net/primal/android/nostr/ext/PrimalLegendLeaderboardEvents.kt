@@ -5,7 +5,7 @@ import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentPrimalLeaderboardItem
-import net.primal.android.premium.legend.asLegendaryCustomization
+import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.legend.model.LegendLeaderboardEntry
 import net.primal.android.profile.db.ProfileData
 

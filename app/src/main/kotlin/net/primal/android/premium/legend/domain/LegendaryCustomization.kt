@@ -1,4 +1,4 @@
-package net.primal.android.premium.legend
+package net.primal.android.premium.legend.domain
 
 import net.primal.android.profile.domain.PrimalLegendProfile
 

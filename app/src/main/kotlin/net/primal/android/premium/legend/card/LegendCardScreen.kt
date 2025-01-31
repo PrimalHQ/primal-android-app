@@ -73,8 +73,8 @@ import net.primal.android.core.compose.icons.primaliconpack.Settings
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.core.utils.formatToDefaultDateFormat
-import net.primal.android.premium.legend.LegendaryCustomization
-import net.primal.android.premium.legend.LegendaryStyle
+import net.primal.android.premium.legend.domain.LegendaryCustomization
+import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.profile.details.ui.ProfilePremiumBadge
 import net.primal.android.profile.details.ui.model.shouldShowPremiumBadge
 import net.primal.android.theme.AppTheme

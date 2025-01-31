@@ -8,8 +8,8 @@ import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.highlights.model.HighlightUi
 import net.primal.android.highlights.model.asHighlightUi
 import net.primal.android.notes.feed.model.EventStatsUi
-import net.primal.android.premium.legend.LegendaryCustomization
-import net.primal.android.premium.legend.asLegendaryCustomization
+import net.primal.android.premium.legend.domain.LegendaryCustomization
+import net.primal.android.premium.legend.domain.asLegendaryCustomization
 
 data class ArticleDetailsUi(
     val aTag: String,

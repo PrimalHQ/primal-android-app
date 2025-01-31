@@ -48,8 +48,8 @@ import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.LegendaryProfileNoCustomization
-import net.primal.android.premium.legend.LegendaryCustomization
-import net.primal.android.premium.legend.LegendaryStyle
+import net.primal.android.premium.legend.domain.LegendaryCustomization
+import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.premium.ui.PremiumBadge
 import net.primal.android.theme.AppTheme
 

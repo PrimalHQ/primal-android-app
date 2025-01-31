@@ -10,7 +10,7 @@ import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.highlights.model.HighlightUi
 import net.primal.android.notes.feed.model.FeedPostUi
-import net.primal.android.premium.legend.LegendaryCustomization
+import net.primal.android.premium.legend.domain.LegendaryCustomization
 
 interface NoteEditorContract {
 

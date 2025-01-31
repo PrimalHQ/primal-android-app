@@ -30,8 +30,8 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.core.utils.shortened
-import net.primal.android.premium.legend.LegendaryCustomization
-import net.primal.android.premium.legend.LegendaryStyle
+import net.primal.android.premium.legend.domain.LegendaryCustomization
+import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.theme.AppTheme
 
 @Composable

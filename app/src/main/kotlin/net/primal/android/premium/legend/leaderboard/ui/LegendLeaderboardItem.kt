@@ -26,7 +26,7 @@ import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.utils.formatToDefaultDateFormat
-import net.primal.android.premium.legend.LegendaryCustomization
+import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.model.LegendLeaderboardEntry
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats

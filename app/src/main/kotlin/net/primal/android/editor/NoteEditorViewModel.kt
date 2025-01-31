@@ -58,7 +58,7 @@ import net.primal.android.nostr.utils.Nevent
 import net.primal.android.nostr.utils.Nip19TLV
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
-import net.primal.android.premium.legend.asLegendaryCustomization
+import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState

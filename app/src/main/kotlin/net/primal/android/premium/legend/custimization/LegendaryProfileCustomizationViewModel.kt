@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.premium.legend.asLegendaryCustomization
+import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationContract.SideEffect
 import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationContract.UiEvent
 import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationContract.UiState

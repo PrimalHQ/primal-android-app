@@ -1,4 +1,4 @@
-package net.primal.android.premium.legend
+package net.primal.android.premium.legend.domain
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush

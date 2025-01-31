@@ -15,7 +15,7 @@ import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.premium.legend.asLegendaryCustomization
+import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.settings.muted.db.MutedUser
 import net.primal.android.settings.muted.list.MutedSettingsContract.UiEvent
 import net.primal.android.settings.muted.list.MutedSettingsContract.UiState

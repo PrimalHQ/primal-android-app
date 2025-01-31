@@ -29,8 +29,8 @@ import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.premium.legend.LegendaryCustomization
-import net.primal.android.premium.legend.LegendaryStyle
+import net.primal.android.premium.legend.domain.LegendaryCustomization
+import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.stats.ui.EventZapUiModel
 import net.primal.android.theme.AppTheme
 
