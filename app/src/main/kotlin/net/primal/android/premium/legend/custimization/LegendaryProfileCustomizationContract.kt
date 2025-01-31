@@ -10,10 +10,10 @@ interface LegendaryProfileCustomizationContract {
     data class UiState(
         val avatarCdnImage: CdnImage? = null,
         val membership: PremiumMembership? = null,
-        val avatarLegendaryCustomization: LegendaryCustomization? = null,
+        val avatarLegendaryCustomization: LegendaryCustomization = LegendaryCustomization(),
         val applyingChanges: Boolean = false,
     ) {
-        fun computeShoutout() = membership?.editedShoutout ?: avatarLegendaryCustomization?.currentShoutout ?: ""
+        fun computeShoutout() = membership?.editedShoutout ?: avatarLegendaryCustomization.currentShoutout ?: ""
     }
 
     sealed class UiEvent {

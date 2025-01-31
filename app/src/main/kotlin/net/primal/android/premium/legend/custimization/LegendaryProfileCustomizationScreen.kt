@@ -52,6 +52,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
+import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalSwitch
@@ -60,13 +61,14 @@ import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.LegendaryProfileNoCustomization
+import net.primal.android.premium.domain.PremiumMembership
 import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.premium.legend.LegendaryStyle
 import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationContract.UiEvent
 import net.primal.android.premium.ui.PremiumBadge
 import net.primal.android.theme.AppTheme
 
-const val SHOUTOUT_CHAR_LIMIT = 140
+private const val SHOUTOUT_CHAR_LIMIT = 140
 
 @Composable
 fun LegendaryProfileCustomizationScreen(viewModel: LegendaryProfileCustomizationViewModel, onClose: () -> Unit) {
@@ -81,25 +83,13 @@ fun LegendaryProfileCustomizationScreen(viewModel: LegendaryProfileCustomization
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LegendaryProfileCustomizationScreen(
+private fun LegendaryProfileCustomizationScreen(
     state: LegendaryProfileCustomizationContract.UiState,
     eventPublisher: (UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
-    var customBadge by remember(state.avatarLegendaryCustomization?.customBadge) {
-        mutableStateOf(state.avatarLegendaryCustomization?.customBadge)
-    }
-    var avatarGlow by remember(state.avatarLegendaryCustomization?.avatarGlow) {
-        mutableStateOf(state.avatarLegendaryCustomization?.avatarGlow)
-    }
-    var selectedStyle by remember(state.avatarLegendaryCustomization?.legendaryStyle) {
-        mutableStateOf(state.avatarLegendaryCustomization?.legendaryStyle)
-    }
-    var inLeaderboard by remember(state.avatarLegendaryCustomization?.inLeaderboard) {
-        mutableStateOf(state.avatarLegendaryCustomization?.inLeaderboard)
-    }
-    var shoutout by remember(state.membership?.editedShoutout, state.avatarLegendaryCustomization?.currentShoutout) {
+    var shoutout by remember(state.membership?.editedShoutout, state.avatarLegendaryCustomization.currentShoutout) {
         mutableStateOf(state.computeShoutout())
     }
 
@@ -108,14 +98,13 @@ fun LegendaryProfileCustomizationScreen(
     }
 
     var editMode by remember { mutableStateOf(false) }
-    val textFieldState =
-        rememberSaveable(
-            state.membership?.editedShoutout,
-            state.avatarLegendaryCustomization?.currentShoutout,
-            saver = TextFieldState.Saver,
-        ) {
-            TextFieldState(initialText = state.computeShoutout())
-        }
+    val textFieldState = rememberSaveable(
+        state.membership?.editedShoutout,
+        state.avatarLegendaryCustomization.currentShoutout,
+        saver = TextFieldState.Saver,
+    ) {
+        TextFieldState(initialText = state.computeShoutout())
+    }
 
     fun cancelEditMode() {
         editMode = false
@@ -163,101 +152,98 @@ fun LegendaryProfileCustomizationScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterVertically),
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                UniversalAvatarThumbnail(
-                    avatarCdnImage = state.avatarCdnImage,
-                    avatarSize = 80.dp,
-                    legendaryCustomization = LegendaryCustomization(
-                        avatarGlow = avatarGlow == true,
-                        customBadge = customBadge == true,
-                        legendaryStyle = selectedStyle,
-                    ),
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                val primalName = state.membership?.premiumName ?: ""
-                NostrUserText(
-                    modifier = Modifier.padding(start = 8.dp),
-                    displayName = primalName,
-                    internetIdentifier = "$primalName@primal.net",
-                    internetIdentifierBadgeSize = 24.dp,
-                    legendaryCustomization = LegendaryCustomization(
-                        customBadge = customBadge == true,
-                        legendaryStyle = selectedStyle,
-                    ),
-                    fontSize = 20.sp,
-                )
-            }
+            ProfileSummary(
+                modifier = Modifier.padding(top = 36.dp),
+                avatarCdnImage = state.avatarCdnImage,
+                avatarGlow = state.avatarLegendaryCustomization.avatarGlow,
+                customBadge = state.avatarLegendaryCustomization.customBadge,
+                selectedStyle = state.avatarLegendaryCustomization.legendaryStyle,
+                membership = state.membership,
+            )
 
-            if (state.membership != null) {
-                PremiumBadge(
-                    firstCohort = state.membership.cohort1,
-                    secondCohort = state.membership.cohort2,
-                    membershipExpired = state.membership.isExpired(),
-                    legendaryStyle = selectedStyle ?: LegendaryStyle.NO_CUSTOMIZATION,
-                )
+            PrimalDivider(modifier = Modifier.padding(top = 16.dp))
 
-                PrimalDivider(modifier = Modifier.padding(top = 16.dp))
+            LegendaryColorPicker(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp, vertical = 8.dp),
+                activeLegendaryStyle = state.avatarLegendaryCustomization.legendaryStyle
+                    ?: LegendaryStyle.NO_CUSTOMIZATION,
+                onStyleChanged = { eventPublisher(UiEvent.ApplyCustomization(style = it)) },
+            )
 
-                LegendaryColorPicker(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 32.dp, vertical = 8.dp),
-                    activeLegendaryStyle = selectedStyle ?: LegendaryStyle.NO_CUSTOMIZATION,
-                    onStyleChanged = {
-                        selectedStyle = it
-                        eventPublisher(UiEvent.ApplyCustomization(style = it))
-                    },
-                )
+            SwitchSettings(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                avatarRing = state.avatarLegendaryCustomization.avatarGlow == true,
+                onAvatarRingChanged = { eventPublisher(UiEvent.ApplyCustomization(avatarGlow = it)) },
+                customBadge = state.avatarLegendaryCustomization.customBadge == true,
+                onCustomBadgeChanged = { eventPublisher(UiEvent.ApplyCustomization(customBadge = it)) },
+                appearInLeaderboard = state.avatarLegendaryCustomization.inLeaderboard == true,
+                onAppearInLeaderboardChanged = { eventPublisher(UiEvent.ApplyCustomization(inLeaderboard = it)) },
+            )
 
-                SwitchSettings(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    avatarRing = avatarGlow == true,
-                    onAvatarRingChanged = {
-                        avatarGlow = it
-                        eventPublisher(UiEvent.ApplyCustomization(avatarGlow = it))
-                    },
-                    customBadge = customBadge == true,
-                    onCustomBadgeChanged = {
-                        customBadge = it
-                        eventPublisher(UiEvent.ApplyCustomization(customBadge = it))
-                    },
-                    appearInLeaderboard = inLeaderboard == true,
-                    onAppearInLeaderboardChanged = {
-                        inLeaderboard = it
-                        eventPublisher(UiEvent.ApplyCustomization(inLeaderboard = it))
-                    },
-                )
+            Spacer(modifier = Modifier.height(16.dp))
+            LegendCardShoutout(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                onShoutoutChanged = { shoutout = it },
+                editMode = editMode,
+                onEditModeChange = { editMode = it },
+                textFieldState = textFieldState,
+                editsInReview = editsInReview,
+            )
 
-                Spacer(modifier = Modifier.height(24.dp))
-                LegendCardShoutout(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    onShoutoutChanged = { shoutout = it },
-                    editMode = editMode,
-                    onEditModeChange = { editMode = it },
-                    textFieldState = textFieldState,
-                )
-                if (editsInReview) {
-                    EditsInReviewBadge(modifier = Modifier.padding(bottom = 16.dp))
-                }
+            BottomNotice(editsInReview = editsInReview)
+        }
+    }
+}
 
-                Text(
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                    text = if (editsInReview) {
-                        stringResource(id = R.string.premium_legend_profile_customization_notice_in_review)
-                    } else {
-                        stringResource(id = R.string.premium_legend_profile_customization_notice)
-                    },
-                    style = AppTheme.typography.bodySmall,
-                    fontSize = 13.sp,
-                    textAlign = TextAlign.Center,
-                )
-            }
+@Composable
+private fun ProfileSummary(
+    modifier: Modifier = Modifier,
+    avatarCdnImage: CdnImage?,
+    avatarGlow: Boolean?,
+    customBadge: Boolean?,
+    selectedStyle: LegendaryStyle?,
+    membership: PremiumMembership?,
+) {
+    val primalName = membership?.premiumName ?: ""
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+    ) {
+        UniversalAvatarThumbnail(
+            avatarCdnImage = avatarCdnImage,
+            avatarSize = 80.dp,
+            legendaryCustomization = LegendaryCustomization(
+                avatarGlow = avatarGlow == true,
+                customBadge = customBadge == true,
+                legendaryStyle = selectedStyle,
+            ),
+        )
+        NostrUserText(
+            modifier = Modifier.padding(start = 8.dp),
+            displayName = primalName,
+            internetIdentifier = "$primalName@primal.net",
+            internetIdentifierBadgeSize = 24.dp,
+            legendaryCustomization = LegendaryCustomization(
+                customBadge = customBadge == true,
+                legendaryStyle = selectedStyle,
+            ),
+            fontSize = 20.sp,
+        )
+
+        membership?.let {
+            PremiumBadge(
+                firstCohort = membership.cohort1,
+                secondCohort = membership.cohort2,
+                membershipExpired = membership.isExpired(),
+                legendaryStyle = selectedStyle ?: LegendaryStyle.NO_CUSTOMIZATION,
+            )
         }
     }
 }
@@ -266,15 +252,12 @@ fun LegendaryProfileCustomizationScreen(
 private fun LegendCardShoutout(
     modifier: Modifier = Modifier,
     textFieldState: TextFieldState,
-    onShoutoutChanged: (String) -> Unit,
     editMode: Boolean,
+    editsInReview: Boolean,
+    onShoutoutChanged: (String) -> Unit,
     onEditModeChange: (Boolean) -> Unit,
 ) {
-    Text(
-        text = stringResource(id = R.string.premium_legend_profile_customization_card_shoutout).uppercase(),
-        style = AppTheme.typography.bodyMedium,
-        fontSize = 14.sp,
-    )
+    val bottomPadding = if (editMode) 28.dp else 12.dp
     LaunchedEffect(textFieldState) {
         snapshotFlow { textFieldState.text }.collect {
             if (it.length > SHOUTOUT_CHAR_LIMIT) {
@@ -285,28 +268,35 @@ private fun LegendCardShoutout(
         }
     }
 
-    val bottomPadding = if (editMode) 28.dp else 12.dp
+    Text(
+        fontWeight = FontWeight.Medium,
+        text = stringResource(id = R.string.premium_legend_profile_customization_card_shoutout).uppercase(),
+        style = AppTheme.typography.bodyMedium,
+        fontSize = 14.sp,
+    )
 
-    BasicTextField(
-        modifier = modifier
-            .clip(AppTheme.shapes.medium)
-            .background(AppTheme.extraColorScheme.surfaceVariantAlt1),
-        readOnly = !editMode,
-        state = textFieldState,
-        textStyle = AppTheme.typography.bodyMedium.copy(
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-            textAlign = TextAlign.Center,
-        ),
-        decorator = { innerTextField ->
-            Box(
-                modifier = modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 28.dp, bottom = bottomPadding)
-                    .clip(AppTheme.shapes.medium)
-                    .background(AppTheme.extraColorScheme.surfaceVariantAlt1),
-                contentAlignment = Alignment.Center,
-            ) {
+    Column(
+        modifier = Modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+    ) {
+        BasicTextField(
+            modifier = modifier
+                .clip(AppTheme.shapes.medium)
+                .background(AppTheme.extraColorScheme.surfaceVariantAlt1),
+            readOnly = !editMode,
+            state = textFieldState,
+            textStyle = AppTheme.typography.bodyMedium.copy(
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                textAlign = TextAlign.Center,
+            ),
+            decorator = { innerTextField ->
                 Column(
+                    modifier = modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 28.dp, bottom = bottomPadding)
+                        .clip(AppTheme.shapes.medium)
+                        .background(AppTheme.extraColorScheme.surfaceVariantAlt1),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
                 ) {
@@ -325,9 +315,12 @@ private fun LegendCardShoutout(
                         }
                     }
                 }
-            }
-        },
-    )
+            },
+        )
+        if (editsInReview) {
+            EditsInReviewBadge(modifier = Modifier.padding(bottom = 16.dp))
+        }
+    }
 }
 
 @Composable
@@ -580,4 +573,19 @@ private fun BottomBarButtons(
             }
         }
     }
+}
+
+@Composable
+private fun BottomNotice(editsInReview: Boolean) {
+    Text(
+        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+        text = if (editsInReview) {
+            stringResource(id = R.string.premium_legend_profile_customization_notice_in_review)
+        } else {
+            stringResource(id = R.string.premium_legend_profile_customization_notice)
+        },
+        style = AppTheme.typography.bodySmall,
+        fontSize = 13.sp,
+        textAlign = TextAlign.Center,
+    )
 }

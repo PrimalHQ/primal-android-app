@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
+import net.primal.android.premium.legend.LegendaryCustomization
 import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationContract.UiEvent
 import net.primal.android.premium.legend.custimization.LegendaryProfileCustomizationContract.UiState
@@ -55,6 +56,7 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
     private fun applyCustomization(event: UiEvent.ApplyCustomization) {
         viewModelScope.launch {
             setState { copy(applyingChanges = true) }
+            event.optimisticallyUpdateCustomization()
 
             try {
                 premiumRepository.updateLegendProfile(
@@ -67,10 +69,10 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
                         editedShoutout = event.editedShoutout,
                     ),
                 )
-                userRepository.fetchAndUpdateUserAccount(userId = activeAccountStore.activeUserId())
             } catch (error: WssException) {
                 Timber.e(error)
             } finally {
+                runCatching { userRepository.fetchAndUpdateUserAccount(userId = activeAccountStore.activeUserId()) }
                 setState { copy(applyingChanges = false) }
             }
         }
@@ -94,7 +96,7 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
                 setState {
                     copy(
                         avatarLegendaryCustomization = it.metadata?.primalPremiumInfo
-                            ?.legendProfile?.asLegendaryCustomization(),
+                            ?.legendProfile?.asLegendaryCustomization() ?: LegendaryCustomization(),
                     )
                 }
             }
@@ -104,6 +106,20 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
     private fun requestProfileUpdate() {
         viewModelScope.launch {
             profileRepository.requestProfileUpdate(profileId = activeAccountStore.activeUserId())
+        }
+    }
+
+    private fun UiEvent.ApplyCustomization.optimisticallyUpdateCustomization() {
+        val data = this
+        setState {
+            copy(
+                avatarLegendaryCustomization = avatarLegendaryCustomization.copy(
+                    avatarGlow = data.avatarGlow ?: avatarLegendaryCustomization.avatarGlow,
+                    customBadge = data.customBadge ?: avatarLegendaryCustomization.customBadge,
+                    legendaryStyle = data.style ?: avatarLegendaryCustomization.legendaryStyle,
+                    inLeaderboard = data.inLeaderboard ?: avatarLegendaryCustomization.inLeaderboard,
+                ),
+            )
         }
     }
 }
