@@ -37,7 +37,7 @@ import net.primal.android.premium.legend.leaderboard.ui.LATEST_INDEX
 import net.primal.android.premium.legend.leaderboard.ui.LeaderboardTabs
 import net.primal.android.premium.legend.leaderboard.ui.LegendLeaderboardItem
 import net.primal.android.premium.legend.leaderboard.ui.PAGE_COUNT
-import net.primal.android.premium.legend.model.LegendLeaderboardEntry
+import net.primal.android.premium.legend.domain.LeaderboardLegendEntry
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -106,7 +106,7 @@ fun LegendLeaderboardScreen(
 }
 
 @Composable
-fun LeaderboardList(entries: List<LegendLeaderboardEntry>, onProfileClick: (String) -> Unit) {
+fun LeaderboardList(entries: List<LeaderboardLegendEntry>, onProfileClick: (String) -> Unit) {
     LazyColumn {
         itemsIndexed(
             items = entries,

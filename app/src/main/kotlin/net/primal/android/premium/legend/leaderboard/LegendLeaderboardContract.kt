@@ -1,11 +1,11 @@
 package net.primal.android.premium.legend.leaderboard
 
 import net.primal.android.premium.api.model.LeaderboardOrderBy
-import net.primal.android.premium.legend.model.LegendLeaderboardEntry
+import net.primal.android.premium.legend.domain.LeaderboardLegendEntry
 
 interface LegendLeaderboardContract {
     data class UiState(
-        val leaderboardEntries: Map<LeaderboardOrderBy, List<LegendLeaderboardEntry>> = emptyMap(),
+        val leaderboardEntries: Map<LeaderboardOrderBy, List<LeaderboardLegendEntry>> = emptyMap(),
         val loading: Boolean = true,
         val error: Throwable? = null,
     )
