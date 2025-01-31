@@ -32,12 +32,12 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.premium.api.model.LeaderboardOrderBy
+import net.primal.android.premium.legend.domain.LeaderboardLegendEntry
 import net.primal.android.premium.legend.leaderboard.ui.CONTRIBUTION_INDEX
 import net.primal.android.premium.legend.leaderboard.ui.LATEST_INDEX
 import net.primal.android.premium.legend.leaderboard.ui.LeaderboardTabs
 import net.primal.android.premium.legend.leaderboard.ui.LegendLeaderboardItem
 import net.primal.android.premium.legend.leaderboard.ui.PAGE_COUNT
-import net.primal.android.premium.legend.domain.LeaderboardLegendEntry
 import net.primal.android.theme.AppTheme
 
 @Composable
