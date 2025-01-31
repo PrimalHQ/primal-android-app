@@ -29,6 +29,8 @@ import net.primal.android.settings.wallet.WalletSettingsScreen
 import net.primal.android.settings.wallet.WalletSettingsViewModel
 import net.primal.android.settings.wallet.connection.NwcNewWalletConnectionScreen
 import net.primal.android.settings.wallet.connection.NwcNewWalletConnectionViewModel
+import net.primal.android.settings.wallet.link.LinkPrimalWalletScreen
+import net.primal.android.settings.wallet.link.LinkPrimalWalletViewModel
 import net.primal.android.settings.wallet.nwc.NwcQrCodeScannerScreen
 import net.primal.android.settings.wallet.nwc.NwcQrCodeScannerViewModel
 import net.primal.android.settings.zaps.ZapSettingsScreen
@@ -38,12 +40,22 @@ private fun NavController.navigateToAccountSettings() = navigate(route = "accoun
 private fun NavController.navigateToNetworkSettings() = navigate(route = "network")
 private fun NavController.navigateToWalletSettings() = navigate(route = "wallet_settings")
 private fun NavController.navigateToWalletScanNwcUrl() = navigate(route = "wallet_settings/scanNwcUrl")
-private fun NavController.navigateToNewWalletConnection() = navigate(route = "wallet_settings/newWalletConnection")
+
+// private fun NavController.navigateToNewWalletConnection() = navigate(route = "wallet_settings/newWalletConnection")
 private fun NavController.navigateToAppearanceSettings() = navigate(route = "appearance_settings")
 private fun NavController.navigateToContentDisplaySettings() = navigate(route = "content_display")
 fun NavController.navigateToNotificationsSettings() = navigate(route = "notifications_settings")
 private fun NavController.navigateToZapsSettings() = navigate(route = "zaps_settings")
 private fun NavController.navigateToMutedAccounts() = navigate(route = "muted_accounts_settings")
+private fun NavController.navigateToLinkPrimalWallet(
+    appName: String? = null,
+    appIcon: String? = null,
+    callback: String,
+) {
+    navigate(
+        route = "wallet_settings/linkPrimalWallet?appName=$appName&appIcon=$appIcon&callback=$callback",
+    )
+}
 
 fun NavGraphBuilder.settingsNavigation(route: String, navController: NavController) =
     navigation(
@@ -74,6 +86,24 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
                 navArgument(NWC_URL) {
                     type = NavType.StringType
                     nullable = true
+                },
+            ),
+            navController = navController,
+        )
+        linkPrimalWallet(
+            route = "wallet_settings/linkPrimalWallet?appName={$NWC_APP_NAME}" +
+                "&appIcon={$NWC_APP_ICON}&callback={$NWC_CALLBACK}",
+            arguments = listOf(
+                navArgument(NWC_APP_NAME) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(NWC_APP_ICON) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(NWC_CALLBACK) {
+                    type = NavType.StringType
                 },
             ),
             navController = navController,
@@ -159,7 +189,12 @@ private fun NavGraphBuilder.wallet(
         onClose = { navController.navigateUp() },
         onEditProfileClick = { navController.navigateToProfileEditor() },
         onOtherConnectClick = { navController.navigateToWalletScanNwcUrl() },
-        onCreateNewWalletConnection = { navController.navigateToNewWalletConnection() },
+        onCreateNewWalletConnection = {
+//            navController.navigateToNewWalletConnection()
+            navController.navigateToLinkPrimalWallet(
+                callback = "callback",
+            )
+        },
     )
 }
 
@@ -178,6 +213,26 @@ private fun NavGraphBuilder.scanNwcUrl(route: String, navController: NavControll
             onClose = { navController.popBackStack() },
         )
     }
+
+private fun NavGraphBuilder.linkPrimalWallet(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) {
+    val viewModel = hiltViewModel<LinkPrimalWalletViewModel>()
+    LockToOrientationPortrait()
+    LinkPrimalWalletScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+    )
+}
 
 private fun NavGraphBuilder.newWalletConnection(route: String, navController: NavController) =
     composable(
