@@ -125,10 +125,7 @@ fun BecomeLegendAmountStage(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 if (state.arePaymentInstructionsAvailable()) {
-                    SelectAmountSlider(
-                        state = state,
-                        eventPublisher = eventPublisher,
-                    )
+                    SelectAmountSlider(state = state, eventPublisher = eventPublisher)
                 } else if (state.isFetchingPaymentInstructions) {
                     PrimalLoadingSpinner()
                 } else {
