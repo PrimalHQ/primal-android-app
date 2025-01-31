@@ -59,7 +59,6 @@ fun LeaderboardTabs(
                 onClick = onContributionClick,
                 text = stringResource(id = R.string.premium_legend_leaderboard_contribution_tab).uppercase(),
             )
-
         }
     }
 }
