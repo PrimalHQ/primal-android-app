@@ -84,14 +84,14 @@ fun LegendLeaderboardItem(
             ) {
                 legendSince?.let {
                     Text(
-                        text = stringResource(id = R.string.legend_leaderboard_since) + ": " +
-                            legendSince.formatToDefaultDateFormat(FormatStyle.MEDIUM),
+                        text = stringResource(id = R.string.premium_legend_leaderboard_since) +
+                                ": " + legendSince.formatToDefaultDateFormat(FormatStyle.MEDIUM),
                         style = AppTheme.typography.bodySmall,
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                     )
                 }
                 Text(
-                    text = stringResource(id = R.string.legend_leaderboard_sats),
+                    text = stringResource(id = R.string.premium_legend_leaderboard_sats),
                     style = AppTheme.typography.bodySmall,
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                 )

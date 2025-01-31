@@ -328,12 +328,12 @@
     <string name="premium_legend_card_dropdown_close">Close</string>
     <string name="premium_legend_card_dropdown_legend_settings">Legend settings</string>
 
-    <string name="legend_leaderboard_title">Primal Legends</string>
-    <string name="legend_leaderboard_latest_tab">Latest</string>
-    <string name="legend_leaderboard_contribution_tab">Contribution</string>
-    <string name="legend_leaderboard_about_legends">About Legends</string>
-    <string name="legend_leaderboard_since">Since</string>
-    <string name="legend_leaderboard_sats">sats</string>
+    <string name="premium_legend_leaderboard_title">Primal Legends</string>
+    <string name="premium_legend_leaderboard_latest_tab">Latest</string>
+    <string name="premium_legend_leaderboard_contribution_tab">Contribution</string>
+    <string name="premium_legend_leaderboard_about_legends">About Legends</string>
+    <string name="premium_legend_leaderboard_since">Since</string>
+    <string name="premium_legend_leaderboard_sats">sats</string>
 
     <string name="feed_reposted_suffix">reposted</string>
     <string name="feed_see_more">See more…</string>

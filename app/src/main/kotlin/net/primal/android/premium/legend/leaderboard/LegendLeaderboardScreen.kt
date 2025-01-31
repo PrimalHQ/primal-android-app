@@ -115,7 +115,7 @@ private fun LeaderboardTopAppBar(
 
     Column {
         PrimalTopAppBar(
-            title = stringResource(id = R.string.legend_leaderboard_title),
+            title = stringResource(id = R.string.premium_legend_leaderboard_title),
             navigationIcon = PrimalIcons.ArrowBack,
             onNavigationIconClick = onBackClick,
             showDivider = false,
@@ -137,7 +137,7 @@ private fun LeaderboardTopAppBar(
                 onClick = onAboutLegendsClick,
             ) {
                 Text(
-                    text = stringResource(id = R.string.legend_leaderboard_about_legends),
+                    text = stringResource(id = R.string.premium_legend_leaderboard_about_legends),
                     style = AppTheme.typography.bodySmall,
                 )
             }

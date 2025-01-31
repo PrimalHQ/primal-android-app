@@ -47,12 +47,12 @@ fun LeaderboardTabs(
         PrimalSingleTab(
             selected = selectedTabIndex == LATEST_INDEX,
             onClick = onLatestClick,
-            text = stringResource(id = R.string.legend_leaderboard_latest_tab).uppercase(),
+            text = stringResource(id = R.string.premium_legend_leaderboard_latest_tab).uppercase(),
         )
         PrimalSingleTab(
             selected = selectedTabIndex == CONTRIBUTION_INDEX,
             onClick = onContributionClick,
-            text = stringResource(id = R.string.legend_leaderboard_contribution_tab).uppercase(),
+            text = stringResource(id = R.string.premium_legend_leaderboard_contribution_tab).uppercase(),
         )
     }
 }
