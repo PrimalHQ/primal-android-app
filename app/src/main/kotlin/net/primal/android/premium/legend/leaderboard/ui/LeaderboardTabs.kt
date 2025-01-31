@@ -2,10 +2,13 @@ package net.primal.android.premium.legend.leaderboard.ui
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
@@ -18,6 +21,7 @@ internal const val PAGE_COUNT = 2
 internal const val LATEST_INDEX = 0
 internal const val CONTRIBUTION_INDEX = 1
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LeaderboardTabs(
     modifier: Modifier = Modifier,
@@ -44,15 +48,18 @@ fun LeaderboardTabs(
             }
         },
     ) {
-        PrimalSingleTab(
-            selected = selectedTabIndex == LATEST_INDEX,
-            onClick = onLatestClick,
-            text = stringResource(id = R.string.premium_legend_leaderboard_latest_tab).uppercase(),
-        )
-        PrimalSingleTab(
-            selected = selectedTabIndex == CONTRIBUTION_INDEX,
-            onClick = onContributionClick,
-            text = stringResource(id = R.string.premium_legend_leaderboard_contribution_tab).uppercase(),
-        )
+        CompositionLocalProvider(LocalRippleConfiguration provides null) {
+            PrimalSingleTab(
+                selected = selectedTabIndex == LATEST_INDEX,
+                onClick = onLatestClick,
+                text = stringResource(id = R.string.premium_legend_leaderboard_latest_tab).uppercase(),
+            )
+            PrimalSingleTab(
+                selected = selectedTabIndex == CONTRIBUTION_INDEX,
+                onClick = onContributionClick,
+                text = stringResource(id = R.string.premium_legend_leaderboard_contribution_tab).uppercase(),
+            )
+
+        }
     }
 }
