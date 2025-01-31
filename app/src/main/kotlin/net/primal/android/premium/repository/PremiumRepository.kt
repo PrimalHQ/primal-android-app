@@ -99,9 +99,11 @@ class PremiumRepository @Inject constructor(
 
     suspend fun updateLegendProfile(
         userId: String,
-        styleId: String,
-        customBadge: Boolean,
-        avatarGlow: Boolean,
+        styleId: String?,
+        customBadge: Boolean?,
+        avatarGlow: Boolean?,
+        inLeaderboard: Boolean?,
+        editedShoutout: String?,
     ) = withContext(dispatchers.io()) {
         premiumApi.updateLegendProfile(
             userId = userId,
@@ -109,6 +111,8 @@ class PremiumRepository @Inject constructor(
                 styleId = styleId,
                 customBadge = customBadge,
                 avatarGlow = avatarGlow,
+                inLeaderboard = inLeaderboard,
+                editedShoutout = editedShoutout,
             ),
         )
     }
@@ -134,6 +138,7 @@ class PremiumRepository @Inject constructor(
             cohort2 = this.cohort2,
             recurring = this.recurring,
             origin = this.origin,
+            editedShoutout = this.editedShoutout,
         )
     }
 }

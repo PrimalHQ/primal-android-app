@@ -17,6 +17,12 @@ val NostrJson = Json {
     coerceInputValues = true
 }
 
+val NostrJsonImplicitNulls = Json {
+    ignoreUnknownKeys = true
+    coerceInputValues = true
+    explicitNulls = false
+}
+
 val NostrJsonEncodeDefaults = Json {
     ignoreUnknownKeys = true
     encodeDefaults = true
