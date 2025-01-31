@@ -8,7 +8,6 @@ import net.primal.android.nostr.model.primal.content.ContentProfilePremiumInfo
 import net.primal.android.nostr.model.primal.content.ContentUserProfileStats
 import net.primal.android.profile.db.ProfileStats
 import net.primal.android.profile.domain.PrimalLegendProfile
-import net.primal.android.profile.domain.PrimalPremiumInfo
 
 fun List<PrimalEvent>.mapNotNullAsProfileStatsPO() = mapNotNull { it.asProfileStatsPO() }
 

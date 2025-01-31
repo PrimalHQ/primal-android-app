@@ -9,7 +9,6 @@ import net.primal.android.premium.legend.asLegendaryCustomization
 import net.primal.android.premium.legend.model.LegendLeaderboardEntry
 import net.primal.android.profile.db.ProfileData
 
-
 fun PrimalEvent?.parseAndMapAsLeaderboardEntries(profiles: Map<String, ProfileData>) =
     NostrJson.decodeFromStringOrNull<List<ContentPrimalLeaderboardItem>>(this?.content)
         ?.mapNotNull { item ->

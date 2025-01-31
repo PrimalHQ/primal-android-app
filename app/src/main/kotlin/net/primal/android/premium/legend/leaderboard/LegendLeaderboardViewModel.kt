@@ -28,15 +28,16 @@ class LegendLeaderboardViewModel @Inject constructor(
         fetchLeaderboardByOrder(orderBy = LeaderboardOrderBy.DonatedBtc)
     }
 
-    private fun fetchLeaderboardByOrder(orderBy: LeaderboardOrderBy) = viewModelScope.launch {
-        setState { copy(loading = true) }
-        try {
-            val entries = premiumRepository.fetchLegendLeaderboard(orderBy = orderBy)
-            setState { copy(leaderboardEntries = leaderboardEntries + (orderBy to entries)) }
-        } catch (error: WssException) {
-            Timber.w(error)
-        } finally {
-            setState { copy(loading = false) }
+    private fun fetchLeaderboardByOrder(orderBy: LeaderboardOrderBy) =
+        viewModelScope.launch {
+            setState { copy(loading = true) }
+            try {
+                val entries = premiumRepository.fetchLegendLeaderboard(orderBy = orderBy)
+                setState { copy(leaderboardEntries = leaderboardEntries + (orderBy to entries)) }
+            } catch (error: WssException) {
+                Timber.w(error)
+            } finally {
+                setState { copy(loading = false) }
+            }
         }
-    }
 }

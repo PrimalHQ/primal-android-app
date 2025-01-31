@@ -1265,24 +1265,22 @@ private fun NavGraphBuilder.premiumLegendCard(
     )
 }
 
-private fun NavGraphBuilder.premiumLegendLeaderboard(
-    route: String,
-    navController: NavController,
-) = composable(
-    route = route,
-) {
-    val viewModel = hiltViewModel<LegendLeaderboardViewModel>()
+private fun NavGraphBuilder.premiumLegendLeaderboard(route: String, navController: NavController) =
+    composable(
+        route = route,
+    ) {
+        val viewModel = hiltViewModel<LegendLeaderboardViewModel>()
 
-    ApplyEdgeToEdge()
-    LockToOrientationPortrait()
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
 
-    LegendLeaderboardScreen(
-        viewModel = viewModel,
-        onBackClick = { navController.navigateUp() },
-        onProfileClick = { navController.navigateToProfile(profileId = it) },
-        onAboutLegendsClick = {},
-    )
-}
+        LegendLeaderboardScreen(
+            viewModel = viewModel,
+            onBackClick = { navController.navigateUp() },
+            onProfileClick = { navController.navigateToProfile(profileId = it) },
+            onAboutLegendsClick = {},
+        )
+    }
 
 private fun NavGraphBuilder.premiumManage(route: String, navController: NavController) =
     composable(

@@ -14,7 +14,6 @@ import net.primal.android.R
 import net.primal.android.core.compose.PrimalSingleTab
 import net.primal.android.theme.AppTheme
 
-
 internal const val PAGE_COUNT = 2
 internal const val LATEST_INDEX = 0
 internal const val CONTRIBUTION_INDEX = 1

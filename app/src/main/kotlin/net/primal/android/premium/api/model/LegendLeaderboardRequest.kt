@@ -13,6 +13,7 @@ data class LegendLeaderboardRequest(
 enum class LeaderboardOrderBy {
     @SerialName("donated_btc")
     DonatedBtc,
+
     @SerialName("last_donation")
     LastDonation,
 }
