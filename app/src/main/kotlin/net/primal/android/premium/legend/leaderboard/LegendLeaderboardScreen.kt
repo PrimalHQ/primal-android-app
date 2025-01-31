@@ -3,6 +3,9 @@ package net.primal.android.premium.legend.leaderboard
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
@@ -24,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
+import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -34,6 +38,7 @@ import net.primal.android.premium.legend.leaderboard.ui.LATEST_INDEX
 import net.primal.android.premium.legend.leaderboard.ui.LeaderboardTabs
 import net.primal.android.premium.legend.leaderboard.ui.LegendLeaderboardItem
 import net.primal.android.premium.legend.leaderboard.ui.PAGE_COUNT
+import net.primal.android.premium.legend.model.LegendLeaderboardEntry
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -86,20 +91,36 @@ fun LegendLeaderboardScreen(
             val entries = state.leaderboardEntries[currentPage.resolveOrderBy()] ?: emptyList()
             if (state.loading && entries.isEmpty()) {
                 HeightAdjustableLoadingLazyListPlaceholder(height = 80.dp)
+            } else if (state.error != null) {
+                ListNoContent(
+                    modifier = Modifier.fillMaxSize(),
+                    noContentText = stringResource(id = R.string.premium_legend_leaderboard_no_content),
+                    onRefresh = {
+                        eventPublisher(LegendLeaderboardContract.UiEvent.RetryFetch(currentPage.resolveOrderBy()))
+                    },
+                )
             } else {
-                LazyColumn {
-                    itemsIndexed(
-                        items = entries,
-                        key = { index, item -> item.userId },
-                    ) { index, entry ->
-                        LegendLeaderboardItem(
-                            item = entry,
-                            index = index + 1,
-                            onClick = { onProfileClick(entry.userId) },
-                        )
-                    }
-                }
+                LeaderboardList(entries = entries, onProfileClick = onProfileClick)
             }
+        }
+    }
+}
+
+@Composable
+fun LeaderboardList(
+    entries: List<LegendLeaderboardEntry>,
+    onProfileClick: (String) -> Unit,
+) {
+    LazyColumn {
+        itemsIndexed(
+            items = entries,
+            key = { index, item -> item.userId },
+        ) { index, entry ->
+            LegendLeaderboardItem(
+                item = entry,
+                index = index + 1,
+                onClick = { onProfileClick(entry.userId) },
+            )
         }
     }
 }
@@ -134,6 +155,7 @@ private fun LeaderboardTopAppBar(
             )
 
             TextButton(
+                modifier = Modifier.padding(end = 8.dp),
                 onClick = onAboutLegendsClick,
             ) {
                 Text(

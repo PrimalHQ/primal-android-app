@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,18 +43,21 @@ class LegendLeaderboardViewModel @Inject constructor(
                             fetchLeaderboardByOrder(it.orderBy)
                         }
                     }
+
+                    is UiEvent.RetryFetch -> fetchLeaderboardByOrder(it.orderBy)
                 }
             }
         }
 
     private fun fetchLeaderboardByOrder(orderBy: LeaderboardOrderBy) =
         viewModelScope.launch {
-            setState { copy(loading = true) }
+            setState { copy(loading = true, error = null) }
             try {
                 val entries = premiumRepository.fetchLegendLeaderboard(orderBy = orderBy)
                 setState { copy(leaderboardEntries = leaderboardEntries + (orderBy to entries)) }
             } catch (error: WssException) {
                 Timber.w(error)
+                setState { copy(error = error) }
             } finally {
                 setState { copy(loading = false) }
             }
