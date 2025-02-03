@@ -9,5 +9,5 @@ data class PostWithAuthorData(
     val post: PostData,
 
     @Relation(entityColumn = "ownerId", parentColumn = "authorId")
-    val author: ProfileData,
+    val author: ProfileData?,
 )
