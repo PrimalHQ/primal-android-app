@@ -3,6 +3,7 @@ package net.primal.android.premium.legend.domain
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 
 @Suppress("MagicNumber")
 enum class LegendaryStyle(
@@ -17,9 +18,7 @@ enum class LegendaryStyle(
         primaryBrush = Brush.linearGradient(
             listOf(Color.Transparent, Color.Transparent),
         ),
-        secondaryBrush = Brush.linearGradient(
-            listOf(Color.Transparent, Color.Transparent),
-        ),
+        secondaryBrush = SolidColor(Color(0xFF444444)),
     ),
     GOLD(
         id = "GOLD",

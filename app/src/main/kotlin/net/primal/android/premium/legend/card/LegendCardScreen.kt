@@ -53,6 +53,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
@@ -89,6 +90,7 @@ private val CARD_BACKGROUND_COLOR = Color(0xFF222222)
 private val DROPDOWN_BACKGROUND_COLOR = Color(0xFF282828)
 private val PRIMARY_TEXT_COLOR = Color(0xFFFFFFFF)
 private val SECONDARY_TEXT_COLOR = Color(0xFFAAAAAA)
+private val FALLBACK_BACKGROUND_ELEMENT_COLOR = Color(0xFF444444)
 
 private const val PRIMAL_2_0_RELEASE_DATE_IN_SECONDS = 1732147200L
 
@@ -136,7 +138,8 @@ fun LegendCardScreen(
             .clip(AppTheme.shapes.medium)
             .background(CARD_BACKGROUND_COLOR)
             .drawAnimatedBackgroundAndGlow(
-                brush = state.profile?.premiumDetails?.legendaryCustomization?.legendaryStyle?.secondaryBrush,
+                brush = state.profile?.premiumDetails?.legendaryCustomization?.legendaryStyle?.secondaryBrush
+                    ?: SolidColor(FALLBACK_BACKGROUND_ELEMENT_COLOR),
                 backgroundProgress = animationProgress,
                 glowProgress = glowProgress,
             )
@@ -188,17 +191,15 @@ private suspend fun AnimationState<Float, AnimationVector1D>.startAnimation(dela
     )
 
 private fun Modifier.drawAnimatedBackgroundAndGlow(
-    brush: Brush?,
+    brush: Brush,
     backgroundProgress: AnimationState<Float, AnimationVector1D>,
     glowProgress: AnimationState<Float, AnimationVector1D>,
 ) = drawWithContent {
     val (topStart, bottomStart, topEnd) = makeEdgePaths(animationProgress = backgroundProgress)
 
-    brush?.let {
-        drawPath(alpha = 0.25f, path = topStart, brush = brush)
-        drawPath(alpha = 0.25f, path = bottomStart, brush = brush)
-        drawPath(path = topEnd, brush = brush)
-    }
+    drawPath(alpha = 0.25f, path = topStart, brush = brush)
+    drawPath(alpha = 0.15f, path = bottomStart, brush = brush)
+    drawPath(path = topEnd, brush = brush)
 
     drawContent()
     drawGlowRectangle(glowProgress = glowProgress)
@@ -315,11 +316,11 @@ private fun LegendaryStyle?.resolveNoCustomizationAndNull(): Color =
 
 private fun LegendaryStyle?.resolveButtonColor(): Color =
     when (this) {
-        LegendaryStyle.NO_CUSTOMIZATION, LegendaryStyle.GOLD, LegendaryStyle.AQUA,
+        LegendaryStyle.GOLD, LegendaryStyle.AQUA,
         LegendaryStyle.SILVER, LegendaryStyle.TEAL, LegendaryStyle.BROWN, null,
         -> Color.Black
 
-        LegendaryStyle.PURPLE, LegendaryStyle.PURPLE_HAZE,
+        LegendaryStyle.NO_CUSTOMIZATION, LegendaryStyle.PURPLE, LegendaryStyle.PURPLE_HAZE,
         LegendaryStyle.BLUE, LegendaryStyle.SUN_FIRE,
         -> Color.White
     }
