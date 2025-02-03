@@ -1,8 +1,6 @@
 ## Changes
-- Implemented Primal Wallet NWC (#287)
-- Implemented Primal Wallet deep linking;
-- Implemented legends leaderboard (#290)
-- Implemented updated legend settings with leaderboard toggle and shoutout edits (#293)
-- Implemented handling non activated wallets in NWC apps list (#291)
-- Added showing generic error message to NWC apps list ui;
-- Loading indicator in become legend flow if payment instructions are taking too long;
+- Implemented handling no profile metadata for highlight authors in Reads (#298)
+- Polished legend cards (#294)
+- Fixed too long display names not showing properly in Profile Details (#299)
+- Fixed premium badge not showing on long display name in Profile Details (#295)
+- Fixed missing overflow for long topic names in explore (#297)
