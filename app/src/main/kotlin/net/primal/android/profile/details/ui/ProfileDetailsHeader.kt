@@ -338,11 +338,13 @@ private fun UserDisplayName(
     onPremiumBadgeClick: (tier: String, profileId: String) -> Unit,
 ) {
     Row(
-        modifier = modifier.padding(top = 12.dp, bottom = 3.dp),
+        modifier = modifier.padding(top = 12.dp, bottom = 3.dp, end = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         NostrUserText(
-            modifier = Modifier.padding(start = 14.dp, end = 6.dp),
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 14.dp, end = 6.dp),
             displayName = displayName,
             internetIdentifier = internetIdentifier,
             internetIdentifierBadgeSize = 21.dp,
