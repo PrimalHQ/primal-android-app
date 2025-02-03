@@ -79,6 +79,7 @@ import net.primal.android.core.utils.formatToDefaultDateFormat
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.profile.details.ui.ProfilePremiumBadge
+import net.primal.android.profile.details.ui.model.PremiumProfileDataUi
 import net.primal.android.profile.details.ui.model.shouldShowPremiumBadge
 import net.primal.android.theme.AppTheme
 
@@ -416,34 +417,45 @@ private fun ProfileSummary(modifier: Modifier = Modifier, profile: ProfileDetail
         AnimatedDisplayName(showContent = showContent, profile = profile)
 
         profile.internetIdentifier?.let { internetIdentifier ->
-            AnimatedVisibility(
-                visible = showContent,
-                enter = makeEnterTransition(delayMillis = 416),
-            ) {
-                Text(
-                    modifier = Modifier,
-                    text = internetIdentifier.formatNip05Identifier(),
-                    style = AppTheme.typography.bodyMedium.copy(
-                        lineHeight = 12.sp,
-                    ),
-                    color = PRIMARY_TEXT_COLOR,
-                )
-            }
+            AnimatedInternetIdentifier(showContent = showContent, internetIdentifier = internetIdentifier)
         }
+
         if (profile.premiumDetails?.shouldShowPremiumBadge() == true) {
-            AnimatedVisibility(
-                visible = showContent,
-                enter = makeEnterTransition(delayMillis = 500),
-            ) {
-                ProfilePremiumBadge(
-                    firstCohort = profile.premiumDetails.cohort1 ?: "",
-                    secondCohort = profile.premiumDetails.cohort2 ?: "",
-                    legendaryStyle = profile.premiumDetails.legendaryCustomization?.legendaryStyle,
-                    firstCohortFontSize = 14.sp,
-                    secondCohortFontSize = 14.sp,
-                )
-            }
+            AnimatedPremiumBadge(showContent = showContent, premiumDetails = profile.premiumDetails)
         }
+    }
+}
+
+@Composable
+private fun ColumnScope.AnimatedPremiumBadge(showContent: Boolean, premiumDetails: PremiumProfileDataUi) {
+    AnimatedVisibility(
+        visible = showContent,
+        enter = makeEnterTransition(delayMillis = 500),
+    ) {
+        ProfilePremiumBadge(
+            firstCohort = premiumDetails.cohort1 ?: "",
+            secondCohort = premiumDetails.cohort2 ?: "",
+            legendaryStyle = premiumDetails.legendaryCustomization?.legendaryStyle,
+            firstCohortFontSize = 14.sp,
+            secondCohortFontSize = 14.sp,
+        )
+    }
+}
+
+@Composable
+private fun ColumnScope.AnimatedInternetIdentifier(showContent: Boolean, internetIdentifier: String) {
+    AnimatedVisibility(
+        visible = showContent,
+        enter = makeEnterTransition(delayMillis = 416),
+    ) {
+        Text(
+            modifier = Modifier,
+            text = internetIdentifier.formatNip05Identifier(),
+            style = AppTheme.typography.bodyMedium.copy(
+                lineHeight = 12.sp,
+            ),
+            color = PRIMARY_TEXT_COLOR,
+        )
     }
 }
 
