@@ -31,6 +31,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
@@ -378,6 +379,8 @@ fun ProfilePremiumBadge(
     firstCohort: String,
     secondCohort: String,
     legendaryStyle: LegendaryStyle?,
+    firstCohortFontSize: TextUnit = 12.sp,
+    secondCohortFontSize: TextUnit = 12.sp,
 ) {
     val density = LocalDensity.current
     val shadowOffset = with(density) { 0.5.dp.toPx() }
@@ -385,7 +388,6 @@ fun ProfilePremiumBadge(
         modifier = modifier
             .padding(bottom = 1.dp)
             .shadow(elevation = 1.dp, shape = AppTheme.shapes.extraLarge)
-            .height(20.dp)
             .clip(AppTheme.shapes.extraLarge)
             .background(
                 brush = if (legendaryStyle != null && legendaryStyle != LegendaryStyle.NO_CUSTOMIZATION) {
@@ -394,7 +396,8 @@ fun ProfilePremiumBadge(
                     Brush.linearGradient(listOf(AppTheme.colorScheme.tertiary, AppTheme.colorScheme.tertiary))
                 },
             )
-            .padding(start = 10.dp, end = 2.dp),
+            .padding(start = 10.dp, end = 2.dp)
+            .padding(vertical = 2.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -408,12 +411,11 @@ fun ProfilePremiumBadge(
                     offset = Offset(x = shadowOffset, y = shadowOffset),
                 ),
             ),
-            fontSize = 12.sp,
+            fontSize = firstCohortFontSize,
             color = Color.White,
         )
         Box(
             modifier = Modifier
-                .height(16.dp)
                 .clip(AppTheme.shapes.extraLarge)
                 .background(Color.Black.copy(alpha = 0.4f)),
         ) {
@@ -423,7 +425,7 @@ fun ProfilePremiumBadge(
                     .padding(top = 0.75.dp),
                 text = secondCohort,
                 style = AppTheme.typography.bodySmall,
-                fontSize = 12.sp,
+                fontSize = secondCohortFontSize,
                 fontWeight = FontWeight.Normal,
                 color = Color.White,
             )

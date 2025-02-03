@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
@@ -16,12 +17,13 @@ fun DropdownPrimalMenu(
     onDismissRequest: () -> Unit,
     offset: DpOffset = DpOffset(0.dp, 0.dp),
     properties: PopupProperties = PopupProperties(focusable = true),
+    backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     DropdownMenu(
         modifier = Modifier
             .background(
-                color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                color = backgroundColor,
                 shape = AppTheme.shapes.small,
             ),
         expanded = expanded,
