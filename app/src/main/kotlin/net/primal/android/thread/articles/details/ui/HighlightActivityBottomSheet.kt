@@ -327,7 +327,7 @@ private fun List<String>.buildHighlightedString() =
     buildAnnotatedString {
         withStyle(style = SpanStyle(color = AppTheme.colorScheme.onPrimary)) {
             withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                append(this@buildHighlightedString.first())
+                append(this@buildHighlightedString.firstOrNull())
             }
             val otherSize = this@buildHighlightedString.size - 1
             if (otherSize == 0) {
