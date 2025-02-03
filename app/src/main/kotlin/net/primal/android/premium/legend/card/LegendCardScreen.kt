@@ -394,9 +394,7 @@ private fun ProfileSummary(modifier: Modifier = Modifier, profile: ProfileDetail
     }
 
     Column(
-        modifier = modifier
-            .wrapContentSize(unbounded = true)
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
     ) {
@@ -415,7 +413,9 @@ private fun ProfileSummary(modifier: Modifier = Modifier, profile: ProfileDetail
             )
         }
         Spacer(modifier = Modifier.height(10.dp))
-        AnimatedDisplayName(showContent = showContent, profile = profile)
+        Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+            AnimatedDisplayName(showContent = showContent, profile = profile)
+        }
 
         profile.internetIdentifier?.let { internetIdentifier ->
             AnimatedInternetIdentifier(showContent = showContent, internetIdentifier = internetIdentifier)
@@ -461,13 +461,14 @@ private fun ColumnScope.AnimatedInternetIdentifier(showContent: Boolean, interne
 }
 
 @Composable
-private fun ColumnScope.AnimatedDisplayName(showContent: Boolean, profile: ProfileDetailsUi) {
+private fun AnimatedDisplayName(showContent: Boolean, profile: ProfileDetailsUi) {
     AnimatedVisibility(
         visible = showContent,
         enter = makeEnterTransition(delayMillis = 333),
     ) {
         Box {
             NostrUserText(
+                autoResizeToFit = true,
                 displayName = profile.authorDisplayName,
                 displayNameColor = PRIMARY_TEXT_COLOR,
                 internetIdentifier = profile.internetIdentifier,

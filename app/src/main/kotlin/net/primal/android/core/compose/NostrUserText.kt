@@ -10,8 +10,13 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.AnnotatedString
@@ -27,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isUnspecified
 import androidx.compose.ui.unit.sp
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.PrimalBadgeAqua
@@ -54,7 +60,12 @@ fun NostrUserText(
     displayNameColor: Color = AppTheme.colorScheme.onSurface,
     fontSize: TextUnit = TextUnit.Unspecified,
     style: TextStyle = LocalTextStyle.current,
-    overflow: TextOverflow = TextOverflow.Ellipsis,
+    autoResizeToFit: Boolean = false,
+    overflow: TextOverflow = if (autoResizeToFit) {
+        TextOverflow.Clip
+    } else {
+        TextOverflow.Ellipsis
+    },
     maxLines: Int = 1,
     internetIdentifierBadgeSize: Dp = 14.dp,
     internetIdentifierBadgeAlign: PlaceholderVerticalAlign = PlaceholderVerticalAlign.Center,
@@ -63,6 +74,7 @@ fun NostrUserText(
     annotatedStringSuffixBuilder: (AnnotatedString.Builder.() -> Unit)? = null,
 ) {
     val verifiedBadge = !internetIdentifier.isNullOrEmpty()
+    var resizedTextStyle by remember { mutableStateOf(style) }
 
     val customBadgeStyle = if (legendaryCustomization?.customBadge == true) {
         legendaryCustomization.legendaryStyle
@@ -140,15 +152,38 @@ fun NostrUserText(
         },
     )
 
+    var shouldDraw by remember { mutableStateOf(false) }
+    val defaultFontSize = AppTheme.typography.bodyLarge.fontSize
     Text(
-        modifier = modifier,
+        modifier = modifier
+            .drawWithContent {
+                if (shouldDraw) {
+                    drawContent()
+                }
+            },
         text = titleText,
         fontSize = fontSize,
         textAlign = TextAlign.Start,
         overflow = overflow,
         inlineContent = inlineContent,
+        softWrap = false,
         maxLines = maxLines,
-        style = style,
+        style = resizedTextStyle,
+        onTextLayout = { result ->
+            if (result.didOverflowWidth && autoResizeToFit) {
+                if (style.fontSize.isUnspecified) {
+                    resizedTextStyle = resizedTextStyle.copy(
+                        fontSize = defaultFontSize,
+                    )
+                }
+
+                resizedTextStyle = resizedTextStyle.copy(
+                    fontSize = resizedTextStyle.fontSize * .95f,
+                )
+            } else {
+                shouldDraw = true
+            }
+        },
     )
 }
 

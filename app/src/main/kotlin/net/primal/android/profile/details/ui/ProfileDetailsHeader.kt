@@ -344,11 +344,12 @@ private fun UserDisplayName(
     ) {
         NostrUserText(
             modifier = Modifier
-                .weight(1f)
+                .weight(1f, fill = false)
                 .padding(start = 14.dp, end = 6.dp),
             displayName = displayName,
             internetIdentifier = internetIdentifier,
             internetIdentifierBadgeSize = 21.dp,
+            autoResizeToFit = true,
             internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
             style = AppTheme.typography.titleLarge.copy(
                 fontSize = 22.sp,
@@ -360,10 +361,8 @@ private fun UserDisplayName(
 
         if (profilePremiumDetails?.shouldShowPremiumBadge() == true) {
             ProfilePremiumBadge(
-                modifier = if (profilePremiumDetails.tier != null) {
-                    Modifier.clickable { onPremiumBadgeClick(profilePremiumDetails.tier, profileId) }
-                } else {
-                    Modifier
+                modifier = Modifier.clickable(enabled = profilePremiumDetails.tier != null) {
+                    profilePremiumDetails.tier?.let { onPremiumBadgeClick(profilePremiumDetails.tier, profileId) }
                 },
                 firstCohort = profilePremiumDetails.cohort1 ?: "",
                 secondCohort = profilePremiumDetails.cohort2 ?: "",
