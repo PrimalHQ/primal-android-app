@@ -21,6 +21,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -198,6 +199,7 @@ private fun PremiumHomeScreen(
                             when (state.membership.isPrimalLegendTier()) {
                                 true -> {
                                     SupportUsNoticeLegend(
+                                        visible = state.membership.donatedBtc != null,
                                         donatedSats = state.membership.donatedBtc?.toSats()?.toLong() ?: 0L,
                                         onSupportPrimal = onSupportPrimal,
                                     )
@@ -288,9 +290,13 @@ private fun SupportUsNoticePremium(onSupportPrimal: () -> Unit) {
 }
 
 @Composable
-private fun SupportUsNoticeLegend(donatedSats: Long, onSupportPrimal: () -> Unit) {
+private fun SupportUsNoticeLegend(
+    visible: Boolean,
+    donatedSats: Long,
+    onSupportPrimal: () -> Unit,
+) {
     Column(
-        modifier = Modifier,
+        modifier = Modifier.alpha(if (visible) 1.0f else 0.0f),
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
