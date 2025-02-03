@@ -16,7 +16,6 @@ import net.primal.android.premium.home.PremiumHomeContract.UiEvent
 import net.primal.android.premium.home.PremiumHomeContract.UiState
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.repository.PremiumRepository
-import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
@@ -131,7 +130,7 @@ class PremiumHomeViewModel @Inject constructor(
                 val clientConfigShowSupport = premiumRepository.shouldShowSupportUsNotice()
                 setState {
                     copy(
-                        showSupportUsNotice = clientConfigShowSupport && !membership.isPrimalLegendTier(),
+                        showSupportUsNotice = clientConfigShowSupport,
                     )
                 }
             } catch (error: WssException) {

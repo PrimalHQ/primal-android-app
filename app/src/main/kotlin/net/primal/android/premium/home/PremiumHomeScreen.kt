@@ -21,7 +21,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -45,7 +44,9 @@ import net.primal.android.premium.ui.PremiumBadge
 import net.primal.android.premium.ui.PrimalPremiumTable
 import net.primal.android.premium.ui.toHumanReadableString
 import net.primal.android.premium.utils.isPremiumFreeTier
+import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.theme.AppTheme
+import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 
 @Composable
 fun PremiumHomeScreen(
@@ -193,10 +194,21 @@ private fun PremiumHomeScreen(
                     }
 
                     else -> {
-                        SupportUsNotice(
-                            visible = state.showSupportUsNotice,
-                            onSupportPrimal = onSupportPrimal,
-                        )
+                        if (state.showSupportUsNotice) {
+                            when (state.membership.isPrimalLegendTier()) {
+                                true -> {
+                                    SupportUsNoticeLegend(
+                                        donatedSats = state.membership.donatedBtc?.toSats()?.toLong() ?: 0L,
+                                        onSupportPrimal = onSupportPrimal,
+                                    )
+                                }
+                                false -> {
+                                    SupportUsNoticePremium(
+                                        onSupportPrimal = onSupportPrimal,
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -230,9 +242,9 @@ private fun BottomBarButton(
 }
 
 @Composable
-private fun SupportUsNotice(visible: Boolean, onSupportPrimal: () -> Unit) {
+private fun SupportUsNoticePremium(onSupportPrimal: () -> Unit) {
     Column(
-        modifier = Modifier.alpha(if (visible) 1.0f else 0.0f),
+        modifier = Modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -251,7 +263,6 @@ private fun SupportUsNotice(visible: Boolean, onSupportPrimal: () -> Unit) {
             Text(
                 modifier = Modifier
                     .clickable(
-                        enabled = visible,
                         onClick = onSupportPrimal,
                     ),
                 style = AppTheme.typography.bodyMedium,
@@ -273,5 +284,57 @@ private fun SupportUsNotice(visible: Boolean, onSupportPrimal: () -> Unit) {
                 },
             )
         }
+    }
+}
+
+@Composable
+private fun SupportUsNoticeLegend(donatedSats: Long, onSupportPrimal: () -> Unit) {
+    Column(
+        modifier = Modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Row {
+            Text(
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                text = stringResource(id = R.string.legend_contribution_title) + " ",
+                style = AppTheme.typography.bodyMedium,
+            )
+            Text(
+                modifier = Modifier
+                    .clickable(
+                        onClick = onSupportPrimal,
+                    ),
+                style = AppTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                text = buildAnnotatedString {
+                    withStyle(
+                        style = SpanStyle(
+                            color = AppTheme.colorScheme.onBackground,
+                        ),
+                    ) {
+                        append(donatedSats.let { "%,d sats".format(it) })
+                    }
+                },
+            )
+        }
+        if (donatedSats > 0L) {
+            Text(
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                text = stringResource(id = R.string.legend_support_appreciation),
+                style = AppTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+            )
+        }
+        Text(
+            modifier = Modifier
+                .clickable(
+                    onClick = onSupportPrimal,
+                ),
+            color = AppTheme.colorScheme.secondary,
+            text = stringResource(id = R.string.legend_contribute_more),
+            style = AppTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+        )
     }
 }
