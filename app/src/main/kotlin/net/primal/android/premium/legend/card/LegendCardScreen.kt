@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -30,6 +32,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -81,6 +84,10 @@ import net.primal.android.theme.AppTheme
 
 private val TOP_ICON_COLOR = Color(0xFF1E1E1E)
 private val GLOW_RECT_COLOR = Color(0xFFCCCCCC)
+private val CARD_BACKGROUND_COLOR = Color(0xFF222222)
+private val DROPDOWN_BACKGROUND_COLOR = Color(0xFF282828)
+private val PRIMARY_TEXT_COLOR = Color(0xFFFFFFFF)
+private val SECONDARY_TEXT_COLOR = Color(0xFFAAAAAA)
 
 private const val PRIMAL_2_0_RELEASE_DATE_IN_SECONDS = 1732147200L
 
@@ -126,18 +133,20 @@ fun LegendCardScreen(
             .padding(20.dp)
             .fillMaxWidth()
             .clip(AppTheme.shapes.medium)
-            .background(AppTheme.extraColorScheme.surfaceVariantAlt1)
+            .background(CARD_BACKGROUND_COLOR)
             .drawAnimatedBackgroundAndGlow(
                 brush = state.profile?.premiumDetails?.legendaryCustomization?.legendaryStyle?.secondaryBrush,
                 backgroundProgress = animationProgress,
                 glowProgress = glowProgress,
             )
             .padding(bottom = 16.dp)
-            .padding(4.dp),
+            .padding(4.dp)
+            .aspectRatio(ratio = 0.56f),
     ) {
         Column(
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(28.dp, Alignment.CenterVertically),
+            verticalArrangement = Arrangement.SpaceBetween,
         ) {
             if (state.isActiveAccountCard) {
                 OptionsDropdownMenu(
@@ -256,7 +265,7 @@ private fun ButtonsColumn(
 private fun ContentDrawScope.drawGlowRectangle(glowProgress: AnimationState<Float, AnimationVector1D>) =
     rotate(degrees = 45f) {
         drawRect(
-            topLeft = Offset(x = -440f, y = 1740f - glowProgress.value * 2180f),
+            topLeft = Offset(x = -440f, y = 1840f - glowProgress.value * 2280f),
             alpha = .05f + glowProgress.value * .25f,
             color = GLOW_RECT_COLOR,
             size = Size(width = 2000f, height = 300f),
@@ -268,8 +277,8 @@ private fun DrawScope.makeEdgePaths(
     animationProgress: AnimationState<Float, AnimationVector1D>,
 ): Triple<Path, Path, Path> {
     val topStart = Path().apply {
-        moveTo(0f, animationProgress.value * size.height * 0.30f)
-        lineTo(animationProgress.value * size.height * 0.30f, 0f)
+        moveTo(0f, animationProgress.value * size.height * .31f)
+        lineTo(animationProgress.value * size.width * .6f, 0f)
         lineTo(-10f, 0f)
         close()
     }
@@ -277,17 +286,17 @@ private fun DrawScope.makeEdgePaths(
     val bottomStart = Path().apply {
         moveTo(
             x = 0f,
-            y = size.height * 0.70f + (1 - animationProgress.value) * size.height * .3f,
+            y = size.height * 0.745f + (1 - animationProgress.value) * size.height * .255f,
         )
         lineTo(0f, size.height)
-        lineTo(animationProgress.value * size.height * 0.30f, size.height)
+        lineTo(animationProgress.value * size.width * 0.49f, size.height)
         close()
     }
 
     val topEnd = Path().apply {
         moveTo(size.width - 10f - animationProgress.value * size.width, 0f)
         lineTo(size.width, 0f)
-        lineTo(size.width, animationProgress.value * size.height * .45f)
+        lineTo(size.width, animationProgress.value * size.height * .5f)
         close()
     }
 
@@ -328,7 +337,9 @@ private fun LegendDescription(modifier: Modifier = Modifier, profile: ProfileDet
         enter = makeEnterTransition(delayMillis = 583),
     ) {
         Column(
-            modifier = modifier.fillMaxWidth(),
+            modifier = modifier
+                .padding(horizontal = 20.dp)
+                .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         ) {
@@ -336,14 +347,14 @@ private fun LegendDescription(modifier: Modifier = Modifier, profile: ProfileDet
                 text = stringResource(id = R.string.premium_legend_card_legend_since) + " " +
                     legendSince.formatToDefaultDateFormat(FormatStyle.LONG),
                 style = AppTheme.typography.bodyMedium,
-                color = AppTheme.colorScheme.onPrimary,
+                color = PRIMARY_TEXT_COLOR,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
                 text = profile.premiumDetails?.legendaryCustomization?.currentShoutout ?: "",
                 style = AppTheme.typography.bodyMedium,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                color = SECONDARY_TEXT_COLOR,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center,
             )
@@ -388,16 +399,17 @@ private fun ProfileSummary(modifier: Modifier = Modifier, profile: ProfileDetail
         verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
     ) {
         Box(
-            modifier = Modifier.size(100.dp),
+            modifier = Modifier.size(145.dp),
             contentAlignment = Alignment.Center,
         ) {
             UniversalAvatarThumbnail(
                 modifier = Modifier
                     .alpha(avatarSizeAndAlphaProgress.value)
                     .rotate(avatarRotation.value),
-                avatarSize = (avatarSizeAndAlphaProgress.value * 100).dp,
+                avatarSize = (avatarSizeAndAlphaProgress.value * 145).dp,
                 avatarCdnImage = profile.avatarCdnImage,
                 legendaryCustomization = profile.premiumDetails?.legendaryCustomization,
+                hasInnerBorderOverride = false,
             )
         }
         Spacer(modifier = Modifier.height(10.dp))
@@ -414,7 +426,7 @@ private fun ProfileSummary(modifier: Modifier = Modifier, profile: ProfileDetail
                     style = AppTheme.typography.bodyMedium.copy(
                         lineHeight = 12.sp,
                     ),
-                    color = AppTheme.colorScheme.onPrimary,
+                    color = PRIMARY_TEXT_COLOR,
                 )
             }
         }
@@ -427,6 +439,8 @@ private fun ProfileSummary(modifier: Modifier = Modifier, profile: ProfileDetail
                     firstCohort = profile.premiumDetails.cohort1 ?: "",
                     secondCohort = profile.premiumDetails.cohort2 ?: "",
                     legendaryStyle = profile.premiumDetails.legendaryCustomization?.legendaryStyle,
+                    firstCohortFontSize = 14.sp,
+                    secondCohortFontSize = 14.sp,
                 )
             }
         }
@@ -442,6 +456,7 @@ private fun ColumnScope.AnimatedDisplayName(showContent: Boolean, profile: Profi
         Box {
             NostrUserText(
                 displayName = profile.authorDisplayName,
+                displayNameColor = PRIMARY_TEXT_COLOR,
                 internetIdentifier = profile.internetIdentifier,
                 internetIdentifierBadgeSize = 26.dp,
                 internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
@@ -479,6 +494,7 @@ private fun OptionsDropdownMenu(
     onLegendSettingsClick: () -> Unit,
 ) {
     var menuVisible by remember { mutableStateOf(false) }
+    val itemColors = MenuDefaults.itemColors(textColor = PRIMARY_TEXT_COLOR, trailingIconColor = PRIMARY_TEXT_COLOR)
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -496,16 +512,19 @@ private fun OptionsDropdownMenu(
         DropdownPrimalMenu(
             expanded = menuVisible,
             onDismissRequest = { menuVisible = false },
+            backgroundColor = DROPDOWN_BACKGROUND_COLOR,
         ) {
             DropdownPrimalMenuItem(
                 trailingIconVector = Icons.Default.Close,
                 text = stringResource(id = R.string.premium_legend_card_dropdown_close),
                 onClick = onBackClick,
+                colors = itemColors,
             )
             DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.Settings,
                 text = stringResource(id = R.string.premium_legend_card_dropdown_legend_settings),
                 onClick = onLegendSettingsClick,
+                colors = itemColors,
             )
         }
     }
