@@ -2,6 +2,7 @@ package net.primal.android.highlights.model
 
 import java.time.Instant
 import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.notes.db.PostWithAuthorData
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
@@ -20,8 +21,8 @@ data class CommentUi(
 fun PostWithAuthorData.toCommentUi() =
     CommentUi(
         commentId = this.post.postId,
-        authorId = this.author?.ownerId,
-        authorDisplayName = this.author?.displayName,
+        authorId = this.post.authorId,
+        authorDisplayName = this.author?.displayName ?: this.post.authorId.asEllipsizedNpub(),
         authorInternetIdentifier = this.author?.internetIdentifier,
         authorLegendaryCustomization = this.author?.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
         authorCdnImage = this.author?.avatarCdnImage,
