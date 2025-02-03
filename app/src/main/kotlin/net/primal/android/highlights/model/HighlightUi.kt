@@ -1,6 +1,7 @@
 package net.primal.android.highlights.model
 
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.core.compose.profile.model.asFallbackProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.highlights.db.Highlight
 import net.primal.android.nostr.model.NostrEventKind
@@ -62,7 +63,7 @@ fun List<Highlight>.sum() =
 fun Highlight.asJoinedHighlightsUi() =
     JoinedHighlightsUi(
         highlightId = this.data.highlightId,
-        authors = setOfNotNull(this.author?.asProfileDetailsUi()),
+        authors = setOf(this.author?.asProfileDetailsUi() ?: this.data.authorId.asFallbackProfileDetailsUi()),
         content = this.data.content,
         comments = this.comments.map { it.toCommentUi() },
         referencedEventATag = this.data.referencedEventATag,

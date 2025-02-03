@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PrimalLegendProfile(
-    @SerialName("style") val styleId: String,
+    @SerialName("style") val styleId: String?,
     @SerialName("custom_badge") val customBadge: Boolean,
     @SerialName("avatar_glow") val avatarGlow: Boolean,
     @SerialName("legend_since") val legendSince: Long? = null,

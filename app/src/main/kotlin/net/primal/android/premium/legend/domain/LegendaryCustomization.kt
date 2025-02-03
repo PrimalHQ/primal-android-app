@@ -15,7 +15,7 @@ fun PrimalLegendProfile.asLegendaryCustomization() =
     LegendaryCustomization(
         avatarGlow = avatarGlow,
         customBadge = customBadge,
-        legendaryStyle = LegendaryStyle.valueById(id = styleId),
+        legendaryStyle = LegendaryStyle.valueById(id = styleId ?: ""),
         legendSince = legendSince,
         currentShoutout = currentShoutout,
         inLeaderboard = inLeaderboard,

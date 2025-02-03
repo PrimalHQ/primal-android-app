@@ -43,13 +43,14 @@ fun UniversalAvatarThumbnail(
     borderSizeOverride: Dp? = null,
     backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onClick: (() -> Unit)? = null,
+    hasInnerBorderOverride: Boolean = true,
     defaultAvatar: @Composable () -> Unit = { DefaultAvatarThumbnailPlaceholderListItemImage() },
 ) {
     val hasLegendBorder = legendaryCustomization?.avatarGlow == true &&
         legendaryCustomization.legendaryStyle != LegendaryStyle.NO_CUSTOMIZATION
 
     val borderBrush = if (hasLegendBorder) {
-        legendaryCustomization?.legendaryStyle?.primaryBrush
+        legendaryCustomization.legendaryStyle?.primaryBrush
     } else {
         null
     }
@@ -65,7 +66,7 @@ fun UniversalAvatarThumbnail(
         cdnVariantUrl = variant?.mediaUrl,
         sourceUrl = avatarCdnImage?.sourceUrl,
         hasOuterBorder = hasBorder && avatarSize > 0.dp,
-        hasInnerBorder = hasLegendBorder && avatarSize > 0.dp,
+        hasInnerBorder = hasLegendBorder && avatarSize > 0.dp && hasInnerBorderOverride,
         borderBrush = borderBrush ?: Brush.linearGradient(
             colors = listOf(
                 fallbackBorderColor,
