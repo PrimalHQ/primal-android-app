@@ -160,6 +160,7 @@ private fun LeaderboardTopAppBar(
                     Text(
                         text = stringResource(id = R.string.premium_ogs_leaderboard_get_primal_premium),
                         style = AppTheme.typography.bodySmall,
+                        color = AppTheme.colorScheme.secondary,
                     )
                 }
             }

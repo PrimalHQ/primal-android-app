@@ -163,6 +163,7 @@ private fun LeaderboardTopAppBar(
                     Text(
                         text = stringResource(id = R.string.premium_legend_leaderboard_about_legends),
                         style = AppTheme.typography.bodySmall,
+                        color = AppTheme.colorScheme.secondary,
                     )
                 }
             }
