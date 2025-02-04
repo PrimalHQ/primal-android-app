@@ -6,6 +6,7 @@ interface PremiumCardContract {
     data class UiState(
         val profile: ProfileDetailsUi? = null,
         val isActiveAccountCard: Boolean = false,
+        val isActiveAccountLegend: Boolean = false,
         val isPrimalLegend: Boolean = false,
     )
 }
