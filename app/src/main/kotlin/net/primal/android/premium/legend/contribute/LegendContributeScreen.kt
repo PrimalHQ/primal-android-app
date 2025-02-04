@@ -15,6 +15,8 @@ import net.primal.android.premium.legend.contribute.LegendContributeContract.UiE
 import net.primal.android.premium.legend.contribute.LegendContributeContract.UiState
 import net.primal.android.premium.legend.contribute.amount.LegendContributeAmountStage
 import net.primal.android.premium.legend.contribute.intro.LegendContributeIntroStage
+import net.primal.android.premium.legend.contribute.payment.LegendContributePaymentInstructionsStage
+import net.primal.android.premium.legend.contribute.success.LegendContributePaymentSuccessStage
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.repository.isValidExchangeRate
 
@@ -60,7 +62,7 @@ private fun LegendContributeScreen(
             LegendContributeState.PickAmount -> {
                 LegendContributeAmountStage(
                     modifier = Modifier.fillMaxSize(),
-                    onNext = {},
+                    onNext = { eventPublisher(UiEvent.ShowPaymentInstructions) },
                     onBack = { eventPublisher(UiEvent.GoBackToIntro) },
                     state = state,
                     onAmountClick = {
@@ -74,8 +76,18 @@ private fun LegendContributeScreen(
                 )
             }
             LegendContributeState.Payment -> {
+                LegendContributePaymentInstructionsStage(
+                    modifier = Modifier.fillMaxSize(),
+                    state = state,
+                    onBack = { eventPublisher(UiEvent.GoBackToPickAmount) },
+                    onNext = { eventPublisher(UiEvent.ShowSuccess) },
+                )
             }
             LegendContributeState.Success -> {
+                LegendContributePaymentSuccessStage(
+                    modifier = Modifier.fillMaxSize(),
+                    onBack = { eventPublisher(UiEvent.GoBackToPickAmount) },
+                )
             }
         }
     }
@@ -91,7 +103,7 @@ private fun LegendContributeBackHandler(
         when (stage) {
             LegendContributeState.Intro -> onClose()
             LegendContributeState.PickAmount -> eventPublisher(UiEvent.GoBackToIntro)
-            LegendContributeState.Payment -> onClose()
+            LegendContributeState.Payment -> eventPublisher(UiEvent.GoBackToPickAmount)
             LegendContributeState.Success -> onClose()
         }
     }

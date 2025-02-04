@@ -18,6 +18,9 @@ class LegendContributeContract {
     sealed class UiEvent {
         data object GoBackToIntro : UiEvent()
         data object ChangeCurrencyMode : UiEvent()
+        data object GoBackToPickAmount : UiEvent()
+        data object ShowPaymentInstructions : UiEvent()
+        data object ShowSuccess : UiEvent()
         data class ShowAmountEditor(val paymentMethod: PaymentMethod) : UiEvent()
         data class AmountChanged(val amount: String) : UiEvent()
     }
