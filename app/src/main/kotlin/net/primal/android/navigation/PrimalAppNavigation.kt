@@ -91,10 +91,10 @@ import net.primal.android.premium.home.PremiumHomeScreen
 import net.primal.android.premium.home.PremiumHomeViewModel
 import net.primal.android.premium.info.PREMIUM_MORE_INFO_FAQ_TAB_INDEX
 import net.primal.android.premium.info.PremiumMoreInfoScreen
+import net.primal.android.premium.legend.become.PremiumBecomeLegendScreen
+import net.primal.android.premium.legend.become.PremiumBecomeLegendViewModel
 import net.primal.android.premium.legend.card.LegendCardScreen
 import net.primal.android.premium.legend.card.LegendCardViewModel
-import net.primal.android.premium.legend.contribute.LegendContributeScreen
-import net.primal.android.premium.legend.contribute.LegendContributeViewModel
 import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationScreen
 import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationViewModel
 import net.primal.android.premium.legend.leaderboard.LegendLeaderboardScreen
@@ -1214,30 +1214,21 @@ private fun NavGraphBuilder.premiumBuyPrimalLegend(
     popEnterTransition = { primalScaleIn },
     popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
-//    val viewModel = hiltViewModel<PremiumBecomeLegendViewModel>()
-//    ApplyEdgeToEdge()
-//    LockToOrientationPortrait()
-//
-//    PremiumBecomeLegendScreen(
-//        viewModel = viewModel,
-//        onClose = { navController.navigateUp() },
-//        onLegendPurchased = {
-//            navController.navigateUp()
-//            if (it.buyingPremiumFromOrigin == FROM_ORIGIN_PREMIUM_BADGE) {
-//                navController.navigateToPremiumHome()
-//            } else {
-//                navController.popBackStack()
-//            }
-//        },
-//    )
-
-    val viewModel = hiltViewModel<LegendContributeViewModel>()
+    val viewModel = hiltViewModel<PremiumBecomeLegendViewModel>()
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
 
-    LegendContributeScreen(
+    PremiumBecomeLegendScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
+        onLegendPurchased = {
+            navController.navigateUp()
+            if (it.buyingPremiumFromOrigin == FROM_ORIGIN_PREMIUM_BADGE) {
+                navController.navigateToPremiumHome()
+            } else {
+                navController.popBackStack()
+            }
+        },
     )
 }
 
