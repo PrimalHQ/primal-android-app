@@ -1,6 +1,5 @@
 package net.primal.android.premium.legend.contribute.payment
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,7 +17,6 @@ import net.primal.android.premium.legend.contribute.LegendContributeContract
 import net.primal.android.premium.legend.contribute.LegendContributeContract.UiState
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun LegendContributePaymentInstructionsStage(
     modifier: Modifier,

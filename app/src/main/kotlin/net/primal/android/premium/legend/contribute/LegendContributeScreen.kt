@@ -86,7 +86,7 @@ private fun LegendContributeScreen(
             LegendContributeState.Success -> {
                 LegendContributePaymentSuccessStage(
                     modifier = Modifier.fillMaxSize(),
-                    onBack = { eventPublisher(UiEvent.GoBackToPaymentInstructions) },
+                    onBack = onClose,
                 )
             }
         }

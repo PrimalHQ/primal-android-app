@@ -1,6 +1,5 @@
 package net.primal.android.premium.legend.contribute.amount
 
-import android.annotation.SuppressLint
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -32,7 +30,6 @@ import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.ui.TransactionAmountText
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LegendContributeAmountStage(
@@ -70,8 +67,12 @@ fun LegendContributeAmountStage(
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            TransactionHeader(
-                state = state,
+            TransactionAmountText(
+                modifier = Modifier.padding(top = 100.dp),
+                amountInBtc = state.amountInSats.toULong().toBtc().toString(),
+                amountInUsd = state.amountInUsd,
+                currentExchangeRate = state.currentExchangeRate,
+                currentCurrencyMode = state.currencyMode,
                 onAmountClick = onAmountClick,
             )
 
@@ -109,21 +110,6 @@ private fun LegendContributeAmountStageBottomBar(
             onCancelClick = onBack,
             onActionClick = onNext,
             nextEnabled = state.amountInSats != "0",
-        )
-    }
-}
-
-@Composable
-private fun TransactionHeader(state: UiState, onAmountClick: () -> Unit) {
-    Column {
-        Spacer(modifier = Modifier.height(100.dp))
-
-        TransactionAmountText(
-            amountInBtc = state.amountInSats.toULong().toBtc().toString(),
-            amountInUsd = state.amountInUsd,
-            currentExchangeRate = state.currentExchangeRate,
-            currentCurrencyMode = state.currencyMode,
-            onAmountClick = onAmountClick,
         )
     }
 }

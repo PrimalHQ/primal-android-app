@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,12 +64,11 @@ fun LegendContributeIntroStage(
 
 @Composable
 private fun LegendContributeIntroStageBottomBar(onClose: () -> Unit) {
-    Column(
+    TextButton(
         modifier = Modifier
             .fillMaxWidth()
             .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        onClick = onClose,
     ) {
         Text(
             modifier = Modifier.clickable { onClose() },

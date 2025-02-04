@@ -19,7 +19,9 @@ import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.domain.not
 import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
-import net.primal.android.wallet.utils.CurrencyConversionUtils.fromUsdToSats
+import net.primal.android.wallet.utils.formatUsdZeros
+import net.primal.android.wallet.utils.parseSatsToUsd
+import net.primal.android.wallet.utils.parseUsdToSats
 
 @HiltViewModel
 class LegendContributeViewModel @Inject constructor(
@@ -37,6 +39,7 @@ class LegendContributeViewModel @Inject constructor(
 
     init {
         observeEvents()
+        fetchExchangeRate()
         observeUsdExchangeRate()
     }
 
@@ -88,11 +91,7 @@ class LegendContributeViewModel @Inject constructor(
                 setState {
                     copy(
                         amountInSats = amount,
-                        amountInUsd = BigDecimal(amount.toDouble())
-                            .fromSatsToUsd(state.value.currentExchangeRate)
-                            .stripTrailingZeros()
-                            .let { if (it.compareTo(BigDecimal.ZERO) == 0) BigDecimal.ZERO else it }
-                            .toPlainString(),
+                        amountInUsd = amount.parseSatsToUsd(state.value.currentExchangeRate),
                     )
                 }
             }
@@ -100,10 +99,8 @@ class LegendContributeViewModel @Inject constructor(
             CurrencyMode.FIAT -> {
                 setState {
                     copy(
+                        amountInSats = amount.parseUsdToSats(state.value.currentExchangeRate),
                         amountInUsd = amount,
-                        amountInSats = BigDecimal(amount)
-                            .fromUsdToSats(state.value.currentExchangeRate)
-                            .toString(),
                     )
                 }
             }
@@ -111,7 +108,6 @@ class LegendContributeViewModel @Inject constructor(
 
     private fun observeUsdExchangeRate() =
         viewModelScope.launch {
-            fetchExchangeRate()
             exchangeRateHandler.usdExchangeRate.collect {
                 setState {
                     copy(
@@ -119,13 +115,7 @@ class LegendContributeViewModel @Inject constructor(
                         maximumUsdAmount = getMaximumUsdAmount(it),
                         amountInUsd = BigDecimal(_state.value.amountInSats)
                             .fromSatsToUsd(it)
-                            .let { amount ->
-                                if (amount.compareTo(BigDecimal.ZERO) == 0) {
-                                    "0"
-                                } else {
-                                    amount.toString()
-                                }
-                            },
+                            .formatUsdZeros(),
                     )
                 }
             }
