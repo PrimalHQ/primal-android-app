@@ -8,6 +8,7 @@ interface OGLeaderboardContract {
         val leaderboardEntries: Map<LeaderboardOrderBy, List<LeaderboardLegendEntry>> = emptyMap(),
         val loading: Boolean = true,
         val error: Throwable? = null,
+        val isActiveAccountPremium: Boolean = false,
     )
 
     sealed class UiEvent {

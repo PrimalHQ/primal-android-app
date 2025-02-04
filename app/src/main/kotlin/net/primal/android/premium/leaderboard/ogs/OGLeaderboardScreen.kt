@@ -44,7 +44,7 @@ fun OGLeaderboardScreen(
     viewModel: OGLeaderboardViewModel,
     onClose: () -> Unit,
     onProfileClick: (String) -> Unit,
-    onAboutOGsClick: () -> Unit,
+    onGetPrimalPremiumClick: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -53,7 +53,7 @@ fun OGLeaderboardScreen(
         eventPublisher = viewModel::setEvent,
         onClose = onClose,
         onProfileClick = onProfileClick,
-        onAboutOGsClick = onAboutOGsClick,
+        onGetPrimalPremiumClick = onGetPrimalPremiumClick,
     )
 }
 
@@ -63,7 +63,7 @@ private fun OGLeaderboardScreen(
     state: OGLeaderboardContract.UiState,
     eventPublisher: (OGLeaderboardContract.UiEvent) -> Unit,
     onClose: () -> Unit,
-    onAboutOGsClick: () -> Unit,
+    onGetPrimalPremiumClick: () -> Unit,
     onProfileClick: (String) -> Unit,
 ) {
     val pagerState = rememberPagerState { PAGE_COUNT }
@@ -77,8 +77,9 @@ private fun OGLeaderboardScreen(
         topBar = {
             LeaderboardTopAppBar(
                 onBackClick = onClose,
+                isActiveAccountPremium = state.isActiveAccountPremium,
                 pagerState = pagerState,
-                onAboutOGsClick = onAboutOGsClick,
+                onGetPrimalPremiumClick = onGetPrimalPremiumClick,
             )
         },
     ) { paddingValues ->
@@ -105,7 +106,10 @@ private fun OGLeaderboardScreen(
 }
 
 @Composable
-private fun LeaderboardList(entries: List<LeaderboardLegendEntry>, onProfileClick: (String) -> Unit) {
+private fun LeaderboardList(
+    entries: List<LeaderboardLegendEntry>,
+    onProfileClick: (String) -> Unit
+) {
     LazyColumn {
         items(
             items = entries,
@@ -122,9 +126,10 @@ private fun LeaderboardList(entries: List<LeaderboardLegendEntry>, onProfileClic
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun LeaderboardTopAppBar(
-    onBackClick: () -> Unit,
     pagerState: PagerState,
-    onAboutOGsClick: () -> Unit,
+    isActiveAccountPremium: Boolean,
+    onBackClick: () -> Unit,
+    onGetPrimalPremiumClick: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -142,17 +147,21 @@ private fun LeaderboardTopAppBar(
             OGLeaderboardTabs(
                 modifier = Modifier.weight(1f),
                 selectedTabIndex = pagerState.currentPage,
-                onLatestClick = { coroutineScope.launch { pagerState.animateScrollToPage(page = LATEST_INDEX) } },
+                onLatestClick = {
+                    coroutineScope.launch { pagerState.animateScrollToPage(page = LATEST_INDEX) }
+                },
             )
 
-            TextButton(
-                modifier = Modifier.padding(end = 8.dp),
-                onClick = onAboutOGsClick,
-            ) {
-                Text(
-                    text = stringResource(id = R.string.premium_ogs_leaderboard_about_ogs),
-                    style = AppTheme.typography.bodySmall,
-                )
+            if (!isActiveAccountPremium) {
+                TextButton(
+                    modifier = Modifier.padding(end = 8.dp),
+                    onClick = onGetPrimalPremiumClick,
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.premium_ogs_leaderboard_get_primal_premium),
+                        style = AppTheme.typography.bodySmall,
+                    )
+                }
             }
         }
 

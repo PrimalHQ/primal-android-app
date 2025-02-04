@@ -1318,7 +1318,7 @@ private fun NavGraphBuilder.premiumOGsLeaderboard(route: String, navController: 
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
             onProfileClick = { navController.navigateToProfile(profileId = it) },
-            onAboutOGsClick = {},
+            onGetPrimalPremiumClick = { navController.navigateToPremiumBuying() },
         )
     }
 
