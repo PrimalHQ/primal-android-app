@@ -45,6 +45,7 @@ import net.primal.android.premium.ui.PremiumBadge
 import net.primal.android.premium.ui.PrimalPremiumTable
 import net.primal.android.premium.ui.toHumanReadableString
 import net.primal.android.premium.utils.isPremiumFreeTier
+import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -54,6 +55,7 @@ fun PremiumHomeScreen(
     onRenewSubscription: (primalName: String) -> Unit,
     onManagePremium: () -> Unit,
     onSupportPrimal: () -> Unit,
+    onLegendCardClick: (String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -70,6 +72,7 @@ fun PremiumHomeScreen(
         onRenewSubscription = onRenewSubscription,
         onManagePremium = onManagePremium,
         onSupportPrimal = onSupportPrimal,
+        onLegendCardClick = onLegendCardClick,
         eventPublisher = viewModel::setEvent,
     )
 }
@@ -82,6 +85,7 @@ private fun PremiumHomeScreen(
     onRenewSubscription: (primalName: String) -> Unit,
     onManagePremium: () -> Unit,
     onSupportPrimal: () -> Unit,
+    onLegendCardClick: (String) -> Unit,
     eventPublisher: (PremiumHomeContract.UiEvent) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -153,6 +157,9 @@ private fun PremiumHomeScreen(
 
             if (state.membership != null) {
                 PremiumBadge(
+                    modifier = Modifier.clickable(enabled = state.membership.isPrimalLegendTier()) {
+                        state.profileId?.let { onLegendCardClick(it) }
+                    },
                     firstCohort = state.membership.cohort1,
                     secondCohort = state.membership.cohort2,
                     membershipExpired = state.membership.isExpired(),

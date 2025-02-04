@@ -62,6 +62,7 @@ class PremiumHomeViewModel @Inject constructor(
             activeAccountStore.activeUserAccount.collect {
                 setState {
                     copy(
+                        profileId = it.pubkey,
                         avatarCdnImage = it.avatarCdnImage,
                         profileNostrAddress = it.internetIdentifier,
                         profileLightningAddress = it.lightningAddress,
