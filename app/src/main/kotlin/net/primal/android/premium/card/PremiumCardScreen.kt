@@ -155,6 +155,7 @@ private fun PremiumCardScreen(
                 LegendCardLayout(
                     state = state,
                     onClose = onClose,
+                    isActiveAccountLegend = state.isActiveAccountLegend,
                     onLegendSettingsClick = onLegendSettingsClick,
                     onSeeOtherLegendsClick = onSeeOtherLegendsClick,
                     onBecomeLegendClick = onBecomeLegendClick,
@@ -189,7 +190,11 @@ private fun PrimalOGLayout(onClose: () -> Unit, state: PremiumCardContract.UiSta
                 PrimalOGDescription()
             }
         }
-        PremiumButton(onSeeOtherPrimalOGsClick = {})
+        AnimatedButtonsColumn(
+            primaryButtonText = stringResource(id = R.string.premium_card_button_see_other_ogs),
+            onPrimaryButtonClick = {},
+            isSecondaryButtonVisible = false,
+        )
     }
 }
 
@@ -197,6 +202,7 @@ private fun PrimalOGLayout(onClose: () -> Unit, state: PremiumCardContract.UiSta
 private fun LegendCardLayout(
     state: PremiumCardContract.UiState,
     onClose: () -> Unit,
+    isActiveAccountLegend: Boolean,
     onLegendSettingsClick: () -> Unit,
     onSeeOtherLegendsClick: () -> Unit,
     onBecomeLegendClick: () -> Unit,
@@ -224,10 +230,13 @@ private fun LegendCardLayout(
         }
 
         state.profile?.premiumDetails?.legendaryCustomization?.let { legendaryCustomization ->
-            LegendButtonsColumn(
+            AnimatedButtonsColumn(
+                primaryButtonText = stringResource(id = R.string.premium_card_button_see_other_legends),
+                onPrimaryButtonClick = onSeeOtherLegendsClick,
+                secondaryButtonText = stringResource(id = R.string.premium_card_button_become_a_legend),
+                onSecondaryButtonClick = onBecomeLegendClick,
+                isSecondaryButtonVisible = !isActiveAccountLegend,
                 legendaryCustomization = legendaryCustomization,
-                onSeeOtherLegendsClick = onSeeOtherLegendsClick,
-                onBecomeLegendClick = onBecomeLegendClick,
             )
         }
     }
@@ -259,41 +268,18 @@ private fun Modifier.drawAnimatedBackgroundAndGlow(
 }
 
 @Composable
-private fun PremiumButton(modifier: Modifier = Modifier, onSeeOtherPrimalOGsClick: () -> Unit) {
-    var showContent by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { showContent = true }
-
-    AnimatedVisibility(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp),
-        visible = showContent,
-        enter = makeEnterTransition(delayMillis = 583),
-    ) {
-        TextButton(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = onSeeOtherPrimalOGsClick,
-            contentPadding = PaddingValues(vertical = 16.dp),
-        ) {
-            Text(
-                text = stringResource(id = R.string.premium_card_button_see_other_ogs),
-                style = AppTheme.typography.bodyMedium,
-                color = AppTheme.colorScheme.secondary,
-                fontSize = 16.sp,
-            )
-        }
-    }
-}
-
-@Composable
-private fun LegendButtonsColumn(
+private fun AnimatedButtonsColumn(
     modifier: Modifier = Modifier,
-    onSeeOtherLegendsClick: () -> Unit,
-    onBecomeLegendClick: () -> Unit,
-    legendaryCustomization: LegendaryCustomization,
+    primaryButtonText: String,
+    secondaryButtonText: String = "",
+    onPrimaryButtonClick: () -> Unit,
+    onSecondaryButtonClick: () -> Unit = {},
+    isSecondaryButtonVisible: Boolean = true,
+    legendaryCustomization: LegendaryCustomization? = null,
 ) {
     var showContent by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { showContent = true }
+    val secondaryButtonAlpha = if (isSecondaryButtonVisible) 1f else 0f
 
     Column(
         modifier = modifier
@@ -308,13 +294,13 @@ private fun LegendButtonsColumn(
         ) {
             TextButton(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = onSeeOtherLegendsClick,
+                onClick = onPrimaryButtonClick,
                 contentPadding = PaddingValues(vertical = 16.dp),
             ) {
                 Text(
-                    text = stringResource(id = R.string.premium_card_button_see_other_legends),
+                    text = primaryButtonText,
                     style = AppTheme.typography.bodyMedium,
-                    color = legendaryCustomization.legendaryStyle.resolveNoCustomizationAndNull(),
+                    color = legendaryCustomization?.legendaryStyle.resolveNoCustomizationAndNull(),
                     fontSize = 16.sp,
                 )
             }
@@ -324,17 +310,19 @@ private fun LegendButtonsColumn(
             enter = makeEnterTransition(delayMillis = 667),
         ) {
             Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = onBecomeLegendClick,
+                modifier = Modifier
+                    .alpha(secondaryButtonAlpha)
+                    .fillMaxWidth(),
+                enabled = isSecondaryButtonVisible,
+                onClick = onSecondaryButtonClick,
                 contentPadding = PaddingValues(vertical = 16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = legendaryCustomization.legendaryStyle
-                        .resolveNoCustomizationAndNull(),
-                    contentColor = legendaryCustomization.legendaryStyle.resolveButtonColor(),
+                    containerColor = legendaryCustomization?.legendaryStyle.resolveNoCustomizationAndNull(),
+                    contentColor = legendaryCustomization?.legendaryStyle.resolveButtonColor(),
                 ),
             ) {
                 Text(
-                    text = stringResource(id = R.string.premium_card_button_become_a_legend),
+                    text = secondaryButtonText,
                     style = AppTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp,
