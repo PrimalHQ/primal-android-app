@@ -56,6 +56,7 @@ fun PremiumHomeScreen(
     onRenewSubscription: (primalName: String) -> Unit,
     onManagePremium: () -> Unit,
     onSupportPrimal: () -> Unit,
+    onContributePrimal: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -72,6 +73,7 @@ fun PremiumHomeScreen(
         onRenewSubscription = onRenewSubscription,
         onManagePremium = onManagePremium,
         onSupportPrimal = onSupportPrimal,
+        onContributePrimal = onContributePrimal,
         eventPublisher = viewModel::setEvent,
     )
 }
@@ -84,6 +86,7 @@ private fun PremiumHomeScreen(
     onRenewSubscription: (primalName: String) -> Unit,
     onManagePremium: () -> Unit,
     onSupportPrimal: () -> Unit,
+    onContributePrimal: () -> Unit,
     eventPublisher: (PremiumHomeContract.UiEvent) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -200,7 +203,7 @@ private fun PremiumHomeScreen(
                                 SupportUsNoticeLegend(
                                     visible = state.membership.donatedBtc != null,
                                     donatedSats = state.membership.donatedBtc?.toSats()?.toLong() ?: 0L,
-                                    onSupportPrimal = onSupportPrimal,
+                                    onContributePrimal = onContributePrimal,
                                 )
                             } else {
                                 SupportUsNoticePremium(
@@ -287,7 +290,7 @@ private fun SupportUsNoticePremium(onSupportPrimal: () -> Unit) {
 private fun SupportUsNoticeLegend(
     visible: Boolean,
     donatedSats: Long,
-    onSupportPrimal: () -> Unit,
+    onContributePrimal: () -> Unit,
 ) {
     Column(
         modifier = Modifier.alpha(if (visible) 1.0f else 0.0f),
@@ -301,7 +304,7 @@ private fun SupportUsNoticeLegend(
                 style = AppTheme.typography.bodyMedium,
             )
             Text(
-                modifier = Modifier.clickable(onClick = onSupportPrimal),
+                modifier = Modifier.clickable(onClick = onContributePrimal),
                 style = AppTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
                 text = buildAnnotatedString {
@@ -326,7 +329,7 @@ private fun SupportUsNoticeLegend(
         Text(
             modifier = Modifier
                 .clickable(
-                    onClick = onSupportPrimal,
+                    onClick = onContributePrimal,
                 ),
             color = AppTheme.colorScheme.secondary,
             text = stringResource(id = R.string.premium_home_legend_contribute_more),
