@@ -337,7 +337,7 @@
     <string name="premium_card_dropdown_close">Close</string>
     <string name="premium_card_dropdown_legend_settings">Legend settings</string>
 
-    <string name="premium_ogs_leaderboard_title">Primal OGs</string>
+    <string name="premium_ogs_leaderboard_title">Premium Users</string>
     <string name="premium_ogs_leaderboard_latest_tab">Latest</string>
     <string name="premium_ogs_leaderboard_get_primal_premium">Get Primal Premium</string>
     <string name="premium_ogs_leaderboard_since">Since</string>
