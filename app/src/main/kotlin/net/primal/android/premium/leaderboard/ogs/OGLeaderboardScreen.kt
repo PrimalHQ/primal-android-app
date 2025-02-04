@@ -128,19 +128,19 @@ private fun LeaderboardTopAppBar(
             onNavigationIconClick = onBackClick,
             showDivider = false,
         )
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            OGLeaderboardTabs(
-                modifier = Modifier.weight(1f),
-                selectedTabIndex = pagerState.currentPage,
-                onLatestClick = {
-                    coroutineScope.launch { pagerState.animateScrollToPage(page = LATEST_INDEX) }
-                },
-            )
+        if (!isActiveAccountPremium) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                OGLeaderboardTabs(
+                    modifier = Modifier.weight(1f),
+                    selectedTabIndex = pagerState.currentPage,
+                    onLatestClick = {
+                        coroutineScope.launch { pagerState.animateScrollToPage(page = LATEST_INDEX) }
+                    },
+                )
 
-            if (!isActiveAccountPremium) {
                 TextButton(
                     modifier = Modifier.padding(end = 8.dp),
                     onClick = onGetPrimalPremiumClick,
