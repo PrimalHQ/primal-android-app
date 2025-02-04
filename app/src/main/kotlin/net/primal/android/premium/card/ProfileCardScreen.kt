@@ -186,7 +186,7 @@ private fun PrimalOGLayout(onClose: () -> Unit, state: ProfileCardContract.UiSta
 
             state.profile?.let { profile ->
                 ProfileSummary(profile = profile)
-                PrimalOGDescription(profile = profile)
+                PrimalOGDescription()
             }
         }
         PremiumButton(onSeeOtherPrimalOGsClick = {})
@@ -406,7 +406,7 @@ private fun LegendaryStyle?.resolveButtonColor(): Color =
     }
 
 @Composable
-private fun PrimalOGDescription(modifier: Modifier = Modifier, profile: ProfileDetailsUi) {
+private fun PrimalOGDescription(modifier: Modifier = Modifier) {
     var showContent by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { showContent = true }
 
