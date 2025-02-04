@@ -335,6 +335,10 @@
     <string name="premium_legend_card_dropdown_close">Close</string>
     <string name="premium_legend_card_dropdown_legend_settings">Legend settings</string>
 
+    <string name="premium_ogs_leaderboard_title">Primal OGs</string>
+    <string name="premium_ogs_leaderboard_latest_tab">Latest</string>
+    <string name="premium_ogs_leaderboard_about_ogs">About Primal OGs</string>
+    <string name="premium_ogs_leaderboard_since">Since</string>
     <string name="premium_legend_leaderboard_title">Primal Legends</string>
     <string name="premium_legend_leaderboard_latest_tab">Latest</string>
     <string name="premium_legend_leaderboard_contribution_tab">Contribution</string>

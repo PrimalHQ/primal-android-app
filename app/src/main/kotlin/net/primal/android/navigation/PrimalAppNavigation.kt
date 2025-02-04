@@ -99,6 +99,8 @@ import net.primal.android.premium.legend.customization.LegendaryProfileCustomiza
 import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationViewModel
 import net.primal.android.premium.leaderboard.legend.LegendLeaderboardScreen
 import net.primal.android.premium.leaderboard.legend.LegendLeaderboardViewModel
+import net.primal.android.premium.leaderboard.ogs.OGLeaderboardScreen
+import net.primal.android.premium.leaderboard.ogs.OGLeaderboardViewModel
 import net.primal.android.premium.manage.PremiumManageContract
 import net.primal.android.premium.manage.PremiumManageScreen
 import net.primal.android.premium.manage.PremiumManageViewModel
@@ -302,7 +304,9 @@ private fun NavController.navigateToPremiumBuyPrimalLegend(fromOrigin: String? =
 private fun NavController.navigateToPremiumLegendaryProfile() = navigate(route = "premium/legend/profile")
 private fun NavController.navigateToPremiumLegendCard(profileId: String) =
     navigate(route = "premium/legend/card/$profileId")
+
 private fun NavController.navigateToPremiumLegendLeaderboard() = navigate(route = "premium/legend/leaderboard")
+private fun NavController.navigateToPremiumOGsLeaderboard() = navigate(route = "premium/ogs/leaderboard")
 
 private fun NavController.navigateToPremiumManage() = navigate(route = "premium/manage")
 private fun NavController.navigateToPremiumMediaManagement() = navigate(route = "premium/manage/media")
@@ -598,6 +602,7 @@ fun SharedTransitionScope.PrimalAppNavigation() {
         )
 
         premiumLegendLeaderboard(route = "premium/legend/leaderboard", navController = navController)
+        premiumOGsLeaderboard(route = "premium/ogs/leaderboard", navController = navController)
 
         premiumManage(route = "premium/manage", navController = navController)
 
@@ -1296,6 +1301,27 @@ private fun NavGraphBuilder.premiumLegendLeaderboard(route: String, navControlle
         )
     }
 
+private fun NavGraphBuilder.premiumOGsLeaderboard(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        val viewModel = hiltViewModel<OGLeaderboardViewModel>()
+
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+
+        OGLeaderboardScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+            onProfileClick = { navController.navigateToProfile(profileId = it) },
+            onAboutOGsClick = {},
+        )
+    }
+
 private fun NavGraphBuilder.premiumManage(route: String, navController: NavController) =
     composable(
         route = route,
@@ -1692,7 +1718,7 @@ private fun NavGraphBuilder.mediaItem(
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = this@composable,
 
-        )
+            )
     }
 }
 
