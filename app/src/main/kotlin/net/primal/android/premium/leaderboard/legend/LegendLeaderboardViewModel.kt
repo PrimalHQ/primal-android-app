@@ -1,4 +1,4 @@
-package net.primal.android.premium.legend.leaderboard
+package net.primal.android.premium.leaderboard.legend
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.api.model.LeaderboardOrderBy
-import net.primal.android.premium.legend.leaderboard.LegendLeaderboardContract.UiEvent
-import net.primal.android.premium.legend.leaderboard.LegendLeaderboardContract.UiState
+import net.primal.android.premium.leaderboard.legend.LegendLeaderboardContract.UiEvent
+import net.primal.android.premium.leaderboard.legend.LegendLeaderboardContract.UiState
 import net.primal.android.premium.repository.PremiumRepository
 import timber.log.Timber
 

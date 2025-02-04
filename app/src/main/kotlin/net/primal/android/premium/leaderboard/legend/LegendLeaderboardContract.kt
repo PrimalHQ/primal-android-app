@@ -1,4 +1,4 @@
-package net.primal.android.premium.legend.leaderboard
+package net.primal.android.premium.leaderboard.legend
 
 import net.primal.android.premium.api.model.LeaderboardOrderBy
 import net.primal.android.premium.legend.domain.LeaderboardLegendEntry

@@ -1,4 +1,4 @@
-package net.primal.android.premium.legend.leaderboard
+package net.primal.android.premium.leaderboard.legend
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,12 +32,12 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.premium.api.model.LeaderboardOrderBy
+import net.primal.android.premium.leaderboard.legend.ui.CONTRIBUTION_INDEX
+import net.primal.android.premium.leaderboard.legend.ui.LATEST_INDEX
+import net.primal.android.premium.leaderboard.legend.ui.LeaderboardTabs
+import net.primal.android.premium.leaderboard.legend.ui.LegendLeaderboardItem
+import net.primal.android.premium.leaderboard.legend.ui.PAGE_COUNT
 import net.primal.android.premium.legend.domain.LeaderboardLegendEntry
-import net.primal.android.premium.legend.leaderboard.ui.CONTRIBUTION_INDEX
-import net.primal.android.premium.legend.leaderboard.ui.LATEST_INDEX
-import net.primal.android.premium.legend.leaderboard.ui.LeaderboardTabs
-import net.primal.android.premium.legend.leaderboard.ui.LegendLeaderboardItem
-import net.primal.android.premium.legend.leaderboard.ui.PAGE_COUNT
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -60,7 +60,7 @@ fun LegendLeaderboardScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LegendLeaderboardScreen(
+private fun LegendLeaderboardScreen(
     state: LegendLeaderboardContract.UiState,
     eventPublisher: (LegendLeaderboardContract.UiEvent) -> Unit,
     onClose: () -> Unit,
@@ -93,7 +93,7 @@ fun LegendLeaderboardScreen(
             } else if (state.error != null) {
                 ListNoContent(
                     modifier = Modifier.fillMaxSize(),
-                    noContentText = stringResource(id = R.string.premium_legend_leaderboard_no_content),
+                    noContentText = stringResource(id = R.string.premium_leaderboard_no_content),
                     onRefresh = {
                         eventPublisher(LegendLeaderboardContract.UiEvent.RetryFetch(currentPage.resolveOrderBy()))
                     },
@@ -106,7 +106,7 @@ fun LegendLeaderboardScreen(
 }
 
 @Composable
-fun LeaderboardList(entries: List<LeaderboardLegendEntry>, onProfileClick: (String) -> Unit) {
+private fun LeaderboardList(entries: List<LeaderboardLegendEntry>, onProfileClick: (String) -> Unit) {
     LazyColumn {
         itemsIndexed(
             items = entries,

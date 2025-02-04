@@ -341,7 +341,7 @@
     <string name="premium_legend_leaderboard_about_legends">About Legends</string>
     <string name="premium_legend_leaderboard_since">Since</string>
     <string name="premium_legend_leaderboard_sats">sats</string>
-    <string name="premium_legend_leaderboard_no_content">Unable to load leaderboard.\nPlease try again.</string>
+    <string name="premium_leaderboard_no_content">Unable to load leaderboard.\nPlease try again.</string>
 
 
     <string name="feed_reposted_suffix">reposted</string>

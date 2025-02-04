@@ -1,4 +1,4 @@
-package net.primal.android.premium.legend.leaderboard.ui
+package net.primal.android.premium.leaderboard.legend.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
