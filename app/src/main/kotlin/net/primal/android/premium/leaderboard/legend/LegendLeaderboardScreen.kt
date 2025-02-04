@@ -37,7 +37,7 @@ import net.primal.android.premium.leaderboard.legend.ui.LATEST_INDEX
 import net.primal.android.premium.leaderboard.legend.ui.LeaderboardTabs
 import net.primal.android.premium.leaderboard.legend.ui.LegendLeaderboardItem
 import net.primal.android.premium.leaderboard.legend.ui.PAGE_COUNT
-import net.primal.android.premium.legend.domain.LeaderboardLegendEntry
+import net.primal.android.premium.leaderboard.domain.LeaderboardLegendEntry
 import net.primal.android.theme.AppTheme
 
 @Composable

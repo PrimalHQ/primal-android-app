@@ -1,7 +1,7 @@
 package net.primal.android.premium.leaderboard.ogs
 
 import net.primal.android.premium.api.model.LeaderboardOrderBy
-import net.primal.android.premium.legend.domain.LeaderboardLegendEntry
+import net.primal.android.premium.leaderboard.domain.LeaderboardLegendEntry
 
 interface OGLeaderboardContract {
     data class UiState(
