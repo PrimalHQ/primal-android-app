@@ -24,7 +24,8 @@ class ProfileCardViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(ProfileCardContract.UiState())
     val state = _state.asStateFlow()
-    private fun setState(reducer: ProfileCardContract.UiState.() -> ProfileCardContract.UiState) = _state.getAndUpdate { it.reducer() }
+    private fun setState(reducer: ProfileCardContract.UiState.() -> ProfileCardContract.UiState) =
+        _state.getAndUpdate { it.reducer() }
 
     init {
         viewModelScope.launch { profileRepository.requestProfileUpdate(profileId = profileId) }
@@ -43,7 +44,12 @@ class ProfileCardViewModel @Inject constructor(
         viewModelScope.launch {
             profileRepository.observeProfileData(profileId = profileId)
                 .collect { profile ->
-                    setState { copy(profile = profile.asProfileDetailsUi()) }
+                    setState {
+                        copy(
+                            profile = profile.asProfileDetailsUi(),
+                            isPrimalLegend = profile.primalPremiumInfo?.legendProfile != null,
+                        )
+                    }
                 }
         }
 }

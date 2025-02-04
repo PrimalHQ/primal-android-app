@@ -87,14 +87,14 @@ import net.primal.android.notifications.list.NotificationsViewModel
 import net.primal.android.premium.buying.PremiumBuyingContract
 import net.primal.android.premium.buying.PremiumBuyingScreen
 import net.primal.android.premium.buying.PremiumBuyingViewModel
+import net.primal.android.premium.card.ProfileCardScreen
+import net.primal.android.premium.card.ProfileCardViewModel
 import net.primal.android.premium.home.PremiumHomeScreen
 import net.primal.android.premium.home.PremiumHomeViewModel
 import net.primal.android.premium.info.PREMIUM_MORE_INFO_FAQ_TAB_INDEX
 import net.primal.android.premium.info.PremiumMoreInfoScreen
 import net.primal.android.premium.legend.become.PremiumBecomeLegendScreen
 import net.primal.android.premium.legend.become.PremiumBecomeLegendViewModel
-import net.primal.android.premium.card.ProfileCardScreen
-import net.primal.android.premium.card.ProfileCardViewModel
 import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationScreen
 import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationViewModel
 import net.primal.android.premium.legend.leaderboard.LegendLeaderboardScreen
@@ -300,8 +300,8 @@ private fun NavController.navigateToPremiumBuyPrimalLegend(fromOrigin: String? =
 }
 
 private fun NavController.navigateToPremiumLegendaryProfile() = navigate(route = "premium/legend/profile")
-private fun NavController.navigateToProfileCard(profileId: String) =
-    navigate(route = "premium/card/$profileId")
+private fun NavController.navigateToProfileCard(profileId: String) = navigate(route = "premium/card/$profileId")
+
 private fun NavController.navigateToPremiumLegendLeaderboard() = navigate(route = "premium/legend/leaderboard")
 
 private fun NavController.navigateToPremiumManage() = navigate(route = "premium/manage")
@@ -1730,10 +1730,8 @@ private fun NavGraphBuilder.profile(
         onGoToWallet = { navController.navigateToWallet() },
         onSearchClick = { navController.navigateToAdvancedSearch(initialPostedBy = listOf(it)) },
         onPremiumBadgeClick = { premiumTier, profileId ->
-            if (premiumTier.isPrimalLegendTier()) {
+            if (premiumTier.isPrimalLegendTier() || premiumTier.isPremiumTier()) {
                 navController.navigateToProfileCard(profileId = profileId)
-            } else if (premiumTier.isPremiumTier()) {
-                navController.navigateToPremiumBuying(fromOrigin = FROM_ORIGIN_PREMIUM_BADGE)
             }
         },
     )

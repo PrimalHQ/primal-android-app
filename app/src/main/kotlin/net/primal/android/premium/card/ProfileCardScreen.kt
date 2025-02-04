@@ -59,8 +59,11 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.Instant
@@ -147,35 +150,85 @@ private fun ProfileCardScreen(
             .padding(4.dp)
             .aspectRatio(ratio = 0.56f),
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween,
-        ) {
-            if (state.isActiveAccountCard) {
-                OptionsDropdownMenu(
-                    onBackClick = onClose,
+        when {
+            state.isPrimalLegend -> {
+                LegendCardLayout(
+                    state = state,
+                    onClose = onClose,
                     onLegendSettingsClick = onLegendSettingsClick,
-                )
-            } else {
-                CloseButtonRow(onDismissRequest = onClose)
-            }
-
-            state.profile?.let { profile ->
-                ProfileSummary(profile = profile)
-                LegendDescription(
-                    modifier = Modifier.padding(vertical = 16.dp),
-                    profile = profile,
-                )
-            }
-
-            state.profile?.premiumDetails?.legendaryCustomization?.let { legendaryCustomization ->
-                ButtonsColumn(
-                    legendaryCustomization = legendaryCustomization,
                     onSeeOtherLegendsClick = onSeeOtherLegendsClick,
                     onBecomeLegendClick = onBecomeLegendClick,
                 )
             }
+
+            else -> {
+                PrimalOGLayout(
+                    onClose = onClose,
+                    state = state,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PrimalOGLayout(onClose: () -> Unit, state: ProfileCardContract.UiState) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(48.dp, Alignment.CenterVertically),
+        ) {
+            CloseButtonRow(onDismissRequest = onClose)
+
+            state.profile?.let { profile ->
+                ProfileSummary(profile = profile)
+                PrimalOGDescription(profile = profile)
+            }
+        }
+        PremiumButton(onSeeOtherPrimalOGsClick = {})
+    }
+}
+
+@Composable
+private fun LegendCardLayout(
+    state: ProfileCardContract.UiState,
+    onClose: () -> Unit,
+    onLegendSettingsClick: () -> Unit,
+    onSeeOtherLegendsClick: () -> Unit,
+    onBecomeLegendClick: () -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween,
+    ) {
+        if (state.isActiveAccountCard) {
+            OptionsDropdownMenu(
+                onBackClick = onClose,
+                onLegendSettingsClick = onLegendSettingsClick,
+            )
+        } else {
+            CloseButtonRow(onDismissRequest = onClose)
+        }
+
+        state.profile?.let { profile ->
+            ProfileSummary(profile = profile)
+            LegendDescription(
+                modifier = Modifier.padding(vertical = 16.dp),
+                profile = profile,
+            )
+        }
+
+        state.profile?.premiumDetails?.legendaryCustomization?.let { legendaryCustomization ->
+            LegendButtonsColumn(
+                legendaryCustomization = legendaryCustomization,
+                onSeeOtherLegendsClick = onSeeOtherLegendsClick,
+                onBecomeLegendClick = onBecomeLegendClick,
+            )
         }
     }
 }
@@ -206,7 +259,34 @@ private fun Modifier.drawAnimatedBackgroundAndGlow(
 }
 
 @Composable
-private fun ButtonsColumn(
+private fun PremiumButton(modifier: Modifier = Modifier, onSeeOtherPrimalOGsClick: () -> Unit) {
+    var showContent by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { showContent = true }
+
+    AnimatedVisibility(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp),
+        visible = showContent,
+        enter = makeEnterTransition(delayMillis = 583),
+    ) {
+        TextButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = onSeeOtherPrimalOGsClick,
+            contentPadding = PaddingValues(vertical = 16.dp),
+        ) {
+            Text(
+                text = stringResource(id = R.string.premium_card_button_see_other_ogs),
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.colorScheme.secondary,
+                fontSize = 16.sp,
+            )
+        }
+    }
+}
+
+@Composable
+private fun LegendButtonsColumn(
     modifier: Modifier = Modifier,
     onSeeOtherLegendsClick: () -> Unit,
     onBecomeLegendClick: () -> Unit,
@@ -232,7 +312,7 @@ private fun ButtonsColumn(
                 contentPadding = PaddingValues(vertical = 16.dp),
             ) {
                 Text(
-                    text = stringResource(id = R.string.premium_legend_card_button_see_other),
+                    text = stringResource(id = R.string.premium_card_button_see_other_legends),
                     style = AppTheme.typography.bodyMedium,
                     color = legendaryCustomization.legendaryStyle.resolveNoCustomizationAndNull(),
                     fontSize = 16.sp,
@@ -254,7 +334,7 @@ private fun ButtonsColumn(
                 ),
             ) {
                 Text(
-                    text = stringResource(id = R.string.premium_legend_card_button_become_a_legend),
+                    text = stringResource(id = R.string.premium_card_button_become_a_legend),
                     style = AppTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp,
@@ -326,6 +406,43 @@ private fun LegendaryStyle?.resolveButtonColor(): Color =
     }
 
 @Composable
+private fun PrimalOGDescription(modifier: Modifier = Modifier, profile: ProfileDetailsUi) {
+    var showContent by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { showContent = true }
+
+    val ogSince = Instant.ofEpochSecond(PRIMAL_2_0_RELEASE_DATE_IN_SECONDS)
+
+    AnimatedVisibility(
+        visible = showContent,
+        enter = makeEnterTransition(delayMillis = 583),
+    ) {
+        Column(
+            modifier = modifier
+                .padding(horizontal = 20.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+        ) {
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
+                        append(stringResource(id = R.string.premium_card_og_since))
+                        append(" ")
+                    }
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.SemiBold)) {
+                        append(ogSince.formatToDefaultDateFormat(FormatStyle.MEDIUM))
+                    }
+                },
+                style = AppTheme.typography.bodyMedium,
+                color = PRIMARY_TEXT_COLOR,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+    }
+}
+
+@Composable
 private fun LegendDescription(modifier: Modifier = Modifier, profile: ProfileDetailsUi) {
     var showContent by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { showContent = true }
@@ -346,7 +463,7 @@ private fun LegendDescription(modifier: Modifier = Modifier, profile: ProfileDet
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         ) {
             Text(
-                text = stringResource(id = R.string.premium_legend_card_legend_since) + " " +
+                text = stringResource(id = R.string.premium_card_legend_since) + " " +
                     legendSince.formatToDefaultDateFormat(FormatStyle.LONG),
                 style = AppTheme.typography.bodyMedium,
                 color = PRIMARY_TEXT_COLOR,
@@ -396,7 +513,7 @@ private fun ProfileSummary(modifier: Modifier = Modifier, profile: ProfileDetail
     Column(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
+        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
     ) {
         Box(
             modifier = Modifier.size(145.dp),
@@ -530,13 +647,13 @@ private fun OptionsDropdownMenu(
         ) {
             DropdownPrimalMenuItem(
                 trailingIconVector = Icons.Default.Close,
-                text = stringResource(id = R.string.premium_legend_card_dropdown_close),
+                text = stringResource(id = R.string.premium_card_dropdown_close),
                 onClick = onBackClick,
                 colors = itemColors,
             )
             DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.Settings,
-                text = stringResource(id = R.string.premium_legend_card_dropdown_legend_settings),
+                text = stringResource(id = R.string.premium_card_dropdown_legend_settings),
                 onClick = onLegendSettingsClick,
                 colors = itemColors,
             )
