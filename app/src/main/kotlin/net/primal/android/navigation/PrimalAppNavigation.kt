@@ -1155,7 +1155,7 @@ private fun NavGraphBuilder.premiumHome(route: String, navController: NavControl
             onClose = { navController.navigateUp() },
             onRenewSubscription = { navController.navigateToPremiumExtendSubscription(primalName = it) },
             onManagePremium = { navController.navigateToPremiumManage() },
-            onLegendCardClick = { navController.navigateToPremiumLegendCard(profileId = it) },
+            onLegendCardClick = { navController.navigateToPremiumCard(profileId = it) },
             onSupportPrimal = { navController.navigateToPremiumSupportPrimal() },
         )
     }
