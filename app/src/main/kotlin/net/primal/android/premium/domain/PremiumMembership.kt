@@ -20,6 +20,7 @@ data class PremiumMembership(
     val renewsOn: Long? = null,
     val origin: String? = null,
     val editedShoutout: String? = null,
+    val donatedBtc: String? = null,
 ) {
     fun isExpired() = expiresOn != null && Clock.System.now().epochSeconds > expiresOn
 }

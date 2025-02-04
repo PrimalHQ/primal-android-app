@@ -45,7 +45,9 @@ import net.primal.android.premium.ui.PremiumBadge
 import net.primal.android.premium.ui.PrimalPremiumTable
 import net.primal.android.premium.ui.toHumanReadableString
 import net.primal.android.premium.utils.isPremiumFreeTier
+import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.theme.AppTheme
+import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 
 @Composable
 fun PremiumHomeScreen(
@@ -97,7 +99,7 @@ private fun PremiumHomeScreen(
     Scaffold(
         topBar = {
             PrimalTopAppBar(
-                title = stringResource(id = R.string.premium_member_title),
+                title = stringResource(id = R.string.premium_home_member_title),
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onClose,
                 showDivider = false,
@@ -106,14 +108,14 @@ private fun PremiumHomeScreen(
         bottomBar = {
             if (state.membership?.isExpired() == true) {
                 BottomBarButton(
-                    text = stringResource(id = R.string.premium_renew_subscription),
+                    text = stringResource(id = R.string.premium_home_renew_subscription),
                     onClick = {
                         onRenewSubscription(state.membership.premiumName)
                     },
                 )
             } else {
                 BottomBarButton(
-                    text = stringResource(id = R.string.premium_manage_premium_button),
+                    text = stringResource(id = R.string.premium_home_premium_button),
                     onClick = onManagePremium,
                 )
             }
@@ -164,7 +166,7 @@ private fun PremiumHomeScreen(
                 if (state.membership.isPremiumFreeTier()) {
                     Text(
                         modifier = Modifier.padding(horizontal = 36.dp),
-                        text = stringResource(id = R.string.premium_member_early_primal_user),
+                        text = stringResource(id = R.string.premium_home_member_early_primal_user),
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                         style = AppTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
@@ -186,17 +188,26 @@ private fun PremiumHomeScreen(
                     state.membership.isExpired() -> {
                         Text(
                             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                            text = stringResource(id = R.string.premium_expired_subscription_notice),
+                            text = stringResource(id = R.string.premium_home_expired_subscription_notice),
                             style = AppTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center,
                         )
                     }
 
                     else -> {
-                        SupportUsNotice(
-                            visible = state.showSupportUsNotice,
-                            onSupportPrimal = onSupportPrimal,
-                        )
+                        if (state.showSupportUsNotice) {
+                            if (state.membership.isPrimalLegendTier()) {
+                                SupportUsNoticeLegend(
+                                    visible = state.membership.donatedBtc != null,
+                                    donatedSats = state.membership.donatedBtc?.toSats()?.toLong() ?: 0L,
+                                    onSupportPrimal = onSupportPrimal,
+                                )
+                            } else {
+                                SupportUsNoticePremium(
+                                    onSupportPrimal = onSupportPrimal,
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -230,30 +241,26 @@ private fun BottomBarButton(
 }
 
 @Composable
-private fun SupportUsNotice(visible: Boolean, onSupportPrimal: () -> Unit) {
+private fun SupportUsNoticePremium(onSupportPrimal: () -> Unit) {
     Column(
-        modifier = Modifier.alpha(if (visible) 1.0f else 0.0f),
+        modifier = Modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-            text = stringResource(id = R.string.premium_enjoying_primal),
+            text = stringResource(id = R.string.premium_home_enjoying_primal),
             style = AppTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
         )
         Row {
             Text(
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                text = stringResource(id = R.string.premium_enjoying_primal_if_so) + " ",
+                text = stringResource(id = R.string.premium_home_enjoying_primal_if_so) + " ",
                 style = AppTheme.typography.bodyMedium,
             )
             Text(
-                modifier = Modifier
-                    .clickable(
-                        enabled = visible,
-                        onClick = onSupportPrimal,
-                    ),
+                modifier = Modifier.clickable(onClick = onSupportPrimal),
                 style = AppTheme.typography.bodyMedium,
                 text = buildAnnotatedString {
                     withStyle(
@@ -261,7 +268,7 @@ private fun SupportUsNotice(visible: Boolean, onSupportPrimal: () -> Unit) {
                             color = AppTheme.colorScheme.secondary,
                         ),
                     ) {
-                        append(stringResource(id = R.string.premium_support_us))
+                        append(stringResource(id = R.string.premium_home_support_us))
                     }
                     withStyle(
                         style = SpanStyle(
@@ -273,5 +280,58 @@ private fun SupportUsNotice(visible: Boolean, onSupportPrimal: () -> Unit) {
                 },
             )
         }
+    }
+}
+
+@Composable
+private fun SupportUsNoticeLegend(
+    visible: Boolean,
+    donatedSats: Long,
+    onSupportPrimal: () -> Unit,
+) {
+    Column(
+        modifier = Modifier.alpha(if (visible) 1.0f else 0.0f),
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Row {
+            Text(
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                text = stringResource(id = R.string.premium_home_legend_contribution_title) + " ",
+                style = AppTheme.typography.bodyMedium,
+            )
+            Text(
+                modifier = Modifier.clickable(onClick = onSupportPrimal),
+                style = AppTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                text = buildAnnotatedString {
+                    withStyle(
+                        style = SpanStyle(
+                            color = AppTheme.colorScheme.onBackground,
+                        ),
+                    ) {
+                        append(donatedSats.let { "%,d sats".format(it) })
+                    }
+                },
+            )
+        }
+        if (donatedSats > 0L) {
+            Text(
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                text = stringResource(id = R.string.premium_home_legend_support_appreciation),
+                style = AppTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+            )
+        }
+        Text(
+            modifier = Modifier
+                .clickable(
+                    onClick = onSupportPrimal,
+                ),
+            color = AppTheme.colorScheme.secondary,
+            text = stringResource(id = R.string.premium_home_legend_contribute_more),
+            style = AppTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+        )
     }
 }

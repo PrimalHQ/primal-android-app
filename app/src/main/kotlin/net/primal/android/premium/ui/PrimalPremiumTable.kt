@@ -61,16 +61,16 @@ fun PrimalPremiumTable(
         PrimalDivider()
         if (premiumMembership.isPrimalLegendTier()) {
             PrimalPremiumTableRow(
-                key = stringResource(id = R.string.premium_table_expires),
-                value = stringResource(id = R.string.premium_table_never),
+                key = stringResource(id = R.string.premium_home_table_expires),
+                value = stringResource(id = R.string.premium_home_table_never),
                 alwaysHideApply = true,
             )
         } else {
             PrimalPremiumTableRow(
                 key = when {
-                    premiumMembership.isExpired() -> stringResource(id = R.string.premium_table_expired_on)
-                    premiumMembership.recurring -> stringResource(id = R.string.premium_table_renews_on)
-                    else -> stringResource(id = R.string.premium_table_expires_on)
+                    premiumMembership.isExpired() -> stringResource(id = R.string.premium_home_table_expired_on)
+                    premiumMembership.recurring -> stringResource(id = R.string.premium_home_table_renews_on)
+                    else -> stringResource(id = R.string.premium_home_table_expires_on)
                 },
                 value = when {
                     premiumMembership.recurring && premiumMembership.renewsOn != null ->
@@ -80,7 +80,7 @@ fun PrimalPremiumTable(
                     premiumMembership.expiresOn != null -> Instant.ofEpochSecond(premiumMembership.expiresOn)
                         .formatToDefaultDateFormat(FormatStyle.LONG)
 
-                    else -> stringResource(R.string.premium_table_never)
+                    else -> stringResource(R.string.premium_home_table_never)
                 },
                 alwaysHideApply = true,
             )
@@ -148,7 +148,7 @@ private fun PrimalPremiumTableRow(
                     }
                     Text(
                         modifier = Modifier.clickable { onApplyClick?.invoke() },
-                        text = stringResource(id = R.string.premium_table_apply),
+                        text = stringResource(id = R.string.premium_home_table_apply),
                         color = AppTheme.colorScheme.secondary,
                         style = AppTheme.typography.bodyMedium,
                     )

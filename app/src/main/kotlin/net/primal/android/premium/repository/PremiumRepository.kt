@@ -156,6 +156,7 @@ class PremiumRepository @Inject constructor(
             recurring = this.recurring,
             origin = this.origin,
             editedShoutout = this.editedShoutout,
+            donatedBtc = this.donatedBtc,
         )
     }
 }
