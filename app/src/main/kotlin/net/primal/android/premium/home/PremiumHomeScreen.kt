@@ -99,7 +99,7 @@ private fun PremiumHomeScreen(
     Scaffold(
         topBar = {
             PrimalTopAppBar(
-                title = stringResource(id = R.string.premium_member_title),
+                title = stringResource(id = R.string.premium_home_member_title),
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onClose,
                 showDivider = false,
@@ -108,14 +108,14 @@ private fun PremiumHomeScreen(
         bottomBar = {
             if (state.membership?.isExpired() == true) {
                 BottomBarButton(
-                    text = stringResource(id = R.string.premium_renew_subscription),
+                    text = stringResource(id = R.string.premium_home_renew_subscription),
                     onClick = {
                         onRenewSubscription(state.membership.premiumName)
                     },
                 )
             } else {
                 BottomBarButton(
-                    text = stringResource(id = R.string.premium_manage_premium_button),
+                    text = stringResource(id = R.string.premium_home_premium_button),
                     onClick = onManagePremium,
                 )
             }
@@ -166,7 +166,7 @@ private fun PremiumHomeScreen(
                 if (state.membership.isPremiumFreeTier()) {
                     Text(
                         modifier = Modifier.padding(horizontal = 36.dp),
-                        text = stringResource(id = R.string.premium_member_early_primal_user),
+                        text = stringResource(id = R.string.premium_home_member_early_primal_user),
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                         style = AppTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
@@ -188,7 +188,7 @@ private fun PremiumHomeScreen(
                     state.membership.isExpired() -> {
                         Text(
                             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                            text = stringResource(id = R.string.premium_expired_subscription_notice),
+                            text = stringResource(id = R.string.premium_home_expired_subscription_notice),
                             style = AppTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center,
                         )
@@ -196,19 +196,16 @@ private fun PremiumHomeScreen(
 
                     else -> {
                         if (state.showSupportUsNotice) {
-                            when (state.membership.isPrimalLegendTier()) {
-                                true -> {
-                                    SupportUsNoticeLegend(
-                                        visible = state.membership.donatedBtc != null,
-                                        donatedSats = state.membership.donatedBtc?.toSats()?.toLong() ?: 0L,
-                                        onSupportPrimal = onSupportPrimal,
-                                    )
-                                }
-                                false -> {
-                                    SupportUsNoticePremium(
-                                        onSupportPrimal = onSupportPrimal,
-                                    )
-                                }
+                            if (state.membership.isPrimalLegendTier()) {
+                                SupportUsNoticeLegend(
+                                    visible = state.membership.donatedBtc != null,
+                                    donatedSats = state.membership.donatedBtc?.toSats()?.toLong() ?: 0L,
+                                    onSupportPrimal = onSupportPrimal,
+                                )
+                            } else {
+                                SupportUsNoticePremium(
+                                    onSupportPrimal = onSupportPrimal,
+                                )
                             }
                         }
                     }
@@ -252,21 +249,18 @@ private fun SupportUsNoticePremium(onSupportPrimal: () -> Unit) {
     ) {
         Text(
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-            text = stringResource(id = R.string.premium_enjoying_primal),
+            text = stringResource(id = R.string.premium_home_enjoying_primal),
             style = AppTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
         )
         Row {
             Text(
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                text = stringResource(id = R.string.premium_enjoying_primal_if_so) + " ",
+                text = stringResource(id = R.string.premium_home_enjoying_primal_if_so) + " ",
                 style = AppTheme.typography.bodyMedium,
             )
             Text(
-                modifier = Modifier
-                    .clickable(
-                        onClick = onSupportPrimal,
-                    ),
+                modifier = Modifier.clickable(onClick = onSupportPrimal),
                 style = AppTheme.typography.bodyMedium,
                 text = buildAnnotatedString {
                     withStyle(
@@ -274,7 +268,7 @@ private fun SupportUsNoticePremium(onSupportPrimal: () -> Unit) {
                             color = AppTheme.colorScheme.secondary,
                         ),
                     ) {
-                        append(stringResource(id = R.string.premium_support_us))
+                        append(stringResource(id = R.string.premium_home_support_us))
                     }
                     withStyle(
                         style = SpanStyle(
@@ -303,14 +297,11 @@ private fun SupportUsNoticeLegend(
         Row {
             Text(
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                text = stringResource(id = R.string.legend_contribution_title) + " ",
+                text = stringResource(id = R.string.premium_home_legend_contribution_title) + " ",
                 style = AppTheme.typography.bodyMedium,
             )
             Text(
-                modifier = Modifier
-                    .clickable(
-                        onClick = onSupportPrimal,
-                    ),
+                modifier = Modifier.clickable(onClick = onSupportPrimal),
                 style = AppTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
                 text = buildAnnotatedString {
@@ -327,7 +318,7 @@ private fun SupportUsNoticeLegend(
         if (donatedSats > 0L) {
             Text(
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                text = stringResource(id = R.string.legend_support_appreciation),
+                text = stringResource(id = R.string.premium_home_legend_support_appreciation),
                 style = AppTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
             )
@@ -338,7 +329,7 @@ private fun SupportUsNoticeLegend(
                     onClick = onSupportPrimal,
                 ),
             color = AppTheme.colorScheme.secondary,
-            text = stringResource(id = R.string.legend_contribute_more),
+            text = stringResource(id = R.string.premium_home_legend_contribute_more),
             style = AppTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
         )

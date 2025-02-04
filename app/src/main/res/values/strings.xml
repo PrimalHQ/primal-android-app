@@ -160,27 +160,26 @@
     <string name="premium_promo_code_apply_button">Apply Promo Code</string>
     <string name="premium_promo_code_cancel_button">Cancel</string>
 
-    <string name="premium_member_title">Premium</string>
-    <string name="premium_member_early_primal_user">Hey there! You are an early Primal user who interacted with our team, so we gave you 6 months of Primal Premium for free. ♥\uFE0F\uD83E\uDEC2</string>
-    <string name="premium_manage_premium_button">Manage Premium</string>
-    <string name="premium_renew_subscription">Renew Subscription</string>
-    <string name="premium_extend_subscription">Extend Subscription</string>
-    <string name="premium_enjoying_primal">Are you enjoying Primal?</string>
-    <string name="premium_enjoying_primal_if_so">If so, see how you can</string>
-    <string name="premium_support_us">support us</string>
-    <string name="premium_table_expires">Expires</string>
-    <string name="premium_table_never">Never</string>
-    <string name="premium_table_renews_on">Renews on</string>
-    <string name="premium_table_expires_on">Expires on</string>
-    <string name="premium_table_expired_on">Expired on</string>
-    <string name="premium_table_apply">apply</string>
-    <string name="premium_expired_subscription_notice">Your Primal Premium subscription has expired.\nYou can renew it below:</string>
+    <string name="premium_home_member_title">Premium</string>
+    <string name="premium_home_member_early_primal_user">Hey there! You are an early Primal user who interacted with our team, so we gave you 6 months of Primal Premium for free. ♥\uFE0F\uD83E\uDEC2</string>
+    <string name="premium_home_premium_button">Manage Premium</string>
+    <string name="premium_home_renew_subscription">Renew Subscription</string>
+    <string name="premium_home_extend_subscription">Extend Subscription</string>
+    <string name="premium_home_enjoying_primal">Are you enjoying Primal?</string>
+    <string name="premium_home_enjoying_primal_if_so">If so, see how you can</string>
+    <string name="premium_home_support_us">support us</string>
+    <string name="premium_home_table_expires">Expires</string>
+    <string name="premium_home_table_never">Never</string>
+    <string name="premium_home_table_renews_on">Renews on</string>
+    <string name="premium_home_table_expires_on">Expires on</string>
+    <string name="premium_home_table_expired_on">Expired on</string>
+    <string name="premium_home_table_apply">apply</string>
+    <string name="premium_home_expired_subscription_notice">Your Primal Premium subscription has expired.\nYou can renew it below:</string>
+    <string name="premium_home_legend_contribution_title">Your contribution to Primal:</string>
+    <string name="premium_home_legend_support_appreciation">Thank you for your support! 💜🫂</string>
+    <string name="premium_home_legend_contribute_more">Want to contribute more?</string>
 
     <string name="premium_support_primal_title">Support Primal</string>
-
-    <string name="legend_contribution_title">Your contribution to Primal:</string>
-    <string name="legend_support_appreciation">Thank you for your support! 💜🫂</string>
-    <string name="legend_contribute_more">Want to contribute more?</string>
 
     <string name="premium_become_legend_primal_title">Primal Legend</string>
     <string name="premium_become_legend_intro_description">The Legend tier was created to recognize users who have made a significant\ncontribution to Primal.</string>
