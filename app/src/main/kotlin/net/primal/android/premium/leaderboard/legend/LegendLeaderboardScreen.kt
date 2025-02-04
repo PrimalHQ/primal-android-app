@@ -79,6 +79,7 @@ private fun LegendLeaderboardScreen(
             LeaderboardTopAppBar(
                 onBackClick = onClose,
                 pagerState = pagerState,
+                isActiveAccountLegend = state.isActiveAccountLegend,
                 onAboutLegendsClick = onAboutLegendsClick,
             )
         },
@@ -106,7 +107,10 @@ private fun LegendLeaderboardScreen(
 }
 
 @Composable
-private fun LeaderboardList(entries: List<LeaderboardLegendEntry>, onProfileClick: (String) -> Unit) {
+private fun LeaderboardList(
+    entries: List<LeaderboardLegendEntry>,
+    onProfileClick: (String) -> Unit
+) {
     LazyColumn {
         itemsIndexed(
             items = entries,
@@ -125,6 +129,7 @@ private fun LeaderboardList(entries: List<LeaderboardLegendEntry>, onProfileClic
 @OptIn(ExperimentalMaterial3Api::class)
 private fun LeaderboardTopAppBar(
     onBackClick: () -> Unit,
+    isActiveAccountLegend: Boolean,
     pagerState: PagerState,
     onAboutLegendsClick: () -> Unit,
 ) {
@@ -150,14 +155,16 @@ private fun LeaderboardTopAppBar(
                 },
             )
 
-            TextButton(
-                modifier = Modifier.padding(end = 8.dp),
-                onClick = onAboutLegendsClick,
-            ) {
-                Text(
-                    text = stringResource(id = R.string.premium_legend_leaderboard_about_legends),
-                    style = AppTheme.typography.bodySmall,
-                )
+            if (!isActiveAccountLegend) {
+                TextButton(
+                    modifier = Modifier.padding(end = 8.dp),
+                    onClick = onAboutLegendsClick,
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.premium_legend_leaderboard_about_legends),
+                        style = AppTheme.typography.bodySmall,
+                    )
+                }
             }
         }
 

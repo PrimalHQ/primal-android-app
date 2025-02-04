@@ -1296,7 +1296,7 @@ private fun NavGraphBuilder.premiumLegendLeaderboard(route: String, navControlle
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
             onProfileClick = { navController.navigateToProfile(profileId = it) },
-            onAboutLegendsClick = {},
+            onAboutLegendsClick = { navController.navigateToPremiumBuyPrimalLegend() },
         )
     }
 
