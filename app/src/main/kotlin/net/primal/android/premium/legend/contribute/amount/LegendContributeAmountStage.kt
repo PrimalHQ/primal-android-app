@@ -54,19 +54,11 @@ fun LegendContributeAmountStage(
             )
         },
         bottomBar = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                TransactionActionsRow(
-                    onCancelClick = onBack,
-                    onActionClick = onNext,
-                    nextEnabled = state.amountInSats != "0",
-                )
-            }
+            LegendContributeAmountStageBottomBar(
+                state = state,
+                onBack = onBack,
+                onNext = onNext,
+            )
         },
     ) { paddingValues ->
         Column(
@@ -97,6 +89,27 @@ fun LegendContributeAmountStage(
                 },
             )
         }
+    }
+}
+
+@Composable
+private fun LegendContributeAmountStageBottomBar(
+    state: UiState,
+    onBack: () -> Unit,
+    onNext: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        TransactionActionsRow(
+            onCancelClick = onBack,
+            onActionClick = onNext,
+            nextEnabled = state.amountInSats != "0",
+        )
     }
 }
 
