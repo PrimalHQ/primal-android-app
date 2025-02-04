@@ -15,10 +15,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -31,12 +29,12 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.premium.api.model.LeaderboardOrderBy
+import net.primal.android.premium.api.model.LegendLeaderboardOrderBy
+import net.primal.android.premium.leaderboard.domain.OGLeaderboardEntry
 import net.primal.android.premium.leaderboard.legend.ui.LATEST_INDEX
 import net.primal.android.premium.leaderboard.ogs.ui.OGLeaderboardItem
 import net.primal.android.premium.leaderboard.ogs.ui.OGLeaderboardTabs
 import net.primal.android.premium.leaderboard.ogs.ui.PAGE_COUNT
-import net.primal.android.premium.leaderboard.domain.LeaderboardLegendEntry
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -67,11 +65,6 @@ private fun OGLeaderboardScreen(
     onProfileClick: (String) -> Unit,
 ) {
     val pagerState = rememberPagerState { PAGE_COUNT }
-    LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.currentPage }.collect {
-            eventPublisher(OGLeaderboardContract.UiEvent.FetchLeaderboardByOrder(it.resolveOrderBy()))
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -87,19 +80,18 @@ private fun OGLeaderboardScreen(
             contentPadding = paddingValues,
             state = pagerState,
         ) { currentPage ->
-            val entries = state.leaderboardEntries[currentPage.resolveOrderBy()] ?: emptyList()
-            if (state.loading && entries.isEmpty()) {
+            if (state.loading && state.leaderboardEntries.isEmpty()) {
                 HeightAdjustableLoadingLazyListPlaceholder(height = 80.dp)
             } else if (state.error != null) {
                 ListNoContent(
                     modifier = Modifier.fillMaxSize(),
                     noContentText = stringResource(id = R.string.premium_leaderboard_no_content),
                     onRefresh = {
-                        eventPublisher(OGLeaderboardContract.UiEvent.RetryFetch(currentPage.resolveOrderBy()))
+                        eventPublisher(OGLeaderboardContract.UiEvent.RetryFetch)
                     },
                 )
             } else {
-                LeaderboardList(entries = entries, onProfileClick = onProfileClick)
+                LeaderboardList(entries = state.leaderboardEntries, onProfileClick = onProfileClick)
             }
         }
     }
@@ -107,7 +99,7 @@ private fun OGLeaderboardScreen(
 
 @Composable
 private fun LeaderboardList(
-    entries: List<LeaderboardLegendEntry>,
+    entries: List<OGLeaderboardEntry>,
     onProfileClick: (String) -> Unit
 ) {
     LazyColumn {
@@ -169,6 +161,3 @@ private fun LeaderboardTopAppBar(
         PrimalDivider()
     }
 }
-
-private fun Int.resolveOrderBy() =
-    if (this == LATEST_INDEX) LeaderboardOrderBy.LastDonation else LeaderboardOrderBy.DonatedBtc

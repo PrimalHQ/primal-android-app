@@ -1,18 +1,18 @@
 package net.primal.android.premium.leaderboard.ogs
 
-import net.primal.android.premium.api.model.LeaderboardOrderBy
+import net.primal.android.premium.api.model.LegendLeaderboardOrderBy
 import net.primal.android.premium.leaderboard.domain.LeaderboardLegendEntry
+import net.primal.android.premium.leaderboard.domain.OGLeaderboardEntry
 
 interface OGLeaderboardContract {
     data class UiState(
-        val leaderboardEntries: Map<LeaderboardOrderBy, List<LeaderboardLegendEntry>> = emptyMap(),
+        val leaderboardEntries: List<OGLeaderboardEntry> = emptyList(),
         val loading: Boolean = true,
         val error: Throwable? = null,
         val isActiveAccountPremium: Boolean = false,
     )
 
     sealed class UiEvent {
-        data class FetchLeaderboardByOrder(val orderBy: LeaderboardOrderBy) : UiEvent()
-        data class RetryFetch(val orderBy: LeaderboardOrderBy) : UiEvent()
+        data object RetryFetch : UiEvent()
     }
 }

@@ -31,7 +31,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.premium.api.model.LeaderboardOrderBy
+import net.primal.android.premium.api.model.LegendLeaderboardOrderBy
 import net.primal.android.premium.leaderboard.legend.ui.CONTRIBUTION_INDEX
 import net.primal.android.premium.leaderboard.legend.ui.LATEST_INDEX
 import net.primal.android.premium.leaderboard.legend.ui.LeaderboardTabs
@@ -174,4 +174,4 @@ private fun LeaderboardTopAppBar(
 }
 
 private fun Int.resolveOrderBy() =
-    if (this == LATEST_INDEX) LeaderboardOrderBy.LastDonation else LeaderboardOrderBy.DonatedBtc
+    if (this == LATEST_INDEX) LegendLeaderboardOrderBy.LastDonation else LegendLeaderboardOrderBy.DonatedBtc

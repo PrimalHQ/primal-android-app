@@ -7,11 +7,9 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.premium.api.model.LeaderboardOrderBy
 import net.primal.android.premium.leaderboard.ogs.OGLeaderboardContract.UiEvent
 import net.primal.android.premium.leaderboard.ogs.OGLeaderboardContract.UiState
 import net.primal.android.premium.repository.PremiumRepository
@@ -34,6 +32,7 @@ class OGLeaderboardViewModel @Inject constructor(
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
+        fetchLeaderboardByOrder()
         observeEvents()
         observeActiveAccount()
     }
@@ -44,7 +43,7 @@ class OGLeaderboardViewModel @Inject constructor(
                 setState {
                     copy(
                         isActiveAccountPremium = it.premiumMembership?.isPremiumTier() == true
-                                || it.premiumMembership?.isPrimalLegendTier() == true,
+                            || it.premiumMembership?.isPrimalLegendTier() == true,
                     )
                 }
             }
@@ -54,23 +53,17 @@ class OGLeaderboardViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.FetchLeaderboardByOrder -> {
-                        if (state.value.leaderboardEntries[it.orderBy].isNullOrEmpty()) {
-                            fetchLeaderboardByOrder(it.orderBy)
-                        }
-                    }
-
-                    is UiEvent.RetryFetch -> fetchLeaderboardByOrder(it.orderBy)
+                    is UiEvent.RetryFetch -> fetchLeaderboardByOrder()
                 }
             }
         }
 
-    private fun fetchLeaderboardByOrder(orderBy: LeaderboardOrderBy) =
+    private fun fetchLeaderboardByOrder() =
         viewModelScope.launch {
             setState { copy(loading = true, error = null) }
             try {
-                val entries = premiumRepository.fetchLegendLeaderboard(orderBy = orderBy)
-                setState { copy(leaderboardEntries = leaderboardEntries + (orderBy to entries)) }
+                val entries = premiumRepository.fetchPremiumLeaderboard()
+                setState { copy(leaderboardEntries = entries) }
             } catch (error: WssException) {
                 Timber.w(error)
                 setState { copy(error = error) }

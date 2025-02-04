@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.premium.api.model.LeaderboardOrderBy
+import net.primal.android.premium.api.model.LegendLeaderboardOrderBy
 import net.primal.android.premium.leaderboard.legend.LegendLeaderboardContract.UiEvent
 import net.primal.android.premium.leaderboard.legend.LegendLeaderboardContract.UiState
 import net.primal.android.premium.repository.PremiumRepository
@@ -62,7 +62,7 @@ class LegendLeaderboardViewModel @Inject constructor(
             }
         }
 
-    private fun fetchLeaderboardByOrder(orderBy: LeaderboardOrderBy) =
+    private fun fetchLeaderboardByOrder(orderBy: LegendLeaderboardOrderBy) =
         viewModelScope.launch {
             setState { copy(loading = true, error = null) }
             try {

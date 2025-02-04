@@ -18,7 +18,7 @@ import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.premium.api.model.CancelMembershipRequest
 import net.primal.android.premium.api.model.ChangeNameRequest
-import net.primal.android.premium.api.model.LeaderboardOrderBy
+import net.primal.android.premium.api.model.LegendLeaderboardOrderBy
 import net.primal.android.premium.api.model.LegendLeaderboardRequest
 import net.primal.android.premium.api.model.LegendLeaderboardResponse
 import net.primal.android.premium.api.model.LegendPaymentInstructionsResponse
@@ -26,6 +26,9 @@ import net.primal.android.premium.api.model.MembershipProductsRequest
 import net.primal.android.premium.api.model.MembershipStatusResponse
 import net.primal.android.premium.api.model.NameAvailableRequest
 import net.primal.android.premium.api.model.NameAvailableResponse
+import net.primal.android.premium.api.model.PremiumLeaderboardOrderBy
+import net.primal.android.premium.api.model.PremiumLeaderboardRequest
+import net.primal.android.premium.api.model.PremiumLeaderboardResponse
 import net.primal.android.premium.api.model.PurchaseMembershipRequest
 import net.primal.android.premium.api.model.ShowSupportUsResponse
 import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
@@ -225,7 +228,7 @@ class PremiumApiImpl @Inject constructor(
         )
     }
 
-    override suspend fun getLegendLeaderboard(orderBy: LeaderboardOrderBy, limit: Int): LegendLeaderboardResponse {
+    override suspend fun getLegendLeaderboard(orderBy: LegendLeaderboardOrderBy, limit: Int): LegendLeaderboardResponse {
         val queryResult = primalCacheApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.MEMBERSHIP_LEGENDS_LEADERBOARD,
@@ -242,6 +245,30 @@ class PremiumApiImpl @Inject constructor(
             orderedLegendLeaderboardEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendLeaderboard),
             primalPremiumInfoEvents = queryResult.filterPrimalEvents(NostrEventKind.PrimalPremiumInfo),
             primalLegendProfiles = queryResult.filterPrimalEvents(NostrEventKind.PrimalLegendProfiles),
+            primalUsernames = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserNames),
+            cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
+            userFollowersCounts = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserFollowersCounts),
+            userScores = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserScores),
+            profileMetadatas = queryResult.filterNostrEvents(NostrEventKind.Metadata),
+        )
+    }
+
+    override suspend fun getPremiumLeaderboard(orderBy: PremiumLeaderboardOrderBy, limit: Int): PremiumLeaderboardResponse {
+        val queryResult = primalCacheApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.MEMBERSHIP_PREMIUM_LEADERBOARD,
+                optionsJson = NostrJsonEncodeDefaults.encodeToString(
+                    PremiumLeaderboardRequest(
+                        orderBy = orderBy,
+                        limit = limit,
+                    ),
+                ),
+            ),
+        )
+
+        return PremiumLeaderboardResponse(
+            orderedPremiumLeaderboardEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumLeaderboard),
+            primalPremiumInfoEvents = queryResult.filterPrimalEvents(NostrEventKind.PrimalPremiumInfo),
             primalUsernames = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserNames),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
             userFollowersCounts = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserFollowersCounts),
