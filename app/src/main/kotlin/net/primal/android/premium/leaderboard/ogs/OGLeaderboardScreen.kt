@@ -29,7 +29,6 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.premium.api.model.LegendLeaderboardOrderBy
 import net.primal.android.premium.leaderboard.domain.OGLeaderboardEntry
 import net.primal.android.premium.leaderboard.legend.ui.LATEST_INDEX
 import net.primal.android.premium.leaderboard.ogs.ui.OGLeaderboardItem
@@ -98,10 +97,7 @@ private fun OGLeaderboardScreen(
 }
 
 @Composable
-private fun LeaderboardList(
-    entries: List<OGLeaderboardEntry>,
-    onProfileClick: (String) -> Unit
-) {
+private fun LeaderboardList(entries: List<OGLeaderboardEntry>, onProfileClick: (String) -> Unit) {
     LazyColumn {
         items(
             items = entries,

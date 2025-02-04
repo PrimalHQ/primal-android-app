@@ -18,6 +18,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import java.text.NumberFormat
+import java.time.Instant
+import java.time.format.FormatStyle
 import net.primal.android.R
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
@@ -27,9 +30,6 @@ import net.primal.android.premium.leaderboard.domain.LeaderboardLegendEntry
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
-import java.text.NumberFormat
-import java.time.Instant
-import java.time.format.FormatStyle
 
 @Composable
 fun LegendLeaderboardItem(
@@ -83,7 +83,7 @@ fun LegendLeaderboardItem(
                 legendSince?.let {
                     Text(
                         text = stringResource(id = R.string.premium_legend_leaderboard_since) +
-                                ": " + legendSince.formatToDefaultDateFormat(FormatStyle.MEDIUM),
+                            ": " + legendSince.formatToDefaultDateFormat(FormatStyle.MEDIUM),
                         style = AppTheme.typography.bodySmall,
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                     )

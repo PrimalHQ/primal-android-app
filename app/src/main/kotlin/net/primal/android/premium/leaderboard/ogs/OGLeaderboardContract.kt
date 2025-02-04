@@ -1,7 +1,5 @@
 package net.primal.android.premium.leaderboard.ogs
 
-import net.primal.android.premium.api.model.LegendLeaderboardOrderBy
-import net.primal.android.premium.leaderboard.domain.LeaderboardLegendEntry
 import net.primal.android.premium.leaderboard.domain.OGLeaderboardEntry
 
 interface OGLeaderboardContract {

@@ -42,8 +42,8 @@ class OGLeaderboardViewModel @Inject constructor(
             activeAccountStore.activeUserAccount.collect {
                 setState {
                     copy(
-                        isActiveAccountPremium = it.premiumMembership?.isPremiumTier() == true
-                            || it.premiumMembership?.isPrimalLegendTier() == true,
+                        isActiveAccountPremium = it.premiumMembership?.isPremiumTier() == true ||
+                            it.premiumMembership?.isPrimalLegendTier() == true,
                     )
                 }
             }

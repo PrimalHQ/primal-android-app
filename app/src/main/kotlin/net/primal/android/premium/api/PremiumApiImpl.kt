@@ -228,7 +228,10 @@ class PremiumApiImpl @Inject constructor(
         )
     }
 
-    override suspend fun getLegendLeaderboard(orderBy: LegendLeaderboardOrderBy, limit: Int): LegendLeaderboardResponse {
+    override suspend fun getLegendLeaderboard(
+        orderBy: LegendLeaderboardOrderBy,
+        limit: Int,
+    ): LegendLeaderboardResponse {
         val queryResult = primalCacheApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.MEMBERSHIP_LEGENDS_LEADERBOARD,
@@ -253,7 +256,10 @@ class PremiumApiImpl @Inject constructor(
         )
     }
 
-    override suspend fun getPremiumLeaderboard(orderBy: PremiumLeaderboardOrderBy, limit: Int): PremiumLeaderboardResponse {
+    override suspend fun getPremiumLeaderboard(
+        orderBy: PremiumLeaderboardOrderBy,
+        limit: Int,
+    ): PremiumLeaderboardResponse {
         val queryResult = primalCacheApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.MEMBERSHIP_PREMIUM_LEADERBOARD,
