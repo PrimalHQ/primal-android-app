@@ -106,6 +106,7 @@ fun PremiumCardScreen(
     onClose: () -> Unit,
     onLegendSettingsClick: () -> Unit,
     onSeeOtherLegendsClick: () -> Unit,
+    onSeeOtherPrimalOGsClick: () -> Unit,
     onBecomeLegendClick: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -115,6 +116,7 @@ fun PremiumCardScreen(
         onClose = onClose,
         onLegendSettingsClick = onLegendSettingsClick,
         onSeeOtherLegendsClick = onSeeOtherLegendsClick,
+        onSeeOtherPrimalOGsClick = onSeeOtherPrimalOGsClick,
         onBecomeLegendClick = onBecomeLegendClick,
     )
 }
@@ -123,6 +125,7 @@ fun PremiumCardScreen(
 private fun PremiumCardScreen(
     state: PremiumCardContract.UiState,
     onClose: () -> Unit,
+    onSeeOtherPrimalOGsClick: () -> Unit,
     onLegendSettingsClick: () -> Unit,
     onSeeOtherLegendsClick: () -> Unit,
     onBecomeLegendClick: () -> Unit,
@@ -164,8 +167,9 @@ private fun PremiumCardScreen(
 
             else -> {
                 PrimalOGLayout(
-                    onClose = onClose,
                     state = state,
+                    onClose = onClose,
+                    onSeeOtherPrimalOGsClick = onSeeOtherPrimalOGsClick,
                 )
             }
         }
@@ -173,7 +177,11 @@ private fun PremiumCardScreen(
 }
 
 @Composable
-private fun PrimalOGLayout(onClose: () -> Unit, state: PremiumCardContract.UiState) {
+private fun PrimalOGLayout(
+    onClose: () -> Unit,
+    onSeeOtherPrimalOGsClick: () -> Unit,
+    state: PremiumCardContract.UiState,
+) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -192,7 +200,7 @@ private fun PrimalOGLayout(onClose: () -> Unit, state: PremiumCardContract.UiSta
         }
         AnimatedButtonsColumn(
             primaryButtonText = stringResource(id = R.string.premium_card_button_see_other_ogs),
-            onPrimaryButtonClick = {},
+            onPrimaryButtonClick = onSeeOtherPrimalOGsClick,
             isSecondaryButtonVisible = false,
         )
     }

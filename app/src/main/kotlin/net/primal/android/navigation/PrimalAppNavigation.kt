@@ -1272,6 +1272,7 @@ private fun NavGraphBuilder.premiumCard(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onSeeOtherLegendsClick = { navController.navigateToPremiumLegendLeaderboard() },
+        onSeeOtherPrimalOGsClick = { navController.navigateToPremiumOGsLeaderboard() },
         onBecomeLegendClick = {
             navController.navigateToPremiumBuyPrimalLegend(fromOrigin = FROM_ORIGIN_PREMIUM_BADGE)
         },
