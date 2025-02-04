@@ -204,6 +204,12 @@
     <string name="premium_become_legend_failed_fetching_payment_instructions">Unable to get payment instructions. Please try again.</string>
     <string name="premium_become_legend_retry_button">Retry</string>
 
+    <string name="legend_contribution_intro_stage_title">Contribute to Primal</string>
+    <string name="legend_contribution_cancel">Cancel</string>
+    <string name="legend_contribution_pay_with_on_chain_bitcoin_button">Pay with on-chain bitcoin</string>
+    <string name="legend_contribution_pay_with_bitcoin_lightning">Pay with bitcoin lightning</string>
+    <string name="legend_contribution_amount_stage_title">Enter Amount</string>
+
     <string name="premium_manage_title">Manage Premium</string>
     <string name="premium_manage_nostr_tools">Nostr Tools</string>
     <string name="premium_manage_primal_account">Primal Account</string>
@@ -345,7 +351,6 @@
     <string name="premium_legend_leaderboard_since">Since</string>
     <string name="premium_legend_leaderboard_sats">sats</string>
     <string name="premium_legend_leaderboard_no_content">Unable to load leaderboard.\nPlease try again.</string>
-
 
     <string name="feed_reposted_suffix">reposted</string>
     <string name="feed_see_more">See more…</string>
