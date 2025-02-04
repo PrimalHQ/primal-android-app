@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.navigation.profileIdOrThrow
+import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 
@@ -36,7 +37,12 @@ class PremiumCardViewModel @Inject constructor(
     private fun observeActiveAccount() =
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect {
-                setState { copy(isActiveAccountCard = it.pubkey == profileId) }
+                setState {
+                    copy(
+                        isActiveAccountCard = it.pubkey == profileId,
+                        isActiveAccountLegend = it.premiumMembership?.isPrimalLegendTier() == true,
+                    )
+                }
             }
         }
 
