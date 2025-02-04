@@ -52,6 +52,10 @@ class LegendContributeViewModel @Inject constructor(
                         copy(stage = LegendContributeState.PickAmount)
                     }
 
+                    UiEvent.GoBackToPaymentInstructions -> setState {
+                        copy(stage = LegendContributeState.Payment)
+                    }
+
                     UiEvent.ChangeCurrencyMode -> setState {
                         copy(currencyMode = !state.value.currencyMode)
                     }

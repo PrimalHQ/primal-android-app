@@ -47,7 +47,7 @@ private fun LegendContributeScreen(
         modifier = Modifier
             .background(AppTheme.colorScheme.surfaceVariant)
             .fillMaxSize(),
-        label = "BecomeLegendStages",
+        label = "ContributeLegendStages",
         targetState = state.stage,
         transitionSpec = { fadeIn() togetherWith fadeOut() },
     ) { stage ->
@@ -86,7 +86,7 @@ private fun LegendContributeScreen(
             LegendContributeState.Success -> {
                 LegendContributePaymentSuccessStage(
                     modifier = Modifier.fillMaxSize(),
-                    onBack = { eventPublisher(UiEvent.GoBackToPickAmount) },
+                    onBack = { eventPublisher(UiEvent.GoBackToPaymentInstructions) },
                 )
             }
         }
