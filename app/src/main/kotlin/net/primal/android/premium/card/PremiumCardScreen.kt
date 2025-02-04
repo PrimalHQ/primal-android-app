@@ -106,6 +106,7 @@ fun PremiumCardScreen(
     onClose: () -> Unit,
     onLegendSettingsClick: () -> Unit,
     onSeeOtherLegendsClick: () -> Unit,
+    onSeeOtherPrimalOGsClick: () -> Unit,
     onBecomeLegendClick: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -115,6 +116,7 @@ fun PremiumCardScreen(
         onClose = onClose,
         onLegendSettingsClick = onLegendSettingsClick,
         onSeeOtherLegendsClick = onSeeOtherLegendsClick,
+        onSeeOtherPrimalOGsClick = onSeeOtherPrimalOGsClick,
         onBecomeLegendClick = onBecomeLegendClick,
     )
 }
@@ -123,6 +125,7 @@ fun PremiumCardScreen(
 private fun PremiumCardScreen(
     state: PremiumCardContract.UiState,
     onClose: () -> Unit,
+    onSeeOtherPrimalOGsClick: () -> Unit,
     onLegendSettingsClick: () -> Unit,
     onSeeOtherLegendsClick: () -> Unit,
     onBecomeLegendClick: () -> Unit,
@@ -155,7 +158,6 @@ private fun PremiumCardScreen(
                 LegendCardLayout(
                     state = state,
                     onClose = onClose,
-                    isActiveAccountLegend = state.isActiveAccountLegend,
                     onLegendSettingsClick = onLegendSettingsClick,
                     onSeeOtherLegendsClick = onSeeOtherLegendsClick,
                     onBecomeLegendClick = onBecomeLegendClick,
@@ -164,8 +166,9 @@ private fun PremiumCardScreen(
 
             else -> {
                 PrimalOGLayout(
-                    onClose = onClose,
                     state = state,
+                    onClose = onClose,
+                    onSeeOtherPrimalOGsClick = onSeeOtherPrimalOGsClick,
                 )
             }
         }
@@ -173,7 +176,11 @@ private fun PremiumCardScreen(
 }
 
 @Composable
-private fun PrimalOGLayout(onClose: () -> Unit, state: PremiumCardContract.UiState) {
+private fun PrimalOGLayout(
+    onClose: () -> Unit,
+    onSeeOtherPrimalOGsClick: () -> Unit,
+    state: PremiumCardContract.UiState,
+) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -187,12 +194,12 @@ private fun PrimalOGLayout(onClose: () -> Unit, state: PremiumCardContract.UiSta
 
             state.profile?.let { profile ->
                 ProfileSummary(profile = profile)
-                PrimalOGDescription()
+                PrimalOGDescription(profile = profile)
             }
         }
         AnimatedButtonsColumn(
             primaryButtonText = stringResource(id = R.string.premium_card_button_see_other_ogs),
-            onPrimaryButtonClick = {},
+            onPrimaryButtonClick = onSeeOtherPrimalOGsClick,
             isSecondaryButtonVisible = false,
         )
     }
@@ -202,7 +209,6 @@ private fun PrimalOGLayout(onClose: () -> Unit, state: PremiumCardContract.UiSta
 private fun LegendCardLayout(
     state: PremiumCardContract.UiState,
     onClose: () -> Unit,
-    isActiveAccountLegend: Boolean,
     onLegendSettingsClick: () -> Unit,
     onSeeOtherLegendsClick: () -> Unit,
     onBecomeLegendClick: () -> Unit,
@@ -235,7 +241,7 @@ private fun LegendCardLayout(
                 onPrimaryButtonClick = onSeeOtherLegendsClick,
                 secondaryButtonText = stringResource(id = R.string.premium_card_button_become_a_legend),
                 onSecondaryButtonClick = onBecomeLegendClick,
-                isSecondaryButtonVisible = !isActiveAccountLegend,
+                isSecondaryButtonVisible = !state.isActiveAccountLegend,
                 legendaryCustomization = legendaryCustomization,
             )
         }
@@ -394,11 +400,13 @@ private fun LegendaryStyle?.resolveButtonColor(): Color =
     }
 
 @Composable
-private fun PrimalOGDescription(modifier: Modifier = Modifier) {
+private fun PrimalOGDescription(modifier: Modifier = Modifier, profile: ProfileDetailsUi) {
     var showContent by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { showContent = true }
 
-    val ogSince = Instant.ofEpochSecond(PRIMAL_2_0_RELEASE_DATE_IN_SECONDS)
+    val ogSince = profile.premiumDetails?.premiumSince?.let {
+        Instant.ofEpochSecond(it)
+    } ?: Instant.ofEpochSecond(PRIMAL_2_0_RELEASE_DATE_IN_SECONDS)
 
     AnimatedVisibility(
         visible = showContent,
@@ -435,7 +443,7 @@ private fun LegendDescription(modifier: Modifier = Modifier, profile: ProfileDet
     var showContent by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { showContent = true }
 
-    val legendSince = profile.premiumDetails?.legendaryCustomization?.legendSince?.let {
+    val legendSince = profile.premiumDetails?.legendSince?.let {
         Instant.ofEpochSecond(it)
     } ?: Instant.ofEpochSecond(PRIMAL_2_0_RELEASE_DATE_IN_SECONDS)
 
@@ -523,7 +531,10 @@ private fun ProfileSummary(modifier: Modifier = Modifier, profile: ProfileDetail
         }
 
         profile.internetIdentifier?.let { internetIdentifier ->
-            AnimatedInternetIdentifier(showContent = showContent, internetIdentifier = internetIdentifier)
+            AnimatedInternetIdentifier(
+                showContent = showContent,
+                internetIdentifier = internetIdentifier,
+            )
         }
 
         if (profile.premiumDetails?.shouldShowPremiumBadge() == true) {
@@ -613,7 +624,10 @@ private fun OptionsDropdownMenu(
     onLegendSettingsClick: () -> Unit,
 ) {
     var menuVisible by remember { mutableStateOf(false) }
-    val itemColors = MenuDefaults.itemColors(textColor = PRIMARY_TEXT_COLOR, trailingIconColor = PRIMARY_TEXT_COLOR)
+    val itemColors = MenuDefaults.itemColors(
+        textColor = PRIMARY_TEXT_COLOR,
+        trailingIconColor = PRIMARY_TEXT_COLOR,
+    )
     Box(
         modifier = modifier
             .fillMaxWidth()

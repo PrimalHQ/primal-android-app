@@ -5,12 +5,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class LegendLeaderboardRequest(
-    @SerialName("order_by") val orderBy: LeaderboardOrderBy,
+    @SerialName("order_by") val orderBy: LegendLeaderboardOrderBy,
     val limit: Int = 1000,
 )
 
 @Serializable
-enum class LeaderboardOrderBy {
+enum class LegendLeaderboardOrderBy {
     @SerialName("donated_btc")
     DonatedBtc,
 

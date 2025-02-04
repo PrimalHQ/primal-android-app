@@ -29,7 +29,9 @@ class PremiumCardViewModel @Inject constructor(
         _state.getAndUpdate { it.reducer() }
 
     init {
-        viewModelScope.launch { profileRepository.requestProfileUpdate(profileId = profileId) }
+        viewModelScope.launch {
+            runCatching { profileRepository.requestProfileUpdate(profileId = profileId) }
+        }
         observeActiveAccount()
         observeProfileById(profileId)
     }

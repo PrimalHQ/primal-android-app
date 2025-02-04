@@ -1,4 +1,4 @@
-package net.primal.android.premium.legend.leaderboard
+package net.primal.android.premium.leaderboard.legend
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,15 +10,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.premium.api.model.LeaderboardOrderBy
-import net.primal.android.premium.legend.leaderboard.LegendLeaderboardContract.UiEvent
-import net.primal.android.premium.legend.leaderboard.LegendLeaderboardContract.UiState
+import net.primal.android.premium.api.model.LegendLeaderboardOrderBy
+import net.primal.android.premium.leaderboard.legend.LegendLeaderboardContract.UiEvent
+import net.primal.android.premium.leaderboard.legend.LegendLeaderboardContract.UiState
 import net.primal.android.premium.repository.PremiumRepository
+import net.primal.android.premium.utils.isPrimalLegendTier
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import timber.log.Timber
 
 @HiltViewModel
 class LegendLeaderboardViewModel @Inject constructor(
     private val premiumRepository: PremiumRepository,
+    private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -30,7 +33,19 @@ class LegendLeaderboardViewModel @Inject constructor(
 
     init {
         observeEvents()
+        observeActiveAccount()
     }
+
+    private fun observeActiveAccount() =
+        viewModelScope.launch {
+            activeAccountStore.activeUserAccount.collect {
+                setState {
+                    copy(
+                        isActiveAccountLegend = it.premiumMembership?.isPrimalLegendTier() == true,
+                    )
+                }
+            }
+        }
 
     private fun observeEvents() =
         viewModelScope.launch {
@@ -47,7 +62,7 @@ class LegendLeaderboardViewModel @Inject constructor(
             }
         }
 
-    private fun fetchLeaderboardByOrder(orderBy: LeaderboardOrderBy) =
+    private fun fetchLeaderboardByOrder(orderBy: LegendLeaderboardOrderBy) =
         viewModelScope.launch {
             setState { copy(loading = true, error = null) }
             try {

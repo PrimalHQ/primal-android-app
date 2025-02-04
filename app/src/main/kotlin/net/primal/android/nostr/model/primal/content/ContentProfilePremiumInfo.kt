@@ -9,4 +9,6 @@ data class ContentProfilePremiumInfo(
     @SerialName("cohort_2") val cohort2: String? = null,
     @SerialName("tier") val tier: String? = null,
     @SerialName("expires_on") val expiresAt: Long? = null,
+    @SerialName("legend_since") val legendSince: Long? = null,
+    @SerialName("premium_since") val premiumSince: Long? = null,
 )

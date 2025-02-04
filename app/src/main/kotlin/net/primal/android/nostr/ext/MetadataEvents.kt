@@ -93,6 +93,8 @@ fun NostrEvent.asProfileDataPO(
             cohort2 = premiumInfo?.cohort2,
             tier = premiumInfo?.tier,
             expiresAt = premiumInfo?.expiresAt,
+            legendSince = premiumInfo?.legendSince,
+            premiumSince = premiumInfo?.premiumSince,
             legendProfile = primalLegendProfiles[this.pubKey],
         ),
         blossoms = blossoms ?: emptyList(),
