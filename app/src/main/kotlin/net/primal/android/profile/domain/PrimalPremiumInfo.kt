@@ -9,5 +9,7 @@ data class PrimalPremiumInfo(
     val cohort2: String? = null,
     val tier: String? = null,
     val expiresAt: Long? = null,
+    val legendSince: Long? = null,
+    val premiumSince: Long? = null,
     val legendProfile: PrimalLegendProfile? = null,
 )

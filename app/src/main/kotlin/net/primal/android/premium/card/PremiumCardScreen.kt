@@ -66,8 +66,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.time.Instant
-import java.time.format.FormatStyle
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.NostrUserText
@@ -86,6 +84,8 @@ import net.primal.android.profile.details.ui.ProfilePremiumBadge
 import net.primal.android.profile.details.ui.model.PremiumProfileDataUi
 import net.primal.android.profile.details.ui.model.shouldShowPremiumBadge
 import net.primal.android.theme.AppTheme
+import java.time.Instant
+import java.time.format.FormatStyle
 
 private val TOP_ICON_COLOR = Color(0xFF1E1E1E)
 private val GLOW_RECT_COLOR = Color(0xFFCCCCCC)
@@ -158,7 +158,6 @@ private fun PremiumCardScreen(
                 LegendCardLayout(
                     state = state,
                     onClose = onClose,
-                    isActiveAccountLegend = state.isActiveAccountLegend,
                     onLegendSettingsClick = onLegendSettingsClick,
                     onSeeOtherLegendsClick = onSeeOtherLegendsClick,
                     onBecomeLegendClick = onBecomeLegendClick,
@@ -195,7 +194,7 @@ private fun PrimalOGLayout(
 
             state.profile?.let { profile ->
                 ProfileSummary(profile = profile)
-                PrimalOGDescription()
+                PrimalOGDescription(profile = profile)
             }
         }
         AnimatedButtonsColumn(
@@ -210,7 +209,6 @@ private fun PrimalOGLayout(
 private fun LegendCardLayout(
     state: PremiumCardContract.UiState,
     onClose: () -> Unit,
-    isActiveAccountLegend: Boolean,
     onLegendSettingsClick: () -> Unit,
     onSeeOtherLegendsClick: () -> Unit,
     onBecomeLegendClick: () -> Unit,
@@ -243,14 +241,17 @@ private fun LegendCardLayout(
                 onPrimaryButtonClick = onSeeOtherLegendsClick,
                 secondaryButtonText = stringResource(id = R.string.premium_card_button_become_a_legend),
                 onSecondaryButtonClick = onBecomeLegendClick,
-                isSecondaryButtonVisible = !isActiveAccountLegend,
+                isSecondaryButtonVisible = !state.isActiveAccountLegend,
                 legendaryCustomization = legendaryCustomization,
             )
         }
     }
 }
 
-private suspend fun AnimationState<Float, AnimationVector1D>.startAnimation(delayMillis: Int, easing: Easing) =
+private suspend fun AnimationState<Float, AnimationVector1D>.startAnimation(
+    delayMillis: Int,
+    easing: Easing
+) =
     animateTo(
         targetValue = 1f,
         animationSpec = tween(
@@ -394,19 +395,21 @@ private fun LegendaryStyle?.resolveButtonColor(): Color =
     when (this) {
         LegendaryStyle.GOLD, LegendaryStyle.AQUA,
         LegendaryStyle.SILVER, LegendaryStyle.TEAL, LegendaryStyle.BROWN, null,
-        -> Color.Black
+            -> Color.Black
 
         LegendaryStyle.NO_CUSTOMIZATION, LegendaryStyle.PURPLE, LegendaryStyle.PURPLE_HAZE,
         LegendaryStyle.BLUE, LegendaryStyle.SUN_FIRE,
-        -> Color.White
+            -> Color.White
     }
 
 @Composable
-private fun PrimalOGDescription(modifier: Modifier = Modifier) {
+private fun PrimalOGDescription(modifier: Modifier = Modifier, profile: ProfileDetailsUi) {
     var showContent by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { showContent = true }
 
-    val ogSince = Instant.ofEpochSecond(PRIMAL_2_0_RELEASE_DATE_IN_SECONDS)
+    val ogSince = profile.premiumDetails?.premiumSince?.let {
+        Instant.ofEpochSecond(it)
+    } ?: Instant.ofEpochSecond(PRIMAL_2_0_RELEASE_DATE_IN_SECONDS)
 
     AnimatedVisibility(
         visible = showContent,
@@ -443,7 +446,7 @@ private fun LegendDescription(modifier: Modifier = Modifier, profile: ProfileDet
     var showContent by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { showContent = true }
 
-    val legendSince = profile.premiumDetails?.legendaryCustomization?.legendSince?.let {
+    val legendSince = profile.premiumDetails?.legendSince?.let {
         Instant.ofEpochSecond(it)
     } ?: Instant.ofEpochSecond(PRIMAL_2_0_RELEASE_DATE_IN_SECONDS)
 
@@ -460,7 +463,7 @@ private fun LegendDescription(modifier: Modifier = Modifier, profile: ProfileDet
         ) {
             Text(
                 text = stringResource(id = R.string.premium_card_legend_since) + " " +
-                    legendSince.formatToDefaultDateFormat(FormatStyle.LONG),
+                        legendSince.formatToDefaultDateFormat(FormatStyle.LONG),
                 style = AppTheme.typography.bodyMedium,
                 color = PRIMARY_TEXT_COLOR,
                 fontSize = 15.sp,
@@ -531,7 +534,10 @@ private fun ProfileSummary(modifier: Modifier = Modifier, profile: ProfileDetail
         }
 
         profile.internetIdentifier?.let { internetIdentifier ->
-            AnimatedInternetIdentifier(showContent = showContent, internetIdentifier = internetIdentifier)
+            AnimatedInternetIdentifier(
+                showContent = showContent,
+                internetIdentifier = internetIdentifier
+            )
         }
 
         if (profile.premiumDetails?.shouldShowPremiumBadge() == true) {
@@ -541,7 +547,10 @@ private fun ProfileSummary(modifier: Modifier = Modifier, profile: ProfileDetail
 }
 
 @Composable
-private fun ColumnScope.AnimatedPremiumBadge(showContent: Boolean, premiumDetails: PremiumProfileDataUi) {
+private fun ColumnScope.AnimatedPremiumBadge(
+    showContent: Boolean,
+    premiumDetails: PremiumProfileDataUi
+) {
     AnimatedVisibility(
         visible = showContent,
         enter = makeEnterTransition(delayMillis = 500),
@@ -557,7 +566,10 @@ private fun ColumnScope.AnimatedPremiumBadge(showContent: Boolean, premiumDetail
 }
 
 @Composable
-private fun ColumnScope.AnimatedInternetIdentifier(showContent: Boolean, internetIdentifier: String) {
+private fun ColumnScope.AnimatedInternetIdentifier(
+    showContent: Boolean,
+    internetIdentifier: String
+) {
     AnimatedVisibility(
         visible = showContent,
         enter = makeEnterTransition(delayMillis = 416),
@@ -621,7 +633,10 @@ private fun OptionsDropdownMenu(
     onLegendSettingsClick: () -> Unit,
 ) {
     var menuVisible by remember { mutableStateOf(false) }
-    val itemColors = MenuDefaults.itemColors(textColor = PRIMARY_TEXT_COLOR, trailingIconColor = PRIMARY_TEXT_COLOR)
+    val itemColors = MenuDefaults.itemColors(
+        textColor = PRIMARY_TEXT_COLOR,
+        trailingIconColor = PRIMARY_TEXT_COLOR
+    )
     Box(
         modifier = modifier
             .fillMaxWidth()

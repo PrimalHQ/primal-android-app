@@ -37,9 +37,8 @@ fun OGLeaderboardItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val ogSince = item.legendaryCustomization?.legendSince?.let {
-        Instant.ofEpochSecond(item.legendaryCustomization.legendSince)
-    }
+    val ogSince = item.premiumProfileDataUi?.premiumSince?.let { Instant.ofEpochSecond(it) }
+
     ListItem(
         modifier = modifier
             .clickable(onClick = onClick)
@@ -48,14 +47,14 @@ fun OGLeaderboardItem(
             UniversalAvatarThumbnail(
                 avatarSize = 42.dp,
                 avatarCdnImage = item.avatarCdnImage,
-                legendaryCustomization = item.legendaryCustomization,
+//                legendaryCustomization = item.legendaryCustomization,
             )
         },
         headlineContent = {
             DisplayNameAndSatsDonatedRow(
                 displayName = item.displayName,
                 internetIdentifier = item.internetIdentifier,
-                legendaryCustomization = item.legendaryCustomization,
+                legendaryCustomization = item.premiumProfileDataUi?.legendaryCustomization,
                 satsDonated = item.donatedBtc.toSats(),
             )
         },

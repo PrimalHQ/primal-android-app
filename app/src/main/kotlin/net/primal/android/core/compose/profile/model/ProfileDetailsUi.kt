@@ -44,12 +44,14 @@ fun ProfileData.asProfileDetailsUi() =
         premiumDetails = this.primalPremiumInfo?.asPremiumProfileDataUi(),
     )
 
-private fun PrimalPremiumInfo.asPremiumProfileDataUi() =
+fun PrimalPremiumInfo.asPremiumProfileDataUi() =
     PremiumProfileDataUi(
         primalName = this.primalName,
         cohort1 = this.cohort1,
         cohort2 = this.cohort2,
         tier = this.tier,
+        legendSince = this.legendSince,
+        premiumSince = this.premiumSince,
         expiresAt = this.expiresAt,
         legendaryCustomization = this.legendProfile?.asLegendaryCustomization(),
     )

@@ -1,5 +1,6 @@
 package net.primal.android.nostr.ext
 
+import net.primal.android.core.compose.profile.model.asPremiumProfileDataUi
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.core.utils.authorNameUiFriendly
@@ -18,7 +19,7 @@ fun PrimalEvent?.parseAndMapAsLeaderboardEntries(profiles: Map<String, ProfileDa
                     avatarCdnImage = profile.avatarCdnImage,
                     displayName = profile.authorNameUiFriendly(),
                     internetIdentifier = profile.internetIdentifier,
-                    legendaryCustomization = profile.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
+                    premiumProfileDataUi = profile.primalPremiumInfo?.asPremiumProfileDataUi(),
                     donatedBtc = item.donatedBtc,
                 )
             }
