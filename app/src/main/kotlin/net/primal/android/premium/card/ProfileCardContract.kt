@@ -1,8 +1,8 @@
-package net.primal.android.premium.legend.card
+package net.primal.android.premium.card
 
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 
-interface LegendCardContract {
+interface ProfileCardContract {
     data class UiState(
         val profile: ProfileDetailsUi? = null,
         val isActiveAccountCard: Boolean = false,

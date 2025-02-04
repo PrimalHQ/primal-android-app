@@ -1,4 +1,4 @@
-package net.primal.android.premium.legend.card
+package net.primal.android.premium.card
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
@@ -98,8 +98,8 @@ private const val AVATAR_START_ROTATION = -45f
 private const val AVATAR_END_ROTATION = 0f
 
 @Composable
-fun LegendCardScreen(
-    viewModel: LegendCardViewModel,
+fun ProfileCardScreen(
+    viewModel: ProfileCardViewModel,
     onClose: () -> Unit,
     onLegendSettingsClick: () -> Unit,
     onSeeOtherLegendsClick: () -> Unit,
@@ -107,7 +107,7 @@ fun LegendCardScreen(
 ) {
     val uiState = viewModel.state.collectAsState()
 
-    LegendCardScreen(
+    ProfileCardScreen(
         state = uiState.value,
         onClose = onClose,
         onLegendSettingsClick = onLegendSettingsClick,
@@ -117,8 +117,8 @@ fun LegendCardScreen(
 }
 
 @Composable
-fun LegendCardScreen(
-    state: LegendCardContract.UiState,
+private fun ProfileCardScreen(
+    state: ProfileCardContract.UiState,
     onClose: () -> Unit,
     onLegendSettingsClick: () -> Unit,
     onSeeOtherLegendsClick: () -> Unit,

@@ -93,8 +93,8 @@ import net.primal.android.premium.info.PREMIUM_MORE_INFO_FAQ_TAB_INDEX
 import net.primal.android.premium.info.PremiumMoreInfoScreen
 import net.primal.android.premium.legend.become.PremiumBecomeLegendScreen
 import net.primal.android.premium.legend.become.PremiumBecomeLegendViewModel
-import net.primal.android.premium.legend.card.LegendCardScreen
-import net.primal.android.premium.legend.card.LegendCardViewModel
+import net.primal.android.premium.card.ProfileCardScreen
+import net.primal.android.premium.card.ProfileCardViewModel
 import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationScreen
 import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationViewModel
 import net.primal.android.premium.legend.leaderboard.LegendLeaderboardScreen
@@ -300,8 +300,8 @@ private fun NavController.navigateToPremiumBuyPrimalLegend(fromOrigin: String? =
 }
 
 private fun NavController.navigateToPremiumLegendaryProfile() = navigate(route = "premium/legend/profile")
-private fun NavController.navigateToPremiumLegendCard(profileId: String) =
-    navigate(route = "premium/legend/card/$profileId")
+private fun NavController.navigateToProfileCard(profileId: String) =
+    navigate(route = "premium/card/$profileId")
 private fun NavController.navigateToPremiumLegendLeaderboard() = navigate(route = "premium/legend/leaderboard")
 
 private fun NavController.navigateToPremiumManage() = navigate(route = "premium/manage")
@@ -587,8 +587,8 @@ fun SharedTransitionScope.PrimalAppNavigation() {
 
         premiumLegendaryProfile(route = "premium/legend/profile", navController = navController)
 
-        premiumLegendCard(
-            route = "premium/legend/card/{$PROFILE_ID}",
+        profileCard(
+            route = "premium/card/{$PROFILE_ID}",
             arguments = listOf(
                 navArgument(PROFILE_ID) {
                     type = NavType.StringType
@@ -1250,7 +1250,7 @@ private fun NavGraphBuilder.premiumLegendaryProfile(route: String, navController
         )
     }
 
-private fun NavGraphBuilder.premiumLegendCard(
+private fun NavGraphBuilder.profileCard(
     route: String,
     arguments: List<NamedNavArgument>,
     navController: NavController,
@@ -1259,12 +1259,12 @@ private fun NavGraphBuilder.premiumLegendCard(
     arguments = arguments,
     dialogProperties = DialogProperties(usePlatformDefaultWidth = false),
 ) {
-    val viewModel = hiltViewModel<LegendCardViewModel>()
+    val viewModel = hiltViewModel<ProfileCardViewModel>()
 
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
 
-    LegendCardScreen(
+    ProfileCardScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onSeeOtherLegendsClick = { navController.navigateToPremiumLegendLeaderboard() },
@@ -1731,7 +1731,7 @@ private fun NavGraphBuilder.profile(
         onSearchClick = { navController.navigateToAdvancedSearch(initialPostedBy = listOf(it)) },
         onPremiumBadgeClick = { premiumTier, profileId ->
             if (premiumTier.isPrimalLegendTier()) {
-                navController.navigateToPremiumLegendCard(profileId = profileId)
+                navController.navigateToProfileCard(profileId = profileId)
             } else if (premiumTier.isPremiumTier()) {
                 navController.navigateToPremiumBuying(fromOrigin = FROM_ORIGIN_PREMIUM_BADGE)
             }
