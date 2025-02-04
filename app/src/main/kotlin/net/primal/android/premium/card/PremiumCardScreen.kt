@@ -101,8 +101,8 @@ private const val AVATAR_START_ROTATION = -45f
 private const val AVATAR_END_ROTATION = 0f
 
 @Composable
-fun ProfileCardScreen(
-    viewModel: ProfileCardViewModel,
+fun PremiumCardScreen(
+    viewModel: PremiumCardViewModel,
     onClose: () -> Unit,
     onLegendSettingsClick: () -> Unit,
     onSeeOtherLegendsClick: () -> Unit,
@@ -110,7 +110,7 @@ fun ProfileCardScreen(
 ) {
     val uiState = viewModel.state.collectAsState()
 
-    ProfileCardScreen(
+    PremiumCardScreen(
         state = uiState.value,
         onClose = onClose,
         onLegendSettingsClick = onLegendSettingsClick,
@@ -120,8 +120,8 @@ fun ProfileCardScreen(
 }
 
 @Composable
-private fun ProfileCardScreen(
-    state: ProfileCardContract.UiState,
+private fun PremiumCardScreen(
+    state: PremiumCardContract.UiState,
     onClose: () -> Unit,
     onLegendSettingsClick: () -> Unit,
     onSeeOtherLegendsClick: () -> Unit,
@@ -172,7 +172,7 @@ private fun ProfileCardScreen(
 }
 
 @Composable
-private fun PrimalOGLayout(onClose: () -> Unit, state: ProfileCardContract.UiState) {
+private fun PrimalOGLayout(onClose: () -> Unit, state: PremiumCardContract.UiState) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -195,7 +195,7 @@ private fun PrimalOGLayout(onClose: () -> Unit, state: ProfileCardContract.UiSta
 
 @Composable
 private fun LegendCardLayout(
-    state: ProfileCardContract.UiState,
+    state: PremiumCardContract.UiState,
     onClose: () -> Unit,
     onLegendSettingsClick: () -> Unit,
     onSeeOtherLegendsClick: () -> Unit,

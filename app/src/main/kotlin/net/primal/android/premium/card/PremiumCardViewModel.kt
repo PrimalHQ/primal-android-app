@@ -15,16 +15,16 @@ import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 
 @HiltViewModel
-class ProfileCardViewModel @Inject constructor(
+class PremiumCardViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val profileRepository: ProfileRepository,
     private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
     private val profileId = savedStateHandle.profileIdOrThrow
 
-    private val _state = MutableStateFlow(ProfileCardContract.UiState())
+    private val _state = MutableStateFlow(PremiumCardContract.UiState())
     val state = _state.asStateFlow()
-    private fun setState(reducer: ProfileCardContract.UiState.() -> ProfileCardContract.UiState) =
+    private fun setState(reducer: PremiumCardContract.UiState.() -> PremiumCardContract.UiState) =
         _state.getAndUpdate { it.reducer() }
 
     init {

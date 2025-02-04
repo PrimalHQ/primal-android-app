@@ -87,8 +87,8 @@ import net.primal.android.notifications.list.NotificationsViewModel
 import net.primal.android.premium.buying.PremiumBuyingContract
 import net.primal.android.premium.buying.PremiumBuyingScreen
 import net.primal.android.premium.buying.PremiumBuyingViewModel
-import net.primal.android.premium.card.ProfileCardScreen
-import net.primal.android.premium.card.ProfileCardViewModel
+import net.primal.android.premium.card.PremiumCardScreen
+import net.primal.android.premium.card.PremiumCardViewModel
 import net.primal.android.premium.home.PremiumHomeScreen
 import net.primal.android.premium.home.PremiumHomeViewModel
 import net.primal.android.premium.info.PREMIUM_MORE_INFO_FAQ_TAB_INDEX
@@ -300,7 +300,7 @@ private fun NavController.navigateToPremiumBuyPrimalLegend(fromOrigin: String? =
 }
 
 private fun NavController.navigateToPremiumLegendaryProfile() = navigate(route = "premium/legend/profile")
-private fun NavController.navigateToProfileCard(profileId: String) = navigate(route = "premium/card/$profileId")
+private fun NavController.navigateToPremiumCard(profileId: String) = navigate(route = "premium/card/$profileId")
 
 private fun NavController.navigateToPremiumLegendLeaderboard() = navigate(route = "premium/legend/leaderboard")
 
@@ -587,7 +587,7 @@ fun SharedTransitionScope.PrimalAppNavigation() {
 
         premiumLegendaryProfile(route = "premium/legend/profile", navController = navController)
 
-        profileCard(
+        premiumCard(
             route = "premium/card/{$PROFILE_ID}",
             arguments = listOf(
                 navArgument(PROFILE_ID) {
@@ -1250,7 +1250,7 @@ private fun NavGraphBuilder.premiumLegendaryProfile(route: String, navController
         )
     }
 
-private fun NavGraphBuilder.profileCard(
+private fun NavGraphBuilder.premiumCard(
     route: String,
     arguments: List<NamedNavArgument>,
     navController: NavController,
@@ -1259,12 +1259,12 @@ private fun NavGraphBuilder.profileCard(
     arguments = arguments,
     dialogProperties = DialogProperties(usePlatformDefaultWidth = false),
 ) {
-    val viewModel = hiltViewModel<ProfileCardViewModel>()
+    val viewModel = hiltViewModel<PremiumCardViewModel>()
 
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
 
-    ProfileCardScreen(
+    PremiumCardScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onSeeOtherLegendsClick = { navController.navigateToPremiumLegendLeaderboard() },
@@ -1731,7 +1731,7 @@ private fun NavGraphBuilder.profile(
         onSearchClick = { navController.navigateToAdvancedSearch(initialPostedBy = listOf(it)) },
         onPremiumBadgeClick = { premiumTier, profileId ->
             if (premiumTier.isPrimalLegendTier() || premiumTier.isPremiumTier()) {
-                navController.navigateToProfileCard(profileId = profileId)
+                navController.navigateToPremiumCard(profileId = profileId)
             }
         },
     )
