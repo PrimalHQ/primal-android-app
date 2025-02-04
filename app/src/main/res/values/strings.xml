@@ -329,11 +329,13 @@
     <string name="premium_legend_profile_appear_in_leaderboard">Appear in leaderboard</string>
     <string name="premium_legend_profile_apply_button">Apply</string>
 
-    <string name="premium_legend_card_legend_since">Legend since</string>
-    <string name="premium_legend_card_button_see_other">See other Legends</string>
-    <string name="premium_legend_card_button_become_a_legend">Become a Legend</string>
-    <string name="premium_legend_card_dropdown_close">Close</string>
-    <string name="premium_legend_card_dropdown_legend_settings">Legend settings</string>
+    <string name="premium_card_legend_since">Legend since</string>
+    <string name="premium_card_og_since">Primal OG since</string>
+    <string name="premium_card_button_see_other_legends">See other Legends</string>
+    <string name="premium_card_button_see_other_ogs">See other Primal OGs</string>
+    <string name="premium_card_button_become_a_legend">Become a Legend</string>
+    <string name="premium_card_dropdown_close">Close</string>
+    <string name="premium_card_dropdown_legend_settings">Legend settings</string>
 
     <string name="premium_ogs_leaderboard_title">Primal OGs</string>
     <string name="premium_ogs_leaderboard_latest_tab">Latest</string>
