@@ -135,6 +135,20 @@ class PremiumApiImpl @Inject constructor(
             ?: throw WssException("Missing event or invalid content.")
     }
 
+    override suspend fun getPrimalLegendContributePaymentInstructions(
+        onChain: Boolean,
+    ): LegendPaymentInstructionsResponse {
+        val result = primalWalletApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.WALLET_CONTRIBUTE_LEGEND,
+            ),
+        )
+
+        val event = result.findPrimalEvent(NostrEventKind.PrimalMembershipLegendPaymentInstructions)
+        return event?.takeContentOrNull<LegendPaymentInstructionsResponse>()
+            ?: throw WssException("Missing event or invalid content.")
+    }
+
     override suspend fun getMembershipProducts() {
         primalWalletApiClient.query(
             message = PrimalCacheFilter(

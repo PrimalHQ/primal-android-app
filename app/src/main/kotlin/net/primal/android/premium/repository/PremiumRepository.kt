@@ -1,6 +1,8 @@
 package net.primal.android.premium.repository
 
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
@@ -14,6 +16,7 @@ import net.primal.android.nostr.ext.parseAndMapAsLeaderboardEntries
 import net.primal.android.premium.api.PremiumApi
 import net.primal.android.premium.api.model.CancelMembershipRequest
 import net.primal.android.premium.api.model.LeaderboardOrderBy
+import net.primal.android.premium.api.model.LegendPaymentInstructionsResponse
 import net.primal.android.premium.api.model.MembershipStatusResponse
 import net.primal.android.premium.api.model.PurchaseMembershipRequest
 import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
@@ -120,6 +123,17 @@ class PremiumRepository @Inject constructor(
                 )
             }
         }
+
+    suspend fun fetchPrimalLegendContributeInstructions(onChain: Boolean): LegendPaymentInstructionsResponse {
+        delay(5000.milliseconds)
+
+        return LegendPaymentInstructionsResponse(
+            membershipQuoteId = "mockMembershipQuoteId",
+            amountUsd = "100.00",
+            amountBtc = "0.0025",
+            qrCode = "",
+        )
+    }
 
     suspend fun fetchOrderHistory(userId: String) =
         withContext(dispatchers.io()) {

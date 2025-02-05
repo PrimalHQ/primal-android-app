@@ -13,6 +13,10 @@ class LegendContributeContract {
         val currencyMode: CurrencyMode = CurrencyMode.SATS,
         val maximumUsdAmount: BigDecimal? = null,
         val currentExchangeRate: Double? = null,
+        val bitcoinAddress: String? = null,
+        val isFetchingPaymentInstructions: Boolean = false,
+        val qrCodeValue: String? = null,
+        val primalName: String? = null,
     )
 
     sealed class UiEvent {
@@ -22,6 +26,7 @@ class LegendContributeContract {
         data object GoBackToPaymentInstructions : UiEvent()
         data object ShowPaymentInstructions : UiEvent()
         data object ShowSuccess : UiEvent()
+        data object FetchPaymentInstructions : UiEvent()
         data class ShowAmountEditor(val paymentMethod: PaymentMethod) : UiEvent()
         data class AmountChanged(val amount: String) : UiEvent()
     }

@@ -26,6 +26,8 @@ interface PremiumApi {
         primalName: String,
     ): LegendPaymentInstructionsResponse
 
+    suspend fun getPrimalLegendContributePaymentInstructions(onChain: Boolean): LegendPaymentInstructionsResponse
+
     suspend fun getMembershipProducts()
 
     suspend fun cancelMembership(userId: String, body: CancelMembershipRequest)
