@@ -124,21 +124,19 @@ class LegendContributeViewModel @Inject constructor(
                 setState {
                     copy(
                         bitcoinAddress = response.qrCode.parseBitcoinPaymentInstructions()?.address,
+                        membershipQuoteId = response.membershipQuoteId,
                     )
                 }
 
-                updateAmount("0")
-                Timber.i("Here is the response, with $primalName: $response")
-
-//                startPurchaseMonitorIfStopped()
+                updateAmount()
             } catch (error: WssException) {
-                Timber.e("Here is the response, with $primalName: $error")
+                Timber.e("Error $primalName: $error")
             } finally {
                 setState { copy(isFetchingPaymentInstructions = false) }
             }
         }
 
-    private fun updateAmount(amount: String) =
+    private fun updateAmount(amount: String = "0") =
         when (_state.value.currencyMode) {
             CurrencyMode.SATS -> {
                 setState {

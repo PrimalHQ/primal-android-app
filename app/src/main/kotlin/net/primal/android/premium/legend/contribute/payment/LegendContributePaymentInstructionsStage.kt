@@ -106,9 +106,7 @@ fun LegendContributePaymentInstructionsStage(
 }
 
 @Composable
-private fun LegendContributePaymentStageBottomBar(
-    state: UiState,
-) {
+private fun LegendContributePaymentStageBottomBar(state: UiState) {
     val context = LocalContext.current
 
     Column(

@@ -17,6 +17,7 @@ class LegendContributeContract {
         val isFetchingPaymentInstructions: Boolean = false,
         val qrCodeValue: String? = null,
         val primalName: String? = null,
+        val membershipQuoteId: String? = null,
     )
 
     sealed class UiEvent {
