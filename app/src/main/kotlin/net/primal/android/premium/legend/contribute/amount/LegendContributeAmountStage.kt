@@ -52,52 +52,44 @@ fun LegendContributeAmountStage(
             )
         },
         bottomBar = {
-            if (!state.isFetchingPaymentInstructions) {
-                LegendContributeAmountStageBottomBar(
-                    state = state,
-                    onBack = onBack,
-                    onNext = onNext,
-                )
-            }
+            LegendContributeAmountStageBottomBar(
+                state = state,
+                onBack = onBack,
+                onNext = onNext,
+            )
         },
     ) { paddingValues ->
-        if (state.isFetchingPaymentInstructions) {
-            Column(verticalArrangement = Arrangement.Center) {
-                PrimalLoadingSpinner()
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(state = rememberScrollState())
-                    .padding(paddingValues)
-                    .padding(horizontal = 32.dp),
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                TransactionAmountText(
-                    modifier = Modifier.padding(top = 100.dp),
-                    amountInBtc = state.amountInSats.toULong().toBtc().toString(),
-                    amountInUsd = state.amountInUsd,
-                    currentExchangeRate = state.currentExchangeRate,
-                    currentCurrencyMode = state.currencyMode,
-                    onAmountClick = onAmountClick,
-                )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(state = rememberScrollState())
+                .padding(paddingValues)
+                .padding(horizontal = 32.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            TransactionAmountText(
+                modifier = Modifier.padding(top = 100.dp),
+                amountInBtc = state.amountInSats.toULong().toBtc().toString(),
+                amountInUsd = state.amountInUsd,
+                currentExchangeRate = state.currentExchangeRate,
+                currentCurrencyMode = state.currencyMode,
+                onAmountClick = onAmountClick,
+            )
 
-                PrimalNumericPad(
-                    modifier = Modifier.fillMaxWidth(),
-                    amountInSats = if (state.currencyMode == CurrencyMode.SATS) {
-                        state.amountInSats
-                    } else {
-                        state.amountInUsd
-                    },
-                    currencyMode = state.currencyMode,
-                    maximumUsdAmount = state.maximumUsdAmount,
-                    onAmountInSatsChanged = { newAmount ->
-                        onAmountChanged(newAmount)
-                    },
-                )
-            }
+            PrimalNumericPad(
+                modifier = Modifier.fillMaxWidth(),
+                amountInSats = if (state.currencyMode == CurrencyMode.SATS) {
+                    state.amountInSats
+                } else {
+                    state.amountInUsd
+                },
+                currencyMode = state.currencyMode,
+                maximumUsdAmount = state.maximumUsdAmount,
+                onAmountInSatsChanged = { newAmount ->
+                    onAmountChanged(newAmount)
+                },
+            )
         }
     }
 }

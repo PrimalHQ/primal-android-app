@@ -125,13 +125,11 @@ class PremiumRepository @Inject constructor(
         }
 
     suspend fun fetchPrimalLegendContributeInstructions(onChain: Boolean): LegendPaymentInstructionsResponse {
-        delay(5000.milliseconds)
-
         return LegendPaymentInstructionsResponse(
             membershipQuoteId = "mockMembershipQuoteId",
             amountUsd = "100.00",
             amountBtc = "0.0025",
-            qrCode = "",
+            qrCode = "bitcoin:bc1quhkhtsmdhd0g8aac83uvsjewqnxwlzm2fsavcn?amount=0.01023223437260262",
         )
     }
 

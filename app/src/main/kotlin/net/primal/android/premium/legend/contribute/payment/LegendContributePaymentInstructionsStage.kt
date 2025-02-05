@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.math.BigDecimal
 import net.primal.android.R
+import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -76,14 +77,18 @@ fun LegendContributePaymentInstructionsStage(
             verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
         ) {
             Box(modifier = Modifier.size(280.dp)) {
-                QrCodeBox(
-                    qrCodeValue = state.qrCodeValue,
-                    network = if (state.paymentMethod == LegendContributeContract.PaymentMethod.OnChainBitcoin) {
-                        Network.Bitcoin
-                    } else {
-                        Network.Lightning
-                    },
-                )
+                if (state.isFetchingPaymentInstructions) {
+                    PrimalLoadingSpinner()
+                } else {
+                    QrCodeBox(
+                        qrCodeValue = state.qrCodeValue,
+                        network = if (state.paymentMethod == LegendContributeContract.PaymentMethod.OnChainBitcoin) {
+                            Network.Bitcoin
+                        } else {
+                            Network.Lightning
+                        },
+                    )
+                }
             }
 
             PrimalLegendAmount(

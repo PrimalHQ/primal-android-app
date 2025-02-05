@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.math.BigDecimal
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -112,6 +114,28 @@ class LegendContributeViewModel @Inject constructor(
             }
         }
 
+    private fun observeUsdExchangeRate() =
+        viewModelScope.launch {
+            exchangeRateHandler.usdExchangeRate.collect {
+                setState {
+                    copy(
+                        currentExchangeRate = it,
+                        maximumUsdAmount = getMaximumUsdAmount(it),
+                        amountInUsd = BigDecimal(_state.value.amountInSats)
+                            .fromSatsToUsd(it)
+                            .formatUsdZeros(),
+                    )
+                }
+            }
+        }
+
+    private fun fetchExchangeRate() =
+        viewModelScope.launch {
+            exchangeRateHandler.updateExchangeRate(
+                userId = activeAccountStore.activeUserId(),
+            )
+        }
+
     private fun fetchLegendPaymentInstructions(primalName: String) =
         viewModelScope.launch {
             try {
@@ -121,6 +145,8 @@ class LegendContributeViewModel @Inject constructor(
                     onChain = state.value.paymentMethod == LegendContributeContract.PaymentMethod.OnChainBitcoin,
                 )
 
+                delay(5.seconds)
+
                 setState {
                     copy(
                         bitcoinAddress = response.qrCode.parseBitcoinPaymentInstructions()?.address,
@@ -128,7 +154,13 @@ class LegendContributeViewModel @Inject constructor(
                     )
                 }
 
-                updateAmount()
+                val currentAmount = if (state.value.currencyMode == CurrencyMode.SATS) {
+                    state.value.amountInSats
+                } else {
+                    state.value.amountInUsd
+                }
+
+                updateAmount(currentAmount)
             } catch (error: WssException) {
                 Timber.e("Error $primalName: $error")
             } finally {
@@ -159,27 +191,5 @@ class LegendContributeViewModel @Inject constructor(
                     )
                 }
             }
-        }
-
-    private fun observeUsdExchangeRate() =
-        viewModelScope.launch {
-            exchangeRateHandler.usdExchangeRate.collect {
-                setState {
-                    copy(
-                        currentExchangeRate = it,
-                        maximumUsdAmount = getMaximumUsdAmount(it),
-                        amountInUsd = BigDecimal(_state.value.amountInSats)
-                            .fromSatsToUsd(it)
-                            .formatUsdZeros(),
-                    )
-                }
-            }
-        }
-
-    private fun fetchExchangeRate() =
-        viewModelScope.launch {
-            exchangeRateHandler.updateExchangeRate(
-                userId = activeAccountStore.activeUserId(),
-            )
         }
 }
