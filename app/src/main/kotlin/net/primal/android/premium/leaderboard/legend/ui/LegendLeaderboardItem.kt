@@ -29,7 +29,6 @@ import net.primal.android.core.utils.formatToDefaultDateFormat
 import net.primal.android.premium.leaderboard.domain.LeaderboardLegendEntry
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 
 @Composable
 fun LegendLeaderboardItem(
@@ -71,7 +70,7 @@ fun LegendLeaderboardItem(
                 displayName = item.displayName,
                 internetIdentifier = item.internetIdentifier,
                 legendaryCustomization = item.premiumProfileDataUi?.legendaryCustomization,
-                satsDonated = item.donatedBtc.toSats(),
+                satsDonated = item.donatedSats,
             )
         },
         supportingContent = {
@@ -104,7 +103,7 @@ private fun DisplayNameAndSatsDonatedRow(
     displayName: String?,
     internetIdentifier: String?,
     legendaryCustomization: LegendaryCustomization?,
-    satsDonated: Double,
+    satsDonated: ULong,
 ) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
 
@@ -127,7 +126,7 @@ private fun DisplayNameAndSatsDonatedRow(
             )
         }
         Text(
-            text = numberFormat.format(satsDonated),
+            text = numberFormat.format(satsDonated.toLong()),
             fontWeight = FontWeight.Bold,
             style = AppTheme.typography.bodyMedium,
         )

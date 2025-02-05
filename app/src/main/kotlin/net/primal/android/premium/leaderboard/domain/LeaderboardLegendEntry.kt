@@ -9,5 +9,5 @@ data class LeaderboardLegendEntry(
     val displayName: String?,
     val internetIdentifier: String?,
     val premiumProfileDataUi: PremiumProfileDataUi?,
-    val donatedBtc: Double,
+    val donatedSats: ULong,
 )

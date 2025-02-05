@@ -4,6 +4,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
+import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.primal.retryNetworkCall
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsProfileDataPO
@@ -27,6 +28,7 @@ class PremiumRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
     private val premiumApi: PremiumApi,
     private val accountsStore: UserAccountsStore,
+    private val database: PrimalDatabase,
 ) {
     suspend fun isPrimalNameAvailable(name: String): Boolean =
         withContext(dispatchers.io()) {
@@ -83,10 +85,12 @@ class PremiumRepository @Inject constructor(
     }
 
     suspend fun fetchPremiumLeaderboard(
-        orderBy: PremiumLeaderboardOrderBy = PremiumLeaderboardOrderBy.Index,
+        orderBy: PremiumLeaderboardOrderBy = PremiumLeaderboardOrderBy.PremiumSince,
+        since: Long? = null,
+        until: Long? = null,
         limit: Int = 100,
     ) = withContext(dispatchers.io()) {
-        val response = premiumApi.getPremiumLeaderboard(orderBy = orderBy, limit = limit)
+        val response = premiumApi.getPremiumLeaderboard(orderBy = orderBy, limit = limit, since = since, until = until)
 
         val primalUserNames = response.primalUsernames.parseAndFoldPrimalUserNames()
         val primalPremiumInfo = response.primalPremiumInfoEvents.parseAndFoldPrimalPremiumInfo()
@@ -98,6 +102,8 @@ class PremiumRepository @Inject constructor(
             primalLegendProfiles = emptyMap(),
             blossomServers = emptyMap(),
         )
+
+        database.profiles().insertOrUpdateAll(profiles)
 
         response.orderedPremiumLeaderboardEvent.parseAndMapAsOGLeaderboardEntries(
             profiles = profiles.asMapByKey { it.ownerId },
@@ -119,6 +125,8 @@ class PremiumRepository @Inject constructor(
                 primalLegendProfiles = primalLegendProfiles,
                 blossomServers = emptyMap(),
             )
+
+            database.profiles().insertOrUpdateAll(profiles)
 
             response.orderedLegendLeaderboardEvent.parseAndMapAsLeaderboardLegendEntries(
                 profiles = profiles.asMapByKey { it.ownerId },

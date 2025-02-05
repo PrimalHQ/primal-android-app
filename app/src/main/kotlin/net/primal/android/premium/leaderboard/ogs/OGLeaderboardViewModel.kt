@@ -2,21 +2,24 @@ package net.primal.android.premium.leaderboard.ogs
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.premium.leaderboard.ogs.OGLeaderboardContract.UiEvent
+import net.primal.android.premium.api.paging.PremiumLeaderboardPagingSource
+import net.primal.android.premium.leaderboard.domain.OGLeaderboardEntry
 import net.primal.android.premium.leaderboard.ogs.OGLeaderboardContract.UiState
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.premium.utils.isPremiumTier
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import timber.log.Timber
 
 @HiltViewModel
 class OGLeaderboardViewModel @Inject constructor(
@@ -24,16 +27,31 @@ class OGLeaderboardViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(UiState())
+    companion object {
+        private const val PAGE_SIZE = 100
+    }
+
+    private val leaderboardEntries: Flow<PagingData<OGLeaderboardEntry>> = Pager(
+        config = PagingConfig(
+            pageSize = PAGE_SIZE,
+            enablePlaceholders = false,
+            prefetchDistance = PAGE_SIZE / 2,
+            initialLoadSize = PAGE_SIZE * 2,
+        ),
+        pagingSourceFactory = {
+            PremiumLeaderboardPagingSource(
+                premiumRepository = premiumRepository,
+                pageSize = PAGE_SIZE,
+            )
+        },
+    ).flow
+        .cachedIn(viewModelScope)
+
+    private val _state = MutableStateFlow(UiState(leaderboardEntries = leaderboardEntries))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
-    private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
-    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
-
     init {
-        fetchLeaderboardByOrder()
-        observeEvents()
         observeActiveAccount()
     }
 
@@ -46,29 +64,6 @@ class OGLeaderboardViewModel @Inject constructor(
                             it.premiumMembership?.isPrimalLegendTier() == true,
                     )
                 }
-            }
-        }
-
-    private fun observeEvents() =
-        viewModelScope.launch {
-            events.collect {
-                when (it) {
-                    is UiEvent.RetryFetch -> fetchLeaderboardByOrder()
-                }
-            }
-        }
-
-    private fun fetchLeaderboardByOrder() =
-        viewModelScope.launch {
-            setState { copy(loading = true, error = null) }
-            try {
-                val entries = premiumRepository.fetchPremiumLeaderboard()
-                setState { copy(leaderboardEntries = entries) }
-            } catch (error: WssException) {
-                Timber.w(error)
-                setState { copy(error = error) }
-            } finally {
-                setState { copy(loading = false) }
             }
         }
 }

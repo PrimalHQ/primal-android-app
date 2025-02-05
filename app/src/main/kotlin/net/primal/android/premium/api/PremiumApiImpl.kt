@@ -257,16 +257,20 @@ class PremiumApiImpl @Inject constructor(
     }
 
     override suspend fun getPremiumLeaderboard(
+        since: Long?,
+        until: Long?,
         orderBy: PremiumLeaderboardOrderBy,
         limit: Int,
     ): PremiumLeaderboardResponse {
         val queryResult = primalCacheApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.MEMBERSHIP_PREMIUM_LEADERBOARD,
-                optionsJson = NostrJsonEncodeDefaults.encodeToString(
+                optionsJson = NostrJsonImplicitNulls.encodeToString(
                     PremiumLeaderboardRequest(
                         orderBy = orderBy,
                         limit = limit,
+                        since = since,
+                        until = until,
                     ),
                 ),
             ),

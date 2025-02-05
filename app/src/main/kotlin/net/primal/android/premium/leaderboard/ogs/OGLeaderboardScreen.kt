@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -21,20 +21,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.isEmpty
 import net.primal.android.premium.leaderboard.domain.OGLeaderboardEntry
 import net.primal.android.premium.leaderboard.legend.ui.LATEST_INDEX
 import net.primal.android.premium.leaderboard.ogs.ui.OGLeaderboardItem
 import net.primal.android.premium.leaderboard.ogs.ui.OGLeaderboardTabs
 import net.primal.android.premium.leaderboard.ogs.ui.PAGE_COUNT
 import net.primal.android.theme.AppTheme
+import timber.log.Timber
 
 @Composable
 fun OGLeaderboardScreen(
@@ -47,7 +53,6 @@ fun OGLeaderboardScreen(
 
     OGLeaderboardScreen(
         state = uiState.value,
-        eventPublisher = viewModel::setEvent,
         onClose = onClose,
         onProfileClick = onProfileClick,
         onGetPrimalPremiumClick = onGetPrimalPremiumClick,
@@ -58,7 +63,6 @@ fun OGLeaderboardScreen(
 @Composable
 private fun OGLeaderboardScreen(
     state: OGLeaderboardContract.UiState,
-    eventPublisher: (OGLeaderboardContract.UiEvent) -> Unit,
     onClose: () -> Unit,
     onGetPrimalPremiumClick: () -> Unit,
     onProfileClick: (String) -> Unit,
@@ -75,38 +79,66 @@ private fun OGLeaderboardScreen(
             )
         },
     ) { paddingValues ->
+        val pagingItems = state.leaderboardEntries.collectAsLazyPagingItems()
+        val lazyListState = pagingItems.rememberLazyListStatePagingWorkaround()
         HorizontalPager(
             contentPadding = paddingValues,
             state = pagerState,
         ) { currentPage ->
-            if (state.loading && state.leaderboardEntries.isEmpty()) {
-                HeightAdjustableLoadingLazyListPlaceholder(height = 80.dp)
-            } else if (state.error != null) {
-                ListNoContent(
-                    modifier = Modifier.fillMaxSize(),
-                    noContentText = stringResource(id = R.string.premium_leaderboard_no_content),
-                    onRefresh = {
-                        eventPublisher(OGLeaderboardContract.UiEvent.RetryFetch)
-                    },
-                )
+            if (pagingItems.isEmpty()) {
+                when (val refreshLoadState = pagingItems.loadState.refresh) {
+                    is LoadState.Error -> {
+                        Timber.w(refreshLoadState.error)
+                        ListNoContent(
+                            modifier = Modifier.fillMaxSize(),
+                            noContentText = stringResource(id = R.string.premium_leaderboard_error_loading),
+                            onRefresh = { pagingItems.refresh() },
+                        )
+                    }
+
+                    is LoadState.NotLoading -> {
+                        if (pagingItems.loadState.isIdle) {
+                            ListNoContent(
+                                modifier = Modifier.fillMaxSize(),
+                                noContentText = stringResource(id = R.string.premium_leaderboard_no_content),
+                                onRefresh = { pagingItems.refresh() },
+                            )
+                        }
+                    }
+
+                    LoadState.Loading -> {
+                        HeightAdjustableLoadingLazyListPlaceholder(height = 80.dp)
+                    }
+                }
             } else {
-                LeaderboardList(entries = state.leaderboardEntries, onProfileClick = onProfileClick)
+                LeaderboardList(
+                    lazyListState = lazyListState,
+                    entries = pagingItems,
+                    onProfileClick = onProfileClick,
+                )
             }
         }
     }
 }
 
 @Composable
-private fun LeaderboardList(entries: List<OGLeaderboardEntry>, onProfileClick: (String) -> Unit) {
-    LazyColumn {
+private fun LeaderboardList(
+    lazyListState: LazyListState,
+    entries: LazyPagingItems<OGLeaderboardEntry>,
+    onProfileClick: (String) -> Unit,
+) {
+    LazyColumn(state = lazyListState) {
         items(
-            items = entries,
-            key = { it.userId },
-        ) { entry ->
-            OGLeaderboardItem(
-                item = entry,
-                onClick = { onProfileClick(entry.userId) },
-            )
+            count = entries.itemCount,
+        ) { index ->
+            val entry = entries[index]
+
+            entry?.let {
+                OGLeaderboardItem(
+                    item = entry,
+                    onClick = { onProfileClick(entry.userId) },
+                )
+            }
         }
     }
 }
