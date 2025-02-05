@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ContentLegendLeaderboardItem(
     val pubkey: String,
-    @SerialName("donated_btc") val donatedBtc: Double,
+    @SerialName("donated_btc") val donatedSats: String,
 )

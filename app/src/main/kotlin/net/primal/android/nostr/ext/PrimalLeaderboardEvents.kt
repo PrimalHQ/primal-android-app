@@ -21,7 +21,7 @@ fun PrimalEvent?.parseAndMapAsLeaderboardLegendEntries(profiles: Map<String, Pro
                     displayName = profile.authorNameUiFriendly(),
                     internetIdentifier = profile.internetIdentifier,
                     premiumProfileDataUi = profile.primalPremiumInfo?.asPremiumProfileDataUi(),
-                    donatedBtc = item.donatedBtc,
+                    donatedSats = item.donatedSats.toULong(),
                 )
             }
         } ?: emptyList()
