@@ -31,7 +31,7 @@ fun PrimalEvent?.parseAndMapAsOGLeaderboardEntries(profiles: Map<String, Profile
         ?.mapNotNull { item ->
             profiles[item.pubkey]?.let { profile ->
                 OGLeaderboardEntry(
-                    index = item.index,
+                    index = item.index.toInt(),
                     userId = item.pubkey,
                     avatarCdnImage = profile.avatarCdnImage,
                     displayName = profile.authorNameUiFriendly(),

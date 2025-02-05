@@ -6,7 +6,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 class PremiumLeaderboardRequest(
     @SerialName("order_by") val orderBy: PremiumLeaderboardOrderBy,
-    val limit: Int = 100,
+    val limit: Int,
+    val since: Long?,
+    val until: Long?,
 )
 
 enum class PremiumLeaderboardOrderBy {

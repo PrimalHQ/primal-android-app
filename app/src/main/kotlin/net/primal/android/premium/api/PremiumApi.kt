@@ -40,7 +40,12 @@ interface PremiumApi {
 
     suspend fun getLegendLeaderboard(orderBy: LegendLeaderboardOrderBy, limit: Int = 1000): LegendLeaderboardResponse
 
-    suspend fun getPremiumLeaderboard(orderBy: PremiumLeaderboardOrderBy, limit: Int = 100): PremiumLeaderboardResponse
+    suspend fun getPremiumLeaderboard(
+        since: Long?,
+        until: Long?,
+        orderBy: PremiumLeaderboardOrderBy,
+        limit: Int = 100,
+    ): PremiumLeaderboardResponse
 
     suspend fun getRecoveryContactsList(userId: String): List<NostrEvent>
 }

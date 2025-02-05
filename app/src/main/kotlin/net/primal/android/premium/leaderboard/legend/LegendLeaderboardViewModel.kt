@@ -66,7 +66,7 @@ class LegendLeaderboardViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(loading = true, error = null) }
             try {
-                val entries = premiumRepository.fetchLegendLeaderboard(orderBy = orderBy)
+                val entries = premiumRepository.fetchLegendLeaderboard(orderBy = orderBy, limit = 200)
                 setState { copy(leaderboardEntries = leaderboardEntries + (orderBy to entries)) }
             } catch (error: WssException) {
                 Timber.w(error)

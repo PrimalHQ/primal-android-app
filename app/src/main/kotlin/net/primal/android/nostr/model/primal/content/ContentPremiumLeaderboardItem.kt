@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ContentPremiumLeaderboardItem(
-    val index: Int,
+    val index: Double,
     val pubkey: String,
     @SerialName("premium_since") val premiumSince: Long? = null,
 )
