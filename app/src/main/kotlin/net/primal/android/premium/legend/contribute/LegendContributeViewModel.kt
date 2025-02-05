@@ -147,11 +147,9 @@ class LegendContributeViewModel @Inject constructor(
                     state.value.amountInUsd
                 }
 
-                Timber.i("My response: $response")
-
                 updateAmount(currentAmount)
             } catch (error: WssException) {
-                Timber.e("My response: $error")
+                Timber.e(error)
             } finally {
                 setState { copy(isFetchingPaymentInstructions = false) }
             }
