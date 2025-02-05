@@ -129,7 +129,7 @@ class PremiumRepository @Inject constructor(
             membershipQuoteId = "mockMembershipQuoteId",
             amountUsd = "100.00",
             amountBtc = "0.0025",
-            qrCode = "bitcoin:bc1quhkhtsmdhd0g8aac83uvsjewqnxwlzm2fsavcn?amount=0.01023223437260262",
+            qrCode = "",
         )
     }
 
