@@ -11,7 +11,6 @@ interface LegendaryProfileCustomizationContract {
         val avatarCdnImage: CdnImage? = null,
         val membership: PremiumMembership? = null,
         val avatarLegendaryCustomization: LegendaryCustomization = LegendaryCustomization(),
-        val applyingChanges: Boolean = false,
     ) {
         fun computeShoutout() = membership?.editedShoutout ?: avatarLegendaryCustomization.currentShoutout ?: ""
     }
