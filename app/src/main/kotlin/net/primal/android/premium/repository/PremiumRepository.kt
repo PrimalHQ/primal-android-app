@@ -83,7 +83,7 @@ class PremiumRepository @Inject constructor(
     }
 
     suspend fun fetchPremiumLeaderboard(
-        orderBy: PremiumLeaderboardOrderBy = PremiumLeaderboardOrderBy.Index,
+        orderBy: PremiumLeaderboardOrderBy = PremiumLeaderboardOrderBy.PremiumSince,
         limit: Int = 100,
     ) = withContext(dispatchers.io()) {
         val response = premiumApi.getPremiumLeaderboard(orderBy = orderBy, limit = limit)

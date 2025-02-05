@@ -10,6 +10,9 @@ class PremiumLeaderboardRequest(
 )
 
 enum class PremiumLeaderboardOrderBy {
+    @SerialName("premium_since")
+    PremiumSince,
+
     @SerialName("index")
     Index,
 }
