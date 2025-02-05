@@ -2,6 +2,7 @@ package net.primal.android.premium.api.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.leaderboard.domain.OGLeaderboardEntry
 import net.primal.android.premium.repository.PremiumRepository
 
@@ -33,7 +34,7 @@ class PremiumLeaderboardPagingSource(
                 prevKey = null,
                 nextKey = nextUntil,
             )
-        } catch (e: Exception) {
+        } catch (e: WssException) {
             LoadResult.Error(e)
         }
     }
