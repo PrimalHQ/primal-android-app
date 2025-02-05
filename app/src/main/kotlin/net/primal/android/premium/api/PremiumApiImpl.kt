@@ -31,6 +31,7 @@ import net.primal.android.premium.api.model.ShowSupportUsResponse
 import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
 import net.primal.android.premium.domain.PremiumPurchaseOrder
 import net.primal.android.settings.api.model.AppSpecificDataRequest
+import timber.log.Timber
 
 class PremiumApiImpl @Inject constructor(
     @PrimalWalletApiClient private val primalWalletApiClient: PrimalApiClient,
@@ -109,6 +110,7 @@ class PremiumApiImpl @Inject constructor(
     override suspend fun getPrimalLegendPaymentInstructions(
         userId: String,
         primalName: String,
+        onChain: Boolean,
     ): LegendPaymentInstructionsResponse {
         val result = primalWalletApiClient.query(
             message = PrimalCacheFilter(
@@ -122,6 +124,7 @@ class PremiumApiImpl @Inject constructor(
                                     primalProductId = "legend-premium",
                                     name = primalName,
                                     receiverUserId = userId,
+                                    onChain = onChain,
                                 ),
                             ),
                         ),
@@ -130,19 +133,7 @@ class PremiumApiImpl @Inject constructor(
             ),
         )
 
-        val event = result.findPrimalEvent(NostrEventKind.PrimalMembershipLegendPaymentInstructions)
-        return event?.takeContentOrNull<LegendPaymentInstructionsResponse>()
-            ?: throw WssException("Missing event or invalid content.")
-    }
-
-    override suspend fun getPrimalLegendContributePaymentInstructions(
-        onChain: Boolean,
-    ): LegendPaymentInstructionsResponse {
-        val result = primalWalletApiClient.query(
-            message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET_CONTRIBUTE_LEGEND,
-            ),
-        )
+        Timber.i("My response: $result")
 
         val event = result.findPrimalEvent(NostrEventKind.PrimalMembershipLegendPaymentInstructions)
         return event?.takeContentOrNull<LegendPaymentInstructionsResponse>()

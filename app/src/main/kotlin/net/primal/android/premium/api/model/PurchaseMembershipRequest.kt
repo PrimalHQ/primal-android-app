@@ -9,4 +9,5 @@ data class PurchaseMembershipRequest(
     @SerialName("receiver_pubkey") val receiverUserId: String,
     @SerialName("product_id") val primalProductId: String? = null,
     @SerialName("android_subscription") val playSubscription: String? = null,
+    @SerialName("onchain") val onChain: Boolean = true,
 )

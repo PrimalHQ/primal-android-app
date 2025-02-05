@@ -20,7 +20,7 @@ import net.primal.android.premium.legend.become.amount.MainAmountText
 fun PrimalLegendAmount(
     btcValue: BigDecimal,
     exchangeBtcUsdRate: Double?,
-    isContribution: Boolean = false,
+    coerceMinAmount: Boolean = false,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -45,7 +45,7 @@ fun PrimalLegendAmount(
 
             AltAmountText(
                 modifier = Modifier.padding(top = 8.dp),
-                amount = if (isContribution) {
+                amount = if (coerceMinAmount) {
                     numberFormat.format(usdValue.toInt())
                 } else {
                     numberFormat.format(usdValue.toInt().coerceAtLeast(minimumValue = LEGEND_THRESHOLD_IN_USD))

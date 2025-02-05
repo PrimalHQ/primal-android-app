@@ -95,7 +95,7 @@ fun LegendContributePaymentInstructionsStage(
             PrimalLegendAmount(
                 btcValue = BigDecimal(state.amountInSats.toULong().toBtc()),
                 exchangeBtcUsdRate = state.currentExchangeRate,
-                isContribution = true,
+                coerceMinAmount = true,
             )
 
             Text(
@@ -125,7 +125,7 @@ private fun LegendContributePaymentStageBottomBar(state: UiState) {
     ) {
         PrimalLoadingButton(
             modifier = Modifier.fillMaxWidth(),
-            text = stringResource(id = R.string.legend_contribute_payment_instructions_copy_invoice),
+            text = stringResource(id = R.string.legend_contribution_payment_instructions_copy_invoice),
             containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
             contentColor = AppTheme.colorScheme.onSurface,
             onClick = {
@@ -140,7 +140,7 @@ private fun LegendContributePaymentStageBottomBar(state: UiState) {
         PrimalLoadingButton(
             modifier = Modifier.fillMaxWidth(),
             enabled = true,
-            text = stringResource(id = R.string.legend_contribute_payment_instructions_pay_with_primal_wallet),
+            text = stringResource(id = R.string.legend_contribution_payment_instructions_pay_with_primal_wallet),
             onClick = { },
         )
     }

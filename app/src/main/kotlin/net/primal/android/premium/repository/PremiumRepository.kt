@@ -14,7 +14,6 @@ import net.primal.android.nostr.ext.parseAndMapAsLeaderboardEntries
 import net.primal.android.premium.api.PremiumApi
 import net.primal.android.premium.api.model.CancelMembershipRequest
 import net.primal.android.premium.api.model.LeaderboardOrderBy
-import net.primal.android.premium.api.model.LegendPaymentInstructionsResponse
 import net.primal.android.premium.api.model.MembershipStatusResponse
 import net.primal.android.premium.api.model.PurchaseMembershipRequest
 import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
@@ -112,23 +111,18 @@ class PremiumRepository @Inject constructor(
         }
     }
 
-    suspend fun fetchPrimalLegendPaymentInstructions(userId: String, primalName: String) =
-        withContext(dispatchers.io()) {
-            retryNetworkCall(retries = 2) {
-                premiumApi.getPrimalLegendPaymentInstructions(
-                    userId = userId,
-                    primalName = primalName,
-                )
-            }
+    suspend fun fetchPrimalLegendPaymentInstructions(
+        userId: String,
+        primalName: String,
+        onChain: Boolean = true,
+    ) = withContext(dispatchers.io()) {
+        retryNetworkCall(retries = 2) {
+            premiumApi.getPrimalLegendPaymentInstructions(
+                userId = userId,
+                primalName = primalName,
+                onChain = onChain,
+            )
         }
-
-    suspend fun fetchPrimalLegendContributeInstructions(onChain: Boolean): LegendPaymentInstructionsResponse {
-        return LegendPaymentInstructionsResponse(
-            membershipQuoteId = "mockMembershipQuoteId",
-            amountUsd = "100.00",
-            amountBtc = "0.0025",
-            qrCode = "",
-        )
     }
 
     suspend fun fetchOrderHistory(userId: String) =

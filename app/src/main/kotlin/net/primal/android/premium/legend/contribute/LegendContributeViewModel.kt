@@ -4,9 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.math.BigDecimal
+import java.math.RoundingMode
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,6 +37,10 @@ class LegendContributeViewModel @Inject constructor(
     private val premiumRepository: PremiumRepository,
 ) : ViewModel() {
 
+    private companion object {
+        private const val BTC_DECIMAL_PLACES = 8
+    }
+
     private val _state = MutableStateFlow(UiState())
 
     val state = _state.asStateFlow()
@@ -48,7 +51,6 @@ class LegendContributeViewModel @Inject constructor(
 
     init {
         observeEvents()
-        observeActiveAccount()
         fetchExchangeRate()
         observeUsdExchangeRate()
     }
@@ -82,11 +84,7 @@ class LegendContributeViewModel @Inject constructor(
                     }
 
                     UiEvent.FetchPaymentInstructions -> {
-                        val state = _state.value
-
-                        if (state.primalName != null) {
-                            fetchLegendPaymentInstructions(primalName = state.primalName)
-                        }
+                        fetchLegendPaymentInstructions()
                     }
 
                     is UiEvent.ShowAmountEditor -> setState {
@@ -99,17 +97,6 @@ class LegendContributeViewModel @Inject constructor(
                     is UiEvent.AmountChanged -> {
                         updateAmount(amount = it.amount)
                     }
-                }
-            }
-        }
-
-    private fun observeActiveAccount() =
-        viewModelScope.launch {
-            activeAccountStore.activeUserAccount.collect {
-                setState {
-                    copy(
-                        primalName = it.premiumMembership?.premiumName,
-                    )
                 }
             }
         }
@@ -136,16 +123,16 @@ class LegendContributeViewModel @Inject constructor(
             )
         }
 
-    private fun fetchLegendPaymentInstructions(primalName: String) =
+    private fun fetchLegendPaymentInstructions() =
         viewModelScope.launch {
             try {
                 setState { copy(isFetchingPaymentInstructions = true) }
 
-                val response = premiumRepository.fetchPrimalLegendContributeInstructions(
+                val response = premiumRepository.fetchPrimalLegendPaymentInstructions(
+                    userId = activeAccountStore.activeUserId(),
+                    primalName = "",
                     onChain = state.value.paymentMethod == LegendContributeContract.PaymentMethod.OnChainBitcoin,
                 )
-
-                delay(5.seconds)
 
                 setState {
                     copy(
@@ -160,9 +147,11 @@ class LegendContributeViewModel @Inject constructor(
                     state.value.amountInUsd
                 }
 
+                Timber.i("My response: $response")
+
                 updateAmount(currentAmount)
             } catch (error: WssException) {
-                Timber.e("Error $primalName: $error")
+                Timber.e("My response: $error")
             } finally {
                 setState { copy(isFetchingPaymentInstructions = false) }
             }
@@ -175,7 +164,9 @@ class LegendContributeViewModel @Inject constructor(
                     copy(
                         amountInSats = amount,
                         amountInUsd = amount.parseSatsToUsd(state.value.currentExchangeRate),
-                        qrCodeValue = "bitcoin:${this.bitcoinAddress}?amount=${amount.toULong().toBtc()}",
+                        qrCodeValue = "bitcoin:${this.bitcoinAddress}?amount=${
+                            amount.toULong().toBtc().toBigDecimal().formatToBtcString(BTC_DECIMAL_PLACES)
+                        }",
                     )
                 }
             }
@@ -186,10 +177,15 @@ class LegendContributeViewModel @Inject constructor(
                         amountInSats = amount.parseUsdToSats(state.value.currentExchangeRate),
                         amountInUsd = amount,
                         qrCodeValue = "bitcoin:${this.bitcoinAddress}?amount=${
-                            BigDecimal(amount).fromUsdToSats(state.value.currentExchangeRate).toBtc()
+                            BigDecimal(amount).fromUsdToSats(state.value.currentExchangeRate)
+                                .toBtc().toBigDecimal().formatToBtcString(BTC_DECIMAL_PLACES)
                         }",
                     )
                 }
             }
         }
+
+    private fun BigDecimal.formatToBtcString(scale: Int): String {
+        return this.setScale(scale, RoundingMode.HALF_UP).toPlainString()
+    }
 }
