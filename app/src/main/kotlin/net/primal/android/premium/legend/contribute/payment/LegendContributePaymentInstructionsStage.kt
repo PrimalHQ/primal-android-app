@@ -33,6 +33,7 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.premium.legend.become.PrimalLegendAmount
+import net.primal.android.premium.legend.become.amount.NoPaymentInstructionsColumn
 import net.primal.android.premium.legend.contribute.LegendContributeContract
 import net.primal.android.premium.legend.contribute.LegendContributeContract.UiState
 import net.primal.android.theme.AppTheme
@@ -46,7 +47,7 @@ fun LegendContributePaymentInstructionsStage(
     modifier: Modifier,
     state: UiState,
     onBack: () -> Unit,
-    onNext: () -> Unit,
+    onPaymentInstructionRetry: () -> Unit,
 ) {
     Scaffold(
         modifier = modifier,
@@ -65,6 +66,7 @@ fun LegendContributePaymentInstructionsStage(
         bottomBar = {
             LegendContributePaymentStageBottomBar(
                 state = state,
+                enabled = state.arePaymentInstructionsAvailable(),
             )
         },
     ) { paddingValues ->
@@ -77,18 +79,18 @@ fun LegendContributePaymentInstructionsStage(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
         ) {
-            Box(modifier = Modifier.size(280.dp)) {
-                if (state.isFetchingPaymentInstructions) {
-                    PrimalLoadingSpinner()
-                } else {
-                    QrCodeBox(
+            Box(modifier = Modifier.size(280.dp), contentAlignment = Alignment.Center) {
+                when {
+                    state.isFetchingPaymentInstructions -> PrimalLoadingSpinner()
+                    state.arePaymentInstructionsAvailable() -> QrCodeBox(
                         qrCodeValue = state.qrCodeValue,
-                        network = if (state.paymentMethod == LegendContributeContract.PaymentMethod.OnChainBitcoin) {
-                            Network.Bitcoin
-                        } else {
-                            Network.Lightning
+                        network = when (state.paymentMethod) {
+                            LegendContributeContract.PaymentMethod.OnChainBitcoin -> Network.Bitcoin
+                            else -> Network.Lightning
                         },
                     )
+
+                    else -> NoPaymentInstructionsColumn(onRetryClick = onPaymentInstructionRetry)
                 }
             }
 
@@ -112,7 +114,7 @@ fun LegendContributePaymentInstructionsStage(
 }
 
 @Composable
-private fun LegendContributePaymentStageBottomBar(state: UiState) {
+private fun LegendContributePaymentStageBottomBar(state: UiState, enabled: Boolean) {
     val context = LocalContext.current
 
     Column(
@@ -128,6 +130,7 @@ private fun LegendContributePaymentStageBottomBar(state: UiState) {
             text = stringResource(id = R.string.legend_contribution_payment_instructions_copy_invoice),
             containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
             contentColor = AppTheme.colorScheme.onSurface,
+            enabled = enabled,
             onClick = {
                 val clipboard = context.getSystemService(ClipboardManager::class.java)
                 val clip = ClipData.newPlainText("", state.qrCodeValue)
@@ -139,7 +142,7 @@ private fun LegendContributePaymentStageBottomBar(state: UiState) {
 
         PrimalLoadingButton(
             modifier = Modifier.fillMaxWidth(),
-            enabled = true,
+            enabled = enabled,
             text = stringResource(id = R.string.legend_contribution_payment_instructions_pay_with_primal_wallet),
             onClick = { },
         )

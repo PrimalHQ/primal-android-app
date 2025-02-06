@@ -12,6 +12,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.premium.ui.PaymentSuccess
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,6 +33,14 @@ fun LegendContributePaymentSuccessStage(modifier: Modifier, onBack: () -> Unit) 
                 .fillMaxSize()
                 .padding(paddingValues),
         ) {
+            PaymentSuccess(
+                modifier = modifier,
+                title = stringResource(R.string.premium_become_legend_success_title),
+                headlineText = stringResource(R.string.premium_become_legend_success_headline),
+                supportText = stringResource(R.string.premium_become_legend_success_supporting_text),
+                buttonText = stringResource(R.string.premium_become_legend_success_done_button),
+                onDoneClick = onBack,
+            )
         }
     }
 }

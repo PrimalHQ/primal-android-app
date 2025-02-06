@@ -214,6 +214,9 @@
     <string name="legend_contribution_payment_instructions_pay_with_primal_wallet">Pay Now via Primal Wallet</string>
     <string name="legend_contribution_payment_instructions_copy_invoice">Copy Invoice</string>
     <string name="legend_contribution_success_stage_title">Success</string>
+    <string name="legend_contribution_success_stage_appreciation_title">Success, payment received!</string>
+    <string name="legend_contribution_success_stage_appreciation_subtitle">Thank you, Legend!</string>
+    <string name="legend_contribution_success_stage_appreciation_done_button">Done</string>
 
     <string name="premium_manage_title">Manage Premium</string>
     <string name="premium_manage_nostr_tools">Nostr Tools</string>

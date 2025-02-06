@@ -16,6 +16,7 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.legend.contribute.LegendContributeContract.LegendContributeState
 import net.primal.android.premium.legend.contribute.LegendContributeContract.UiEvent
 import net.primal.android.premium.legend.contribute.LegendContributeContract.UiState
+import net.primal.android.premium.legend.subscription.PurchaseMonitorManager
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.domain.CurrencyMode
@@ -35,6 +36,7 @@ class LegendContributeViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val exchangeRateHandler: ExchangeRateHandler,
     private val premiumRepository: PremiumRepository,
+    private val purchaseMonitorManager: PurchaseMonitorManager,
 ) : ViewModel() {
 
     private companion object {
@@ -86,6 +88,10 @@ class LegendContributeViewModel @Inject constructor(
                     UiEvent.FetchPaymentInstructions -> {
                         fetchLegendPaymentInstructions()
                     }
+
+                    UiEvent.StartPurchaseMonitor -> startPurchaseMonitor()
+
+                    UiEvent.StopPurchaseMonitor -> stopPurchaseMonitor()
 
                     is UiEvent.ShowAmountEditor -> setState {
                         copy(
@@ -148,6 +154,8 @@ class LegendContributeViewModel @Inject constructor(
                 }
 
                 updateAmount(currentAmount)
+
+                startPurchaseMonitor()
             } catch (error: WssException) {
                 Timber.e(error)
             } finally {
@@ -182,6 +190,19 @@ class LegendContributeViewModel @Inject constructor(
                 }
             }
         }
+
+    private fun startPurchaseMonitor() {
+        purchaseMonitorManager.startMonitor(
+            scope = viewModelScope,
+            quoteId = _state.value.membershipQuoteId,
+        ) {
+            setState { copy(stage = LegendContributeState.Success) }
+        }
+    }
+
+    private fun stopPurchaseMonitor() {
+        purchaseMonitorManager.stopMonitor(viewModelScope)
+    }
 
     private fun BigDecimal.formatToBtcString(scale: Int): String {
         return this.setScale(scale, RoundingMode.HALF_UP).toPlainString()
