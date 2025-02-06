@@ -67,6 +67,8 @@ class PremiumRepository @Inject constructor(
                     receiverUserId = userId,
                     primalProductId = null,
                     playSubscription = purchase.playSubscriptionJson,
+                    onChain = true,
+                    amountUsd = null,
                 ),
             )
         }
@@ -115,12 +117,14 @@ class PremiumRepository @Inject constructor(
         userId: String,
         primalName: String,
         onChain: Boolean = true,
+        amountUsd: String?,
     ) = withContext(dispatchers.io()) {
         retryNetworkCall(retries = 2) {
             premiumApi.getPrimalLegendPaymentInstructions(
                 userId = userId,
                 primalName = primalName,
                 onChain = onChain,
+                amountUsd = amountUsd,
             )
         }
     }

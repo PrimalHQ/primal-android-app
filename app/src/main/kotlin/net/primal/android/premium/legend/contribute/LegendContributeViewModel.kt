@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.math.BigDecimal
-import java.math.RoundingMode
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,6 +13,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.core.utils.getMaximumUsdAmount
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.legend.contribute.LegendContributeContract.LegendContributeState
+import net.primal.android.premium.legend.contribute.LegendContributeContract.PaymentMethod
 import net.primal.android.premium.legend.contribute.LegendContributeContract.UiEvent
 import net.primal.android.premium.legend.contribute.LegendContributeContract.UiState
 import net.primal.android.premium.legend.subscription.PurchaseMonitorManager
@@ -23,8 +23,6 @@ import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.domain.not
 import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
-import net.primal.android.wallet.utils.CurrencyConversionUtils.fromUsdToSats
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.formatUsdZeros
 import net.primal.android.wallet.utils.parseBitcoinPaymentInstructions
 import net.primal.android.wallet.utils.parseSatsToUsd
@@ -38,10 +36,6 @@ class LegendContributeViewModel @Inject constructor(
     private val premiumRepository: PremiumRepository,
     private val purchaseMonitorManager: PurchaseMonitorManager,
 ) : ViewModel() {
-
-    private companion object {
-        private const val BTC_DECIMAL_PLACES = 8
-    }
 
     private val _state = MutableStateFlow(UiState())
 
@@ -66,7 +60,12 @@ class LegendContributeViewModel @Inject constructor(
                     }
 
                     UiEvent.GoBackToPickAmount -> setState {
-                        copy(stage = LegendContributeState.PickAmount)
+                        copy(
+                            stage = LegendContributeState.PickAmount,
+                            lightningAddress = null,
+                            bitcoinAddress = null,
+                            membershipQuoteId = null,
+                        )
                     }
 
                     UiEvent.GoBackToPaymentInstructions -> setState {
@@ -136,24 +135,28 @@ class LegendContributeViewModel @Inject constructor(
 
                 val response = premiumRepository.fetchPrimalLegendPaymentInstructions(
                     userId = activeAccountStore.activeUserId(),
-                    primalName = "",
-                    onChain = state.value.paymentMethod == LegendContributeContract.PaymentMethod.OnChainBitcoin,
+                    primalName = "qa",
+                    onChain = state.value.paymentMethod == PaymentMethod.OnChainBitcoin,
+                    amountUsd = state.value.amountInUsd,
                 )
 
-                setState {
-                    copy(
-                        bitcoinAddress = response.qrCode.parseBitcoinPaymentInstructions()?.address,
-                        membershipQuoteId = response.membershipQuoteId,
-                    )
-                }
-
-                val currentAmount = if (state.value.currencyMode == CurrencyMode.SATS) {
-                    state.value.amountInSats
+                if (state.value.paymentMethod == PaymentMethod.OnChainBitcoin) {
+                    setState {
+                        copy(
+                            bitcoinAddress = response.qrCode.parseBitcoinPaymentInstructions()?.address,
+                            membershipQuoteId = response.membershipQuoteId,
+                            qrCodeValue = response.qrCode,
+                        )
+                    }
                 } else {
-                    state.value.amountInUsd
+                    setState {
+                        copy(
+                            lightningAddress = response.qrCode,
+                            membershipQuoteId = response.membershipQuoteId,
+                            qrCodeValue = response.qrCode,
+                        )
+                    }
                 }
-
-                updateAmount(currentAmount)
 
                 startPurchaseMonitor()
             } catch (error: WssException) {
@@ -163,16 +166,13 @@ class LegendContributeViewModel @Inject constructor(
             }
         }
 
-    private fun updateAmount(amount: String = "0") =
+    private fun updateAmount(amount: String) =
         when (_state.value.currencyMode) {
             CurrencyMode.SATS -> {
                 setState {
                     copy(
                         amountInSats = amount,
                         amountInUsd = amount.parseSatsToUsd(state.value.currentExchangeRate),
-                        qrCodeValue = "bitcoin:${this.bitcoinAddress}?amount=${
-                            amount.toULong().toBtc().toBigDecimal().formatToBtcString(BTC_DECIMAL_PLACES)
-                        }",
                     )
                 }
             }
@@ -182,10 +182,6 @@ class LegendContributeViewModel @Inject constructor(
                     copy(
                         amountInSats = amount.parseUsdToSats(state.value.currentExchangeRate),
                         amountInUsd = amount,
-                        qrCodeValue = "bitcoin:${this.bitcoinAddress}?amount=${
-                            BigDecimal(amount).fromUsdToSats(state.value.currentExchangeRate)
-                                .toBtc().toBigDecimal().formatToBtcString(BTC_DECIMAL_PLACES)
-                        }",
                     )
                 }
             }
@@ -202,9 +198,5 @@ class LegendContributeViewModel @Inject constructor(
 
     private fun stopPurchaseMonitor() {
         purchaseMonitorManager.stopMonitor(viewModelScope)
-    }
-
-    private fun BigDecimal.formatToBtcString(scale: Int): String {
-        return this.setScale(scale, RoundingMode.HALF_UP).toPlainString()
     }
 }

@@ -70,16 +70,16 @@ private fun LegendContributeScreen(
                 LegendContributeIntroStage(
                     modifier = Modifier.fillMaxSize(),
                     onClose = onClose,
-                    onNext = {
-                        eventPublisher(UiEvent.ShowAmountEditor(it))
-                        eventPublisher(UiEvent.FetchPaymentInstructions)
-                    },
+                    onNext = { eventPublisher(UiEvent.ShowAmountEditor(it)) },
                 )
             }
             LegendContributeState.PickAmount -> {
                 LegendContributeAmountStage(
                     modifier = Modifier.fillMaxSize(),
-                    onNext = { eventPublisher(UiEvent.ShowPaymentInstructions) },
+                    onNext = {
+                        eventPublisher(UiEvent.ShowPaymentInstructions)
+                        eventPublisher(UiEvent.FetchPaymentInstructions)
+                    },
                     onBack = { eventPublisher(UiEvent.GoBackToIntro) },
                     state = state,
                     onAmountClick = {

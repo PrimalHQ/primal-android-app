@@ -157,6 +157,7 @@ class PremiumBecomeLegendViewModel @Inject constructor(
                 val response = premiumRepository.fetchPrimalLegendPaymentInstructions(
                     userId = activeAccountStore.activeUserId(),
                     primalName = primalName,
+                    amountUsd = null,
                 )
 
                 val minAmount = response.amountBtc.toBigDecimal().setScale(BTC_DECIMAL_PLACES, RoundingMode.HALF_UP)
