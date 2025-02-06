@@ -57,6 +57,7 @@ import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
+import net.primal.android.multiaccount.model.AccountSwitcherCallbacks
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.NoteContract
@@ -78,6 +79,7 @@ fun NotificationsScreen(
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
+    accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val noteViewModel = hiltViewModel<NoteViewModel>()
 
@@ -104,6 +106,7 @@ fun NotificationsScreen(
         onGoToWallet = onGoToWallet,
         noteCallbacks = noteCallbacks,
         noteEventPublisher = noteViewModel::setEvent,
+        accountSwitcherCallbacks = accountSwitcherCallbacks,
     )
 }
 
@@ -119,6 +122,7 @@ fun NotificationsScreen(
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
     noteEventPublisher: (NoteContract.UiEvent) -> Unit,
+    accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
@@ -149,6 +153,7 @@ fun NotificationsScreen(
                 )
             }
         },
+        accountSwitcherCallbacks = accountSwitcherCallbacks,
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
         onDrawerQrCodeClick = onDrawerQrCodeClick,

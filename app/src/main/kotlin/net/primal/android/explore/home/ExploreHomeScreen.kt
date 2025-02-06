@@ -75,6 +75,7 @@ import net.primal.android.explore.home.ui.TOPICS_INDEX
 import net.primal.android.explore.home.ui.ZAPS_INDEX
 import net.primal.android.explore.home.zaps.ExploreZaps
 import net.primal.android.feeds.domain.exploreMediaFeedSpec
+import net.primal.android.multiaccount.model.AccountSwitcherCallbacks
 import net.primal.android.notes.feed.grid.MediaFeedGrid
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.domain.LegendaryCustomization
@@ -91,6 +92,7 @@ fun ExploreHomeScreen(
     onAdvancedSearchClick: () -> Unit,
     onGoToWallet: (() -> Unit)? = null,
     noteCallbacks: NoteCallbacks,
+    accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -103,6 +105,7 @@ fun ExploreHomeScreen(
         onAdvancedSearchClick = onAdvancedSearchClick,
         noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
+        accountSwitcherCallbacks = accountSwitcherCallbacks,
     )
 }
 
@@ -117,6 +120,7 @@ private fun ExploreHomeScreen(
     onAdvancedSearchClick: () -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: (() -> Unit)? = null,
+    accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
@@ -136,6 +140,7 @@ private fun ExploreHomeScreen(
         badges = state.badges,
         focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled,
         topAppBarState = topAppBarState,
+        accountSwitcherCallbacks = accountSwitcherCallbacks,
         topAppBar = {
             ExploreTopAppBar(
                 pagerState = pagerState,

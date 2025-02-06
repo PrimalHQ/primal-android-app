@@ -55,6 +55,7 @@ import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
+import net.primal.android.multiaccount.model.AccountSwitcherCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
@@ -80,6 +81,7 @@ fun WalletDashboardScreen(
     onSendClick: () -> Unit,
     onScanClick: () -> Unit,
     onReceiveClick: () -> Unit,
+    accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -95,6 +97,8 @@ fun WalletDashboardScreen(
         onScanClick = onScanClick,
         onReceiveClick = onReceiveClick,
         eventPublisher = { viewModel.setEvents(it) },
+        accountSwitcherCallbacks = accountSwitcherCallbacks,
+
     )
 }
 
@@ -112,6 +116,7 @@ fun WalletDashboardScreen(
     onScanClick: () -> Unit,
     onReceiveClick: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
+    accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
@@ -176,6 +181,7 @@ fun WalletDashboardScreen(
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         badges = state.badges,
         focusModeEnabled = false,
+        accountSwitcherCallbacks = accountSwitcherCallbacks,
         topAppBar = { scrollBehaviour ->
             PrimalTopAppBar(
                 modifier = Modifier.onSizeChanged { topBarHeight = it.height },

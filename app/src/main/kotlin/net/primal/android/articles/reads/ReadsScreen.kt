@@ -53,6 +53,7 @@ import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.list.FeedsBottomSheet
 import net.primal.android.feeds.list.ui.model.FeedUi
+import net.primal.android.multiaccount.model.AccountSwitcherCallbacks
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 
 @Composable
@@ -64,6 +65,7 @@ fun ReadsScreen(
     onSearchClick: () -> Unit,
     onArticleClick: (naddr: String) -> Unit,
     onGetPremiumClick: () -> Unit,
+    accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -76,6 +78,7 @@ fun ReadsScreen(
         onArticleClick = onArticleClick,
         onGetPremiumClick = onGetPremiumClick,
         eventPublisher = viewModel::setEvent,
+        accountSwitcherCallbacks = accountSwitcherCallbacks,
     )
 }
 
@@ -90,6 +93,7 @@ private fun ReadsScreen(
     onArticleClick: (naddr: String) -> Unit,
     onGetPremiumClick: () -> Unit,
     eventPublisher: (ReadsScreenContract.UiEvent) -> Unit,
+    accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
@@ -119,6 +123,7 @@ private fun ReadsScreen(
                 shouldAnimateScrollToTop = false
             }
         },
+        accountSwitcherCallbacks = accountSwitcherCallbacks,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
         onDrawerQrCodeClick = onDrawerQrCodeClick,
