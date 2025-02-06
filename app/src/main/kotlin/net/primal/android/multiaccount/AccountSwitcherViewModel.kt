@@ -46,7 +46,6 @@ class AccountSwitcherViewModel @Inject constructor(
                     is UiEvent.SwitchAccount -> setActiveAccount(userId = it.userId)
                 }
             }
-
         }
 
     private fun setActiveAccount(userId: String) =
@@ -81,5 +80,4 @@ class AccountSwitcherViewModel @Inject constructor(
                     }
                 }
         }
-
 }

@@ -27,13 +27,9 @@ import net.primal.android.multiaccount.model.AccountSwitcherCallbacks
 import net.primal.android.multiaccount.ui.AccountSwitcherBottomSheet
 import net.primal.android.theme.AppTheme
 
-
 @ExperimentalMaterial3Api
 @Composable
-fun AccountSwitcher(
-    modifier: Modifier = Modifier,
-    callbacks: AccountSwitcherCallbacks,
-) {
+fun AccountSwitcher(modifier: Modifier = Modifier, callbacks: AccountSwitcherCallbacks) {
     val viewModel = hiltViewModel<AccountSwitcherViewModel>()
     val uiState = viewModel.state.collectAsState()
 
@@ -51,7 +47,6 @@ fun AccountSwitcher(
         eventPublisher = viewModel::setEvent,
         callbacks = callbacks,
     )
-
 }
 
 @ExperimentalMaterial3Api

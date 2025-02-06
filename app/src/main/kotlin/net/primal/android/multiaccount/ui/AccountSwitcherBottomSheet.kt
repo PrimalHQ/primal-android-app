@@ -39,7 +39,6 @@ import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.multiaccount.model.UserAccountUi
 import net.primal.android.theme.AppTheme
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountSwitcherBottomSheet(
@@ -70,7 +69,8 @@ fun AccountSwitcherBottomSheet(
         ) {
             BottomSheetTopAppBar(onEditClick = onEditClick)
             AccountList(
-                activeAccount = activeAccount, accounts = accounts,
+                activeAccount = activeAccount,
+                accounts = accounts,
                 onAccountClick = { userId ->
                     uiScope.launch {
                         sheetState.hide()
@@ -80,7 +80,6 @@ fun AccountSwitcherBottomSheet(
                         }
                         onAccountClick(userId)
                     }
-
                 },
             )
             Column {
@@ -193,7 +192,6 @@ private fun AccountListItem(
             }
         },
     )
-
 }
 
 @Composable
