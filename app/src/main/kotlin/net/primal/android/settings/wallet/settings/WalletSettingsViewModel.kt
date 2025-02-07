@@ -174,7 +174,7 @@ class WalletSettingsViewModel @Inject constructor(
             userRepository.updatePrimalWalletSettings(userId = activeAccountStore.activeUserId()) {
                 this.copy(spamThresholdAmountInSats = amountInSats)
             }
-            walletRepository.deleteAllTransactions()
+            walletRepository.deleteAllTransactions(userId = activeAccountStore.activeUserId())
         }
 
     private fun PrimalNwcConnectionInfo.mapAsConnectedAppUi(): NwcConnectionInfo {
