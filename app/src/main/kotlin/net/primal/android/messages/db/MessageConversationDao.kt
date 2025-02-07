@@ -15,16 +15,25 @@ interface MessageConversationDao {
     fun upsertAll(data: List<MessageConversationData>)
 
     @Transaction
-    @Query("SELECT * FROM MessageConversationData WHERE relation = :relation ORDER BY lastMessageAt DESC")
-    fun newestConversationsPaged(relation: ConversationRelation): PagingSource<Int, MessageConversation>
+    @Query(
+        """
+           SELECT * FROM MessageConversationData
+           WHERE relation = :relation AND ownerId = :ownerId ORDER BY lastMessageAt DESC
+       """,
+    )
+    fun newestConversationsPagedByOwnerId(
+        relation: ConversationRelation,
+        ownerId: String,
+    ): PagingSource<Int, MessageConversation>
 
-    @Transaction
-    @Query("SELECT * FROM MessageConversationData WHERE participantId = :participantId")
-    fun findConversationByParticipantId(participantId: String): MessageConversation
+    @Query(
+        """
+        UPDATE MessageConversationData SET unreadMessagesCount = 0
+        WHERE participantId = :participantId AND ownerId = :ownerId
+    """,
+    )
+    fun markConversationAsRead(participantId: String, ownerId: String)
 
-    @Query("UPDATE MessageConversationData SET unreadMessagesCount = 0 WHERE participantId = :participantId")
-    fun markConversationAsRead(participantId: String)
-
-    @Query("UPDATE MessageConversationData SET unreadMessagesCount = 0")
-    fun markAllConversationAsRead()
+    @Query("UPDATE MessageConversationData SET unreadMessagesCount = 0 WHERE ownerId = :ownerId")
+    fun markAllConversationAsRead(ownerId: String)
 }

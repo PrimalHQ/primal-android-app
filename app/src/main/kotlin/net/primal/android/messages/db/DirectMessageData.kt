@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 data class DirectMessageData(
     @PrimaryKey
     val messageId: String,
+    val ownerId: String,
     val senderId: String,
     val receiverId: String,
     val participantId: String,

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 56,
-    "identityHash": "2f4d6f28d05d3970021a86ec4aad587d",
+    "identityHash": "0049be178e01795dc65456c20410c312",
     "entities": [
       {
         "tableName": "PostData",
@@ -1284,11 +1284,17 @@
       },
       {
         "tableName": "DirectMessageData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`messageId` TEXT NOT NULL, `senderId` TEXT NOT NULL, `receiverId` TEXT NOT NULL, `participantId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `content` TEXT NOT NULL, `uris` TEXT NOT NULL, `hashtags` TEXT NOT NULL, PRIMARY KEY(`messageId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`messageId` TEXT NOT NULL, `ownerId` TEXT NOT NULL, `senderId` TEXT NOT NULL, `receiverId` TEXT NOT NULL, `participantId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `content` TEXT NOT NULL, `uris` TEXT NOT NULL, `hashtags` TEXT NOT NULL, PRIMARY KEY(`messageId`))",
         "fields": [
           {
             "fieldPath": "messageId",
             "columnName": "messageId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ownerId",
+            "columnName": "ownerId",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -1346,8 +1352,14 @@
       },
       {
         "tableName": "MessageConversationData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`participantId` TEXT NOT NULL, `lastMessageId` TEXT NOT NULL, `lastMessageAt` INTEGER NOT NULL, `unreadMessagesCount` INTEGER NOT NULL, `relation` TEXT NOT NULL, `participantMetadataId` TEXT, PRIMARY KEY(`participantId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ownerId` TEXT NOT NULL, `participantId` TEXT NOT NULL, `lastMessageId` TEXT NOT NULL, `lastMessageAt` INTEGER NOT NULL, `unreadMessagesCount` INTEGER NOT NULL, `relation` TEXT NOT NULL, `participantMetadataId` TEXT, PRIMARY KEY(`participantId`, `ownerId`))",
         "fields": [
+          {
+            "fieldPath": "ownerId",
+            "columnName": "ownerId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
           {
             "fieldPath": "participantId",
             "columnName": "participantId",
@@ -1388,7 +1400,8 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "participantId"
+            "participantId",
+            "ownerId"
           ]
         },
         "indices": [],
@@ -1967,7 +1980,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2f4d6f28d05d3970021a86ec4aad587d')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0049be178e01795dc65456c20410c312')"
     ]
   }
 }
