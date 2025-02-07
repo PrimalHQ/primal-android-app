@@ -22,6 +22,7 @@ import net.primal.android.explore.search.SearchContract.UiEvent
 import net.primal.android.explore.search.SearchContract.UiState
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.repository.ProfileRepository
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import timber.log.Timber
 
 @HiltViewModel
@@ -29,6 +30,7 @@ class SearchViewModel @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val exploreRepository: ExploreRepository,
     private val profileRepository: ProfileRepository,
+    private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -102,7 +104,7 @@ class SearchViewModel @Inject constructor(
     private fun markProfileInteraction(profileId: String) {
         viewModelScope.launch {
             withContext(dispatcherProvider.io()) {
-                profileRepository.markAsInteracted(profileId = profileId)
+                profileRepository.markAsInteracted(profileId = profileId, ownerId = activeAccountStore.activeUserId())
             }
         }
     }
