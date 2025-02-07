@@ -120,14 +120,15 @@ private fun ContextualZapsFlowRow(
         maxLines = 1,
         overflow = overflow,
     ) {
-        val zap = zaps[it]
-        key(zap.id) {
-            EventZapItem(
-                modifier = Modifier.padding(end = 6.dp),
-                noteZap = zap,
-                showMessage = false,
-                onClick = onClick,
-            )
+        zaps.getOrNull(it)?.let { zap ->
+            key(zap.id) {
+                EventZapItem(
+                    modifier = Modifier.padding(end = 6.dp),
+                    noteZap = zap,
+                    showMessage = false,
+                    onClick = onClick,
+                )
+            }
         }
     }
 }
