@@ -20,14 +20,15 @@ interface MutedUserDao {
         """
         SELECT * FROM MutedUserData 
         INNER JOIN ProfileData ON MutedUserData.userId = ProfileData.ownerId
+        WHERE MutedUserData.ownerId = :ownerId
         ORDER BY ProfileData.displayName ASC
         """,
     )
-    fun observeMutedUsers(): Flow<List<MutedUser>>
+    fun observeMutedUsersByOwnerId(ownerId: String): Flow<List<MutedUser>>
 
-    @Query("SELECT EXISTS(SELECT * FROM MutedUserData WHERE userId = :pubkey)")
-    fun observeIsUserMuted(pubkey: String): Flow<Boolean>
+    @Query("SELECT EXISTS(SELECT * FROM MutedUserData WHERE userId = :pubkey AND ownerId = :ownerId)")
+    fun observeIsUserMutedByOwnerId(pubkey: String, ownerId: String): Flow<Boolean>
 
-    @Query("DELETE FROM MutedUserData")
-    fun deleteAll()
+    @Query("DELETE FROM MutedUserData WHERE ownerId = :ownerId")
+    fun deleteAllByOwnerId(ownerId: String)
 }

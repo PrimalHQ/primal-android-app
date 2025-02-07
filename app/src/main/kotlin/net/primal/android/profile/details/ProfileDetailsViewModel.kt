@@ -214,7 +214,10 @@ class ProfileDetailsViewModel @Inject constructor(
 
     private fun observeMutedAccount() =
         viewModelScope.launch {
-            mutedUserRepository.observeIsUserMuted(pubkey = profileId).collect {
+            mutedUserRepository.observeIsUserMutedByOwnerId(
+                pubkey = profileId,
+                ownerId = activeAccountStore.activeUserId(),
+            ).collect {
                 setState { copy(isProfileMuted = it) }
             }
         }
