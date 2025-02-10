@@ -1,4 +1,4 @@
-package net.primal.android.multiaccount.ui
+package net.primal.android.drawer.multiaccount.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -36,7 +36,7 @@ import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Check
 import net.primal.android.core.utils.formatNip05Identifier
-import net.primal.android.multiaccount.model.UserAccountUi
+import net.primal.android.drawer.multiaccount.model.UserAccountUi
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)

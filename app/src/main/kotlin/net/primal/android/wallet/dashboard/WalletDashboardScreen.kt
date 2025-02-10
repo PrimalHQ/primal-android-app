@@ -55,7 +55,7 @@ import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
-import net.primal.android.multiaccount.events.AccountSwitcherCallbacks
+import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent

@@ -1,4 +1,4 @@
-package net.primal.android.multiaccount
+package net.primal.android.drawer.multiaccount
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -23,8 +23,8 @@ import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AddAccount
 import net.primal.android.core.compose.icons.primaliconpack.DetailsRounded
-import net.primal.android.multiaccount.events.AccountSwitcherCallbacks
-import net.primal.android.multiaccount.ui.AccountSwitcherBottomSheet
+import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
+import net.primal.android.drawer.multiaccount.ui.AccountSwitcherBottomSheet
 import net.primal.android.theme.AppTheme
 
 @ExperimentalMaterial3Api

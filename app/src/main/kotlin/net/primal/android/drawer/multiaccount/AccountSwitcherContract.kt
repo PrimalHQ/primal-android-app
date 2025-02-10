@@ -1,6 +1,6 @@
-package net.primal.android.multiaccount
+package net.primal.android.drawer.multiaccount
 
-import net.primal.android.multiaccount.model.UserAccountUi
+import net.primal.android.drawer.multiaccount.model.UserAccountUi
 
 interface AccountSwitcherContract {
 

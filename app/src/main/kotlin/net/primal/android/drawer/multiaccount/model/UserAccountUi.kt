@@ -1,4 +1,4 @@
-package net.primal.android.multiaccount.model
+package net.primal.android.drawer.multiaccount.model
 
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.utils.authorNameUiFriendly
