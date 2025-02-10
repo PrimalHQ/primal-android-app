@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 56,
-    "identityHash": "33178af54a0099141ae27d77a0f7029f",
+    "identityHash": "0ab4a0c7ca5b9aee15619267acd13c46",
     "entities": [
       {
         "tableName": "PostData",
@@ -1307,7 +1307,7 @@
       },
       {
         "tableName": "DirectMessageData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`messageId` TEXT NOT NULL, `ownerId` TEXT NOT NULL, `senderId` TEXT NOT NULL, `receiverId` TEXT NOT NULL, `participantId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `content` TEXT NOT NULL, `uris` TEXT NOT NULL, `hashtags` TEXT NOT NULL, PRIMARY KEY(`messageId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`messageId` TEXT NOT NULL, `ownerId` TEXT NOT NULL, `senderId` TEXT NOT NULL, `receiverId` TEXT NOT NULL, `participantId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `content` TEXT NOT NULL, `uris` TEXT NOT NULL, `hashtags` TEXT NOT NULL, PRIMARY KEY(`messageId`, `ownerId`))",
         "fields": [
           {
             "fieldPath": "messageId",
@@ -1367,7 +1367,8 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "messageId"
+            "messageId",
+            "ownerId"
           ]
         },
         "indices": [],
@@ -2003,7 +2004,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '33178af54a0099141ae27d77a0f7029f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0ab4a0c7ca5b9aee15619267acd13c46')"
     ]
   }
 }

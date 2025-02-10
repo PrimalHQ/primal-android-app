@@ -1,11 +1,9 @@
 package net.primal.android.messages.db
 
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 
-@Entity
+@Entity(primaryKeys = ["messageId", "ownerId"])
 data class DirectMessageData(
-    @PrimaryKey
     val messageId: String,
     val ownerId: String,
     val senderId: String,
