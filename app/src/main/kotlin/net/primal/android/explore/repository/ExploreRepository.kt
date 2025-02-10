@@ -35,12 +35,14 @@ import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowStats
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
 import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
 import net.primal.android.profile.db.ProfileStats
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 
 class ExploreRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
     private val exploreApi: ExploreApi,
     private val database: PrimalDatabase,
+    private val activeAccountStore: ActiveAccountStore,
 ) {
 
     suspend fun fetchTrendingZaps(userId: String): List<ExploreZapNoteData> =
@@ -207,7 +209,8 @@ class ExploreRepository @Inject constructor(
         }
 
     fun observeRecentUsers(): Flow<List<UserProfileSearchItem>> {
-        return database.profileInteractions().observeRecentProfiles()
+        return database.profileInteractions()
+            .observeRecentProfilesByOwnerId(ownerId = activeAccountStore.activeUserId())
             .map { recentProfiles ->
                 recentProfiles.mapNotNull { profile ->
                     if (profile.metadata != null) {

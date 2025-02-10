@@ -46,7 +46,7 @@ class MutedSettingsViewModel @Inject constructor(
 
     private fun observeMutedUsers() =
         viewModelScope.launch {
-            mutedUserRepository.observeMutedUsers().collect {
+            mutedUserRepository.observeMutedUsersByOwnerId(ownerId = activeAccountStore.activeUserId()).collect {
                 setState {
                     copy(mutedUsers = it.map { it.asMutedUserUi() })
                 }

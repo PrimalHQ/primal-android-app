@@ -31,7 +31,7 @@ class MessagesRemoteMediator(
             LoadType.PREPEND -> {
                 state.firstItemOrNull()?.data?.createdAt
                     ?: withContext(Dispatchers.IO) {
-                        database.messages().first()?.createdAt
+                        database.messages().firstByOwnerId(ownerId = userId)?.createdAt
                     }
                     ?: return MediatorResult.Success(endOfPaginationReached = true)
             }
@@ -39,7 +39,7 @@ class MessagesRemoteMediator(
             LoadType.APPEND -> {
                 state.lastItemOrNull()?.data?.createdAt
                     ?: withContext(Dispatchers.IO) {
-                        database.messages().last()?.createdAt
+                        database.messages().lastByOwnerId(ownerId = userId)?.createdAt
                     }
                     ?: return MediatorResult.Success(endOfPaginationReached = true)
             }
