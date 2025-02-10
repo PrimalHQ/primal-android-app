@@ -264,7 +264,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                 val publishResult = if (args.isQuoting) {
                     notePublishHandler.publishShortTextNote(
                         userId = activeAccountStore.activeUserId(),
-                        content = noteContent.concatenateReferencedEvents().ensureWhitespaceBeforeUserTag(),
+                        content = noteContent.concatenateReferencedEvents(),
                         attachments = _state.value.attachments,
                     )
                 } else {
@@ -272,7 +272,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                     val replyToPost = _state.value.conversation.lastOrNull()
                     notePublishHandler.publishShortTextNote(
                         userId = activeAccountStore.activeUserId(),
-                        content = noteContent.ensureWhitespaceBeforeUserTag(),
+                        content = noteContent,
                         attachments = _state.value.attachments,
                         rootNoteNevent = rootPost?.let {
                             Nevent(
@@ -557,6 +557,4 @@ class NoteEditorViewModel @AssistedInject constructor(
             args.referencedHighlightNevent,
             args.referencedArticleNaddr,
         ).joinToString(separator = " \n\n", prefix = " \n\n") { "nostr:$it" }
-
-    private fun String.ensureWhitespaceBeforeUserTag(): String = this.replace(Regex("([^-\\s])(nostr:npub)"), "$1 $2")
 }

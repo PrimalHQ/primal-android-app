@@ -41,13 +41,15 @@ class NotePublishHandler @Inject constructor(
         rootHighlightNevent: Nevent? = null,
         replyToNoteNevent: Nevent? = null,
     ): PublishResult {
+        val noteContent = content.ensureWhitespaceBeforeUserTag()
+
         /* Event mentions from content */
-        val mentionEventTags = content.parseEventTags(marker = "mention")
-        val mentionReplaceableEventTags = content.parseReplaceableEventTags(marker = "mention")
+        val mentionEventTags = noteContent.parseEventTags(marker = "mention")
+        val mentionReplaceableEventTags = noteContent.parseReplaceableEventTags(marker = "mention")
         val allMentionedEventTags = mentionEventTags + mentionReplaceableEventTags
 
         /* Pubkey mentions from content and referenced pub keys. */
-        val mentionPubkeyTags = content.parsePubkeyTags(marker = "mention").toSet()
+        val mentionPubkeyTags = noteContent.parsePubkeyTags(marker = "mention").toSet()
         val referencedPubkeyTags = resolveReferencedPubkeyTags(
             rootNoteNevent = rootNoteNevent,
             rootArticleNaddr = rootArticleNaddr,
@@ -70,7 +72,7 @@ class NotePublishHandler @Inject constructor(
         )
 
         /* Hashtag tags */
-        val hashtagTags = content.parseHashtagTags().toSet()
+        val hashtagTags = noteContent.parseHashtagTags().toSet()
 
         /* iMeta tags */
         val iMetaTags = attachments.filter { it.isImageAttachment }.map { it.asIMetaTag() }
@@ -85,7 +87,7 @@ class NotePublishHandler @Inject constructor(
         val allReferenceTagsWithRelays = allReferenceTags.insertRelayHints(relayHintsMap = relayHintsMap)
 
         /* Content */
-        val refinedContent = content.appendAttachmentUrls(attachments)
+        val refinedContent = noteContent.appendAttachmentUrls(attachments)
 
         return withContext(dispatcherProvider.io()) {
             val outboxRelays = replyToNoteNevent?.eventId?.let { noteId ->
@@ -198,4 +200,6 @@ class NotePublishHandler @Inject constructor(
                 },
             )
         }
+
+    private fun String.ensureWhitespaceBeforeUserTag(): String = this.replace(Regex("([^-\\s])(nostr:npub)"), "$1 $2")
 }

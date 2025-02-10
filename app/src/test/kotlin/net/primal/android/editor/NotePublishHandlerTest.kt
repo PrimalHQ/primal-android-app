@@ -155,8 +155,6 @@ class NotePublishHandlerTest {
         uploadError = uploadError,
     )
 
-    fun String.ensureWhitespaceBeforeUserTag(): String = this.replace(Regex("([^-\\s])(nostr:npub)"), "$1 $2")
-
     /**
      * User Ids
      */
@@ -385,7 +383,7 @@ class NotePublishHandlerTest {
      */
 
     @Test
-    fun publishShortTextNote_addsWhitespace_forMentionedUsersWithoutWhitespace() =
+    fun publishShortTextNote_addsWhitespaceBefore_forMentionedUsersWithoutWhitespace() =
         runTest {
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
             val notePublisher = buildNotePublishHandler(
@@ -399,7 +397,7 @@ class NotePublishHandlerTest {
 
             notePublisher.publishShortTextNote(
                 userId = expectedUserId,
-                content = input.ensureWhitespaceBeforeUserTag(),
+                content = input,
             )
 
             coVerify {
@@ -428,7 +426,7 @@ class NotePublishHandlerTest {
 
             notePublisher.publishShortTextNote(
                 userId = expectedUserId,
-                content = input.ensureWhitespaceBeforeUserTag(),
+                content = input,
             )
 
             coVerify {
@@ -447,19 +445,19 @@ class NotePublishHandlerTest {
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
             val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
 
-            val input = "Hey nostr:npub16c0nh3dnadzqpm76uctf5hqhe2lny344zsmpm6feee9p5rdxaa9q586nvr, how are you?"
-            val expectedOutput = input
+            val content = "Hey nostr:npub16c0nh3dnadzqpm76uctf5hqhe2lny344zsmpm6feee9p5rdxaa9q586nvr, how are you? " +
+                "Check this nostr:npub16c0nh3dnadzqpm76uctf5hqhe2lny344zsmpm6feee9p5rdxaa9q586nvr's note!"
 
             notePublishHandler.publishShortTextNote(
                 userId = expectedUserId,
-                content = input.ensureWhitespaceBeforeUserTag(),
+                content = content,
             )
 
             coVerify {
                 nostrPublisher.signPublishImportNostrEvent(
                     any(),
                     withArg { event ->
-                        event.content shouldBe expectedOutput
+                        event.content shouldBe content
                     },
                 )
             }
@@ -471,19 +469,18 @@ class NotePublishHandlerTest {
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
             val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
 
-            val input = "This is a normal message without any npub mentions."
-            val expectedOutput = input
+            val content = "This is a normal message without any npub mentions."
 
             notePublishHandler.publishShortTextNote(
                 userId = expectedUserId,
-                content = input.ensureWhitespaceBeforeUserTag(),
+                content = content,
             )
 
             coVerify {
                 nostrPublisher.signPublishImportNostrEvent(
                     any(),
                     withArg { event ->
-                        event.content shouldBe expectedOutput
+                        event.content shouldBe content
                     },
                 )
             }
