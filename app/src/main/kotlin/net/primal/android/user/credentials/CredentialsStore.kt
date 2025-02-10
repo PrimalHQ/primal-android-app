@@ -43,6 +43,12 @@ class CredentialsStore @Inject constructor(
         return pubkey.bech32ToHexOrThrow()
     }
 
+    suspend fun removeCredentialByNsec(nsec: String) {
+        persistence.updateData {
+            it.filterNot { cred -> cred.nsec == nsec }
+        }
+    }
+
     fun findOrThrow(npub: String): Credential =
         credentials.value.find { it.npub == npub }
             ?: throw IllegalArgumentException("Credential not found for $npub.")
