@@ -65,7 +65,7 @@ import net.primal.android.core.compose.icons.primaliconpack.QrCode
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.multiaccount.AccountSwitcher
-import net.primal.android.multiaccount.model.AccountSwitcherCallbacks
+import net.primal.android.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme

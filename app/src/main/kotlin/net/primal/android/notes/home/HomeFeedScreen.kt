@@ -64,7 +64,7 @@ import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.list.FeedsBottomSheet
 import net.primal.android.feeds.list.ui.model.FeedUi
-import net.primal.android.multiaccount.model.AccountSwitcherCallbacks
+import net.primal.android.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.notes.feed.list.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedContract.UiEvent

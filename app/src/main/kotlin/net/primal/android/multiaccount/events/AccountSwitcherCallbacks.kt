@@ -1,4 +1,4 @@
-package net.primal.android.multiaccount.model
+package net.primal.android.multiaccount.events
 
 data class AccountSwitcherCallbacks(
     val onActiveAccountChanged: () -> Unit,
