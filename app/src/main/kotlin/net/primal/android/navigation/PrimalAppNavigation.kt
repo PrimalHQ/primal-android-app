@@ -47,6 +47,7 @@ import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.drawer.DrawerScreenDestination
+import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.editor.NoteEditorScreen
 import net.primal.android.editor.di.noteEditorViewModel
 import net.primal.android.editor.domain.NoteEditorArgs
@@ -74,7 +75,6 @@ import net.primal.android.messages.chat.ChatViewModel
 import net.primal.android.messages.conversation.MessageConversationListViewModel
 import net.primal.android.messages.conversation.MessageListScreen
 import net.primal.android.messages.conversation.create.NewConversationScreen
-import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.navigation.deeplinking.DeepLink
 import net.primal.android.navigation.deeplinking.parseDeepLinkOrNull
 import net.primal.android.navigation.splash.SplashContract

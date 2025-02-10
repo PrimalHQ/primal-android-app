@@ -21,7 +21,8 @@ class AccountSwitcherViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(AccountSwitcherContract.UiState())
     val state = _state.asStateFlow()
-    private fun setState(reducer: AccountSwitcherContract.UiState.() -> AccountSwitcherContract.UiState) = _state.getAndUpdate { it.reducer() }
+    private fun setState(reducer: AccountSwitcherContract.UiState.() -> AccountSwitcherContract.UiState) =
+        _state.getAndUpdate { it.reducer() }
 
     private val events: MutableSharedFlow<AccountSwitcherContract.UiEvent> = MutableSharedFlow()
     fun setEvent(event: AccountSwitcherContract.UiEvent) = viewModelScope.launch { events.emit(event) }

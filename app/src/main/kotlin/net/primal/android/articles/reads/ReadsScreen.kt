@@ -50,10 +50,10 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
+import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.list.FeedsBottomSheet
 import net.primal.android.feeds.list.ui.model.FeedUi
-import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 
 @Composable
