@@ -186,7 +186,8 @@ class LegendContributeViewModel @Inject constructor(
                         userId = activeAccountStore.activeUserId(),
                         body = WithdrawRequestBody(
                             subWallet = SubWallet.Open,
-                            targetBtcAddress = state.value.bitcoinAddress
+                            targetBtcAddress = state.value.qrCodeValue?.parseBitcoinPaymentInstructions()?.address,
+                            amountBtc = state.value.qrCodeValue?.parseBitcoinPaymentInstructions()?.amount
                         ),
                     )
                 } else {
