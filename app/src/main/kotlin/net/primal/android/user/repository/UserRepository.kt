@@ -1,6 +1,8 @@
 package net.primal.android.user.repository
 
+import java.time.Instant
 import javax.inject.Inject
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
@@ -19,6 +21,7 @@ import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.accounts.UserAccountsStore
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.copyFollowListIfNotNull
 import net.primal.android.user.accounts.copyIfNotNull
 import net.primal.android.user.api.UsersApi
@@ -35,10 +38,20 @@ class UserRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
     private val userAccountFetcher: UserAccountFetcher,
     private val accountsStore: UserAccountsStore,
+    private val activeAccountStore: ActiveAccountStore,
     private val fileUploader: PrimalFileUploader,
     private val usersApi: UsersApi,
     private val nostrPublisher: NostrPublisher,
 ) {
+    suspend fun setActiveAccount(userId: String) =
+        withContext(dispatchers.io()) {
+            accountsStore.getAndUpdateAccount(userId = userId) { copy(lastAccessedAt = Instant.now().epochSecond) }
+            activeAccountStore.setActiveUserId(pubkey = userId)
+        }
+
+    fun observeUserAccounts() = accountsStore.userAccounts
+
+    fun observeActiveAccount() = activeAccountStore.activeUserAccount.distinctUntilChanged()
 
     suspend fun createNewUserAccount(userId: String): UserAccount {
         val account = UserAccount.buildLocal(pubkey = userId)

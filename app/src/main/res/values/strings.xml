@@ -103,6 +103,11 @@
     <string name="drawer_followers_suffix">Followers</string>
     <string name="drawer_following_suffix">Following</string>
 
+    <string name="account_switcher_sheet_title">Accounts</string>
+    <string name="account_switcher_edit">Edit</string>
+    <string name="account_switcher_create_new_account">Create a new account</string>
+    <string name="account_switcher_add_existing_account">Add an existing account</string>
+
     <string name="premium_primal_og_title">Primal OG</string>
     <string name="premium_primal_og_description">The Primal OG tier was created to recognize those users who signed up to Primal Premium in the first year.</string>
     <string name="premium_subscribe_to_get">Subscribe to Primal Premium to get:</string>

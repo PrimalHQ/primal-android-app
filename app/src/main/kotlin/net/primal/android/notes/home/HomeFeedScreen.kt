@@ -61,6 +61,7 @@ import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
+import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.list.FeedsBottomSheet
 import net.primal.android.feeds.list.ui.model.FeedUi
@@ -80,6 +81,7 @@ fun HomeFeedScreen(
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     onNewPostClick: (content: TextFieldValue?) -> Unit,
+    accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -103,6 +105,7 @@ fun HomeFeedScreen(
         onGoToWallet = onGoToWallet,
         onNewPostClick = onNewPostClick,
         eventPublisher = viewModel::setEvent,
+        accountSwitcherCallbacks = accountSwitcherCallbacks,
     )
 }
 
@@ -118,6 +121,7 @@ fun HomeFeedScreen(
     onGoToWallet: () -> Unit,
     onNewPostClick: (content: TextFieldValue?) -> Unit,
     eventPublisher: (UiEvent) -> Unit,
+    accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
@@ -155,6 +159,7 @@ fun HomeFeedScreen(
                 shouldAnimateScrollToTop = false
             }
         },
+        accountSwitcherCallbacks = accountSwitcherCallbacks,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
         onDrawerQrCodeClick = onDrawerQrCodeClick,

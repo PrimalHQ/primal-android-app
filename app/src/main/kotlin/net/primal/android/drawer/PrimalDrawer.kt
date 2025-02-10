@@ -6,6 +6,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -20,6 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.DrawerState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -30,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -61,6 +64,8 @@ import net.primal.android.core.compose.icons.primaliconpack.LightMode
 import net.primal.android.core.compose.icons.primaliconpack.QrCode
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.utils.formatNip05Identifier
+import net.primal.android.drawer.multiaccount.AccountSwitcher
+import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -71,6 +76,7 @@ fun PrimalDrawer(
     drawerState: DrawerState,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onQrCodeClick: () -> Unit,
+    accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val uiScope = rememberCoroutineScope()
     val viewModel = hiltViewModel<PrimalDrawerViewModel>()
@@ -83,6 +89,7 @@ fun PrimalDrawer(
 
     PrimalDrawer(
         state = uiState.value,
+        accountSwitcherCallbacks = accountSwitcherCallbacks,
         onDrawerDestinationClick = {
             when (it) {
                 DrawerScreenDestination.SignOut -> Unit
@@ -104,6 +111,7 @@ fun PrimalDrawer(
     eventPublisher: (PrimalDrawerContract.UiEvent) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onQrCodeClick: () -> Unit,
+    accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val isSystemInDarkTheme = isSystemInDarkTheme()
     Surface {
@@ -119,6 +127,7 @@ fun PrimalDrawer(
                 userAccount = state.activeUserAccount,
                 onQrCodeClick = onQrCodeClick,
                 legendaryCustomization = state.legendaryCustomization,
+                accountSwitcherCallbacks = accountSwitcherCallbacks,
             )
 
             DrawerMenu(
@@ -143,11 +152,13 @@ fun PrimalDrawer(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DrawerHeader(
     userAccount: UserAccount?,
     legendaryCustomization: LegendaryCustomization?,
     onQrCodeClick: () -> Unit,
+    accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
     ConstraintLayout(
@@ -156,15 +167,25 @@ private fun DrawerHeader(
         val startGuideline = createGuidelineFromStart(24.dp)
         val (avatarRef, usernameRef, iconRef, identifierRef, statsRef) = createRefs()
 
-        UniversalAvatarThumbnail(
-            modifier = Modifier.constrainAs(avatarRef) {
-                start.linkTo(startGuideline)
-                top.linkTo(parent.top, margin = 16.dp)
-            },
-            avatarSize = 52.dp,
-            avatarCdnImage = userAccount?.avatarCdnImage,
-            legendaryCustomization = legendaryCustomization,
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .constrainAs(avatarRef) {
+                    start.linkTo(startGuideline)
+                    top.linkTo(parent.top, margin = 16.dp)
+                    width = Dimension.preferredValue(260.dp)
+                },
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            UniversalAvatarThumbnail(
+                avatarSize = 52.dp,
+                avatarCdnImage = userAccount?.avatarCdnImage,
+                legendaryCustomization = legendaryCustomization,
+            )
+
+            AccountSwitcher(callbacks = accountSwitcherCallbacks)
+        }
 
         NostrUserText(
             displayName = userAccount?.authorDisplayName ?: "",
@@ -389,6 +410,12 @@ fun PrimalDrawerPreview() {
             eventPublisher = {},
             onDrawerDestinationClick = {},
             onQrCodeClick = {},
+            accountSwitcherCallbacks = AccountSwitcherCallbacks(
+                onActiveAccountChanged = {},
+                onAddExistingAccountClick = {},
+                onCreateNewAccountClick = {},
+                onEditClick = {},
+            ),
         )
     }
 }

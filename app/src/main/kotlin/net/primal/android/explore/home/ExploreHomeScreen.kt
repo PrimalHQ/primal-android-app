@@ -63,6 +63,7 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
+import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.explore.home.feeds.ExploreFeeds
 import net.primal.android.explore.home.people.ExplorePeople
 import net.primal.android.explore.home.topics.ExploreTopics
@@ -91,6 +92,7 @@ fun ExploreHomeScreen(
     onAdvancedSearchClick: () -> Unit,
     onGoToWallet: (() -> Unit)? = null,
     noteCallbacks: NoteCallbacks,
+    accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -103,6 +105,7 @@ fun ExploreHomeScreen(
         onAdvancedSearchClick = onAdvancedSearchClick,
         noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
+        accountSwitcherCallbacks = accountSwitcherCallbacks,
     )
 }
 
@@ -117,6 +120,7 @@ private fun ExploreHomeScreen(
     onAdvancedSearchClick: () -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: (() -> Unit)? = null,
+    accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
@@ -136,6 +140,7 @@ private fun ExploreHomeScreen(
         badges = state.badges,
         focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled,
         topAppBarState = topAppBarState,
+        accountSwitcherCallbacks = accountSwitcherCallbacks,
         topAppBar = {
             ExploreTopAppBar(
                 pagerState = pagerState,

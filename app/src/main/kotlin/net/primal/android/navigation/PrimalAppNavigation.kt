@@ -47,6 +47,7 @@ import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.drawer.DrawerScreenDestination
+import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.editor.NoteEditorScreen
 import net.primal.android.editor.di.noteEditorViewModel
 import net.primal.android.editor.domain.NoteEditorArgs
@@ -313,6 +314,14 @@ private fun NavController.navigateToPremiumContentBackup() = navigate(route = "p
 private fun NavController.navigateToPremiumChangePrimalName() = navigate(route = "premium/manage/changePrimalName")
 private fun NavController.navigateToPremiumOrderHistory() = navigate(route = "premium/manage/order")
 private fun NavController.navigateToPremiumRelay() = navigate(route = "premium/manage/relay")
+
+fun accountSwitcherCallbacksHandler(navController: NavController) =
+    AccountSwitcherCallbacks(
+        onActiveAccountChanged = { navController.navigateToHome() },
+        onAddExistingAccountClick = { navController.navigateToLogin() },
+        onCreateNewAccountClick = { navController.navigateToOnboarding() },
+        onEditClick = {},
+    )
 
 fun noteCallbacksHandler(navController: NavController) =
     NoteCallbacks(
@@ -901,6 +910,7 @@ private fun NavGraphBuilder.home(
         onGoToWallet = { navController.navigateToWallet() },
         onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
         onNewPostClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent?.asNoteEditorArgs()) },
+        accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
     )
 }
 
@@ -942,6 +952,7 @@ private fun NavGraphBuilder.reads(
         onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Reads) },
         onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr) },
         onGetPremiumClick = { navController.navigateToPremiumBuying() },
+        accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
     )
 }
 
@@ -1005,6 +1016,7 @@ private fun NavGraphBuilder.explore(
         onAdvancedSearchClick = { navController.navigateToAdvancedSearch() },
         noteCallbacks = noteCallbacksHandler(navController),
         onGoToWallet = { navController.navigateToWallet() },
+        accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
     )
 }
 
@@ -1601,6 +1613,7 @@ private fun NavGraphBuilder.notifications(
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
+        accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
     )
 }
 

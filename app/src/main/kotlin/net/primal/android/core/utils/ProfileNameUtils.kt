@@ -4,10 +4,14 @@ import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.profile.db.ProfileData
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.stats.db.EventZap
+import net.primal.android.user.domain.UserAccount
 
 fun ProfileData.usernameUiFriendly(): String = usernameUiFriendly(this.displayName, this.handle, this.ownerId)
 
 fun ProfileData.authorNameUiFriendly(): String = authorNameUiFriendly(this.displayName, this.handle, this.ownerId)
+
+fun UserAccount.authorNameUiFriendly(): String =
+    authorNameUiFriendly(this.authorDisplayName, this.userDisplayName, this.pubkey)
 
 fun EventZap.usernameUiFriendly(): String =
     usernameUiFriendly(this.zapSenderDisplayName, this.zapSenderHandle, this.zapSenderId)
