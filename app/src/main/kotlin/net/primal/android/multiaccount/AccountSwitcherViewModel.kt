@@ -11,15 +11,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import net.primal.android.auth.repository.AuthRepository
 import net.primal.android.multiaccount.AccountSwitcherContract.SideEffect
 import net.primal.android.multiaccount.AccountSwitcherContract.UiEvent
 import net.primal.android.multiaccount.AccountSwitcherContract.UiState
 import net.primal.android.multiaccount.model.asUserAccountUi
+import net.primal.android.user.repository.UserRepository
 
 @HiltViewModel
 class AccountSwitcherViewModel @Inject constructor(
-    private val authRepository: AuthRepository,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -50,13 +50,13 @@ class AccountSwitcherViewModel @Inject constructor(
 
     private fun setActiveAccount(userId: String) =
         viewModelScope.launch {
-            authRepository.setActiveAccount(userId = userId)
+            userRepository.setActiveAccount(userId = userId)
             setEffect(SideEffect.AccountSwitched)
         }
 
     private fun observeActiveAccount() =
         viewModelScope.launch {
-            authRepository.observeActiveAccount().collect { activeAccount ->
+            userRepository.observeActiveAccount().collect { activeAccount ->
                 setState {
                     copy(
                         userAccounts = listOfNotNull(this.activeAccount) +
@@ -69,7 +69,7 @@ class AccountSwitcherViewModel @Inject constructor(
 
     private fun observeUserAccounts() =
         viewModelScope.launch {
-            authRepository.observeUserAccounts()
+            userRepository.observeUserAccounts()
                 .collect {
                     setState {
                         copy(
