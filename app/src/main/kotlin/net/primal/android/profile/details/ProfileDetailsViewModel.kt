@@ -207,9 +207,10 @@ class ProfileDetailsViewModel @Inject constructor(
     private fun observeContainsFeed() =
         viewModelScope.launch {
             val feedSpec = buildLatestNotesUserFeedSpec(userId = profileId)
-            feedsRepository.observeContainsFeedSpec(feedSpec = feedSpec).collect {
-                setState { copy(isProfileFeedInActiveUserFeeds = it) }
-            }
+            feedsRepository.observeContainsFeedSpec(userId = activeAccountStore.activeUserId(), feedSpec = feedSpec)
+                .collect {
+                    setState { copy(isProfileFeedInActiveUserFeeds = it) }
+                }
         }
 
     private fun observeMutedAccount() =
@@ -388,6 +389,7 @@ class ProfileDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 feedsRepository.addFeedLocally(
+                    userId = activeAccountStore.activeUserId(),
                     feedSpec = buildLatestNotesUserFeedSpec(userId = action.profileId),
                     title = action.feedTitle,
                     description = action.feedDescription,
@@ -406,7 +408,10 @@ class ProfileDetailsViewModel @Inject constructor(
     private fun removeProfileFeed(action: UiEvent.RemoveProfileFeedAction) {
         viewModelScope.launch {
             try {
-                feedsRepository.removeFeedLocally(buildLatestNotesUserFeedSpec(userId = action.profileId))
+                feedsRepository.removeFeedLocally(
+                    userId = activeAccountStore.activeUserId(),
+                    feedSpec = buildLatestNotesUserFeedSpec(userId = action.profileId),
+                )
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
                 setEffect(ProfileDetailsContract.SideEffect.ProfileFeedRemoved)
             } catch (error: WssException) {

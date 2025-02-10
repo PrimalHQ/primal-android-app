@@ -98,7 +98,7 @@ class HomeFeedViewModel @Inject constructor(
 
     private fun observeFeeds() =
         viewModelScope.launch {
-            feedsRepository.observeNotesFeeds()
+            feedsRepository.observeNotesFeeds(userId = activeAccountStore.activeUserId())
                 .collect { feeds ->
                     setState {
                         copy(

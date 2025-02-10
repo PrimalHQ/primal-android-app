@@ -10,30 +10,24 @@ import net.primal.android.feeds.domain.FeedSpecKind
 @Dao
 interface FeedDao {
 
-    @Query("SELECT * FROM Feed WHERE specKind = :specKind")
-    fun getAllFeedsBySpecKind(specKind: FeedSpecKind): List<Feed>
+    @Query("SELECT * FROM Feed WHERE specKind = :specKind AND ownerId = :ownerId ORDER BY `order` ASC")
+    fun getAllFeedsBySpecKind(ownerId: String, specKind: FeedSpecKind): List<Feed>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertAll(data: List<Feed>)
 
-    @Query("SELECT * FROM Feed WHERE specKind = :specKind LIMIT 1")
-    fun first(specKind: FeedSpecKind): Feed?
+    @Query("SELECT * FROM Feed WHERE ownerId = :ownerId ORDER BY `order` ASC")
+    fun observeAllFeeds(ownerId: String): Flow<List<Feed>>
 
-    @Query("SELECT * FROM Feed")
-    fun observeAllFeeds(): Flow<List<Feed>>
+    @Query("SELECT * FROM Feed WHERE ownerId = :ownerId AND specKind = :specKind ORDER BY `order` ASC")
+    fun observeAllFeedsBySpecKind(ownerId: String, specKind: FeedSpecKind): Flow<List<Feed>>
 
-    @Query("SELECT * FROM Feed WHERE specKind = :specKind")
-    fun observeAllFeeds(specKind: FeedSpecKind): Flow<List<Feed>>
+    @Query("SELECT EXISTS(SELECT 1 FROM Feed WHERE ownerId = :ownerId AND spec = :spec)")
+    fun observeContainsFeed(ownerId: String, spec: String): Flow<Boolean>
 
-    @Query("SELECT EXISTS(SELECT 1 FROM Feed WHERE spec = :spec)")
-    fun observeContainsFeed(spec: String): Flow<Boolean>
+    @Query("DELETE FROM Feed WHERE ownerId = :ownerId AND specKind = :specKind")
+    fun deleteAllByOwnerIdAndSpecKind(ownerId: String, specKind: FeedSpecKind)
 
-    @Query("SELECT * FROM Feed WHERE Feed.spec = :spec")
-    fun observeFeedBySpec(spec: String): Flow<Feed?>
-
-    @Query("DELETE FROM Feed WHERE specKind = :specKind")
-    fun deleteAll(specKind: FeedSpecKind)
-
-    @Query("DELETE FROM Feed WHERE spec = :spec")
-    fun delete(spec: String)
+    @Query("DELETE FROM Feed WHERE ownerId = :ownerId AND spec = :spec")
+    fun deleteAllByOwnerIdAndSpec(ownerId: String, spec: String)
 }

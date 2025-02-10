@@ -163,7 +163,7 @@ class FeedListViewModel @AssistedInject constructor(
 
     private fun observeFeeds() =
         viewModelScope.launch {
-            feedsRepository.observeFeeds(specKind = specKind)
+            feedsRepository.observeFeeds(userId = activeAccountStore.activeUserId(), specKind = specKind)
                 .collect { feeds ->
                     changeAllFeeds(feeds = feeds.map { it.asFeedUi() })
                 }
@@ -198,7 +198,10 @@ class FeedListViewModel @AssistedInject constructor(
     private fun fetchAndProcessDefaultFeeds() =
         viewModelScope.launch {
             try {
-                defaultFeeds = feedsRepository.fetchDefaultFeeds(specKind = specKind) ?: emptyList()
+                defaultFeeds = feedsRepository.fetchDefaultFeeds(
+                    userId = activeAccountStore.activeUserId(),
+                    specKind = specKind,
+                ) ?: emptyList()
             } catch (error: WssException) {
                 Timber.w(error)
             }
@@ -246,7 +249,11 @@ class FeedListViewModel @AssistedInject constructor(
 
     private fun addToUserFeeds(dvmFeed: DvmFeed) =
         viewModelScope.launch {
-            feedsRepository.addDvmFeedLocally(dvmFeed = dvmFeed, specKind = specKind)
+            feedsRepository.addDvmFeedLocally(
+                userId = activeAccountStore.activeUserId(),
+                dvmFeed = dvmFeed,
+                specKind = specKind,
+            )
         }
 
     private fun removeFromUserFeeds(spec: String) =
@@ -255,7 +262,7 @@ class FeedListViewModel @AssistedInject constructor(
                 removeIf { it.spec == spec }
             }
             updateFeedsState()
-            feedsRepository.removeFeedLocally(feedSpec = spec)
+            feedsRepository.removeFeedLocally(userId = activeAccountStore.activeUserId(), feedSpec = spec)
             persistRemotelyFeeds()
         }
 

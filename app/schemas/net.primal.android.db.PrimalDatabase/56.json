@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 56,
-    "identityHash": "0049be178e01795dc65456c20410c312",
+    "identityHash": "33178af54a0099141ae27d77a0f7029f",
     "entities": [
       {
         "tableName": "PostData",
@@ -884,8 +884,20 @@
       },
       {
         "tableName": "Feed",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`spec` TEXT NOT NULL, `specKind` TEXT NOT NULL, `feedKind` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `enabled` INTEGER NOT NULL, PRIMARY KEY(`spec`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`order` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ownerId` TEXT NOT NULL, `spec` TEXT NOT NULL, `specKind` TEXT NOT NULL, `feedKind` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `enabled` INTEGER NOT NULL)",
         "fields": [
+          {
+            "fieldPath": "order",
+            "columnName": "order",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ownerId",
+            "columnName": "ownerId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
           {
             "fieldPath": "spec",
             "columnName": "spec",
@@ -924,12 +936,23 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
-            "spec"
+            "order"
           ]
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_Feed_ownerId_spec",
+            "unique": true,
+            "columnNames": [
+              "ownerId",
+              "spec"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Feed_ownerId_spec` ON `${TABLE_NAME}` (`ownerId`, `spec`)"
+          }
+        ],
         "foreignKeys": []
       },
       {
@@ -1980,7 +2003,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0049be178e01795dc65456c20410c312')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '33178af54a0099141ae27d77a0f7029f')"
     ]
   }
 }
