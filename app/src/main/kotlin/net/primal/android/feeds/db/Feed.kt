@@ -8,7 +8,7 @@ import net.primal.android.feeds.domain.FeedSpecKind
 @Entity(indices = [Index(value = ["ownerId", "spec"], unique = true)])
 data class Feed(
     @PrimaryKey(autoGenerate = true)
-    val order: Int = 0,
+    val position: Int = 0,
     val ownerId: String,
     val spec: String,
     val specKind: FeedSpecKind,

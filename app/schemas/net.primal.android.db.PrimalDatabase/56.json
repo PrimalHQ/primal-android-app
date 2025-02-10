@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 56,
-    "identityHash": "0ab4a0c7ca5b9aee15619267acd13c46",
+    "identityHash": "2c54cd4e6f2437637cee188d1ba11935",
     "entities": [
       {
         "tableName": "PostData",
@@ -884,11 +884,11 @@
       },
       {
         "tableName": "Feed",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`order` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ownerId` TEXT NOT NULL, `spec` TEXT NOT NULL, `specKind` TEXT NOT NULL, `feedKind` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `enabled` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`position` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ownerId` TEXT NOT NULL, `spec` TEXT NOT NULL, `specKind` TEXT NOT NULL, `feedKind` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `enabled` INTEGER NOT NULL)",
         "fields": [
           {
-            "fieldPath": "order",
-            "columnName": "order",
+            "fieldPath": "position",
+            "columnName": "position",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -938,7 +938,7 @@
         "primaryKey": {
           "autoGenerate": true,
           "columnNames": [
-            "order"
+            "position"
           ]
         },
         "indices": [
@@ -2004,7 +2004,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0ab4a0c7ca5b9aee15619267acd13c46')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2c54cd4e6f2437637cee188d1ba11935')"
     ]
   }
 }
