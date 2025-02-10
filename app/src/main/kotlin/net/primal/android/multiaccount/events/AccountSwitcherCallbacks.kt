@@ -5,13 +5,4 @@ data class AccountSwitcherCallbacks(
     val onEditClick: () -> Unit,
     val onCreateNewAccountClick: () -> Unit,
     val onAddExistingAccountClick: () -> Unit,
-) {
-    companion object {
-        val EMPTY = AccountSwitcherCallbacks(
-            onActiveAccountChanged = {},
-            onAddExistingAccountClick = {},
-            onCreateNewAccountClick = {},
-            onEditClick = {},
-        )
-    }
-}
+)

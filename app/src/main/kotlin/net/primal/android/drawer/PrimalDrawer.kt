@@ -410,7 +410,12 @@ fun PrimalDrawerPreview() {
             eventPublisher = {},
             onDrawerDestinationClick = {},
             onQrCodeClick = {},
-            accountSwitcherCallbacks = AccountSwitcherCallbacks.EMPTY,
+            accountSwitcherCallbacks = AccountSwitcherCallbacks(
+                onActiveAccountChanged = {},
+                onAddExistingAccountClick = {},
+                onCreateNewAccountClick = {},
+                onEditClick = {},
+            ),
         )
     }
 }
