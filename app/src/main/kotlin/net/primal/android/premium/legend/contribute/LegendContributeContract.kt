@@ -16,6 +16,7 @@ class LegendContributeContract {
         val bitcoinAddress: String? = null,
         val lightningAddress: String? = null,
         val isFetchingPaymentInstructions: Boolean = false,
+        val isFetchingWithdrawRequest: Boolean = false,
         val qrCodeValue: String? = null,
         val membershipQuoteId: String? = null,
     ) {
@@ -34,6 +35,7 @@ class LegendContributeContract {
         data object StartPurchaseMonitor : UiEvent()
         data object StopPurchaseMonitor : UiEvent()
         data object FetchPaymentInstructions : UiEvent()
+        data object PrimalWalletPayment : UiEvent()
         data class ShowAmountEditor(val paymentMethod: PaymentMethod) : UiEvent()
         data class AmountChanged(val amount: String) : UiEvent()
     }

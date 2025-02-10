@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.math.BigDecimal
 import javax.inject.Inject
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,12 +20,16 @@ import net.primal.android.premium.legend.contribute.LegendContributeContract.UiS
 import net.primal.android.premium.legend.subscription.PurchaseMonitorManager
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.wallet.api.model.WithdrawRequestBody
 import net.primal.android.wallet.domain.CurrencyMode
+import net.primal.android.wallet.domain.SubWallet
 import net.primal.android.wallet.domain.not
 import net.primal.android.wallet.repository.ExchangeRateHandler
+import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.android.wallet.utils.formatUsdZeros
 import net.primal.android.wallet.utils.parseBitcoinPaymentInstructions
+import net.primal.android.wallet.utils.parseLightningPaymentInstructions
 import net.primal.android.wallet.utils.parseSatsToUsd
 import net.primal.android.wallet.utils.parseUsdToSats
 import timber.log.Timber
@@ -34,6 +39,7 @@ class LegendContributeViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val exchangeRateHandler: ExchangeRateHandler,
     private val premiumRepository: PremiumRepository,
+    private val walletRepository: WalletRepository,
     private val purchaseMonitorManager: PurchaseMonitorManager,
 ) : ViewModel() {
 
@@ -86,6 +92,10 @@ class LegendContributeViewModel @Inject constructor(
 
                     UiEvent.FetchPaymentInstructions -> {
                         fetchLegendPaymentInstructions()
+                    }
+
+                    UiEvent.PrimalWalletPayment -> {
+                        withdrawViaPrimalWallet()
                     }
 
                     UiEvent.StartPurchaseMonitor -> startPurchaseMonitor()
@@ -151,7 +161,7 @@ class LegendContributeViewModel @Inject constructor(
                 } else {
                     setState {
                         copy(
-                            lightningAddress = response.qrCode,
+                            lightningAddress = response.qrCode.parseLightningPaymentInstructions(),
                             membershipQuoteId = response.membershipQuoteId,
                             qrCodeValue = response.qrCode,
                         )
@@ -163,6 +173,36 @@ class LegendContributeViewModel @Inject constructor(
                 Timber.e(error)
             } finally {
                 setState { copy(isFetchingPaymentInstructions = false) }
+            }
+        }
+
+    private fun withdrawViaPrimalWallet() =
+        viewModelScope.launch {
+            try {
+                setState { copy(isFetchingWithdrawRequest = true) }
+
+                if (state.value.paymentMethod == PaymentMethod.OnChainBitcoin) {
+                    walletRepository.withdraw(
+                        userId = activeAccountStore.activeUserId(),
+                        body = WithdrawRequestBody(
+                            subWallet = SubWallet.Open,
+                            targetBtcAddress = state.value.bitcoinAddress
+                        ),
+                    )
+                } else {
+                    walletRepository.withdraw(
+                        userId = activeAccountStore.activeUserId(),
+                        body = WithdrawRequestBody(
+                            subWallet = SubWallet.Open,
+                            lnInvoice = state.value.lightningAddress
+                        ),
+                    )
+                }
+
+            } catch (error: WssException) {
+                Timber.e(error)
+            } finally {
+                setState { copy(isFetchingWithdrawRequest = false) }
             }
         }
 

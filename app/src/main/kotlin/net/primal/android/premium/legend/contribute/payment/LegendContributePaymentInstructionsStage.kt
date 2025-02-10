@@ -48,6 +48,7 @@ fun LegendContributePaymentInstructionsStage(
     state: UiState,
     onBack: () -> Unit,
     onPaymentInstructionRetry: () -> Unit,
+    onPrimalWalletPayment: () -> Unit,
 ) {
     Scaffold(
         modifier = modifier,
@@ -67,6 +68,8 @@ fun LegendContributePaymentInstructionsStage(
             LegendContributePaymentStageBottomBar(
                 state = state,
                 enabled = state.arePaymentInstructionsAvailable(),
+                onPrimalWalletPayment = onPrimalWalletPayment,
+                isFetchingWithdrawRequest = state.isFetchingWithdrawRequest,
             )
         },
     ) { paddingValues ->
@@ -114,7 +117,12 @@ fun LegendContributePaymentInstructionsStage(
 }
 
 @Composable
-private fun LegendContributePaymentStageBottomBar(state: UiState, enabled: Boolean) {
+private fun LegendContributePaymentStageBottomBar(
+    state: UiState,
+    enabled: Boolean,
+    onPrimalWalletPayment: () -> Unit,
+    isFetchingWithdrawRequest: Boolean,
+) {
     val context = LocalContext.current
 
     Column(
@@ -143,8 +151,9 @@ private fun LegendContributePaymentStageBottomBar(state: UiState, enabled: Boole
         PrimalLoadingButton(
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled,
+            loading = isFetchingWithdrawRequest,
             text = stringResource(id = R.string.legend_contribution_payment_instructions_pay_with_primal_wallet),
-            onClick = { },
+            onClick = onPrimalWalletPayment,
         )
     }
 }
