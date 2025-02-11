@@ -150,13 +150,11 @@ class OnboardingViewModel @Inject constructor(
                 avatarUploadJob?.job?.join()
                 bannerUploadJob?.job?.join()
                 val uiState = state.value
-                withContext(dispatcherProvider.io()) {
-                    createAccountHandler.createNostrAccount(
-                        privateKey = keyPair.privateKey,
-                        profileMetadata = uiState.asProfileMetadata(),
-                        interests = uiState.selectedSuggestions,
-                    )
-                }
+                createAccountHandler.createNostrAccount(
+                    privateKey = keyPair.privateKey,
+                    profileMetadata = uiState.asProfileMetadata(),
+                    interests = uiState.selectedSuggestions,
+                )
                 setState { copy(accountCreated = true, accountCreationStep = AccountCreationStep.AccountCreated) }
             } catch (error: UnsuccessfulFileUpload) {
                 Timber.w(error)
