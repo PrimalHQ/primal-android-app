@@ -12,24 +12,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.navigation.FROM_ORIGIN_PREMIUM_BADGE
 import net.primal.android.navigation.buyingPremiumFromOrigin
-import net.primal.android.networking.di.PrimalWalletApiClient
-import net.primal.android.networking.primal.PrimalApiClient
-import net.primal.android.networking.primal.PrimalCacheFilter
-import net.primal.android.networking.primal.PrimalSocketSubscription
-import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.ext.takeContentOrNull
-import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.premium.api.model.MembershipPurchaseMonitorRequestBody
-import net.primal.android.premium.api.model.MembershipPurchaseMonitorResponse
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.Companion.LEGEND_THRESHOLD_IN_USD
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.UiEvent
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.UiState
+import net.primal.android.premium.legend.subscription.PurchaseMonitor
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.repository.WalletRepository
@@ -42,7 +31,7 @@ class PremiumBecomeLegendViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val walletRepository: WalletRepository,
     private val premiumRepository: PremiumRepository,
-    @PrimalWalletApiClient private val walletApiClient: PrimalApiClient,
+    private val purchaseMonitor: PurchaseMonitor,
 ) : ViewModel() {
 
     private companion object {
@@ -59,9 +48,6 @@ class PremiumBecomeLegendViewModel @Inject constructor(
 
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
-
-    private var monitorSubscription: PrimalSocketSubscription<MembershipPurchaseMonitorResponse>? = null
-    private var monitorMutex = Mutex()
 
     init {
         observeEvents()
@@ -99,7 +85,7 @@ class PremiumBecomeLegendViewModel @Inject constructor(
                         )
                     }
 
-                    UiEvent.StartPurchaseMonitor -> startPurchaseMonitorIfStopped()
+                    UiEvent.StartPurchaseMonitor -> startPurchaseMonitor()
 
                     UiEvent.StopPurchaseMonitor -> stopPurchaseMonitor()
 
@@ -171,6 +157,7 @@ class PremiumBecomeLegendViewModel @Inject constructor(
                 val response = premiumRepository.fetchPrimalLegendPaymentInstructions(
                     userId = activeAccountStore.activeUserId(),
                     primalName = primalName,
+                    amountUsd = null,
                 )
 
                 val minAmount = response.amountBtc.toBigDecimal().setScale(BTC_DECIMAL_PLACES, RoundingMode.HALF_UP)
@@ -184,7 +171,7 @@ class PremiumBecomeLegendViewModel @Inject constructor(
                 }
                 updatePaymentAmount(amount = minAmount)
 
-                startPurchaseMonitorIfStopped()
+                startPurchaseMonitor()
             } catch (error: WssException) {
                 Timber.e(error)
             } finally {
@@ -192,51 +179,20 @@ class PremiumBecomeLegendViewModel @Inject constructor(
             }
         }
 
-    private fun subscribeToPurchaseMonitor(quoteId: String) =
-        PrimalSocketSubscription.launch(
-            scope = viewModelScope,
-            primalApiClient = walletApiClient,
-            cacheFilter = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET_MEMBERSHIP_PURCHASE_MONITOR,
-                optionsJson = NostrJson.encodeToString(
-                    MembershipPurchaseMonitorRequestBody(membershipQuoteId = quoteId),
-                ),
-            ),
-            transformer = {
-                if (primalEvent?.kind == NostrEventKind.PrimalMembershipPurchaseMonitor.value) {
-                    primalEvent.takeContentOrNull<MembershipPurchaseMonitorResponse>()
-                } else {
-                    null
-                }
-            },
-        ) {
-            if (it.completedAt != null) {
+    private fun startPurchaseMonitor() {
+        _state.value.membershipQuoteId?.let {
+            purchaseMonitor.startMonitor(
+                scope = viewModelScope,
+                quoteId = it,
+            ) {
                 fetchMembershipStatus()
                 setState { copy(stage = PremiumBecomeLegendContract.BecomeLegendStage.Success) }
-                stopPurchaseMonitor()
-            }
-        }
-
-    private fun startPurchaseMonitorIfStopped() {
-        viewModelScope.launch {
-            monitorMutex.withLock {
-                if (monitorSubscription == null) {
-                    val quoteId = _state.value.membershipQuoteId
-                    if (quoteId != null) {
-                        monitorSubscription = subscribeToPurchaseMonitor(quoteId = quoteId)
-                    }
-                }
             }
         }
     }
 
     private fun stopPurchaseMonitor() {
-        viewModelScope.launch {
-            monitorMutex.withLock {
-                monitorSubscription?.unsubscribe()
-                monitorSubscription = null
-            }
-        }
+        purchaseMonitor.stopMonitor(viewModelScope)
     }
 
     private fun fetchMembershipStatus() =

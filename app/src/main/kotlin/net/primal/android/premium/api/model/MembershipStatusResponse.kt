@@ -20,4 +20,5 @@ data class MembershipStatusResponse(
     @SerialName("renews_on") val renewsOn: Long? = null,
     @SerialName("origin") val origin: String? = null,
     @SerialName("edited_shoutout") val editedShoutout: String? = null,
+    @SerialName("donated_btc") val donatedBtc: String? = null,
 )

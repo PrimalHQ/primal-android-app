@@ -160,21 +160,24 @@
     <string name="premium_promo_code_apply_button">Apply Promo Code</string>
     <string name="premium_promo_code_cancel_button">Cancel</string>
 
-    <string name="premium_member_title">Premium</string>
-    <string name="premium_member_early_primal_user">Hey there! You are an early Primal user who interacted with our team, so we gave you 6 months of Primal Premium for free. ♥\uFE0F\uD83E\uDEC2</string>
-    <string name="premium_manage_premium_button">Manage Premium</string>
-    <string name="premium_renew_subscription">Renew Subscription</string>
-    <string name="premium_extend_subscription">Extend Subscription</string>
-    <string name="premium_enjoying_primal">Are you enjoying Primal?</string>
-    <string name="premium_enjoying_primal_if_so">If so, see how you can</string>
-    <string name="premium_support_us">support us</string>
-    <string name="premium_table_expires">Expires</string>
-    <string name="premium_table_never">Never</string>
-    <string name="premium_table_renews_on">Renews on</string>
-    <string name="premium_table_expires_on">Expires on</string>
-    <string name="premium_table_expired_on">Expired on</string>
-    <string name="premium_table_apply">apply</string>
-    <string name="premium_expired_subscription_notice">Your Primal Premium subscription has expired.\nYou can renew it below:</string>
+    <string name="premium_home_member_title">Premium</string>
+    <string name="premium_home_member_early_primal_user">Hey there! You are an early Primal user who interacted with our team, so we gave you 6 months of Primal Premium for free. ♥\uFE0F\uD83E\uDEC2</string>
+    <string name="premium_home_premium_button">Manage Premium</string>
+    <string name="premium_home_renew_subscription">Renew Subscription</string>
+    <string name="premium_home_extend_subscription">Extend Subscription</string>
+    <string name="premium_home_enjoying_primal">Are you enjoying Primal?</string>
+    <string name="premium_home_enjoying_primal_if_so">If so, see how you can</string>
+    <string name="premium_home_support_us">support us</string>
+    <string name="premium_home_table_expires">Expires</string>
+    <string name="premium_home_table_never">Never</string>
+    <string name="premium_home_table_renews_on">Renews on</string>
+    <string name="premium_home_table_expires_on">Expires on</string>
+    <string name="premium_home_table_expired_on">Expired on</string>
+    <string name="premium_home_table_apply">apply</string>
+    <string name="premium_home_expired_subscription_notice">Your Primal Premium subscription has expired.\nYou can renew it below:</string>
+    <string name="premium_home_legend_contribution_title">Your contribution to Primal:</string>
+    <string name="premium_home_legend_support_appreciation">Thank you for your support! 💜🫂</string>
+    <string name="premium_home_legend_contribute_more">Want to contribute more?</string>
 
     <string name="premium_support_primal_title">Support Primal</string>
 
@@ -192,7 +195,8 @@
     <string name="premium_become_legend_button_start">Become a Legend</string>
     <string name="premium_become_legend_button_pay_now">Pay Now</string>
     <string name="premium_become_legend_payment_title">On-chain Payment</string>
-    <string name="premium_become_legend_payment_instruction">Pay this on-chain invoice to complete your purchase. Your legendary status will be active immediately.</string>
+    <string name="premium_become_legend_payment_instruction_on_chain">Pay this on-chain invoice to complete your purchase. Your legendary status will be active immediately.</string>
+    <string name="premium_become_legend_payment_instruction_lightning">Pay this lightning invoice to complete your donation. Your legendary contribution will be active immediately.</string>
     <string name="premium_become_legend_button_copy_invoice">Copy Invoice</string>
     <string name="premium_become_legend_success_title">Success</string>
     <string name="premium_become_legend_success_headline">Success, payment received!</string>
@@ -200,6 +204,20 @@
     <string name="premium_become_legend_success_done_button">Done</string>
     <string name="premium_become_legend_failed_fetching_payment_instructions">Unable to get payment instructions. Please try again.</string>
     <string name="premium_become_legend_retry_button">Retry</string>
+
+    <string name="legend_contribution_intro_stage_title">Contribute to Primal</string>
+    <string name="legend_contribution_cancel">Cancel</string>
+    <string name="legend_contribution_pay_with_on_chain_bitcoin_button">Pay with on-chain bitcoin</string>
+    <string name="legend_contribution_pay_with_bitcoin_lightning">Pay with bitcoin lightning</string>
+    <string name="legend_contribution_amount_stage_title">Enter Amount</string>
+    <string name="legend_contribution_payment_instructions_on_chain_stage_title">On-chain Payment</string>
+    <string name="legend_contribution_payment_instructions_lightning_stage_title">Lightning Payment</string>
+    <string name="legend_contribution_payment_instructions_pay_with_primal_wallet">Pay Now via Primal Wallet</string>
+    <string name="legend_contribution_payment_instructions_copy_invoice">Copy Invoice</string>
+    <string name="legend_contribution_success_stage_title">Success</string>
+    <string name="legend_contribution_success_stage_appreciation_title">Success, payment received!</string>
+    <string name="legend_contribution_success_stage_appreciation_subtitle">Thank you, Legend!</string>
+    <string name="legend_contribution_success_stage_appreciation_done_button">Done</string>
 
     <string name="premium_manage_title">Manage Premium</string>
     <string name="premium_manage_nostr_tools">Nostr Tools</string>
@@ -349,7 +367,6 @@
     <string name="premium_legend_leaderboard_sats">sats</string>
     <string name="premium_leaderboard_no_content">There is no content on this leaderboard.</string>
     <string name="premium_leaderboard_error_loading">Unable to load leaderboard.\nPlease try again.</string>
-
 
     <string name="feed_reposted_suffix">reposted</string>
     <string name="feed_see_more">See more…</string>

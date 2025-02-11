@@ -71,6 +71,7 @@ class PremiumRepository @Inject constructor(
                     receiverUserId = userId,
                     primalProductId = null,
                     playSubscription = purchase.playSubscriptionJson,
+                    onChain = null,
                 ),
             )
         }
@@ -143,15 +144,21 @@ class PremiumRepository @Inject constructor(
         }
     }
 
-    suspend fun fetchPrimalLegendPaymentInstructions(userId: String, primalName: String) =
-        withContext(dispatchers.io()) {
-            retryNetworkCall(retries = 2) {
-                premiumApi.getPrimalLegendPaymentInstructions(
-                    userId = userId,
-                    primalName = primalName,
-                )
-            }
+    suspend fun fetchPrimalLegendPaymentInstructions(
+        userId: String,
+        primalName: String,
+        onChain: Boolean = true,
+        amountUsd: String?,
+    ) = withContext(dispatchers.io()) {
+        retryNetworkCall(retries = 2) {
+            premiumApi.getPrimalLegendPaymentInstructions(
+                userId = userId,
+                primalName = primalName,
+                onChain = onChain,
+                amountUsd = amountUsd,
+            )
         }
+    }
 
     suspend fun fetchOrderHistory(userId: String) =
         withContext(dispatchers.io()) {
@@ -188,6 +195,7 @@ class PremiumRepository @Inject constructor(
             recurring = this.recurring,
             origin = this.origin,
             editedShoutout = this.editedShoutout,
+            donatedBtc = this.donatedBtc,
         )
     }
 }

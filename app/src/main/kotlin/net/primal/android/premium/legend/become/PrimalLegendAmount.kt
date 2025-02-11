@@ -17,7 +17,11 @@ import net.primal.android.premium.legend.become.amount.AltAmountText
 import net.primal.android.premium.legend.become.amount.MainAmountText
 
 @Composable
-fun PrimalLegendAmount(btcValue: BigDecimal, exchangeBtcUsdRate: Double?) {
+fun PrimalLegendAmount(
+    btcValue: BigDecimal,
+    exchangeBtcUsdRate: Double?,
+    coerceMinAmount: Boolean = false,
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -41,9 +45,11 @@ fun PrimalLegendAmount(btcValue: BigDecimal, exchangeBtcUsdRate: Double?) {
 
             AltAmountText(
                 modifier = Modifier.padding(top = 8.dp),
-                amount = numberFormat.format(
-                    usdValue.toInt().coerceAtLeast(minimumValue = LEGEND_THRESHOLD_IN_USD),
-                ),
+                amount = if (coerceMinAmount) {
+                    numberFormat.format(usdValue.toInt())
+                } else {
+                    numberFormat.format(usdValue.toInt().coerceAtLeast(minimumValue = LEGEND_THRESHOLD_IN_USD))
+                },
                 currency = "USD",
             )
         }
