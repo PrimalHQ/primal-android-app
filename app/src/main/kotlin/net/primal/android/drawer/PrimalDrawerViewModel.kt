@@ -123,6 +123,6 @@ class PrimalDrawerViewModel @Inject constructor(
             DrawerScreenDestination.Messages,
             DrawerScreenDestination.Bookmarks(userId = userId),
             DrawerScreenDestination.Settings,
-            DrawerScreenDestination.SignOut,
+            DrawerScreenDestination.SignOut(userId = userId),
         )
 }

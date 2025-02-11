@@ -1,5 +1,6 @@
 package net.primal.android.user.repository
 
+import androidx.core.util.Predicate
 import java.time.Instant
 import javax.inject.Inject
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -104,8 +105,8 @@ class UserRepository @Inject constructor(
         }
     }
 
-    suspend fun removeAllUserAccounts() {
-        accountsStore.clearAllAccounts()
+    suspend fun removeUserAccountById(pubkey: String) {
+        accountsStore.deleteAccount(pubkey = pubkey)
     }
 
     @Throws(UnsuccessfulFileUpload::class, NostrPublishException::class)

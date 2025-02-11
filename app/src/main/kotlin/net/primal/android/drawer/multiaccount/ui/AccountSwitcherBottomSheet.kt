@@ -1,8 +1,16 @@
 package net.primal.android.drawer.multiaccount.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -12,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ModalBottomSheet
@@ -21,10 +30,15 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -34,6 +48,7 @@ import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Check
+import net.primal.android.core.compose.icons.primaliconpack.RemoveAccount
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.core.utils.hideAndRun
 import net.primal.android.drawer.multiaccount.model.UserAccountUi
@@ -46,12 +61,14 @@ fun AccountSwitcherBottomSheet(
     activeAccount: UserAccountUi,
     accounts: List<UserAccountUi>,
     onDismissRequest: () -> Unit,
-    onEditClick: () -> Unit,
+    onLogoutClick: (String) -> Unit,
     onAccountClick: (String) -> Unit,
     onCreateNewAccountClick: () -> Unit,
     onAddExistingAccountClick: () -> Unit,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
 ) {
+    var isEditMode by remember { mutableStateOf(false) }
+
     val uiScope = rememberCoroutineScope()
     ModalBottomSheet(
         modifier = modifier.statusBarsPadding(),
@@ -61,6 +78,14 @@ fun AccountSwitcherBottomSheet(
     ) {
         Column(
             modifier = Modifier
+                .animateContentSize()
+                .run {
+                    if (isEditMode) {
+                        this.fillMaxSize()
+                    } else {
+                        this
+                    }
+                }
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 20.dp)
                 .navigationBarsPadding(),
@@ -68,21 +93,26 @@ fun AccountSwitcherBottomSheet(
             verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
         ) {
             BottomSheetTopAppBar(
-                onEditClick = {
-                    sheetState.hideAndRun(coroutineScope = uiScope, onDismissRequest = onDismissRequest) {
-                        onEditClick()
-                    }
-                },
+                isEditMode = isEditMode,
+                onToggleEditMode = { isEditMode = !isEditMode },
             )
-            AccountList(
-                activeAccount = activeAccount,
-                accounts = accounts,
-                onAccountClick = { userId ->
-                    sheetState.hideAndRun(coroutineScope = uiScope, onDismissRequest = onDismissRequest) {
-                        onAccountClick(userId)
-                    }
-                },
-            )
+
+            AnimatedContent(
+                targetState = isEditMode,
+                transitionSpec = { transitionSpecBetweenStages() },
+            ) { editMode ->
+                AccountList(
+                    isEditMode = editMode,
+                    onLogoutClick = onLogoutClick,
+                    activeAccount = activeAccount,
+                    accounts = accounts,
+                    onAccountClick = { userId ->
+                        sheetState.hideAndRun(coroutineScope = uiScope, onDismissRequest = onDismissRequest) {
+                            onAccountClick(userId)
+                        }
+                    },
+                )
+            }
             Column {
                 PlainTextButton(
                     text = stringResource(id = R.string.account_switcher_create_new_account),
@@ -126,6 +156,8 @@ private fun PlainTextButton(
 @Composable
 private fun AccountList(
     modifier: Modifier = Modifier,
+    isEditMode: Boolean,
+    onLogoutClick: (String) -> Unit,
     activeAccount: UserAccountUi,
     accounts: List<UserAccountUi>,
     onAccountClick: (String) -> Unit,
@@ -136,13 +168,24 @@ private fun AccountList(
         verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.Top),
     ) {
         item(key = activeAccount.pubkey) {
-            AccountListItem(account = activeAccount, isActive = true, onAccountClick = onAccountClick)
+            AccountListItem(
+                isEditMode = isEditMode,
+                account = activeAccount,
+                isActive = true,
+                onAccountClick = onAccountClick,
+                onLogoutClick = onLogoutClick,
+            )
         }
         items(
             items = accounts,
             key = { it.pubkey },
         ) { account ->
-            AccountListItem(account = account, onAccountClick = onAccountClick)
+            AccountListItem(
+                isEditMode = isEditMode,
+                account = account,
+                onAccountClick = onAccountClick,
+                onLogoutClick = onLogoutClick,
+            )
         }
     }
 }
@@ -151,10 +194,12 @@ private fun AccountList(
 private fun AccountListItem(
     modifier: Modifier = Modifier,
     account: UserAccountUi,
-    isActive: Boolean = false,
+    isEditMode: Boolean,
+    onLogoutClick: (String) -> Unit,
     onAccountClick: (String) -> Unit,
+    isActive: Boolean = false,
 ) {
-    val backgroundColor = if (isActive) {
+    val backgroundColor = if (isActive && !isEditMode) {
         AppTheme.extraColorScheme.surfaceVariantAlt1
     } else {
         AppTheme.extraColorScheme.surfaceVariantAlt2
@@ -168,11 +213,27 @@ private fun AccountListItem(
             .clip(AppTheme.shapes.medium)
             .clickable { onAccountClick(account.pubkey) },
         leadingContent = {
-            UniversalAvatarThumbnail(
-                avatarSize = 40.dp,
-                avatarCdnImage = account.avatarCdnImage,
-                legendaryCustomization = account.legendaryCustomization,
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+            ) {
+                if (isEditMode) {
+                    IconButton(onClick = { onLogoutClick(account.pubkey) }) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            imageVector = PrimalIcons.RemoveAccount,
+                            contentDescription = null,
+                            tint = Color.Unspecified,
+                        )
+                    }
+                }
+
+                UniversalAvatarThumbnail(
+                    avatarSize = 40.dp,
+                    avatarCdnImage = account.avatarCdnImage,
+                    legendaryCustomization = account.legendaryCustomization,
+                )
+            }
         },
         headlineContent = {
             NostrUserText(
@@ -191,7 +252,7 @@ private fun AccountListItem(
             }
         },
         trailingContent = {
-            if (isActive) {
+            if (isActive && !isEditMode) {
                 Icon(
                     modifier = Modifier.size(16.dp),
                     imageVector = PrimalIcons.Check,
@@ -205,7 +266,7 @@ private fun AccountListItem(
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun BottomSheetTopAppBar(onEditClick: () -> Unit) {
+private fun BottomSheetTopAppBar(isEditMode: Boolean, onToggleEditMode: () -> Unit) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
@@ -221,10 +282,14 @@ private fun BottomSheetTopAppBar(onEditClick: () -> Unit) {
         },
         navigationIcon = {
             TextButton(
-                onClick = onEditClick,
+                onClick = onToggleEditMode,
             ) {
                 Text(
-                    text = stringResource(id = R.string.account_switcher_edit),
+                    text = if (isEditMode) {
+                        stringResource(id = R.string.account_switcher_done)
+                    } else {
+                        stringResource(id = R.string.account_switcher_edit)
+                    },
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                     style = AppTheme.typography.bodyLarge,
                 )
@@ -232,3 +297,16 @@ private fun BottomSheetTopAppBar(onEditClick: () -> Unit) {
         },
     )
 }
+
+private fun AnimatedContentTransitionScope<Boolean>.transitionSpecBetweenStages() =
+    when (initialState) {
+        false -> {
+            slideInHorizontally(initialOffsetX = { it })
+                .togetherWith(slideOutHorizontally(targetOffsetX = { -it }))
+        }
+
+        true -> {
+            slideInHorizontally(initialOffsetX = { -it })
+                .togetherWith(slideOutHorizontally(targetOffsetX = { it }))
+        }
+    }

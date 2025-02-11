@@ -29,7 +29,11 @@ import net.primal.android.theme.AppTheme
 
 @ExperimentalMaterial3Api
 @Composable
-fun AccountSwitcher(modifier: Modifier = Modifier, callbacks: AccountSwitcherCallbacks) {
+fun AccountSwitcher(
+    modifier: Modifier = Modifier,
+    callbacks: AccountSwitcherCallbacks,
+    onLogoutClick: (String) -> Unit,
+) {
     val viewModel = hiltViewModel<AccountSwitcherViewModel>()
     val uiState = viewModel.state.collectAsState()
 
@@ -46,6 +50,7 @@ fun AccountSwitcher(modifier: Modifier = Modifier, callbacks: AccountSwitcherCal
         state = uiState.value,
         eventPublisher = viewModel::setEvent,
         callbacks = callbacks,
+        onLogoutClick = onLogoutClick,
     )
 }
 
@@ -56,6 +61,7 @@ private fun AccountSwitcher(
     eventPublisher: (AccountSwitcherContract.UiEvent) -> Unit,
     state: AccountSwitcherContract.UiState,
     callbacks: AccountSwitcherCallbacks,
+    onLogoutClick: (String) -> Unit,
 ) {
     var accountsBottomSheetVisibility by remember { mutableStateOf(false) }
     val bottomSheetIcon = remember(state.userAccounts) {
@@ -73,7 +79,7 @@ private fun AccountSwitcher(
             activeAccount = state.activeAccount,
             accounts = state.userAccounts,
             onDismissRequest = { accountsBottomSheetVisibility = false },
-            onEditClick = callbacks.onEditClick,
+            onLogoutClick = onLogoutClick,
             onCreateNewAccountClick = callbacks.onCreateNewAccountClick,
             onAddExistingAccountClick = callbacks.onAddExistingAccountClick,
             onAccountClick = { eventPublisher(AccountSwitcherContract.UiEvent.SwitchAccount(it)) },

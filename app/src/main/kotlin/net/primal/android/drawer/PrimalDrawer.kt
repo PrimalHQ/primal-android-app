@@ -92,7 +92,7 @@ fun PrimalDrawer(
         accountSwitcherCallbacks = accountSwitcherCallbacks,
         onDrawerDestinationClick = {
             when (it) {
-                DrawerScreenDestination.SignOut -> Unit
+                is DrawerScreenDestination.SignOut -> Unit
                 else -> uiScope.launch { drawerState.close() }
             }
             onDrawerDestinationClick(it)
@@ -128,6 +128,7 @@ fun PrimalDrawer(
                 onQrCodeClick = onQrCodeClick,
                 legendaryCustomization = state.legendaryCustomization,
                 accountSwitcherCallbacks = accountSwitcherCallbacks,
+                onLogoutClick = { onDrawerDestinationClick(DrawerScreenDestination.SignOut(it)) },
             )
 
             DrawerMenu(
@@ -159,6 +160,7 @@ private fun DrawerHeader(
     legendaryCustomization: LegendaryCustomization?,
     onQrCodeClick: () -> Unit,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
+    onLogoutClick: (String) -> Unit,
 ) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
     ConstraintLayout(
@@ -184,7 +186,7 @@ private fun DrawerHeader(
                 legendaryCustomization = legendaryCustomization,
             )
 
-            AccountSwitcher(callbacks = accountSwitcherCallbacks)
+            AccountSwitcher(callbacks = accountSwitcherCallbacks, onLogoutClick = onLogoutClick)
         }
 
         NostrUserText(
@@ -366,7 +368,7 @@ sealed class DrawerScreenDestination {
     data object Messages : DrawerScreenDestination()
     data class Bookmarks(val userId: String) : DrawerScreenDestination()
     data object Settings : DrawerScreenDestination()
-    data object SignOut : DrawerScreenDestination()
+    data class SignOut(val userId: String) : DrawerScreenDestination()
 }
 
 @Composable
@@ -377,7 +379,7 @@ private fun DrawerScreenDestination.label(): String {
         DrawerScreenDestination.Messages -> stringResource(R.string.drawer_destination_messages)
         is DrawerScreenDestination.Bookmarks -> stringResource(R.string.drawer_destination_bookmarks)
         DrawerScreenDestination.Settings -> stringResource(R.string.drawer_destination_settings)
-        DrawerScreenDestination.SignOut -> stringResource(R.string.drawer_destination_sign_out)
+        is DrawerScreenDestination.SignOut -> stringResource(R.string.drawer_destination_sign_out)
     }
 }
 
@@ -389,7 +391,7 @@ private fun DrawerScreenDestination.icon(): ImageVector {
         DrawerScreenDestination.Messages -> PrimalIcons.DrawerMessages
         is DrawerScreenDestination.Bookmarks -> PrimalIcons.DrawerBookmarks
         DrawerScreenDestination.Settings -> PrimalIcons.DrawerSettings
-        DrawerScreenDestination.SignOut -> PrimalIcons.DrawerSignOut
+        is DrawerScreenDestination.SignOut -> PrimalIcons.DrawerSignOut
     }
 }
 
@@ -404,7 +406,7 @@ fun PrimalDrawerPreview() {
                     DrawerScreenDestination.Messages,
                     DrawerScreenDestination.Bookmarks(userId = "none"),
                     DrawerScreenDestination.Settings,
-                    DrawerScreenDestination.SignOut,
+                    DrawerScreenDestination.SignOut(userId = "none"),
                 ),
             ),
             eventPublisher = {},
@@ -414,7 +416,6 @@ fun PrimalDrawerPreview() {
                 onActiveAccountChanged = {},
                 onAddExistingAccountClick = {},
                 onCreateNewAccountClick = {},
-                onEditClick = {},
             ),
         )
     }

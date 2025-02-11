@@ -118,6 +118,7 @@ import net.primal.android.core.compose.icons.primaliconpack.PrimalPremium
 import net.primal.android.core.compose.icons.primaliconpack.QrCode
 import net.primal.android.core.compose.icons.primaliconpack.Quote
 import net.primal.android.core.compose.icons.primaliconpack.Read
+import net.primal.android.core.compose.icons.primaliconpack.RemoveAccount
 import net.primal.android.core.compose.icons.primaliconpack.RemoveHighlight
 import net.primal.android.core.compose.icons.primaliconpack.Report
 import net.primal.android.core.compose.icons.primaliconpack.Repost
@@ -303,6 +304,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             WalletChangeCurrency,
             NwcExternalAppForeground,
             NwcExternalAppConnection,
+            RemoveAccount,
         )
         return __PrimalIcons!!
     }
