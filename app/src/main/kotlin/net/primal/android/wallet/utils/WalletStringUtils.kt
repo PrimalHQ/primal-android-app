@@ -34,6 +34,13 @@ fun String?.isBitcoinAddress(): Boolean {
     return result.getOrNull() != null
 }
 
+fun String.parseLightningPaymentInstructions(): String? {
+    return when {
+        isLightningUri() -> this.split(":").last()
+        else -> null
+    }
+}
+
 fun String.parseBitcoinPaymentInstructions(): BitcoinPaymentInstruction? {
     return when {
         isBitcoinAddress() -> BitcoinPaymentInstruction(address = this)

@@ -11,22 +11,35 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.core.utils.getMaximumUsdAmount
+import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.legend.contribute.LegendContributeContract.LegendContributeState
+import net.primal.android.premium.legend.contribute.LegendContributeContract.PaymentMethod
 import net.primal.android.premium.legend.contribute.LegendContributeContract.UiEvent
 import net.primal.android.premium.legend.contribute.LegendContributeContract.UiState
+import net.primal.android.premium.legend.subscription.PurchaseMonitor
+import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.wallet.api.model.WithdrawRequestBody
 import net.primal.android.wallet.domain.CurrencyMode
+import net.primal.android.wallet.domain.SubWallet
 import net.primal.android.wallet.domain.not
 import net.primal.android.wallet.repository.ExchangeRateHandler
+import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.android.wallet.utils.formatUsdZeros
+import net.primal.android.wallet.utils.parseBitcoinPaymentInstructions
+import net.primal.android.wallet.utils.parseLightningPaymentInstructions
 import net.primal.android.wallet.utils.parseSatsToUsd
 import net.primal.android.wallet.utils.parseUsdToSats
+import timber.log.Timber
 
 @HiltViewModel
 class LegendContributeViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val exchangeRateHandler: ExchangeRateHandler,
+    private val premiumRepository: PremiumRepository,
+    private val walletRepository: WalletRepository,
+    private val purchaseMonitor: PurchaseMonitor,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -52,7 +65,13 @@ class LegendContributeViewModel @Inject constructor(
                     }
 
                     UiEvent.GoBackToPickAmount -> setState {
-                        copy(stage = LegendContributeState.PickAmount)
+                        copy(
+                            isFetchingPaymentInstructions = true,
+                            stage = LegendContributeState.PickAmount,
+                            lightningInvoice = null,
+                            bitcoinAddress = null,
+                            membershipQuoteId = null,
+                        )
                     }
 
                     UiEvent.GoBackToPaymentInstructions -> setState {
@@ -71,6 +90,18 @@ class LegendContributeViewModel @Inject constructor(
                         copy(stage = LegendContributeState.Success)
                     }
 
+                    UiEvent.FetchPaymentInstructions -> {
+                        fetchLegendPaymentInstructions()
+                    }
+
+                    UiEvent.PrimalWalletPayment -> {
+                        withdrawViaPrimalWallet()
+                    }
+
+                    UiEvent.StartPurchaseMonitor -> startPurchaseMonitor()
+
+                    UiEvent.StopPurchaseMonitor -> stopPurchaseMonitor()
+
                     is UiEvent.ShowAmountEditor -> setState {
                         copy(
                             paymentMethod = it.paymentMethod,
@@ -81,27 +112,6 @@ class LegendContributeViewModel @Inject constructor(
                     is UiEvent.AmountChanged -> {
                         updateAmount(amount = it.amount)
                     }
-                }
-            }
-        }
-
-    private fun updateAmount(amount: String) =
-        when (_state.value.currencyMode) {
-            CurrencyMode.SATS -> {
-                setState {
-                    copy(
-                        amountInSats = amount,
-                        amountInUsd = amount.parseSatsToUsd(state.value.currentExchangeRate),
-                    )
-                }
-            }
-
-            CurrencyMode.FIAT -> {
-                setState {
-                    copy(
-                        amountInSats = amount.parseUsdToSats(state.value.currentExchangeRate),
-                        amountInUsd = amount,
-                    )
                 }
             }
         }
@@ -127,4 +137,116 @@ class LegendContributeViewModel @Inject constructor(
                 userId = activeAccountStore.activeUserId(),
             )
         }
+
+    private fun fetchLegendPaymentInstructions() =
+        viewModelScope.launch {
+            try {
+                setState { copy(isFetchingPaymentInstructions = true) }
+
+                val response = premiumRepository.fetchPrimalLegendPaymentInstructions(
+                    userId = activeAccountStore.activeUserId(),
+                    primalName = "",
+                    onChain = state.value.paymentMethod == PaymentMethod.OnChainBitcoin,
+                    amountUsd = state.value.amountInUsd,
+                )
+
+                when (state.value.paymentMethod) {
+                    PaymentMethod.OnChainBitcoin -> {
+                        setState {
+                            copy(
+                                bitcoinAddress = response.qrCode.parseBitcoinPaymentInstructions()?.address,
+                                membershipQuoteId = response.membershipQuoteId,
+                                qrCodeValue = response.qrCode,
+                            )
+                        }
+                    }
+                    PaymentMethod.BitcoinLightning -> {
+                        setState {
+                            copy(
+                                lightningInvoice = response.qrCode.parseLightningPaymentInstructions(),
+                                membershipQuoteId = response.membershipQuoteId,
+                                qrCodeValue = response.qrCode,
+                            )
+                        }
+                    }
+                    null -> Unit
+                }
+
+                startPurchaseMonitor()
+            } catch (error: WssException) {
+                Timber.e(error)
+            } finally {
+                setState { copy(isFetchingPaymentInstructions = false) }
+            }
+        }
+
+    private fun withdrawViaPrimalWallet() =
+        viewModelScope.launch {
+            try {
+                setState { copy(isFetchingWithdrawRequest = true) }
+
+                when (state.value.paymentMethod) {
+                    PaymentMethod.OnChainBitcoin -> {
+                        walletRepository.withdraw(
+                            userId = activeAccountStore.activeUserId(),
+                            body = WithdrawRequestBody(
+                                subWallet = SubWallet.Open,
+                                targetBtcAddress = state.value.qrCodeValue?.parseBitcoinPaymentInstructions()?.address,
+                                amountBtc = state.value.qrCodeValue?.parseBitcoinPaymentInstructions()?.amount,
+                            ),
+                        )
+                    }
+                    PaymentMethod.BitcoinLightning -> {
+                        walletRepository.withdraw(
+                            userId = activeAccountStore.activeUserId(),
+                            body = WithdrawRequestBody(
+                                subWallet = SubWallet.Open,
+                                lnInvoice = state.value.lightningInvoice,
+                            ),
+                        )
+                    }
+                    null -> Unit
+                }
+            } catch (error: WssException) {
+                Timber.e(error)
+            } finally {
+                setState { copy(isFetchingWithdrawRequest = false) }
+            }
+        }
+
+    private fun updateAmount(amount: String) =
+        when (_state.value.currencyMode) {
+            CurrencyMode.SATS -> {
+                setState {
+                    copy(
+                        amountInSats = amount,
+                        amountInUsd = amount.parseSatsToUsd(state.value.currentExchangeRate),
+                    )
+                }
+            }
+
+            CurrencyMode.FIAT -> {
+                setState {
+                    copy(
+                        amountInSats = amount.parseUsdToSats(state.value.currentExchangeRate),
+                        amountInUsd = amount,
+                    )
+                }
+            }
+        }
+
+    private fun startPurchaseMonitor() {
+        _state.value.membershipQuoteId?.let {
+            purchaseMonitor.startMonitor(
+                scope = viewModelScope,
+                quoteId = it,
+            ) {
+                setState { copy(stage = LegendContributeState.Success) }
+            }
+        }
+    }
+
+    private fun stopPurchaseMonitor() {
+        purchaseMonitor.stopMonitor(viewModelScope)
+    }
 }

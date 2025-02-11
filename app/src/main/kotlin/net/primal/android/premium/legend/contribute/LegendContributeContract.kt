@@ -13,7 +13,17 @@ class LegendContributeContract {
         val currencyMode: CurrencyMode = CurrencyMode.SATS,
         val maximumUsdAmount: BigDecimal? = null,
         val currentExchangeRate: Double? = null,
-    )
+        val bitcoinAddress: String? = null,
+        val lightningInvoice: String? = null,
+        val isFetchingPaymentInstructions: Boolean = true,
+        val isFetchingWithdrawRequest: Boolean = false,
+        val qrCodeValue: String? = null,
+        val membershipQuoteId: String? = null,
+    ) {
+        fun arePaymentInstructionsAvailable() =
+            (this.bitcoinAddress != null || this.lightningInvoice != null) &&
+                this.membershipQuoteId != null
+    }
 
     sealed class UiEvent {
         data object GoBackToIntro : UiEvent()
@@ -22,6 +32,10 @@ class LegendContributeContract {
         data object GoBackToPaymentInstructions : UiEvent()
         data object ShowPaymentInstructions : UiEvent()
         data object ShowSuccess : UiEvent()
+        data object StartPurchaseMonitor : UiEvent()
+        data object StopPurchaseMonitor : UiEvent()
+        data object FetchPaymentInstructions : UiEvent()
+        data object PrimalWalletPayment : UiEvent()
         data class ShowAmountEditor(val paymentMethod: PaymentMethod) : UiEvent()
         data class AmountChanged(val amount: String) : UiEvent()
     }

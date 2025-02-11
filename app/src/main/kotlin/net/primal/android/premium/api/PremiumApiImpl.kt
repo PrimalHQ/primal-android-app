@@ -109,6 +109,8 @@ class PremiumApiImpl @Inject constructor(
     override suspend fun getPrimalLegendPaymentInstructions(
         userId: String,
         primalName: String,
+        onChain: Boolean,
+        amountUsd: String?,
     ): LegendPaymentInstructionsResponse {
         val result = primalWalletApiClient.query(
             message = PrimalCacheFilter(
@@ -122,6 +124,8 @@ class PremiumApiImpl @Inject constructor(
                                     primalProductId = "legend-premium",
                                     name = primalName,
                                     receiverUserId = userId,
+                                    onChain = onChain,
+                                    amountUsd = amountUsd,
                                 ),
                             ),
                         ),

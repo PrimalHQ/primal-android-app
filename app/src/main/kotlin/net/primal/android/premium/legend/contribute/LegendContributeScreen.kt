@@ -7,22 +7,35 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.Lifecycle
+import net.primal.android.R
+import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.premium.legend.contribute.LegendContributeContract.LegendContributeState
 import net.primal.android.premium.legend.contribute.LegendContributeContract.UiEvent
 import net.primal.android.premium.legend.contribute.LegendContributeContract.UiState
 import net.primal.android.premium.legend.contribute.amount.LegendContributeAmountStage
 import net.primal.android.premium.legend.contribute.intro.LegendContributeIntroStage
 import net.primal.android.premium.legend.contribute.payment.LegendContributePaymentInstructionsStage
-import net.primal.android.premium.legend.contribute.success.LegendContributePaymentSuccessStage
+import net.primal.android.premium.ui.PaymentSuccess
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.repository.isValidExchangeRate
 
 @Composable
 fun LegendContributeScreen(viewModel: LegendContributeViewModel, onClose: () -> Unit) {
     val state = viewModel.state.collectAsState()
+
+    DisposableLifecycleObserverEffect(viewModel) {
+        when (it) {
+            Lifecycle.Event.ON_START -> viewModel.setEvent(UiEvent.StartPurchaseMonitor)
+            Lifecycle.Event.ON_STOP -> viewModel.setEvent(UiEvent.StopPurchaseMonitor)
+            else -> Unit
+        }
+    }
 
     LegendContributeScreen(
         state = state.value,
@@ -31,6 +44,7 @@ fun LegendContributeScreen(viewModel: LegendContributeViewModel, onClose: () -> 
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LegendContributeScreen(
     state: UiState,
@@ -62,7 +76,10 @@ private fun LegendContributeScreen(
             LegendContributeState.PickAmount -> {
                 LegendContributeAmountStage(
                     modifier = Modifier.fillMaxSize(),
-                    onNext = { eventPublisher(UiEvent.ShowPaymentInstructions) },
+                    onNext = {
+                        eventPublisher(UiEvent.ShowPaymentInstructions)
+                        eventPublisher(UiEvent.FetchPaymentInstructions)
+                    },
                     onBack = { eventPublisher(UiEvent.GoBackToIntro) },
                     state = state,
                     onAmountClick = {
@@ -80,13 +97,18 @@ private fun LegendContributeScreen(
                     modifier = Modifier.fillMaxSize(),
                     state = state,
                     onBack = { eventPublisher(UiEvent.GoBackToPickAmount) },
-                    onNext = { eventPublisher(UiEvent.ShowSuccess) },
+                    onPaymentInstructionRetry = { eventPublisher(UiEvent.FetchPaymentInstructions) },
+                    onPrimalWalletPayment = { eventPublisher(UiEvent.PrimalWalletPayment) },
                 )
             }
             LegendContributeState.Success -> {
-                LegendContributePaymentSuccessStage(
+                PaymentSuccess(
                     modifier = Modifier.fillMaxSize(),
-                    onBack = onClose,
+                    title = stringResource(R.string.legend_contribution_success_stage_title),
+                    headlineText = stringResource(R.string.legend_contribution_success_stage_appreciation_title),
+                    supportText = stringResource(R.string.legend_contribution_success_stage_appreciation_subtitle),
+                    buttonText = stringResource(R.string.legend_contribution_success_stage_appreciation_done_button),
+                    onDoneClick = onClose,
                 )
             }
         }
