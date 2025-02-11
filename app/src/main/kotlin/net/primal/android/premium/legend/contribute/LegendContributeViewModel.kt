@@ -183,7 +183,7 @@ class LegendContributeViewModel @Inject constructor(
     private fun withdrawViaPrimalWallet() =
         viewModelScope.launch {
             try {
-                setState { copy(isFetchingWithdrawRequest = true) }
+                setState { copy(primalWalletPaymentInProgress = true) }
 
                 when (state.value.paymentMethod) {
                     PaymentMethod.OnChainBitcoin -> {
@@ -210,7 +210,7 @@ class LegendContributeViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.e(error)
             } finally {
-                setState { copy(isFetchingWithdrawRequest = false) }
+                setState { copy(primalWalletPaymentInProgress = false) }
             }
         }
 

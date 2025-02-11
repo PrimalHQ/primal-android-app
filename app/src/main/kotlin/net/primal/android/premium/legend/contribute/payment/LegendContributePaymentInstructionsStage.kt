@@ -54,11 +54,7 @@ fun LegendContributePaymentInstructionsStage(
         modifier = modifier,
         topBar = {
             PrimalTopAppBar(
-                title = if (state.paymentMethod == LegendContributeContract.PaymentMethod.OnChainBitcoin) {
-                    stringResource(id = R.string.legend_contribution_payment_instructions_on_chain_stage_title)
-                } else {
-                    stringResource(id = R.string.legend_contribution_payment_instructions_lightning_stage_title)
-                },
+                title = state.paymentMethod.resolveTitle(),
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onBack,
                 showDivider = true,
@@ -69,7 +65,7 @@ fun LegendContributePaymentInstructionsStage(
                 state = state,
                 enabled = state.arePaymentInstructionsAvailable(),
                 onPrimalWalletPayment = onPrimalWalletPayment,
-                isFetchingWithdrawRequest = state.isFetchingWithdrawRequest,
+                primalWalletPaymentInProgress = state.primalWalletPaymentInProgress,
             )
         },
     ) { paddingValues ->
@@ -103,32 +99,42 @@ fun LegendContributePaymentInstructionsStage(
                 coerceMinAmount = true,
             )
 
-            when (state.paymentMethod) {
-                LegendContributeContract.PaymentMethod.OnChainBitcoin -> {
-                    Text(
-                        modifier = Modifier.padding(horizontal = 48.dp),
-                        text = stringResource(R.string.premium_become_legend_payment_instruction_on_chain),
-                        textAlign = TextAlign.Center,
-                        style = AppTheme.typography.bodyMedium,
-                        fontSize = 17.sp,
-                        lineHeight = 23.sp,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                    )
-                }
-                LegendContributeContract.PaymentMethod.BitcoinLightning -> {
-                    Text(
-                        modifier = Modifier.padding(horizontal = 48.dp),
-                        text = stringResource(R.string.premium_become_legend_payment_instruction_lightning),
-                        textAlign = TextAlign.Center,
-                        style = AppTheme.typography.bodyMedium,
-                        fontSize = 17.sp,
-                        lineHeight = 23.sp,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                    )
-                }
-                null -> Unit
-            }
+            Text(
+                modifier = Modifier.padding(horizontal = 48.dp),
+                text = state.paymentMethod.resolveDescriptionText(),
+                textAlign = TextAlign.Center,
+                style = AppTheme.typography.bodyMedium,
+                fontSize = 17.sp,
+                lineHeight = 23.sp,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            )
         }
+    }
+}
+
+@Composable
+private fun LegendContributeContract.PaymentMethod?.resolveTitle(): String {
+    return when (this) {
+        LegendContributeContract.PaymentMethod.OnChainBitcoin ->
+            stringResource(id = R.string.legend_contribution_payment_instructions_on_chain_stage_title)
+
+        LegendContributeContract.PaymentMethod.BitcoinLightning ->
+            stringResource(id = R.string.legend_contribution_payment_instructions_lightning_stage_title)
+
+        null -> ""
+    }
+}
+
+@Composable
+private fun LegendContributeContract.PaymentMethod?.resolveDescriptionText(): String {
+    return when (this) {
+        LegendContributeContract.PaymentMethod.OnChainBitcoin ->
+            stringResource(R.string.premium_become_legend_payment_instruction_on_chain)
+
+        LegendContributeContract.PaymentMethod.BitcoinLightning ->
+            stringResource(R.string.premium_become_legend_payment_instruction_lightning)
+
+        null -> ""
     }
 }
 
@@ -137,7 +143,7 @@ private fun LegendContributePaymentStageBottomBar(
     state: UiState,
     enabled: Boolean,
     onPrimalWalletPayment: () -> Unit,
-    isFetchingWithdrawRequest: Boolean,
+    primalWalletPaymentInProgress: Boolean,
 ) {
     val context = LocalContext.current
 
@@ -167,7 +173,7 @@ private fun LegendContributePaymentStageBottomBar(
         PrimalLoadingButton(
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled,
-            loading = isFetchingWithdrawRequest,
+            loading = primalWalletPaymentInProgress,
             text = stringResource(id = R.string.legend_contribution_payment_instructions_pay_with_primal_wallet),
             onClick = onPrimalWalletPayment,
         )

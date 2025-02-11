@@ -16,7 +16,7 @@ class LegendContributeContract {
         val bitcoinAddress: String? = null,
         val lightningInvoice: String? = null,
         val isFetchingPaymentInstructions: Boolean = true,
-        val isFetchingWithdrawRequest: Boolean = false,
+        val primalWalletPaymentInProgress: Boolean = false,
         val qrCodeValue: String? = null,
         val membershipQuoteId: String? = null,
     ) {
