@@ -292,7 +292,7 @@ private fun NavController.navigateToPremiumExtendSubscription(primalName: String
 
 private fun NavController.navigateToPremiumHome() = navigate(route = "premium/home")
 private fun NavController.navigateToPremiumSupportPrimal() = navigate(route = "premium/supportPrimal")
-private fun NavController.navigateToLegendContributePrimal() = navigate(route = "legend/contributePrimal")
+private fun NavController.navigateToLegendContributePrimal() = navigate(route = "premium/legend/contribution")
 private fun NavController.navigateToPremiumMoreInfo(tabIndex: Int = 0) =
     navigate(route = "premium/info?$PREMIUM_MORE_INFO_TAB_INDEX=$tabIndex")
 
@@ -568,7 +568,7 @@ fun SharedTransitionScope.PrimalAppNavigation() {
 
         premiumSupportPrimal(route = "premium/supportPrimal", navController = navController)
 
-        legendContributePrimal(route = "legend/contributePrimal", navController = navController)
+        premiumLegendContribution(route = "premium/legend/contribution", navController = navController)
 
         premiumMoreInfo(
             route = "premium/info?$PREMIUM_MORE_INFO_TAB_INDEX={$PREMIUM_MORE_INFO_TAB_INDEX}",
@@ -1190,7 +1190,7 @@ private fun NavGraphBuilder.premiumSupportPrimal(route: String, navController: N
         )
     }
 
-private fun NavGraphBuilder.legendContributePrimal(route: String, navController: NavController) =
+private fun NavGraphBuilder.premiumLegendContribution(route: String, navController: NavController) =
     composable(
         route = route,
         enterTransition = { primalSlideInHorizontallyFromEnd },
