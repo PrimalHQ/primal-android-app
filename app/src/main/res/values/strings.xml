@@ -347,19 +347,26 @@
     <string name="premium_legend_profile_appear_in_leaderboard">Appear in leaderboard</string>
     <string name="premium_legend_profile_apply_button">Apply</string>
 
-    <string name="premium_legend_card_legend_since">Legend since</string>
-    <string name="premium_legend_card_button_see_other">See other Legends</string>
-    <string name="premium_legend_card_button_become_a_legend">Become a Legend</string>
-    <string name="premium_legend_card_dropdown_close">Close</string>
-    <string name="premium_legend_card_dropdown_legend_settings">Legend settings</string>
+    <string name="premium_card_legend_since">Legend since</string>
+    <string name="premium_card_og_since">Primal OG since</string>
+    <string name="premium_card_button_see_other_legends">See other Legends</string>
+    <string name="premium_card_button_see_other_ogs">See other Primal OGs</string>
+    <string name="premium_card_button_become_a_legend">Become a Legend</string>
+    <string name="premium_card_dropdown_close">Close</string>
+    <string name="premium_card_dropdown_legend_settings">Legend settings</string>
 
+    <string name="premium_ogs_leaderboard_title">Premium Users</string>
+    <string name="premium_ogs_leaderboard_latest_tab">Latest</string>
+    <string name="premium_ogs_leaderboard_get_primal_premium">Get Primal Premium</string>
+    <string name="premium_ogs_leaderboard_since">Since</string>
     <string name="premium_legend_leaderboard_title">Primal Legends</string>
     <string name="premium_legend_leaderboard_latest_tab">Latest</string>
     <string name="premium_legend_leaderboard_contribution_tab">Contribution</string>
     <string name="premium_legend_leaderboard_about_legends">About Legends</string>
     <string name="premium_legend_leaderboard_since">Since</string>
     <string name="premium_legend_leaderboard_sats">sats</string>
-    <string name="premium_legend_leaderboard_no_content">Unable to load leaderboard.\nPlease try again.</string>
+    <string name="premium_leaderboard_no_content">There is no content on this leaderboard.</string>
+    <string name="premium_leaderboard_error_loading">Unable to load leaderboard.\nPlease try again.</string>
 
     <string name="feed_reposted_suffix">reposted</string>
     <string name="feed_see_more">See more…</string>

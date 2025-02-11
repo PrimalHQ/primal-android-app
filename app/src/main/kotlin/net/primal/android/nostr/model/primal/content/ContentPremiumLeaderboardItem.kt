@@ -4,7 +4,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ContentPrimalLeaderboardItem(
+data class ContentPremiumLeaderboardItem(
+    val index: Double,
     val pubkey: String,
-    @SerialName("donated_btc") val donatedBtc: Double,
+    @SerialName("premium_since") val premiumSince: Long? = null,
 )

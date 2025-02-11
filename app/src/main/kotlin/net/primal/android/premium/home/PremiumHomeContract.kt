@@ -8,6 +8,7 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 interface PremiumHomeContract {
 
     data class UiState(
+        val profileId: String? = null,
         val avatarCdnImage: CdnImage? = null,
         val profileNostrAddress: String? = null,
         val profileLightningAddress: String? = null,

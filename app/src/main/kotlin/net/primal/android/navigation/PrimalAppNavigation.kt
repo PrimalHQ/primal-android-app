@@ -87,20 +87,22 @@ import net.primal.android.notifications.list.NotificationsViewModel
 import net.primal.android.premium.buying.PremiumBuyingContract
 import net.primal.android.premium.buying.PremiumBuyingScreen
 import net.primal.android.premium.buying.PremiumBuyingViewModel
+import net.primal.android.premium.card.PremiumCardScreen
+import net.primal.android.premium.card.PremiumCardViewModel
 import net.primal.android.premium.home.PremiumHomeScreen
 import net.primal.android.premium.home.PremiumHomeViewModel
 import net.primal.android.premium.info.PREMIUM_MORE_INFO_FAQ_TAB_INDEX
 import net.primal.android.premium.info.PremiumMoreInfoScreen
+import net.primal.android.premium.leaderboard.legend.LegendLeaderboardScreen
+import net.primal.android.premium.leaderboard.legend.LegendLeaderboardViewModel
+import net.primal.android.premium.leaderboard.ogs.OGLeaderboardScreen
+import net.primal.android.premium.leaderboard.ogs.OGLeaderboardViewModel
 import net.primal.android.premium.legend.become.PremiumBecomeLegendScreen
 import net.primal.android.premium.legend.become.PremiumBecomeLegendViewModel
-import net.primal.android.premium.legend.card.LegendCardScreen
-import net.primal.android.premium.legend.card.LegendCardViewModel
 import net.primal.android.premium.legend.contribute.LegendContributeScreen
 import net.primal.android.premium.legend.contribute.LegendContributeViewModel
 import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationScreen
 import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationViewModel
-import net.primal.android.premium.legend.leaderboard.LegendLeaderboardScreen
-import net.primal.android.premium.legend.leaderboard.LegendLeaderboardViewModel
 import net.primal.android.premium.manage.PremiumManageContract
 import net.primal.android.premium.manage.PremiumManageScreen
 import net.primal.android.premium.manage.PremiumManageViewModel
@@ -303,9 +305,9 @@ private fun NavController.navigateToPremiumBuyPrimalLegend(fromOrigin: String? =
 }
 
 private fun NavController.navigateToPremiumLegendaryProfile() = navigate(route = "premium/legend/profile")
-private fun NavController.navigateToPremiumLegendCard(profileId: String) =
-    navigate(route = "premium/legend/card/$profileId")
+private fun NavController.navigateToPremiumCard(profileId: String) = navigate(route = "premium/card/$profileId")
 private fun NavController.navigateToPremiumLegendLeaderboard() = navigate(route = "premium/legend/leaderboard")
+private fun NavController.navigateToPremiumOGsLeaderboard() = navigate(route = "premium/ogs/leaderboard")
 
 private fun NavController.navigateToPremiumManage() = navigate(route = "premium/manage")
 private fun NavController.navigateToPremiumMediaManagement() = navigate(route = "premium/manage/media")
@@ -592,8 +594,8 @@ fun SharedTransitionScope.PrimalAppNavigation() {
 
         premiumLegendaryProfile(route = "premium/legend/profile", navController = navController)
 
-        premiumLegendCard(
-            route = "premium/legend/card/{$PROFILE_ID}",
+        premiumCard(
+            route = "premium/card/{$PROFILE_ID}",
             arguments = listOf(
                 navArgument(PROFILE_ID) {
                     type = NavType.StringType
@@ -603,6 +605,7 @@ fun SharedTransitionScope.PrimalAppNavigation() {
         )
 
         premiumLegendLeaderboard(route = "premium/legend/leaderboard", navController = navController)
+        premiumOGsLeaderboard(route = "premium/ogs/leaderboard", navController = navController)
 
         premiumManage(route = "premium/manage", navController = navController)
 
@@ -1160,6 +1163,7 @@ private fun NavGraphBuilder.premiumHome(route: String, navController: NavControl
             onClose = { navController.navigateUp() },
             onRenewSubscription = { navController.navigateToPremiumExtendSubscription(primalName = it) },
             onManagePremium = { navController.navigateToPremiumManage() },
+            onLegendCardClick = { navController.navigateToPremiumCard(profileId = it) },
             onSupportPrimal = { navController.navigateToPremiumSupportPrimal() },
             onContributePrimal = { navController.navigateToLegendContributePrimal() },
         )
@@ -1273,7 +1277,7 @@ private fun NavGraphBuilder.premiumLegendaryProfile(route: String, navController
         )
     }
 
-private fun NavGraphBuilder.premiumLegendCard(
+private fun NavGraphBuilder.premiumCard(
     route: String,
     arguments: List<NamedNavArgument>,
     navController: NavController,
@@ -1282,15 +1286,16 @@ private fun NavGraphBuilder.premiumLegendCard(
     arguments = arguments,
     dialogProperties = DialogProperties(usePlatformDefaultWidth = false),
 ) {
-    val viewModel = hiltViewModel<LegendCardViewModel>()
+    val viewModel = hiltViewModel<PremiumCardViewModel>()
 
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
 
-    LegendCardScreen(
+    PremiumCardScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onSeeOtherLegendsClick = { navController.navigateToPremiumLegendLeaderboard() },
+        onSeeOtherPrimalOGsClick = { navController.navigateToPremiumOGsLeaderboard() },
         onBecomeLegendClick = {
             navController.navigateToPremiumBuyPrimalLegend(fromOrigin = FROM_ORIGIN_PREMIUM_BADGE)
         },
@@ -1315,7 +1320,28 @@ private fun NavGraphBuilder.premiumLegendLeaderboard(route: String, navControlle
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
             onProfileClick = { navController.navigateToProfile(profileId = it) },
-            onAboutLegendsClick = {},
+            onAboutLegendsClick = { navController.navigateToPremiumBuyPrimalLegend() },
+        )
+    }
+
+private fun NavGraphBuilder.premiumOGsLeaderboard(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        val viewModel = hiltViewModel<OGLeaderboardViewModel>()
+
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+
+        OGLeaderboardScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+            onProfileClick = { navController.navigateToProfile(profileId = it) },
+            onGetPrimalPremiumClick = { navController.navigateToPremiumBuying() },
         )
     }
 
@@ -1753,10 +1779,8 @@ private fun NavGraphBuilder.profile(
         onGoToWallet = { navController.navigateToWallet() },
         onSearchClick = { navController.navigateToAdvancedSearch(initialPostedBy = listOf(it)) },
         onPremiumBadgeClick = { premiumTier, profileId ->
-            if (premiumTier.isPrimalLegendTier()) {
-                navController.navigateToPremiumLegendCard(profileId = profileId)
-            } else if (premiumTier.isPremiumTier()) {
-                navController.navigateToPremiumBuying(fromOrigin = FROM_ORIGIN_PREMIUM_BADGE)
+            if (premiumTier.isPrimalLegendTier() || premiumTier.isPremiumTier()) {
+                navController.navigateToPremiumCard(profileId = profileId)
             }
         },
     )

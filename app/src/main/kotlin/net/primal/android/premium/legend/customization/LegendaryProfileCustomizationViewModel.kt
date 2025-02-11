@@ -16,7 +16,6 @@ import net.primal.android.premium.legend.customization.LegendaryProfileCustomiza
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.repository.PremiumRepository
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import timber.log.Timber
@@ -24,7 +23,6 @@ import timber.log.Timber
 @HiltViewModel
 class LegendaryProfileCustomizationViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
-    private val profileRepository: ProfileRepository,
     private val premiumRepository: PremiumRepository,
     private val userRepository: UserRepository,
 ) : ViewModel() {
@@ -37,10 +35,9 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
+        requestUpdateActiveAccount()
         observeActiveAccount()
-        observeProfile()
         observeEvents()
-        requestProfileUpdate()
     }
 
     private fun observeEvents() {
@@ -55,7 +52,6 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
 
     private fun applyCustomization(event: UiEvent.ApplyCustomization) {
         viewModelScope.launch {
-            setState { copy(applyingChanges = true) }
             event.optimisticallyUpdateCustomization()
 
             try {
@@ -72,8 +68,7 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.e(error)
             } finally {
-                runCatching { userRepository.fetchAndUpdateUserAccount(userId = activeAccountStore.activeUserId()) }
-                setState { copy(applyingChanges = false) }
+                requestUpdateActiveAccount()
             }
         }
     }
@@ -85,29 +80,20 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
                     copy(
                         avatarCdnImage = it.avatarCdnImage,
                         membership = it.premiumMembership,
+                        avatarLegendaryCustomization = it.primalLegendProfile?.asLegendaryCustomization()
+                            ?: LegendaryCustomization(),
                     )
                 }
             }
         }
 
-    private fun observeProfile() {
+    private fun requestUpdateActiveAccount() =
         viewModelScope.launch {
-            profileRepository.observeProfile(profileId = activeAccountStore.activeUserId()).collect {
-                setState {
-                    copy(
-                        avatarLegendaryCustomization = it.metadata?.primalPremiumInfo
-                            ?.legendProfile?.asLegendaryCustomization() ?: LegendaryCustomization(),
-                    )
-                }
+            runCatching {
+                userRepository.fetchAndUpdateUserAccount(userId = activeAccountStore.activeUserId())
+                premiumRepository.fetchMembershipStatus(userId = activeAccountStore.activeUserId())
             }
         }
-    }
-
-    private fun requestProfileUpdate() {
-        viewModelScope.launch {
-            profileRepository.requestProfileUpdate(profileId = activeAccountStore.activeUserId())
-        }
-    }
 
     private fun UiEvent.ApplyCustomization.optimisticallyUpdateCustomization() {
         val data = this

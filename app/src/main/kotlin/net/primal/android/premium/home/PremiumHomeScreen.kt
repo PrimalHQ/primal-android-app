@@ -56,6 +56,7 @@ fun PremiumHomeScreen(
     onRenewSubscription: (primalName: String) -> Unit,
     onManagePremium: () -> Unit,
     onSupportPrimal: () -> Unit,
+    onLegendCardClick: (String) -> Unit,
     onContributePrimal: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -73,6 +74,7 @@ fun PremiumHomeScreen(
         onRenewSubscription = onRenewSubscription,
         onManagePremium = onManagePremium,
         onSupportPrimal = onSupportPrimal,
+        onLegendCardClick = onLegendCardClick,
         onContributePrimal = onContributePrimal,
         eventPublisher = viewModel::setEvent,
     )
@@ -86,6 +88,7 @@ private fun PremiumHomeScreen(
     onRenewSubscription: (primalName: String) -> Unit,
     onManagePremium: () -> Unit,
     onSupportPrimal: () -> Unit,
+    onLegendCardClick: (String) -> Unit,
     onContributePrimal: () -> Unit,
     eventPublisher: (PremiumHomeContract.UiEvent) -> Unit,
 ) {
@@ -158,6 +161,9 @@ private fun PremiumHomeScreen(
 
             if (state.membership != null) {
                 PremiumBadge(
+                    modifier = Modifier.clickable(enabled = state.membership.isPrimalLegendTier()) {
+                        state.profileId?.let { onLegendCardClick(it) }
+                    },
                     firstCohort = state.membership.cohort1,
                     secondCohort = state.membership.cohort2,
                     membershipExpired = state.membership.isExpired(),
