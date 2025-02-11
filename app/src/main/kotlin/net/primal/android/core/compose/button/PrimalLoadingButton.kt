@@ -59,7 +59,9 @@ fun PrimalLoadingButton(
         disabledContainerColor = disabledContainerColor,
         content = {
             if (loading) {
-                LoadingContent()
+                LoadingContent(
+                    contentColor = contentColor,
+                )
             } else {
                 if (text != null) {
                     IconText(
@@ -79,11 +81,11 @@ fun PrimalLoadingButton(
 }
 
 @Composable
-private fun LoadingContent() {
+private fun LoadingContent(contentColor: Color) {
     CircularProgressIndicator(
         modifier = Modifier.size(12.dp),
         strokeWidth = 2.dp,
-        color = AppTheme.colorScheme.onSurface,
+        color = contentColor,
     )
 }
 
@@ -118,11 +120,30 @@ class PrimalButtonStatePreviewProvider : PreviewParameterProvider<PrimalLoadingB
 
 @Preview
 @Composable
-fun PrimalLoadingButtonPreview(
+fun PrimalLoadingButtonDarkThemePreview(
     @PreviewParameter(PrimalButtonStatePreviewProvider::class)
     state: PrimalLoadingButtonPreviewState,
 ) {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+        PrimalLoadingButton(
+            modifier = Modifier.height(48.dp),
+            onClick = { },
+            enabled = state.enabled,
+            loading = state.loading,
+            text = state.text,
+            icon = state.icon,
+            leadingIcon = state.leadingIcon,
+        )
+    }
+}
+
+@Preview
+@Composable
+fun PrimalLoadingButtonLightThemePreview(
+    @PreviewParameter(PrimalButtonStatePreviewProvider::class)
+    state: PrimalLoadingButtonPreviewState,
+) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
         PrimalLoadingButton(
             modifier = Modifier.height(48.dp),
             onClick = { },
