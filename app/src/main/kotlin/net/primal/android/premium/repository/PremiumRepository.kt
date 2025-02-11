@@ -71,8 +71,7 @@ class PremiumRepository @Inject constructor(
                     receiverUserId = userId,
                     primalProductId = null,
                     playSubscription = purchase.playSubscriptionJson,
-                    onChain = true,
-                    amountUsd = null,
+                    onChain = null,
                 ),
             )
         }
