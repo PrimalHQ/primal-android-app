@@ -14,11 +14,6 @@ class AuthRepository @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val userRepository: UserRepository,
 ) {
-    fun generateUserIdFromNsec(nostrKey: String): String {
-        val (_, pubkey) = nostrKey.extractKeyPairFromPrivateKeyOrThrow()
-        return pubkey.bech32ToHexOrThrow()
-    }
-
     suspend fun login(nostrKey: String): String {
         val userId = credentialsStore.save(nostrKey)
         activeAccountStore.setActiveUserId(userId)
