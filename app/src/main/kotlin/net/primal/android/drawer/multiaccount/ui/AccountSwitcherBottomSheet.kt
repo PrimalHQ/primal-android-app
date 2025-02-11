@@ -29,13 +29,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Check
 import net.primal.android.core.utils.formatNip05Identifier
+import net.primal.android.core.utils.hideAndRun
 import net.primal.android.drawer.multiaccount.model.UserAccountUi
 import net.primal.android.theme.AppTheme
 
@@ -67,17 +67,18 @@ fun AccountSwitcherBottomSheet(
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
         ) {
-            BottomSheetTopAppBar(onEditClick = onEditClick)
+            BottomSheetTopAppBar(
+                onEditClick = {
+                    sheetState.hideAndRun(coroutineScope = uiScope, onDismissRequest = onDismissRequest) {
+                        onEditClick()
+                    }
+                },
+            )
             AccountList(
                 activeAccount = activeAccount,
                 accounts = accounts,
                 onAccountClick = { userId ->
-                    uiScope.launch {
-                        sheetState.hide()
-                    }.invokeOnCompletion {
-                        if (!sheetState.isVisible) {
-                            onDismissRequest()
-                        }
+                    sheetState.hideAndRun(coroutineScope = uiScope, onDismissRequest = onDismissRequest) {
                         onAccountClick(userId)
                     }
                 },
@@ -85,11 +86,19 @@ fun AccountSwitcherBottomSheet(
             Column {
                 PlainTextButton(
                     text = stringResource(id = R.string.account_switcher_create_new_account),
-                    onClick = onCreateNewAccountClick,
+                    onClick = {
+                        sheetState.hideAndRun(coroutineScope = uiScope, onDismissRequest = onDismissRequest) {
+                            onCreateNewAccountClick()
+                        }
+                    },
                 )
                 PlainTextButton(
                     text = stringResource(id = R.string.account_switcher_add_existing_account),
-                    onClick = onAddExistingAccountClick,
+                    onClick = {
+                        sheetState.hideAndRun(coroutineScope = uiScope, onDismissRequest = onDismissRequest) {
+                            onAddExistingAccountClick()
+                        }
+                    },
                 )
             }
         }
