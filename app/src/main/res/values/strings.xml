@@ -104,6 +104,7 @@
     <string name="drawer_following_suffix">Following</string>
 
     <string name="account_switcher_sheet_title">Accounts</string>
+    <string name="account_switcher_done">Done</string>
     <string name="account_switcher_edit">Edit</string>
     <string name="account_switcher_create_new_account">Create a new account</string>
     <string name="account_switcher_add_existing_account">Add an existing account</string>

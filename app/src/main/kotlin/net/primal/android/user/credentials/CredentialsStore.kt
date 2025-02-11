@@ -42,6 +42,11 @@ class CredentialsStore @Inject constructor(
             it.filterNot { cred -> cred.nsec == nsec }.toSet()
         }
 
+    suspend fun removeCredentialByNpub(npub: String) =
+        persistence.updateData {
+            it.filterNot { cred -> cred.npub == npub }.toSet()
+        }
+
     fun findOrThrow(npub: String): Credential =
         credentials.value.find { it.npub == npub }
             ?: throw IllegalArgumentException("Credential not found for $npub.")
