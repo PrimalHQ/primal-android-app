@@ -4,6 +4,9 @@ import org.spongycastle.util.encoders.DecoderException
 import org.spongycastle.util.encoders.Hex
 import timber.log.Timber
 
+fun String.assureValidNsec() = if (startsWith("nsec")) this else this.hexToNsecHrp()
+
+
 fun String.hexToNoteHrp() =
     Bech32.encodeBytes(
         hrp = "note",
@@ -48,7 +51,7 @@ fun String.bechToBytesOrThrow(hrp: String? = null): ByteArray {
 
 fun String.extractKeyPairFromPrivateKeyOrThrow(): Pair<String, String> {
     return try {
-        val nsec = if (startsWith("nsec")) this else this.hexToNsecHrp()
+        val nsec = this.assureValidNsec()
         val decoded = Bech32.decodeBytes(nsec)
         val pubkey = CryptoUtils.publicKeyCreate(decoded.second)
         nsec to pubkey.toNpub()

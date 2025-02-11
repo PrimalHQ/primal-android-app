@@ -31,6 +31,7 @@ class LoginHandlerTest {
         userRepository: UserRepository = mockk(relaxed = true),
         mutedUserRepository: MutedUserRepository = mockk(relaxed = true),
         bookmarksRepository: BookmarksRepository = mockk(relaxed = true),
+        credentialsStore: CredentialsStore = mockk(relaxed = true),
     ): LoginHandler =
         LoginHandler(
             settingsRepository = settingsRepository,
@@ -38,6 +39,8 @@ class LoginHandlerTest {
             userRepository = userRepository,
             mutedUserRepository = mutedUserRepository,
             bookmarksRepository = bookmarksRepository,
+            dispatchers = coroutinesTestRule.dispatcherProvider,
+            credentialsStore = credentialsStore,
         )
 
     @Test
@@ -57,13 +60,13 @@ class LoginHandlerTest {
     fun login_callsFetchAndUpdateUserAccount() =
         runTest {
             val expectedUserId = "b10a23"
-            val authRepository = mockk<AuthRepository>(relaxed = true) {
-                coEvery { login(any()) } returns expectedUserId
+            val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
+                coEvery { save(any()) } returns expectedUserId
             }
             val userRepository = mockk<UserRepository>(relaxed = true)
             val loginHandler = createLoginHandler(
-                authRepository = authRepository,
                 userRepository = userRepository,
+                credentialsStore = credentialsStore,
             )
             loginHandler.login(nostrKey = "random")
 
@@ -76,13 +79,13 @@ class LoginHandlerTest {
     fun login_callsFetchAndPersistAppSettings() =
         runTest {
             val expectedUserId = "b10a23"
-            val authRepository = mockk<AuthRepository>(relaxed = true) {
-                coEvery { login(any()) } returns expectedUserId
+            val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
+                coEvery { save(any()) } returns expectedUserId
             }
             val settingsRepository = mockk<SettingsRepository>(relaxed = true)
             val loginHandler = createLoginHandler(
-                authRepository = authRepository,
                 settingsRepository = settingsRepository,
+                credentialsStore = credentialsStore,
             )
             loginHandler.login(nostrKey = "random")
 
@@ -95,13 +98,13 @@ class LoginHandlerTest {
     fun login_callsFetchAndPersistMuteList() =
         runTest {
             val expectedUserId = "b10a23"
-            val authRepository = mockk<AuthRepository>(relaxed = true) {
-                coEvery { login(any()) } returns expectedUserId
+            val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
+                coEvery { save(any()) } returns expectedUserId
             }
             val mutedUserRepository = mockk<MutedUserRepository>(relaxed = true)
             val loginHandler = createLoginHandler(
-                authRepository = authRepository,
                 mutedUserRepository = mutedUserRepository,
+                credentialsStore = credentialsStore,
             )
             loginHandler.login(nostrKey = "random")
 
@@ -140,7 +143,8 @@ class LoginHandlerTest {
 
             try {
                 loginHandler.login(nostrKey = nsec)
-            } catch (_: WssException) { }
+            } catch (_: WssException) {
+            }
 
             credentialsPersistence.latestData shouldBe emptyList()
             activeAccountPersistence.latestData shouldBe ""

@@ -15,7 +15,7 @@ import net.primal.android.user.domain.Credential
 
 @Singleton
 class CredentialsStore @Inject constructor(
-    private val persistence: DataStore<List<Credential>>,
+    private val persistence: DataStore<Set<Credential>>,
 ) {
 
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -27,21 +27,20 @@ class CredentialsStore @Inject constructor(
             initialValue = runBlocking { persistence.data.first() },
         )
 
-    private suspend fun addCredential(credential: Credential) {
-        persistence.updateData {
-            it.toMutableList().apply { add(credential) }
-        }
-    }
+    private suspend fun addCredential(credential: Credential) = persistence.updateData { it + credential }
 
-    suspend fun clearCredentials() {
-        persistence.updateData { emptyList() }
-    }
+    suspend fun clearCredentials() = persistence.updateData { emptySet() }
 
     suspend fun save(nostrKey: String): String {
         val (nsec, pubkey) = nostrKey.extractKeyPairFromPrivateKeyOrThrow()
         addCredential(Credential(nsec = nsec, npub = pubkey))
         return pubkey.bech32ToHexOrThrow()
     }
+
+    suspend fun removeCredentialByNsec(nsec: String) =
+        persistence.updateData {
+            it.filterNot { cred -> cred.nsec == nsec }.toSet()
+        }
 
     fun findOrThrow(npub: String): Credential =
         credentials.value.find { it.npub == npub }

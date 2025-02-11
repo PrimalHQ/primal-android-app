@@ -2,6 +2,8 @@ package net.primal.android.auth.repository
 
 import javax.inject.Inject
 import javax.inject.Singleton
+import net.primal.android.crypto.bech32ToHexOrThrow
+import net.primal.android.crypto.extractKeyPairFromPrivateKeyOrThrow
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.repository.UserRepository

@@ -13,11 +13,11 @@ import net.primal.android.user.domain.Credential
 class CredentialsSerialization(
     private val json: Json = NostrJson,
     private val encryption: Encryption,
-) : Serializer<List<Credential>> {
+) : Serializer<Set<Credential>> {
 
-    override val defaultValue: List<Credential> = emptyList()
+    override val defaultValue: Set<Credential> = emptySet()
 
-    override suspend fun readFrom(input: InputStream): List<Credential> = input.readDecrypted(json, encryption)
+    override suspend fun readFrom(input: InputStream): Set<Credential> = input.readDecrypted(json, encryption)
 
-    override suspend fun writeTo(t: List<Credential>, output: OutputStream) = output.writeEncrypted(t, json, encryption)
+    override suspend fun writeTo(t: Set<Credential>, output: OutputStream) = output.writeEncrypted(t, json, encryption)
 }
