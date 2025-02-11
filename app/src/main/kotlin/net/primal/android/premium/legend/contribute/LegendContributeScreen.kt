@@ -11,9 +11,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
-import net.primal.android.R
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.premium.legend.contribute.LegendContributeContract.LegendContributeState
 import net.primal.android.premium.legend.contribute.LegendContributeContract.UiEvent
@@ -21,7 +19,7 @@ import net.primal.android.premium.legend.contribute.LegendContributeContract.UiS
 import net.primal.android.premium.legend.contribute.amount.LegendContributeAmountStage
 import net.primal.android.premium.legend.contribute.intro.LegendContributeIntroStage
 import net.primal.android.premium.legend.contribute.payment.LegendContributePaymentInstructionsStage
-import net.primal.android.premium.ui.PaymentSuccess
+import net.primal.android.premium.legend.contribute.success.LegendContributePaymentSuccessStage
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.repository.isValidExchangeRate
 
@@ -73,6 +71,7 @@ private fun LegendContributeScreen(
                     onNext = { eventPublisher(UiEvent.ShowAmountEditor(it)) },
                 )
             }
+
             LegendContributeState.PickAmount -> {
                 LegendContributeAmountStage(
                     modifier = Modifier.fillMaxSize(),
@@ -92,6 +91,7 @@ private fun LegendContributeScreen(
                     },
                 )
             }
+
             LegendContributeState.Payment -> {
                 LegendContributePaymentInstructionsStage(
                     modifier = Modifier.fillMaxSize(),
@@ -101,14 +101,11 @@ private fun LegendContributeScreen(
                     onPrimalWalletPayment = { eventPublisher(UiEvent.PrimalWalletPayment) },
                 )
             }
+
             LegendContributeState.Success -> {
-                PaymentSuccess(
+                LegendContributePaymentSuccessStage(
                     modifier = Modifier.fillMaxSize(),
-                    title = stringResource(R.string.legend_contribution_success_stage_title),
-                    headlineText = stringResource(R.string.legend_contribution_success_stage_appreciation_title),
-                    supportText = stringResource(R.string.legend_contribution_success_stage_appreciation_subtitle),
-                    buttonText = stringResource(R.string.legend_contribution_success_stage_appreciation_done_button),
-                    onDoneClick = onClose,
+                    onBack = onClose,
                 )
             }
         }
