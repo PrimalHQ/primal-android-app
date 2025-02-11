@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.math.BigDecimal
 import javax.inject.Inject
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,7 +16,7 @@ import net.primal.android.premium.legend.contribute.LegendContributeContract.Leg
 import net.primal.android.premium.legend.contribute.LegendContributeContract.PaymentMethod
 import net.primal.android.premium.legend.contribute.LegendContributeContract.UiEvent
 import net.primal.android.premium.legend.contribute.LegendContributeContract.UiState
-import net.primal.android.premium.legend.subscription.PurchaseMonitorManager
+import net.primal.android.premium.legend.subscription.PurchaseMonitor
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.api.model.WithdrawRequestBody
@@ -40,7 +39,7 @@ class LegendContributeViewModel @Inject constructor(
     private val exchangeRateHandler: ExchangeRateHandler,
     private val premiumRepository: PremiumRepository,
     private val walletRepository: WalletRepository,
-    private val purchaseMonitorManager: PurchaseMonitorManager,
+    private val purchaseMonitor: PurchaseMonitor,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -67,8 +66,9 @@ class LegendContributeViewModel @Inject constructor(
 
                     UiEvent.GoBackToPickAmount -> setState {
                         copy(
+                            isFetchingPaymentInstructions = true,
                             stage = LegendContributeState.PickAmount,
-                            lightningAddress = null,
+                            lightningInvoice = null,
                             bitcoinAddress = null,
                             membershipQuoteId = null,
                         )
@@ -145,27 +145,31 @@ class LegendContributeViewModel @Inject constructor(
 
                 val response = premiumRepository.fetchPrimalLegendPaymentInstructions(
                     userId = activeAccountStore.activeUserId(),
-                    primalName = "qa",
+                    primalName = "",
                     onChain = state.value.paymentMethod == PaymentMethod.OnChainBitcoin,
                     amountUsd = state.value.amountInUsd,
                 )
 
-                if (state.value.paymentMethod == PaymentMethod.OnChainBitcoin) {
-                    setState {
-                        copy(
-                            bitcoinAddress = response.qrCode.parseBitcoinPaymentInstructions()?.address,
-                            membershipQuoteId = response.membershipQuoteId,
-                            qrCodeValue = response.qrCode,
-                        )
+                when (state.value.paymentMethod) {
+                    PaymentMethod.OnChainBitcoin -> {
+                        setState {
+                            copy(
+                                bitcoinAddress = response.qrCode.parseBitcoinPaymentInstructions()?.address,
+                                membershipQuoteId = response.membershipQuoteId,
+                                qrCodeValue = response.qrCode,
+                            )
+                        }
                     }
-                } else {
-                    setState {
-                        copy(
-                            lightningAddress = response.qrCode.parseLightningPaymentInstructions(),
-                            membershipQuoteId = response.membershipQuoteId,
-                            qrCodeValue = response.qrCode,
-                        )
+                    PaymentMethod.BitcoinLightning -> {
+                        setState {
+                            copy(
+                                lightningInvoice = response.qrCode.parseLightningPaymentInstructions(),
+                                membershipQuoteId = response.membershipQuoteId,
+                                qrCodeValue = response.qrCode,
+                            )
+                        }
                     }
+                    null -> Unit
                 }
 
                 startPurchaseMonitor()
@@ -181,25 +185,28 @@ class LegendContributeViewModel @Inject constructor(
             try {
                 setState { copy(isFetchingWithdrawRequest = true) }
 
-                if (state.value.paymentMethod == PaymentMethod.OnChainBitcoin) {
-                    walletRepository.withdraw(
-                        userId = activeAccountStore.activeUserId(),
-                        body = WithdrawRequestBody(
-                            subWallet = SubWallet.Open,
-                            targetBtcAddress = state.value.qrCodeValue?.parseBitcoinPaymentInstructions()?.address,
-                            amountBtc = state.value.qrCodeValue?.parseBitcoinPaymentInstructions()?.amount
-                        ),
-                    )
-                } else {
-                    walletRepository.withdraw(
-                        userId = activeAccountStore.activeUserId(),
-                        body = WithdrawRequestBody(
-                            subWallet = SubWallet.Open,
-                            lnInvoice = state.value.lightningAddress
-                        ),
-                    )
+                when (state.value.paymentMethod) {
+                    PaymentMethod.OnChainBitcoin -> {
+                        walletRepository.withdraw(
+                            userId = activeAccountStore.activeUserId(),
+                            body = WithdrawRequestBody(
+                                subWallet = SubWallet.Open,
+                                targetBtcAddress = state.value.qrCodeValue?.parseBitcoinPaymentInstructions()?.address,
+                                amountBtc = state.value.qrCodeValue?.parseBitcoinPaymentInstructions()?.amount,
+                            ),
+                        )
+                    }
+                    PaymentMethod.BitcoinLightning -> {
+                        walletRepository.withdraw(
+                            userId = activeAccountStore.activeUserId(),
+                            body = WithdrawRequestBody(
+                                subWallet = SubWallet.Open,
+                                lnInvoice = state.value.lightningInvoice,
+                            ),
+                        )
+                    }
+                    null -> Unit
                 }
-
             } catch (error: WssException) {
                 Timber.e(error)
             } finally {
@@ -229,15 +236,17 @@ class LegendContributeViewModel @Inject constructor(
         }
 
     private fun startPurchaseMonitor() {
-        purchaseMonitorManager.startMonitor(
-            scope = viewModelScope,
-            quoteId = _state.value.membershipQuoteId,
-        ) {
-            setState { copy(stage = LegendContributeState.Success) }
+        _state.value.membershipQuoteId?.let {
+            purchaseMonitor.startMonitor(
+                scope = viewModelScope,
+                quoteId = it,
+            ) {
+                setState { copy(stage = LegendContributeState.Success) }
+            }
         }
     }
 
     private fun stopPurchaseMonitor() {
-        purchaseMonitorManager.stopMonitor(viewModelScope)
+        purchaseMonitor.stopMonitor(viewModelScope)
     }
 }

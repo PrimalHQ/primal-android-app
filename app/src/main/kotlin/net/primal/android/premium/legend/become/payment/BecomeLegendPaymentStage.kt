@@ -86,7 +86,7 @@ fun BecomeLegendPaymentStage(
 
             Text(
                 modifier = Modifier.padding(horizontal = 48.dp),
-                text = stringResource(R.string.premium_become_legend_payment_instruction),
+                text = stringResource(R.string.premium_become_legend_payment_instruction_on_chain),
                 textAlign = TextAlign.Center,
                 style = AppTheme.typography.bodyMedium,
                 fontSize = 17.sp,

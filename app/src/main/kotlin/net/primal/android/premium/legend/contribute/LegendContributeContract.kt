@@ -14,14 +14,14 @@ class LegendContributeContract {
         val maximumUsdAmount: BigDecimal? = null,
         val currentExchangeRate: Double? = null,
         val bitcoinAddress: String? = null,
-        val lightningAddress: String? = null,
-        val isFetchingPaymentInstructions: Boolean = false,
+        val lightningInvoice: String? = null,
+        val isFetchingPaymentInstructions: Boolean = true,
         val isFetchingWithdrawRequest: Boolean = false,
         val qrCodeValue: String? = null,
         val membershipQuoteId: String? = null,
     ) {
         fun arePaymentInstructionsAvailable() =
-            (this.bitcoinAddress != null || this.lightningAddress != null) &&
+            (this.bitcoinAddress != null || this.lightningInvoice != null) &&
                 this.membershipQuoteId != null
     }
 

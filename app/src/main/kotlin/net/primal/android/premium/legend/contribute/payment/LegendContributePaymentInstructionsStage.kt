@@ -103,15 +103,31 @@ fun LegendContributePaymentInstructionsStage(
                 coerceMinAmount = true,
             )
 
-            Text(
-                modifier = Modifier.padding(horizontal = 48.dp),
-                text = stringResource(R.string.premium_become_legend_payment_instruction),
-                textAlign = TextAlign.Center,
-                style = AppTheme.typography.bodyMedium,
-                fontSize = 17.sp,
-                lineHeight = 23.sp,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-            )
+            when (state.paymentMethod) {
+                LegendContributeContract.PaymentMethod.OnChainBitcoin -> {
+                    Text(
+                        modifier = Modifier.padding(horizontal = 48.dp),
+                        text = stringResource(R.string.premium_become_legend_payment_instruction_on_chain),
+                        textAlign = TextAlign.Center,
+                        style = AppTheme.typography.bodyMedium,
+                        fontSize = 17.sp,
+                        lineHeight = 23.sp,
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    )
+                }
+                LegendContributeContract.PaymentMethod.BitcoinLightning -> {
+                    Text(
+                        modifier = Modifier.padding(horizontal = 48.dp),
+                        text = stringResource(R.string.premium_become_legend_payment_instruction_lightning),
+                        textAlign = TextAlign.Center,
+                        style = AppTheme.typography.bodyMedium,
+                        fontSize = 17.sp,
+                        lineHeight = 23.sp,
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    )
+                }
+                null -> Unit
+            }
         }
     }
 }

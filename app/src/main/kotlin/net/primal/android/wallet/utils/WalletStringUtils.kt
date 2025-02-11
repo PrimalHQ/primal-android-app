@@ -36,7 +36,7 @@ fun String?.isBitcoinAddress(): Boolean {
 
 fun String.parseLightningPaymentInstructions(): String? {
     return when {
-        isLightningUri () -> this.split(":").last()
+        isLightningUri() -> this.split(":").last()
         else -> null
     }
 }

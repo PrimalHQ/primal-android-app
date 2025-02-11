@@ -31,7 +31,6 @@ import net.primal.android.premium.api.model.ShowSupportUsResponse
 import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
 import net.primal.android.premium.domain.PremiumPurchaseOrder
 import net.primal.android.settings.api.model.AppSpecificDataRequest
-import timber.log.Timber
 
 class PremiumApiImpl @Inject constructor(
     @PrimalWalletApiClient private val primalWalletApiClient: PrimalApiClient,
@@ -134,8 +133,6 @@ class PremiumApiImpl @Inject constructor(
                 ),
             ),
         )
-
-        Timber.i("My response: $result")
 
         val event = result.findPrimalEvent(NostrEventKind.PrimalMembershipLegendPaymentInstructions)
         return event?.takeContentOrNull<LegendPaymentInstructionsResponse>()

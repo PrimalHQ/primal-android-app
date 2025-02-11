@@ -18,7 +18,7 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.Companion.LEGEND_THRESHOLD_IN_USD
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.UiEvent
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.UiState
-import net.primal.android.premium.legend.subscription.PurchaseMonitorManager
+import net.primal.android.premium.legend.subscription.PurchaseMonitor
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.repository.WalletRepository
@@ -31,7 +31,7 @@ class PremiumBecomeLegendViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val walletRepository: WalletRepository,
     private val premiumRepository: PremiumRepository,
-    private val purchaseMonitorManager: PurchaseMonitorManager,
+    private val purchaseMonitor: PurchaseMonitor,
 ) : ViewModel() {
 
     private companion object {
@@ -180,17 +180,19 @@ class PremiumBecomeLegendViewModel @Inject constructor(
         }
 
     private fun startPurchaseMonitor() {
-        purchaseMonitorManager.startMonitor(
-            scope = viewModelScope,
-            quoteId = _state.value.membershipQuoteId,
-        ) {
-            fetchMembershipStatus()
-            setState { copy(stage = PremiumBecomeLegendContract.BecomeLegendStage.Success) }
+        _state.value.membershipQuoteId?.let {
+            purchaseMonitor.startMonitor(
+                scope = viewModelScope,
+                quoteId = it,
+            ) {
+                fetchMembershipStatus()
+                setState { copy(stage = PremiumBecomeLegendContract.BecomeLegendStage.Success) }
+            }
         }
     }
 
     private fun stopPurchaseMonitor() {
-        purchaseMonitorManager.stopMonitor(viewModelScope)
+        purchaseMonitor.stopMonitor(viewModelScope)
     }
 
     private fun fetchMembershipStatus() =

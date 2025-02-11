@@ -1,7 +1,6 @@
 package net.primal.android.premium.legend.subscription
 
 import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -17,8 +16,7 @@ import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.premium.api.model.MembershipPurchaseMonitorRequestBody
 import net.primal.android.premium.api.model.MembershipPurchaseMonitorResponse
 
-@Singleton
-class PurchaseMonitorManager @Inject constructor(
+class PurchaseMonitor @Inject constructor(
     @PrimalWalletApiClient private val walletApiClient: PrimalApiClient,
 ) {
     private var monitorSubscription: PrimalSocketSubscription<MembershipPurchaseMonitorResponse>? = null
@@ -26,12 +24,12 @@ class PurchaseMonitorManager @Inject constructor(
 
     fun startMonitor(
         scope: CoroutineScope,
-        quoteId: String?,
+        quoteId: String,
         onComplete: () -> Unit,
     ) {
         scope.launch {
             monitorMutex.withLock {
-                if (monitorSubscription == null && quoteId != null) {
+                if (monitorSubscription == null) {
                     monitorSubscription = subscribeToPurchaseMonitor(scope, quoteId, onComplete)
                 }
             }
