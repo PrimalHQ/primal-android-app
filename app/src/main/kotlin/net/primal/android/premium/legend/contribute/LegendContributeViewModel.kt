@@ -209,7 +209,6 @@ class LegendContributeViewModel @Inject constructor(
                 }
             } catch (error: WssException) {
                 Timber.e(error)
-            } finally {
                 setState { copy(primalWalletPaymentInProgress = false) }
             }
         }
