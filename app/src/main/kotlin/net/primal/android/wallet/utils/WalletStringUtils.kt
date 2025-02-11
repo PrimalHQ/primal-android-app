@@ -1,3 +1,5 @@
+@file:Suppress("TooManyFunctions")
+
 package net.primal.android.wallet.utils
 
 import android.util.Patterns
