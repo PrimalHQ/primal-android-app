@@ -1,7 +1,12 @@
+@file:Suppress("TooManyFunctions")
+
 package net.primal.android.wallet.utils
 
 import android.util.Patterns
+import java.math.BigDecimal
 import net.primal.android.navigation.asUrlDecoded
+import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
+import net.primal.android.wallet.utils.CurrencyConversionUtils.fromUsdToSats
 import org.bitcoinj.core.Address
 import org.bitcoinj.params.MainNetParams
 
@@ -29,6 +34,13 @@ fun String?.isBitcoinAddress(): Boolean {
         Address.fromString(MainNetParams.get(), this)
     }
     return result.getOrNull() != null
+}
+
+fun String.parseLightningPaymentInstructions(): String? {
+    return when {
+        isLightningUri() -> this.split(":").last()
+        else -> null
+    }
 }
 
 fun String.parseBitcoinPaymentInstructions(): BitcoinPaymentInstruction? {
@@ -69,5 +81,29 @@ fun String.parseBitcoinPaymentInstructions(): BitcoinPaymentInstruction? {
         }
 
         else -> null
+    }
+}
+
+fun String.parseSatsToUsd(currentExchangeRate: Double?): String {
+    return BigDecimal(this.toDouble())
+        .fromSatsToUsd(currentExchangeRate)
+        .stripTrailingZeros()
+        .let { if (it.compareTo(BigDecimal.ZERO) == 0) BigDecimal.ZERO else it }
+        .toPlainString()
+}
+
+fun String.parseUsdToSats(currentExchangeRate: Double?): String {
+    return BigDecimal(this)
+        .fromUsdToSats(currentExchangeRate)
+        .toString()
+}
+
+fun BigDecimal.formatUsdZeros(): String {
+    return this.let { amount ->
+        if (amount.compareTo(BigDecimal.ZERO) == 0) {
+            "0"
+        } else {
+            amount.toString()
+        }
     }
 }

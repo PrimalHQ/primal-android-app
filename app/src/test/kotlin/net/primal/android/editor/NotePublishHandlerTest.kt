@@ -383,6 +383,110 @@ class NotePublishHandlerTest {
      */
 
     @Test
+    fun publishShortTextNote_addsWhitespaceBefore_forMentionedUsersWithoutWhitespace() =
+        runTest {
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublisher = buildNotePublishHandler(
+                nostrPublisher = nostrPublisher,
+                database = mockkPrimalDatabase(),
+            )
+
+            val input = "Heynostr:npub16c0nh3dnadzqpm76uctf5hqhe2lny344zsmpm6feee9p5rdxaa9q586nvr how are you?"
+            val expectedOutput = "Hey nostr:npub16c0nh3dnadzqpm76uctf5hqhe2lny344zsmpm6feee9p5rdxaa9q586nvr " +
+                "how are you?"
+
+            notePublisher.publishShortTextNote(
+                userId = expectedUserId,
+                content = input,
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    any(),
+                    withArg { event ->
+                        event.content shouldBe expectedOutput
+                    },
+                )
+            }
+        }
+
+    @Test
+    fun publishShortTextNote_handlesMultipleMentionsCorrectly_forMultipleMentionedUsersWithoutWhitespace() =
+        runTest {
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublisher = buildNotePublishHandler(
+                nostrPublisher = nostrPublisher,
+                database = mockkPrimalDatabase(),
+            )
+
+            val input = "nostr:npub1235jkvq3mr0pm7gpqkj07n4lw2yacr009h0ncqgegrt00s3hugdsmpzphwnostr:" +
+                "npub1235jkvq3mr0pm7gpqkj07n4lw2yacr009h0ncqgegrt00s3hugdsmpzphw"
+            val expectedOutput = "nostr:npub1235jkvq3mr0pm7gpqkj07n4lw2yacr009h0ncqgegrt00s3hugdsmpzphw " +
+                "nostr:npub1235jkvq3mr0pm7gpqkj07n4lw2yacr009h0ncqgegrt00s3hugdsmpzphw"
+
+            notePublisher.publishShortTextNote(
+                userId = expectedUserId,
+                content = input,
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    any(),
+                    withArg { event ->
+                        event.content shouldBe expectedOutput
+                    },
+                )
+            }
+        }
+
+    @Test
+    fun publishShortTextNote_doesNotModifyCorrectlyFormattedMentions_forMentionedUsersWithWhitespace() =
+        runTest {
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
+
+            val content = "Hey nostr:npub16c0nh3dnadzqpm76uctf5hqhe2lny344zsmpm6feee9p5rdxaa9q586nvr, how are you? " +
+                "Check this nostr:npub16c0nh3dnadzqpm76uctf5hqhe2lny344zsmpm6feee9p5rdxaa9q586nvr's note!"
+
+            notePublishHandler.publishShortTextNote(
+                userId = expectedUserId,
+                content = content,
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    any(),
+                    withArg { event ->
+                        event.content shouldBe content
+                    },
+                )
+            }
+        }
+
+    @Test
+    fun publishShortTextNote_correctlyProcessesTextWithoutMentions_withoutMentionedUsers() =
+        runTest {
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
+
+            val content = "This is a normal message without any npub mentions."
+
+            notePublishHandler.publishShortTextNote(
+                userId = expectedUserId,
+                content = content,
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    any(),
+                    withArg { event ->
+                        event.content shouldBe content
+                    },
+                )
+            }
+        }
+
+    @Test
     fun publishShortTextNote_createsPubkeyTags_forMentionedUsers() =
         runTest {
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)

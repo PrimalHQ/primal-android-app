@@ -100,6 +100,8 @@ import net.primal.android.premium.leaderboard.ogs.OGLeaderboardScreen
 import net.primal.android.premium.leaderboard.ogs.OGLeaderboardViewModel
 import net.primal.android.premium.legend.become.PremiumBecomeLegendScreen
 import net.primal.android.premium.legend.become.PremiumBecomeLegendViewModel
+import net.primal.android.premium.legend.contribute.LegendContributeScreen
+import net.primal.android.premium.legend.contribute.LegendContributeViewModel
 import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationScreen
 import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationViewModel
 import net.primal.android.premium.manage.PremiumManageContract
@@ -291,6 +293,7 @@ private fun NavController.navigateToPremiumExtendSubscription(primalName: String
 
 private fun NavController.navigateToPremiumHome() = navigate(route = "premium/home")
 private fun NavController.navigateToPremiumSupportPrimal() = navigate(route = "premium/supportPrimal")
+private fun NavController.navigateToLegendContributePrimal() = navigate(route = "premium/legend/contribution")
 private fun NavController.navigateToPremiumMoreInfo(tabIndex: Int = 0) =
     navigate(route = "premium/info?$PREMIUM_MORE_INFO_TAB_INDEX=$tabIndex")
 
@@ -581,6 +584,8 @@ fun SharedTransitionScope.PrimalAppNavigation() {
         premiumHome(route = "premium/home", navController = navController)
 
         premiumSupportPrimal(route = "premium/supportPrimal", navController = navController)
+
+        premiumLegendContribution(route = "premium/legend/contribution", navController = navController)
 
         premiumMoreInfo(
             route = "premium/info?$PREMIUM_MORE_INFO_TAB_INDEX={$PREMIUM_MORE_INFO_TAB_INDEX}",
@@ -1180,6 +1185,7 @@ private fun NavGraphBuilder.premiumHome(route: String, navController: NavControl
             onManagePremium = { navController.navigateToPremiumManage() },
             onLegendCardClick = { navController.navigateToPremiumCard(profileId = it) },
             onSupportPrimal = { navController.navigateToPremiumSupportPrimal() },
+            onContributePrimal = { navController.navigateToLegendContributePrimal() },
         )
     }
 
@@ -1201,6 +1207,23 @@ private fun NavGraphBuilder.premiumSupportPrimal(route: String, navController: N
                 onExtendSubscription = { navController.navigateToPremiumExtendSubscription(primalName = it) },
                 onBecomeLegend = { navController.navigateToPremiumBuyPrimalLegend() },
             ),
+        )
+    }
+
+private fun NavGraphBuilder.premiumLegendContribution(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        val viewModel = hiltViewModel<LegendContributeViewModel>()
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+        LegendContributeScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
         )
     }
 

@@ -71,6 +71,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -483,7 +484,9 @@ private fun refineContentAsAnnotatedString(content: String): AnnotatedString {
     val refinedContent = content.trim()
 
     return buildAnnotatedString {
-        append(refinedContent)
+        withStyle(style = SpanStyle(color = AppTheme.colorScheme.onSurface)) {
+            append(refinedContent)
+        }
 
         uriLinks.forEach { url ->
             addUrlAnnotation(url, refinedContent, AppTheme.colorScheme.secondary)

@@ -24,9 +24,10 @@ fun TransactionAmountText(
     amountInBtc: String,
     amountInUsd: String,
     onAmountClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = Modifier.clickable(
+        modifier = modifier.clickable(
             interactionSource = remember { MutableInteractionSource() },
             indication = null,
             onClick = {
