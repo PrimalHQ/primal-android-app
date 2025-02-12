@@ -2,6 +2,7 @@ package net.primal.android.premium.legend.contribute
 
 import java.math.BigDecimal
 import net.primal.android.wallet.domain.CurrencyMode
+import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
 
 class LegendContributeContract {
 
@@ -19,10 +20,13 @@ class LegendContributeContract {
         val primalWalletPaymentInProgress: Boolean = false,
         val qrCodeValue: String? = null,
         val membershipQuoteId: String? = null,
+        val isFetchingMiningFees: Boolean = false,
+        val miningFeeTiers: List<MiningFeeUi> = emptyList(),
+        val selectedFeeTierIndex: Int? = null,
     ) {
         fun arePaymentInstructionsAvailable() =
             (this.bitcoinAddress != null || this.lightningInvoice != null) &&
-                this.membershipQuoteId != null
+                this.membershipQuoteId != null && !this.isFetchingMiningFees
     }
 
     sealed class UiEvent {
@@ -38,6 +42,7 @@ class LegendContributeContract {
         data object PrimalWalletPayment : UiEvent()
         data class ShowAmountEditor(val paymentMethod: PaymentMethod) : UiEvent()
         data class AmountChanged(val amount: String) : UiEvent()
+        data object ReloadMiningFees : UiEvent()
     }
 
     enum class LegendContributeState {
