@@ -18,7 +18,6 @@ class AuthRepository @Inject constructor(
     suspend fun login(nostrKey: String): String {
         val userId = credentialsStore.save(nostrKey)
         activeAccountStore.setActiveUserId(userId)
-        userRepository.createNewUserAccount(userId = userId)
         return userId
     }
 
