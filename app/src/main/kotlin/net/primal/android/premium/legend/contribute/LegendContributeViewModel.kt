@@ -220,6 +220,7 @@ class LegendContributeViewModel @Inject constructor(
                     copy(
                         amountInSats = amount,
                         amountInUsd = amount.parseSatsToUsd(state.value.currentExchangeRate),
+                        isDonationAmountValid = amount.validateDonationAmount()
                     )
                 }
             }
@@ -229,6 +230,8 @@ class LegendContributeViewModel @Inject constructor(
                     copy(
                         amountInSats = amount.parseUsdToSats(state.value.currentExchangeRate),
                         amountInUsd = amount,
+                        isDonationAmountValid = amount.parseUsdToSats(state.value.currentExchangeRate)
+                            .validateDonationAmount()
                     )
                 }
             }
@@ -248,4 +251,8 @@ class LegendContributeViewModel @Inject constructor(
     private fun stopPurchaseMonitor() {
         purchaseMonitor.stopMonitor(viewModelScope)
     }
+
+    private fun String.validateDonationAmount(): Boolean =
+        (this.toIntOrNull() ?: 0) >= LegendContributeContract.MIN_DONATION_AMOUNT
+
 }
