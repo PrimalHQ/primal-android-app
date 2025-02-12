@@ -11,7 +11,6 @@ import net.primal.android.theme.AppTheme
 
 @Composable
 fun LogoutScreen(viewModel: LogoutViewModel, onClose: () -> Unit) {
-
     LaunchedEffect(viewModel, viewModel.effects) {
         viewModel.effects.collect {
             when (it) {

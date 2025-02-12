@@ -1762,7 +1762,7 @@ private fun NavGraphBuilder.mediaItem(
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = this@composable,
 
-            )
+        )
     }
 }
 
@@ -1882,15 +1882,18 @@ private fun NavGraphBuilder.profileQrCodeViewer(
     }
 }
 
-private fun NavGraphBuilder.logout(route: String, arguments: List<NamedNavArgument>, navController: NavController) =
-    dialog(
-        route = route,
-        arguments = arguments,
-    ) {
-        val viewModel: LogoutViewModel = hiltViewModel(it)
-        LockToOrientationPortrait()
-        LogoutScreen(
-            viewModel = viewModel,
-            onClose = { navController.popBackStack() },
-        )
-    }
+private fun NavGraphBuilder.logout(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = dialog(
+    route = route,
+    arguments = arguments,
+) {
+    val viewModel: LogoutViewModel = hiltViewModel(it)
+    LockToOrientationPortrait()
+    LogoutScreen(
+        viewModel = viewModel,
+        onClose = { navController.popBackStack() },
+    )
+}

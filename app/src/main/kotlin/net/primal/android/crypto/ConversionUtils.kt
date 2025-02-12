@@ -6,7 +6,6 @@ import timber.log.Timber
 
 fun String.assureValidNsec() = if (startsWith("nsec")) this else this.hexToNsecHrp()
 
-
 fun String.hexToNoteHrp() =
     Bech32.encodeBytes(
         hrp = "note",

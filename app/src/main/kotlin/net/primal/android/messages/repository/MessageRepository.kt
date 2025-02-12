@@ -21,7 +21,6 @@ import net.primal.android.messages.db.MessageConversation
 import net.primal.android.messages.db.MessageConversationData
 import net.primal.android.messages.domain.ConversationRelation
 import net.primal.android.nostr.publish.NostrPublisher
-import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 
 @OptIn(ExperimentalPagingApi::class)

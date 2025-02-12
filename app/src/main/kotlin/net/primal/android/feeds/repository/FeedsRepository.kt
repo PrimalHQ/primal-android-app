@@ -229,7 +229,11 @@ class FeedsRepository @Inject constructor(
         return dvmFeeds
     }
 
-    suspend fun addDvmFeedLocally(userId: String, dvmFeed: DvmFeed, specKind: FeedSpecKind) {
+    suspend fun addDvmFeedLocally(
+        userId: String,
+        dvmFeed: DvmFeed,
+        specKind: FeedSpecKind,
+    ) {
         withContext(dispatcherProvider.io()) {
             val feed = Feed(
                 ownerId = userId,

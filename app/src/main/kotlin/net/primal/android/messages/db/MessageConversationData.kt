@@ -1,7 +1,6 @@
 package net.primal.android.messages.db
 
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 import net.primal.android.messages.domain.ConversationRelation
 
 @Entity(primaryKeys = ["participantId", "ownerId"])
