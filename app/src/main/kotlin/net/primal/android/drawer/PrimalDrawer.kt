@@ -162,7 +162,6 @@ private fun DrawerHeader(
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
     onLogoutClick: (String) -> Unit,
 ) {
-    val numberFormat = remember { NumberFormat.getNumberInstance() }
     ConstraintLayout(
         modifier = Modifier.fillMaxWidth(),
     ) {
@@ -227,45 +226,11 @@ private fun DrawerHeader(
             },
         )
 
-        val statsAnnotatedString = buildAnnotatedString {
-            append(
-                AnnotatedString(
-                    text = userAccount?.followingCount?.let { numberFormat.format(it) } ?: "-",
-                    spanStyle = SpanStyle(
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                        fontStyle = AppTheme.typography.labelLarge.fontStyle,
-                    ),
-                ),
-            )
-            append(
-                AnnotatedString(
-                    text = " " + stringResource(id = R.string.drawer_following_suffix),
-                    spanStyle = SpanStyle(
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                        fontStyle = AppTheme.typography.labelLarge.fontStyle,
-                    ),
-                ),
-            )
-            append("   ")
-            append(
-                AnnotatedString(
-                    text = userAccount?.followersCount?.let { numberFormat.format(it) } ?: "-",
-                    spanStyle = SpanStyle(
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                        fontStyle = AppTheme.typography.labelLarge.fontStyle,
-                    ),
-                ),
-            )
-            append(
-                AnnotatedString(
-                    text = " " + stringResource(id = R.string.drawer_followers_suffix),
-                    spanStyle = SpanStyle(
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                        fontStyle = AppTheme.typography.labelLarge.fontStyle,
-                    ),
-                ),
-            )
-        }
+        val statsAnnotatedString = buildStatsAnnotatedString(
+            followersCount = userAccount?.followersCount,
+            followingCount = userAccount?.followingCount,
+        )
+
         Text(
             text = statsAnnotatedString,
             style = AppTheme.typography.labelLarge,
@@ -273,6 +238,50 @@ private fun DrawerHeader(
                 start.linkTo(startGuideline)
                 top.linkTo(identifierRef.bottom, margin = 16.dp)
             },
+        )
+    }
+}
+
+@Composable
+private fun buildStatsAnnotatedString(followingCount: Int?, followersCount: Int?): AnnotatedString {
+    val numberFormat = remember { NumberFormat.getNumberInstance() }
+    return buildAnnotatedString {
+        append(
+            AnnotatedString(
+                text = followingCount?.let { numberFormat.format(it) } ?: "-",
+                spanStyle = SpanStyle(
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                    fontStyle = AppTheme.typography.labelLarge.fontStyle,
+                ),
+            ),
+        )
+        append(
+            AnnotatedString(
+                text = " " + stringResource(id = R.string.drawer_following_suffix),
+                spanStyle = SpanStyle(
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                    fontStyle = AppTheme.typography.labelLarge.fontStyle,
+                ),
+            ),
+        )
+        append("   ")
+        append(
+            AnnotatedString(
+                text = followersCount?.let { numberFormat.format(it) } ?: "-",
+                spanStyle = SpanStyle(
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                    fontStyle = AppTheme.typography.labelLarge.fontStyle,
+                ),
+            ),
+        )
+        append(
+            AnnotatedString(
+                text = " " + stringResource(id = R.string.drawer_followers_suffix),
+                spanStyle = SpanStyle(
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                    fontStyle = AppTheme.typography.labelLarge.fontStyle,
+                ),
+            ),
         )
     }
 }
