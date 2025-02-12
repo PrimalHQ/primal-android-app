@@ -111,7 +111,7 @@ private fun LegendContributeAmountStageBottomBar(
         TransactionActionsRow(
             onCancelClick = onBack,
             onActionClick = onNext,
-            nextEnabled = state.amountInSats != "0",
+            nextEnabled = state.isDonationAmountValid,
         )
     }
 }
