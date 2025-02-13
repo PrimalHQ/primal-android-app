@@ -80,7 +80,7 @@ fun LegendContributePaymentInstructionsStage(
         ) {
             Box(modifier = Modifier.size(280.dp), contentAlignment = Alignment.Center) {
                 when {
-                    state.isFetchingPaymentInstructions || state.isFetchingMiningFees -> PrimalLoadingSpinner()
+                    state.isFetchingPaymentInstructions -> PrimalLoadingSpinner()
                     state.arePaymentInstructionsAvailable() -> QrCodeBox(
                         qrCodeValue = state.qrCodeValue,
                         network = when (state.paymentMethod) {
