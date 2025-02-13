@@ -26,7 +26,20 @@ class ArticleFeedMediator(
 ) : RemoteMediator<Int, Article>() {
 
     override suspend fun load(loadType: LoadType, state: PagingState<Int, Article>): MediatorResult {
-        val pageSize = state.config.pageSize
+        val nextUntil = when (loadType) {
+            LoadType.APPEND -> {
+                val lastItem = state.lastItemOrNull()
+                if (lastItem == null) {
+                    return MediatorResult.Success(endOfPaginationReached = true)
+                }
+
+                lastItem.data.createdAt
+            }
+
+            LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
+            LoadType.REFRESH -> null
+        }
+
         return try {
             val response = withContext(dispatcherProvider.io()) {
                 retryNetworkCall {
@@ -34,7 +47,8 @@ class ArticleFeedMediator(
                         body = ArticleFeedRequestBody(
                             spec = feedSpec,
                             userId = userId,
-                            limit = pageSize,
+                            limit = state.config.pageSize,
+                            until = nextUntil,
                         ),
                     )
                 }
@@ -65,7 +79,9 @@ class ArticleFeedMediator(
                 }
             }
 
-            MediatorResult.Success(endOfPaginationReached = true)
+            MediatorResult.Success(
+                endOfPaginationReached = state.lastItemOrNull()?.data?.articleId == connections.firstOrNull()?.articleId,
+            )
         } catch (error: WssException) {
             MediatorResult.Error(error)
         }
