@@ -25,6 +25,7 @@ class ArticleFeedMediator(
     private val dispatcherProvider: CoroutineDispatcherProvider,
 ) : RemoteMediator<Int, Article>() {
 
+    @Suppress("ReturnCount")
     override suspend fun load(loadType: LoadType, state: PagingState<Int, Article>): MediatorResult {
         val nextUntil = when (loadType) {
             LoadType.APPEND -> {
@@ -80,7 +81,8 @@ class ArticleFeedMediator(
             }
 
             MediatorResult.Success(
-                endOfPaginationReached = state.lastItemOrNull()?.data?.articleId == connections.firstOrNull()?.articleId,
+                endOfPaginationReached = state.lastItemOrNull()?.data?.articleId
+                    == connections.firstOrNull()?.articleId,
             )
         } catch (error: WssException) {
             MediatorResult.Error(error)
