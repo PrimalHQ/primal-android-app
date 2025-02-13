@@ -177,7 +177,6 @@ class LegendContributeViewModel @Inject constructor(
                 startPurchaseMonitor()
             } catch (error: WssException) {
                 Timber.e(error)
-                setState { copy(error = UiState.ContributionError.PaymentInstructionFetchFailed(error)) }
             } finally {
                 setState { copy(isFetchingPaymentInstructions = false) }
             }
@@ -211,7 +210,7 @@ class LegendContributeViewModel @Inject constructor(
                     null -> Unit
                 }
             } catch (error: WssException) {
-                setState { copy(error = UiState.ContributionError.WithdrawViaPrimalWalletFailed(error)) }
+                setState { copy(error = UiState.ContributionUiError.WithdrawViaPrimalWalletFailed(error)) }
                 setState { copy(primalWalletPaymentInProgress = false) }
             }
         }

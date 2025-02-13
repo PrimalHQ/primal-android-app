@@ -1,10 +1,9 @@
 package net.primal.android.premium.legend.contribute
 
 import java.math.BigDecimal
-import net.primal.android.auth.onboarding.account.OnboardingContract.UiEvent
 import net.primal.android.wallet.domain.CurrencyMode
 
-class LegendContributeContract {
+interface LegendContributeContract {
 
     data class UiState(
         val stage: LegendContributeState = LegendContributeState.Intro,
@@ -20,15 +19,14 @@ class LegendContributeContract {
         val primalWalletPaymentInProgress: Boolean = false,
         val qrCodeValue: String? = null,
         val membershipQuoteId: String? = null,
-        val error: ContributionError? = null,
+        val error: ContributionUiError? = null,
     ) {
         fun arePaymentInstructionsAvailable() =
             (this.bitcoinAddress != null || this.lightningInvoice != null) &&
                 this.membershipQuoteId != null
 
-        sealed class ContributionError {
-            data class PaymentInstructionFetchFailed(val cause: Throwable) : ContributionError()
-            data class WithdrawViaPrimalWalletFailed(val cause: Throwable) : ContributionError()
+        sealed class ContributionUiError {
+            data class WithdrawViaPrimalWalletFailed(val cause: Throwable) : ContributionUiError()
         }
     }
 

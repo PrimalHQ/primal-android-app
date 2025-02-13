@@ -62,9 +62,7 @@ fun LegendContributePaymentInstructionsStage(
         snackbarHostState = snackbarHostState,
         errorMessageResolver = {
             when (it) {
-                is UiState.ContributionError.PaymentInstructionFetchFailed ->
-                    it.cause.message.toString()
-                is UiState.ContributionError.WithdrawViaPrimalWalletFailed ->
+                is UiState.ContributionUiError.WithdrawViaPrimalWalletFailed ->
                     it.cause.message.toString()
             }
         },
