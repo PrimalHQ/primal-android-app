@@ -5,6 +5,10 @@ import net.primal.android.wallet.domain.CurrencyMode
 
 interface LegendContributeContract {
 
+    companion object {
+        const val MIN_DONATION_AMOUNT = 10_000
+    }
+
     data class UiState(
         val stage: LegendContributeState = LegendContributeState.Intro,
         val paymentMethod: PaymentMethod? = null,
@@ -20,6 +24,7 @@ interface LegendContributeContract {
         val qrCodeValue: String? = null,
         val membershipQuoteId: String? = null,
         val error: ContributionUiError? = null,
+        val isDonationAmountValid: Boolean = false,
     ) {
         fun arePaymentInstructionsAvailable() =
             (this.bitcoinAddress != null || this.lightningInvoice != null) &&
