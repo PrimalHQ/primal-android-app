@@ -188,27 +188,6 @@ class LegendContributeViewModel @Inject constructor(
             }
         }
 
-//    private fun fetchMining() {
-//
-//
-//        if (btcAddress == null || amountInSats.toInt() == 0) return
-//
-//        viewModelScope.launch {
-//            try {
-//                withContext(dispatchers.io()) {
-//                    val tiers = walletRepository.fetchMiningFees(
-//                        userId = activeUserId,
-//                        onChainAddress = btcAddress,
-//                        amountInBtc = state.value.qrCodeValue?.parseBitcoinPaymentInstructions()?.amount.toString(),
-//                    )
-//                    return@withContext tiers
-//                }
-//            } catch (error: WssException) {
-//                Timber.w(error)
-//            }
-//        }
-//    }
-
     private fun withdrawViaPrimalWallet() =
         viewModelScope.launch {
             try {
