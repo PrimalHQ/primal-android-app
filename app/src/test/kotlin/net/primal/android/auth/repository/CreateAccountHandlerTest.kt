@@ -17,6 +17,7 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.repository.SettingsRepository
+import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.Credential
@@ -51,13 +52,15 @@ class CreateAccountHandlerTest {
     }
 
     private fun createAuthRepository(
-        credentialsStore: CredentialsStore = CredentialsStore(FakeDataStore(emptyList())),
+        credentialsStore: CredentialsStore = CredentialsStore(FakeDataStore(emptySet())),
         activeAccountStore: ActiveAccountStore = mockk(relaxed = true),
         userRepository: UserRepository = mockk(relaxed = true),
+        accountsStore: UserAccountsStore = mockk(relaxed = true),
     ) = AuthRepository(
         credentialsStore = credentialsStore,
         activeAccountStore = activeAccountStore,
         userRepository = userRepository,
+        accountsStore = accountsStore,
     )
 
     @Test
@@ -238,7 +241,7 @@ class CreateAccountHandlerTest {
     fun createNostrAccount_revertsAuthData_ifAnyOfApiCallsFail() =
         runTest {
             val keyPair = CryptoUtils.generateHexEncodedKeypair()
-            val credentialsPersistence = FakeDataStore(emptyList<Credential>())
+            val credentialsPersistence = FakeDataStore(emptySet<Credential>())
             val credentialsStore = CredentialsStore(persistence = credentialsPersistence)
 
             val activeAccountPersistence = FakeDataStore(initialValue = "")

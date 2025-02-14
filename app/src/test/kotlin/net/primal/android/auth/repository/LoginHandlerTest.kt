@@ -117,7 +117,7 @@ class LoginHandlerTest {
     fun login_revertsLoginData_ifAnyOfApiCallsFail() =
         runTest {
             val nsec = "nsec1p64ty2pgcj6k2c6v7u9dwu7aesle8v9qelnpgx4zrfa37av8f24qyftvle"
-            val credentialsPersistence = FakeDataStore(emptyList<Credential>())
+            val credentialsPersistence = FakeDataStore(emptySet<Credential>())
             val credentialsStore = CredentialsStore(persistence = credentialsPersistence)
 
             val activeAccountPersistence = FakeDataStore(initialValue = "")
@@ -131,6 +131,7 @@ class LoginHandlerTest {
                 credentialsStore = credentialsStore,
                 activeAccountStore = activeAccountStore,
                 userRepository = mockk(relaxed = true),
+                accountsStore = mockk(relaxed = true),
             )
 
             val userRepository = mockk<UserRepository>(relaxed = true) {
