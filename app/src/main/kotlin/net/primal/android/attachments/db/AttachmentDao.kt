@@ -14,7 +14,7 @@ interface AttachmentDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertAllNoteAttachments(data: List<NoteAttachment>)
 
-    @Query("SELECT * FROM NoteAttachment WHERE eventId = :noteId AND type IN (:types)")
+    @Query("SELECT * FROM NoteAttachment WHERE eventId = :noteId AND type IN (:types) ORDER BY position")
     fun loadNoteAttachments(
         noteId: String,
         types: List<NoteAttachmentType> = NoteAttachmentType.entries,
