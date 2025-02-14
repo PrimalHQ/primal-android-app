@@ -44,7 +44,7 @@ class MessageConversationListViewModel @Inject constructor(
         value = UiState(
             activeRelation = ConversationRelation.Follows,
             conversations = messageRepository
-                .newestConversations(ConversationRelation.Follows)
+                .newestConversations(userId = activeUserId, relation = ConversationRelation.Follows)
                 .mapAsPagingDataOfMessageConversationUi(),
         ),
     )
@@ -88,13 +88,13 @@ class MessageConversationListViewModel @Inject constructor(
             try {
                 when (state.value.activeRelation) {
                     ConversationRelation.Follows -> {
-                        messageRepository.fetchFollowConversations()
-                        messageRepository.fetchNonFollowsConversations()
+                        messageRepository.fetchFollowConversations(userId = activeUserId)
+                        messageRepository.fetchNonFollowsConversations(userId = activeUserId)
                     }
 
                     ConversationRelation.Other -> {
-                        messageRepository.fetchNonFollowsConversations()
-                        messageRepository.fetchFollowConversations()
+                        messageRepository.fetchNonFollowsConversations(userId = activeUserId)
+                        messageRepository.fetchFollowConversations(userId = activeUserId)
                     }
                 }
             } catch (error: WssException) {
@@ -109,7 +109,7 @@ class MessageConversationListViewModel @Inject constructor(
             copy(
                 activeRelation = relation,
                 conversations = messageRepository
-                    .newestConversations(relation = relation)
+                    .newestConversations(userId = activeUserId, relation = relation)
                     .mapAsPagingDataOfMessageConversationUi(),
             )
         }

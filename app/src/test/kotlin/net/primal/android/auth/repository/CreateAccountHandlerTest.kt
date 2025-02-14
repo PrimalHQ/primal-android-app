@@ -37,6 +37,7 @@ class CreateAccountHandlerTest {
         userRepository: UserRepository = mockk(relaxed = true),
         profileRepository: ProfileRepository = mockk(relaxed = true),
         settingsRepository: SettingsRepository = mockk(relaxed = true),
+        credentialsStore: CredentialsStore = mockk(relaxed = true),
     ): CreateAccountHandler {
         return CreateAccountHandler(
             authRepository = authRepository,
@@ -44,6 +45,8 @@ class CreateAccountHandlerTest {
             userRepository = userRepository,
             profileRepository = profileRepository,
             settingsRepository = settingsRepository,
+            credentialsStore = credentialsStore,
+            dispatchers = coroutinesTestRule.dispatcherProvider,
         )
     }
 
@@ -83,9 +86,13 @@ class CreateAccountHandlerTest {
         runTest {
             val keyPair = CryptoUtils.generateHexEncodedKeypair()
             val userRepository = mockk<UserRepository>(relaxed = true)
+            val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
+                coEvery { save(any()) } returns keyPair.pubKey
+            }
+
             val handler = createAccountHandler(
-                authRepository = createAuthRepository(),
                 userRepository = userRepository,
+                credentialsStore = credentialsStore,
             )
 
             val expectedProfileMetadata = ProfileMetadata(displayName = "Test", username = null)
@@ -108,9 +115,14 @@ class CreateAccountHandlerTest {
         runTest {
             val keyPair = CryptoUtils.generateHexEncodedKeypair()
             val profileRepository = mockk<ProfileRepository>(relaxed = true)
+            val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
+                coEvery { save(any()) } returns keyPair.pubKey
+            }
+
             val handler = createAccountHandler(
                 authRepository = createAuthRepository(),
                 profileRepository = profileRepository,
+                credentialsStore = credentialsStore,
             )
 
             handler.createNostrAccount(
@@ -132,9 +144,13 @@ class CreateAccountHandlerTest {
         runTest {
             val keyPair = CryptoUtils.generateHexEncodedKeypair()
             val profileRepository = mockk<ProfileRepository>(relaxed = true)
+            val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
+                coEvery { save(any()) } returns keyPair.pubKey
+            }
+
             val handler = createAccountHandler(
-                authRepository = createAuthRepository(),
                 profileRepository = profileRepository,
+                credentialsStore = credentialsStore,
             )
 
             val partiallyFollowedMembers = primalTeamMembers.mapIndexed { index, followGroupMember ->
@@ -169,9 +185,13 @@ class CreateAccountHandlerTest {
         runTest {
             val keyPair = CryptoUtils.generateHexEncodedKeypair()
             val relayRepository = mockk<RelayRepository>(relaxed = true)
+            val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
+                coEvery { save(any()) } returns keyPair.pubKey
+            }
+
             val handler = createAccountHandler(
-                authRepository = createAuthRepository(),
                 relayRepository = relayRepository,
+                credentialsStore = credentialsStore,
             )
 
             handler.createNostrAccount(
@@ -192,9 +212,13 @@ class CreateAccountHandlerTest {
         runTest {
             val keyPair = CryptoUtils.generateHexEncodedKeypair()
             val settingsRepository = mockk<SettingsRepository>(relaxed = true)
+            val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
+                coEvery { save(any()) } returns keyPair.pubKey
+            }
+
             val handler = createAccountHandler(
-                authRepository = createAuthRepository(),
                 settingsRepository = settingsRepository,
+                credentialsStore = credentialsStore,
             )
 
             handler.createNostrAccount(

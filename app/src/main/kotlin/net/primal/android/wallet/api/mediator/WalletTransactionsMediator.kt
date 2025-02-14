@@ -50,7 +50,7 @@ class WalletTransactionsMediator(
             LoadType.PREPEND -> {
                 state.firstItemOrNull()?.data?.updatedAt
                     ?: withContext(dispatchers.io()) {
-                        database.walletTransactions().first()?.updatedAt
+                        database.walletTransactions().firstByUserId(userId = userId)?.updatedAt
                     }
                     ?: return MediatorResult.Success(endOfPaginationReached = true)
             }
@@ -58,7 +58,7 @@ class WalletTransactionsMediator(
             LoadType.APPEND -> {
                 state.lastItemOrNull()?.data?.updatedAt
                     ?: withContext(dispatchers.io()) {
-                        database.walletTransactions().last()?.updatedAt
+                        database.walletTransactions().lastByUserId(userId = userId)?.updatedAt
                     }
                     ?: return MediatorResult.Success(endOfPaginationReached = true)
             }

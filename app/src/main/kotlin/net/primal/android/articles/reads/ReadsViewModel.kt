@@ -45,7 +45,7 @@ class ReadsViewModel @Inject constructor(
 
     private fun observeFeeds() =
         viewModelScope.launch {
-            feedsRepository.observeReadsFeeds()
+            feedsRepository.observeReadsFeeds(userId = activeAccountStore.activeUserId())
                 .collect { feeds ->
                     setState {
                         copy(

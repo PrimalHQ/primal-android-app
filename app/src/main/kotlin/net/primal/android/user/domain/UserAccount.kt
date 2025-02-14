@@ -1,5 +1,6 @@
 package net.primal.android.user.domain
 
+import java.time.Instant
 import kotlinx.serialization.Serializable
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.utils.asEllipsizedNpub
@@ -39,6 +40,7 @@ data class UserAccount(
     val premiumMembership: PremiumMembership? = null,
     val lastBuyPremiumTimestampInMillis: Long? = null,
     val primalLegendProfile: PrimalLegendProfile? = null,
+    val lastAccessedAt: Long = Instant.now().epochSecond,
 ) {
     companion object {
         val EMPTY = UserAccount(

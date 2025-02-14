@@ -2,7 +2,7 @@ package net.primal.android.feeds.repository
 
 import androidx.room.withTransaction
 import javax.inject.Inject
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
@@ -40,15 +40,22 @@ class FeedsRepository @Inject constructor(
     private val feedsApi: FeedsApi,
     private val database: PrimalDatabase,
 ) {
-    fun observeAllFeeds() = database.feeds().observeAllFeeds()
+    fun observeAllFeeds(userId: String) = database.feeds().observeAllFeeds(ownerId = userId).distinctUntilChanged()
 
-    fun observeReadsFeeds() = database.feeds().observeAllFeeds(specKind = FeedSpecKind.Reads)
+    fun observeReadsFeeds(userId: String) =
+        database.feeds().observeAllFeedsBySpecKind(ownerId = userId, specKind = FeedSpecKind.Reads)
+            .distinctUntilChanged()
 
-    fun observeNotesFeeds() = database.feeds().observeAllFeeds(specKind = FeedSpecKind.Notes)
+    fun observeNotesFeeds(userId: String) =
+        database.feeds().observeAllFeedsBySpecKind(ownerId = userId, specKind = FeedSpecKind.Notes)
+            .distinctUntilChanged()
 
-    fun observeFeeds(specKind: FeedSpecKind) = database.feeds().observeAllFeeds(specKind = specKind)
+    fun observeFeeds(userId: String, specKind: FeedSpecKind) =
+        database.feeds().observeAllFeedsBySpecKind(ownerId = userId, specKind = specKind)
+            .distinctUntilChanged()
 
-    fun observeContainsFeedSpec(feedSpec: String) = database.feeds().observeContainsFeed(feedSpec)
+    fun observeContainsFeedSpec(userId: String, feedSpec: String) =
+        database.feeds().observeContainsFeed(ownerId = userId, feedSpec)
 
     suspend fun fetchAndPersistArticleFeeds(userId: String) =
         fetchAndPersistFeeds(userId = userId, specKind = FeedSpecKind.Reads)
@@ -62,11 +69,11 @@ class FeedsRepository @Inject constructor(
             val content = NostrJson.decodeFromStringOrNull<List<ContentArticleFeedData>>(
                 string = response.articleFeeds.content,
             )
-            val feeds = content?.map { it.asFeedPO(specKind = specKind) }
+            val feeds = content?.map { it.asFeedPO(ownerId = userId, specKind = specKind) }
 
             if (feeds != null) {
                 database.withTransaction {
-                    database.feeds().deleteAll(specKind = specKind)
+                    database.feeds().deleteAllByOwnerIdAndSpecKind(ownerId = userId, specKind = specKind)
                     database.feeds().upsertAll(data = feeds)
                 }
             }
@@ -79,9 +86,10 @@ class FeedsRepository @Inject constructor(
         specKind: FeedSpecKind,
     ) {
         val localFeeds = withContext(dispatcherProvider.io()) {
-            database.feeds().observeAllFeeds(specKind = specKind).first()
+            database.feeds().getAllFeedsBySpecKind(ownerId = userId, specKind = specKind)
         }
-        val defaultFeeds = givenDefaultFeeds.ifEmpty { fetchDefaultFeeds(specKind = specKind) ?: emptyList() }
+        val defaultFeeds = givenDefaultFeeds
+            .ifEmpty { fetchDefaultFeeds(userId = userId, specKind = specKind) ?: emptyList() }
 
         val localFeedSpecs = localFeeds.map { it.spec }.toSet()
         val newFeeds = defaultFeeds.filterNot { localFeedSpecs.contains(it.spec) }
@@ -93,14 +101,14 @@ class FeedsRepository @Inject constructor(
         }
     }
 
-    suspend fun fetchDefaultFeeds(specKind: FeedSpecKind): List<Feed>? {
+    suspend fun fetchDefaultFeeds(userId: String, specKind: FeedSpecKind): List<Feed>? {
         return withContext(dispatcherProvider.io()) {
             val response = feedsApi.getDefaultUserFeeds(specKind = specKind)
             val content = NostrJson.decodeFromStringOrNull<List<ContentArticleFeedData>>(
                 string = response.articleFeeds.content,
             )
 
-            content?.map { it.asFeedPO(specKind = specKind) }
+            content?.map { it.asFeedPO(ownerId = userId, specKind = specKind) }
         }
     }
 
@@ -111,7 +119,7 @@ class FeedsRepository @Inject constructor(
 
     private suspend fun persistRemotelyLocalUserFeedsBySpecKind(userId: String, specKind: FeedSpecKind) {
         val feeds = withContext(dispatcherProvider.io()) {
-            database.feeds().getAllFeedsBySpecKind(specKind = specKind)
+            database.feeds().getAllFeedsBySpecKind(ownerId = userId, specKind = specKind)
         }
 
         feedsApi.setUserFeeds(
@@ -128,7 +136,7 @@ class FeedsRepository @Inject constructor(
     ) {
         withContext(dispatcherProvider.io()) {
             database.withTransaction {
-                database.feeds().deleteAll(specKind = specKind)
+                database.feeds().deleteAllByOwnerIdAndSpecKind(ownerId = userId, specKind = specKind)
                 database.feeds().upsertAll(data = feeds)
             }
 
@@ -147,7 +155,8 @@ class FeedsRepository @Inject constructor(
         givenDefaultFeeds: List<Feed>,
         specKind: FeedSpecKind,
     ) = withContext(dispatcherProvider.io()) {
-        val feeds = givenDefaultFeeds.ifEmpty { fetchDefaultFeeds(specKind = specKind) ?: return@withContext }
+        val feeds = givenDefaultFeeds
+            .ifEmpty { fetchDefaultFeeds(userId = userId, specKind = specKind) ?: return@withContext }
         persistLocallyAndRemotelyUserFeeds(userId = userId, feeds = feeds, specKind = specKind)
     }
 
@@ -220,9 +229,14 @@ class FeedsRepository @Inject constructor(
         return dvmFeeds
     }
 
-    suspend fun addDvmFeedLocally(dvmFeed: DvmFeed, specKind: FeedSpecKind) {
+    suspend fun addDvmFeedLocally(
+        userId: String,
+        dvmFeed: DvmFeed,
+        specKind: FeedSpecKind,
+    ) {
         withContext(dispatcherProvider.io()) {
             val feed = Feed(
+                ownerId = userId,
                 spec = dvmFeed.buildSpec(specKind = specKind),
                 specKind = specKind,
                 title = dvmFeed.title,
@@ -234,6 +248,7 @@ class FeedsRepository @Inject constructor(
     }
 
     suspend fun addFeedLocally(
+        userId: String,
         feedSpec: String,
         title: String,
         description: String,
@@ -242,6 +257,7 @@ class FeedsRepository @Inject constructor(
     ) {
         withContext(dispatcherProvider.io()) {
             val feed = Feed(
+                ownerId = userId,
                 spec = feedSpec,
                 specKind = feedSpecKind,
                 feedKind = feedKind,
@@ -253,9 +269,9 @@ class FeedsRepository @Inject constructor(
         }
     }
 
-    suspend fun removeFeedLocally(feedSpec: String) {
+    suspend fun removeFeedLocally(userId: String, feedSpec: String) {
         withContext(dispatcherProvider.io()) {
-            database.feeds().delete(feedSpec)
+            database.feeds().deleteAllByOwnerIdAndSpec(ownerId = userId, spec = feedSpec)
         }
     }
 }

@@ -54,7 +54,7 @@ class ChatViewModel @Inject constructor(
         UiState(
             participantId = participantId,
             messages = messageRepository
-                .newestMessages(participantId = participantId)
+                .newestMessages(userId = userId, participantId = participantId)
                 .mapAsPagingDataOfChatMessageUi(),
         ),
     )

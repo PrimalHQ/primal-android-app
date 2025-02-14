@@ -21,12 +21,10 @@ import net.primal.android.messages.db.MessageConversation
 import net.primal.android.messages.db.MessageConversationData
 import net.primal.android.messages.domain.ConversationRelation
 import net.primal.android.nostr.publish.NostrPublisher
-import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 
 @OptIn(ExperimentalPagingApi::class)
 class MessageRepository @Inject constructor(
-    private val activeAccountStore: ActiveAccountStore,
     private val credentialsStore: CredentialsStore,
     private val database: PrimalDatabase,
     private val messagesApi: MessagesApi,
@@ -34,18 +32,17 @@ class MessageRepository @Inject constructor(
     private val nostrPublisher: NostrPublisher,
 ) {
 
-    fun newestConversations(relation: ConversationRelation) =
+    fun newestConversations(userId: String, relation: ConversationRelation) =
         createConversationsPager {
-            database.messageConversations().newestConversationsPaged(relation = relation)
+            database.messageConversations().newestConversationsPagedByOwnerId(ownerId = userId, relation = relation)
         }.flow
 
-    fun newestMessages(participantId: String) =
-        createMessagesPager(participantId = participantId) {
-            database.messages().newestMessagesPaged(participantId = participantId)
+    fun newestMessages(userId: String, participantId: String) =
+        createMessagesPager(userId = userId, participantId = participantId) {
+            database.messages().newestMessagesPagedByOwnerId(ownerId = userId, participantId = participantId)
         }.flow
 
-    private suspend fun fetchConversations(relation: ConversationRelation) {
-        val userId = activeAccountStore.activeUserId()
+    private suspend fun fetchConversations(userId: String, relation: ConversationRelation) {
         val response = withContext(Dispatchers.IO) {
             messagesApi.getConversations(
                 userId = userId,
@@ -63,6 +60,7 @@ class MessageRepository @Inject constructor(
             }
             .map { (participantId, summary) ->
                 MessageConversationData(
+                    ownerId = userId,
                     participantId = participantId,
                     participantMetadataId = response.profileMetadata
                         .find { it.pubKey == participantId }
@@ -91,19 +89,21 @@ class MessageRepository @Inject constructor(
         }
     }
 
-    suspend fun fetchFollowConversations() =
+    suspend fun fetchFollowConversations(userId: String) =
         fetchConversations(
+            userId = userId,
             relation = ConversationRelation.Follows,
         )
 
-    suspend fun fetchNonFollowsConversations() =
+    suspend fun fetchNonFollowsConversations(userId: String) =
         fetchConversations(
+            userId = userId,
             relation = ConversationRelation.Other,
         )
 
     suspend fun fetchNewConversationMessages(userId: String, conversationUserId: String) {
         withContext(Dispatchers.IO) {
-            val latestMessage = database.messages().first(participantId = conversationUserId)
+            val latestMessage = database.messages().firstByOwnerId(ownerId = userId, participantId = conversationUserId)
             val response = messagesApi.getMessages(
                 body = MessagesRequestBody(
                     userId = userId,
@@ -131,6 +131,7 @@ class MessageRepository @Inject constructor(
                 conversationUserId = conversationUserId,
             )
             database.messageConversations().markConversationAsRead(
+                ownerId = userId,
                 participantId = conversationUserId,
             )
         }
@@ -139,7 +140,7 @@ class MessageRepository @Inject constructor(
     suspend fun markAllMessagesAsRead(userId: String) {
         withContext(Dispatchers.IO) {
             messagesApi.markAllMessagesAsRead(userId = userId)
-            database.messageConversations().markAllConversationAsRead()
+            database.messageConversations().markAllConversationAsRead(ownerId = userId)
         }
     }
 
@@ -187,6 +188,7 @@ class MessageRepository @Inject constructor(
         )
 
     private fun createMessagesPager(
+        userId: String,
         participantId: String,
         pagingSourceFactory: () -> PagingSource<Int, DirectMessage>,
     ) = Pager(
@@ -197,7 +199,7 @@ class MessageRepository @Inject constructor(
             enablePlaceholders = true,
         ),
         remoteMediator = MessagesRemoteMediator(
-            userId = activeAccountStore.activeUserId(),
+            userId = userId,
             participantId = participantId,
             database = database,
             messagesApi = messagesApi,
