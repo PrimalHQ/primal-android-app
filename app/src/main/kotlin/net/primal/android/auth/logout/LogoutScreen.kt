@@ -10,11 +10,19 @@ import net.primal.android.R
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun LogoutScreen(viewModel: LogoutViewModel, onClose: () -> Unit) {
+fun LogoutScreen(
+    viewModel: LogoutViewModel,
+    onClose: () -> Unit,
+    navigateToHome: () -> Unit,
+) {
     LaunchedEffect(viewModel, viewModel.effects) {
         viewModel.effects.collect {
             when (it) {
-                LogoutContract.SideEffect.LogoutSuccessful -> onClose()
+                LogoutContract.SideEffect.UserAccountLogoutSuccessful -> onClose()
+                LogoutContract.SideEffect.ActiveAccountLogoutSuccessful -> {
+                    onClose()
+                    navigateToHome()
+                }
             }
         }
     }

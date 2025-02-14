@@ -1895,5 +1895,6 @@ private fun NavGraphBuilder.logout(
     LogoutScreen(
         viewModel = viewModel,
         onClose = { navController.popBackStack() },
+        navigateToHome = { navController.navigateToHome() },
     )
 }
