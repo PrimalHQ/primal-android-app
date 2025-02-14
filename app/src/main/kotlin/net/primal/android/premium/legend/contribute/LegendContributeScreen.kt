@@ -99,6 +99,7 @@ private fun LegendContributeScreen(
                     onBack = { eventPublisher(UiEvent.GoBackToPickAmount) },
                     onPaymentInstructionRetry = { eventPublisher(UiEvent.FetchPaymentInstructions) },
                     onPrimalWalletPayment = { eventPublisher(UiEvent.PrimalWalletPayment) },
+                    onErrorDismiss = { eventPublisher(UiEvent.DismissError) },
                 )
             }
 
