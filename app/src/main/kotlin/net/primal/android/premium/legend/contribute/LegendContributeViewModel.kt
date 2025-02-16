@@ -10,8 +10,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.getMaximumUsdAmount
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.legend.contribute.LegendContributeContract.LegendContributeState
@@ -21,14 +19,12 @@ import net.primal.android.premium.legend.contribute.LegendContributeContract.UiS
 import net.primal.android.premium.legend.subscription.PurchaseMonitor
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.wallet.api.model.MiningFeeTier
 import net.primal.android.wallet.api.model.WithdrawRequestBody
 import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.domain.SubWallet
 import net.primal.android.wallet.domain.not
 import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.repository.WalletRepository
-import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
 import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.android.wallet.utils.formatUsdZeros
 import net.primal.android.wallet.utils.parseBitcoinPaymentInstructions
@@ -40,7 +36,6 @@ import timber.log.Timber
 @HiltViewModel
 class LegendContributeViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
-    private val dispatchers: CoroutineDispatcherProvider,
     private val exchangeRateHandler: ExchangeRateHandler,
     private val premiumRepository: PremiumRepository,
     private val walletRepository: WalletRepository,
@@ -108,8 +103,6 @@ class LegendContributeViewModel @Inject constructor(
 
                     UiEvent.StopPurchaseMonitor -> stopPurchaseMonitor()
 
-                    UiEvent.ReloadMiningFees -> {}
-
                     is UiEvent.ShowAmountEditor -> setState {
                         copy(
                             paymentMethod = it.paymentMethod,
@@ -168,6 +161,7 @@ class LegendContributeViewModel @Inject constructor(
                             )
                         }
                     }
+
                     PaymentMethod.BitcoinLightning -> {
                         setState {
                             copy(
@@ -177,6 +171,7 @@ class LegendContributeViewModel @Inject constructor(
                             )
                         }
                     }
+
                     null -> Unit
                 }
 
@@ -192,57 +187,9 @@ class LegendContributeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 setState { copy(primalWalletPaymentInProgress = true) }
-
                 when (state.value.paymentMethod) {
-                    PaymentMethod.OnChainBitcoin -> {
-                        val activeUserId = activeAccountStore.activeUserId()
-
-                        val uiState = _state.value
-                        val btcAddress = uiState.bitcoinAddress
-
-                        withContext(dispatchers.io()) {
-                            val tiers = btcAddress?.let {
-                                walletRepository.fetchMiningFees(
-                                    userId = activeUserId,
-                                    onChainAddress = it,
-                                    amountInBtc = state.value.qrCodeValue?.parseBitcoinPaymentInstructions()
-                                        ?.amount.toString(),
-                                )
-                            }
-
-                            val miningFeeTiers = tiers?.map { it.asMiningFeeUi() }
-
-                            val lastStandardTier = miningFeeTiers?.lastOrNull {
-                                it.id.contains("standard", ignoreCase = true)
-                            }
-
-                            val lastFastTier = lastStandardTier ?: miningFeeTiers?.lastOrNull {
-                                it.id.contains("fast", ignoreCase = true)
-                            }
-
-                            val lastTier = lastFastTier ?: miningFeeTiers?.lastOrNull()
-
-                            walletRepository.withdraw(
-                                userId = activeUserId,
-                                body = WithdrawRequestBody(
-                                    subWallet = SubWallet.Open,
-                                    targetBtcAddress = state.value.qrCodeValue?.parseBitcoinPaymentInstructions()
-                                        ?.address,
-                                    amountBtc = state.value.qrCodeValue?.parseBitcoinPaymentInstructions()?.amount,
-                                    onChainTier = lastTier?.id,
-                                ),
-                            )
-                        }
-                    }
-                    PaymentMethod.BitcoinLightning -> {
-                        walletRepository.withdraw(
-                            userId = activeAccountStore.activeUserId(),
-                            body = WithdrawRequestBody(
-                                subWallet = SubWallet.Open,
-                                lnInvoice = state.value.lightningInvoice,
-                            ),
-                        )
-                    }
+                    PaymentMethod.OnChainBitcoin -> executeOnChainPayment()
+                    PaymentMethod.BitcoinLightning -> executeLightningPayment()
                     null -> Unit
                 }
             } catch (error: WssException) {
@@ -250,6 +197,43 @@ class LegendContributeViewModel @Inject constructor(
                 setState { copy(primalWalletPaymentInProgress = false) }
             }
         }
+
+    private suspend fun executeOnChainPayment() {
+        val activeUserId = activeAccountStore.activeUserId()
+        val instructions = state.value.qrCodeValue?.parseBitcoinPaymentInstructions()
+        val targetBtcAddress = instructions?.address
+        val amountBtc = instructions?.amount
+
+        if (targetBtcAddress != null && amountBtc != null) {
+            val defaultMiningFee = walletRepository.fetchDefaultMiningFee(
+                userId = activeUserId,
+                onChainAddress = targetBtcAddress,
+                amountInBtc = amountBtc,
+            )
+
+            walletRepository.withdraw(
+                userId = activeUserId,
+                body = WithdrawRequestBody(
+                    subWallet = SubWallet.Open,
+                    targetBtcAddress = targetBtcAddress,
+                    amountBtc = amountBtc,
+                    onChainTier = defaultMiningFee?.id,
+                ),
+            )
+        }
+    }
+
+    private suspend fun executeLightningPayment() {
+        if (state.value.lightningInvoice != null) {
+            walletRepository.withdraw(
+                userId = activeAccountStore.activeUserId(),
+                body = WithdrawRequestBody(
+                    subWallet = SubWallet.Open,
+                    lnInvoice = state.value.lightningInvoice,
+                ),
+            )
+        }
+    }
 
     private fun updateAmount(amount: String) =
         when (_state.value.currencyMode) {
@@ -285,15 +269,5 @@ class LegendContributeViewModel @Inject constructor(
 
     private fun stopPurchaseMonitor() {
         purchaseMonitor.stopMonitor(viewModelScope)
-    }
-
-    private fun MiningFeeTier.asMiningFeeUi(): MiningFeeUi {
-        return MiningFeeUi(
-            id = this.id,
-            label = this.label,
-            confirmationEstimateInMin = this.estimatedDeliveryDurationInMin,
-            feeInBtc = this.estimatedFee.amount,
-            minAmountInBtc = this.minimumAmount?.amount,
-        )
     }
 }

@@ -38,7 +38,6 @@ class LegendContributeContract {
         data object PrimalWalletPayment : UiEvent()
         data class ShowAmountEditor(val paymentMethod: PaymentMethod) : UiEvent()
         data class AmountChanged(val amount: String) : UiEvent()
-        data object ReloadMiningFees : UiEvent()
     }
 
     enum class LegendContributeState {
