@@ -282,5 +282,4 @@ class LegendContributeViewModel @Inject constructor(
 
     private fun String.validateDonationAmount(): Boolean =
         (this.toIntOrNull() ?: 0) >= LegendContributeContract.MIN_DONATION_AMOUNT
-
 }
