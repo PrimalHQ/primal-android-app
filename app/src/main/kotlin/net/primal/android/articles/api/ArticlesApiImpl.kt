@@ -8,6 +8,7 @@ import net.primal.android.articles.api.model.ArticleHighlightsRequestBody
 import net.primal.android.articles.api.model.ArticleHighlightsResponse
 import net.primal.android.articles.api.model.ArticleResponse
 import net.primal.android.core.serialization.json.NostrJson
+import net.primal.android.core.serialization.json.NostrJsonImplicitNulls
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
@@ -54,7 +55,7 @@ class ArticlesApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.MEGA_FEED_DIRECTIVE,
-                optionsJson = NostrJson.encodeToString(body),
+                optionsJson = NostrJsonImplicitNulls.encodeToString(body),
             ),
         )
 
