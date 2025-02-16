@@ -145,9 +145,29 @@ class WalletRepository @Inject constructor(
         userId: String,
         onChainAddress: String,
         amountInBtc: String,
-    ): List<MiningFeeTier> {
-        return walletApi.getMiningFees(userId = userId, onChainAddress = onChainAddress, amountInBtc = amountInBtc)
-    }
+    ): List<MiningFeeTier> =
+        withContext(dispatcherProvider.io()) {
+            walletApi.getMiningFees(userId = userId, onChainAddress = onChainAddress, amountInBtc = amountInBtc)
+        }
+
+    suspend fun fetchDefaultMiningFee(
+        userId: String,
+        onChainAddress: String,
+        amountInBtc: String,
+    ): MiningFeeTier? =
+        withContext(dispatcherProvider.io()) {
+            val tiers = fetchMiningFees(
+                userId = userId,
+                onChainAddress = onChainAddress,
+                amountInBtc = amountInBtc,
+            )
+
+            tiers.lastOrNull {
+                it.id.contains("standard", ignoreCase = true)
+            } ?: tiers.lastOrNull {
+                it.id.contains("fast", ignoreCase = true)
+            } ?: tiers.lastOrNull()
+        }
 
     private suspend fun storeWalletInfoLocally(
         userId: String,

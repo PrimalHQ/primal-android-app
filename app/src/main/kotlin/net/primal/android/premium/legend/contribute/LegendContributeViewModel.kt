@@ -67,6 +67,7 @@ class LegendContributeViewModel @Inject constructor(
                     UiEvent.GoBackToPickAmount -> setState {
                         copy(
                             isFetchingPaymentInstructions = true,
+                            primalWalletPaymentInProgress = false,
                             stage = LegendContributeState.PickAmount,
                             lightningInvoice = null,
                             bitcoinAddress = null,
@@ -82,8 +83,8 @@ class LegendContributeViewModel @Inject constructor(
                         copy(currencyMode = !state.value.currencyMode)
                     }
 
-                    UiEvent.ShowPaymentInstructions -> setState {
-                        copy(stage = LegendContributeState.Payment)
+                    UiEvent.ShowPaymentInstructions -> {
+                        setState { copy(stage = LegendContributeState.Payment) }
                     }
 
                     UiEvent.ShowSuccess -> setState {
@@ -162,6 +163,7 @@ class LegendContributeViewModel @Inject constructor(
                             )
                         }
                     }
+
                     PaymentMethod.BitcoinLightning -> {
                         setState {
                             copy(
@@ -171,6 +173,7 @@ class LegendContributeViewModel @Inject constructor(
                             )
                         }
                     }
+
                     null -> Unit
                 }
 
@@ -186,34 +189,57 @@ class LegendContributeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 setState { copy(primalWalletPaymentInProgress = true) }
-
                 when (state.value.paymentMethod) {
-                    PaymentMethod.OnChainBitcoin -> {
-                        walletRepository.withdraw(
-                            userId = activeAccountStore.activeUserId(),
-                            body = WithdrawRequestBody(
-                                subWallet = SubWallet.Open,
-                                targetBtcAddress = state.value.qrCodeValue?.parseBitcoinPaymentInstructions()?.address,
-                                amountBtc = state.value.qrCodeValue?.parseBitcoinPaymentInstructions()?.amount,
-                            ),
-                        )
-                    }
-                    PaymentMethod.BitcoinLightning -> {
-                        walletRepository.withdraw(
-                            userId = activeAccountStore.activeUserId(),
-                            body = WithdrawRequestBody(
-                                subWallet = SubWallet.Open,
-                                lnInvoice = state.value.lightningInvoice,
-                            ),
-                        )
-                    }
+                    PaymentMethod.OnChainBitcoin -> executeOnChainPayment()
+                    PaymentMethod.BitcoinLightning -> executeLightningPayment()
                     null -> Unit
                 }
             } catch (error: WssException) {
-                setState { copy(error = UiState.ContributionUiError.WithdrawViaPrimalWalletFailed(error)) }
-                setState { copy(primalWalletPaymentInProgress = false) }
+                setState {
+                    copy(
+                        error = UiState.ContributionUiError.WithdrawViaPrimalWalletFailed(error),
+                        primalWalletPaymentInProgress = false,
+                    )
+                }
             }
         }
+
+    private suspend fun executeOnChainPayment() {
+        val activeUserId = activeAccountStore.activeUserId()
+        val instructions = state.value.qrCodeValue?.parseBitcoinPaymentInstructions()
+        val targetBtcAddress = instructions?.address
+        val amountBtc = instructions?.amount
+
+        if (targetBtcAddress != null && amountBtc != null) {
+            val defaultMiningFee = walletRepository.fetchDefaultMiningFee(
+                userId = activeUserId,
+                onChainAddress = targetBtcAddress,
+                amountInBtc = amountBtc,
+            )
+
+            walletRepository.withdraw(
+                userId = activeUserId,
+                body = WithdrawRequestBody(
+                    subWallet = SubWallet.Open,
+                    targetBtcAddress = targetBtcAddress,
+                    amountBtc = amountBtc,
+                    onChainTier = defaultMiningFee?.id,
+                ),
+            )
+        }
+    }
+
+    private suspend fun executeLightningPayment() {
+        if (state.value.lightningInvoice != null) {
+            walletRepository.withdraw(
+                userId = activeAccountStore.activeUserId(),
+                body = WithdrawRequestBody(
+                    subWallet = SubWallet.Open,
+                    lnInvoice = state.value.lightningInvoice,
+                ),
+            )
+        }
+    }
 
     private fun updateAmount(amount: String) =
         when (_state.value.currencyMode) {
@@ -222,7 +248,7 @@ class LegendContributeViewModel @Inject constructor(
                     copy(
                         amountInSats = amount,
                         amountInUsd = amount.parseSatsToUsd(state.value.currentExchangeRate),
-                        isDonationAmountValid = amount.validateDonationAmount()
+                        isDonationAmountValid = amount.validateDonationAmount(),
                     )
                 }
             }
@@ -233,7 +259,7 @@ class LegendContributeViewModel @Inject constructor(
                         amountInSats = amount.parseUsdToSats(state.value.currentExchangeRate),
                         amountInUsd = amount,
                         isDonationAmountValid = amount.parseUsdToSats(state.value.currentExchangeRate)
-                            .validateDonationAmount()
+                            .validateDonationAmount(),
                     )
                 }
             }
@@ -256,5 +282,4 @@ class LegendContributeViewModel @Inject constructor(
 
     private fun String.validateDonationAmount(): Boolean =
         (this.toIntOrNull() ?: 0) >= LegendContributeContract.MIN_DONATION_AMOUNT
-
 }
