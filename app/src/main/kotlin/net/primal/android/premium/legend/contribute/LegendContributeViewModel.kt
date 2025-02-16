@@ -195,8 +195,12 @@ class LegendContributeViewModel @Inject constructor(
                     null -> Unit
                 }
             } catch (error: WssException) {
-                setState { copy(error = UiState.ContributionUiError.WithdrawViaPrimalWalletFailed(error)) }
-                setState { copy(primalWalletPaymentInProgress = false) }
+                setState {
+                    copy(
+                        error = UiState.ContributionUiError.WithdrawViaPrimalWalletFailed(error),
+                        primalWalletPaymentInProgress = false,
+                    )
+                }
             }
         }
 
@@ -244,7 +248,7 @@ class LegendContributeViewModel @Inject constructor(
                     copy(
                         amountInSats = amount,
                         amountInUsd = amount.parseSatsToUsd(state.value.currentExchangeRate),
-                        isDonationAmountValid = amount.validateDonationAmount()
+                        isDonationAmountValid = amount.validateDonationAmount(),
                     )
                 }
             }
@@ -255,7 +259,7 @@ class LegendContributeViewModel @Inject constructor(
                         amountInSats = amount.parseUsdToSats(state.value.currentExchangeRate),
                         amountInUsd = amount,
                         isDonationAmountValid = amount.parseUsdToSats(state.value.currentExchangeRate)
-                            .validateDonationAmount()
+                            .validateDonationAmount(),
                     )
                 }
             }
