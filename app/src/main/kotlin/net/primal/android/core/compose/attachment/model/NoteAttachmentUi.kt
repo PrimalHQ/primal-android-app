@@ -14,6 +14,7 @@ data class NoteAttachmentUi(
     val description: String? = null,
     val thumbnailUrl: String? = null,
     val authorAvatarUrl: String? = null,
+    val position: Int,
 )
 
 fun NoteAttachment.asNoteAttachmentUi() =
@@ -27,6 +28,7 @@ fun NoteAttachment.asNoteAttachmentUi() =
         description = this.description,
         thumbnailUrl = this.thumbnail,
         authorAvatarUrl = this.authorAvatarUrl,
+        position = this.position,
     )
 
 fun NoteAttachmentUi.isMediaAttachment() = type == NoteAttachmentType.Image || type == NoteAttachmentType.Video

@@ -17,6 +17,7 @@ data class NoteNostrUriUi(
     val referencedArticle: ReferencedArticle?,
     val referencedUser: ReferencedUser?,
     val referencedZap: ReferencedZap?,
+    val position: Int,
 )
 
 fun NoteNostrUri.asNoteNostrUriUi() =
@@ -29,4 +30,5 @@ fun NoteNostrUri.asNoteNostrUriUi() =
         referencedArticle = this.referencedArticle,
         referencedUser = this.referencedUser,
         referencedZap = referencedZap,
+        position = this.position,
     )

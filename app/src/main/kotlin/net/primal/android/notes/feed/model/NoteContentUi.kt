@@ -22,8 +22,8 @@ fun FeedPostUi.toNoteContentUi(): NoteContentUi {
     return NoteContentUi(
         noteId = this.postId,
         content = this.content,
-        attachments = this.attachments,
-        nostrUris = this.nostrUris,
+        attachments = this.attachments.sortedBy { it.position },
+        nostrUris = this.nostrUris.sortedBy { it.position },
         hashtags = this.hashtags,
         invoices = invoices,
         blossoms = this.authorBlossoms,
@@ -36,8 +36,8 @@ fun ChatMessageUi.toNoteContentUi(): NoteContentUi {
     return NoteContentUi(
         noteId = this.messageId,
         content = this.content,
-        attachments = this.attachments,
-        nostrUris = this.nostrUris,
+        attachments = this.attachments.sortedBy { it.position },
+        nostrUris = this.nostrUris.sortedBy { it.position },
         hashtags = this.hashtags,
         invoices = invoices,
         blossoms = emptyList(),
@@ -48,7 +48,7 @@ fun PostData.toNoteContentUi(nostrUris: List<NoteNostrUriUi> = emptyList()): Not
     return NoteContentUi(
         noteId = this.postId,
         content = this.content,
-        nostrUris = nostrUris,
+        nostrUris = nostrUris.sortedBy { it.position },
         hashtags = this.hashtags,
         invoices = emptyList(),
         blossoms = emptyList(),

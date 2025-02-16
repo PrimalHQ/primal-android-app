@@ -103,6 +103,8 @@ class LegendContributeViewModel @Inject constructor(
 
                     UiEvent.StopPurchaseMonitor -> stopPurchaseMonitor()
 
+                    UiEvent.DismissError -> setState { copy(error = null) }
+
                     is UiEvent.ShowAmountEditor -> setState {
                         copy(
                             paymentMethod = it.paymentMethod,
@@ -193,7 +195,7 @@ class LegendContributeViewModel @Inject constructor(
                     null -> Unit
                 }
             } catch (error: WssException) {
-                Timber.e(error)
+                setState { copy(error = UiState.ContributionUiError.WithdrawViaPrimalWalletFailed(error)) }
                 setState { copy(primalWalletPaymentInProgress = false) }
             }
         }
@@ -242,6 +244,7 @@ class LegendContributeViewModel @Inject constructor(
                     copy(
                         amountInSats = amount,
                         amountInUsd = amount.parseSatsToUsd(state.value.currentExchangeRate),
+                        isDonationAmountValid = amount.validateDonationAmount()
                     )
                 }
             }
@@ -251,6 +254,8 @@ class LegendContributeViewModel @Inject constructor(
                     copy(
                         amountInSats = amount.parseUsdToSats(state.value.currentExchangeRate),
                         amountInUsd = amount,
+                        isDonationAmountValid = amount.parseUsdToSats(state.value.currentExchangeRate)
+                            .validateDonationAmount()
                     )
                 }
             }
@@ -270,4 +275,8 @@ class LegendContributeViewModel @Inject constructor(
     private fun stopPurchaseMonitor() {
         purchaseMonitor.stopMonitor(viewModelScope)
     }
+
+    private fun String.validateDonationAmount(): Boolean =
+        (this.toIntOrNull() ?: 0) >= LegendContributeContract.MIN_DONATION_AMOUNT
+
 }
