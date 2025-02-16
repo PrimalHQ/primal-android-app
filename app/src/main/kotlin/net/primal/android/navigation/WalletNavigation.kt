@@ -8,7 +8,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import kotlinx.serialization.encodeToString
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.serialization.json.NostrJson
@@ -155,6 +154,7 @@ private fun NavGraphBuilder.dashboard(
         onSendClick = { navController.navigateToWalletSendPayment(tab = SendPaymentTab.Nostr) },
         onScanClick = { navController.navigateToWalletSendPayment(tab = SendPaymentTab.Scan) },
         onReceiveClick = { navController.navigateToWalletReceive() },
+        accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
     )
 }
 

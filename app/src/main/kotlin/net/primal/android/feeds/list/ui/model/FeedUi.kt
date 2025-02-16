@@ -5,6 +5,7 @@ import net.primal.android.feeds.domain.FEED_KIND_PRIMAL
 import net.primal.android.feeds.domain.FeedSpecKind
 
 data class FeedUi(
+    val ownerId: String,
     val spec: String,
     val specKind: FeedSpecKind,
     val feedKind: String,
@@ -16,6 +17,7 @@ data class FeedUi(
 
 fun Feed.asFeedUi() =
     FeedUi(
+        ownerId = this.ownerId,
         spec = this.spec,
         specKind = this.specKind,
         title = this.title,
@@ -27,6 +29,7 @@ fun Feed.asFeedUi() =
 
 fun FeedUi.asFeedPO() =
     Feed(
+        ownerId = this.ownerId,
         spec = this.spec,
         specKind = this.specKind,
         title = this.title,

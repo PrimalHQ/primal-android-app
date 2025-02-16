@@ -1,6 +1,5 @@
 package net.primal.android.nostr.ext
 
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
 import net.primal.android.core.serialization.json.NostrJson
@@ -56,6 +55,7 @@ fun NostrEvent.mapAsMessageDataPO(userId: String, nsec: String): DirectMessageDa
     }
 
     return DirectMessageData(
+        ownerId = userId,
         messageId = this.id,
         senderId = senderId,
         receiverId = receiverId,

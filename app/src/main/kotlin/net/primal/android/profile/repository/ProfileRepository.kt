@@ -272,11 +272,12 @@ class ProfileRepository @Inject constructor(
             usersApi.isUserFollowing(userId, targetUserId)
         }
 
-    fun markAsInteracted(profileId: String) {
-        database.profileInteractions().insertOrUpdate(
+    fun markAsInteracted(profileId: String, ownerId: String) {
+        database.profileInteractions().upsert(
             ProfileInteraction(
                 profileId = profileId,
                 lastInteractionAt = Instant.now().epochSecond,
+                ownerId = ownerId,
             ),
         )
     }

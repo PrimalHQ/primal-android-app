@@ -546,7 +546,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private fun markProfileInteraction(profileId: String) {
         viewModelScope.launch {
             withContext(dispatcherProvider.io()) {
-                profileRepository.markAsInteracted(profileId = profileId)
+                profileRepository.markAsInteracted(profileId = profileId, ownerId = activeAccountStore.activeUserId())
             }
         }
     }

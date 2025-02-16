@@ -61,7 +61,7 @@ class CredentialsSerializationTest {
             val serializer = CredentialsSerialization(encryption = encryptionMock)
 
             val outputStream = mockk<OutputStream>()
-            serializer.writeTo(listOf(), outputStream)
+            serializer.writeTo(setOf(), outputStream)
 
             coVerify {
                 encryptionMock.encrypt(

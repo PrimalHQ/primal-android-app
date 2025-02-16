@@ -47,6 +47,7 @@ import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.drawer.DrawerScreenDestination
+import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.editor.NoteEditorScreen
 import net.primal.android.editor.di.noteEditorViewModel
 import net.primal.android.editor.domain.NoteEditorArgs
@@ -155,7 +156,7 @@ private fun NavController.navigateToOnboarding() = navigate(route = "onboarding"
 
 private fun NavController.navigateToWalletOnboarding() = navigate(route = "onboardingWallet")
 
-private fun NavController.navigateToLogout() = navigate(route = "logout")
+private fun NavController.navigateToLogout(profileId: String) = navigate(route = "logout?$PROFILE_ID=$profileId")
 
 private fun NavController.navigateToSearch(searchScope: SearchScope) =
     navigate(route = "search?$SEARCH_SCOPE=$searchScope")
@@ -317,6 +318,13 @@ private fun NavController.navigateToPremiumChangePrimalName() = navigate(route =
 private fun NavController.navigateToPremiumOrderHistory() = navigate(route = "premium/manage/order")
 private fun NavController.navigateToPremiumRelay() = navigate(route = "premium/manage/relay")
 
+fun accountSwitcherCallbacksHandler(navController: NavController) =
+    AccountSwitcherCallbacks(
+        onActiveAccountChanged = { navController.navigateToHome() },
+        onAddExistingAccountClick = { navController.navigateToLogin() },
+        onCreateNewAccountClick = { navController.navigateToOnboarding() },
+    )
+
 fun noteCallbacksHandler(navController: NavController) =
     NoteCallbacks(
         onNoteClick = { noteId -> navController.navigateToThread(noteId = noteId) },
@@ -407,7 +415,7 @@ fun SharedTransitionScope.PrimalAppNavigation() {
             DrawerScreenDestination.Messages -> navController.navigateToMessages()
             is DrawerScreenDestination.Bookmarks -> navController.navigateToBookmarks()
             DrawerScreenDestination.Settings -> navController.navigateToSettings()
-            DrawerScreenDestination.SignOut -> navController.navigateToLogout()
+            is DrawerScreenDestination.SignOut -> navController.navigateToLogout(profileId = it.userId)
         }
     }
 
@@ -470,7 +478,16 @@ fun SharedTransitionScope.PrimalAppNavigation() {
 
         onboardingWalletActivation(route = "onboardingWallet", navController)
 
-        logout(route = "logout", navController = navController)
+        logout(
+            route = "logout?$PROFILE_ID={$PROFILE_ID}",
+            arguments = listOf(
+                navArgument(PROFILE_ID) {
+                    type = NavType.StringType
+                    nullable = false
+                },
+            ),
+            navController = navController,
+        )
 
         home(
             route = "home",
@@ -906,6 +923,7 @@ private fun NavGraphBuilder.home(
         onGoToWallet = { navController.navigateToWallet() },
         onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
         onNewPostClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent?.asNoteEditorArgs()) },
+        accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
     )
 }
 
@@ -947,6 +965,7 @@ private fun NavGraphBuilder.reads(
         onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Reads) },
         onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr) },
         onGetPremiumClick = { navController.navigateToPremiumBuying() },
+        accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
     )
 }
 
@@ -1010,6 +1029,7 @@ private fun NavGraphBuilder.explore(
         onAdvancedSearchClick = { navController.navigateToAdvancedSearch() },
         noteCallbacks = noteCallbacksHandler(navController),
         onGoToWallet = { navController.navigateToWallet() },
+        accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
     )
 }
 
@@ -1624,6 +1644,7 @@ private fun NavGraphBuilder.notifications(
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
+        accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
     )
 }
 
@@ -1861,14 +1882,19 @@ private fun NavGraphBuilder.profileQrCodeViewer(
     }
 }
 
-private fun NavGraphBuilder.logout(route: String, navController: NavController) =
-    dialog(
-        route = route,
-    ) {
-        val viewModel: LogoutViewModel = hiltViewModel(it)
-        LockToOrientationPortrait()
-        LogoutScreen(
-            viewModel = viewModel,
-            onClose = { navController.popBackStack() },
-        )
-    }
+private fun NavGraphBuilder.logout(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = dialog(
+    route = route,
+    arguments = arguments,
+) {
+    val viewModel: LogoutViewModel = hiltViewModel(it)
+    LockToOrientationPortrait()
+    LogoutScreen(
+        viewModel = viewModel,
+        onClose = { navController.popBackStack() },
+        navigateToHome = { navController.navigateToHome() },
+    )
+}

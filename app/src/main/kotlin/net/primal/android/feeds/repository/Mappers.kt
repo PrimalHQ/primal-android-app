@@ -4,8 +4,9 @@ import net.primal.android.feeds.db.Feed
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
 
-fun ContentArticleFeedData.asFeedPO(specKind: FeedSpecKind): Feed {
+fun ContentArticleFeedData.asFeedPO(ownerId: String, specKind: FeedSpecKind): Feed {
     return Feed(
+        ownerId = ownerId,
         spec = this.spec,
         specKind = specKind,
         title = this.name,
