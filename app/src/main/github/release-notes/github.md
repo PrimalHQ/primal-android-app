@@ -1,3 +1,11 @@
 ## Changes
-- Implemented pagination on premium leaderboard (#306)
-- Fix edited shoutout not visible (#307)
+- Implement ellipsis links in note content (#324)
+- Implement fetching default mining fee for on-chain contribution (#320)
+- Fix IndexOutOfBoundsException in ContextualZapsFlowRow
+- Implement showing error if wallet payment fails for legend contribution (#318)
+- Fix order for media and links (#315)
+- Enforce minimal legend contribution amount of 10_000 sats (#319)
+- Implement legends contributions (#317)
+- Ensure white space before user mentions in note's content (#311)
+- Add extra white space (after) when tagging a user in note
+- Fix transaction description color on tx info screen (#310)
