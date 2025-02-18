@@ -1033,6 +1033,7 @@ private fun NavGraphBuilder.exploreFeed(
         onClose = { navController.navigateUp() },
         noteCallbacks = noteCallbacksHandler(navController),
         onGoToWallet = { navController.navigateToWallet() },
+        onNewPostClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent?.asNoteEditorArgs()) },
     )
 }
 
@@ -1624,6 +1625,7 @@ private fun NavGraphBuilder.notifications(
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
+        onNewPostClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent?.asNoteEditorArgs()) },
     )
 }
 
@@ -1783,6 +1785,7 @@ private fun NavGraphBuilder.profile(
                 navController.navigateToPremiumCard(profileId = profileId)
             }
         },
+        onNewPostClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent?.asNoteEditorArgs()) },
     )
 }
 

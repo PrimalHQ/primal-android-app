@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -47,6 +48,7 @@ import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
+import net.primal.android.core.compose.fab.NewPostFloatingActionButton
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -78,6 +80,7 @@ fun NotificationsScreen(
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
+    onNewPostClick: (content: TextFieldValue?) -> Unit,
 ) {
     val noteViewModel = hiltViewModel<NoteViewModel>()
 
@@ -104,6 +107,7 @@ fun NotificationsScreen(
         onGoToWallet = onGoToWallet,
         noteCallbacks = noteCallbacks,
         noteEventPublisher = noteViewModel::setEvent,
+        onNewPostClick = onNewPostClick,
     )
 }
 
@@ -119,6 +123,7 @@ fun NotificationsScreen(
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
     noteEventPublisher: (NoteContract.UiEvent) -> Unit,
+    onNewPostClick: (content: TextFieldValue?) -> Unit,
 ) {
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
@@ -230,6 +235,9 @@ fun NotificationsScreen(
                     },
                 )
             }
+        },
+        floatingActionButton = {
+            NewPostFloatingActionButton(onNewPostClick = onNewPostClick)
         },
     )
 }

@@ -27,6 +27,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
@@ -35,6 +36,7 @@ import net.primal.android.articles.feed.ArticleFeedList
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.button.PrimalLoadingButton
+import net.primal.android.core.compose.fab.NewPostFloatingActionButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.errors.UiError
@@ -58,6 +60,7 @@ fun ExploreFeedScreen(
     onClose: () -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
+    onNewPostClick: (content: TextFieldValue?) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -67,6 +70,7 @@ fun ExploreFeedScreen(
         noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
         eventPublisher = { viewModel.setEvent(it) },
+        onNewPostClick = onNewPostClick,
     )
 }
 
@@ -78,6 +82,7 @@ fun ExploreFeedScreen(
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     eventPublisher: (ExploreFeedContract.UiEvent) -> Unit,
+    onNewPostClick: (content: TextFieldValue?) -> Unit,
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
@@ -174,6 +179,9 @@ fun ExploreFeedScreen(
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
+        },
+        floatingActionButton = {
+            NewPostFloatingActionButton(onNewPostClick = onNewPostClick)
         },
     )
 }
