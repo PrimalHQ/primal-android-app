@@ -5,9 +5,12 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
+import java.time.Instant
+import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.withContext
 import net.primal.android.articles.api.ArticlesApi
 import net.primal.android.articles.api.model.ArticleFeedRequestBody
+import net.primal.android.articles.api.model.ArticleResponse
 import net.primal.android.articles.db.Article
 import net.primal.android.articles.db.ArticleFeedCrossRef
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
@@ -15,6 +18,9 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.primal.retryNetworkCall
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.mapNotNullAsArticleDataPO
+import net.primal.android.nostr.model.NostrEvent
+import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
+import net.primal.android.notes.db.FeedPostRemoteKey
 
 @OptIn(ExperimentalPagingApi::class)
 class ArticleFeedMediator(
@@ -25,16 +31,31 @@ class ArticleFeedMediator(
     private val dispatcherProvider: CoroutineDispatcherProvider,
 ) : RemoteMediator<Int, Article>() {
 
+    private val lastRequests: MutableMap<LoadType, Pair<ArticleFeedRequestBody, Long>> = mutableMapOf()
+
+    override suspend fun initialize(): InitializeAction {
+        val latestRemoteKey = withContext(dispatcherProvider.io()) {
+            database.feedPostsRemoteKeys().findLatestByDirective(directive = feedSpec)
+        }
+
+        return latestRemoteKey?.let {
+            if (it.cachedAt.isTimestampOlderThan(duration = INITIALIZE_CACHE_EXPIRY)) {
+                InitializeAction.LAUNCH_INITIAL_REFRESH
+            } else {
+                InitializeAction.SKIP_INITIAL_REFRESH
+            }
+        } ?: InitializeAction.LAUNCH_INITIAL_REFRESH
+    }
+
     @Suppress("ReturnCount")
     override suspend fun load(loadType: LoadType, state: PagingState<Int, Article>): MediatorResult {
         val nextUntil = when (loadType) {
             LoadType.APPEND -> {
-                val lastItem = state.lastItemOrNull()
-                if (lastItem == null) {
+                val latestRemoteKey = findLastRemoteKey()
+                if (latestRemoteKey == null) {
                     return MediatorResult.Success(endOfPaginationReached = true)
                 }
-
-                lastItem.data.createdAt
+                latestRemoteKey.sinceId
             }
 
             LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
@@ -42,50 +63,107 @@ class ArticleFeedMediator(
         }
 
         return try {
-            val response = withContext(dispatcherProvider.io()) {
-                retryNetworkCall {
-                    articlesApi.getArticleFeed(
-                        body = ArticleFeedRequestBody(
-                            spec = feedSpec,
-                            userId = userId,
-                            limit = state.config.pageSize,
-                            until = nextUntil,
-                        ),
-                    )
-                }
-            }
+            val response = fetchArticles(
+                pageSize = state.config.pageSize,
+                nextUntil = nextUntil,
+                loadType = loadType,
+            )
 
-            val connections = response.articles.mapNotNullAsArticleDataPO().map {
-                ArticleFeedCrossRef(
-                    spec = feedSpec,
-                    articleId = it.articleId,
-                    articleAuthorId = it.authorId,
+            processAndPersistToDatabase(response = response, clearFeed = loadType == LoadType.REFRESH)
+
+            MediatorResult.Success(endOfPaginationReached = false)
+        } catch (error: WssException) {
+            MediatorResult.Error(error)
+        } catch (_: RepeatingRequestBodyException) {
+            MediatorResult.Success(endOfPaginationReached = true)
+        }
+    }
+
+    @Throws(RepeatingRequestBodyException::class)
+    private suspend fun fetchArticles(
+        pageSize: Int,
+        nextUntil: Long?,
+        loadType: LoadType,
+    ): ArticleResponse {
+        val request = ArticleFeedRequestBody(
+            spec = feedSpec,
+            userId = userId,
+            limit = pageSize,
+            until = nextUntil,
+        )
+
+        lastRequests[loadType]?.let { (lastRequest, lastRequestAt) ->
+            if (request == lastRequest && !lastRequestAt.isTimestampOlderThan(duration = LAST_REQUEST_EXPIRY)) {
+                throw RepeatingRequestBodyException()
+            }
+        }
+
+        val response = withContext(dispatcherProvider.io()) {
+            retryNetworkCall {
+                articlesApi.getArticleFeed(
+                    body = request,
+                )
+            }
+        }
+
+        lastRequests[loadType] = request to Instant.now().epochSecond
+        return response
+    }
+
+    private suspend fun findLastRemoteKey(): FeedPostRemoteKey? =
+        withContext(dispatcherProvider.io()) {
+            database.feedPostsRemoteKeys().findLatestByDirective(directive = feedSpec)
+        }
+
+    private suspend fun processAndPersistToDatabase(response: ArticleResponse, clearFeed: Boolean) {
+        val connections = response.articles.mapNotNullAsArticleDataPO().map {
+            ArticleFeedCrossRef(
+                spec = feedSpec,
+                articleId = it.articleId,
+                articleAuthorId = it.authorId,
+            )
+        }
+
+        withContext(dispatcherProvider.io()) {
+            database.withTransaction {
+                if (clearFeed) {
+                    database.feedPostsRemoteKeys().deleteByDirective(feedSpec)
+                    database.articleFeedsConnections().deleteConnectionsBySpec(spec = feedSpec)
+                }
+
+                database.articleFeedsConnections().connect(data = connections)
+
+                response.persistToDatabaseAsTransaction(
+                    userId = userId,
+                    database = database,
                 )
             }
 
-            withContext(dispatcherProvider.io()) {
-                database.withTransaction {
-                    if (loadType == LoadType.REFRESH) {
-                        database.articleFeedsConnections().deleteConnectionsBySpec(spec = feedSpec)
-                    }
-
-                    if (connections.isNotEmpty()) {
-                        database.articleFeedsConnections().connect(data = connections)
-                    }
-
-                    response.persistToDatabaseAsTransaction(
-                        userId = userId,
-                        database = database,
-                    )
-                }
-            }
-
-            MediatorResult.Success(
-                endOfPaginationReached = state.lastItemOrNull()?.data?.articleId
-                    == connections.firstOrNull()?.articleId,
-            )
-        } catch (error: WssException) {
-            MediatorResult.Error(error)
+            response.articles.processRemoteKeys(pagingEvent = response.paging)
         }
+    }
+
+    private fun List<NostrEvent>.processRemoteKeys(pagingEvent: ContentPrimalPaging?) {
+        if (pagingEvent?.sinceId != null && pagingEvent.untilId != null) {
+            val remoteKeys = this.map {
+                FeedPostRemoteKey(
+                    eventId = it.id,
+                    directive = feedSpec,
+                    sinceId = pagingEvent.sinceId,
+                    untilId = pagingEvent.untilId,
+                    cachedAt = Instant.now().epochSecond,
+                )
+            }
+            database.feedPostsRemoteKeys().upsert(remoteKeys)
+        }
+    }
+
+    private fun Long.isTimestampOlderThan(duration: Long) = (Instant.now().epochSecond - this) > duration
+
+    private inner class RepeatingRequestBodyException : RuntimeException()
+
+    companion object {
+        private val LAST_REQUEST_EXPIRY = 60.minutes.inWholeSeconds
+        private val INITIALIZE_CACHE_EXPIRY = 3.minutes.inWholeSeconds
     }
 }

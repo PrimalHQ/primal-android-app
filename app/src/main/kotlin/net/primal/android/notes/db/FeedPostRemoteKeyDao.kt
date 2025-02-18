@@ -23,6 +23,9 @@ interface FeedPostRemoteKeyDao {
         directive: String,
     ): FeedPostRemoteKey?
 
+    @Query("SELECT * FROM FeedPostRemoteKey WHERE (directive = :directive) ORDER BY cachedAt DESC LIMIT 1")
+    fun findLatestByDirective(directive: String): FeedPostRemoteKey?
+
     @Query("SELECT cachedAt FROM FeedPostRemoteKey WHERE (directive = :directive) ORDER BY cachedAt DESC LIMIT 1")
     fun lastCachedAt(directive: String): Long?
 
