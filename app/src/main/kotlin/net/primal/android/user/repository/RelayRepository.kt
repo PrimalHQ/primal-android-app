@@ -1,8 +1,11 @@
 package net.primal.android.user.repository
 
+import net.primal.android.user.domain.Relay as RelayDO
 import androidx.room.withTransaction
 import javax.inject.Inject
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.FALLBACK_RELAYS
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -10,8 +13,8 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.user.accounts.parseNip65Relays
 import net.primal.android.user.api.UsersApi
-import net.primal.android.user.domain.Relay as RelayDO
 import net.primal.android.user.domain.RelayKind
+import net.primal.android.user.domain.UserRelays
 import net.primal.android.user.domain.cleanWebSocketUrl
 import net.primal.android.user.domain.mapToRelayPO
 import net.primal.android.user.domain.toRelay
@@ -21,6 +24,7 @@ class RelayRepository @Inject constructor(
     private val primalDatabase: PrimalDatabase,
     private val usersApi: UsersApi,
     private val nostrPublisher: NostrPublisher,
+    private val dispatchers: CoroutineDispatcherProvider,
 ) {
     fun observeUserRelays(userId: String) =
         primalDatabase.relays().observeRelays(userId)
@@ -50,6 +54,18 @@ class RelayRepository @Inject constructor(
         val relayList = fetchUserRelays(userId)
         if (relayList != null) replaceUserRelays(userId, relayList)
     }
+
+    private suspend fun fetchUserRelays(userIds: List<String>): List<UserRelays> =
+        usersApi.getUserRelays(userIds).cachedRelayListEvents
+            .filterNot { it.pubKey == null }
+            .map { UserRelays(pubkey = it.pubKey!!, relays = it.tags.parseNip65Relays()) }
+
+    suspend fun fetchAndUpdateUserRelays(userIds: List<String>): List<UserRelays> =
+        withContext(dispatchers.io()) {
+            fetchUserRelays(userIds).onEach {
+                replaceUserRelays(userId = it.pubkey, relays = it.relays)
+            }
+        }
 
     private suspend fun replaceUserRelays(userId: String, relays: List<RelayDO>) {
         primalDatabase.withTransaction {

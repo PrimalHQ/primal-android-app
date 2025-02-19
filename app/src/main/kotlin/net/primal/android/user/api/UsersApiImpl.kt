@@ -20,6 +20,8 @@ import net.primal.android.user.api.model.UserProfilesRequestBody
 import net.primal.android.user.api.model.UserProfilesResponse
 import net.primal.android.user.api.model.UserRelaysResponse
 import net.primal.android.user.api.model.UserRequestBody
+import net.primal.android.user.api.model.UsersRelaysResponse
+import net.primal.android.user.api.model.UsersRequestBody
 
 class UsersApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
@@ -162,6 +164,19 @@ class UsersApiImpl @Inject constructor(
 
         return UserRelaysResponse(
             cachedRelayListEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalUserRelaysList),
+        )
+    }
+
+    override suspend fun getUserRelays(userIds: List<String>): UsersRelaysResponse {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.USER_RELAYS,
+                optionsJson = NostrJson.encodeToString(UsersRequestBody(pubkeys = userIds)),
+            ),
+        )
+
+        return UsersRelaysResponse(
+            cachedRelayListEvents = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserRelaysList),
         )
     }
 
