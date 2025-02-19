@@ -50,7 +50,6 @@ import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.editor.NoteEditorScreen
 import net.primal.android.editor.di.noteEditorViewModel
 import net.primal.android.editor.domain.NoteEditorArgs
-import net.primal.android.editor.domain.NoteEditorArgs.Companion.asNoteEditorArgs
 import net.primal.android.editor.domain.NoteEditorArgs.Companion.jsonAsNoteEditorArgs
 import net.primal.android.explore.asearch.AdvancedSearchContract
 import net.primal.android.explore.asearch.AdvancedSearchScreen
@@ -905,7 +904,7 @@ private fun NavGraphBuilder.home(
         noteCallbacks = noteCallbacksHandler(navController),
         onGoToWallet = { navController.navigateToWallet() },
         onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
-        onNewPostClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent?.asNoteEditorArgs()) },
+        onNewPostClick = { navController.navigateToNoteEditor(null) },
     )
 }
 
@@ -1010,6 +1009,7 @@ private fun NavGraphBuilder.explore(
         onAdvancedSearchClick = { navController.navigateToAdvancedSearch() },
         noteCallbacks = noteCallbacksHandler(navController),
         onGoToWallet = { navController.navigateToWallet() },
+        onNewPostClick = { navController.navigateToNoteEditor(null) },
     )
 }
 
@@ -1624,6 +1624,7 @@ private fun NavGraphBuilder.notifications(
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
+        onNewPostClick = { navController.navigateToNoteEditor(null) },
     )
 }
 
@@ -1783,6 +1784,7 @@ private fun NavGraphBuilder.profile(
                 navController.navigateToPremiumCard(profileId = profileId)
             }
         },
+        onNewPostClick = { navController.navigateToNoteEditor(null) },
     )
 }
 
