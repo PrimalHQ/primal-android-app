@@ -1,5 +1,6 @@
 package net.primal.android.core.utils
 
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -47,7 +48,7 @@ class UriUtilsTest {
         Here's a link to a secure site: https://www.example.com/path/to/resource
         And a simple link: example.com
         Don't forget the test with brackets: https://example.com/page?(query)=1&sort=desc
-    """.trimIndent()
+        """.trimIndent()
 
         val expectedUrls = content.parseUris()
 
@@ -58,9 +59,40 @@ class UriUtilsTest {
             "https://www.example.com/path/to/resource",
             "example.com",
             "https://en.m.wikipedia.org/wiki/Bit_(money)",
-            "https://example.com/page?(query)=1&sort=desc"
+            "https://example.com/page?(query)=1&sort=desc",
         )
         expectedUrls.size shouldBeExactly 7
+    }
+
+    @Test
+    fun `parseUrls should recognize urls with port numbers`() {
+        val content = """
+        A link with a port number:
+        https://www.example.com:443/resource
+    """.trimIndent()
+
+        val expectedUrls = content.parseUris()
+
+        expectedUrls.shouldNotBeNull()
+        expectedUrls shouldContainExactly listOf(
+            "https://www.example.com:443/resource"
+        )
+    }
+
+    @Test
+    fun `parseUrls should return empty for invalid urls`() {
+        val content = """
+        Some random links:
+        thisisnotalink
+        http://
+        www.
+        example@com
+    """.trimIndent()
+
+        val expectedUrls = content.parseUris()
+
+        expectedUrls.shouldNotBeNull()
+        expectedUrls.size shouldBe 0
     }
 
     @Test
