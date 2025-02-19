@@ -327,9 +327,14 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private suspend fun String.replaceUserMentionsWithUserIds(users: List<NoteTaggedUser>): String {
         var content = this
-        val userRelaysMap = relayRepository
-            .fetchAndUpdateUserRelays(userIds = users.map { it.userId })
-            .associateBy { it.pubkey }
+        val userRelaysMap = try {
+            relayRepository
+                .fetchAndUpdateUserRelays(userIds = users.map { it.userId })
+                .associateBy { it.pubkey }
+        } catch (error: WssException) {
+            Timber.w(error)
+            emptyMap()
+        }
 
         users.forEach { user ->
             val nprofile = Nprofile(
