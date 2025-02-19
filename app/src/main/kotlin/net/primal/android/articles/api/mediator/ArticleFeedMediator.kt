@@ -40,7 +40,7 @@ class ArticleFeedMediator(
         }
 
         return latestRemoteKey?.let {
-            if (it.cachedAt.isTimestampOlderThan(duration = INITIALIZE_CACHE_EXPIRY)) {
+            if (it.cachedAt.isTimestampOlderThen(duration = INITIALIZE_CACHE_EXPIRY)) {
                 InitializeAction.LAUNCH_INITIAL_REFRESH
             } else {
                 InitializeAction.SKIP_INITIAL_REFRESH
@@ -154,9 +154,9 @@ class ArticleFeedMediator(
         }
     }
 
-    private fun Long.isTimestampOlderThan(duration: Long) = (Instant.now().epochSecond - this) > duration
+    private fun Long.isTimestampOlderThen(duration: Long) = (Instant.now().epochSecond - this) > duration
 
-    private fun Long.isRequestCacheExpired() = isTimestampOlderThan(duration = LAST_REQUEST_EXPIRY)
+    private fun Long.isRequestCacheExpired() = isTimestampOlderThen(duration = LAST_REQUEST_EXPIRY)
 
     private inner class RepeatingRequestBodyException : RuntimeException()
 
