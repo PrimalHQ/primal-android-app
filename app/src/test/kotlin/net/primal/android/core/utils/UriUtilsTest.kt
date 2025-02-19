@@ -38,6 +38,32 @@ class UriUtilsTest {
     }
 
     @Test
+    fun `parseUrls should recognize various url formats`() {
+        val content = """
+        Some random links about bitcoin:
+        https://en.m.wikipedia.org/wiki/Bit_(money)
+        Check out primal.net for more info!
+        Visit us at www.primal.net or at https://primal.net
+        Here's a link to a secure site: https://www.example.com/path/to/resource
+        And a simple link: example.com
+        Don't forget the test with brackets: https://example.com/page?(query)=1&sort=desc
+    """.trimIndent()
+
+        val expectedUrls = content.parseUris()
+
+        expectedUrls shouldBe listOf(
+            "primal.net",
+            "www.primal.net",
+            "https://primal.net",
+            "https://www.example.com/path/to/resource",
+            "example.com",
+            "https://en.m.wikipedia.org/wiki/Bit_(money)",
+            "https://example.com/page?(query)=1&sort=desc"
+        )
+        expectedUrls.size shouldBeExactly 7
+    }
+
+    @Test
     fun `parseUrls should not return urls with brackets`() {
         val hugeContent = javaClass.getResource("/core/release_notes.txt")?.readText()
         hugeContent.shouldNotBeNull()
