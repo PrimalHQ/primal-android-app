@@ -170,7 +170,7 @@ class UsersApiImpl @Inject constructor(
     override suspend fun getUserRelays(userIds: List<String>): UsersRelaysResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.USER_RELAYS,
+                primalVerb = PrimalVerb.USER_RELAYS_2,
                 optionsJson = NostrJson.encodeToString(UsersRequestBody(pubkeys = userIds)),
             ),
         )
