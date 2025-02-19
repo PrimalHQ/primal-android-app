@@ -71,6 +71,17 @@ private fun String.remove(texts: List<String>): String {
     return newContent
 }
 
+private const val ELLIPSIZE_URL_THRESHOLD = 40
+private const val ELLIPSIZE_URL_TEXT = "..."
+
+private fun String.ellipsizeLongUrls(texts: List<String>): String {
+    var newContent = this
+    texts.filter { it.length > ELLIPSIZE_URL_THRESHOLD }.forEach {
+        newContent = newContent.replace(it, it.take(ELLIPSIZE_URL_THRESHOLD) + ELLIPSIZE_URL_TEXT)
+    }
+    return newContent
+}
+
 private fun String.replaceNostrProfileUrisWithHandles(resources: List<NoteNostrUriUi>): String {
     var newContent = this
     resources.forEach {
@@ -394,6 +405,7 @@ fun renderContentAsAnnotatedString(
         .clearParsedPrimalLinks()
         .limitLineBreaks(maxBreaks = 2)
         .trim()
+        .ellipsizeLongUrls(texts = linkAttachments.filter { it.title?.isNotEmpty() != true }.map { it.url })
         .ellipsize(expanded = expanded, ellipsizeText = seeMoreText)
 
     return buildAnnotatedString {
@@ -497,10 +509,16 @@ private fun AnnotatedString.Builder.addUrlAnnotation(
     content: String,
     highlightColor: Color,
 ) {
-    var startIndex = content.indexOf(url)
+    val ellipsizedUrl = if (url.length > ELLIPSIZE_URL_THRESHOLD) {
+        url.take(ELLIPSIZE_URL_THRESHOLD) + ELLIPSIZE_URL_TEXT
+    } else {
+        url
+    }
+
+    var startIndex = content.indexOf(ellipsizedUrl)
 
     while (startIndex >= 0) {
-        val endIndex = startIndex + url.length
+        val endIndex = startIndex + ellipsizedUrl.length
         addStyle(
             style = SpanStyle(color = highlightColor),
             start = startIndex,
@@ -514,7 +532,7 @@ private fun AnnotatedString.Builder.addUrlAnnotation(
             end = endIndex,
         )
 
-        startIndex = content.indexOf(url, startIndex + 1)
+        startIndex = content.indexOf(ellipsizedUrl, startIndex + 1)
     }
 }
 
