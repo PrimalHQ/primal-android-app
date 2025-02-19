@@ -42,6 +42,27 @@ object Nip19TLV {
 
     private fun String.cleanNostrScheme(): String = this.removePrefix("nostr:")
 
+    fun parseUriAsNprofileOrNull(nprofileUri: String): Nprofile? =
+        runCatching {
+            parseAsNprofile(nprofile = nprofileUri.cleanNostrScheme())
+        }.getOrNull()
+
+    private fun parseAsNprofile(nprofile: String): Nprofile? {
+        val tlv = parse(nprofile)
+        val pubkey = tlv[Type.SPECIAL.id]?.first()?.toHex()
+
+        val relays = tlv[Type.RELAY.id]?.map {
+            String(bytes = it, charset = Charsets.US_ASCII)
+        } ?: emptyList()
+
+        return pubkey?.let {
+            Nprofile(
+                pubkey = pubkey,
+                relays = relays,
+            )
+        }
+    }
+
     fun parseUriAsNeventOrNull(neventUri: String): Nevent? =
         runCatching {
             parseAsNevent(nevent = neventUri.cleanNostrScheme())
@@ -104,6 +125,24 @@ object Nip19TLV {
         }
     }
 
+    fun Nprofile.toNprofileString(): String {
+        val tlv = mutableListOf<Byte>()
+
+        // Add profile public key
+        tlv.addAll(this.pubkey.constructNprofileSpecialBytes())
+
+        // Add RELAY type if not empty
+        if (this.relays.isNotEmpty()) {
+            tlv.addAll(this.relays.constructRelayBytes())
+        }
+
+        return Bech32.encodeBytes(
+            hrp = "nprofile",
+            data = tlv.toByteArray(),
+            encoding = Bech32.Encoding.Bech32,
+        )
+    }
+
     fun Nevent.toNeventString(): String {
         val tlv = mutableListOf<Byte>()
 
@@ -157,6 +196,11 @@ object Nip19TLV {
     private fun Int.constructKindBytes(): List<Byte> {
         val kindBytes = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(this).array()
         return kindBytes.toTLVBytes(type = Type.KIND)
+    }
+
+    private fun String.constructNprofileSpecialBytes(): List<Byte> {
+        val authorBytes = this.hexToBytes()
+        return authorBytes.toTLVBytes(type = Type.SPECIAL)
     }
 
     private fun String.constructNeventSpecialBytes(): List<Byte> {

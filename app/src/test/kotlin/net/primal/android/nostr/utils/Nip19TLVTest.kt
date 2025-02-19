@@ -7,6 +7,7 @@ import net.primal.android.crypto.toHex
 import net.primal.android.crypto.toNpub
 import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import net.primal.android.nostr.utils.Nip19TLV.toNeventString
+import net.primal.android.nostr.utils.Nip19TLV.toNprofileString
 import org.junit.Test
 
 class Nip19TLVTest {
@@ -257,5 +258,86 @@ class Nip19TLVTest {
         )
 
         nevent.toNeventString() shouldBe expectedNevent
+    }
+
+    @Test
+    fun parseUriAsNprofileOrNull_returnsProperValuesForNeventNoUris() {
+        val nprofile = "nostr:nprofile1qqs9gjvm6sh9wr2z3ns6el2cg2npuz09wz3nn35pjhluenmfekd53mqxg4j84"
+
+        val expectedPubkey = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec"
+        val expectedRelays = emptyList<String>()
+
+        val result = Nip19TLV.parseUriAsNprofileOrNull(nprofile)
+
+        result.shouldNotBeNull()
+        result.pubkey shouldBe expectedPubkey
+        result.relays shouldBe expectedRelays
+    }
+
+    @Test
+    fun parseUriAsNprofileOrNull_returnsProperValuesForNeventSingleUri() {
+        val nprofile = "nostr:nprofile1qyv8wumn8ghj7urjv4kkjatd9ec8y6tdv9" +
+            "kzumn9wsqzq4zfn02zu4cdg2xwrt8atpp2v8sfu4c2xwwxsx2llnx0d8xekj8v8ee8fv"
+
+        val expectedPubkey = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec"
+        val expectedRelays = listOf("wss://premium.primal.net")
+
+        val result = Nip19TLV.parseUriAsNprofileOrNull(nprofile)
+
+        result.shouldNotBeNull()
+        result.pubkey shouldBe expectedPubkey
+        result.relays shouldBe expectedRelays
+    }
+
+    @Test
+    fun parseUriAsNprofileOrNull_returnsProperValuesForNeventMultipleUris() {
+        val nprofile = "nostr:nprofile1qyv8wumn8ghj7urjv4kkjatd9ec8y6tdv9kzu" +
+            "mn9wsq3gamnwvaz7tmjv4kxz7fwv3sk6atn9e5k7qpq23yeh4pw2ux59r8p4n74ss4xrcy72u9r88rgr90len8knnvmfrkq3s8k4w"
+
+        val expectedPubkey = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec"
+        val expectedRelays = listOf("wss://premium.primal.net", "wss://relay.damus.io")
+
+        val result = Nip19TLV.parseUriAsNprofileOrNull(nprofile)
+
+        result.shouldNotBeNull()
+        result.pubkey shouldBe expectedPubkey
+        result.relays shouldBe expectedRelays
+    }
+
+    @Test
+    fun toNprofileString_createsProperNprofile_forGivenNprofileStructureWithoutRelays() {
+        val expectedNprofile = "nprofile1qqs9gjvm6sh9wr2z3ns6el2cg2npuz09wz3nn35pjhluenmfekd53mqxg4j84"
+
+        val nprofile = Nprofile(
+            pubkey = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec",
+        )
+
+        nprofile.toNprofileString() shouldBe expectedNprofile
+    }
+
+    @Test
+    fun toNprofileString_createsProperNprofile_forGivenNprofileStructureWithSingleRelay() {
+        val expectedNprofile = "nprofile1qqs9gjvm6sh9wr2z3ns6el2cg2npuz09wz3n" +
+            "n35pjhluenmfekd53mqprpmhxue69uhhqun9d45h2mfwwpexjmtpdshxuet5n9zrjx"
+
+        val nprofile = Nprofile(
+            pubkey = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec",
+            relays = listOf("wss://premium.primal.net"),
+        )
+
+        nprofile.toNprofileString() shouldBe expectedNprofile
+    }
+
+    @Test
+    fun toNprofileString_createsProperNprofile_forGivenNprofileStructureWithMultipleRelays() {
+        val expectedNprofile = "nprofile1qqs9gjvm6sh9wr2z3ns6el2cg2npuz09wz3nn35p" +
+            "jhluenmfekd53mqprpmhxue69uhhqun9d45h2mfwwpexjmtpdshxuet5qy28wumn8ghj7un9d3shjtnyv9kh2uewd9hsqa5sds"
+
+        val nprofile = Nprofile(
+            pubkey = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec",
+            relays = listOf("wss://premium.primal.net", "wss://relay.damus.io"),
+        )
+
+        nprofile.toNprofileString() shouldBe expectedNprofile
     }
 }
