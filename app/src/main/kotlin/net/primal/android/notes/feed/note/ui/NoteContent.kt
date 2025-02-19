@@ -219,6 +219,7 @@ fun NoteContent(
                         onPostClick = noteCallbacks.onNoteClick,
                         onHashtagClick = noteCallbacks.onHashtagClick,
                         onArticleClick = noteCallbacks.onArticleClick,
+                        onPrimalLegendsLeaderboardClick = noteCallbacks.onPrimalLegendsLeaderboardClick,
                     ) ?: onClick?.invoke(offset)
                 },
             )
@@ -258,7 +259,13 @@ fun NoteContent(
                 attachments = data.attachments,
                 blossoms = data.blossoms,
                 expanded = expanded,
-                onUrlClick = onUrlClick,
+                onUrlClick = { url ->
+                    when {
+                        url.isPrimalLegendsUrl() ->
+                            noteCallbacks.onPrimalLegendsLeaderboardClick?.invoke()
+                        else -> onUrlClick?.invoke(url)
+                    }
+                },
                 onMediaClick = noteCallbacks.onMediaClick,
             )
         }
@@ -369,9 +376,16 @@ private fun AnnotatedString.Range<String>.handleAnnotationClick(
     onPostClick: ((String) -> Unit)?,
     onHashtagClick: ((String) -> Unit)?,
     onArticleClick: ((naddr: String) -> Unit)?,
+    onPrimalLegendsLeaderboardClick: (() -> Unit)?,
 ) = when (this.tag) {
     PROFILE_ID_ANNOTATION_TAG -> onProfileClick?.invoke(this.item)
-    URL_ANNOTATION_TAG -> onUrlClick?.invoke(this.item)
+    URL_ANNOTATION_TAG -> {
+        if (this.item.isPrimalLegendsUrl()) {
+            onPrimalLegendsLeaderboardClick?.invoke()
+        } else {
+            onUrlClick?.invoke(this.item)
+        }
+    }
     NOTE_ANNOTATION_TAG -> onPostClick?.invoke(this.item)
     HASHTAG_ANNOTATION_TAG -> onHashtagClick?.invoke(this.item)
     NOSTR_ADDRESS_ANNOTATION_TAG -> {
@@ -556,6 +570,12 @@ private fun AnnotatedString.Builder.addNostrAddressAnnotation(
             end = endIndex,
         )
     }
+}
+
+private const val PRIMAL_LEGENDS_URL = "primal.net/legends"
+
+private fun String.isPrimalLegendsUrl(): Boolean {
+    return this.endsWith(PRIMAL_LEGENDS_URL)
 }
 
 @Preview
