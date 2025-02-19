@@ -7,6 +7,7 @@ import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import java.time.Instant
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.withContext
 import net.primal.android.articles.api.ArticlesApi
 import net.primal.android.articles.api.model.ArticleFeedRequestBody
@@ -50,13 +51,8 @@ class ArticleFeedMediator(
     @Suppress("ReturnCount")
     override suspend fun load(loadType: LoadType, state: PagingState<Int, Article>): MediatorResult {
         val nextUntil = when (loadType) {
-            LoadType.APPEND -> {
-                val latestRemoteKey = findLastRemoteKey()
-                if (latestRemoteKey == null) {
-                    return MediatorResult.Success(endOfPaginationReached = true)
-                }
-                latestRemoteKey.sinceId
-            }
+            LoadType.APPEND -> findLastRemoteKey()?.sinceId
+                ?: return MediatorResult.Success(endOfPaginationReached = true)
 
             LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
             LoadType.REFRESH -> null
@@ -93,7 +89,7 @@ class ArticleFeedMediator(
         )
 
         lastRequests[loadType]?.let { (lastRequest, lastRequestAt) ->
-            if (request == lastRequest && !lastRequestAt.isTimestampOlderThan(duration = LAST_REQUEST_EXPIRY)) {
+            if (request == lastRequest && lastRequestAt.isRequestCacheExpired()) {
                 throw RepeatingRequestBodyException()
             }
         }
@@ -160,10 +156,12 @@ class ArticleFeedMediator(
 
     private fun Long.isTimestampOlderThan(duration: Long) = (Instant.now().epochSecond - this) > duration
 
+    private fun Long.isRequestCacheExpired() = (Instant.now().epochSecond - this) < LAST_REQUEST_EXPIRY
+
     private inner class RepeatingRequestBodyException : RuntimeException()
 
     companion object {
-        private val LAST_REQUEST_EXPIRY = 60.minutes.inWholeSeconds
+        private val LAST_REQUEST_EXPIRY = 10.seconds.inWholeSeconds
         private val INITIALIZE_CACHE_EXPIRY = 3.minutes.inWholeSeconds
     }
 }
