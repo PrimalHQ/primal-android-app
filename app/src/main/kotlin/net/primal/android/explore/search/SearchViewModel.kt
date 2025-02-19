@@ -101,9 +101,7 @@ class SearchViewModel @Inject constructor(
 
     private fun markProfileInteraction(profileId: String) {
         viewModelScope.launch {
-            withContext(dispatcherProvider.io()) {
-                profileRepository.markAsInteracted(profileId = profileId)
-            }
+            profileRepository.markAsInteracted(profileId = profileId)
         }
     }
 }

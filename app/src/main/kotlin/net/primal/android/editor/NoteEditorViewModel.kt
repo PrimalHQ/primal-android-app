@@ -26,13 +26,11 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import net.primal.android.articles.ArticleRepository
 import net.primal.android.articles.feed.ui.generateNaddr
 import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
 import net.primal.android.attachments.repository.AttachmentsRepository
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.files.FileAnalyser
 import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.crypto.hexToNpubHrp
@@ -66,7 +64,6 @@ import timber.log.Timber
 
 class NoteEditorViewModel @AssistedInject constructor(
     @Assisted private val args: NoteEditorArgs,
-    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val fileAnalyser: FileAnalyser,
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
@@ -232,9 +229,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private fun fetchNoteThreadFromNetwork(replyToNoteId: String) =
         viewModelScope.launch {
             try {
-                withContext(dispatcherProvider.io()) {
-                    feedRepository.fetchReplies(noteId = replyToNoteId)
-                }
+                feedRepository.fetchReplies(noteId = replyToNoteId)
             } catch (error: WssException) {
                 Timber.w(error)
             }
@@ -243,12 +238,10 @@ class NoteEditorViewModel @AssistedInject constructor(
     private fun fetchArticleDetailsFromNetwork(replyToArticleNaddr: Naddr) =
         viewModelScope.launch {
             try {
-                withContext(dispatcherProvider.io()) {
-                    articleRepository.fetchArticleAndComments(
-                        articleId = replyToArticleNaddr.identifier,
-                        articleAuthorId = replyToArticleNaddr.userId,
-                    )
-                }
+                articleRepository.fetchArticleAndComments(
+                    articleId = replyToArticleNaddr.identifier,
+                    articleAuthorId = replyToArticleNaddr.userId,
+                )
             } catch (error: WssException) {
                 Timber.w(error)
             }
@@ -380,19 +373,17 @@ class NoteEditorViewModel @AssistedInject constructor(
             updatedAttachment = updatedAttachment.copy(uploadError = null)
             updateNoteAttachmentState(attachment = updatedAttachment)
 
-            val uploadResult = withContext(dispatcherProvider.io()) {
-                attachmentRepository.uploadNoteAttachment(
-                    attachment = attachment,
-                    uploadId = uploadId,
-                    onProgress = { uploadedBytes, totalBytes ->
-                        updatedAttachment = updatedAttachment.copy(
-                            originalUploadedInBytes = uploadedBytes,
-                            originalSizeInBytes = totalBytes,
-                        )
-                        updateNoteAttachmentState(attachment = updatedAttachment)
-                    },
-                )
-            }
+            val uploadResult = attachmentRepository.uploadNoteAttachment(
+                attachment = attachment,
+                uploadId = uploadId,
+                onProgress = { uploadedBytes, totalBytes ->
+                    updatedAttachment = updatedAttachment.copy(
+                        originalUploadedInBytes = uploadedBytes,
+                        originalSizeInBytes = totalBytes,
+                    )
+                    updateNoteAttachmentState(attachment = updatedAttachment)
+                },
+            )
 
             updatedAttachment = updatedAttachment.copy(
                 remoteUrl = uploadResult.remoteUrl,
@@ -503,7 +494,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private fun fetchPopularUsers() =
         viewModelScope.launch {
             try {
-                val popularUsers = withContext(dispatcherProvider.io()) { exploreRepository.fetchPopularUsers() }
+                val popularUsers = exploreRepository.fetchPopularUsers()
                 setState { copy(popularUsers = popularUsers.map { it.mapAsUserProfileUi() }) }
             } catch (error: WssException) {
                 Timber.w(error)
@@ -514,9 +505,7 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             if (query.isNotEmpty()) {
                 try {
-                    val result = withContext(dispatcherProvider.io()) {
-                        exploreRepository.searchUsers(query = query, limit = 10)
-                    }
+                    val result = exploreRepository.searchUsers(query = query, limit = 10)
                     setState { copy(users = result.map { it.mapAsUserProfileUi() }) }
                 } catch (error: WssException) {
                     Timber.w(error)
@@ -545,9 +534,7 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private fun markProfileInteraction(profileId: String) {
         viewModelScope.launch {
-            withContext(dispatcherProvider.io()) {
-                profileRepository.markAsInteracted(profileId = profileId)
-            }
+            profileRepository.markAsInteracted(profileId = profileId)
         }
     }
 

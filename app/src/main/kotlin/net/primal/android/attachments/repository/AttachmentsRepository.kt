@@ -1,9 +1,10 @@
 package net.primal.android.attachments.repository
 
-import java.util.*
 import javax.inject.Inject
+import kotlinx.coroutines.withContext
 import net.primal.android.attachments.db.NoteAttachment
 import net.primal.android.attachments.domain.NoteAttachmentType
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
@@ -14,6 +15,7 @@ class AttachmentsRepository @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val fileUploader: PrimalFileUploader,
     private val database: PrimalDatabase,
+    private val dispatchers: CoroutineDispatcherProvider,
 ) {
 
     fun loadAttachments(noteId: String, types: List<NoteAttachmentType>): List<NoteAttachment> {
@@ -25,9 +27,9 @@ class AttachmentsRepository @Inject constructor(
         attachment: net.primal.android.editor.domain.NoteAttachment,
         uploadId: String,
         onProgress: ((uploadedBytes: Int, totalBytes: Int) -> Unit)? = null,
-    ): UploadResult {
+    ): UploadResult = withContext(dispatchers.io()) {
         val userId = activeAccountStore.activeUserId()
-        return fileUploader.uploadFile(
+        fileUploader.uploadFile(
             uri = attachment.localUri,
             userId = userId,
             uploadId = uploadId,
