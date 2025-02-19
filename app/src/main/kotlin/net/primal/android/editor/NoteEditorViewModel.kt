@@ -33,7 +33,6 @@ import net.primal.android.attachments.repository.AttachmentsRepository
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.core.files.FileAnalyser
 import net.primal.android.crypto.hexToNoteHrp
-import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.editor.NoteEditorContract.SideEffect
 import net.primal.android.editor.NoteEditorContract.UiEvent
 import net.primal.android.editor.NoteEditorContract.UiState
@@ -54,12 +53,15 @@ import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nevent
 import net.primal.android.nostr.utils.Nip19TLV
+import net.primal.android.nostr.utils.Nip19TLV.toNprofileString
+import net.primal.android.nostr.utils.Nprofile
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
+import net.primal.android.user.repository.RelayRepository
 import timber.log.Timber
 
 class NoteEditorViewModel @AssistedInject constructor(
@@ -73,6 +75,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val exploreRepository: ExploreRepository,
     private val profileRepository: ProfileRepository,
     private val articleRepository: ArticleRepository,
+    private val relayRepository: RelayRepository,
 ) : ViewModel() {
 
     private val referencedNoteId = args.referencedNoteId
@@ -322,12 +325,20 @@ class NoteEditorViewModel @AssistedInject constructor(
             fetchNoteReplies()
         }
 
-    private fun String.replaceUserMentionsWithUserIds(users: List<NoteTaggedUser>): String {
+    private suspend fun String.replaceUserMentionsWithUserIds(users: List<NoteTaggedUser>): String {
         var content = this
+        val userRelaysMap = relayRepository
+            .fetchAndUpdateUserRelays(userIds = users.map { it.userId })
+            .associateBy { it.pubkey }
+
         users.forEach { user ->
+            val nprofile = Nprofile(
+                pubkey = user.userId,
+                relays = userRelaysMap[user.userId]?.relays?.map { it.url } ?: emptyList(),
+            )
             content = content.replace(
                 oldValue = user.displayUsername,
-                newValue = "nostr:${user.userId.hexToNpubHrp()}",
+                newValue = "nostr:${nprofile.toNprofileString()}",
             )
         }
         return content
