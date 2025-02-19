@@ -32,7 +32,6 @@ import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
 import net.primal.android.attachments.repository.AttachmentsRepository
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.core.files.FileAnalyser
-import net.primal.android.crypto.hexToNoteHrp
 import net.primal.android.editor.NoteEditorContract.SideEffect
 import net.primal.android.editor.NoteEditorContract.UiEvent
 import net.primal.android.editor.NoteEditorContract.UiState
@@ -53,10 +52,12 @@ import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nevent
 import net.primal.android.nostr.utils.Nip19TLV
+import net.primal.android.nostr.utils.Nip19TLV.toNeventString
 import net.primal.android.nostr.utils.Nip19TLV.toNprofileString
 import net.primal.android.nostr.utils.Nprofile
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
+import net.primal.android.notes.repository.PostRepository
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -76,6 +77,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val profileRepository: ProfileRepository,
     private val articleRepository: ArticleRepository,
     private val relayRepository: RelayRepository,
+    private val postRepository: PostRepository,
 ) : ViewModel() {
 
     private val referencedNoteId = args.referencedNoteId
@@ -554,10 +556,21 @@ class NoteEditorViewModel @AssistedInject constructor(
         }
     }
 
-    private fun String.concatenateReferencedEvents() =
-        this + listOfNotNull(
-            args.referencedNoteId?.hexToNoteHrp(),
+    private suspend fun String.concatenateReferencedEvents(): String {
+        val referencedNoteNevent = referencedNoteId?.let {
+            runCatching { postRepository.findByPostId(postId = referencedNoteId) }.getOrNull()
+        }?.let {
+            Nevent(
+                kind = NostrEventKind.ShortTextNote.value,
+                userId = it.authorId,
+                eventId = it.postId,
+            )
+        }
+
+        return this + listOfNotNull(
+            referencedNoteNevent?.toNeventString(),
             args.referencedHighlightNevent,
             args.referencedArticleNaddr,
         ).joinToString(separator = " \n\n", prefix = " \n\n") { "nostr:$it" }
+    }
 }
