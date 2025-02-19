@@ -89,7 +89,7 @@ class ArticleFeedMediator(
         )
 
         lastRequests[loadType]?.let { (lastRequest, lastRequestAt) ->
-            if (request == lastRequest && lastRequestAt.isRequestCacheExpired()) {
+            if (request == lastRequest && !lastRequestAt.isRequestCacheExpired() && loadType != LoadType.REFRESH) {
                 throw RepeatingRequestBodyException()
             }
         }
@@ -156,7 +156,7 @@ class ArticleFeedMediator(
 
     private fun Long.isTimestampOlderThan(duration: Long) = (Instant.now().epochSecond - this) > duration
 
-    private fun Long.isRequestCacheExpired() = (Instant.now().epochSecond - this) < LAST_REQUEST_EXPIRY
+    private fun Long.isRequestCacheExpired() = isTimestampOlderThan(duration = LAST_REQUEST_EXPIRY)
 
     private inner class RepeatingRequestBodyException : RuntimeException()
 
