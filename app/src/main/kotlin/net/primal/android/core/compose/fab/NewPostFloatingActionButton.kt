@@ -13,15 +13,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun NewPostFloatingActionButton(onNewPostClick: (content: TextFieldValue?) -> Unit) {
+fun NewPostFloatingActionButton(onNewPostClick: () -> Unit) {
     FloatingActionButton(
-        onClick = { onNewPostClick(null) },
+        onClick = onNewPostClick,
         modifier = Modifier
             .size(64.dp)
             .clip(CircleShape)

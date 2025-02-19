@@ -30,7 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -80,7 +79,7 @@ fun NotificationsScreen(
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
-    onNewPostClick: (content: TextFieldValue?) -> Unit,
+    onNewPostClick: () -> Unit,
 ) {
     val noteViewModel = hiltViewModel<NoteViewModel>()
 
@@ -123,7 +122,7 @@ fun NotificationsScreen(
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
     noteEventPublisher: (NoteContract.UiEvent) -> Unit,
-    onNewPostClick: (content: TextFieldValue?) -> Unit,
+    onNewPostClick: () -> Unit,
 ) {
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
