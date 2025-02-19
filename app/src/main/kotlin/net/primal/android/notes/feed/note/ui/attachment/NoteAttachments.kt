@@ -12,6 +12,7 @@ import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
 import net.primal.android.core.compose.attachment.model.isMediaAttachment
 import net.primal.android.notes.feed.note.ui.NoteAudioSpotifyLinkPreview
 import net.primal.android.notes.feed.note.ui.NoteAudioTidalLinkPreview
+import net.primal.android.notes.feed.note.ui.NoteLinkLargePreview
 import net.primal.android.notes.feed.note.ui.NoteLinkPreview
 import net.primal.android.notes.feed.note.ui.NoteVideoLinkPreview
 import net.primal.android.notes.feed.note.ui.NoteYouTubeLinkPreview
@@ -119,6 +120,17 @@ private fun NoteLinkAttachment(
                     title = attachment.title,
                     description = attachment.description,
                     thumbnailUrl = attachment.thumbnailUrl,
+                )
+            }
+
+            NoteAttachmentType.GitHub -> {
+                NoteLinkLargePreview(
+                    url = attachment.url,
+                    title = attachment.title,
+                    thumbnailUrl = attachment.thumbnailUrl,
+                    onClick = { onUrlClick?.invoke(attachment.url) },
+                    description = attachment.description,
+                    thumbnailImageSize = thumbnailImageSizeDp,
                 )
             }
 
