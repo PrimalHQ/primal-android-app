@@ -14,9 +14,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.explore.search.SearchContract.UiEvent
 import net.primal.android.explore.search.SearchContract.UiState
@@ -26,7 +24,6 @@ import timber.log.Timber
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val exploreRepository: ExploreRepository,
     private val profileRepository: ProfileRepository,
 ) : ViewModel() {
@@ -70,7 +67,7 @@ class SearchViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(searching = true) }
             try {
-                val result = withContext(dispatcherProvider.io()) { exploreRepository.searchUsers(query = query) }
+                val result = exploreRepository.searchUsers(query = query)
                 setState { copy(searchResults = result.map { it.mapAsUserProfileUi() }) }
             } catch (error: WssException) {
                 Timber.w(error)
@@ -92,7 +89,7 @@ class SearchViewModel @Inject constructor(
     private fun fetchRecommendedUsers() =
         viewModelScope.launch {
             try {
-                val popularUsers = withContext(dispatcherProvider.io()) { exploreRepository.fetchPopularUsers() }
+                val popularUsers = exploreRepository.fetchPopularUsers()
                 setState { copy(popularUsers = popularUsers.map { it.mapAsUserProfileUi() }) }
             } catch (error: WssException) {
                 Timber.w(error)
