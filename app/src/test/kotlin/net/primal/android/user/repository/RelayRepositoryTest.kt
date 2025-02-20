@@ -78,6 +78,7 @@ class RelayRepositoryTest {
                     coEvery { getDefaultRelays() } returns expectedRelays
                 },
                 primalDatabase = myDatabase,
+                dispatchers = coroutinesTestRule.dispatcherProvider,
             )
 
             repository.bootstrapUserRelays(userId = userId)
@@ -100,6 +101,7 @@ class RelayRepositoryTest {
                     )
                 },
                 primalDatabase = myDatabase,
+                dispatchers = coroutinesTestRule.dispatcherProvider,
             )
 
             repository.removeRelayAndPublishRelayList(userId = userId, url = relays.first())
@@ -123,6 +125,7 @@ class RelayRepositoryTest {
                     )
                 },
                 primalDatabase = myDatabase,
+                dispatchers = coroutinesTestRule.dispatcherProvider,
             )
 
             repository.removeRelayAndPublishRelayList(userId = userId, url = "wss://nostr1.current.fyi/")
@@ -146,6 +149,7 @@ class RelayRepositoryTest {
                     )
                 },
                 primalDatabase = myDatabase,
+                dispatchers = coroutinesTestRule.dispatcherProvider,
             )
 
             repository.removeRelayAndPublishRelayList(userId = userId, url = relays.first())
@@ -172,6 +176,7 @@ class RelayRepositoryTest {
                     )
                 },
                 primalDatabase = myDatabase,
+                dispatchers = coroutinesTestRule.dispatcherProvider,
             )
 
             myDatabase.relays().upsertAll(
@@ -203,6 +208,7 @@ class RelayRepositoryTest {
                     coEvery { getUserRelays(userId) } returns UserRelaysResponse(cachedRelayListEvent = null)
                 },
                 primalDatabase = myDatabase,
+                dispatchers = coroutinesTestRule.dispatcherProvider,
             )
 
             val expectedRelays = listOf(
