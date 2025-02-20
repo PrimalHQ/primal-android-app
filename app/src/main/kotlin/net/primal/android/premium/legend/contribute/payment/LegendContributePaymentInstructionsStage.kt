@@ -16,8 +16,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -29,6 +32,7 @@ import java.math.BigDecimal
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -49,7 +53,22 @@ fun LegendContributePaymentInstructionsStage(
     onBack: () -> Unit,
     onPaymentInstructionRetry: () -> Unit,
     onPrimalWalletPayment: () -> Unit,
+    onErrorDismiss: () -> Unit,
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    SnackbarErrorHandler(
+        error = state.error,
+        snackbarHostState = snackbarHostState,
+        errorMessageResolver = {
+            when (it) {
+                is UiState.ContributionUiError.WithdrawViaPrimalWalletFailed ->
+                    it.cause.message.toString()
+            }
+        },
+        onErrorDismiss = onErrorDismiss,
+    )
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -67,6 +86,9 @@ fun LegendContributePaymentInstructionsStage(
                 onPrimalWalletPayment = onPrimalWalletPayment,
                 primalWalletPaymentInProgress = state.primalWalletPaymentInProgress,
             )
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
         },
     ) { paddingValues ->
         Column(

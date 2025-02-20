@@ -61,6 +61,7 @@ import kotlinx.coroutines.withContext
 import net.primal.android.R
 import net.primal.android.articles.feed.ArticleFeedList
 import net.primal.android.core.compose.SnackbarErrorHandler
+import net.primal.android.core.compose.fab.NewPostFloatingActionButton
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.approvals.ApproveFollowUnfollowProfileAlertDialog
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
@@ -103,6 +104,7 @@ fun ProfileDetailsScreen(
     onFollowsClick: (String, ProfileFollowsType) -> Unit,
     onGoToWallet: () -> Unit,
     onPremiumBadgeClick: (tier: String, profileId: String) -> Unit,
+    onNewPostClick: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -170,6 +172,7 @@ fun ProfileDetailsScreen(
         pullToRefreshState = pullToRefreshState,
         pullToRefreshing = pullToRefreshing,
         onMediaItemClick = onMediaItemClick,
+        onNewPostClick = onNewPostClick,
     )
 }
 
@@ -199,6 +202,7 @@ fun ProfileDetailsScreen(
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     pullToRefreshState: PullToRefreshState,
     pullToRefreshing: MutableState<Boolean>,
+    onNewPostClick: () -> Unit,
 ) {
     val density = LocalDensity.current
 
@@ -335,6 +339,9 @@ fun ProfileDetailsScreen(
                 hostState = snackbarHostState,
                 modifier = Modifier.navigationBarsPadding(),
             )
+        },
+        floatingActionButton = {
+            NewPostFloatingActionButton(onNewPostClick = onNewPostClick)
         },
     ) { paddingValues ->
         BoxWithConstraints(
@@ -640,6 +647,7 @@ private fun PreviewProfileScreen() {
             eventPublisher = {},
             pullToRefreshing = remember { mutableStateOf(false) },
             pullToRefreshState = rememberPullToRefreshState(),
+            onNewPostClick = {},
         )
     }
 }

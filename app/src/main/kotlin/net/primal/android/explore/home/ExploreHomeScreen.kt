@@ -55,6 +55,7 @@ import net.primal.android.core.compose.InvisibleAppBarIcon
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.UniversalAvatarThumbnail
+import net.primal.android.core.compose.fab.NewPostFloatingActionButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearch
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
@@ -91,6 +92,7 @@ fun ExploreHomeScreen(
     onAdvancedSearchClick: () -> Unit,
     onGoToWallet: (() -> Unit)? = null,
     noteCallbacks: NoteCallbacks,
+    onNewPostClick: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -103,6 +105,7 @@ fun ExploreHomeScreen(
         onAdvancedSearchClick = onAdvancedSearchClick,
         noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
+        onNewPostClick = onNewPostClick,
     )
 }
 
@@ -117,6 +120,7 @@ private fun ExploreHomeScreen(
     onAdvancedSearchClick: () -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: (() -> Unit)? = null,
+    onNewPostClick: () -> Unit,
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
@@ -217,6 +221,9 @@ private fun ExploreHomeScreen(
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
+        },
+        floatingActionButton = {
+            NewPostFloatingActionButton(onNewPostClick = onNewPostClick)
         },
     )
 }

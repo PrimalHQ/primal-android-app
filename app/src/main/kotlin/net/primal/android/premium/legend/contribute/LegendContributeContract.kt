@@ -3,7 +3,7 @@ package net.primal.android.premium.legend.contribute
 import java.math.BigDecimal
 import net.primal.android.wallet.domain.CurrencyMode
 
-class LegendContributeContract {
+interface LegendContributeContract {
 
     companion object {
         const val MIN_DONATION_AMOUNT = 10_000
@@ -23,11 +23,16 @@ class LegendContributeContract {
         val primalWalletPaymentInProgress: Boolean = false,
         val qrCodeValue: String? = null,
         val membershipQuoteId: String? = null,
+        val error: ContributionUiError? = null,
         val isDonationAmountValid: Boolean = false,
     ) {
         fun arePaymentInstructionsAvailable() =
             (this.bitcoinAddress != null || this.lightningInvoice != null) &&
                 this.membershipQuoteId != null
+
+        sealed class ContributionUiError {
+            data class WithdrawViaPrimalWalletFailed(val cause: Throwable) : ContributionUiError()
+        }
     }
 
     sealed class UiEvent {
@@ -43,6 +48,7 @@ class LegendContributeContract {
         data object PrimalWalletPayment : UiEvent()
         data class ShowAmountEditor(val paymentMethod: PaymentMethod) : UiEvent()
         data class AmountChanged(val amount: String) : UiEvent()
+        data object DismissError : UiEvent()
     }
 
     enum class LegendContributeState {
