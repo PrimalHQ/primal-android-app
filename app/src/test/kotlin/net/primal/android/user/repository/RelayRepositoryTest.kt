@@ -205,7 +205,8 @@ class RelayRepositoryTest {
             val repository = RelayRepository(
                 nostrPublisher = nostrPublisher,
                 usersApi = mockk(relaxed = true) {
-                    coEvery { getUserRelays(listOf(userId)) } returns UsersRelaysResponse(cachedRelayListEvents = emptyList())
+                    coEvery { getUserRelays(listOf(userId)) } returns
+                        UsersRelaysResponse(cachedRelayListEvents = emptyList())
                 },
                 primalDatabase = myDatabase,
                 dispatchers = coroutinesTestRule.dispatcherProvider,
