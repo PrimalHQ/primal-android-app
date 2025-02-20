@@ -33,19 +33,20 @@ class RelayRepository @Inject constructor(
     fun findRelays(userId: String, kind: RelayKind) = primalDatabase.relays().findRelays(userId, kind)
 
     @Throws(NostrPublishException::class)
-    suspend fun bootstrapUserRelays(userId: String) {
-        val relays = try {
-            usersApi.getDefaultRelays().map { it.toRelay() }
-        } catch (error: WssException) {
-            Timber.w(error)
-            FALLBACK_RELAYS
+    suspend fun bootstrapUserRelays(userId: String) =
+        withContext(dispatchers.io()) {
+            val relays = try {
+                usersApi.getDefaultRelays().map { it.toRelay() }
+            } catch (error: WssException) {
+                Timber.w(error)
+                FALLBACK_RELAYS
+            }
+            replaceUserRelays(userId, relays)
+            nostrPublisher.publishRelayList(userId, relays)
         }
-        replaceUserRelays(userId, relays)
-        nostrPublisher.publishRelayList(userId, relays)
-    }
 
     private suspend fun fetchUserRelays(userId: String): List<RelayDO>? {
-        val response = usersApi.getUserRelays(userId)
+        val response = withContext(dispatchers.io()) { usersApi.getUserRelays(userId) }
         val cachedNip65Event = response.cachedRelayListEvent ?: return null
         return cachedNip65Event.tags.parseNip65Relays()
     }
@@ -55,28 +56,30 @@ class RelayRepository @Inject constructor(
         if (relayList != null) replaceUserRelays(userId, relayList)
     }
 
-    private suspend fun fetchUserRelays(userIds: List<String>): List<UserRelays> =
-        usersApi.getUserRelays(userIds).cachedRelayListEvents
-            .filterNot { it.pubKey == null }
-            .map { UserRelays(pubkey = it.pubKey!!, relays = it.tags.parseNip65Relays()) }
-
-    suspend fun fetchAndUpdateUserRelays(userIds: List<String>): List<UserRelays> =
+    private suspend fun fetchUserRelays(userIds: List<String>) =
         withContext(dispatchers.io()) {
-            fetchUserRelays(userIds).onEach {
-                replaceUserRelays(userId = it.pubkey, relays = it.relays)
-            }
+            usersApi.getUserRelays(userIds).cachedRelayListEvents
+                .filterNot { it.pubKey == null }
+                .map { UserRelays(pubkey = it.pubKey!!, relays = it.tags.parseNip65Relays()) }
         }
 
-    private suspend fun replaceUserRelays(userId: String, relays: List<RelayDO>) {
-        primalDatabase.withTransaction {
-            primalDatabase.relays().deleteAll(userId = userId, kind = RelayKind.UserRelay)
-            primalDatabase.relays().upsertAll(
-                relays = relays.map {
-                    it.mapToRelayPO(userId = userId, kind = RelayKind.UserRelay)
-                },
-            )
+    suspend fun fetchAndUpdateUserRelays(userIds: List<String>): List<UserRelays> {
+        return fetchUserRelays(userIds).onEach {
+            replaceUserRelays(userId = it.pubkey, relays = it.relays)
         }
     }
+
+    private suspend fun replaceUserRelays(userId: String, relays: List<RelayDO>) =
+        withContext(dispatchers.io()) {
+            primalDatabase.withTransaction {
+                primalDatabase.relays().deleteAll(userId = userId, kind = RelayKind.UserRelay)
+                primalDatabase.relays().upsertAll(
+                    relays = relays.map {
+                        it.mapToRelayPO(userId = userId, kind = RelayKind.UserRelay)
+                    },
+                )
+            }
+        }
 
     @Throws(NostrPublishException::class)
     suspend fun addRelayAndPublishRelayList(userId: String, url: String) {
@@ -97,10 +100,11 @@ class RelayRepository @Inject constructor(
         }
     }
 
-    private suspend fun updateRelayList(userId: String, reducer: List<RelayDO>.() -> List<RelayDO>) {
-        val latestRelayList = fetchUserRelays(userId = userId) ?: emptyList()
-        val newRelayList = latestRelayList.reducer()
-        nostrPublisher.publishRelayList(userId = userId, relays = newRelayList)
-        replaceUserRelays(userId = userId, relays = newRelayList)
-    }
+    private suspend fun updateRelayList(userId: String, reducer: List<RelayDO>.() -> List<RelayDO>) =
+        withContext(dispatchers.io()) {
+            val latestRelayList = fetchUserRelays(userId = userId) ?: emptyList()
+            val newRelayList = latestRelayList.reducer()
+            nostrPublisher.publishRelayList(userId = userId, relays = newRelayList)
+            replaceUserRelays(userId = userId, relays = newRelayList)
+        }
 }
