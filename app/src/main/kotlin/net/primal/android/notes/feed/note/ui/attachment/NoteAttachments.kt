@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
@@ -130,7 +131,7 @@ private fun NoteLinkAttachment(
                     thumbnailUrl = attachment.thumbnailUrl,
                     onClick = { onUrlClick?.invoke(attachment.url) },
                     description = attachment.description,
-                    thumbnailImageSize = thumbnailImageSizeDp,
+                    thumbnailImageSize = DpSize(width = maxWidth, height = maxWidth / 2),
                 )
             }
 
