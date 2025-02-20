@@ -19,6 +19,7 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.primal.retryNetworkCall
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.mapNotNullAsArticleDataPO
+import net.primal.android.nostr.ext.orderByPagingIfNotNull
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
 import net.primal.android.notes.db.FeedPostRemoteKey
@@ -112,13 +113,15 @@ class ArticleFeedMediator(
         }
 
     private suspend fun processAndPersistToDatabase(response: ArticleResponse, clearFeed: Boolean) {
-        val connections = response.articles.mapNotNullAsArticleDataPO().map {
-            ArticleFeedCrossRef(
-                spec = feedSpec,
-                articleId = it.articleId,
-                articleAuthorId = it.authorId,
-            )
-        }
+        val connections = response.articles
+            .orderByPagingIfNotNull(pagingEvent = response.paging)
+            .mapNotNullAsArticleDataPO().map {
+                ArticleFeedCrossRef(
+                    spec = feedSpec,
+                    articleId = it.articleId,
+                    articleAuthorId = it.authorId,
+                )
+            }
 
         withContext(dispatcherProvider.io()) {
             database.withTransaction {

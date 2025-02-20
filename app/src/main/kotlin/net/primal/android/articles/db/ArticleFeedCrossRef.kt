@@ -2,20 +2,16 @@ package net.primal.android.articles.db
 
 import androidx.room.Entity
 import androidx.room.Index
+import androidx.room.PrimaryKey
 
 @Entity(
-    primaryKeys = [
-        "spec",
-        "articleId",
-        "articleAuthorId",
-    ],
     indices = [
-        Index(value = ["spec"]),
-        Index(value = ["articleId"]),
-        Index(value = ["articleAuthorId"]),
+        Index(value = ["spec", "articleId", "articleAuthorId"], unique = true),
     ],
 )
 data class ArticleFeedCrossRef(
+    @PrimaryKey(autoGenerate = true)
+    val position: Long = 0,
     val spec: String,
     val articleId: String,
     val articleAuthorId: String,

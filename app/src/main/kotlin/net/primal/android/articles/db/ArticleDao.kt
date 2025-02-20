@@ -27,7 +27,7 @@ interface ArticleDao {
             LEFT JOIN EventUserStats ON EventUserStats.eventId = ArticleData.eventId AND EventUserStats.userId = :userId
             LEFT JOIN MutedUserData ON MutedUserData.userId = ArticleData.authorId
             WHERE ArticleFeedCrossRef.spec = :spec AND isMuted = 0
-            ORDER BY ArticleData.publishedAt DESC
+            ORDER BY ArticleFeedCrossRef.position ASC
         """,
     )
     fun feed(spec: String, userId: String): PagingSource<Int, Article>
