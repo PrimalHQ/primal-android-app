@@ -157,7 +157,8 @@ class NostrSocketClient(
         chunks.forEachIndexed { index, chunk ->
             val prefix = if (incoming) "<--" else "-->"
             val suffix = if (index == chunksCount - 1) "[$url]" else ""
-            Timber.d("$prefix $chunk $suffix")
+            Timber.tag(if (incoming) "NostrSocketClientIncoming" else "NostrSocketClientOutgoing")
+                .d("$prefix $chunk $suffix")
         }
     }
 

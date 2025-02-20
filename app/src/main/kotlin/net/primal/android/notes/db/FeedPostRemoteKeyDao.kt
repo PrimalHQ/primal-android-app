@@ -11,6 +11,9 @@ interface FeedPostRemoteKeyDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsert(data: List<FeedPostRemoteKey>)
 
+    @Query("SELECT * FROM FeedPostRemoteKey WHERE eventId = :eventId LIMIT 1")
+    fun findByEventId(eventId: String): FeedPostRemoteKey?
+
     @Query(
         """
             SELECT * FROM FeedPostRemoteKey 

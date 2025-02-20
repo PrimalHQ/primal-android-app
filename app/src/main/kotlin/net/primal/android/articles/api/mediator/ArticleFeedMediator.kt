@@ -23,6 +23,7 @@ import net.primal.android.nostr.ext.orderByPagingIfNotNull
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
 import net.primal.android.notes.db.FeedPostRemoteKey
+import timber.log.Timber
 
 @OptIn(ExperimentalPagingApi::class)
 class ArticleFeedMediator(
@@ -52,10 +53,17 @@ class ArticleFeedMediator(
     @Suppress("ReturnCount")
     override suspend fun load(loadType: LoadType, state: PagingState<Int, Article>): MediatorResult {
         val nextUntil = when (loadType) {
-            LoadType.APPEND -> findLastRemoteKey()?.sinceId
-                ?: return MediatorResult.Success(endOfPaginationReached = true)
+            LoadType.APPEND -> findLastRemoteKey(state = state)?.sinceId
+                ?: run {
+                    Timber.d("APPEND no remote key found exit.")
+                    return MediatorResult.Success(endOfPaginationReached = true)
+                }
 
-            LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
+            LoadType.PREPEND -> {
+                Timber.d("PREPEND end of pagination exit.")
+                return MediatorResult.Success(endOfPaginationReached = true)
+            }
+
             LoadType.REFRESH -> null
         }
 
@@ -72,6 +80,7 @@ class ArticleFeedMediator(
         } catch (error: WssException) {
             MediatorResult.Error(error)
         } catch (_: RepeatingRequestBodyException) {
+            Timber.d("RepeatingRequestBody exit.")
             MediatorResult.Success(endOfPaginationReached = true)
         }
     }
@@ -107,9 +116,19 @@ class ArticleFeedMediator(
         return response
     }
 
-    private suspend fun findLastRemoteKey(): FeedPostRemoteKey? =
+    private suspend fun findLastRemoteKey(state: PagingState<Int, Article>): FeedPostRemoteKey? {
+        val lastItemId = state.lastItemOrNull()?.data?.eventId
+            ?: findLastItemOrNull()?.articleId
+
+        return withContext(dispatcherProvider.io()) {
+            lastItemId?.let { database.feedPostsRemoteKeys().findByEventId(eventId = lastItemId) }
+                ?: database.feedPostsRemoteKeys().findLatestByDirective(directive = feedSpec)
+        }
+    }
+
+    private suspend fun findLastItemOrNull(): ArticleFeedCrossRef? =
         withContext(dispatcherProvider.io()) {
-            database.feedPostsRemoteKeys().findLatestByDirective(directive = feedSpec)
+            database.articleFeedsConnections().findLastBySpec(spec = feedSpec)
         }
 
     private suspend fun processAndPersistToDatabase(response: ArticleResponse, clearFeed: Boolean) {
