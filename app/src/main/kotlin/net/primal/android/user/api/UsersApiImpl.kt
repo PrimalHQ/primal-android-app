@@ -1,7 +1,6 @@
 package net.primal.android.user.api
 
 import javax.inject.Inject
-import kotlinx.serialization.encodeToString
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.explore.api.model.UsersResponse
 import net.primal.android.networking.di.PrimalCacheApiClient
@@ -18,8 +17,9 @@ import net.primal.android.user.api.model.UserProfileFollowedByRequestBody
 import net.primal.android.user.api.model.UserProfileResponse
 import net.primal.android.user.api.model.UserProfilesRequestBody
 import net.primal.android.user.api.model.UserProfilesResponse
-import net.primal.android.user.api.model.UserRelaysResponse
 import net.primal.android.user.api.model.UserRequestBody
+import net.primal.android.user.api.model.UsersRelaysResponse
+import net.primal.android.user.api.model.UsersRequestBody
 
 class UsersApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
@@ -152,16 +152,16 @@ class UsersApiImpl @Inject constructor(
         )
     }
 
-    override suspend fun getUserRelays(userId: String): UserRelaysResponse {
+    override suspend fun getUserRelays(userIds: List<String>): UsersRelaysResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.USER_RELAYS,
-                optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = userId)),
+                primalVerb = PrimalVerb.USER_RELAYS_2,
+                optionsJson = NostrJson.encodeToString(UsersRequestBody(pubkeys = userIds)),
             ),
         )
 
-        return UserRelaysResponse(
-            cachedRelayListEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalUserRelaysList),
+        return UsersRelaysResponse(
+            cachedRelayListEvents = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserRelaysList),
         )
     }
 

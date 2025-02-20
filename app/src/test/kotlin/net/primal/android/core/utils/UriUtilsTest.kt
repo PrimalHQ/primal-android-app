@@ -69,13 +69,13 @@ class UriUtilsTest {
         val content = """
         A link with a port number:
         https://www.example.com:443/resource
-    """.trimIndent()
+        """.trimIndent()
 
         val expectedUrls = content.parseUris()
 
         expectedUrls.shouldNotBeNull()
         expectedUrls shouldContainExactly listOf(
-            "https://www.example.com:443/resource"
+            "https://www.example.com:443/resource",
         )
     }
 
@@ -87,7 +87,7 @@ class UriUtilsTest {
         http://
         www.
         example@com
-    """.trimIndent()
+        """.trimIndent()
 
         val expectedUrls = content.parseUris()
 

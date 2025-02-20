@@ -7,6 +7,7 @@ import net.primal.android.crypto.toHex
 import net.primal.android.crypto.toNpub
 import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import net.primal.android.nostr.utils.Nip19TLV.toNeventString
+import net.primal.android.nostr.utils.Nip19TLV.toNprofileString
 import org.junit.Test
 
 class Nip19TLVTest {
@@ -138,8 +139,8 @@ class Nip19TLVTest {
     @Test
     fun toNaddrString_createsProperNaddr_forGivenNaddrStructureWithMultipleRelays() {
         val expectedNaddr = "naddr1qqw9x6rfwpcxjmn894fks6ts09shyepdg3ty6tthv4unxmf5q" +
-            "y4hwumn8ghj7un9d3shjtnyv9kh2uewd9hjcamnwvaz7tmjv4kxz7fwwpexjmtpdshxuet5" +
-            "qgs04xzt6ldm9qhs0ctw0t58kf4z57umjzmjg6jywu0seadwtqqc75srqsqqqa28zkfejp"
+            "y28wumn8ghj7un9d3shjtnyv9kh2uewd9hsz9nhwden5te0wfjkccte9ec8y6tdv9kzumn9" +
+            "wspzp75cf0tahv5z7plpdeaws7ex52nmnwgtwfr2g3m37r844evqrr6jqvzqqqr4gux34syq"
 
         val naddr = Naddr(
             identifier = "Shipping-Shipyard-DVM-wey3m4",
@@ -173,12 +174,12 @@ class Nip19TLVTest {
 
     @Test
     fun parseUriAsNeventOrNull_returnsProperValuesForNeventSingleUri() {
-        val nevent = "nostr:nevent1qvzqqqpxfgpzp4sl80zm866yqrha4esknfwp0j4lxfrt29pkrh5nnnj2rgx6dm62qyvhwumn8g" +
-            "hj7urjv4kkjatd9ec8y6tdv9kzumn9wshszymhwden5te0wp6hyurvv4cxzeewv4ej7qgkwaehxw309aex2mrp0yhx6mmnw" +
-            "3ezuur4vghsqgz5fxdagtjhp4pgecdvl4vy9fs7p8jhpgeec6qetl7vea5umx6gaswmqppq"
+        val nevent = "nostr:nevent1qvzqqqpxfgpzp4sl80zm866yqrha4esknfwp0j4lxfrt2" +
+            "9pkrh5nnnj2rgx6dm62qyv8wumn8ghj7urjv4kkjatd9ec8y6tdv9kzumn9wsqzq4zf" +
+            "n02zu4cdg2xwrt8atpp2v8sfu4c2xwwxsx2llnx0d8xekj8v6xeest"
 
         val expectedEventId = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec"
-        val expectedRelays = listOf("wss://premium.primal.net/")
+        val expectedRelays = listOf("wss://premium.primal.net")
         val expectedUserId = "d61f3bc5b3eb4400efdae6169a5c17cabf3246b514361de939ce4a1a0da6ef4a"
         val expectedKind = 9802
 
@@ -194,9 +195,9 @@ class Nip19TLVTest {
 
     @Test
     fun parseUriAsNeventOrNull_returnsProperValuesForNeventMultipleUris() {
-        val nevent = "nostr:nevent1qqs9gjvm6sh9wr2z3ns6el2cg2npuz09wz3nn35pjhluenmfekd53mqp" +
-            "94mhxue69uhhyetvv9ujuerpd46hxtnfduk8wumn8ghj7urjv4kkjatd9ec8y6tdv9kzumn9wspzp4" +
-            "sl80zm866yqrha4esknfwp0j4lxfrt29pkrh5nnnj2rgx6dm62qvzqqqpxfgvudpun"
+        val nevent = "nostr:nevent1qvzqqqpxfgpzp4sl80zm866yqrha4esknfwp0j4l" +
+            "xfrt29pkrh5nnnj2rgx6dm62qy28wumn8ghj7un9d3shjtnyv9kh2uewd9hszx" +
+            "rhwden5te0wpex2mtfw4kjuurjd9kkzmpwdejhgqpq23yeh4pw2ux59r8p4n74ss4xrcy72u9r88rgr90len8knnvmfrkqe7q9g2"
 
         val expectedEventId = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec"
         val expectedRelays = listOf("wss://relay.damus.io", "wss://premium.primal.net")
@@ -245,9 +246,9 @@ class Nip19TLVTest {
 
     @Test
     fun toNeventString_createsProperNevent_forGivenNeventStructureWithMultipleRelays() {
-        val expectedNevent = "nevent1qqs9gjvm6sh9wr2z3ns6el2cg2npuz09wz3nn35pjhluenmfekd53mqp94mhxu" +
-            "e69uhhyetvv9ujuerpd46hxtnfduk8wumn8ghj7urjv4kkjatd9ec8y6tdv9kzumn9wspzp4sl80zm866yqrha" +
-            "4esknfwp0j4lxfrt29pkrh5nnnj2rgx6dm62qvzqqqpxfgvudpun"
+        val expectedNevent = "nevent1qqs9gjvm6sh9wr2z3ns6el2cg2npuz09wz3nn35pjhluenm" +
+            "fekd53mqpz3mhxue69uhhyetvv9ujuerpd46hxtnfduq3samnwvaz7tmswfjk66t4d5h8qu" +
+            "nfd4skctnwv46qygxkruautvltgsqwlkhxz6d9c972hueyddg5xcw7jwwwfgdqmfh0fgpsgqqqye9qaww523"
 
         val nevent = Nevent(
             eventId = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec",
@@ -257,5 +258,86 @@ class Nip19TLVTest {
         )
 
         nevent.toNeventString() shouldBe expectedNevent
+    }
+
+    @Test
+    fun parseUriAsNprofileOrNull_returnsProperValuesForNeventNoUris() {
+        val nprofile = "nostr:nprofile1qqs9gjvm6sh9wr2z3ns6el2cg2npuz09wz3nn35pjhluenmfekd53mqxg4j84"
+
+        val expectedPubkey = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec"
+        val expectedRelays = emptyList<String>()
+
+        val result = Nip19TLV.parseUriAsNprofileOrNull(nprofile)
+
+        result.shouldNotBeNull()
+        result.pubkey shouldBe expectedPubkey
+        result.relays shouldBe expectedRelays
+    }
+
+    @Test
+    fun parseUriAsNprofileOrNull_returnsProperValuesForNeventSingleUri() {
+        val nprofile = "nostr:nprofile1qyv8wumn8ghj7urjv4kkjatd9ec8y6tdv9" +
+            "kzumn9wsqzq4zfn02zu4cdg2xwrt8atpp2v8sfu4c2xwwxsx2llnx0d8xekj8v8ee8fv"
+
+        val expectedPubkey = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec"
+        val expectedRelays = listOf("wss://premium.primal.net")
+
+        val result = Nip19TLV.parseUriAsNprofileOrNull(nprofile)
+
+        result.shouldNotBeNull()
+        result.pubkey shouldBe expectedPubkey
+        result.relays shouldBe expectedRelays
+    }
+
+    @Test
+    fun parseUriAsNprofileOrNull_returnsProperValuesForNeventMultipleUris() {
+        val nprofile = "nostr:nprofile1qyv8wumn8ghj7urjv4kkjatd9ec8y6tdv9kzu" +
+            "mn9wsq3gamnwvaz7tmjv4kxz7fwv3sk6atn9e5k7qpq23yeh4pw2ux59r8p4n74ss4xrcy72u9r88rgr90len8knnvmfrkq3s8k4w"
+
+        val expectedPubkey = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec"
+        val expectedRelays = listOf("wss://premium.primal.net", "wss://relay.damus.io")
+
+        val result = Nip19TLV.parseUriAsNprofileOrNull(nprofile)
+
+        result.shouldNotBeNull()
+        result.pubkey shouldBe expectedPubkey
+        result.relays shouldBe expectedRelays
+    }
+
+    @Test
+    fun toNprofileString_createsProperNprofile_forGivenNprofileStructureWithoutRelays() {
+        val expectedNprofile = "nprofile1qqs9gjvm6sh9wr2z3ns6el2cg2npuz09wz3nn35pjhluenmfekd53mqxg4j84"
+
+        val nprofile = Nprofile(
+            pubkey = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec",
+        )
+
+        nprofile.toNprofileString() shouldBe expectedNprofile
+    }
+
+    @Test
+    fun toNprofileString_createsProperNprofile_forGivenNprofileStructureWithSingleRelay() {
+        val expectedNprofile = "nprofile1qqs9gjvm6sh9wr2z3ns6el2cg2npuz09wz3n" +
+            "n35pjhluenmfekd53mqprpmhxue69uhhqun9d45h2mfwwpexjmtpdshxuet5n9zrjx"
+
+        val nprofile = Nprofile(
+            pubkey = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec",
+            relays = listOf("wss://premium.primal.net"),
+        )
+
+        nprofile.toNprofileString() shouldBe expectedNprofile
+    }
+
+    @Test
+    fun toNprofileString_createsProperNprofile_forGivenNprofileStructureWithMultipleRelays() {
+        val expectedNprofile = "nprofile1qqs9gjvm6sh9wr2z3ns6el2cg2npuz09wz3nn35p" +
+            "jhluenmfekd53mqprpmhxue69uhhqun9d45h2mfwwpexjmtpdshxuet5qy28wumn8ghj7un9d3shjtnyv9kh2uewd9hsqa5sds"
+
+        val nprofile = Nprofile(
+            pubkey = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec",
+            relays = listOf("wss://premium.primal.net", "wss://relay.damus.io"),
+        )
+
+        nprofile.toNprofileString() shouldBe expectedNprofile
     }
 }

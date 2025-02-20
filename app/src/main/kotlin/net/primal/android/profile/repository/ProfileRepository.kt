@@ -272,14 +272,15 @@ class ProfileRepository @Inject constructor(
             usersApi.isUserFollowing(userId, targetUserId)
         }
 
-    fun markAsInteracted(profileId: String) {
-        database.profileInteractions().insertOrUpdate(
-            ProfileInteraction(
-                profileId = profileId,
-                lastInteractionAt = Instant.now().epochSecond,
-            ),
-        )
-    }
+    suspend fun markAsInteracted(profileId: String) =
+        withContext(dispatchers.io()) {
+            database.profileInteractions().insertOrUpdate(
+                ProfileInteraction(
+                    profileId = profileId,
+                    lastInteractionAt = Instant.now().epochSecond,
+                ),
+            )
+        }
 
     class FollowListNotFound : Exception()
 }
