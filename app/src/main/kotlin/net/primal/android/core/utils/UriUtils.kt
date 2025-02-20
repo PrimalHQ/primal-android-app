@@ -15,7 +15,7 @@ fun String.parseUris(includeNostrUris: Boolean = true): List<String> {
         .filterInvalidTLDs()
         .map { it.originalUrl }
     val customUrls = this.detectUrls()
-    val mergedUrls = mergeUrls(emptyList(), customUrls)
+    val mergedUrls = mergeUrls(libUrls, customUrls)
 
     return if (includeNostrUris) {
         val nostr = this.parseNostrUris()

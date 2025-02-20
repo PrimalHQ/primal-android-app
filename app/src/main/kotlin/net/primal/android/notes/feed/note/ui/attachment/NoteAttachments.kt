@@ -45,6 +45,14 @@ fun NoteAttachments(
     attachments
         .filterNot { it.isMediaAttachment() }
         .take(n = if (!expanded) 2 else Int.MAX_VALUE)
+        .filter {
+            when (it.type) {
+                NoteAttachmentType.YouTube, NoteAttachmentType.Rumble -> {
+                    it.title != null || it.thumbnailUrl != null
+                }
+                else -> true
+            }
+        }
         .forEach { attachment ->
             NoteLinkAttachment(
                 modifier = modifier,
