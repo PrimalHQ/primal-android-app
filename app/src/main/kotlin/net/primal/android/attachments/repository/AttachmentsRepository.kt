@@ -27,15 +27,16 @@ class AttachmentsRepository @Inject constructor(
         attachment: net.primal.android.editor.domain.NoteAttachment,
         uploadId: String,
         onProgress: ((uploadedBytes: Int, totalBytes: Int) -> Unit)? = null,
-    ): UploadResult = withContext(dispatchers.io()) {
-        val userId = activeAccountStore.activeUserId()
-        fileUploader.uploadFile(
-            uri = attachment.localUri,
-            userId = userId,
-            uploadId = uploadId,
-            onProgress = onProgress,
-        )
-    }
+    ): UploadResult =
+        withContext(dispatchers.io()) {
+            val userId = activeAccountStore.activeUserId()
+            fileUploader.uploadFile(
+                uri = attachment.localUri,
+                userId = userId,
+                uploadId = uploadId,
+                onProgress = onProgress,
+            )
+        }
 
     suspend fun cancelNoteAttachmentUpload(uploadId: String) {
         val userId = activeAccountStore.activeUserId()

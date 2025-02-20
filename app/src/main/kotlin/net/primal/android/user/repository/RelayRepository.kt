@@ -1,6 +1,5 @@
 package net.primal.android.user.repository
 
-import net.primal.android.user.domain.Relay as RelayDO
 import androidx.room.withTransaction
 import javax.inject.Inject
 import kotlinx.coroutines.flow.map
@@ -13,6 +12,7 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.user.accounts.parseNip65Relays
 import net.primal.android.user.api.UsersApi
+import net.primal.android.user.domain.Relay as RelayDO
 import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.UserRelays
 import net.primal.android.user.domain.cleanWebSocketUrl

@@ -13,5 +13,4 @@ class RelayHintsRepository @Inject constructor(
         withContext(dispatchers.io()) {
             database.eventHints().findById(eventIds = eventIds)
         }
-
 }
