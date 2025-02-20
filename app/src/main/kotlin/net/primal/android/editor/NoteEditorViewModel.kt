@@ -50,6 +50,7 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.repository.RelayHintsRepository
+import net.primal.android.nostr.utils.MAX_RELAY_HINTS
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nevent
 import net.primal.android.nostr.utils.Nip19TLV
@@ -330,7 +331,8 @@ class NoteEditorViewModel @AssistedInject constructor(
         users.forEach { user ->
             val nprofile = Nprofile(
                 pubkey = user.userId,
-                relays = userRelaysMap[user.userId]?.relays?.map { it.url } ?: emptyList(),
+                relays = userRelaysMap[user.userId]?.relays
+                    ?.filter { it.write }?.map { it.url }?.take(MAX_RELAY_HINTS) ?: emptyList(),
             )
             content = content.replace(
                 oldValue = user.displayUsername,
@@ -546,13 +548,14 @@ class NoteEditorViewModel @AssistedInject constructor(
     }
 
     private suspend fun FeedPostUi.asNevent(): Nevent {
-        val relayHints = relayHintsRepository.findRelaysByIds(listOf(this.postId))
+        val relayHints = runCatching { relayHintsRepository.findRelaysByIds(listOf(this.postId)) }.getOrNull()
 
         return Nevent(
             kind = NostrEventKind.ShortTextNote.value,
             userId = this.authorId,
             eventId = this.postId,
-            relays = relayHints.firstOrNull { it.eventId == this.postId }?.relays ?: emptyList(),
+            relays = relayHints?.firstOrNull { it.eventId == this.postId }?.relays?.take(MAX_RELAY_HINTS)
+                ?: emptyList(),
         )
     }
 
