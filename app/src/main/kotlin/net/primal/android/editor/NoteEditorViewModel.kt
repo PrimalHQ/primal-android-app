@@ -49,15 +49,16 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.repository.RelayHintsRepository
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nevent
 import net.primal.android.nostr.utils.Nip19TLV
 import net.primal.android.nostr.utils.Nip19TLV.toNeventString
 import net.primal.android.nostr.utils.Nip19TLV.toNprofileString
 import net.primal.android.nostr.utils.Nprofile
+import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
-import net.primal.android.notes.repository.PostRepository
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -77,7 +78,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val profileRepository: ProfileRepository,
     private val articleRepository: ArticleRepository,
     private val relayRepository: RelayRepository,
-    private val postRepository: PostRepository,
+    private val relayHintsRepository: RelayHintsRepository,
 ) : ViewModel() {
 
     private val referencedNoteId = args.referencedNoteId
@@ -272,20 +273,8 @@ class NoteEditorViewModel @AssistedInject constructor(
                         userId = activeAccountStore.activeUserId(),
                         content = noteContent,
                         attachments = _state.value.attachments,
-                        rootNoteNevent = rootPost?.let {
-                            Nevent(
-                                kind = NostrEventKind.ShortTextNote.value,
-                                userId = rootPost.authorId,
-                                eventId = rootPost.postId,
-                            )
-                        },
-                        replyToNoteNevent = replyToPost?.let {
-                            Nevent(
-                                kind = NostrEventKind.ShortTextNote.value,
-                                userId = replyToPost.authorId,
-                                eventId = replyToPost.postId,
-                            )
-                        },
+                        rootNoteNevent = rootPost?.asNevent(),
+                        replyToNoteNevent = replyToPost?.asNevent(),
                         rootArticleNaddr = referencedArticleNaddr
                             ?: _state.value.referencedArticle?.generateNaddr(),
                         rootHighlightNevent = referencedHighlightNevent
@@ -556,16 +545,21 @@ class NoteEditorViewModel @AssistedInject constructor(
         }
     }
 
+    private suspend fun FeedPostUi.asNevent(): Nevent {
+        val relayHints = relayHintsRepository.findRelaysByIds(listOf(this.postId))
+
+        return Nevent(
+            kind = NostrEventKind.ShortTextNote.value,
+            userId = this.authorId,
+            eventId = this.postId,
+            relays = relayHints.firstOrNull { it.eventId == this.postId }?.relays ?: emptyList(),
+        )
+    }
+
     private suspend fun String.concatenateReferencedEvents(): String {
-        val referencedNoteNevent = referencedNoteId?.let {
-            runCatching { postRepository.findByPostId(postId = referencedNoteId) }.getOrNull()
-        }?.let {
-            Nevent(
-                kind = NostrEventKind.ShortTextNote.value,
-                userId = it.authorId,
-                eventId = it.postId,
-            )
-        }
+        val referencedNoteNevent = referencedNoteId?.let { refNote ->
+            state.value.conversation.first { it.postId == refNote }
+        }?.asNevent()
 
         return this + listOfNotNull(
             referencedNoteNevent?.toNeventString(),
