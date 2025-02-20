@@ -18,7 +18,7 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.publish.NostrPublisher
-import net.primal.android.user.api.model.UserRelaysResponse
+import net.primal.android.user.api.model.UsersRelaysResponse
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.cleanWebSocketUrl
@@ -96,8 +96,8 @@ class RelayRepositoryTest {
             val repository = RelayRepository(
                 nostrPublisher = nostrPublisher,
                 usersApi = mockk(relaxed = true) {
-                    coEvery { getUserRelays(userId) } returns UserRelaysResponse(
-                        cachedRelayListEvent = buildPrimalUserRelaysListEvent(relays = relays),
+                    coEvery { getUserRelays(listOf(userId)) } returns UsersRelaysResponse(
+                        cachedRelayListEvents = listOf(buildPrimalUserRelaysListEvent(relays = relays)),
                     )
                 },
                 primalDatabase = myDatabase,
@@ -120,8 +120,8 @@ class RelayRepositoryTest {
             val repository = RelayRepository(
                 nostrPublisher = nostrPublisher,
                 usersApi = mockk(relaxed = true) {
-                    coEvery { getUserRelays(userId) } returns UserRelaysResponse(
-                        cachedRelayListEvent = buildPrimalUserRelaysListEvent(relays = relays),
+                    coEvery { getUserRelays(listOf(userId)) } returns UsersRelaysResponse(
+                        cachedRelayListEvents = listOf(buildPrimalUserRelaysListEvent(relays = relays)),
                     )
                 },
                 primalDatabase = myDatabase,
@@ -144,8 +144,8 @@ class RelayRepositoryTest {
             val repository = RelayRepository(
                 nostrPublisher = nostrPublisher,
                 usersApi = mockk(relaxed = true) {
-                    coEvery { getUserRelays(userId) } returns UserRelaysResponse(
-                        cachedRelayListEvent = buildPrimalUserRelaysListEvent(relays = relays),
+                    coEvery { getUserRelays(listOf(userId)) } returns UsersRelaysResponse(
+                        cachedRelayListEvents = listOf(buildPrimalUserRelaysListEvent(relays = relays)),
                     )
                 },
                 primalDatabase = myDatabase,
@@ -171,8 +171,8 @@ class RelayRepositoryTest {
             val repository = RelayRepository(
                 nostrPublisher = nostrPublisher,
                 usersApi = mockk(relaxed = true) {
-                    coEvery { getUserRelays(userId) } returns UserRelaysResponse(
-                        cachedRelayListEvent = buildPrimalUserRelaysListEvent(relays = emptyList()),
+                    coEvery { getUserRelays(listOf(userId)) } returns UsersRelaysResponse(
+                        cachedRelayListEvents = listOf(buildPrimalUserRelaysListEvent(relays = emptyList())),
                     )
                 },
                 primalDatabase = myDatabase,
@@ -205,7 +205,7 @@ class RelayRepositoryTest {
             val repository = RelayRepository(
                 nostrPublisher = nostrPublisher,
                 usersApi = mockk(relaxed = true) {
-                    coEvery { getUserRelays(userId) } returns UserRelaysResponse(cachedRelayListEvent = null)
+                    coEvery { getUserRelays(listOf(userId)) } returns UsersRelaysResponse(cachedRelayListEvents = emptyList())
                 },
                 primalDatabase = myDatabase,
                 dispatchers = coroutinesTestRule.dispatcherProvider,

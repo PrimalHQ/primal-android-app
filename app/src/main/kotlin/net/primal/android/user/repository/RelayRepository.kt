@@ -46,8 +46,8 @@ class RelayRepository @Inject constructor(
         }
 
     private suspend fun fetchUserRelays(userId: String): List<RelayDO>? {
-        val response = withContext(dispatchers.io()) { usersApi.getUserRelays(userId) }
-        val cachedNip65Event = response.cachedRelayListEvent ?: return null
+        val response = withContext(dispatchers.io()) { usersApi.getUserRelays(listOf(userId)) }
+        val cachedNip65Event = response.cachedRelayListEvents.firstOrNull() ?: return null
         return cachedNip65Event.tags.parseNip65Relays()
     }
 
