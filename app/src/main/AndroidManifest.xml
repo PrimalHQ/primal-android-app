@@ -95,6 +95,59 @@
                 <data android:scheme="nostrnwc+primal" />
                 <data android:host="connect"/>
             </intent-filter>
+
+            <intent-filter
+                android:autoVerify="true"
+                android:label="NPub Link">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="https"
+                    android:host="primal.net"
+                    android:pathPrefix="/p/npub" />
+            </intent-filter>
+
+            <intent-filter
+                android:autoVerify="true"
+                android:label="Hex NPub Link">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="https"
+                    android:host="primal.net"
+                    android:pathPrefix="/p/"
+                    android:pathPattern="/[0-9a-f]+/" />
+            </intent-filter>
+
+            <intent-filter
+                android:autoVerify="true"
+                android:label="NProfile Link">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="https"
+                    android:host="primal.net"
+                    android:pathPrefix="/p/nprofile" />
+            </intent-filter>
+
+            <intent-filter
+                android:autoVerify="true"
+                android:label="Primal Name Link">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="https"
+                    android:host="primal.net"
+                    android:pathPrefix="/" />
+            </intent-filter>
         </activity>
 
         <provider
