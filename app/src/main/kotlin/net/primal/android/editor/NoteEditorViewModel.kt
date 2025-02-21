@@ -200,7 +200,7 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private fun observeThreadConversation(replyToNoteId: String) {
         viewModelScope.launch {
-            feedRepository.observeConversation(noteId = replyToNoteId)
+            feedRepository.observeConversation(userId = activeAccountStore.activeUserId(), noteId = replyToNoteId)
                 .filter { it.isNotEmpty() }
                 .map { posts -> posts.map { it.asFeedPostUi() } }
                 .collect { conversation ->
@@ -233,7 +233,7 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             try {
                 withContext(dispatcherProvider.io()) {
-                    feedRepository.fetchReplies(noteId = replyToNoteId)
+                    feedRepository.fetchReplies(userId = activeAccountStore.activeUserId(), noteId = replyToNoteId)
                 }
             } catch (error: WssException) {
                 Timber.w(error)

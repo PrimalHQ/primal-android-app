@@ -59,7 +59,7 @@ class NoteFeedViewModel @AssistedInject constructor(
     }
 
     private fun buildFeedByDirective(feedSpec: String) =
-        feedRepository.feedBySpec(feedSpec = feedSpec)
+        feedRepository.feedBySpec(userId = activeAccountStore.activeUserId(), feedSpec = feedSpec)
             .map { it.map { feedNote -> feedNote.asFeedPostUi() } }
             .cachedIn(viewModelScope)
 
@@ -147,7 +147,7 @@ class NoteFeedViewModel @AssistedInject constructor(
         latestFeedResponse = feedResponse
         feedResponse.processSyncCount(
             newestLocalNote = feedRepository
-                .findNewestPosts(feedDirective = feedSpec, limit = 1)
+                .findNewestPosts(userId = activeAccountStore.activeUserId(), feedDirective = feedSpec, limit = 1)
                 .firstOrNull(),
         )
     }
