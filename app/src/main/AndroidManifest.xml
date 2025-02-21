@@ -75,6 +75,20 @@
                     android:scheme="https" />
             </intent-filter>
 
+            <intent-filter
+                android:autoVerify="true"
+                android:label="Primal Profile">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="primal.net"
+                    android:pathPrefix="/p/"
+                    android:scheme="https" />
+            </intent-filter>
+
             <intent-filter android:label="Wallet Connect">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -95,6 +109,7 @@
                 <data android:scheme="nostrnwc+primal" />
                 <data android:host="connect"/>
             </intent-filter>
+
         </activity>
 
         <provider
