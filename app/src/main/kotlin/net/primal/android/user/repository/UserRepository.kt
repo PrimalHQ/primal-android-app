@@ -53,12 +53,6 @@ class UserRepository @Inject constructor(
 
     fun observeActiveAccount() = activeAccountStore.activeUserAccount.distinctUntilChanged()
 
-    suspend fun createNewUserAccount(userId: String): UserAccount {
-        val account = UserAccount.buildLocal(pubkey = userId)
-        accountsStore.upsertAccount(account)
-        return account
-    }
-
     suspend fun fetchAndUpdateUserAccount(userId: String): UserAccount {
         val userProfile = userAccountFetcher.fetchUserProfileOrNull(userId = userId)
         val userStats = userProfile?.takeIf {
