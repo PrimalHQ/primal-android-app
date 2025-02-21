@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 57,
-    "identityHash": "ee73d8ff2dfd370561890be6d7a7a988",
+    "identityHash": "ec75602f4ad4b57447eccd5f60ade284",
     "entities": [
       {
         "tableName": "PostData",
@@ -1859,7 +1859,7 @@
       },
       {
         "tableName": "ArticleFeedCrossRef",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`position` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `spec` TEXT NOT NULL, `articleId` TEXT NOT NULL, `articleAuthorId` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`position` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `spec` TEXT NOT NULL, `articleATag` TEXT NOT NULL, `articleAuthorId` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "position",
@@ -1874,8 +1874,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "articleId",
-            "columnName": "articleId",
+            "fieldPath": "articleATag",
+            "columnName": "articleATag",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -1894,15 +1894,15 @@
         },
         "indices": [
           {
-            "name": "index_ArticleFeedCrossRef_spec_articleId_articleAuthorId",
+            "name": "index_ArticleFeedCrossRef_spec_articleATag_articleAuthorId",
             "unique": true,
             "columnNames": [
               "spec",
-              "articleId",
+              "articleATag",
               "articleAuthorId"
             ],
             "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ArticleFeedCrossRef_spec_articleId_articleAuthorId` ON `${TABLE_NAME}` (`spec`, `articleId`, `articleAuthorId`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ArticleFeedCrossRef_spec_articleATag_articleAuthorId` ON `${TABLE_NAME}` (`spec`, `articleATag`, `articleAuthorId`)"
           }
         ],
         "foreignKeys": []
@@ -1973,7 +1973,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ee73d8ff2dfd370561890be6d7a7a988')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ec75602f4ad4b57447eccd5f60ade284')"
     ]
   }
 }

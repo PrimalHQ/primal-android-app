@@ -22,7 +22,7 @@ interface ArticleDao {
                 CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted
             FROM ArticleData
             INNER JOIN ArticleFeedCrossRef 
-                ON ArticleFeedCrossRef.articleId = ArticleData.articleId 
+                ON ArticleFeedCrossRef.articleATag = ArticleData.aTag 
                 AND ArticleFeedCrossRef.articleAuthorId = ArticleData.authorId
             LEFT JOIN EventUserStats ON EventUserStats.eventId = ArticleData.eventId AND EventUserStats.userId = :userId
             LEFT JOIN MutedUserData ON MutedUserData.userId = ArticleData.authorId

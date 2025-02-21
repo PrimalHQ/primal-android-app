@@ -20,7 +20,6 @@ import net.primal.android.networking.primal.retryNetworkCall
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.mapNotNullAsArticleDataPO
 import net.primal.android.nostr.ext.orderByPagingIfNotNull
-import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
 import net.primal.android.notes.db.FeedPostRemoteKey
 import timber.log.Timber
@@ -117,11 +116,11 @@ class ArticleFeedMediator(
     }
 
     private suspend fun findLastRemoteKey(state: PagingState<Int, Article>): FeedPostRemoteKey? {
-        val lastItemId = state.lastItemOrNull()?.data?.eventId
-            ?: findLastItemOrNull()?.articleId
+        val lastItemATag = state.lastItemOrNull()?.data?.aTag
+            ?: findLastItemOrNull()?.articleATag
 
         return withContext(dispatcherProvider.io()) {
-            lastItemId?.let { database.feedPostsRemoteKeys().findByEventId(eventId = lastItemId) }
+            lastItemATag?.let { database.feedPostsRemoteKeys().findByEventId(eventId = lastItemATag) }
                 ?: database.feedPostsRemoteKeys().findLatestByDirective(directive = feedSpec)
         }
     }
@@ -137,7 +136,7 @@ class ArticleFeedMediator(
             .mapNotNullAsArticleDataPO().map {
                 ArticleFeedCrossRef(
                     spec = feedSpec,
-                    articleId = it.articleId,
+                    articleATag = it.aTag,
                     articleAuthorId = it.authorId,
                 )
             }
@@ -157,15 +156,15 @@ class ArticleFeedMediator(
                 )
             }
 
-            response.articles.processRemoteKeys(pagingEvent = response.paging)
+            connections.processRemoteKeys(pagingEvent = response.paging)
         }
     }
 
-    private fun List<NostrEvent>.processRemoteKeys(pagingEvent: ContentPrimalPaging?) {
+    private fun List<ArticleFeedCrossRef>.processRemoteKeys(pagingEvent: ContentPrimalPaging?) {
         if (pagingEvent?.sinceId != null && pagingEvent.untilId != null) {
             val remoteKeys = this.map {
                 FeedPostRemoteKey(
-                    eventId = it.id,
+                    eventId = it.articleATag,
                     directive = feedSpec,
                     sinceId = pagingEvent.sinceId,
                     untilId = pagingEvent.untilId,
