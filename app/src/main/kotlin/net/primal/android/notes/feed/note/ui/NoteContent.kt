@@ -217,7 +217,7 @@ fun NoteContent(
                         onProfileClick = noteCallbacks.onProfileClick,
                         onUrlClick = {
                             if (it.isPrimalLegendsUrl()) {
-                                noteCallbacks.onPrimalLegendsLeaderboardClick
+                                noteCallbacks.onPrimalLegendsLeaderboardClick?.invoke()
                             } else {
                                 onUrlClick?.invoke(it)
                             }
