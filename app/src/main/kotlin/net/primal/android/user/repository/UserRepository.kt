@@ -2,7 +2,6 @@ package net.primal.android.user.repository
 
 import java.time.Instant
 import javax.inject.Inject
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
@@ -48,10 +47,6 @@ class UserRepository @Inject constructor(
             accountsStore.getAndUpdateAccount(userId = userId) { copy(lastAccessedAt = Instant.now().epochSecond) }
             activeAccountStore.setActiveUserId(pubkey = userId)
         }
-
-    fun observeUserAccounts() = accountsStore.userAccounts
-
-    fun observeActiveAccount() = activeAccountStore.activeUserAccount.distinctUntilChanged()
 
     suspend fun fetchAndUpdateUserAccount(userId: String): UserAccount {
         val userProfile = userAccountFetcher.fetchUserProfileOrNull(userId = userId)
