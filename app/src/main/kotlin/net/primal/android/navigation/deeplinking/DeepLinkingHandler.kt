@@ -8,6 +8,7 @@ import net.primal.android.user.domain.isNwcUrl
 import net.primal.android.user.domain.parseNWCUrl
 
 private val PRIMAL_NOTE_REGEX = Regex("https://.*primal.net/e/")
+private val PRIMAL_ARTICLE_REGEX = Regex("https://.*primal.net/a/")
 
 private const val NOSTR_WALLET_CONNECT_SCHEMA = "nostr+walletconnect://"
 private const val NOSTR_WALLET_CONNECT_ALT_SCHEMA = "nostrwalletconnect://"
@@ -20,6 +21,11 @@ fun String.parseDeepLinkOrNull(): DeepLink? =
         PRIMAL_NOTE_REGEX.containsMatchIn(this) -> {
             val unknownNoteIdentifier = PRIMAL_NOTE_REGEX.replace(this, "")
             unknownNoteIdentifier.resolveNoteId()?.let { DeepLink.Note(it) }
+        }
+
+        PRIMAL_ARTICLE_REGEX.containsMatchIn(this) -> {
+            val unknownArticleIdentifier = PRIMAL_ARTICLE_REGEX.replace(this, "")
+            unknownArticleIdentifier.let { DeepLink.Article(it) }
         }
 
         isNostrWalletConnectSchemaAndUrl() ->
