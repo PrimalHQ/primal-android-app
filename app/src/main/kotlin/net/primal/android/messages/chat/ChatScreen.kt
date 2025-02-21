@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material.icons.outlined.HourglassBottom
@@ -42,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -87,6 +89,7 @@ fun ChatScreen(
             Lifecycle.Event.ON_START, Lifecycle.Event.ON_STOP -> {
                 viewModel.setEvent(ChatContract.UiEvent.MessagesSeen)
             }
+
             else -> Unit
         }
     }
@@ -437,6 +440,9 @@ private fun MessageOutlinedTextField(
             textStyle = AppTheme.typography.bodyMedium,
             colors = PrimalDefaults.outlinedTextFieldColors(),
             shape = AppTheme.shapes.medium,
+            keyboardOptions = KeyboardOptions.Default.copy(
+                capitalization = KeyboardCapitalization.Sentences,
+            ),
         )
 
         AppBarIcon(
@@ -463,8 +469,10 @@ private fun ChatErrorHandler(error: ChatContract.UiState.ChatError?, snackbarHos
         val errorMessage = when (error) {
             is ChatContract.UiState.ChatError.MissingRelaysConfiguration ->
                 context.getString(R.string.app_missing_relays_config)
+
             is ChatContract.UiState.ChatError.PublishError ->
                 context.getString(R.string.chat_nostr_publish_error)
+
             else -> null
         }
 
