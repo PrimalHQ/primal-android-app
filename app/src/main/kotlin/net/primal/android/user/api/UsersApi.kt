@@ -5,7 +5,7 @@ import net.primal.android.user.api.model.BookmarksResponse
 import net.primal.android.user.api.model.UserContactsResponse
 import net.primal.android.user.api.model.UserProfileResponse
 import net.primal.android.user.api.model.UserProfilesResponse
-import net.primal.android.user.api.model.UserRelaysResponse
+import net.primal.android.user.api.model.UsersRelaysResponse
 
 interface UsersApi {
 
@@ -25,7 +25,7 @@ interface UsersApi {
 
     suspend fun getUserFollowing(userId: String): UsersResponse
 
-    suspend fun getUserRelays(userId: String): UserRelaysResponse
+    suspend fun getUserRelays(userIds: List<String>): UsersRelaysResponse
 
     suspend fun getDefaultRelays(): List<String>
 

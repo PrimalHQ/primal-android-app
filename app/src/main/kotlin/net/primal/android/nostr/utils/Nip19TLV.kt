@@ -42,6 +42,27 @@ object Nip19TLV {
 
     private fun String.cleanNostrScheme(): String = this.removePrefix("nostr:")
 
+    fun parseUriAsNprofileOrNull(nprofileUri: String): Nprofile? =
+        runCatching {
+            parseAsNprofile(nprofile = nprofileUri.cleanNostrScheme())
+        }.getOrNull()
+
+    private fun parseAsNprofile(nprofile: String): Nprofile? {
+        val tlv = parse(nprofile)
+        val pubkey = tlv[Type.SPECIAL.id]?.first()?.toHex()
+
+        val relays = tlv[Type.RELAY.id]?.map {
+            String(bytes = it, charset = Charsets.US_ASCII)
+        } ?: emptyList()
+
+        return pubkey?.let {
+            Nprofile(
+                pubkey = pubkey,
+                relays = relays,
+            )
+        }
+    }
+
     fun parseUriAsNeventOrNull(neventUri: String): Nevent? =
         runCatching {
             parseAsNevent(nevent = neventUri.cleanNostrScheme())
@@ -51,9 +72,10 @@ object Nip19TLV {
         val tlv = parse(nevent)
         val eventId = tlv[Type.SPECIAL.id]?.first()?.toHex()
 
-        val relays = tlv[Type.RELAY.id]?.first()?.let {
+        val relays = tlv[Type.RELAY.id]?.map {
             String(bytes = it, charset = Charsets.US_ASCII)
-        }
+        } ?: emptyList()
+
         val profileId = tlv[Type.AUTHOR.id]?.first()?.toHex()
 
         val kind = tlv[Type.KIND.id]?.first()?.let {
@@ -64,7 +86,7 @@ object Nip19TLV {
                 kind = kind,
                 eventId = eventId,
                 userId = profileId,
-                relays = relays?.split(",") ?: emptyList(),
+                relays = relays,
             )
         } else {
             null
@@ -81,9 +103,10 @@ object Nip19TLV {
         val identifier = tlv[Type.SPECIAL.id]?.first()?.let {
             String(bytes = it, charset = Charsets.US_ASCII)
         }
-        val relays = tlv[Type.RELAY.id]?.first()?.let {
+        val relays = tlv[Type.RELAY.id]?.map {
             String(bytes = it, charset = Charsets.US_ASCII)
-        }
+        } ?: emptyList()
+
         val profileId = tlv[Type.AUTHOR.id]?.first()?.toHex()
 
         val kind = tlv[Type.KIND.id]?.first()?.let {
@@ -93,13 +116,31 @@ object Nip19TLV {
         return if (identifier != null && profileId != null && kind != null) {
             Naddr(
                 identifier = identifier,
-                relays = relays?.split(",") ?: emptyList(),
+                relays = relays,
                 userId = profileId,
                 kind = kind,
             )
         } else {
             null
         }
+    }
+
+    fun Nprofile.toNprofileString(): String {
+        val tlv = mutableListOf<Byte>()
+
+        // Add profile public key
+        tlv.addAll(this.pubkey.constructNprofileSpecialBytes())
+
+        // Add RELAY type if not empty
+        if (this.relays.isNotEmpty()) {
+            tlv.addAll(this.relays.constructRelayBytes())
+        }
+
+        return Bech32.encodeBytes(
+            hrp = "nprofile",
+            data = tlv.toByteArray(),
+            encoding = Bech32.Encoding.Bech32,
+        )
     }
 
     fun Nevent.toNeventString(): String {
@@ -157,6 +198,11 @@ object Nip19TLV {
         return kindBytes.toTLVBytes(type = Type.KIND)
     }
 
+    private fun String.constructNprofileSpecialBytes(): List<Byte> {
+        val authorBytes = this.hexToBytes()
+        return authorBytes.toTLVBytes(type = Type.SPECIAL)
+    }
+
     private fun String.constructNeventSpecialBytes(): List<Byte> {
         val authorBytes = this.hexToBytes()
         return authorBytes.toTLVBytes(type = Type.SPECIAL)
@@ -173,8 +219,7 @@ object Nip19TLV {
     }
 
     private fun List<String>.constructRelayBytes(): List<Byte> {
-        val relaysBytes = this.joinToString(",").toByteArray(Charsets.US_ASCII)
-        return relaysBytes.toTLVBytes(type = Type.RELAY)
+        return flatMap { it.toByteArray(Charsets.US_ASCII).toTLVBytes(type = Type.RELAY) }
     }
 
     private fun ByteArray.toTLVBytes(type: Type) =

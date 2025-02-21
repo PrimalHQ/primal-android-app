@@ -92,9 +92,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private fun markProfileInteraction() {
         if (!isActiveUser) {
             viewModelScope.launch {
-                withContext(dispatcherProvider.io()) {
-                    profileRepository.markAsInteracted(profileId = profileId)
-                }
+                profileRepository.markAsInteracted(profileId = profileId)
             }
         }
     }
