@@ -92,12 +92,10 @@ class ProfileDetailsViewModel @Inject constructor(
     private fun markProfileInteraction() {
         if (!isActiveUser) {
             viewModelScope.launch {
-                withContext(dispatcherProvider.io()) {
-                    profileRepository.markAsInteracted(
-                        profileId = profileId,
-                        ownerId = activeAccountStore.activeUserId(),
-                    )
-                }
+                profileRepository.markAsInteracted(
+                    profileId = profileId,
+                    ownerId = activeAccountStore.activeUserId(),
+                )
             }
         }
     }

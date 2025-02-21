@@ -9,5 +9,6 @@ enum class NoteAttachmentType {
     Rumble,
     Spotify,
     Tidal,
+    GitHub,
     Other,
 }

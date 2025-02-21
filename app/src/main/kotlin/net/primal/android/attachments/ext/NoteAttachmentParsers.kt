@@ -57,22 +57,35 @@ fun List<DirectMessageData>.flatMapMessagesAsNoteAttachmentPO() =
         }
 
 private fun detectNoteAttachmentType(url: String, mimeType: String?): NoteAttachmentType {
-    return when {
-        mimeType?.startsWith("image") == true -> NoteAttachmentType.Image
-        mimeType?.startsWith("video") == true -> NoteAttachmentType.Video
-        mimeType?.startsWith("audio") == true -> NoteAttachmentType.Audio
-        mimeType?.endsWith("pdf") == true -> NoteAttachmentType.Pdf
-        else -> {
-            when {
-                url.contains(".youtube.com") -> NoteAttachmentType.YouTube
-                url.contains("/youtube.com") -> NoteAttachmentType.YouTube
-                url.contains("/youtu.be") -> NoteAttachmentType.YouTube
-                url.contains(".rumble.com") -> NoteAttachmentType.Rumble
-                url.contains("/rumble.com") -> NoteAttachmentType.Rumble
-                url.contains("/open.spotify.com/") -> NoteAttachmentType.Spotify
-                url.contains("/listen.tidal.com/") -> NoteAttachmentType.Tidal
-                else -> NoteAttachmentType.Other
-            }
+    mimeType?.let {
+        val mimeTypeAttachment = detectMimeTypeAttachment(mimeType)
+        if (mimeTypeAttachment != NoteAttachmentType.Other) {
+            return mimeTypeAttachment
         }
+    }
+
+    return detectUrlAttachmentType(url)
+}
+
+private fun detectMimeTypeAttachment(mimeType: String): NoteAttachmentType {
+    return when {
+        mimeType.startsWith("image") -> NoteAttachmentType.Image
+        mimeType.startsWith("video") -> NoteAttachmentType.Video
+        mimeType.startsWith("audio") -> NoteAttachmentType.Audio
+        mimeType.endsWith("pdf") -> NoteAttachmentType.Pdf
+        else -> NoteAttachmentType.Other
+    }
+}
+
+private fun detectUrlAttachmentType(url: String): NoteAttachmentType {
+    return when {
+        url.contains(".youtube.com") -> NoteAttachmentType.YouTube
+        url.contains("/youtube.com") -> NoteAttachmentType.YouTube
+        url.contains("/youtu.be") -> NoteAttachmentType.YouTube
+        url.contains(".rumble.com") || url.contains("/rumble.com") -> NoteAttachmentType.Rumble
+        url.contains("/open.spotify.com/") -> NoteAttachmentType.Spotify
+        url.contains("/listen.tidal.com/") -> NoteAttachmentType.Tidal
+        url.contains("/github.com/") -> NoteAttachmentType.GitHub
+        else -> NoteAttachmentType.Other
     }
 }

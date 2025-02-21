@@ -44,7 +44,7 @@ fun NoteTagUserLazyColumn(
                     val newCursorPosition = lastIndexOfUserTaggingSign + 1 + taggedUser.displayUsername.length
                     val newText = content.text.substring(0, lastIndexOfUserTaggingSign) +
                         taggedUser.displayUsername +
-                        content.text.substring(startIndex = endOfQueryIndex)
+                        content.text.substring(startIndex = endOfQueryIndex) + " "
 
                     val newContent = content.copy(
                         text = newText,

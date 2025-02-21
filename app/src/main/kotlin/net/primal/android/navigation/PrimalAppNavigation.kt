@@ -51,7 +51,6 @@ import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.editor.NoteEditorScreen
 import net.primal.android.editor.di.noteEditorViewModel
 import net.primal.android.editor.domain.NoteEditorArgs
-import net.primal.android.editor.domain.NoteEditorArgs.Companion.asNoteEditorArgs
 import net.primal.android.editor.domain.NoteEditorArgs.Companion.jsonAsNoteEditorArgs
 import net.primal.android.explore.asearch.AdvancedSearchContract
 import net.primal.android.explore.asearch.AdvancedSearchScreen
@@ -386,6 +385,7 @@ fun noteCallbacksHandler(navController: NavController) =
             navController.navigateToReactions(eventId = noteId)
         },
         onGetPrimalPremiumClick = { navController.navigateToPremiumBuying() },
+        onPrimalLegendsLeaderboardClick = { navController.navigateToPremiumLegendLeaderboard() },
     )
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -922,7 +922,7 @@ private fun NavGraphBuilder.home(
         noteCallbacks = noteCallbacksHandler(navController),
         onGoToWallet = { navController.navigateToWallet() },
         onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
-        onNewPostClick = { preFillContent -> navController.navigateToNoteEditor(preFillContent?.asNoteEditorArgs()) },
+        onNewPostClick = { navController.navigateToNoteEditor(null) },
         accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
     )
 }
@@ -1030,6 +1030,7 @@ private fun NavGraphBuilder.explore(
         noteCallbacks = noteCallbacksHandler(navController),
         onGoToWallet = { navController.navigateToWallet() },
         accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
+        onNewPostClick = { navController.navigateToNoteEditor(null) },
     )
 }
 
@@ -1645,6 +1646,7 @@ private fun NavGraphBuilder.notifications(
         onDrawerScreenClick = onDrawerScreenClick,
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
         accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
+        onNewPostClick = { navController.navigateToNoteEditor(null) },
     )
 }
 
@@ -1804,6 +1806,7 @@ private fun NavGraphBuilder.profile(
                 navController.navigateToPremiumCard(profileId = profileId)
             }
         },
+        onNewPostClick = { navController.navigateToNoteEditor(null) },
     )
 }
 

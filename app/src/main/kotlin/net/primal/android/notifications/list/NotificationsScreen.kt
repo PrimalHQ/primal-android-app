@@ -47,6 +47,7 @@ import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
+import net.primal.android.core.compose.fab.NewPostFloatingActionButton
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -80,6 +81,7 @@ fun NotificationsScreen(
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
+    onNewPostClick: () -> Unit,
 ) {
     val noteViewModel = hiltViewModel<NoteViewModel>()
 
@@ -107,6 +109,7 @@ fun NotificationsScreen(
         noteCallbacks = noteCallbacks,
         noteEventPublisher = noteViewModel::setEvent,
         accountSwitcherCallbacks = accountSwitcherCallbacks,
+        onNewPostClick = onNewPostClick,
     )
 }
 
@@ -123,6 +126,7 @@ fun NotificationsScreen(
     onDrawerQrCodeClick: () -> Unit,
     noteEventPublisher: (NoteContract.UiEvent) -> Unit,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
+    onNewPostClick: () -> Unit,
 ) {
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
@@ -235,6 +239,9 @@ fun NotificationsScreen(
                     },
                 )
             }
+        },
+        floatingActionButton = {
+            NewPostFloatingActionButton(onNewPostClick = onNewPostClick)
         },
     )
 }

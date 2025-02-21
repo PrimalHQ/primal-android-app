@@ -1,23 +1,16 @@
 package net.primal.android.notes.home
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -36,11 +29,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import kotlin.time.Duration.Companion.milliseconds
@@ -54,6 +44,7 @@ import net.primal.android.core.compose.FeedsErrorColumn
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
+import net.primal.android.core.compose.fab.NewPostFloatingActionButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.Search
@@ -69,7 +60,6 @@ import net.primal.android.notes.feed.list.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedContract.UiEvent
 import net.primal.android.premium.legend.domain.LegendaryCustomization
-import net.primal.android.theme.AppTheme
 
 @Composable
 fun HomeFeedScreen(
@@ -80,7 +70,7 @@ fun HomeFeedScreen(
     onSearchClick: () -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
-    onNewPostClick: (content: TextFieldValue?) -> Unit,
+    onNewPostClick: () -> Unit,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -119,7 +109,7 @@ fun HomeFeedScreen(
     onSearchClick: () -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
-    onNewPostClick: (content: TextFieldValue?) -> Unit,
+    onNewPostClick: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
@@ -228,22 +218,7 @@ fun HomeFeedScreen(
             }
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { onNewPostClick(null) },
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(CircleShape)
-                    .background(color = AppTheme.colorScheme.primary, shape = CircleShape),
-                elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
-                containerColor = Color.Unspecified,
-                content = {
-                    Icon(
-                        imageVector = Icons.Outlined.Add,
-                        contentDescription = stringResource(id = R.string.accessibility_new_post),
-                        tint = Color.White,
-                    )
-                },
-            )
+            NewPostFloatingActionButton(onNewPostClick = onNewPostClick)
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)

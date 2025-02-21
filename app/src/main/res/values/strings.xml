@@ -220,6 +220,7 @@
     <string name="legend_contribution_payment_instructions_lightning_stage_title">Lightning Payment</string>
     <string name="legend_contribution_payment_instructions_pay_with_primal_wallet">Pay Now via Primal Wallet</string>
     <string name="legend_contribution_payment_instructions_copy_invoice">Copy Invoice</string>
+    <string name="legend_contribution_payment_instructions_error_on_fetching_mining_fees">Unable to load mining fees. Please try again.</string>
     <string name="legend_contribution_success_stage_title">Success</string>
     <string name="legend_contribution_success_stage_appreciation_title">Success, payment received!</string>
     <string name="legend_contribution_success_stage_appreciation_subtitle">Thank you, Legend!</string>
