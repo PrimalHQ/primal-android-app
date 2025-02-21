@@ -2,7 +2,6 @@ package net.primal.android.drawer.multiaccount.ui
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -10,7 +9,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -78,14 +76,6 @@ fun AccountSwitcherBottomSheet(
     ) {
         Column(
             modifier = Modifier
-                .animateContentSize()
-                .run {
-                    if (isEditMode) {
-                        this.fillMaxSize()
-                    } else {
-                        this
-                    }
-                }
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 20.dp)
                 .navigationBarsPadding(),
