@@ -64,14 +64,10 @@ private fun AccountSwitcher(
     onLogoutClick: (String) -> Unit,
 ) {
     var accountsBottomSheetVisibility by remember { mutableStateOf(false) }
-    val bottomSheetIcon = remember(state.userAccounts) {
-        mutableStateOf(
-            if (state.userAccounts.isEmpty()) {
-                PrimalIcons.AddAccount
-            } else {
-                PrimalIcons.DetailsRounded
-            },
-        )
+    val bottomSheetIcon = if (state.userAccounts.isEmpty()) {
+        PrimalIcons.AddAccount
+    } else {
+        PrimalIcons.DetailsRounded
     }
 
     if (accountsBottomSheetVisibility && state.activeAccount != null) {
@@ -106,7 +102,7 @@ private fun AccountSwitcher(
             ) {
                 Icon(
                     modifier = Modifier.size(28.dp),
-                    imageVector = bottomSheetIcon.value,
+                    imageVector = bottomSheetIcon,
                     contentDescription = null,
                     tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 )
