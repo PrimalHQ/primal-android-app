@@ -243,7 +243,10 @@ class FeedListViewModel @AssistedInject constructor(
     private fun scheduleClearingDvmFeed(dvmFeed: DvmFeed) =
         viewModelScope.launch {
             delay(400.milliseconds)
-            feedRepository.removeFeedSpec(feedSpec = dvmFeed.buildSpec(specKind = specKind))
+            feedRepository.removeFeedSpec(
+                userId = activeAccountStore.activeUserId(),
+                feedSpec = dvmFeed.buildSpec(specKind = specKind),
+            )
             setState { copy(selectedDvmFeed = null) }
         }
 

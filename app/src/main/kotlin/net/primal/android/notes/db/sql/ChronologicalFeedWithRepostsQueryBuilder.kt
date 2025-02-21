@@ -31,7 +31,7 @@ class ChronologicalFeedWithRepostsQueryBuilder(
             JOIN FeedPostDataCrossRef ON FeedPostDataCrossRef.eventId = PostData.postId
             LEFT JOIN EventUserStats ON EventUserStats.eventId = PostData.postId AND EventUserStats.userId = ?
             LEFT JOIN MutedUserData ON MutedUserData.userId = PostData.authorId
-            WHERE FeedPostDataCrossRef.feedSpec = ? AND isMuted = 0
+            WHERE FeedPostDataCrossRef.feedSpec = ? AND FeedPostDataCrossRef.ownerId = ? AND isMuted = 0
 
             UNION ALL
 
@@ -58,28 +58,28 @@ class ChronologicalFeedWithRepostsQueryBuilder(
             JOIN FeedPostDataCrossRef ON FeedPostDataCrossRef.eventId = RepostData.repostId
             LEFT JOIN EventUserStats ON EventUserStats.eventId = PostData.postId AND EventUserStats.userId = ?
             LEFT JOIN MutedUserData ON MutedUserData.userId = PostData.authorId
-            WHERE FeedPostDataCrossRef.feedSpec = ? AND isMuted = 0
+            WHERE FeedPostDataCrossRef.feedSpec = ? AND FeedPostDataCrossRef.ownerId = ? AND isMuted = 0
         """
     }
 
     override fun feedQuery(): SimpleSQLiteQuery {
         return SimpleSQLiteQuery(
             query = "$LATEST_BASIC_QUERY ORDER BY feedCreatedAt DESC",
-            bindArgs = arrayOf(userPubkey, feedSpec, userPubkey, feedSpec),
+            bindArgs = arrayOf(userPubkey, feedSpec, userPubkey, userPubkey, feedSpec, userPubkey),
         )
     }
 
     override fun newestFeedPostsQuery(limit: Int): SimpleSQLiteQuery {
         return SimpleSQLiteQuery(
             query = "$LATEST_BASIC_QUERY ORDER BY feedCreatedAt DESC LIMIT ?",
-            bindArgs = arrayOf(userPubkey, feedSpec, userPubkey, feedSpec, limit),
+            bindArgs = arrayOf(userPubkey, feedSpec, userPubkey, userPubkey, feedSpec, userPubkey, limit),
         )
     }
 
     override fun oldestFeedPostsQuery(limit: Int): SimpleSQLiteQuery {
         return SimpleSQLiteQuery(
             query = "$LATEST_BASIC_QUERY ORDER BY feedCreatedAt ASC LIMIT ?",
-            bindArgs = arrayOf(userPubkey, feedSpec, userPubkey, feedSpec, limit),
+            bindArgs = arrayOf(userPubkey, feedSpec, userPubkey, userPubkey, feedSpec, userPubkey, limit),
         )
     }
 }

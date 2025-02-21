@@ -26,7 +26,7 @@ interface ArticleDao {
                 AND ArticleFeedCrossRef.articleAuthorId = ArticleData.authorId
             LEFT JOIN EventUserStats ON EventUserStats.eventId = ArticleData.eventId AND EventUserStats.userId = :userId
             LEFT JOIN MutedUserData ON MutedUserData.userId = ArticleData.authorId
-            WHERE ArticleFeedCrossRef.spec = :spec AND isMuted = 0
+            WHERE ArticleFeedCrossRef.spec = :spec AND ArticleFeedCrossRef.ownerId = :userId AND isMuted = 0
             ORDER BY ArticleFeedCrossRef.position ASC
         """,
     )

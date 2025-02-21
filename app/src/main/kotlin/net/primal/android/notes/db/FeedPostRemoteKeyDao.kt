@@ -11,27 +11,40 @@ interface FeedPostRemoteKeyDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsert(data: List<FeedPostRemoteKey>)
 
-    @Query("SELECT * FROM FeedPostRemoteKey WHERE eventId = :eventId LIMIT 1")
-    fun findByEventId(eventId: String): FeedPostRemoteKey?
+    @Query("SELECT * FROM FeedPostRemoteKey WHERE eventId = :eventId AND ownerId = :ownerId LIMIT 1")
+    fun findByEventId(ownerId: String, eventId: String): FeedPostRemoteKey?
 
     @Query(
         """
             SELECT * FROM FeedPostRemoteKey 
-            WHERE (eventId = :postId OR eventId = :repostId) AND directive = :directive
+            WHERE (eventId = :postId OR eventId = :repostId) AND directive = :directive AND ownerId = :ownerId
         """,
     )
     fun find(
         postId: String?,
         repostId: String?,
         directive: String,
+        ownerId: String,
     ): FeedPostRemoteKey?
 
-    @Query("SELECT * FROM FeedPostRemoteKey WHERE (directive = :directive) ORDER BY cachedAt DESC LIMIT 1")
-    fun findLatestByDirective(directive: String): FeedPostRemoteKey?
+    @Query(
+        """
+            SELECT * FROM FeedPostRemoteKey
+            WHERE directive = :directive AND ownerId = :ownerId
+            ORDER BY cachedAt DESC LIMIT 1
+        """,
+    )
+    fun findLatestByDirective(ownerId: String, directive: String): FeedPostRemoteKey?
 
-    @Query("SELECT cachedAt FROM FeedPostRemoteKey WHERE (directive = :directive) ORDER BY cachedAt DESC LIMIT 1")
-    fun lastCachedAt(directive: String): Long?
+    @Query(
+        """
+            SELECT cachedAt FROM FeedPostRemoteKey
+            WHERE directive = :directive AND ownerId = :ownerId
+            ORDER BY cachedAt DESC LIMIT 1
+        """,
+    )
+    fun lastCachedAt(ownerId: String, directive: String): Long?
 
-    @Query("DELETE FROM FeedPostRemoteKey WHERE (directive = :directive)")
-    fun deleteByDirective(directive: String)
+    @Query("DELETE FROM FeedPostRemoteKey WHERE directive = :directive AND ownerId = :ownerId")
+    fun deleteByDirective(ownerId: String, directive: String)
 }
