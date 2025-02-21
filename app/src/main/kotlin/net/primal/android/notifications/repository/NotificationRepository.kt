@@ -14,41 +14,38 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.notifications.api.NotificationsApi
 import net.primal.android.notifications.api.mediator.NotificationsRemoteMediator
 import net.primal.android.notifications.db.Notification
-import net.primal.android.user.accounts.active.ActiveAccountStore
 
 @OptIn(ExperimentalPagingApi::class)
 class NotificationRepository @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val database: PrimalDatabase,
     private val notificationsApi: NotificationsApi,
-    private val activeAccountStore: ActiveAccountStore,
 ) {
 
     fun observeUnseenNotifications() = database.notifications().allUnseenNotifications()
 
-    suspend fun markAllNotificationsAsSeen() {
+    suspend fun markAllNotificationsAsSeen(userId: String) {
         withContext(dispatcherProvider.io()) {
             val seenAt = Instant.now()
-            val userId = activeAccountStore.activeUserId()
             notificationsApi.setLastSeenTimestamp(userId = userId)
-            remoteMediator.updateLastSeenTimestamp(lastSeen = seenAt)
+            constructRemoteMediator(userId = userId).updateLastSeenTimestamp(lastSeen = seenAt)
             database.notifications().markAllUnseenNotificationsAsSeen(seenAt = seenAt.epochSecond)
         }
     }
 
-    fun observeSeenNotifications(): Flow<PagingData<Notification>> {
-        return createPager {
+    fun observeSeenNotifications(userId: String): Flow<PagingData<Notification>> {
+        return createPager(userId = userId) {
             database.notifications().allSeenNotificationsPaged()
         }.flow
     }
 
-    private val remoteMediator = NotificationsRemoteMediator(
-        userId = activeAccountStore.activeUserId(),
+    private fun constructRemoteMediator(userId: String) = NotificationsRemoteMediator(
+        userId = userId,
         notificationsApi = notificationsApi,
         database = database,
     )
 
-    private fun createPager(pagingSourceFactory: () -> PagingSource<Int, Notification>) =
+    private fun createPager(userId: String, pagingSourceFactory: () -> PagingSource<Int, Notification>) =
         Pager(
             config = PagingConfig(
                 pageSize = 50,
@@ -56,7 +53,7 @@ class NotificationRepository @Inject constructor(
                 initialLoadSize = 200,
                 enablePlaceholders = true,
             ),
-            remoteMediator = remoteMediator,
+            remoteMediator = constructRemoteMediator(userId = userId),
             pagingSourceFactory = pagingSourceFactory,
         )
 }

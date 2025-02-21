@@ -45,7 +45,8 @@ class NotificationsViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(
         UiState(
-            seenNotifications = notificationsRepository.observeSeenNotifications()
+            seenNotifications = notificationsRepository
+                .observeSeenNotifications(userId = activeAccountStore.activeUserId())
                 .map { it.map { notification -> notification.asNotificationUi() } }
                 .cachedIn(viewModelScope),
         ),
@@ -131,7 +132,7 @@ class NotificationsViewModel @Inject constructor(
         // Launching in a new scope to survive view model destruction
         CoroutineScope(dispatcherProvider.io()).launch {
             try {
-                notificationsRepository.markAllNotificationsAsSeen()
+                notificationsRepository.markAllNotificationsAsSeen(userId = activeAccountStore.activeUserId())
             } catch (error: WssException) {
                 Timber.w(error)
             } catch (error: NostrSignUnauthorized) {
