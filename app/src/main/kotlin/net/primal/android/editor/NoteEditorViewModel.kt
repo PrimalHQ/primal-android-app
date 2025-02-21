@@ -382,6 +382,7 @@ class NoteEditorViewModel @AssistedInject constructor(
 
             val uploadResult = withContext(dispatcherProvider.io()) {
                 attachmentRepository.uploadNoteAttachment(
+                    userId = activeAccountStore.activeUserId(),
                     attachment = attachment,
                     uploadId = uploadId,
                     onProgress = { uploadedBytes, totalBytes ->
@@ -443,7 +444,10 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             this@cancel.job.cancel()
             runCatching {
-                attachmentRepository.cancelNoteAttachmentUpload(uploadId = this@cancel.id)
+                attachmentRepository.cancelNoteAttachmentUpload(
+                    userId = activeAccountStore.activeUserId(),
+                    uploadId = this@cancel.id,
+                )
             }
         }
     }

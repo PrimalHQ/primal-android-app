@@ -1,6 +1,5 @@
 package net.primal.android.attachments.repository
 
-import java.util.*
 import javax.inject.Inject
 import net.primal.android.attachments.db.NoteAttachment
 import net.primal.android.attachments.domain.NoteAttachmentType
@@ -8,10 +7,8 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.primal.upload.domain.UploadResult
-import net.primal.android.user.accounts.active.ActiveAccountStore
 
 class AttachmentsRepository @Inject constructor(
-    private val activeAccountStore: ActiveAccountStore,
     private val fileUploader: PrimalFileUploader,
     private val database: PrimalDatabase,
 ) {
@@ -22,11 +19,11 @@ class AttachmentsRepository @Inject constructor(
 
     @Throws(UnsuccessfulFileUpload::class)
     suspend fun uploadNoteAttachment(
+        userId: String,
         attachment: net.primal.android.editor.domain.NoteAttachment,
         uploadId: String,
         onProgress: ((uploadedBytes: Int, totalBytes: Int) -> Unit)? = null,
     ): UploadResult {
-        val userId = activeAccountStore.activeUserId()
         return fileUploader.uploadFile(
             uri = attachment.localUri,
             userId = userId,
@@ -35,8 +32,7 @@ class AttachmentsRepository @Inject constructor(
         )
     }
 
-    suspend fun cancelNoteAttachmentUpload(uploadId: String) {
-        val userId = activeAccountStore.activeUserId()
+    suspend fun cancelNoteAttachmentUpload(userId: String, uploadId: String) {
         fileUploader.cancelUpload(userId = userId, uploadId = uploadId)
     }
 }
