@@ -9,6 +9,7 @@ import net.primal.android.user.domain.parseNWCUrl
 
 private val PRIMAL_NOTE_REGEX = Regex("https://.*primal.net/e/")
 private val PRIMAL_ARTICLE_REGEX = Regex("https://.*primal.net/a/")
+private val PRIMAL_PROFILE_REGEX = Regex("https://.*primal.net/p/")
 
 private const val NOSTR_WALLET_CONNECT_SCHEMA = "nostr+walletconnect://"
 private const val NOSTR_WALLET_CONNECT_ALT_SCHEMA = "nostrwalletconnect://"
@@ -21,6 +22,11 @@ fun String.parseDeepLinkOrNull(): DeepLink? =
         PRIMAL_NOTE_REGEX.containsMatchIn(this) -> {
             val unknownNoteIdentifier = PRIMAL_NOTE_REGEX.replace(this, "")
             unknownNoteIdentifier.resolveNoteId()?.let { DeepLink.Note(it) }
+        }
+
+        PRIMAL_PROFILE_REGEX.containsMatchIn(this) -> {
+            val unknownProfileIdentifier = PRIMAL_PROFILE_REGEX.replace(this, "")
+            unknownProfileIdentifier.resolveProfileId()?.let { DeepLink.Profile(it) }
         }
 
         PRIMAL_ARTICLE_REGEX.containsMatchIn(this) -> {
@@ -39,6 +45,16 @@ fun String.parseDeepLinkOrNull(): DeepLink? =
             }.getOrNull()
 
         else -> null
+    }
+
+private fun String.resolveProfileId(): String? =
+    when {
+        this.startsWith("npub") -> runCatching { bech32ToHexOrThrow() }.getOrNull()
+        this.startsWith("nprofile1") -> {
+            val pubkey = Nip19TLV.parseUriAsNprofileOrNull(this)?.pubkey
+            runCatching { pubkey?.bech32ToHexOrThrow() }.getOrNull()
+        }
+        else -> this
     }
 
 private fun String.resolveNoteId(): String? =
