@@ -447,24 +447,6 @@ fun SharedTransitionScope.PrimalAppNavigation() {
                             )
                         }
 
-                        is DeepLink.PrimalName -> {
-
-                        }
-
-                        is DeepLink.Nprofile -> {
-
-                        }
-
-                        is DeepLink.Npub -> {
-                            navController.popBackStack()
-                            navController.navigateToProfile(profileId = deepLink.npubId, )
-                        }
-
-                        is DeepLink.HexNpub -> {
-                            navController.popBackStack()
-                            navController.navigateToProfile(profileId = deepLink.hexId)
-                        }
-
                         null -> navController.navigateToHome()
                     }
                 }

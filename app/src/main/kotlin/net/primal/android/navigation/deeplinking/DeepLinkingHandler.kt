@@ -8,17 +8,13 @@ import net.primal.android.user.domain.isNwcUrl
 import net.primal.android.user.domain.parseNWCUrl
 
 private val PRIMAL_NOTE_REGEX = Regex("https://.*primal.net/e/")
+private val PRIMAL_POST_REGEX = Regex("https://.*primal.net/p/")
 
 private const val NOSTR_WALLET_CONNECT_SCHEMA = "nostr+walletconnect://"
 private const val NOSTR_WALLET_CONNECT_ALT_SCHEMA = "nostrwalletconnect://"
 
 private const val PRIMAL_WALLET_NWC_CONNECT_SCHEMA = "nostrnwc://"
 private const val PRIMAL_WALLET_NWC_CONNECT_PRIMAL_SCHEMA = "nostrnwc+primal://"
-
-private val NPUB_REGEX = Regex("https://primal.net/p/(npub[a-zA-Z0-9]+)")
-private val NPUB_HEX_REGEX = Regex("https://primal.net/p/([a-f0-9]{64})")
-private val NPROFILE_REGEX = Regex("https://primal.net/p/(nprofile[a-zA-Z0-9]+)")
-private val PRIMAL_NAME_REGEX = Regex("https://primal.net/([a-zA-Z0-9-]+)")
 
 fun String.parseDeepLinkOrNull(): DeepLink? =
     when {
@@ -27,24 +23,9 @@ fun String.parseDeepLinkOrNull(): DeepLink? =
             unknownNoteIdentifier.resolveNoteId()?.let { DeepLink.Note(it) }
         }
 
-        NPUB_REGEX.containsMatchIn(this) -> {
-            val npubId = NPUB_REGEX.find(this)?.groupValues?.get(1)
-            npubId?.let { DeepLink.Npub(it) }
-        }
-
-        NPUB_HEX_REGEX.containsMatchIn(this) -> {
-            val npubaId = NPUB_HEX_REGEX.find(this)?.groupValues?.get(1)
-            npubaId?.let { DeepLink.HexNpub(it) }
-        }
-
-        NPROFILE_REGEX.containsMatchIn(this) -> {
-            val nprofileId = NPROFILE_REGEX.find(this)?.groupValues?.get(1)
-            nprofileId?.let { DeepLink.Nprofile(it) }
-        }
-
-        PRIMAL_NAME_REGEX.containsMatchIn(this) -> {
-            val primalName = PRIMAL_NAME_REGEX.find(this)?.groupValues?.get(1)
-            primalName?.let { DeepLink.PrimalName(it) }
+        PRIMAL_POST_REGEX.containsMatchIn(this) -> {
+            val unknownPostIdentifier = PRIMAL_POST_REGEX.replace(this, "")
+            unknownPostIdentifier.resolveProfileId()?.let { DeepLink.Profile(it) }
         }
 
         isNostrWalletConnectSchemaAndUrl() ->
@@ -58,6 +39,16 @@ fun String.parseDeepLinkOrNull(): DeepLink? =
             }.getOrNull()
 
         else -> null
+    }
+
+private fun String.resolveProfileId(): String? =
+    when {
+        this.startsWith("npub") -> runCatching { bech32ToHexOrThrow() }.getOrNull()
+        this.startsWith("nprofile1") -> {
+            val pubkey = Nip19TLV.parseUriAsNprofileOrNull(this)?.pubkey
+            runCatching { pubkey?.bech32ToHexOrThrow() }.getOrNull()
+        }
+        else -> this
     }
 
 private fun String.resolveNoteId(): String? =
