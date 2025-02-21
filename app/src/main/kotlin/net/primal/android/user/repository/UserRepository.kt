@@ -1,5 +1,6 @@
 package net.primal.android.user.repository
 
+import androidx.room.withTransaction
 import java.time.Instant
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
@@ -63,6 +64,24 @@ class UserRepository @Inject constructor(
             )
         }
     }
+
+    suspend fun clearAllUserRelatedData(userId: String) =
+        withContext(dispatchers.io()) {
+            database.withTransaction {
+                database.messages().deleteAllByOwnerId(ownerId = userId)
+                database.messageConversations().deleteAllByOwnerId(ownerId = userId)
+                database.feeds().deleteAllByOwnerId(ownerId = userId)
+                database.mutedUsers().deleteAllByOwnerId(ownerId = userId)
+                database.profileInteractions().deleteAllByOwnerId(ownerId = userId)
+                database.walletTransactions().deleteAllTransactionsByUserId(userId = userId)
+                database.notifications().deleteAllByOwnerId(ownerId = userId)
+                database.articleFeedsConnections().deleteConnections(ownerId = userId)
+                database.feedsConnections().deleteConnections(ownerId = userId)
+                database.feedPostsRemoteKeys().deleteAllByOwnerId(ownerId = userId)
+                database.publicBookmarks().deleteAllBookmarks(userId = userId)
+                database.relays().deleteAll(userId = userId)
+            }
+        }
 
     suspend fun updateFollowList(userId: String, contactsUserAccount: UserAccount) {
         accountsStore.getAndUpdateAccount(userId = userId) {

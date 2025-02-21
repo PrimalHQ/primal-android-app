@@ -25,7 +25,8 @@ interface NotificationDao {
     fun allUnseenNotifications(ownerId: String): Flow<List<Notification>>
 
     @Transaction
-    @Query("""
+    @Query(
+        """
             SELECT * FROM NotificationData
             WHERE seenGloballyAt IS NOT NULL AND ownerId = :ownerId 
             ORDER BY createdAt DESC
@@ -38,4 +39,7 @@ interface NotificationDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertAll(data: List<NotificationData>)
+
+    @Query("DELETE FROM NotificationData WHERE ownerId = :ownerId")
+    fun deleteAllByOwnerId(ownerId: String)
 }

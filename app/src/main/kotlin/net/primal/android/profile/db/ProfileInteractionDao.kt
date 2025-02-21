@@ -24,4 +24,7 @@ interface ProfileInteractionDao {
     """,
     )
     fun observeRecentProfilesByOwnerId(ownerId: String, limit: Int = 10): Flow<List<Profile>>
+
+    @Query("DELETE FROM ProfileInteraction WHERE ownerId = :ownerId")
+    fun deleteAllByOwnerId(ownerId: String)
 }

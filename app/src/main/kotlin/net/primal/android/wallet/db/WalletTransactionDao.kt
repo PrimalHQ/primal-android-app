@@ -34,5 +34,5 @@ interface WalletTransactionDao {
     fun findTransactionById(txId: String): WalletTransaction?
 
     @Query("DELETE FROM WalletTransactionData WHERE userId IS :userId")
-    fun deleteAllTransactionsUserId(userId: String)
+    fun deleteAllTransactionsByUserId(userId: String)
 }
