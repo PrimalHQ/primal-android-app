@@ -65,7 +65,7 @@ class ExploreFeedViewModel @Inject constructor(
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCleared() {
         GlobalScope.launch(dispatcherProvider.io()) {
-            feedRepository.removeFeedSpec(feedSpec = exploreFeedSpec)
+            feedRepository.removeFeedSpec(userId = activeAccountStore.activeUserId(), feedSpec = exploreFeedSpec)
         }
     }
 

@@ -66,10 +66,11 @@ class FeedRepository @Inject constructor(
             response.persistToDatabaseAsTransaction(userId = userId, database = database)
         }
 
-    suspend fun removeFeedSpec(feedSpec: String) =
+    suspend fun removeFeedSpec(userId: String, feedSpec: String) =
         withContext(dispatcherProvider.io()) {
-            database.feedPostsRemoteKeys().deleteByDirective(feedSpec)
-            database.feedsConnections().deleteConnectionsByDirective(feedSpec)
+            database.feedPostsRemoteKeys().deleteByDirective(ownerId = userId, directive = feedSpec)
+            database.feedsConnections().deleteConnectionsByDirective(ownerId = userId, feedSpec = feedSpec)
+            database.articleFeedsConnections().deleteConnectionsBySpec(ownerId = userId, spec = feedSpec)
         }
 
     suspend fun replaceFeedSpec(

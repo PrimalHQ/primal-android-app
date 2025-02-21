@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 58,
-    "identityHash": "f4190d74251fc266ebe40d6fd9f45bac",
+    "identityHash": "6eb4bc98647f0e820c0010e25b11f1c6",
     "entities": [
       {
         "tableName": "PostData",
@@ -989,8 +989,14 @@
       },
       {
         "tableName": "FeedPostDataCrossRef",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`feedSpec` TEXT NOT NULL, `eventId` TEXT NOT NULL, `orderIndex` INTEGER NOT NULL, PRIMARY KEY(`feedSpec`, `eventId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ownerId` TEXT NOT NULL, `feedSpec` TEXT NOT NULL, `eventId` TEXT NOT NULL, `orderIndex` INTEGER NOT NULL, PRIMARY KEY(`ownerId`, `feedSpec`, `eventId`))",
         "fields": [
+          {
+            "fieldPath": "ownerId",
+            "columnName": "ownerId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
           {
             "fieldPath": "feedSpec",
             "columnName": "feedSpec",
@@ -1013,11 +1019,21 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
+            "ownerId",
             "feedSpec",
             "eventId"
           ]
         },
         "indices": [
+          {
+            "name": "index_FeedPostDataCrossRef_ownerId",
+            "unique": false,
+            "columnNames": [
+              "ownerId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_FeedPostDataCrossRef_ownerId` ON `${TABLE_NAME}` (`ownerId`)"
+          },
           {
             "name": "index_FeedPostDataCrossRef_feedSpec",
             "unique": false,
@@ -1041,8 +1057,14 @@
       },
       {
         "tableName": "FeedPostRemoteKey",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eventId` TEXT NOT NULL, `directive` TEXT NOT NULL, `sinceId` INTEGER NOT NULL, `untilId` INTEGER NOT NULL, `cachedAt` INTEGER NOT NULL, PRIMARY KEY(`eventId`, `directive`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ownerId` TEXT NOT NULL, `eventId` TEXT NOT NULL, `directive` TEXT NOT NULL, `sinceId` INTEGER NOT NULL, `untilId` INTEGER NOT NULL, `cachedAt` INTEGER NOT NULL, PRIMARY KEY(`ownerId`, `eventId`, `directive`))",
         "fields": [
+          {
+            "fieldPath": "ownerId",
+            "columnName": "ownerId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
           {
             "fieldPath": "eventId",
             "columnName": "eventId",
@@ -1077,6 +1099,7 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
+            "ownerId",
             "eventId",
             "directive"
           ]
@@ -1910,12 +1933,18 @@
       },
       {
         "tableName": "ArticleFeedCrossRef",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`position` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `spec` TEXT NOT NULL, `articleATag` TEXT NOT NULL, `articleAuthorId` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`position` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ownerId` TEXT NOT NULL, `spec` TEXT NOT NULL, `articleATag` TEXT NOT NULL, `articleAuthorId` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "position",
             "columnName": "position",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ownerId",
+            "columnName": "ownerId",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -1945,15 +1974,16 @@
         },
         "indices": [
           {
-            "name": "index_ArticleFeedCrossRef_spec_articleATag_articleAuthorId",
+            "name": "index_ArticleFeedCrossRef_ownerId_spec_articleATag_articleAuthorId",
             "unique": true,
             "columnNames": [
+              "ownerId",
               "spec",
               "articleATag",
               "articleAuthorId"
             ],
             "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ArticleFeedCrossRef_spec_articleATag_articleAuthorId` ON `${TABLE_NAME}` (`spec`, `articleATag`, `articleAuthorId`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ArticleFeedCrossRef_ownerId_spec_articleATag_articleAuthorId` ON `${TABLE_NAME}` (`ownerId`, `spec`, `articleATag`, `articleAuthorId`)"
           }
         ],
         "foreignKeys": []
@@ -2024,7 +2054,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f4190d74251fc266ebe40d6fd9f45bac')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6eb4bc98647f0e820c0010e25b11f1c6')"
     ]
   }
 }

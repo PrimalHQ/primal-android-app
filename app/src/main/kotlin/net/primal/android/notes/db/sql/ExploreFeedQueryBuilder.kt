@@ -32,7 +32,7 @@ class ExploreFeedQueryBuilder(
             INNER JOIN EventStats ON PostData.postId = EventStats.eventId
             LEFT JOIN EventUserStats ON EventUserStats.eventId = PostData.postId AND EventUserStats.userId = ?
             LEFT JOIN MutedUserData ON MutedUserData.userId = PostData.authorId
-            WHERE FeedPostDataCrossRef.feedSpec = ? AND isMuted = 0
+            WHERE FeedPostDataCrossRef.feedSpec = ? AND FeedPostDataCrossRef.ownerId = ? AND isMuted = 0
         """
     }
 
@@ -43,21 +43,21 @@ class ExploreFeedQueryBuilder(
     override fun feedQuery(): SimpleSQLiteQuery {
         return SimpleSQLiteQuery(
             query = "$EXPLORE_BASIC_QUERY $orderByClause ASC",
-            bindArgs = arrayOf(userPubkey, feedSpec),
+            bindArgs = arrayOf(userPubkey, feedSpec, userPubkey),
         )
     }
 
     override fun newestFeedPostsQuery(limit: Int): SimpleSQLiteQuery {
         return SimpleSQLiteQuery(
             query = "$EXPLORE_BASIC_QUERY $orderByClause ASC LIMIT ?",
-            bindArgs = arrayOf(userPubkey, feedSpec, limit),
+            bindArgs = arrayOf(userPubkey, feedSpec, userPubkey, limit),
         )
     }
 
     override fun oldestFeedPostsQuery(limit: Int): SimpleSQLiteQuery {
         return SimpleSQLiteQuery(
             query = "$EXPLORE_BASIC_QUERY $orderByClause DESC LIMIT ?",
-            bindArgs = arrayOf(userPubkey, feedSpec, limit),
+            bindArgs = arrayOf(userPubkey, feedSpec, userPubkey, limit),
         )
     }
 }
