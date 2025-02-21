@@ -448,6 +448,11 @@ fun SharedTransitionScope.PrimalAppNavigation() {
                             )
                         }
 
+                        is DeepLink.Article -> {
+                            navController.popBackStack()
+                            navController.navigateToArticleDetails(deepLink.naddr)
+                        }
+
                         null -> navController.navigateToHome()
                     }
                 }
