@@ -3,6 +3,7 @@ package net.primal.android.settings.notifications
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -141,6 +142,14 @@ fun NotificationsSettingsBlock(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .clickable {
+                            eventPublisher(
+                                NotificationsSettingsContract.UiEvent.NotificationSettingChanged(
+                                    type = notificationSwitchUi.notificationType,
+                                    value = !notificationSwitchUi.enabled,
+                                ),
+                            )
+                        }
                         .padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,

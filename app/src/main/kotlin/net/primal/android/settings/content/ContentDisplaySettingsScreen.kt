@@ -88,6 +88,17 @@ private fun ContentDisplaySettingsScreen(
                             },
                         )
                     },
+                    onClick = {
+                        eventPublisher(
+                            UiEvent.UpdateAutoPlayVideos(
+                                code = if (state.autoPlayVideos != ContentDisplaySettings.AUTO_PLAY_VIDEO_ALWAYS) {
+                                    ContentDisplaySettings.AUTO_PLAY_VIDEO_ALWAYS
+                                } else {
+                                    ContentDisplaySettings.AUTO_PLAY_VIDEO_NEVER
+                                },
+                            ),
+                        )
+                    },
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -103,6 +114,9 @@ private fun ContentDisplaySettingsScreen(
                             },
                         )
                     },
+                    onClick = {
+                        eventPublisher(UiEvent.UpdateShowAnimatedAvatars(enabled = !state.showAnimatedAvatars))
+                    },
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -117,6 +131,9 @@ private fun ContentDisplaySettingsScreen(
                                 eventPublisher(UiEvent.UpdateShowFocusMode(enabled = it))
                             },
                         )
+                    },
+                    onClick = {
+                        eventPublisher(UiEvent.UpdateShowFocusMode(enabled = !state.focusMode))
                     },
                 )
 
@@ -135,6 +152,9 @@ private fun ContentDisplaySettingsScreen(
                                 eventPublisher(UiEvent.UpdateEnableTweetMode(enabled = it))
                             },
                         )
+                    },
+                    onClick = {
+                        eventPublisher(UiEvent.UpdateEnableTweetMode(enabled = !state.tweetMode))
                     },
                 )
             }

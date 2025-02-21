@@ -144,6 +144,14 @@ fun AppearanceSettingsScreen(
                             },
                         )
                     },
+                    onClick = {
+                        eventPublisher(
+                            UiEvent.ToggleAutoAdjustDarkTheme(
+                                enabled = !state.selectedThemeName.isNullOrEmpty(),
+                                isSystemInDarkTheme = isSystemInDarkTheme,
+                            ),
+                        )
+                    },
                 )
 
                 PrimalDivider(modifier = Modifier.padding(horizontal = 8.dp))

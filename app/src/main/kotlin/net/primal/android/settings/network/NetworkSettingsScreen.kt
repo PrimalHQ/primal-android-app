@@ -220,6 +220,9 @@ private fun LazyListScope.enhancedPrivacyItem(checked: Boolean, onCheckedChanged
                 trailingContent = {
                     PrimalSwitch(checked = checked, onCheckedChange = onCheckedChanged)
                 },
+                onClick = {
+                    onCheckedChanged(!checked)
+                },
             )
         }
     }
