@@ -35,15 +35,18 @@ class FeedRepository @Inject constructor(
         }.flow
     }
 
-    suspend fun findNewestPosts(userId: String, feedDirective: String, limit: Int) =
-        withContext(dispatcherProvider.io()) {
-            database.feedPosts().newestFeedPosts(
-                query = feedQueryBuilder(
-                    userId = userId,
-                    feedSpec = feedDirective,
-                ).newestFeedPostsQuery(limit = limit),
-            )
-        }
+    suspend fun findNewestPosts(
+        userId: String,
+        feedDirective: String,
+        limit: Int,
+    ) = withContext(dispatcherProvider.io()) {
+        database.feedPosts().newestFeedPosts(
+            query = feedQueryBuilder(
+                userId = userId,
+                feedSpec = feedDirective,
+            ).newestFeedPostsQuery(limit = limit),
+        )
+    }
 
     suspend fun findAllPostsByIds(postIds: List<String>): List<FeedPost> =
         withContext(dispatcherProvider.io()) {
@@ -101,23 +104,26 @@ class FeedRepository @Inject constructor(
     }
 
     @OptIn(ExperimentalPagingApi::class)
-    private fun createPager(userId: String, feedSpec: String, pagingSourceFactory: () -> PagingSource<Int, FeedPost>) =
-        Pager(
-            config = PagingConfig(
-                pageSize = PAGE_SIZE,
-                prefetchDistance = PAGE_SIZE,
-                initialLoadSize = PAGE_SIZE * 3,
-                enablePlaceholders = true,
-            ),
-            remoteMediator = NoteFeedRemoteMediator(
-                dispatcherProvider = dispatcherProvider,
-                feedSpec = feedSpec,
-                userId = userId,
-                feedApi = feedApi,
-                database = database,
-            ),
-            pagingSourceFactory = pagingSourceFactory,
-        )
+    private fun createPager(
+        userId: String,
+        feedSpec: String,
+        pagingSourceFactory: () -> PagingSource<Int, FeedPost>,
+    ) = Pager(
+        config = PagingConfig(
+            pageSize = PAGE_SIZE,
+            prefetchDistance = PAGE_SIZE,
+            initialLoadSize = PAGE_SIZE * 3,
+            enablePlaceholders = true,
+        ),
+        remoteMediator = NoteFeedRemoteMediator(
+            dispatcherProvider = dispatcherProvider,
+            feedSpec = feedSpec,
+            userId = userId,
+            feedApi = feedApi,
+            database = database,
+        ),
+        pagingSourceFactory = pagingSourceFactory,
+    )
 
     private fun feedQueryBuilder(userId: String, feedSpec: String): FeedQueryBuilder =
         when {

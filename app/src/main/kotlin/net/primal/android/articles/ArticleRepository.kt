@@ -42,56 +42,65 @@ class ArticleRepository @Inject constructor(
     }
 
     @OptIn(ExperimentalPagingApi::class)
-    private fun createPager(userId: String, feedSpec: String, pagingSourceFactory: () -> PagingSource<Int, Article>) =
-        Pager(
-            config = PagingConfig(
-                pageSize = PAGE_SIZE,
-                prefetchDistance = PAGE_SIZE * 2,
-                initialLoadSize = PAGE_SIZE * 5,
-                enablePlaceholders = true,
-            ),
-            remoteMediator = ArticleFeedMediator(
+    private fun createPager(
+        userId: String,
+        feedSpec: String,
+        pagingSourceFactory: () -> PagingSource<Int, Article>,
+    ) = Pager(
+        config = PagingConfig(
+            pageSize = PAGE_SIZE,
+            prefetchDistance = PAGE_SIZE * 2,
+            initialLoadSize = PAGE_SIZE * 5,
+            enablePlaceholders = true,
+        ),
+        remoteMediator = ArticleFeedMediator(
+            userId = userId,
+            feedSpec = feedSpec,
+            articlesApi = articlesApi,
+            database = database,
+            dispatcherProvider = dispatchers,
+        ),
+        pagingSourceFactory = pagingSourceFactory,
+    )
+
+    suspend fun fetchArticleAndComments(
+        userId: String,
+        articleId: String,
+        articleAuthorId: String,
+    ) = withContext(dispatchers.io()) {
+        val response = articlesApi.getArticleDetails(
+            body = ArticleDetailsRequestBody(
                 userId = userId,
-                feedSpec = feedSpec,
-                articlesApi = articlesApi,
-                database = database,
-                dispatcherProvider = dispatchers,
+                authorUserId = articleAuthorId,
+                identifier = articleId,
+                kind = NostrEventKind.LongFormContent.value,
+                limit = 100,
             ),
-            pagingSourceFactory = pagingSourceFactory,
+        )
+        response.persistToDatabaseAsTransaction(userId = userId, database = database)
+        response.persistArticleCommentsToDatabase(
+            articleId = articleId,
+            articleAuthorId = articleAuthorId,
+            database = database,
+        )
+    }
+
+    suspend fun fetchArticleHighlights(
+        userId: String,
+        articleId: String,
+        articleAuthorId: String,
+    ) = withContext(dispatchers.io()) {
+        val highlightsResponse = articlesApi.getArticleHighlights(
+            body = ArticleHighlightsRequestBody(
+                userId = userId,
+                identifier = articleId,
+                authorUserId = articleAuthorId,
+                kind = NostrEventKind.LongFormContent.value,
+            ),
         )
 
-    suspend fun fetchArticleAndComments(userId: String, articleId: String, articleAuthorId: String) =
-        withContext(dispatchers.io()) {
-            val response = articlesApi.getArticleDetails(
-                body = ArticleDetailsRequestBody(
-                    userId = userId,
-                    authorUserId = articleAuthorId,
-                    identifier = articleId,
-                    kind = NostrEventKind.LongFormContent.value,
-                    limit = 100,
-                ),
-            )
-            response.persistToDatabaseAsTransaction(userId = userId, database = database)
-            response.persistArticleCommentsToDatabase(
-                articleId = articleId,
-                articleAuthorId = articleAuthorId,
-                database = database,
-            )
-        }
-
-    suspend fun fetchArticleHighlights(userId: String, articleId: String, articleAuthorId: String) =
-        withContext(dispatchers.io()) {
-            val highlightsResponse = articlesApi.getArticleHighlights(
-                body = ArticleHighlightsRequestBody(
-                    userId = userId,
-                    identifier = articleId,
-                    authorUserId = articleAuthorId,
-                    kind = NostrEventKind.LongFormContent.value,
-                ),
-            )
-
-            highlightsResponse.persistToDatabaseAsTransaction(database = database)
-        }
+        highlightsResponse.persistToDatabaseAsTransaction(database = database)
+    }
 
     suspend fun observeArticle(articleId: String, articleAuthorId: String) =
         withContext(dispatchers.io()) {
@@ -107,14 +116,17 @@ class ArticleRepository @Inject constructor(
                 .filterNotNull()
         }
 
-    suspend fun observeArticleComments(userId: String, articleId: String, articleAuthorId: String) =
-        withContext(dispatchers.io()) {
-            database.threadConversations().observeArticleComments(
-                articleId = articleId,
-                articleAuthorId = articleAuthorId,
-                userId = userId,
-            )
-        }
+    suspend fun observeArticleComments(
+        userId: String,
+        articleId: String,
+        articleAuthorId: String,
+    ) = withContext(dispatchers.io()) {
+        database.threadConversations().observeArticleComments(
+            articleId = articleId,
+            articleAuthorId = articleAuthorId,
+            userId = userId,
+        )
+    }
 
     suspend fun observeArticleByCommentId(commentNoteId: String): Flow<Article?> =
         withContext(dispatchers.io()) {

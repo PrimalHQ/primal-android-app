@@ -39,11 +39,12 @@ class NotificationRepository @Inject constructor(
         }.flow
     }
 
-    private fun constructRemoteMediator(userId: String) = NotificationsRemoteMediator(
-        userId = userId,
-        notificationsApi = notificationsApi,
-        database = database,
-    )
+    private fun constructRemoteMediator(userId: String) =
+        NotificationsRemoteMediator(
+            userId = userId,
+            notificationsApi = notificationsApi,
+            database = database,
+        )
 
     private fun createPager(userId: String, pagingSourceFactory: () -> PagingSource<Int, Notification>) =
         Pager(

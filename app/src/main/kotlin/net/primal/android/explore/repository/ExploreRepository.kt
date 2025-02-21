@@ -35,7 +35,6 @@ import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowStats
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
 import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
 import net.primal.android.profile.db.ProfileStats
-import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 
 class ExploreRepository @Inject constructor(
