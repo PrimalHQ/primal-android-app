@@ -33,7 +33,7 @@ class ArticleFeedViewModel @AssistedInject constructor(
     }
 
     private fun buildFeedByDirective() =
-        articleRepository.feedBySpec(feedSpec = spec)
+        articleRepository.feedBySpec(userId = activeAccountStore.activeUserId(), feedSpec = spec)
             .map { it.map { article -> article.mapAsFeedArticleUi() } }
             .cachedIn(viewModelScope)
 

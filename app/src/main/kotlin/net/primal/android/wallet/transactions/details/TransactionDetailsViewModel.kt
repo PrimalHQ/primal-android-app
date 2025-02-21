@@ -82,7 +82,11 @@ class TransactionDetailsViewModel @Inject constructor(
             setState { copy(loading = true) }
             try {
                 articleAuthorId?.let {
-                    articleRepository.fetchArticleAndComments(articleId = articleId, articleAuthorId = articleAuthorId)
+                    articleRepository.fetchArticleAndComments(
+                        userId = activeAccountStore.activeUserId(),
+                        articleId = articleId,
+                        articleAuthorId = articleAuthorId,
+                    )
                 }
             } catch (error: WssException) {
                 Timber.w(error)

@@ -245,6 +245,7 @@ class NoteEditorViewModel @AssistedInject constructor(
             try {
                 withContext(dispatcherProvider.io()) {
                     articleRepository.fetchArticleAndComments(
+                        userId = activeAccountStore.activeUserId(),
                         articleId = replyToArticleNaddr.identifier,
                         articleAuthorId = replyToArticleNaddr.userId,
                     )

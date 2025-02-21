@@ -21,11 +21,9 @@ import net.primal.android.articles.db.Article
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.user.accounts.active.ActiveAccountStore
 
 class ArticleRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
-    private val activeAccountStore: ActiveAccountStore,
     private val articlesApi: ArticlesApi,
     private val database: PrimalDatabase,
 ) {
@@ -34,17 +32,17 @@ class ArticleRepository @Inject constructor(
         private const val PAGE_SIZE = 25
     }
 
-    fun feedBySpec(feedSpec: String): Flow<PagingData<Article>> {
-        return createPager(feedSpec = feedSpec) {
+    fun feedBySpec(userId: String, feedSpec: String): Flow<PagingData<Article>> {
+        return createPager(userId = userId, feedSpec = feedSpec) {
             database.articles().feed(
                 spec = feedSpec,
-                userId = activeAccountStore.activeUserId(),
+                userId = userId,
             )
         }.flow
     }
 
     @OptIn(ExperimentalPagingApi::class)
-    private fun createPager(feedSpec: String, pagingSourceFactory: () -> PagingSource<Int, Article>) =
+    private fun createPager(userId: String, feedSpec: String, pagingSourceFactory: () -> PagingSource<Int, Article>) =
         Pager(
             config = PagingConfig(
                 pageSize = PAGE_SIZE,
@@ -53,7 +51,7 @@ class ArticleRepository @Inject constructor(
                 enablePlaceholders = true,
             ),
             remoteMediator = ArticleFeedMediator(
-                userId = activeAccountStore.activeUserId(),
+                userId = userId,
                 feedSpec = feedSpec,
                 articlesApi = articlesApi,
                 database = database,
@@ -62,9 +60,8 @@ class ArticleRepository @Inject constructor(
             pagingSourceFactory = pagingSourceFactory,
         )
 
-    suspend fun fetchArticleAndComments(articleId: String, articleAuthorId: String) =
+    suspend fun fetchArticleAndComments(userId: String, articleId: String, articleAuthorId: String) =
         withContext(dispatchers.io()) {
-            val userId = activeAccountStore.activeUserId()
             val response = articlesApi.getArticleDetails(
                 body = ArticleDetailsRequestBody(
                     userId = userId,
@@ -82,9 +79,8 @@ class ArticleRepository @Inject constructor(
             )
         }
 
-    suspend fun fetchArticleHighlights(articleId: String, articleAuthorId: String) =
+    suspend fun fetchArticleHighlights(userId: String, articleId: String, articleAuthorId: String) =
         withContext(dispatchers.io()) {
-            val userId = activeAccountStore.activeUserId()
             val highlightsResponse = articlesApi.getArticleHighlights(
                 body = ArticleHighlightsRequestBody(
                     userId = userId,
@@ -111,9 +107,8 @@ class ArticleRepository @Inject constructor(
                 .filterNotNull()
         }
 
-    suspend fun observeArticleComments(articleId: String, articleAuthorId: String) =
+    suspend fun observeArticleComments(userId: String, articleId: String, articleAuthorId: String) =
         withContext(dispatchers.io()) {
-            val userId = activeAccountStore.activeUserId()
             database.threadConversations().observeArticleComments(
                 articleId = articleId,
                 articleAuthorId = articleAuthorId,
