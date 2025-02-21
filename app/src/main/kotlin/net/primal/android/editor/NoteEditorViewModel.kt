@@ -247,10 +247,9 @@ class NoteEditorViewModel @AssistedInject constructor(
             try {
                 articleRepository.fetchArticleAndComments(
                     userId = activeAccountStore.activeUserId(),
-                        articleId = replyToArticleNaddr.identifier,
-                        articleAuthorId = replyToArticleNaddr.userId,
-                    )
-
+                    articleId = replyToArticleNaddr.identifier,
+                    articleAuthorId = replyToArticleNaddr.userId,
+                )
             } catch (error: WssException) {
                 Timber.w(error)
             }
@@ -386,17 +385,16 @@ class NoteEditorViewModel @AssistedInject constructor(
 
             val uploadResult = attachmentRepository.uploadNoteAttachment(
                 userId = activeAccountStore.activeUserId(),
-                    attachment = attachment,
-                    uploadId = uploadId,
-                    onProgress = { uploadedBytes, totalBytes ->
-                        updatedAttachment = updatedAttachment.copy(
-                            originalUploadedInBytes = uploadedBytes,
-                            originalSizeInBytes = totalBytes,
-                        )
-                        updateNoteAttachmentState(attachment = updatedAttachment)
-                    },
-                )
-
+                attachment = attachment,
+                uploadId = uploadId,
+                onProgress = { uploadedBytes, totalBytes ->
+                    updatedAttachment = updatedAttachment.copy(
+                        originalUploadedInBytes = uploadedBytes,
+                        originalSizeInBytes = totalBytes,
+                    )
+                    updateNoteAttachmentState(attachment = updatedAttachment)
+                },
+            )
 
             updatedAttachment = updatedAttachment.copy(
                 remoteUrl = uploadResult.remoteUrl,
