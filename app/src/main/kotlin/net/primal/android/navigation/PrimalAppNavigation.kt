@@ -377,6 +377,7 @@ fun noteCallbacksHandler(navController: NavController) =
             navController.navigateToReactions(eventId = noteId)
         },
         onGetPrimalPremiumClick = { navController.navigateToPremiumBuying() },
+        onPrimalLegendsLeaderboardClick = { navController.navigateToPremiumLegendLeaderboard() },
     )
 
 @OptIn(ExperimentalSharedTransitionApi::class)

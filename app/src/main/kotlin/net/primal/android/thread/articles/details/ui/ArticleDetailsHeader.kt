@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,7 +29,9 @@ import java.util.*
 import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.notes.feed.note.ui.attachment.findImageSize
 import net.primal.android.theme.AppTheme
+import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.thread.articles.details.ui.rendering.MarkdownRenderer
 import net.primal.android.thread.articles.details.ui.rendering.rememberPrimalMarkwon
 
@@ -73,9 +76,10 @@ fun ArticleDetailsHeader(
             ) {
                 val maxWidthPx = with(LocalDensity.current) { maxWidth.roundToPx() }
                 val variant = cover.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
+                val maxWidth = maxWidth.value.toInt()
 
                 SubcomposeAsyncImage(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.size(variant.findImageSize(maxWidth)),
                     model = variant?.mediaUrl ?: cover.sourceUrl,
                     contentScale = ContentScale.FillWidth,
                     contentDescription = null,
@@ -132,7 +136,7 @@ private fun Instant.formatDate(): String {
 @Preview
 @Composable
 fun PreviewArticleDetailsHeader() {
-    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         Surface(modifier = Modifier.fillMaxWidth()) {
             ArticleDetailsHeader(
                 modifier = Modifier.fillMaxWidth(),
