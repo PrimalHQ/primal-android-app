@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 56,
-    "identityHash": "2c54cd4e6f2437637cee188d1ba11935",
+    "identityHash": "a279261907a560873ca989dd79346c3a",
     "entities": [
       {
         "tableName": "PostData",
@@ -919,18 +919,6 @@
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`spec` TEXT NOT NULL, `specKind` TEXT NOT NULL, `feedKind` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT NOT NULL, `enabled` INTEGER NOT NULL, PRIMARY KEY(`spec`))",
         "fields": [
           {
-            "fieldPath": "position",
-            "columnName": "position",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ownerId",
-            "columnName": "ownerId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
             "fieldPath": "spec",
             "columnName": "spec",
             "affinity": "TEXT",
@@ -968,23 +956,12 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": true,
+          "autoGenerate": false,
           "columnNames": [
-            "position"
+            "spec"
           ]
         },
-        "indices": [
-          {
-            "name": "index_Feed_ownerId_spec",
-            "unique": true,
-            "columnNames": [
-              "ownerId",
-              "spec"
-            ],
-            "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Feed_ownerId_spec` ON `${TABLE_NAME}` (`ownerId`, `spec`)"
-          }
-        ],
+        "indices": [],
         "foreignKeys": []
       },
       {
@@ -1306,17 +1283,11 @@
       },
       {
         "tableName": "MutedUserData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`userId` TEXT NOT NULL, `ownerId` TEXT NOT NULL, `userMetadataEventId` TEXT, PRIMARY KEY(`userId`, `ownerId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`userId` TEXT NOT NULL, `userMetadataEventId` TEXT, PRIMARY KEY(`userId`))",
         "fields": [
           {
             "fieldPath": "userId",
             "columnName": "userId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ownerId",
-            "columnName": "ownerId",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -1330,8 +1301,7 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "userId",
-            "ownerId"
+            "userId"
           ]
         },
         "indices": [],
@@ -1339,17 +1309,11 @@
       },
       {
         "tableName": "DirectMessageData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`messageId` TEXT NOT NULL, `ownerId` TEXT NOT NULL, `senderId` TEXT NOT NULL, `receiverId` TEXT NOT NULL, `participantId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `content` TEXT NOT NULL, `uris` TEXT NOT NULL, `hashtags` TEXT NOT NULL, PRIMARY KEY(`messageId`, `ownerId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`messageId` TEXT NOT NULL, `senderId` TEXT NOT NULL, `receiverId` TEXT NOT NULL, `participantId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `content` TEXT NOT NULL, `uris` TEXT NOT NULL, `hashtags` TEXT NOT NULL, PRIMARY KEY(`messageId`))",
         "fields": [
           {
             "fieldPath": "messageId",
             "columnName": "messageId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ownerId",
-            "columnName": "ownerId",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -1399,8 +1363,7 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "messageId",
-            "ownerId"
+            "messageId"
           ]
         },
         "indices": [],
@@ -1408,14 +1371,8 @@
       },
       {
         "tableName": "MessageConversationData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ownerId` TEXT NOT NULL, `participantId` TEXT NOT NULL, `lastMessageId` TEXT NOT NULL, `lastMessageAt` INTEGER NOT NULL, `unreadMessagesCount` INTEGER NOT NULL, `relation` TEXT NOT NULL, `participantMetadataId` TEXT, PRIMARY KEY(`participantId`, `ownerId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`participantId` TEXT NOT NULL, `lastMessageId` TEXT NOT NULL, `lastMessageAt` INTEGER NOT NULL, `unreadMessagesCount` INTEGER NOT NULL, `relation` TEXT NOT NULL, `participantMetadataId` TEXT, PRIMARY KEY(`participantId`))",
         "fields": [
-          {
-            "fieldPath": "ownerId",
-            "columnName": "ownerId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
           {
             "fieldPath": "participantId",
             "columnName": "participantId",
@@ -1456,8 +1413,7 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "participantId",
-            "ownerId"
+            "participantId"
           ]
         },
         "indices": [],
@@ -1739,17 +1695,11 @@
       },
       {
         "tableName": "ProfileInteraction",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`profileId` TEXT NOT NULL, `ownerId` TEXT NOT NULL, `lastInteractionAt` INTEGER NOT NULL, PRIMARY KEY(`profileId`, `ownerId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`profileId` TEXT NOT NULL, `lastInteractionAt` INTEGER NOT NULL, PRIMARY KEY(`profileId`))",
         "fields": [
           {
             "fieldPath": "profileId",
             "columnName": "profileId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ownerId",
-            "columnName": "ownerId",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -1763,8 +1713,7 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "profileId",
-            "ownerId"
+            "profileId"
           ]
         },
         "indices": [],
@@ -2036,7 +1985,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2c54cd4e6f2437637cee188d1ba11935')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a279261907a560873ca989dd79346c3a')"
     ]
   }
 }
