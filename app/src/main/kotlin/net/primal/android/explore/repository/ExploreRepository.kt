@@ -42,7 +42,6 @@ class ExploreRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
     private val exploreApi: ExploreApi,
     private val database: PrimalDatabase,
-    private val activeAccountStore: ActiveAccountStore,
 ) {
 
     suspend fun fetchTrendingZaps(userId: String): List<ExploreZapNoteData> =
@@ -208,9 +207,9 @@ class ExploreRepository @Inject constructor(
             exploreApi.getPopularUsers()
         }
 
-    fun observeRecentUsers(): Flow<List<UserProfileSearchItem>> {
+    fun observeRecentUsers(ownerId: String): Flow<List<UserProfileSearchItem>> {
         return database.profileInteractions()
-            .observeRecentProfilesByOwnerId(ownerId = activeAccountStore.activeUserId())
+            .observeRecentProfilesByOwnerId(ownerId = ownerId)
             .map { recentProfiles ->
                 recentProfiles.mapNotNull { profile ->
                     if (profile.metadata != null) {
