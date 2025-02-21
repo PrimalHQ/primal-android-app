@@ -96,36 +96,37 @@ class NotificationsViewModel @Inject constructor(
 
     private fun observeUnseenNotifications() =
         viewModelScope.launch {
-            notificationsRepository.observeUnseenNotifications().collect { newUnseenNotifications ->
-                setState {
-                    val unseenNotifications = mutableListOf<List<Notification>>()
-                    val groupByType = newUnseenNotifications.groupBy { it.data.type }
-                    groupByType.keys.forEach { notificationType ->
-                        groupByType[notificationType]?.let { notificationsByType ->
-                            when (notificationType.collapsable) {
-                                true -> {
-                                    val groupByPostId = notificationsByType.groupBy { it.data.actionPostId }
-                                    groupByPostId.keys.forEach { postId ->
-                                        groupByPostId[postId]?.let {
-                                            unseenNotifications.add(it)
+            notificationsRepository.observeUnseenNotifications(ownerId = activeAccountStore.activeUserId())
+                .collect { newUnseenNotifications ->
+                    setState {
+                        val unseenNotifications = mutableListOf<List<Notification>>()
+                        val groupByType = newUnseenNotifications.groupBy { it.data.type }
+                        groupByType.keys.forEach { notificationType ->
+                            groupByType[notificationType]?.let { notificationsByType ->
+                                when (notificationType.collapsable) {
+                                    true -> {
+                                        val groupByPostId = notificationsByType.groupBy { it.data.actionPostId }
+                                        groupByPostId.keys.forEach { postId ->
+                                            groupByPostId[postId]?.let {
+                                                unseenNotifications.add(it)
+                                            }
                                         }
                                     }
-                                }
 
-                                false -> notificationsByType.forEach {
-                                    unseenNotifications.add(listOf(it))
+                                    false -> notificationsByType.forEach {
+                                        unseenNotifications.add(listOf(it))
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    copy(
-                        unseenNotifications = unseenNotifications.map { byType ->
-                            byType.map { it.asNotificationUi() }
-                        },
-                    )
+                        copy(
+                            unseenNotifications = unseenNotifications.map { byType ->
+                                byType.map { it.asNotificationUi() }
+                            },
+                        )
+                    }
                 }
-            }
         }
 
     private fun handleNotificationsSeen() {

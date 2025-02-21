@@ -22,20 +22,20 @@ class NotificationRepository @Inject constructor(
     private val notificationsApi: NotificationsApi,
 ) {
 
-    fun observeUnseenNotifications() = database.notifications().allUnseenNotifications()
+    fun observeUnseenNotifications(ownerId: String) = database.notifications().allUnseenNotifications(ownerId = ownerId)
 
     suspend fun markAllNotificationsAsSeen(userId: String) {
         withContext(dispatcherProvider.io()) {
             val seenAt = Instant.now()
             notificationsApi.setLastSeenTimestamp(userId = userId)
             constructRemoteMediator(userId = userId).updateLastSeenTimestamp(lastSeen = seenAt)
-            database.notifications().markAllUnseenNotificationsAsSeen(seenAt = seenAt.epochSecond)
+            database.notifications().markAllUnseenNotificationsAsSeen(ownerId = userId, seenAt = seenAt.epochSecond)
         }
     }
 
     fun observeSeenNotifications(userId: String): Flow<PagingData<Notification>> {
         return createPager(userId = userId) {
-            database.notifications().allSeenNotificationsPaged()
+            database.notifications().allSeenNotificationsPaged(ownerId = userId)
         }.flow
     }
 
