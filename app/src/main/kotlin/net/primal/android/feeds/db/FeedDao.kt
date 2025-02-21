@@ -30,4 +30,7 @@ interface FeedDao {
 
     @Query("DELETE FROM Feed WHERE ownerId = :ownerId AND spec = :spec")
     fun deleteAllByOwnerIdAndSpec(ownerId: String, spec: String)
+
+    @Query("DELETE FROM Feed WHERE ownerId = :ownerId")
+    fun deleteAllByOwnerId(ownerId: String)
 }

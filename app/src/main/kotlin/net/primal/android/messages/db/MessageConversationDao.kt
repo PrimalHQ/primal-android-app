@@ -36,4 +36,7 @@ interface MessageConversationDao {
 
     @Query("UPDATE MessageConversationData SET unreadMessagesCount = 0 WHERE ownerId = :ownerId")
     fun markAllConversationAsRead(ownerId: String)
+
+    @Query("DELETE FROM MessageConversationData WHERE ownerId = :ownerId")
+    fun deleteAllByOwnerId(ownerId: String)
 }

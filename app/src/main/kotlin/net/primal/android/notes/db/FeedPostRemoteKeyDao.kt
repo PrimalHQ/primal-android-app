@@ -47,4 +47,7 @@ interface FeedPostRemoteKeyDao {
 
     @Query("DELETE FROM FeedPostRemoteKey WHERE directive = :directive AND ownerId = :ownerId")
     fun deleteByDirective(ownerId: String, directive: String)
+
+    @Query("DELETE FROM FeedPostRemoteKey WHERE ownerId = :ownerId")
+    fun deleteAllByOwnerId(ownerId: String)
 }

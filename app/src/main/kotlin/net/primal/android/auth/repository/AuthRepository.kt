@@ -28,6 +28,7 @@ class AuthRepository @Inject constructor(
 
         userRepository.removeUserAccountById(pubkey = pubkey)
         credentialsStore.removeCredentialByNpub(npub = pubkey.hexToNpubHrp())
+        userRepository.clearAllUserRelatedData(userId = pubkey)
     }
 
     private suspend fun setNextActiveAccount() {

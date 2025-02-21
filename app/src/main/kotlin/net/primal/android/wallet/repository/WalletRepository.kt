@@ -140,7 +140,7 @@ class WalletRepository @Inject constructor(
     }
 
     fun deleteAllTransactions(userId: String) =
-        database.walletTransactions().deleteAllTransactionsUserId(userId = userId)
+        database.walletTransactions().deleteAllTransactionsByUserId(userId = userId)
 
     suspend fun fetchMiningFees(
         userId: String,

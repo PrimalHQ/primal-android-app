@@ -37,4 +37,7 @@ interface DirectMessageDao {
     """,
     )
     fun newestMessagesPagedByOwnerId(ownerId: String, participantId: String): PagingSource<Int, DirectMessage>
+
+    @Query("DELETE FROM DirectMessageData WHERE ownerId = :ownerId")
+    fun deleteAllByOwnerId(ownerId: String)
 }
