@@ -215,7 +215,13 @@ fun NoteContent(
 
                     annotation?.handleAnnotationClick(
                         onProfileClick = noteCallbacks.onProfileClick,
-                        onUrlClick = onUrlClick,
+                        onUrlClick = {
+                            if (it.isPrimalLegendsUrl()) {
+                                noteCallbacks.onPrimalLegendsLeaderboardClick?.invoke()
+                            } else {
+                                onUrlClick?.invoke(it)
+                            }
+                        },
                         onPostClick = noteCallbacks.onNoteClick,
                         onHashtagClick = noteCallbacks.onHashtagClick,
                         onArticleClick = noteCallbacks.onArticleClick,
@@ -258,7 +264,12 @@ fun NoteContent(
                 attachments = data.attachments,
                 blossoms = data.blossoms,
                 expanded = expanded,
-                onUrlClick = onUrlClick,
+                onUrlClick = { url ->
+                    when {
+                        url.isPrimalLegendsUrl() -> noteCallbacks.onPrimalLegendsLeaderboardClick?.invoke()
+                        else -> onUrlClick?.invoke(url)
+                    }
+                },
                 onMediaClick = noteCallbacks.onMediaClick,
             )
         }
@@ -556,6 +567,12 @@ private fun AnnotatedString.Builder.addNostrAddressAnnotation(
             end = endIndex,
         )
     }
+}
+
+private const val PRIMAL_LEGENDS_URL = "primal.net/legends"
+
+private fun String.isPrimalLegendsUrl(): Boolean {
+    return this.endsWith(PRIMAL_LEGENDS_URL)
 }
 
 @Preview
