@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
+import net.primal.android.attachments.domain.CdnResourceVariant
 import net.primal.android.attachments.domain.calculateImageSize
 import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
@@ -19,6 +20,17 @@ fun BoxWithConstraintsScope.findImageSize(attachment: NoteAttachmentUi): DpSize 
     val maxHeight = (LocalConfiguration.current.screenHeightDp * MAX_SCREEN_HEIGHT_VISIBLE_AREA).toInt()
     val variant = attachment.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
     return variant.calculateImageSize(
+        maxWidth = maxWidth,
+        maxHeight = maxHeight,
+        density = density,
+    )
+}
+
+@Composable
+fun CdnResourceVariant?.findImageSize(maxWidth: Int): DpSize {
+    val density = LocalDensity.current.density
+    val maxHeight = (LocalConfiguration.current.screenHeightDp * MAX_SCREEN_HEIGHT_VISIBLE_AREA).toInt()
+    return calculateImageSize(
         maxWidth = maxWidth,
         maxHeight = maxHeight,
         density = density,
