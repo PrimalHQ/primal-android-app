@@ -33,18 +33,19 @@ import timber.log.Timber
 
 @HiltViewModel
 class MessageConversationListViewModel @Inject constructor(
-    activeAccountStore: ActiveAccountStore,
+    private val activeAccountStore: ActiveAccountStore,
     private val subscriptionsManager: SubscriptionsManager,
     private val messageRepository: MessageRepository,
 ) : ViewModel() {
-
-    private val activeUserId = activeAccountStore.activeUserId()
 
     private val _state = MutableStateFlow(
         value = UiState(
             activeRelation = ConversationRelation.Follows,
             conversations = messageRepository
-                .newestConversations(userId = activeUserId, relation = ConversationRelation.Follows)
+                .newestConversations(
+                    userId = activeAccountStore.activeUserId(),
+                    relation = ConversationRelation.Follows,
+                )
                 .mapAsPagingDataOfMessageConversationUi(),
         ),
     )
@@ -88,13 +89,13 @@ class MessageConversationListViewModel @Inject constructor(
             try {
                 when (state.value.activeRelation) {
                     ConversationRelation.Follows -> {
-                        messageRepository.fetchFollowConversations(userId = activeUserId)
-                        messageRepository.fetchNonFollowsConversations(userId = activeUserId)
+                        messageRepository.fetchFollowConversations(userId = activeAccountStore.activeUserId())
+                        messageRepository.fetchNonFollowsConversations(userId = activeAccountStore.activeUserId())
                     }
 
                     ConversationRelation.Other -> {
-                        messageRepository.fetchNonFollowsConversations(userId = activeUserId)
-                        messageRepository.fetchFollowConversations(userId = activeUserId)
+                        messageRepository.fetchNonFollowsConversations(userId = activeAccountStore.activeUserId())
+                        messageRepository.fetchFollowConversations(userId = activeAccountStore.activeUserId())
                     }
                 }
             } catch (error: WssException) {
@@ -109,7 +110,7 @@ class MessageConversationListViewModel @Inject constructor(
             copy(
                 activeRelation = relation,
                 conversations = messageRepository
-                    .newestConversations(userId = activeUserId, relation = relation)
+                    .newestConversations(userId = activeAccountStore.activeUserId(), relation = relation)
                     .mapAsPagingDataOfMessageConversationUi(),
             )
         }
@@ -118,7 +119,7 @@ class MessageConversationListViewModel @Inject constructor(
     private fun markAllConversationAsRead() =
         viewModelScope.launch {
             try {
-                messageRepository.markAllMessagesAsRead(userId = activeUserId)
+                messageRepository.markAllMessagesAsRead(userId = activeAccountStore.activeUserId())
             } catch (error: WssException) {
                 Timber.w(error)
             }
@@ -137,7 +138,7 @@ class MessageConversationListViewModel @Inject constructor(
             lastMessageAttachments = this.lastMessageNoteAttachments.map { it.asNoteAttachmentUi() },
             lastMessageNostrUris = this.lastMessageNostrUris.map { it.asNoteNostrUriUi() },
             lastMessageAt = this.lastMessage?.createdAt?.let { Instant.ofEpochSecond(it) },
-            isLastMessageFromUser = this.lastMessage?.senderId == activeUserId,
+            isLastMessageFromUser = this.lastMessage?.senderId == activeAccountStore.activeUserId(),
             participantInternetIdentifier = this.participant?.internetIdentifier,
             participantAvatarCdnImage = this.participant?.avatarCdnImage,
             participantLegendaryCustomization = this.participant?.primalPremiumInfo
