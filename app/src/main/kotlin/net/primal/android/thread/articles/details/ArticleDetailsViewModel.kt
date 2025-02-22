@@ -128,10 +128,12 @@ class ArticleDetailsViewModel @Inject constructor(
             if (naddr != null) {
                 try {
                     articleRepository.fetchArticleAndComments(
+                        userId = activeAccountStore.activeUserId(),
                         articleAuthorId = naddr.userId,
                         articleId = naddr.identifier,
                     )
                     articleRepository.fetchArticleHighlights(
+                        userId = activeAccountStore.activeUserId(),
                         articleAuthorId = naddr.userId,
                         articleId = naddr.identifier,
                     )
@@ -195,6 +197,7 @@ class ArticleDetailsViewModel @Inject constructor(
     private fun observeArticleComments(naddr: Naddr) =
         viewModelScope.launch {
             articleRepository.observeArticleComments(
+                userId = activeAccountStore.activeUserId(),
                 articleId = naddr.identifier,
                 articleAuthorId = naddr.userId,
             ).collect { comments ->

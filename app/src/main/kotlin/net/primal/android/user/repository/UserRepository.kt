@@ -1,5 +1,7 @@
 package net.primal.android.user.repository
 
+import androidx.room.withTransaction
+import java.time.Instant
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
@@ -19,6 +21,7 @@ import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.accounts.UserAccountsStore
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.copyFollowListIfNotNull
 import net.primal.android.user.accounts.copyIfNotNull
 import net.primal.android.user.api.UsersApi
@@ -35,16 +38,16 @@ class UserRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
     private val userAccountFetcher: UserAccountFetcher,
     private val accountsStore: UserAccountsStore,
+    private val activeAccountStore: ActiveAccountStore,
     private val fileUploader: PrimalFileUploader,
     private val usersApi: UsersApi,
     private val nostrPublisher: NostrPublisher,
 ) {
-
-    suspend fun createNewUserAccount(userId: String): UserAccount {
-        val account = UserAccount.buildLocal(pubkey = userId)
-        accountsStore.upsertAccount(account)
-        return account
-    }
+    suspend fun setActiveAccount(userId: String) =
+        withContext(dispatchers.io()) {
+            accountsStore.getAndUpdateAccount(userId = userId) { copy(lastAccessedAt = Instant.now().epochSecond) }
+            activeAccountStore.setActiveUserId(pubkey = userId)
+        }
 
     suspend fun fetchAndUpdateUserAccount(userId: String): UserAccount {
         val userProfile = userAccountFetcher.fetchUserProfileOrNull(userId = userId)
@@ -61,6 +64,24 @@ class UserRepository @Inject constructor(
             )
         }
     }
+
+    suspend fun clearAllUserRelatedData(userId: String) =
+        withContext(dispatchers.io()) {
+            database.withTransaction {
+                database.messages().deleteAllByOwnerId(ownerId = userId)
+                database.messageConversations().deleteAllByOwnerId(ownerId = userId)
+                database.feeds().deleteAllByOwnerId(ownerId = userId)
+                database.mutedUsers().deleteAllByOwnerId(ownerId = userId)
+                database.profileInteractions().deleteAllByOwnerId(ownerId = userId)
+                database.walletTransactions().deleteAllTransactionsByUserId(userId = userId)
+                database.notifications().deleteAllByOwnerId(ownerId = userId)
+                database.articleFeedsConnections().deleteConnections(ownerId = userId)
+                database.feedsConnections().deleteConnections(ownerId = userId)
+                database.feedPostsRemoteKeys().deleteAllByOwnerId(ownerId = userId)
+                database.publicBookmarks().deleteAllBookmarks(userId = userId)
+                database.relays().deleteAll(userId = userId)
+            }
+        }
 
     suspend fun updateFollowList(userId: String, contactsUserAccount: UserAccount) {
         accountsStore.getAndUpdateAccount(userId = userId) {
@@ -91,8 +112,8 @@ class UserRepository @Inject constructor(
         }
     }
 
-    suspend fun removeAllUserAccounts() {
-        accountsStore.clearAllAccounts()
+    suspend fun removeUserAccountById(pubkey: String) {
+        accountsStore.deleteAccount(pubkey = pubkey)
     }
 
     @Throws(UnsuccessfulFileUpload::class, NostrPublishException::class)

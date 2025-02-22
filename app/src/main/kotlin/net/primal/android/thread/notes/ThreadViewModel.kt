@@ -65,7 +65,7 @@ class ThreadViewModel @Inject constructor(
     private fun observeConversationChanges() =
         viewModelScope.launch {
             var articleObserverStarted = false
-            feedRepository.observeConversation(noteId = highlightPostId)
+            feedRepository.observeConversation(userId = activeAccountStore.activeUserId(), noteId = highlightPostId)
                 .filter { it.isNotEmpty() }
                 .map { posts -> posts.map { it.asFeedPostUi() } }
                 .collect { conversation ->
@@ -116,7 +116,7 @@ class ThreadViewModel @Inject constructor(
             setState { copy(fetching = true) }
             try {
                 withContext(dispatcherProvider.io()) {
-                    feedRepository.fetchReplies(noteId = highlightPostId)
+                    feedRepository.fetchReplies(userId = activeAccountStore.activeUserId(), noteId = highlightPostId)
                 }
             } catch (error: WssException) {
                 Timber.w(error)

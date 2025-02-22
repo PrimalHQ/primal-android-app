@@ -31,7 +31,7 @@ object UserModule {
     fun provideCredentialsStore(
         @ApplicationContext context: Context,
         encryption: Encryption,
-    ): DataStore<List<Credential>> =
+    ): DataStore<Set<Credential>> =
         DataStoreFactory.create(
             produceFile = { context.dataStoreFile("credentials.json") },
             serializer = CredentialsSerialization(encryption = encryption),

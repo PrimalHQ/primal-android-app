@@ -20,55 +20,57 @@ import net.primal.android.notes.db.FeedPost
 import net.primal.android.notes.db.sql.ChronologicalFeedWithRepostsQueryBuilder
 import net.primal.android.notes.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.notes.db.sql.FeedQueryBuilder
-import net.primal.android.user.accounts.active.ActiveAccountStore
 
 class FeedRepository @Inject constructor(
     private val feedApi: FeedApi,
     private val database: PrimalDatabase,
-    private val activeAccountStore: ActiveAccountStore,
     private val dispatcherProvider: CoroutineDispatcherProvider,
 ) {
 
-    fun feedBySpec(feedSpec: String): Flow<PagingData<FeedPost>> {
-        return createPager(feedSpec = feedSpec) {
+    fun feedBySpec(userId: String, feedSpec: String): Flow<PagingData<FeedPost>> {
+        return createPager(userId = userId, feedSpec = feedSpec) {
             database.feedPosts().feedQuery(
-                query = feedQueryBuilder(feedSpec = feedSpec).feedQuery(),
+                query = feedQueryBuilder(userId = userId, feedSpec = feedSpec).feedQuery(),
             )
         }.flow
     }
 
-    suspend fun findNewestPosts(feedDirective: String, limit: Int) =
-        withContext(dispatcherProvider.io()) {
-            database.feedPosts().newestFeedPosts(
-                query = feedQueryBuilder(
-                    feedSpec = feedDirective,
-                ).newestFeedPostsQuery(limit = limit),
-            )
-        }
+    suspend fun findNewestPosts(
+        userId: String,
+        feedDirective: String,
+        limit: Int,
+    ) = withContext(dispatcherProvider.io()) {
+        database.feedPosts().newestFeedPosts(
+            query = feedQueryBuilder(
+                userId = userId,
+                feedSpec = feedDirective,
+            ).newestFeedPostsQuery(limit = limit),
+        )
+    }
 
     suspend fun findAllPostsByIds(postIds: List<String>): List<FeedPost> =
         withContext(dispatcherProvider.io()) {
             database.feedPosts().findAllPostsByIds(postIds)
         }
 
-    fun observeConversation(noteId: String) =
+    fun observeConversation(userId: String, noteId: String) =
         database.threadConversations().observeNoteConversation(
             postId = noteId,
-            userId = activeAccountStore.activeUserId(),
+            userId = userId,
         )
 
-    suspend fun fetchReplies(noteId: String) =
+    suspend fun fetchReplies(userId: String, noteId: String) =
         withContext(dispatcherProvider.io()) {
-            val userId = activeAccountStore.activeUserId()
             val response = feedApi.getThread(ThreadRequestBody(postId = noteId, userPubKey = userId, limit = 100))
             response.persistNoteRepliesAndArticleCommentsToDatabase(noteId = noteId, database = database)
             response.persistToDatabaseAsTransaction(userId = userId, database = database)
         }
 
-    suspend fun removeFeedSpec(feedSpec: String) =
+    suspend fun removeFeedSpec(userId: String, feedSpec: String) =
         withContext(dispatcherProvider.io()) {
-            database.feedPostsRemoteKeys().deleteByDirective(feedSpec)
-            database.feedsConnections().deleteConnectionsByDirective(feedSpec)
+            database.feedPostsRemoteKeys().deleteByDirective(ownerId = userId, directive = feedSpec)
+            database.feedsConnections().deleteConnectionsByDirective(ownerId = userId, feedSpec = feedSpec)
+            database.articleFeedsConnections().deleteConnectionsBySpec(ownerId = userId, spec = feedSpec)
         }
 
     suspend fun replaceFeedSpec(
@@ -103,34 +105,37 @@ class FeedRepository @Inject constructor(
     }
 
     @OptIn(ExperimentalPagingApi::class)
-    private fun createPager(feedSpec: String, pagingSourceFactory: () -> PagingSource<Int, FeedPost>) =
-        Pager(
-            config = PagingConfig(
-                pageSize = PAGE_SIZE,
-                prefetchDistance = PAGE_SIZE,
-                initialLoadSize = PAGE_SIZE * 3,
-                enablePlaceholders = true,
-            ),
-            remoteMediator = NoteFeedRemoteMediator(
-                dispatcherProvider = dispatcherProvider,
-                feedSpec = feedSpec,
-                userId = activeAccountStore.activeUserId(),
-                feedApi = feedApi,
-                database = database,
-            ),
-            pagingSourceFactory = pagingSourceFactory,
-        )
+    private fun createPager(
+        userId: String,
+        feedSpec: String,
+        pagingSourceFactory: () -> PagingSource<Int, FeedPost>,
+    ) = Pager(
+        config = PagingConfig(
+            pageSize = PAGE_SIZE,
+            prefetchDistance = PAGE_SIZE,
+            initialLoadSize = PAGE_SIZE * 3,
+            enablePlaceholders = true,
+        ),
+        remoteMediator = NoteFeedRemoteMediator(
+            dispatcherProvider = dispatcherProvider,
+            feedSpec = feedSpec,
+            userId = userId,
+            feedApi = feedApi,
+            database = database,
+        ),
+        pagingSourceFactory = pagingSourceFactory,
+    )
 
-    private fun feedQueryBuilder(feedSpec: String): FeedQueryBuilder =
+    private fun feedQueryBuilder(userId: String, feedSpec: String): FeedQueryBuilder =
         when {
             feedSpec.supportsNoteReposts() -> ChronologicalFeedWithRepostsQueryBuilder(
                 feedSpec = feedSpec,
-                userPubkey = activeAccountStore.activeUserId(),
+                userPubkey = userId,
             )
 
             else -> ExploreFeedQueryBuilder(
                 feedSpec = feedSpec,
-                userPubkey = activeAccountStore.activeUserId(),
+                userPubkey = userId,
             )
         }
 

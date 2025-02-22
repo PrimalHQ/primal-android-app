@@ -59,7 +59,8 @@ class NoteFeedRemoteMediator(
 
     private suspend fun String.isLastCacheTimestampOlderThan(duration: Duration): Boolean {
         val lastCachedAt = withContext(dispatcherProvider.io()) {
-            database.feedPostsRemoteKeys().lastCachedAt(directive = this@isLastCacheTimestampOlderThan)
+            database.feedPostsRemoteKeys()
+                .lastCachedAt(ownerId = userId, directive = this@isLastCacheTimestampOlderThan)
         } ?: return true
 
         return lastCachedAt < Instant.now().minusSeconds(duration.inWholeSeconds).epochSecond
@@ -80,6 +81,7 @@ class NoteFeedRemoteMediator(
                 clearFeedSpec(feedSpec = feedSpec)
                 InitializeAction.LAUNCH_INITIAL_REFRESH
             }
+
             else -> {
                 InitializeAction.SKIP_INITIAL_REFRESH
             }
@@ -138,8 +140,8 @@ class NoteFeedRemoteMediator(
 
     private suspend fun clearFeedSpec(feedSpec: String) =
         withContext(dispatcherProvider.io()) {
-            database.feedPostsRemoteKeys().deleteByDirective(feedSpec)
-            database.feedsConnections().deleteConnectionsByDirective(feedSpec)
+            database.feedPostsRemoteKeys().deleteByDirective(ownerId = userId, directive = feedSpec)
+            database.feedsConnections().deleteConnectionsByDirective(ownerId = userId, feedSpec = feedSpec)
         }
 
     private suspend fun NoteFeedRemoteMediator.syncFeed(
@@ -267,6 +269,7 @@ class NoteFeedRemoteMediator(
                     " and repostId=${lastItem.data.repostId}",
             )
             database.feedPostsRemoteKeys().find(
+                ownerId = userId,
                 postId = lastItem.data.postId,
                 repostId = lastItem.data.repostId,
                 directive = feedSpec,
@@ -280,13 +283,6 @@ class NoteFeedRemoteMediator(
                 .oldestFeedPosts(query = feedQueryBuilder.oldestFeedPostsQuery(limit = 1))
                 .firstOrNull()
         }
-
-//    private suspend fun newestFeedPostInDatabaseOrNull() =
-//        withContext(dispatcherProvider.io()) {
-//            database.feedPosts()
-//                .newestFeedPosts(query = feedQueryBuilder.newestFeedPostsQuery(limit = 1))
-//                .firstOrNull()
-//        }
 
     private inner class NoSuchFeedPostException : RuntimeException()
 

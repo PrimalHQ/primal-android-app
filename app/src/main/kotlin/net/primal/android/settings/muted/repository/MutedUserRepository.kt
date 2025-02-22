@@ -26,16 +26,18 @@ class MutedUserRepository @Inject constructor(
     private val nostrPublisher: NostrPublisher,
 ) {
 
-    fun observeMutedUsers() = database.mutedUsers().observeMutedUsers()
+    fun observeMutedUsersByOwnerId(ownerId: String) =
+        database.mutedUsers().observeMutedUsersByOwnerId(ownerId = ownerId)
 
-    fun observeIsUserMuted(pubkey: String) =
-        database.mutedUsers().observeIsUserMuted(
+    fun observeIsUserMutedByOwnerId(pubkey: String, ownerId: String) =
+        database.mutedUsers().observeIsUserMutedByOwnerId(
             pubkey = pubkey,
+            ownerId = ownerId,
         )
 
     suspend fun fetchAndPersistMuteList(userId: String) {
         val muteList = fetchMuteListAndPersistProfiles(userId = userId)
-        persistMuteList(muteList = muteList)
+        persistMuteList(ownerId = userId, muteList = muteList)
     }
 
     @Throws(MissingRelaysException::class)
@@ -48,6 +50,7 @@ class MutedUserRepository @Inject constructor(
                         MutedUserData(
                             userId = mutedUserId,
                             userMetadataEventId = userMetadataEventId,
+                            ownerId = userId,
                         ),
                     )
                 }
@@ -57,9 +60,7 @@ class MutedUserRepository @Inject constructor(
     @Throws(MissingRelaysException::class)
     suspend fun unmuteUserAndPersistMuteList(userId: String, unmutedUserId: String) {
         updateAndPersistMuteList(userId = userId) {
-            toMutableSet().apply {
-                removeIf { it.userId == unmutedUserId }
-            }
+            filterNot { it.userId == unmutedUserId && it.ownerId == userId }.toSet()
         }
     }
 
@@ -70,7 +71,7 @@ class MutedUserRepository @Inject constructor(
         val remoteMuteList = fetchMuteListAndPersistProfiles(userId = userId)
         val newMuteList = remoteMuteList.reducer()
         nostrPublisher.setMuteList(userId = userId, muteList = newMuteList.map { it.userId }.toSet())
-        persistMuteList(muteList = newMuteList)
+        persistMuteList(ownerId = userId, muteList = newMuteList)
     }
 
     private suspend fun fetchMuteListAndPersistProfiles(userId: String): Set<MutedUserData> {
@@ -96,20 +97,21 @@ class MutedUserRepository @Inject constructor(
             .map { mutedUserId ->
                 mutedUserId.asMutedAccountPO(
                     metadataEventId = profileData.find { mutedUserId == it.ownerId }?.eventId,
+                    ownerId = userId,
                 )
             }
             .toSet()
     }
 
-    private suspend fun persistMuteList(muteList: Set<MutedUserData>) {
+    private suspend fun persistMuteList(ownerId: String, muteList: Set<MutedUserData>) {
         database.withTransaction {
-            database.mutedUsers().deleteAll()
+            database.mutedUsers().deleteAllByOwnerId(ownerId = ownerId)
             database.mutedUsers().upsertAll(data = muteList)
         }
     }
 
-    private fun String.asMutedAccountPO(metadataEventId: String? = null): MutedUserData =
-        MutedUserData(userId = this, userMetadataEventId = metadataEventId)
+    private fun String.asMutedAccountPO(metadataEventId: String? = null, ownerId: String): MutedUserData =
+        MutedUserData(userId = this, userMetadataEventId = metadataEventId, ownerId = ownerId)
 
     private fun List<JsonArray>?.mapToPubkeySet(): Set<String>? {
         return this?.filter { it.size == 2 }?.map { it[1].jsonPrimitive.content }?.toSet()

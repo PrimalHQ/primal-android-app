@@ -33,7 +33,7 @@ class MediaFeedViewModel @AssistedInject constructor(
     }
 
     private fun buildFeedByDirective(feedSpec: String) =
-        feedRepository.feedBySpec(feedSpec = feedSpec)
+        feedRepository.feedBySpec(userId = activeAccountStore.activeUserId(), feedSpec = feedSpec)
             .map { it.map { feedNote -> feedNote.asFeedPostUi() } }
             .cachedIn(viewModelScope)
 

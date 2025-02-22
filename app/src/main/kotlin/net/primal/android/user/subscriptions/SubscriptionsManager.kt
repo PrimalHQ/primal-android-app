@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.encodeToString
 import net.primal.android.config.AppConfigProvider
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.serialization.json.NostrJson
@@ -36,7 +35,6 @@ import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.notifications.api.model.PubkeyRequestBody
 import net.primal.android.notifications.domain.NotificationsSummary
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.domain.Badges
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.api.model.BalanceRequestBody
@@ -58,7 +56,6 @@ class SubscriptionsManager @Inject constructor(
 
     private val scope = CoroutineScope(dispatcherProvider.io())
     private var subscriptionsActive = false
-    private var activeUserId: String? = null
 
     private var notificationsSummarySubscription: PrimalSocketSubscription<NotificationsSummary>? = null
     private var messagesUnreadCountSubscription: PrimalSocketSubscription<MessagesUnreadCount>? = null
@@ -85,24 +82,21 @@ class SubscriptionsManager @Inject constructor(
     private fun observeActiveAccount() =
         scope.launch {
             appConfigProvider.waitForCacheAndWalletConfigsUrls()
-            activeAccountStore.activeAccountState.collect {
-                when (it) {
-                    is ActiveUserAccountState.ActiveUserAccount -> {
-                        val newActiveUserId = it.data.pubkey
-                        if (newActiveUserId != activeUserId) {
-                            activeUserId = newActiveUserId
-                            subscribeAll(userId = newActiveUserId)
-                            withContext(Dispatchers.Main) {
-                                ProcessLifecycleOwner.get().lifecycle.addObserver(lifecycleEventObserver)
-                            }
-                        }
-                    }
-
-                    ActiveUserAccountState.NoUserAccount -> {
+            activeAccountStore.activeUserId.collect { newActiveUserId ->
+                when {
+                    newActiveUserId.isEmpty() -> {
                         emitBadgesUpdate { Badges() }
                         unsubscribeAll()
                         withContext(Dispatchers.Main) {
                             ProcessLifecycleOwner.get().lifecycle.removeObserver(lifecycleEventObserver)
+                        }
+                    }
+
+                    else -> {
+                        unsubscribeAll()
+                        subscribeAll(userId = newActiveUserId)
+                        withContext(Dispatchers.Main) {
+                            ProcessLifecycleOwner.get().lifecycle.addObserver(lifecycleEventObserver)
                         }
                     }
                 }
@@ -123,16 +117,14 @@ class SubscriptionsManager @Inject constructor(
 
     private suspend fun resumeSubscriptions() {
         if (!subscriptionsActive) {
-            activeUserId?.let {
-                subscribeAll(userId = it)
-            }
+            unsubscribeAll()
+            subscribeAll(userId = activeAccountStore.activeUserId())
         }
     }
 
     private suspend fun pauseSubscriptions() = unsubscribeAll()
 
-    private suspend fun subscribeAll(userId: String) {
-        unsubscribeAll()
+    private fun subscribeAll(userId: String) {
         subscriptionsActive = true
         notificationsSummarySubscription = launchNotificationsSummarySubscription(userId = userId)
         messagesUnreadCountSubscription = launchMessagesUnreadCountSubscription(userId = userId)

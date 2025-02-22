@@ -40,7 +40,7 @@ class WalletRepository @Inject constructor(
 
     fun latestTransactions(userId: String) =
         createTransactionsPager(userId) {
-            database.walletTransactions().latestTransactionsPaged()
+            database.walletTransactions().latestTransactionsPagedByUserId(userId = userId)
         }.flow
 
     fun findTransactionById(txId: String) = database.walletTransactions().findTransactionById(txId = txId)
@@ -139,7 +139,8 @@ class WalletRepository @Inject constructor(
         return walletApi.parseLnInvoice(userId = userId, lnbc = lnbc)
     }
 
-    fun deleteAllTransactions() = database.walletTransactions().deleteAllTransactions()
+    fun deleteAllTransactions(userId: String) =
+        database.walletTransactions().deleteAllTransactionsByUserId(userId = userId)
 
     suspend fun fetchMiningFees(
         userId: String,

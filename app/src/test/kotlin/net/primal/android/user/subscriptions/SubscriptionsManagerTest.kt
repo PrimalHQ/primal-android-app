@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import net.primal.android.config.AppConfigHandler
 import net.primal.android.config.AppConfigProvider
@@ -16,8 +16,6 @@ import net.primal.android.networking.primal.PrimalServerType
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.accounts.active.ActiveUserAccountState
-import net.primal.android.user.domain.UserAccount
 import okhttp3.OkHttpClient
 import org.junit.Rule
 import org.junit.Test
@@ -31,9 +29,7 @@ class SubscriptionsManagerTest {
     val coroutinesTestRule = CoroutinesTestRule()
 
     private val activeAccountStoreMock = mockk<ActiveAccountStore>(relaxed = true) {
-        every { activeAccountState } returns flow {
-            emit(ActiveUserAccountState.ActiveUserAccount(data = UserAccount.EMPTY))
-        }
+        every { activeUserId } returns MutableStateFlow("")
     }
 
     private val emptyNostrEvent = NostrEvent(

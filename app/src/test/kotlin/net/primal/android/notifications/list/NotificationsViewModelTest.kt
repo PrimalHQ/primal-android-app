@@ -36,7 +36,7 @@ class NotificationsViewModelTest {
         runTest {
             val viewModel = createViewModel(
                 notificationsRepository = mockk(relaxed = true) {
-                    coEvery { markAllNotificationsAsSeen() } throws WssException()
+                    coEvery { markAllNotificationsAsSeen(any()) } throws WssException()
                 },
             )
             viewModel.setEvent(NotificationsContract.UiEvent.NotificationsSeen)
@@ -47,7 +47,7 @@ class NotificationsViewModelTest {
         runTest {
             val viewModel = createViewModel(
                 notificationsRepository = mockk(relaxed = true) {
-                    coEvery { markAllNotificationsAsSeen() } throws NostrSignUnauthorized()
+                    coEvery { markAllNotificationsAsSeen(any()) } throws NostrSignUnauthorized()
                 },
             )
             viewModel.setEvent(NotificationsContract.UiEvent.NotificationsSeen)

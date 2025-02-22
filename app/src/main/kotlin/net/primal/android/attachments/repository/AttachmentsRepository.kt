@@ -9,10 +9,8 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.primal.upload.domain.UploadResult
-import net.primal.android.user.accounts.active.ActiveAccountStore
 
 class AttachmentsRepository @Inject constructor(
-    private val activeAccountStore: ActiveAccountStore,
     private val fileUploader: PrimalFileUploader,
     private val database: PrimalDatabase,
     private val dispatchers: CoroutineDispatcherProvider,
@@ -24,12 +22,12 @@ class AttachmentsRepository @Inject constructor(
 
     @Throws(UnsuccessfulFileUpload::class)
     suspend fun uploadNoteAttachment(
+        userId: String,
         attachment: net.primal.android.editor.domain.NoteAttachment,
         uploadId: String,
         onProgress: ((uploadedBytes: Int, totalBytes: Int) -> Unit)? = null,
     ): UploadResult =
         withContext(dispatchers.io()) {
-            val userId = activeAccountStore.activeUserId()
             fileUploader.uploadFile(
                 uri = attachment.localUri,
                 userId = userId,
@@ -38,8 +36,7 @@ class AttachmentsRepository @Inject constructor(
             )
         }
 
-    suspend fun cancelNoteAttachmentUpload(uploadId: String) {
-        val userId = activeAccountStore.activeUserId()
+    suspend fun cancelNoteAttachmentUpload(userId: String, uploadId: String) {
         fileUploader.cancelUpload(userId = userId, uploadId = uploadId)
     }
 }

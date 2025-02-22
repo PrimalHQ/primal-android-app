@@ -22,22 +22,23 @@ class FeedProcessor(
         val pagingEvent = response.paging
         database.withTransaction {
             if (clearFeed) {
-                database.feedPostsRemoteKeys().deleteByDirective(feedSpec)
-                database.feedsConnections().deleteConnectionsByDirective(feedSpec)
+                database.feedPostsRemoteKeys().deleteByDirective(ownerId = userId, directive = feedSpec)
+                database.feedsConnections().deleteConnectionsByDirective(ownerId = userId, feedSpec = feedSpec)
             }
 
             response.persistToDatabaseAsTransaction(userId = userId, database = database)
             val feedEvents = response.notes + response.reposts
-            feedEvents.processRemoteKeys(pagingEvent)
-            feedEvents.processFeedConnections()
+            feedEvents.processRemoteKeys(userId = userId, pagingEvent = pagingEvent)
+            feedEvents.processFeedConnections(userId = userId)
         }
     }
 
-    private suspend fun List<NostrEvent>.processRemoteKeys(pagingEvent: ContentPrimalPaging?) {
+    private suspend fun List<NostrEvent>.processRemoteKeys(userId: String, pagingEvent: ContentPrimalPaging?) {
         if (pagingEvent?.sinceId != null && pagingEvent.untilId != null) {
             database.withTransaction {
                 val remoteKeys = this.map {
                     FeedPostRemoteKey(
+                        ownerId = userId,
                         eventId = it.id,
                         directive = feedSpec,
                         sinceId = pagingEvent.sinceId,
@@ -51,13 +52,14 @@ class FeedProcessor(
         }
     }
 
-    private suspend fun List<NostrEvent>.processFeedConnections() {
+    private suspend fun List<NostrEvent>.processFeedConnections(userId: String) {
         database.withTransaction {
-            val maxIndex = database.feedsConnections().getOrderIndexForFeedSpec(feedSpec)
+            val maxIndex = database.feedsConnections().getOrderIndexForFeedSpec(ownerId = userId, feedSpec = feedSpec)
             val indexOffset = maxIndex?.plus(other = 1) ?: 0
             database.feedsConnections().connect(
                 data = this.mapIndexed { index, nostrEvent ->
                     FeedPostDataCrossRef(
+                        ownerId = userId,
                         feedSpec = feedSpec,
                         eventId = nostrEvent.id,
                         orderIndex = indexOffset + index,

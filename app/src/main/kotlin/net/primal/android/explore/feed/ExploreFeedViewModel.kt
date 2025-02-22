@@ -65,13 +65,16 @@ class ExploreFeedViewModel @Inject constructor(
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCleared() {
         GlobalScope.launch(dispatcherProvider.io()) {
-            feedRepository.removeFeedSpec(feedSpec = exploreFeedSpec)
+            feedRepository.removeFeedSpec(userId = activeAccountStore.activeUserId(), feedSpec = exploreFeedSpec)
         }
     }
 
     private fun observeContainsFeed() =
         viewModelScope.launch {
-            feedsRepository.observeContainsFeedSpec(feedSpec = exploreFeedSpec).collect {
+            feedsRepository.observeContainsFeedSpec(
+                userId = activeAccountStore.activeUserId(),
+                feedSpec = exploreFeedSpec,
+            ).collect {
                 setState { copy(existsInUserFeeds = it) }
             }
         }
@@ -91,6 +94,7 @@ class ExploreFeedViewModel @Inject constructor(
             val feedSpecKind = exploreFeedSpec.resolveFeedSpecKind()
             if (feedSpecKind != null) {
                 feedsRepository.addFeedLocally(
+                    userId = activeAccountStore.activeUserId(),
                     feedSpec = exploreFeedSpec,
                     title = event.title,
                     description = event.description,
@@ -107,7 +111,7 @@ class ExploreFeedViewModel @Inject constructor(
 
     private suspend fun removeFromMyFeeds() {
         try {
-            feedsRepository.removeFeedLocally(feedSpec = exploreFeedSpec)
+            feedsRepository.removeFeedLocally(userId = activeAccountStore.activeUserId(), feedSpec = exploreFeedSpec)
             feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
         } catch (error: WssException) {
             Timber.w(error)

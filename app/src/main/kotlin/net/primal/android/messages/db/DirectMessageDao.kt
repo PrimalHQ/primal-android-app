@@ -13,16 +13,31 @@ interface DirectMessageDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertAll(data: List<DirectMessageData>)
 
-    @Query("SELECT * FROM DirectMessageData ORDER BY createdAt DESC LIMIT 1")
-    fun first(): DirectMessageData?
+    @Query("SELECT * FROM DirectMessageData WHERE ownerId = :ownerId ORDER BY createdAt DESC LIMIT 1")
+    fun firstByOwnerId(ownerId: String): DirectMessageData?
 
-    @Query("SELECT * FROM DirectMessageData WHERE participantId = :participantId ORDER BY createdAt DESC LIMIT 1")
-    fun first(participantId: String): DirectMessageData?
+    @Query(
+        """
+        SELECT * FROM DirectMessageData 
+        WHERE ownerId = :ownerId AND participantId = :participantId
+        ORDER BY createdAt DESC LIMIT 1
+        """,
+    )
+    fun firstByOwnerId(ownerId: String, participantId: String): DirectMessageData?
 
-    @Query("SELECT * FROM DirectMessageData ORDER BY createdAt ASC LIMIT 1")
-    fun last(): DirectMessageData?
+    @Query("SELECT * FROM DirectMessageData WHERE ownerId = :ownerId ORDER BY createdAt ASC LIMIT 1")
+    fun lastByOwnerId(ownerId: String): DirectMessageData?
 
     @Transaction
-    @Query("SELECT * FROM DirectMessageData WHERE participantId = :participantId ORDER BY createdAt DESC")
-    fun newestMessagesPaged(participantId: String): PagingSource<Int, DirectMessage>
+    @Query(
+        """
+        SELECT * FROM DirectMessageData
+        WHERE ownerId = :ownerId AND participantId = :participantId
+        ORDER BY createdAt DESC
+    """,
+    )
+    fun newestMessagesPagedByOwnerId(ownerId: String, participantId: String): PagingSource<Int, DirectMessage>
+
+    @Query("DELETE FROM DirectMessageData WHERE ownerId = :ownerId")
+    fun deleteAllByOwnerId(ownerId: String)
 }

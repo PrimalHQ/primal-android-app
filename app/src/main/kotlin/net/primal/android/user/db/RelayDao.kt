@@ -13,6 +13,9 @@ interface RelayDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertAll(relays: List<Relay>)
 
+    @Query("DELETE FROM Relay WHERE userId = :userId")
+    fun deleteAll(userId: String)
+
     @Query("DELETE FROM Relay WHERE userId = :userId AND kind = :kind")
     fun deleteAll(userId: String, kind: RelayKind)
 

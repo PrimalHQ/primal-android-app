@@ -6,12 +6,13 @@ import androidx.room.PrimaryKey
 
 @Entity(
     indices = [
-        Index(value = ["spec", "articleATag", "articleAuthorId"], unique = true),
+        Index(value = ["ownerId", "spec", "articleATag", "articleAuthorId"], unique = true),
     ],
 )
 data class ArticleFeedCrossRef(
     @PrimaryKey(autoGenerate = true)
     val position: Long = 0,
+    val ownerId: String,
     val spec: String,
     val articleATag: String,
     val articleAuthorId: String,

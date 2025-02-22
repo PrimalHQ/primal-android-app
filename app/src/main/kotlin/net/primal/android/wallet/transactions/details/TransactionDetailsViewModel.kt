@@ -82,7 +82,11 @@ class TransactionDetailsViewModel @Inject constructor(
             setState { copy(loading = true) }
             try {
                 articleAuthorId?.let {
-                    articleRepository.fetchArticleAndComments(articleId = articleId, articleAuthorId = articleAuthorId)
+                    articleRepository.fetchArticleAndComments(
+                        userId = activeAccountStore.activeUserId(),
+                        articleId = articleId,
+                        articleAuthorId = articleAuthorId,
+                    )
                 }
             } catch (error: WssException) {
                 Timber.w(error)
@@ -93,7 +97,7 @@ class TransactionDetailsViewModel @Inject constructor(
 
     private fun observeZappedNote(noteId: String) =
         viewModelScope.launch {
-            feedRepository.observeConversation(noteId = noteId)
+            feedRepository.observeConversation(userId = activeAccountStore.activeUserId(), noteId = noteId)
                 .filter { it.isNotEmpty() }
                 .mapNotNull { conversation -> conversation.first { it.data.postId == noteId } }
                 .collect {
@@ -106,7 +110,7 @@ class TransactionDetailsViewModel @Inject constructor(
             setState { copy(loading = true) }
             try {
                 withContext(dispatcherProvider.io()) {
-                    feedRepository.fetchReplies(noteId = noteId)
+                    feedRepository.fetchReplies(userId = activeAccountStore.activeUserId(), noteId = noteId)
                 }
             } catch (error: WssException) {
                 Timber.w(error)

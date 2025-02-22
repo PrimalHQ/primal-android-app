@@ -204,7 +204,7 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private fun observeThreadConversation(replyToNoteId: String) {
         viewModelScope.launch {
-            feedRepository.observeConversation(noteId = replyToNoteId)
+            feedRepository.observeConversation(userId = activeAccountStore.activeUserId(), noteId = replyToNoteId)
                 .filter { it.isNotEmpty() }
                 .map { posts -> posts.map { it.asFeedPostUi() } }
                 .collect { conversation ->
@@ -236,7 +236,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private fun fetchNoteThreadFromNetwork(replyToNoteId: String) =
         viewModelScope.launch {
             try {
-                feedRepository.fetchReplies(noteId = replyToNoteId)
+                feedRepository.fetchReplies(userId = activeAccountStore.activeUserId(), noteId = replyToNoteId)
             } catch (error: WssException) {
                 Timber.w(error)
             }
@@ -246,6 +246,7 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             try {
                 articleRepository.fetchArticleAndComments(
+                    userId = activeAccountStore.activeUserId(),
                     articleId = replyToArticleNaddr.identifier,
                     articleAuthorId = replyToArticleNaddr.userId,
                 )
@@ -383,6 +384,7 @@ class NoteEditorViewModel @AssistedInject constructor(
             updateNoteAttachmentState(attachment = updatedAttachment)
 
             val uploadResult = attachmentRepository.uploadNoteAttachment(
+                userId = activeAccountStore.activeUserId(),
                 attachment = attachment,
                 uploadId = uploadId,
                 onProgress = { uploadedBytes, totalBytes ->
@@ -443,7 +445,10 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             this@cancel.job.cancel()
             runCatching {
-                attachmentRepository.cancelNoteAttachmentUpload(uploadId = this@cancel.id)
+                attachmentRepository.cancelNoteAttachmentUpload(
+                    userId = activeAccountStore.activeUserId(),
+                    uploadId = this@cancel.id,
+                )
             }
         }
     }
@@ -492,7 +497,7 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private fun observeRecentUsers() {
         viewModelScope.launch {
-            exploreRepository.observeRecentUsers()
+            exploreRepository.observeRecentUsers(ownerId = activeAccountStore.activeUserId())
                 .distinctUntilChanged()
                 .collect {
                     setState { copy(recentUsers = it.map { it.mapAsUserProfileUi() }) }
@@ -543,7 +548,7 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private fun markProfileInteraction(profileId: String) {
         viewModelScope.launch {
-            profileRepository.markAsInteracted(profileId = profileId)
+            profileRepository.markAsInteracted(profileId = profileId, ownerId = activeAccountStore.activeUserId())
         }
     }
 

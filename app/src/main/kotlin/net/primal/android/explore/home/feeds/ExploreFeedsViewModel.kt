@@ -46,7 +46,7 @@ class ExploreFeedsViewModel @Inject constructor(
 
     private fun observeAllUserFeeds() =
         viewModelScope.launch {
-            feedsRepository.observeAllFeeds()
+            feedsRepository.observeAllFeeds(userId = activeAccountStore.activeUserId())
                 .collect {
                     setState { copy(userFeedSpecs = it.map { it.spec }) }
                 }
@@ -67,7 +67,10 @@ class ExploreFeedsViewModel @Inject constructor(
     private fun scheduleClearingDvmFeed(dvmFeed: DvmFeedUi) =
         viewModelScope.launch {
             dvmFeed.data.kind?.let {
-                feedRepository.removeFeedSpec(feedSpec = dvmFeed.data.buildSpec(specKind = it))
+                feedRepository.removeFeedSpec(
+                    userId = activeAccountStore.activeUserId(),
+                    feedSpec = dvmFeed.data.buildSpec(specKind = it),
+                )
             }
         }
 
@@ -75,7 +78,11 @@ class ExploreFeedsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 dvmFeed.kind?.let {
-                    feedsRepository.addDvmFeedLocally(dvmFeed = dvmFeed, specKind = dvmFeed.kind)
+                    feedsRepository.addDvmFeedLocally(
+                        userId = activeAccountStore.activeUserId(),
+                        dvmFeed = dvmFeed,
+                        specKind = dvmFeed.kind,
+                    )
                 }
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
             } catch (error: WssException) {
@@ -87,7 +94,10 @@ class ExploreFeedsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 dvmFeed.kind?.let {
-                    feedsRepository.removeFeedLocally(feedSpec = dvmFeed.buildSpec(specKind = dvmFeed.kind))
+                    feedsRepository.removeFeedLocally(
+                        userId = activeAccountStore.activeUserId(),
+                        feedSpec = dvmFeed.buildSpec(specKind = dvmFeed.kind),
+                    )
                 }
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
             } catch (error: WssException) {
