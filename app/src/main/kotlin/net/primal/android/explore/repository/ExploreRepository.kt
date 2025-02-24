@@ -206,8 +206,9 @@ class ExploreRepository @Inject constructor(
             exploreApi.getPopularUsers()
         }
 
-    fun observeRecentUsers(): Flow<List<UserProfileSearchItem>> {
-        return database.profileInteractions().observeRecentProfiles()
+    fun observeRecentUsers(ownerId: String): Flow<List<UserProfileSearchItem>> {
+        return database.profileInteractions()
+            .observeRecentProfilesByOwnerId(ownerId = ownerId)
             .map { recentProfiles ->
                 recentProfiles.mapNotNull { profile ->
                     if (profile.metadata != null) {

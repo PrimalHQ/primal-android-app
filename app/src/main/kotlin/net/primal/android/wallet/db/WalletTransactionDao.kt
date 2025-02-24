@@ -17,22 +17,22 @@ interface WalletTransactionDao {
     @Query(
         """
             SELECT * FROM WalletTransactionData 
-            WHERE state IN ("SUCCEEDED", "PROCESSING", "CREATED") 
+            WHERE state IN ("SUCCEEDED", "PROCESSING", "CREATED") AND userId IS :userId
             ORDER BY updatedAt DESC
         """,
     )
-    fun latestTransactionsPaged(): PagingSource<Int, WalletTransaction>
+    fun latestTransactionsPagedByUserId(userId: String): PagingSource<Int, WalletTransaction>
 
-    @Query("SELECT * FROM WalletTransactionData ORDER BY updatedAt DESC LIMIT 1")
-    fun first(): WalletTransactionData?
+    @Query("SELECT * FROM WalletTransactionData WHERE userId IS :userId ORDER BY updatedAt DESC LIMIT 1")
+    fun firstByUserId(userId: String): WalletTransactionData?
 
-    @Query("SELECT * FROM WalletTransactionData ORDER BY updatedAt ASC LIMIT 1")
-    fun last(): WalletTransactionData?
+    @Query("SELECT * FROM WalletTransactionData WHERE userId IS :userId ORDER BY updatedAt ASC LIMIT 1")
+    fun lastByUserId(userId: String): WalletTransactionData?
 
     @Transaction
     @Query("SELECT * FROM WalletTransactionData WHERE id IS :txId")
     fun findTransactionById(txId: String): WalletTransaction?
 
-    @Query("DELETE FROM WalletTransactionData")
-    fun deleteAllTransactions()
+    @Query("DELETE FROM WalletTransactionData WHERE userId IS :userId")
+    fun deleteAllTransactionsByUserId(userId: String)
 }

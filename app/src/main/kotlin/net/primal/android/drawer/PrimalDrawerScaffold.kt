@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.NavigationBarFullHeightDp
 import net.primal.android.core.compose.PrimalNavigationBarLightningBolt
 import net.primal.android.core.compose.PrimalTopLevelDestination
+import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.user.domain.Badges
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,6 +61,7 @@ fun PrimalDrawerScaffold(
     floatingActionButton: @Composable () -> Unit = {},
     snackbarHost: @Composable () -> Unit = {},
     focusModeEnabled: Boolean = true,
+    accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val localDensity = LocalDensity.current
 
@@ -89,6 +91,7 @@ fun PrimalDrawerScaffold(
                 drawerState = drawerState,
                 onDrawerDestinationClick = onDrawerDestinationClick,
                 onQrCodeClick = onDrawerQrCodeClick,
+                accountSwitcherCallbacks = accountSwitcherCallbacks,
             )
         },
         content = {

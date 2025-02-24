@@ -2,6 +2,7 @@ package net.primal.android.core.compose.icons
 
 import kotlin.collections.List as ____KtList
 import androidx.compose.ui.graphics.vector.ImageVector
+import net.primal.android.core.compose.icons.primaliconpack.AddAccount
 import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearch
 import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearchFilled
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -30,6 +31,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Copy
 import net.primal.android.core.compose.icons.primaliconpack.CopyAlt
 import net.primal.android.core.compose.icons.primaliconpack.DarkMode
 import net.primal.android.core.compose.icons.primaliconpack.Delete
+import net.primal.android.core.compose.icons.primaliconpack.DetailsRounded
 import net.primal.android.core.compose.icons.primaliconpack.Directory
 import net.primal.android.core.compose.icons.primaliconpack.Discuss
 import net.primal.android.core.compose.icons.primaliconpack.Document
@@ -116,6 +118,7 @@ import net.primal.android.core.compose.icons.primaliconpack.PrimalPremium
 import net.primal.android.core.compose.icons.primaliconpack.QrCode
 import net.primal.android.core.compose.icons.primaliconpack.Quote
 import net.primal.android.core.compose.icons.primaliconpack.Read
+import net.primal.android.core.compose.icons.primaliconpack.RemoveAccount
 import net.primal.android.core.compose.icons.primaliconpack.RemoveHighlight
 import net.primal.android.core.compose.icons.primaliconpack.Report
 import net.primal.android.core.compose.icons.primaliconpack.Repost
@@ -154,6 +157,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             return __PrimalIcons!!
         }
         __PrimalIcons = listOf(
+            AddAccount,
             AvatarDefault,
             AvatarNostrich,
             AdvancedSearch,
@@ -169,6 +173,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             FeedZapsFilled,
             FeedLikes,
             Settings,
+            DetailsRounded,
             Download,
             FeedRepliesFilled,
             FeedReplies,
@@ -299,6 +304,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             WalletChangeCurrency,
             NwcExternalAppForeground,
             NwcExternalAppConnection,
+            RemoveAccount,
         )
         return __PrimalIcons!!
     }

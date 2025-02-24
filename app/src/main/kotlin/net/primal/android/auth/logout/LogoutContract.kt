@@ -5,4 +5,9 @@ interface LogoutContract {
     sealed class UiEvent {
         object LogoutConfirmed : UiEvent()
     }
+
+    sealed class SideEffect {
+        data object UserAccountLogoutSuccessful : SideEffect()
+        data object ActiveAccountLogoutSuccessful : SideEffect()
+    }
 }

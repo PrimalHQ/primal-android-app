@@ -45,7 +45,7 @@ class CredentialsStoreTest {
 
     private val testContext: Context = InstrumentationRegistry.getInstrumentation().targetContext
 
-    private val persistence: DataStore<List<Credential>> = DataStoreFactory.create(
+    private val persistence: DataStore<Set<Credential>> = DataStoreFactory.create(
         serializer = CredentialsSerialization(encryption = NoEncryption()),
         produceFile = { testContext.dataStoreFile(DATA_STORE_FILE) },
     )
@@ -83,7 +83,7 @@ class CredentialsStoreTest {
     fun `findOrThrow finds credential by given npub`() =
         runTest {
             persistence.updateData {
-                listOf(
+                setOf(
                     expectedCredential,
                     Credential(nsec = "invalidNsec", npub = "invalidNpub"),
                 )
@@ -105,7 +105,7 @@ class CredentialsStoreTest {
     @Test
     fun `clearCredentials removes all credentials from data store`() =
         runTest {
-            persistence.updateData { listOf(expectedCredential) }
+            persistence.updateData { setOf(expectedCredential) }
             val credentialsStore = CredentialsStore(persistence = persistence)
 
             credentialsStore.clearCredentials()

@@ -4,12 +4,29 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.res.stringResource
 import net.primal.android.R
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun LogoutScreen(viewModel: LogoutViewModel, onClose: () -> Unit) {
+fun LogoutScreen(
+    viewModel: LogoutViewModel,
+    onClose: () -> Unit,
+    navigateToHome: () -> Unit,
+) {
+    LaunchedEffect(viewModel, viewModel.effects) {
+        viewModel.effects.collect {
+            when (it) {
+                LogoutContract.SideEffect.UserAccountLogoutSuccessful -> onClose()
+                LogoutContract.SideEffect.ActiveAccountLogoutSuccessful -> {
+                    onClose()
+                    navigateToHome()
+                }
+            }
+        }
+    }
+
     LogoutScreen(
         onClose = onClose,
         onLogoutRequested = {

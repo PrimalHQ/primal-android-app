@@ -272,12 +272,13 @@ class ProfileRepository @Inject constructor(
             usersApi.isUserFollowing(userId, targetUserId)
         }
 
-    suspend fun markAsInteracted(profileId: String) =
+    suspend fun markAsInteracted(profileId: String, ownerId: String) =
         withContext(dispatchers.io()) {
-            database.profileInteractions().insertOrUpdate(
+            database.profileInteractions().upsert(
                 ProfileInteraction(
                     profileId = profileId,
                     lastInteractionAt = Instant.now().epochSecond,
+                    ownerId = ownerId,
                 ),
             )
         }

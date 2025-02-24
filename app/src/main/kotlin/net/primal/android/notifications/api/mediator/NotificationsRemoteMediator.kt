@@ -44,7 +44,7 @@ class NotificationsRemoteMediator(
     }
 
     override suspend fun initialize(): InitializeAction {
-        val notificationsCount = withContext(Dispatchers.IO) { database.notifications().allCount() }
+        val notificationsCount = withContext(Dispatchers.IO) { database.notifications().allCount(ownerId = userId) }
         return if (notificationsCount == 0) {
             InitializeAction.LAUNCH_INITIAL_REFRESH
         } else {
@@ -58,7 +58,7 @@ class NotificationsRemoteMediator(
             LoadType.PREPEND -> {
                 state.firstItemOrNull()?.data?.createdAt
                     ?: withContext(Dispatchers.IO) {
-                        database.notifications().first()?.createdAt
+                        database.notifications().first(ownerId = userId)?.createdAt
                     }
                     ?: return MediatorResult.Success(endOfPaginationReached = true)
             }
@@ -66,7 +66,7 @@ class NotificationsRemoteMediator(
             LoadType.APPEND -> {
                 state.lastItemOrNull()?.data?.createdAt
                     ?: withContext(Dispatchers.IO) {
-                        database.notifications().last()?.createdAt
+                        database.notifications().last(ownerId = userId)?.createdAt
                     }
                     ?: return MediatorResult.Success(endOfPaginationReached = true)
             }

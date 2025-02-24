@@ -5,39 +5,26 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ProfileInteractionDao {
 
-    @Query("SELECT * FROM ProfileInteraction WHERE profileId = :profileId")
-    fun getInteractionByProfileId(profileId: String?): ProfileInteraction?
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(interaction: ProfileInteraction)
-
-    @Update
-    fun update(interaction: ProfileInteraction)
-
-    @Transaction
-    fun insertOrUpdate(interaction: ProfileInteraction) {
-        val existingProfile = getInteractionByProfileId(interaction.profileId)
-        if (existingProfile != null) {
-            update(interaction)
-        } else {
-            insert(interaction)
-        }
-    }
+    fun upsert(interaction: ProfileInteraction)
 
     @Transaction
     @Query(
         """
-        SELECT * FROM ProfileData AS PD
-        INNER JOIN ProfileInteraction AS PI ON PD.ownerId = PI.profileId
+        SELECT * FROM ProfileInteraction AS PI
+        INNER JOIN ProfileData AS PD ON PD.ownerId = PI.profileId
+        WHERE PI.ownerId IS :ownerId
         ORDER BY PI.lastInteractionAt DESC
         LIMIT :limit
     """,
     )
-    fun observeRecentProfiles(limit: Int = 10): Flow<List<Profile>>
+    fun observeRecentProfilesByOwnerId(ownerId: String, limit: Int = 10): Flow<List<Profile>>
+
+    @Query("DELETE FROM ProfileInteraction WHERE ownerId = :ownerId")
+    fun deleteAllByOwnerId(ownerId: String)
 }

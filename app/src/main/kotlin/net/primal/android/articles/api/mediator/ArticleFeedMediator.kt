@@ -37,7 +37,7 @@ class ArticleFeedMediator(
 
     override suspend fun initialize(): InitializeAction {
         val latestRemoteKey = withContext(dispatcherProvider.io()) {
-            database.feedPostsRemoteKeys().findLatestByDirective(directive = feedSpec)
+            database.feedPostsRemoteKeys().findLatestByDirective(ownerId = userId, directive = feedSpec)
         }
 
         return latestRemoteKey?.let {
@@ -120,14 +120,14 @@ class ArticleFeedMediator(
             ?: findLastItemOrNull()?.articleATag
 
         return withContext(dispatcherProvider.io()) {
-            lastItemATag?.let { database.feedPostsRemoteKeys().findByEventId(eventId = lastItemATag) }
-                ?: database.feedPostsRemoteKeys().findLatestByDirective(directive = feedSpec)
+            lastItemATag?.let { database.feedPostsRemoteKeys().findByEventId(ownerId = userId, eventId = lastItemATag) }
+                ?: database.feedPostsRemoteKeys().findLatestByDirective(ownerId = userId, directive = feedSpec)
         }
     }
 
     private suspend fun findLastItemOrNull(): ArticleFeedCrossRef? =
         withContext(dispatcherProvider.io()) {
-            database.articleFeedsConnections().findLastBySpec(spec = feedSpec)
+            database.articleFeedsConnections().findLastBySpec(ownerId = userId, spec = feedSpec)
         }
 
     private suspend fun processAndPersistToDatabase(response: ArticleResponse, clearFeed: Boolean) {
@@ -135,6 +135,7 @@ class ArticleFeedMediator(
             .orderByPagingIfNotNull(pagingEvent = response.paging)
             .mapNotNullAsArticleDataPO().map {
                 ArticleFeedCrossRef(
+                    ownerId = userId,
                     spec = feedSpec,
                     articleATag = it.aTag,
                     articleAuthorId = it.authorId,
@@ -144,8 +145,8 @@ class ArticleFeedMediator(
         withContext(dispatcherProvider.io()) {
             database.withTransaction {
                 if (clearFeed) {
-                    database.feedPostsRemoteKeys().deleteByDirective(feedSpec)
-                    database.articleFeedsConnections().deleteConnectionsBySpec(spec = feedSpec)
+                    database.feedPostsRemoteKeys().deleteByDirective(ownerId = userId, directive = feedSpec)
+                    database.articleFeedsConnections().deleteConnectionsBySpec(ownerId = userId, spec = feedSpec)
                 }
 
                 database.articleFeedsConnections().connect(data = connections)
@@ -164,6 +165,7 @@ class ArticleFeedMediator(
         if (pagingEvent?.sinceId != null && pagingEvent.untilId != null) {
             val remoteKeys = this.map {
                 FeedPostRemoteKey(
+                    ownerId = userId,
                     eventId = it.articleATag,
                     directive = feedSpec,
                     sinceId = pagingEvent.sinceId,

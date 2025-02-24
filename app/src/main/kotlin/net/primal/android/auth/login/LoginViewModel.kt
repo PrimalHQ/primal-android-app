@@ -70,9 +70,7 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(loading = true) }
             try {
-                withContext(dispatcherProvider.io()) {
-                    loginHandler.login(nostrKey)
-                }
+                loginHandler.login(nostrKey)
                 setEffect(SideEffect.LoginSuccess)
             } catch (error: WssException) {
                 Timber.w(error)
