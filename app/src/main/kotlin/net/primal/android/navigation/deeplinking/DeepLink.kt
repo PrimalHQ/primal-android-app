@@ -8,4 +8,5 @@ sealed class DeepLink {
     data class Note(val noteId: String) : DeepLink()
     data class Article(val naddr: String) : DeepLink()
     data class PrimalNWC(val primalWalletNwc: PrimalWalletNwc) : DeepLink()
+    data class AdvancedSearch(val feedSpec: String) : DeepLink()
 }
