@@ -453,6 +453,11 @@ fun SharedTransitionScope.PrimalAppNavigation() {
                             navController.navigateToArticleDetails(deepLink.naddr)
                         }
 
+                        is DeepLink.AdvancedSearch -> {
+                            navController.popBackStack()
+                            navController.navigateToExploreFeed(feedSpec = deepLink.feedSpec)
+                        }
+
                         null -> navController.navigateToHome()
                     }
                 }

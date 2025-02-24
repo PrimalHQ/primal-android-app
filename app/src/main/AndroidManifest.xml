@@ -103,6 +103,20 @@
                     android:scheme="https" />
             </intent-filter>
 
+            <intent-filter
+                android:autoVerify="true"
+                android:label="Advanced Search">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="primal.net"
+                    android:pathPrefix="/asearch/"
+                    android:scheme="https" />
+            </intent-filter>
+
             <intent-filter android:label="Wallet Connect">
                 <action android:name="android.intent.action.VIEW" />
 
