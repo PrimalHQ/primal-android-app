@@ -1,5 +1,8 @@
 package net.primal.android.navigation
 
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -17,6 +20,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -426,47 +430,20 @@ fun SharedTransitionScope.PrimalAppNavigation() {
             when (it) {
                 SplashContract.SideEffect.NoActiveAccount -> navController.navigateToWelcome()
                 is SplashContract.SideEffect.ActiveAccount -> {
-                    val url = activity?.intent?.data?.toString()?.ifBlank { null }
-                    when (val deepLink = url?.parseDeepLinkOrNull()) {
-                        is DeepLink.Note -> {
-                            navController.popBackStack()
-                            navController.navigateToThread(noteId = deepLink.noteId)
-                        }
+                    val intent = activity?.intent
 
-                        is DeepLink.Profile -> {
-                            navController.popBackStack()
-                            navController.navigateToProfile(profileId = deepLink.pubkey)
+                    when (intent?.action) {
+                        Intent.ACTION_SEND -> {
+                            handleReceiveSingleMedia(intent, navController)
                         }
-
-                        is DeepLink.NostrWalletConnect -> {
-                            navController.popBackStack()
-                            navController.navigateToWalletSettings(
-                                nwcUrl = withContext(Dispatchers.IO) {
-                                    URLEncoder.encode(url, Charsets.UTF_8.name())
-                                },
-                            )
+                        Intent.ACTION_SEND_MULTIPLE -> {
+                            handleReceiveMultipleMedia(intent, navController)
                         }
-
-                        is DeepLink.PrimalNWC -> {
-                            navController.popBackStack()
-                            navController.navigateToLinkPrimalWallet(
-                                callback = deepLink.primalWalletNwc.callback,
-                                appName = deepLink.primalWalletNwc.appName,
-                                appIcon = deepLink.primalWalletNwc.appIcon,
-                            )
+                        Intent.ACTION_VIEW -> {
+                            val url = intent.data?.toString()?.ifBlank { null }
+                            handleDeepLink(url, navController)
                         }
-
-                        is DeepLink.Article -> {
-                            navController.popBackStack()
-                            navController.navigateToArticleDetails(deepLink.naddr)
-                        }
-
-                        is DeepLink.AdvancedSearch -> {
-                            navController.popBackStack()
-                            navController.navigateToExploreFeed(feedSpec = deepLink.feedSpec)
-                        }
-
-                        null -> navController.navigateToHome()
+                        else -> navController.navigateToHome()
                     }
                 }
             }
@@ -791,6 +768,94 @@ fun SharedTransitionScope.PrimalAppNavigation() {
             onTopLevelDestinationChanged = topLevelDestinationHandler,
             onDrawerScreenClick = drawerDestinationHandler,
         )
+    }
+}
+
+private fun handleReceiveSingleMedia(
+    intent: Intent,
+    navController: NavHostController,
+) {
+    val mediaUri: Uri? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+    } else {
+        @Suppress("DEPRECATION")
+        intent.getParcelableExtra(Intent.EXTRA_STREAM)
+    }
+
+    if (mediaUri != null) {
+        navController.popBackStack()
+        navController.navigateToNoteEditor(
+            NoteEditorArgs(
+                mediaUris = listOf(mediaUri.toString()),
+            ),
+        )
+    } else {
+        navController.navigateToHome()
+    }
+}
+
+private fun handleReceiveMultipleMedia(intent: Intent, navController: NavController) {
+    val mediaUris: List<Uri>? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java)
+    } else {
+        @Suppress("DEPRECATION")
+        intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM)
+    }
+
+    if (!mediaUris.isNullOrEmpty()) {
+        navController.popBackStack()
+        navController.navigateToNoteEditor(NoteEditorArgs(
+            mediaUris = mediaUris.map { it.toString() }
+        ))
+    } else {
+        navController.navigateToHome()
+    }
+}
+
+private suspend fun handleDeepLink(
+    url: String?,
+    navController: NavHostController,
+) {
+    when (val deepLink = url?.parseDeepLinkOrNull()) {
+        is DeepLink.Note -> {
+            navController.popBackStack()
+            navController.navigateToThread(noteId = deepLink.noteId)
+        }
+
+        is DeepLink.Profile -> {
+            navController.popBackStack()
+            navController.navigateToProfile(profileId = deepLink.pubkey)
+        }
+
+        is DeepLink.NostrWalletConnect -> {
+            navController.popBackStack()
+            navController.navigateToWalletSettings(
+                nwcUrl = withContext(Dispatchers.IO) {
+                    URLEncoder.encode(url, Charsets.UTF_8.name())
+                },
+            )
+        }
+
+        is DeepLink.PrimalNWC -> {
+            navController.popBackStack()
+            navController.navigateToLinkPrimalWallet(
+                callback = deepLink.primalWalletNwc.callback,
+                appName = deepLink.primalWalletNwc.appName,
+                appIcon = deepLink.primalWalletNwc.appIcon,
+            )
+        }
+
+        is DeepLink.Article -> {
+            navController.popBackStack()
+            navController.navigateToArticleDetails(deepLink.naddr)
+        }
+
+        is DeepLink.AdvancedSearch -> {
+            navController.popBackStack()
+            navController.navigateToExploreFeed(feedSpec = deepLink.feedSpec)
+        }
+
+        null -> navController.navigateToHome()
     }
 }
 
