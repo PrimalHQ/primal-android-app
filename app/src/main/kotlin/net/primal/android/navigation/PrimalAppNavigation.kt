@@ -771,10 +771,7 @@ fun SharedTransitionScope.PrimalAppNavigation() {
     }
 }
 
-private fun handleReceiveSingleMedia(
-    intent: Intent,
-    navController: NavHostController,
-) {
+private fun handleReceiveSingleMedia(intent: Intent, navController: NavHostController) {
     val mediaUri: Uri? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
     } else {
@@ -804,18 +801,17 @@ private fun handleReceiveMultipleMedia(intent: Intent, navController: NavControl
 
     if (!mediaUris.isNullOrEmpty()) {
         navController.popBackStack()
-        navController.navigateToNoteEditor(NoteEditorArgs(
-            mediaUris = mediaUris.map { it.toString() }
-        ))
+        navController.navigateToNoteEditor(
+            NoteEditorArgs(
+                mediaUris = mediaUris.map { it.toString() },
+            ),
+        )
     } else {
         navController.navigateToHome()
     }
 }
 
-private suspend fun handleDeepLink(
-    url: String?,
-    navController: NavHostController,
-) {
+private suspend fun handleDeepLink(url: String?, navController: NavHostController) {
     when (val deepLink = url?.parseDeepLinkOrNull()) {
         is DeepLink.Note -> {
             navController.popBackStack()
