@@ -204,10 +204,10 @@ fun SearchTextField(
             unfocusedBorderColor = Color.Transparent,
         ),
         keyboardOptions = KeyboardOptions(
-            imeAction = ImeAction.Done,
+            imeAction = ImeAction.Search,
         ),
         keyboardActions = KeyboardActions(
-            onDone = {
+            onSearch = {
                 onSearch()
             },
         ),
