@@ -49,7 +49,7 @@ fun NoteAttachments(
         .take(n = if (!expanded) 2 else Int.MAX_VALUE)
         .filter {
             when (it.type) {
-                NoteAttachmentType.YouTube, NoteAttachmentType.Rumble -> {
+                NoteAttachmentType.YouTube, NoteAttachmentType.Rumble, NoteAttachmentType.Spotify -> {
                     it.title != null || it.thumbnailUrl != null
                 }
                 else -> true
