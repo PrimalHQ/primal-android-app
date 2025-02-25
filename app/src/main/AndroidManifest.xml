@@ -63,20 +63,6 @@
 
             <intent-filter
                 android:autoVerify="true"
-                android:label="Dev Primal Note">
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="dev.primal.net"
-                    android:pathPrefix="/e/"
-                    android:scheme="https" />
-            </intent-filter>
-
-            <intent-filter
-                android:autoVerify="true"
                 android:label="Primal Article">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -133,17 +119,19 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="nostrnwc"/>
+                <data android:scheme="nostrnwc" />
                 <data android:scheme="nostrnwc+primal" />
-                <data android:host="connect"/>
+                <data android:host="connect" />
             </intent-filter>
 
             <intent-filter android:label="Share in a Note">
-                <action android:name="android.intent.action.SEND"/>
-                <action android:name="android.intent.action.SEND_MULTIPLE"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="image/*"/>
-                <data android:mimeType="video/*"/>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="image/*" />
+                <data android:mimeType="video/*" />
             </intent-filter>
         </activity>
 
