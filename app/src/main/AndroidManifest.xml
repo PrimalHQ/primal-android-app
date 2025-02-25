@@ -138,6 +138,13 @@
                 <data android:host="connect"/>
             </intent-filter>
 
+            <intent-filter android:label="Share in a Note">
+                <action android:name="android.intent.action.SEND"/>
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="image/*"/>
+                <data android:mimeType="video/*"/>
+            </intent-filter>
         </activity>
 
         <provider
