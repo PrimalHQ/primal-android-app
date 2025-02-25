@@ -492,7 +492,7 @@ fun ProfileDetailsScreen(
                                             ),
                                             noteCallbacks = noteCallbacks,
                                             onGoToWallet = onGoToWallet,
-                                            pollingEnabled = false,
+                                            pollingEnabled = pageIndex == NOTES_TAB_INDEX,
                                             pullToRefreshEnabled = false,
                                             showTopZaps = true,
                                             onUiError = { uiError ->
