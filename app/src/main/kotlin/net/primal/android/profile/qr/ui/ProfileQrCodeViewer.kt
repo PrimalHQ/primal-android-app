@@ -186,7 +186,7 @@ private fun QrCodeViewer(
                 modifier = Modifier.clickable {
                     clipboardManager.setText(AnnotatedString(text = pubkey))
                 },
-                qrCodeValue = "nostr:$pubkey}",
+                qrCodeValue = "nostr:$pubkey",
                 type = QrCodeType.Nostr,
             )
         },
