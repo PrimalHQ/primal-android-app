@@ -1,11 +1,19 @@
 ## Changes
-- Implement ellipsis links in note content (#324)
-- Implement fetching default mining fee for on-chain contribution (#320)
-- Fix IndexOutOfBoundsException in ContextualZapsFlowRow
-- Implement showing error if wallet payment fails for legend contribution (#318)
-- Fix order for media and links (#315)
-- Enforce minimal legend contribution amount of 10_000 sats (#319)
-- Implement legends contributions (#317)
-- Ensure white space before user mentions in note's content (#311)
-- Add extra white space (after) when tagging a user in note
-- Fix transaction description color on tx info screen (#310)
+- Implemented share photo/video via Primal app (#342)
+- Fixed profile qr code values
+- Add Search button on keyboard in simple search (#343)
+- Enabled polling for notes tab in Profile Details
+- Implemented deep link advanced search results (#341)
+- Implemented multi-account feature (#323)
+- Fixed text not auto-capitalized when using keyboard (#335)
+- Make list items in Settings clickable (#334)
+- Implemented deep link for article links (#333)
+- Implemented deep link for profile links (#332)
+- Implemented articles pagination (#322)
+- Implemented primal.net/legends clicks for legends screen (#327)
+- Fixed article cover resizing in ArticleDetails (#331)
+- Update previews for Github links (#328)
+- Implemented nevent and nprofile in the note editor for mentioned notes and users (#330)
+- Improved url link recognition (#329)
+- Fixed not showing empty Youtube, Rumble or Spotify link previews
+- Add "Post" button to ProfileDetails, Notifications and Explore (#326)
