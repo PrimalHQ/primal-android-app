@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -104,6 +105,12 @@ fun SearchScreen(
                         onQueryChange = {
                             eventPublisher(SearchContract.UiEvent.SearchQueryUpdated(query = it))
                         },
+                        onSearch = {
+                            keyboardController?.hide()
+                            scope.launch {
+                                onSearchContent(searchScope, state.searchQuery)
+                            }
+                        },
                     )
                 },
                 actions = {
@@ -178,6 +185,7 @@ fun SearchTextField(
     query: String,
     onQueryChange: (String) -> Unit,
     focusRequester: FocusRequester = remember { FocusRequester() },
+    onSearch: () -> Unit,
 ) {
     var focusRequested by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(focusRequester) {
@@ -196,7 +204,12 @@ fun SearchTextField(
             unfocusedBorderColor = Color.Transparent,
         ),
         keyboardOptions = KeyboardOptions(
-            imeAction = ImeAction.Done,
+            imeAction = ImeAction.Search,
+        ),
+        keyboardActions = KeyboardActions(
+            onSearch = {
+                onSearch()
+            },
         ),
         singleLine = true,
     )
