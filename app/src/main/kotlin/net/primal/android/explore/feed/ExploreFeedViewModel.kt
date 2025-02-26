@@ -19,9 +19,11 @@ import net.primal.android.explore.feed.ExploreFeedContract.UiEvent
 import net.primal.android.explore.feed.ExploreFeedContract.UiState
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
 import net.primal.android.feeds.domain.FEED_KIND_SEARCH
+import net.primal.android.feeds.domain.buildAdvancedSearchFeedSpec
 import net.primal.android.feeds.domain.resolveFeedSpecKind
 import net.primal.android.feeds.repository.FeedsRepository
-import net.primal.android.navigation.exploreFeedSpecOrThrow
+import net.primal.android.navigation.advancedSearchFeedSpec
+import net.primal.android.navigation.exploreFeedSpec
 import net.primal.android.navigation.renderType
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.notes.repository.FeedRepository
@@ -37,13 +39,16 @@ class ExploreFeedViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
 
-    private val exploreFeedSpec = savedStateHandle.exploreFeedSpecOrThrow
+    private val feedSpec = savedStateHandle.exploreFeedSpec
+        ?: savedStateHandle.advancedSearchFeedSpec?.buildAdvancedSearchFeedSpec()
+        ?: error("no feed spec provided.")
+
     private val renderType = ExploreFeedContract.RenderType.valueOf(savedStateHandle.renderType)
 
     private val _state = MutableStateFlow(
         UiState(
-            feedSpec = exploreFeedSpec,
-            feedSpecKind = exploreFeedSpec.resolveFeedSpecKind(),
+            feedSpec = feedSpec,
+            feedSpecKind = feedSpec.resolveFeedSpecKind(),
             renderType = renderType,
         ),
     )
@@ -65,7 +70,7 @@ class ExploreFeedViewModel @Inject constructor(
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCleared() {
         GlobalScope.launch(dispatcherProvider.io()) {
-            feedRepository.removeFeedSpec(userId = activeAccountStore.activeUserId(), feedSpec = exploreFeedSpec)
+            feedRepository.removeFeedSpec(userId = activeAccountStore.activeUserId(), feedSpec = feedSpec)
         }
     }
 
@@ -73,7 +78,7 @@ class ExploreFeedViewModel @Inject constructor(
         viewModelScope.launch {
             feedsRepository.observeContainsFeedSpec(
                 userId = activeAccountStore.activeUserId(),
-                feedSpec = exploreFeedSpec,
+                feedSpec = feedSpec,
             ).collect {
                 setState { copy(existsInUserFeeds = it) }
             }
@@ -91,11 +96,11 @@ class ExploreFeedViewModel @Inject constructor(
 
     private suspend fun addToMyFeeds(event: UiEvent.AddToUserFeeds) {
         try {
-            val feedSpecKind = exploreFeedSpec.resolveFeedSpecKind()
+            val feedSpecKind = feedSpec.resolveFeedSpecKind()
             if (feedSpecKind != null) {
                 feedsRepository.addFeedLocally(
                     userId = activeAccountStore.activeUserId(),
-                    feedSpec = exploreFeedSpec,
+                    feedSpec = feedSpec,
                     title = event.title,
                     description = event.description,
                     feedSpecKind = feedSpecKind,
@@ -111,7 +116,7 @@ class ExploreFeedViewModel @Inject constructor(
 
     private suspend fun removeFromMyFeeds() {
         try {
-            feedsRepository.removeFeedLocally(userId = activeAccountStore.activeUserId(), feedSpec = exploreFeedSpec)
+            feedsRepository.removeFeedLocally(userId = activeAccountStore.activeUserId(), feedSpec = feedSpec)
             feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
         } catch (error: WssException) {
             Timber.w(error)

@@ -469,15 +469,28 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
         bookmarks(route = "bookmarks", navController = navController)
 
         exploreFeed(
-            route = "explore/note?$EXPLORE_FEED_SPEC={$EXPLORE_FEED_SPEC}&$RENDER_TYPE={$RENDER_TYPE}",
+            route = "explore/note?" +
+                "$EXPLORE_FEED_SPEC={$EXPLORE_FEED_SPEC}&" +
+                "$ADVANCED_SEARCH_FEED_SPEC={$ADVANCED_SEARCH_FEED_SPEC}&" +
+                "$RENDER_TYPE={$RENDER_TYPE}",
             arguments = listOf(
                 navArgument(EXPLORE_FEED_SPEC) {
                     type = NavType.StringType
-                    nullable = false
+                    nullable = true
+                },
+                navArgument(ADVANCED_SEARCH_FEED_SPEC) {
+                    type = NavType.StringType
+                    nullable = true
                 },
                 navArgument(RENDER_TYPE) {
                     type = NavType.StringType
                     nullable = false
+                    defaultValue = ExploreFeedContract.RenderType.List.toString()
+                },
+            ),
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "https://primal.net/search/{$ADVANCED_SEARCH_FEED_SPEC}"
                 },
             ),
             navController = navController,
@@ -652,7 +665,7 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
             deepLinks = listOf(
                 navDeepLink {
                     uriPattern = "https://primal.net/a/{$NADDR}"
-                }
+                },
             ),
             navController = navController,
         )
@@ -1086,10 +1099,12 @@ private fun NavGraphBuilder.explore(
 
 private fun NavGraphBuilder.exploreFeed(
     route: String,
+    deepLinks: List<NavDeepLink>,
     arguments: List<NamedNavArgument>,
     navController: NavController,
 ) = composable(
     route = route,
+    deepLinks = deepLinks,
     arguments = arguments,
     enterTransition = { primalSlideInHorizontallyFromEnd },
     exitTransition = { primalScaleOut },
