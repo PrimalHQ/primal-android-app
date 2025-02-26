@@ -17,6 +17,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
+import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
@@ -26,6 +27,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import androidx.navigation.navOptions
 import java.net.URLEncoder
 import kotlinx.coroutines.Dispatchers
@@ -694,6 +696,11 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
                 navArgument(PROFILE_ID) {
                     type = NavType.StringType
                     nullable = true
+                },
+            ),
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "https://primal.net/p/{$PROFILE_ID}"
                 },
             ),
             navController = navController,
@@ -1804,10 +1811,12 @@ private fun NavGraphBuilder.mediaItem(
 private fun NavGraphBuilder.profile(
     route: String,
     arguments: List<NamedNavArgument>,
+    deepLinks: List<NavDeepLink>,
     navController: NavController,
 ) = composable(
     route = route,
     arguments = arguments,
+    deepLinks = deepLinks,
     enterTransition = { primalSlideInHorizontallyFromEnd },
     exitTransition = { primalScaleOut },
     popEnterTransition = { primalScaleIn },
