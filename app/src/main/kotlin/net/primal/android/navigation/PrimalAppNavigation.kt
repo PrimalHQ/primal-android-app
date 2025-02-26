@@ -1810,7 +1810,6 @@ private fun NavGraphBuilder.mediaItem(
             viewModel = viewModel,
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = this@composable,
-
         )
     }
 }
