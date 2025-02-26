@@ -29,9 +29,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import androidx.navigation.navOptions
-import java.net.URLEncoder
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import net.primal.android.articles.reads.ReadsScreen
 import net.primal.android.articles.reads.ReadsViewModel
 import net.primal.android.attachments.gallery.MediaGalleryScreen
@@ -78,8 +75,6 @@ import net.primal.android.messages.chat.ChatViewModel
 import net.primal.android.messages.conversation.MessageConversationListViewModel
 import net.primal.android.messages.conversation.MessageListScreen
 import net.primal.android.messages.conversation.create.NewConversationScreen
-import net.primal.android.navigation.deeplinking.DeepLink
-import net.primal.android.navigation.deeplinking.parseDeepLinkOrNull
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedScreen
 import net.primal.android.notes.home.HomeFeedViewModel
@@ -243,12 +238,6 @@ fun NavController.navigateToProfileFollows(profileId: String, followsType: Profi
 fun NavController.navigateToProfileEditor() = navigate(route = "profileEditor")
 
 private fun NavController.navigateToSettings() = navigate(route = "settings")
-
-private fun NavController.navigateToWalletSettings(nwcUrl: String? = null) =
-    when {
-        nwcUrl != null -> navigate(route = "wallet_settings?nwcUrl=$nwcUrl")
-        else -> navigate(route = "wallet_settings")
-    }
 
 fun NavController.navigateToThread(noteId: String) = navigate(route = "thread/$noteId")
 
@@ -419,7 +408,6 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
             is DrawerScreenDestination.SignOut -> navController.navigateToLogout(profileId = it.userId)
         }
     }
-
 
     NavHost(
         modifier = Modifier.background(AppTheme.colorScheme.background),
@@ -805,50 +793,6 @@ private fun handleReceiveMultipleMedia(intent: Intent, navController: NavControl
         )
     } else {
         navController.navigateToHome()
-    }
-}
-
-private suspend fun handleDeepLink(url: String?, navController: NavHostController) {
-    when (val deepLink = url?.parseDeepLinkOrNull()) {
-        is DeepLink.Note -> {
-            navController.popBackStack()
-            navController.navigateToThread(noteId = deepLink.noteId)
-        }
-
-        is DeepLink.Profile -> {
-            navController.popBackStack()
-            navController.navigateToProfile(profileId = deepLink.pubkey)
-        }
-
-        is DeepLink.NostrWalletConnect -> {
-            navController.popBackStack()
-            navController.navigateToWalletSettings(
-                nwcUrl = withContext(Dispatchers.IO) {
-                    URLEncoder.encode(url, Charsets.UTF_8.name())
-                },
-            )
-        }
-
-        is DeepLink.PrimalNWC -> {
-            navController.popBackStack()
-            navController.navigateToLinkPrimalWallet(
-                callback = deepLink.primalWalletNwc.callback,
-                appName = deepLink.primalWalletNwc.appName,
-                appIcon = deepLink.primalWalletNwc.appIcon,
-            )
-        }
-
-        is DeepLink.Article -> {
-            navController.popBackStack()
-            navController.navigateToArticleDetails(deepLink.naddr)
-        }
-
-        is DeepLink.AdvancedSearch -> {
-            navController.popBackStack()
-            navController.navigateToExploreFeed(feedSpec = deepLink.feedSpec)
-        }
-
-        null -> navController.navigateToHome()
     }
 }
 
