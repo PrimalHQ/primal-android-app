@@ -1,16 +1,16 @@
 package net.primal.android.settings.wallet.settings
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.navigation.nwcUrl
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.settings.wallet.domain.NwcConnectionInfo
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEvent
@@ -26,14 +26,19 @@ import net.primal.android.wallet.repository.NwcWalletRepository
 import net.primal.android.wallet.repository.WalletRepository
 import timber.log.Timber
 
-@HiltViewModel
-class WalletSettingsViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = WalletSettingsViewModel.Factory::class)
+class WalletSettingsViewModel @AssistedInject constructor(
+    @Assisted private val nwcConnectionUrl: String?,
     private val activeAccountStore: ActiveAccountStore,
     private val userRepository: UserRepository,
     private val walletRepository: WalletRepository,
     private val nwcWalletRepository: NwcWalletRepository,
 ) : ViewModel() {
+
+    @AssistedFactory
+    interface Factory {
+        fun create(nwcConnectionUrl: String?): WalletSettingsViewModel
+    }
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -43,7 +48,6 @@ class WalletSettingsViewModel @Inject constructor(
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
-        val nwcConnectionUrl = savedStateHandle.nwcUrl
         if (nwcConnectionUrl != null) {
             connectWallet(nwcUrl = nwcConnectionUrl)
         } else {

@@ -4,10 +4,12 @@ import androidx.activity.compose.LocalActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
+import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.core.compose.LockToOrientationPortrait
@@ -80,11 +82,13 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
 
         keys(route = "account_settings", navController = navController)
         wallet(
-            route = "wallet_settings?nwcUrl={$NWC_URL}",
-            arguments = listOf(
-                navArgument(NWC_URL) {
-                    type = NavType.StringType
-                    nullable = true
+            route = "wallet_settings",
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "nostr+walletconnect://.*"
+                },
+                navDeepLink {
+                    uriPattern = "nostrwalletconnect://.*"
                 },
             ),
             navController = navController,
@@ -171,17 +175,20 @@ private fun NavGraphBuilder.network(route: String, navController: NavController)
 
 private fun NavGraphBuilder.wallet(
     route: String,
-    arguments: List<NamedNavArgument>,
+    deepLinks: List<NavDeepLink>,
     navController: NavController,
 ) = composable(
     route = route,
-    arguments = arguments,
+    deepLinks = deepLinks,
     enterTransition = { primalSlideInHorizontallyFromEnd },
     exitTransition = { primalScaleOut },
     popEnterTransition = { primalScaleIn },
     popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) { navBackEntry ->
-    val viewModel = hiltViewModel<WalletSettingsViewModel>(navBackEntry)
+    val nwcUrl = LocalActivity.current?.intent?.data?.toString()
+    val viewModel = hiltViewModel<WalletSettingsViewModel, WalletSettingsViewModel.Factory> { factory ->
+        factory.create(nwcConnectionUrl = nwcUrl)
+    }
     LockToOrientationPortrait()
     WalletSettingsScreen(
         viewModel = viewModel,

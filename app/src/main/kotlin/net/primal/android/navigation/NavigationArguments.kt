@@ -74,9 +74,6 @@ inline val SavedStateHandle.exploreFeedSpecOrThrow: String
 
 const val NOTE_EDITOR_ARGS = "preFillContent"
 
-const val NWC_URL = "nwcUrl"
-inline val SavedStateHandle.nwcUrl: String? get() = get(NWC_URL)
-
 const val NWC_APP_NAME = "appName"
 inline val SavedStateHandle.appName: String? get() = get(NWC_APP_NAME)
 
