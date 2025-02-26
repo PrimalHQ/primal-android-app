@@ -29,6 +29,8 @@ class UserAccountsStore @Inject constructor(
             initialValue = runBlocking { persistence.data.first() },
         )
 
+    fun getAccountsCount() = userAccounts.value.size
+
     suspend fun getAndUpdateAccount(userId: String, reducer: UserAccount.() -> UserAccount): UserAccount =
         writeMutex.withLock {
             val current = findByIdOrNull(userId = userId) ?: UserAccount.buildLocal(pubkey = userId)

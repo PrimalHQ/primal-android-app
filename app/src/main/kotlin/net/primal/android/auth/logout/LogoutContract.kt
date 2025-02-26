@@ -8,6 +8,6 @@ interface LogoutContract {
 
     sealed class SideEffect {
         data object UserAccountLogoutSuccessful : SideEffect()
-        data object ActiveAccountLogoutSuccessful : SideEffect()
+        data class ActiveAccountLogoutSuccessful(val isLastAccount: Boolean) : SideEffect()
     }
 }
