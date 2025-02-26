@@ -83,17 +83,16 @@ class SubscriptionsManager @Inject constructor(
         scope.launch {
             appConfigProvider.waitForCacheAndWalletConfigsUrls()
             activeAccountStore.activeUserId.collect { newActiveUserId ->
+                emitBadgesUpdate { Badges() }
+                unsubscribeAll()
                 when {
                     newActiveUserId.isEmpty() -> {
-                        emitBadgesUpdate { Badges() }
-                        unsubscribeAll()
                         withContext(Dispatchers.Main) {
                             ProcessLifecycleOwner.get().lifecycle.removeObserver(lifecycleEventObserver)
                         }
                     }
 
                     else -> {
-                        unsubscribeAll()
                         subscribeAll(userId = newActiveUserId)
                         withContext(Dispatchers.Main) {
                             ProcessLifecycleOwner.get().lifecycle.addObserver(lifecycleEventObserver)
