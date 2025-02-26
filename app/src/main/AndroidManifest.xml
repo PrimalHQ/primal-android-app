@@ -99,7 +99,7 @@
 
                 <data
                     android:host="primal.net"
-                    android:pathPrefix="/asearch/"
+                    android:pathPrefix="/search/"
                     android:scheme="https" />
             </intent-filter>
 

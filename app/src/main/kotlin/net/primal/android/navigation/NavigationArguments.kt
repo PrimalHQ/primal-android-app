@@ -67,10 +67,13 @@ inline val NavBackStackEntry.searchScopeOrThrow: SearchScope
     get() = arguments?.getString(SEARCH_SCOPE)?.let { SearchScope.valueOf(it) }
         ?: throw IllegalArgumentException("Missing required searchScope argument.")
 
+const val ADVANCED_SEARCH_FEED_SPEC = "advancedSearchFeedSpec"
+inline val SavedStateHandle.advancedSearchFeedSpec: String?
+    get() = get<String>(ADVANCED_SEARCH_FEED_SPEC)?.ifEmpty { null }
+
 const val EXPLORE_FEED_SPEC = "exploreFeedSpec"
-inline val SavedStateHandle.exploreFeedSpecOrThrow: String
+inline val SavedStateHandle.exploreFeedSpec: String?
     get() = get<String>(EXPLORE_FEED_SPEC)?.asBase64Decoded()?.ifEmpty { null }
-        ?: throw IllegalArgumentException("Missing required exploreFeedSpec argument.")
 
 const val NOTE_EDITOR_ARGS = "preFillContent"
 
