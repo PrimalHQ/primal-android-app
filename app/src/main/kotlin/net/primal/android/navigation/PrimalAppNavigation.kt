@@ -3,7 +3,6 @@ package net.primal.android.navigation
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -13,7 +12,6 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -80,9 +78,6 @@ import net.primal.android.messages.conversation.MessageListScreen
 import net.primal.android.messages.conversation.create.NewConversationScreen
 import net.primal.android.navigation.deeplinking.DeepLink
 import net.primal.android.navigation.deeplinking.parseDeepLinkOrNull
-import net.primal.android.navigation.splash.SplashContract
-import net.primal.android.navigation.splash.SplashScreen
-import net.primal.android.navigation.splash.SplashViewModel
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedScreen
 import net.primal.android.notes.home.HomeFeedViewModel
@@ -394,7 +389,7 @@ fun noteCallbacksHandler(navController: NavController) =
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun SharedTransitionScope.PrimalAppNavigation() {
+fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
     val navController = rememberNavController()
 
     val topLevelDestinationHandler: (PrimalTopLevelDestination) -> Unit = {
@@ -423,40 +418,12 @@ fun SharedTransitionScope.PrimalAppNavigation() {
         }
     }
 
-    val splashViewModel: SplashViewModel = hiltViewModel()
-    val activity = LocalActivity.current
-    LaunchedEffect(navController, splashViewModel) {
-        splashViewModel.effect.collect {
-            when (it) {
-                SplashContract.SideEffect.NoActiveAccount -> navController.navigateToWelcome()
-                is SplashContract.SideEffect.ActiveAccount -> {
-                    val intent = activity?.intent
-
-                    when (intent?.action) {
-                        Intent.ACTION_SEND -> {
-                            handleReceiveSingleMedia(intent, navController)
-                        }
-                        Intent.ACTION_SEND_MULTIPLE -> {
-                            handleReceiveMultipleMedia(intent, navController)
-                        }
-                        Intent.ACTION_VIEW -> {
-                            val url = intent.data?.toString()?.ifBlank { null }
-                            handleDeepLink(url, navController)
-                        }
-                        else -> navController.navigateToHome()
-                    }
-                }
-            }
-        }
-    }
 
     NavHost(
         modifier = Modifier.background(AppTheme.colorScheme.background),
         navController = navController,
-        startDestination = "splash",
+        startDestination = startDestination,
     ) {
-        splash(route = "splash")
-
         welcome(route = "welcome", navController = navController)
 
         login(route = "login", navController = navController)
@@ -854,11 +821,6 @@ private suspend fun handleDeepLink(url: String?, navController: NavHostControlle
         null -> navController.navigateToHome()
     }
 }
-
-private fun NavGraphBuilder.splash(route: String) =
-    composable(route = route) {
-        SplashScreen()
-    }
 
 private fun NavGraphBuilder.welcome(route: String, navController: NavController) =
     composable(
@@ -1970,5 +1932,6 @@ private fun NavGraphBuilder.logout(
         viewModel = viewModel,
         onClose = { navController.popBackStack() },
         navigateToHome = { navController.navigateToHome() },
+        navigateToWelcome = { navController.navigateToWelcome() },
     )
 }
