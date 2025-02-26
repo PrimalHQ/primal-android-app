@@ -21,6 +21,7 @@ import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileStatsUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.errors.UiError
+import net.primal.android.crypto.bech32ToHexOrThrow
 import net.primal.android.feeds.domain.FEED_KIND_USER
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.domain.buildLatestNotesUserFeedSpec
@@ -30,6 +31,7 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.extractProfileId
+import net.primal.android.nostr.utils.Nip19TLV
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
@@ -55,7 +57,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private val zapHandler: ZapHandler,
 ) : ViewModel() {
 
-    private val profileId: String = savedStateHandle.profileId ?: activeAccountStore.activeUserId()
+    private val profileId: String = savedStateHandle.profileId?.resolveProfileId() ?: activeAccountStore.activeUserId()
 
     private val isActiveUser = profileId == activeAccountStore.activeUserId()
 
@@ -491,4 +493,15 @@ class ProfileDetailsViewModel @Inject constructor(
     private fun setErrorState(error: ProfileError) {
         setState { copy(error = error) }
     }
+
+    private fun String.resolveProfileId(): String? =
+        when {
+            this.startsWith("npub") -> runCatching { bech32ToHexOrThrow() }.getOrNull()
+            this.startsWith("nprofile1") -> {
+                val pubkey = Nip19TLV.parseUriAsNprofileOrNull(this)?.pubkey
+                runCatching { pubkey?.bech32ToHexOrThrow() }.getOrNull()
+            }
+
+            else -> this
+        }
 }
