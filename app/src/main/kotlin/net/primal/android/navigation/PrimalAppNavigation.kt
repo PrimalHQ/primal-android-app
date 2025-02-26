@@ -634,6 +634,11 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
                     type = NavType.StringType
                 },
             ),
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "https://primal.net/e/{$NOTE_ID}"
+                },
+            ),
             navController = navController,
         )
 
@@ -1692,10 +1697,12 @@ private fun NavGraphBuilder.notifications(
 
 private fun NavGraphBuilder.thread(
     route: String,
+    deepLinks: List<NavDeepLink>,
     arguments: List<NamedNavArgument>,
     navController: NavController,
 ) = composable(
     route = route,
+    deepLinks = deepLinks,
     arguments = arguments,
     enterTransition = { primalSlideInHorizontallyFromEnd },
     exitTransition = { primalScaleOut },
