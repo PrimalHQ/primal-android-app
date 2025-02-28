@@ -30,6 +30,7 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.extractProfileId
+import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
 import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
@@ -177,7 +178,15 @@ class ProfileDetailsViewModel @Inject constructor(
                     userId = activeAccountStore.activeUserId(),
                     limit = 10,
                 )
-                setState { copy(userFollowedByProfiles = profiles.map { it.asProfileDetailsUi() }) }
+                setState {
+                    copy(
+                        userFollowedByProfiles = profiles.map {
+                            it.asProfileDetailsUi()
+                        }.filterNot {
+                            it == state.value.profileDetails
+                        }.sortedByDescending { it.premiumDetails?.tier?.isPrimalLegendTier() == true },
+                    )
+                }
             } catch (error: WssException) {
                 Timber.e(error)
             }
