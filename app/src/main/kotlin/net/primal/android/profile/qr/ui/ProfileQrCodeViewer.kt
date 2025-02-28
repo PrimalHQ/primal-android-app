@@ -146,7 +146,7 @@ fun ProfileQrCodeViewer(
         Spacer(
             modifier = Modifier.height(
                 height = when (uiMode) {
-                    UiDensityMode.Normal, UiDensityMode.Compact -> 32.dp
+                    UiDensityMode.Normal, UiDensityMode.Compact, UiDensityMode.Comfortable -> 32.dp
                     else -> 8.dp
                 },
             ),
@@ -200,7 +200,7 @@ private fun QrCodeViewer(
     Flippable(
         modifier = Modifier.size(
             size = when (uiMode) {
-                UiDensityMode.Normal, UiDensityMode.Compact -> 280.dp
+                UiDensityMode.Normal, UiDensityMode.Compact, UiDensityMode.Comfortable -> 280.dp
                 else -> 240.dp
             },
         ),
