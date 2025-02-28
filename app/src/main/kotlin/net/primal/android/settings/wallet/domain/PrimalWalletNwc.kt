@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PrimalWalletNwc(
-    val callback: String,
+    val callback: String? = null,
     val appName: String? = null,
     val appIcon: String? = null,
 )
@@ -17,9 +17,7 @@ fun String.parseAsPrimalWalletNwc(): PrimalWalletNwc {
     val appIcon = uri.getQueryParameterOrNull("appicon")
     val appName = uri.getQueryParameterOrNull("appname")
 
-    if (uri.host != "connect" || callback == null) {
-        throw PrimalWalletNwcParseException()
-    }
+    if (uri.host != "connect") throw PrimalWalletNwcParseException()
 
     return PrimalWalletNwc(
         callback = callback,
@@ -30,15 +28,6 @@ fun String.parseAsPrimalWalletNwc(): PrimalWalletNwc {
 
 private fun Uri.getQueryParameterOrNull(key: String): String? {
     return runCatching { this.getQueryParameter(key) }.getOrNull()
-}
-
-fun String.isPrimalWalletNwcUrl(): Boolean {
-    return try {
-        this.parseAsPrimalWalletNwc()
-        true
-    } catch (error: PrimalWalletNwcParseException) {
-        false
-    }
 }
 
 class PrimalWalletNwcParseException : RuntimeException()

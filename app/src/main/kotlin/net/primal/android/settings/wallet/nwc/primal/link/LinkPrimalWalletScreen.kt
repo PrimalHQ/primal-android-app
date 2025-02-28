@@ -99,7 +99,7 @@ private fun LinkPrimalWalletScreen(
         bottomBar = {
             WalletConnectionFooter(
                 loading = state.creatingSecret,
-                enabled = !state.creatingSecret,
+                enabled = !state.creatingSecret && state.callback.isNotEmpty(),
                 primaryButtonText = stringResource(
                     id = R.string.settings_wallet_link_give_wallet_access_button,
                 ),
@@ -182,8 +182,8 @@ private fun WalletConnectionEditor(
 class LinkPrimalWalletUiStateProvider : PreviewParameterProvider<UiState> {
     override val values: Sequence<UiState>
         get() = sequenceOf(
-            UiState(),
-            UiState(creatingSecret = true),
+            UiState(callback = "olas", creatingSecret = false),
+            UiState(callback = "olas", creatingSecret = true),
         )
 }
 

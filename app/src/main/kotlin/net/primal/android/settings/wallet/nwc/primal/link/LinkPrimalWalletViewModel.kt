@@ -46,7 +46,7 @@ class LinkPrimalWalletViewModel @AssistedInject constructor(
         UiState(
             appName = primalNwcWallet.appName ?: DEFAULT_APP_NAME,
             appIcon = primalNwcWallet.appIcon,
-            callback = primalNwcWallet.callback,
+            callback = primalNwcWallet.callback ?: "",
         ),
     )
     val state = _state.asStateFlow()
