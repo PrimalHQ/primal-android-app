@@ -15,10 +15,10 @@ class SplashViewModel @Inject constructor(
     private val appConfigHandler: AppConfigHandler,
 ) : ViewModel() {
 
-    private val _isAuthCheckComplete = MutableStateFlow<Boolean>(false)
+    private val _isAuthCheckComplete = MutableStateFlow(false)
     val isAuthCheckComplete = _isAuthCheckComplete
 
-    private val _isLoggedIn = MutableStateFlow<Boolean>(false)
+    private val _isLoggedIn = MutableStateFlow(false)
     val isLoggedIn = _isLoggedIn
 
     init {
