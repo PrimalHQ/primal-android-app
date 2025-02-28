@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import net.primal.android.drawer.multiaccount.model.UserAccountUi
 import net.primal.android.drawer.multiaccount.model.asUserAccountUi
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -62,9 +63,7 @@ class AccountSwitcherViewModel @Inject constructor(
                 .collect { activeAccount ->
                     setState {
                         copy(
-                            userAccounts = userAccounts
-                                .sortedByDescending { it.lastAccessedAt }
-                                .filterNot { it.pubkey == activeAccount.pubkey },
+                            userAccounts = userAccounts.sortAndFilterAccounts(activeUserId = activeAccount.pubkey),
                             activeAccount = activeAccount.asUserAccountUi(),
                         )
                     }
@@ -78,10 +77,13 @@ class AccountSwitcherViewModel @Inject constructor(
                     setState {
                         copy(
                             userAccounts = it.map { it.asUserAccountUi() }
-                                .sortedByDescending { it.lastAccessedAt }
-                                .filterNot { it.pubkey == activeAccount?.pubkey },
+                                .sortAndFilterAccounts(activeUserId = activeAccount?.pubkey),
                         )
                     }
                 }
         }
+
+    private fun List<UserAccountUi>.sortAndFilterAccounts(activeUserId: String?) =
+        sortedByDescending { it.lastAccessedAt }
+            .filterNot { it.pubkey == activeUserId }
 }
