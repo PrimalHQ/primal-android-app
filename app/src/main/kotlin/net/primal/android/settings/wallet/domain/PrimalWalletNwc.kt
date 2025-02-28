@@ -17,7 +17,11 @@ fun String.parseAsPrimalWalletNwc(): PrimalWalletNwc {
     val appIcon = uri.getQueryParameterOrNull("appicon")
     val appName = uri.getQueryParameterOrNull("appname")
 
-    if (uri.host != "connect") throw PrimalWalletNwcParseException()
+    if (uri.host != "connect") {
+        throw PrimalWalletNwcParseException(
+            message = "Uri host is not 'connect'. Have you changed the deep linking pattern?",
+        )
+    }
 
     return PrimalWalletNwc(
         callback = callback,
@@ -30,4 +34,4 @@ private fun Uri.getQueryParameterOrNull(key: String): String? {
     return runCatching { this.getQueryParameter(key) }.getOrNull()
 }
 
-class PrimalWalletNwcParseException : RuntimeException()
+class PrimalWalletNwcParseException(override val message: String?) : RuntimeException(message)
