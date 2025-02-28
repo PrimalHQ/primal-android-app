@@ -199,7 +199,7 @@ private fun ProfileHeaderDetails(
         if (state.userFollowedByProfiles.isNotEmpty()) {
             UserFollowedByIndicator(
                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                state.userFollowedByProfiles
+                profiles = state.userFollowedByProfiles
                     .filterNot { it == state.profileDetails }
                     .sortedByDescending { it.premiumDetails?.tier?.isPrimalLegendTier() == true },
                 onProfileClick = onProfileClick,
