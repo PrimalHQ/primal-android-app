@@ -43,15 +43,15 @@ class MainActivity : FragmentActivity() {
     @Inject
     lateinit var activeAccountStore: ActiveAccountStore
 
-    lateinit var primalTheme: PrimalTheme
+    private lateinit var primalTheme: PrimalTheme
+
+    private val splashViewModel: SplashViewModel by viewModels()
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
-        val splashScreen = installSplashScreen()
-        val splashViewModel: SplashViewModel by viewModels()
-
-        splashScreen.setKeepOnScreenCondition { !splashViewModel.isAuthCheckComplete.value }
-
+        installSplashScreen().apply {
+            setKeepOnScreenCondition { !splashViewModel.isAuthCheckComplete.value }
+        }
         super.onCreate(savedInstanceState)
         observeThemeChanges()
         primalTheme = savedInstanceState.restoreOrDefaultPrimalTheme()
