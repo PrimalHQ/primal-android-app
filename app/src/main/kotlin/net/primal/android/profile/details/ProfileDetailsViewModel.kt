@@ -509,5 +509,8 @@ class ProfileDetailsViewModel @Inject constructor(
             else -> this
         }
 
-    private suspend fun String.findProfileId(): String? = profileRepository.fetchProfileId(primalName = this)
+    private suspend fun String.findProfileId(): String? =
+        runCatching {
+            profileRepository.fetchProfileId(primalName = this)
+        }.getOrNull()
 }

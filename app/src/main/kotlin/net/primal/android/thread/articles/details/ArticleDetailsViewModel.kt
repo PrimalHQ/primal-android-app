@@ -73,7 +73,9 @@ class ArticleDetailsViewModel @Inject constructor(
     private val naddr = savedStateHandle.naddr?.let { Nip19TLV.parseUriAsNaddrOrNull(it) }
         ?: runBlocking {
             val identifier = savedStateHandle.articleId
-            val userId = savedStateHandle.primalName?.let { profileRepository.fetchProfileId(it) }
+            val userId = savedStateHandle.primalName?.let {
+                runCatching { profileRepository.fetchProfileId(it) }.getOrNull()
+            }
 
             if (identifier != null && userId != null) {
                 Naddr(
