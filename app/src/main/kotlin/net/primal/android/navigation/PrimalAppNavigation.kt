@@ -241,7 +241,7 @@ private fun NavController.navigateToSettings() = navigate(route = "settings")
 
 fun NavController.navigateToThread(noteId: String) = navigate(route = "thread/$noteId")
 
-fun NavController.navigateToArticleDetails(naddr: String) = navigate(route = "article/$naddr")
+fun NavController.navigateToArticleDetails(naddr: String) = navigate(route = "article?$NADDR=$naddr")
 
 fun NavController.navigateToReactions(eventId: String) = navigate(route = "reactions/$eventId")
 
@@ -717,15 +717,27 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
         )
 
         articleDetails(
-            route = "article/{$NADDR}",
+            route = "article?$NADDR={$NADDR}&$PRIMAL_NAME={$PRIMAL_NAME}&$ARTICLE_ID={$ARTICLE_ID}",
             arguments = listOf(
                 navArgument(NADDR) {
                     type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(PRIMAL_NAME) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(ARTICLE_ID) {
+                    type = NavType.StringType
+                    nullable = true
                 },
             ),
             deepLinks = listOf(
                 navDeepLink {
                     uriPattern = "https://primal.net/a/{$NADDR}"
+                },
+                navDeepLink {
+                    uriPattern = "https://primal.net/{$PRIMAL_NAME}/{$ARTICLE_ID}"
                 },
             ),
             navController = navController,
