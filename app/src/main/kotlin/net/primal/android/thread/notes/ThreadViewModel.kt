@@ -147,5 +147,5 @@ class ThreadViewModel @Inject constructor(
             this.startsWith("note1") -> runCatching { bech32ToHexOrThrow() }.getOrNull()
             this.startsWith("nevent1") -> Nip19TLV.parseUriAsNeventOrNull(this)?.eventId
             else -> this
-        } ?: error("couldn't resolve noteId")
+        }.toString()
 }
