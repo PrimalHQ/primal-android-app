@@ -3,6 +3,7 @@ package net.primal.android
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,6 +25,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.navigation.PrimalAppNavigation
+import net.primal.android.navigation.splash.SplashViewModel
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.active.ActiveThemeStore
@@ -41,11 +43,15 @@ class MainActivity : FragmentActivity() {
     @Inject
     lateinit var activeAccountStore: ActiveAccountStore
 
-    lateinit var primalTheme: PrimalTheme
+    private lateinit var primalTheme: PrimalTheme
+
+    private val splashViewModel: SplashViewModel by viewModels()
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        installSplashScreen().apply {
+            setKeepOnScreenCondition { !splashViewModel.isAuthCheckComplete.value }
+        }
         super.onCreate(savedInstanceState)
         observeThemeChanges()
         primalTheme = savedInstanceState.restoreOrDefaultPrimalTheme()
@@ -75,8 +81,9 @@ class MainActivity : FragmentActivity() {
                 ) {
                     ApplyEdgeToEdge()
 
+                    val isLoggedIn = splashViewModel.isLoggedIn.collectAsState()
                     SharedTransitionLayout {
-                        PrimalAppNavigation()
+                        PrimalAppNavigation(startDestination = if (isLoggedIn.value) "home" else "welcome")
                     }
                 }
             }

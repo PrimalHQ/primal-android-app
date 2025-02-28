@@ -7,7 +7,8 @@ interface LogoutContract {
     }
 
     sealed class SideEffect {
-        data object UserAccountLogoutSuccessful : SideEffect()
-        data object ActiveAccountLogoutSuccessful : SideEffect()
+        data object Close : SideEffect()
+        data object NavigateToWelcome : SideEffect()
+        data object NavigateToHome : SideEffect()
     }
 }

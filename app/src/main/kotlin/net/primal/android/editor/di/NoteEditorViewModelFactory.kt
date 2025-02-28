@@ -17,7 +17,7 @@ interface NoteEditorViewModelFactory {
 }
 
 @Composable
-fun noteEditorViewModel(args: NoteEditorArgs?): NoteEditorViewModel {
+fun noteEditorViewModel(args: NoteEditorArgs): NoteEditorViewModel {
     val activity = LocalActivity.current
     checkNotNull(activity)
     val factory = EntryPointAccessors.fromActivity(
@@ -26,11 +26,11 @@ fun noteEditorViewModel(args: NoteEditorArgs?): NoteEditorViewModel {
     ).noteEditorViewModelFactory()
 
     return viewModel(
-        key = "noteEditorViewModel/${args?.referencedNoteId}",
+        key = "noteEditorViewModel/${args.referencedNoteId}",
         factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return factory.create(noteEditorArgs = args ?: NoteEditorArgs()) as T
+                return factory.create(noteEditorArgs = args) as T
             }
         },
     )

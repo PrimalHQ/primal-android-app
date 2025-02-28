@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import net.primal.android.articles.ArticleRepository
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.utils.authorNameUiFriendly
@@ -20,7 +21,9 @@ import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.highlights.model.JoinedHighlightsUi
 import net.primal.android.highlights.model.joinOnContent
 import net.primal.android.highlights.repository.HighlightRepository
-import net.primal.android.navigation.naddrOrThrow
+import net.primal.android.navigation.articleId
+import net.primal.android.navigation.naddr
+import net.primal.android.navigation.primalName
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
@@ -67,7 +70,21 @@ class ArticleDetailsViewModel @Inject constructor(
     private val zapHandler: ZapHandler,
 ) : ViewModel() {
 
-    private val naddr = Nip19TLV.parseUriAsNaddrOrNull(savedStateHandle.naddrOrThrow)
+    private val naddr = savedStateHandle.naddr?.let { Nip19TLV.parseUriAsNaddrOrNull(it) }
+        ?: runBlocking {
+            val identifier = savedStateHandle.articleId
+            val userId = savedStateHandle.primalName?.let { profileRepository.fetchProfileId(it) }
+
+            if (identifier != null && userId != null) {
+                Naddr(
+                    identifier = identifier,
+                    userId = userId,
+                    kind = NostrEventKind.LongFormContent.value,
+                )
+            } else {
+                null
+            }
+        }
 
     private val _state = MutableStateFlow(UiState(naddr = naddr))
     val state = _state.asStateFlow()

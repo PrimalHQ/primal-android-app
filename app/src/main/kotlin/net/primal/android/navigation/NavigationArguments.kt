@@ -13,14 +13,19 @@ const val NOTE_ID = "noteId"
 inline val SavedStateHandle.noteIdOrThrow: String
     get() = get(NOTE_ID) ?: throw IllegalArgumentException("Missing required noteId argument.")
 
+const val PRIMAL_NAME = "primalName"
+inline val SavedStateHandle.primalName: String? get() = get(PRIMAL_NAME)
+
 const val PROFILE_ID = "profileId"
 inline val SavedStateHandle.profileId: String? get() = get(PROFILE_ID)
 inline val SavedStateHandle.profileIdOrThrow: String
     get() = get(PROFILE_ID) ?: throw IllegalArgumentException("Missing required profileId argument")
 
+const val ARTICLE_ID = "articleId"
+inline val SavedStateHandle.articleId: String? get() = get(ARTICLE_ID)
+
 const val NADDR = "naddr"
-inline val SavedStateHandle.naddrOrThrow: String
-    get() = get(NADDR) ?: throw IllegalArgumentException("Missing required naddr argument.")
+inline val SavedStateHandle.naddr: String? get() = get(NADDR)
 
 const val FOLLOWS_TYPE = "followsType"
 inline val SavedStateHandle.followsType: String? get() = get(FOLLOWS_TYPE)
@@ -67,25 +72,15 @@ inline val NavBackStackEntry.searchScopeOrThrow: SearchScope
     get() = arguments?.getString(SEARCH_SCOPE)?.let { SearchScope.valueOf(it) }
         ?: throw IllegalArgumentException("Missing required searchScope argument.")
 
+const val ADVANCED_SEARCH_FEED_SPEC = "advancedSearchFeedSpec"
+inline val SavedStateHandle.advancedSearchFeedSpec: String?
+    get() = get<String>(ADVANCED_SEARCH_FEED_SPEC)?.ifEmpty { null }
+
 const val EXPLORE_FEED_SPEC = "exploreFeedSpec"
-inline val SavedStateHandle.exploreFeedSpecOrThrow: String
+inline val SavedStateHandle.exploreFeedSpec: String?
     get() = get<String>(EXPLORE_FEED_SPEC)?.asBase64Decoded()?.ifEmpty { null }
-        ?: throw IllegalArgumentException("Missing required exploreFeedSpec argument.")
 
 const val NOTE_EDITOR_ARGS = "preFillContent"
-
-const val NWC_URL = "nwcUrl"
-inline val SavedStateHandle.nwcUrl: String? get() = get(NWC_URL)
-
-const val NWC_APP_NAME = "appName"
-inline val SavedStateHandle.appName: String? get() = get(NWC_APP_NAME)
-
-const val NWC_APP_ICON = "appIcon"
-inline val SavedStateHandle.appIcon: String? get() = get(NWC_APP_ICON)
-
-const val NWC_CALLBACK = "callback"
-inline val SavedStateHandle.callback: String
-    get() = get(NWC_CALLBACK) ?: throw IllegalArgumentException("Missing required $NWC_CALLBACK argument.")
 
 const val MEDIA_URL = "mediaUrl"
 inline val SavedStateHandle.mediaUrl: String? get() = get(MEDIA_URL)

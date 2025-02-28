@@ -2,12 +2,11 @@ package net.primal.android.navigation
 
 import androidx.activity.compose.LocalActivity
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
+import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavType
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.core.compose.LockToOrientationPortrait
@@ -80,29 +79,25 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
 
         keys(route = "account_settings", navController = navController)
         wallet(
-            route = "wallet_settings?nwcUrl={$NWC_URL}",
-            arguments = listOf(
-                navArgument(NWC_URL) {
-                    type = NavType.StringType
-                    nullable = true
+            route = "wallet_settings",
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "nostr+walletconnect://.*"
+                },
+                navDeepLink {
+                    uriPattern = "nostrwalletconnect://.*"
                 },
             ),
             navController = navController,
         )
         linkPrimalWallet(
-            route = "wallet_settings/link_primal_wallet?appName={$NWC_APP_NAME}" +
-                "&appIcon={$NWC_APP_ICON}&callback={$NWC_CALLBACK}",
-            arguments = listOf(
-                navArgument(NWC_APP_NAME) {
-                    type = NavType.StringType
-                    nullable = true
+            route = "wallet_settings/link_primal_wallet",
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "nostrnwc://.*"
                 },
-                navArgument(NWC_APP_ICON) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-                navArgument(NWC_CALLBACK) {
-                    type = NavType.StringType
+                navDeepLink {
+                    uriPattern = "nostrnwc+primal://.*"
                 },
             ),
             navController = navController,
@@ -171,17 +166,20 @@ private fun NavGraphBuilder.network(route: String, navController: NavController)
 
 private fun NavGraphBuilder.wallet(
     route: String,
-    arguments: List<NamedNavArgument>,
+    deepLinks: List<NavDeepLink>,
     navController: NavController,
 ) = composable(
     route = route,
-    arguments = arguments,
+    deepLinks = deepLinks,
     enterTransition = { primalSlideInHorizontallyFromEnd },
     exitTransition = { primalScaleOut },
     popEnterTransition = { primalScaleIn },
     popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) { navBackEntry ->
-    val viewModel = hiltViewModel<WalletSettingsViewModel>(navBackEntry)
+    val nwcUrl = LocalActivity.current?.intent?.data?.toString()
+    val viewModel = hiltViewModel<WalletSettingsViewModel, WalletSettingsViewModel.Factory> { factory ->
+        factory.create(nwcConnectionUrl = nwcUrl)
+    }
     LockToOrientationPortrait()
     WalletSettingsScreen(
         viewModel = viewModel,
@@ -210,17 +208,21 @@ private fun NavGraphBuilder.scanNwcUrl(route: String, navController: NavControll
 
 private fun NavGraphBuilder.linkPrimalWallet(
     route: String,
-    arguments: List<NamedNavArgument>,
+    deepLinks: List<NavDeepLink>,
     navController: NavController,
 ) = composable(
     route = route,
-    arguments = arguments,
+    deepLinks = deepLinks,
     enterTransition = { primalSlideInHorizontallyFromEnd },
     exitTransition = { primalScaleOut },
     popEnterTransition = { primalScaleIn },
     popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
-    val viewModel = hiltViewModel<LinkPrimalWalletViewModel>()
+    val nwcPrimalUrl = LocalActivity.current?.intent?.data?.toString()
+
+    val viewModel = hiltViewModel<LinkPrimalWalletViewModel, LinkPrimalWalletViewModel.Factory> { factory ->
+        factory.create(nwcPrimalUrl = nwcPrimalUrl)
+    }
     val activity = LocalActivity.current
     LockToOrientationPortrait()
     LinkPrimalWalletScreen(

@@ -78,7 +78,7 @@ object Nip19TLV {
 
         val profileId = tlv[Type.AUTHOR.id]?.first()?.toHex()
 
-        val kind = tlv[Type.KIND.id]?.first()?.let {
+        val kind = tlv[Type.KIND.id]?.firstOrNull()?.let {
             toInt32(it)
         }
         return if (eventId != null && profileId != null) {

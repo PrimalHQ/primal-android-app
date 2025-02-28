@@ -49,6 +49,130 @@
 
             <intent-filter
                 android:autoVerify="true"
+                android:label="Primal Home">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="https"/>
+                <data android:host="primal.net"/>
+            </intent-filter>
+
+            <intent-filter
+                android:autoVerify="true"
+                android:label="Primal Home">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="primal.net"
+                    android:pathPrefix="/home"
+                    android:scheme="https" />
+            </intent-filter>
+
+            <intent-filter
+                android:autoVerify="true"
+                android:label="Primal Reads">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="primal.net"
+                    android:pathPrefix="/reads"
+                    android:scheme="https" />
+            </intent-filter>
+
+            <intent-filter
+                android:autoVerify="true"
+                android:label="Primal Notifications">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="primal.net"
+                    android:pathPrefix="/notifications"
+                    android:scheme="https" />
+            </intent-filter>
+
+            <intent-filter
+                android:autoVerify="true"
+                android:label="Primal Explore">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="primal.net"
+                    android:pathPrefix="/explore"
+                    android:scheme="https" />
+            </intent-filter>
+
+            <intent-filter
+                android:autoVerify="true"
+                android:label="Primal DMs">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="primal.net"
+                    android:pathPrefix="/dms"
+                    android:scheme="https" />
+            </intent-filter>
+
+            <intent-filter
+                android:autoVerify="true"
+                android:label="Primal Bookmarks">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="primal.net"
+                    android:pathPrefix="/bookmarks"
+                    android:scheme="https" />
+            </intent-filter>
+
+            <intent-filter
+                android:autoVerify="true"
+                android:label="Primal Premium">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="primal.net"
+                    android:pathPrefix="/premium"
+                    android:scheme="https" />
+            </intent-filter>
+
+            <intent-filter
+                android:autoVerify="true"
+                android:label="Primal Legends">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="primal.net"
+                    android:pathPrefix="/legends"
+                    android:scheme="https" />
+            </intent-filter>
+
+            <intent-filter
+                android:autoVerify="true"
                 android:label="Primal Note">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -77,6 +201,20 @@
 
             <intent-filter
                 android:autoVerify="true"
+                android:label="Primal Article">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="primal.net"
+                    android:pathPrefix="/.+/.+"
+                    android:scheme="https" />
+            </intent-filter>
+
+            <intent-filter
+                android:autoVerify="true"
                 android:label="Primal Profile">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -91,6 +229,20 @@
 
             <intent-filter
                 android:autoVerify="true"
+                android:label="Primal Profile">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="primal.net"
+                    android:pathPrefix="/.+"
+                    android:scheme="https" />
+            </intent-filter>
+
+            <intent-filter
+                android:autoVerify="true"
                 android:label="Advanced Search">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -99,7 +251,7 @@
 
                 <data
                     android:host="primal.net"
-                    android:pathPrefix="/asearch/"
+                    android:pathPrefix="/search/"
                     android:scheme="https" />
             </intent-filter>
 

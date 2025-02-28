@@ -171,6 +171,8 @@ fun String.isAudioSpec() = this.contains("\"query\":\"filter:audio")
 
 fun String.isReadsFeedSpec() = this.contains("\"kind\":\"reads\"") || this.contains("kind:30023")
 
+fun String?.buildAdvancedSearchFeedSpec() = """{"id":"advsearch","query":"$this"}"""
+
 fun buildAdvancedSearchNotesFeedSpec(query: String) = """{"id":"advsearch","query":"kind:1 $query"}"""
 
 fun buildAdvancedSearchReadsFeedSpec(query: String) = """{"id":"advsearch","query":"kind:30023 $query"}"""

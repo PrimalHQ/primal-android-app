@@ -14,24 +14,28 @@ fun LogoutScreen(
     viewModel: LogoutViewModel,
     onClose: () -> Unit,
     navigateToHome: () -> Unit,
+    navigateToWelcome: () -> Unit,
 ) {
     LaunchedEffect(viewModel, viewModel.effects) {
         viewModel.effects.collect {
             when (it) {
-                LogoutContract.SideEffect.UserAccountLogoutSuccessful -> onClose()
-                LogoutContract.SideEffect.ActiveAccountLogoutSuccessful -> {
+                LogoutContract.SideEffect.NavigateToHome -> {
                     onClose()
                     navigateToHome()
                 }
+                LogoutContract.SideEffect.NavigateToWelcome -> {
+                    onClose()
+                    navigateToWelcome()
+                }
+
+                LogoutContract.SideEffect.Close -> onClose()
             }
         }
     }
 
     LogoutScreen(
         onClose = onClose,
-        onLogoutRequested = {
-            viewModel.setEvent(LogoutContract.UiEvent.LogoutConfirmed)
-        },
+        onLogoutRequested = { viewModel.setEvent(LogoutContract.UiEvent.LogoutConfirmed) },
     )
 }
 

@@ -13,16 +13,19 @@ import net.primal.android.auth.logout.LogoutContract.SideEffect
 import net.primal.android.auth.logout.LogoutContract.UiEvent
 import net.primal.android.auth.repository.AuthRepository
 import net.primal.android.navigation.profileIdOrThrow
+import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
 
 @HiltViewModel
 class LogoutViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     activeAccountStore: ActiveAccountStore,
+    accountsStore: UserAccountsStore,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val profileId = savedStateHandle.profileIdOrThrow
     private val isActiveAccount = profileId == activeAccountStore.activeUserId()
+    private val isLastAccount = accountsStore.getAccountsCount() == 1
 
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) {
@@ -50,10 +53,10 @@ class LogoutViewModel @Inject constructor(
         runCatching {
             authRepository.logout(pubkey = profileId)
         }.onSuccess {
-            if (isActiveAccount) {
-                setEffect(SideEffect.ActiveAccountLogoutSuccessful)
-            } else {
-                setEffect(SideEffect.UserAccountLogoutSuccessful)
+            when {
+                isActiveAccount && isLastAccount -> setEffect(SideEffect.NavigateToWelcome)
+                isActiveAccount && !isLastAccount -> setEffect(SideEffect.NavigateToHome)
+                else -> setEffect(SideEffect.Close)
             }
         }
     }
