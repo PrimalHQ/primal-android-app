@@ -133,16 +133,24 @@ fun ProfileQrCodeViewer(
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
         var qrCodeValueText by remember { mutableStateOf(profileId.hexToNpubHrp()) }
         QrCodeViewer(
             profileId = profileId,
             lightningAddress = profileDetails?.lightningAddress,
+            uiMode = uiMode,
             onQrCodeValueChanged = { qrCodeValueText = it },
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(
+            modifier = Modifier.height(
+                height = when (uiMode) {
+                    UiDensityMode.Normal, UiDensityMode.Compact -> 32.dp
+                    else -> 8.dp
+                },
+            ),
+        )
 
         CopyText(
             modifier = Modifier.padding(horizontal = 32.dp),
@@ -161,6 +169,7 @@ private fun QrCodeViewer(
     profileId: String,
     lightningAddress: String?,
     onQrCodeValueChanged: (String) -> Unit,
+    uiMode: UiDensityMode?,
 ) {
     val pubkey = profileId.hexToNpubHrp()
     val lud16 = lightningAddress.orEmpty()
@@ -189,7 +198,12 @@ private fun QrCodeViewer(
     }
 
     Flippable(
-        modifier = Modifier.size(260.dp),
+        modifier = Modifier.size(
+            size = when (uiMode) {
+                UiDensityMode.Normal, UiDensityMode.Compact -> 280.dp
+                else -> 240.dp
+            },
+        ),
         flipController = flipController,
         flipOnTouch = false,
         frontSide = {
