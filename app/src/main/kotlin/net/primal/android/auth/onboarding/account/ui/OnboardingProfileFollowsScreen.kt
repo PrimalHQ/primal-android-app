@@ -337,7 +337,7 @@ private fun FollowGroupListItem(group: FollowGroup, onClick: () -> Unit) {
             PrimalFilledButton(
                 modifier = Modifier
                     .wrapContentWidth()
-                    .size(width = 120.dp, height = 36.dp),
+                    .size(width = 128.dp, height = 36.dp),
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 containerColor = if (isGroupFollowed) {
                     Color.White
@@ -401,7 +401,7 @@ private fun FollowGroupMemberListItem(member: FollowGroupMember, onClick: () -> 
             PrimalFilledButton(
                 modifier = Modifier
                     .wrapContentWidth()
-                    .size(width = 96.dp, height = 36.dp),
+                    .size(width = 104.dp, height = 36.dp),
                 contentPadding = PaddingValues(horizontal = 12.dp),
                 containerColor = if (member.followed) {
                     UnfollowMemberBackgroundColor
