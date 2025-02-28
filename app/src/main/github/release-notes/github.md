@@ -1,19 +1,8 @@
 ## Changes
-- Implemented share photo/video via Primal app (#342)
-- Fixed profile qr code values
-- Add Search button on keyboard in simple search (#343)
-- Enabled polling for notes tab in Profile Details
-- Implemented deep link advanced search results (#341)
-- Implemented multi-account feature (#323)
-- Fixed text not auto-capitalized when using keyboard (#335)
-- Make list items in Settings clickable (#334)
-- Implemented deep link for article links (#333)
-- Implemented deep link for profile links (#332)
-- Implemented articles pagination (#322)
-- Implemented primal.net/legends clicks for legends screen (#327)
-- Fixed article cover resizing in ArticleDetails (#331)
-- Update previews for Github links (#328)
-- Implemented nevent and nprofile in the note editor for mentioned notes and users (#330)
-- Improved url link recognition (#329)
-- Fixed not showing empty Youtube, Rumble or Spotify link previews
-- Add "Post" button to ProfileDetails, Notifications and Explore (#326)
+- Fixed notification & messages red dot slow update on account switch;
+- Fixed showing active account in the accounts list in drawer (#348)
+- Fixed unfollow button on onboarding screen spanning to two rows on some devices (#346);
+- Implemented showing legends first in the Profile details followed by section (#345);
+- Refactor deep linking & splash screen;
+- Implemented deep linking for Primal verified users & static links;
+- Fixed npub QR code page padding issues (#349);
