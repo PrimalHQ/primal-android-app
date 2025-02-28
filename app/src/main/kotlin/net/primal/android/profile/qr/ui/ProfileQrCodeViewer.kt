@@ -63,7 +63,9 @@ import com.wajahatkarim.flippable.rememberFlipController
 import net.primal.android.R
 import net.primal.android.core.compose.DefaultAvatarThumbnailPlaceholderListItemImage
 import net.primal.android.core.compose.PrimalLoadingSpinner
+import net.primal.android.core.compose.UiDensityMode
 import net.primal.android.core.compose.UniversalAvatarThumbnail
+import net.primal.android.core.compose.detectUiDensityModeFromMaxHeight
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Copy
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
@@ -80,10 +82,19 @@ fun ProfileQrCodeViewer(
     profileDetails: ProfileDetailsUi?,
     paddingValues: PaddingValues,
 ) {
+    val density = LocalDensity.current
+    var uiMode by remember { mutableStateOf<UiDensityMode?>(null) }
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues),
+            .padding(paddingValues)
+            .onSizeChanged {
+                with(density) {
+                    if (uiMode == null) {
+                        uiMode = it.height.toDp().detectUiDensityModeFromMaxHeight()
+                    }
+                }
+            },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         UniversalAvatarThumbnail(
@@ -128,10 +139,19 @@ fun ProfileQrCodeViewer(
         QrCodeViewer(
             profileId = profileId,
             lightningAddress = profileDetails?.lightningAddress,
+            uiMode = uiMode,
             onQrCodeValueChanged = { qrCodeValueText = it },
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(
+            modifier = Modifier.height(
+                height = when (uiMode) {
+                    UiDensityMode.Normal, UiDensityMode.Comfortable -> 32.dp
+                    UiDensityMode.Compact -> 16.dp
+                    else -> 8.dp
+                },
+            ),
+        )
 
         CopyText(
             modifier = Modifier.padding(horizontal = 32.dp),
@@ -150,6 +170,7 @@ private fun QrCodeViewer(
     profileId: String,
     lightningAddress: String?,
     onQrCodeValueChanged: (String) -> Unit,
+    uiMode: UiDensityMode?,
 ) {
     val pubkey = profileId.hexToNpubHrp()
     val lud16 = lightningAddress.orEmpty()
@@ -174,11 +195,16 @@ private fun QrCodeViewer(
             indicatorColor = Color.White,
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
     }
 
     Flippable(
-        modifier = Modifier.size(280.dp),
+        modifier = Modifier.size(
+            size = when (uiMode) {
+                UiDensityMode.Normal, UiDensityMode.Comfortable, UiDensityMode.Compact -> 280.dp
+                else -> 240.dp
+            },
+        ),
         flipController = flipController,
         flipOnTouch = false,
         frontSide = {
