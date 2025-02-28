@@ -8,7 +8,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -60,12 +59,12 @@ class AccountSwitcherViewModel @Inject constructor(
     private fun observeActiveAccount() =
         viewModelScope.launch {
             activeAccountStore.activeUserAccount
-                .distinctUntilChanged()
                 .collect { activeAccount ->
                     setState {
                         copy(
-                            userAccounts = listOfNotNull(this.activeAccount) +
-                                userAccounts.filterNot { it.pubkey == activeAccount.pubkey },
+                            userAccounts = userAccounts
+                                .sortedByDescending { it.lastAccessedAt }
+                                .filterNot { it.pubkey == activeAccount.pubkey },
                             activeAccount = activeAccount.asUserAccountUi(),
                         )
                     }
