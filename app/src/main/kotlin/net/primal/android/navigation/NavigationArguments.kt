@@ -13,6 +13,9 @@ const val NOTE_ID = "noteId"
 inline val SavedStateHandle.noteIdOrThrow: String
     get() = get(NOTE_ID) ?: throw IllegalArgumentException("Missing required noteId argument.")
 
+const val PRIMAL_NAME = "primalName"
+inline val SavedStateHandle.primalName: String? get() = get(PRIMAL_NAME)
+
 const val PROFILE_ID = "profileId"
 inline val SavedStateHandle.profileId: String? get() = get(PROFILE_ID)
 inline val SavedStateHandle.profileIdOrThrow: String

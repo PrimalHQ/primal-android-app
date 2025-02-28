@@ -775,9 +775,13 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
         )
 
         profile(
-            route = "profile?$PROFILE_ID={$PROFILE_ID}",
+            route = "profile?$PROFILE_ID={$PROFILE_ID}&$PRIMAL_NAME={$PRIMAL_NAME}",
             arguments = listOf(
                 navArgument(PROFILE_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(PRIMAL_NAME) {
                     type = NavType.StringType
                     nullable = true
                 },
@@ -785,6 +789,9 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
             deepLinks = listOf(
                 navDeepLink {
                     uriPattern = "https://primal.net/p/{$PROFILE_ID}"
+                },
+                navDeepLink {
+                    uriPattern = "https://primal.net/{$PRIMAL_NAME}"
                 },
             ),
             navController = navController,

@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.profile.approvals.ProfileApproval
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
@@ -26,6 +27,7 @@ import net.primal.android.feeds.domain.FEED_KIND_USER
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.domain.buildLatestNotesUserFeedSpec
 import net.primal.android.feeds.repository.FeedsRepository
+import net.primal.android.navigation.primalName
 import net.primal.android.navigation.profileId
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -57,7 +59,9 @@ class ProfileDetailsViewModel @Inject constructor(
     private val zapHandler: ZapHandler,
 ) : ViewModel() {
 
-    private val profileId: String = savedStateHandle.profileId?.resolveProfileId() ?: activeAccountStore.activeUserId()
+    private val profileId: String = savedStateHandle.profileId?.resolveProfileId()
+        ?: runBlocking { savedStateHandle.primalName?.findProfileId() }
+        ?: activeAccountStore.activeUserId()
 
     private val isActiveUser = profileId == activeAccountStore.activeUserId()
 
@@ -504,4 +508,6 @@ class ProfileDetailsViewModel @Inject constructor(
 
             else -> this
         }
+
+    private suspend fun String.findProfileId(): String? = profileRepository.fetchProfileId(primalName = this)
 }
