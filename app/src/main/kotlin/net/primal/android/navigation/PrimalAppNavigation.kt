@@ -438,10 +438,23 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
             navController = navController,
             onTopLevelDestinationChanged = topLevelDestinationHandler,
             onDrawerScreenClick = drawerDestinationHandler,
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "https://primal.net"
+                },
+                navDeepLink {
+                    uriPattern = "https://primal.net/home"
+                },
+            ),
         )
 
         reads(
             route = "reads",
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "https://primal.net/reads"
+                },
+            ),
             navController = navController,
             onTopLevelDestinationChanged = topLevelDestinationHandler,
             onDrawerScreenClick = drawerDestinationHandler,
@@ -452,9 +465,22 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
             navController = navController,
             onTopLevelDestinationChanged = topLevelDestinationHandler,
             onDrawerScreenClick = drawerDestinationHandler,
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "https://primal.net/explore"
+                },
+            ),
         )
 
-        bookmarks(route = "bookmarks", navController = navController)
+        bookmarks(
+            route = "bookmarks",
+            navController = navController,
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "https://primal.net/bookmarks"
+                },
+            ),
+        )
 
         exploreFeed(
             route = "explore/note?" +
@@ -536,9 +562,17 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
                 },
             ),
             navController = navController,
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "https://primal.net/premium"
+                },
+            ),
         )
 
-        premiumHome(route = "premium/home", navController = navController)
+        premiumHome(
+            route = "premium/home",
+            navController = navController,
+        )
 
         premiumSupportPrimal(route = "premium/supportPrimal", navController = navController)
 
@@ -578,7 +612,15 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
             navController = navController,
         )
 
-        premiumLegendLeaderboard(route = "premium/legend/leaderboard", navController = navController)
+        premiumLegendLeaderboard(
+            route = "premium/legend/leaderboard",
+            navController = navController,
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "https://primal.net/legends"
+                },
+            ),
+        )
         premiumOGsLeaderboard(route = "premium/ogs/leaderboard", navController = navController)
 
         premiumManage(route = "premium/manage", navController = navController)
@@ -595,7 +637,15 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
 
         premiumRelay(route = "premium/manage/relay", navController = navController)
 
-        messages(route = "messages", navController = navController)
+        messages(
+            route = "messages",
+            navController = navController,
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "https://primal.net/dms"
+                },
+            ),
+        )
 
         chat(
             route = "messages/{$PROFILE_ID}",
@@ -614,6 +664,11 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
             navController = navController,
             onTopLevelDestinationChanged = topLevelDestinationHandler,
             onDrawerScreenClick = drawerDestinationHandler,
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "https://primal.net/notifications"
+                },
+            ),
         )
 
         noteEditor(
@@ -894,11 +949,13 @@ private fun NavGraphBuilder.onboardingWalletActivation(route: String, navControl
 
 private fun NavGraphBuilder.home(
     route: String,
+    deepLinks: List<NavDeepLink>,
     navController: NavController,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) = composable(
     route = route,
+    deepLinks = deepLinks,
     enterTransition = { null },
     exitTransition = {
         when {
@@ -937,11 +994,13 @@ private fun NavGraphBuilder.home(
 
 private fun NavGraphBuilder.reads(
     route: String,
+    deepLinks: List<NavDeepLink>,
     navController: NavController,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) = composable(
     route = route,
+    deepLinks = deepLinks,
     enterTransition = { null },
     exitTransition = {
         when {
@@ -1008,11 +1067,13 @@ private fun NavGraphBuilder.noteEditor(
 
 private fun NavGraphBuilder.explore(
     route: String,
+    deepLinks: List<NavDeepLink>,
     navController: NavController,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) = composable(
     route = route,
+    deepLinks = deepLinks,
     enterTransition = { null },
     exitTransition = {
         when {
@@ -1156,11 +1217,13 @@ private fun NavGraphBuilder.advancedSearch(
 
 private fun NavGraphBuilder.premiumBuying(
     route: String,
+    deepLinks: List<NavDeepLink>,
     arguments: List<NamedNavArgument>,
     navController: NavController,
 ) = composable(
     route = route,
     arguments = arguments,
+    deepLinks = deepLinks,
     enterTransition = { primalSlideInHorizontallyFromEnd },
     exitTransition = { primalScaleOut },
     popEnterTransition = { primalScaleIn },
@@ -1342,26 +1405,30 @@ private fun NavGraphBuilder.premiumCard(
     )
 }
 
-private fun NavGraphBuilder.premiumLegendLeaderboard(route: String, navController: NavController) =
-    composable(
-        route = route,
-        enterTransition = { primalSlideInHorizontallyFromEnd },
-        exitTransition = { primalScaleOut },
-        popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontallyToEnd },
-    ) {
-        val viewModel = hiltViewModel<LegendLeaderboardViewModel>()
+private fun NavGraphBuilder.premiumLegendLeaderboard(
+    route: String,
+    deepLinks: List<NavDeepLink>,
+    navController: NavController,
+) = composable(
+    route = route,
+    deepLinks = deepLinks,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) {
+    val viewModel = hiltViewModel<LegendLeaderboardViewModel>()
 
-        ApplyEdgeToEdge()
-        LockToOrientationPortrait()
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
 
-        LegendLeaderboardScreen(
-            viewModel = viewModel,
-            onClose = { navController.navigateUp() },
-            onProfileClick = { navController.navigateToProfile(profileId = it) },
-            onAboutLegendsClick = { navController.navigateToPremiumBuyPrimalLegend() },
-        )
-    }
+    LegendLeaderboardScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+        onProfileClick = { navController.navigateToProfile(profileId = it) },
+        onAboutLegendsClick = { navController.navigateToPremiumBuyPrimalLegend() },
+    )
+}
 
 private fun NavGraphBuilder.premiumOGsLeaderboard(route: String, navController: NavController) =
     composable(
@@ -1544,43 +1611,51 @@ private fun NavGraphBuilder.premiumRelay(route: String, navController: NavContro
         )
     }
 
-private fun NavGraphBuilder.messages(route: String, navController: NavController) =
-    composable(
-        route = route,
-        enterTransition = { primalSlideInHorizontallyFromEnd },
-        exitTransition = { primalScaleOut },
-        popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontallyToEnd },
-    ) { navBackEntry ->
-        val viewModel = hiltViewModel<MessageConversationListViewModel>(navBackEntry)
-        ApplyEdgeToEdge()
-        LockToOrientationPortrait()
-        MessageListScreen(
-            viewModel = viewModel,
-            onConversationClick = { profileId -> navController.navigateToChat(profileId) },
-            onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
-            onNewMessageClick = { navController.navigateToNewMessage() },
-            onClose = { navController.navigateUp() },
-        )
-    }
+private fun NavGraphBuilder.messages(
+    route: String,
+    deepLinks: List<NavDeepLink>,
+    navController: NavController,
+) = composable(
+    route = route,
+    deepLinks = deepLinks,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) { navBackEntry ->
+    val viewModel = hiltViewModel<MessageConversationListViewModel>(navBackEntry)
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
+    MessageListScreen(
+        viewModel = viewModel,
+        onConversationClick = { profileId -> navController.navigateToChat(profileId) },
+        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+        onNewMessageClick = { navController.navigateToNewMessage() },
+        onClose = { navController.navigateUp() },
+    )
+}
 
-private fun NavGraphBuilder.bookmarks(route: String, navController: NavController) =
-    composable(
-        route = route,
-        enterTransition = { primalSlideInHorizontallyFromEnd },
-        exitTransition = { primalScaleOut },
-        popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontallyToEnd },
-    ) {
-        val viewModel: BookmarksViewModel = hiltViewModel()
-        ApplyEdgeToEdge()
-        BookmarksScreen(
-            viewModel = viewModel,
-            onClose = { navController.navigateUp() },
-            noteCallbacks = noteCallbacksHandler(navController),
-            onGoToWallet = { navController.navigateToWallet() },
-        )
-    }
+private fun NavGraphBuilder.bookmarks(
+    route: String,
+    deepLinks: List<NavDeepLink>,
+    navController: NavController,
+) = composable(
+    route = route,
+    deepLinks = deepLinks,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) {
+    val viewModel: BookmarksViewModel = hiltViewModel()
+    ApplyEdgeToEdge()
+    BookmarksScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+        noteCallbacks = noteCallbacksHandler(navController),
+        onGoToWallet = { navController.navigateToWallet() },
+    )
+}
 
 private fun NavGraphBuilder.chat(
     route: String,
@@ -1627,11 +1702,13 @@ private fun NavGraphBuilder.newMessage(route: String, navController: NavControll
 
 private fun NavGraphBuilder.notifications(
     route: String,
+    deepLinks: List<NavDeepLink>,
     navController: NavController,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) = composable(
     route = route,
+    deepLinks = deepLinks,
     enterTransition = { null },
     exitTransition = {
         when {
