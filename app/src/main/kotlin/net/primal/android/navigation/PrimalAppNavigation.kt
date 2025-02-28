@@ -3,6 +3,7 @@ package net.primal.android.navigation
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -19,7 +20,6 @@ import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -625,6 +625,24 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
                     defaultValue = null
                 },
             ),
+            deepLinks = listOf(
+                navDeepLink {
+                    action = "ACTION_SEND"
+                    mimeType = "image/*"
+                },
+                navDeepLink {
+                    action = "ACTION_SEND_MULTIPLE"
+                    mimeType = "image/*"
+                },
+                navDeepLink {
+                    action = "ACTION_SEND"
+                    mimeType = "video/*"
+                },
+                navDeepLink {
+                    action = "ACTION_SEND_MULTIPLE"
+                    mimeType = "video/*"
+                },
+            ),
             navController = navController,
         )
 
@@ -756,45 +774,28 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
     }
 }
 
-private fun handleReceiveSingleMedia(intent: Intent, navController: NavHostController) {
-    val mediaUri: Uri? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
-    } else {
-        @Suppress("DEPRECATION")
-        intent.getParcelableExtra(Intent.EXTRA_STREAM)
-    }
+private fun Intent?.parseMediaUris(): List<String> =
+    when (this?.action) {
+        Intent.ACTION_SEND -> {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                this.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                this.getParcelableExtra(Intent.EXTRA_STREAM)
+            }?.run { listOf(toString()) }
+        }
 
-    if (mediaUri != null) {
-        navController.popBackStack()
-        navController.navigateToNoteEditor(
-            NoteEditorArgs(
-                mediaUris = listOf(mediaUri.toString()),
-            ),
-        )
-    } else {
-        navController.navigateToHome()
-    }
-}
+        Intent.ACTION_SEND_MULTIPLE -> {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                this.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                this.getParcelableArrayListExtra(Intent.EXTRA_STREAM)
+            }?.map { it.toString() }
+        }
 
-private fun handleReceiveMultipleMedia(intent: Intent, navController: NavController) {
-    val mediaUris: List<Uri>? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java)
-    } else {
-        @Suppress("DEPRECATION")
-        intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM)
-    }
-
-    if (!mediaUris.isNullOrEmpty()) {
-        navController.popBackStack()
-        navController.navigateToNoteEditor(
-            NoteEditorArgs(
-                mediaUris = mediaUris.map { it.toString() },
-            ),
-        )
-    } else {
-        navController.navigateToHome()
-    }
-}
+        else -> emptyList()
+    } ?: emptyList()
 
 private fun NavGraphBuilder.welcome(route: String, navController: NavController) =
     composable(
@@ -978,17 +979,25 @@ private fun NavGraphBuilder.reads(
 
 private fun NavGraphBuilder.noteEditor(
     route: String,
+    deepLinks: List<NavDeepLink>,
     arguments: List<NamedNavArgument>,
     navController: NavController,
 ) = composable(
     route = route,
+    deepLinks = deepLinks,
     arguments = arguments,
 ) {
-    val viewModel = noteEditorViewModel(
-        args = it.arguments?.getString(NOTE_EDITOR_ARGS)
-            ?.asBase64Decoded()
-            ?.jsonAsNoteEditorArgs(),
-    )
+    val activity = LocalActivity.current
+    val mediaUrls = activity?.intent.parseMediaUris()
+
+    val args = it.arguments?.getString(NOTE_EDITOR_ARGS)
+        ?.asBase64Decoded()
+        ?.jsonAsNoteEditorArgs()
+        ?: NoteEditorArgs()
+            .copy(mediaUris = mediaUrls)
+
+    val viewModel = noteEditorViewModel(args = args)
+
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
     NoteEditorScreen(
