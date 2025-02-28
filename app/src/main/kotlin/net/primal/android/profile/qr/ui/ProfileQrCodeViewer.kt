@@ -200,7 +200,7 @@ private fun QrCodeViewer(
     Flippable(
         modifier = Modifier.size(
             size = when (uiMode) {
-                UiDensityMode.Normal, UiDensityMode.Compact, UiDensityMode.Comfortable -> 280.dp
+                UiDensityMode.Normal, UiDensityMode.Comfortable, UiDensityMode.Compact -> 280.dp
                 else -> 240.dp
             },
         ),
