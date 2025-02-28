@@ -32,7 +32,10 @@ class AuthRepository @Inject constructor(
     }
 
     private suspend fun setNextActiveAccount() {
-        val nextActive = accountsStore.userAccounts.value.sortedByDescending { it.lastAccessedAt }.drop(1).firstOrNull()
+        val nextActive = accountsStore.userAccounts.value
+            .sortedByDescending { it.lastAccessedAt }
+            .drop(1)
+            .firstOrNull()
 
         if (nextActive == null) {
             activeAccountStore.clearActiveUserAccount()

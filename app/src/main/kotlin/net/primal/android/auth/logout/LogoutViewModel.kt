@@ -25,7 +25,7 @@ class LogoutViewModel @Inject constructor(
 ) : ViewModel() {
     private val profileId = savedStateHandle.profileIdOrThrow
     private val isActiveAccount = profileId == activeAccountStore.activeUserId()
-    private val isLastAccount = accountsStore.getAccountsCount() == 1
+    private val isLastAccount = accountsStore.count() == 1
 
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) {
