@@ -25,6 +25,7 @@ import net.primal.android.settings.network.NetworkSettingsScreen
 import net.primal.android.settings.network.NetworkSettingsViewModel
 import net.primal.android.settings.notifications.NotificationsSettingsScreen
 import net.primal.android.settings.notifications.NotificationsSettingsViewModel
+import net.primal.android.settings.wallet.domain.parseAsPrimalWalletNwc
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionScreen
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionViewModel
 import net.primal.android.settings.wallet.nwc.primal.link.LinkPrimalWalletScreen
@@ -218,20 +219,26 @@ private fun NavGraphBuilder.linkPrimalWallet(
     popEnterTransition = { primalScaleIn },
     popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
-    val nwcPrimalUrl = LocalActivity.current?.intent?.data?.toString()
+    val activity = LocalActivity.current
+    fun dismissLinkPrimalWallet() {
+        if (!navController.popBackStack()) {
+            activity?.finishAfterTransition()
+        }
+    }
+
+    val nwcPrimalUrl = activity?.intent?.data?.toString()
+    if (nwcPrimalUrl == null) {
+        dismissLinkPrimalWallet()
+        return@composable
+    }
 
     val viewModel = hiltViewModel<LinkPrimalWalletViewModel, LinkPrimalWalletViewModel.Factory> { factory ->
-        factory.create(nwcPrimalUrl = nwcPrimalUrl)
+        factory.create(nwcRequest = nwcPrimalUrl.parseAsPrimalWalletNwc())
     }
-    val activity = LocalActivity.current
     LockToOrientationPortrait()
     LinkPrimalWalletScreen(
         viewModel = viewModel,
-        onDismiss = {
-            if (!navController.popBackStack()) {
-                activity?.finishAfterTransition()
-            }
-        },
+        onDismiss = { dismissLinkPrimalWallet() },
     )
 }
 
