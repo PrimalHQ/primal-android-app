@@ -63,7 +63,9 @@ import com.wajahatkarim.flippable.rememberFlipController
 import net.primal.android.R
 import net.primal.android.core.compose.DefaultAvatarThumbnailPlaceholderListItemImage
 import net.primal.android.core.compose.PrimalLoadingSpinner
+import net.primal.android.core.compose.UiDensityMode
 import net.primal.android.core.compose.UniversalAvatarThumbnail
+import net.primal.android.core.compose.detectUiDensityModeFromMaxHeight
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Copy
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
@@ -80,10 +82,19 @@ fun ProfileQrCodeViewer(
     profileDetails: ProfileDetailsUi?,
     paddingValues: PaddingValues,
 ) {
+    val density = LocalDensity.current
+    var uiMode by remember { mutableStateOf<UiDensityMode?>(null) }
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues),
+            .padding(paddingValues)
+            .onSizeChanged {
+                with(density) {
+                    if (uiMode == null) {
+                        uiMode = it.height.toDp().detectUiDensityModeFromMaxHeight()
+                    }
+                }
+            },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         UniversalAvatarThumbnail(
