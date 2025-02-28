@@ -6,6 +6,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
+import net.primal.android.config.api.WellKnownApi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
@@ -40,10 +41,16 @@ class ProfileRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
     private val database: PrimalDatabase,
     private val usersApi: UsersApi,
+    private val wellKnownApi: WellKnownApi,
     private val userRepository: UserRepository,
     private val userAccountFetcher: UserAccountFetcher,
     private val nostrPublisher: NostrPublisher,
 ) {
+
+    suspend fun fetchProfileId(primalName: String): String? =
+        withContext(dispatchers.io()) {
+            wellKnownApi.fetchProfileId(primalName = primalName).names[primalName]
+        }
 
     suspend fun findProfileDataOrNull(profileId: String) =
         withContext(dispatchers.io()) {
