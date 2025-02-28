@@ -29,7 +29,7 @@ class UserAccountsStore @Inject constructor(
             initialValue = runBlocking { persistence.data.first() },
         )
 
-    fun getAccountsCount() = userAccounts.value.size
+    fun count() = userAccounts.value.size
 
     suspend fun getAndUpdateAccount(userId: String, reducer: UserAccount.() -> UserAccount): UserAccount =
         writeMutex.withLock {

@@ -48,7 +48,6 @@ import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.LegendaryStyle
-import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.details.ui.model.PremiumProfileDataUi
 import net.primal.android.profile.details.ui.model.shouldShowPremiumBadge
