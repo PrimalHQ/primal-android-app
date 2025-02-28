@@ -122,7 +122,7 @@ fun ProfileQrCodeViewer(
             )
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         var qrCodeValueText by remember { mutableStateOf(profileId.hexToNpubHrp()) }
         QrCodeViewer(
@@ -131,7 +131,7 @@ fun ProfileQrCodeViewer(
             onQrCodeValueChanged = { qrCodeValueText = it },
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         CopyText(
             modifier = Modifier.padding(horizontal = 32.dp),
@@ -174,11 +174,11 @@ private fun QrCodeViewer(
             indicatorColor = Color.White,
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
     }
 
     Flippable(
-        modifier = Modifier.size(280.dp),
+        modifier = Modifier.size(260.dp),
         flipController = flipController,
         flipOnTouch = false,
         frontSide = {
