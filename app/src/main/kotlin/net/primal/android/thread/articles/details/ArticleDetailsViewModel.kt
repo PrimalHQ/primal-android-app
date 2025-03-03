@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import net.primal.android.articles.ArticleRepository
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.utils.authorNameUiFriendly
@@ -60,7 +59,7 @@ import timber.log.Timber
 
 @HiltViewModel
 class ArticleDetailsViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: SavedStateHandle,
     private val activeAccountStore: ActiveAccountStore,
     private val articleRepository: ArticleRepository,
     private val feedRepository: FeedRepository,
@@ -70,25 +69,7 @@ class ArticleDetailsViewModel @Inject constructor(
     private val zapHandler: ZapHandler,
 ) : ViewModel() {
 
-    private val naddr = savedStateHandle.naddr?.let { Nip19TLV.parseUriAsNaddrOrNull(it) }
-        ?: runBlocking {
-            val identifier = savedStateHandle.articleId
-            val userId = savedStateHandle.primalName?.let {
-                runCatching { profileRepository.fetchProfileId(it) }.getOrNull()
-            }
-
-            if (identifier != null && userId != null) {
-                Naddr(
-                    identifier = identifier,
-                    userId = userId,
-                    kind = NostrEventKind.LongFormContent.value,
-                )
-            } else {
-                null
-            }
-        }
-
-    private val _state = MutableStateFlow(UiState(naddr = naddr))
+    private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -102,21 +83,30 @@ class ArticleDetailsViewModel @Inject constructor(
     init {
         observeEvents()
         observeActiveAccount()
-
-        if (naddr == null) {
-            setState { copy(error = UiError.InvalidNaddr) }
-        } else {
-            observeArticle(naddr)
-            observeArticleComments(naddr = naddr)
-        }
+        resolveNaddr()
     }
+
+    private fun resolveNaddr() =
+        viewModelScope.launch {
+            setState { copy(isResolvingNaddr = true, error = null) }
+            val naddr = parseAndResolveNaddr()
+
+            if (naddr == null) {
+                setState { copy(error = UiError.InvalidNaddr) }
+            } else {
+                observeArticle(naddr)
+                observeArticleComments(naddr = naddr)
+            }
+
+            setState { copy(isResolvingNaddr = false) }
+        }
 
     @Suppress("CyclomaticComplexMethod")
     private fun observeEvents() =
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    UiEvent.UpdateContent -> fetchData(naddr)
+                    UiEvent.UpdateContent -> fetchData()
                     UiEvent.DismissErrors -> dismissErrors()
                     is UiEvent.ZapArticle -> zapArticle(zapAction = it)
                     UiEvent.LikeArticle -> likeArticle()
@@ -138,13 +128,15 @@ class ArticleDetailsViewModel @Inject constructor(
                             articleAuthorId = selectedHighlight.referencedEventAuthorId,
                         )
                     }
+
+                    UiEvent.RequestResolveNaddr -> resolveNaddr()
                 }
             }
         }
 
-    private fun fetchData(naddr: Naddr?) =
+    private fun fetchData() =
         viewModelScope.launch {
-            if (naddr != null) {
+            state.value.naddr?.let { naddr ->
                 try {
                     articleRepository.fetchArticleAndComments(
                         userId = activeAccountStore.activeUserId(),
@@ -373,6 +365,8 @@ class ArticleDetailsViewModel @Inject constructor(
     }
 
     private fun publishNewHighlight(event: UiEvent.PublishHighlight) {
+        val naddr = state.value.naddr
+
         publishAndSaveHighlight(
             content = event.content,
             context = event.context,
@@ -466,6 +460,25 @@ class ArticleDetailsViewModel @Inject constructor(
             )
         }
     }
+
+    private suspend fun parseAndResolveNaddr() =
+        savedStateHandle.naddr?.let { Nip19TLV.parseUriAsNaddrOrNull(it) }
+            ?: run {
+                val identifier = savedStateHandle.articleId
+                val userId = savedStateHandle.primalName?.let {
+                    runCatching { profileRepository.fetchProfileId(it) }.getOrNull()
+                }
+
+                if (identifier != null && userId != null) {
+                    Naddr(
+                        identifier = identifier,
+                        userId = userId,
+                        kind = NostrEventKind.LongFormContent.value,
+                    )
+                } else {
+                    null
+                }
+            }
 
     private fun toggleHighlightsVisibility() {
         setState { copy(showHighlights = !showHighlights) }
