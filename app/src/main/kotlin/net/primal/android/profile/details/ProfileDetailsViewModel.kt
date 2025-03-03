@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.net.UnknownHostException
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -15,13 +16,13 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.profile.approvals.ProfileApproval
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileStatsUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.errors.UiError
+import net.primal.android.core.utils.isValidHex
 import net.primal.android.crypto.bech32ToHexOrThrow
 import net.primal.android.feeds.domain.FEED_KIND_USER
 import net.primal.android.feeds.domain.FeedSpecKind
@@ -50,7 +51,7 @@ import timber.log.Timber
 
 @HiltViewModel
 class ProfileDetailsViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: SavedStateHandle,
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val feedsRepository: FeedsRepository,
@@ -59,18 +60,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private val zapHandler: ZapHandler,
 ) : ViewModel() {
 
-    private val profileId: String = savedStateHandle.profileId?.resolveProfileId()
-        ?: runBlocking { savedStateHandle.primalName?.findProfileId() }
-        ?: activeAccountStore.activeUserId()
-
-    private val isActiveUser = profileId == activeAccountStore.activeUserId()
-
-    private val _state = MutableStateFlow(
-        UiState(
-            profileId = profileId,
-            isActiveUser = isActiveUser,
-        ),
-    )
+    private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -85,18 +75,44 @@ class ProfileDetailsViewModel @Inject constructor(
 
     init {
         observeEvents()
-        observeProfileData()
-        observeReferencedProfilesData()
-        observeProfileStats()
-        fetchProfileFollowedBy()
         observeActiveAccount()
-        observeContainsFeed()
-        observeMutedAccount()
-        resolveFollowsMe()
-        markProfileInteraction()
+        initializeProfileId()
     }
 
-    private fun markProfileInteraction() {
+    private fun initializeProfileId() =
+        viewModelScope.launch {
+            try {
+                setState { copy(isResolvingProfileId = true, resolutionError = null) }
+                val profileId = withContext(dispatcherProvider.io()) { resolveProfileId() }!!
+                val isActiveUser = profileId == activeAccountStore.activeUserId()
+
+                if (profileId.isValidHex()) {
+                    setState { copy(profileId = profileId, isActiveUser = isActiveUser) }
+                    initializeProfileData(profileId = profileId, isActiveUser = isActiveUser)
+                } else {
+                    setState { copy(resolutionError = UiState.ProfileResolutionError.InvalidProfileId) }
+                }
+            } catch (error: UnknownHostException) {
+                setState { copy(resolutionError = UiState.ProfileResolutionError.ErrorResolvingPrimalName(error)) }
+            } catch (_: RuntimeException) {
+                setState { copy(resolutionError = UiState.ProfileResolutionError.InvalidProfileId) }
+            } finally {
+                setState { copy(isResolvingProfileId = false) }
+            }
+        }
+
+    private fun initializeProfileData(profileId: String, isActiveUser: Boolean) {
+        observeProfileData(profileId = profileId)
+        observeReferencedProfilesData(profileId = profileId)
+        observeProfileStats(profileId = profileId)
+        fetchProfileFollowedBy(profileId = profileId)
+        observeContainsFeed(profileId = profileId)
+        observeMutedAccount(profileId = profileId)
+        resolveFollowsMe(profileId = profileId)
+        markProfileInteraction(profileId = profileId, isActiveUser = isActiveUser)
+    }
+
+    private fun markProfileInteraction(isActiveUser: Boolean, profileId: String) {
         if (!isActiveUser) {
             viewModelScope.launch {
                 profileRepository.markAsInteracted(
@@ -117,7 +133,7 @@ class ProfileDetailsViewModel @Inject constructor(
                     is UiEvent.RemoveProfileFeedAction -> removeProfileFeed(it)
                     is UiEvent.MuteAction -> mute(it)
                     is UiEvent.UnmuteAction -> unmute(it)
-                    UiEvent.RequestProfileUpdate -> requestProfileUpdate()
+                    is UiEvent.RequestProfileUpdate -> requestProfileUpdate(it.profileId)
 
                     is UiEvent.ReportAbuse -> reportAbuse(it)
                     UiEvent.DismissError -> setState { copy(error = null) }
@@ -131,6 +147,8 @@ class ProfileDetailsViewModel @Inject constructor(
                     UiEvent.DismissZapError -> setState { copy(zapError = null) }
                     UiEvent.DismissConfirmFollowUnfollowAlertDialog ->
                         setState { copy(shouldApproveProfileAction = null) }
+
+                    UiEvent.RequestProfileIdResolution -> initializeProfileId()
                 }
             }
         }
@@ -169,14 +187,14 @@ class ProfileDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun requestProfileUpdate() =
+    private fun requestProfileUpdate(profileId: String) =
         viewModelScope.launch {
-            fetchLatestProfile()
+            fetchLatestProfile(profileId = profileId)
             fetchLatestMuteList()
             setEffect(ProfileDetailsContract.SideEffect.ProfileUpdateFinished)
         }
 
-    private fun fetchProfileFollowedBy() =
+    private fun fetchProfileFollowedBy(profileId: String) =
         viewModelScope.launch {
             try {
                 val profiles = profileRepository.fetchUserProfileFollowedBy(
@@ -217,7 +235,7 @@ class ProfileDetailsViewModel @Inject constructor(
             }
         }
 
-    private fun observeContainsFeed() =
+    private fun observeContainsFeed(profileId: String) =
         viewModelScope.launch {
             val feedSpec = buildLatestNotesUserFeedSpec(userId = profileId)
             feedsRepository.observeContainsFeedSpec(userId = activeAccountStore.activeUserId(), feedSpec = feedSpec)
@@ -226,7 +244,7 @@ class ProfileDetailsViewModel @Inject constructor(
                 }
         }
 
-    private fun observeMutedAccount() =
+    private fun observeMutedAccount(profileId: String) =
         viewModelScope.launch {
             mutedUserRepository.observeIsUserMutedByOwnerId(
                 pubkey = profileId,
@@ -236,7 +254,7 @@ class ProfileDetailsViewModel @Inject constructor(
             }
         }
 
-    private fun observeProfileData() =
+    private fun observeProfileData(profileId: String) =
         viewModelScope.launch {
             profileRepository.observeProfileData(profileId = profileId)
                 .distinctUntilChanged()
@@ -245,7 +263,7 @@ class ProfileDetailsViewModel @Inject constructor(
                 }
         }
 
-    private fun observeReferencedProfilesData() =
+    private fun observeReferencedProfilesData(profileId: String) =
         viewModelScope.launch {
             profileRepository.observeProfile(profileId)
                 .mapNotNull { profile ->
@@ -279,7 +297,7 @@ class ProfileDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun observeProfileStats() =
+    private fun observeProfileStats(profileId: String) =
         viewModelScope.launch {
             profileRepository.observeProfileStats(profileId = profileId).collect {
                 setState {
@@ -288,7 +306,7 @@ class ProfileDetailsViewModel @Inject constructor(
             }
         }
 
-    private fun resolveFollowsMe() {
+    private fun resolveFollowsMe(profileId: String) {
         val activeUserId = activeAccountStore.activeUserId()
         if (profileId != activeUserId) {
             viewModelScope.launch {
@@ -315,7 +333,7 @@ class ProfileDetailsViewModel @Inject constructor(
             Timber.w(error)
         }
 
-    private suspend fun fetchLatestProfile() =
+    private suspend fun fetchLatestProfile(profileId: String) =
         try {
             withContext(dispatcherProvider.io()) {
                 profileRepository.requestProfileUpdate(profileId = profileId)
@@ -498,7 +516,7 @@ class ProfileDetailsViewModel @Inject constructor(
         setState { copy(error = error) }
     }
 
-    private fun String.resolveProfileId(): String? =
+    private fun String.parseForProfileId(): String? =
         when {
             this.startsWith("npub") -> runCatching { bech32ToHexOrThrow() }.getOrNull()
             this.startsWith("nprofile1") -> {
@@ -509,8 +527,7 @@ class ProfileDetailsViewModel @Inject constructor(
             else -> this
         }
 
-    private suspend fun String.findProfileId(): String? =
-        runCatching {
-            profileRepository.fetchProfileId(primalName = this)
-        }.getOrNull()
+    private suspend fun resolveProfileId(): String? =
+        savedStateHandle.profileId?.parseForProfileId()
+            ?: savedStateHandle.primalName?.let { profileRepository.fetchProfileId(it) }
 }

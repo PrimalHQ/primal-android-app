@@ -73,7 +73,7 @@ fun ProfileDetailsHeader(
     ProfileHeaderDetails(
         state = state,
         onEditProfileClick = onEditProfileClick,
-        onMessageClick = { onMessageClick(state.profileId) },
+        onMessageClick = { state.profileId?.let { onMessageClick(state.profileId) } },
         onZapProfileClick = {
             val profileLud16 = state.profileDetails?.lightningAddress
             if (profileLud16?.isLightningAddress() == true) {
@@ -85,20 +85,24 @@ fun ProfileDetailsHeader(
             }
         },
         onFollow = {
-            eventPublisher(
-                ProfileDetailsContract.UiEvent.FollowAction(
-                    profileId = state.profileId,
-                    forceUpdate = false,
-                ),
-            )
+            state.profileId?.let {
+                eventPublisher(
+                    ProfileDetailsContract.UiEvent.FollowAction(
+                        profileId = it,
+                        forceUpdate = false,
+                    ),
+                )
+            }
         },
         onUnfollow = {
-            eventPublisher(
-                ProfileDetailsContract.UiEvent.UnfollowAction(
-                    profileId = state.profileId,
-                    forceUpdate = false,
-                ),
-            )
+            state.profileId?.let {
+                eventPublisher(
+                    ProfileDetailsContract.UiEvent.UnfollowAction(
+                        profileId = it,
+                        forceUpdate = false,
+                    ),
+                )
+            }
         },
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         onFollowsClick = onFollowsClick,
@@ -138,7 +142,7 @@ private fun ProfileHeaderDetails(
                 .padding(top = 14.dp)
                 .background(AppTheme.colorScheme.surfaceVariant),
             isFollowed = state.isProfileFollowed,
-            isActiveUser = state.isActiveUser,
+            isActiveUser = state.isActiveUser == true,
             onEditProfileClick = onEditProfileClick,
             onMessageClick = onMessageClick,
             onZapProfileClick = onZapProfileClick,
@@ -147,13 +151,15 @@ private fun ProfileHeaderDetails(
             onUnfollow = onUnfollow,
         )
 
-        UserDisplayName(
-            profileId = state.profileId,
-            displayName = state.profileDetails?.authorDisplayName ?: state.profileId.asEllipsizedNpub(),
-            internetIdentifier = state.profileDetails?.internetIdentifier,
-            profilePremiumDetails = state.profileDetails?.premiumDetails,
-            onPremiumBadgeClick = onPremiumBadgeClick,
-        )
+        state.profileId?.let { profileId ->
+            UserDisplayName(
+                profileId = profileId,
+                displayName = state.profileDetails?.authorDisplayName ?: profileId.asEllipsizedNpub(),
+                internetIdentifier = state.profileDetails?.internetIdentifier,
+                profilePremiumDetails = state.profileDetails?.premiumDetails,
+                onPremiumBadgeClick = onPremiumBadgeClick,
+            )
+        }
 
         if (state.profileDetails?.internetIdentifier?.isNotEmpty() == true) {
             UserInternetIdentifier(
@@ -162,14 +168,16 @@ private fun ProfileHeaderDetails(
             )
         }
 
-        ProfileFollowIndicators(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp),
-            followingCount = state.profileStats?.followingCount,
-            followersCount = state.profileStats?.followersCount,
-            isProfileFollowingMe = state.isProfileFollowingMe,
-            onFollowingClick = { onFollowsClick(state.profileId, ProfileFollowsType.Following) },
-            onFollowersClick = { onFollowsClick(state.profileId, ProfileFollowsType.Followers) },
-        )
+        state.profileId?.let { profileId ->
+            ProfileFollowIndicators(
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp),
+                followingCount = state.profileStats?.followingCount,
+                followersCount = state.profileStats?.followersCount,
+                isProfileFollowingMe = state.isProfileFollowingMe,
+                onFollowingClick = { onFollowsClick(profileId, ProfileFollowsType.Following) },
+                onFollowersClick = { onFollowsClick(profileId, ProfileFollowsType.Followers) },
+            )
+        }
 
         if (state.profileDetails?.about?.isNotEmpty() == true) {
             ProfileAboutSection(

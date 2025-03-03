@@ -10,8 +10,8 @@ import net.primal.android.profile.report.ReportType
 
 interface ProfileDetailsContract {
     data class UiState(
-        val profileId: String,
-        val isActiveUser: Boolean,
+        val profileId: String? = null,
+        val isActiveUser: Boolean? = null,
         val activeUserPremiumTier: String? = null,
         val isProfileFollowed: Boolean = false,
         val isProfileFollowingMe: Boolean = false,
@@ -27,11 +27,18 @@ interface ProfileDetailsContract {
             ProfileFeedSpec.AuthoredArticles,
             ProfileFeedSpec.AuthoredMedia,
         ),
+        val isResolvingProfileId: Boolean = true,
+        val resolutionError: ProfileResolutionError? = null,
         val error: ProfileError? = null,
         val shouldApproveProfileAction: ProfileApproval? = null,
         val zapError: UiError? = null,
         val zappingState: ZappingState = ZappingState(),
     ) {
+        sealed class ProfileResolutionError {
+            data object InvalidProfileId : ProfileResolutionError()
+            data class ErrorResolvingPrimalName(val cause: Throwable) : ProfileResolutionError()
+        }
+
         sealed class ProfileError {
             data class MissingRelaysConfiguration(val cause: Throwable) : ProfileError()
             data class FailedToFollowProfile(val cause: Throwable) : ProfileError()
@@ -67,7 +74,8 @@ interface ProfileDetailsContract {
         data class RemoveProfileFeedAction(val profileId: String) : UiEvent()
         data class MuteAction(val profileId: String) : UiEvent()
         data class UnmuteAction(val profileId: String) : UiEvent()
-        data object RequestProfileUpdate : UiEvent()
+        data object RequestProfileIdResolution : UiEvent()
+        data class RequestProfileUpdate(val profileId: String) : UiEvent()
         data class ReportAbuse(val type: ReportType, val profileId: String, val noteId: String? = null) : UiEvent()
         data object DismissError : UiEvent()
         data object DismissZapError : UiEvent()

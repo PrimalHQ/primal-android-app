@@ -180,7 +180,7 @@ private fun ProfileTopAppBar(
                     NostrUserText(
                         modifier = Modifier.padding(top = 4.dp),
                         displayName = state.profileDetails?.authorDisplayName
-                            ?: state.profileId.asEllipsizedNpub(),
+                            ?: state.profileId?.asEllipsizedNpub() ?: "",
                         internetIdentifier = state.profileDetails?.internetIdentifier,
                         internetIdentifierBadgeSize = 20.dp,
                         internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
@@ -202,15 +202,17 @@ private fun ProfileTopAppBar(
                     tint = Color.White,
                 )
                 Spacer(modifier = Modifier.width(12.dp))
-                ProfileDropdownMenu(
-                    profileId = state.profileId,
-                    isActiveUser = state.isActiveUser,
-                    isProfileMuted = state.isProfileMuted,
-                    isProfileFeedInActiveUserFeeds = state.isProfileFeedInActiveUserFeeds,
-                    profileName = profileName,
-                    eventPublisher = eventPublisher,
-                    primalName = state.profileDetails?.primalName,
-                )
+                state.profileId?.let {
+                    ProfileDropdownMenu(
+                        profileId = it,
+                        isActiveUser = state.isActiveUser == true,
+                        isProfileMuted = state.isProfileMuted,
+                        isProfileFeedInActiveUserFeeds = state.isProfileFeedInActiveUserFeeds,
+                        profileName = profileName,
+                        eventPublisher = eventPublisher,
+                        primalName = state.profileDetails?.primalName,
+                    )
+                }
             },
         )
 
