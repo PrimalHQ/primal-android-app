@@ -118,7 +118,7 @@ class PrimalDrawerViewModel @Inject constructor(
 
     private fun buildDrawerMenuItems(hasPremium: Boolean = false, userId: String) =
         listOf(
-            DrawerScreenDestination.Profile,
+            DrawerScreenDestination.Profile(userId = userId),
             DrawerScreenDestination.Premium(hasPremium = hasPremium),
             DrawerScreenDestination.Messages,
             DrawerScreenDestination.Bookmarks(userId = userId),

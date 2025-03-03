@@ -220,11 +220,7 @@ private fun NavController.navigateToChat(profileId: String) = navigate(route = "
 
 private fun NavController.navigateToNewMessage() = navigate(route = "messages/new")
 
-fun NavController.navigateToProfile(profileId: String? = null) =
-    when {
-        profileId != null -> navigate(route = "profile?$PROFILE_ID=$profileId")
-        else -> navigate(route = "profile")
-    }
+fun NavController.navigateToProfile(profileId: String) = navigate(route = "profile?$PROFILE_ID=$profileId")
 
 fun NavController.navigateToProfileQrCodeViewer(profileId: String? = null) =
     when {
@@ -395,7 +391,7 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
 
     val drawerDestinationHandler: (DrawerScreenDestination) -> Unit = {
         when (it) {
-            DrawerScreenDestination.Profile -> navController.navigateToProfile()
+            is DrawerScreenDestination.Profile -> navController.navigateToProfile(profileId = it.userId)
             is DrawerScreenDestination.Premium -> if (it.hasPremium) {
                 navController.navigateToPremiumHome()
             } else {
