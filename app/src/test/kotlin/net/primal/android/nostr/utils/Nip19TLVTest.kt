@@ -25,8 +25,6 @@ class Nip19TLVTest {
 
         val tlv = Nip19TLV.parse(nevent1)
 
-        println(tlv[0]?.first()?.toString())
-
         tlv shouldBe instanceOf(Map::class)
         tlv.size shouldBe 2
         val actualEventId = tlv[Nip19TLV.Type.SPECIAL.id]?.first()?.toHex()
@@ -164,7 +162,6 @@ class Nip19TLVTest {
 
         val result = Nip19TLV.parseUriAsNeventOrNull(nevent)
         result.shouldNotBeNull()
-        println(result)
 
         result.eventId shouldBe expectedEventId
         result.relays shouldBe expectedRelays
@@ -185,7 +182,6 @@ class Nip19TLVTest {
 
         val result = Nip19TLV.parseUriAsNeventOrNull(nevent)
         result.shouldNotBeNull()
-        println(result)
 
         result.eventId shouldBe expectedEventId
         result.relays shouldBe expectedRelays
@@ -206,7 +202,6 @@ class Nip19TLVTest {
 
         val result = Nip19TLV.parseUriAsNeventOrNull(nevent)
         result.shouldNotBeNull()
-        println(result)
 
         result.eventId shouldBe expectedEventId
         result.relays shouldBe expectedRelays
