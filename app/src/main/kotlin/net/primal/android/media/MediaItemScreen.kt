@@ -40,6 +40,8 @@ import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.utils.copyImageToClipboard
+import net.primal.android.core.utils.copyText
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -85,6 +87,9 @@ private fun MediaItemScreen(
     animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
     SnackbarErrorHandler(
         error = state.error,
         snackbarHostState = snackbarHostState,
@@ -119,6 +124,14 @@ private fun MediaItemScreen(
                 actions = {
                     GalleryDropdownMenu(
                         onSaveClick = { eventPublisher(MediaItemContract.UiEvent.SaveMedia) },
+                        onMediaUrlCopyClick = {
+                            copyText(context = context, text = state.mediaUrl)
+                        },
+                        onMediaCopyClick = {
+                            coroutineScope.launch {
+                                copyImageToClipboard(context = context, imageUrl = state.mediaUrl)
+                            }
+                        },
                     )
                 },
             )
