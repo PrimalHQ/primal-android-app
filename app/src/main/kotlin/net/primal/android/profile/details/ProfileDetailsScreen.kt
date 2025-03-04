@@ -113,9 +113,7 @@ fun ProfileDetailsScreen(
     DisposableLifecycleObserverEffect(viewModel) {
         when (it) {
             Lifecycle.Event.ON_START -> {
-                uiState.value.profileId?.let {
-                    viewModel.setEvent(ProfileDetailsContract.UiEvent.RequestProfileUpdate(it))
-                }
+                viewModel.setEvent(ProfileDetailsContract.UiEvent.RequestProfileUpdate)
             }
 
             else -> Unit
@@ -381,9 +379,7 @@ fun ProfileDetailsScreen(
                 indicatorPaddingValues = paddingValues,
                 onRefresh = {
                     pullToRefreshing.value = true
-                    state.profileId?.let {
-                        eventPublisher(ProfileDetailsContract.UiEvent.RequestProfileUpdate(profileId = it))
-                    }
+                    eventPublisher(ProfileDetailsContract.UiEvent.RequestProfileUpdate)
                 },
             ) {
                 if (state.isResolvingProfileId) {

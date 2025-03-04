@@ -134,7 +134,7 @@ class ProfileDetailsViewModel @Inject constructor(
                     is UiEvent.RemoveProfileFeedAction -> removeProfileFeed(it)
                     is UiEvent.MuteAction -> mute(it)
                     is UiEvent.UnmuteAction -> unmute(it)
-                    is UiEvent.RequestProfileUpdate -> requestProfileUpdate(it.profileId)
+                    UiEvent.RequestProfileUpdate -> state.value.profileId?.let { requestProfileUpdate(it) }
 
                     is UiEvent.ReportAbuse -> reportAbuse(it)
                     UiEvent.DismissError -> setState { copy(error = null) }

@@ -72,7 +72,7 @@ interface ProfileDetailsContract {
         data class MuteAction(val profileId: String) : UiEvent()
         data class UnmuteAction(val profileId: String) : UiEvent()
         data object RequestProfileIdResolution : UiEvent()
-        data class RequestProfileUpdate(val profileId: String) : UiEvent()
+        data object RequestProfileUpdate : UiEvent()
         data class ReportAbuse(val type: ReportType, val profileId: String, val noteId: String? = null) : UiEvent()
         data object DismissError : UiEvent()
         data object DismissZapError : UiEvent()
