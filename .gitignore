@@ -1,9 +1,9 @@
-android/
-caches/
-daemon/
-kotlin-profile/
-native/
-wrapper/
+/android/
+/caches/
+/daemon/
+/kotlin-profile/
+/native/
+/wrapper/
 *.iml
 .gradle
 /local.properties
