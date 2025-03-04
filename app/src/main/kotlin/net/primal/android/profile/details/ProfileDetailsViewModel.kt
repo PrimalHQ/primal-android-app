@@ -86,9 +86,8 @@ class ProfileDetailsViewModel @Inject constructor(
                         ?: savedStateHandle.primalName?.let { profileRepository.fetchProfileId(it) }
                 }
 
-                val isActiveUser = profileId == activeAccountStore.activeUserId()
-
                 if (profileId?.isValidHex() == true) {
+                    val isActiveUser = profileId == activeAccountStore.activeUserId()
                     setState { copy(profileId = profileId, isActiveUser = isActiveUser) }
                     initializeProfileDetails(profileId = profileId, isActiveUser = isActiveUser)
                 }

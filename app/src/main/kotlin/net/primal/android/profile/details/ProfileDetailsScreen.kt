@@ -57,8 +57,11 @@ import net.primal.android.R
 import net.primal.android.articles.feed.ArticleFeedList
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalLoadingSpinner
+import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.fab.NewPostFloatingActionButton
+import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.approvals.ApproveFollowUnfollowProfileAlertDialog
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
@@ -194,7 +197,8 @@ private fun ProfileDetailsScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState, modifier = Modifier.navigationBarsPadding()) },
-        floatingActionButton = { NewPostFloatingActionButton(onNewPostClick = callbacks.onNewPostClick) },
+        floatingActionButton = resolveProfileDetailsFloatingActionButton(state, callbacks),
+        topBar = resolveProfileDetailsTopBar(state, callbacks),
     ) { paddingValues ->
         BoxWithConstraints(
             modifier = Modifier
@@ -244,6 +248,40 @@ private fun ProfileDetailsScreen(
                 }
             }
         }
+    }
+}
+
+@ExperimentalMaterial3Api
+@Composable
+private fun resolveProfileDetailsTopBar(
+    state: ProfileDetailsContract.UiState,
+    callbacks: ProfileDetailsContract.ScreenCallbacks,
+): @Composable () -> Unit {
+    return if (state.profileId == null) {
+        {
+            PrimalTopAppBar(
+                showDivider = false,
+                navigationIcon = PrimalIcons.ArrowBack,
+                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
+                onNavigationIconClick = callbacks.onClose,
+            )
+        }
+    } else {
+        {}
+    }
+}
+
+@Composable
+private fun resolveProfileDetailsFloatingActionButton(
+    state: ProfileDetailsContract.UiState,
+    callbacks: ProfileDetailsContract.ScreenCallbacks,
+): @Composable () -> Unit {
+    return if (state.profileId != null) {
+        {
+            NewPostFloatingActionButton(onNewPostClick = callbacks.onNewPostClick)
+        }
+    } else {
+        {}
     }
 }
 
