@@ -134,7 +134,7 @@ class ProfileDetailsViewModel @Inject constructor(
                     is UiEvent.RemoveProfileFeedAction -> removeProfileFeed(it)
                     is UiEvent.MuteAction -> mute(it)
                     is UiEvent.UnmuteAction -> unmute(it)
-                    UiEvent.RequestProfileUpdate -> state.value.profileId?.let { requestProfileUpdate(it) }
+                    UiEvent.RequestProfileUpdate -> requestProfileUpdate()
 
                     is UiEvent.ReportAbuse -> reportAbuse(it)
                     UiEvent.DismissError -> setState { copy(error = null) }
@@ -188,11 +188,13 @@ class ProfileDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun requestProfileUpdate(profileId: String) =
+    private fun requestProfileUpdate() =
         viewModelScope.launch {
-            fetchLatestProfile(profileId = profileId)
-            fetchLatestMuteList()
-            setEffect(ProfileDetailsContract.SideEffect.ProfileUpdateFinished)
+            state.value.profileId?.let {
+                fetchLatestProfile(profileId = it)
+                fetchLatestMuteList()
+                setEffect(ProfileDetailsContract.SideEffect.ProfileUpdateFinished)
+            }
         }
 
     private fun fetchProfileFollowedBy(profileId: String) =
