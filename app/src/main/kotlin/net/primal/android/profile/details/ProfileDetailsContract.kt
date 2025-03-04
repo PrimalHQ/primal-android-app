@@ -11,6 +11,7 @@ import net.primal.android.profile.report.ReportType
 interface ProfileDetailsContract {
     data class UiState(
         val profileId: String? = null,
+        val isResolvingProfileId: Boolean = true,
         val isActiveUser: Boolean? = null,
         val activeUserPremiumTier: String? = null,
         val isProfileFollowed: Boolean = false,
@@ -27,7 +28,6 @@ interface ProfileDetailsContract {
             ProfileFeedSpec.AuthoredArticles,
             ProfileFeedSpec.AuthoredMedia,
         ),
-        val isResolvingProfileId: Boolean = true,
         val resolutionError: ProfileResolutionError? = null,
         val error: ProfileError? = null,
         val shouldApproveProfileAction: ProfileApproval? = null,
