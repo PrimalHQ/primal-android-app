@@ -79,7 +79,7 @@ class ProfileDetailsViewModel @Inject constructor(
 
     private fun resolveProfileId() =
         viewModelScope.launch {
-            setState { copy(isResolvingProfileId = true, isInvalidProfileId = false) }
+            setState { copy(isResolvingProfileId = true) }
             runCatching {
                 val profileId = withContext(dispatcherProvider.io()) {
                     savedStateHandle.profileId?.parseForProfileId()
@@ -91,14 +91,9 @@ class ProfileDetailsViewModel @Inject constructor(
                 if (profileId?.isValidHex() == true) {
                     setState { copy(profileId = profileId, isActiveUser = isActiveUser) }
                     initializeProfileDetails(profileId = profileId, isActiveUser = isActiveUser)
-                } else {
-                    setState { copy(isInvalidProfileId = true) }
                 }
-            }.onFailure {
-                setState { copy(isInvalidProfileId = true, isResolvingProfileId = false) }
-            }.onSuccess {
-                setState { copy(isResolvingProfileId = false) }
             }
+            setState { copy(isResolvingProfileId = false) }
         }
 
     private fun initializeProfileDetails(profileId: String, isActiveUser: Boolean) {

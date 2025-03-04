@@ -14,7 +14,6 @@ interface ProfileDetailsContract {
     data class UiState(
         val profileId: String? = null,
         val isResolvingProfileId: Boolean = true,
-        val isInvalidProfileId: Boolean = false,
         val isActiveUser: Boolean? = null,
         val activeUserPremiumTier: String? = null,
         val isProfileFollowed: Boolean = false,

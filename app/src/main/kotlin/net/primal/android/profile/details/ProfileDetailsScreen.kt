@@ -215,27 +215,33 @@ private fun ProfileDetailsScreen(
         ) {
             val screenHeight = maxHeight - with(LocalDensity.current) { WindowInsets.statusBars.getTop(this).toDp() }
 
-            if (state.isResolvingProfileId) {
-                PrimalLoadingSpinner()
-            } else if (state.isInvalidProfileId) {
-                ListNoContent(
-                    modifier = Modifier.fillMaxSize(),
-                    noContentText = stringResource(id = R.string.profile_invalid_profile_id),
-                    onRefresh = { eventPublisher(ProfileDetailsContract.UiEvent.RequestProfileIdResolution) },
-                )
-            } else {
-                ProfileDetailsContent(
-                    pullToRefreshing = pullToRefreshing,
-                    pullToRefreshState = pullToRefreshState,
-                    paddingValues = paddingValues,
-                    eventPublisher = eventPublisher,
-                    listState = listState,
-                    state = state,
-                    callbacks = callbacks,
-                    noteCallbacks = noteCallbacks,
-                    screenHeight = screenHeight,
-                    snackbarHostState = snackbarHostState,
-                )
+            when {
+                state.isResolvingProfileId -> {
+                    PrimalLoadingSpinner()
+                }
+
+                state.profileId == null -> {
+                    ListNoContent(
+                        modifier = Modifier.fillMaxSize(),
+                        noContentText = stringResource(id = R.string.profile_invalid_profile_id),
+                        onRefresh = { eventPublisher(ProfileDetailsContract.UiEvent.RequestProfileIdResolution) },
+                    )
+                }
+
+                else -> {
+                    ProfileDetailsContent(
+                        pullToRefreshing = pullToRefreshing,
+                        pullToRefreshState = pullToRefreshState,
+                        paddingValues = paddingValues,
+                        eventPublisher = eventPublisher,
+                        listState = listState,
+                        state = state,
+                        callbacks = callbacks,
+                        noteCallbacks = noteCallbacks,
+                        screenHeight = screenHeight,
+                        snackbarHostState = snackbarHostState,
+                    )
+                }
             }
         }
     }
