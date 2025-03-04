@@ -4,6 +4,7 @@ import net.primal.android.core.compose.profile.approvals.ProfileApproval
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.core.errors.UiError
+import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.profile.domain.ProfileFeedSpec
 import net.primal.android.profile.domain.ProfileFollowsType
@@ -34,7 +35,9 @@ interface ProfileDetailsContract {
         val shouldApproveProfileAction: ProfileApproval? = null,
         val zapError: UiError? = null,
         val zappingState: ZappingState = ZappingState(),
-    )
+    ) {
+        fun resolveProfileName() = profileDetails?.authorDisplayName ?: profileId?.asEllipsizedNpub() ?: ""
+    }
 
     sealed class SideEffect {
         data object ProfileUpdateFinished : SideEffect()

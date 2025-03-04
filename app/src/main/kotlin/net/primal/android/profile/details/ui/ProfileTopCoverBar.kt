@@ -55,7 +55,6 @@ import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Search
-import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.theme.AppTheme
 
@@ -247,11 +246,11 @@ private fun ProfileTopCoverBar(
 private fun ProfileTopAppBar(
     state: ProfileDetailsContract.UiState,
     titleVisible: Boolean,
+    paddingValues: PaddingValues,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     onClose: () -> Unit,
     onSearchClick: () -> Unit,
     onMediaClick: () -> Unit,
-    paddingValues: PaddingValues,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Column(
@@ -284,8 +283,7 @@ private fun ProfileTopAppBar(
                 ) {
                     NostrUserText(
                         modifier = Modifier.padding(top = 4.dp),
-                        displayName = state.profileDetails?.authorDisplayName
-                            ?: state.profileId?.asEllipsizedNpub() ?: "",
+                        displayName = state.resolveProfileName(),
                         internetIdentifier = state.profileDetails?.internetIdentifier,
                         internetIdentifierBadgeSize = 20.dp,
                         internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
@@ -294,7 +292,7 @@ private fun ProfileTopAppBar(
                 }
             },
             actions = {
-                val profileName = state.profileDetails?.authorDisplayName ?: ""
+                val profileName = state.resolveProfileName()
                 ProfileAppBarIcon(
                     icon = PrimalIcons.Search,
                     onClick = onSearchClick,
@@ -306,10 +304,12 @@ private fun ProfileTopAppBar(
                     enabledBackgroundColor = Color.Black.copy(alpha = 0.5f),
                     tint = Color.White,
                 )
+
                 Spacer(modifier = Modifier.width(12.dp))
-                state.profileId?.let {
+
+                if (state.profileId != null) {
                     ProfileDropdownMenu(
-                        profileId = it,
+                        profileId = state.profileId,
                         isActiveUser = state.isActiveUser == true,
                         isProfileMuted = state.isProfileMuted,
                         isProfileFeedInActiveUserFeeds = state.isProfileFeedInActiveUserFeeds,
