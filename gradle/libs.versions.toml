@@ -58,7 +58,6 @@ telephoto = "0.14.0"
 timber = "5.0.1"
 url-detector = "0.1.23"
 webkit = "1.12.1"
-storage = "1.5.0"
 
 [libraries]
 # Core libs
@@ -194,7 +193,6 @@ androidx-camera-core = { group = "androidx.camera", name = "camera-core", versio
 androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camera" }
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camera" }
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camera" }
-androidx-storage = { group = "androidx.test.services", name = "storage", version.ref = "storage" }
 
 [bundles]
 hilt = ["hilt-android", "navigation-hilt"]
