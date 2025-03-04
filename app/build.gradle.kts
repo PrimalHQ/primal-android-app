@@ -217,6 +217,7 @@ dependencies {
     implementation(libs.activity.compose)
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.activity.ktx)
+    implementation(libs.androidx.storage)
     runtimeOnly(libs.androidx.appcompat)
 
     implementation(platform(libs.compose.bom))
