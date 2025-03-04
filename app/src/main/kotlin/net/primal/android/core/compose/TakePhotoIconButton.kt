@@ -20,7 +20,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import net.primal.android.BuildConfig
 
-private fun Context.createImageFile(): File {
+fun Context.createImageFile(): File {
     val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
     val imageFileName = "JPEG_" + timeStamp + "_"
     return File.createTempFile(

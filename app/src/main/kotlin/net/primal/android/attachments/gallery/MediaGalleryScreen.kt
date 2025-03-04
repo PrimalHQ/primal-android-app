@@ -78,8 +78,12 @@ import net.primal.android.core.compose.dropdown.DropdownPrimalMenuItem
 import net.primal.android.core.compose.foundation.KeepScreenOn
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteLink
+import net.primal.android.core.compose.icons.primaliconpack.ContextCopyRawData
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.core.utils.copyImageToClipboard
+import net.primal.android.core.utils.copyText
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -140,6 +144,7 @@ fun MediaGalleryScreen(
     )
 
     val containerColor = AppTheme.colorScheme.surface.copy(alpha = 0.21f)
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         contentColor = AppTheme.colorScheme.background,
@@ -161,6 +166,16 @@ fun MediaGalleryScreen(
                     GalleryDropdownMenu(
                         onSaveClick = {
                             currentImage()?.let { eventPublisher(MediaGalleryContract.UiEvent.SaveMedia(it)) }
+                        },
+                        onMediaUrlCopyClick = {
+                            currentImage()?.url?.let { copyText(context = context, text = it) }
+                        },
+                        onMediaCopyClick = {
+                            currentImage()?.let { image ->
+                                coroutineScope.launch {
+                                    copyImageToClipboard(context = context, imageUrl = image.url)
+                                }
+                            }
                         },
                     )
                 },
@@ -223,7 +238,11 @@ private fun MediaGalleryContent(
 }
 
 @Composable
-fun GalleryDropdownMenu(onSaveClick: () -> Unit) {
+fun GalleryDropdownMenu(
+    onSaveClick: () -> Unit,
+    onMediaUrlCopyClick: () -> Unit,
+    onMediaCopyClick: () -> Unit,
+) {
     var menuVisible by remember { mutableStateOf(false) }
 
     AppBarIcon(
@@ -240,6 +259,18 @@ fun GalleryDropdownMenu(onSaveClick: () -> Unit) {
             onSaveClick = {
                 menuVisible = false
                 onSaveClick()
+            },
+        )
+        MediaUrlCopyMenuItem(
+            onMediaUrlCopyClick = {
+                menuVisible = false
+                onMediaUrlCopyClick()
+            },
+        )
+        MediaCopyMenuItem(
+            onMediaCopyClick = {
+                menuVisible = false
+                onMediaCopyClick()
             },
         )
     }
@@ -268,6 +299,50 @@ private fun SaveMediaMenuItem(onSaveClick: () -> Unit) {
             } else {
                 launcher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
+        },
+    )
+}
+
+@Composable
+private fun MediaUrlCopyMenuItem(onMediaUrlCopyClick: () -> Unit) {
+    val context = LocalContext.current
+    val copyConfirmationText = stringResource(id = R.string.media_gallery_context_copy_url_toast_success)
+    val uiScope = rememberCoroutineScope()
+
+    DropdownPrimalMenuItem(
+        trailingIconVector = PrimalIcons.ContextCopyNoteLink,
+        text = stringResource(id = R.string.media_gallery_context_copy_image_url),
+        onClick = {
+            uiScope.launch {
+                Toast.makeText(
+                    context,
+                    copyConfirmationText,
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
+            onMediaUrlCopyClick()
+        },
+    )
+}
+
+@Composable
+private fun MediaCopyMenuItem(onMediaCopyClick: () -> Unit) {
+    val context = LocalContext.current
+    val copyConfirmationText = stringResource(id = R.string.media_gallery_context_copy_url_toast_success)
+    val uiScope = rememberCoroutineScope()
+
+    DropdownPrimalMenuItem(
+        trailingIconVector = PrimalIcons.ContextCopyRawData,
+        text = stringResource(id = R.string.media_gallery_context_copy_image),
+        onClick = {
+            uiScope.launch {
+                Toast.makeText(
+                    context,
+                    copyConfirmationText,
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
+            onMediaCopyClick()
         },
     )
 }
