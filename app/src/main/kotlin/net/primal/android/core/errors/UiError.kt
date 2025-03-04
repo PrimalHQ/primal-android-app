@@ -13,8 +13,12 @@ sealed class UiError {
     data class FailedToFollowUser(val cause: Throwable) : UiError()
     data class FailedToUnfollowUser(val cause: Throwable) : UiError()
     data class FailedToMuteUser(val cause: Throwable) : UiError()
+    data class FailedToUnmuteUser(val cause: Throwable) : UiError()
 
     data class MissingRelaysConfiguration(val cause: Throwable) : UiError()
+
+    data class FailedToAddToFeed(val cause: Throwable) : UiError()
+    data class FailedToRemoveFeed(val cause: Throwable) : UiError()
 
     data class GenericError(val message: String? = null) : UiError()
 }

@@ -31,21 +31,11 @@ interface ProfileDetailsContract {
             ProfileFeedSpec.AuthoredArticles,
             ProfileFeedSpec.AuthoredMedia,
         ),
-        val error: ProfileError? = null,
+        val error: UiError? = null,
         val shouldApproveProfileAction: ProfileApproval? = null,
         val zapError: UiError? = null,
         val zappingState: ZappingState = ZappingState(),
-    ) {
-        sealed class ProfileError {
-            data class MissingRelaysConfiguration(val cause: Throwable) : ProfileError()
-            data class FailedToFollowProfile(val cause: Throwable) : ProfileError()
-            data class FailedToUnfollowProfile(val cause: Throwable) : ProfileError()
-            data class FailedToAddToFeed(val cause: Throwable) : ProfileError()
-            data class FailedToRemoveFeed(val cause: Throwable) : ProfileError()
-            data class FailedToMuteProfile(val cause: Throwable) : ProfileError()
-            data class FailedToUnmuteProfile(val cause: Throwable) : ProfileError()
-        }
-    }
+    )
 
     sealed class SideEffect {
         data object ProfileUpdateFinished : SideEffect()

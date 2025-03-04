@@ -37,7 +37,6 @@ import net.primal.android.nostr.utils.Nip19TLV
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
-import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -370,22 +369,20 @@ class ProfileDetailsViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.w(error)
                 updateStateProfileAsUnfollowedAndClearApprovalFlag()
-                setErrorState(error = ProfileError.FailedToFollowProfile(error))
+                setErrorState(error = UiError.FailedToFollowUser(error))
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 updateStateProfileAsUnfollowedAndClearApprovalFlag()
-                setErrorState(error = ProfileError.FailedToFollowProfile(error))
+                setErrorState(error = UiError.FailedToFollowUser(error))
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 updateStateProfileAsUnfollowedAndClearApprovalFlag()
-                setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
+                setErrorState(error = UiError.MissingRelaysConfiguration(error))
             } catch (error: ProfileRepository.FollowListNotFound) {
                 Timber.w(error)
                 updateStateProfileAsUnfollowedAndClearApprovalFlag()
                 setState {
-                    copy(
-                        shouldApproveProfileAction = ProfileApproval.Follow(profileId = followAction.profileId),
-                    )
+                    copy(shouldApproveProfileAction = ProfileApproval.Follow(profileId = followAction.profileId))
                 }
             }
         }
@@ -402,15 +399,15 @@ class ProfileDetailsViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.w(error)
                 updateStateProfileAsFollowedAndClearApprovalFlag()
-                setErrorState(error = ProfileError.FailedToUnfollowProfile(error))
+                setErrorState(error = UiError.FailedToUnfollowUser(error))
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 updateStateProfileAsFollowedAndClearApprovalFlag()
-                setErrorState(error = ProfileError.FailedToUnfollowProfile(error))
+                setErrorState(error = UiError.FailedToUnfollowUser(error))
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 updateStateProfileAsFollowedAndClearApprovalFlag()
-                setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
+                setErrorState(error = UiError.MissingRelaysConfiguration(error))
             } catch (error: ProfileRepository.FollowListNotFound) {
                 Timber.w(error)
                 updateStateProfileAsFollowedAndClearApprovalFlag()
@@ -437,7 +434,7 @@ class ProfileDetailsViewModel @Inject constructor(
                 setEffect(ProfileDetailsContract.SideEffect.ProfileFeedAdded)
             } catch (error: WssException) {
                 Timber.w(error)
-                setErrorState(error = ProfileError.FailedToAddToFeed(error))
+                setErrorState(error = UiError.FailedToAddToFeed(error))
             }
         }
     }
@@ -453,7 +450,7 @@ class ProfileDetailsViewModel @Inject constructor(
                 setEffect(ProfileDetailsContract.SideEffect.ProfileFeedRemoved)
             } catch (error: WssException) {
                 Timber.w(error)
-                setErrorState(error = ProfileError.FailedToRemoveFeed(error))
+                setErrorState(error = UiError.FailedToRemoveFeed(error))
             }
         }
     }
@@ -470,13 +467,13 @@ class ProfileDetailsViewModel @Inject constructor(
                 setState { copy(isProfileMuted = true) }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
-                setErrorState(error = ProfileError.FailedToMuteProfile(error))
+                setErrorState(error = UiError.FailedToMuteUser(error))
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
-                setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
+                setErrorState(error = UiError.MissingRelaysConfiguration(error))
             } catch (error: WssException) {
                 Timber.w(error)
-                setErrorState(error = ProfileError.FailedToMuteProfile(error))
+                setErrorState(error = UiError.FailedToMuteUser(error))
             }
         }
 
@@ -492,13 +489,13 @@ class ProfileDetailsViewModel @Inject constructor(
                 setState { copy(isProfileMuted = false) }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
-                setErrorState(error = ProfileError.FailedToUnmuteProfile(error))
+                setErrorState(error = UiError.FailedToUnmuteUser(error))
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
-                setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
+                setErrorState(error = UiError.MissingRelaysConfiguration(error))
             } catch (error: WssException) {
                 Timber.w(error)
-                setErrorState(error = ProfileError.FailedToUnmuteProfile(error))
+                setErrorState(error = UiError.FailedToUnmuteUser(error))
             }
         }
 
@@ -518,7 +515,7 @@ class ProfileDetailsViewModel @Inject constructor(
             }
         }
 
-    private fun setErrorState(error: ProfileError) {
+    private fun setErrorState(error: UiError) {
         setState { copy(error = error) }
     }
 

@@ -1,6 +1,5 @@
 package net.primal.android.profile.details
 
-import android.content.Context
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -53,7 +52,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
-import fr.acinq.lightning.channel.InteractiveTxInput
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ArticleFeedList
@@ -74,7 +72,6 @@ import net.primal.android.notes.feed.list.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
-import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
 import net.primal.android.profile.details.ui.PROFILE_TAB_COUNT
 import net.primal.android.profile.details.ui.ProfileHeaderDetails
 import net.primal.android.profile.details.ui.ProfileTabs
@@ -298,7 +295,7 @@ private fun ProfileDetailsContent(
     SnackbarErrorHandler(
         error = state.error,
         snackbarHostState = snackbarHostState,
-        errorMessageResolver = { it.asHumanReadableText(context) },
+        errorMessageResolver = { it.resolveUiErrorMessage(context) },
         onErrorDismiss = { eventPublisher(ProfileDetailsContract.UiEvent.DismissError) },
     )
 
@@ -495,38 +492,6 @@ private fun ProfileMutedNotice(profileName: String, onUnmuteClick: () -> Unit) {
                 text = stringResource(id = R.string.context_menu_unmute_user).uppercase(),
             )
         }
-    }
-}
-
-private fun ProfileError.asHumanReadableText(context: Context): String {
-    return when (this) {
-        is ProfileError.FailedToFollowProfile -> context.getString(
-            R.string.app_error_unable_to_follow_profile,
-        )
-
-        is ProfileError.FailedToUnfollowProfile -> context.getString(
-            R.string.app_error_unable_to_unfollow_profile,
-        )
-
-        is ProfileError.MissingRelaysConfiguration -> context.getString(
-            R.string.app_missing_relays_config,
-        )
-
-        is ProfileError.FailedToAddToFeed -> context.getString(
-            R.string.app_error_adding_to_feed,
-        )
-
-        is ProfileError.FailedToRemoveFeed -> context.getString(
-            R.string.app_error_removing_feed,
-        )
-
-        is ProfileError.FailedToMuteProfile -> context.getString(
-            R.string.app_error_muting_user,
-        )
-
-        is ProfileError.FailedToUnmuteProfile -> context.getString(
-            R.string.app_error_unmuting_user,
-        )
     }
 }
 
