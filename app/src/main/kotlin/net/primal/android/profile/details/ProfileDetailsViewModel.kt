@@ -86,11 +86,11 @@ class ProfileDetailsViewModel @Inject constructor(
                 val profileId = withContext(dispatcherProvider.io()) {
                     savedStateHandle.profileId?.parseForProfileId()
                         ?: savedStateHandle.primalName?.let { profileRepository.fetchProfileId(it) }
-                }!!
+                }
 
                 val isActiveUser = profileId == activeAccountStore.activeUserId()
 
-                if (profileId.isValidHex()) {
+                if (profileId?.isValidHex() == true) {
                     setState { copy(profileId = profileId, isActiveUser = isActiveUser) }
                     initializeProfileData(profileId = profileId, isActiveUser = isActiveUser)
                 } else {
