@@ -91,7 +91,7 @@ import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.zaps.canZap
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ProfileDetailsScreen(
     viewModel: ProfileDetailsViewModel,
@@ -167,10 +167,10 @@ internal const val REPLIES_TAB_INDEX = 1
 internal const val READS_TAB_INDEX = 2
 internal const val MEDIA_TAB_INDEX = 3
 
-@Suppress("LongMethod", "CyclomaticComplexMethod")
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@ExperimentalMaterial3Api
+@ExperimentalFoundationApi
 @Composable
-fun ProfileDetailsScreen(
+private fun ProfileDetailsScreen(
     state: ProfileDetailsContract.UiState,
     snackbarHostState: SnackbarHostState,
     pullToRefreshState: PullToRefreshState,
@@ -263,8 +263,8 @@ fun ProfileDetailsScreen(
 }
 
 @ExperimentalFoundationApi
-@Composable
 @ExperimentalMaterial3Api
+@Composable
 fun ProfileDetailsContent(
     pullToRefreshing: MutableState<Boolean>,
     pullToRefreshState: PullToRefreshState,
@@ -451,107 +451,130 @@ fun ProfileDetailsContent(
                 )
             }
             item {
-                val tabVerticalPadding = 8.dp
-                Column(
-                    modifier = Modifier
-                        .background(AppTheme.colorScheme.surfaceVariant)
-                        .height(screenHeight + tabVerticalPadding * 2),
-                ) {
-                    val pagerState = rememberPagerState { PROFILE_TAB_COUNT }
+                ProfileDetailsFeeds(
+                    state = state,
+                    screenHeight = screenHeight,
+                    eventPublisher = eventPublisher,
+                    snackbarHostState = snackbarHostState,
+                    noteCallbacks = noteCallbacks,
+                    callbacks = callbacks,
+                )
+            }
+        }
+    }
+}
 
-                    ProfileTabs(
-                        selectedTabIndex = pagerState.currentPage,
-                        modifier = Modifier.padding(vertical = tabVerticalPadding),
-                        notesCount = state.profileStats?.notesCount,
-                        onNotesCountClick = {
-                            uiScope.launch { pagerState.animateScrollToPage(page = NOTES_TAB_INDEX) }
-                        },
-                        repliesCount = state.profileStats?.repliesCount,
-                        onRepliesCountClick = {
-                            uiScope.launch { pagerState.animateScrollToPage(page = REPLIES_TAB_INDEX) }
-                        },
-                        readsCount = state.profileStats?.readsCount,
-                        onReadsCountClick = {
-                            uiScope.launch { pagerState.animateScrollToPage(page = READS_TAB_INDEX) }
-                        },
-                        mediaCount = state.profileStats?.mediaCount,
-                        onMediaCountClick = {
-                            uiScope.launch { pagerState.animateScrollToPage(page = MEDIA_TAB_INDEX) }
-                        },
-                    )
-                    HorizontalPager(state = pagerState) { pageIndex ->
-                        when {
-                            state.isProfileMuted -> {
-                                Box(modifier = Modifier.fillMaxSize()) {
-                                    ProfileMutedNotice(
-                                        profileName = state.profileDetails?.authorDisplayName
-                                            ?: state.profileId?.asEllipsizedNpub() ?: "",
-                                        onUnmuteClick = {
-                                            state.profileId?.let {
-                                                eventPublisher(ProfileDetailsContract.UiEvent.UnmuteAction(it))
-                                            }
-                                        },
-                                    )
-                                }
-                            }
+@Composable
+private fun ProfileDetailsFeeds(
+    state: ProfileDetailsContract.UiState,
+    screenHeight: Dp,
+    eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
+    snackbarHostState: SnackbarHostState,
+    noteCallbacks: NoteCallbacks,
+    callbacks: ProfileDetailsContract.ScreenCallbacks,
+) {
+    val uiScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
-                            pageIndex == NOTES_TAB_INDEX || pageIndex == REPLIES_TAB_INDEX -> {
+    val tabVerticalPadding = 8.dp
+
+    Column(
+        modifier = Modifier
+            .background(AppTheme.colorScheme.surfaceVariant)
+            .height(screenHeight + tabVerticalPadding * 2),
+    ) {
+        val pagerState = rememberPagerState { PROFILE_TAB_COUNT }
+
+        ProfileTabs(
+            selectedTabIndex = pagerState.currentPage,
+            modifier = Modifier.padding(vertical = tabVerticalPadding),
+            notesCount = state.profileStats?.notesCount,
+            onNotesCountClick = {
+                uiScope.launch { pagerState.animateScrollToPage(page = NOTES_TAB_INDEX) }
+            },
+            repliesCount = state.profileStats?.repliesCount,
+            onRepliesCountClick = {
+                uiScope.launch { pagerState.animateScrollToPage(page = REPLIES_TAB_INDEX) }
+            },
+            readsCount = state.profileStats?.readsCount,
+            onReadsCountClick = {
+                uiScope.launch { pagerState.animateScrollToPage(page = READS_TAB_INDEX) }
+            },
+            mediaCount = state.profileStats?.mediaCount,
+            onMediaCountClick = {
+                uiScope.launch { pagerState.animateScrollToPage(page = MEDIA_TAB_INDEX) }
+            },
+        )
+        HorizontalPager(state = pagerState) { pageIndex ->
+            when {
+                state.isProfileMuted -> {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        ProfileMutedNotice(
+                            profileName = state.profileDetails?.authorDisplayName
+                                ?: state.profileId?.asEllipsizedNpub() ?: "",
+                            onUnmuteClick = {
                                 state.profileId?.let {
-                                    NoteFeedList(
-                                        feedSpec = state.profileFeedSpecs[pageIndex].buildSpec(profileId = it),
-                                        noteCallbacks = noteCallbacks,
-                                        onGoToWallet = callbacks.onGoToWallet,
-                                        pollingEnabled = pageIndex == NOTES_TAB_INDEX,
-                                        pullToRefreshEnabled = false,
-                                        showTopZaps = true,
-                                        onUiError = { uiError ->
-                                            uiScope.launch {
-                                                snackbarHostState.showSnackbar(
-                                                    message = uiError.resolveUiErrorMessage(context),
-                                                    duration = SnackbarDuration.Short,
-                                                )
-                                            }
-                                        },
-                                        noContentVerticalArrangement = Arrangement.Top,
-                                        noContentPaddingValues = PaddingValues(top = 16.dp),
-                                    )
+                                    eventPublisher(ProfileDetailsContract.UiEvent.UnmuteAction(it))
                                 }
-                            }
+                            },
+                        )
+                    }
+                }
 
-                            pageIndex == READS_TAB_INDEX -> {
-                                state.profileId?.let {
-                                    ArticleFeedList(
-                                        feedSpec = state.profileFeedSpecs[pageIndex].buildSpec(profileId = it),
-                                        onArticleClick = { naddr -> noteCallbacks.onArticleClick?.invoke(naddr) },
-                                        onGetPremiumClick = { noteCallbacks.onGetPrimalPremiumClick?.invoke() },
-                                        pullToRefreshEnabled = false,
-                                        noContentVerticalArrangement = Arrangement.Top,
-                                        noContentPaddingValues = PaddingValues(top = 16.dp),
-                                        onUiError = { uiError: UiError ->
-                                            uiScope.launch {
-                                                snackbarHostState.showSnackbar(
-                                                    message = uiError.resolveUiErrorMessage(context),
-                                                    duration = SnackbarDuration.Short,
-                                                )
-                                            }
-                                        },
+                pageIndex == NOTES_TAB_INDEX || pageIndex == REPLIES_TAB_INDEX -> {
+                    state.profileId?.let {
+                        NoteFeedList(
+                            feedSpec = state.profileFeedSpecs[pageIndex].buildSpec(profileId = it),
+                            noteCallbacks = noteCallbacks,
+                            onGoToWallet = callbacks.onGoToWallet,
+                            pollingEnabled = pageIndex == NOTES_TAB_INDEX,
+                            pullToRefreshEnabled = false,
+                            showTopZaps = true,
+                            onUiError = { uiError ->
+                                uiScope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = uiError.resolveUiErrorMessage(context),
+                                        duration = SnackbarDuration.Short,
                                     )
                                 }
-                            }
+                            },
+                            noContentVerticalArrangement = Arrangement.Top,
+                            noContentPaddingValues = PaddingValues(top = 16.dp),
+                        )
+                    }
+                }
 
-                            pageIndex == MEDIA_TAB_INDEX -> {
-                                state.profileId?.let {
-                                    MediaFeedGrid(
-                                        modifier = Modifier.fillMaxSize(),
-                                        feedSpec = state.profileFeedSpecs[pageIndex].buildSpec(profileId = it),
-                                        onNoteClick = { naddr -> noteCallbacks.onNoteClick?.let { it(naddr) } },
-                                        noContentVerticalArrangement = Arrangement.Top,
-                                        noContentPaddingValues = PaddingValues(top = 16.dp),
-                                        onGetPrimalPremiumClick = { noteCallbacks.onGetPrimalPremiumClick?.invoke() },
+                pageIndex == READS_TAB_INDEX -> {
+                    state.profileId?.let {
+                        ArticleFeedList(
+                            feedSpec = state.profileFeedSpecs[pageIndex].buildSpec(profileId = it),
+                            onArticleClick = { naddr -> noteCallbacks.onArticleClick?.invoke(naddr) },
+                            onGetPremiumClick = { noteCallbacks.onGetPrimalPremiumClick?.invoke() },
+                            pullToRefreshEnabled = false,
+                            noContentVerticalArrangement = Arrangement.Top,
+                            noContentPaddingValues = PaddingValues(top = 16.dp),
+                            onUiError = { uiError: UiError ->
+                                uiScope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = uiError.resolveUiErrorMessage(context),
+                                        duration = SnackbarDuration.Short,
                                     )
                                 }
-                            }
-                        }
+                            },
+                        )
+                    }
+                }
+
+                pageIndex == MEDIA_TAB_INDEX -> {
+                    state.profileId?.let {
+                        MediaFeedGrid(
+                            modifier = Modifier.fillMaxSize(),
+                            feedSpec = state.profileFeedSpecs[pageIndex].buildSpec(profileId = it),
+                            onNoteClick = { naddr -> noteCallbacks.onNoteClick?.let { it(naddr) } },
+                            noContentVerticalArrangement = Arrangement.Top,
+                            noContentPaddingValues = PaddingValues(top = 16.dp),
+                            onGetPrimalPremiumClick = { noteCallbacks.onGetPrimalPremiumClick?.invoke() },
+                        )
                     }
                 }
             }
@@ -614,7 +637,7 @@ private fun ProfileError.asHumanReadableText(context: Context): String {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Preview
 @Composable
 private fun PreviewProfileScreen() {
