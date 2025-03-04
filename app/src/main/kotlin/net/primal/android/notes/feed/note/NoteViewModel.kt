@@ -2,8 +2,10 @@ package net.primal.android.notes.feed.note
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,6 +18,7 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.repository.RelayHintsRepository
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.NoteContract.UiState
 import net.primal.android.profile.repository.ProfileRepository
@@ -29,15 +32,22 @@ import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
 import timber.log.Timber
 
-@HiltViewModel
-class NoteViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = NoteViewModel.Factory::class)
+class NoteViewModel @AssistedInject constructor(
+    @Assisted private val noteId: String,
     private val activeAccountStore: ActiveAccountStore,
+    private val zapHandler: ZapHandler,
     private val eventRepository: EventRepository,
     private val profileRepository: ProfileRepository,
-    private val zapHandler: ZapHandler,
     private val mutedUserRepository: MutedUserRepository,
     private val bookmarksRepository: BookmarksRepository,
+    private val relayHintsRepository: RelayHintsRepository,
 ) : ViewModel() {
+
+    @AssistedFactory
+    interface Factory {
+        fun create(noteId: String): NoteViewModel
+    }
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -49,7 +59,16 @@ class NoteViewModel @Inject constructor(
     init {
         observeEvents()
         subscribeToActiveAccount()
+        prepareRelayHints()
     }
+
+    private fun prepareRelayHints() =
+        viewModelScope.launch {
+            val hints = relayHintsRepository.findRelaysByIds(eventIds = listOf(noteId))
+            hints.firstOrNull()?.let { relayHints ->
+                setState { copy(relayHints = relayHints.relays.take(n = 2)) }
+            }
+        }
 
     private fun subscribeToActiveAccount() =
         viewModelScope.launch {

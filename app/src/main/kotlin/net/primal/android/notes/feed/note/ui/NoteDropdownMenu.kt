@@ -52,6 +52,7 @@ fun NoteDropdownMenuIcon(
     noteRawData: String,
     authorId: String,
     isBookmarked: Boolean,
+    relayHints: List<String> = emptyList(),
     enabled: Boolean = true,
     onBookmarkClick: (() -> Unit)? = null,
     onMuteUserClick: (() -> Unit)? = null,
@@ -148,6 +149,7 @@ fun NoteDropdownMenuIcon(
                         eventId = noteId,
                         kind = NostrEventKind.ShortTextNote.value,
                         userId = authorId,
+                        relays = relayHints,
                     ).toNeventString()
                     copyText(context = context, text = nevent)
                     menuVisible = false
