@@ -3,6 +3,7 @@ package net.primal.android.core.errors
 import android.content.Context
 import net.primal.android.R
 
+@Suppress("CyclomaticComplexMethod")
 fun UiError.resolveUiErrorMessage(context: Context): String {
     return when (this) {
         UiError.InvalidNaddr -> context.getString(
@@ -29,9 +30,9 @@ fun UiError.resolveUiErrorMessage(context: Context): String {
             R.string.post_action_repost_failed,
         )
 
-        is UiError.FailedToMuteUser -> context.getString(
-            R.string.app_error_muting_user,
-        )
+        is UiError.FailedToMuteUser -> context.getString(R.string.app_error_muting_user)
+
+        is UiError.FailedToUnmuteUser -> context.getString(R.string.app_error_unmuting_user)
 
         is UiError.FailedToFollowUser -> context.getString(R.string.app_error_unable_to_follow_profile)
 
@@ -41,6 +42,10 @@ fun UiError.resolveUiErrorMessage(context: Context): String {
             R.string.app_missing_relays_config,
         )
 
+        is UiError.FailedToAddToFeed -> context.getString(R.string.app_error_adding_to_feed)
+
         is UiError.GenericError -> context.getString(R.string.app_generic_error)
+
+        is UiError.FailedToRemoveFeed -> context.getString(R.string.app_error_removing_feed)
     }
 }

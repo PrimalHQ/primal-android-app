@@ -372,7 +372,7 @@ private fun DrawerFooter(onThemeSwitch: () -> Unit) {
 }
 
 sealed class DrawerScreenDestination {
-    data object Profile : DrawerScreenDestination()
+    data class Profile(val userId: String) : DrawerScreenDestination()
     data class Premium(val hasPremium: Boolean) : DrawerScreenDestination()
     data object Messages : DrawerScreenDestination()
     data class Bookmarks(val userId: String) : DrawerScreenDestination()
@@ -383,7 +383,7 @@ sealed class DrawerScreenDestination {
 @Composable
 private fun DrawerScreenDestination.label(): String {
     return when (this) {
-        DrawerScreenDestination.Profile -> stringResource(R.string.drawer_destination_profile)
+        is DrawerScreenDestination.Profile -> stringResource(R.string.drawer_destination_profile)
         is DrawerScreenDestination.Premium -> stringResource(id = R.string.drawer_destination_premium)
         DrawerScreenDestination.Messages -> stringResource(R.string.drawer_destination_messages)
         is DrawerScreenDestination.Bookmarks -> stringResource(R.string.drawer_destination_bookmarks)
@@ -395,7 +395,7 @@ private fun DrawerScreenDestination.label(): String {
 @Composable
 private fun DrawerScreenDestination.icon(): ImageVector {
     return when (this) {
-        DrawerScreenDestination.Profile -> PrimalIcons.DrawerProfile
+        is DrawerScreenDestination.Profile -> PrimalIcons.DrawerProfile
         is DrawerScreenDestination.Premium -> PrimalIcons.DrawerPremium
         DrawerScreenDestination.Messages -> PrimalIcons.DrawerMessages
         is DrawerScreenDestination.Bookmarks -> PrimalIcons.DrawerBookmarks
@@ -411,7 +411,7 @@ fun PrimalDrawerPreview() {
         PrimalDrawer(
             state = PrimalDrawerContract.UiState(
                 menuItems = listOf(
-                    DrawerScreenDestination.Profile,
+                    DrawerScreenDestination.Profile(userId = "none"),
                     DrawerScreenDestination.Messages,
                     DrawerScreenDestination.Bookmarks(userId = "none"),
                     DrawerScreenDestination.Settings,

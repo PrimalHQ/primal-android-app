@@ -15,13 +15,13 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.profile.approvals.ProfileApproval
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileStatsUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.errors.UiError
+import net.primal.android.core.utils.isValidHex
 import net.primal.android.crypto.bech32ToHexOrThrow
 import net.primal.android.feeds.domain.FEED_KIND_USER
 import net.primal.android.feeds.domain.FeedSpecKind
@@ -37,7 +37,6 @@ import net.primal.android.nostr.utils.Nip19TLV
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
-import net.primal.android.profile.details.ProfileDetailsContract.UiState.ProfileError
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -50,7 +49,7 @@ import timber.log.Timber
 
 @HiltViewModel
 class ProfileDetailsViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: SavedStateHandle,
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val feedsRepository: FeedsRepository,
@@ -59,18 +58,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private val zapHandler: ZapHandler,
 ) : ViewModel() {
 
-    private val profileId: String = savedStateHandle.profileId?.resolveProfileId()
-        ?: runBlocking { savedStateHandle.primalName?.findProfileId() }
-        ?: activeAccountStore.activeUserId()
-
-    private val isActiveUser = profileId == activeAccountStore.activeUserId()
-
-    private val _state = MutableStateFlow(
-        UiState(
-            profileId = profileId,
-            isActiveUser = isActiveUser,
-        ),
-    )
+    private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -85,18 +73,40 @@ class ProfileDetailsViewModel @Inject constructor(
 
     init {
         observeEvents()
-        observeProfileData()
-        observeReferencedProfilesData()
-        observeProfileStats()
-        fetchProfileFollowedBy()
         observeActiveAccount()
-        observeContainsFeed()
-        observeMutedAccount()
-        resolveFollowsMe()
-        markProfileInteraction()
+        resolveProfileId()
     }
 
-    private fun markProfileInteraction() {
+    private fun resolveProfileId() =
+        viewModelScope.launch {
+            setState { copy(isResolvingProfileId = true) }
+            runCatching {
+                val profileId = withContext(dispatcherProvider.io()) {
+                    savedStateHandle.profileId?.parseForProfileId()
+                        ?: savedStateHandle.primalName?.let { profileRepository.fetchProfileId(it) }
+                }
+
+                if (profileId?.isValidHex() == true) {
+                    val isActiveUser = profileId == activeAccountStore.activeUserId()
+                    setState { copy(profileId = profileId, isActiveUser = isActiveUser) }
+                    initializeProfileDetails(profileId = profileId, isActiveUser = isActiveUser)
+                }
+            }
+            setState { copy(isResolvingProfileId = false) }
+        }
+
+    private fun initializeProfileDetails(profileId: String, isActiveUser: Boolean) {
+        observeProfileData(profileId = profileId)
+        observeReferencedProfilesData(profileId = profileId)
+        observeProfileStats(profileId = profileId)
+        fetchProfileFollowedBy(profileId = profileId)
+        observeContainsFeed(profileId = profileId)
+        observeMutedAccount(profileId = profileId)
+        resolveFollowsMe(profileId = profileId)
+        markProfileInteraction(profileId = profileId, isActiveUser = isActiveUser)
+    }
+
+    private fun markProfileInteraction(isActiveUser: Boolean, profileId: String) {
         if (!isActiveUser) {
             viewModelScope.launch {
                 profileRepository.markAsInteracted(
@@ -131,6 +141,8 @@ class ProfileDetailsViewModel @Inject constructor(
                     UiEvent.DismissZapError -> setState { copy(zapError = null) }
                     UiEvent.DismissConfirmFollowUnfollowAlertDialog ->
                         setState { copy(shouldApproveProfileAction = null) }
+
+                    UiEvent.RequestProfileIdResolution -> resolveProfileId()
                 }
             }
         }
@@ -171,12 +183,14 @@ class ProfileDetailsViewModel @Inject constructor(
 
     private fun requestProfileUpdate() =
         viewModelScope.launch {
-            fetchLatestProfile()
-            fetchLatestMuteList()
-            setEffect(ProfileDetailsContract.SideEffect.ProfileUpdateFinished)
+            state.value.profileId?.let {
+                fetchLatestProfile(profileId = it)
+                fetchLatestMuteList()
+                setEffect(ProfileDetailsContract.SideEffect.ProfileUpdateFinished)
+            }
         }
 
-    private fun fetchProfileFollowedBy() =
+    private fun fetchProfileFollowedBy(profileId: String) =
         viewModelScope.launch {
             try {
                 val profiles = profileRepository.fetchUserProfileFollowedBy(
@@ -217,16 +231,19 @@ class ProfileDetailsViewModel @Inject constructor(
             }
         }
 
-    private fun observeContainsFeed() =
+    private fun observeContainsFeed(profileId: String) =
         viewModelScope.launch {
             val feedSpec = buildLatestNotesUserFeedSpec(userId = profileId)
-            feedsRepository.observeContainsFeedSpec(userId = activeAccountStore.activeUserId(), feedSpec = feedSpec)
+            feedsRepository.observeContainsFeedSpec(
+                userId = activeAccountStore.activeUserId(),
+                feedSpec = feedSpec,
+            )
                 .collect {
                     setState { copy(isProfileFeedInActiveUserFeeds = it) }
                 }
         }
 
-    private fun observeMutedAccount() =
+    private fun observeMutedAccount(profileId: String) =
         viewModelScope.launch {
             mutedUserRepository.observeIsUserMutedByOwnerId(
                 pubkey = profileId,
@@ -236,7 +253,7 @@ class ProfileDetailsViewModel @Inject constructor(
             }
         }
 
-    private fun observeProfileData() =
+    private fun observeProfileData(profileId: String) =
         viewModelScope.launch {
             profileRepository.observeProfileData(profileId = profileId)
                 .distinctUntilChanged()
@@ -245,7 +262,7 @@ class ProfileDetailsViewModel @Inject constructor(
                 }
         }
 
-    private fun observeReferencedProfilesData() =
+    private fun observeReferencedProfilesData(profileId: String) =
         viewModelScope.launch {
             profileRepository.observeProfile(profileId)
                 .mapNotNull { profile ->
@@ -279,7 +296,7 @@ class ProfileDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun observeProfileStats() =
+    private fun observeProfileStats(profileId: String) =
         viewModelScope.launch {
             profileRepository.observeProfileStats(profileId = profileId).collect {
                 setState {
@@ -288,7 +305,7 @@ class ProfileDetailsViewModel @Inject constructor(
             }
         }
 
-    private fun resolveFollowsMe() {
+    private fun resolveFollowsMe(profileId: String) {
         val activeUserId = activeAccountStore.activeUserId()
         if (profileId != activeUserId) {
             viewModelScope.launch {
@@ -315,7 +332,7 @@ class ProfileDetailsViewModel @Inject constructor(
             Timber.w(error)
         }
 
-    private suspend fun fetchLatestProfile() =
+    private suspend fun fetchLatestProfile(profileId: String) =
         try {
             withContext(dispatcherProvider.io()) {
                 profileRepository.requestProfileUpdate(profileId = profileId)
@@ -346,22 +363,20 @@ class ProfileDetailsViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.w(error)
                 updateStateProfileAsUnfollowedAndClearApprovalFlag()
-                setErrorState(error = ProfileError.FailedToFollowProfile(error))
+                setErrorState(error = UiError.FailedToFollowUser(error))
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 updateStateProfileAsUnfollowedAndClearApprovalFlag()
-                setErrorState(error = ProfileError.FailedToFollowProfile(error))
+                setErrorState(error = UiError.FailedToFollowUser(error))
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 updateStateProfileAsUnfollowedAndClearApprovalFlag()
-                setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
+                setErrorState(error = UiError.MissingRelaysConfiguration(error))
             } catch (error: ProfileRepository.FollowListNotFound) {
                 Timber.w(error)
                 updateStateProfileAsUnfollowedAndClearApprovalFlag()
                 setState {
-                    copy(
-                        shouldApproveProfileAction = ProfileApproval.Follow(profileId = followAction.profileId),
-                    )
+                    copy(shouldApproveProfileAction = ProfileApproval.Follow(profileId = followAction.profileId))
                 }
             }
         }
@@ -378,15 +393,15 @@ class ProfileDetailsViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.w(error)
                 updateStateProfileAsFollowedAndClearApprovalFlag()
-                setErrorState(error = ProfileError.FailedToUnfollowProfile(error))
+                setErrorState(error = UiError.FailedToUnfollowUser(error))
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 updateStateProfileAsFollowedAndClearApprovalFlag()
-                setErrorState(error = ProfileError.FailedToUnfollowProfile(error))
+                setErrorState(error = UiError.FailedToUnfollowUser(error))
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 updateStateProfileAsFollowedAndClearApprovalFlag()
-                setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
+                setErrorState(error = UiError.MissingRelaysConfiguration(error))
             } catch (error: ProfileRepository.FollowListNotFound) {
                 Timber.w(error)
                 updateStateProfileAsFollowedAndClearApprovalFlag()
@@ -413,7 +428,7 @@ class ProfileDetailsViewModel @Inject constructor(
                 setEffect(ProfileDetailsContract.SideEffect.ProfileFeedAdded)
             } catch (error: WssException) {
                 Timber.w(error)
-                setErrorState(error = ProfileError.FailedToAddToFeed(error))
+                setErrorState(error = UiError.FailedToAddToFeed(error))
             }
         }
     }
@@ -429,7 +444,7 @@ class ProfileDetailsViewModel @Inject constructor(
                 setEffect(ProfileDetailsContract.SideEffect.ProfileFeedRemoved)
             } catch (error: WssException) {
                 Timber.w(error)
-                setErrorState(error = ProfileError.FailedToRemoveFeed(error))
+                setErrorState(error = UiError.FailedToRemoveFeed(error))
             }
         }
     }
@@ -446,13 +461,13 @@ class ProfileDetailsViewModel @Inject constructor(
                 setState { copy(isProfileMuted = true) }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
-                setErrorState(error = ProfileError.FailedToMuteProfile(error))
+                setErrorState(error = UiError.FailedToMuteUser(error))
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
-                setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
+                setErrorState(error = UiError.MissingRelaysConfiguration(error))
             } catch (error: WssException) {
                 Timber.w(error)
-                setErrorState(error = ProfileError.FailedToMuteProfile(error))
+                setErrorState(error = UiError.FailedToMuteUser(error))
             }
         }
 
@@ -468,13 +483,13 @@ class ProfileDetailsViewModel @Inject constructor(
                 setState { copy(isProfileMuted = false) }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
-                setErrorState(error = ProfileError.FailedToUnmuteProfile(error))
+                setErrorState(error = UiError.FailedToUnmuteUser(error))
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
-                setErrorState(error = ProfileError.MissingRelaysConfiguration(error))
+                setErrorState(error = UiError.MissingRelaysConfiguration(error))
             } catch (error: WssException) {
                 Timber.w(error)
-                setErrorState(error = ProfileError.FailedToUnmuteProfile(error))
+                setErrorState(error = UiError.FailedToUnmuteUser(error))
             }
         }
 
@@ -494,11 +509,11 @@ class ProfileDetailsViewModel @Inject constructor(
             }
         }
 
-    private fun setErrorState(error: ProfileError) {
+    private fun setErrorState(error: UiError) {
         setState { copy(error = error) }
     }
 
-    private fun String.resolveProfileId(): String? =
+    private fun String.parseForProfileId(): String? =
         when {
             this.startsWith("npub") -> runCatching { bech32ToHexOrThrow() }.getOrNull()
             this.startsWith("nprofile1") -> {
@@ -508,9 +523,4 @@ class ProfileDetailsViewModel @Inject constructor(
 
             else -> this
         }
-
-    private suspend fun String.findProfileId(): String? =
-        runCatching {
-            profileRepository.fetchProfileId(primalName = this)
-        }.getOrNull()
 }
