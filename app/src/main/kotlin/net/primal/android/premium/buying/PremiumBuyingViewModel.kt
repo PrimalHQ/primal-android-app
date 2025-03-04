@@ -86,9 +86,13 @@ class PremiumBuyingViewModel @Inject constructor(
 
     private fun checkMembershipStatus() =
         viewModelScope.launch {
-            premiumRepository.fetchMembershipStatus(userId = activeAccountStore.activeUserId())?.let {
-                if (it.hasPremiumMembership()) {
-                    setEffect(SideEffect.NavigateToPremiumHome)
+            if (activeAccountStore.activeUserAccount().hasPremiumMembership()) {
+                setEffect(SideEffect.NavigateToPremiumHome)
+            } else {
+                premiumRepository.fetchMembershipStatus(userId = activeAccountStore.activeUserId())?.let {
+                    if (it.hasPremiumMembership()) {
+                        setEffect(SideEffect.NavigateToPremiumHome)
+                    }
                 }
             }
         }
