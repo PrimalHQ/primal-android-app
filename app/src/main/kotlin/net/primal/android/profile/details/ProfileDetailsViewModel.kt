@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.net.UnknownHostException
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -81,8 +80,8 @@ class ProfileDetailsViewModel @Inject constructor(
 
     private fun initializeProfileId() =
         viewModelScope.launch {
-            try {
-                setState { copy(isResolvingProfileId = true, resolutionError = null) }
+            setState { copy(isResolvingProfileId = true, resolutionError = null) }
+            runCatching {
                 val profileId = withContext(dispatcherProvider.io()) {
                     savedStateHandle.profileId?.parseForProfileId()
                         ?: savedStateHandle.primalName?.let { profileRepository.fetchProfileId(it) }
@@ -96,11 +95,14 @@ class ProfileDetailsViewModel @Inject constructor(
                 } else {
                     setState { copy(resolutionError = UiState.ProfileResolutionError.InvalidProfileId) }
                 }
-            } catch (error: UnknownHostException) {
-                setState { copy(resolutionError = UiState.ProfileResolutionError.ErrorResolvingPrimalName(error)) }
-            } catch (_: RuntimeException) {
-                setState { copy(resolutionError = UiState.ProfileResolutionError.InvalidProfileId) }
-            } finally {
+            }.onFailure {
+                setState {
+                    copy(
+                        resolutionError = UiState.ProfileResolutionError.InvalidProfileId,
+                        isResolvingProfileId = false,
+                    )
+                }
+            }.onSuccess {
                 setState { copy(isResolvingProfileId = false) }
             }
         }
@@ -242,7 +244,10 @@ class ProfileDetailsViewModel @Inject constructor(
     private fun observeContainsFeed(profileId: String) =
         viewModelScope.launch {
             val feedSpec = buildLatestNotesUserFeedSpec(userId = profileId)
-            feedsRepository.observeContainsFeedSpec(userId = activeAccountStore.activeUserId(), feedSpec = feedSpec)
+            feedsRepository.observeContainsFeedSpec(
+                userId = activeAccountStore.activeUserId(),
+                feedSpec = feedSpec,
+            )
                 .collect {
                     setState { copy(isProfileFeedInActiveUserFeeds = it) }
                 }
