@@ -84,29 +84,17 @@ import net.primal.android.profile.details.ui.PROFILE_TAB_COUNT
 import net.primal.android.profile.details.ui.ProfileDetailsHeader
 import net.primal.android.profile.details.ui.ProfileTabs
 import net.primal.android.profile.details.ui.ProfileTopCoverBar
-import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.domain.WalletPreference
-import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.zaps.canZap
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileDetailsScreen(
     viewModel: ProfileDetailsViewModel,
-    onClose: () -> Unit,
-    onSearchClick: (String) -> Unit,
-    onMediaItemClick: (String) -> Unit,
+    callbacks: ProfileDetailsContract.ScreenCallbacks,
     noteCallbacks: NoteCallbacks,
-    onEditProfileClick: () -> Unit,
-    onMessageClick: (String) -> Unit,
-    onSendWalletTx: (DraftTx) -> Unit,
-    onDrawerQrCodeClick: (String) -> Unit,
-    onFollowsClick: (String, ProfileFollowsType) -> Unit,
-    onGoToWallet: () -> Unit,
-    onPremiumBadgeClick: (tier: String, profileId: String) -> Unit,
-    onNewPostClick: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -163,21 +151,11 @@ fun ProfileDetailsScreen(
     ProfileDetailsScreen(
         state = uiState.value,
         snackbarHostState = snackbarHostState,
-        onClose = onClose,
-        onSearchClick = onSearchClick,
-        noteCallbacks = noteCallbacks,
-        onEditProfileClick = onEditProfileClick,
-        onMessageClick = onMessageClick,
-        onSendWalletTx = onSendWalletTx,
-        onDrawerQrCodeClick = onDrawerQrCodeClick,
-        onGoToWallet = onGoToWallet,
-        onFollowsClick = onFollowsClick,
-        onPremiumBadgeClick = onPremiumBadgeClick,
-        eventPublisher = viewModel::setEvent,
         pullToRefreshState = pullToRefreshState,
         pullToRefreshing = pullToRefreshing,
-        onMediaItemClick = onMediaItemClick,
-        onNewPostClick = onNewPostClick,
+        callbacks = callbacks,
+        noteCallbacks = noteCallbacks,
+        eventPublisher = viewModel::setEvent,
     )
 }
 
@@ -193,21 +171,11 @@ internal const val MEDIA_TAB_INDEX = 3
 fun ProfileDetailsScreen(
     state: ProfileDetailsContract.UiState,
     snackbarHostState: SnackbarHostState,
-    onClose: () -> Unit,
-    onMediaItemClick: (String) -> Unit,
-    onSearchClick: (String) -> Unit,
-    noteCallbacks: NoteCallbacks,
-    onEditProfileClick: () -> Unit,
-    onMessageClick: (String) -> Unit,
-    onSendWalletTx: (DraftTx) -> Unit,
-    onDrawerQrCodeClick: (String) -> Unit,
-    onGoToWallet: () -> Unit,
-    onFollowsClick: (String, ProfileFollowsType) -> Unit,
-    onPremiumBadgeClick: (tier: String, profileId: String) -> Unit,
-    eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     pullToRefreshState: PullToRefreshState,
     pullToRefreshing: MutableState<Boolean>,
-    onNewPostClick: () -> Unit,
+    noteCallbacks: NoteCallbacks,
+    callbacks: ProfileDetailsContract.ScreenCallbacks,
+    eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
 ) {
     val density = LocalDensity.current
 
@@ -241,7 +209,7 @@ fun ProfileDetailsScreen(
         UnableToZapBottomSheet(
             zappingState = state.zappingState,
             onDismissRequest = { showCantZapWarning = false },
-            onGoToWallet = { onGoToWallet.invoke() },
+            onGoToWallet = { callbacks.onGoToWallet() },
         )
     }
 
@@ -346,7 +314,7 @@ fun ProfileDetailsScreen(
             )
         },
         floatingActionButton = {
-            NewPostFloatingActionButton(onNewPostClick = onNewPostClick)
+            NewPostFloatingActionButton(onNewPostClick = callbacks.onNewPostClick)
         },
     ) { paddingValues ->
         BoxWithConstraints(
@@ -410,18 +378,18 @@ fun ProfileDetailsScreen(
                                     avatarOffsetY = with(density) { maxAvatarSizePx.times(other = 0.65f).toDp() },
                                 ),
                                 eventPublisher = eventPublisher,
-                                onClose = onClose,
+                                onClose = callbacks.onClose,
                                 paddingValues = paddingValues,
-                                onSearchClick = { state.profileId?.let { onSearchClick(state.profileId) } },
-                                onMediaItemClick = onMediaItemClick,
+                                onSearchClick = { state.profileId?.let { callbacks.onSearchClick(state.profileId) } },
+                                onMediaItemClick = callbacks.onMediaItemClick,
                             )
                         }
                         item {
                             ProfileDetailsHeader(
                                 state = state,
                                 eventPublisher = eventPublisher,
-                                onEditProfileClick = onEditProfileClick,
-                                onMessageClick = onMessageClick,
+                                onEditProfileClick = callbacks.onEditProfileClick,
+                                onMessageClick = callbacks.onMessageClick,
                                 onZapProfileClick = {
                                     if (state.zappingState.walletConnected) {
                                         if (state.zappingState.walletPreference
@@ -429,13 +397,13 @@ fun ProfileDetailsScreen(
                                         ) {
                                             showZapOptions = true
                                         } else {
-                                            onSendWalletTx(it)
+                                            callbacks.onSendWalletTx(it)
                                         }
                                     } else {
                                         showCantZapWarning = true
                                     }
                                 },
-                                onDrawerQrCodeClick = { state.profileId?.let { onDrawerQrCodeClick(it) } },
+                                onDrawerQrCodeClick = { state.profileId?.let { callbacks.onDrawerQrCodeClick(it) } },
                                 onUnableToZapProfile = {
                                     uiScope.launch {
                                         snackbarHostState.showSnackbar(
@@ -448,10 +416,10 @@ fun ProfileDetailsScreen(
                                         )
                                     }
                                 },
-                                onFollowsClick = onFollowsClick,
+                                onFollowsClick = callbacks.onFollowsClick,
                                 onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
                                 onHashtagClick = { noteCallbacks.onHashtagClick?.invoke(it) },
-                                onPremiumBadgeClick = onPremiumBadgeClick,
+                                onPremiumBadgeClick = callbacks.onPremiumBadgeClick,
                             )
                         }
                         item {
@@ -514,7 +482,7 @@ fun ProfileDetailsScreen(
                                                         profileId = it,
                                                     ),
                                                     noteCallbacks = noteCallbacks,
-                                                    onGoToWallet = onGoToWallet,
+                                                    onGoToWallet = callbacks.onGoToWallet,
                                                     pollingEnabled = pageIndex == NOTES_TAB_INDEX,
                                                     pullToRefreshEnabled = false,
                                                     showTopZaps = true,
@@ -671,22 +639,24 @@ private fun PreviewProfileScreen() {
                 isActiveUser = true,
                 isProfileFeedInActiveUserFeeds = false,
             ),
+            callbacks = ProfileDetailsContract.ScreenCallbacks(
+                onClose = {},
+                onSearchClick = {},
+                onMediaItemClick = {},
+                onEditProfileClick = {},
+                onMessageClick = {},
+                onSendWalletTx = {},
+                onDrawerQrCodeClick = {},
+                onFollowsClick = { _, _ -> },
+                onGoToWallet = {},
+                onPremiumBadgeClick = { _, _ -> },
+                onNewPostClick = {},
+            ),
             snackbarHostState = SnackbarHostState(),
-            onClose = {},
-            onSearchClick = {},
             noteCallbacks = NoteCallbacks(),
-            onEditProfileClick = {},
-            onMessageClick = {},
-            onSendWalletTx = {},
-            onDrawerQrCodeClick = {},
-            onFollowsClick = { _, _ -> },
-            onPremiumBadgeClick = { _, _ -> },
-            onMediaItemClick = {},
-            onGoToWallet = {},
             eventPublisher = {},
             pullToRefreshing = remember { mutableStateOf(false) },
             pullToRefreshState = rememberPullToRefreshState(),
-            onNewPostClick = {},
         )
     }
 }

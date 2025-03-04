@@ -119,6 +119,7 @@ import net.primal.android.premium.support.SupportPrimalScreen
 import net.primal.android.premium.support.SupportPrimalViewModel
 import net.primal.android.premium.utils.isPremiumTier
 import net.primal.android.premium.utils.isPrimalLegendTier
+import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.details.ProfileDetailsScreen
 import net.primal.android.profile.details.ProfileDetailsViewModel
 import net.primal.android.profile.domain.ProfileFollowsType
@@ -1901,27 +1902,29 @@ private fun NavGraphBuilder.profile(
     LockToOrientationPortrait()
     ProfileDetailsScreen(
         viewModel = viewModel,
-        onClose = { navController.navigateUp() },
+        callbacks = ProfileDetailsContract.ScreenCallbacks(
+            onClose = { navController.navigateUp() },
+            onEditProfileClick = { navController.navigateToProfileEditor() },
+            onMessageClick = { profileId -> navController.navigateToChat(profileId = profileId) },
+            onSendWalletTx = { transaction -> navController.navigateToWalletCreateTransaction(transaction) },
+            onDrawerQrCodeClick = { profileId -> navController.navigateToProfileQrCodeViewer(profileId) },
+            onFollowsClick = { profileId, followsType ->
+                navController.navigateToProfileFollows(
+                    profileId = profileId,
+                    followsType = followsType,
+                )
+            },
+            onMediaItemClick = { navController.navigateToMediaItem(it) },
+            onGoToWallet = { navController.navigateToWallet() },
+            onSearchClick = { navController.navigateToAdvancedSearch(initialPostedBy = listOf(it)) },
+            onPremiumBadgeClick = { premiumTier, profileId ->
+                if (premiumTier.isPrimalLegendTier() || premiumTier.isPremiumTier()) {
+                    navController.navigateToPremiumCard(profileId = profileId)
+                }
+            },
+            onNewPostClick = { navController.navigateToNoteEditor(null) },
+        ),
         noteCallbacks = noteCallbacksHandler(navController),
-        onEditProfileClick = { navController.navigateToProfileEditor() },
-        onMessageClick = { profileId -> navController.navigateToChat(profileId = profileId) },
-        onSendWalletTx = { transaction -> navController.navigateToWalletCreateTransaction(transaction) },
-        onDrawerQrCodeClick = { profileId -> navController.navigateToProfileQrCodeViewer(profileId) },
-        onFollowsClick = { profileId, followsType ->
-            navController.navigateToProfileFollows(
-                profileId = profileId,
-                followsType = followsType,
-            )
-        },
-        onMediaItemClick = { navController.navigateToMediaItem(it) },
-        onGoToWallet = { navController.navigateToWallet() },
-        onSearchClick = { navController.navigateToAdvancedSearch(initialPostedBy = listOf(it)) },
-        onPremiumBadgeClick = { premiumTier, profileId ->
-            if (premiumTier.isPrimalLegendTier() || premiumTier.isPremiumTier()) {
-                navController.navigateToPremiumCard(profileId = profileId)
-            }
-        },
-        onNewPostClick = { navController.navigateToNoteEditor(null) },
     )
 }
 

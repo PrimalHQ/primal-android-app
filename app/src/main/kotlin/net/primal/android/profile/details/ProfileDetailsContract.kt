@@ -6,7 +6,9 @@ import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.core.errors.UiError
 import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.profile.domain.ProfileFeedSpec
+import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.profile.report.ReportType
+import net.primal.android.wallet.domain.DraftTx
 
 interface ProfileDetailsContract {
     data class UiState(
@@ -78,4 +80,18 @@ interface ProfileDetailsContract {
         data object DismissZapError : UiEvent()
         data object DismissConfirmFollowUnfollowAlertDialog : UiEvent()
     }
+
+    data class ScreenCallbacks(
+        val onClose: () -> Unit,
+        val onSearchClick: (String) -> Unit,
+        val onMediaItemClick: (String) -> Unit,
+        val onEditProfileClick: () -> Unit,
+        val onMessageClick: (String) -> Unit,
+        val onSendWalletTx: (DraftTx) -> Unit,
+        val onDrawerQrCodeClick: (String) -> Unit,
+        val onFollowsClick: (String, ProfileFollowsType) -> Unit,
+        val onGoToWallet: () -> Unit,
+        val onPremiumBadgeClick: (tier: String, profileId: String) -> Unit,
+        val onNewPostClick: () -> Unit,
+    )
 }
