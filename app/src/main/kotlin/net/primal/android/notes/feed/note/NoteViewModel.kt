@@ -34,7 +34,7 @@ import timber.log.Timber
 
 @HiltViewModel(assistedFactory = NoteViewModel.Factory::class)
 class NoteViewModel @AssistedInject constructor(
-    @Assisted private val noteId: String,
+    @Assisted private val noteId: String?,
     private val activeAccountStore: ActiveAccountStore,
     private val zapHandler: ZapHandler,
     private val eventRepository: EventRepository,
@@ -46,7 +46,7 @@ class NoteViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(noteId: String): NoteViewModel
+        fun create(noteId: String? = null): NoteViewModel
     }
 
     private val _state = MutableStateFlow(UiState())
@@ -59,10 +59,12 @@ class NoteViewModel @AssistedInject constructor(
     init {
         observeEvents()
         subscribeToActiveAccount()
-        prepareRelayHints()
+        if (noteId != null) {
+            prepareRelayHints(noteId = noteId)
+        }
     }
 
-    private fun prepareRelayHints() =
+    private fun prepareRelayHints(noteId: String) =
         viewModelScope.launch {
             val hints = relayHintsRepository.findRelaysByIds(eventIds = listOf(noteId))
             hints.firstOrNull()?.let { relayHints ->
