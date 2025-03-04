@@ -388,32 +388,12 @@ fun ProfileDetailsScreen(
             ) {
                 if (state.isResolvingProfileId) {
                     PrimalLoadingSpinner()
-                } else if (state.resolutionError != null) {
-                    when (state.resolutionError) {
-                        ProfileDetailsContract.UiState.ProfileResolutionError.InvalidProfileId -> {
-                            ListNoContent(
-                                modifier = Modifier.fillMaxSize(),
-                                noContentText = stringResource(id = R.string.profile_invalid_profile_id),
-                                onRefresh = {
-                                    eventPublisher(
-                                        ProfileDetailsContract.UiEvent.RequestProfileIdResolution,
-                                    )
-                                },
-                            )
-                        }
-
-                        is ProfileDetailsContract.UiState.ProfileResolutionError.ErrorResolvingPrimalName -> {
-                            ListNoContent(
-                                modifier = Modifier.fillMaxSize(),
-                                noContentText = stringResource(id = R.string.profile_error_resolving_primal_name),
-                                onRefresh = {
-                                    eventPublisher(
-                                        ProfileDetailsContract.UiEvent.RequestProfileIdResolution,
-                                    )
-                                },
-                            )
-                        }
-                    }
+                } else if (state.isInvalidProfileId) {
+                    ListNoContent(
+                        modifier = Modifier.fillMaxSize(),
+                        noContentText = stringResource(id = R.string.profile_invalid_profile_id),
+                        onRefresh = { eventPublisher(ProfileDetailsContract.UiEvent.RequestProfileIdResolution) },
+                    )
                 } else {
                     LazyColumn(
                         state = listState,

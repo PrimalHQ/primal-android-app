@@ -12,6 +12,7 @@ interface ProfileDetailsContract {
     data class UiState(
         val profileId: String? = null,
         val isResolvingProfileId: Boolean = true,
+        val isInvalidProfileId: Boolean = false,
         val isActiveUser: Boolean? = null,
         val activeUserPremiumTier: String? = null,
         val isProfileFollowed: Boolean = false,
@@ -28,17 +29,11 @@ interface ProfileDetailsContract {
             ProfileFeedSpec.AuthoredArticles,
             ProfileFeedSpec.AuthoredMedia,
         ),
-        val resolutionError: ProfileResolutionError? = null,
         val error: ProfileError? = null,
         val shouldApproveProfileAction: ProfileApproval? = null,
         val zapError: UiError? = null,
         val zappingState: ZappingState = ZappingState(),
     ) {
-        sealed class ProfileResolutionError {
-            data object InvalidProfileId : ProfileResolutionError()
-            data class ErrorResolvingPrimalName(val cause: Throwable) : ProfileResolutionError()
-        }
-
         sealed class ProfileError {
             data class MissingRelaysConfiguration(val cause: Throwable) : ProfileError()
             data class FailedToFollowProfile(val cause: Throwable) : ProfileError()
@@ -63,12 +58,14 @@ interface ProfileDetailsContract {
             val feedTitle: String,
             val feedDescription: String,
         ) : UiEvent()
+
         data class ZapProfile(
             val profileId: String,
             val profileLnUrlDecoded: String?,
             val zapDescription: String? = null,
             val zapAmount: ULong? = null,
         ) : UiEvent()
+
         data class FollowAction(val profileId: String, val forceUpdate: Boolean) : UiEvent()
         data class UnfollowAction(val profileId: String, val forceUpdate: Boolean) : UiEvent()
         data class RemoveProfileFeedAction(val profileId: String) : UiEvent()
