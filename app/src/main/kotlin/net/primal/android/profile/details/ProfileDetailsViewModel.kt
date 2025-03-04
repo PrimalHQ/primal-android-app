@@ -91,7 +91,7 @@ class ProfileDetailsViewModel @Inject constructor(
 
                 if (profileId?.isValidHex() == true) {
                     setState { copy(profileId = profileId, isActiveUser = isActiveUser) }
-                    initializeProfileData(profileId = profileId, isActiveUser = isActiveUser)
+                    initializeProfileDetails(profileId = profileId, isActiveUser = isActiveUser)
                 } else {
                     setState { copy(resolutionError = UiState.ProfileResolutionError.InvalidProfileId) }
                 }
@@ -107,7 +107,7 @@ class ProfileDetailsViewModel @Inject constructor(
             }
         }
 
-    private fun initializeProfileData(profileId: String, isActiveUser: Boolean) {
+    private fun initializeProfileDetails(profileId: String, isActiveUser: Boolean) {
         observeProfileData(profileId = profileId)
         observeReferencedProfilesData(profileId = profileId)
         observeProfileStats(profileId = profileId)
