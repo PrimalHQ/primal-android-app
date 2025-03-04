@@ -40,6 +40,10 @@ interface PremiumBuyingContract {
         ) : UiEvent()
     }
 
+    sealed class SideEffect {
+        data object NavigateToPremiumHome : SideEffect()
+    }
+
     enum class PremiumStage {
         Home,
         FindPrimalName,

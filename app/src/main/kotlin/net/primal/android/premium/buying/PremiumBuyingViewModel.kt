@@ -6,11 +6,13 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.utils.isGoogleBuild
@@ -19,10 +21,12 @@ import net.primal.android.navigation.buyingPremiumFromOrigin
 import net.primal.android.navigation.extendExistingPremiumName
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.buying.PremiumBuyingContract.PremiumStage
+import net.primal.android.premium.buying.PremiumBuyingContract.SideEffect
 import net.primal.android.premium.buying.PremiumBuyingContract.UiEvent
 import net.primal.android.premium.buying.PremiumBuyingContract.UiState
 import net.primal.android.premium.domain.MembershipError
 import net.primal.android.premium.repository.PremiumRepository
+import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
@@ -61,7 +65,12 @@ class PremiumBuyingViewModel @Inject constructor(
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
+    private val _effects = Channel<SideEffect>()
+    val effects = _effects.receiveAsFlow()
+    private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effects.send(effect) }
+
     init {
+        checkMembershipStatus()
         observeEvents()
         observePurchases()
         observeActiveProfile()
@@ -74,6 +83,15 @@ class PremiumBuyingViewModel @Inject constructor(
             userRepository.updateBuyPremiumTimestamp(userId = activeAccountStore.activeUserId())
         }
     }
+
+    private fun checkMembershipStatus() =
+        viewModelScope.launch {
+            premiumRepository.fetchMembershipStatus(userId = activeAccountStore.activeUserId())?.let {
+                if (it.hasPremiumMembership()) {
+                    setEffect(SideEffect.NavigateToPremiumHome)
+                }
+            }
+        }
 
     private fun initBillingClient() {
         viewModelScope.launch {

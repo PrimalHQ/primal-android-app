@@ -43,15 +43,14 @@ class PremiumRepository @Inject constructor(
             response.available
         }
 
-    suspend fun fetchMembershipStatus(userId: String) {
+    suspend fun fetchMembershipStatus(userId: String): PremiumMembership? =
         withContext(dispatchers.io()) {
             premiumApi.getPremiumMembershipStatus(userId = userId)?.let { response ->
                 accountsStore.getAndUpdateAccount(userId = userId) {
                     this.copy(premiumMembership = response.toPremiumMembership())
                 }
-            }
+            }?.premiumMembership
         }
-    }
 
     suspend fun shouldShowSupportUsNotice() =
         withContext(dispatchers.io()) {
