@@ -83,7 +83,11 @@ class ProfileDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 setState { copy(isResolvingProfileId = true, resolutionError = null) }
-                val profileId = withContext(dispatcherProvider.io()) { resolveProfileId() }!!
+                val profileId = withContext(dispatcherProvider.io()) {
+                    savedStateHandle.profileId?.parseForProfileId()
+                        ?: savedStateHandle.primalName?.let { profileRepository.fetchProfileId(it) }
+                }!!
+
                 val isActiveUser = profileId == activeAccountStore.activeUserId()
 
                 if (profileId.isValidHex()) {
@@ -526,8 +530,4 @@ class ProfileDetailsViewModel @Inject constructor(
 
             else -> this
         }
-
-    private suspend fun resolveProfileId(): String? =
-        savedStateHandle.profileId?.parseForProfileId()
-            ?: savedStateHandle.primalName?.let { profileRepository.fetchProfileId(it) }
 }
