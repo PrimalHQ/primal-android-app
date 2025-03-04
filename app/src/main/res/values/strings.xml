@@ -1178,6 +1178,9 @@
         <item quantity="one">and 1 other highlighted</item>
         <item quantity="other">and %1$s others highlighted</item>
     </plurals>
+    <string name="article_details_error_resolving_naddr">
+       We couldn’t locate the article.\nMake sure you’ve got the right one.
+    </string>
 
     <string name="feed_note_render_unknown_audio_title">Unknown title</string>
     <string name="feed_note_render_play_button">Play</string>

@@ -246,16 +246,19 @@ class TagsTest {
 
     @Test
     fun `NeventAsPubkeyTag returns proper JsonArray tag`() {
+        val userId = "userId"
+
         val nevent = Nevent(
-            userId = "userId",
+            userId = userId,
             eventId = "eventId",
             kind = NostrEventKind.Highlight.value,
             relays = listOf("wss://relay.primal.net"),
         )
         val expectedRecommendedRelay = "wss://relay.primal.net"
         val expectedOptional = "marker"
-        val actual = nevent.asPubkeyTag(
-            marker = expectedOptional,
+        val actual = userId.asPubkeyTag(
+            relayHint = expectedRecommendedRelay,
+            optional = expectedOptional,
         )
         actual shouldBe instanceOf(JsonArray::class)
         actual.size shouldBe 4
@@ -267,15 +270,15 @@ class TagsTest {
 
     @Test
     fun `NeventAsPubkeyTag returns proper JsonArray tag if optional args null`() {
+        val userId = "userId"
         val nevent = Nevent(
-            userId = "userId",
+            userId = userId,
             eventId = "eventId",
             kind = NostrEventKind.Highlight.value,
             relays = emptyList(),
         )
-        val actual = nevent.asPubkeyTag(
-            marker = null,
-        )
+        val actual = userId.asPubkeyTag()
+
         actual shouldBe instanceOf(JsonArray::class)
         actual.size shouldBe 2
         actual[0].jsonPrimitive.content shouldBe "p"

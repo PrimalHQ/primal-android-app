@@ -12,6 +12,7 @@ import net.primal.android.thread.articles.details.ui.ArticleDetailsUi
 interface ArticleDetailsContract {
     data class UiState(
         val naddr: Naddr? = null,
+        val isResolvingNaddr: Boolean = true,
         val showHighlights: Boolean = true,
         val isAuthorFollowed: Boolean = false,
         val article: ArticleDetailsUi? = null,
@@ -34,6 +35,7 @@ interface ArticleDetailsContract {
     }
 
     sealed class UiEvent {
+        data object RequestResolveNaddr : UiEvent()
         data object UpdateContent : UiEvent()
         data object DismissErrors : UiEvent()
         data class ZapArticle(val zapAmount: ULong? = null, val zapDescription: String? = null) : UiEvent()

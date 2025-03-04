@@ -59,6 +59,7 @@ import net.primal.android.R
 import net.primal.android.articles.feed.ui.ArticleDropdownMenuIcon
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.IconText
+import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -323,8 +324,15 @@ private fun ArticleDetailsScreen(
             )
         },
         content = { paddingValues ->
-            if (detailsState.article == null) {
+            if (detailsState.isResolvingNaddr) {
                 PrimalLoadingSpinner()
+            }
+            if (detailsState.article == null) {
+                ListNoContent(
+                    modifier = Modifier.fillMaxSize(),
+                    noContentText = stringResource(id = R.string.article_details_error_resolving_naddr),
+                    onRefresh = { detailsEventPublisher(UiEvent.RequestResolveNaddr) },
+                )
             } else {
                 ArticleContentWithComments(
                     state = detailsState,

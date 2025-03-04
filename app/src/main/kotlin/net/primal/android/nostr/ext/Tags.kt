@@ -128,8 +128,8 @@ fun String.asPubkeyTag(relayHint: String? = null, optional: String? = null): Jso
         add(optional ?: "")
     }.removeTrailingEmptyStrings()
 
-fun Nevent.asPubkeyTag(marker: String? = null): JsonArray =
-    this.userId.asPubkeyTag(
+fun Nevent.asPubkeyTag(marker: String? = null): JsonArray? =
+    this.userId?.asPubkeyTag(
         relayHint = this.relays.firstOrNull(),
         optional = marker,
     )
