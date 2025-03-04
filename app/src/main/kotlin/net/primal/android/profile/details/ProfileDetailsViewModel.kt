@@ -75,10 +75,10 @@ class ProfileDetailsViewModel @Inject constructor(
     init {
         observeEvents()
         observeActiveAccount()
-        initializeProfileId()
+        resolveProfileId()
     }
 
-    private fun initializeProfileId() =
+    private fun resolveProfileId() =
         viewModelScope.launch {
             setState { copy(isResolvingProfileId = true, resolutionError = null) }
             runCatching {
@@ -154,7 +154,7 @@ class ProfileDetailsViewModel @Inject constructor(
                     UiEvent.DismissConfirmFollowUnfollowAlertDialog ->
                         setState { copy(shouldApproveProfileAction = null) }
 
-                    UiEvent.RequestProfileIdResolution -> initializeProfileId()
+                    UiEvent.RequestProfileIdResolution -> resolveProfileId()
                 }
             }
         }
