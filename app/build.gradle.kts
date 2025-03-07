@@ -3,7 +3,7 @@ import java.util.*
 plugins {
     alias(libs.plugins.com.android.application)
     alias(libs.plugins.org.jetbrains.kotlin.android)
-    kotlin("plugin.serialization")
+    alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
@@ -210,6 +210,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":shared"))
 
     implementation(libs.core.ktx)
     implementation(libs.core.splashscreen)
@@ -318,9 +319,11 @@ dependencies {
     debugImplementation(libs.compose.ui.test.manifest)
 
     testImplementation(libs.junit)
-    testImplementation(libs.junit.android.runner)
+    testImplementation(libs.androidx.test.runner)
+    testImplementation(libs.androidx.test.ext.junit)
+    testImplementation(libs.androidx.test.ext.junit.ktx)
+    testImplementation(libs.androidx.arch.core.testing)
     testImplementation(libs.robolectric)
-    testImplementation(libs.androidx.core.testing)
     testImplementation(libs.espresso.core)
     testImplementation(libs.mockk)
     testImplementation(libs.kotest.assertions.core)
@@ -331,7 +334,7 @@ dependencies {
     testImplementation(libs.okhttp.mockwebserver)
 
     androidTestImplementation(platform(libs.compose.bom))
-    androidTestImplementation(libs.junit.android.runner)
+    androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.compose.ui.test.junit4)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.kotest.assertions.core)
