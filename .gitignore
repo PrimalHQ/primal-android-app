@@ -2,11 +2,13 @@
 /caches/
 /daemon/
 /kotlin-profile/
+/.kotlin/
 /native/
 /wrapper/
 *.iml
 .gradle
 /local.properties
+/.idea/artifacts/
 /.idea/caches
 /.idea/libraries
 /.idea/modules.xml
