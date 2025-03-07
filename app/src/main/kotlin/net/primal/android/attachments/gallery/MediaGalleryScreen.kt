@@ -3,6 +3,8 @@ package net.primal.android.attachments.gallery
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -82,7 +84,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteLink
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyRawData
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
-import net.primal.android.core.utils.copyImageToClipboard
+import net.primal.android.core.utils.copyBitmapToClipboard
 import net.primal.android.core.utils.copyText
 import net.primal.android.theme.AppTheme
 
@@ -171,9 +173,9 @@ fun MediaGalleryScreen(
                             currentImage()?.url?.let { copyText(context = context, text = it) }
                         },
                         onMediaCopyClick = {
-                            currentImage()?.let { image ->
+                            state.currentDisplayedBitmap?.let { bitmap ->
                                 coroutineScope.launch {
-                                    copyImageToClipboard(context = context, imageUrl = image.url)
+                                    copyBitmapToClipboard(context, bitmap)
                                 }
                             }
                         },
@@ -188,6 +190,7 @@ fun MediaGalleryScreen(
                 initialPositionMs = state.initialPositionMs,
                 imageAttachments = imageAttachments,
                 pagerIndicatorContainerColor = containerColor,
+                onBitmapLoaded = { eventPublisher(MediaGalleryContract.UiEvent.LoadBitmap(it)) },
             )
         },
         snackbarHost = {
@@ -204,6 +207,7 @@ private fun MediaGalleryContent(
     initialPositionMs: Long,
     imageAttachments: List<NoteAttachmentUi>,
     pagerIndicatorContainerColor: Color,
+    onBitmapLoaded: ((Bitmap) -> Unit),
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -216,6 +220,7 @@ private fun MediaGalleryContent(
                 pagerState = pagerState,
                 initialIndex = initialAttachmentIndex,
                 initialPositionMs = initialPositionMs,
+                onBitmapLoaded = onBitmapLoaded,
             )
         }
 
@@ -351,6 +356,7 @@ private fun MediaCopyMenuItem(onMediaCopyClick: () -> Unit) {
 @Composable
 private fun AttachmentsHorizontalPager(
     modifier: Modifier = Modifier,
+    onBitmapLoaded: ((Bitmap) -> Unit),
     pagerState: PagerState,
     imageAttachments: List<NoteAttachmentUi>,
     initialIndex: Int = 0,
@@ -372,6 +378,7 @@ private fun AttachmentsHorizontalPager(
                     ImageScreen(
                         modifier = Modifier.fillMaxSize(),
                         attachment = attachment,
+                        onBitmapLoaded = onBitmapLoaded,
                     )
                 }
 
@@ -397,14 +404,22 @@ private fun AttachmentsHorizontalPager(
 }
 
 @Composable
-private fun ImageScreen(attachment: NoteAttachmentUi, modifier: Modifier = Modifier) {
+private fun ImageScreen(
+    onBitmapLoaded: (Bitmap) -> Unit,
+    attachment: NoteAttachmentUi,
+    modifier: Modifier = Modifier,
+) {
     val zoomSpec = ZoomSpec(maxZoomFactor = 2.5f)
+    var loadedBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     var error by remember { mutableStateOf<ErrorResult?>(null) }
+    val imageLoader = LocalContext.current.imageLoader
+
     val loadingImageListener = remember {
         object : ImageRequest.Listener {
             override fun onSuccess(request: ImageRequest, result: SuccessResult) {
                 error = null
+                loadedBitmap = (result.drawable as? BitmapDrawable)?.bitmap
             }
 
             override fun onError(request: ImageRequest, result: ErrorResult) {
@@ -413,7 +428,10 @@ private fun ImageScreen(attachment: NoteAttachmentUi, modifier: Modifier = Modif
         }
     }
 
-    val imageLoader = LocalContext.current.imageLoader
+    LaunchedEffect(loadedBitmap) {
+        loadedBitmap?.let { onBitmapLoaded(it) }
+    }
+
     val keys = attachment.variants.orEmpty()
         .sortedBy { it.width }
         .mapNotNull {

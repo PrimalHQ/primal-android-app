@@ -52,6 +52,7 @@ class MediaItemViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
+                    is UiEvent.LoadBitmap -> setState { copy(currentDisplayedBitmap = it.bitmap) }
                     UiEvent.DismissError -> setState { copy(error = null) }
                     UiEvent.SaveMedia -> saveMedia()
                 }
