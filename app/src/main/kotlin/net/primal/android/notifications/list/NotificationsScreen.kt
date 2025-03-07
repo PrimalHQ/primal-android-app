@@ -83,7 +83,7 @@ fun NotificationsScreen(
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
     onNewPostClick: () -> Unit,
 ) {
-    val noteViewModel = hiltViewModel<NoteViewModel>()
+    val noteViewModel = hiltViewModel<NoteViewModel, NoteViewModel.Factory> { it.create() }
 
     val uiState = viewModel.state.collectAsState()
     val noteState = noteViewModel.state.collectAsState()

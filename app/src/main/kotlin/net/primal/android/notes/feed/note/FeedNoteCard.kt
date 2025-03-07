@@ -92,7 +92,7 @@ fun FeedNoteCard(
     onUiError: ((UiError) -> Unit)? = null,
     contentFooter: @Composable () -> Unit = {},
 ) {
-    val viewModel = hiltViewModel<NoteViewModel>()
+    val viewModel = hiltViewModel<NoteViewModel, NoteViewModel.Factory> { it.create(noteId = data.postId) }
     val uiState by viewModel.state.collectAsState()
 
     LaunchedEffect(viewModel, uiState.error, onUiError) {
@@ -277,6 +277,7 @@ private fun FeedNoteCard(
                 noteRawData = data.rawNostrEventJson,
                 authorId = data.authorId,
                 isBookmarked = data.isBookmarked,
+                relayHints = state.relayHints,
                 enabled = noteOptionsMenuEnabled,
                 onBookmarkClick = {
                     eventPublisher(UiEvent.BookmarkAction(noteId = data.postId))

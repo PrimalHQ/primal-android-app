@@ -9,10 +9,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,6 +24,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
@@ -35,6 +39,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
+import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarOverlap
 import net.primal.android.core.compose.AvatarThumbnailsRow
@@ -46,6 +51,7 @@ import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.formatNip05Identifier
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.profile.details.ProfileDetailsContract
@@ -53,58 +59,75 @@ import net.primal.android.profile.details.ui.model.PremiumProfileDataUi
 import net.primal.android.profile.details.ui.model.shouldShowPremiumBadge
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.theme.AppTheme
+import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.utils.isLightningAddress
 
 @Composable
-fun ProfileDetailsHeader(
+fun ProfileHeaderDetails(
     state: ProfileDetailsContract.UiState,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
-    onEditProfileClick: () -> Unit,
-    onMessageClick: (String) -> Unit,
-    onZapProfileClick: (DraftTx) -> Unit,
-    onDrawerQrCodeClick: () -> Unit,
-    onUnableToZapProfile: () -> Unit,
-    onFollowsClick: (String, ProfileFollowsType) -> Unit,
-    onProfileClick: (String) -> Unit,
-    onHashtagClick: (String) -> Unit,
-    onPremiumBadgeClick: (tier: String, profileId: String) -> Unit,
+    callbacks: ProfileDetailsContract.ScreenCallbacks,
+    noteCallbacks: NoteCallbacks,
+    showZapOptions: () -> Unit,
+    showCantZapWarning: () -> Unit,
+    snackbarHostState: SnackbarHostState,
 ) {
+    val uiScope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    fun onZapProfile(draftTx: DraftTx) {
+        if (state.zappingState.walletConnected) {
+            if (state.zappingState.walletPreference == WalletPreference.NostrWalletConnect) {
+                showZapOptions()
+            } else {
+                callbacks.onSendWalletTx(draftTx)
+            }
+        } else {
+            showCantZapWarning()
+        }
+    }
+
+    fun onUnableToZapProfile() {
+        uiScope.launch {
+            snackbarHostState.showSnackbar(
+                message = context.getString(
+                    R.string.wallet_send_payment_error_nostr_user_without_lightning_address,
+                    state.profileDetails?.authorDisplayName
+                        ?: context.getString(R.string.wallet_send_payment_this_user_chunk),
+                ),
+                duration = SnackbarDuration.Short,
+            )
+        }
+    }
+
     ProfileHeaderDetails(
         state = state,
-        onEditProfileClick = onEditProfileClick,
-        onMessageClick = { onMessageClick(state.profileId) },
+        onEditProfileClick = callbacks.onEditProfileClick,
+        onMessageClick = { state.profileId?.let { callbacks.onMessageClick(state.profileId) } },
         onZapProfileClick = {
             val profileLud16 = state.profileDetails?.lightningAddress
             if (profileLud16?.isLightningAddress() == true) {
-                onZapProfileClick(
-                    DraftTx(targetUserId = state.profileId, targetLud16 = profileLud16),
-                )
+                onZapProfile(DraftTx(targetUserId = state.profileId, targetLud16 = profileLud16))
             } else {
                 onUnableToZapProfile()
             }
         },
         onFollow = {
-            eventPublisher(
-                ProfileDetailsContract.UiEvent.FollowAction(
-                    profileId = state.profileId,
-                    forceUpdate = false,
-                ),
-            )
+            state.profileId?.let {
+                eventPublisher(ProfileDetailsContract.UiEvent.FollowAction(profileId = it, forceUpdate = false))
+            }
         },
         onUnfollow = {
-            eventPublisher(
-                ProfileDetailsContract.UiEvent.UnfollowAction(
-                    profileId = state.profileId,
-                    forceUpdate = false,
-                ),
-            )
+            state.profileId?.let {
+                eventPublisher(ProfileDetailsContract.UiEvent.UnfollowAction(profileId = it, forceUpdate = false))
+            }
         },
-        onDrawerQrCodeClick = onDrawerQrCodeClick,
-        onFollowsClick = onFollowsClick,
-        onProfileClick = onProfileClick,
-        onHashtagClick = onHashtagClick,
-        onPremiumBadgeClick = onPremiumBadgeClick,
+        onDrawerQrCodeClick = { state.profileId?.let { callbacks.onDrawerQrCodeClick(it) } },
+        onFollowsClick = callbacks.onFollowsClick,
+        onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
+        onHashtagClick = { noteCallbacks.onHashtagClick?.invoke(it) },
+        onPremiumBadgeClick = callbacks.onPremiumBadgeClick,
     )
 }
 
@@ -138,7 +161,7 @@ private fun ProfileHeaderDetails(
                 .padding(top = 14.dp)
                 .background(AppTheme.colorScheme.surfaceVariant),
             isFollowed = state.isProfileFollowed,
-            isActiveUser = state.isActiveUser,
+            isActiveUser = state.isActiveUser == true,
             onEditProfileClick = onEditProfileClick,
             onMessageClick = onMessageClick,
             onZapProfileClick = onZapProfileClick,
@@ -147,13 +170,15 @@ private fun ProfileHeaderDetails(
             onUnfollow = onUnfollow,
         )
 
-        UserDisplayName(
-            profileId = state.profileId,
-            displayName = state.profileDetails?.authorDisplayName ?: state.profileId.asEllipsizedNpub(),
-            internetIdentifier = state.profileDetails?.internetIdentifier,
-            profilePremiumDetails = state.profileDetails?.premiumDetails,
-            onPremiumBadgeClick = onPremiumBadgeClick,
-        )
+        state.profileId?.let { profileId ->
+            UserDisplayName(
+                profileId = profileId,
+                displayName = state.profileDetails?.authorDisplayName ?: profileId.asEllipsizedNpub(),
+                internetIdentifier = state.profileDetails?.internetIdentifier,
+                profilePremiumDetails = state.profileDetails?.premiumDetails,
+                onPremiumBadgeClick = onPremiumBadgeClick,
+            )
+        }
 
         if (state.profileDetails?.internetIdentifier?.isNotEmpty() == true) {
             UserInternetIdentifier(
@@ -162,14 +187,16 @@ private fun ProfileHeaderDetails(
             )
         }
 
-        ProfileFollowIndicators(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp),
-            followingCount = state.profileStats?.followingCount,
-            followersCount = state.profileStats?.followersCount,
-            isProfileFollowingMe = state.isProfileFollowingMe,
-            onFollowingClick = { onFollowsClick(state.profileId, ProfileFollowsType.Following) },
-            onFollowersClick = { onFollowsClick(state.profileId, ProfileFollowsType.Followers) },
-        )
+        state.profileId?.let { profileId ->
+            ProfileFollowIndicators(
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp),
+                followingCount = state.profileStats?.followingCount,
+                followersCount = state.profileStats?.followersCount,
+                isProfileFollowingMe = state.isProfileFollowingMe,
+                onFollowingClick = { onFollowsClick(profileId, ProfileFollowsType.Following) },
+                onFollowersClick = { onFollowsClick(profileId, ProfileFollowsType.Followers) },
+            )
+        }
 
         if (state.profileDetails?.about?.isNotEmpty() == true) {
             ProfileAboutSection(

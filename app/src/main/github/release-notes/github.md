@@ -1,8 +1,7 @@
 ## Changes
-- Fixed notification & messages red dot slow update on account switch;
-- Fixed showing active account in the accounts list in drawer (#348)
-- Fixed unfollow button on onboarding screen spanning to two rows on some devices (#346);
-- Implemented showing legends first in the Profile details followed by section (#345);
-- Refactor deep linking & splash screen;
-- Implemented deep linking for Primal verified users & static links;
-- Fixed npub QR code page padding issues (#349);
+- Implement relay hints in copy note id;
+- Implement using nevent and nprofile when creating primal share links;
+- Implement redirection from PremiumBuying to PremiumHome if user has membership (#355);
+- Implement profileId resolution process in ProfileDetailsScreen (#351);
+- Make author field optional in Nevents (#353);
+- Implement resolving naddr screen state in ArticleDetails screen (#352);

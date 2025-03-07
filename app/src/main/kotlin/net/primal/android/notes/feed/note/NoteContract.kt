@@ -10,6 +10,7 @@ interface NoteContract {
     data class UiState(
         val zappingState: ZappingState = ZappingState(),
         val shouldApproveBookmark: Boolean = false,
+        val relayHints: List<String> = emptyList(),
         val error: UiError? = null,
     )
 
