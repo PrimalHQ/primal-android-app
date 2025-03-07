@@ -46,7 +46,8 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation(libs.kotlinx.coroutines)
+                // Coroutines
+                implementation(libs.kotlinx.coroutines.core)
 
                 // Koin
                 implementation(project.dependencies.platform(libs.koin.bom))
@@ -58,23 +59,43 @@ kotlin {
                 // Room
                 implementation(libs.room.runtime)
                 implementation(libs.jetpack.sqlite.framework)
+
+                // Networking && Serialization
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.websockets)
+                implementation(libs.ktor.client.content.negotiation)
+                implementation(libs.ktor.client.logging)
+                implementation(libs.ktor.client.serialization.kotlinx.json)
+                implementation(libs.kotlinx.serialization.json)
+                implementation(libs.okio)
+
+                // Logging
+                implementation(libs.napier)
             }
         }
 
         androidMain {
             dependencies {
+                // Coroutines
+                implementation(libs.kotlinx.coroutines.android)
+
                 // Koin
+                implementation(libs.koin.android)
                 implementation(libs.koin.androidx.compose)
 
                 // Room
                 implementation(libs.room.runtime.android)
                 implementation(libs.jetpack.sqlite.framework.android)
+
+                // Networking
+                implementation(libs.ktor.client.okhttp)
             }
         }
 
         iosMain {
             dependencies {
-                // Dependencies for all ios targets
+                // Networking
+                implementation(libs.ktor.client.darwin)
             }
         }
 
@@ -97,7 +118,12 @@ kotlin {
 //        val desktopMain by getting
 //        desktopMain.dependencies {
 //            // Add JVM-Desktop-specific dependencies here
+//
+//            // Room & SQLite
 //            implementation(libs.jetpack.sqlite.bundled.jvm)
+//
+//            // Ktor
+//            implementation(libs.ktor.client.cio)
 //        }
 
         commonTest {
@@ -141,7 +167,7 @@ kotlin {
 }
 
 nativeCoroutines {
-    exposedSeverity = ExposedSeverity.ERROR
+    exposedSeverity = ExposedSeverity.WARNING
 }
 
 tasks.register("assembleXCFramework") {

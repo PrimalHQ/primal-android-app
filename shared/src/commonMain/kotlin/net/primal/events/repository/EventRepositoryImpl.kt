@@ -4,11 +4,11 @@ import kotlin.random.Random
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import net.primal.core.coroutines.DispatcherProvider
-import net.primal.core.db.AppDatabase
+import net.primal.db.PrimalDatabase
 import net.primal.events.db.Event
 
 internal class EventRepositoryImpl(
-    private val database: AppDatabase,
+    private val database: PrimalDatabase,
     private val dispatcherProvider: DispatcherProvider,
 ) : EventRepository {
 
