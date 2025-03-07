@@ -46,7 +46,6 @@ fun NoteMediaAttachmentsHorizontalPager(
     BoxWithConstraints(modifier = modifier) {
         val imageSizeDp = findImageSize(attachment = mediaAttachments.first())
         val imagesCount = mediaAttachments.size
-
         val pagerState = rememberPagerState { imagesCount }
 
         when (imagesCount) {
@@ -86,9 +85,7 @@ fun NoteMediaAttachmentsHorizontalPager(
                 HorizontalPager(state = pagerState, pageSpacing = 12.dp) {
                     val attachment = mediaAttachments[it]
                     NoteMediaAttachment(
-                        modifier = Modifier
-                            .clip(AppTheme.shapes.large)
-                            .padding(vertical = 4.dp),
+                        modifier = Modifier.clip(AppTheme.shapes.large).padding(vertical = 4.dp),
                         attachment = attachment,
                         blossoms = blossoms,
                         imageSizeDp = imageSizeDp,
