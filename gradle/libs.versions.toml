@@ -38,16 +38,19 @@ kotlin = "2.1.10"
 kotlinx-coroutines = "1.10.1"
 kotlinx-serialization-json = "1.8.0"
 kotest = "5.9.0"
-koin-bom = "4.0.0"
-koinComposeMultiplatform = "4.0.0"
-koinCompose = "4.0.0"
-ksp = "2.1.10-1.0.30"
+koin-bom = "4.0.2"
+koinComposeMultiplatform = "4.0.2"
+koinCompose = "4.0.2"
+ksp = "2.1.10-1.0.31"
 ktlint_compose_rules = "0.3.17"
+ktor = "3.1.1"
 markwon = "4.6.2"
 material-icons = "1.7.8"
 media3-exoplayer = "1.5.1"
+napier = "2.7.1"
 mockk = "1.13.12"
 okhttp = "4.12.0"
+okio = "3.10.2"
 placeholder = "2.0.0"
 play-publishing = "3.8.4"
 play-billing = "7.1.1"
@@ -130,7 +133,8 @@ androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycl
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camera" }
 
 # Kotlin
-kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
 
 # DI libs
 hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hilt" }
@@ -144,12 +148,24 @@ koin-core = { module = "io.insert-koin:koin-core" }
 koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koinComposeMultiplatform" }
 koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koinComposeMultiplatform" }
 koin-compose-viewmodel-navigation = { module = "io.insert-koin:koin-compose-viewmodel-navigation", version.ref = "koinComposeMultiplatform" }
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinCompose" }
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koinCompose" }
 
 # Networking libs
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okhttp-logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
 okhttp-mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }
+ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
+ktor-client-websockets = { module = "io.ktor:ktor-client-websockets", version.ref = "ktor" }
+ktor-client-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
+okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit-converter-scalars = { module = "com.squareup.retrofit2:converter-scalars", version.ref = "retrofit" }
@@ -188,6 +204,7 @@ media3-exoplayer-ui = { module = "androidx.media3:media3-ui", version.ref = "med
 
 # Loggers
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
+napier = { module = "io.github.aakira:napier", version.ref = "napier"}
 
 # Other libs
 ktlint_compose_rules = { module = "io.nlopez.compose.rules:ktlint", version.ref = "ktlint_compose_rules" }
