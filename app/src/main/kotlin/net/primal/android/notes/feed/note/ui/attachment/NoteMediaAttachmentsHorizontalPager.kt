@@ -86,7 +86,9 @@ fun NoteMediaAttachmentsHorizontalPager(
                 HorizontalPager(state = pagerState, pageSpacing = 12.dp) {
                     val attachment = mediaAttachments[it]
                     NoteMediaAttachment(
-                        modifier = Modifier.clip(AppTheme.shapes.medium),
+                        modifier = Modifier
+                            .clip(AppTheme.shapes.large)
+                            .padding(vertical = 4.dp),
                         attachment = attachment,
                         blossoms = blossoms,
                         imageSizeDp = imageSizeDp,
@@ -133,24 +135,25 @@ private fun FourImageGallery(
     onMediaClick: (MediaClickEvent) -> Unit,
 ) {
     val shapeMatrix = listOf(
-        RoundedCornerShape(AppTheme.shapes.medium.topStart, CornerSize(0.dp), CornerSize(0.dp), CornerSize(0.dp)),
-        RoundedCornerShape(CornerSize(0.dp), AppTheme.shapes.medium.topEnd, CornerSize(0.dp), CornerSize(0.dp)),
-        RoundedCornerShape(CornerSize(0.dp), CornerSize(0.dp), CornerSize(0.dp), AppTheme.shapes.medium.bottomEnd),
-        RoundedCornerShape(CornerSize(0.dp), CornerSize(0.dp), AppTheme.shapes.medium.bottomStart, CornerSize(0.dp)),
+        RoundedCornerShape(AppTheme.shapes.large.topStart, CornerSize(0.dp), CornerSize(0.dp), CornerSize(0.dp)),
+        RoundedCornerShape(CornerSize(0.dp), AppTheme.shapes.large.topEnd, CornerSize(0.dp), CornerSize(0.dp)),
+        RoundedCornerShape(CornerSize(0.dp), CornerSize(0.dp), CornerSize(0.dp), AppTheme.shapes.large.bottomEnd),
+        RoundedCornerShape(CornerSize(0.dp), CornerSize(0.dp), AppTheme.shapes.large.bottomStart, CornerSize(0.dp)),
     )
 
     Column(modifier = Modifier.fillMaxWidth()) {
         mediaAttachments.chunked(2).forEachIndexed { rowIndex, rowAttachments ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 rowAttachments.forEachIndexed { index, attachment ->
                     NoteMediaAttachment(
                         modifier = Modifier
                             .weight(1f)
                             .aspectRatio(1f)
-                            .clip(shapeMatrix[rowIndex * 2 + index]),
+                            .clip(shapeMatrix[rowIndex * 2 + index])
+                            .then(if (rowIndex == 0) Modifier.padding(0.dp) else Modifier.padding(vertical = 4.dp)),
                         attachment = attachment,
                         blossoms = blossoms,
                         imageSizeDp = imageSizeDp,
@@ -180,6 +183,7 @@ private fun ThreeImageGallery(
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
         NoteMediaAttachment(
             modifier = Modifier
@@ -187,12 +191,13 @@ private fun ThreeImageGallery(
                 .aspectRatio(2f / 1f)
                 .clip(
                     RoundedCornerShape(
-                        topStart = AppTheme.shapes.medium.topStart,
-                        topEnd = AppTheme.shapes.medium.topEnd,
+                        topStart = AppTheme.shapes.large.topStart,
+                        topEnd = AppTheme.shapes.large.topEnd,
                         bottomStart = CornerSize(0.dp),
                         bottomEnd = CornerSize(0.dp),
                     ),
-                ),
+                )
+                .padding(vertical = 4.dp),
             attachment = mediaAttachments[0],
             blossoms = blossoms,
             imageSizeDp = imageSizeDp,
@@ -210,7 +215,7 @@ private fun ThreeImageGallery(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             mediaAttachments.drop(1).take(2).forEachIndexed { index, attachment ->
                 NoteMediaAttachment(
@@ -222,7 +227,7 @@ private fun ThreeImageGallery(
                                 RoundedCornerShape(
                                     topStart = CornerSize(0.dp),
                                     topEnd = CornerSize(0.dp),
-                                    bottomStart = AppTheme.shapes.medium.bottomStart,
+                                    bottomStart = AppTheme.shapes.large.bottomStart,
                                     bottomEnd = CornerSize(0.dp),
                                 )
                             } else {
@@ -230,7 +235,7 @@ private fun ThreeImageGallery(
                                     topStart = CornerSize(0.dp),
                                     topEnd = CornerSize(0.dp),
                                     bottomStart = CornerSize(0.dp),
-                                    bottomEnd = AppTheme.shapes.medium.bottomEnd,
+                                    bottomEnd = AppTheme.shapes.large.bottomEnd,
                                 )
                             },
                         ),
@@ -262,7 +267,7 @@ private fun TwoImageGallery(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         mediaAttachments.take(2).forEachIndexed { index, attachment ->
             NoteMediaAttachment(
@@ -272,20 +277,21 @@ private fun TwoImageGallery(
                     .clip(
                         if (index == 0) {
                             RoundedCornerShape(
-                                topStart = AppTheme.shapes.medium.topStart,
+                                topStart = AppTheme.shapes.large.topStart,
                                 topEnd = CornerSize(0.dp),
-                                bottomStart = AppTheme.shapes.medium.bottomStart,
+                                bottomStart = AppTheme.shapes.large.bottomStart,
                                 bottomEnd = CornerSize(0.dp),
                             )
                         } else {
                             RoundedCornerShape(
                                 topStart = CornerSize(0.dp),
-                                topEnd = AppTheme.shapes.medium.topEnd,
+                                topEnd = AppTheme.shapes.large.topEnd,
                                 bottomStart = CornerSize(0.dp),
-                                bottomEnd = AppTheme.shapes.medium.bottomEnd,
+                                bottomEnd = AppTheme.shapes.large.bottomEnd,
                             )
                         },
-                    ),
+                    )
+                    .padding(vertical = 4.dp),
                 attachment = attachment,
                 blossoms = blossoms,
                 imageSizeDp = imageSizeDp,
@@ -313,7 +319,9 @@ private fun SingleImageGallery(
 ) {
     val attachment = mediaAttachments.first()
     NoteMediaAttachment(
-        modifier = Modifier.clip(AppTheme.shapes.medium),
+        modifier = Modifier
+            .clip(AppTheme.shapes.large)
+            .padding(vertical = 4.dp),
         attachment = attachment,
         blossoms = blossoms,
         imageSizeDp = imageSizeDp,
@@ -339,8 +347,7 @@ private fun NoteMediaAttachment(
     modifier: Modifier = Modifier,
 ) {
     BoxWithConstraints(
-        modifier = modifier
-            .padding(vertical = 4.dp),
+        modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
         when (attachment.type) {
