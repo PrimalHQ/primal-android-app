@@ -19,3 +19,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Primal"
 include(":app")
+include(":shared")

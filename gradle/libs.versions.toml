@@ -15,31 +15,39 @@ constraintlayout-compose = "1.1.1"
 coil = "2.7.0"
 core-ktx = "1.15.0"
 core-splashscreen = "1.0.1"
-core-testing = "2.2.0"
 dagger = "2.55"
-datastore = "1.1.3"
 detekt = "1.23.8"
 emoji2 = "1.5.0"
 espresso-core = "3.6.1"
 flippable = "1.5.4"
 guava = "33.0.0-android" # do not upgrade (added with zap settings, should be removed)
 hilt = "1.2.0"
+jetpack-arch-core-testing = "2.2.0"
+jetpack-test-runner = "1.6.2"
+jetpack-test-core = "1.6.1"
+jetpack-test-ext = "1.2.1"
+jetpack-datastore = "1.1.3"
+jetpack-lifecycle = "2.8.7"
+jetpack-paging = "3.3.6"
+jetpack-room = "2.7.0-rc01"
+jetpack-sqlite = "2.5.0-rc01"
+jetpack-webkit = "1.13.0"
 junit = "4.13.2"
-junit-android-runner = "1.2.1"
 ktlint-wrapper-plugin = "12.2.0"
 kotlin = "2.1.10"
 kotlinx-coroutines = "1.10.1"
 kotlinx-serialization-json = "1.8.0"
 kotest = "5.9.0"
-ksp = "2.1.10-1.0.31"
+koin-bom = "4.0.0"
+koinComposeMultiplatform = "4.0.0"
+koinCompose = "4.0.0"
+ksp = "2.1.10-1.0.30"
 ktlint_compose_rules = "0.3.17"
-lifecycle = "2.8.7"
 markwon = "4.6.2"
 material-icons = "1.7.8"
 media3-exoplayer = "1.5.1"
 mockk = "1.13.12"
 okhttp = "4.12.0"
-paging = "3.3.6"
 placeholder = "2.0.0"
 play-publishing = "3.8.4"
 play-billing = "7.1.1"
@@ -47,24 +55,23 @@ qrcode-generator = "1.6.2"
 reorderable = "2.4.0"
 retrofit = "2.11.0"
 roboelectric = "4.13"
-room = "2.6.1"
 security-app-authenticator = "1.0.0-beta01"
 security-crypto = "1.1.0-alpha06"
 security-identity-credential = "1.0.0-alpha03"
 secp256k1-kmp = "0.15.0"
 spongycastle = "1.58.0.0"
 sqlcipher-android = "4.6.1"
+swift-nativecoroutines = "1.0.0-ALPHA-39"
 telephoto = "0.14.0"
 timber = "5.0.1"
 url-detector = "0.1.23"
-webkit = "1.13.0"
 
 [libraries]
 # Core libs
-androidx-webkit = { module = "androidx.webkit:webkit", version.ref = "webkit" }
+androidx-webkit = { module = "androidx.webkit:webkit", version.ref = "jetpack-webkit" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "core-splashscreen" }
-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
+lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "jetpack-lifecycle" }
 androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version = "lifecycle" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
@@ -112,15 +119,32 @@ navigation-compose = { module = "androidx.navigation:navigation-compose", versio
 navigation-hilt = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt" }
 navigation-material = { module = "com.google.accompanist:accompanist-navigation-material", version.ref = "accompanist" }
 
-paging-runtime = { module = "androidx.paging:paging-runtime", version.ref = "paging" }
-paging-common = { module = "androidx.paging:paging-common", version.ref = "paging" }
-paging-compose = { module = "androidx.paging:paging-compose", version = "paging" }
+paging-runtime = { module = "androidx.paging:paging-runtime", version.ref = "jetpack-paging" }
+paging-common = { module = "androidx.paging:paging-common", version.ref = "jetpack-paging" }
+paging-compose = { module = "androidx.paging:paging-compose", version.ref = "jetpack-paging" }
+
+# Camera
+androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "camera" }
+androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camera" }
+androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camera" }
+androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camera" }
+
+# Kotlin
+kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 
 # DI libs
 hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hilt" }
 hilt-compiler-dagger = { module = "com.google.dagger:hilt-compiler", version.ref = "dagger" }
 hilt-compiler-android = { module = "com.google.dagger:hilt-android-compiler", version.ref = "dagger" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "dagger" }
+
+# KMP Koin DI
+koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
+koin-core = { module = "io.insert-koin:koin-core" }
+koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koinComposeMultiplatform" }
+koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koinComposeMultiplatform" }
+koin-compose-viewmodel-navigation = { module = "io.insert-koin:koin-compose-viewmodel-navigation", version.ref = "koinComposeMultiplatform" }
+koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koinCompose" }
 
 # Networking libs
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
@@ -136,12 +160,19 @@ url-detector = { module = "io.github.url-detector:url-detector", version.ref = "
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 
-# Database libs
-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
-room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
-paging-room = { module = "androidx.room:room-paging", version.ref = "room" }
+# KMP Room
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "jetpack-room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "jetpack-room" }
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "jetpack-room" }
+room-testing = { module = "androidx.room:room-testing", version.ref = "jetpack-room" }
+room-runtime-android = { group = "androidx.room", name = "room-runtime-android", version.ref = "jetpack-room" }
+paging-room = { module = "androidx.room:room-paging", version.ref = "jetpack-room" }
+jetpack-sqlite-bundled-jvm = { module = "androidx.sqlite:sqlite-bundled-jvm", version.ref = "jetpack-sqlite" }
+jetpack-sqlite-framework = { module = "androidx.sqlite:sqlite-framework", version.ref = "jetpack-sqlite" }
+jetpack-sqlite-framework-android = { module = "androidx.sqlite:sqlite-framework-android", version.ref = "jetpack-sqlite" }
+jetpack-sqlite-framework-iosarm64 = { module = "androidx.sqlite:sqlite-framework-iosarm64", version.ref = "jetpack-sqlite" }
+jetpack-sqlite-framework-iossimulatorarm64 = { module = "androidx.sqlite:sqlite-framework-iossimulatorarm64", version.ref = "jetpack-sqlite" }
+jetpack-sqlite-framework-iosx64 = { module = "androidx.sqlite:sqlite-framework-iosx64", version.ref = "jetpack-sqlite" }
 sqlcipher-android = { module = "net.zetetic:sqlcipher-android", version.ref = "sqlcipher-android" }
 
 # Media libs
@@ -155,14 +186,16 @@ telephoto-zoomable-image-coil = { module = "me.saket.telephoto:zoomable-image-co
 media3-exoplayer-core = { module = "androidx.media3:media3-exoplayer", version.ref = "media3-exoplayer" }
 media3-exoplayer-ui = { module = "androidx.media3:media3-ui", version.ref = "media3-exoplayer" }
 
-# Other libs
+# Loggers
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
+
+# Other libs
 ktlint_compose_rules = { module = "io.nlopez.compose.rules:ktlint", version.ref = "ktlint_compose_rules" }
 qrcode-generator = { module = "com.github.alexzhirkevich:custom-qr-generator", version.ref = "qrcode-generator" }
 
 # Data storage libs
-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+datastore = { module = "androidx.datastore:datastore", version.ref = "jetpack-datastore" }
+datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "jetpack-datastore" }
 
 # Crytpo libs
 secp256k1-kmp-jvm = { module = "fr.acinq.secp256k1:secp256k1-kmp-jvm", version.ref = "secp256k1-kmp" }
@@ -180,19 +213,19 @@ androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "b
 
 # Tests libs
 junit = { group = "junit", name = "junit", version.ref = "junit" }
-junit-android-runner = { group = "androidx.test.ext", name = "junit", version.ref = "junit-android-runner" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "jetpack-test-runner" }
+androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "jetpack-test-ext" }
+androidx-test-ext-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "jetpack-test-ext" }
+androidx-test-core = { group = "androidx.test", name = "core", version.ref = "jetpack-test-core" }
+androidx-arch-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "jetpack-arch-core-testing" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "roboelectric" }
-androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "core-testing" }
-kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockk" }
 kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotest-assertions-json = { module = "io.kotest:kotest-assertions-json", version.ref = "kotest" }
-androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "camera" }
-androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camera" }
-androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camera" }
-androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camera" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
+
 
 [bundles]
 hilt = ["hilt-android", "navigation-hilt"]
@@ -208,3 +241,7 @@ play-publishing = { id = "com.github.triplet.play", version.ref = "play-publishi
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 ktlint-wrapper-plugin = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-wrapper-plugin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+jetpack-room = { id = "androidx.room", version.ref = "jetpack-room" }
+swift-nativecoroutines = { id = "com.rickclephas.kmp.nativecoroutines", version.ref = "swift-nativecoroutines" }

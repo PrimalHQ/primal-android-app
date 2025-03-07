@@ -6,6 +6,7 @@ import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 import net.primal.android.core.crash.PrimalCrashReporter
 import net.primal.android.core.images.PrimalImageLoaderFactory
+import net.primal.core.init.initPrimal
 import timber.log.Timber
 
 @HiltAndroidApp
@@ -22,6 +23,8 @@ class PrimalApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        initPrimal(this@PrimalApp)
+
         loggers.forEach {
             Timber.plant(it)
         }
