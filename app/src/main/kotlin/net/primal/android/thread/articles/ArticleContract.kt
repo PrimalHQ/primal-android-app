@@ -8,6 +8,7 @@ interface ArticleContract {
     data class UiState(
         val shouldApproveBookmark: Boolean = false,
         val error: UiError? = null,
+        val initialPositionMs: Long = 0,
     )
 
     sealed class UiEvent {

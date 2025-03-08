@@ -1,13 +1,17 @@
 package net.primal.android.articles.api.mediator
 
+import android.util.Log
 import androidx.room.withTransaction
 import net.primal.android.articles.api.model.ArticleResponse
+import net.primal.android.attachments.ext.flatMapArticlesAsNoteAttachmentPO
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.nostr.db.eventRelayHintsUpserter
 import net.primal.android.nostr.ext.flatMapAsEventHintsPO
 import net.primal.android.nostr.ext.flatMapAsWordCount
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
+import net.primal.android.nostr.ext.flatMapNotNullAsLinkPreviewResource
+import net.primal.android.nostr.ext.flatMapNotNullAsVideoThumbnailsMap
 import net.primal.android.nostr.ext.mapAsEventZapDO
 import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.android.nostr.ext.mapAsPostDataPO
@@ -58,6 +62,15 @@ suspend fun ArticleResponse.persistToDatabaseAsTransaction(userId: String, datab
         referencedHighlights = referencedHighlights,
     )
 
+    val linkPreviews = primalLinkPreviews.flatMapNotNullAsLinkPreviewResource().asMapByKey { it.url }
+    val videoThumbnails = this.cdnResources.flatMapNotNullAsVideoThumbnailsMap()
+
+    val noteAttachments = allArticles.flatMapArticlesAsNoteAttachmentPO(
+        cdnResources = cdnResources,
+        linkPreviews = linkPreviews,
+        videoThumbnails = videoThumbnails,
+    )
+
     val eventZaps = this.zaps.mapAsEventZapDO(profilesMap = profiles.associateBy { it.ownerId })
     val eventStats = this.primalEventStats.mapNotNullAsEventStatsPO()
     val eventUserStats = this.primalEventUserStats.mapNotNullAsEventUserStatsPO(userId = userId)
@@ -70,6 +83,7 @@ suspend fun ArticleResponse.persistToDatabaseAsTransaction(userId: String, datab
         database.eventUserStats().upsertAll(data = eventUserStats)
         database.eventZaps().upsertAll(data = eventZaps)
         database.highlights().upsertAll(data = referencedHighlights)
+        database.attachments().upsertAllNoteAttachments(data = noteAttachments)
 
         val eventHintsDao = database.eventHints()
         val hintsMap = eventHints.associateBy { it.eventId }

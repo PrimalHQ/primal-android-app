@@ -1,5 +1,6 @@
 package net.primal.android.thread.articles.details.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -27,18 +28,24 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
 import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.notes.feed.note.ui.attachment.findImageSize
+import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.thread.articles.details.ui.rendering.MarkdownRenderer
 import net.primal.android.thread.articles.details.ui.rendering.rememberPrimalMarkwon
+import timber.log.Timber
 
 @Composable
 fun ArticleDetailsHeader(
+    eventId: String?,
     title: String,
     date: Instant?,
+    noteCallbacks: NoteCallbacks,
     modifier: Modifier = Modifier,
     cover: CdnImage? = null,
     summary: String? = null,
@@ -79,7 +86,23 @@ fun ArticleDetailsHeader(
                 val maxWidth = maxWidth.value.toInt()
 
                 SubcomposeAsyncImage(
-                    modifier = Modifier.size(variant.findImageSize(maxWidth)),
+                    modifier = Modifier
+                        .size(variant.findImageSize(maxWidth))
+                        .clickable {
+                            Timber.i("Article: ${variant?.mediaUrl}")
+                            eventId?.let {
+                                MediaClickEvent(
+                                    noteId = it,
+                                    noteAttachmentType = NoteAttachmentType.Image,
+                                    mediaUrl = variant?.mediaUrl ?: cover.sourceUrl,
+                                    positionMs = 0L,
+                                )
+                            }?.let {
+                                noteCallbacks.onMediaClick?.invoke(
+                                    it
+                                )
+                            }
+                        },
                     model = variant?.mediaUrl ?: cover.sourceUrl,
                     contentScale = ContentScale.FillWidth,
                     contentDescription = null,
@@ -146,8 +169,9 @@ fun PreviewArticleDetailsHeader() {
                         This is a short summary of this preview test.
                         This is a short summary of this preview test.
                         This is a short summary of this preview test.
-                """.trimIndent(),
-                date = Instant.now(),
+                """.trimIndent(), date = Instant.now(),
+                eventId = "id",
+                noteCallbacks = NoteCallbacks(),
             )
         }
     }
