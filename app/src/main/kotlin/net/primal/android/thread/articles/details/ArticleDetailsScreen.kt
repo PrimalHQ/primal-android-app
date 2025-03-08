@@ -54,7 +54,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import coil.compose.SubcomposeAsyncImage
 import java.text.NumberFormat
-import kotlin.math.log
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.ArticleDropdownMenuIcon
@@ -541,8 +540,20 @@ private fun ArticleContentWithComments(
                     .background(color = AppTheme.colorScheme.surfaceVariant)
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                eventId = state.article?.eventId,
-                noteCallbacks = noteCallbacks,
+                onMediaClick = { mediaUrl ->
+                    state.article?.eventId?.let {
+                        MediaClickEvent(
+                            noteId = state.article.eventId,
+                            noteAttachmentType = NoteAttachmentType.Image,
+                            mediaUrl = mediaUrl,
+                            positionMs = 0L,
+                        )
+                    }?.let {
+                        noteCallbacks.onMediaClick?.invoke(
+                            it,
+                        )
+                    }
+                },
                 title = state.article?.title ?: "",
                 date = state.article?.publishedAt,
                 cover = state.article?.coverImageCdnImage,
@@ -645,7 +656,7 @@ private fun ArticleContentWithComments(
                                     )
                                 }?.let {
                                     noteCallbacks.onMediaClick?.invoke(
-                                        it
+                                        it,
                                     )
                                 }
                             },

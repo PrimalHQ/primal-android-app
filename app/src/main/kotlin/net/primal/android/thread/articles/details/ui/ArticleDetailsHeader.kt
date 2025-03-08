@@ -28,27 +28,22 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
 import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.notes.feed.note.ui.attachment.findImageSize
-import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
-import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.thread.articles.details.ui.rendering.MarkdownRenderer
 import net.primal.android.thread.articles.details.ui.rendering.rememberPrimalMarkwon
-import timber.log.Timber
 
 @Composable
 fun ArticleDetailsHeader(
-    eventId: String?,
     title: String,
     date: Instant?,
-    noteCallbacks: NoteCallbacks,
     modifier: Modifier = Modifier,
     cover: CdnImage? = null,
     summary: String? = null,
+    onMediaClick: (String) -> Unit,
 ) {
     val markwon = rememberPrimalMarkwon()
     Column(
@@ -88,21 +83,7 @@ fun ArticleDetailsHeader(
                 SubcomposeAsyncImage(
                     modifier = Modifier
                         .size(variant.findImageSize(maxWidth))
-                        .clickable {
-                            Timber.i("Article: ${variant?.mediaUrl}")
-                            eventId?.let {
-                                MediaClickEvent(
-                                    noteId = it,
-                                    noteAttachmentType = NoteAttachmentType.Image,
-                                    mediaUrl = variant?.mediaUrl ?: cover.sourceUrl,
-                                    positionMs = 0L,
-                                )
-                            }?.let {
-                                noteCallbacks.onMediaClick?.invoke(
-                                    it
-                                )
-                            }
-                        },
+                        .clickable { onMediaClick(variant?.mediaUrl ?: cover.sourceUrl) },
                     model = variant?.mediaUrl ?: cover.sourceUrl,
                     contentScale = ContentScale.FillWidth,
                     contentDescription = null,
@@ -169,9 +150,9 @@ fun PreviewArticleDetailsHeader() {
                         This is a short summary of this preview test.
                         This is a short summary of this preview test.
                         This is a short summary of this preview test.
-                """.trimIndent(), date = Instant.now(),
-                eventId = "id",
-                noteCallbacks = NoteCallbacks(),
+                """.trimIndent(),
+                date = Instant.now(),
+                onMediaClick = {},
             )
         }
     }

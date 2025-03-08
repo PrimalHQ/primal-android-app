@@ -1,6 +1,5 @@
 package net.primal.android.articles.api.mediator
 
-import android.util.Log
 import androidx.room.withTransaction
 import net.primal.android.articles.api.model.ArticleResponse
 import net.primal.android.attachments.ext.flatMapArticlesAsNoteAttachmentPO
