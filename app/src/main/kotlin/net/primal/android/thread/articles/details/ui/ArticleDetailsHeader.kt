@@ -1,5 +1,6 @@
 package net.primal.android.thread.articles.details.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -42,6 +43,7 @@ fun ArticleDetailsHeader(
     modifier: Modifier = Modifier,
     cover: CdnImage? = null,
     summary: String? = null,
+    onMediaClick: (String) -> Unit,
 ) {
     val markwon = rememberPrimalMarkwon()
     Column(
@@ -79,7 +81,9 @@ fun ArticleDetailsHeader(
                 val maxWidth = maxWidth.value.toInt()
 
                 SubcomposeAsyncImage(
-                    modifier = Modifier.size(variant.findImageSize(maxWidth)),
+                    modifier = Modifier
+                        .size(variant.findImageSize(maxWidth))
+                        .clickable { onMediaClick(variant?.mediaUrl ?: cover.sourceUrl) },
                     model = variant?.mediaUrl ?: cover.sourceUrl,
                     contentScale = ContentScale.FillWidth,
                     contentDescription = null,
@@ -148,6 +152,7 @@ fun PreviewArticleDetailsHeader() {
                         This is a short summary of this preview test.
                 """.trimIndent(),
                 date = Instant.now(),
+                onMediaClick = {},
             )
         }
     }
