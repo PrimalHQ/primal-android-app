@@ -1,5 +1,7 @@
 package net.primal.android.media
 
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -40,6 +42,8 @@ import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.utils.copyBitmapToClipboard
+import net.primal.android.core.utils.copyText
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -85,6 +89,9 @@ private fun MediaItemScreen(
     animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
     SnackbarErrorHandler(
         error = state.error,
         snackbarHostState = snackbarHostState,
@@ -119,6 +126,16 @@ private fun MediaItemScreen(
                 actions = {
                     GalleryDropdownMenu(
                         onSaveClick = { eventPublisher(MediaItemContract.UiEvent.SaveMedia) },
+                        onMediaUrlCopyClick = {
+                            copyText(context = context, text = state.mediaUrl)
+                        },
+                        onMediaCopyClick = {
+                            state.currentDisplayedBitmap?.let {
+                                coroutineScope.launch {
+                                    copyBitmapToClipboard(context = context, bitmap = it)
+                                }
+                            }
+                        },
                     )
                 },
             )
@@ -132,6 +149,7 @@ private fun MediaItemScreen(
                 modifier = Modifier.padding(it),
                 mediaUrl = state.mediaUrl,
                 animatedVisibilityScope = animatedVisibilityScope,
+                onBitmapLoaded = { eventPublisher(MediaItemContract.UiEvent.LoadBitmap(it)) },
             )
         }
     }
@@ -143,14 +161,17 @@ fun SharedTransitionScope.MediaItemContent(
     modifier: Modifier = Modifier,
     mediaUrl: String,
     animatedVisibilityScope: AnimatedVisibilityScope,
+    onBitmapLoaded: ((Bitmap) -> Unit),
 ) {
     val zoomSpec = ZoomSpec(maxZoomFactor = 15f)
+    var loadedBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     var error by remember { mutableStateOf<ErrorResult?>(null) }
     val loadingImageListener = remember {
         object : ImageRequest.Listener {
             override fun onSuccess(request: ImageRequest, result: SuccessResult) {
                 error = null
+                loadedBitmap = (result.drawable as? BitmapDrawable)?.bitmap
             }
 
             override fun onError(request: ImageRequest, result: ErrorResult) {
@@ -159,6 +180,10 @@ fun SharedTransitionScope.MediaItemContent(
         }
     }
     val imageLoader = LocalContext.current.imageLoader
+
+    LaunchedEffect(loadedBitmap) {
+        loadedBitmap?.let { onBitmapLoaded(it) }
+    }
 
     Box(
         modifier = modifier.fillMaxSize(),

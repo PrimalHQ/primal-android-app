@@ -3,6 +3,8 @@ package net.primal.android.attachments.gallery
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -78,8 +80,12 @@ import net.primal.android.core.compose.dropdown.DropdownPrimalMenuItem
 import net.primal.android.core.compose.foundation.KeepScreenOn
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteLink
+import net.primal.android.core.compose.icons.primaliconpack.ContextCopyRawData
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.core.utils.copyBitmapToClipboard
+import net.primal.android.core.utils.copyText
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -140,6 +146,7 @@ fun MediaGalleryScreen(
     )
 
     val containerColor = AppTheme.colorScheme.surface.copy(alpha = 0.21f)
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         contentColor = AppTheme.colorScheme.background,
@@ -162,6 +169,16 @@ fun MediaGalleryScreen(
                         onSaveClick = {
                             currentImage()?.let { eventPublisher(MediaGalleryContract.UiEvent.SaveMedia(it)) }
                         },
+                        onMediaUrlCopyClick = {
+                            currentImage()?.url?.let { copyText(context = context, text = it) }
+                        },
+                        onMediaCopyClick = {
+                            state.currentDisplayedBitmap?.let { bitmap ->
+                                coroutineScope.launch {
+                                    copyBitmapToClipboard(context, bitmap)
+                                }
+                            }
+                        },
                     )
                 },
             )
@@ -173,6 +190,7 @@ fun MediaGalleryScreen(
                 initialPositionMs = state.initialPositionMs,
                 imageAttachments = imageAttachments,
                 pagerIndicatorContainerColor = containerColor,
+                onBitmapLoaded = { eventPublisher(MediaGalleryContract.UiEvent.LoadBitmap(it)) },
             )
         },
         snackbarHost = {
@@ -189,6 +207,7 @@ private fun MediaGalleryContent(
     initialPositionMs: Long,
     imageAttachments: List<NoteAttachmentUi>,
     pagerIndicatorContainerColor: Color,
+    onBitmapLoaded: ((Bitmap) -> Unit),
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -201,6 +220,7 @@ private fun MediaGalleryContent(
                 pagerState = pagerState,
                 initialIndex = initialAttachmentIndex,
                 initialPositionMs = initialPositionMs,
+                onBitmapLoaded = onBitmapLoaded,
             )
         }
 
@@ -223,7 +243,11 @@ private fun MediaGalleryContent(
 }
 
 @Composable
-fun GalleryDropdownMenu(onSaveClick: () -> Unit) {
+fun GalleryDropdownMenu(
+    onSaveClick: () -> Unit,
+    onMediaUrlCopyClick: () -> Unit,
+    onMediaCopyClick: () -> Unit,
+) {
     var menuVisible by remember { mutableStateOf(false) }
 
     AppBarIcon(
@@ -240,6 +264,18 @@ fun GalleryDropdownMenu(onSaveClick: () -> Unit) {
             onSaveClick = {
                 menuVisible = false
                 onSaveClick()
+            },
+        )
+        MediaUrlCopyMenuItem(
+            onMediaUrlCopyClick = {
+                menuVisible = false
+                onMediaUrlCopyClick()
+            },
+        )
+        MediaCopyMenuItem(
+            onMediaCopyClick = {
+                menuVisible = false
+                onMediaCopyClick()
             },
         )
     }
@@ -272,10 +308,55 @@ private fun SaveMediaMenuItem(onSaveClick: () -> Unit) {
     )
 }
 
+@Composable
+private fun MediaUrlCopyMenuItem(onMediaUrlCopyClick: () -> Unit) {
+    val context = LocalContext.current
+    val copyConfirmationText = stringResource(id = R.string.media_gallery_context_copy_url_toast_success)
+    val uiScope = rememberCoroutineScope()
+
+    DropdownPrimalMenuItem(
+        trailingIconVector = PrimalIcons.ContextCopyNoteLink,
+        text = stringResource(id = R.string.media_gallery_context_copy_image_url),
+        onClick = {
+            uiScope.launch {
+                Toast.makeText(
+                    context,
+                    copyConfirmationText,
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
+            onMediaUrlCopyClick()
+        },
+    )
+}
+
+@Composable
+private fun MediaCopyMenuItem(onMediaCopyClick: () -> Unit) {
+    val context = LocalContext.current
+    val copyConfirmationText = stringResource(id = R.string.media_gallery_context_copy_url_toast_success)
+    val uiScope = rememberCoroutineScope()
+
+    DropdownPrimalMenuItem(
+        trailingIconVector = PrimalIcons.ContextCopyRawData,
+        text = stringResource(id = R.string.media_gallery_context_copy_image),
+        onClick = {
+            uiScope.launch {
+                Toast.makeText(
+                    context,
+                    copyConfirmationText,
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
+            onMediaCopyClick()
+        },
+    )
+}
+
 @ExperimentalFoundationApi
 @Composable
 private fun AttachmentsHorizontalPager(
     modifier: Modifier = Modifier,
+    onBitmapLoaded: ((Bitmap) -> Unit),
     pagerState: PagerState,
     imageAttachments: List<NoteAttachmentUi>,
     initialIndex: Int = 0,
@@ -297,6 +378,7 @@ private fun AttachmentsHorizontalPager(
                     ImageScreen(
                         modifier = Modifier.fillMaxSize(),
                         attachment = attachment,
+                        onBitmapLoaded = onBitmapLoaded,
                     )
                 }
 
@@ -322,14 +404,22 @@ private fun AttachmentsHorizontalPager(
 }
 
 @Composable
-private fun ImageScreen(attachment: NoteAttachmentUi, modifier: Modifier = Modifier) {
+private fun ImageScreen(
+    onBitmapLoaded: (Bitmap) -> Unit,
+    attachment: NoteAttachmentUi,
+    modifier: Modifier = Modifier,
+) {
     val zoomSpec = ZoomSpec(maxZoomFactor = 2.5f)
+    var loadedBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     var error by remember { mutableStateOf<ErrorResult?>(null) }
+    val imageLoader = LocalContext.current.imageLoader
+
     val loadingImageListener = remember {
         object : ImageRequest.Listener {
             override fun onSuccess(request: ImageRequest, result: SuccessResult) {
                 error = null
+                loadedBitmap = (result.drawable as? BitmapDrawable)?.bitmap
             }
 
             override fun onError(request: ImageRequest, result: ErrorResult) {
@@ -338,7 +428,10 @@ private fun ImageScreen(attachment: NoteAttachmentUi, modifier: Modifier = Modif
         }
     }
 
-    val imageLoader = LocalContext.current.imageLoader
+    LaunchedEffect(loadedBitmap) {
+        loadedBitmap?.let { onBitmapLoaded(it) }
+    }
+
     val keys = attachment.variants.orEmpty()
         .sortedBy { it.width }
         .mapNotNull {
