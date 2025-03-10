@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -83,6 +84,7 @@ import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.numericpad.PrimalNumericPad
+import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
@@ -344,7 +346,7 @@ private fun ReceivePaymentViewer(
                 },
                 content = when (state.currentTab) {
                     ReceivePaymentTab.Lightning -> networkDetails.address
-                    ReceivePaymentTab.Bitcoin -> networkDetails.address.ellipsizeMiddle(size = 12)
+                    ReceivePaymentTab.Bitcoin -> networkDetails.address
                 },
                 contentFontSize = 20.sp,
                 maxLines = when (state.currentTab) {
@@ -495,6 +497,8 @@ private fun TwoLineText(
     maxLines: Int = 3,
     contentFontSize: TextUnit = 18.sp,
 ) {
+    val context = LocalContext.current
+
     Text(
         modifier = Modifier.padding(horizontal = 32.dp),
         text = title,
@@ -503,8 +507,12 @@ private fun TwoLineText(
     )
 
     Text(
-        modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
-        text = content,
+        modifier = Modifier
+            .padding(vertical = 8.dp, horizontal = 16.dp)
+            .clickable {
+                copyText(context = context, text = content)
+            },
+        text = content.ellipsizeMiddle(size = 12),
         style = AppTheme.typography.bodyLarge.copy(fontSize = contentFontSize),
         fontWeight = FontWeight.Bold,
         maxLines = maxLines,
