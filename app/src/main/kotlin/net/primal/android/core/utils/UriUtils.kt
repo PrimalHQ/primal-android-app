@@ -15,7 +15,7 @@ fun String.parseUris(includeNostrUris: Boolean = true): List<String> {
         .filterInvalidTLDs()
         .map { it.originalUrl }
     val customUrls = this.detectUrls()
-    val mergedUrls = mergeUrls(libUrls, customUrls)
+    val mergedUrls = mergeUrls(libUrls, customUrls, this)
 
     return if (includeNostrUris) {
         val nostr = this.parseNostrUris()
@@ -25,16 +25,20 @@ fun String.parseUris(includeNostrUris: Boolean = true): List<String> {
     }
 }
 
-fun mergeUrls(libUrls: List<String>, customUrls: List<String>): List<String> {
+fun mergeUrls(libUrls: List<String>, customUrls: List<String>, content: String): List<String> {
     val result = mutableListOf<String>()
-
     val allUrls = (libUrls + customUrls).distinct()
     val visited = mutableSetOf<String>()
 
     for (url in allUrls) {
-        if (visited.any { existing -> isRelativeMatch(existing, url) }) {
-            val matchingUrl = visited.first { existing -> isRelativeMatch(existing, url) }
-            if (url.length > matchingUrl.length) {
+        val matchingUrl = visited.find { existing -> isRelativeMatch(existing, url) }
+
+        if (matchingUrl != null) {
+            val bothExist = containsCompleteUrl(content, matchingUrl) && containsCompleteUrl(content, url)
+
+            if (bothExist) {
+                visited.add(url)
+            } else if (url.length > matchingUrl.length) {
                 visited.remove(matchingUrl)
                 visited.add(url)
             }
@@ -49,6 +53,10 @@ fun mergeUrls(libUrls: List<String>, customUrls: List<String>): List<String> {
 
 fun isRelativeMatch(url1: String, url2: String): Boolean {
     return url1.startsWith(url2) || url2.startsWith(url1)
+}
+
+fun containsCompleteUrl(content: String, url: String): Boolean {
+    return Regex("\\b${Regex.escape(url)}\\b").containsMatchIn(content)
 }
 
 private fun List<Url>.filterInvalidTLDs() =
