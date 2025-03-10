@@ -457,6 +457,7 @@ fun renderContentAsAnnotatedString(
                 highlightColor = highlightColor,
             )
         }
+
         TextMatcher(
             content = refinedContent,
             texts = data.hashtags.sortedByDescending { it.length },
