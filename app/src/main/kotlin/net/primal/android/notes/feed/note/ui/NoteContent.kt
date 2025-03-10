@@ -49,6 +49,7 @@ import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import timber.log.Timber
 
 private const val PROFILE_ID_ANNOTATION_TAG = "profileId"
 private const val URL_ANNOTATION_TAG = "url"
@@ -457,10 +458,9 @@ fun renderContentAsAnnotatedString(
                 highlightColor = highlightColor,
             )
         }
-
         TextMatcher(
             content = refinedContent,
-            texts = data.hashtags,
+            texts = data.hashtags.sortedByDescending { it.length },
             repeatingOccurrences = true,
         )
             .matches()
