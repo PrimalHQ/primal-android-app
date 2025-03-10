@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
+import net.primal.android.profile.utils.combinePremiumInfoIfLegend
 
 @Dao
 interface ProfileDataDao {
@@ -15,12 +16,7 @@ interface ProfileDataDao {
         val existingProfiles = findProfileData(data.map { it.ownerId }).associateBy { it.ownerId }
         insertOrReplaceAll(
             data.map { profileData ->
-                profileData.copy(
-                    primalPremiumInfo = profileData.primalPremiumInfo?.copy(
-                        legendProfile = profileData.primalPremiumInfo.legendProfile
-                            ?: existingProfiles[profileData.ownerId]?.primalPremiumInfo?.legendProfile,
-                    ),
-                )
+                profileData.combinePremiumInfoIfLegend(existingProfiles[profileData.ownerId])
             },
         )
     }
