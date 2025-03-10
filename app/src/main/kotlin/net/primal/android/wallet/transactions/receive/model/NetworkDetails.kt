@@ -24,5 +24,5 @@ data class NetworkDetails(
             }
         }
 
-    val copyValue: String? get() = invoice ?: address
+    val copyValue: String? get() = invoice ?: qrCodeValue
 }
