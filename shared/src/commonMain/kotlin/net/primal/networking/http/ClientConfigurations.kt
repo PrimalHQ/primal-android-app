@@ -1,9 +1,7 @@
-package net.primal.networking.di
+package net.primal.networking.http
 
 import io.github.aakira.napier.Napier
-import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
-import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.plugins.UserAgent
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
@@ -16,12 +14,8 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import net.primal.PrimalLib
-import net.primal.serialization.json.NostrJson
-import org.koin.dsl.module
 
-expect fun createHttpClientEngine(): HttpClientEngineFactory<*>
-
-private fun HttpClientConfig<*>.installSharedConfiguration(
+internal fun HttpClientConfig<*>.installSharedHttpClientConfiguration(
     json: Json,
 ) {
     install(ContentNegotiation) {
@@ -53,41 +47,12 @@ private fun HttpClientConfig<*>.installSharedConfiguration(
 //    }
 }
 
-internal val networkingModule = module {
-    single<HttpClient>(WebSocketHttpClient) {
-        HttpClient(createHttpClientEngine()) {
-            installSharedConfiguration(json = NostrJson)
-
-            PrimalLib.userAgent?.let { userAgent ->
-                install(UserAgent) {
-                    agent = userAgent
-                }
-            }
-
-
-            install(WebSockets) {
-
-            }
+internal fun HttpClientConfig<*>.installWebSocketsHttpClientConfiguration() {
+    PrimalLib.userAgent?.let { userAgent ->
+        install(UserAgent) {
+            agent = userAgent
         }
     }
 
-    single<HttpClient>(RegularHttpClient) {
-        HttpClient(createHttpClientEngine()) {
-            installSharedConfiguration(json = NostrJson)
-        }
-    }
+    install(WebSockets) { }
 }
-
-//@Module
-//@InstallIn(SingletonComponent::class)
-//object NetworkingModule {
-//    @Provides
-//    @Singleton
-//    fun unauthenticatedRetrofit(okHttpClient: OkHttpClient): Retrofit =
-//        Retrofit.Builder()
-//            .baseUrl("https://primal.net")
-//            .client(okHttpClient)
-//            .addConverterFactory(ScalarsConverterFactory.create())
-//            .addConverterFactory(NostrJson.asConverterFactory("application/json".toMediaType()))
-//            .build()
-//}

@@ -1,8 +1,9 @@
 package net.primal
 
+import net.primal.api.feeds.di.primalFeedApiModule
 import net.primal.core.di.platformModule
 import net.primal.events.di.eventsModule
-import net.primal.networking.di.networkingModule
+import net.primal.networking.di.httpClientModule
 import net.primal.networking.di.socketsModule
 import net.primal.networking.primal.api.di.primalImportApiModule
 import net.primal.networking.primal.upload.api.di.primalUploadApiModule
@@ -26,7 +27,7 @@ internal object PrimalLib {
             modules(
                 // Core
                 platformModule(),
-                networkingModule,
+                httpClientModule,
                 socketsModule,
 
                 // Repositories
@@ -35,6 +36,7 @@ internal object PrimalLib {
                 // Apis
                 primalImportApiModule,
                 primalUploadApiModule,
+                primalFeedApiModule,
             )
         }
     }
