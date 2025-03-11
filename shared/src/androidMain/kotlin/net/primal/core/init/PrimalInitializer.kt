@@ -11,6 +11,7 @@ object PrimalInitializer {
         context: Context,
         appName: String? = null,
         userAgent: String? = null,
+        showLog: Boolean = false,
     ) {
         PrimalLib.apply {
             initKoin { androidContext(context) }
@@ -18,6 +19,8 @@ object PrimalInitializer {
             setUserAgent(userAgent)
         }
 
-        Napier.base(DebugAntilog())
+        if (showLog) {
+            Napier.base(DebugAntilog())
+        }
     }
 }
