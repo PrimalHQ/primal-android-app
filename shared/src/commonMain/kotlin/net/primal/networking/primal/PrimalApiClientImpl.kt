@@ -40,8 +40,6 @@ internal class PrimalApiClientImpl(
 //    private val appConfigHandler: AppConfigHandler,
 ) : PrimalApiClient {
 
-    // TODO Remove unused SocketSendMessageException
-
     private val scope = CoroutineScope(dispatcherProvider.io())
 
     private var socketClientInitialized: Boolean = false
@@ -65,16 +63,16 @@ internal class PrimalApiClientImpl(
             // TODO Fix observeApiUrlByType
             val apiUrl = "wss://stage.primal.net"
 //            appConfigProvider.observeApiUrlByType(type = serverType).collect { apiUrl ->
-                socketClientMutex.withLock {
-                    scope.launch { updateStatus { copy(url = apiUrl) } }
-                    if (socketClientInitialized) {
-                        scope.launch { updateStatus { copy(connected = false) } }
-                        socketClient.close()
-                    }
-                    socketClient = buildAndInitializeSocketClient(apiUrl)
-                    socketClient.ensureSocketConnection()
-                    socketClientInitialized = true
+            socketClientMutex.withLock {
+                scope.launch { updateStatus { copy(url = apiUrl) } }
+                if (socketClientInitialized) {
+                    scope.launch { updateStatus { copy(connected = false) } }
+                    socketClient.close()
                 }
+                socketClient = buildAndInitializeSocketClient(apiUrl)
+                socketClient.ensureSocketConnection()
+                socketClientInitialized = true
+            }
 //            }
         }
 
@@ -99,6 +97,10 @@ internal class PrimalApiClientImpl(
 
     private fun PrimalServerType.isIncomingCompressionSupported(): Boolean {
         return this == PrimalServerType.Caching || this == PrimalServerType.Wallet
+    }
+
+    private suspend fun ensureSocketClientConnection() = socketClientMutex.withLock {
+        socketClient.ensureSocketConnection()
     }
 
     private suspend fun <T> retrySendMessage(times: Int, block: suspend (Int) -> T): T {
@@ -148,7 +150,11 @@ internal class PrimalApiClientImpl(
     }
 
     private suspend fun sendMessageOrThrow(subscriptionId: String, data: JsonObject) {
-        socketClient.sendREQ(subscriptionId = subscriptionId, data = data)
+        try {
+            socketClient.sendREQ(subscriptionId = subscriptionId, data = data)
+        } catch (error: Exception) {
+            throw SocketSendMessageException(message = error.message)
+        }
     }
 
     private fun Throwable?.takeAsWssException(): WssException {
@@ -173,9 +179,14 @@ internal class PrimalApiClientImpl(
         return socketClient.incomingMessages.filterBySubscriptionId(id = subscriptionId)
     }
 
-    override suspend fun closeSubscription(subscriptionId: String) {
+    override suspend fun closeSubscription(subscriptionId: String): Boolean {
         ensureSocketClientConnection()
-        return socketClient.sendCLOSE(subscriptionId = subscriptionId)
+        return try {
+            socketClient.sendCLOSE(subscriptionId = subscriptionId)
+            true
+        } catch (error: Exception) {
+            false
+        }
     }
 
     @OptIn(FlowPreview::class)
@@ -184,7 +195,7 @@ internal class PrimalApiClientImpl(
         val messages = socketClient.incomingMessages
             .filterBySubscriptionId(id = subscriptionId)
             .transformWhileEventsAreIncoming()
-            .timeout(20.seconds)
+            .timeout(15.seconds)
             .toList()
 
         val terminationMessage = messages.last()
@@ -218,16 +229,10 @@ internal class PrimalApiClientImpl(
             it is NostrIncomingMessage.EventMessage || it is NostrIncomingMessage.EventsMessage
         }
 
-    private suspend fun ensureSocketClientConnection() =
-        socketClientMutex.withLock {
-            socketClient.ensureSocketConnection()
-        }
-
-    @Deprecated("This is no longer being thrown anywhere since Ktor implementation")
     private class SocketSendMessageException(override val message: String?) : RuntimeException()
 
     companion object {
-        const val MAX_RETRIES = 3
+        const val MAX_RETRIES = 2
         private const val RETRY_DELAY_MILLIS = 500L
     }
 }
