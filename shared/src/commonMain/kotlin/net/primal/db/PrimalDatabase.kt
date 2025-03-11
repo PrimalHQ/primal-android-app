@@ -36,7 +36,7 @@ internal expect object AppDatabaseConstructor : RoomDatabaseConstructor<PrimalDa
     override fun initialize(): PrimalDatabase
 }
 
-internal fun buildAppDatabase(
+internal fun buildPrimalDatabase(
     driver: SQLiteDriver,
     queryCoroutineContext: CoroutineContext,
     builder: RoomDatabase.Builder<PrimalDatabase>,

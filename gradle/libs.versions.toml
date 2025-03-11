@@ -36,6 +36,7 @@ junit = "4.13.2"
 ktlint-wrapper-plugin = "12.2.0"
 kotlin = "2.1.10"
 kotlinx-coroutines = "1.10.1"
+kotlinx-datetime = "0.6.2"
 kotlinx-serialization-json = "1.8.0"
 kotest = "5.9.0"
 koin-bom = "4.0.2"
@@ -44,6 +45,7 @@ koinCompose = "4.0.2"
 ksp = "2.1.10-1.0.31"
 ktlint_compose_rules = "0.3.17"
 ktor = "3.1.1"
+ktorfit = "2.4.0"
 markwon = "4.6.2"
 material-icons = "1.7.8"
 media3-exoplayer = "1.5.1"
@@ -135,6 +137,7 @@ androidx-camera-view = { group = "androidx.camera", name = "camera-view", versio
 # Kotlin
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
+kotlinx-datetime  = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 
 # DI libs
 hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hilt" }
@@ -170,6 +173,11 @@ okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit-converter-scalars = { module = "com.squareup.retrofit2:converter-scalars", version.ref = "retrofit" }
 retrofit-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version = "1.0.0" }
+
+ktorfit-light = { module = "de.jensklingenberg.ktorfit:ktorfit-lib", version.ref = "ktorfit" }
+ktorfit-converters-response = { module = "de.jensklingenberg.ktorfit:ktorfit-converters-response", version.ref = "ktorfit" }
+ktorfit-converters-call = { module = "de.jensklingenberg.ktorfit:ktorfit-converters-call", version.ref = "ktorfit" }
+ktorfit-converters-flow = { module = "de.jensklingenberg.ktorfit:ktorfit-converters-flow", version.ref = "ktorfit" }
 
 url-detector = { module = "io.github.url-detector:url-detector", version.ref = "url-detector" }
 
@@ -262,3 +270,4 @@ kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref 
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 jetpack-room = { id = "androidx.room", version.ref = "jetpack-room" }
 swift-nativecoroutines = { id = "com.rickclephas.kmp.nativecoroutines", version.ref = "swift-nativecoroutines" }
+ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit" }

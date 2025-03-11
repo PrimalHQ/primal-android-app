@@ -1,5 +1,7 @@
 package net.primal.core.init
 
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
 import net.primal.PrimalLib
 
 object PrimalInitializer {
@@ -12,5 +14,7 @@ object PrimalInitializer {
             setAppName(appName)
             setUserAgent(userAgent)
         }
+
+        Napier.base(DebugAntilog())
     }
 }
