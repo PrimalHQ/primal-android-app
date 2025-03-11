@@ -335,32 +335,29 @@ private fun ReceivePaymentViewer(
 
         if (networkDetails.address != null) {
             val context = LocalContext.current
+            TwoLineText(
+                title = when (state.currentTab) {
+                    ReceivePaymentTab.Lightning -> stringResource(
+                        id = R.string.wallet_receive_transaction_your_lightning_address,
+                    )
 
-            Column(
-                modifier = Modifier.clickable { copyText(context = context, text = networkDetails.address) },
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                TwoLineText(
-                    title = when (state.currentTab) {
-                        ReceivePaymentTab.Lightning -> stringResource(
-                            id = R.string.wallet_receive_transaction_your_lightning_address,
-                        )
-
-                        ReceivePaymentTab.Bitcoin -> stringResource(
-                            id = R.string.wallet_receive_transaction_your_bitcoin_address,
-                        )
-                    },
-                    content = when (state.currentTab) {
-                        ReceivePaymentTab.Lightning -> networkDetails.address
-                        ReceivePaymentTab.Bitcoin -> networkDetails.address.ellipsizeMiddle(size = 12)
-                    },
-                    contentFontSize = 20.sp,
-                    maxLines = when (state.currentTab) {
-                        ReceivePaymentTab.Lightning -> 3
-                        ReceivePaymentTab.Bitcoin -> 1
-                    },
-                )
-            }
+                    ReceivePaymentTab.Bitcoin -> stringResource(
+                        id = R.string.wallet_receive_transaction_your_bitcoin_address,
+                    )
+                },
+                content = when (state.currentTab) {
+                    ReceivePaymentTab.Lightning -> networkDetails.address
+                    ReceivePaymentTab.Bitcoin -> networkDetails.address.ellipsizeMiddle(size = 12)
+                },
+                contentFontSize = 20.sp,
+                maxLines = when (state.currentTab) {
+                    ReceivePaymentTab.Lightning -> 3
+                    ReceivePaymentTab.Bitcoin -> 1
+                },
+                onCopyClick = {
+                    copyText(context = context, text = networkDetails.address)
+                },
+            )
             if (state.paymentDetails.comment == null && !state.hasPremium) {
                 TextButton(onClick = onBuyPremium) {
                     Text(
@@ -378,6 +375,7 @@ private fun ReceivePaymentViewer(
             TwoLineText(
                 title = stringResource(id = R.string.wallet_receive_transaction_comment),
                 content = state.paymentDetails.comment,
+                onCopyClick = {},
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -503,23 +501,29 @@ private fun TwoLineText(
     content: String,
     maxLines: Int = 3,
     contentFontSize: TextUnit = 18.sp,
+    onCopyClick: () -> Unit,
 ) {
-    Text(
-        modifier = Modifier.padding(horizontal = 32.dp),
-        text = title,
-        style = AppTheme.typography.bodyLarge,
-        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-    )
+    Column(
+        modifier = Modifier.clickable { onCopyClick() },
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            modifier = Modifier.padding(horizontal = 32.dp),
+            text = title,
+            style = AppTheme.typography.bodyLarge,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+        )
 
-    Text(
-        modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
-        text = content,
-        style = AppTheme.typography.bodyLarge.copy(fontSize = contentFontSize),
-        fontWeight = FontWeight.Bold,
-        maxLines = maxLines,
-        overflow = TextOverflow.Ellipsis,
-        textAlign = TextAlign.Center,
-    )
+        Text(
+            modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+            text = content,
+            style = AppTheme.typography.bodyLarge.copy(fontSize = contentFontSize),
+            fontWeight = FontWeight.Bold,
+            maxLines = maxLines,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center,
+        )
+    }
 }
 
 @ExperimentalComposeUiApi
