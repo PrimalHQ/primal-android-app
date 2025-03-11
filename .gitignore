@@ -19,6 +19,7 @@
 /.idea/other.xml
 /.idea/deploymentTargetSelector.xml
 /.idea/runConfigurations.xml
+/.idea/AndroidProjectSystem.xml
 .DS_Store
 /build
 /captures
