@@ -3,6 +3,7 @@ package net.primal
 import net.primal.api.feeds.di.primalFeedApiModule
 import net.primal.core.di.platformModule
 import net.primal.events.di.eventsModule
+import net.primal.networking.config.di.appConfigModule
 import net.primal.networking.di.httpClientModule
 import net.primal.networking.di.socketsModule
 import net.primal.networking.primal.api.di.primalImportApiModule
@@ -29,6 +30,7 @@ internal object PrimalLib {
                 platformModule(),
                 httpClientModule,
                 socketsModule,
+                appConfigModule,
 
                 // Repositories
                 eventsModule,

@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.jetpack.room)
+    alias(libs.plugins.ktorfit)
 //    alias(libs.plugins.swift.nativecoroutines)
 }
 
@@ -46,8 +47,9 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                // Coroutines
+                // Core
                 implementation(libs.kotlinx.coroutines.core)
+                implementation(libs.kotlinx.datetime)
 
                 // Koin
                 implementation(project.dependencies.platform(libs.koin.bom))
@@ -60,6 +62,10 @@ kotlin {
                 implementation(libs.room.runtime)
                 implementation(libs.jetpack.sqlite.framework)
 
+                // Data Store
+                implementation(libs.datastore)
+                implementation(libs.datastore.preferences)
+
                 // Networking && Serialization
                 implementation(libs.ktor.client.core)
                 implementation(libs.ktor.client.websockets)
@@ -68,6 +74,10 @@ kotlin {
                 implementation(libs.ktor.client.serialization.kotlinx.json)
                 implementation(libs.kotlinx.serialization.json)
                 implementation(libs.okio)
+                implementation(libs.ktorfit.light)
+                implementation(libs.ktorfit.converters.response)
+                implementation(libs.ktorfit.converters.call)
+                implementation(libs.ktorfit.converters.flow)
 
                 // Logging
                 implementation(libs.napier)
