@@ -375,7 +375,6 @@ private fun ReceivePaymentViewer(
             TwoLineText(
                 title = stringResource(id = R.string.wallet_receive_transaction_comment),
                 content = state.paymentDetails.comment,
-                onCopyClick = {},
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -501,10 +500,13 @@ private fun TwoLineText(
     content: String,
     maxLines: Int = 3,
     contentFontSize: TextUnit = 18.sp,
-    onCopyClick: () -> Unit,
+    onCopyClick: (() -> Unit)? = null,
 ) {
     Column(
-        modifier = Modifier.clickable { onCopyClick() },
+        modifier = Modifier.clickable(
+            enabled = onCopyClick != null,
+            onClick = { onCopyClick?.invoke() },
+        ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
