@@ -27,7 +27,7 @@ class TextMatcher(
     }
 
     init {
-        texts.forEach { text ->
+        texts.sortedByDescending { it.length }.forEach { text ->
             var currentIndex = content.indexOfNotMatchedBefore(text = text)
 
             while (currentIndex != null) {

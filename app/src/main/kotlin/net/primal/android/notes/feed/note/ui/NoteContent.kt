@@ -460,7 +460,7 @@ fun renderContentAsAnnotatedString(
 
         TextMatcher(
             content = refinedContent,
-            texts = data.hashtags.sortedByDescending { it.length },
+            texts = data.hashtags,
             repeatingOccurrences = true,
         )
             .matches()
