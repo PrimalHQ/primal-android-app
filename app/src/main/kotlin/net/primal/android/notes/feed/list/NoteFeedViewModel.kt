@@ -204,7 +204,7 @@ class NoteFeedViewModel @AssistedInject constructor(
         val newSyncStats = FeedPostsSyncStats(
             latestNoteIds = allNotes.map { it.id },
             latestAvatarCdnImages = avatarCdnImagesAndLegendaryCustomizations
-                .map { it.first ?: CdnImage(sourceUrl = "") }
+                .map { it.first }
                 .take(limit)
         )
 
