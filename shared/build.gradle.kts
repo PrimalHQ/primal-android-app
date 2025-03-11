@@ -1,4 +1,4 @@
-import com.rickclephas.kmp.nativecoroutines.gradle.ExposedSeverity
+//import com.rickclephas.kmp.nativecoroutines.gradle.ExposedSeverity
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.jetpack.room)
-    alias(libs.plugins.swift.nativecoroutines)
+//    alias(libs.plugins.swift.nativecoroutines)
 }
 
 kotlin {
@@ -166,9 +166,9 @@ kotlin {
     }
 }
 
-nativeCoroutines {
-    exposedSeverity = ExposedSeverity.WARNING
-}
+//nativeCoroutines {
+//    exposedSeverity = ExposedSeverity.WARNING
+//}
 
 tasks.register("assembleXCFramework") {
     dependsOn("assemblePrimalSharedReleaseXCFramework")
