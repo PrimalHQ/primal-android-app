@@ -24,5 +24,13 @@ data class NetworkDetails(
             }
         }
 
-    val copyValue: String? get() = invoice ?: address
-}
+    val copyValue: String?
+        get() {
+            return invoice ?: address?.let {
+                when (network) {
+                    Network.Lightning -> it.parseAsLNUrlOrNull()?.urlToLnUrlHrp()
+                    Network.Bitcoin -> it
+                }
+            }
+        }}
+
