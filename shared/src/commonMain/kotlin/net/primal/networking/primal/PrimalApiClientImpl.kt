@@ -3,6 +3,7 @@ package net.primal.networking.primal
 import androidx.annotation.VisibleForTesting
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -25,6 +26,9 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonObject
 import net.primal.core.coroutines.DispatcherProvider
+import net.primal.networking.config.AppConfigHandler
+import net.primal.networking.config.AppConfigProvider
+import net.primal.networking.config.observeApiUrlByType
 import net.primal.networking.sockets.NostrIncomingMessage
 import net.primal.networking.sockets.NostrSocketClient
 import net.primal.networking.sockets.errors.NostrNoticeException
@@ -36,8 +40,8 @@ internal class PrimalApiClientImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val httpClient: HttpClient,
     private val serverType: PrimalServerType,
-//    private val appConfigProvider: AppConfigProvider,
-//    private val appConfigHandler: AppConfigHandler,
+    private val appConfigProvider: AppConfigProvider,
+    private val appConfigHandler: AppConfigHandler,
 ) : PrimalApiClient {
 
     private val scope = CoroutineScope(dispatcherProvider.io())
@@ -55,25 +59,24 @@ internal class PrimalApiClientImpl(
         scope.launch { _connectionStatus.getAndUpdate(reducer) }
 
     init {
+        scope.launch { appConfigHandler.updateAppConfigOrFailSilently() }
         observeApiUrlAndInitializeSocketClient()
     }
 
     private fun observeApiUrlAndInitializeSocketClient() =
         scope.launch {
-            // TODO Fix observeApiUrlByType
-            val apiUrl = "wss://stage.primal.net"
-//            appConfigProvider.observeApiUrlByType(type = serverType).collect { apiUrl ->
-            socketClientMutex.withLock {
-                scope.launch { updateStatus { copy(url = apiUrl) } }
-                if (socketClientInitialized) {
-                    scope.launch { updateStatus { copy(connected = false) } }
-                    socketClient.close()
+            appConfigProvider.observeApiUrlByType(type = serverType).collect { apiUrl ->
+                socketClientMutex.withLock {
+                    scope.launch { updateStatus { copy(url = apiUrl) } }
+                    if (socketClientInitialized) {
+                        scope.launch { updateStatus { copy(connected = false) } }
+                        socketClient.close()
+                    }
+                    socketClient = buildAndInitializeSocketClient(apiUrl)
+                    socketClient.ensureSocketConnection()
+                    socketClientInitialized = true
                 }
-                socketClient = buildAndInitializeSocketClient(apiUrl)
-                socketClient.ensureSocketConnection()
-                socketClientInitialized = true
             }
-//            }
         }
 
     private fun buildAndInitializeSocketClient(apiUrl: String): NostrSocketClient {
@@ -88,8 +91,7 @@ internal class PrimalApiClientImpl(
             onSocketConnectionClosed = { _, _ ->
                 scope.launch {
                     updateStatus { copy(connected = false) }
-                    // TODO Fix updateAppConfigWithDebounce
-//                    appConfigHandler.updateAppConfigWithDebounce(1.minutes)
+                    appConfigHandler.updateAppConfigWithDebounce(1.minutes)
                 }
             },
         )

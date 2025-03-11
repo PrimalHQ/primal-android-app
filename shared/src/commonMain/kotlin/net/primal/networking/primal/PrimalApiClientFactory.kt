@@ -23,8 +23,8 @@ object PrimalApiClientFactory {
             dispatcherProvider = koin.get(),
             httpClient = koin.get(),
             serverType = serverType,
-//            appConfigProvider = appConfigProvider,
-//            appConfigHandler = appConfigHandler,
+            appConfigProvider = koin.get(),
+            appConfigHandler = koin.get(),
         )
     }
 

@@ -28,8 +28,8 @@ internal val socketsModule = module {
             dispatcherProvider = get(),
             httpClient = get(WebSocketHttpClient),
             serverType = PrimalServerType.Caching,
-//            appConfigProvider = appConfigProvider,
-//            appConfigHandler = appConfigHandler,
+            appConfigProvider = get(),
+            appConfigHandler = get(),
         )
     }
 
@@ -40,8 +40,8 @@ internal val socketsModule = module {
             dispatcherProvider = get(),
             httpClient = get(WebSocketHttpClient),
             serverType = PrimalServerType.Upload,
-//            appConfigProvider = appConfigProvider,
-//            appConfigHandler = appConfigHandler,
+            appConfigProvider = get(),
+            appConfigHandler = get(),
         )
     }
 
@@ -52,8 +52,8 @@ internal val socketsModule = module {
             dispatcherProvider = get(),
             httpClient = get(WebSocketHttpClient),
             serverType = PrimalServerType.Wallet,
-//            appConfigProvider = appConfigProvider,
-//            appConfigHandler = appConfigHandler,
+            appConfigProvider = get(),
+            appConfigHandler = get(),
         )
     }
 }

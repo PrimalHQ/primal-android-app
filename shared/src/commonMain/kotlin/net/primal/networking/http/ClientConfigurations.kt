@@ -32,7 +32,7 @@ internal fun HttpClientConfig<*>.installSharedHttpClientConfiguration(
                 Napier.v(message = message, tag = "HttpClient")
             }
         }
-        level = LogLevel.INFO
+        level = LogLevel.ALL
     }
 
 //    HttpResponseValidator {
@@ -54,5 +54,18 @@ internal fun HttpClientConfig<*>.installWebSocketsHttpClientConfiguration() {
         }
     }
 
-    install(WebSockets) { }
+    install(WebSockets) {
+        
+    }
+
+//    HttpResponseValidator {
+//        validateResponse { response ->
+//            if (!response.status.isSuccess()) {
+//                throw ResponseException(
+//                    response = response,
+//                    cachedResponseText = "HTTP status is not successful: ${response.status}",
+//                )
+//            }
+//        }
+//    }
 }
