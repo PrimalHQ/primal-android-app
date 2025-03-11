@@ -334,26 +334,33 @@ private fun ReceivePaymentViewer(
         Spacer(modifier = Modifier.height(24.dp))
 
         if (networkDetails.address != null) {
-            TwoLineText(
-                title = when (state.currentTab) {
-                    ReceivePaymentTab.Lightning -> stringResource(
-                        id = R.string.wallet_receive_transaction_your_lightning_address,
-                    )
+            val context = LocalContext.current
 
-                    ReceivePaymentTab.Bitcoin -> stringResource(
-                        id = R.string.wallet_receive_transaction_your_bitcoin_address,
-                    )
-                },
-                content = when (state.currentTab) {
-                    ReceivePaymentTab.Lightning -> networkDetails.address
-                    ReceivePaymentTab.Bitcoin -> networkDetails.address
-                },
-                contentFontSize = 20.sp,
-                maxLines = when (state.currentTab) {
-                    ReceivePaymentTab.Lightning -> 3
-                    ReceivePaymentTab.Bitcoin -> 1
-                },
-            )
+            Column(
+                modifier = Modifier.clickable { copyText(context = context, text = networkDetails.address) },
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                TwoLineText(
+                    title = when (state.currentTab) {
+                        ReceivePaymentTab.Lightning -> stringResource(
+                            id = R.string.wallet_receive_transaction_your_lightning_address,
+                        )
+
+                        ReceivePaymentTab.Bitcoin -> stringResource(
+                            id = R.string.wallet_receive_transaction_your_bitcoin_address,
+                        )
+                    },
+                    content = when (state.currentTab) {
+                        ReceivePaymentTab.Lightning -> networkDetails.address
+                        ReceivePaymentTab.Bitcoin -> networkDetails.address.ellipsizeMiddle(size = 12)
+                    },
+                    contentFontSize = 20.sp,
+                    maxLines = when (state.currentTab) {
+                        ReceivePaymentTab.Lightning -> 3
+                        ReceivePaymentTab.Bitcoin -> 1
+                    },
+                )
+            }
             if (state.paymentDetails.comment == null && !state.hasPremium) {
                 TextButton(onClick = onBuyPremium) {
                     Text(
@@ -497,8 +504,6 @@ private fun TwoLineText(
     maxLines: Int = 3,
     contentFontSize: TextUnit = 18.sp,
 ) {
-    val context = LocalContext.current
-
     Text(
         modifier = Modifier.padding(horizontal = 32.dp),
         text = title,
@@ -507,12 +512,8 @@ private fun TwoLineText(
     )
 
     Text(
-        modifier = Modifier
-            .padding(vertical = 8.dp, horizontal = 16.dp)
-            .clickable {
-                copyText(context = context, text = content)
-            },
-        text = content.ellipsizeMiddle(size = 12),
+        modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+        text = content,
         style = AppTheme.typography.bodyLarge.copy(fontSize = contentFontSize),
         fontWeight = FontWeight.Bold,
         maxLines = maxLines,
