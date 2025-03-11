@@ -102,6 +102,7 @@ import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.android.wallet.utils.CurrencyConversionUtils.fromUsdToSats
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -139,8 +140,9 @@ fun ReceivePaymentScreen(
         snackbarHostState = snackbarHostState,
         errorMessageResolver = {
             when (it) {
-                is UiState.ReceivePaymentError.FailedToCreateLightningInvoice ->
-                    context.getString(R.string.wallet_receive_transaction_invoice_creation_error)
+                is UiState.ReceivePaymentError.FailedToCreateLightningInvoice -> {
+                    it.cause.message ?: context.getString(R.string.wallet_receive_transaction_invoice_creation_error)
+                }
             }
         },
         onErrorDismiss = { eventPublisher(ReceivePaymentContract.UiEvent.DismissError) },
