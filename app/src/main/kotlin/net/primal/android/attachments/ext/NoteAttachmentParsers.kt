@@ -58,26 +58,27 @@ private fun List<Pair<String, String>>.toNoteAttachments(
     cdnResources: Map<String, CdnResource>,
     linkPreviews: Map<String, LinkPreviewData>,
     videoThumbnails: Map<String, String>,
-): List<NoteAttachment> = map { (eventId, uri) ->
-    val uriCdnResource = cdnResources[uri]
-    val linkPreview = linkPreviews[uri]
-    val linkThumbnailCdnResource = linkPreview?.thumbnailUrl?.let { cdnResources[it] }
-    val videoThumbnail = videoThumbnails[uri]
-    val mimeType = uri.detectMimeType() ?: uriCdnResource?.contentType ?: linkPreview?.mimeType
-    val type = detectNoteAttachmentType(url = uri, mimeType = mimeType)
+): List<NoteAttachment> =
+    map { (eventId, uri) ->
+        val uriCdnResource = cdnResources[uri]
+        val linkPreview = linkPreviews[uri]
+        val linkThumbnailCdnResource = linkPreview?.thumbnailUrl?.let { cdnResources[it] }
+        val videoThumbnail = videoThumbnails[uri]
+        val mimeType = uri.detectMimeType() ?: uriCdnResource?.contentType ?: linkPreview?.mimeType
+        val type = detectNoteAttachmentType(url = uri, mimeType = mimeType)
 
-    NoteAttachment(
-        eventId = eventId,
-        url = uri,
-        type = type,
-        mimeType = mimeType,
-        variants = (uriCdnResource?.variants ?: emptyList()) + (linkThumbnailCdnResource?.variants ?: emptyList()),
-        title = linkPreview?.title?.ifBlank { null },
-        description = linkPreview?.description?.ifBlank { null },
-        thumbnail = linkPreview?.thumbnailUrl?.ifBlank { null } ?: videoThumbnail,
-        authorAvatarUrl = linkPreview?.authorAvatarUrl?.ifBlank { null },
-    )
-}
+        NoteAttachment(
+            eventId = eventId,
+            url = uri,
+            type = type,
+            mimeType = mimeType,
+            variants = (uriCdnResource?.variants ?: emptyList()) + (linkThumbnailCdnResource?.variants ?: emptyList()),
+            title = linkPreview?.title?.ifBlank { null },
+            description = linkPreview?.description?.ifBlank { null },
+            thumbnail = linkPreview?.thumbnailUrl?.ifBlank { null } ?: videoThumbnail,
+            authorAvatarUrl = linkPreview?.authorAvatarUrl?.ifBlank { null },
+        )
+    }
 
 private fun detectNoteAttachmentType(url: String, mimeType: String?): NoteAttachmentType {
     mimeType?.let {
