@@ -1,5 +1,6 @@
 package net.primal.android.attachments.ext
 
+import net.primal.android.articles.db.ArticleData
 import net.primal.android.attachments.db.NoteAttachment
 import net.primal.android.attachments.domain.CdnResource
 import net.primal.android.attachments.domain.LinkPreviewData
@@ -19,25 +20,7 @@ fun List<PostData>.flatMapPostsAsNoteAttachmentPO(
     }
 }
     .filterNot { (_, uri) -> uri.isNostrUri() }
-    .map { (eventId, uri) ->
-        val uriCdnResource = cdnResources[uri]
-        val linkPreview = linkPreviews[uri]
-        val linkThumbnailCdnResource = linkPreview?.thumbnailUrl?.let { cdnResources[it] }
-        val videoThumbnail = videoThumbnails[uri]
-        val mimeType = uri.detectMimeType() ?: uriCdnResource?.contentType ?: linkPreview?.mimeType
-        val type = detectNoteAttachmentType(url = uri, mimeType = mimeType)
-        NoteAttachment(
-            eventId = eventId,
-            url = uri,
-            type = type,
-            mimeType = mimeType,
-            variants = (uriCdnResource?.variants ?: emptyList()) + (linkThumbnailCdnResource?.variants ?: emptyList()),
-            title = linkPreview?.title?.ifBlank { null },
-            description = linkPreview?.description?.ifBlank { null },
-            thumbnail = linkPreview?.thumbnailUrl?.ifBlank { null } ?: videoThumbnail,
-            authorAvatarUrl = linkPreview?.authorAvatarUrl?.ifBlank { null },
-        )
-    }
+    .toNoteAttachments(cdnResources, linkPreviews, videoThumbnails)
 
 fun List<DirectMessageData>.flatMapMessagesAsNoteAttachmentPO() =
     flatMap { messageData ->
@@ -55,6 +38,47 @@ fun List<DirectMessageData>.flatMapMessagesAsNoteAttachmentPO() =
                 mimeType = mimeType,
             )
         }
+
+fun List<ArticleData>.flatMapArticlesAsNoteAttachmentPO(
+    cdnResources: Map<String, CdnResource>,
+    linkPreviews: Map<String, LinkPreviewData>,
+    videoThumbnails: Map<String, String>,
+) = flatMap { articleData ->
+    val uriAttachments = articleData.uris.map { uri -> articleData.eventId to uri }
+    val imageAttachment = articleData.imageCdnImage?.sourceUrl?.let { imageUrl ->
+        listOf(articleData.eventId to imageUrl)
+    } ?: emptyList()
+
+    imageAttachment + uriAttachments
+}
+    .filterNot { (_, uri) -> uri.isNostrUri() }
+    .toNoteAttachments(cdnResources, linkPreviews, videoThumbnails)
+
+private fun List<Pair<String, String>>.toNoteAttachments(
+    cdnResources: Map<String, CdnResource>,
+    linkPreviews: Map<String, LinkPreviewData>,
+    videoThumbnails: Map<String, String>,
+): List<NoteAttachment> =
+    map { (eventId, uri) ->
+        val uriCdnResource = cdnResources[uri]
+        val linkPreview = linkPreviews[uri]
+        val linkThumbnailCdnResource = linkPreview?.thumbnailUrl?.let { cdnResources[it] }
+        val videoThumbnail = videoThumbnails[uri]
+        val mimeType = uri.detectMimeType() ?: uriCdnResource?.contentType ?: linkPreview?.mimeType
+        val type = detectNoteAttachmentType(url = uri, mimeType = mimeType)
+
+        NoteAttachment(
+            eventId = eventId,
+            url = uri,
+            type = type,
+            mimeType = mimeType,
+            variants = (uriCdnResource?.variants ?: emptyList()) + (linkThumbnailCdnResource?.variants ?: emptyList()),
+            title = linkPreview?.title?.ifBlank { null },
+            description = linkPreview?.description?.ifBlank { null },
+            thumbnail = linkPreview?.thumbnailUrl?.ifBlank { null } ?: videoThumbnail,
+            authorAvatarUrl = linkPreview?.authorAvatarUrl?.ifBlank { null },
+        )
+    }
 
 private fun detectNoteAttachmentType(url: String, mimeType: String?): NoteAttachmentType {
     mimeType?.let {

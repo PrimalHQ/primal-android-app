@@ -57,6 +57,7 @@ import java.text.NumberFormat
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.ArticleDropdownMenuIcon
+import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.ListNoContent
@@ -92,6 +93,7 @@ import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.notes.feed.note.ui.FeedNoteActionsRow
 import net.primal.android.notes.feed.note.ui.ReferencedNoteCard
 import net.primal.android.notes.feed.note.ui.ThreadNoteStatsRow
+import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
@@ -538,6 +540,20 @@ private fun ArticleContentWithComments(
                     .background(color = AppTheme.colorScheme.surfaceVariant)
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
+                onMediaClick = { mediaUrl ->
+                    state.article?.eventId?.let {
+                        MediaClickEvent(
+                            noteId = state.article.eventId,
+                            noteAttachmentType = NoteAttachmentType.Image,
+                            mediaUrl = mediaUrl,
+                            positionMs = 0L,
+                        )
+                    }?.let {
+                        noteCallbacks.onMediaClick?.invoke(
+                            it,
+                        )
+                    }
+                },
                 title = state.article?.title ?: "",
                 date = state.article?.publishedAt,
                 cover = state.article?.coverImageCdnImage,
@@ -629,7 +645,21 @@ private fun ArticleContentWithComments(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
-                            .clip(AppTheme.shapes.medium),
+                            .clip(AppTheme.shapes.medium)
+                            .clickable {
+                                state.article?.eventId?.let {
+                                    MediaClickEvent(
+                                        noteId = it,
+                                        noteAttachmentType = NoteAttachmentType.Image,
+                                        mediaUrl = part.imageUrl,
+                                        positionMs = 0L,
+                                    )
+                                }?.let {
+                                    noteCallbacks.onMediaClick?.invoke(
+                                        it,
+                                    )
+                                }
+                            },
                         model = part.imageUrl,
                         contentScale = ContentScale.FillWidth,
                         contentDescription = null,
