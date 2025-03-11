@@ -28,6 +28,7 @@ class PrimalApp : Application() {
             context = this@PrimalApp,
             appName = "android-${BuildConfig.VERSION_NAME}",
             userAgent = UserAgentProvider.USER_AGENT,
+            showLog = true,
         )
 
         loggers.forEach {

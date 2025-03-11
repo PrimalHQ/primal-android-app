@@ -8,6 +8,7 @@ object PrimalInitializer {
     fun init(
         appName: String? = null,
         userAgent: String? = null,
+        showLog: Boolean = false,
     ) {
         PrimalLib.apply {
             initKoin()
@@ -15,6 +16,8 @@ object PrimalInitializer {
             setUserAgent(userAgent)
         }
 
-        Napier.base(DebugAntilog())
+        if (showLog) {
+            Napier.base(DebugAntilog())
+        }
     }
 }
