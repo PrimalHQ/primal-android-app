@@ -92,6 +92,8 @@ private fun MediaItemScreen(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
+    var mediaItemBitmap by remember { mutableStateOf<Bitmap?>(null) }
+
     SnackbarErrorHandler(
         error = state.error,
         snackbarHostState = snackbarHostState,
@@ -130,7 +132,7 @@ private fun MediaItemScreen(
                             copyText(context = context, text = state.mediaUrl)
                         },
                         onMediaCopyClick = {
-                            state.currentDisplayedBitmap?.let {
+                            mediaItemBitmap?.let {
                                 coroutineScope.launch {
                                     copyBitmapToClipboard(context = context, bitmap = it)
                                 }
@@ -149,7 +151,7 @@ private fun MediaItemScreen(
                 modifier = Modifier.padding(it),
                 mediaUrl = state.mediaUrl,
                 animatedVisibilityScope = animatedVisibilityScope,
-                onBitmapLoaded = { eventPublisher(MediaItemContract.UiEvent.LoadBitmap(it)) },
+                onMediaLoaded = { mediaItemBitmap = it },
             )
         }
     }
@@ -161,7 +163,7 @@ fun SharedTransitionScope.MediaItemContent(
     modifier: Modifier = Modifier,
     mediaUrl: String,
     animatedVisibilityScope: AnimatedVisibilityScope,
-    onBitmapLoaded: ((Bitmap) -> Unit),
+    onMediaLoaded: ((Bitmap) -> Unit),
 ) {
     val zoomSpec = ZoomSpec(maxZoomFactor = 15f)
     var loadedBitmap by remember { mutableStateOf<Bitmap?>(null) }
@@ -182,7 +184,7 @@ fun SharedTransitionScope.MediaItemContent(
     val imageLoader = LocalContext.current.imageLoader
 
     LaunchedEffect(loadedBitmap) {
-        loadedBitmap?.let { onBitmapLoaded(it) }
+        loadedBitmap?.let { onMediaLoaded(it) }
     }
 
     Box(

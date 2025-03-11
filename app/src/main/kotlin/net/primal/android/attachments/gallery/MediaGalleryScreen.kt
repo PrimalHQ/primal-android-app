@@ -84,7 +84,6 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteLink
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyRawData
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
-import net.primal.android.core.utils.copyBitmapToClipboard
 import net.primal.android.core.utils.copyText
 import net.primal.android.theme.AppTheme
 
@@ -173,11 +172,11 @@ fun MediaGalleryScreen(
                             currentImage()?.url?.let { copyText(context = context, text = it) }
                         },
                         onMediaCopyClick = {
-                            state.currentDisplayedBitmap?.let { bitmap ->
-                                coroutineScope.launch {
-                                    copyBitmapToClipboard(context, bitmap)
-                                }
-                            }
+//                            state.currentDisplayedBitmap?.let { bitmap ->
+//                                coroutineScope.launch {
+//                                    copyBitmapToClipboard(context, bitmap)
+//                                }
+//                            }
                         },
                     )
                 },
@@ -190,7 +189,8 @@ fun MediaGalleryScreen(
                 initialPositionMs = state.initialPositionMs,
                 imageAttachments = imageAttachments,
                 pagerIndicatorContainerColor = containerColor,
-                onBitmapLoaded = { eventPublisher(MediaGalleryContract.UiEvent.LoadBitmap(it)) },
+                onCurrentlyVisibleBitmap = { bitmap ->
+                },
             )
         },
         snackbarHost = {
@@ -207,7 +207,7 @@ private fun MediaGalleryContent(
     initialPositionMs: Long,
     imageAttachments: List<NoteAttachmentUi>,
     pagerIndicatorContainerColor: Color,
-    onBitmapLoaded: ((Bitmap) -> Unit),
+    onCurrentlyVisibleBitmap: ((Bitmap?) -> Unit)? = null,
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -220,7 +220,7 @@ private fun MediaGalleryContent(
                 pagerState = pagerState,
                 initialIndex = initialAttachmentIndex,
                 initialPositionMs = initialPositionMs,
-                onBitmapLoaded = onBitmapLoaded,
+                onCurrentlyVisibleBitmap = onCurrentlyVisibleBitmap,
             )
         }
 
@@ -355,13 +355,15 @@ private fun MediaCopyMenuItem(onMediaCopyClick: () -> Unit) {
 @ExperimentalFoundationApi
 @Composable
 private fun AttachmentsHorizontalPager(
-    modifier: Modifier = Modifier,
-    onBitmapLoaded: ((Bitmap) -> Unit),
     pagerState: PagerState,
     imageAttachments: List<NoteAttachmentUi>,
+    modifier: Modifier = Modifier,
     initialIndex: Int = 0,
     initialPositionMs: Long = 0,
+    onCurrentlyVisibleBitmap: ((Bitmap?) -> Unit)? = null,
 ) {
+    // TODO This needs to be fixed to consider `beyondViewportPageCount` & clearing current bitmap for videos
+
     HorizontalPager(
         modifier = modifier,
         state = pagerState,
@@ -378,7 +380,9 @@ private fun AttachmentsHorizontalPager(
                     ImageScreen(
                         modifier = Modifier.fillMaxSize(),
                         attachment = attachment,
-                        onBitmapLoaded = onBitmapLoaded,
+                        onImageBitmapLoaded = {
+                            onCurrentlyVisibleBitmap?.invoke(it)
+                        },
                     )
                 }
 
@@ -405,8 +409,8 @@ private fun AttachmentsHorizontalPager(
 
 @Composable
 private fun ImageScreen(
-    onBitmapLoaded: (Bitmap) -> Unit,
     attachment: NoteAttachmentUi,
+    onImageBitmapLoaded: (Bitmap) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val zoomSpec = ZoomSpec(maxZoomFactor = 2.5f)
@@ -429,7 +433,7 @@ private fun ImageScreen(
     }
 
     LaunchedEffect(loadedBitmap) {
-        loadedBitmap?.let { onBitmapLoaded(it) }
+        loadedBitmap?.let { onImageBitmapLoaded(it) }
     }
 
     val keys = attachment.variants.orEmpty()
@@ -474,10 +478,10 @@ private fun AttachmentLoadingError() {
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun VideoScreen(
-    modifier: Modifier = Modifier,
     positionMs: Long,
     attachment: NoteAttachmentUi,
     isPageVisible: Boolean,
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
 

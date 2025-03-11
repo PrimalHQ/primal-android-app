@@ -61,7 +61,6 @@ class MediaGalleryViewModel @Inject constructor(
             events.collect {
                 when (it) {
                     is UiEvent.SaveMedia -> saveMedia(attachment = it.attachment)
-                    is UiEvent.LoadBitmap -> setState { copy(currentDisplayedBitmap = it.bitmap) }
                     UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
