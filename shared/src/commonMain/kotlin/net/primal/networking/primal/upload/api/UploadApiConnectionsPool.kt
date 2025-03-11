@@ -1,12 +1,11 @@
 package net.primal.networking.primal.upload.api
 
 import io.github.aakira.napier.Napier
-import io.ktor.client.HttpClient
 import kotlinx.coroutines.channels.Channel
-import net.primal.core.coroutines.DispatcherProvider
 import net.primal.networking.model.NostrEvent
 import net.primal.networking.model.NostrEventKind
 import net.primal.networking.primal.PrimalApiClient
+import net.primal.networking.primal.PrimalApiClientFactory
 import net.primal.networking.primal.PrimalCacheFilter
 import net.primal.networking.primal.PrimalQueryResult
 import net.primal.networking.primal.PrimalServerType
@@ -16,12 +15,7 @@ import net.primal.networking.primal.upload.api.model.UploadChunkRequest
 import net.primal.networking.sockets.errors.WssException
 import net.primal.serialization.json.NostrJsonEncodeDefaults
 
-internal class UploadApiConnectionsPool(
-    private val dispatcherProvider: DispatcherProvider,
-    private val httpClient: HttpClient,
-//    private val appConfigProvider: AppConfigProvider,
-//    private val appConfigHandler: AppConfigHandler,
-) : UploadApi {
+internal class UploadApiConnectionsPool : UploadApi {
 
     companion object {
         const val POOL_SIZE = 5
@@ -32,13 +26,7 @@ internal class UploadApiConnectionsPool(
     init {
         repeat(times = POOL_SIZE) {
             channel.trySend(
-                PrimalApiClient(
-                    dispatcherProvider = dispatcherProvider,
-                    httpClient = httpClient,
-                    serverType = PrimalServerType.Upload,
-//                    appConfigProvider = appConfigProvider,
-//                    appConfigHandler = appConfigHandler,
-                ),
+                PrimalApiClientFactory.create(serverType = PrimalServerType.Upload),
             )
         }
     }
