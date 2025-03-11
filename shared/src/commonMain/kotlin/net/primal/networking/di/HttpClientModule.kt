@@ -1,5 +1,6 @@
 package net.primal.networking.di
 
+import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
 import net.primal.networking.http.createHttpClientEngine
 import net.primal.networking.http.installSharedHttpClientConfiguration
@@ -30,18 +31,11 @@ internal val httpClientModule = module {
             installSharedHttpClientConfiguration(json = NostrJson)
         }
     }
-}
 
-//@Module
-//@InstallIn(SingletonComponent::class)
-//object NetworkingModule {
-//    @Provides
-//    @Singleton
-//    fun unauthenticatedRetrofit(okHttpClient: OkHttpClient): Retrofit =
-//        Retrofit.Builder()
-//            .baseUrl("https://primal.net")
-//            .client(okHttpClient)
-//            .addConverterFactory(ScalarsConverterFactory.create())
-//            .addConverterFactory(NostrJson.asConverterFactory("application/json".toMediaType()))
-//            .build()
-//}
+    single<Ktorfit> {
+        Ktorfit.Builder()
+            .baseUrl("https://primal.net/")
+            .httpClient(client = get(RegularHttpClient))
+            .build()
+    }
+}
