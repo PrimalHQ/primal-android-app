@@ -2,6 +2,9 @@
 accompanist = "0.34.0"
 activity-compose = "1.10.1"
 activity-ktx = "1.10.1"
+acinq-lightning-kmp = "1.8.4"
+acinq-bitcoin-kmp = "0.22.1"
+acinq-secp256k1-kmp = "0.17.1"
 agp = "8.9.0"
 appcompat = "1.7.0"
 bitcoinj-core = "0.16.3"
@@ -29,19 +32,19 @@ jetpack-test-ext = "1.2.1"
 jetpack-datastore = "1.1.3"
 jetpack-lifecycle = "2.8.7"
 jetpack-paging = "3.3.6"
-jetpack-room = "2.7.0-rc01"
-jetpack-sqlite = "2.5.0-rc01"
+jetpack-room = "2.7.0-rc02"
+jetpack-sqlite = "2.5.0-rc02"
 jetpack-webkit = "1.13.0"
 junit = "4.13.2"
 ktlint-wrapper-plugin = "12.2.0"
-kotlin = "2.1.10"
-kotlinx-coroutines = "1.10.1"
-kotlinx-datetime = "0.6.2"
-kotlinx-serialization-json = "1.8.0"
 kotest = "5.9.0"
 koin-bom = "4.0.2"
 koinComposeMultiplatform = "4.0.2"
 koinCompose = "4.0.2"
+kotlin = "2.1.10"
+kotlinx-coroutines = "1.10.1"
+kotlinx-datetime = "0.6.2"
+kotlinx-serialization-json = "1.8.0"
 ksp = "2.1.10-1.0.31"
 ktlint_compose_rules = "0.3.17"
 ktor = "3.1.1"
@@ -63,7 +66,6 @@ roboelectric = "4.13"
 security-app-authenticator = "1.0.0-beta01"
 security-crypto = "1.1.0-alpha06"
 security-identity-credential = "1.0.0-alpha03"
-secp256k1-kmp = "0.15.0"
 spongycastle = "1.58.0.0"
 sqlcipher-android = "4.6.1"
 swift-nativecoroutines = "1.0.0-ALPHA-39"
@@ -190,7 +192,7 @@ room-compiler = { module = "androidx.room:room-compiler", version.ref = "jetpack
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "jetpack-room" }
 room-testing = { module = "androidx.room:room-testing", version.ref = "jetpack-room" }
 room-runtime-android = { group = "androidx.room", name = "room-runtime-android", version.ref = "jetpack-room" }
-paging-room = { module = "androidx.room:room-paging", version.ref = "jetpack-room" }
+room-paging = { module = "androidx.room:room-paging", version.ref = "jetpack-room" }
 jetpack-sqlite-bundled-jvm = { module = "androidx.sqlite:sqlite-bundled-jvm", version.ref = "jetpack-sqlite" }
 jetpack-sqlite-framework = { module = "androidx.sqlite:sqlite-framework", version.ref = "jetpack-sqlite" }
 jetpack-sqlite-framework-android = { module = "androidx.sqlite:sqlite-framework-android", version.ref = "jetpack-sqlite" }
@@ -223,12 +225,24 @@ datastore = { module = "androidx.datastore:datastore", version.ref = "jetpack-da
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "jetpack-datastore" }
 
 # Crytpo libs
-secp256k1-kmp-jvm = { module = "fr.acinq.secp256k1:secp256k1-kmp-jvm", version.ref = "secp256k1-kmp" }
-secp256k1-kmp-jni-android = { module = "fr.acinq.secp256k1:secp256k1-kmp-jni-android", version.ref = "secp256k1-kmp" }
-secp256k1-kmp-jni-jvm = { module = "fr.acinq.secp256k1:secp256k1-kmp-jni-jvm", version.ref = "secp256k1-kmp" }
+lightning-kmp = { module = "fr.acinq.lightning:lightning-kmp", version.ref = "acinq-lightning-kmp" }
+lightning-kmp-iosarm64 = { module = "fr.acinq.lightning:lightning-kmp-iosarm64", version.ref = "acinq-lightning-kmp" }
+lightning-kmp-iossimulatorarm64 = { module = "fr.acinq.lightning:lightning-kmp-iossimulatorarm64", version.ref = "acinq-lightning-kmp" }
+lightning-kmp-iosx64 = { module = "fr.acinq.lightning:lightning-kmp-iosx64", version.ref = "acinq-lightning-kmp" }
+bitcoin-kmp = { module = "fr.acinq.bitcoin:bitcoin-kmp", version.ref = "acinq-bitcoin-kmp"}
+bitcoin-kmp-iosarm64 = { module = "fr.acinq.bitcoin:bitcoin-kmp-iosarm64", version.ref = "acinq-bitcoin-kmp"}
+bitcoin-kmp-iossimulatorarm64 = { module = "fr.acinq.bitcoin:bitcoin-kmp-iossimulatorarm64", version.ref = "acinq-bitcoin-kmp"}
+bitcoin-kmp-iosx64 = { module = "fr.acinq.bitcoin:bitcoin-kmp-iosx64", version.ref = "acinq-bitcoin-kmp"}
+secp256k1 = { module = "fr.acinq.secp256k1:secp256k1", version.ref = "acinq-secp256k1-kmp" }
+secp256k1-kmp = { module = "fr.acinq.secp256k1:secp256k1-kmp", version.ref = "acinq-secp256k1-kmp" }
+secp256k1-kmp-iosarm64 = { module = "fr.acinq.secp256k1:secp256k1-kmp-iosarm64", version.ref = "acinq-secp256k1-kmp" }
+secp256k1-kmp-iossimulatorarm64 = { module = "fr.acinq.secp256k1:secp256k1-kmp-iossimulatorarm64", version.ref = "acinq-secp256k1-kmp" }
+secp256k1-kmp-iosx64 = { module = "fr.acinq.secp256k1:secp256k1-kmp-iosx64", version.ref = "acinq-secp256k1-kmp" }
+secp256k1-kmp-jvm = { module = "fr.acinq.secp256k1:secp256k1-kmp-jvm", version.ref = "acinq-secp256k1-kmp" }
+secp256k1-kmp-jni-android = { module = "fr.acinq.secp256k1:secp256k1-kmp-jni-android", version.ref = "acinq-secp256k1-kmp" }
+secp256k1-kmp-jni-jvm = { module = "fr.acinq.secp256k1:secp256k1-kmp-jni-jvm", version.ref = "acinq-secp256k1-kmp" }
 spongycastle-core = { module = "com.madgag.spongycastle:core", version.ref = "spongycastle" }
 bitcoinj-core = { module = "org.bitcoinj:bitcoinj-core", version.ref = "bitcoinj-core" }
-lightning-kmp = { module = "fr.acinq.lightning:lightning-kmp", version = "1.6.1" }
 
 #Security
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "security-crypto" }
