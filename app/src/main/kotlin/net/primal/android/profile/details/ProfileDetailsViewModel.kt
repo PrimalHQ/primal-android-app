@@ -96,11 +96,11 @@ class ProfileDetailsViewModel @Inject constructor(
         }
 
     private fun initializeProfileDetails(profileId: String, isActiveUser: Boolean) {
+        requestProfileUpdate(profileId = profileId)
         observeProfileData(profileId = profileId)
         observeIsProfileFollowed(profileId = profileId)
         observeReferencedProfilesData(profileId = profileId)
         observeProfileStats(profileId = profileId)
-        fetchProfileFollowedBy(profileId = profileId)
         observeContainsFeed(profileId = profileId)
         observeMutedAccount(profileId = profileId)
         resolveFollowsMe(profileId = profileId)
@@ -118,32 +118,32 @@ class ProfileDetailsViewModel @Inject constructor(
         }
     }
 
+    @Suppress("CyclomaticComplexMethod")
     private fun observeEvents() =
         viewModelScope.launch {
-            events.collect {
-                when (it) {
-                    is UiEvent.FollowAction -> follow(it)
-                    is UiEvent.UnfollowAction -> unfollow(it)
-                    is UiEvent.AddProfileFeedAction -> addProfileFeed(it)
-                    is UiEvent.RemoveProfileFeedAction -> removeProfileFeed(it)
-                    is UiEvent.MuteAction -> mute(it)
-                    is UiEvent.UnmuteAction -> unmute(it)
-                    UiEvent.RequestProfileUpdate -> requestProfileUpdate()
-
-                    is UiEvent.ReportAbuse -> reportAbuse(it)
+            events.collect { event ->
+                when (event) {
+                    is UiEvent.FollowAction -> follow(event)
+                    is UiEvent.UnfollowAction -> unfollow(event)
+                    is UiEvent.AddProfileFeedAction -> addProfileFeed(event)
+                    is UiEvent.RemoveProfileFeedAction -> removeProfileFeed(event)
+                    is UiEvent.MuteAction -> mute(event)
+                    is UiEvent.UnmuteAction -> unmute(event)
+                    is UiEvent.ReportAbuse -> reportAbuse(event)
+                    UiEvent.RequestProfileUpdate -> _state.value.profileId?.let { requestProfileUpdate(it) }
+                    UiEvent.RequestProfileIdResolution -> resolveProfileId()
                     UiEvent.DismissError -> setState { copy(error = null) }
+                    UiEvent.DismissZapError -> setState { copy(zapError = null) }
+
                     is UiEvent.ZapProfile -> zapProfile(
-                        profileId = it.profileId,
-                        profileLnUrlDecoded = it.profileLnUrlDecoded,
-                        zapAmount = it.zapAmount,
-                        zapDescription = it.zapDescription,
+                        profileId = event.profileId,
+                        profileLnUrlDecoded = event.profileLnUrlDecoded,
+                        zapAmount = event.zapAmount,
+                        zapDescription = event.zapDescription,
                     )
 
-                    UiEvent.DismissZapError -> setState { copy(zapError = null) }
                     UiEvent.DismissConfirmFollowUnfollowAlertDialog ->
                         setState { copy(shouldApproveProfileAction = null) }
-
-                    UiEvent.RequestProfileIdResolution -> resolveProfileId()
                 }
             }
         }
@@ -182,13 +182,12 @@ class ProfileDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun requestProfileUpdate() =
+    private fun requestProfileUpdate(profileId: String) =
         viewModelScope.launch {
-            state.value.profileId?.let {
-                fetchLatestProfile(profileId = it)
-                fetchLatestMuteList()
-                setEffect(ProfileDetailsContract.SideEffect.ProfileUpdateFinished)
-            }
+            fetchLatestProfile(profileId = profileId)
+            fetchProfileFollowedBy(profileId = profileId)
+            fetchLatestMuteList()
+            setEffect(ProfileDetailsContract.SideEffect.ProfileUpdateFinished)
         }
 
     private fun fetchProfileFollowedBy(profileId: String) =
