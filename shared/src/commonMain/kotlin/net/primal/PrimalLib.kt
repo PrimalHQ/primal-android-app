@@ -1,13 +1,13 @@
 package net.primal
 
-import net.primal.api.feeds.di.primalFeedApiModule
+import net.primal.api.feed.di.primalFeedApiModule
 import net.primal.core.di.platformModule
-import net.primal.events.di.eventsModule
 import net.primal.networking.config.di.appConfigModule
 import net.primal.networking.di.httpClientModule
 import net.primal.networking.di.socketsModule
 import net.primal.networking.primal.api.di.primalImportApiModule
 import net.primal.networking.primal.upload.api.di.primalUploadApiModule
+import net.primal.repository.di.repositoryModule
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
@@ -33,7 +33,7 @@ internal object PrimalLib {
                 appConfigModule,
 
                 // Repositories
-                eventsModule,
+                repositoryModule,
 
                 // Apis
                 primalImportApiModule,

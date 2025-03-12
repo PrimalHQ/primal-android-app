@@ -1,4 +1,4 @@
-//import com.rickclephas.kmp.nativecoroutines.gradle.ExposedSeverity
+// import com.rickclephas.kmp.nativecoroutines.gradle.ExposedSeverity
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
@@ -51,20 +51,29 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.datetime)
 
+                // Cryptography
+//                implementation(libs.lightning.kmp)
+                implementation(libs.bitcoin.kmp)
+                implementation(libs.secp256k1.kmp)
+
                 // Koin
                 implementation(project.dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
-                implementation(libs.koin.compose)
-                implementation(libs.koin.compose.viewmodel)
-                implementation(libs.koin.compose.viewmodel.navigation)
+//                implementation(libs.koin.compose)
+//                implementation(libs.koin.compose.viewmodel)
+//                implementation(libs.koin.compose.viewmodel.navigation)
 
                 // Room
                 implementation(libs.room.runtime)
+//                implementation(libs.room.paging)
                 implementation(libs.jetpack.sqlite.framework)
 
                 // Data Store
                 implementation(libs.datastore)
                 implementation(libs.datastore.preferences)
+
+                // Paging
+                implementation(libs.paging.common)
 
                 // Networking && Serialization
                 implementation(libs.ktor.client.core)
@@ -97,8 +106,14 @@ kotlin {
                 implementation(libs.room.runtime.android)
                 implementation(libs.jetpack.sqlite.framework.android)
 
+                // Paging
+//                implementation(libs.paging.runtime)
+
                 // Networking
                 implementation(libs.ktor.client.okhttp)
+
+                // Cryptography
+                implementation(libs.secp256k1.kmp.jni.android)
             }
         }
 
@@ -111,17 +126,35 @@ kotlin {
 
         val iosArm64Main by getting {
             dependencies {
+                // SQLite
                 implementation(libs.jetpack.sqlite.framework.iosarm64)
+
+                // Cryptography
+//                implementation(libs.lightning.kmp.iosarm64)
+                implementation(libs.bitcoin.kmp.iosarm64)
+                implementation(libs.secp256k1.kmp.iosarm64)
             }
         }
         val iosSimulatorArm64Main by getting {
             dependencies {
+                // SQLite
                 implementation(libs.jetpack.sqlite.framework.iossimulatorarm64)
+
+                // Cryptography
+//                implementation(libs.lightning.kmp.iossimulatorarm64)
+                implementation(libs.bitcoin.kmp.iossimulatorarm64)
+                implementation(libs.secp256k1.kmp.iossimulatorarm64)
             }
         }
         val iosX64Main by getting {
             dependencies {
+                // SQLite
                 implementation(libs.jetpack.sqlite.framework.iosx64)
+
+                // Cryptography
+//                implementation(libs.lightning.kmp.iosx64)
+                implementation(libs.bitcoin.kmp.iosx64)
+                implementation(libs.secp256k1.kmp.iosx64)
             }
         }
 
@@ -176,9 +209,9 @@ kotlin {
     }
 }
 
-//nativeCoroutines {
+// nativeCoroutines {
 //    exposedSeverity = ExposedSeverity.WARNING
-//}
+// }
 
 tasks.register("assembleXCFramework") {
     dependsOn("assemblePrimalSharedReleaseXCFramework")
