@@ -32,5 +32,5 @@ data class NetworkDetails(
                     Network.Bitcoin -> it
                 }
             }
-        }}
-
+        }
+}

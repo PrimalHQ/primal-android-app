@@ -25,7 +25,11 @@ fun String.parseUris(includeNostrUris: Boolean = true): List<String> {
     }
 }
 
-private fun mergeUrls(libUrls: List<String>, customUrls: List<String>, content: String): List<String> {
+private fun mergeUrls(
+    libUrls: List<String>,
+    customUrls: List<String>,
+    content: String,
+): List<String> {
     val result = mutableListOf<String>()
     val allUrls = (libUrls + customUrls).distinct()
     val visited = mutableSetOf<String>()

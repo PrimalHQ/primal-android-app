@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
@@ -205,7 +204,7 @@ class NoteFeedViewModel @AssistedInject constructor(
             latestNoteIds = allNotes.map { it.id },
             latestAvatarCdnImages = avatarCdnImagesAndLegendaryCustomizations
                 .map { it.first }
-                .take(limit)
+                .take(limit),
         )
 
         if (newSyncStats.isTopVisibleNoteTheLatestNote()) {
