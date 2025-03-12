@@ -25,7 +25,7 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.utils.Nip19TLV
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
-import net.primal.android.stats.repository.EventRepository
+import net.primal.android.events.repository.EventRepository
 import net.primal.android.thread.notes.ThreadContract.UiEvent
 import net.primal.android.thread.notes.ThreadContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore

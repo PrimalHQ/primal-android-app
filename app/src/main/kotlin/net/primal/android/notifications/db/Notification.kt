@@ -6,8 +6,8 @@ import net.primal.android.attachments.db.NoteAttachment
 import net.primal.android.attachments.db.NoteNostrUri
 import net.primal.android.notes.db.PostData
 import net.primal.android.profile.db.ProfileData
-import net.primal.android.stats.db.EventStats
-import net.primal.android.stats.db.EventUserStats
+import net.primal.android.events.db.EventStats
+import net.primal.android.events.db.EventUserStats
 
 data class Notification(
     @Embedded

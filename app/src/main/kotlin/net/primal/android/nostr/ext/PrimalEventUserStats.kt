@@ -4,7 +4,7 @@ import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventUserStats
-import net.primal.android.stats.db.EventUserStats
+import net.primal.android.events.db.EventUserStats
 
 fun ContentPrimalEventUserStats.asEventUserStatsPO(userId: String) =
     EventUserStats(

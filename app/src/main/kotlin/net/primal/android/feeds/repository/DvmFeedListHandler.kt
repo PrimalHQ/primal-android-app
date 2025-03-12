@@ -10,7 +10,7 @@ import net.primal.android.feeds.dvm.ui.DvmFeedUi
 import net.primal.android.networking.primal.retryNetworkCall
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.profile.repository.ProfileRepository
-import net.primal.android.stats.repository.EventRepository
+import net.primal.android.events.repository.EventRepository
 
 class DvmFeedListHandler @Inject constructor(
     private val feedsRepository: FeedsRepository,

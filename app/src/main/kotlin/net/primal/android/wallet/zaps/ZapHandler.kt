@@ -6,7 +6,7 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.FALLBACK_RELAYS
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.stats.repository.EventStatsUpdater
+import net.primal.android.events.repository.EventStatsUpdater
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.UserAccount

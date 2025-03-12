@@ -41,9 +41,9 @@ import net.primal.android.nostr.utils.asATagValue
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.profile.repository.ProfileRepository
-import net.primal.android.stats.repository.EventRepository
-import net.primal.android.stats.ui.EventZapUiModel
-import net.primal.android.stats.ui.asEventZapUiModel
+import net.primal.android.events.repository.EventRepository
+import net.primal.android.events.ui.EventZapUiModel
+import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.thread.articles.details.ArticleDetailsContract.SideEffect
 import net.primal.android.thread.articles.details.ArticleDetailsContract.UiEvent
 import net.primal.android.thread.articles.details.ArticleDetailsContract.UiState

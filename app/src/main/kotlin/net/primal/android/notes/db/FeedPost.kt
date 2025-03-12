@@ -7,8 +7,8 @@ import net.primal.android.attachments.db.NoteNostrUri
 import net.primal.android.bookmarks.db.PublicBookmark
 import net.primal.android.nostr.db.EventRelayHints
 import net.primal.android.profile.db.ProfileData
-import net.primal.android.stats.db.EventStats
-import net.primal.android.stats.db.EventZap
+import net.primal.android.events.db.EventStats
+import net.primal.android.events.db.EventZap
 
 data class FeedPost(
 

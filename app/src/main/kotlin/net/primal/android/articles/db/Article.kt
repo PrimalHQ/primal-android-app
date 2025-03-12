@@ -6,9 +6,9 @@ import net.primal.android.bookmarks.db.PublicBookmark
 import net.primal.android.highlights.db.Highlight
 import net.primal.android.highlights.db.HighlightData
 import net.primal.android.profile.db.ProfileData
-import net.primal.android.stats.db.EventStats
-import net.primal.android.stats.db.EventUserStats
-import net.primal.android.stats.db.EventZap
+import net.primal.android.events.db.EventStats
+import net.primal.android.events.db.EventUserStats
+import net.primal.android.events.db.EventZap
 
 data class Article(
     @Embedded

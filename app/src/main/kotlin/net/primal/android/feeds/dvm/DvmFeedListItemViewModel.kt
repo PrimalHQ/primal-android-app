@@ -17,7 +17,7 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.asReplaceableEventTag
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.stats.repository.EventRepository
+import net.primal.android.events.repository.EventRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.domain.ZapTarget
 import net.primal.android.wallet.zaps.InvalidZapRequestException
