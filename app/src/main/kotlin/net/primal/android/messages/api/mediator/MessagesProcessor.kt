@@ -2,10 +2,10 @@ package net.primal.android.messages.api.mediator
 
 import androidx.room.withTransaction
 import javax.inject.Inject
-import net.primal.android.attachments.ext.flatMapMessagesAsNoteAttachmentPO
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.events.ext.flatMapMessagesAsEventUriPO
 import net.primal.android.messages.db.DirectMessageData
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.extractNoteId
@@ -57,7 +57,7 @@ class MessagesProcessor @Inject constructor(
         val primalUserNamesMap = primalUserNames.parseAndMapPrimalUserNames()
         val primalPremiumInfoMap = primalPremiumInfo.parseAndMapPrimalPremiumInfo()
         val primalLegendProfilesMap = primalLegendProfiles.parseAndMapPrimalLegendProfiles()
-        val attachments = messageDataList.flatMapMessagesAsNoteAttachmentPO()
+        val attachments = messageDataList.flatMapMessagesAsEventUriPO()
         val blossomServers = blossomServerEvents?.mapAsMapPubkeyToListOfBlossomServers() ?: emptyMap()
 
         database.withTransaction {
@@ -71,7 +71,7 @@ class MessagesProcessor @Inject constructor(
                 ),
             )
             database.messages().upsertAll(data = messageDataList)
-            database.attachments().upsertAllNoteAttachments(data = attachments)
+            database.eventUris().upsertAllEventUris(data = attachments)
         }
     }
 
@@ -142,7 +142,7 @@ class MessagesProcessor @Inject constructor(
             .groupBy { it.ownerId }
             .mapValues { it.value.first() }
 
-        database.attachments().upsertAllNostrUris(
+        database.eventUris().upsertAllEventNostrUris(
             data = messageDataList.flatMapMessagesAsNostrResourcePO(
                 eventIdToNostrEvent = emptyMap(),
                 postIdToPostDataMap = referencedNotesMap,

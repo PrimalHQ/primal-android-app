@@ -1,4 +1,4 @@
-package net.primal.android.attachments.gallery
+package net.primal.android.events.gallery
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -68,11 +68,10 @@ import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
 import net.primal.android.R
-import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.HorizontalPagerIndicator
 import net.primal.android.core.compose.SnackbarErrorHandler
-import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
+import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenuItem
 import net.primal.android.core.compose.foundation.KeepScreenOn
@@ -80,10 +79,11 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.events.domain.EventUriType
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun MediaGalleryScreen(viewModel: MediaGalleryViewModel, onClose: () -> Unit) {
+fun EventMediaGalleryScreen(viewModel: EventMediaGalleryViewModel, onClose: () -> Unit) {
     val uiState = viewModel.state.collectAsState()
 
     val uiScope = rememberCoroutineScope()
@@ -91,10 +91,10 @@ fun MediaGalleryScreen(viewModel: MediaGalleryViewModel, onClose: () -> Unit) {
     LaunchedEffect(viewModel) {
         viewModel.effects.collect {
             when (it) {
-                is MediaGalleryContract.SideEffect.MediaSaved -> uiScope.launch {
+                is EventMediaGalleryContract.SideEffect.MediaSaved -> uiScope.launch {
                     val message = when (it.type) {
-                        NoteAttachmentType.Image -> context.getString(R.string.media_gallery_toast_photo_saved)
-                        NoteAttachmentType.Video -> context.getString(R.string.media_gallery_toast_video_saved)
+                        EventUriType.Image -> context.getString(R.string.media_gallery_toast_photo_saved)
+                        EventUriType.Video -> context.getString(R.string.media_gallery_toast_video_saved)
                         else -> context.getString(R.string.media_gallery_toast_file_saved)
                     }
                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
@@ -103,7 +103,7 @@ fun MediaGalleryScreen(viewModel: MediaGalleryViewModel, onClose: () -> Unit) {
         }
     }
 
-    MediaGalleryScreen(
+    EventMediaGalleryScreen(
         state = uiState.value,
         onClose = onClose,
         eventPublisher = { viewModel.setEvent(it) },
@@ -113,10 +113,10 @@ fun MediaGalleryScreen(viewModel: MediaGalleryViewModel, onClose: () -> Unit) {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun MediaGalleryScreen(
-    state: MediaGalleryContract.UiState,
+private fun EventMediaGalleryScreen(
+    state: EventMediaGalleryContract.UiState,
     onClose: () -> Unit,
-    eventPublisher: (MediaGalleryContract.UiEvent) -> Unit,
+    eventPublisher: (EventMediaGalleryContract.UiEvent) -> Unit,
 ) {
     val imageAttachments = state.attachments
     val pagerState = rememberPagerState { imageAttachments.size }
@@ -130,13 +130,21 @@ fun MediaGalleryScreen(
         snackbarHostState = snackbarHostState,
         errorMessageResolver = {
             when (it) {
-                is MediaGalleryContract.UiState.MediaGalleryError.FailedToSaveMedia ->
+                is EventMediaGalleryContract.UiState.MediaGalleryError.FailedToSaveMedia ->
                     context.getString(R.string.media_gallery_error_photo_not_saved)
             }
         },
         actionLabel = stringResource(id = R.string.media_gallery_retry_save),
-        onErrorDismiss = { eventPublisher(MediaGalleryContract.UiEvent.DismissError) },
-        onActionPerformed = { currentImage()?.let { eventPublisher(MediaGalleryContract.UiEvent.SaveMedia(it)) } },
+        onErrorDismiss = { eventPublisher(EventMediaGalleryContract.UiEvent.DismissError) },
+        onActionPerformed = {
+            currentImage()?.let {
+                eventPublisher(
+                    EventMediaGalleryContract.UiEvent.SaveMedia(
+                        it,
+                    ),
+                )
+            }
+        },
     )
 
     val containerColor = AppTheme.colorScheme.surface.copy(alpha = 0.21f)
@@ -160,7 +168,7 @@ fun MediaGalleryScreen(
                 actions = {
                     GalleryDropdownMenu(
                         onSaveClick = {
-                            currentImage()?.let { eventPublisher(MediaGalleryContract.UiEvent.SaveMedia(it)) }
+                            currentImage()?.let { eventPublisher(EventMediaGalleryContract.UiEvent.SaveMedia(it)) }
                         },
                     )
                 },
@@ -187,7 +195,7 @@ private fun MediaGalleryContent(
     pagerState: PagerState,
     initialAttachmentIndex: Int,
     initialPositionMs: Long,
-    imageAttachments: List<NoteAttachmentUi>,
+    imageAttachments: List<EventUriUi>,
     pagerIndicatorContainerColor: Color,
 ) {
     Box(
@@ -277,7 +285,7 @@ private fun SaveMediaMenuItem(onSaveClick: () -> Unit) {
 private fun AttachmentsHorizontalPager(
     modifier: Modifier = Modifier,
     pagerState: PagerState,
-    imageAttachments: List<NoteAttachmentUi>,
+    imageAttachments: List<EventUriUi>,
     initialIndex: Int = 0,
     initialPositionMs: Long = 0,
 ) {
@@ -293,14 +301,14 @@ private fun AttachmentsHorizontalPager(
         val attachment = imageAttachments[index]
         Box(modifier = Modifier.fillMaxSize()) {
             when (attachment.type) {
-                NoteAttachmentType.Image -> {
+                EventUriType.Image -> {
                     ImageScreen(
                         modifier = Modifier.fillMaxSize(),
                         attachment = attachment,
                     )
                 }
 
-                NoteAttachmentType.Video -> {
+                EventUriType.Video -> {
                     VideoScreen(
                         modifier = Modifier
                             .fillMaxSize()
@@ -322,7 +330,7 @@ private fun AttachmentsHorizontalPager(
 }
 
 @Composable
-private fun ImageScreen(attachment: NoteAttachmentUi, modifier: Modifier = Modifier) {
+private fun ImageScreen(attachment: EventUriUi, modifier: Modifier = Modifier) {
     val zoomSpec = ZoomSpec(maxZoomFactor = 2.5f)
 
     var error by remember { mutableStateOf<ErrorResult?>(null) }
@@ -383,7 +391,7 @@ private fun AttachmentLoadingError() {
 fun VideoScreen(
     modifier: Modifier = Modifier,
     positionMs: Long,
-    attachment: NoteAttachmentUi,
+    attachment: EventUriUi,
     isPageVisible: Boolean,
 ) {
     val context = LocalContext.current

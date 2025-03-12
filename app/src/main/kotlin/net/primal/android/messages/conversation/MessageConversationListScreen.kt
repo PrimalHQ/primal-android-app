@@ -332,7 +332,7 @@ private fun ConversationListItem(
                     noteId = conversation.lastMessageId ?: "",
                     content = conversation.lastMessageSnippet ?: conversation.participantInternetIdentifier ?: "",
                     hashtags = conversation.lastMessageSnippet?.parseHashtags() ?: emptyList(),
-                    attachments = conversation.lastMessageAttachments,
+                    uris = conversation.lastMessageAttachments,
                     nostrUris = conversation.lastMessageNostrUris,
                 ),
                 expanded = false,

@@ -24,10 +24,10 @@ import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
-import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.images.AvatarCoilImageLoader
+import net.primal.android.events.domain.CdnImage
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.theme.AppTheme

@@ -1,7 +1,7 @@
 package net.primal.android.notifications.list.ui
 
 import java.time.Instant
-import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.events.domain.CdnImage
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notifications.domain.NotificationType
 import net.primal.android.premium.legend.domain.LegendaryCustomization

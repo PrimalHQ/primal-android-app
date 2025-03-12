@@ -1,23 +1,22 @@
-package net.primal.android.attachments.db.serialization
+package net.primal.android.events.db.serialization
 
 import androidx.room.TypeConverter
-import kotlinx.serialization.encodeToString
-import net.primal.android.attachments.db.NoteAttachment
-import net.primal.android.attachments.db.NoteNostrUri
-import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.attachments.domain.CdnResourceVariant
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
+import net.primal.android.events.db.EventUri
+import net.primal.android.events.db.EventUriNostr
+import net.primal.android.events.domain.CdnImage
+import net.primal.android.events.domain.CdnResourceVariant
 
-class AttachmentTypeConverters {
+class EventUriTypeConverters {
 
     @TypeConverter
-    fun stringToListOfNoteNostrUri(value: String?): List<NoteNostrUri>? {
-        return NostrJson.decodeFromStringOrNull<List<NoteNostrUri>>(value)
+    fun stringToListOfNoteNostrUri(value: String?): List<EventUriNostr>? {
+        return NostrJson.decodeFromStringOrNull<List<EventUriNostr>>(value)
     }
 
     @TypeConverter
-    fun listOfNoteNostrUriToString(list: List<NoteNostrUri>?): String? {
+    fun listOfNoteNostrUriToString(list: List<EventUriNostr>?): String? {
         return when (list) {
             null -> null
             else -> NostrJson.encodeToString(list)
@@ -25,12 +24,12 @@ class AttachmentTypeConverters {
     }
 
     @TypeConverter
-    fun stringToListOfNoteAttachment(value: String?): List<NoteAttachment>? {
-        return NostrJson.decodeFromStringOrNull<List<NoteAttachment>>(value)
+    fun stringToListOfNoteAttachment(value: String?): List<EventUri>? {
+        return NostrJson.decodeFromStringOrNull<List<EventUri>>(value)
     }
 
     @TypeConverter
-    fun listOfNoteAttachmentToString(list: List<NoteAttachment>?): String? {
+    fun listOfNoteAttachmentToString(list: List<EventUri>?): String? {
         return when (list) {
             null -> null
             else -> NostrJson.encodeToString(list)

@@ -31,8 +31,6 @@ import androidx.navigation.navDeepLink
 import androidx.navigation.navOptions
 import net.primal.android.articles.reads.ReadsScreen
 import net.primal.android.articles.reads.ReadsViewModel
-import net.primal.android.attachments.gallery.MediaGalleryScreen
-import net.primal.android.attachments.gallery.MediaGalleryViewModel
 import net.primal.android.auth.login.LoginScreen
 import net.primal.android.auth.login.LoginViewModel
 import net.primal.android.auth.logout.LogoutScreen
@@ -53,6 +51,8 @@ import net.primal.android.editor.NoteEditorScreen
 import net.primal.android.editor.di.noteEditorViewModel
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteEditorArgs.Companion.jsonAsNoteEditorArgs
+import net.primal.android.events.gallery.EventMediaGalleryScreen
+import net.primal.android.events.gallery.EventMediaGalleryViewModel
 import net.primal.android.events.reactions.ReactionsViewModel
 import net.primal.android.events.reactions.ui.ReactionsScreen
 import net.primal.android.explore.asearch.AdvancedSearchContract
@@ -1849,10 +1849,10 @@ private fun NavGraphBuilder.media(
     popEnterTransition = { EnterTransition.None },
     popExitTransition = { fadeOut() },
 ) { navBackEntry ->
-    val viewModel = hiltViewModel<MediaGalleryViewModel>(navBackEntry)
+    val viewModel = hiltViewModel<EventMediaGalleryViewModel>(navBackEntry)
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         ApplyEdgeToEdge(isDarkTheme = true)
-        MediaGalleryScreen(
+        EventMediaGalleryScreen(
             onClose = { navController.navigateUp() },
             viewModel = viewModel,
         )

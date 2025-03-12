@@ -21,20 +21,20 @@ import coil.compose.SubcomposeAsyncImage
 import io.github.fornewid.placeholder.foundation.PlaceholderHighlight
 import io.github.fornewid.placeholder.foundation.fade
 import io.github.fornewid.placeholder.material3.placeholder
-import net.primal.android.attachments.domain.NoteAttachmentType
-import net.primal.android.attachments.domain.findNearestOrNull
-import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
+import net.primal.android.core.compose.attachment.model.EventUriUi
+import net.primal.android.events.domain.EventUriType
+import net.primal.android.events.domain.findNearestOrNull
 import net.primal.android.theme.AppTheme
 
 @Composable
 fun NoteAttachmentImagePreview(
-    attachment: NoteAttachmentUi,
+    attachment: EventUriUi,
     blossoms: List<String>,
     maxWidth: Dp,
     modifier: Modifier = Modifier,
 ) {
     val cdnImageSource = when (attachment.type) {
-        NoteAttachmentType.Image -> {
+        EventUriType.Image -> {
             val maxWidthPx = with(LocalDensity.current) { maxWidth.roundToPx() }
             val variant = attachment.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
             variant?.mediaUrl

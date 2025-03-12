@@ -1,9 +1,9 @@
 package net.primal.android.nostr.ext
 
-import net.primal.android.attachments.domain.CdnResource
-import net.primal.android.attachments.domain.CdnResourceVariant
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
+import net.primal.android.events.domain.CdnResource
+import net.primal.android.events.domain.CdnResourceVariant
 import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventResources
 

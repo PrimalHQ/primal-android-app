@@ -24,13 +24,13 @@ import androidx.compose.ui.unit.sp
 import java.time.Instant
 import kotlin.time.Duration.Companion.seconds
 import net.primal.android.LocalContentDisplaySettings
-import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.ReplyingToText
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.WrappedContentWithSuffix
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.utils.formatNip05Identifier
+import net.primal.android.events.domain.CdnImage
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme

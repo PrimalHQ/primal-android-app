@@ -17,13 +17,13 @@ import coil.request.CachePolicy
 import coil.request.ImageRequest
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
-import net.primal.android.attachments.domain.NoteAttachmentType
-import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.InfiniteLottieAnimation
-import net.primal.android.core.compose.attachment.model.isMediaAttachment
+import net.primal.android.core.compose.attachment.model.isMediaUri
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.MediaGalleryFilled
 import net.primal.android.core.compose.icons.primaliconpack.MediaVideoFilled
+import net.primal.android.events.domain.EventUriType
+import net.primal.android.events.domain.findNearestOrNull
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.theme.AppTheme
 
@@ -33,8 +33,8 @@ fun MediaGridItem(
     item: FeedPostUi,
     maxWidthPx: Int,
 ) {
-    val firstAttachment = item.attachments.firstOrNull()
-    val hasMultipleMediaAttachments = item.attachments.filter { it.isMediaAttachment() }.size > 1
+    val firstAttachment = item.uris.firstOrNull()
+    val hasMultipleMediaAttachments = item.uris.filter { it.isMediaUri() }.size > 1
     val cdnResource = firstAttachment?.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
     val animationRawResId = when (LocalPrimalTheme.current.isDarkTheme) {
         true -> R.raw.primal_loader_generic_square_dark
@@ -69,7 +69,7 @@ fun MediaGridItem(
                 )
             }
 
-            firstAttachment?.type == NoteAttachmentType.Video -> {
+            firstAttachment?.type == EventUriType.Video -> {
                 Icon(
                     modifier = Modifier
                         .padding(top = 4.dp, end = 4.dp)

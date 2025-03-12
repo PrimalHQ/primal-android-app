@@ -43,7 +43,6 @@ import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
 import java.time.Instant
 import net.primal.android.R
-import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.WrappedContentWithSuffix
@@ -54,6 +53,7 @@ import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.zaps.ZappersAvatarThumbnailRow
+import net.primal.android.events.domain.findNearestOrNull
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Naddr

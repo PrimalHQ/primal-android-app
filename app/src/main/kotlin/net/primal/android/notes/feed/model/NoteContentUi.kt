@@ -1,7 +1,7 @@
 package net.primal.android.notes.feed.model
 
 import fr.acinq.lightning.payment.Bolt11Invoice
-import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
+import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.messages.chat.model.ChatMessageUi
 import net.primal.android.notes.db.PostData
 import net.primal.android.wallet.utils.LnInvoiceUtils
@@ -9,7 +9,7 @@ import net.primal.android.wallet.utils.LnInvoiceUtils
 data class NoteContentUi(
     val noteId: String,
     val content: String,
-    val attachments: List<NoteAttachmentUi> = emptyList(),
+    val uris: List<EventUriUi> = emptyList(),
     val nostrUris: List<NoteNostrUriUi> = emptyList(),
     val hashtags: List<String> = emptyList(),
     val invoices: List<String> = emptyList(),
@@ -22,7 +22,7 @@ fun FeedPostUi.toNoteContentUi(): NoteContentUi {
     return NoteContentUi(
         noteId = this.postId,
         content = this.content,
-        attachments = this.attachments.sortedBy { it.position },
+        uris = this.uris.sortedBy { it.position },
         nostrUris = this.nostrUris.sortedBy { it.position },
         hashtags = this.hashtags,
         invoices = invoices,
@@ -36,7 +36,7 @@ fun ChatMessageUi.toNoteContentUi(): NoteContentUi {
     return NoteContentUi(
         noteId = this.messageId,
         content = this.content,
-        attachments = this.attachments.sortedBy { it.position },
+        uris = this.uris.sortedBy { it.position },
         nostrUris = this.nostrUris.sortedBy { it.position },
         hashtags = this.hashtags,
         invoices = invoices,

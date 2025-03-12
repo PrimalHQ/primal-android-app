@@ -2,9 +2,9 @@ package net.primal.android.articles.feed.ui
 
 import java.time.Instant
 import net.primal.android.articles.db.Article
-import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
+import net.primal.android.events.domain.CdnImage
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.nostr.model.NostrEventKind

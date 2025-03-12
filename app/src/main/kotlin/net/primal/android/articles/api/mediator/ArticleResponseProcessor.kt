@@ -2,9 +2,9 @@ package net.primal.android.articles.api.mediator
 
 import androidx.room.withTransaction
 import net.primal.android.articles.api.model.ArticleResponse
-import net.primal.android.attachments.ext.flatMapArticlesAsNoteAttachmentPO
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.events.ext.flatMapArticlesAsEventUriPO
 import net.primal.android.nostr.db.eventRelayHintsUpserter
 import net.primal.android.nostr.ext.flatMapAsEventHintsPO
 import net.primal.android.nostr.ext.flatMapAsWordCount
@@ -64,7 +64,7 @@ suspend fun ArticleResponse.persistToDatabaseAsTransaction(userId: String, datab
     val linkPreviews = primalLinkPreviews.flatMapNotNullAsLinkPreviewResource().asMapByKey { it.url }
     val videoThumbnails = this.cdnResources.flatMapNotNullAsVideoThumbnailsMap()
 
-    val noteAttachments = allArticles.flatMapArticlesAsNoteAttachmentPO(
+    val noteAttachments = allArticles.flatMapArticlesAsEventUriPO(
         cdnResources = cdnResources,
         linkPreviews = linkPreviews,
         videoThumbnails = videoThumbnails,
@@ -82,7 +82,7 @@ suspend fun ArticleResponse.persistToDatabaseAsTransaction(userId: String, datab
         database.eventUserStats().upsertAll(data = eventUserStats)
         database.eventZaps().upsertAll(data = eventZaps)
         database.highlights().upsertAll(data = referencedHighlights)
-        database.attachments().upsertAllNoteAttachments(data = noteAttachments)
+        database.eventUris().upsertAllEventUris(data = noteAttachments)
 
         val eventHintsDao = database.eventHints()
         val hintsMap = eventHints.associateBy { it.eventId }

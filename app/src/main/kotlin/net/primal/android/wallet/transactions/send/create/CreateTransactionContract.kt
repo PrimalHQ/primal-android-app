@@ -1,7 +1,7 @@
 package net.primal.android.wallet.transactions.send.create
 
 import java.math.BigDecimal
-import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.events.domain.CdnImage
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.domain.DraftTx

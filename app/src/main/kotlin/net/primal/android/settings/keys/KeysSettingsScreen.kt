@@ -42,7 +42,6 @@ import androidx.compose.ui.unit.sp
 import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.delay
 import net.primal.android.R
-import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.BiometricPrompt
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalDivider
@@ -53,6 +52,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.events.domain.CdnImage
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme

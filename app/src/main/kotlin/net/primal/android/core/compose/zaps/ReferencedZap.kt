@@ -21,11 +21,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
-import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.events.domain.CdnImage
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.profile.domain.PrimalLegendProfile

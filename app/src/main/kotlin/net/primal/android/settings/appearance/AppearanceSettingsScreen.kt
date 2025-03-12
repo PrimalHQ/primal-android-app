@@ -61,7 +61,6 @@ import java.time.Instant
 import kotlin.time.Duration.Companion.minutes
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
-import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalSliderThumb
 import net.primal.android.core.compose.PrimalSwitch
@@ -71,6 +70,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.FontSize
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.settings.SettingsItem
+import net.primal.android.events.domain.CdnImage
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard

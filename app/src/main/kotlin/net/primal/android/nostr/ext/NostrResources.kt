@@ -4,17 +4,17 @@ import java.util.regex.Pattern
 import kotlinx.serialization.json.JsonArray
 import net.primal.android.articles.db.ArticleData
 import net.primal.android.articles.feed.ui.wordsCountToReadingTime
-import net.primal.android.attachments.db.NoteNostrUri
-import net.primal.android.attachments.domain.CdnResource
-import net.primal.android.attachments.domain.LinkPreviewData
-import net.primal.android.attachments.domain.NostrUriType
-import net.primal.android.attachments.ext.flatMapPostsAsNoteAttachmentPO
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.crypto.bech32ToHexOrThrow
 import net.primal.android.crypto.bechToBytesOrThrow
 import net.primal.android.crypto.toHex
+import net.primal.android.events.db.EventUriNostr
+import net.primal.android.events.domain.CdnResource
+import net.primal.android.events.domain.EventLinkPreviewData
+import net.primal.android.events.domain.EventUriNostrType
+import net.primal.android.events.ext.flatMapPostsAsEventUriPO
 import net.primal.android.messages.db.DirectMessageData
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
@@ -241,9 +241,9 @@ fun List<PostData>.flatMapPostsAsNoteNostrUriPO(
     articleIdToArticle: Map<String, ArticleData>,
     profileIdToProfileDataMap: Map<String, ProfileData>,
     cdnResources: Map<String, CdnResource>,
-    linkPreviews: Map<String, LinkPreviewData>,
+    linkPreviews: Map<String, EventLinkPreviewData>,
     videoThumbnails: Map<String, String>,
-): List<NoteNostrUri> =
+): List<EventUriNostr> =
     flatMap { postData ->
         postData.uris.mapAsNoteNostrUriPO(
             eventId = postData.postId,
@@ -263,7 +263,7 @@ fun List<DirectMessageData>.flatMapMessagesAsNostrResourcePO(
     articleIdToArticle: Map<String, ArticleData>,
     profileIdToProfileDataMap: Map<String, ProfileData>,
     cdnResources: Map<String, CdnResource>,
-    linkPreviews: Map<String, LinkPreviewData>,
+    linkPreviews: Map<String, EventLinkPreviewData>,
     videoThumbnails: Map<String, String>,
 ) = flatMap { messageData ->
     messageData.uris.mapAsNoteNostrUriPO(
@@ -285,7 +285,7 @@ fun List<String>.mapAsNoteNostrUriPO(
     articleIdToArticle: Map<String, ArticleData>,
     profileIdToProfileDataMap: Map<String, ProfileData>,
     cdnResources: Map<String, CdnResource>,
-    linkPreviews: Map<String, LinkPreviewData>,
+    linkPreviews: Map<String, EventLinkPreviewData>,
     videoThumbnails: Map<String, String>,
 ) = filter { it.isNostrUri() }.map { link ->
     val refUserProfileId = link.extractProfileId()
@@ -304,20 +304,20 @@ fun List<String>.mapAsNoteNostrUriPO(
     val refHighlightATag = referencedNostrEvent?.tags?.firstOrNull { it.isATag() }
 
     val type = when {
-        refUserProfileId != null -> NostrUriType.Profile
-        refNote != null && refPostAuthor != null -> NostrUriType.Note
+        refUserProfileId != null -> EventUriNostrType.Profile
+        refNote != null && refPostAuthor != null -> EventUriNostrType.Note
         refNaddr?.kind == NostrEventKind.LongFormContent.value &&
-            refArticle != null && refArticleAuthor != null -> NostrUriType.Article
+            refArticle != null && refArticleAuthor != null -> EventUriNostrType.Article
 
         referencedNostrEvent?.kind == NostrEventKind.Highlight.value &&
-            refHighlightText?.isNotEmpty() == true && refHighlightATag != null -> NostrUriType.Highlight
+            refHighlightText?.isNotEmpty() == true && refHighlightATag != null -> EventUriNostrType.Highlight
 
-        referencedNostrEvent?.kind == NostrEventKind.Zap.value -> NostrUriType.Zap
+        referencedNostrEvent?.kind == NostrEventKind.Zap.value -> EventUriNostrType.Zap
 
-        else -> NostrUriType.Unsupported
+        else -> EventUriNostrType.Unsupported
     }
 
-    NoteNostrUri(
+    EventUriNostr(
         noteId = eventId,
         uri = link,
         type = type,
@@ -358,7 +358,7 @@ private fun takeAsReferencedNoteOrNull(
     refNote: PostData?,
     refPostAuthor: ProfileData?,
     cdnResources: Map<String, CdnResource>,
-    linkPreviews: Map<String, LinkPreviewData>,
+    linkPreviews: Map<String, EventLinkPreviewData>,
     videoThumbnails: Map<String, String>,
     eventIdToNostrEvent: Map<String, NostrEvent>,
     postIdToPostDataMap: Map<String, PostData>,
@@ -375,7 +375,7 @@ private fun takeAsReferencedNoteOrNull(
         authorInternetIdentifier = refPostAuthor.internetIdentifier,
         authorLightningAddress = refPostAuthor.lightningAddress,
         authorLegendProfile = refPostAuthor.primalPremiumInfo?.legendProfile,
-        attachments = listOf(refNote).flatMapPostsAsNoteAttachmentPO(
+        attachments = listOf(refNote).flatMapPostsAsEventUriPO(
             cdnResources = cdnResources,
             linkPreviews = linkPreviews,
             videoThumbnails = videoThumbnails,
@@ -458,7 +458,7 @@ private fun takeAsReferencedZapOrNull(
     profilesMap: Map<String, ProfileData>,
     postsMap: Map<String, PostData>,
     cdnResourcesMap: Map<String, CdnResource>,
-    linkPreviewsMap: Map<String, LinkPreviewData>,
+    linkPreviewsMap: Map<String, EventLinkPreviewData>,
     nostrEventsMap: Map<String, NostrEvent>,
     videoThumbnailsMap: Map<String, String>,
     articlesMap: Map<String, ArticleData>,

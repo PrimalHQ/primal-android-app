@@ -11,7 +11,7 @@ import net.primal.android.networking.primal.PrimalApiClient
 
 @Module
 @InstallIn(SingletonComponent::class)
-object EventStatsApiModule {
+object EventsApiModule {
 
     @Provides
     fun provideEventStatsApi(@PrimalCacheApiClient primalApiClient: PrimalApiClient): EventStatsApi =

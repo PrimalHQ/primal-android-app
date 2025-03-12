@@ -1,4 +1,4 @@
-package net.primal.android.attachments.domain
+package net.primal.android.events.domain
 
 import kotlinx.serialization.Serializable
 

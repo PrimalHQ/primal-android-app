@@ -2,7 +2,7 @@ package net.primal.android.profile.db
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.events.domain.CdnImage
 import net.primal.android.profile.domain.PrimalPremiumInfo
 
 @Entity

@@ -1,6 +1,6 @@
 package net.primal.android.articles.reads
 
-import net.primal.android.attachments.domain.CdnImage
+import net.primal.android.events.domain.CdnImage
 import net.primal.android.feeds.list.ui.model.FeedUi
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.user.domain.Badges

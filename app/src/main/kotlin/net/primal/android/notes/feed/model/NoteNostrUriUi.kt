@@ -1,7 +1,7 @@
 package net.primal.android.notes.feed.model
 
-import net.primal.android.attachments.db.NoteNostrUri
-import net.primal.android.attachments.domain.NostrUriType
+import net.primal.android.events.db.EventUriNostr
+import net.primal.android.events.domain.EventUriNostrType
 import net.primal.android.notes.db.ReferencedArticle
 import net.primal.android.notes.db.ReferencedHighlight
 import net.primal.android.notes.db.ReferencedNote
@@ -10,7 +10,7 @@ import net.primal.android.notes.db.ReferencedZap
 
 data class NoteNostrUriUi(
     val uri: String,
-    val type: NostrUriType,
+    val type: EventUriNostrType,
     val referencedEventAlt: String?,
     val referencedHighlight: ReferencedHighlight?,
     val referencedNote: ReferencedNote?,
@@ -20,7 +20,7 @@ data class NoteNostrUriUi(
     val position: Int,
 )
 
-fun NoteNostrUri.asNoteNostrUriUi() =
+fun EventUriNostr.asNoteNostrUriUi() =
     NoteNostrUriUi(
         uri = this.uri,
         type = this.type,

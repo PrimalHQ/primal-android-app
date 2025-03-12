@@ -46,7 +46,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
-import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.auth.compose.ColumnWithBackground
 import net.primal.android.auth.compose.OnboardingBottomBar
 import net.primal.android.auth.compose.onboardingTextHintTypography
@@ -62,6 +61,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.utils.formatNip05Identifier
+import net.primal.android.events.domain.CdnImage
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.theme.AppTheme
 

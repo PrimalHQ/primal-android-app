@@ -1,13 +1,13 @@
 package net.primal.android.core.compose.attachment.model
 
-import net.primal.android.attachments.db.NoteAttachment
-import net.primal.android.attachments.domain.CdnResourceVariant
-import net.primal.android.attachments.domain.NoteAttachmentType
+import net.primal.android.events.db.EventUri
+import net.primal.android.events.domain.CdnResourceVariant
+import net.primal.android.events.domain.EventUriType
 
-data class NoteAttachmentUi(
-    val noteId: String,
+data class EventUriUi(
+    val eventId: String,
     val url: String,
-    val type: NoteAttachmentType,
+    val type: EventUriType,
     val mimeType: String? = null,
     val variants: List<CdnResourceVariant>? = null,
     val title: String? = null,
@@ -17,9 +17,9 @@ data class NoteAttachmentUi(
     val position: Int,
 )
 
-fun NoteAttachment.asNoteAttachmentUi() =
-    NoteAttachmentUi(
-        noteId = this.eventId,
+fun EventUri.asEventUriUiModel() =
+    EventUriUi(
+        eventId = this.eventId,
         url = this.url,
         mimeType = this.mimeType,
         type = this.type,
@@ -31,4 +31,4 @@ fun NoteAttachment.asNoteAttachmentUi() =
         position = this.position,
     )
 
-fun NoteAttachmentUi.isMediaAttachment() = type == NoteAttachmentType.Image || type == NoteAttachmentType.Video
+fun EventUriUi.isMediaUri() = type == EventUriType.Image || type == EventUriType.Video

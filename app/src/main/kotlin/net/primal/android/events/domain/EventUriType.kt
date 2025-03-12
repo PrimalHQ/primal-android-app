@@ -1,6 +1,6 @@
-package net.primal.android.attachments.domain
+package net.primal.android.events.domain
 
-enum class NoteAttachmentType {
+enum class EventUriType {
     Image,
     Video,
     Audio,

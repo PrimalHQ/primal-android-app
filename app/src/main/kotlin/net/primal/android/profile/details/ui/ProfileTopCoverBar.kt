@@ -48,13 +48,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
-import net.primal.android.attachments.domain.findNearestOrNull
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Search
+import net.primal.android.events.domain.findNearestOrNull
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.theme.AppTheme
 

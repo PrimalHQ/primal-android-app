@@ -57,7 +57,6 @@ import java.text.NumberFormat
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.ArticleDropdownMenuIcon
-import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.ListNoContent
@@ -78,6 +77,7 @@ import net.primal.android.core.compose.zaps.ArticleTopZapsSection
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
+import net.primal.android.events.domain.EventUriType
 import net.primal.android.nostr.ext.isNEvent
 import net.primal.android.nostr.ext.isNEventUri
 import net.primal.android.nostr.ext.isNostrUri
@@ -544,7 +544,7 @@ private fun ArticleContentWithComments(
                     state.article?.eventId?.let {
                         MediaClickEvent(
                             noteId = state.article.eventId,
-                            noteAttachmentType = NoteAttachmentType.Image,
+                            eventUriType = EventUriType.Image,
                             mediaUrl = mediaUrl,
                             positionMs = 0L,
                         )
@@ -650,7 +650,7 @@ private fun ArticleContentWithComments(
                                 state.article?.eventId?.let {
                                     MediaClickEvent(
                                         noteId = it,
-                                        noteAttachmentType = NoteAttachmentType.Image,
+                                        eventUriType = EventUriType.Image,
                                         mediaUrl = part.imageUrl,
                                         positionMs = 0L,
                                     )

@@ -1,20 +1,20 @@
-package net.primal.android.attachments.db
+package net.primal.android.events.db
 
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
-import net.primal.android.attachments.domain.CdnResourceVariant
-import net.primal.android.attachments.domain.NoteAttachmentType
+import net.primal.android.events.domain.CdnResourceVariant
+import net.primal.android.events.domain.EventUriType
 
 @Entity(indices = [Index(value = ["eventId", "url"], unique = true)])
 @Serializable
-data class NoteAttachment(
+data class EventUri(
     @PrimaryKey(autoGenerate = true)
     val position: Int = 0,
     val eventId: String,
     val url: String,
-    val type: NoteAttachmentType,
+    val type: EventUriType,
     val mimeType: String? = null,
     val variants: List<CdnResourceVariant>? = null,
     val title: String? = null,

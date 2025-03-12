@@ -29,10 +29,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
 import net.primal.android.R
-import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Play
+import net.primal.android.events.domain.EventUriType
 import net.primal.android.notes.feed.note.ui.attachment.NoteImageErrorImage
 import net.primal.android.notes.feed.note.ui.attachment.NoteImageLoadingPlaceholder
 import net.primal.android.theme.AppTheme
@@ -43,13 +43,13 @@ fun NoteAudioLinkPreview(
     title: String?,
     description: String?,
     thumbnailUrl: String?,
-    attachmentType: NoteAttachmentType,
+    eventUriType: EventUriType,
     onPlayClick: () -> Unit,
     loading: Boolean = false,
 ) {
-    val previewHeight = when (attachmentType) {
-        NoteAttachmentType.Spotify -> 150.dp
-        NoteAttachmentType.Tidal -> 100.dp
+    val previewHeight = when (eventUriType) {
+        EventUriType.Spotify -> 150.dp
+        EventUriType.Tidal -> 100.dp
         else -> 100.dp
     }
     Row(
@@ -92,7 +92,7 @@ fun NoteAudioLinkPreview(
                 .padding(vertical = 12.dp),
             title = title ?: stringResource(R.string.feed_note_render_unknown_audio_title),
             description = description,
-            attachmentType = attachmentType,
+            attachmentType = eventUriType,
             onPlayClick = onPlayClick,
             loading = loading,
         )
@@ -104,7 +104,7 @@ private fun AudioInfoColumn(
     modifier: Modifier = Modifier,
     title: String,
     description: String?,
-    attachmentType: NoteAttachmentType,
+    attachmentType: EventUriType,
     loading: Boolean,
     onPlayClick: () -> Unit,
 ) {
@@ -115,19 +115,19 @@ private fun AudioInfoColumn(
     ) {
         TopLevelDomainText(
             modifier = Modifier.padding(
-                top = if (attachmentType == NoteAttachmentType.Tidal) 8.dp else 0.dp,
+                top = if (attachmentType == EventUriType.Tidal) 8.dp else 0.dp,
             ),
-            attachmentType = attachmentType,
+            eventUriType = attachmentType,
         )
 
-        if (attachmentType != NoteAttachmentType.Tidal) {
+        if (attachmentType != EventUriType.Tidal) {
             TitleDescriptionColumn(
                 title = title,
                 description = description,
             )
         }
 
-        val buttonSize = if (attachmentType == NoteAttachmentType.Tidal) {
+        val buttonSize = if (attachmentType == EventUriType.Tidal) {
             DpSize(width = 88.dp, height = 36.dp)
         } else {
             DpSize(width = 72.dp, height = 32.dp)

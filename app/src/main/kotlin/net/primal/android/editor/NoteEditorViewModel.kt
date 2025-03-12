@@ -3,6 +3,7 @@ package net.primal.android.editor
 import android.net.Uri
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.assisted.Assisted
@@ -29,7 +30,6 @@ import kotlinx.coroutines.launch
 import net.primal.android.articles.ArticleRepository
 import net.primal.android.articles.feed.ui.generateNaddr
 import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
-import net.primal.android.attachments.repository.AttachmentsRepository
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.core.files.FileAnalyser
 import net.primal.android.editor.NoteEditorContract.SideEffect
@@ -38,6 +38,7 @@ import net.primal.android.editor.NoteEditorContract.UiState
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteTaggedUser
+import net.primal.android.events.repository.EventUriRepository
 import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.highlights.model.asHighlightUi
 import net.primal.android.highlights.model.generateNevent
@@ -73,7 +74,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
     private val notePublishHandler: NotePublishHandler,
-    private val attachmentRepository: AttachmentsRepository,
+    private val eventUriRepository: EventUriRepository,
     private val highlightRepository: HighlightRepository,
     private val exploreRepository: ExploreRepository,
     private val profileRepository: ProfileRepository,
@@ -126,7 +127,7 @@ class NoteEditorViewModel @AssistedInject constructor(
             }
 
             if (args.mediaUris.isNotEmpty()) {
-                importPhotos(args.mediaUris.mapNotNull { Uri.parse(it) })
+                importPhotos(args.mediaUris.map { it.toUri() })
             }
         }
     }
@@ -383,7 +384,7 @@ class NoteEditorViewModel @AssistedInject constructor(
             updatedAttachment = updatedAttachment.copy(uploadError = null)
             updateNoteAttachmentState(attachment = updatedAttachment)
 
-            val uploadResult = attachmentRepository.uploadNoteAttachment(
+            val uploadResult = eventUriRepository.uploadNoteAttachment(
                 userId = activeAccountStore.activeUserId(),
                 attachment = attachment,
                 uploadId = uploadId,
@@ -445,7 +446,7 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             this@cancel.job.cancel()
             runCatching {
-                attachmentRepository.cancelNoteAttachmentUpload(
+                eventUriRepository.cancelNoteAttachmentUpload(
                     userId = activeAccountStore.activeUserId(),
                     uploadId = this@cancel.id,
                 )

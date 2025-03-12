@@ -2,8 +2,8 @@ package net.primal.android.messages.db
 
 import androidx.room.Embedded
 import androidx.room.Relation
-import net.primal.android.attachments.db.NoteAttachment
-import net.primal.android.attachments.db.NoteNostrUri
+import net.primal.android.events.db.EventUri
+import net.primal.android.events.db.EventUriNostr
 import net.primal.android.profile.db.ProfileData
 
 data class MessageConversation(
@@ -26,11 +26,11 @@ data class MessageConversation(
         entityColumn = "eventId",
         parentColumn = "lastMessageId",
     )
-    val lastMessageNoteAttachments: List<NoteAttachment>,
+    val lastMessageUris: List<EventUri>,
 
     @Relation(
         entityColumn = "noteId",
         parentColumn = "lastMessageId",
     )
-    val lastMessageNostrUris: List<NoteNostrUri>,
+    val lastMessageNostrUris: List<EventUriNostr>,
 )

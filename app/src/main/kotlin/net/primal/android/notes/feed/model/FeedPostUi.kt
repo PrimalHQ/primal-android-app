@@ -1,15 +1,15 @@
 package net.primal.android.notes.feed.model
 
 import java.time.Instant
-import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
-import net.primal.android.core.compose.attachment.model.asNoteAttachmentUi
+import net.primal.android.core.compose.attachment.model.EventUriUi
+import net.primal.android.core.compose.attachment.model.asEventUriUiModel
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.core.utils.usernameUiFriendly
+import net.primal.android.events.domain.CdnImage
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.nostr.model.NostrEvent
@@ -32,7 +32,7 @@ data class FeedPostUi(
     val repostAuthorName: String? = null,
     val authorInternetIdentifier: String? = null,
     val authorAvatarCdnImage: CdnImage? = null,
-    val attachments: List<NoteAttachmentUi> = emptyList(),
+    val uris: List<EventUriUi> = emptyList(),
     val nostrUris: List<NoteNostrUriUi> = emptyList(),
     val hashtags: List<String> = emptyList(),
     val replyToAuthorHandle: String? = null,
@@ -55,7 +55,7 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
         authorAvatarCdnImage = this.author?.avatarCdnImage,
         timestamp = Instant.ofEpochSecond(this.data.createdAt),
         content = this.data.content,
-        attachments = this.attachments.map { it.asNoteAttachmentUi() }.sortedBy { it.position },
+        uris = this.uris.map { it.asEventUriUiModel() }.sortedBy { it.position },
         nostrUris = this.nostrUris.map { it.asNoteNostrUriUi() }.sortedBy { it.position },
         stats = EventStatsUi.from(eventStats = this.eventStats, feedPostUserStats = this.userStats),
         hashtags = this.data.hashtags,

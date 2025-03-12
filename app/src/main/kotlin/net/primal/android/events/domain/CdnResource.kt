@@ -1,4 +1,4 @@
-package net.primal.android.attachments.domain
+package net.primal.android.events.domain
 
 data class CdnResource(
     val url: String,

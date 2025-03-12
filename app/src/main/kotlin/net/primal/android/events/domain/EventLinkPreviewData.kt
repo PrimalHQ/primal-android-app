@@ -1,6 +1,6 @@
-package net.primal.android.attachments.domain
+package net.primal.android.events.domain
 
-data class LinkPreviewData(
+data class EventLinkPreviewData(
     val url: String,
     val mimeType: String? = null,
     val title: String? = null,

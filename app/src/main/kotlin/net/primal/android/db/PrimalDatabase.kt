@@ -9,20 +9,20 @@ import net.primal.android.articles.db.ArticleDao
 import net.primal.android.articles.db.ArticleData
 import net.primal.android.articles.db.ArticleFeedCrossRef
 import net.primal.android.articles.db.ArticleFeedCrossRefDao
-import net.primal.android.attachments.db.AttachmentDao
-import net.primal.android.attachments.db.NoteAttachment
-import net.primal.android.attachments.db.NoteNostrUri
-import net.primal.android.attachments.db.serialization.AttachmentTypeConverters
 import net.primal.android.bookmarks.db.PublicBookmark
 import net.primal.android.bookmarks.db.PublicBookmarkDao
 import net.primal.android.core.serialization.room.JsonTypeConverters
 import net.primal.android.core.serialization.room.ListsTypeConverters
 import net.primal.android.events.db.EventStats
 import net.primal.android.events.db.EventStatsDao
+import net.primal.android.events.db.EventUri
+import net.primal.android.events.db.EventUriDao
+import net.primal.android.events.db.EventUriNostr
 import net.primal.android.events.db.EventUserStats
 import net.primal.android.events.db.EventUserStatsDao
 import net.primal.android.events.db.EventZap
 import net.primal.android.events.db.EventZapDao
+import net.primal.android.events.db.serialization.EventUriTypeConverters
 import net.primal.android.explore.db.TrendingTopic
 import net.primal.android.explore.db.TrendingTopicDao
 import net.primal.android.feeds.db.Feed
@@ -71,8 +71,9 @@ import net.primal.android.wallet.db.WalletTransactionData
         EventStats::class,
         EventZap::class,
         EventUserStats::class,
-        NoteNostrUri::class,
-        NoteAttachment::class,
+        EventUriNostr::class,
+        EventUri::class,
+        EventRelayHints::class,
         Feed::class,
         FeedPostDataCrossRef::class,
         FeedPostRemoteKey::class,
@@ -85,7 +86,6 @@ import net.primal.android.wallet.db.WalletTransactionData
         MessageConversationData::class,
         WalletTransactionData::class,
         Relay::class,
-        EventRelayHints::class,
         PublicBookmark::class,
         ProfileInteraction::class,
         ArticleData::class,
@@ -93,13 +93,13 @@ import net.primal.android.wallet.db.WalletTransactionData
         ArticleFeedCrossRef::class,
         HighlightData::class,
     ],
-    version = 58,
+    version = 59,
     exportSchema = true,
 )
 @TypeConverters(
     ListsTypeConverters::class,
     JsonTypeConverters::class,
-    AttachmentTypeConverters::class,
+    EventUriTypeConverters::class,
     ProfileTypeConverters::class,
 )
 abstract class PrimalDatabase : RoomDatabase() {
@@ -110,15 +110,17 @@ abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun reposts(): RepostDao
 
-    abstract fun eventStats(): EventStatsDao
-
-    abstract fun attachments(): AttachmentDao
-
     abstract fun feeds(): FeedDao
 
     abstract fun eventUserStats(): EventUserStatsDao
 
     abstract fun eventZaps(): EventZapDao
+
+    abstract fun eventStats(): EventStatsDao
+
+    abstract fun eventUris(): EventUriDao
+
+    abstract fun eventHints(): EventRelayHintsDao
 
     abstract fun profileStats(): ProfileStatsDao
 
@@ -143,8 +145,6 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun walletTransactions(): WalletTransactionDao
 
     abstract fun relays(): RelayDao
-
-    abstract fun eventHints(): EventRelayHintsDao
 
     abstract fun publicBookmarks(): PublicBookmarkDao
 

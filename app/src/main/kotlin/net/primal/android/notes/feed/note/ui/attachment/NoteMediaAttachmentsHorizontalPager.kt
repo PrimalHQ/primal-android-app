@@ -24,9 +24,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.core.compose.HorizontalPagerIndicator
-import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
+import net.primal.android.core.compose.attachment.model.EventUriUi
+import net.primal.android.events.domain.EventUriType
 import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
 import net.primal.android.theme.AppTheme
 
@@ -41,17 +41,17 @@ fun NoteMediaAttachmentsHorizontalPager(
     modifier: Modifier = Modifier,
     onMediaClick: (MediaClickEvent) -> Unit,
     blossoms: List<String>,
-    mediaAttachments: List<NoteAttachmentUi> = emptyList(),
+    mediaEventUris: List<EventUriUi> = emptyList(),
 ) {
     BoxWithConstraints(modifier = modifier) {
-        val imageSizeDp = findImageSize(attachment = mediaAttachments.first())
-        val imagesCount = mediaAttachments.size
+        val imageSizeDp = findImageSize(eventUri = mediaEventUris.first())
+        val imagesCount = mediaEventUris.size
         val pagerState = rememberPagerState { imagesCount }
 
         when (imagesCount) {
             SINGLE_IMAGE -> {
                 SingleImageGallery(
-                    mediaAttachments = mediaAttachments,
+                    mediaEventUris = mediaEventUris,
                     blossoms = blossoms,
                     imageSizeDp = imageSizeDp,
                     onMediaClick = onMediaClick,
@@ -59,7 +59,7 @@ fun NoteMediaAttachmentsHorizontalPager(
             }
             TWO_IMAGES -> {
                 TwoImageGallery(
-                    mediaAttachments = mediaAttachments,
+                    mediaEventUris = mediaEventUris,
                     blossoms = blossoms,
                     imageSizeDp = imageSizeDp,
                     onMediaClick = onMediaClick,
@@ -67,7 +67,7 @@ fun NoteMediaAttachmentsHorizontalPager(
             }
             THREE_IMAGES -> {
                 ThreeImageGallery(
-                    mediaAttachments = mediaAttachments,
+                    mediaEventUris = mediaEventUris,
                     blossoms = blossoms,
                     imageSizeDp = imageSizeDp,
                     onMediaClick = onMediaClick,
@@ -75,7 +75,7 @@ fun NoteMediaAttachmentsHorizontalPager(
             }
             FOUR_IMAGES -> {
                 FourImageGallery(
-                    mediaAttachments = mediaAttachments,
+                    mediaEventUri = mediaEventUris,
                     blossoms = blossoms,
                     imageSizeDp = imageSizeDp,
                     onMediaClick = onMediaClick,
@@ -83,18 +83,18 @@ fun NoteMediaAttachmentsHorizontalPager(
             }
             else -> {
                 HorizontalPager(state = pagerState, pageSpacing = 12.dp) {
-                    val attachment = mediaAttachments[it]
+                    val mediaUri = mediaEventUris[it]
                     NoteMediaAttachment(
                         modifier = Modifier.clip(AppTheme.shapes.large).padding(vertical = 4.dp),
-                        attachment = attachment,
+                        mediaEventUri = mediaUri,
                         blossoms = blossoms,
                         imageSizeDp = imageSizeDp,
                         onClick = { positionMs ->
                             onMediaClick(
                                 MediaClickEvent(
-                                    noteId = attachment.noteId,
-                                    noteAttachmentType = attachment.type,
-                                    mediaUrl = attachment.url,
+                                    noteId = mediaUri.eventId,
+                                    eventUriType = mediaUri.type,
+                                    mediaUrl = mediaUri.url,
                                     positionMs = positionMs,
                                 ),
                             )
@@ -126,7 +126,7 @@ fun NoteMediaAttachmentsHorizontalPager(
 
 @Composable
 private fun FourImageGallery(
-    mediaAttachments: List<NoteAttachmentUi>,
+    mediaEventUri: List<EventUriUi>,
     blossoms: List<String>,
     imageSizeDp: DpSize,
     onMediaClick: (MediaClickEvent) -> Unit,
@@ -139,27 +139,27 @@ private fun FourImageGallery(
     )
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        mediaAttachments.chunked(2).forEachIndexed { rowIndex, rowAttachments ->
+        mediaEventUri.chunked(2).forEachIndexed { rowIndex, rowAttachments ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                rowAttachments.forEachIndexed { index, attachment ->
+                rowAttachments.forEachIndexed { index, mediaEventUri ->
                     NoteMediaAttachment(
                         modifier = Modifier
                             .weight(1f)
                             .aspectRatio(1f)
                             .clip(shapeMatrix[rowIndex * 2 + index])
                             .then(if (rowIndex == 0) Modifier.padding(0.dp) else Modifier.padding(vertical = 4.dp)),
-                        attachment = attachment,
+                        mediaEventUri = mediaEventUri,
                         blossoms = blossoms,
                         imageSizeDp = imageSizeDp,
                         onClick = { positionMs ->
                             onMediaClick(
                                 MediaClickEvent(
-                                    noteId = attachment.noteId,
-                                    noteAttachmentType = attachment.type,
-                                    mediaUrl = attachment.url,
+                                    noteId = mediaEventUri.eventId,
+                                    eventUriType = mediaEventUri.type,
+                                    mediaUrl = mediaEventUri.url,
                                     positionMs = positionMs,
                                 ),
                             )
@@ -173,7 +173,7 @@ private fun FourImageGallery(
 
 @Composable
 private fun ThreeImageGallery(
-    mediaAttachments: List<NoteAttachmentUi>,
+    mediaEventUris: List<EventUriUi>,
     blossoms: List<String>,
     imageSizeDp: DpSize,
     onMediaClick: (MediaClickEvent) -> Unit,
@@ -195,15 +195,15 @@ private fun ThreeImageGallery(
                     ),
                 )
                 .padding(vertical = 4.dp),
-            attachment = mediaAttachments[0],
+            mediaEventUri = mediaEventUris[0],
             blossoms = blossoms,
             imageSizeDp = imageSizeDp,
             onClick = { positionMs ->
                 onMediaClick(
                     MediaClickEvent(
-                        noteId = mediaAttachments[0].noteId,
-                        noteAttachmentType = mediaAttachments[0].type,
-                        mediaUrl = mediaAttachments[0].url,
+                        noteId = mediaEventUris[0].eventId,
+                        eventUriType = mediaEventUris[0].type,
+                        mediaUrl = mediaEventUris[0].url,
                         positionMs = positionMs,
                     ),
                 )
@@ -214,7 +214,7 @@ private fun ThreeImageGallery(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            mediaAttachments.drop(1).take(2).forEachIndexed { index, attachment ->
+            mediaEventUris.drop(1).take(2).forEachIndexed { index, attachment ->
                 NoteMediaAttachment(
                     modifier = Modifier
                         .weight(1f)
@@ -236,14 +236,14 @@ private fun ThreeImageGallery(
                                 )
                             },
                         ),
-                    attachment = attachment,
+                    mediaEventUri = attachment,
                     blossoms = blossoms,
                     imageSizeDp = imageSizeDp,
                     onClick = { positionMs ->
                         onMediaClick(
                             MediaClickEvent(
-                                noteId = attachment.noteId,
-                                noteAttachmentType = attachment.type,
+                                noteId = attachment.eventId,
+                                eventUriType = attachment.type,
                                 mediaUrl = attachment.url,
                                 positionMs = positionMs,
                             ),
@@ -257,7 +257,7 @@ private fun ThreeImageGallery(
 
 @Composable
 private fun TwoImageGallery(
-    mediaAttachments: List<NoteAttachmentUi>,
+    mediaEventUris: List<EventUriUi>,
     blossoms: List<String>,
     imageSizeDp: DpSize,
     onMediaClick: (MediaClickEvent) -> Unit,
@@ -266,7 +266,7 @@ private fun TwoImageGallery(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        mediaAttachments.take(2).forEachIndexed { index, attachment ->
+        mediaEventUris.take(2).forEachIndexed { index, attachment ->
             NoteMediaAttachment(
                 modifier = Modifier
                     .weight(1f)
@@ -289,14 +289,14 @@ private fun TwoImageGallery(
                         },
                     )
                     .padding(vertical = 4.dp),
-                attachment = attachment,
+                mediaEventUri = attachment,
                 blossoms = blossoms,
                 imageSizeDp = imageSizeDp,
                 onClick = { positionMs ->
                     onMediaClick(
                         MediaClickEvent(
-                            noteId = attachment.noteId,
-                            noteAttachmentType = attachment.type,
+                            noteId = attachment.eventId,
+                            eventUriType = attachment.type,
                             mediaUrl = attachment.url,
                             positionMs = positionMs,
                         ),
@@ -309,25 +309,25 @@ private fun TwoImageGallery(
 
 @Composable
 private fun SingleImageGallery(
-    mediaAttachments: List<NoteAttachmentUi>,
+    mediaEventUris: List<EventUriUi>,
     blossoms: List<String>,
     imageSizeDp: DpSize,
     onMediaClick: (MediaClickEvent) -> Unit,
 ) {
-    val attachment = mediaAttachments.first()
+    val mediaEventUri = mediaEventUris.first()
     NoteMediaAttachment(
         modifier = Modifier
             .clip(AppTheme.shapes.large)
             .padding(vertical = 4.dp),
-        attachment = attachment,
+        mediaEventUri = mediaEventUri,
         blossoms = blossoms,
         imageSizeDp = imageSizeDp,
         onClick = { positionMs ->
             onMediaClick(
                 MediaClickEvent(
-                    noteId = attachment.noteId,
-                    noteAttachmentType = attachment.type,
-                    mediaUrl = attachment.url,
+                    noteId = mediaEventUri.eventId,
+                    eventUriType = mediaEventUri.type,
+                    mediaUrl = mediaEventUri.url,
                     positionMs = positionMs,
                 ),
             )
@@ -337,7 +337,7 @@ private fun SingleImageGallery(
 
 @Composable
 private fun NoteMediaAttachment(
-    attachment: NoteAttachmentUi,
+    mediaEventUri: EventUriUi,
     blossoms: List<String>,
     imageSizeDp: DpSize,
     onClick: (positionMs: Long) -> Unit,
@@ -347,10 +347,10 @@ private fun NoteMediaAttachment(
         modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
-        when (attachment.type) {
-            NoteAttachmentType.Video -> {
+        when (mediaEventUri.type) {
+            EventUriType.Video -> {
                 NoteAttachmentVideoPreview(
-                    attachment = attachment,
+                    eventUri = mediaEventUri,
                     onVideoClick = { positionMs -> onClick(positionMs) },
                     modifier = Modifier
                         .width(imageSizeDp.width)
@@ -360,7 +360,7 @@ private fun NoteMediaAttachment(
 
             else -> {
                 NoteAttachmentImagePreview(
-                    attachment = attachment,
+                    attachment = mediaEventUri,
                     blossoms = blossoms,
                     maxWidth = this.maxWidth,
                     modifier = Modifier

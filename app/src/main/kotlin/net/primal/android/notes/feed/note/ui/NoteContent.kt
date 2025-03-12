@@ -27,9 +27,8 @@ import java.time.Instant
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
-import net.primal.android.attachments.domain.NostrUriType
 import net.primal.android.core.compose.PrimalClickableText
-import net.primal.android.core.compose.attachment.model.isMediaAttachment
+import net.primal.android.core.compose.attachment.model.isMediaUri
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Document
 import net.primal.android.core.compose.preview.PrimalPreview
@@ -37,6 +36,7 @@ import net.primal.android.core.compose.zaps.ReferencedNoteZap
 import net.primal.android.core.compose.zaps.ReferencedZap
 import net.primal.android.core.utils.TextMatch
 import net.primal.android.core.utils.TextMatcher
+import net.primal.android.events.domain.EventUriNostrType
 import net.primal.android.nostr.ext.cleanNostrUris
 import net.primal.android.notes.db.ReferencedNote
 import net.primal.android.notes.db.ReferencedUser
@@ -56,7 +56,7 @@ private const val NOTE_ANNOTATION_TAG = "note"
 private const val HASHTAG_ANNOTATION_TAG = "hashtag"
 private const val NOSTR_ADDRESS_ANNOTATION_TAG = "naddr"
 
-private fun List<NoteNostrUriUi>.filter(type: NostrUriType) = filter { it.type == type }
+private fun List<NoteNostrUriUi>.filter(type: EventUriNostrType) = filter { it.type == type }
 
 private fun List<NoteNostrUriUi>.filterUnhandledNostrAddressUris() =
     filter {
@@ -230,7 +230,7 @@ fun NoteContent(
             )
         }
 
-        val referencedHighlights = data.nostrUris.filter(type = NostrUriType.Highlight)
+        val referencedHighlights = data.nostrUris.filter(type = EventUriNostrType.Highlight)
         if (referencedHighlights.isNotEmpty()) {
             referencedHighlights
                 .mapNotNull { it.referencedHighlight }
@@ -255,13 +255,13 @@ fun NoteContent(
             )
         }
 
-        if (data.attachments.isNotEmpty()) {
+        if (data.uris.isNotEmpty()) {
             NoteAttachments(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = if (contentText.isEmpty()) 4.dp else 6.dp)
                     .heightIn(min = 0.dp, max = 500.dp),
-                attachments = data.attachments,
+                eventUris = data.uris,
                 blossoms = data.blossoms,
                 expanded = expanded,
                 onUrlClick = { url ->
@@ -274,7 +274,7 @@ fun NoteContent(
             )
         }
 
-        val referencedPostResources = data.nostrUris.filter(type = NostrUriType.Note)
+        val referencedPostResources = data.nostrUris.filter(type = EventUriNostrType.Note)
         if (referencedPostResources.isNotEmpty()) {
             ReferencedNotesColumn(
                 modifier = Modifier.padding(top = 4.dp),
@@ -286,7 +286,7 @@ fun NoteContent(
             )
         }
 
-        val referencedArticleResources = data.nostrUris.filter(type = NostrUriType.Article)
+        val referencedArticleResources = data.nostrUris.filter(type = EventUriNostrType.Article)
         if (referencedArticleResources.isNotEmpty()) {
             ReferencedArticlesColumn(
                 modifier = Modifier.padding(top = 4.dp),
@@ -298,7 +298,7 @@ fun NoteContent(
             )
         }
 
-        val referencedZaps = data.nostrUris.filter(type = NostrUriType.Zap)
+        val referencedZaps = data.nostrUris.filter(type = EventUriNostrType.Zap)
         referencedZaps
             .mapNotNull { it.referencedZap }
             .forEach { zap ->
@@ -338,7 +338,7 @@ fun NoteContent(
                 }
             }
 
-        val genericEvents = data.nostrUris.filter(type = NostrUriType.Unsupported)
+        val genericEvents = data.nostrUris.filter(type = EventUriNostrType.Unsupported)
         if (genericEvents.isNotEmpty()) {
             genericEvents.forEachIndexed { index, nostrUriUi ->
                 NoteUnknownEvent(
@@ -401,9 +401,9 @@ fun renderContentAsAnnotatedString(
     highlightColor: Color,
     shouldKeepNostrNoteUris: Boolean = false,
 ): AnnotatedString {
-    val mediaAttachments = data.attachments.filter { it.isMediaAttachment() }
-    val linkAttachments = data.attachments.filterNot { it.isMediaAttachment() }
-    val mentionedUsers = data.nostrUris.filter(type = NostrUriType.Profile)
+    val mediaAttachments = data.uris.filter { it.isMediaUri() }
+    val linkAttachments = data.uris.filterNot { it.isMediaUri() }
+    val mentionedUsers = data.nostrUris.filter(type = EventUriNostrType.Profile)
     val unhandledNostrAddressUris = data.nostrUris.filterUnhandledNostrAddressUris()
 
     val refinedContent = data.content
@@ -438,8 +438,8 @@ fun renderContentAsAnnotatedString(
             )
         }
 
-        data.attachments
-            .filterNot { it.isMediaAttachment() }
+        data.uris
+            .filterNot { it.isMediaUri() }
             .map { it.url }
             .forEach {
                 addUrlAnnotation(
@@ -586,11 +586,11 @@ fun PreviewPostContent() {
                     content = """
                         Hey there nostr:referencedUser, how is life? #nostr 
                     """.trimIndent(),
-                    attachments = emptyList(),
+                    uris = emptyList(),
                     nostrUris = listOf(
                         NoteNostrUriUi(
                             uri = "nostr:referencedUser",
-                            type = NostrUriType.Profile,
+                            type = EventUriNostrType.Profile,
                             referencedEventAlt = null,
                             referencedNote = null,
                             referencedUser = ReferencedUser(
@@ -624,11 +624,11 @@ fun PreviewPostUnknownReferencedEventWithAlt() {
                 data = NoteContentUi(
                     noteId = "",
                     content = "This is amazing! nostr:nevent124124124214123412",
-                    attachments = emptyList(),
+                    uris = emptyList(),
                     nostrUris = listOf(
                         NoteNostrUriUi(
                             uri = "nostr:nevent124124124214123412",
-                            type = NostrUriType.Unsupported,
+                            type = EventUriNostrType.Unsupported,
                             referencedEventAlt = "This is a music song.",
                             referencedNote = null,
                             referencedUser = null,
@@ -659,11 +659,11 @@ fun PreviewPostUnknownReferencedEventWithoutAlt() {
                 data = NoteContentUi(
                     noteId = "",
                     content = "This is amazing! nostr:note111",
-                    attachments = emptyList(),
+                    uris = emptyList(),
                     nostrUris = listOf(
                         NoteNostrUriUi(
                             uri = "nostr:note111",
-                            type = NostrUriType.Unsupported,
+                            type = EventUriNostrType.Unsupported,
                             referencedEventAlt = null,
                             referencedNote = null,
                             referencedUser = null,
@@ -703,11 +703,11 @@ fun PreviewPostContentWithReferencedPost() {
                         
                         nostr:referenced2Post
                     """.trimIndent(),
-                    attachments = emptyList(),
+                    uris = emptyList(),
                     nostrUris = listOf(
                         NoteNostrUriUi(
                             uri = "nostr:referencedPost",
-                            type = NostrUriType.Note,
+                            type = EventUriNostrType.Note,
                             referencedNote = ReferencedNote(
                                 postId = "postId",
                                 createdAt = 0,
@@ -731,7 +731,7 @@ fun PreviewPostContentWithReferencedPost() {
                         ),
                         NoteNostrUriUi(
                             uri = "nostr:referenced2Post",
-                            type = NostrUriType.Note,
+                            type = EventUriNostrType.Note,
                             referencedNote = ReferencedNote(
                                 postId = "postId",
                                 createdAt = 0,
@@ -782,7 +782,7 @@ fun PreviewPostContentWithTweet() {
                 data = NoteContentUi(
                     noteId = "",
                     content = "Rise and shine!",
-                    attachments = emptyList(),
+                    uris = emptyList(),
                 ),
                 expanded = false,
                 enableTweetsMode = true,

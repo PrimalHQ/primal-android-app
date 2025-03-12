@@ -1,11 +1,11 @@
 package net.primal.android.notes.repository
 
 import androidx.room.withTransaction
-import net.primal.android.attachments.ext.flatMapPostsAsNoteAttachmentPO
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.events.ext.flatMapPostsAsEventUriPO
 import net.primal.android.nostr.db.eventRelayHintsUpserter
 import net.primal.android.nostr.ext.flatMapAsEventHintsPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
@@ -74,7 +74,7 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
         postData.copy(authorMetadataId = eventIdMap[postData.authorId])
     }
 
-    val noteAttachments = allPosts.flatMapPostsAsNoteAttachmentPO(
+    val noteAttachments = allPosts.flatMapPostsAsEventUriPO(
         cdnResources = cdnResources,
         linkPreviews = linkPreviews,
         videoThumbnails = videoThumbnails,
@@ -100,8 +100,8 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
     database.withTransaction {
         database.profiles().insertOrUpdateAll(data = profiles)
         database.posts().upsertAll(data = allPosts)
-        database.attachments().upsertAllNoteAttachments(data = noteAttachments)
-        database.attachments().upsertAllNostrUris(data = noteNostrUris)
+        database.eventUris().upsertAllEventUris(data = noteAttachments)
+        database.eventUris().upsertAllEventNostrUris(data = noteNostrUris)
         database.reposts().upsertAll(data = reposts)
         database.eventZaps().upsertAll(data = eventZaps)
         database.eventStats().upsertAll(data = postStats)
