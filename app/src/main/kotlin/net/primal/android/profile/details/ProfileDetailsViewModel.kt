@@ -97,6 +97,7 @@ class ProfileDetailsViewModel @Inject constructor(
 
     private fun initializeProfileDetails(profileId: String, isActiveUser: Boolean) {
         observeProfileData(profileId = profileId)
+        observeIsProfileFollowed(profileId = profileId)
         observeReferencedProfilesData(profileId = profileId)
         observeProfileStats(profileId = profileId)
         fetchProfileFollowedBy(profileId = profileId)
@@ -217,7 +218,6 @@ class ProfileDetailsViewModel @Inject constructor(
             activeAccountStore.activeUserAccount.collect {
                 setState {
                     copy(
-                        isProfileFollowed = it.following.contains(profileId),
                         activeUserPremiumTier = it.premiumMembership?.tier,
                         zappingState = this.zappingState.copy(
                             walletConnected = it.hasWallet(),
@@ -226,6 +226,17 @@ class ProfileDetailsViewModel @Inject constructor(
                             zapsConfig = it.appSettings?.zapsConfig ?: this.zappingState.zapsConfig,
                             walletBalanceInBtc = it.primalWalletState.balanceInBtc,
                         ),
+                    )
+                }
+            }
+        }
+
+    private fun observeIsProfileFollowed(profileId: String) =
+        viewModelScope.launch {
+            activeAccountStore.activeUserAccount.collect {
+                setState {
+                    copy(
+                        isProfileFollowed = it.following.contains(profileId),
                     )
                 }
             }
