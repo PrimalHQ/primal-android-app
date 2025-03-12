@@ -1,3 +1,4 @@
-- Deep linking.
-- Deprecated note1 and npub1 links.
-- Stability and improvements.
+- Multi-account support
+- Deep linking support
+- "Share via Primal" support
+- Stability and improvements
