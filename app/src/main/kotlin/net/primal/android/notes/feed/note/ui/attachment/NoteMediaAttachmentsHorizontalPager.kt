@@ -85,7 +85,7 @@ fun NoteMediaAttachmentsHorizontalPager(
                 HorizontalPager(state = pagerState, pageSpacing = 12.dp) {
                     val mediaUri = mediaEventUris[it]
                     NoteMediaAttachment(
-                        modifier = Modifier.clip(AppTheme.shapes.large).padding(vertical = 4.dp),
+                        modifier = Modifier.padding(vertical = 4.dp).clip(AppTheme.shapes.large),
                         mediaEventUri = mediaUri,
                         blossoms = blossoms,
                         imageSizeDp = imageSizeDp,
@@ -149,8 +149,8 @@ private fun FourImageGallery(
                         modifier = Modifier
                             .weight(1f)
                             .aspectRatio(1f)
-                            .clip(shapeMatrix[rowIndex * 2 + index])
-                            .then(if (rowIndex == 0) Modifier.padding(0.dp) else Modifier.padding(vertical = 4.dp)),
+                            .then(if (rowIndex == 0) Modifier.padding(0.dp) else Modifier.padding(vertical = 4.dp))
+                            .clip(shapeMatrix[rowIndex * 2 + index]),
                         mediaEventUri = mediaEventUri,
                         blossoms = blossoms,
                         imageSizeDp = imageSizeDp,
@@ -186,6 +186,7 @@ private fun ThreeImageGallery(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(2f / 1f)
+                .padding(vertical = 4.dp)
                 .clip(
                     RoundedCornerShape(
                         topStart = AppTheme.shapes.large.topStart,
@@ -193,8 +194,7 @@ private fun ThreeImageGallery(
                         bottomStart = CornerSize(0.dp),
                         bottomEnd = CornerSize(0.dp),
                     ),
-                )
-                .padding(vertical = 4.dp),
+                ),
             mediaEventUri = mediaEventUris[0],
             blossoms = blossoms,
             imageSizeDp = imageSizeDp,
@@ -271,6 +271,7 @@ private fun TwoImageGallery(
                 modifier = Modifier
                     .weight(1f)
                     .aspectRatio(1f)
+                    .padding(vertical = 4.dp)
                     .clip(
                         if (index == 0) {
                             RoundedCornerShape(
@@ -287,8 +288,7 @@ private fun TwoImageGallery(
                                 bottomEnd = AppTheme.shapes.large.bottomEnd,
                             )
                         },
-                    )
-                    .padding(vertical = 4.dp),
+                    ),
                 mediaEventUri = attachment,
                 blossoms = blossoms,
                 imageSizeDp = imageSizeDp,
@@ -317,8 +317,8 @@ private fun SingleImageGallery(
     val mediaEventUri = mediaEventUris.first()
     NoteMediaAttachment(
         modifier = Modifier
-            .clip(AppTheme.shapes.large)
-            .padding(vertical = 4.dp),
+            .padding(vertical = 4.dp)
+            .clip(AppTheme.shapes.large),
         mediaEventUri = mediaEventUri,
         blossoms = blossoms,
         imageSizeDp = imageSizeDp,
