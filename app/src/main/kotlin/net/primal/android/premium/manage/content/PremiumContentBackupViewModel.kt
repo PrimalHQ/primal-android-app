@@ -23,6 +23,7 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.takeContentOrNull
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
+import net.primal.android.nostr.notary.NostrReadOnlyMode
 import net.primal.android.premium.manage.content.PremiumContentBackupContract.UiEvent
 import net.primal.android.premium.manage.content.PremiumContentBackupContract.UiState
 import net.primal.android.premium.manage.content.api.model.BroadcastingStatus
@@ -66,6 +67,9 @@ class PremiumContentBackupViewModel @Inject constructor(
                 handleBroadcastStatus(status)
             } catch (error: WssException) {
                 Timber.e(error)
+            } catch (error: NostrReadOnlyMode) {
+                /* TODO(marko): what to do here? */
+                Timber.e(error)
             }
         }
     }
@@ -88,6 +92,9 @@ class PremiumContentBackupViewModel @Inject constructor(
                     )
                 }
             } catch (error: WssException) {
+                Timber.e(error)
+            } catch (error: NostrReadOnlyMode) {
+                /* TODO(marko): what to do here? */
                 Timber.e(error)
             }
         }
@@ -149,7 +156,10 @@ class PremiumContentBackupViewModel @Inject constructor(
         viewModelScope.launch {
             monitorMutex.withLock {
                 if (monitorBroadcasting == null) {
-                    monitorBroadcasting = subscribeToBroadcastMonitor(userId = activeAccountStore.activeUserId())
+                    monitorBroadcasting = runCatching {
+                        subscribeToBroadcastMonitor(userId = activeAccountStore.activeUserId())
+                    }.getOrNull()
+                    /* TODO(marko): what to do here? */
                 }
             }
         }
@@ -184,6 +194,9 @@ class PremiumContentBackupViewModel @Inject constructor(
                 }
             } catch (error: WssException) {
                 Timber.e(error)
+            } catch (error: NostrReadOnlyMode) {
+                /* TODO(marko): what to do here? */
+                Timber.e(error)
             }
         }
     }
@@ -193,6 +206,9 @@ class PremiumContentBackupViewModel @Inject constructor(
             try {
                 broadcastRepository.cancelBroadcast(userId = activeAccountStore.activeUserId())
             } catch (error: WssException) {
+                Timber.e(error)
+            } catch (error: NostrReadOnlyMode) {
+                /* TODO(marko): what to do here? */
                 Timber.e(error)
             }
         }

@@ -19,6 +19,7 @@ import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.notary.NostrReadOnlyMode
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.repository.UserRepository
@@ -138,6 +139,9 @@ class WalletActivationViewModel @Inject constructor(
                     ),
                 )
                 setState { copy(status = WalletActivationStatus.PendingOtpVerification) }
+            } catch (error: NostrReadOnlyMode) {
+                Timber.w(error)
+                setState { copy(error = error) }
             } catch (error: WssException) {
                 Timber.w(error)
                 setState { copy(error = error) }
@@ -169,6 +173,8 @@ class WalletActivationViewModel @Inject constructor(
                 activeUser.primalWallet?.lightningAddress?.let {
                     try {
                         userRepository.setLightningAddress(userId = userId, lightningAddress = it)
+                    } catch (error: NostrReadOnlyMode) {
+                        Timber.w(error)
                     } catch (error: NostrPublishException) {
                         Timber.w(error)
                     } catch (error: WssException) {

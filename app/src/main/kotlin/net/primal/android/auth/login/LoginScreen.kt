@@ -190,10 +190,9 @@ fun LoginContent(
                 .wrapContentHeight(align = Alignment.Bottom),
             verticalArrangement = Arrangement.Bottom,
         ) {
-            val isValidNsec = state.loginInput.isValidNostrPrivateKey()
             OnboardingButton(
                 text = when {
-                    isValidNsec -> stringResource(id = R.string.login_button_sign_in)
+                    state.isValidKey -> stringResource(id = R.string.login_button_sign_in)
                     state.loginInput.isEmpty() -> stringResource(id = R.string.login_button_paste_your_key)
                     else -> stringResource(id = R.string.login_button_paste_new_key)
                 },
@@ -205,7 +204,7 @@ fun LoginContent(
                 enabled = !state.loading,
                 onClick = {
                     keyboardController?.hide()
-                    if (isValidNsec) {
+                    if (state.isValidKey) {
                         onLoginClick()
                     } else {
                         pasteFromClipboard()

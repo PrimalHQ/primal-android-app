@@ -50,6 +50,7 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.notary.NostrReadOnlyMode
 import net.primal.android.nostr.repository.RelayHintsRepository
 import net.primal.android.nostr.utils.MAX_RELAY_HINTS
 import net.primal.android.nostr.utils.Naddr
@@ -415,6 +416,10 @@ class NoteEditorViewModel @AssistedInject constructor(
         } catch (error: UnsuccessfulFileUpload) {
             Timber.w(error)
             updateNoteAttachmentState(attachment = updatedAttachment.copy(uploadError = error))
+        } catch (error: NostrReadOnlyMode) {
+            Timber.w(error)
+            updateNoteAttachmentState(attachment = updatedAttachment.copy(uploadError = error))
+            /* TODO(marko): what to do here? */
         }
     }
 

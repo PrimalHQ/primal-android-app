@@ -19,6 +19,7 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.notary.NostrReadOnlyMode
 import net.primal.android.nostr.repository.RelayHintsRepository
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.NoteContract.UiState
@@ -119,6 +120,9 @@ class NoteViewModel @AssistedInject constructor(
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
+            } catch (error: NostrReadOnlyMode) {
+                /* TODO(marko): what to do here? */
+                Timber.w(error)
             }
         }
 
@@ -138,6 +142,9 @@ class NoteViewModel @AssistedInject constructor(
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
+            } catch (error: NostrReadOnlyMode) {
+                /* TODO(marko): what to do here? */
+                Timber.w(error)
             }
         }
 
@@ -182,6 +189,8 @@ class NoteViewModel @AssistedInject constructor(
             } catch (error: WssException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToMuteUser(error)) }
+            } catch (error: NostrReadOnlyMode) {
+                Timber.w(error)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToMuteUser(error)) }
@@ -200,6 +209,8 @@ class NoteViewModel @AssistedInject constructor(
                     profileId = event.profileId,
                     eventId = event.noteId,
                 )
+            } catch (error: NostrReadOnlyMode) {
+                Timber.w(error)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
             }
@@ -231,6 +242,9 @@ class NoteViewModel @AssistedInject constructor(
             } catch (error: BookmarksRepository.BookmarksListNotFound) {
                 Timber.w(error)
                 setState { copy(shouldApproveBookmark = true) }
+            } catch (error: NostrReadOnlyMode) {
+                Timber.w(error)
+                /* TODO(marko): what to do here? */
             }
         }
 

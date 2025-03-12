@@ -20,6 +20,7 @@ import net.primal.android.navigation.FROM_ORIGIN_PREMIUM_BADGE
 import net.primal.android.navigation.buyingPremiumFromOrigin
 import net.primal.android.navigation.extendExistingPremiumName
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.notary.NostrReadOnlyMode
 import net.primal.android.premium.buying.PremiumBuyingContract.PremiumStage
 import net.primal.android.premium.buying.PremiumBuyingContract.SideEffect
 import net.primal.android.premium.buying.PremiumBuyingContract.UiEvent
@@ -158,6 +159,9 @@ class PremiumBuyingViewModel @Inject constructor(
                             purchase = purchase,
                         )
                         setState { copy(stage = PremiumStage.Success) }
+                    } catch (error: NostrReadOnlyMode) {
+                        /* TODO(marko): should we do something else here? */
+                        Timber.e(error)
                     } catch (error: WssException) {
                         Timber.e(error)
                         this@PremiumBuyingViewModel.purchase = purchase
@@ -208,6 +212,8 @@ class PremiumBuyingViewModel @Inject constructor(
                     )
                     setState { copy(stage = PremiumStage.Success) }
                     premiumRepository.fetchMembershipStatus(userId = userId)
+                } catch (error: NostrReadOnlyMode) {
+                    Timber.e(error)
                 } catch (error: WssException) {
                     Timber.e(error)
                 }

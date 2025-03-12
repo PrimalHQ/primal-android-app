@@ -33,6 +33,7 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.extractProfileId
+import net.primal.android.nostr.notary.NostrReadOnlyMode
 import net.primal.android.nostr.utils.Nip19TLV
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
@@ -374,6 +375,10 @@ class ProfileDetailsViewModel @Inject constructor(
                 Timber.w(error)
                 updateStateProfileAsUnfollowedAndClearApprovalFlag()
                 setErrorState(error = UiError.FailedToFollowUser(error))
+            } catch (error: NostrReadOnlyMode) {
+                Timber.w(error)
+                updateStateProfileAsUnfollowedAndClearApprovalFlag()
+                setErrorState(error = UiError.FailedToFollowUser(error))
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 updateStateProfileAsUnfollowedAndClearApprovalFlag()
@@ -401,6 +406,10 @@ class ProfileDetailsViewModel @Inject constructor(
                     forceUpdate = unfollowAction.forceUpdate,
                 )
             } catch (error: WssException) {
+                Timber.w(error)
+                updateStateProfileAsFollowedAndClearApprovalFlag()
+                setErrorState(error = UiError.FailedToUnfollowUser(error))
+            } catch (error: NostrReadOnlyMode) {
                 Timber.w(error)
                 updateStateProfileAsFollowedAndClearApprovalFlag()
                 setErrorState(error = UiError.FailedToUnfollowUser(error))
@@ -436,6 +445,8 @@ class ProfileDetailsViewModel @Inject constructor(
                 )
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
                 setEffect(ProfileDetailsContract.SideEffect.ProfileFeedAdded)
+            } catch (error: NostrReadOnlyMode) {
+                Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
                 setErrorState(error = UiError.FailedToAddToFeed(error))
@@ -452,6 +463,8 @@ class ProfileDetailsViewModel @Inject constructor(
                 )
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
                 setEffect(ProfileDetailsContract.SideEffect.ProfileFeedRemoved)
+            } catch (error: NostrReadOnlyMode) {
+                Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
                 setErrorState(error = UiError.FailedToRemoveFeed(error))
@@ -469,6 +482,8 @@ class ProfileDetailsViewModel @Inject constructor(
                     )
                 }
                 setState { copy(isProfileMuted = true) }
+            } catch (error: NostrReadOnlyMode) {
+                Timber.w(error)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setErrorState(error = UiError.FailedToMuteUser(error))
@@ -491,6 +506,8 @@ class ProfileDetailsViewModel @Inject constructor(
                     )
                 }
                 setState { copy(isProfileMuted = false) }
+            } catch (error: NostrReadOnlyMode) {
+                Timber.w(error)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setErrorState(error = UiError.FailedToUnmuteUser(error))
@@ -514,6 +531,8 @@ class ProfileDetailsViewModel @Inject constructor(
                         eventId = event.noteId,
                     )
                 }
+            } catch (error: NostrReadOnlyMode) {
+                Timber.w(error)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
             }

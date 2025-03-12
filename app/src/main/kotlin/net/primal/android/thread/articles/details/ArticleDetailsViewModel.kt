@@ -37,6 +37,7 @@ import net.primal.android.nostr.ext.isNoteUri
 import net.primal.android.nostr.ext.nostrUriToNoteId
 import net.primal.android.nostr.ext.nostrUriToPubkey
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.notary.NostrReadOnlyMode
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nevent
 import net.primal.android.nostr.utils.Nip19TLV
@@ -290,6 +291,9 @@ class ArticleDetailsViewModel @Inject constructor(
                     Timber.w(error)
                 } catch (error: MissingRelaysException) {
                     Timber.w(error)
+                } catch (error: NostrReadOnlyMode) {
+                    /* TODO(marko): what to do here? */
+                    Timber.w(error)
                 }
             }
         }
@@ -313,6 +317,9 @@ class ArticleDetailsViewModel @Inject constructor(
                 } catch (error: NostrPublishException) {
                     Timber.w(error)
                 } catch (error: MissingRelaysException) {
+                    Timber.w(error)
+                } catch (error: NostrReadOnlyMode) {
+                    /* TODO(marko): what to do here? */
                     Timber.w(error)
                 }
             }
@@ -343,7 +350,9 @@ class ArticleDetailsViewModel @Inject constructor(
             if (followUnfollowResult.isFailure) {
                 followUnfollowResult.exceptionOrNull()?.let { error ->
                     when (error) {
-                        is WssException, is ProfileRepository.FollowListNotFound, is NostrPublishException -> {
+                        is WssException, is ProfileRepository.FollowListNotFound,
+                        is NostrPublishException, is NostrReadOnlyMode,
+                            -> {
                             Timber.e(error)
                             setState {
                                 copy(
@@ -405,6 +414,8 @@ class ArticleDetailsViewModel @Inject constructor(
             )
             setState { copy(isHighlighted = true) }
             onSuccess?.invoke(highlightNevent)
+        } catch (error: NostrReadOnlyMode) {
+            Timber.w(error)
         } catch (error: NostrPublishException) {
             Timber.w(error)
         } finally {
@@ -434,6 +445,8 @@ class ArticleDetailsViewModel @Inject constructor(
                 )
 
                 setState { copy(isHighlighted = false) }
+            } catch (error: NostrReadOnlyMode) {
+                Timber.w(error)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
             } finally {

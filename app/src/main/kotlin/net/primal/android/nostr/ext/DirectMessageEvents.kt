@@ -35,10 +35,10 @@ fun PrimalEvent.asMessageConversationsSummary(): ConversationsSummary {
     return ConversationsSummary(summaryPerParticipantId = map)
 }
 
-fun List<NostrEvent>.mapAsMessageDataPO(userId: String, nsec: String) =
+fun List<NostrEvent>.mapAsMessageDataPO(userId: String, nsec: String?) =
     mapNotNull { it.mapAsMessageDataPO(userId = userId, nsec = nsec) }
 
-fun NostrEvent.mapAsMessageDataPO(userId: String, nsec: String): DirectMessageData? {
+fun NostrEvent.mapAsMessageDataPO(userId: String, nsec: String?): DirectMessageData? {
     val senderId = this.pubKey
     val receiverId = this.tags.findFirstProfileId() ?: return null
     val participantId = if (senderId != userId) senderId else receiverId
@@ -46,7 +46,7 @@ fun NostrEvent.mapAsMessageDataPO(userId: String, nsec: String): DirectMessageDa
     val decryptedMessage = runCatching {
         CryptoUtils.decrypt(
             message = this.content,
-            privateKey = nsec.bechToBytesOrThrow(hrp = "nsec"),
+            privateKey = nsec?.bechToBytesOrThrow(hrp = "nsec")!!, /* TODO(marko): what to do here? */
             pubKey = participantId.hexToNpubHrp().bechToBytesOrThrow(hrp = "npub"),
         )
     }.getOrElse {

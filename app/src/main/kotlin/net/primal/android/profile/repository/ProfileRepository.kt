@@ -27,6 +27,7 @@ import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.notary.NostrReadOnlyMode
 import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.profile.db.ProfileData
@@ -127,7 +128,7 @@ class ProfileRepository @Inject constructor(
             }
         }
 
-    @Throws(FollowListNotFound::class, NostrPublishException::class)
+    @Throws(FollowListNotFound::class, NostrPublishException::class, NostrReadOnlyMode::class)
     suspend fun follow(
         userId: String,
         followedUserId: String,
@@ -138,7 +139,7 @@ class ProfileRepository @Inject constructor(
         }
     }
 
-    @Throws(FollowListNotFound::class, NostrPublishException::class)
+    @Throws(FollowListNotFound::class, NostrPublishException::class, NostrReadOnlyMode::class)
     suspend fun unfollow(
         userId: String,
         unfollowedUserId: String,
@@ -149,7 +150,7 @@ class ProfileRepository @Inject constructor(
         }
     }
 
-    @Throws(FollowListNotFound::class, NostrPublishException::class)
+    @Throws(FollowListNotFound::class, NostrPublishException::class, NostrReadOnlyMode::class)
     private suspend fun updateFollowList(
         userId: String,
         forceUpdate: Boolean,
@@ -173,7 +174,7 @@ class ProfileRepository @Inject constructor(
         )
     }
 
-    @Throws(NostrPublishException::class)
+    @Throws(NostrPublishException::class, NostrReadOnlyMode::class)
     suspend fun setFollowList(
         userId: String,
         contacts: Set<String>,
@@ -190,7 +191,7 @@ class ProfileRepository @Inject constructor(
         )
     }
 
-    @Throws(NostrPublishException::class)
+    @Throws(NostrPublishException::class, NostrReadOnlyMode::class)
     suspend fun recoverFollowList(
         userId: String,
         tags: List<JsonArray>,
@@ -247,7 +248,7 @@ class ProfileRepository @Inject constructor(
             usersApi.getUserFollowing(userId = userId)
         }
 
-    @Throws(NostrPublishException::class)
+    @Throws(NostrPublishException::class, NostrReadOnlyMode::class)
     suspend fun reportAbuse(
         userId: String,
         reportType: ReportType,

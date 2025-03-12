@@ -31,10 +31,15 @@ class CredentialsStore @Inject constructor(
 
     suspend fun clearCredentials() = persistence.updateData { emptySet() }
 
-    suspend fun save(nostrKey: String): String {
+    suspend fun saveNsec(nostrKey: String): String {
         val (nsec, pubkey) = nostrKey.extractKeyPairFromPrivateKeyOrThrow()
         addCredential(Credential(nsec = nsec, npub = pubkey))
         return pubkey.bech32ToHexOrThrow()
+    }
+
+    suspend fun saveNpub(npub: String): String {
+        addCredential(Credential(nsec = null, npub = npub))
+        return npub.bech32ToHexOrThrow()
     }
 
     suspend fun removeCredentialByNsec(nsec: String) =

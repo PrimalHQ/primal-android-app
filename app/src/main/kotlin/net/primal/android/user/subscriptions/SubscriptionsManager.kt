@@ -168,43 +168,45 @@ class SubscriptionsManager @Inject constructor(
         }
 
     private fun launchWalletMonitorSubscription(userId: String) =
-        PrimalSocketSubscription.launch(
-            scope = scope,
-            primalApiClient = walletApiClient,
-            cacheFilter = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET_MONITOR,
-                optionsJson = NostrJsonEncodeDefaults.encodeToString(
-                    WalletRequestBody(
-                        event = nostrNotary.signPrimalWalletOperationNostrEvent(
-                            userId = userId,
-                            content = NostrJson.encodeToString(
-                                BalanceRequestBody(subWallet = SubWallet.Open),
+        runCatching {
+            PrimalSocketSubscription.launch(
+                scope = scope,
+                primalApiClient = walletApiClient,
+                cacheFilter = PrimalCacheFilter(
+                    primalVerb = PrimalVerb.WALLET_MONITOR,
+                    optionsJson = NostrJsonEncodeDefaults.encodeToString(
+                        WalletRequestBody(
+                            event = nostrNotary.signPrimalWalletOperationNostrEvent(
+                                userId = userId,
+                                content = NostrJson.encodeToString(
+                                    BalanceRequestBody(subWallet = SubWallet.Open),
+                                ),
                             ),
                         ),
                     ),
                 ),
-            ),
-            transformer = { this.primalEvent },
-        ) { event ->
-            when (event.kind) {
-                NostrEventKind.PrimalWalletBalance.value -> {
-                    event.takeContentOrNull<BalanceResponse>()?.let { response ->
-                        userRepository.updatePrimalWalletBalance(
-                            userId = userId,
-                            balanceInBtc = response.amount,
-                            maxBalanceInBtc = response.maxAmount,
-                        )
+                transformer = { this.primalEvent },
+            ) { event ->
+                when (event.kind) {
+                    NostrEventKind.PrimalWalletBalance.value -> {
+                        event.takeContentOrNull<BalanceResponse>()?.let { response ->
+                            userRepository.updatePrimalWalletBalance(
+                                userId = userId,
+                                balanceInBtc = response.amount,
+                                maxBalanceInBtc = response.maxAmount,
+                            )
+                        }
                     }
-                }
 
-                NostrEventKind.PrimalWalletUpdatedAt.value -> {
-                    event.takeContentOrNull<LastUpdatedAtResponse>()?.let { response ->
-                        userRepository.updatePrimalWalletLastUpdatedAt(
-                            userId = userId,
-                            lastUpdatedAt = response.lastUpdatedAt,
-                        )
+                    NostrEventKind.PrimalWalletUpdatedAt.value -> {
+                        event.takeContentOrNull<LastUpdatedAtResponse>()?.let { response ->
+                            userRepository.updatePrimalWalletLastUpdatedAt(
+                                userId = userId,
+                                lastUpdatedAt = response.lastUpdatedAt,
+                            )
+                        }
                     }
                 }
             }
-        }
+        }.getOrNull()
 }

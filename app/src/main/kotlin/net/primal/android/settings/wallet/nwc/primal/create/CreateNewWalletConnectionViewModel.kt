@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.notary.NostrReadOnlyMode
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiEvent
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -85,6 +86,8 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
                         creatingSecret = false,
                     )
                 }
+            } catch (error: NostrReadOnlyMode) {
+                Timber.w(error)
             } catch (error: WssException) {
                 setState { copy(creatingSecret = false) }
                 Timber.w(error)

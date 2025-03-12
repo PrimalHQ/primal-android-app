@@ -19,6 +19,7 @@ import net.primal.android.navigation.profileId
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.extractNoteId
 import net.primal.android.nostr.ext.extractProfileId
+import net.primal.android.nostr.notary.NostrReadOnlyMode
 import net.primal.android.profile.qr.ProfileQrCodeContract.SideEffect
 import net.primal.android.profile.qr.ProfileQrCodeContract.UiEvent
 import net.primal.android.profile.qr.ProfileQrCodeContract.UiState
@@ -108,6 +109,8 @@ class ProfileQrCodeViewModel @Inject constructor(
             } else {
                 Timber.w("Unable to parse text. [text = $text]")
             }
+        } catch (error: NostrReadOnlyMode) {
+            Timber.w(error)
         } catch (error: WssException) {
             Timber.w(error)
         }

@@ -6,6 +6,7 @@ import java.time.Instant
 import kotlin.time.Duration
 import net.primal.android.bookmarks.BookmarksRepository
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.notary.NostrReadOnlyMode
 import net.primal.android.nostr.notary.NostrSignUnauthorized
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.settings.repository.SettingsRepository
@@ -42,6 +43,7 @@ class UserDataUpdater @AssistedInject constructor(
     }
 
     private suspend fun updateData() {
+        /* TODO(marko): maybe all of this should go in a try catch? */
         settingsRepository.fetchAndPersistAppSettings(userId = userId)
         settingsRepository.ensureZapConfig(userId = userId)
         premiumRepository.fetchMembershipStatus(userId = userId)
@@ -50,6 +52,8 @@ class UserDataUpdater @AssistedInject constructor(
         bookmarksRepository.fetchAndPersistPublicBookmarks(userId = userId)
         try {
             walletRepository.fetchUserWalletInfoAndUpdateUserAccount(userId = userId)
+        } catch (error: NostrReadOnlyMode) {
+            Timber.w(error)
         } catch (error: NostrSignUnauthorized) {
             Timber.w(error)
         }

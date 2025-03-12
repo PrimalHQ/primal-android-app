@@ -17,6 +17,7 @@ import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.notary.NostrReadOnlyMode
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import timber.log.Timber
@@ -104,7 +105,7 @@ class ExplorePeopleViewModel @Inject constructor(
                     Timber.w(error)
                     updateStateProfileUnfollowAndClearApprovalFlag(profileId)
                     when (error) {
-                        is WssException, is NostrPublishException ->
+                        is WssException, is NostrPublishException, is NostrReadOnlyMode ->
                             setState { copy(error = UiError.FailedToFollowUser(error)) }
 
                         is ProfileRepository.FollowListNotFound -> setState {
@@ -137,7 +138,7 @@ class ExplorePeopleViewModel @Inject constructor(
                 unfollowResult.exceptionOrNull()?.let { error ->
                     Timber.w(error)
                     when (error) {
-                        is WssException, is NostrPublishException ->
+                        is WssException, is NostrPublishException, is NostrReadOnlyMode ->
                             setState { copy(error = UiError.FailedToUnfollowUser(error)) }
 
                         is ProfileRepository.FollowListNotFound -> setState {

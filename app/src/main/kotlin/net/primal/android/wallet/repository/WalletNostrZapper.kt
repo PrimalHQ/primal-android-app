@@ -3,6 +3,7 @@ package net.primal.android.wallet.repository
 import javax.inject.Inject
 import net.primal.android.crypto.urlToLnUrlHrp
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.notary.NostrReadOnlyMode
 import net.primal.android.wallet.api.model.WithdrawRequestBody
 import net.primal.android.wallet.domain.SubWallet
 import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
@@ -29,6 +30,8 @@ class WalletNostrZapper @Inject constructor(
                     zapRequest = data.userZapRequestEvent,
                 ),
             )
+        } catch (error: NostrReadOnlyMode) {
+            throw ZapFailureException(cause = error)
         } catch (error: WssException) {
             throw ZapFailureException(cause = error)
         }

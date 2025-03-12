@@ -35,7 +35,7 @@ class KeysSettingsViewModel @Inject constructor(
                     val credential = credentialsStore.findOrThrow(it.pubkey.hexToNpubHrp())
                     copy(
                         avatarCdnImage = it.avatarCdnImage,
-                        nsec = credential.nsec,
+                        nsec = credential.nsec ?: "", /* TODO(marko): what to do here? */
                         npub = credential.npub,
                         legendaryCustomization = it.primalLegendProfile?.asLegendaryCustomization(),
                     )

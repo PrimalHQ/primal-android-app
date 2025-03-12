@@ -27,6 +27,7 @@ import net.primal.android.feeds.list.ui.model.asFeedUi
 import net.primal.android.feeds.repository.DvmFeedListHandler
 import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.notary.NostrReadOnlyMode
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import timber.log.Timber
@@ -156,6 +157,8 @@ class FeedListViewModel @AssistedInject constructor(
                 )
                 setState { copy(isEditMode = false) }
                 updateFeedsState()
+            } catch (error: NostrReadOnlyMode) {
+                Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
             }
@@ -212,6 +215,8 @@ class FeedListViewModel @AssistedInject constructor(
                     givenDefaultFeeds = defaultFeeds,
                     specKind = specKind,
                 )
+            } catch (error: NostrReadOnlyMode) {
+                Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
             }
@@ -290,6 +295,9 @@ class FeedListViewModel @AssistedInject constructor(
                     feeds = currentFeeds,
                     specKind = specKind,
                 )
+            } catch (error: NostrReadOnlyMode) {
+                /* TODO(marko): what to do here? */
+                Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
             }

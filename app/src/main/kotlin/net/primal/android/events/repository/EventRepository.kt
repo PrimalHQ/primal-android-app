@@ -30,6 +30,7 @@ import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.notary.NostrReadOnlyMode
 import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.nostr.publish.NostrPublisher
 import timber.log.Timber
@@ -46,7 +47,7 @@ class EventRepository @Inject constructor(
     fun observeUserEventStatus(eventIds: List<String>, userId: String) =
         database.eventUserStats().observeStats(eventIds, userId)
 
-    @Throws(NostrPublishException::class)
+    @Throws(NostrPublishException::class, NostrReadOnlyMode::class)
     suspend fun likeEvent(
         userId: String,
         eventId: String,
@@ -75,10 +76,14 @@ class EventRepository @Inject constructor(
             Timber.w(error)
             statsUpdater.revertStats()
             throw error
+        } catch (error: NostrReadOnlyMode) {
+            Timber.w(error)
+            statsUpdater.revertStats()
+            throw error
         }
     }
 
-    @Throws(NostrPublishException::class)
+    @Throws(NostrPublishException::class, NostrReadOnlyMode::class)
     suspend fun repostEvent(
         userId: String,
         eventId: String,
@@ -110,6 +115,10 @@ class EventRepository @Inject constructor(
                 ),
             )
         } catch (error: NostrPublishException) {
+            Timber.w(error)
+            statsUpdater.revertStats()
+            throw error
+        } catch (error: NostrReadOnlyMode) {
             Timber.w(error)
             statsUpdater.revertStats()
             throw error

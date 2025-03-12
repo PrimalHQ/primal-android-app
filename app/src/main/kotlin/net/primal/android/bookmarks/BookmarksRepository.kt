@@ -14,6 +14,7 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.notary.NostrReadOnlyMode
 import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.user.api.UsersApi
@@ -75,7 +76,7 @@ class BookmarksRepository @Inject constructor(
             database.publicBookmarks().findByTagValue(tagValue = tagValue) != null
         }
 
-    @Throws(BookmarksListNotFound::class, NostrPublishException::class)
+    @Throws(BookmarksListNotFound::class, NostrPublishException::class, NostrReadOnlyMode::class)
     suspend fun addToBookmarks(
         userId: String,
         bookmarkType: BookmarkType,
@@ -101,7 +102,7 @@ class BookmarksRepository @Inject constructor(
         )
     }
 
-    @Throws(BookmarksListNotFound::class, NostrPublishException::class)
+    @Throws(BookmarksListNotFound::class, NostrPublishException::class, NostrReadOnlyMode::class)
     suspend fun removeFromBookmarks(
         userId: String,
         bookmarkType: BookmarkType,
@@ -123,7 +124,7 @@ class BookmarksRepository @Inject constructor(
             BookmarkType.Article -> "a"
         }
 
-    @Throws(BookmarksListNotFound::class, NostrPublishException::class)
+    @Throws(BookmarksListNotFound::class, NostrPublishException::class, NostrReadOnlyMode::class)
     private suspend fun publishAddBookmark(
         userId: String,
         forceUpdate: Boolean,
@@ -134,7 +135,7 @@ class BookmarksRepository @Inject constructor(
         }
     }
 
-    @Throws(BookmarksListNotFound::class, NostrPublishException::class)
+    @Throws(BookmarksListNotFound::class, NostrPublishException::class, NostrReadOnlyMode::class)
     private suspend fun publishRemoveBookmark(
         userId: String,
         forceUpdate: Boolean,
@@ -145,7 +146,7 @@ class BookmarksRepository @Inject constructor(
         }
     }
 
-    @Throws(BookmarksListNotFound::class, NostrPublishException::class)
+    @Throws(BookmarksListNotFound::class, NostrPublishException::class, NostrReadOnlyMode::class)
     private suspend fun publishBookmarksList(
         userId: String,
         forceUpdate: Boolean,

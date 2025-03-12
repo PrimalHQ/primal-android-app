@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.notary.NostrReadOnlyMode
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameContract.ChangePrimalNameStage
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameContract.SideEffect
@@ -77,6 +78,8 @@ class PremiumChangePrimalNameViewModel @Inject constructor(
                     premiumRepository.fetchMembershipStatus(userId = activeAccountStore.activeUserId())
                     setEffect(SideEffect.PrimalNameChanged)
                 }
+            } catch (error: NostrReadOnlyMode) {
+                Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
                 setState { copy(error = PremiumChangePrimalNameContract.NameChangeError.GenericError) }
