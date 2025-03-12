@@ -84,6 +84,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteLink
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyRawData
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.core.utils.copyBitmapToClipboard
 import net.primal.android.core.utils.copyText
 import net.primal.android.theme.AppTheme
 
@@ -125,6 +126,7 @@ fun MediaGalleryScreen(
 ) {
     val imageAttachments = state.attachments
     val pagerState = rememberPagerState { imageAttachments.size }
+    var mediaItemBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     fun currentImage() = imageAttachments.getOrNull(pagerState.currentPage)
 
@@ -172,11 +174,11 @@ fun MediaGalleryScreen(
                             currentImage()?.url?.let { copyText(context = context, text = it) }
                         },
                         onMediaCopyClick = {
-//                            state.currentDisplayedBitmap?.let { bitmap ->
-//                                coroutineScope.launch {
-//                                    copyBitmapToClipboard(context, bitmap)
-//                                }
-//                            }
+                            mediaItemBitmap?.let {
+                                coroutineScope.launch {
+                                    copyBitmapToClipboard(context, it)
+                                }
+                            }
                         },
                     )
                 },
@@ -189,8 +191,7 @@ fun MediaGalleryScreen(
                 initialPositionMs = state.initialPositionMs,
                 imageAttachments = imageAttachments,
                 pagerIndicatorContainerColor = containerColor,
-                onCurrentlyVisibleBitmap = { bitmap ->
-                },
+                onCurrentlyVisibleBitmap = { mediaItemBitmap = it },
             )
         },
         snackbarHost = {
@@ -362,8 +363,6 @@ private fun AttachmentsHorizontalPager(
     initialPositionMs: Long = 0,
     onCurrentlyVisibleBitmap: ((Bitmap?) -> Unit)? = null,
 ) {
-    // TODO This needs to be fixed to consider `beyondViewportPageCount` & clearing current bitmap for videos
-
     HorizontalPager(
         modifier = modifier,
         state = pagerState,
@@ -380,9 +379,8 @@ private fun AttachmentsHorizontalPager(
                     ImageScreen(
                         modifier = Modifier.fillMaxSize(),
                         attachment = attachment,
-                        onImageBitmapLoaded = {
-                            onCurrentlyVisibleBitmap?.invoke(it)
-                        },
+                        currentImage = imageAttachments.getOrNull(pagerState.currentPage),
+                        onImageBitmapLoaded = { onCurrentlyVisibleBitmap?.invoke(it) },
                     )
                 }
 
@@ -410,6 +408,7 @@ private fun AttachmentsHorizontalPager(
 @Composable
 private fun ImageScreen(
     attachment: NoteAttachmentUi,
+    currentImage: NoteAttachmentUi?,
     onImageBitmapLoaded: (Bitmap) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -432,8 +431,10 @@ private fun ImageScreen(
         }
     }
 
-    LaunchedEffect(loadedBitmap) {
-        loadedBitmap?.let { onImageBitmapLoaded(it) }
+    LaunchedEffect(loadedBitmap, currentImage) {
+        if (currentImage?.equals(attachment) == true) {
+            loadedBitmap?.let { onImageBitmapLoaded(it) }
+        }
     }
 
     val keys = attachment.variants.orEmpty()
