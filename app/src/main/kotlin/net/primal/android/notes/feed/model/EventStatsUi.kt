@@ -1,8 +1,8 @@
 package net.primal.android.notes.feed.model
 
-import net.primal.android.notes.db.FeedPostUserStats
 import net.primal.android.events.db.EventStats
 import net.primal.android.events.db.EventUserStats
+import net.primal.android.notes.db.FeedPostUserStats
 
 data class EventStatsUi(
     val repliesCount: Long = 0,

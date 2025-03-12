@@ -13,13 +13,13 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
-import net.primal.android.navigation.noteIdOrThrow
-import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.events.domain.EventAction
 import net.primal.android.events.reactions.ReactionsContract.UiState
 import net.primal.android.events.repository.EventRepository
 import net.primal.android.events.ui.asEventZapUiModel
+import net.primal.android.navigation.noteIdOrThrow
+import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import timber.log.Timber
 

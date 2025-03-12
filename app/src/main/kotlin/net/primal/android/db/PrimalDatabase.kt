@@ -17,6 +17,12 @@ import net.primal.android.bookmarks.db.PublicBookmark
 import net.primal.android.bookmarks.db.PublicBookmarkDao
 import net.primal.android.core.serialization.room.JsonTypeConverters
 import net.primal.android.core.serialization.room.ListsTypeConverters
+import net.primal.android.events.db.EventStats
+import net.primal.android.events.db.EventStatsDao
+import net.primal.android.events.db.EventUserStats
+import net.primal.android.events.db.EventUserStatsDao
+import net.primal.android.events.db.EventZap
+import net.primal.android.events.db.EventZapDao
 import net.primal.android.explore.db.TrendingTopic
 import net.primal.android.explore.db.TrendingTopicDao
 import net.primal.android.feeds.db.Feed
@@ -49,12 +55,6 @@ import net.primal.android.profile.db.ProfileStatsDao
 import net.primal.android.profile.db.serialization.ProfileTypeConverters
 import net.primal.android.settings.muted.db.MutedUserDao
 import net.primal.android.settings.muted.db.MutedUserData
-import net.primal.android.events.db.EventStats
-import net.primal.android.events.db.EventStatsDao
-import net.primal.android.events.db.EventUserStats
-import net.primal.android.events.db.EventUserStatsDao
-import net.primal.android.events.db.EventZap
-import net.primal.android.events.db.EventZapDao
 import net.primal.android.thread.db.ArticleCommentCrossRef
 import net.primal.android.thread.db.NoteConversationCrossRef
 import net.primal.android.thread.db.ThreadConversationDao

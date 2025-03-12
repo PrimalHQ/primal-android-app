@@ -13,6 +13,12 @@ import kotlinx.serialization.json.JsonArray
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.events.api.EventStatsApi
+import net.primal.android.events.api.model.EventActionsRequestBody
+import net.primal.android.events.api.model.EventZapsRequestBody
+import net.primal.android.events.db.EventZap
+import net.primal.android.events.domain.EventAction
+import net.primal.android.events.reactions.mediator.EventZapsMediator
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.asEventIdTag
 import net.primal.android.nostr.ext.asPubkeyTag
@@ -26,12 +32,6 @@ import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.nostr.publish.NostrPublisher
-import net.primal.android.events.api.EventStatsApi
-import net.primal.android.events.api.model.EventActionsRequestBody
-import net.primal.android.events.api.model.EventZapsRequestBody
-import net.primal.android.events.db.EventZap
-import net.primal.android.events.domain.EventAction
-import net.primal.android.events.reactions.mediator.EventZapsMediator
 import timber.log.Timber
 
 class EventRepository @Inject constructor(

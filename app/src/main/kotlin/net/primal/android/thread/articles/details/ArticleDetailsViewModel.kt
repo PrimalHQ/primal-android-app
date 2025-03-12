@@ -17,6 +17,9 @@ import net.primal.android.articles.ArticleRepository
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.crypto.hexToNpubHrp
+import net.primal.android.events.repository.EventRepository
+import net.primal.android.events.ui.EventZapUiModel
+import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.highlights.model.JoinedHighlightsUi
 import net.primal.android.highlights.model.joinOnContent
 import net.primal.android.highlights.repository.HighlightRepository
@@ -41,9 +44,6 @@ import net.primal.android.nostr.utils.asATagValue
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.profile.repository.ProfileRepository
-import net.primal.android.events.repository.EventRepository
-import net.primal.android.events.ui.EventZapUiModel
-import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.thread.articles.details.ArticleDetailsContract.SideEffect
 import net.primal.android.thread.articles.details.ArticleDetailsContract.UiEvent
 import net.primal.android.thread.articles.details.ArticleDetailsContract.UiState

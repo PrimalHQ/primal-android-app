@@ -3,15 +3,15 @@ package net.primal.android.events.api
 import javax.inject.Inject
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
+import net.primal.android.events.api.model.EventActionsRequestBody
+import net.primal.android.events.api.model.EventActionsResponse
+import net.primal.android.events.api.model.EventZapsRequestBody
+import net.primal.android.events.api.model.EventZapsResponse
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.events.api.model.EventActionsRequestBody
-import net.primal.android.events.api.model.EventActionsResponse
-import net.primal.android.events.api.model.EventZapsRequestBody
-import net.primal.android.events.api.model.EventZapsResponse
 
 class EventStatsApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
