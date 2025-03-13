@@ -25,10 +25,10 @@ interface ProfileDataDao {
 
     @Transaction
     @Query("SELECT * FROM ProfileData WHERE ownerId = :profileId")
-    fun observeProfile(profileId: String): Flow<Profile>
+    fun observeProfile(profileId: String): Flow<Profile?>
 
     @Query("SELECT * FROM ProfileData WHERE ownerId = :profileId")
-    fun observeProfileData(profileId: String): Flow<ProfileData>
+    fun observeProfileData(profileId: String): Flow<ProfileData?>
 
     @Query("SELECT * FROM ProfileData WHERE ownerId IN (:profileIds)")
     fun observeProfilesData(profileIds: List<String>): Flow<List<ProfileData>>

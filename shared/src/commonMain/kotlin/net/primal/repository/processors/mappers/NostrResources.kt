@@ -1,6 +1,8 @@
 package net.primal.repository.processors.mappers
 
 import io.github.aakira.napier.Napier
+import kotlinx.serialization.json.JsonArray
+import net.primal.core.cryptography.bech32ToHexOrThrow
 import net.primal.core.cryptography.bechToBytesOrThrow
 import net.primal.core.cryptography.toHex
 import net.primal.core.utils.asEllipsizedNpub
@@ -8,16 +10,27 @@ import net.primal.core.utils.authorNameUiFriendly
 import net.primal.core.utils.usernameUiFriendly
 import net.primal.db.events.EventUriNostr
 import net.primal.db.events.EventUriNostrType
+import net.primal.db.events.ReferencedArticle
+import net.primal.db.events.ReferencedHighlight
 import net.primal.db.events.ReferencedNote
 import net.primal.db.events.ReferencedUser
+import net.primal.db.events.ReferencedZap
+import net.primal.db.messages.DirectMessageData
 import net.primal.db.notes.PostData
 import net.primal.db.profiles.ProfileData
+import net.primal.db.reads.ArticleData
+import net.primal.db.reads.wordsCountToReadingTime
 import net.primal.domain.CdnResource
 import net.primal.domain.EventLinkPreviewData
 import net.primal.networking.model.NostrEvent
 import net.primal.networking.model.NostrEventKind
+import net.primal.nostr.Naddr
+import net.primal.nostr.Nevent
 import net.primal.nostr.Nip19TLV
 import net.primal.repository.findFirstAltDescription
+import net.primal.repository.findFirstEventId
+import net.primal.repository.findFirstProfileId
+import net.primal.repository.isATag
 
 // TODO Port referenced articles, highlights and zaps
 // TODO Port missing helper functions and consider splitting this file
@@ -165,15 +178,15 @@ fun String.extractEventId(): String? {
         }
     }
 }
-//
-//fun PostData.toNevent() =
-//    Nevent(
-//        userId = this.authorId,
-//        eventId = this.postId,
-//        kind = NostrEventKind.ShortTextNote.value,
-//        relays = emptyList(),
-//    )
-//
+
+fun PostData.toNevent() =
+    Nevent(
+        userId = this.authorId,
+        eventId = this.postId,
+        kind = NostrEventKind.ShortTextNote.value,
+        relays = emptyList(),
+    )
+
 private fun String.extract(parser: (bechPrefix: String?, key: String?) -> String?): String? {
     val matchResult = nostrUriRegexPattern.find(this) ?: return null
 
@@ -188,26 +201,8 @@ private fun String.extract(parser: (bechPrefix: String?, key: String?) -> String
     }
 }
 
-//fun String.takeAsNoteHexIdOrNull(): String? {
-//    return if (isNote() || isNoteUri() || isNEventUri() || isNEvent()) {
-//        val result = runCatching { this.extractNoteId() }
-//        result.getOrNull()
-//    } else {
-//        null
-//    }
-//}
-//
-//fun String.takeAsProfileHexIdOrNull(): String? {
-//    return if (isNPub() || isNPubUri()) {
-//        val result = runCatching {
-//            this.bech32ToHexOrThrow()
-//        }
-//        result.getOrNull()
-//    } else {
-//        null
-//    }
-//}
-//
+// TODO Rewire once NIP19 is implemented and put in correct package and/or module
+
 //fun String.takeAsNaddrOrNull(): String? {
 //    return if (isNAddr() || isNAddrUri()) {
 //        val result = runCatching {
@@ -223,10 +218,30 @@ private fun String.extract(parser: (bechPrefix: String?, key: String?) -> String
 //    }
 //}
 
+fun String.takeAsNoteHexIdOrNull(): String? {
+    return if (isNote() || isNoteUri() || isNEventUri() || isNEvent()) {
+        val result = runCatching { this.extractNoteId() }
+        result.getOrNull()
+    } else {
+        null
+    }
+}
+
+fun String.takeAsProfileHexIdOrNull(): String? {
+    return if (isNPub() || isNPubUri()) {
+        val result = runCatching {
+            this.bech32ToHexOrThrow()
+        }
+        result.getOrNull()
+    } else {
+        null
+    }
+}
+
 fun List<PostData>.flatMapPostsAsNoteNostrUriPO(
     eventIdToNostrEvent: Map<String, NostrEvent>,
     postIdToPostDataMap: Map<String, PostData>,
-//    articleIdToArticle: Map<String, ArticleData>,
+    articleIdToArticle: Map<String, ArticleData>,
     profileIdToProfileDataMap: Map<String, ProfileData>,
     cdnResources: Map<String, CdnResource>,
     linkPreviews: Map<String, EventLinkPreviewData>,
@@ -237,7 +252,7 @@ fun List<PostData>.flatMapPostsAsNoteNostrUriPO(
             eventId = postData.postId,
             eventIdToNostrEvent = eventIdToNostrEvent,
             postIdToPostDataMap = postIdToPostDataMap,
-//            articleIdToArticle = articleIdToArticle,
+            articleIdToArticle = articleIdToArticle,
             profileIdToProfileDataMap = profileIdToProfileDataMap,
             cdnResources = cdnResources,
             linkPreviews = linkPreviews,
@@ -245,32 +260,32 @@ fun List<PostData>.flatMapPostsAsNoteNostrUriPO(
         )
     }
 
-//fun List<DirectMessageData>.flatMapMessagesAsNostrResourcePO(
-//    eventIdToNostrEvent: Map<String, NostrEvent>,
-//    postIdToPostDataMap: Map<String, PostData>,
-//    articleIdToArticle: Map<String, ArticleData>,
-//    profileIdToProfileDataMap: Map<String, ProfileData>,
-//    cdnResources: Map<String, CdnResource>,
-//    linkPreviews: Map<String, EventLinkPreviewData>,
-//    videoThumbnails: Map<String, String>,
-//) = flatMap { messageData ->
-//    messageData.uris.mapAsNoteNostrUriPO(
-//        eventId = messageData.messageId,
-//        eventIdToNostrEvent = eventIdToNostrEvent,
-//        postIdToPostDataMap = postIdToPostDataMap,
-//        articleIdToArticle = articleIdToArticle,
-//        profileIdToProfileDataMap = profileIdToProfileDataMap,
-//        cdnResources = cdnResources,
-//        linkPreviews = linkPreviews,
-//        videoThumbnails = videoThumbnails,
-//    )
-//}
+fun List<DirectMessageData>.flatMapMessagesAsNostrResourcePO(
+    eventIdToNostrEvent: Map<String, NostrEvent>,
+    postIdToPostDataMap: Map<String, PostData>,
+    articleIdToArticle: Map<String, ArticleData>,
+    profileIdToProfileDataMap: Map<String, ProfileData>,
+    cdnResources: Map<String, CdnResource>,
+    linkPreviews: Map<String, EventLinkPreviewData>,
+    videoThumbnails: Map<String, String>,
+) = flatMap { messageData ->
+    messageData.uris.mapAsNoteNostrUriPO(
+        eventId = messageData.messageId,
+        eventIdToNostrEvent = eventIdToNostrEvent,
+        postIdToPostDataMap = postIdToPostDataMap,
+        articleIdToArticle = articleIdToArticle,
+        profileIdToProfileDataMap = profileIdToProfileDataMap,
+        cdnResources = cdnResources,
+        linkPreviews = linkPreviews,
+        videoThumbnails = videoThumbnails,
+    )
+}
 
 fun List<String>.mapAsNoteNostrUriPO(
     eventId: String,
     eventIdToNostrEvent: Map<String, NostrEvent>,
     postIdToPostDataMap: Map<String, PostData>,
-//    articleIdToArticle: Map<String, ArticleData>,
+    articleIdToArticle: Map<String, ArticleData>,
     profileIdToProfileDataMap: Map<String, ProfileData>,
     cdnResources: Map<String, CdnResource>,
     linkPreviews: Map<String, EventLinkPreviewData>,
@@ -282,23 +297,24 @@ fun List<String>.mapAsNoteNostrUriPO(
     val refNote = postIdToPostDataMap[refNoteId]
     val refPostAuthor = profileIdToProfileDataMap[refNote?.authorId]
 
-//    val refNaddr = Nip19TLV.parseUriAsNaddrOrNull(link)
-//    val refArticle = articleIdToArticle[refNaddr?.identifier]
-//    val refArticleAuthor = profileIdToProfileDataMap[refNaddr?.userId]
+    // Rewire once Nip19 is implemented for KMP
+    val refNaddr: Naddr? = null //Nip19TLV.parseUriAsNaddrOrNull(link)
+    val refArticle = articleIdToArticle[refNaddr?.identifier]
+    val refArticleAuthor = profileIdToProfileDataMap[refNaddr?.userId]
 
     val referencedNostrEvent: NostrEvent? = eventIdToNostrEvent[link.extractEventId()]
 
-//    val refHighlightText = referencedNostrEvent?.content
-//    val refHighlightATag = referencedNostrEvent?.tags?.firstOrNull { it.isATag() }
+    val refHighlightText = referencedNostrEvent?.content
+    val refHighlightATag = referencedNostrEvent?.tags?.firstOrNull { it.isATag() }
 
     val type = when {
         refUserProfileId != null -> EventUriNostrType.Profile
         refNote != null && refPostAuthor != null -> EventUriNostrType.Note
-//        refNaddr?.kind == NostrEventKind.LongFormContent.value &&
-//            refArticle != null && refArticleAuthor != null -> EventUriNostrType.Article
+        refNaddr?.kind == NostrEventKind.LongFormContent.value &&
+            refArticle != null && refArticleAuthor != null -> EventUriNostrType.Article
 
-//        referencedNostrEvent?.kind == NostrEventKind.Highlight.value &&
-//            refHighlightText?.isNotEmpty() == true && refHighlightATag != null -> EventUriNostrType.Highlight
+        referencedNostrEvent?.kind == NostrEventKind.Highlight.value &&
+            refHighlightText?.isNotEmpty() == true && refHighlightATag != null -> EventUriNostrType.Highlight
 
         referencedNostrEvent?.kind == NostrEventKind.Zap.value -> EventUriNostrType.Zap
 
@@ -319,26 +335,26 @@ fun List<String>.mapAsNoteNostrUriPO(
             videoThumbnails = videoThumbnails,
             eventIdToNostrEvent = eventIdToNostrEvent,
             postIdToPostDataMap = postIdToPostDataMap,
-//            articleIdToArticle = articleIdToArticle,
+            articleIdToArticle = articleIdToArticle,
             profileIdToProfileDataMap = profileIdToProfileDataMap,
         ),
-//        referencedArticle = takeAsReferencedArticleOrNull(refNaddr, refArticle, refArticleAuthor),
-//        referencedZap = takeAsReferencedZapOrNull(
-//            event = referencedNostrEvent,
-//            profilesMap = profileIdToProfileDataMap,
-//            postsMap = postIdToPostDataMap,
-//            cdnResourcesMap = cdnResources,
-//            linkPreviewsMap = linkPreviews,
-//            nostrEventsMap = eventIdToNostrEvent,
-//            videoThumbnailsMap = videoThumbnails,
-//            articlesMap = articleIdToArticle,
-//        ),
-//        referencedHighlight = takeAsReferencedHighlightOrNull(
-//            uri = link,
-//            highlight = refHighlightText,
-//            aTag = refHighlightATag,
-//            authorId = referencedNostrEvent?.tags?.findFirstProfileId(),
-//        ),
+        referencedArticle = takeAsReferencedArticleOrNull(refNaddr, refArticle, refArticleAuthor),
+        referencedZap = takeAsReferencedZapOrNull(
+            event = referencedNostrEvent,
+            profilesMap = profileIdToProfileDataMap,
+            postsMap = postIdToPostDataMap,
+            cdnResourcesMap = cdnResources,
+            linkPreviewsMap = linkPreviews,
+            nostrEventsMap = eventIdToNostrEvent,
+            videoThumbnailsMap = videoThumbnails,
+            articlesMap = articleIdToArticle,
+        ),
+        referencedHighlight = takeAsReferencedHighlightOrNull(
+            uri = link,
+            highlight = refHighlightText,
+            aTag = refHighlightATag,
+            authorId = referencedNostrEvent?.tags?.findFirstProfileId(),
+        ),
     )
 }
 
@@ -350,7 +366,7 @@ private fun takeAsReferencedNoteOrNull(
     videoThumbnails: Map<String, String>,
     eventIdToNostrEvent: Map<String, NostrEvent>,
     postIdToPostDataMap: Map<String, PostData>,
-//    articleIdToArticle: Map<String, ArticleData>,
+    articleIdToArticle: Map<String, ArticleData>,
     profileIdToProfileDataMap: Map<String, ProfileData>,
 ) = if (refNote != null && refPostAuthor != null) {
     ReferencedNote(
@@ -371,7 +387,7 @@ private fun takeAsReferencedNoteOrNull(
         nostrUris = listOf(refNote).flatMapPostsAsNoteNostrUriPO(
             eventIdToNostrEvent = eventIdToNostrEvent,
             postIdToPostDataMap = postIdToPostDataMap,
-//            articleIdToArticle = articleIdToArticle,
+            articleIdToArticle = articleIdToArticle,
             profileIdToProfileDataMap = profileIdToProfileDataMap,
             cdnResources = cdnResources,
             linkPreviews = linkPreviews,
@@ -396,103 +412,107 @@ private fun takeAsReferencedUserOrNull(
     null
 }
 
-//private fun takeAsReferencedArticleOrNull(
-//    refNaddr: Naddr?,
-//    refArticle: ArticleData?,
-//    refArticleAuthor: ProfileData?,
-//) = if (
-//    refNaddr?.kind == NostrEventKind.LongFormContent.value &&
-//    refArticle != null &&
-//    refArticleAuthor != null
-//) {
-//    ReferencedArticle(
-//        naddr = refNaddr.toNaddrString(),
-//        aTag = refArticle.aTag,
-//        eventId = refArticle.eventId,
-//        articleId = refArticle.articleId,
-//        articleTitle = refArticle.title,
-//        authorId = refArticle.authorId,
-//        authorName = refArticleAuthor.authorNameUiFriendly(),
-//        authorAvatarCdnImage = refArticleAuthor.avatarCdnImage,
-//        authorLegendProfile = refArticleAuthor.primalPremiumInfo?.legendProfile,
-//        createdAt = refArticle.createdAt,
-//        raw = refArticle.raw,
-//        articleImageCdnImage = refArticle.imageCdnImage,
-//        articleReadingTimeInMinutes = refArticle.wordsCount.wordsCountToReadingTime(),
-//    )
-//} else {
-//    null
-//}
+private fun takeAsReferencedArticleOrNull(
+    refNaddr: Naddr?,
+    refArticle: ArticleData?,
+    refArticleAuthor: ProfileData?,
+) = if (
+    refNaddr?.kind == NostrEventKind.LongFormContent.value &&
+    refArticle != null &&
+    refArticleAuthor != null
+) {
+    // TODO Rewire once NIP19 is implemented
+    ReferencedArticle(
+        naddr = "", //refNaddr.toNaddrString(),
+        aTag = refArticle.aTag,
+        eventId = refArticle.eventId,
+        articleId = refArticle.articleId,
+        articleTitle = refArticle.title,
+        authorId = refArticle.authorId,
+        authorName = refArticleAuthor.authorNameUiFriendly(),
+        authorAvatarCdnImage = refArticleAuthor.avatarCdnImage,
+        authorLegendProfile = refArticleAuthor.primalPremiumInfo?.legendProfile,
+        createdAt = refArticle.createdAt,
+        raw = refArticle.raw,
+        articleImageCdnImage = refArticle.imageCdnImage,
+        articleReadingTimeInMinutes = refArticle.wordsCount.wordsCountToReadingTime(),
+    )
+} else {
+    null
+}
 
-//private fun takeAsReferencedHighlightOrNull(
-//    uri: String,
-//    highlight: String?,
-//    aTag: JsonArray?,
-//    authorId: String?,
-//) = if (highlight?.isNotEmpty() == true && aTag != null) {
-//    val nevent = Nip19TLV.parseUriAsNeventOrNull(neventUri = uri)
-//    ReferencedHighlight(
-//        text = highlight,
-//        aTag = aTag,
-//        eventId = nevent?.eventId,
-//        authorId = authorId,
-//    )
-//} else {
-//    null
-//}
+private fun takeAsReferencedHighlightOrNull(
+    uri: String,
+    highlight: String?,
+    aTag: JsonArray?,
+    authorId: String?,
+) = if (highlight?.isNotEmpty() == true && aTag != null) {
+    // TODO Rewire once NIP19 is implemented
+    val nevent: Nevent? = null //Nip19TLV.parseUriAsNeventOrNull(neventUri = uri)
+    ReferencedHighlight(
+        text = highlight,
+        aTag = aTag,
+        eventId = nevent?.eventId,
+        authorId = authorId,
+    )
+} else {
+    null
+}
 
-//private fun takeAsReferencedZapOrNull(
-//    event: NostrEvent?,
-//    profilesMap: Map<String, ProfileData>,
-//    postsMap: Map<String, PostData>,
-//    cdnResourcesMap: Map<String, CdnResource>,
-//    linkPreviewsMap: Map<String, EventLinkPreviewData>,
-//    nostrEventsMap: Map<String, NostrEvent>,
-//    videoThumbnailsMap: Map<String, String>,
-//    articlesMap: Map<String, ArticleData>,
-//): ReferencedZap? {
-//    val zapRequest = event?.extractZapRequestOrNull()
-//
-//    val receiverId = event?.tags?.findFirstProfileId()
-//
-//    val senderId = zapRequest?.pubKey
-//
-//    val noteId = event?.tags?.findFirstEventId()
-//        ?: zapRequest?.tags?.findFirstEventId()
-//
+private fun takeAsReferencedZapOrNull(
+    event: NostrEvent?,
+    profilesMap: Map<String, ProfileData>,
+    postsMap: Map<String, PostData>,
+    cdnResourcesMap: Map<String, CdnResource>,
+    linkPreviewsMap: Map<String, EventLinkPreviewData>,
+    nostrEventsMap: Map<String, NostrEvent>,
+    videoThumbnailsMap: Map<String, String>,
+    articlesMap: Map<String, ArticleData>,
+): ReferencedZap? {
+    val zapRequest = event?.extractZapRequestOrNull()
+
+    val receiverId = event?.tags?.findFirstProfileId()
+
+    val senderId = zapRequest?.pubKey
+
+    val noteId = event?.tags?.findFirstEventId()
+        ?: zapRequest?.tags?.findFirstEventId()
+
+    // TODO Rewire once LN utils are implemented in KMP
+    val amountInSats = 888888
 //    val amountInSats = (event?.tags?.findFirstBolt11() ?: zapRequest?.tags?.findFirstZapAmount())
 //        ?.let(LnInvoiceUtils::getAmountInSats)
-//
-//    if (receiverId == null || senderId == null || amountInSats == null) return null
-//
-//    val zappedPost = postsMap[noteId]
-//
-//    val nostrUris = listOfNotNull(zappedPost).flatMapPostsAsNoteNostrUriPO(
-//        eventIdToNostrEvent = nostrEventsMap,
-//        postIdToPostDataMap = postsMap,
-//        articleIdToArticle = articlesMap,
-//        profileIdToProfileDataMap = profilesMap,
-//        cdnResources = cdnResourcesMap,
-//        videoThumbnails = videoThumbnailsMap,
-//        linkPreviews = linkPreviewsMap,
-//    )
-//
-//    val sender = profilesMap[senderId]
-//    val receiver = profilesMap[receiverId]
-//    return ReferencedZap(
-//        senderId = senderId,
-//        senderAvatarCdnImage = sender?.avatarCdnImage,
-//        senderPrimalLegendProfile = sender?.primalPremiumInfo?.legendProfile,
-//        receiverId = receiverId,
-//        receiverDisplayName = receiver?.displayName ?: receiver?.handle,
-//        receiverAvatarCdnImage = receiver?.avatarCdnImage,
-//        receiverPrimalLegendProfile = receiver?.primalPremiumInfo?.legendProfile,
-//        amountInSats = amountInSats.toDouble(),
-//        message = zapRequest.content,
-//        zappedEventId = noteId,
-//        zappedEventContent = zappedPost?.content,
-//        zappedEventNostrUris = nostrUris,
-//        zappedEventHashtags = zappedPost?.hashtags ?: emptyList(),
-//        createdAt = event.createdAt,
-//    )
-//}
+
+    if (receiverId == null || senderId == null || amountInSats == null) return null
+
+    val zappedPost = postsMap[noteId]
+
+    val nostrUris = listOfNotNull(zappedPost).flatMapPostsAsNoteNostrUriPO(
+        eventIdToNostrEvent = nostrEventsMap,
+        postIdToPostDataMap = postsMap,
+        articleIdToArticle = articlesMap,
+        profileIdToProfileDataMap = profilesMap,
+        cdnResources = cdnResourcesMap,
+        videoThumbnails = videoThumbnailsMap,
+        linkPreviews = linkPreviewsMap,
+    )
+
+    val sender = profilesMap[senderId]
+    val receiver = profilesMap[receiverId]
+    return ReferencedZap(
+        senderId = senderId,
+        senderAvatarCdnImage = sender?.avatarCdnImage,
+        senderPrimalLegendProfile = sender?.primalPremiumInfo?.legendProfile,
+        receiverId = receiverId,
+        receiverDisplayName = receiver?.displayName ?: receiver?.handle,
+        receiverAvatarCdnImage = receiver?.avatarCdnImage,
+        receiverPrimalLegendProfile = receiver?.primalPremiumInfo?.legendProfile,
+        amountInSats = amountInSats.toDouble(),
+        message = zapRequest.content,
+        zappedEventId = noteId,
+        zappedEventContent = zappedPost?.content,
+        zappedEventNostrUris = nostrUris,
+        zappedEventHashtags = zappedPost?.hashtags ?: emptyList(),
+        createdAt = event.createdAt,
+    )
+}
