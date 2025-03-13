@@ -180,6 +180,7 @@ fun MediaGalleryScreen(
                                 }
                             }
                         },
+                        isCurrentAttachmentVideo = currentImage()?.type == NoteAttachmentType.Video,
                     )
                 },
             )
@@ -248,6 +249,7 @@ fun GalleryDropdownMenu(
     onSaveClick: () -> Unit,
     onMediaUrlCopyClick: () -> Unit,
     onMediaCopyClick: () -> Unit,
+    isCurrentAttachmentVideo: Boolean = false,
 ) {
     var menuVisible by remember { mutableStateOf(false) }
 
@@ -273,12 +275,14 @@ fun GalleryDropdownMenu(
                 onMediaUrlCopyClick()
             },
         )
-        MediaCopyMenuItem(
-            onMediaCopyClick = {
-                menuVisible = false
-                onMediaCopyClick()
-            },
-        )
+        if (!isCurrentAttachmentVideo) {
+            MediaCopyMenuItem(
+                onMediaCopyClick = {
+                    menuVisible = false
+                    onMediaCopyClick()
+                },
+            )
+        }
     }
 }
 

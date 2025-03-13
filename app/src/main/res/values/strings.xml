@@ -710,7 +710,7 @@
     <string name="media_gallery_toast_file_saved">File saved.</string>
     <string name="media_gallery_retry_save">Retry</string>
     <string name="media_gallery_error_photo_not_saved">Unable to save photo. Please try again.</string>
-    <string name="media_gallery_context_copy_image_url">Copy image url</string>
+    <string name="media_gallery_context_copy_image_url">Copy url</string>
     <string name="media_gallery_context_copy_image">Copy image</string>
     <string name="media_gallery_context_copy_url_toast_success">Copied!</string>
 
