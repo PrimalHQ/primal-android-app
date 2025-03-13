@@ -2,6 +2,7 @@ package net.primal.db.notes
 
 import androidx.room.Embedded
 import androidx.room.Relation
+import net.primal.db.bookmarks.PublicBookmark
 import net.primal.db.events.EventRelayHints
 import net.primal.db.events.EventStats
 import net.primal.db.events.EventUri
@@ -65,10 +66,9 @@ data class FeedPost(
     )
     val eventZaps: List<EventZap> = emptyList(),
 
-    // TODO Rewire public bookmarks once ported
-//    @Relation(
-//        entityColumn = "tagValue",
-//        parentColumn = "postId",
-//    )
-//    val bookmark: PublicBookmark? = null,
+    @Relation(
+        entityColumn = "tagValue",
+        parentColumn = "postId",
+    )
+    val bookmark: PublicBookmark? = null,
 )
