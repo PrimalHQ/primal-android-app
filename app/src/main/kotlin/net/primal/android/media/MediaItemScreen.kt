@@ -134,7 +134,11 @@ private fun MediaItemScreen(
                         onMediaCopyClick = {
                             mediaItemBitmap?.let {
                                 coroutineScope.launch {
-                                    copyBitmapToClipboard(context = context, bitmap = it)
+                                    copyBitmapToClipboard(
+                                        context = context,
+                                        bitmap = it,
+                                        errorMessage = context.getString(R.string.media_gallery_error_photo_not_copied),
+                                    )
                                 }
                             }
                         },

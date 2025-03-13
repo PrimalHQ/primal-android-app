@@ -83,9 +83,9 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteLink
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyRawData
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
-import net.primal.android.events.domain.EventUriType
 import net.primal.android.core.utils.copyBitmapToClipboard
 import net.primal.android.core.utils.copyText
+import net.primal.android.events.domain.EventUriType
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -143,15 +143,7 @@ private fun EventMediaGalleryScreen(
         },
         actionLabel = stringResource(id = R.string.media_gallery_retry_save),
         onErrorDismiss = { eventPublisher(EventMediaGalleryContract.UiEvent.DismissError) },
-        onActionPerformed = {
-            currentImage()?.let {
-                eventPublisher(
-                    EventMediaGalleryContract.UiEvent.SaveMedia(
-                        it,
-                    ),
-                )
-            }
-        },
+        onActionPerformed = { currentImage()?.let { eventPublisher(EventMediaGalleryContract.UiEvent.SaveMedia(it)) } },
     )
 
     val containerColor = AppTheme.colorScheme.surface.copy(alpha = 0.21f)
@@ -184,11 +176,15 @@ private fun EventMediaGalleryScreen(
                         onMediaCopyClick = {
                             mediaItemBitmap?.let {
                                 coroutineScope.launch {
-                                    copyBitmapToClipboard(context, it)
+                                    copyBitmapToClipboard(
+                                        context = context,
+                                        bitmap = it,
+                                        errorMessage = context.getString(R.string.media_gallery_error_photo_not_copied),
+                                    )
                                 }
                             }
                         },
-                        isCurrentAttachmentVideo = currentImage()?.type == NoteAttachmentType.Video,
+                        showCopyMediaMenuItem = currentImage()?.type == EventUriType.Image,
                     )
                 },
             )
@@ -257,7 +253,7 @@ fun GalleryDropdownMenu(
     onSaveClick: () -> Unit,
     onMediaUrlCopyClick: () -> Unit,
     onMediaCopyClick: () -> Unit,
-    isCurrentAttachmentVideo: Boolean = false,
+    showCopyMediaMenuItem: Boolean = true,
 ) {
     var menuVisible by remember { mutableStateOf(false) }
 
@@ -283,7 +279,7 @@ fun GalleryDropdownMenu(
                 onMediaUrlCopyClick()
             },
         )
-        if (!isCurrentAttachmentVideo) {
+        if (showCopyMediaMenuItem) {
             MediaCopyMenuItem(
                 onMediaCopyClick = {
                     menuVisible = false
@@ -420,7 +416,7 @@ private fun AttachmentsHorizontalPager(
 @Composable
 private fun ImageScreen(
     attachment: EventUriUi,
-    currentImage: NoteAttachmentUi?,
+    currentImage: EventUriUi?,
     onImageBitmapLoaded: (Bitmap) -> Unit,
     modifier: Modifier = Modifier,
 ) {

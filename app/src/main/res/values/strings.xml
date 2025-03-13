@@ -713,6 +713,7 @@
     <string name="media_gallery_context_copy_image_url">Copy url</string>
     <string name="media_gallery_context_copy_image">Copy image</string>
     <string name="media_gallery_context_copy_url_toast_success">Copied!</string>
+    <string name="media_gallery_error_photo_not_copied">Unable to copy photo. Please try again.</string>
 
 
     <string name="media_item_saved">Media saved.</string>

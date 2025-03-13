@@ -5,12 +5,10 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
-import android.os.Environment
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import java.io.File
 import java.io.FileOutputStream
-import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -30,11 +28,11 @@ suspend fun copyBitmapToClipboard(
     context: Context,
     bitmap: Bitmap,
     format: Bitmap.CompressFormat? = null,
+    errorMessage: String? = null,
 ) {
-    try {
+    val result = runCatching {
         val file = withContext(Dispatchers.IO) {
-            val clipboardDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-
+            val clipboardDir = context.externalCacheDir
             val fileExtension = when (format ?: getBitmapFormat(bitmap)) {
                 Bitmap.CompressFormat.PNG -> "png"
                 Bitmap.CompressFormat.JPEG -> "jpg"
@@ -42,7 +40,7 @@ suspend fun copyBitmapToClipboard(
                 else -> "jpg"
             }
 
-            val imageFile = File(clipboardDir, "copied_image.$fileExtension")
+            val imageFile = File(clipboardDir, "PrimalCopyImage.$fileExtension")
 
             FileOutputStream(imageFile).use { outputStream ->
                 bitmap.compress(format ?: getBitmapFormat(bitmap), IMAGE_COMPRESSION_QUALITY, outputStream)
@@ -56,10 +54,11 @@ suspend fun copyBitmapToClipboard(
         val clipData = ClipData.newUri(context.contentResolver, "Image", uri)
 
         clipboard.setPrimaryClip(clipData)
-    } catch (e: IOException) {
-        showToast(context, "Failed to copy image: ${e.message}")
-    } catch (e: SecurityException) {
-        showToast(context, "Permission issue: ${e.message}")
+        file.deleteOnExit()
+    }
+
+    if (result.isFailure) {
+        showToast(context, errorMessage ?: "Failed to copy image. Please try again.")
     }
 }
 
