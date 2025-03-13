@@ -16,7 +16,7 @@ interface ProfileStatsDao {
     fun upsertAll(data: List<ProfileStats>)
 
     @Query("SELECT * FROM ProfileStats WHERE profileId = :profileId")
-    fun observeProfileStats(profileId: String): Flow<ProfileStats>
+    fun observeProfileStats(profileId: String): Flow<ProfileStats?>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertOrIgnore(data: List<ProfileStats>)
