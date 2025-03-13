@@ -65,7 +65,7 @@ kotlin {
 
                 // Room
                 implementation(libs.room.runtime)
-//                implementation(libs.room.paging)
+                implementation(libs.room.paging)
                 implementation(libs.jetpack.sqlite.framework)
 
                 // Data Store
@@ -110,7 +110,7 @@ kotlin {
                 implementation(libs.jetpack.sqlite.framework.android)
 
                 // Paging
-//                implementation(libs.paging.runtime)
+                implementation(libs.paging.runtime)
 
                 // Networking
                 implementation(libs.ktor.client.okhttp)

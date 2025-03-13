@@ -7,6 +7,9 @@ import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
 import androidx.sqlite.SQLiteDriver
 import kotlin.coroutines.CoroutineContext
+import net.primal.db.bookmarks.PublicBookmark
+import net.primal.db.bookmarks.PublicBookmarkDao
+import net.primal.db.conversation.ArticleCommentCrossRef
 import net.primal.db.conversation.NoteConversationCrossRef
 import net.primal.db.conversation.ThreadConversationDao
 import net.primal.db.events.EventRelayHints
@@ -21,9 +24,25 @@ import net.primal.db.events.EventUserStatsDao
 import net.primal.db.events.EventZap
 import net.primal.db.events.EventZapDao
 import net.primal.db.events.serialization.EventUriTypeConverters
+import net.primal.db.explore.TrendingTopic
+import net.primal.db.explore.TrendingTopicDao
+import net.primal.db.feeds.Feed
+import net.primal.db.feeds.FeedDao
+import net.primal.db.messages.DirectMessageDao
+import net.primal.db.messages.DirectMessageData
+import net.primal.db.messages.MessageConversationDao
+import net.primal.db.messages.MessageConversationData
 import net.primal.db.notes.FeedPostDao
+import net.primal.db.notes.FeedPostDataCrossRef
+import net.primal.db.notes.FeedPostDataCrossRefDao
+import net.primal.db.notes.FeedPostRemoteKey
+import net.primal.db.notes.FeedPostRemoteKeyDao
 import net.primal.db.notes.PostDao
 import net.primal.db.notes.PostData
+import net.primal.db.notes.RepostDao
+import net.primal.db.notes.RepostData
+import net.primal.db.notifications.NotificationDao
+import net.primal.db.notifications.NotificationData
 import net.primal.db.profiles.MutedUserDao
 import net.primal.db.profiles.MutedUserData
 import net.primal.db.profiles.ProfileData
@@ -31,6 +50,12 @@ import net.primal.db.profiles.ProfileDataDao
 import net.primal.db.profiles.ProfileStats
 import net.primal.db.profiles.ProfileStatsDao
 import net.primal.db.profiles.serialization.ProfileTypeConverters
+import net.primal.db.reads.ArticleDao
+import net.primal.db.reads.ArticleData
+import net.primal.db.reads.ArticleFeedCrossRef
+import net.primal.db.reads.ArticleFeedCrossRefDao
+import net.primal.db.reads.HighlightDao
+import net.primal.db.reads.HighlightData
 import net.primal.serialization.room.JsonTypeConverters
 import net.primal.serialization.room.ListsTypeConverters
 
@@ -39,30 +64,30 @@ import net.primal.serialization.room.ListsTypeConverters
         PostData::class,
         ProfileData::class,
         ProfileStats::class,
-//        ProfileInteraction::class,
-//        RepostData::class,
+        RepostData::class,
         EventStats::class,
         EventZap::class,
         EventUserStats::class,
         EventUri::class,
         EventUriNostr::class,
         EventRelayHints::class,
-//        Feed::class,
-//        FeedPostDataCrossRef::class,
-//        FeedPostRemoteKey::class,
+        Feed::class,
+        FeedPostDataCrossRef::class,
+        FeedPostRemoteKey::class,
         NoteConversationCrossRef::class,
-//        TrendingTopic::class,
-//        NotificationData::class,
+        TrendingTopic::class,
+        NotificationData::class,
         MutedUserData::class,
-//        DirectMessageData::class,
-//        MessageConversationData::class,
+        DirectMessageData::class,
+        MessageConversationData::class,
+        PublicBookmark::class,
+        ArticleData::class,
+        ArticleCommentCrossRef::class,
+        ArticleFeedCrossRef::class,
+        HighlightData::class,
+//        ProfileInteraction::class,
 //        WalletTransactionData::class,
 //        Relay::class,
-//        PublicBookmark::class,
-//        ArticleData::class,
-//        ArticleCommentCrossRef::class,
-//        ArticleFeedCrossRef::class,
-//        HighlightData::class,
     ],
     version = 1,
     exportSchema = true,
@@ -80,13 +105,11 @@ abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun profileStats(): ProfileStatsDao
 
-//    abstract fun profileInteractions(): ProfileInteractionDao
-
     abstract fun posts(): PostDao
 
-//    abstract fun reposts(): RepostDao
+    abstract fun reposts(): RepostDao
 
-//    abstract fun feeds(): FeedDao
+    abstract fun feeds(): FeedDao
 
     abstract fun eventUserStats(): EventUserStatsDao
 
@@ -98,35 +121,37 @@ abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun eventHints(): EventRelayHintsDao
 
-//    abstract fun feedsConnections(): FeedPostDataCrossRefDao
-
     abstract fun feedPosts(): FeedPostDao
 
-//    abstract fun feedPostsRemoteKeys(): FeedPostRemoteKeyDao
+    abstract fun feedsConnections(): FeedPostDataCrossRefDao
+
+    abstract fun feedPostsRemoteKeys(): FeedPostRemoteKeyDao
 
     abstract fun threadConversations(): ThreadConversationDao
 
-//    abstract fun trendingTopics(): TrendingTopicDao
+    abstract fun trendingTopics(): TrendingTopicDao
 
-//    abstract fun notifications(): NotificationDao
+    abstract fun notifications(): NotificationDao
 
     abstract fun mutedUsers(): MutedUserDao
 
-//    abstract fun messages(): DirectMessageDao
+    abstract fun messages(): DirectMessageDao
 
-//    abstract fun messageConversations(): MessageConversationDao
+    abstract fun messageConversations(): MessageConversationDao
 
-//    abstract fun walletTransactions(): WalletTransactionDao
+    abstract fun publicBookmarks(): PublicBookmarkDao
+
+    abstract fun articles(): ArticleDao
+
+    abstract fun articleFeedsConnections(): ArticleFeedCrossRefDao
+
+    abstract fun highlights(): HighlightDao
 
 //    abstract fun relays(): RelayDao
 
-//    abstract fun publicBookmarks(): PublicBookmarkDao
+//    abstract fun profileInteractions(): ProfileInteractionDao
 
-//    abstract fun articles(): ArticleDao
-
-//    abstract fun articleFeedsConnections(): ArticleFeedCrossRefDao
-
-//    abstract fun highlights(): HighlightDao
+//    abstract fun walletTransactions(): WalletTransactionDao
 }
 
 // The Room compiler generates the `actual` implementations.

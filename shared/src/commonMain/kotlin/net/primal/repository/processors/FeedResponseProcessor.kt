@@ -3,6 +3,7 @@ package net.primal.repository.processors
 import net.primal.api.feed.model.FeedResponse
 import net.primal.core.utils.asMapByKey
 import net.primal.db.PrimalDatabase
+import net.primal.db.conversation.ArticleCommentCrossRef
 import net.primal.db.conversation.NoteConversationCrossRef
 import net.primal.db.events.eventRelayHintsUpserter
 import net.primal.db.withTransaction
@@ -17,16 +18,18 @@ import net.primal.repository.processors.mappers.mapAsEventZapDO
 import net.primal.repository.processors.mappers.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.repository.processors.mappers.mapAsPostDataPO
 import net.primal.repository.processors.mappers.mapAsProfileDataPO
+import net.primal.repository.processors.mappers.mapNotNullAsArticleDataPO
 import net.primal.repository.processors.mappers.mapNotNullAsEventStatsPO
 import net.primal.repository.processors.mappers.mapNotNullAsEventUserStatsPO
 import net.primal.repository.processors.mappers.mapNotNullAsPostDataPO
+import net.primal.repository.processors.mappers.mapNotNullAsRepostDataPO
+import net.primal.repository.processors.mappers.mapReferencedEventsAsArticleDataPO
+import net.primal.repository.processors.mappers.mapReferencedEventsAsHighlightDataPO
 import net.primal.repository.processors.mappers.parseAndMapPrimalLegendProfiles
 import net.primal.repository.processors.mappers.parseAndMapPrimalPremiumInfo
 import net.primal.repository.processors.mappers.parseAndMapPrimalUserNames
 import net.primal.serialization.json.NostrJson
 import net.primal.serialization.json.decodeFromStringOrNull
-
-// TODO Add support for articles, highlights and reposts once ported
 
 suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database: PrimalDatabase) {
     val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
@@ -34,21 +37,21 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
     val linkPreviews = primalLinkPreviews.flatMapNotNullAsLinkPreviewResource().asMapByKey { it.url }
     val eventHints = this.primalRelayHints.flatMapAsEventHintsPO()
 
-//    val articles = this.articles.mapNotNullAsArticleDataPO(cdnResources = cdnResources)
-//    val referencedArticles = this.referencedEvents.mapReferencedEventsAsArticleDataPO(cdnResources = cdnResources)
-//    val referencedHighlights = this.referencedEvents.mapReferencedEventsAsHighlightDataPO()
-//    val allArticles = articles + referencedArticles
+    val articles = this.articles.mapNotNullAsArticleDataPO(cdnResources = cdnResources)
+    val referencedArticles = this.referencedEvents.mapReferencedEventsAsArticleDataPO(cdnResources = cdnResources)
+    val referencedHighlights = this.referencedEvents.mapReferencedEventsAsHighlightDataPO()
+    val allArticles = articles + referencedArticles
 
     val referencedPostsWithoutReplyTo = referencedEvents.mapNotNullAsPostDataPO()
     val referencedPostsWithReplyTo = referencedEvents.mapNotNullAsPostDataPO(
         referencedPosts = referencedPostsWithoutReplyTo,
-//        referencedArticles = allArticles,
-//        referencedHighlights = referencedHighlights,
+        referencedArticles = allArticles,
+        referencedHighlights = referencedHighlights,
     )
     val feedPosts = notes.mapAsPostDataPO(
         referencedPosts = referencedPostsWithReplyTo,
-//        referencedArticles = allArticles,
-//        referencedHighlights = referencedHighlights,
+        referencedArticles = allArticles,
+        referencedHighlights = referencedHighlights,
     )
 
     val primalUserNames = this.primalUserNames.parseAndMapPrimalUserNames()
@@ -82,7 +85,7 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
     val noteNostrUris = allPosts.flatMapPostsAsNoteNostrUriPO(
         eventIdToNostrEvent = refEvents.associateBy { it.id },
         postIdToPostDataMap = allPosts.groupBy { it.postId }.mapValues { it.value.first() },
-//        articleIdToArticle = allArticles.groupBy { it.articleId }.mapValues { it.value.first() },
+        articleIdToArticle = allArticles.groupBy { it.articleId }.mapValues { it.value.first() },
         profileIdToProfileDataMap = profileIdToProfileDataMap,
         cdnResources = cdnResources,
         videoThumbnails = videoThumbnails,
@@ -90,7 +93,7 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
     )
 
     val eventZaps = zaps.mapAsEventZapDO(profilesMap = profiles.associateBy { it.ownerId })
-//    val reposts = reposts.mapNotNullAsRepostDataPO()
+    val reposts = reposts.mapNotNullAsRepostDataPO()
     val postStats = primalEventStats.mapNotNullAsEventStatsPO()
     val userPostStats = primalEventUserStats.mapNotNullAsEventUserStatsPO(userId = userId)
 
@@ -99,12 +102,12 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
         database.posts().upsertAll(data = allPosts)
         database.eventUris().upsertAllEventUris(data = noteAttachments)
         database.eventUris().upsertAllEventNostrUris(data = noteNostrUris)
-//        database.reposts().upsertAll(data = reposts)
+        database.reposts().upsertAll(data = reposts)
         database.eventZaps().upsertAll(data = eventZaps)
         database.eventStats().upsertAll(data = postStats)
         database.eventUserStats().upsertAll(data = userPostStats)
-//        database.articles().upsertAll(list = allArticles)
-//        database.highlights().upsertAll(data = referencedHighlights)
+        database.articles().upsertAll(list = allArticles)
+        database.highlights().upsertAll(data = referencedHighlights)
 
         val eventHintsDao = database.eventHints()
         val hintsMap = eventHints.associateBy { it.eventId }
@@ -116,7 +119,7 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
 
 suspend fun FeedResponse.persistNoteRepliesAndArticleCommentsToDatabase(noteId: String, database: PrimalDatabase) {
     val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-//    val articles = this.articles.mapNotNullAsArticleDataPO(cdnResources = cdnResources)
+    val articles = this.articles.mapNotNullAsArticleDataPO(cdnResources = cdnResources)
 
     database.withTransaction {
         database.threadConversations().connectNoteWithReply(
@@ -127,14 +130,14 @@ suspend fun FeedResponse.persistNoteRepliesAndArticleCommentsToDatabase(noteId: 
                 )
             },
         )
-//        database.threadConversations().connectArticleWithComment(
-//            data = articles.map { article ->
-//                ArticleCommentCrossRef(
-//                    articleId = article.articleId,
-//                    articleAuthorId = article.authorId,
-//                    commentNoteId = noteId,
-//                )
-//            },
-//        )
+        database.threadConversations().connectArticleWithComment(
+            data = articles.map { article ->
+                ArticleCommentCrossRef(
+                    articleId = article.articleId,
+                    articleAuthorId = article.authorId,
+                    commentNoteId = noteId,
+                )
+            },
+        )
     }
 }

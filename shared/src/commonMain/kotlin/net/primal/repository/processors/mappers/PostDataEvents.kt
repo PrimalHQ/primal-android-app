@@ -3,6 +3,8 @@ package net.primal.repository.processors.mappers
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.core.utils.parseHashtags
 import net.primal.db.notes.PostData
+import net.primal.db.reads.ArticleData
+import net.primal.db.reads.HighlightData
 import net.primal.networking.model.NostrEvent
 import net.primal.networking.model.NostrEventKind
 import net.primal.networking.model.primal.PrimalEvent
@@ -16,33 +18,31 @@ import net.primal.repository.isIMetaTag
 import net.primal.serialization.json.NostrJson
 import net.primal.serialization.json.toJsonObject
 
-// TODO Rewire articles, highlights and parsing uris once ported
-
 fun List<NostrEvent>.mapAsPostDataPO(
     referencedPosts: List<PostData>,
-//    referencedArticles: List<ArticleData>,
-//    referencedHighlights: List<HighlightData>,
+    referencedArticles: List<ArticleData>,
+    referencedHighlights: List<HighlightData>,
 ): List<PostData> {
     val referencedPostsMap = referencedPosts.associateBy { it.postId }
-//    val referencedArticlesMap = referencedArticles.associateBy { it.articleId }
-//    val referencedHighlightsMap = referencedHighlights.associateBy { it.highlightId }
+    val referencedArticlesMap = referencedArticles.associateBy { it.articleId }
+    val referencedHighlightsMap = referencedHighlights.associateBy { it.highlightId }
     return map {
         it.shortTextNoteAsPost(
             referencedPostsMap = referencedPostsMap,
-//            referencedArticlesMap = referencedArticlesMap,
-//            referencedHighlightsMap = referencedHighlightsMap,
+            referencedArticlesMap = referencedArticlesMap,
+            referencedHighlightsMap = referencedHighlightsMap,
         )
     }
 }
 
 fun List<PrimalEvent>.mapNotNullAsPostDataPO(
     referencedPosts: List<PostData> = emptyList(),
-//    referencedArticles: List<ArticleData> = emptyList(),
-//    referencedHighlights: List<HighlightData> = emptyList(),
+    referencedArticles: List<ArticleData> = emptyList(),
+    referencedHighlights: List<HighlightData> = emptyList(),
 ): List<PostData> {
     val referencedPostsMap = referencedPosts.associateBy { it.postId }
-//    val referencedArticlesMap = referencedArticles.associateBy { it.articleId }
-//    val referencedHighlightsMap = referencedHighlights.associateBy { it.highlightId }
+    val referencedArticlesMap = referencedArticles.associateBy { it.articleId }
+    val referencedHighlightsMap = referencedHighlights.associateBy { it.highlightId }
 
     val events = this.mapNotNull { it.takeContentOrNull<NostrEvent>() }
     val notes = events
@@ -50,8 +50,8 @@ fun List<PrimalEvent>.mapNotNullAsPostDataPO(
         .map {
             it.shortTextNoteAsPost(
                 referencedPostsMap = referencedPostsMap,
-//                referencedArticlesMap = referencedArticlesMap,
-//                referencedHighlightsMap = referencedHighlightsMap,
+                referencedArticlesMap = referencedArticlesMap,
+                referencedHighlightsMap = referencedHighlightsMap,
             )
         }
 
@@ -64,8 +64,8 @@ fun List<PrimalEvent>.mapNotNullAsPostDataPO(
 
 private fun NostrEvent.shortTextNoteAsPost(
     referencedPostsMap: Map<String, PostData>,
-//    referencedArticlesMap: Map<String, ArticleData>,
-//    referencedHighlightsMap: Map<String, HighlightData>,
+    referencedArticlesMap: Map<String, ArticleData>,
+    referencedHighlightsMap: Map<String, HighlightData>,
 ): PostData {
     val replyToPostId = this.tags.find { it.hasReplyMarker() }?.getTagValueOrNull()
         ?: this.tags.find { it.hasRootMarker() }?.getTagValueOrNull()
@@ -74,8 +74,8 @@ private fun NostrEvent.shortTextNoteAsPost(
     val replyToAuthorId = this.tags.find { it.hasReplyMarker() }?.getPubkeyFromReplyOrRootTag()
         ?: this.tags.find { it.hasRootMarker() }?.getPubkeyFromReplyOrRootTag()
         ?: referencedPostsMap[replyToPostId]?.authorId
-//        ?: referencedArticlesMap[replyToPostId]?.authorId
-//        ?: referencedHighlightsMap[replyToPostId]?.authorId
+        ?: referencedArticlesMap[replyToPostId]?.authorId
+        ?: referencedHighlightsMap[replyToPostId]?.authorId
 
     return PostData(
         postId = this.id,
