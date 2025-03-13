@@ -3,6 +3,8 @@ package net.primal.android.events.gallery
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -77,8 +79,12 @@ import net.primal.android.core.compose.dropdown.DropdownPrimalMenuItem
 import net.primal.android.core.compose.foundation.KeepScreenOn
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteLink
+import net.primal.android.core.compose.icons.primaliconpack.ContextCopyRawData
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.core.utils.copyBitmapToClipboard
+import net.primal.android.core.utils.copyText
 import net.primal.android.events.domain.EventUriType
 import net.primal.android.theme.AppTheme
 
@@ -120,6 +126,7 @@ private fun EventMediaGalleryScreen(
 ) {
     val imageAttachments = state.attachments
     val pagerState = rememberPagerState { imageAttachments.size }
+    var mediaItemBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     fun currentImage() = imageAttachments.getOrNull(pagerState.currentPage)
 
@@ -136,18 +143,11 @@ private fun EventMediaGalleryScreen(
         },
         actionLabel = stringResource(id = R.string.media_gallery_retry_save),
         onErrorDismiss = { eventPublisher(EventMediaGalleryContract.UiEvent.DismissError) },
-        onActionPerformed = {
-            currentImage()?.let {
-                eventPublisher(
-                    EventMediaGalleryContract.UiEvent.SaveMedia(
-                        it,
-                    ),
-                )
-            }
-        },
+        onActionPerformed = { currentImage()?.let { eventPublisher(EventMediaGalleryContract.UiEvent.SaveMedia(it)) } },
     )
 
     val containerColor = AppTheme.colorScheme.surface.copy(alpha = 0.21f)
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         contentColor = AppTheme.colorScheme.background,
@@ -170,6 +170,21 @@ private fun EventMediaGalleryScreen(
                         onSaveClick = {
                             currentImage()?.let { eventPublisher(EventMediaGalleryContract.UiEvent.SaveMedia(it)) }
                         },
+                        onMediaUrlCopyClick = {
+                            currentImage()?.url?.let { copyText(context = context, text = it) }
+                        },
+                        onMediaCopyClick = {
+                            mediaItemBitmap?.let {
+                                coroutineScope.launch {
+                                    copyBitmapToClipboard(
+                                        context = context,
+                                        bitmap = it,
+                                        errorMessage = context.getString(R.string.media_gallery_error_photo_not_copied),
+                                    )
+                                }
+                            }
+                        },
+                        showCopyMediaMenuItem = currentImage()?.type == EventUriType.Image,
                     )
                 },
             )
@@ -181,6 +196,7 @@ private fun EventMediaGalleryScreen(
                 initialPositionMs = state.initialPositionMs,
                 imageAttachments = imageAttachments,
                 pagerIndicatorContainerColor = containerColor,
+                onCurrentlyVisibleBitmap = { mediaItemBitmap = it },
             )
         },
         snackbarHost = {
@@ -197,6 +213,7 @@ private fun MediaGalleryContent(
     initialPositionMs: Long,
     imageAttachments: List<EventUriUi>,
     pagerIndicatorContainerColor: Color,
+    onCurrentlyVisibleBitmap: ((Bitmap?) -> Unit)? = null,
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -209,6 +226,7 @@ private fun MediaGalleryContent(
                 pagerState = pagerState,
                 initialIndex = initialAttachmentIndex,
                 initialPositionMs = initialPositionMs,
+                onCurrentlyVisibleBitmap = onCurrentlyVisibleBitmap,
             )
         }
 
@@ -231,7 +249,12 @@ private fun MediaGalleryContent(
 }
 
 @Composable
-fun GalleryDropdownMenu(onSaveClick: () -> Unit) {
+fun GalleryDropdownMenu(
+    onSaveClick: () -> Unit,
+    onMediaUrlCopyClick: () -> Unit,
+    onMediaCopyClick: () -> Unit,
+    showCopyMediaMenuItem: Boolean = true,
+) {
     var menuVisible by remember { mutableStateOf(false) }
 
     AppBarIcon(
@@ -250,6 +273,20 @@ fun GalleryDropdownMenu(onSaveClick: () -> Unit) {
                 onSaveClick()
             },
         )
+        MediaUrlCopyMenuItem(
+            onMediaUrlCopyClick = {
+                menuVisible = false
+                onMediaUrlCopyClick()
+            },
+        )
+        if (showCopyMediaMenuItem) {
+            MediaCopyMenuItem(
+                onMediaCopyClick = {
+                    menuVisible = false
+                    onMediaCopyClick()
+                },
+            )
+        }
     }
 }
 
@@ -280,14 +317,59 @@ private fun SaveMediaMenuItem(onSaveClick: () -> Unit) {
     )
 }
 
+@Composable
+private fun MediaUrlCopyMenuItem(onMediaUrlCopyClick: () -> Unit) {
+    val context = LocalContext.current
+    val copyConfirmationText = stringResource(id = R.string.media_gallery_context_copy_url_toast_success)
+    val uiScope = rememberCoroutineScope()
+
+    DropdownPrimalMenuItem(
+        trailingIconVector = PrimalIcons.ContextCopyNoteLink,
+        text = stringResource(id = R.string.media_gallery_context_copy_image_url),
+        onClick = {
+            uiScope.launch {
+                Toast.makeText(
+                    context,
+                    copyConfirmationText,
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
+            onMediaUrlCopyClick()
+        },
+    )
+}
+
+@Composable
+private fun MediaCopyMenuItem(onMediaCopyClick: () -> Unit) {
+    val context = LocalContext.current
+    val copyConfirmationText = stringResource(id = R.string.media_gallery_context_copy_url_toast_success)
+    val uiScope = rememberCoroutineScope()
+
+    DropdownPrimalMenuItem(
+        trailingIconVector = PrimalIcons.ContextCopyRawData,
+        text = stringResource(id = R.string.media_gallery_context_copy_image),
+        onClick = {
+            uiScope.launch {
+                Toast.makeText(
+                    context,
+                    copyConfirmationText,
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
+            onMediaCopyClick()
+        },
+    )
+}
+
 @ExperimentalFoundationApi
 @Composable
 private fun AttachmentsHorizontalPager(
-    modifier: Modifier = Modifier,
     pagerState: PagerState,
     imageAttachments: List<EventUriUi>,
+    modifier: Modifier = Modifier,
     initialIndex: Int = 0,
     initialPositionMs: Long = 0,
+    onCurrentlyVisibleBitmap: ((Bitmap?) -> Unit)? = null,
 ) {
     HorizontalPager(
         modifier = modifier,
@@ -305,6 +387,8 @@ private fun AttachmentsHorizontalPager(
                     ImageScreen(
                         modifier = Modifier.fillMaxSize(),
                         attachment = attachment,
+                        currentImage = imageAttachments.getOrNull(pagerState.currentPage),
+                        onImageBitmapLoaded = { onCurrentlyVisibleBitmap?.invoke(it) },
                     )
                 }
 
@@ -330,14 +414,23 @@ private fun AttachmentsHorizontalPager(
 }
 
 @Composable
-private fun ImageScreen(attachment: EventUriUi, modifier: Modifier = Modifier) {
+private fun ImageScreen(
+    attachment: EventUriUi,
+    currentImage: EventUriUi?,
+    onImageBitmapLoaded: (Bitmap) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val zoomSpec = ZoomSpec(maxZoomFactor = 2.5f)
+    var loadedBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     var error by remember { mutableStateOf<ErrorResult?>(null) }
+    val imageLoader = LocalContext.current.imageLoader
+
     val loadingImageListener = remember {
         object : ImageRequest.Listener {
             override fun onSuccess(request: ImageRequest, result: SuccessResult) {
                 error = null
+                loadedBitmap = (result.drawable as? BitmapDrawable)?.bitmap
             }
 
             override fun onError(request: ImageRequest, result: ErrorResult) {
@@ -346,7 +439,12 @@ private fun ImageScreen(attachment: EventUriUi, modifier: Modifier = Modifier) {
         }
     }
 
-    val imageLoader = LocalContext.current.imageLoader
+    LaunchedEffect(loadedBitmap, currentImage) {
+        if (currentImage?.equals(attachment) == true) {
+            loadedBitmap?.let { onImageBitmapLoaded(it) }
+        }
+    }
+
     val keys = attachment.variants.orEmpty()
         .sortedBy { it.width }
         .mapNotNull {
@@ -389,10 +487,10 @@ private fun AttachmentLoadingError() {
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun VideoScreen(
-    modifier: Modifier = Modifier,
     positionMs: Long,
     attachment: EventUriUi,
     isPageVisible: Boolean,
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
 
