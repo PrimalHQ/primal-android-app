@@ -59,6 +59,7 @@ import net.primal.android.R
 import net.primal.android.articles.feed.ui.ArticleDropdownMenuIcon
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.IconText
+import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -76,6 +77,7 @@ import net.primal.android.core.compose.zaps.ArticleTopZapsSection
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
+import net.primal.android.events.domain.EventUriType
 import net.primal.android.nostr.ext.isNEvent
 import net.primal.android.nostr.ext.isNEventUri
 import net.primal.android.nostr.ext.isNostrUri
@@ -91,6 +93,7 @@ import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.notes.feed.note.ui.FeedNoteActionsRow
 import net.primal.android.notes.feed.note.ui.ReferencedNoteCard
 import net.primal.android.notes.feed.note.ui.ThreadNoteStatsRow
+import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
@@ -323,8 +326,15 @@ private fun ArticleDetailsScreen(
             )
         },
         content = { paddingValues ->
-            if (detailsState.article == null) {
+            if (detailsState.isResolvingNaddr) {
                 PrimalLoadingSpinner()
+            }
+            if (detailsState.article == null) {
+                ListNoContent(
+                    modifier = Modifier.fillMaxSize(),
+                    noContentText = stringResource(id = R.string.article_details_error_resolving_naddr),
+                    onRefresh = { detailsEventPublisher(UiEvent.RequestResolveNaddr) },
+                )
             } else {
                 ArticleContentWithComments(
                     state = detailsState,
@@ -530,6 +540,20 @@ private fun ArticleContentWithComments(
                     .background(color = AppTheme.colorScheme.surfaceVariant)
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
+                onMediaClick = { mediaUrl ->
+                    state.article?.eventId?.let {
+                        MediaClickEvent(
+                            noteId = state.article.eventId,
+                            eventUriType = EventUriType.Image,
+                            mediaUrl = mediaUrl,
+                            positionMs = 0L,
+                        )
+                    }?.let {
+                        noteCallbacks.onMediaClick?.invoke(
+                            it,
+                        )
+                    }
+                },
                 title = state.article?.title ?: "",
                 date = state.article?.publishedAt,
                 cover = state.article?.coverImageCdnImage,
@@ -621,7 +645,21 @@ private fun ArticleContentWithComments(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
-                            .clip(AppTheme.shapes.medium),
+                            .clip(AppTheme.shapes.medium)
+                            .clickable {
+                                state.article?.eventId?.let {
+                                    MediaClickEvent(
+                                        noteId = it,
+                                        eventUriType = EventUriType.Image,
+                                        mediaUrl = part.imageUrl,
+                                        positionMs = 0L,
+                                    )
+                                }?.let {
+                                    noteCallbacks.onMediaClick?.invoke(
+                                        it,
+                                    )
+                                }
+                            },
                         model = part.imageUrl,
                         contentScale = ContentScale.FillWidth,
                         contentDescription = null,

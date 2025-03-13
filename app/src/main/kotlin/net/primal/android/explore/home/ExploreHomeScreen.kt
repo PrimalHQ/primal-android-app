@@ -48,7 +48,6 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
-import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.InvisibleAppBarIcon
@@ -65,6 +64,7 @@ import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
+import net.primal.android.events.domain.CdnImage
 import net.primal.android.explore.home.feeds.ExploreFeeds
 import net.primal.android.explore.home.people.ExplorePeople
 import net.primal.android.explore.home.topics.ExploreTopics

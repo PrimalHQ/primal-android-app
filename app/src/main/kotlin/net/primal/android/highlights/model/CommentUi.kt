@@ -1,8 +1,8 @@
 package net.primal.android.highlights.model
 
 import java.time.Instant
-import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.utils.asEllipsizedNpub
+import net.primal.android.events.domain.CdnImage
 import net.primal.android.notes.db.PostWithAuthorData
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization

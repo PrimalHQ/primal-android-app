@@ -190,7 +190,6 @@ class NoteFeedViewModel @AssistedInject constructor(
         )
         val avatarCdnImagesAndLegendaryCustomizations = allNotes
             .mapNotNull { note -> profiles.find { it.ownerId == note.pubKey } }
-            .filter { profileData -> profileData.avatarCdnImage != null }
             .map { profileData ->
                 Pair(
                     profileData.avatarCdnImage,
@@ -203,7 +202,9 @@ class NoteFeedViewModel @AssistedInject constructor(
 
         val newSyncStats = FeedPostsSyncStats(
             latestNoteIds = allNotes.map { it.id },
-            latestAvatarCdnImages = avatarCdnImagesAndLegendaryCustomizations.mapNotNull { it.first }.take(limit),
+            latestAvatarCdnImages = avatarCdnImagesAndLegendaryCustomizations
+                .map { it.first }
+                .take(limit),
         )
 
         if (newSyncStats.isTopVisibleNoteTheLatestNote()) {

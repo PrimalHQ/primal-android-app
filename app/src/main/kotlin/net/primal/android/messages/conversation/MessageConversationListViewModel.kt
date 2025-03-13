@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import net.primal.android.core.compose.attachment.model.asNoteAttachmentUi
+import net.primal.android.core.compose.attachment.model.asEventUriUiModel
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent
@@ -135,7 +135,7 @@ class MessageConversationListViewModel @Inject constructor(
                 ?: this.data.participantId.asEllipsizedNpub(),
             lastMessageId = this.lastMessage?.messageId,
             lastMessageSnippet = this.lastMessage?.content,
-            lastMessageAttachments = this.lastMessageNoteAttachments.map { it.asNoteAttachmentUi() },
+            lastMessageAttachments = this.lastMessageUris.map { it.asEventUriUiModel() },
             lastMessageNostrUris = this.lastMessageNostrUris.map { it.asNoteNostrUriUi() },
             lastMessageAt = this.lastMessage?.createdAt?.let { Instant.ofEpochSecond(it) },
             isLastMessageFromUser = this.lastMessage?.senderId == activeAccountStore.activeUserId(),

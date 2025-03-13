@@ -15,7 +15,7 @@ fun String.parseUris(includeNostrUris: Boolean = true): List<String> {
         .filterInvalidTLDs()
         .map { it.originalUrl }
     val customUrls = this.detectUrls()
-    val mergedUrls = mergeUrls(libUrls, customUrls)
+    val mergedUrls = mergeUrls(libUrls, customUrls, this)
 
     return if (includeNostrUris) {
         val nostr = this.parseNostrUris()
@@ -25,21 +25,28 @@ fun String.parseUris(includeNostrUris: Boolean = true): List<String> {
     }
 }
 
-fun mergeUrls(libUrls: List<String>, customUrls: List<String>): List<String> {
+private fun mergeUrls(
+    libUrls: List<String>,
+    customUrls: List<String>,
+    content: String,
+): List<String> {
     val result = mutableListOf<String>()
-
     val allUrls = (libUrls + customUrls).distinct()
     val visited = mutableSetOf<String>()
 
-    for (url in allUrls) {
-        if (visited.any { existing -> isRelativeMatch(existing, url) }) {
-            val matchingUrl = visited.first { existing -> isRelativeMatch(existing, url) }
-            if (url.length > matchingUrl.length) {
-                visited.remove(matchingUrl)
-                visited.add(url)
+    for (originalUrl in allUrls) {
+        val potentialDuplicateUrl = visited.find { existing -> isRelativeMatch(existing, originalUrl) }
+
+        if (potentialDuplicateUrl != null) {
+            val bothUrlExists = content.containsUrl(potentialDuplicateUrl) && content.containsUrl(originalUrl)
+            if (bothUrlExists) {
+                visited.add(originalUrl)
+            } else if (originalUrl.length > potentialDuplicateUrl.length) {
+                visited.remove(potentialDuplicateUrl)
+                visited.add(originalUrl)
             }
         } else {
-            visited.add(url)
+            visited.add(originalUrl)
         }
     }
 
@@ -47,8 +54,12 @@ fun mergeUrls(libUrls: List<String>, customUrls: List<String>): List<String> {
     return result
 }
 
-fun isRelativeMatch(url1: String, url2: String): Boolean {
+private fun isRelativeMatch(url1: String, url2: String): Boolean {
     return url1.startsWith(url2) || url2.startsWith(url1)
+}
+
+private fun String.containsUrl(url: String): Boolean {
+    return Regex("\\b${Regex.escape(url)}\\b").containsMatchIn(this)
 }
 
 private fun List<Url>.filterInvalidTLDs() =

@@ -15,8 +15,8 @@ import androidx.compose.ui.unit.dp
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import kotlin.time.Duration.Companion.minutes
-import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.events.domain.CdnImage
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
@@ -100,7 +100,7 @@ fun PreviewReferencedPostListItemLight() {
                     have augmented reality HUDs that incorporate real-time facial recognition. 
                     Hiding behind a pseudonym will become a distant dream.
                 """.trimIndent(),
-                attachments = emptyList(),
+                uris = emptyList(),
                 authorId = "npubSomething",
                 authorName = "android_robots_from_space",
                 authorHandle = "user",
@@ -141,7 +141,7 @@ fun PreviewReferencedPostListItemDark() {
                     have augmented reality HUDs that incorporate real-time facial recognition. 
                     Hiding behind a pseudonym will become a distant dream.
                 """.trimIndent(),
-                attachments = emptyList(),
+                uris = emptyList(),
                 authorId = "npubSomething",
                 authorName = "android",
                 authorHandle = "user",

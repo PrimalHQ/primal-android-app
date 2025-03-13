@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import java.net.URL
 import kotlin.time.Duration.Companion.milliseconds
-import net.primal.android.attachments.domain.NoteAttachmentType
+import net.primal.android.events.domain.EventUriType
 import net.primal.android.theme.AppTheme
 
 private fun String.convertToSpotifyEmbedUrl(): String? =
@@ -78,7 +78,7 @@ fun NoteAudioSpotifyLinkPreview(
                 title = title,
                 description = description,
                 thumbnailUrl = thumbnailUrl,
-                attachmentType = NoteAttachmentType.Spotify,
+                eventUriType = EventUriType.Spotify,
                 loading = embeddedWebState == EmbeddedWebPageState.Initializing,
                 onPlayClick = {
                     if (embedUrl != null) {

@@ -37,13 +37,13 @@ import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
 import net.primal.android.R
-import net.primal.android.attachments.gallery.GalleryDropdownMenu
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.utils.copyBitmapToClipboard
 import net.primal.android.core.utils.copyText
+import net.primal.android.events.gallery.GalleryDropdownMenu
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)

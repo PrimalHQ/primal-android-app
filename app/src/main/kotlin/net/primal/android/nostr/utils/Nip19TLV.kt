@@ -76,20 +76,19 @@ object Nip19TLV {
             String(bytes = it, charset = Charsets.US_ASCII)
         } ?: emptyList()
 
-        val profileId = tlv[Type.AUTHOR.id]?.first()?.toHex()
+        val profileId = tlv[Type.AUTHOR.id]?.firstOrNull()?.toHex()
 
         val kind = tlv[Type.KIND.id]?.firstOrNull()?.let {
             toInt32(it)
         }
-        return if (eventId != null && profileId != null) {
+
+        return eventId?.let {
             Nevent(
                 kind = kind,
                 eventId = eventId,
                 userId = profileId,
                 relays = relays,
             )
-        } else {
-            null
         }
     }
 
@@ -155,7 +154,7 @@ object Nip19TLV {
         }
 
         // Add AUTHOR type
-        tlv.addAll(this.userId.constructAuthorBytes())
+        this.userId?.let { tlv.addAll(this.userId.constructAuthorBytes()) }
 
         // Add KIND type
         if (this.kind != null) {

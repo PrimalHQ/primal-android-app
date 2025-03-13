@@ -25,8 +25,6 @@ class Nip19TLVTest {
 
         val tlv = Nip19TLV.parse(nevent1)
 
-        println(tlv[0]?.first()?.toString())
-
         tlv shouldBe instanceOf(Map::class)
         tlv.size shouldBe 2
         val actualEventId = tlv[Nip19TLV.Type.SPECIAL.id]?.first()?.toHex()
@@ -153,6 +151,24 @@ class Nip19TLVTest {
     }
 
     @Test
+    fun parseUriAsNeventOrNull_returnsProperValuesForNoAuthorAndNeventNoUris() {
+        val nevent = "nostr:nevent1qvzqqqpxfgqzq4zfn02zu4cdg2xwrt8atpp2v8sfu4c2xwwxsx2llnx0d8xekj8vvs3qvg"
+
+        val expectedEventId = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec"
+        val expectedRelays = emptyList<String>()
+        val expectedUserId = null
+        val expectedKind = 9802
+
+        val result = Nip19TLV.parseUriAsNeventOrNull(nevent)
+        result.shouldNotBeNull()
+
+        result.eventId shouldBe expectedEventId
+        result.relays shouldBe expectedRelays
+        result.userId shouldBe expectedUserId
+        result.kind shouldBe expectedKind
+    }
+
+    @Test
     fun parseUriAsNeventOrNull_returnsProperValuesForNeventNoUris() {
         val nevent = "nostr:nevent1qqs9gjvm6sh9wr2z3ns6el2cg2npuz09wz3nn35pjhluenmfekd53mqzyrtp7w" +
             "79k045gq80mtnpdxjuzl9t7vjxk52rv80f888y5xsd5mh55qcyqqqzvjsk2whrp"
@@ -164,7 +180,6 @@ class Nip19TLVTest {
 
         val result = Nip19TLV.parseUriAsNeventOrNull(nevent)
         result.shouldNotBeNull()
-        println(result)
 
         result.eventId shouldBe expectedEventId
         result.relays shouldBe expectedRelays
@@ -185,7 +200,6 @@ class Nip19TLVTest {
 
         val result = Nip19TLV.parseUriAsNeventOrNull(nevent)
         result.shouldNotBeNull()
-        println(result)
 
         result.eventId shouldBe expectedEventId
         result.relays shouldBe expectedRelays
@@ -206,12 +220,25 @@ class Nip19TLVTest {
 
         val result = Nip19TLV.parseUriAsNeventOrNull(nevent)
         result.shouldNotBeNull()
-        println(result)
 
         result.eventId shouldBe expectedEventId
         result.relays shouldBe expectedRelays
         result.userId shouldBe expectedUserId
         result.kind shouldBe expectedKind
+    }
+
+    @Test
+    fun toNeventString_createsProperNevent_forGivenNeventStructureWithoutRelaysAndNoAuthor() {
+        val expectedNevent = "nevent1qqs9gjvm6sh9wr2z3ns6el2cg2npuz09wz3nn35pjhluenmfekd53mqrqsqqqfj27mfm7c"
+
+        val nevent = Nevent(
+            eventId = "54499bd42e570d428ce1acfd5842a61e09e570a339c68195ffcccf69cd9b48ec",
+            relays = emptyList(),
+            userId = null,
+            kind = 9802,
+        )
+
+        nevent.toNeventString() shouldBe expectedNevent
     }
 
     @Test

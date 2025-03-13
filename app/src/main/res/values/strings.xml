@@ -882,6 +882,7 @@
     <string name="profile_followed_by">Followed by</string>
     <string name="profile_save_user_feed_title">%1$s\'s Latest</string>
     <string name="profile_save_user_feed_description">Latest notes by %1$s\'s follows</string>
+    <string name="profile_invalid_profile_id">We couldn’t locate this profile. Please confirm the details and try again.</string>
 
     <string name="profile_follow">Follow</string>
     <string name="profile_unfollow">Unfollow</string>
@@ -1182,6 +1183,9 @@
         <item quantity="one">and 1 other highlighted</item>
         <item quantity="other">and %1$s others highlighted</item>
     </plurals>
+    <string name="article_details_error_resolving_naddr">
+       We couldn’t locate the article.\nMake sure you’ve got the right one.
+    </string>
 
     <string name="feed_note_render_unknown_audio_title">Unknown title</string>
     <string name="feed_note_render_play_button">Play</string>

@@ -31,8 +31,6 @@ import androidx.navigation.navDeepLink
 import androidx.navigation.navOptions
 import net.primal.android.articles.reads.ReadsScreen
 import net.primal.android.articles.reads.ReadsViewModel
-import net.primal.android.attachments.gallery.MediaGalleryScreen
-import net.primal.android.attachments.gallery.MediaGalleryViewModel
 import net.primal.android.auth.login.LoginScreen
 import net.primal.android.auth.login.LoginViewModel
 import net.primal.android.auth.logout.LogoutScreen
@@ -53,6 +51,10 @@ import net.primal.android.editor.NoteEditorScreen
 import net.primal.android.editor.di.noteEditorViewModel
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteEditorArgs.Companion.jsonAsNoteEditorArgs
+import net.primal.android.events.gallery.EventMediaGalleryScreen
+import net.primal.android.events.gallery.EventMediaGalleryViewModel
+import net.primal.android.events.reactions.ReactionsViewModel
+import net.primal.android.events.reactions.ui.ReactionsScreen
 import net.primal.android.explore.asearch.AdvancedSearchContract
 import net.primal.android.explore.asearch.AdvancedSearchScreen
 import net.primal.android.explore.asearch.AdvancedSearchViewModel
@@ -119,6 +121,7 @@ import net.primal.android.premium.support.SupportPrimalScreen
 import net.primal.android.premium.support.SupportPrimalViewModel
 import net.primal.android.premium.utils.isPremiumTier
 import net.primal.android.premium.utils.isPrimalLegendTier
+import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.details.ProfileDetailsScreen
 import net.primal.android.profile.details.ProfileDetailsViewModel
 import net.primal.android.profile.domain.ProfileFollowsType
@@ -128,8 +131,6 @@ import net.primal.android.profile.follows.ProfileFollowsScreen
 import net.primal.android.profile.follows.ProfileFollowsViewModel
 import net.primal.android.profile.qr.ProfileQrCodeViewModel
 import net.primal.android.profile.qr.ui.ProfileQrCodeViewerScreen
-import net.primal.android.stats.reactions.ReactionsViewModel
-import net.primal.android.stats.reactions.ui.ReactionsScreen
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -220,11 +221,7 @@ private fun NavController.navigateToChat(profileId: String) = navigate(route = "
 
 private fun NavController.navigateToNewMessage() = navigate(route = "messages/new")
 
-fun NavController.navigateToProfile(profileId: String? = null) =
-    when {
-        profileId != null -> navigate(route = "profile?$PROFILE_ID=$profileId")
-        else -> navigate(route = "profile")
-    }
+fun NavController.navigateToProfile(profileId: String) = navigate(route = "profile?$PROFILE_ID=$profileId")
 
 fun NavController.navigateToProfileQrCodeViewer(profileId: String? = null) =
     when {
@@ -395,7 +392,7 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
 
     val drawerDestinationHandler: (DrawerScreenDestination) -> Unit = {
         when (it) {
-            DrawerScreenDestination.Profile -> navController.navigateToProfile()
+            is DrawerScreenDestination.Profile -> navController.navigateToProfile(profileId = it.userId)
             is DrawerScreenDestination.Premium -> if (it.hasPremium) {
                 navController.navigateToPremiumHome()
             } else {
@@ -1852,10 +1849,10 @@ private fun NavGraphBuilder.media(
     popEnterTransition = { EnterTransition.None },
     popExitTransition = { fadeOut() },
 ) { navBackEntry ->
-    val viewModel = hiltViewModel<MediaGalleryViewModel>(navBackEntry)
+    val viewModel = hiltViewModel<EventMediaGalleryViewModel>(navBackEntry)
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         ApplyEdgeToEdge(isDarkTheme = true)
-        MediaGalleryScreen(
+        EventMediaGalleryScreen(
             onClose = { navController.navigateUp() },
             viewModel = viewModel,
         )
@@ -1905,27 +1902,29 @@ private fun NavGraphBuilder.profile(
     LockToOrientationPortrait()
     ProfileDetailsScreen(
         viewModel = viewModel,
-        onClose = { navController.navigateUp() },
+        callbacks = ProfileDetailsContract.ScreenCallbacks(
+            onClose = { navController.navigateUp() },
+            onEditProfileClick = { navController.navigateToProfileEditor() },
+            onMessageClick = { profileId -> navController.navigateToChat(profileId = profileId) },
+            onSendWalletTx = { transaction -> navController.navigateToWalletCreateTransaction(transaction) },
+            onDrawerQrCodeClick = { profileId -> navController.navigateToProfileQrCodeViewer(profileId) },
+            onFollowsClick = { profileId, followsType ->
+                navController.navigateToProfileFollows(
+                    profileId = profileId,
+                    followsType = followsType,
+                )
+            },
+            onMediaItemClick = { navController.navigateToMediaItem(it) },
+            onGoToWallet = { navController.navigateToWallet() },
+            onSearchClick = { navController.navigateToAdvancedSearch(initialPostedBy = listOf(it)) },
+            onPremiumBadgeClick = { premiumTier, profileId ->
+                if (premiumTier.isPrimalLegendTier() || premiumTier.isPremiumTier()) {
+                    navController.navigateToPremiumCard(profileId = profileId)
+                }
+            },
+            onNewPostClick = { navController.navigateToNoteEditor(null) },
+        ),
         noteCallbacks = noteCallbacksHandler(navController),
-        onEditProfileClick = { navController.navigateToProfileEditor() },
-        onMessageClick = { profileId -> navController.navigateToChat(profileId = profileId) },
-        onSendWalletTx = { transaction -> navController.navigateToWalletCreateTransaction(transaction) },
-        onDrawerQrCodeClick = { profileId -> navController.navigateToProfileQrCodeViewer(profileId) },
-        onFollowsClick = { profileId, followsType ->
-            navController.navigateToProfileFollows(
-                profileId = profileId,
-                followsType = followsType,
-            )
-        },
-        onMediaItemClick = { navController.navigateToMediaItem(it) },
-        onGoToWallet = { navController.navigateToWallet() },
-        onSearchClick = { navController.navigateToAdvancedSearch(initialPostedBy = listOf(it)) },
-        onPremiumBadgeClick = { premiumTier, profileId ->
-            if (premiumTier.isPrimalLegendTier() || premiumTier.isPremiumTier()) {
-                navController.navigateToPremiumCard(profileId = profileId)
-            }
-        },
-        onNewPostClick = { navController.navigateToNoteEditor(null) },
     )
 }
 

@@ -1,2 +1,3 @@
 - Deep linking.
+- Deprecated note1 and npub1 links.
 - Stability and improvements.

@@ -8,9 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import net.primal.android.attachments.domain.NoteAttachmentType
-import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
-import net.primal.android.core.compose.attachment.model.isMediaAttachment
+import net.primal.android.core.compose.attachment.model.EventUriUi
+import net.primal.android.core.compose.attachment.model.isMediaUri
+import net.primal.android.events.domain.EventUriType
 import net.primal.android.notes.feed.note.ui.NoteAudioSpotifyLinkPreview
 import net.primal.android.notes.feed.note.ui.NoteAudioTidalLinkPreview
 import net.primal.android.notes.feed.note.ui.NoteLinkLargePreview
@@ -23,33 +23,33 @@ import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
 @Composable
 fun NoteAttachments(
     modifier: Modifier = Modifier,
-    attachments: List<NoteAttachmentUi>,
+    eventUris: List<EventUriUi>,
     blossoms: List<String>,
     expanded: Boolean,
     onUrlClick: ((mediaUrl: String) -> Unit)? = null,
     onMediaClick: ((MediaClickEvent) -> Unit)? = null,
 ) {
-    val mediaAttachments = attachments.filter { it.isMediaAttachment() }
+    val mediaAttachments = eventUris.filter { it.isMediaUri() }
     if (mediaAttachments.isNotEmpty()) {
         NoteMediaAttachmentsHorizontalPager(
             modifier = modifier,
-            mediaAttachments = mediaAttachments,
+            mediaEventUris = mediaAttachments,
             blossoms = blossoms,
             onMediaClick = {
-                when (it.noteAttachmentType) {
-                    NoteAttachmentType.Image, NoteAttachmentType.Video -> onMediaClick?.invoke(it)
+                when (it.eventUriType) {
+                    EventUriType.Image, EventUriType.Video -> onMediaClick?.invoke(it)
                     else -> onUrlClick?.invoke(it.mediaUrl)
                 }
             },
         )
     }
 
-    attachments
-        .filterNot { it.isMediaAttachment() }
+    eventUris
+        .filterNot { it.isMediaUri() }
         .take(n = if (!expanded) 2 else Int.MAX_VALUE)
         .filter {
             when (it.type) {
-                NoteAttachmentType.YouTube, NoteAttachmentType.Rumble, NoteAttachmentType.Spotify -> {
+                EventUriType.YouTube, EventUriType.Rumble, EventUriType.Spotify -> {
                     it.title != null || it.thumbnailUrl != null
                 }
                 else -> true
@@ -58,7 +58,7 @@ fun NoteAttachments(
         .forEach { attachment ->
             NoteLinkAttachment(
                 modifier = modifier,
-                attachment = attachment,
+                eventUri = attachment,
                 onUrlClick = onUrlClick,
             )
         }
@@ -67,82 +67,82 @@ fun NoteAttachments(
 @Composable
 private fun NoteLinkAttachment(
     modifier: Modifier,
-    attachment: NoteAttachmentUi,
+    eventUri: EventUriUi,
     onUrlClick: ((mediaUrl: String) -> Unit)?,
 ) {
     BoxWithConstraints(modifier = modifier) {
-        val thumbnailImageSizeDp = findImageSize(attachment = attachment)
-        when (attachment.type) {
-            NoteAttachmentType.YouTube -> {
+        val thumbnailImageSizeDp = findImageSize(eventUri = eventUri)
+        when (eventUri.type) {
+            EventUriType.YouTube -> {
                 NoteYouTubeLinkPreview(
                     modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
-                    url = attachment.url,
-                    title = attachment.title,
-                    thumbnailUrl = attachment.thumbnailUrl,
+                    url = eventUri.url,
+                    title = eventUri.title,
+                    thumbnailUrl = eventUri.thumbnailUrl,
                     thumbnailImageSizeDp = thumbnailImageSizeDp,
-                    onClick = { onUrlClick?.invoke(attachment.url) },
+                    onClick = { onUrlClick?.invoke(eventUri.url) },
                 )
             }
 
-            NoteAttachmentType.Rumble -> {
+            EventUriType.Rumble -> {
                 NoteVideoLinkPreview(
                     modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
-                    title = attachment.title,
-                    thumbnailUrl = attachment.thumbnailUrl,
+                    title = eventUri.title,
+                    thumbnailUrl = eventUri.thumbnailUrl,
                     thumbnailImageSize = thumbnailImageSizeDp,
-                    type = attachment.type,
+                    type = eventUri.type,
                     onClick = if (onUrlClick != null) {
-                        { onUrlClick(attachment.url) }
+                        { onUrlClick(eventUri.url) }
                     } else {
                         null
                     },
                 )
             }
 
-            NoteAttachmentType.Spotify -> {
+            EventUriType.Spotify -> {
                 NoteAudioSpotifyLinkPreview(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 4.dp, bottom = 8.dp),
-                    url = attachment.url,
-                    title = attachment.title,
-                    description = attachment.description,
-                    thumbnailUrl = attachment.thumbnailUrl,
-                    onPlayClick = { onUrlClick?.invoke(attachment.url) },
+                    url = eventUri.url,
+                    title = eventUri.title,
+                    description = eventUri.description,
+                    thumbnailUrl = eventUri.thumbnailUrl,
+                    onPlayClick = { onUrlClick?.invoke(eventUri.url) },
                 )
             }
 
-            NoteAttachmentType.Tidal -> {
+            EventUriType.Tidal -> {
                 NoteAudioTidalLinkPreview(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 4.dp, bottom = 8.dp),
-                    url = attachment.url,
-                    title = attachment.title,
-                    description = attachment.description,
-                    thumbnailUrl = attachment.thumbnailUrl,
+                    url = eventUri.url,
+                    title = eventUri.title,
+                    description = eventUri.description,
+                    thumbnailUrl = eventUri.thumbnailUrl,
                 )
             }
 
-            NoteAttachmentType.GitHub -> {
+            EventUriType.GitHub -> {
                 NoteLinkLargePreview(
-                    url = attachment.url,
-                    title = attachment.title,
-                    thumbnailUrl = attachment.thumbnailUrl,
-                    onClick = { onUrlClick?.invoke(attachment.url) },
-                    description = attachment.description,
+                    url = eventUri.url,
+                    title = eventUri.title,
+                    thumbnailUrl = eventUri.thumbnailUrl,
+                    onClick = { onUrlClick?.invoke(eventUri.url) },
+                    description = eventUri.description,
                     thumbnailImageSize = DpSize(width = maxWidth, height = maxWidth / 2),
                 )
             }
 
-            else -> if (!attachment.title.isNullOrBlank()) {
+            else -> if (!eventUri.title.isNullOrBlank()) {
                 NoteLinkPreview(
                     modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
-                    url = attachment.url,
-                    title = attachment.title,
-                    thumbnailUrl = attachment.thumbnailUrl,
+                    url = eventUri.url,
+                    title = eventUri.title,
+                    thumbnailUrl = eventUri.thumbnailUrl,
                     onClick = if (onUrlClick != null) {
-                        { onUrlClick.invoke(attachment.url) }
+                        { onUrlClick.invoke(eventUri.url) }
                     } else {
                         null
                     },

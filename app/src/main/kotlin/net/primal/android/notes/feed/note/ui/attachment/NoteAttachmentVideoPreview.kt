@@ -32,7 +32,7 @@ import androidx.media3.ui.PlayerView
 import coil.compose.SubcomposeAsyncImage
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.core.compose.PrimalLoadingSpinner
-import net.primal.android.core.compose.attachment.model.NoteAttachmentUi
+import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Mute
 import net.primal.android.core.compose.icons.primaliconpack.Play
@@ -42,7 +42,7 @@ import net.primal.android.user.domain.ContentDisplaySettings
 
 @Composable
 fun NoteAttachmentVideoPreview(
-    attachment: NoteAttachmentUi,
+    eventUri: EventUriUi,
     onVideoClick: (positionMs: Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -51,13 +51,13 @@ fun NoteAttachmentVideoPreview(
     if (autoPlay) {
         AutoPlayVideo(
             modifier = modifier,
-            attachment = attachment,
+            eventUri = eventUri,
             onVideoClick = onVideoClick,
         )
     } else {
         VideoThumbnailImagePreview(
             modifier = modifier,
-            attachment = attachment,
+            eventUri = eventUri,
             onClick = { onVideoClick(0) },
         )
     }
@@ -65,15 +65,15 @@ fun NoteAttachmentVideoPreview(
 
 @Composable
 private fun AutoPlayVideo(
-    attachment: NoteAttachmentUi,
+    eventUri: EventUriUi,
     onVideoClick: (positionMs: Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     var isMuted by remember { mutableStateOf(true) }
     val exoPlayer = remember { ExoPlayer.Builder(context).build() }
-    val mediaSource = remember(attachment) {
-        val mediaUrl = attachment.variants?.firstOrNull()?.mediaUrl ?: attachment.url
+    val mediaSource = remember(eventUri) {
+        val mediaUrl = eventUri.variants?.firstOrNull()?.mediaUrl ?: eventUri.url
         MediaItem.fromUri(mediaUrl)
     }
 
@@ -148,16 +148,16 @@ private fun AudioButton(
 @Composable
 private fun VideoThumbnailImagePreview(
     modifier: Modifier = Modifier,
-    attachment: NoteAttachmentUi,
+    eventUri: EventUriUi,
     onClick: () -> Unit,
 ) {
-    val mediaUrl = attachment.variants?.firstOrNull()?.mediaUrl ?: attachment.url
+    val mediaUrl = eventUri.variants?.firstOrNull()?.mediaUrl ?: eventUri.url
     Box(
         modifier = modifier.clip(AppTheme.shapes.medium),
         contentAlignment = Alignment.Center,
     ) {
         SubcomposeAsyncImage(
-            model = attachment.thumbnailUrl ?: mediaUrl,
+            model = eventUri.thumbnailUrl ?: mediaUrl,
             modifier = modifier,
             contentDescription = null,
             contentScale = ContentScale.Crop,

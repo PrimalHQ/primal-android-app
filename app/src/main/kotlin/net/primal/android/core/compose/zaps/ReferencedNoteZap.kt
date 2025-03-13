@@ -23,11 +23,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import java.text.NumberFormat
 import java.time.Instant
-import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
+import net.primal.android.events.domain.CdnImage
 import net.primal.android.notes.feed.model.NoteContentUi
 import net.primal.android.notes.feed.note.ui.NoteContent
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks

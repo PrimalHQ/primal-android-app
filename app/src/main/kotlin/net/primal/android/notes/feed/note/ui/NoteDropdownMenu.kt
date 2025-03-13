@@ -37,8 +37,11 @@ import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.resolvePrimalNoteLink
 import net.primal.android.core.utils.systemShareText
-import net.primal.android.crypto.hexToNoteHrp
-import net.primal.android.crypto.hexToNpubHrp
+import net.primal.android.nostr.model.NostrEventKind
+import net.primal.android.nostr.utils.Nevent
+import net.primal.android.nostr.utils.Nip19TLV.toNeventString
+import net.primal.android.nostr.utils.Nip19TLV.toNprofileString
+import net.primal.android.nostr.utils.Nprofile
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -49,6 +52,7 @@ fun NoteDropdownMenuIcon(
     noteRawData: String,
     authorId: String,
     isBookmarked: Boolean,
+    relayHints: List<String> = emptyList(),
     enabled: Boolean = true,
     onBookmarkClick: (() -> Unit)? = null,
     onMuteUserClick: (() -> Unit)? = null,
@@ -141,7 +145,13 @@ fun NoteDropdownMenuIcon(
                 trailingIconVector = PrimalIcons.ContextCopyNoteId,
                 text = stringResource(id = R.string.feed_context_copy_note_id),
                 onClick = {
-                    copyText(context = context, text = noteId.hexToNoteHrp())
+                    val nevent = Nevent(
+                        eventId = noteId,
+                        kind = NostrEventKind.ShortTextNote.value,
+                        userId = authorId,
+                        relays = relayHints,
+                    ).toNeventString()
+                    copyText(context = context, text = nevent)
                     menuVisible = false
                     uiScope.launch {
                         Toast.makeText(
@@ -171,7 +181,7 @@ fun NoteDropdownMenuIcon(
                 trailingIconVector = PrimalIcons.ContextCopyPublicKey,
                 text = stringResource(id = R.string.feed_context_copy_user_id),
                 onClick = {
-                    copyText(context = context, text = authorId.hexToNpubHrp())
+                    copyText(context = context, text = Nprofile(pubkey = authorId).toNprofileString())
                     menuVisible = false
                     uiScope.launch {
                         Toast.makeText(

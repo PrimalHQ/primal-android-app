@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
+import net.primal.android.profile.utils.combinePremiumInfoIfLegend
 
 @Dao
 interface ProfileDataDao {
@@ -15,12 +16,7 @@ interface ProfileDataDao {
         val existingProfiles = findProfileData(data.map { it.ownerId }).associateBy { it.ownerId }
         insertOrReplaceAll(
             data.map { profileData ->
-                profileData.copy(
-                    primalPremiumInfo = profileData.primalPremiumInfo?.copy(
-                        legendProfile = profileData.primalPremiumInfo.legendProfile
-                            ?: existingProfiles[profileData.ownerId]?.primalPremiumInfo?.legendProfile,
-                    ),
-                )
+                profileData.combinePremiumInfoIfLegend(existingProfiles[profileData.ownerId])
             },
         )
     }
@@ -30,10 +26,10 @@ interface ProfileDataDao {
 
     @Transaction
     @Query("SELECT * FROM ProfileData WHERE ownerId = :profileId")
-    fun observeProfile(profileId: String): Flow<Profile>
+    fun observeProfile(profileId: String): Flow<Profile?>
 
     @Query("SELECT * FROM ProfileData WHERE ownerId = :profileId")
-    fun observeProfileData(profileId: String): Flow<ProfileData>
+    fun observeProfileData(profileId: String): Flow<ProfileData?>
 
     @Query("SELECT * FROM ProfileData WHERE ownerId IN (:profileIds)")
     fun observeProfilesData(profileIds: List<String>): Flow<List<ProfileData>>
@@ -45,5 +41,5 @@ interface ProfileDataDao {
     fun findProfileData(profileIds: List<String>): List<ProfileData>
 
     @Query("SELECT eventId FROM ProfileData WHERE ownerId = :profileId")
-    fun findMetadataEventId(profileId: String): String
+    fun findMetadataEventId(profileId: String): String?
 }

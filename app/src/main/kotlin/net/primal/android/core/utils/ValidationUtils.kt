@@ -1,11 +1,16 @@
 package net.primal.android.core.utils
 
 import android.util.Patterns
+import java.util.regex.Pattern
 import net.primal.android.crypto.Bech32
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.crypto.hexToNsecHrp
 import org.spongycastle.util.encoders.DecoderException
 import timber.log.Timber
+
+private val HEXADECIMAL_PATTERN = Pattern.compile("\\p{XDigit}+")
+
+fun String.isValidHex() = HEXADECIMAL_PATTERN.matcher(this).matches()
 
 fun String?.isValidNostrPrivateKey(): Boolean {
     if (this == null) return false

@@ -2,13 +2,13 @@ package net.primal.android.notes.db
 
 import androidx.room.Embedded
 import androidx.room.Relation
-import net.primal.android.attachments.db.NoteAttachment
-import net.primal.android.attachments.db.NoteNostrUri
 import net.primal.android.bookmarks.db.PublicBookmark
+import net.primal.android.events.db.EventStats
+import net.primal.android.events.db.EventUri
+import net.primal.android.events.db.EventUriNostr
+import net.primal.android.events.db.EventZap
 import net.primal.android.nostr.db.EventRelayHints
 import net.primal.android.profile.db.ProfileData
-import net.primal.android.stats.db.EventStats
-import net.primal.android.stats.db.EventZap
 
 data class FeedPost(
 
@@ -19,13 +19,13 @@ data class FeedPost(
         entityColumn = "eventId",
         parentColumn = "postId",
     )
-    val attachments: List<NoteAttachment>,
+    val uris: List<EventUri>,
 
     @Relation(
-        entityColumn = "noteId",
+        entityColumn = "eventId",
         parentColumn = "postId",
     )
-    val nostrUris: List<NoteNostrUri>,
+    val nostrUris: List<EventUriNostr>,
 
     @Relation(
         entityColumn = "ownerId",

@@ -2,11 +2,11 @@ package net.primal.android.notes.db
 
 import java.time.Instant
 import kotlinx.serialization.Serializable
-import net.primal.android.attachments.db.NoteAttachment
-import net.primal.android.attachments.db.NoteNostrUri
-import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.core.compose.attachment.model.asNoteAttachmentUi
+import net.primal.android.core.compose.attachment.model.asEventUriUiModel
 import net.primal.android.core.utils.parseHashtags
+import net.primal.android.events.db.EventUri
+import net.primal.android.events.db.EventUriNostr
+import net.primal.android.events.domain.CdnImage
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
@@ -24,8 +24,8 @@ data class ReferencedNote(
     val authorInternetIdentifier: String?,
     val authorLightningAddress: String?,
     val authorLegendProfile: PrimalLegendProfile?,
-    val attachments: List<NoteAttachment>,
-    val nostrUris: List<NoteNostrUri>,
+    val attachments: List<EventUri>,
+    val nostrUris: List<EventUriNostr>,
     val raw: String,
 )
 
@@ -41,7 +41,7 @@ fun ReferencedNote.asFeedPostUi() =
         authorInternetIdentifier = this.authorInternetIdentifier,
         authorAvatarCdnImage = this.authorAvatarCdnImage,
         authorLegendaryCustomization = this.authorLegendProfile?.asLegendaryCustomization(),
-        attachments = this.attachments.map { it.asNoteAttachmentUi() },
+        uris = this.attachments.map { it.asEventUriUiModel() },
         nostrUris = this.nostrUris.map { it.asNoteNostrUriUi() },
         timestamp = Instant.ofEpochSecond(this.createdAt),
         content = this.content,

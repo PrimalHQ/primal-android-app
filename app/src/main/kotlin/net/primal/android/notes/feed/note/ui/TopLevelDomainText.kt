@@ -12,22 +12,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
-import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
+import net.primal.android.events.domain.EventUriType
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun TopLevelDomainText(modifier: Modifier, attachmentType: NoteAttachmentType) {
+fun TopLevelDomainText(modifier: Modifier, eventUriType: EventUriType) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        val iconResId = when (attachmentType) {
-            NoteAttachmentType.YouTube -> R.drawable.logo_youtube
-            NoteAttachmentType.Rumble -> R.drawable.logo_rumble
-            NoteAttachmentType.Spotify -> R.drawable.logo_spotify
-            NoteAttachmentType.Tidal -> if (isAppInDarkPrimalTheme()) {
+        val iconResId = when (eventUriType) {
+            EventUriType.YouTube -> R.drawable.logo_youtube
+            EventUriType.Rumble -> R.drawable.logo_rumble
+            EventUriType.Spotify -> R.drawable.logo_spotify
+            EventUriType.Tidal -> if (isAppInDarkPrimalTheme()) {
                 R.drawable.logo_tidal_dark
             } else {
                 R.drawable.logo_tidal_light
@@ -46,11 +46,11 @@ fun TopLevelDomainText(modifier: Modifier, attachmentType: NoteAttachmentType) {
             )
         }
 
-        val text = when (attachmentType) {
-            NoteAttachmentType.YouTube -> "youtube.com"
-            NoteAttachmentType.Rumble -> "rumble.com"
-            NoteAttachmentType.Spotify -> "spotify.com"
-            NoteAttachmentType.Tidal -> "tidal.com"
+        val text = when (eventUriType) {
+            EventUriType.YouTube -> "youtube.com"
+            EventUriType.Rumble -> "rumble.com"
+            EventUriType.Spotify -> "spotify.com"
+            EventUriType.Tidal -> "tidal.com"
             else -> ""
         }
         IconText(

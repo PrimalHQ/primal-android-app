@@ -2,8 +2,8 @@ package net.primal.android.messages.db
 
 import androidx.room.Embedded
 import androidx.room.Relation
-import net.primal.android.attachments.db.NoteAttachment
-import net.primal.android.attachments.db.NoteNostrUri
+import net.primal.android.events.db.EventUri
+import net.primal.android.events.db.EventUriNostr
 
 data class DirectMessage(
 
@@ -14,11 +14,11 @@ data class DirectMessage(
         entityColumn = "eventId",
         parentColumn = "messageId",
     )
-    val attachments: List<NoteAttachment>,
+    val eventUris: List<EventUri>,
 
     @Relation(
-        entityColumn = "noteId",
+        entityColumn = "eventId",
         parentColumn = "messageId",
     )
-    val nostrUris: List<NoteNostrUri>,
+    val eventNostrUris: List<EventUriNostr>,
 )

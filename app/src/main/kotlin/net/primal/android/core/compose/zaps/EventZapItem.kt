@@ -19,7 +19,7 @@ import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedNewZapFilled
-import net.primal.android.stats.ui.EventZapUiModel
+import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.theme.AppTheme
 
 @Composable

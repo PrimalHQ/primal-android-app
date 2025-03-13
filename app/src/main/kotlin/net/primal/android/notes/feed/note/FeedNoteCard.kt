@@ -41,13 +41,13 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.launch
 import net.primal.android.LocalContentDisplaySettings
-import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.ext.openUriSafely
+import net.primal.android.events.domain.CdnImage
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
@@ -92,7 +92,7 @@ fun FeedNoteCard(
     onUiError: ((UiError) -> Unit)? = null,
     contentFooter: @Composable () -> Unit = {},
 ) {
-    val viewModel = hiltViewModel<NoteViewModel>()
+    val viewModel = hiltViewModel<NoteViewModel, NoteViewModel.Factory> { it.create(noteId = data.postId) }
     val uiState by viewModel.state.collectAsState()
 
     LaunchedEffect(viewModel, uiState.error, onUiError) {
@@ -277,6 +277,7 @@ private fun FeedNoteCard(
                 noteRawData = data.rawNostrEventJson,
                 authorId = data.authorId,
                 isBookmarked = data.isBookmarked,
+                relayHints = state.relayHints,
                 enabled = noteOptionsMenuEnabled,
                 onBookmarkClick = {
                     eventPublisher(UiEvent.BookmarkAction(noteId = data.postId))
@@ -510,7 +511,7 @@ class FeedPostUiProvider : PreviewParameterProvider<FeedPostUi> {
                 content = """
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                 """.trimIndent(),
-                attachments = emptyList(),
+                uris = emptyList(),
                 authorId = "npubSomething",
                 authorName = "android_robots_from_space",
                 authorHandle = "user",
@@ -537,7 +538,7 @@ class FeedPostUiProvider : PreviewParameterProvider<FeedPostUi> {
                 content = """
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi et ligula feugiat enim faucibus volutpat ac et lorem. Vivamus tellus sem, rutrum non elit sed, congue efficitur nisl. 
                 """.trimIndent(),
-                attachments = emptyList(),
+                uris = emptyList(),
                 authorId = "npubSomething",
                 authorName = "android_robots_from_space",
                 authorHandle = "user",
@@ -564,7 +565,7 @@ class FeedPostUiProvider : PreviewParameterProvider<FeedPostUi> {
                     
                     Duis ante turpis, dapibus vitae est vehicula, vulputate commodo libero. Vestibulum massa ante, semper sit amet urna vel, commodo maximus velit. Sed nec nisi laoreet, faucibus est ac, placerat orci. 
                 """.trimIndent(),
-                attachments = emptyList(),
+                uris = emptyList(),
                 authorId = "npubSomething",
                 authorName = "primal",
                 authorHandle = "primal",

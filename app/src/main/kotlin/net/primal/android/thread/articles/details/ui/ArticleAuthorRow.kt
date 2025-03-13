@@ -28,11 +28,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
-import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.events.domain.CdnImage
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.theme.AppTheme

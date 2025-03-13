@@ -52,7 +52,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
-import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalSwitch
@@ -61,6 +60,7 @@ import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.LegendaryProfileNoCustomization
+import net.primal.android.events.domain.CdnImage
 import net.primal.android.premium.domain.PremiumMembership
 import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationContract.UiEvent
 import net.primal.android.premium.legend.domain.LegendaryCustomization

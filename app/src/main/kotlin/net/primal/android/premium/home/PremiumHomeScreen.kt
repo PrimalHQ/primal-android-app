@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import net.primal.android.R
-import net.primal.android.attachments.domain.CdnImage
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.SnackbarErrorHandler
@@ -41,6 +40,7 @@ import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.events.domain.CdnImage
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.premium.ui.PremiumBadge

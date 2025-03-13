@@ -10,6 +10,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -83,6 +85,7 @@ import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.numericpad.PrimalNumericPad
+import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
@@ -139,8 +142,9 @@ fun ReceivePaymentScreen(
         snackbarHostState = snackbarHostState,
         errorMessageResolver = {
             when (it) {
-                is UiState.ReceivePaymentError.FailedToCreateLightningInvoice ->
-                    context.getString(R.string.wallet_receive_transaction_invoice_creation_error)
+                is UiState.ReceivePaymentError.FailedToCreateLightningInvoice -> {
+                    it.cause.message ?: context.getString(R.string.wallet_receive_transaction_invoice_creation_error)
+                }
             }
         },
         onErrorDismiss = { eventPublisher(ReceivePaymentContract.UiEvent.DismissError) },
@@ -332,6 +336,7 @@ private fun ReceivePaymentViewer(
         Spacer(modifier = Modifier.height(24.dp))
 
         if (networkDetails.address != null) {
+            val context = LocalContext.current
             TwoLineText(
                 title = when (state.currentTab) {
                     ReceivePaymentTab.Lightning -> stringResource(
@@ -350,6 +355,9 @@ private fun ReceivePaymentViewer(
                 maxLines = when (state.currentTab) {
                     ReceivePaymentTab.Lightning -> 3
                     ReceivePaymentTab.Bitcoin -> 1
+                },
+                onCopyClick = {
+                    copyText(context = context, text = networkDetails.address)
                 },
             )
             if (state.paymentDetails.comment == null && !state.hasPremium) {
@@ -494,23 +502,34 @@ private fun TwoLineText(
     content: String,
     maxLines: Int = 3,
     contentFontSize: TextUnit = 18.sp,
+    onCopyClick: (() -> Unit)? = null,
 ) {
-    Text(
-        modifier = Modifier.padding(horizontal = 32.dp),
-        text = title,
-        style = AppTheme.typography.bodyLarge,
-        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-    )
+    Column(
+        modifier = Modifier.clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = null,
+            enabled = onCopyClick != null,
+            onClick = { onCopyClick?.invoke() },
+        ),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            modifier = Modifier.padding(horizontal = 32.dp),
+            text = title,
+            style = AppTheme.typography.bodyLarge,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+        )
 
-    Text(
-        modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
-        text = content,
-        style = AppTheme.typography.bodyLarge.copy(fontSize = contentFontSize),
-        fontWeight = FontWeight.Bold,
-        maxLines = maxLines,
-        overflow = TextOverflow.Ellipsis,
-        textAlign = TextAlign.Center,
-    )
+        Text(
+            modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+            text = content,
+            style = AppTheme.typography.bodyLarge.copy(fontSize = contentFontSize),
+            fontWeight = FontWeight.Bold,
+            maxLines = maxLines,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center,
+        )
+    }
 }
 
 @ExperimentalComposeUiApi

@@ -22,8 +22,8 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
-import net.primal.android.attachments.domain.NoteAttachmentType
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.events.domain.EventUriType
 import net.primal.android.notes.feed.note.ui.attachment.NoteImageLoadingPlaceholder
 import net.primal.android.notes.feed.note.ui.attachment.PlayButton
 import net.primal.android.theme.AppTheme
@@ -34,7 +34,7 @@ fun NoteVideoLinkPreview(
     title: String?,
     thumbnailUrl: String?,
     thumbnailImageSize: DpSize,
-    type: NoteAttachmentType,
+    type: EventUriType,
     modifier: Modifier = Modifier,
     loading: Boolean = false,
     onClick: (() -> Unit)? = null,
@@ -60,7 +60,7 @@ fun NoteVideoLinkPreview(
             Modifier
                 .padding(horizontal = 16.dp)
                 .padding(top = 16.dp, bottom = 12.dp),
-            attachmentType = type,
+            eventUriType = type,
         )
 
         if (title != null) {
@@ -123,7 +123,7 @@ private fun PreviewNoteVideoLinkPreview() {
         NoteVideoLinkPreview(
             title = "Stop Mass Warrantless Surveillance: End Section 70",
             thumbnailUrl = "",
-            type = NoteAttachmentType.YouTube,
+            type = EventUriType.YouTube,
             thumbnailImageSize = DpSize(width = 480.dp, height = 256.dp),
         )
     }

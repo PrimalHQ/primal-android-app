@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import net.primal.android.core.compose.attachment.model.asNoteAttachmentUi
+import net.primal.android.core.compose.attachment.model.asEventUriUiModel
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
@@ -176,7 +176,7 @@ class NotificationsViewModel @Inject constructor(
             authorAvatarCdnImage = this.actionByUser?.avatarCdnImage,
             timestamp = Instant.ofEpochSecond(this.actionPost.createdAt),
             content = this.actionPost.content,
-            attachments = this.actionPostNoteAttachments.map { it.asNoteAttachmentUi() },
+            uris = this.actionPostUris.map { it.asEventUriUiModel() },
             nostrUris = this.actionPostNostrUris.map { it.asNoteNostrUriUi() },
             stats = EventStatsUi.from(
                 eventStats = this.actionEventStats,

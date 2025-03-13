@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import kotlin.time.Duration.Companion.milliseconds
-import net.primal.android.attachments.domain.NoteAttachmentType
+import net.primal.android.events.domain.EventUriType
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -59,7 +59,7 @@ fun NoteYouTubeLinkPreview(
                 title = title,
                 thumbnailUrl = thumbnailUrl,
                 thumbnailImageSize = thumbnailImageSizeDp,
-                type = NoteAttachmentType.YouTube,
+                type = EventUriType.YouTube,
                 loading = embeddedWebState == EmbeddedWebPageState.Initializing,
                 onClick = {
                     if (youTubeVideoId != null) {

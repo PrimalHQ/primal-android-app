@@ -1,13 +1,12 @@
 package net.primal.android.nostr.ext
 
-import kotlinx.serialization.encodeToString
 import net.primal.android.articles.db.ArticleData
-import net.primal.android.attachments.domain.CdnImage
-import net.primal.android.attachments.domain.CdnResource
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.toJsonObject
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.core.utils.parseUris
+import net.primal.android.events.domain.CdnImage
+import net.primal.android.events.domain.CdnResource
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.PrimalEvent
