@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.core.utils.getMaximumUsdAmount
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.notary.NostrReadOnlyMode
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.premium.legend.contribute.LegendContributeContract.LegendContributeState
 import net.primal.android.premium.legend.contribute.LegendContributeContract.PaymentMethod
 import net.primal.android.premium.legend.contribute.LegendContributeContract.UiEvent
@@ -179,7 +179,7 @@ class LegendContributeViewModel @Inject constructor(
                 }
 
                 startPurchaseMonitor()
-            } catch (error: NostrReadOnlyMode) {
+            } catch (error: MissingPrivateKeyException) {
                 Timber.e(error)
             } catch (error: WssException) {
                 Timber.e(error)
@@ -197,7 +197,7 @@ class LegendContributeViewModel @Inject constructor(
                     PaymentMethod.BitcoinLightning -> executeLightningPayment()
                     null -> Unit
                 }
-            } catch (error: NostrReadOnlyMode) {
+            } catch (error: MissingPrivateKeyException) {
                 setState {
                     copy(
                         error = UiState.ContributionUiError.WithdrawViaPrimalWalletFailed(error),

@@ -25,7 +25,7 @@ import net.primal.android.messages.db.MessageConversation
 import net.primal.android.messages.domain.ConversationRelation
 import net.primal.android.messages.repository.MessageRepository
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.notary.NostrReadOnlyMode
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -121,7 +121,7 @@ class MessageConversationListViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 messageRepository.markAllMessagesAsRead(userId = activeAccountStore.activeUserId())
-            } catch (error: NostrReadOnlyMode) {
+            } catch (error: MissingPrivateKeyException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)

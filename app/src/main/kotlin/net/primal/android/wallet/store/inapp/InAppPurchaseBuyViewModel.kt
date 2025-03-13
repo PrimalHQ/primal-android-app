@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.notary.NostrReadOnlyMode
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.store.PrimalBillingClient
@@ -83,7 +83,7 @@ class InAppPurchaseBuyViewModel @Inject constructor(
                             ),
                         )
                     }
-                } catch (error: NostrReadOnlyMode) {
+                } catch (error: MissingPrivateKeyException) {
                     Timber.w(error)
                     if (_state.value.quote == null) {
                         setState { copy(error = error) }

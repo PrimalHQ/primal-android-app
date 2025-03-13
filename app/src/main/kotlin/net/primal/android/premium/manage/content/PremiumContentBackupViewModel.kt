@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.encodeToString
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
@@ -23,7 +22,7 @@ import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.takeContentOrNull
 import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.nostr.notary.NostrReadOnlyMode
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.premium.manage.content.PremiumContentBackupContract.UiEvent
 import net.primal.android.premium.manage.content.PremiumContentBackupContract.UiState
 import net.primal.android.premium.manage.content.api.model.BroadcastingStatus
@@ -67,7 +66,7 @@ class PremiumContentBackupViewModel @Inject constructor(
                 handleBroadcastStatus(status)
             } catch (error: WssException) {
                 Timber.e(error)
-            } catch (error: NostrReadOnlyMode) {
+            } catch (error: MissingPrivateKeyException) {
                 /* TODO(marko): what to do here? */
                 Timber.e(error)
             }
@@ -93,7 +92,7 @@ class PremiumContentBackupViewModel @Inject constructor(
                 }
             } catch (error: WssException) {
                 Timber.e(error)
-            } catch (error: NostrReadOnlyMode) {
+            } catch (error: MissingPrivateKeyException) {
                 /* TODO(marko): what to do here? */
                 Timber.e(error)
             }
@@ -194,7 +193,7 @@ class PremiumContentBackupViewModel @Inject constructor(
                 }
             } catch (error: WssException) {
                 Timber.e(error)
-            } catch (error: NostrReadOnlyMode) {
+            } catch (error: MissingPrivateKeyException) {
                 /* TODO(marko): what to do here? */
                 Timber.e(error)
             }
@@ -207,7 +206,7 @@ class PremiumContentBackupViewModel @Inject constructor(
                 broadcastRepository.cancelBroadcast(userId = activeAccountStore.activeUserId())
             } catch (error: WssException) {
                 Timber.e(error)
-            } catch (error: NostrReadOnlyMode) {
+            } catch (error: MissingPrivateKeyException) {
                 /* TODO(marko): what to do here? */
                 Timber.e(error)
             }

@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.notary.NostrReadOnlyMode
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.premium.manage.contact.PremiumContactListContract.SideEffect
 import net.primal.android.premium.manage.contact.PremiumContactListContract.UiEvent
 import net.primal.android.premium.manage.contact.PremiumContactListContract.UiState
@@ -59,7 +59,7 @@ class PremiumContactListViewModel @Inject constructor(
                     )
                 }.sortedByDescending { it.timestamp }
                 setState { copy(backups = backups) }
-            } catch (error: NostrReadOnlyMode) {
+            } catch (error: MissingPrivateKeyException) {
                 Timber.e(error)
             } catch (error: WssException) {
                 Timber.e(error)

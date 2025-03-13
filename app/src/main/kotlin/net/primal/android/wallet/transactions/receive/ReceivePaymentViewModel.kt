@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.core.utils.getMaximumUsdAmount
 import net.primal.android.navigation.asUrlEncoded
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.notary.NostrReadOnlyMode
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.domain.Network
 import net.primal.android.wallet.repository.ExchangeRateHandler
@@ -111,7 +111,7 @@ class ReceivePaymentViewModel @Inject constructor(
                 setState {
                     copy(bitcoinNetworkDetails = this.bitcoinNetworkDetails.copy(address = response.onChainAddress))
                 }
-            } catch (error: NostrReadOnlyMode) {
+            } catch (error: MissingPrivateKeyException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
@@ -151,7 +151,7 @@ class ReceivePaymentViewModel @Inject constructor(
                     ),
                 )
             }
-        } catch (error: NostrReadOnlyMode) {
+        } catch (error: MissingPrivateKeyException) {
             Timber.w(error)
             setState { copy(error = UiState.ReceivePaymentError.FailedToCreateLightningInvoice(cause = error)) }
         } catch (error: WssException) {

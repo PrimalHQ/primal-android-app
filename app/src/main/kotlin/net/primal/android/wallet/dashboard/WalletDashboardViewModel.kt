@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.networking.sockets.errors.NostrNoticeException
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.notary.NostrReadOnlyMode
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.WalletPreference
@@ -115,7 +115,7 @@ class WalletDashboardViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 walletRepository.fetchWalletBalance(userId = activeUserId)
-            } catch (error: NostrReadOnlyMode) {
+            } catch (error: MissingPrivateKeyException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
@@ -154,7 +154,7 @@ class WalletDashboardViewModel @Inject constructor(
                     quoteId = purchase.quote.quoteId,
                     purchaseToken = purchase.purchaseToken,
                 )
-            } catch (error: NostrReadOnlyMode) {
+            } catch (error: MissingPrivateKeyException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)

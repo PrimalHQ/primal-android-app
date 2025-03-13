@@ -17,7 +17,7 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.model.content.ContentMetadata
-import net.primal.android.nostr.notary.NostrReadOnlyMode
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.user.accounts.UserAccountFetcher
@@ -117,7 +117,7 @@ class UserRepository @Inject constructor(
         accountsStore.deleteAccount(pubkey = pubkey)
     }
 
-    @Throws(UnsuccessfulFileUpload::class, NostrPublishException::class, NostrReadOnlyMode::class)
+    @Throws(UnsuccessfulFileUpload::class, NostrPublishException::class, MissingPrivateKeyException::class)
     suspend fun setProfileMetadata(userId: String, profileMetadata: ProfileMetadata) {
         val pictureUrl = profileMetadata.remotePictureUrl
             ?: if (profileMetadata.localPictureUri != null) {
@@ -148,7 +148,7 @@ class UserRepository @Inject constructor(
         )
     }
 
-    @Throws(NostrPublishException::class, WssException::class, NostrReadOnlyMode::class)
+    @Throws(NostrPublishException::class, WssException::class, MissingPrivateKeyException::class)
     suspend fun setNostrAddress(userId: String, nostrAddress: String) =
         withContext(dispatchers.io()) {
             val userProfileResponse = usersApi.getUserProfile(userId = userId)
@@ -161,7 +161,7 @@ class UserRepository @Inject constructor(
             )
         }
 
-    @Throws(NostrPublishException::class, WssException::class, NostrReadOnlyMode::class)
+    @Throws(NostrPublishException::class, WssException::class, MissingPrivateKeyException::class)
     suspend fun setLightningAddress(userId: String, lightningAddress: String) =
         withContext(dispatchers.io()) {
             val userProfileResponse = usersApi.getUserProfile(userId = userId)

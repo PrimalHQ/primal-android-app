@@ -20,7 +20,7 @@ import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.notary.NostrReadOnlyMode
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.nostr.notary.NostrSignUnauthorized
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
@@ -137,7 +137,7 @@ class NotificationsViewModel @Inject constructor(
                 notificationsRepository.markAllNotificationsAsSeen(userId = activeAccountStore.activeUserId())
             } catch (error: WssException) {
                 Timber.w(error)
-            } catch (error: NostrReadOnlyMode) {
+            } catch (error: MissingPrivateKeyException) {
                 Timber.w(error)
             } catch (error: NostrSignUnauthorized) {
                 // If user logs out on notifications screen local account gets cleared

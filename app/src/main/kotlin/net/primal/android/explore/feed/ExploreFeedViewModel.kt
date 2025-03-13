@@ -26,7 +26,7 @@ import net.primal.android.navigation.advancedSearchFeedSpec
 import net.primal.android.navigation.exploreFeedSpec
 import net.primal.android.navigation.renderType
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.notary.NostrReadOnlyMode
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import timber.log.Timber
@@ -109,7 +109,7 @@ class ExploreFeedViewModel @Inject constructor(
                 )
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
             }
-        } catch (error: NostrReadOnlyMode) {
+        } catch (error: MissingPrivateKeyException) {
             Timber.w(error)
         } catch (error: WssException) {
             Timber.w(error)
@@ -121,7 +121,7 @@ class ExploreFeedViewModel @Inject constructor(
         try {
             feedsRepository.removeFeedLocally(userId = activeAccountStore.activeUserId(), feedSpec = feedSpec)
             feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
-        } catch (error: NostrReadOnlyMode) {
+        } catch (error: MissingPrivateKeyException) {
             Timber.w(error)
         } catch (error: WssException) {
             Timber.w(error)

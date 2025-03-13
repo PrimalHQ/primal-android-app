@@ -15,7 +15,7 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.notary.NostrReadOnlyMode
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.thread.articles.ArticleContract.UiEvent
@@ -65,7 +65,7 @@ class ArticleViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToMuteUser(error)) }
-            } catch (error: NostrReadOnlyMode) {
+            } catch (error: MissingPrivateKeyException) {
                 Timber.w(error)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
@@ -86,7 +86,7 @@ class ArticleViewModel @Inject constructor(
                     eventId = uiEvent.eventId,
                     articleId = uiEvent.articleId,
                 )
-            } catch (error: NostrReadOnlyMode) {
+            } catch (error: MissingPrivateKeyException) {
                 Timber.w(error)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
@@ -119,7 +119,7 @@ class ArticleViewModel @Inject constructor(
             } catch (error: BookmarksRepository.BookmarksListNotFound) {
                 Timber.w(error)
                 setState { copy(shouldApproveBookmark = true) }
-            } catch (error: NostrReadOnlyMode) {
+            } catch (error: MissingPrivateKeyException) {
                 Timber.w(error)
                 /* TODO(marko): what to do here? */
             }

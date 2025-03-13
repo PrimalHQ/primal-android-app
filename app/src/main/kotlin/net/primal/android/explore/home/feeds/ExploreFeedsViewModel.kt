@@ -17,7 +17,7 @@ import net.primal.android.feeds.dvm.ui.DvmFeedUi
 import net.primal.android.feeds.repository.DvmFeedListHandler
 import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.notary.NostrReadOnlyMode
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import timber.log.Timber
@@ -86,7 +86,7 @@ class ExploreFeedsViewModel @Inject constructor(
                     )
                 }
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
-            } catch (error: NostrReadOnlyMode) {
+            } catch (error: MissingPrivateKeyException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
@@ -103,7 +103,7 @@ class ExploreFeedsViewModel @Inject constructor(
                     )
                 }
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
-            } catch (error: NostrReadOnlyMode) {
+            } catch (error: MissingPrivateKeyException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)

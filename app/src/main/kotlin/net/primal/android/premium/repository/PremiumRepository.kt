@@ -13,7 +13,7 @@ import net.primal.android.nostr.ext.parseAndFoldPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndFoldPrimalUserNames
 import net.primal.android.nostr.ext.parseAndMapAsLeaderboardLegendEntries
 import net.primal.android.nostr.ext.parseAndMapAsOGLeaderboardEntries
-import net.primal.android.nostr.notary.NostrReadOnlyMode
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.premium.api.PremiumApi
 import net.primal.android.premium.api.model.CancelMembershipRequest
 import net.primal.android.premium.api.model.LegendLeaderboardOrderBy
@@ -53,7 +53,7 @@ class PremiumRepository @Inject constructor(
                         this.copy(premiumMembership = response.toPremiumMembership())
                     }
                 }?.premiumMembership
-            } catch (error: NostrReadOnlyMode) {
+            } catch (error: MissingPrivateKeyException) {
                 /* TODO(marko): should we catch this here and fail silently, or handle this in viewModel? */
                 Timber.w(error)
                 null

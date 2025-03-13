@@ -7,11 +7,10 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.notary.NostrReadOnlyMode
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.premium.manage.relay.PremiumRelayContract.UiEvent
 import net.primal.android.premium.manage.relay.PremiumRelayContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -61,7 +60,7 @@ class PremiumRelayViewModel @Inject constructor(
                     userId = activeAccountStore.activeUserId(),
                     url = state.value.relayUrl,
                 )
-            } catch (error: NostrReadOnlyMode) {
+            } catch (error: MissingPrivateKeyException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)

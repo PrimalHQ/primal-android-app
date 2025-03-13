@@ -20,7 +20,7 @@ import net.primal.android.navigation.profileIdOrThrow
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.notary.NostrReadOnlyMode
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.profile.follows.ProfileFollowsContract.UiEvent
 import net.primal.android.profile.follows.ProfileFollowsContract.UiState
@@ -151,7 +151,7 @@ class ProfileFollowsViewModel @Inject constructor(
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.FailedToFollowUser(error))
                 updateStateProfileUnfollowAndClearApprovalFlag(profileId)
-            } catch (error: NostrReadOnlyMode) {
+            } catch (error: MissingPrivateKeyException) {
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.FailedToFollowUser(error))
                 updateStateProfileUnfollowAndClearApprovalFlag(profileId)
@@ -183,7 +183,7 @@ class ProfileFollowsViewModel @Inject constructor(
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.FailedToUnfollowUser(error))
                 updateStateProfileFollowAndClearApprovalFlag(profileId)
-            } catch (error: NostrReadOnlyMode) {
+            } catch (error: MissingPrivateKeyException) {
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.FailedToUnfollowUser(error))
                 updateStateProfileFollowAndClearApprovalFlag(profileId)

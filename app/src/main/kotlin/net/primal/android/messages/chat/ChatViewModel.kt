@@ -32,7 +32,7 @@ import net.primal.android.navigation.profileIdOrThrow
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.notary.NostrReadOnlyMode
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -123,7 +123,7 @@ class ChatViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 messageRepository.markConversationAsRead(userId, participantId)
-            } catch (error: NostrReadOnlyMode) {
+            } catch (error: MissingPrivateKeyException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
@@ -140,7 +140,7 @@ class ChatViewModel @Inject constructor(
                     text = state.value.newMessageText,
                 )
                 setState { copy(newMessageText = "") }
-            } catch (error: NostrReadOnlyMode) {
+            } catch (error: MissingPrivateKeyException) {
                 Timber.w(error)
             } catch (error: NostrPublishException) {
                 Timber.w(error)

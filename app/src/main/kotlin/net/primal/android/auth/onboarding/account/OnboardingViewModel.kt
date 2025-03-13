@@ -28,7 +28,7 @@ import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.primal.upload.domain.UploadJob
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.content.ContentMetadata
-import net.primal.android.nostr.notary.NostrReadOnlyMode
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.profile.domain.ProfileMetadata
 import timber.log.Timber
 
@@ -184,7 +184,7 @@ class OnboardingViewModel @Inject constructor(
                     Timber.w(error)
                 } catch (error: WssException) {
                     Timber.w(error)
-                } catch (error: NostrReadOnlyMode) {
+                } catch (error: MissingPrivateKeyException) {
                     Timber.w(error)
                 }
             }
@@ -208,7 +208,7 @@ class OnboardingViewModel @Inject constructor(
                     Timber.w(error)
                 } catch (error: WssException) {
                     Timber.w(error)
-                } catch (error: NostrReadOnlyMode) {
+                } catch (error: MissingPrivateKeyException) {
                     Timber.w(error)
                 }
             }

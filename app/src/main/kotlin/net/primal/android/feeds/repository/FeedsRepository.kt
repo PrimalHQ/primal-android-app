@@ -33,9 +33,7 @@ import net.primal.android.nostr.model.primal.content.ContentDvmFeedMetadata
 import net.primal.android.nostr.model.primal.content.ContentPrimalDvmFeedMetadata
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventUserStats
-import net.primal.android.nostr.notary.NostrReadOnlyMode
 import net.primal.android.wallet.api.parseAsLNUrlOrNull
-import timber.log.Timber
 
 class FeedsRepository @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,

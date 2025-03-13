@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.notary.NostrReadOnlyMode
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import timber.log.Timber
 
 @Singleton
@@ -22,7 +22,7 @@ class ExchangeRateHandler @Inject constructor(
         try {
             val btcRate = walletRepository.getExchangeRate(userId = userId)
             setState { btcRate }
-        } catch (error: NostrReadOnlyMode) {
+        } catch (error: MissingPrivateKeyException) {
             Timber.e(error)
         } catch (error: WssException) {
             Timber.e(error)
