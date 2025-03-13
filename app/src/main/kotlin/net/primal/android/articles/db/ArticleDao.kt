@@ -40,7 +40,7 @@ interface ArticleDao {
         ORDER BY publishedAt DESC LIMIT 1
         """,
     )
-    fun observeArticle(articleId: String, authorId: String): Flow<Article>
+    fun observeArticle(articleId: String, authorId: String): Flow<Article?>
 
     @Transaction
     @Query(
@@ -50,5 +50,5 @@ interface ArticleDao {
         ORDER BY publishedAt DESC LIMIT 1
         """,
     )
-    fun observeArticleByEventId(eventId: String, authorId: String): Flow<Article>
+    fun observeArticleByEventId(eventId: String, authorId: String): Flow<Article?>
 }
