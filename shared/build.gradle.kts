@@ -1,4 +1,4 @@
-// import com.rickclephas.kmp.nativecoroutines.gradle.ExposedSeverity
+import co.touchlab.skie.configuration.DefaultArgumentInterop
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
@@ -9,7 +9,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.jetpack.room)
     alias(libs.plugins.ktorfit)
-//    alias(libs.plugins.swift.nativecoroutines)
+    alias(libs.plugins.touchlab.skie)
 }
 
 kotlin {
@@ -90,6 +90,9 @@ kotlin {
 
                 // Logging
                 implementation(libs.napier)
+
+                // Interop
+                implementation(libs.skie.configuration.annotations)
             }
         }
 
@@ -209,16 +212,30 @@ kotlin {
     }
 }
 
-// nativeCoroutines {
-//    exposedSeverity = ExposedSeverity.WARNING
-// }
-
 tasks.register("assembleXCFramework") {
     dependsOn("assemblePrimalSharedReleaseXCFramework")
 }
 
 room {
     schemaDirectory("$projectDir/schemas")
+}
+
+skie {
+    build {
+        produceDistributableFramework()
+    }
+
+    features {
+        enableFlowCombineConvertorPreview = true
+
+        group {
+            DefaultArgumentInterop.Enabled(false)
+        }
+    }
+
+    analytics {
+        enabled.set(false)
+    }
 }
 
 dependencies {
