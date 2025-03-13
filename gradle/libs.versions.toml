@@ -66,9 +66,9 @@ roboelectric = "4.13"
 security-app-authenticator = "1.0.0-beta01"
 security-crypto = "1.1.0-alpha06"
 security-identity-credential = "1.0.0-alpha03"
+skie = "0.10.1"
 spongycastle = "1.58.0.0"
 sqlcipher-android = "4.6.1"
-swift-nativecoroutines = "1.0.0-ALPHA-39"
 telephoto = "0.14.0"
 timber = "5.0.1"
 url-detector = "0.1.23"
@@ -250,6 +250,12 @@ androidx-security-app-authenticator = { module = "androidx.security:security-app
 androidx-security-identity-credential = { module = "androidx.security:security-identity-credential", version.ref = "security-identity-credential" }
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 
+#Interop
+skie-configuration-annotations = { module = "co.touchlab.skie:configuration-annotations", version.ref = "skie" }
+skie-configuration-annotations-iosarm64 = { module = "co.touchlab.skie:configuration-annotations-iosarm64", version.ref = "skie" }
+skie-configuration-annotations-iossimulatorarm64 = { module = "co.touchlab.skie:configuration-annotations-iossimulatorarm64", version.ref = "skie" }
+skie-configuration-annotations-iosx64  = { module = "co.touchlab.skie:configuration-annotation-iosx64", version.ref = "skie" }
+
 # Tests libs
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "jetpack-test-runner" }
@@ -283,5 +289,5 @@ compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 jetpack-room = { id = "androidx.room", version.ref = "jetpack-room" }
-swift-nativecoroutines = { id = "com.rickclephas.kmp.nativecoroutines", version.ref = "swift-nativecoroutines" }
 ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit" }
+touchlab-skie = { id = "co.touchlab.skie", version.ref = "skie" }
