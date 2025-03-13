@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 59,
-    "identityHash": "fc85738ebfa3ab95b90ffcf7ff4e5318",
+    "identityHash": "8f2ed8531f0f61e224dac09f29923161",
     "entities": [
       {
         "tableName": "PostData",
@@ -506,7 +506,7 @@
       },
       {
         "tableName": "EventUriNostr",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`position` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `noteId` TEXT NOT NULL, `uri` TEXT NOT NULL, `type` TEXT NOT NULL, `refEvent_alt` TEXT, `refHighlight_text` TEXT, `refHighlight_eventId` TEXT, `refHighlight_authorId` TEXT, `refHighlight_aTag` TEXT, `refNote_postId` TEXT, `refNote_createdAt` INTEGER, `refNote_content` TEXT, `refNote_authorId` TEXT, `refNote_authorName` TEXT, `refNote_authorAvatarCdnImage` TEXT, `refNote_authorInternetIdentifier` TEXT, `refNote_authorLightningAddress` TEXT, `refNote_authorLegendProfile` TEXT, `refNote_attachments` TEXT, `refNote_nostrUris` TEXT, `refNote_raw` TEXT, `refArticle_naddr` TEXT, `refArticle_aTag` TEXT, `refArticle_eventId` TEXT, `refArticle_articleId` TEXT, `refArticle_articleTitle` TEXT, `refArticle_authorId` TEXT, `refArticle_authorName` TEXT, `refArticle_authorAvatarCdnImage` TEXT, `refArticle_authorLegendProfile` TEXT, `refArticle_createdAt` INTEGER, `refArticle_raw` TEXT, `refArticle_articleImageCdnImage` TEXT, `refArticle_articleReadingTimeInMinutes` INTEGER, `refUser_userId` TEXT, `refUser_handle` TEXT, `refZap_senderId` TEXT, `refZap_senderAvatarCdnImage` TEXT, `refZap_senderPrimalLegendProfile` TEXT, `refZap_receiverId` TEXT, `refZap_receiverDisplayName` TEXT, `refZap_receiverAvatarCdnImage` TEXT, `refZap_receiverPrimalLegendProfile` TEXT, `refZap_zappedEventId` TEXT, `refZap_zappedEventContent` TEXT, `refZap_zappedEventNostrUris` TEXT, `refZap_zappedEventHashtags` TEXT, `refZap_amountInSats` REAL, `refZap_message` TEXT, `refZap_createdAt` INTEGER)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`position` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `eventId` TEXT NOT NULL, `uri` TEXT NOT NULL, `type` TEXT NOT NULL, `refEvent_alt` TEXT, `refHighlight_text` TEXT, `refHighlight_eventId` TEXT, `refHighlight_authorId` TEXT, `refHighlight_aTag` TEXT, `refNote_postId` TEXT, `refNote_createdAt` INTEGER, `refNote_content` TEXT, `refNote_authorId` TEXT, `refNote_authorName` TEXT, `refNote_authorAvatarCdnImage` TEXT, `refNote_authorInternetIdentifier` TEXT, `refNote_authorLightningAddress` TEXT, `refNote_authorLegendProfile` TEXT, `refNote_attachments` TEXT, `refNote_nostrUris` TEXT, `refNote_raw` TEXT, `refArticle_naddr` TEXT, `refArticle_aTag` TEXT, `refArticle_eventId` TEXT, `refArticle_articleId` TEXT, `refArticle_articleTitle` TEXT, `refArticle_authorId` TEXT, `refArticle_authorName` TEXT, `refArticle_authorAvatarCdnImage` TEXT, `refArticle_authorLegendProfile` TEXT, `refArticle_createdAt` INTEGER, `refArticle_raw` TEXT, `refArticle_articleImageCdnImage` TEXT, `refArticle_articleReadingTimeInMinutes` INTEGER, `refUser_userId` TEXT, `refUser_handle` TEXT, `refZap_senderId` TEXT, `refZap_senderAvatarCdnImage` TEXT, `refZap_senderPrimalLegendProfile` TEXT, `refZap_receiverId` TEXT, `refZap_receiverDisplayName` TEXT, `refZap_receiverAvatarCdnImage` TEXT, `refZap_receiverPrimalLegendProfile` TEXT, `refZap_zappedEventId` TEXT, `refZap_zappedEventContent` TEXT, `refZap_zappedEventNostrUris` TEXT, `refZap_zappedEventHashtags` TEXT, `refZap_amountInSats` REAL, `refZap_message` TEXT, `refZap_createdAt` INTEGER)",
         "fields": [
           {
             "fieldPath": "position",
@@ -515,8 +515,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "noteId",
-            "columnName": "noteId",
+            "fieldPath": "eventId",
+            "columnName": "eventId",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -817,14 +817,14 @@
         },
         "indices": [
           {
-            "name": "index_EventUriNostr_noteId_uri",
+            "name": "index_EventUriNostr_eventId_uri",
             "unique": true,
             "columnNames": [
-              "noteId",
+              "eventId",
               "uri"
             ],
             "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_EventUriNostr_noteId_uri` ON `${TABLE_NAME}` (`noteId`, `uri`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_EventUriNostr_eventId_uri` ON `${TABLE_NAME}` (`eventId`, `uri`)"
           }
         ],
         "foreignKeys": []
@@ -2054,7 +2054,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'fc85738ebfa3ab95b90ffcf7ff4e5318')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8f2ed8531f0f61e224dac09f29923161')"
     ]
   }
 }

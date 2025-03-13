@@ -22,7 +22,7 @@ data class FeedPost(
     val uris: List<EventUri>,
 
     @Relation(
-        entityColumn = "noteId",
+        entityColumn = "eventId",
         parentColumn = "postId",
     )
     val nostrUris: List<EventUriNostr>,

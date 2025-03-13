@@ -29,7 +29,7 @@ data class MessageConversation(
     val lastMessageUris: List<EventUri>,
 
     @Relation(
-        entityColumn = "noteId",
+        entityColumn = "eventId",
         parentColumn = "lastMessageId",
     )
     val lastMessageNostrUris: List<EventUriNostr>,

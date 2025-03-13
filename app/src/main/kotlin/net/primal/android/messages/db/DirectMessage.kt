@@ -17,7 +17,7 @@ data class DirectMessage(
     val eventUris: List<EventUri>,
 
     @Relation(
-        entityColumn = "noteId",
+        entityColumn = "eventId",
         parentColumn = "messageId",
     )
     val eventNostrUris: List<EventUriNostr>,

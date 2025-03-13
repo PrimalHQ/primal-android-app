@@ -13,12 +13,12 @@ import net.primal.android.notes.db.ReferencedNote
 import net.primal.android.notes.db.ReferencedUser
 import net.primal.android.notes.db.ReferencedZap
 
-@Entity(indices = [Index(value = ["noteId", "uri"], unique = true)])
+@Entity(indices = [Index(value = ["eventId", "uri"], unique = true)])
 @Serializable
 data class EventUriNostr(
     @PrimaryKey(autoGenerate = true)
     val position: Int = 0,
-    val noteId: String,
+    val eventId: String,
     val uri: String,
     val type: EventUriNostrType,
     @ColumnInfo("refEvent_alt") val referencedEventAlt: String? = null,

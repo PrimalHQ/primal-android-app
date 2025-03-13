@@ -318,7 +318,7 @@ fun List<String>.mapAsNoteNostrUriPO(
     }
 
     EventUriNostr(
-        noteId = eventId,
+        eventId = eventId,
         uri = link,
         type = type,
         referencedEventAlt = referencedNostrEvent?.tags?.findFirstAltDescription(),

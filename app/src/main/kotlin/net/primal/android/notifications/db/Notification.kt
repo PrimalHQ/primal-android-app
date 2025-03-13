@@ -28,6 +28,6 @@ data class Notification(
     @Relation(entityColumn = "eventId", parentColumn = "actionPostId")
     val actionPostUris: List<EventUri> = emptyList(),
 
-    @Relation(entityColumn = "noteId", parentColumn = "actionPostId")
+    @Relation(entityColumn = "eventId", parentColumn = "actionPostId")
     val actionPostNostrUris: List<EventUriNostr> = emptyList(),
 )
