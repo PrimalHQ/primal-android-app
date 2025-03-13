@@ -93,7 +93,7 @@ class HomeFeedViewModel @Inject constructor(
                     feedsRepository.fetchAndPersistNoteFeeds(userId = activeAccountStore.activeUserId())
                 }
             } catch (error: NostrReadOnlyMode) {
-                /* TODO(marko): what to do here? */
+                restoreDefaultNoteFeeds()
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)

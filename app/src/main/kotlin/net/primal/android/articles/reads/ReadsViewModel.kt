@@ -94,7 +94,7 @@ class ReadsViewModel @Inject constructor(
                     feedsRepository.fetchAndPersistArticleFeeds(userId = activeAccountStore.activeUserId())
                 }
             } catch (error: NostrReadOnlyMode) {
-                /* TODO(marko): what to do here? */
+                restoreDefaultReadsFeeds()
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
