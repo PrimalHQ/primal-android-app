@@ -1,8 +1,8 @@
-package net.primal.core.coroutines
+package net.primal.core.utils.coroutines
 
 import kotlinx.coroutines.CoroutineDispatcher
 
-internal interface DispatcherProvider {
+interface DispatcherProvider {
     fun io(): CoroutineDispatcher
     fun main(): CoroutineDispatcher
 }
