@@ -229,10 +229,12 @@ lightning-kmp = { module = "fr.acinq.lightning:lightning-kmp", version.ref = "ac
 lightning-kmp-iosarm64 = { module = "fr.acinq.lightning:lightning-kmp-iosarm64", version.ref = "acinq-lightning-kmp" }
 lightning-kmp-iossimulatorarm64 = { module = "fr.acinq.lightning:lightning-kmp-iossimulatorarm64", version.ref = "acinq-lightning-kmp" }
 lightning-kmp-iosx64 = { module = "fr.acinq.lightning:lightning-kmp-iosx64", version.ref = "acinq-lightning-kmp" }
+lightning-kmp-jvm = { module = "fr.acinq.lightning:lightning-kmp-jvm", version.ref = "acinq-lightning-kmp" }
 bitcoin-kmp = { module = "fr.acinq.bitcoin:bitcoin-kmp", version.ref = "acinq-bitcoin-kmp"}
 bitcoin-kmp-iosarm64 = { module = "fr.acinq.bitcoin:bitcoin-kmp-iosarm64", version.ref = "acinq-bitcoin-kmp"}
 bitcoin-kmp-iossimulatorarm64 = { module = "fr.acinq.bitcoin:bitcoin-kmp-iossimulatorarm64", version.ref = "acinq-bitcoin-kmp"}
 bitcoin-kmp-iosx64 = { module = "fr.acinq.bitcoin:bitcoin-kmp-iosx64", version.ref = "acinq-bitcoin-kmp"}
+bitcoin-kmp-jvm = { module = "fr.acinq.bitcoin:bitcoin-kmp-jvm", version.ref = "acinq-bitcoin-kmp"}
 secp256k1 = { module = "fr.acinq.secp256k1:secp256k1", version.ref = "acinq-secp256k1-kmp" }
 secp256k1-kmp = { module = "fr.acinq.secp256k1:secp256k1-kmp", version.ref = "acinq-secp256k1-kmp" }
 secp256k1-kmp-iosarm64 = { module = "fr.acinq.secp256k1:secp256k1-kmp-iosarm64", version.ref = "acinq-secp256k1-kmp" }
@@ -270,6 +272,7 @@ mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockk" }
 kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotest-assertions-json = { module = "io.kotest:kotest-assertions-json", version.ref = "kotest" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 
 
 [bundles]

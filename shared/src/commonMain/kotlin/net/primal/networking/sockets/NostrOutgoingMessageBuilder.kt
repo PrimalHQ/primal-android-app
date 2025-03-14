@@ -7,7 +7,7 @@ import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import net.primal.PrimalLib
 
-fun JsonObject.buildNostrREQMessage(subscriptionId: String): String {
+internal fun JsonObject.buildNostrREQMessage(subscriptionId: String): String {
     return buildJsonArray {
         add(NostrVerb.Outgoing.REQ.toString())
         add(subscriptionId)
@@ -15,21 +15,21 @@ fun JsonObject.buildNostrREQMessage(subscriptionId: String): String {
     }.toString()
 }
 
-fun JsonObject.buildNostrEVENTMessage(): String {
+internal fun JsonObject.buildNostrEVENTMessage(): String {
     return buildJsonArray {
         add(NostrVerb.Outgoing.EVENT.toString())
         add(this@buildNostrEVENTMessage)
     }.toString()
 }
 
-fun JsonObject.buildNostrAUTHMessage(): String {
+internal fun JsonObject.buildNostrAUTHMessage(): String {
     return buildJsonArray {
         add(NostrVerb.Outgoing.AUTH.toString())
         add(this@buildNostrAUTHMessage)
     }.toString()
 }
 
-fun JsonObject.buildNostrCOUNTMessage(subscriptionId: String): String {
+internal fun JsonObject.buildNostrCOUNTMessage(subscriptionId: String): String {
     return buildJsonArray {
         add(NostrVerb.Outgoing.COUNT.toString())
         add(subscriptionId)
@@ -37,7 +37,7 @@ fun JsonObject.buildNostrCOUNTMessage(subscriptionId: String): String {
     }.toString()
 }
 
-fun String.buildNostrCLOSEMessage(): String {
+internal fun String.buildNostrCLOSEMessage(): String {
     return buildJsonArray {
         add(NostrVerb.Outgoing.CLOSE.toString())
         add(this@buildNostrCLOSEMessage)
@@ -45,4 +45,4 @@ fun String.buildNostrCLOSEMessage(): String {
 }
 
 @OptIn(ExperimentalUuidApi::class)
-fun Uuid.toPrimalSubscriptionId(): String = "${PrimalLib.appName}-$this"
+internal fun Uuid.toPrimalSubscriptionId(): String = "${PrimalLib.appName}-$this"

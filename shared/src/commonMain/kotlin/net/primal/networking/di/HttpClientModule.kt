@@ -5,7 +5,7 @@ import io.ktor.client.HttpClient
 import net.primal.networking.http.createHttpClientEngine
 import net.primal.networking.http.installSharedHttpClientConfiguration
 import net.primal.networking.http.installWebSocketsHttpClientConfiguration
-import net.primal.serialization.json.NostrJson
+import net.primal.data.serialization.NostrJson
 import org.koin.core.qualifier.Qualifier
 import org.koin.dsl.module
 

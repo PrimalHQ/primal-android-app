@@ -5,9 +5,9 @@ import androidx.sqlite.driver.NativeSQLiteDriver
 import kotlinx.cinterop.ExperimentalForeignApi
 import net.primal.core.coroutines.DispatcherProvider
 import net.primal.core.coroutines.IOSDispatcherProvider
-import net.primal.db.PrimalDatabase
-import net.primal.db.buildPrimalDatabase
-import net.primal.db.getDatabaseBuilder
+import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.buildPrimalDatabase
+import net.primal.data.local.db.getDatabaseBuilder
 import net.primal.networking.config.domain.AppConfig
 import net.primal.networking.config.store.AppConfigDataStoreFactory
 import org.koin.dsl.module
