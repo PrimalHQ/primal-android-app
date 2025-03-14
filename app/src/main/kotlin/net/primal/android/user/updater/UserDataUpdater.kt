@@ -38,24 +38,21 @@ class UserDataUpdater @AssistedInject constructor(
                 lastTimeFetched = Instant.now()
             } catch (error: WssException) {
                 Timber.w(error)
+            } catch (error: MissingPrivateKeyException) {
+                Timber.w(error)
+            } catch (error: NostrSignUnauthorized) {
+                Timber.w(error)
             }
         }
     }
 
     private suspend fun updateData() {
-        /* TODO(marko): maybe all of this should go in a try catch? */
         settingsRepository.fetchAndPersistAppSettings(userId = userId)
         settingsRepository.ensureZapConfig(userId = userId)
         premiumRepository.fetchMembershipStatus(userId = userId)
         relayRepository.fetchAndUpdateUserRelays(userId = userId)
         userRepository.fetchAndUpdateUserAccount(userId = userId)
         bookmarksRepository.fetchAndPersistPublicBookmarks(userId = userId)
-        try {
-            walletRepository.fetchUserWalletInfoAndUpdateUserAccount(userId = userId)
-        } catch (error: MissingPrivateKeyException) {
-            Timber.w(error)
-        } catch (error: NostrSignUnauthorized) {
-            Timber.w(error)
-        }
+        walletRepository.fetchUserWalletInfoAndUpdateUserAccount(userId = userId)
     }
 }

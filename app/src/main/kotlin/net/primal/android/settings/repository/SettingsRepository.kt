@@ -123,7 +123,7 @@ class SettingsRepository @Inject constructor(
                 string = response.userSettings?.content ?: response.defaultSettings?.content,
             )
         } catch (error: MissingPrivateKeyException) {
-            Timber.w(error) /* TODO(marko): should we catch this here? */
+            Timber.w(error)
             null
         }
 

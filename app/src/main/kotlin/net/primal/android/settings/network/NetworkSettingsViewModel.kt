@@ -176,7 +176,7 @@ class NetworkSettingsViewModel @Inject constructor(
             setState { copy(error = UiState.NetworkSettingsError.FailedToAddRelay(error)) }
         } catch (error: MissingPrivateKeyException) {
             Timber.w(error)
-            setState { copy(error = UiState.NetworkSettingsError.FailedToAddRelay(error)) } /* TODO(marko): probably should make a new error for this */
+            setState { copy(error = UiState.NetworkSettingsError.FailedToAddRelay(error)) }
         } catch (error: NostrPublishException) {
             Timber.w(error)
             setState { copy(error = UiState.NetworkSettingsError.FailedToAddRelay(error)) }

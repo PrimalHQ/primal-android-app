@@ -87,6 +87,7 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
                     )
                 }
             } catch (error: MissingPrivateKeyException) {
+                setState { copy(creatingSecret = false) }
                 Timber.w(error)
             } catch (error: WssException) {
                 setState { copy(creatingSecret = false) }

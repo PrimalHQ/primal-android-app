@@ -34,12 +34,7 @@ class NostrNotary @Inject constructor(
     private fun findNsecOrThrow(pubkey: String): String {
         return try {
             val npub = Hex.decode(pubkey).toNpub()
-            val nsec = credentialsStore.findOrThrow(npub = npub).nsec
-            if (nsec == null) {
-                throw MissingPrivateKeyException()
-            }
-
-            nsec
+            credentialsStore.findOrThrow(npub = npub).nsec ?: throw MissingPrivateKeyException()
         } catch (error: IllegalArgumentException) {
             Timber.w(error)
             throw NostrSignUnauthorized()

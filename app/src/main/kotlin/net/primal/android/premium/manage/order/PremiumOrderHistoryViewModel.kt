@@ -103,7 +103,6 @@ class PremiumOrderHistoryViewModel @Inject constructor(
                     premiumRepository.cancelSubscription(userId = userId, purchaseJson = purchase.playSubscriptionJson)
                     premiumRepository.fetchMembershipStatus(activeAccountStore.activeUserId())
                 } catch (error: MissingPrivateKeyException) {
-                    /* TODO(marko): not sure if we should do something here, I don't think the user can get here, silent fail might be good enough */
                     Timber.w(error)
                 } catch (error: WssException) {
                     setState { copy(error = MembershipError.FailedToCancelSubscription(cause = error)) }

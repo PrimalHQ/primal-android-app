@@ -160,8 +160,7 @@ class PremiumBuyingViewModel @Inject constructor(
                         )
                         setState { copy(stage = PremiumStage.Success) }
                     } catch (error: MissingPrivateKeyException) {
-                        /* TODO(marko): should we do something else here? */
-                        Timber.e(error)
+                        Timber.w(error)
                     } catch (error: WssException) {
                         Timber.e(error)
                         this@PremiumBuyingViewModel.purchase = purchase

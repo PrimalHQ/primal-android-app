@@ -419,7 +419,6 @@ class NoteEditorViewModel @AssistedInject constructor(
         } catch (error: MissingPrivateKeyException) {
             Timber.w(error)
             updateNoteAttachmentState(attachment = updatedAttachment.copy(uploadError = error))
-            /* TODO(marko): what to do here? */
         }
     }
 

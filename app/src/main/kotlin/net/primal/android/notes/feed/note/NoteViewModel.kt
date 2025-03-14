@@ -121,7 +121,7 @@ class NoteViewModel @AssistedInject constructor(
                 Timber.w(error)
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
             } catch (error: MissingPrivateKeyException) {
-                /* TODO(marko): what to do here? */
+                setState { copy(error = UiError.MissingPrivateKey) }
                 Timber.w(error)
             }
         }
@@ -143,7 +143,7 @@ class NoteViewModel @AssistedInject constructor(
                 Timber.w(error)
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
             } catch (error: MissingPrivateKeyException) {
-                /* TODO(marko): what to do here? */
+                setState { copy(error = UiError.MissingPrivateKey) }
                 Timber.w(error)
             }
         }
@@ -243,8 +243,8 @@ class NoteViewModel @AssistedInject constructor(
                 Timber.w(error)
                 setState { copy(shouldApproveBookmark = true) }
             } catch (error: MissingPrivateKeyException) {
+                setState { copy(error = UiError.MissingPrivateKey) }
                 Timber.w(error)
-                /* TODO(marko): what to do here? */
             }
         }
 

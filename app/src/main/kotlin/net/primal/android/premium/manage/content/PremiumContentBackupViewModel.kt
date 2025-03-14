@@ -67,7 +67,6 @@ class PremiumContentBackupViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.e(error)
             } catch (error: MissingPrivateKeyException) {
-                /* TODO(marko): what to do here? */
                 Timber.e(error)
             }
         }
@@ -93,7 +92,6 @@ class PremiumContentBackupViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.e(error)
             } catch (error: MissingPrivateKeyException) {
-                /* TODO(marko): what to do here? */
                 Timber.e(error)
             }
         }
@@ -155,10 +153,11 @@ class PremiumContentBackupViewModel @Inject constructor(
         viewModelScope.launch {
             monitorMutex.withLock {
                 if (monitorBroadcasting == null) {
-                    monitorBroadcasting = runCatching {
-                        subscribeToBroadcastMonitor(userId = activeAccountStore.activeUserId())
-                    }.getOrNull()
-                    /* TODO(marko): what to do here? */
+                    try {
+                        monitorBroadcasting = subscribeToBroadcastMonitor(userId = activeAccountStore.activeUserId())
+                    } catch (error: MissingPrivateKeyException) {
+                        Timber.w(error)
+                    }
                 }
             }
         }
@@ -194,7 +193,6 @@ class PremiumContentBackupViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.e(error)
             } catch (error: MissingPrivateKeyException) {
-                /* TODO(marko): what to do here? */
                 Timber.e(error)
             }
         }
@@ -207,7 +205,6 @@ class PremiumContentBackupViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.e(error)
             } catch (error: MissingPrivateKeyException) {
-                /* TODO(marko): what to do here? */
                 Timber.e(error)
             }
         }

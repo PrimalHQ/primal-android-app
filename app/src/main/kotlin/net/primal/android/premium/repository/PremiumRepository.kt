@@ -54,7 +54,6 @@ class PremiumRepository @Inject constructor(
                     }
                 }?.premiumMembership
             } catch (error: MissingPrivateKeyException) {
-                /* TODO(marko): should we catch this here and fail silently, or handle this in viewModel? */
                 Timber.w(error)
                 null
             }

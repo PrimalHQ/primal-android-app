@@ -6,7 +6,7 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 interface KeysSettingsContract {
     data class UiState(
         val avatarCdnImage: CdnImage? = null,
-        val nsec: String = "",
+        val nsec: String? = null,
         val npub: String = "",
         val legendaryCustomization: LegendaryCustomization? = null,
     )

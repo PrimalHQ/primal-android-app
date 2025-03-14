@@ -120,8 +120,8 @@ class ArticleViewModel @Inject constructor(
                 Timber.w(error)
                 setState { copy(shouldApproveBookmark = true) }
             } catch (error: MissingPrivateKeyException) {
+                setState { copy(error = UiError.MissingPrivateKey) }
                 Timber.w(error)
-                /* TODO(marko): what to do here? */
             }
         }
 

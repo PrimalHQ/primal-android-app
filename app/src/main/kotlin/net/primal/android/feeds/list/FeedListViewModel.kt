@@ -296,7 +296,6 @@ class FeedListViewModel @AssistedInject constructor(
                     specKind = specKind,
                 )
             } catch (error: MissingPrivateKeyException) {
-                /* TODO(marko): what to do here? */
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)

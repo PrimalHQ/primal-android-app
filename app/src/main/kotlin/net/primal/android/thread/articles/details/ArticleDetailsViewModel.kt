@@ -292,7 +292,7 @@ class ArticleDetailsViewModel @Inject constructor(
                 } catch (error: MissingRelaysException) {
                     Timber.w(error)
                 } catch (error: MissingPrivateKeyException) {
-                    /* TODO(marko): what to do here? */
+                    setState { copy(error = UiError.MissingPrivateKey) }
                     Timber.w(error)
                 }
             }
@@ -319,7 +319,7 @@ class ArticleDetailsViewModel @Inject constructor(
                 } catch (error: MissingRelaysException) {
                     Timber.w(error)
                 } catch (error: MissingPrivateKeyException) {
-                    /* TODO(marko): what to do here? */
+                    setState { copy(error = UiError.MissingPrivateKey) }
                     Timber.w(error)
                 }
             }
@@ -351,7 +351,7 @@ class ArticleDetailsViewModel @Inject constructor(
                 followUnfollowResult.exceptionOrNull()?.let { error ->
                     when (error) {
                         is WssException, is ProfileRepository.FollowListNotFound,
-                        is NostrPublishException, is MissingPrivateKeyException,
+                        is NostrPublishException,
                             -> {
                             Timber.e(error)
                             setState {
@@ -364,6 +364,11 @@ class ArticleDetailsViewModel @Inject constructor(
                                     },
                                 )
                             }
+                        }
+
+                        is MissingPrivateKeyException -> {
+                            Timber.e(error)
+                            setState { copy(isAuthorFollowed = isAuthorFollowed, error = UiError.MissingPrivateKey) }
                         }
 
                         else -> throw error
@@ -415,6 +420,7 @@ class ArticleDetailsViewModel @Inject constructor(
             setState { copy(isHighlighted = true) }
             onSuccess?.invoke(highlightNevent)
         } catch (error: MissingPrivateKeyException) {
+            setState { copy(error = UiError.MissingPrivateKey) }
             Timber.w(error)
         } catch (error: NostrPublishException) {
             Timber.w(error)
@@ -446,6 +452,7 @@ class ArticleDetailsViewModel @Inject constructor(
 
                 setState { copy(isHighlighted = false) }
             } catch (error: MissingPrivateKeyException) {
+                setState { copy(error = UiError.MissingPrivateKey) }
                 Timber.w(error)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
