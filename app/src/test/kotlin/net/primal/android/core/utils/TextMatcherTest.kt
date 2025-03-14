@@ -1,8 +1,10 @@
 package net.primal.android.core.utils
 
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.collections.shouldNotContain
 import org.junit.Test
 
@@ -57,5 +59,89 @@ class TextMatcherTest {
         val actual = matcher.matches().map { it.value }
         actual.shouldContain(hashtags.first())
         actual.shouldNotContain(hashtags.last())
+    }
+
+    @Test
+    fun `matches should prioritize longest matching hashtags first`() {
+        val hashtags = listOf("#grownostr", "#artstr", "nostr", "art")
+        val matcher = TextMatcher(
+            content = "#art #nostr #artstr #grownostr",
+            texts = hashtags,
+        )
+
+        val actual = matcher.matches().map { it.value }
+        actual.shouldContainInOrder(hashtags.first())
+    }
+
+    @Test
+    fun `matches should return an empty list when no hashtags match`() {
+        val hashtags = listOf("#NotInText", "#AbsentTag")
+        val matcher = TextMatcher(
+            content = "This text contains no matching hashtags.",
+            texts = hashtags,
+        )
+
+        val actual = matcher.matches()
+        actual.shouldBeEmpty()
+    }
+
+    @Test
+    fun `matches should correctly handle overlapping hashtags`() {
+        val hashtags = listOf("#love", "#lovely", "#lovelyday")
+        val matcher = TextMatcher(
+            content = "What a #lovelyday to spread #love and enjoy a #lovely moment.",
+            texts = hashtags,
+        )
+
+        val actual = matcher.matches().map { it.value }
+        actual.shouldContainInOrder("#lovelyday", "#lovely", "#love")
+    }
+
+    @Test
+    fun `matches should match single-character hashtags`() {
+        val hashtags = listOf("#A", "#B", "#C")
+        val matcher = TextMatcher(
+            content = "Check out these: #A #B #C",
+            texts = hashtags,
+        )
+
+        val actual = matcher.matches().map { it.value }
+        actual.shouldContainAll("#A", "#B", "#C")
+    }
+
+    @Test
+    fun `matches should match case-sensitive hashtags correctly`() {
+        val hashtags = listOf("#Hello", "#HELLO", "#hello")
+        val matcher = TextMatcher(
+            content = "Greetings! #Hello #HELLO #hello",
+            texts = hashtags,
+        )
+
+        val actual = matcher.matches().map { it.value }
+        actual.shouldContainAll("#Hello", "#HELLO", "#hello")
+    }
+
+    @Test
+    fun `matches should not match partial words`() {
+        val hashtags = listOf("#car")
+        val matcher = TextMatcher(
+            content = "My favorite cartoon is not related to #car.",
+            texts = hashtags,
+        )
+
+        val actual = matcher.matches().map { it.value }
+        actual.shouldContain("#car")
+    }
+
+    @Test
+    fun `matches should prioritize longest matching hashtags`() {
+        val hashtags = listOf("#nostr", "#nostrich", "#nostrcommunity")
+        val matcher = TextMatcher(
+            content = "Join the #nostrcommunity for #nostrich updates on #nostr tech!",
+            texts = hashtags,
+        )
+
+        val actual = matcher.matches().map { it.value }
+        actual.shouldContainInOrder("#nostrcommunity", "#nostrich", "#nostr")
     }
 }
