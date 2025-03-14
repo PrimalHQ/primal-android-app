@@ -1,10 +1,10 @@
-package net.primal.core.di
+package net.primal
 
 import androidx.datastore.core.DataStore
 import androidx.sqlite.driver.NativeSQLiteDriver
 import kotlinx.cinterop.ExperimentalForeignApi
-import net.primal.core.coroutines.DispatcherProvider
-import net.primal.core.coroutines.IOSDispatcherProvider
+import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.coroutines.IOSDispatcherProvider
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.local.db.buildPrimalDatabase
 import net.primal.data.local.db.getDatabaseBuilder

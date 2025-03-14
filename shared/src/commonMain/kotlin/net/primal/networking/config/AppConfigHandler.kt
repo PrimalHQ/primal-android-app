@@ -5,7 +5,7 @@ import kotlin.time.Duration
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import net.primal.core.coroutines.DispatcherProvider
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.networking.config.api.ApiConfigResponse
 import net.primal.networking.config.api.WellKnownApi
 import net.primal.networking.config.domain.DEFAULT_APP_CONFIG

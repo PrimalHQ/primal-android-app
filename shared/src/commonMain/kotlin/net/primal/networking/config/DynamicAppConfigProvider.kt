@@ -4,7 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import net.primal.core.coroutines.DispatcherProvider
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.networking.config.store.AppConfigDataStore
 
 internal class DynamicAppConfigProvider(
