@@ -55,7 +55,7 @@ class CredentialsStoreTest {
         runTest {
             val credentialsStore = CredentialsStore(persistence = persistence)
             shouldThrow<InvalidNostrPrivateKeyException> {
-                credentialsStore.save(nostrKey = "invalid nsec")
+                credentialsStore.saveNsec(nostrKey = "invalid nsec")
             }
         }
 
@@ -63,7 +63,7 @@ class CredentialsStoreTest {
     fun `save stores nsec to data store as Credential`() =
         runTest {
             val credentialsStore = CredentialsStore(persistence = persistence)
-            credentialsStore.save(nostrKey = expectedNsec)
+            credentialsStore.saveNsec(nostrKey = expectedNsec)
             advanceUntilIdleAndDelay()
 
             val actual = credentialsStore.credentials.value
@@ -75,7 +75,7 @@ class CredentialsStoreTest {
     fun `save returns pubkey in hex value`() =
         runTest {
             val credentialsStore = CredentialsStore(persistence = persistence)
-            val actual = credentialsStore.save(nostrKey = expectedNsec)
+            val actual = credentialsStore.saveNsec(nostrKey = expectedNsec)
             actual shouldBe Bech32.decodeBytes(expectedCredential.npub).second.toHex()
         }
 

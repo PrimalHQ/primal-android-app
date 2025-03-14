@@ -6,6 +6,7 @@ import java.time.Instant
 import kotlin.time.Duration
 import net.primal.android.bookmarks.BookmarksRepository
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.nostr.notary.NostrSignUnauthorized
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.settings.repository.SettingsRepository
@@ -37,6 +38,10 @@ class UserDataUpdater @AssistedInject constructor(
                 lastTimeFetched = Instant.now()
             } catch (error: WssException) {
                 Timber.w(error)
+            } catch (error: MissingPrivateKeyException) {
+                Timber.w(error)
+            } catch (error: NostrSignUnauthorized) {
+                Timber.w(error)
             }
         }
     }
@@ -48,10 +53,6 @@ class UserDataUpdater @AssistedInject constructor(
         relayRepository.fetchAndUpdateUserRelays(userId = userId)
         userRepository.fetchAndUpdateUserAccount(userId = userId)
         bookmarksRepository.fetchAndPersistPublicBookmarks(userId = userId)
-        try {
-            walletRepository.fetchUserWalletInfoAndUpdateUserAccount(userId = userId)
-        } catch (error: NostrSignUnauthorized) {
-            Timber.w(error)
-        }
+        walletRepository.fetchUserWalletInfoAndUpdateUserAccount(userId = userId)
     }
 }

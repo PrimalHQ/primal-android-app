@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
 import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationContract.UiEvent
 import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationContract.UiState
@@ -65,6 +66,8 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
                         editedShoutout = event.editedShoutout,
                     ),
                 )
+            } catch (error: MissingPrivateKeyException) {
+                Timber.e(error)
             } catch (error: WssException) {
                 Timber.e(error)
             } finally {

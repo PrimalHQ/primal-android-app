@@ -30,7 +30,7 @@ class CreateAccountHandler @Inject constructor(
         interests: List<FollowGroup>,
     ) = withContext(dispatchers.io()) {
         runCatching {
-            val userId = credentialsStore.save(nostrKey = privateKey)
+            val userId = credentialsStore.saveNsec(nostrKey = privateKey)
 
             relayRepository.bootstrapUserRelays(userId)
             userRepository.setProfileMetadata(userId = userId, profileMetadata = profileMetadata)
@@ -42,7 +42,7 @@ class CreateAccountHandler @Inject constructor(
             credentialsStore.removeCredentialByNsec(nsec = privateKey.assureValidNsec())
             throw AccountCreationException(cause = exception)
         }.onSuccess {
-            authRepository.login(nostrKey = privateKey)
+            authRepository.loginWithNsec(nostrKey = privateKey)
         }
     }
 

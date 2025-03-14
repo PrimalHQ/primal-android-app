@@ -21,6 +21,7 @@ import net.primal.android.auth.repository.LoginHandler
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.isValidNostrPrivateKey
+import net.primal.android.core.utils.isValidNostrPublicKey
 import net.primal.android.crypto.bech32ToHexOrThrow
 import net.primal.android.crypto.extractKeyPairFromPrivateKeyOrThrow
 import net.primal.android.networking.sockets.errors.WssException
@@ -70,7 +71,13 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(loading = true) }
             try {
-                loginHandler.login(nostrKey)
+                val loginType = if (state.value.isNpubLogin == true) {
+                    LoginHandler.LoginType.Npub
+                } else {
+                    LoginHandler.LoginType.Nsec
+                }
+
+                loginHandler.login(nostrKey = nostrKey, loginType = loginType)
                 setEffect(SideEffect.LoginSuccess)
             } catch (error: WssException) {
                 Timber.w(error)
@@ -95,25 +102,43 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             when {
                 input.isValidNostrPrivateKey() -> {
-                    setState { copy(fetchingProfileDetails = true) }
+                    setState { copy(isValidKey = true, isNpubLogin = false) }
                     val (_, npub) = input.extractKeyPairFromPrivateKeyOrThrow()
-                    val userId = npub.bech32ToHexOrThrow()
-                    val profile = withContext(dispatcherProvider.io()) {
-                        try {
-                            profileRepository.requestProfileUpdate(profileId = userId)
-                            profileRepository.findProfileDataOrNull(profileId = userId)
-                        } catch (error: WssException) {
-                            Timber.w(error)
-                            null
-                        }
-                    }
-                    setState { copy(fetchingProfileDetails = false, profileDetails = profile?.asProfileDetailsUi()) }
+                    fetchProfileDetails(npub = npub)
+                }
+
+                input.isValidNostrPublicKey() -> {
+                    setState { copy(isValidKey = true, isNpubLogin = true) }
+                    fetchProfileDetails(npub = input)
                 }
 
                 else -> {
-                    setState { copy(fetchingProfileDetails = false, profileDetails = null) }
+                    setState {
+                        copy(
+                            fetchingProfileDetails = false,
+                            profileDetails = null,
+                            isValidKey = false,
+                            isNpubLogin = null,
+                        )
+                    }
                 }
             }
         }
     }
+
+    private fun fetchProfileDetails(npub: String) =
+        viewModelScope.launch {
+            setState { copy(fetchingProfileDetails = true) }
+            val userId = npub.bech32ToHexOrThrow()
+            val profile = withContext(dispatcherProvider.io()) {
+                try {
+                    profileRepository.requestProfileUpdate(profileId = userId)
+                    profileRepository.findProfileDataOrNull(profileId = userId)
+                } catch (error: WssException) {
+                    Timber.w(error)
+                    null
+                }
+            }
+            setState { copy(fetchingProfileDetails = false, profileDetails = profile?.asProfileDetailsUi()) }
+        }
 }

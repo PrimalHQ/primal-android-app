@@ -78,7 +78,7 @@ class CreateAccountHandlerTest {
             )
 
             coVerify {
-                authRepository.login(
+                authRepository.loginWithNsec(
                     withArg { it shouldBe keyPair.privateKey },
                 )
             }
@@ -90,7 +90,7 @@ class CreateAccountHandlerTest {
             val keyPair = CryptoUtils.generateHexEncodedKeypair()
             val userRepository = mockk<UserRepository>(relaxed = true)
             val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
-                coEvery { save(any()) } returns keyPair.pubKey
+                coEvery { saveNsec(any()) } returns keyPair.pubKey
             }
 
             val handler = createAccountHandler(
@@ -119,7 +119,7 @@ class CreateAccountHandlerTest {
             val keyPair = CryptoUtils.generateHexEncodedKeypair()
             val profileRepository = mockk<ProfileRepository>(relaxed = true)
             val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
-                coEvery { save(any()) } returns keyPair.pubKey
+                coEvery { saveNsec(any()) } returns keyPair.pubKey
             }
 
             val handler = createAccountHandler(
@@ -148,7 +148,7 @@ class CreateAccountHandlerTest {
             val keyPair = CryptoUtils.generateHexEncodedKeypair()
             val profileRepository = mockk<ProfileRepository>(relaxed = true)
             val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
-                coEvery { save(any()) } returns keyPair.pubKey
+                coEvery { saveNsec(any()) } returns keyPair.pubKey
             }
 
             val handler = createAccountHandler(
@@ -189,7 +189,7 @@ class CreateAccountHandlerTest {
             val keyPair = CryptoUtils.generateHexEncodedKeypair()
             val relayRepository = mockk<RelayRepository>(relaxed = true)
             val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
-                coEvery { save(any()) } returns keyPair.pubKey
+                coEvery { saveNsec(any()) } returns keyPair.pubKey
             }
 
             val handler = createAccountHandler(
@@ -216,7 +216,7 @@ class CreateAccountHandlerTest {
             val keyPair = CryptoUtils.generateHexEncodedKeypair()
             val settingsRepository = mockk<SettingsRepository>(relaxed = true)
             val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
-                coEvery { save(any()) } returns keyPair.pubKey
+                coEvery { saveNsec(any()) } returns keyPair.pubKey
             }
 
             val handler = createAccountHandler(

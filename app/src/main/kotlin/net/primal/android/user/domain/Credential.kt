@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Credential(
-    val nsec: String,
+    val nsec: String?,
     val npub: String,
 )

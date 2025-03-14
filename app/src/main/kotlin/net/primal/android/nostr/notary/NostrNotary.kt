@@ -2,7 +2,6 @@ package net.primal.android.nostr.notary
 
 import fr.acinq.secp256k1.Hex
 import javax.inject.Inject
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
@@ -35,7 +34,7 @@ class NostrNotary @Inject constructor(
     private fun findNsecOrThrow(pubkey: String): String {
         return try {
             val npub = Hex.decode(pubkey).toNpub()
-            credentialsStore.findOrThrow(npub = npub).nsec
+            credentialsStore.findOrThrow(npub = npub).nsec ?: throw MissingPrivateKeyException()
         } catch (error: IllegalArgumentException) {
             Timber.w(error)
             throw NostrSignUnauthorized()

@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.premium.manage.media.PremiumMediaManagementContract.SideEffect
 import net.primal.android.premium.manage.media.PremiumMediaManagementContract.UiEvent
 import net.primal.android.premium.manage.media.PremiumMediaManagementContract.UiState
@@ -95,6 +96,8 @@ class PremiumMediaManagementViewModel @Inject constructor(
                 }
 
                 setState { copy(mediaItems = uploads) }
+            } catch (error: MissingPrivateKeyException) {
+                Timber.e(error)
             } catch (error: WssException) {
                 Timber.e(error)
             }
@@ -113,6 +116,8 @@ class PremiumMediaManagementViewModel @Inject constructor(
                         otherInBytes = stats.otherFilesInBytes,
                     )
                 }
+            } catch (error: MissingPrivateKeyException) {
+                Timber.e(error)
             } catch (error: WssException) {
                 Timber.e(error)
             } finally {
@@ -137,6 +142,8 @@ class PremiumMediaManagementViewModel @Inject constructor(
 
                 fetchMediaStats()
                 premiumRepository.fetchMembershipStatus(userId = userId)
+            } catch (error: MissingPrivateKeyException) {
+                Timber.e(error)
             } catch (error: WssException) {
                 Timber.e(error)
             }

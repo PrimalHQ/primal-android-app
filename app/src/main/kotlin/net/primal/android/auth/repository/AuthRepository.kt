@@ -15,8 +15,14 @@ class AuthRepository @Inject constructor(
     private val userRepository: UserRepository,
     private val accountsStore: UserAccountsStore,
 ) {
-    suspend fun login(nostrKey: String): String {
-        val userId = credentialsStore.save(nostrKey)
+    suspend fun loginWithNsec(nostrKey: String): String {
+        val userId = credentialsStore.saveNsec(nostrKey)
+        activeAccountStore.setActiveUserId(userId)
+        return userId
+    }
+
+    suspend fun loginWithNpub(npub: String): String {
+        val userId = credentialsStore.saveNpub(npub = npub)
         activeAccountStore.setActiveUserId(userId)
         return userId
     }

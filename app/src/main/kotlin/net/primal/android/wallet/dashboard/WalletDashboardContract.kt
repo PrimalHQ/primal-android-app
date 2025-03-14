@@ -13,6 +13,7 @@ import net.primal.android.wallet.transactions.list.TransactionListItemDataUi
 interface WalletDashboardContract {
     data class UiState(
         val transactions: Flow<PagingData<TransactionListItemDataUi>>,
+        val isNpubLogin: Boolean = false,
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val activeAccountLegendaryCustomization: LegendaryCustomization? = null,
         val badges: Badges = Badges(),

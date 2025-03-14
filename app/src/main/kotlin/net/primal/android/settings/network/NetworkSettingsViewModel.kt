@@ -17,6 +17,7 @@ import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.relays.RelaysSocketManager
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.settings.network.NetworkSettingsContract.UiEvent
 import net.primal.android.settings.network.NetworkSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -140,6 +141,8 @@ class NetworkSettingsViewModel @Inject constructor(
             changeRelayList { userId ->
                 try {
                     relayRepository.bootstrapUserRelays(userId = userId)
+                } catch (error: MissingPrivateKeyException) {
+                    Timber.w(error)
                 } catch (error: NostrPublishException) {
                     Timber.w(error)
                 }
@@ -169,6 +172,9 @@ class NetworkSettingsViewModel @Inject constructor(
             val userId = activeAccountStore.activeUserId()
             block(userId)
         } catch (error: WssException) {
+            Timber.w(error)
+            setState { copy(error = UiState.NetworkSettingsError.FailedToAddRelay(error)) }
+        } catch (error: MissingPrivateKeyException) {
             Timber.w(error)
             setState { copy(error = UiState.NetworkSettingsError.FailedToAddRelay(error)) }
         } catch (error: NostrPublishException) {

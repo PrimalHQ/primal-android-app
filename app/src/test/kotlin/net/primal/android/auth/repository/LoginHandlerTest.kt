@@ -49,10 +49,10 @@ class LoginHandlerTest {
             val expectedKey = "random"
             val authRepository = mockk<AuthRepository>(relaxed = true)
             val loginHandler = createLoginHandler(authRepository = authRepository)
-            loginHandler.login(nostrKey = expectedKey)
+            loginHandler.login(nostrKey = expectedKey, loginType = LoginHandler.LoginType.Nsec)
 
             coVerify {
-                authRepository.login(nostrKey = expectedKey)
+                authRepository.loginWithNsec(nostrKey = expectedKey)
             }
         }
 
@@ -61,14 +61,14 @@ class LoginHandlerTest {
         runTest {
             val expectedUserId = "b10a23"
             val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
-                coEvery { save(any()) } returns expectedUserId
+                coEvery { saveNsec(any()) } returns expectedUserId
             }
             val userRepository = mockk<UserRepository>(relaxed = true)
             val loginHandler = createLoginHandler(
                 userRepository = userRepository,
                 credentialsStore = credentialsStore,
             )
-            loginHandler.login(nostrKey = "random")
+            loginHandler.login(nostrKey = "random", loginType = LoginHandler.LoginType.Nsec)
 
             coVerify {
                 userRepository.fetchAndUpdateUserAccount(expectedUserId)
@@ -80,14 +80,14 @@ class LoginHandlerTest {
         runTest {
             val expectedUserId = "b10a23"
             val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
-                coEvery { save(any()) } returns expectedUserId
+                coEvery { saveNsec(any()) } returns expectedUserId
             }
             val settingsRepository = mockk<SettingsRepository>(relaxed = true)
             val loginHandler = createLoginHandler(
                 settingsRepository = settingsRepository,
                 credentialsStore = credentialsStore,
             )
-            loginHandler.login(nostrKey = "random")
+            loginHandler.login(nostrKey = "random", loginType = LoginHandler.LoginType.Nsec)
 
             coVerify {
                 settingsRepository.fetchAndPersistAppSettings(expectedUserId)
@@ -99,14 +99,14 @@ class LoginHandlerTest {
         runTest {
             val expectedUserId = "b10a23"
             val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
-                coEvery { save(any()) } returns expectedUserId
+                coEvery { saveNsec(any()) } returns expectedUserId
             }
             val mutedUserRepository = mockk<MutedUserRepository>(relaxed = true)
             val loginHandler = createLoginHandler(
                 mutedUserRepository = mutedUserRepository,
                 credentialsStore = credentialsStore,
             )
-            loginHandler.login(nostrKey = "random")
+            loginHandler.login(nostrKey = "random", loginType = LoginHandler.LoginType.Nsec)
 
             coVerify {
                 mutedUserRepository.fetchAndPersistMuteList(expectedUserId)
@@ -143,7 +143,7 @@ class LoginHandlerTest {
             )
 
             try {
-                loginHandler.login(nostrKey = nsec)
+                loginHandler.login(nostrKey = nsec, loginType = LoginHandler.LoginType.Nsec)
             } catch (_: WssException) {
             }
 

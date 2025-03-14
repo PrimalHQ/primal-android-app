@@ -15,6 +15,7 @@ import net.primal.android.messages.domain.ConversationsSummary
 import net.primal.android.messages.domain.MessagesUnreadCount
 import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.primal.PrimalEvent
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import timber.log.Timber
 
 fun PrimalEvent.asMessagesTotalCount(): MessagesUnreadCount? {
@@ -35,10 +36,10 @@ fun PrimalEvent.asMessageConversationsSummary(): ConversationsSummary {
     return ConversationsSummary(summaryPerParticipantId = map)
 }
 
-fun List<NostrEvent>.mapAsMessageDataPO(userId: String, nsec: String) =
+fun List<NostrEvent>.mapAsMessageDataPO(userId: String, nsec: String?) =
     mapNotNull { it.mapAsMessageDataPO(userId = userId, nsec = nsec) }
 
-fun NostrEvent.mapAsMessageDataPO(userId: String, nsec: String): DirectMessageData? {
+fun NostrEvent.mapAsMessageDataPO(userId: String, nsec: String?): DirectMessageData? {
     val senderId = this.pubKey
     val receiverId = this.tags.findFirstProfileId() ?: return null
     val participantId = if (senderId != userId) senderId else receiverId
@@ -46,7 +47,7 @@ fun NostrEvent.mapAsMessageDataPO(userId: String, nsec: String): DirectMessageDa
     val decryptedMessage = runCatching {
         CryptoUtils.decrypt(
             message = this.content,
-            privateKey = nsec.bechToBytesOrThrow(hrp = "nsec"),
+            privateKey = nsec?.bechToBytesOrThrow(hrp = "nsec") ?: throw MissingPrivateKeyException(),
             pubKey = participantId.hexToNpubHrp().bechToBytesOrThrow(hrp = "npub"),
         )
     }.getOrElse {

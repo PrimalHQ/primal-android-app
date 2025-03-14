@@ -228,7 +228,7 @@ fun WalletDashboardScreen(
                                             },
                                         ),
                                     walletBalance = state.walletBalance,
-                                    enabled = state.primalWallet?.kycLevel != WalletKycLevel.None,
+                                    enabled = state.primalWallet?.kycLevel != WalletKycLevel.None && !state.isNpubLogin,
                                     actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
                                     onWalletAction = { action ->
                                         when (action) {
@@ -259,6 +259,7 @@ fun WalletDashboardScreen(
                                         }
                                     },
                                     currencyMode = currencyMode,
+                                    enabled = !state.isNpubLogin,
                                     onSwitchCurrencyMode = { currencyMode = it },
                                     exchangeBtcUsdRate = state.exchangeBtcUsdRate,
                                 )
@@ -295,6 +296,19 @@ fun WalletDashboardScreen(
                         message = stringResource(id = R.string.wallet_dashboard_activate_notice_hint),
                         actionLabel = stringResource(id = R.string.wallet_dashboard_activate_button),
                         onActionClick = onWalletActivateClick,
+                    )
+                }
+
+                state.isNpubLogin -> {
+                    WalletCallToActionBox(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .animateContentSize()
+                            .padding(paddingValues)
+                            .padding(horizontal = 32.dp)
+                            .padding(bottom = 32.dp)
+                            .navigationBarsPadding(),
+                        message = stringResource(id = R.string.wallet_dashboard_npub_login),
                     )
                 }
 

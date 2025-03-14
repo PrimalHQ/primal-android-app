@@ -11,9 +11,11 @@ import net.primal.android.nostr.model.primal.content.ContentZapConfigItem
 import net.primal.android.nostr.model.primal.content.ContentZapDefault
 import net.primal.android.nostr.model.primal.content.DEFAULT_ZAP_CONFIG
 import net.primal.android.nostr.model.primal.content.DEFAULT_ZAP_DEFAULT
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.settings.api.SettingsApi
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.domain.UserAccount
+import timber.log.Timber
 
 class SettingsRepository @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
@@ -114,12 +116,16 @@ class SettingsRepository @Inject constructor(
         persistAppSettingsLocally(userId = userId, appSettings = newAppSettings)
     }
 
-    private suspend fun fetchAppSettings(userId: String): ContentAppSettings? {
-        val response = settingsApi.getAppSettings(pubkey = userId)
-        return NostrJson.decodeFromStringOrNull<ContentAppSettings>(
-            string = response.userSettings?.content ?: response.defaultSettings?.content,
-        )
-    }
+    private suspend fun fetchAppSettings(userId: String): ContentAppSettings? =
+        try {
+            val response = settingsApi.getAppSettings(pubkey = userId)
+            NostrJson.decodeFromStringOrNull<ContentAppSettings>(
+                string = response.userSettings?.content ?: response.defaultSettings?.content,
+            )
+        } catch (error: MissingPrivateKeyException) {
+            Timber.w(error)
+            null
+        }
 
     private suspend fun fetchDefaultAppSettings(userId: String): ContentAppSettings? {
         val response = settingsApi.getDefaultAppSettings(pubkey = userId)
