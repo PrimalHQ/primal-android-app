@@ -297,6 +297,9 @@ class NoteEditorViewModel @AssistedInject constructor(
                 resetState()
 
                 sendEffect(SideEffect.PostPublished)
+            } catch (error: MissingPrivateKeyException) {
+                Timber.w(error)
+                setErrorState(error = UiState.NoteEditorError.PublishError(cause = error.cause))
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setErrorState(error = UiState.NoteEditorError.PublishError(cause = error.cause))
