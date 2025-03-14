@@ -1,8 +1,8 @@
 package net.primal.networking.primal
 
-import net.primal.networking.model.NostrEvent
-import net.primal.networking.model.NostrEventKind
-import net.primal.networking.model.primal.PrimalEvent
+import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.PrimalEvent
 import net.primal.networking.sockets.NostrIncomingMessage
 
 data class PrimalQueryResult(
