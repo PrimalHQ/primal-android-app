@@ -57,6 +57,11 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
     val primalUserNames = this.primalUserNames.parseAndMapPrimalUserNames()
     val primalPremiumInfo = this.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
     val primalLegendProfiles = this.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
+    val existingPrimalLegendProfiles = mapOf(
+        pairs = database.profiles().findProfileData(profileIds = this.metadata.map { it.pubKey })
+            .filter { it.primalPremiumInfo?.legendProfile != null }
+            .map { it.ownerId to it.primalPremiumInfo?.legendProfile!! }.toTypedArray(),
+    )
 
     val blossomServers = this.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
 
@@ -64,7 +69,7 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
         cdnResources = cdnResources,
         primalUserNames = primalUserNames,
         primalPremiumInfo = primalPremiumInfo,
-        primalLegendProfiles = primalLegendProfiles,
+        primalLegendProfiles = primalLegendProfiles + existingPrimalLegendProfiles,
         blossomServers = blossomServers,
     )
     val profileIdToProfileDataMap = profiles.asMapByKey { it.ownerId }
