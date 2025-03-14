@@ -90,25 +90,33 @@ class PremiumBuyingViewModel @Inject constructor(
             if (activeAccountStore.activeUserAccount().hasPremiumMembership()) {
                 setEffect(SideEffect.NavigateToPremiumHome)
             } else {
-                premiumRepository.fetchMembershipStatus(userId = activeAccountStore.activeUserId())?.let {
-                    if (it.hasPremiumMembership()) {
-                        setEffect(SideEffect.NavigateToPremiumHome)
+                try {
+                    premiumRepository.fetchMembershipStatus(userId = activeAccountStore.activeUserId())?.let {
+                        if (it.hasPremiumMembership()) {
+                            setEffect(SideEffect.NavigateToPremiumHome)
+                        }
                     }
+                } catch (error: WssException) {
+                    Timber.w(error)
                 }
             }
         }
 
     private fun initBillingClient() {
         viewModelScope.launch {
-            if (isGoogleBuild()) {
-                val subscriptionProducts = primalBillingClient.querySubscriptionProducts()
-                setState { copy(loading = false, subscriptions = subscriptionProducts) }
-            } else {
-                premiumRepository.fetchMembershipProducts()
-                setState { copy(loading = false) }
-            }
+            try {
+                if (isGoogleBuild()) {
+                    val subscriptionProducts = primalBillingClient.querySubscriptionProducts()
+                    setState { copy(loading = false, subscriptions = subscriptionProducts) }
+                } else {
+                    premiumRepository.fetchMembershipProducts()
+                    setState { copy(loading = false) }
+                }
 
-            fetchActiveSubscription()
+                fetchActiveSubscription()
+            } catch (error: WssException) {
+                Timber.w(error)
+            }
         }
     }
 
