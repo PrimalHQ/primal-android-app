@@ -54,9 +54,10 @@ import net.primal.data.local.dao.reads.HighlightData
 import net.primal.data.local.dao.threads.ArticleCommentCrossRef
 import net.primal.data.local.dao.threads.NoteConversationCrossRef
 import net.primal.data.local.dao.threads.ThreadConversationDao
-import net.primal.data.local.serialization.EventUriTypeConverters
+import net.primal.data.local.serialization.CdnTypeConverters
 import net.primal.data.local.serialization.JsonTypeConverters
 import net.primal.data.local.serialization.ListsTypeConverters
+import net.primal.data.local.serialization.NostrReferenceTypeConverters
 import net.primal.data.local.serialization.ProfileTypeConverters
 
 @Database(
@@ -92,12 +93,13 @@ import net.primal.data.local.serialization.ProfileTypeConverters
     version = 1,
     exportSchema = true,
 )
-@ConstructedBy(net.primal.data.local.db.AppDatabaseConstructor::class)
+@ConstructedBy(AppDatabaseConstructor::class)
 @TypeConverters(
     ListsTypeConverters::class,
     JsonTypeConverters::class,
-    EventUriTypeConverters::class,
+    CdnTypeConverters::class,
     ProfileTypeConverters::class,
+    NostrReferenceTypeConverters::class,
 )
 abstract class PrimalDatabase : RoomDatabase() {
 

@@ -3,12 +3,10 @@ package net.primal.data.local.dao.events
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import kotlinx.serialization.Serializable
 import net.primal.domain.CdnResourceVariant
 import net.primal.domain.EventUriType
 
 @Entity(indices = [Index(value = ["eventId", "url"], unique = true)])
-@Serializable
 data class EventUri(
     @PrimaryKey(autoGenerate = true)
     val position: Int = 0,

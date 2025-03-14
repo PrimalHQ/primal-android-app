@@ -43,6 +43,9 @@ kotlin {
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.kotlinx.serialization.json)
 
+                // Paging (for PagingData entity in repositories)
+                implementation(libs.paging.common)
+
                 // Swift interop
                 implementation(libs.skie.configuration.annotations)
             }

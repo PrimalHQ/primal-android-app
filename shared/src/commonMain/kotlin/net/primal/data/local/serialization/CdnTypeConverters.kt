@@ -1,40 +1,12 @@
 package net.primal.data.local.serialization
 
 import androidx.room.TypeConverter
-import net.primal.data.local.dao.events.EventUri
-import net.primal.data.local.dao.events.EventUriNostr
 import net.primal.data.serialization.NostrJson
 import net.primal.data.serialization.decodeFromStringOrNull
 import net.primal.domain.CdnImage
 import net.primal.domain.CdnResourceVariant
 
-class EventUriTypeConverters {
-
-    @TypeConverter
-    fun stringToListOfNoteNostrUri(value: String?): List<EventUriNostr>? {
-        return NostrJson.decodeFromStringOrNull<List<EventUriNostr>>(value)
-    }
-
-    @TypeConverter
-    fun listOfNoteNostrUriToString(list: List<EventUriNostr>?): String? {
-        return when (list) {
-            null -> null
-            else -> NostrJson.encodeToString(list)
-        }
-    }
-
-    @TypeConverter
-    fun stringToListOfNoteAttachment(value: String?): List<EventUri>? {
-        return NostrJson.decodeFromStringOrNull<List<EventUri>>(value)
-    }
-
-    @TypeConverter
-    fun listOfNoteAttachmentToString(list: List<EventUri>?): String? {
-        return when (list) {
-            null -> null
-            else -> NostrJson.encodeToString(list)
-        }
-    }
+class CdnTypeConverters {
 
     @TypeConverter
     fun stringToCdnImage(value: String?): CdnImage? {

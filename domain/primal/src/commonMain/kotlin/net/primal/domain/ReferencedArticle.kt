@@ -1,8 +1,6 @@
-package net.primal.data.local.dao.events
+package net.primal.domain
 
 import kotlinx.serialization.Serializable
-import net.primal.domain.CdnImage
-import net.primal.domain.PrimalLegendProfile
 
 @Serializable
 data class ReferencedArticle(
