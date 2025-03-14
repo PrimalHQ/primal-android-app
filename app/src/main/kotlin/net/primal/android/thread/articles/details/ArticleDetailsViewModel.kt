@@ -352,7 +352,7 @@ class ArticleDetailsViewModel @Inject constructor(
                     when (error) {
                         is WssException, is ProfileRepository.FollowListNotFound,
                         is NostrPublishException,
-                            -> {
+                        -> {
                             Timber.e(error)
                             setState {
                                 copy(

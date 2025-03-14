@@ -20,7 +20,8 @@ class LoginHandler @Inject constructor(
     private val credentialsStore: CredentialsStore,
 ) {
     enum class LoginType {
-        Npub, Nsec
+        Npub,
+        Nsec,
     }
 
     suspend fun login(nostrKey: String, loginType: LoginType) =
@@ -30,7 +31,6 @@ class LoginHandler @Inject constructor(
                     LoginType.Npub -> credentialsStore.saveNpub(npub = nostrKey)
                     LoginType.Nsec -> credentialsStore.saveNsec(nostrKey = nostrKey)
                 }
-
 
                 userRepository.fetchAndUpdateUserAccount(userId = userId)
                 bookmarksRepository.fetchAndPersistPublicBookmarks(userId = userId)

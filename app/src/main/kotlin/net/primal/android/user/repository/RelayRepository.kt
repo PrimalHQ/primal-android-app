@@ -9,11 +9,11 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.FALLBACK_RELAYS
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.user.accounts.parseNip65Relays
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.Relay as RelayDO
-import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.UserRelays
 import net.primal.android.user.domain.cleanWebSocketUrl
