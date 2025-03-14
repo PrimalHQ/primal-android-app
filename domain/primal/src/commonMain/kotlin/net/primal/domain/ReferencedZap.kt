@@ -1,8 +1,6 @@
-package net.primal.data.local.dao.events
+package net.primal.domain
 
 import kotlinx.serialization.Serializable
-import net.primal.domain.CdnImage
-import net.primal.domain.PrimalLegendProfile
 
 @Serializable
 data class ReferencedZap(
@@ -15,7 +13,7 @@ data class ReferencedZap(
     val receiverPrimalLegendProfile: PrimalLegendProfile? = null,
     val zappedEventId: String?,
     val zappedEventContent: String?,
-    val zappedEventNostrUris: List<EventUriNostr>,
+    val zappedEventNostrUris: List<EventUriNostrReference>,
     val zappedEventHashtags: List<String>,
     val amountInSats: Double,
     val message: String?,
