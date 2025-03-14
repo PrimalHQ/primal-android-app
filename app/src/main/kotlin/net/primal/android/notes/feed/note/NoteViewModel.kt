@@ -191,6 +191,7 @@ class NoteViewModel @AssistedInject constructor(
                 setState { copy(error = UiError.FailedToMuteUser(error)) }
             } catch (error: MissingPrivateKeyException) {
                 Timber.w(error)
+                setState { copy(error = UiError.MissingPrivateKey) }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToMuteUser(error)) }
@@ -211,6 +212,7 @@ class NoteViewModel @AssistedInject constructor(
                 )
             } catch (error: MissingPrivateKeyException) {
                 Timber.w(error)
+                setState { copy(error = UiError.MissingPrivateKey) }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
             }

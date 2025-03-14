@@ -125,6 +125,7 @@ class ChatViewModel @Inject constructor(
                 messageRepository.markConversationAsRead(userId, participantId)
             } catch (error: MissingPrivateKeyException) {
                 Timber.w(error)
+                setErrorState(error = UiState.ChatError.PublishError(error))
             } catch (error: WssException) {
                 Timber.w(error)
             }
@@ -142,6 +143,7 @@ class ChatViewModel @Inject constructor(
                 setState { copy(newMessageText = "") }
             } catch (error: MissingPrivateKeyException) {
                 Timber.w(error)
+                setErrorState(error = UiState.ChatError.PublishError(error))
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setErrorState(error = UiState.ChatError.PublishError(error))

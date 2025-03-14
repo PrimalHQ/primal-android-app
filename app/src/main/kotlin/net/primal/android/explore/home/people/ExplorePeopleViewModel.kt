@@ -105,7 +105,9 @@ class ExplorePeopleViewModel @Inject constructor(
                     Timber.w(error)
                     updateStateProfileUnfollowAndClearApprovalFlag(profileId)
                     when (error) {
-                        is WssException, is NostrPublishException, is MissingPrivateKeyException ->
+                        is MissingPrivateKeyException -> setState { copy(error = UiError.MissingPrivateKey) }
+
+                        is WssException, is NostrPublishException ->
                             setState { copy(error = UiError.FailedToFollowUser(error)) }
 
                         is ProfileRepository.FollowListNotFound -> setState {

@@ -67,6 +67,7 @@ class ArticleViewModel @Inject constructor(
                 setState { copy(error = UiError.FailedToMuteUser(error)) }
             } catch (error: MissingPrivateKeyException) {
                 Timber.w(error)
+                setState { copy(error = UiError.MissingPrivateKey) }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToMuteUser(error)) }
@@ -87,6 +88,7 @@ class ArticleViewModel @Inject constructor(
                     articleId = uiEvent.articleId,
                 )
             } catch (error: MissingPrivateKeyException) {
+                setState { copy(error = UiError.MissingPrivateKey) }
                 Timber.w(error)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
