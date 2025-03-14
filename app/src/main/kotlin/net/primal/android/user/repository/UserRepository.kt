@@ -10,6 +10,7 @@ import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
+import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
@@ -26,6 +27,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.copyFollowListIfNotNull
 import net.primal.android.user.accounts.copyIfNotNull
 import net.primal.android.user.api.UsersApi
+import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.db.Relay
 import net.primal.android.user.domain.ContentDisplaySettings
 import net.primal.android.user.domain.NostrWalletConnect
@@ -39,6 +41,7 @@ class UserRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
     private val userAccountFetcher: UserAccountFetcher,
     private val accountsStore: UserAccountsStore,
+    private val credentialsStore: CredentialsStore,
     private val activeAccountStore: ActiveAccountStore,
     private val fileUploader: PrimalFileUploader,
     private val usersApi: UsersApi,
@@ -49,6 +52,9 @@ class UserRepository @Inject constructor(
             accountsStore.getAndUpdateAccount(userId = userId) { copy(lastAccessedAt = Instant.now().epochSecond) }
             activeAccountStore.setActiveUserId(pubkey = userId)
         }
+
+    fun isNpubLogin(userId: String) =
+        runCatching { credentialsStore.isNpubLogin(npub = userId.hexToNpubHrp()) }.getOrDefault(false)
 
     suspend fun fetchAndUpdateUserAccount(userId: String): UserAccount {
         val userProfile = userAccountFetcher.fetchUserProfileOrNull(userId = userId)
