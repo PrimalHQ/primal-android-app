@@ -294,7 +294,7 @@ private fun LoginInputField(
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     text = when {
-                        loginInput.isEmpty() -> stringResource(id = R.string.nsec)
+                        loginInput.isEmpty() -> stringResource(id = R.string.nsec_or_npub)
                         else -> "••••••••••••••••••••••••••••••••••••••"
                     },
                     textAlign = TextAlign.Center,
