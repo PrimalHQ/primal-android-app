@@ -17,8 +17,8 @@ import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import net.primal.core.coroutines.DispatcherProvider
-import net.primal.networking.model.NostrEvent
-import net.primal.networking.model.NostrEventKind
+import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrEventKind
 import net.primal.networking.primal.PrimalApiClient
 import net.primal.networking.primal.PrimalCacheFilter
 import net.primal.networking.primal.PrimalVerb
@@ -33,9 +33,9 @@ import net.primal.networking.sockets.errors.NostrNoticeException
 import net.primal.networking.sockets.errors.WssException
 import net.primal.networking.sockets.filterByEventId
 import net.primal.networking.sockets.parseIncomingMessage
-import net.primal.serialization.json.NostrJson
-import net.primal.serialization.json.decodeFromStringOrNull
-import net.primal.serialization.json.toJsonObject
+import net.primal.data.serialization.NostrJson
+import net.primal.data.serialization.decodeFromStringOrNull
+import net.primal.data.serialization.toJsonObject
 
 internal class RelayPool(
     private val dispatchers: DispatcherProvider,

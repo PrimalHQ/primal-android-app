@@ -18,5 +18,14 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Primal"
+
 include(":app")
+
+include(":core:utils")
+
+include(":domain:common")
+include(":domain:nostr")
+include(":domain:primal")
+include(":domain:primal-wallet")
+
 include(":shared")

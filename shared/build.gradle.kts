@@ -18,14 +18,6 @@ kotlin {
         namespace = "net.primal"
         compileSdk = 35
         minSdk = 26
-
-        withHostTestBuilder { }
-
-        withDeviceTestBuilder {
-            sourceSetTreeName = "test"
-        }.configure {
-            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        }
     }
 
     // JVM Target
@@ -47,14 +39,14 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
+                // Internal
+                implementation(project(":core:utils"))
+                implementation(project(":domain:nostr"))
+                implementation(project(":domain:primal"))
+
                 // Core
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.datetime)
-
-                // Cryptography
-//                implementation(libs.lightning.kmp)
-                implementation(libs.bitcoin.kmp)
-                implementation(libs.secp256k1.kmp)
 
                 // Koin
                 implementation(project.dependencies.platform(libs.koin.bom))
@@ -116,7 +108,7 @@ kotlin {
                 implementation(libs.ktor.client.okhttp)
 
                 // Cryptography
-                implementation(libs.secp256k1.kmp.jni.android)
+//                implementation(libs.secp256k1.kmp.jni.android)
             }
         }
 
@@ -134,8 +126,8 @@ kotlin {
 
                 // Cryptography
 //                implementation(libs.lightning.kmp.iosarm64)
-                implementation(libs.bitcoin.kmp.iosarm64)
-                implementation(libs.secp256k1.kmp.iosarm64)
+//                implementation(libs.bitcoin.kmp.iosarm64)
+//                implementation(libs.secp256k1.kmp.iosarm64)
             }
         }
         val iosSimulatorArm64Main by getting {
@@ -145,8 +137,8 @@ kotlin {
 
                 // Cryptography
 //                implementation(libs.lightning.kmp.iossimulatorarm64)
-                implementation(libs.bitcoin.kmp.iossimulatorarm64)
-                implementation(libs.secp256k1.kmp.iossimulatorarm64)
+//                implementation(libs.bitcoin.kmp.iossimulatorarm64)
+//                implementation(libs.secp256k1.kmp.iossimulatorarm64)
             }
         }
         val iosX64Main by getting {
@@ -156,8 +148,8 @@ kotlin {
 
                 // Cryptography
 //                implementation(libs.lightning.kmp.iosx64)
-                implementation(libs.bitcoin.kmp.iosx64)
-                implementation(libs.secp256k1.kmp.iosx64)
+//                implementation(libs.bitcoin.kmp.iosx64)
+//                implementation(libs.secp256k1.kmp.iosx64)
             }
         }
 
@@ -178,21 +170,6 @@ kotlin {
                 implementation(libs.kotest.assertions.core)
                 implementation(libs.kotest.assertions.json)
                 implementation(libs.kotlinx.coroutines.test)
-            }
-        }
-
-        getByName("androidDeviceTest") {
-            dependencies {
-                implementation(libs.androidx.test.runner)
-                implementation(libs.androidx.test.ext.junit)
-                implementation(libs.androidx.test.ext.junit.ktx)
-                implementation(libs.androidx.test.core)
-                implementation(libs.androidx.arch.core.testing)
-            }
-        }
-        getByName("androidHostTest") {
-            dependencies {
-                implementation(kotlin("test"))
             }
         }
     }

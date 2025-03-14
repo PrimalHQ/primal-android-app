@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.primal.core.coroutines.DispatcherProvider
-import net.primal.networking.model.NostrEvent
+import net.primal.domain.nostr.NostrEvent
 import net.primal.networking.primal.PrimalApiClient
 import net.primal.networking.relays.errors.NostrPublishException
 

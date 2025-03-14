@@ -9,18 +9,18 @@ import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import net.primal.networking.model.NostrEvent
-import net.primal.networking.model.NostrEventKind
-import net.primal.networking.model.ext.asNostrEventOrNull
-import net.primal.networking.model.ext.asPrimalEventOrNull
-import net.primal.networking.model.ext.isNotPrimalEventKind
-import net.primal.networking.model.ext.isNotUnknown
-import net.primal.networking.model.ext.isPrimalEventKind
-import net.primal.networking.model.primal.PrimalEvent
-import net.primal.serialization.json.NostrJson
-import net.primal.serialization.json.decodeFromStringOrNull
+import net.primal.data.remote.asNostrEventOrNull
+import net.primal.data.remote.asPrimalEventOrNull
+import net.primal.data.serialization.NostrJson
+import net.primal.data.serialization.decodeFromStringOrNull
+import net.primal.domain.PrimalEvent
+import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.isNotPrimalEventKind
+import net.primal.domain.nostr.isNotUnknown
+import net.primal.domain.nostr.isPrimalEventKind
 
-fun String.parseIncomingMessage(): NostrIncomingMessage? {
+internal fun String.parseIncomingMessage(): NostrIncomingMessage? {
     val jsonArray = NostrJson.decodeFromStringOrNull<JsonArray>(this)
     val verbElement = jsonArray?.elementAtOrNull(0) ?: return null
 
