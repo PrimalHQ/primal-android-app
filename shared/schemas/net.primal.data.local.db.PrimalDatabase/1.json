@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "bf2dda4b2504e4de8969c8ec44ad261f",
+    "identityHash": "e9eeea55edad4a292f327becb09c8c7b",
     "entities": [
       {
         "tableName": "PostData",
@@ -627,7 +627,7 @@
       },
       {
         "tableName": "EventUriNostr",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`position` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `eventId` TEXT NOT NULL, `uri` TEXT NOT NULL, `type` TEXT NOT NULL, `referencedEventAlt` TEXT, `refHighlight_text` TEXT, `refHighlight_eventId` TEXT, `refHighlight_authorId` TEXT, `refHighlight_aTag` TEXT, `refNote_postId` TEXT, `refNote_createdAt` INTEGER, `refNote_content` TEXT, `refNote_authorId` TEXT, `refNote_authorName` TEXT, `refNote_authorAvatarCdnImage` TEXT, `refNote_authorInternetIdentifier` TEXT, `refNote_authorLightningAddress` TEXT, `refNote_authorLegendProfile` TEXT, `refNote_attachments` TEXT, `refNote_nostrUris` TEXT, `refNote_raw` TEXT, `refArticle_naddr` TEXT, `refArticle_aTag` TEXT, `refArticle_eventId` TEXT, `refArticle_articleId` TEXT, `refArticle_articleTitle` TEXT, `refArticle_authorId` TEXT, `refArticle_authorName` TEXT, `refArticle_authorAvatarCdnImage` TEXT, `refArticle_authorLegendProfile` TEXT, `refArticle_createdAt` INTEGER, `refArticle_raw` TEXT, `refArticle_articleImageCdnImage` TEXT, `refArticle_articleReadingTimeInMinutes` INTEGER, `refUser_userId` TEXT, `refUser_handle` TEXT, `refZap_senderId` TEXT, `refZap_senderAvatarCdnImage` TEXT, `refZap_senderPrimalLegendProfile` TEXT, `refZap_receiverId` TEXT, `refZap_receiverDisplayName` TEXT, `refZap_receiverAvatarCdnImage` TEXT, `refZap_receiverPrimalLegendProfile` TEXT, `refZap_zappedEventId` TEXT, `refZap_zappedEventContent` TEXT, `refZap_zappedEventNostrUris` TEXT, `refZap_zappedEventHashtags` TEXT, `refZap_amountInSats` REAL, `refZap_message` TEXT, `refZap_createdAt` INTEGER)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`position` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `eventId` TEXT NOT NULL, `uri` TEXT NOT NULL, `type` TEXT NOT NULL, `referencedEventAlt` TEXT, `referencedHighlight` TEXT, `referencedNote` TEXT, `referencedArticle` TEXT, `referencedUser` TEXT, `referencedZap` TEXT)",
         "fields": [
           {
             "fieldPath": "position",
@@ -659,229 +659,29 @@
             "affinity": "TEXT"
           },
           {
-            "fieldPath": "referencedHighlight.text",
-            "columnName": "refHighlight_text",
+            "fieldPath": "referencedHighlight",
+            "columnName": "referencedHighlight",
             "affinity": "TEXT"
           },
           {
-            "fieldPath": "referencedHighlight.eventId",
-            "columnName": "refHighlight_eventId",
+            "fieldPath": "referencedNote",
+            "columnName": "referencedNote",
             "affinity": "TEXT"
           },
           {
-            "fieldPath": "referencedHighlight.authorId",
-            "columnName": "refHighlight_authorId",
+            "fieldPath": "referencedArticle",
+            "columnName": "referencedArticle",
             "affinity": "TEXT"
           },
           {
-            "fieldPath": "referencedHighlight.aTag",
-            "columnName": "refHighlight_aTag",
+            "fieldPath": "referencedUser",
+            "columnName": "referencedUser",
             "affinity": "TEXT"
           },
           {
-            "fieldPath": "referencedNote.postId",
-            "columnName": "refNote_postId",
+            "fieldPath": "referencedZap",
+            "columnName": "referencedZap",
             "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedNote.createdAt",
-            "columnName": "refNote_createdAt",
-            "affinity": "INTEGER"
-          },
-          {
-            "fieldPath": "referencedNote.content",
-            "columnName": "refNote_content",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedNote.authorId",
-            "columnName": "refNote_authorId",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedNote.authorName",
-            "columnName": "refNote_authorName",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedNote.authorAvatarCdnImage",
-            "columnName": "refNote_authorAvatarCdnImage",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedNote.authorInternetIdentifier",
-            "columnName": "refNote_authorInternetIdentifier",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedNote.authorLightningAddress",
-            "columnName": "refNote_authorLightningAddress",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedNote.authorLegendProfile",
-            "columnName": "refNote_authorLegendProfile",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedNote.attachments",
-            "columnName": "refNote_attachments",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedNote.nostrUris",
-            "columnName": "refNote_nostrUris",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedNote.raw",
-            "columnName": "refNote_raw",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedArticle.naddr",
-            "columnName": "refArticle_naddr",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedArticle.aTag",
-            "columnName": "refArticle_aTag",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedArticle.eventId",
-            "columnName": "refArticle_eventId",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedArticle.articleId",
-            "columnName": "refArticle_articleId",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedArticle.articleTitle",
-            "columnName": "refArticle_articleTitle",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedArticle.authorId",
-            "columnName": "refArticle_authorId",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedArticle.authorName",
-            "columnName": "refArticle_authorName",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedArticle.authorAvatarCdnImage",
-            "columnName": "refArticle_authorAvatarCdnImage",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedArticle.authorLegendProfile",
-            "columnName": "refArticle_authorLegendProfile",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedArticle.createdAt",
-            "columnName": "refArticle_createdAt",
-            "affinity": "INTEGER"
-          },
-          {
-            "fieldPath": "referencedArticle.raw",
-            "columnName": "refArticle_raw",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedArticle.articleImageCdnImage",
-            "columnName": "refArticle_articleImageCdnImage",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedArticle.articleReadingTimeInMinutes",
-            "columnName": "refArticle_articleReadingTimeInMinutes",
-            "affinity": "INTEGER"
-          },
-          {
-            "fieldPath": "referencedUser.userId",
-            "columnName": "refUser_userId",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedUser.handle",
-            "columnName": "refUser_handle",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedZap.senderId",
-            "columnName": "refZap_senderId",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedZap.senderAvatarCdnImage",
-            "columnName": "refZap_senderAvatarCdnImage",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedZap.senderPrimalLegendProfile",
-            "columnName": "refZap_senderPrimalLegendProfile",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedZap.receiverId",
-            "columnName": "refZap_receiverId",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedZap.receiverDisplayName",
-            "columnName": "refZap_receiverDisplayName",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedZap.receiverAvatarCdnImage",
-            "columnName": "refZap_receiverAvatarCdnImage",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedZap.receiverPrimalLegendProfile",
-            "columnName": "refZap_receiverPrimalLegendProfile",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedZap.zappedEventId",
-            "columnName": "refZap_zappedEventId",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedZap.zappedEventContent",
-            "columnName": "refZap_zappedEventContent",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedZap.zappedEventNostrUris",
-            "columnName": "refZap_zappedEventNostrUris",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedZap.zappedEventHashtags",
-            "columnName": "refZap_zappedEventHashtags",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedZap.amountInSats",
-            "columnName": "refZap_amountInSats",
-            "affinity": "REAL"
-          },
-          {
-            "fieldPath": "referencedZap.message",
-            "columnName": "refZap_message",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "referencedZap.createdAt",
-            "columnName": "refZap_createdAt",
-            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -1673,7 +1473,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bf2dda4b2504e4de8969c8ec44ad261f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e9eeea55edad4a292f327becb09c8c7b')"
     ]
   }
 }

@@ -3,11 +3,6 @@ package net.primal.data.remote.mapper
 import io.github.aakira.napier.Napier
 import kotlinx.serialization.json.JsonArray
 import net.primal.data.local.dao.events.EventUriNostr
-import net.primal.data.local.dao.events.ReferencedArticle
-import net.primal.data.local.dao.events.ReferencedHighlight
-import net.primal.data.local.dao.events.ReferencedNote
-import net.primal.data.local.dao.events.ReferencedUser
-import net.primal.data.local.dao.events.ReferencedZap
 import net.primal.data.local.dao.messages.DirectMessageData
 import net.primal.data.local.dao.notes.PostData
 import net.primal.data.local.dao.profiles.ProfileData
@@ -17,7 +12,13 @@ import net.primal.data.utils.authorNameUiFriendly
 import net.primal.data.utils.usernameUiFriendly
 import net.primal.domain.CdnResource
 import net.primal.domain.EventLinkPreviewData
+import net.primal.domain.EventUriNostrReference
 import net.primal.domain.EventUriNostrType
+import net.primal.domain.ReferencedArticle
+import net.primal.domain.ReferencedHighlight
+import net.primal.domain.ReferencedNote
+import net.primal.domain.ReferencedUser
+import net.primal.domain.ReferencedZap
 import net.primal.domain.common.cryptography.bech32ToHexOrThrow
 import net.primal.domain.common.cryptography.bechToBytesOrThrow
 import net.primal.domain.common.cryptography.toHex
@@ -32,7 +33,6 @@ import net.primal.domain.nostr.findFirstEventId
 import net.primal.domain.nostr.findFirstProfileId
 import net.primal.domain.nostr.isATag
 
-// TODO Port referenced articles, highlights and zaps
 // TODO Port missing helper functions and consider splitting this file
 
 private const val NOSTR = "nostr:"
@@ -238,7 +238,21 @@ fun String.takeAsProfileHexIdOrNull(): String? {
     }
 }
 
-fun List<PostData>.flatMapPostsAsNoteNostrUriPO(
+fun List<EventUriNostrReference>.mapReferencedNostrUriAsEventUriNostrPO() = map {
+    EventUriNostr(
+        eventId = it.eventId,
+        uri = it.uri,
+        type = it.type,
+        referencedEventAlt = it.referencedEventAlt,
+        referencedHighlight = it.referencedHighlight,
+        referencedNote = it.referencedNote,
+        referencedArticle = it.referencedArticle,
+        referencedUser = it.referencedUser,
+        referencedZap = it.referencedZap,
+    )
+}
+
+fun List<PostData>.flatMapPostsAsReferencedNostrUriDO(
     eventIdToNostrEvent: Map<String, NostrEvent>,
     postIdToPostDataMap: Map<String, PostData>,
     articleIdToArticle: Map<String, ArticleData>,
@@ -246,9 +260,9 @@ fun List<PostData>.flatMapPostsAsNoteNostrUriPO(
     cdnResources: Map<String, CdnResource>,
     linkPreviews: Map<String, EventLinkPreviewData>,
     videoThumbnails: Map<String, String>,
-): List<EventUriNostr> =
+): List<EventUriNostrReference> =
     flatMap { postData ->
-        postData.uris.mapAsNoteNostrUriPO(
+        postData.uris.mapAsReferencedNostrUriDO(
             eventId = postData.postId,
             eventIdToNostrEvent = eventIdToNostrEvent,
             postIdToPostDataMap = postIdToPostDataMap,
@@ -260,7 +274,7 @@ fun List<PostData>.flatMapPostsAsNoteNostrUriPO(
         )
     }
 
-fun List<DirectMessageData>.flatMapMessagesAsNostrResourcePO(
+fun List<DirectMessageData>.flatMapMessagesAsReferencedNostrUriDO(
     eventIdToNostrEvent: Map<String, NostrEvent>,
     postIdToPostDataMap: Map<String, PostData>,
     articleIdToArticle: Map<String, ArticleData>,
@@ -269,7 +283,7 @@ fun List<DirectMessageData>.flatMapMessagesAsNostrResourcePO(
     linkPreviews: Map<String, EventLinkPreviewData>,
     videoThumbnails: Map<String, String>,
 ) = flatMap { messageData ->
-    messageData.uris.mapAsNoteNostrUriPO(
+    messageData.uris.mapAsReferencedNostrUriDO(
         eventId = messageData.messageId,
         eventIdToNostrEvent = eventIdToNostrEvent,
         postIdToPostDataMap = postIdToPostDataMap,
@@ -281,7 +295,7 @@ fun List<DirectMessageData>.flatMapMessagesAsNostrResourcePO(
     )
 }
 
-fun List<String>.mapAsNoteNostrUriPO(
+fun List<String>.mapAsReferencedNostrUriDO(
     eventId: String,
     eventIdToNostrEvent: Map<String, NostrEvent>,
     postIdToPostDataMap: Map<String, PostData>,
@@ -321,7 +335,7 @@ fun List<String>.mapAsNoteNostrUriPO(
         else -> EventUriNostrType.Unsupported
     }
 
-    EventUriNostr(
+    EventUriNostrReference(
         eventId = eventId,
         uri = link,
         type = type,
@@ -383,8 +397,8 @@ private fun takeAsReferencedNoteOrNull(
             cdnResources = cdnResources,
             linkPreviews = linkPreviews,
             videoThumbnails = videoThumbnails,
-        ),
-        nostrUris = listOf(refNote).flatMapPostsAsNoteNostrUriPO(
+        ).mapEventUriAsNoteLinkDO(),
+        nostrUris = listOf(refNote).flatMapPostsAsReferencedNostrUriDO(
             eventIdToNostrEvent = eventIdToNostrEvent,
             postIdToPostDataMap = postIdToPostDataMap,
             articleIdToArticle = articleIdToArticle,
@@ -487,7 +501,7 @@ private fun takeAsReferencedZapOrNull(
 
     val zappedPost = postsMap[noteId]
 
-    val nostrUris = listOfNotNull(zappedPost).flatMapPostsAsNoteNostrUriPO(
+    val nostrUris = listOfNotNull(zappedPost).flatMapPostsAsReferencedNostrUriDO(
         eventIdToNostrEvent = nostrEventsMap,
         postIdToPostDataMap = postsMap,
         articleIdToArticle = articlesMap,

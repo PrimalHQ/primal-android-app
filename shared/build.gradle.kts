@@ -193,6 +193,10 @@ tasks.register("assembleXCFramework") {
     dependsOn("assemblePrimalSharedReleaseXCFramework")
 }
 
+tasks.register("compileTargets") {
+    dependsOn("compileKotlinIosArm64", "compileAndroidMain")
+}
+
 room {
     schemaDirectory("$projectDir/schemas")
 }
