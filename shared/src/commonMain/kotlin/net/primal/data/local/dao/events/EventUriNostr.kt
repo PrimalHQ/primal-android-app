@@ -1,14 +1,16 @@
 package net.primal.data.local.dao.events
 
-import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import kotlinx.serialization.Serializable
 import net.primal.domain.EventUriNostrType
+import net.primal.domain.ReferencedArticle
+import net.primal.domain.ReferencedHighlight
+import net.primal.domain.ReferencedNote
+import net.primal.domain.ReferencedUser
+import net.primal.domain.ReferencedZap
 
 @Entity(indices = [Index(value = ["eventId", "uri"], unique = true)])
-@Serializable
 data class EventUriNostr(
     @PrimaryKey(autoGenerate = true)
     val position: Int = 0,
@@ -16,9 +18,9 @@ data class EventUriNostr(
     val uri: String,
     val type: EventUriNostrType,
     val referencedEventAlt: String? = null,
-    @Embedded(prefix = "refHighlight_") val referencedHighlight: ReferencedHighlight? = null,
-    @Embedded(prefix = "refNote_") val referencedNote: ReferencedNote? = null,
-    @Embedded(prefix = "refArticle_") val referencedArticle: ReferencedArticle? = null,
-    @Embedded(prefix = "refUser_") val referencedUser: ReferencedUser? = null,
-    @Embedded(prefix = "refZap_") val referencedZap: ReferencedZap? = null,
+    val referencedHighlight: ReferencedHighlight? = null,
+    val referencedNote: ReferencedNote? = null,
+    val referencedArticle: ReferencedArticle? = null,
+    val referencedUser: ReferencedUser? = null,
+    val referencedZap: ReferencedZap? = null,
 )

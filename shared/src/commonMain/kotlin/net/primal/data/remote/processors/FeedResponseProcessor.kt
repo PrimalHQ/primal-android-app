@@ -1,6 +1,9 @@
 package net.primal.data.remote.processors
 
 import net.primal.core.utils.asMapByKey
+import net.primal.data.local.dao.events.eventRelayHintsUpserter
+import net.primal.data.local.dao.threads.ArticleCommentCrossRef
+import net.primal.data.local.dao.threads.NoteConversationCrossRef
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.feed.model.FeedResponse
@@ -9,7 +12,7 @@ import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.flatMapNotNullAsLinkPreviewResource
 import net.primal.data.remote.mapper.flatMapNotNullAsVideoThumbnailsMap
 import net.primal.data.remote.mapper.flatMapPostsAsEventUriPO
-import net.primal.data.remote.mapper.flatMapPostsAsNoteNostrUriPO
+import net.primal.data.remote.mapper.flatMapPostsAsReferencedNostrUriDO
 import net.primal.data.remote.mapper.mapAsEventZapDO
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.data.remote.mapper.mapAsPostDataPO
@@ -21,15 +24,13 @@ import net.primal.data.remote.mapper.mapNotNullAsPostDataPO
 import net.primal.data.remote.mapper.mapNotNullAsRepostDataPO
 import net.primal.data.remote.mapper.mapReferencedEventsAsArticleDataPO
 import net.primal.data.remote.mapper.mapReferencedEventsAsHighlightDataPO
+import net.primal.data.remote.mapper.mapReferencedNostrUriAsEventUriNostrPO
 import net.primal.data.remote.mapper.parseAndMapPrimalLegendProfiles
 import net.primal.data.remote.mapper.parseAndMapPrimalPremiumInfo
 import net.primal.data.remote.mapper.parseAndMapPrimalUserNames
-import net.primal.data.local.dao.events.eventRelayHintsUpserter
-import net.primal.data.local.dao.threads.ArticleCommentCrossRef
-import net.primal.data.local.dao.threads.NoteConversationCrossRef
-import net.primal.domain.nostr.NostrEvent
 import net.primal.data.serialization.NostrJson
 import net.primal.data.serialization.decodeFromStringOrNull
+import net.primal.domain.nostr.NostrEvent
 
 suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database: PrimalDatabase) {
     val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
@@ -82,7 +83,7 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
 
     val refEvents = referencedEvents.mapNotNull { NostrJson.decodeFromStringOrNull<NostrEvent>(it.content) }
 
-    val noteNostrUris = allPosts.flatMapPostsAsNoteNostrUriPO(
+    val noteNostrUris = allPosts.flatMapPostsAsReferencedNostrUriDO(
         eventIdToNostrEvent = refEvents.associateBy { it.id },
         postIdToPostDataMap = allPosts.groupBy { it.postId }.mapValues { it.value.first() },
         articleIdToArticle = allArticles.groupBy { it.articleId }.mapValues { it.value.first() },
@@ -90,7 +91,7 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
         cdnResources = cdnResources,
         videoThumbnails = videoThumbnails,
         linkPreviews = linkPreviews,
-    )
+    ).mapReferencedNostrUriAsEventUriNostrPO()
 
     val eventZaps = zaps.mapAsEventZapDO(profilesMap = profiles.associateBy { it.ownerId })
     val reposts = reposts.mapNotNullAsRepostDataPO()

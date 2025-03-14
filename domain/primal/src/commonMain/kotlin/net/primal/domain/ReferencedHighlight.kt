@@ -1,4 +1,4 @@
-package net.primal.data.local.dao.events
+package net.primal.domain
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonArray
