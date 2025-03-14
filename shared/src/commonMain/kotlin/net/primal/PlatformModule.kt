@@ -1,4 +1,4 @@
-package net.primal.core.di
+package net.primal
 
 import org.koin.core.module.Module
 

@@ -12,7 +12,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.io.IOException
-import net.primal.core.coroutines.DispatcherProvider
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notes.FeedPost
 import net.primal.data.local.dao.notes.FeedPostRemoteKey
 import net.primal.data.local.db.PrimalDatabase

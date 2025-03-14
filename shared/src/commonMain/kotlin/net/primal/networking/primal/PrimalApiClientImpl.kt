@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonObject
-import net.primal.core.coroutines.DispatcherProvider
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.networking.config.AppConfigHandler
 import net.primal.networking.config.AppConfigProvider
 import net.primal.networking.config.observeApiUrlByType

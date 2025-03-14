@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import net.primal.core.coroutines.DispatcherProvider
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notes.FeedPost as FeedPostPO
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.local.paging.NoteFeedRemoteMediator
