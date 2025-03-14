@@ -567,7 +567,7 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private suspend fun String.concatenateReferencedEvents(): String {
         val referencedNoteNevent = referencedNoteId?.let { refNote ->
-            state.value.conversation.first { it.postId == refNote }
+            state.value.conversation.firstOrNull { it.postId == refNote }
         }?.asNevent()
 
         return this + listOfNotNull(
