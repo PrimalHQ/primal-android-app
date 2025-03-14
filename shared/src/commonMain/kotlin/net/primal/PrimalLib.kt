@@ -1,6 +1,5 @@
 package net.primal
 
-import net.primal.core.di.platformModule
 import net.primal.data.remote.di.remoteApiModule
 import net.primal.data.repository.di.repositoryModule
 import net.primal.networking.config.di.appConfigModule

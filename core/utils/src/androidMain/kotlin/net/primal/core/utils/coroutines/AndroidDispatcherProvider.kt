@@ -1,4 +1,4 @@
-package net.primal.core.coroutines
+package net.primal.core.utils.coroutines
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
