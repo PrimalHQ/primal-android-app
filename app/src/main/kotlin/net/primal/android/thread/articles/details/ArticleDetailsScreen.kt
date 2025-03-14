@@ -93,6 +93,7 @@ import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.notes.feed.note.ui.FeedNoteActionsRow
 import net.primal.android.notes.feed.note.ui.ReferencedNoteCard
 import net.primal.android.notes.feed.note.ui.ThreadNoteStatsRow
+import net.primal.android.notes.feed.note.ui.attachment.PlayButton
 import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
@@ -588,6 +589,7 @@ private fun ArticleContentWithComments(
                     is ArticlePartRender.MarkdownRender -> "MarkdownRender"
                     is ArticlePartRender.NoteRender -> "NoteRender"
                     is ArticlePartRender.ImageRender -> "ImageRender"
+                    is ArticlePartRender.VideoRender -> "VideoRender"
                 }
             },
         ) { index ->
@@ -636,6 +638,35 @@ private fun ArticleContentWithComments(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                             data = part.note,
                             noteCallbacks = noteCallbacks,
+                        )
+                    }
+                }
+
+                is ArticlePartRender.VideoRender -> {
+                    Box(contentAlignment = Alignment.Center) {
+                        SubcomposeAsyncImage(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .clip(AppTheme.shapes.medium),
+                            model = part.videoUrl,
+                            contentScale = ContentScale.FillWidth,
+                            contentDescription = null,
+                        )
+
+                        PlayButton(
+                            onClick = {
+                                state.article?.eventId?.let {
+                                    MediaClickEvent(
+                                        noteId = it,
+                                        eventUriType = EventUriType.Video,
+                                        mediaUrl = part.videoUrl,
+                                        positionMs = 0L,
+                                    )
+                                }?.let {
+                                    noteCallbacks.onMediaClick?.invoke(it)
+                                }
+                            },
                         )
                     }
                 }
@@ -844,7 +875,11 @@ private fun List<String>.buildArticleRenderParts(referencedNotes: List<FeedPostU
             }
 
             part.isValidHttpOrHttpsUrl() -> {
-                ArticlePartRender.ImageRender(imageUrl = part)
+                if (part.isVideoUrl()) {
+                    ArticlePartRender.VideoRender(videoUrl = part)
+                } else {
+                    ArticlePartRender.ImageRender(imageUrl = part)
+                }
             }
 
             else -> ArticlePartRender.MarkdownRender(markdown = part)
@@ -853,3 +888,14 @@ private fun List<String>.buildArticleRenderParts(referencedNotes: List<FeedPostU
 }
 
 private fun String.isNostrNote() = isNote() || isNostrUri() || isNEvent() || isNEventUri()
+
+fun String?.isVideoUrl(): Boolean {
+    return this?.run {
+        endsWith(".mp4", ignoreCase = true) ||
+            endsWith(".mov", ignoreCase = true) ||
+            endsWith(".webm", ignoreCase = true) ||
+            endsWith(".mkv", ignoreCase = true) ||
+            endsWith(".avi", ignoreCase = true) ||
+            endsWith(".flv", ignoreCase = true)
+    } == true
+}
