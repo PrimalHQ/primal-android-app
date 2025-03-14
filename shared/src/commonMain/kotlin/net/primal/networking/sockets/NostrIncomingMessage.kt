@@ -1,7 +1,7 @@
 package net.primal.networking.sockets
 
-import net.primal.networking.model.NostrEvent
-import net.primal.networking.model.primal.PrimalEvent
+import net.primal.domain.PrimalEvent
+import net.primal.domain.nostr.NostrEvent
 
 sealed class NostrIncomingMessage {
 

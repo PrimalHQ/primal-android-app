@@ -3,7 +3,7 @@ package net.primal.networking.sockets
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-sealed class NostrVerb {
+internal sealed class NostrVerb {
 
     @Serializable
     enum class Outgoing {

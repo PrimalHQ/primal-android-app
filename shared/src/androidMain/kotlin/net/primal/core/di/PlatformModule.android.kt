@@ -5,9 +5,9 @@ import androidx.datastore.dataStoreFile
 import androidx.sqlite.driver.AndroidSQLiteDriver
 import net.primal.core.coroutines.AndroidDispatcherProvider
 import net.primal.core.coroutines.DispatcherProvider
-import net.primal.db.PrimalDatabase
-import net.primal.db.buildPrimalDatabase
-import net.primal.db.getDatabaseBuilder
+import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.buildPrimalDatabase
+import net.primal.data.local.db.getDatabaseBuilder
 import net.primal.networking.config.domain.AppConfig
 import net.primal.networking.config.store.AppConfigDataStoreFactory
 import org.koin.android.ext.koin.androidContext

@@ -3,7 +3,7 @@ package net.primal.networking.config.store
 import androidx.datastore.core.okio.OkioSerializer
 import net.primal.networking.config.domain.AppConfig
 import net.primal.networking.config.domain.DEFAULT_APP_CONFIG
-import net.primal.serialization.json.NostrJson
+import net.primal.data.serialization.NostrJson
 import okio.BufferedSink
 import okio.BufferedSource
 import okio.use
