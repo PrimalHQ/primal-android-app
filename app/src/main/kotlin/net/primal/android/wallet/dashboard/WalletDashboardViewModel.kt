@@ -51,6 +51,7 @@ class WalletDashboardViewModel @Inject constructor(
             transactions = walletRepository
                 .latestTransactions(userId = activeUserId)
                 .mapAsPagingDataOfTransactionUi(),
+            isNpubLogin = userRepository.isNpubLogin(userId = activeUserId),
         ),
     )
     val state = _state.asStateFlow()
