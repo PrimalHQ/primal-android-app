@@ -57,11 +57,10 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
     val primalUserNames = this.primalUserNames.parseAndMapPrimalUserNames()
     val primalPremiumInfo = this.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
     val primalLegendProfiles = this.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
-    val existingPrimalLegendProfiles = mapOf(
-        pairs = database.profiles().findProfileData(profileIds = this.metadata.map { it.pubKey })
-            .filter { it.primalPremiumInfo?.legendProfile != null }
-            .map { it.ownerId to it.primalPremiumInfo?.legendProfile!! }.toTypedArray(),
-    )
+    val existingPrimalLegendProfiles = database.profiles()
+        .findLegendProfileData(profileIds = this.metadata.map { it.pubKey })
+        .mapNotNull { it.value?.legendProfile?.let { value -> it.key to value } }
+        .toMap()
 
     val blossomServers = this.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
 
