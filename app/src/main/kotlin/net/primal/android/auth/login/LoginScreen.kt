@@ -258,6 +258,7 @@ private fun LoginInputFieldContent(
         ) {
             LoginInputField(
                 loginInput = state.loginInput,
+                isValidKey = state.isValidKey,
                 keyboardVisible = keyboardVisible,
                 onLoginInputChanged = onLoginInputChanged,
                 onLoginClick = onLoginClick,
@@ -269,12 +270,12 @@ private fun LoginInputFieldContent(
 @Composable
 private fun LoginInputField(
     modifier: Modifier = Modifier,
+    isValidKey: Boolean,
     loginInput: String,
     keyboardVisible: Boolean,
     onLoginInputChanged: (String) -> Unit,
     onLoginClick: () -> Unit,
 ) {
-    val isValidNsec = loginInput.isValidNostrPrivateKey()
     val keyboardController = LocalSoftwareKeyboardController.current
     val shape = if (keyboardVisible) AppTheme.shapes.medium else AppTheme.shapes.extraLarge
     Row(
@@ -308,14 +309,14 @@ private fun LoginInputField(
                     },
                 )
             },
-            isError = loginInput.isNotEmpty() && !isValidNsec,
+            isError = loginInput.isNotEmpty() && !isValidKey,
             keyboardOptions = KeyboardOptions(
-                imeAction = if (isValidNsec) ImeAction.Go else ImeAction.Default,
+                imeAction = if (isValidKey) ImeAction.Go else ImeAction.Default,
                 keyboardType = KeyboardType.Password,
             ),
             keyboardActions = KeyboardActions(
                 onGo = {
-                    if (isValidNsec) {
+                    if (isValidKey) {
                         keyboardController?.hide()
                         onLoginClick()
                     }
