@@ -8,6 +8,7 @@ pluginManagement {
     }
 }
 
+@Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -22,6 +23,7 @@ rootProject.name = "Primal"
 include(":app")
 
 include(":core:utils")
+include(":core:networking")
 
 include(":domain:common")
 include(":domain:nostr")

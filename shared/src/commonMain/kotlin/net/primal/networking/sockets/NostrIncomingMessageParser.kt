@@ -9,10 +9,10 @@ import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import net.primal.data.remote.asNostrEventOrNull
-import net.primal.data.remote.asPrimalEventOrNull
+import net.primal.core.networking.mappers.asNostrEventOrNull
+import net.primal.core.networking.mappers.asPrimalEventOrNull
+import net.primal.core.utils.decodeFromStringOrNull
 import net.primal.data.serialization.NostrJson
-import net.primal.data.serialization.decodeFromStringOrNull
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind

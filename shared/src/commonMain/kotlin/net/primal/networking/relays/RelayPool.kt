@@ -21,7 +21,7 @@ import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.networking.primal.PrimalApiClient
 import net.primal.networking.primal.PrimalCacheFilter
-import net.primal.networking.primal.PrimalVerb
+import net.primal.data.remote.PrimalVerb
 import net.primal.networking.relays.broadcast.BroadcastEventResponse
 import net.primal.networking.relays.broadcast.BroadcastRequestBody
 import net.primal.networking.relays.errors.NostrPublishException
@@ -34,7 +34,7 @@ import net.primal.networking.sockets.errors.WssException
 import net.primal.networking.sockets.filterByEventId
 import net.primal.networking.sockets.parseIncomingMessage
 import net.primal.data.serialization.NostrJson
-import net.primal.data.serialization.decodeFromStringOrNull
+import net.primal.core.utils.decodeFromStringOrNull
 import net.primal.data.serialization.toJsonObject
 
 internal class RelayPool(
