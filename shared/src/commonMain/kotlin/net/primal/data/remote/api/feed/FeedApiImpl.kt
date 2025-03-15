@@ -5,11 +5,11 @@ import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.remote.api.feed.model.NotesRequestBody
 import net.primal.data.remote.api.feed.model.ThreadRequestBody
 import net.primal.data.serialization.NostrJson
-import net.primal.data.serialization.decodeFromStringOrNull
+import net.primal.core.utils.decodeFromStringOrNull
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.networking.primal.PrimalApiClient
 import net.primal.networking.primal.PrimalCacheFilter
-import net.primal.networking.primal.PrimalVerb
+import net.primal.data.remote.PrimalVerb
 
 internal class FeedApiImpl(
     private val primalApiClient: PrimalApiClient,

@@ -8,7 +8,7 @@ import net.primal.domain.nostr.NostrEventKind
 import net.primal.networking.primal.PrimalApiClient
 import net.primal.networking.primal.PrimalCacheFilter
 import net.primal.networking.primal.PrimalQueryResult
-import net.primal.networking.primal.PrimalVerb
+import net.primal.data.remote.PrimalVerb
 import net.primal.data.repository.upload.UnsuccessfulFileUpload
 import net.primal.networking.primal.upload.api.model.UploadChunkRequest
 import net.primal.networking.sockets.errors.WssException

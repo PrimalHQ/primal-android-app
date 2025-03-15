@@ -11,7 +11,7 @@ import net.primal.networking.primal.PrimalApiClientFactory
 import net.primal.networking.primal.PrimalCacheFilter
 import net.primal.networking.primal.PrimalQueryResult
 import net.primal.networking.primal.PrimalServerType
-import net.primal.networking.primal.PrimalVerb
+import net.primal.data.remote.PrimalVerb
 import net.primal.data.repository.upload.UnsuccessfulFileUpload
 import net.primal.networking.primal.upload.api.model.UploadChunkRequest
 import net.primal.networking.sockets.errors.WssException

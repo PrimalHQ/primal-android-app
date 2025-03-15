@@ -1,6 +1,5 @@
 package net.primal.data.serialization
 
-import io.github.aakira.napier.Napier
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -28,17 +27,6 @@ val NostrJsonEncodeDefaults = Json {
 
 val NostrNotaryJson = Json {
     ignoreUnknownKeys = true
-}
-
-inline fun <reified T> Json.decodeFromStringOrNull(string: String?): T? {
-    if (string.isNullOrEmpty()) return null
-
-    return try {
-        decodeFromString(string)
-    } catch (error: IllegalArgumentException) {
-        Napier.w(error) { "Unable to decode from json string." }
-        null
-    }
 }
 
 fun NostrEvent.toJsonObject(): JsonObject {

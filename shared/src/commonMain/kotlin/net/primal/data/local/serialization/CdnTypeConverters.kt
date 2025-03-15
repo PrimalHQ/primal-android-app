@@ -1,8 +1,8 @@
 package net.primal.data.local.serialization
 
 import androidx.room.TypeConverter
+import net.primal.core.utils.decodeFromStringOrNull
 import net.primal.data.serialization.NostrJson
-import net.primal.data.serialization.decodeFromStringOrNull
 import net.primal.domain.CdnImage
 import net.primal.domain.CdnResourceVariant
 

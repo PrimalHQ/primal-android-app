@@ -11,25 +11,6 @@ import net.primal.domain.nostr.NostrEvent
 
 // TODO Where does this belongs?
 
-fun JsonObject?.asNostrEventOrNull(): NostrEvent? {
-    return try {
-        if (this != null) NostrJson.decodeFromJsonElement(this) else null
-    } catch (error: IllegalArgumentException) {
-        Napier.w(error) { "Unable to map as NostrEvent." }
-        this?.let(NostrJson::encodeToString)?.let { Napier.w { it } }
-        null
-    }
-}
-
-fun JsonObject?.asPrimalEventOrNull(): PrimalEvent? {
-    return try {
-        if (this != null) NostrJson.decodeFromJsonElement(this) else null
-    } catch (error: IllegalArgumentException) {
-        Napier.w(error) { "Unable map as PrimalEvent." }
-        this?.let(NostrJson::encodeToString)?.let { Napier.w { it } }
-        null
-    }
-}
 
 fun List<NostrEvent>.orderByPagingIfNotNull(pagingEvent: ContentPrimalPaging?): List<NostrEvent> {
     if (pagingEvent == null) return this

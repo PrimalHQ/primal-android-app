@@ -3,7 +3,7 @@ package net.primal.data.local.serialization
 import androidx.room.TypeConverter
 import kotlinx.serialization.json.JsonArray
 import net.primal.data.serialization.NostrJson
-import net.primal.data.serialization.decodeFromStringOrNull
+import net.primal.core.utils.decodeFromStringOrNull
 
 class ListsTypeConverters {
 

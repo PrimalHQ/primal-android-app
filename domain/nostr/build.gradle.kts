@@ -7,6 +7,8 @@ plugins {
     alias(libs.plugins.touchlab.skie)
 }
 
+private val xcfName = "NostrDomain"
+
 kotlin {
     // Android target
     androidLibrary {
@@ -19,7 +21,6 @@ kotlin {
     jvm("desktop")
 
     // iOS Target
-    val xcfName = "NostrDomain"
     val xcfFramework = XCFramework(xcfName)
     val iosTargets = listOf(iosX64(), iosArm64(), iosSimulatorArm64())
 
@@ -76,14 +77,14 @@ kotlin {
         }
     }
 
-    // Opting in to the experimental @ObjCName annotation for native coroutines on iOS targers
+    // Opting in to the experimental @ObjCName annotation for native coroutines on iOS targets
     kotlin.sourceSets.all {
         languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
     }
 }
 
 tasks.register("assembleXCFramework") {
-    dependsOn("assemblePrimalDomainReleaseXCFramework")
+    dependsOn("assemble${xcfName}ReleaseXCFramework")
 }
 
 skie {
