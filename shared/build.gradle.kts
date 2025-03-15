@@ -12,6 +12,8 @@ plugins {
     alias(libs.plugins.touchlab.skie)
 }
 
+private val xcfName = "PrimalShared"
+
 kotlin {
     // Android target
     androidLibrary {
@@ -24,7 +26,6 @@ kotlin {
 //    jvm("desktop")
 
     // iOS Target
-    val xcfName = "PrimalShared"
     val xcfFramework = XCFramework(xcfName)
     val iosTargets = listOf(iosX64(), iosArm64(), iosSimulatorArm64())
 
@@ -41,6 +42,7 @@ kotlin {
             dependencies {
                 // Internal
                 implementation(project(":core:utils"))
+                implementation(project(":core:networking"))
                 implementation(project(":domain:nostr"))
                 implementation(project(":domain:primal"))
 
@@ -106,9 +108,6 @@ kotlin {
 
                 // Networking
                 implementation(libs.ktor.client.okhttp)
-
-                // Cryptography
-//                implementation(libs.secp256k1.kmp.jni.android)
             }
         }
 
@@ -123,33 +122,18 @@ kotlin {
             dependencies {
                 // SQLite
                 implementation(libs.jetpack.sqlite.framework.iosarm64)
-
-                // Cryptography
-//                implementation(libs.lightning.kmp.iosarm64)
-//                implementation(libs.bitcoin.kmp.iosarm64)
-//                implementation(libs.secp256k1.kmp.iosarm64)
             }
         }
         val iosSimulatorArm64Main by getting {
             dependencies {
                 // SQLite
                 implementation(libs.jetpack.sqlite.framework.iossimulatorarm64)
-
-                // Cryptography
-//                implementation(libs.lightning.kmp.iossimulatorarm64)
-//                implementation(libs.bitcoin.kmp.iossimulatorarm64)
-//                implementation(libs.secp256k1.kmp.iossimulatorarm64)
             }
         }
         val iosX64Main by getting {
             dependencies {
                 // SQLite
                 implementation(libs.jetpack.sqlite.framework.iosx64)
-
-                // Cryptography
-//                implementation(libs.lightning.kmp.iosx64)
-//                implementation(libs.bitcoin.kmp.iosx64)
-//                implementation(libs.secp256k1.kmp.iosx64)
             }
         }
 
@@ -183,14 +167,14 @@ kotlin {
         }
     }
 
-    // Opting in to the experimental @ObjCName annotation for native coroutines on iOS targers
+    // Opting in to the experimental @ObjCName annotation for native coroutines on iOS targets
     kotlin.sourceSets.all {
         languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
     }
 }
 
 tasks.register("assembleXCFramework") {
-    dependsOn("assemblePrimalSharedReleaseXCFramework")
+    dependsOn("assemble${xcfName}ReleaseXCFramework")
 }
 
 tasks.register("compileTargets") {

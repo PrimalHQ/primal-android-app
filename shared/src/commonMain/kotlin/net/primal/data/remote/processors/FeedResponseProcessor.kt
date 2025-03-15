@@ -29,7 +29,7 @@ import net.primal.data.remote.mapper.parseAndMapPrimalLegendProfiles
 import net.primal.data.remote.mapper.parseAndMapPrimalPremiumInfo
 import net.primal.data.remote.mapper.parseAndMapPrimalUserNames
 import net.primal.data.serialization.NostrJson
-import net.primal.data.serialization.decodeFromStringOrNull
+import net.primal.core.utils.decodeFromStringOrNull
 import net.primal.domain.nostr.NostrEvent
 
 suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database: PrimalDatabase) {

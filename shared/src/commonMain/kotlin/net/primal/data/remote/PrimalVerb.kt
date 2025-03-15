@@ -1,4 +1,4 @@
-package net.primal.networking.primal
+package net.primal.data.remote
 
 enum class PrimalVerb(val identifier: String) {
     FOLLOW_LIST("contact_list"),

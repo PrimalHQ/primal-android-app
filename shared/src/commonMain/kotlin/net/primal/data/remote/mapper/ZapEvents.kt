@@ -3,7 +3,7 @@ package net.primal.data.remote.mapper
 import net.primal.data.local.dao.events.EventZap
 import net.primal.data.local.dao.profiles.ProfileData
 import net.primal.data.serialization.NostrJson
-import net.primal.data.serialization.decodeFromStringOrNull
+import net.primal.core.utils.decodeFromStringOrNull
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.findFirstEventId
 import net.primal.domain.nostr.findFirstProfileId

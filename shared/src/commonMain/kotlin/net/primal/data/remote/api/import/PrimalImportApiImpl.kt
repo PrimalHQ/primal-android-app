@@ -6,7 +6,7 @@ import net.primal.data.serialization.toJsonArray
 import net.primal.domain.nostr.NostrEvent
 import net.primal.networking.primal.PrimalApiClient
 import net.primal.networking.primal.PrimalCacheFilter
-import net.primal.networking.primal.PrimalVerb
+import net.primal.data.remote.PrimalVerb
 import net.primal.networking.sockets.NostrIncomingMessage
 
 internal class PrimalImportApiImpl(

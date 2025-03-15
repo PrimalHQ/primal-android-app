@@ -2,7 +2,7 @@ package net.primal.data.remote.mapper
 
 import net.primal.data.remote.model.ContentPrimalEventResources
 import net.primal.data.serialization.NostrJson
-import net.primal.data.serialization.decodeFromStringOrNull
+import net.primal.core.utils.decodeFromStringOrNull
 import net.primal.domain.CdnResource
 import net.primal.domain.CdnResourceVariant
 import net.primal.domain.PrimalEvent
