@@ -2,9 +2,9 @@ package net.primal.android.nostr.ext
 
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
-import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.primal.content.ContentWalletTransaction
 import net.primal.android.wallet.db.WalletTransactionData
+import net.primal.domain.nostr.NostrEvent
 
 fun List<ContentWalletTransaction>.mapAsWalletTransactionPO(walletAddress: String) =
     map { it.asWalletTransactionPO(walletAddress) }

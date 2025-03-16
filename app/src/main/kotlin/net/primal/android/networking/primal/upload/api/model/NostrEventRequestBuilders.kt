@@ -1,11 +1,10 @@
 package net.primal.android.networking.primal.upload.api.model
 
 import android.util.Base64
-import kotlinx.serialization.encodeToString
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.nostr.ext.asPubkeyTag
-import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrUnsignedEvent
+import net.primal.domain.nostr.NostrEventKind
 
 fun chunkUploadRequest(
     userId: String,

@@ -33,7 +33,6 @@ import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
-import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.notes.api.model.FeedResponse
 import net.primal.android.notes.db.FeedPost
 import net.primal.android.notes.feed.list.NoteFeedContract.UiEvent
@@ -44,6 +43,7 @@ import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.domain.nostr.NostrEvent
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = NoteFeedViewModel.Factory::class)

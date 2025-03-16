@@ -1,6 +1,5 @@
 package net.primal.android.nostr.notary
 
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.addJsonArray
 import kotlinx.serialization.json.buildJsonArray
@@ -8,7 +7,7 @@ import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.crypto.Bech32
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.crypto.toHex
-import net.primal.android.nostr.model.NostrEvent
+import net.primal.domain.nostr.NostrEvent
 
 fun NostrUnsignedEvent.signOrThrow(nsec: String): NostrEvent {
     val hexPrivateKey = Bech32.decodeBytes(nsec).second

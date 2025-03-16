@@ -9,11 +9,11 @@ import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.primal.PrimalVerb.EVENTS
 import net.primal.android.networking.primal.PrimalVerb.THREAD_VIEW
-import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.notes.api.model.FeedBySpecRequestBody
 import net.primal.android.notes.api.model.FeedResponse
 import net.primal.android.notes.api.model.NotesRequestBody
 import net.primal.android.notes.api.model.ThreadRequestBody
+import net.primal.domain.nostr.NostrEventKind
 
 class FeedApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,

@@ -1,9 +1,9 @@
 package net.primal.android.networking.primal
 
 import net.primal.android.networking.sockets.NostrIncomingMessage
-import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.nostr.model.primal.PrimalEvent
+import net.primal.domain.PrimalEvent
+import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrEventKind
 
 data class PrimalQueryResult(
     val terminationMessage: NostrIncomingMessage,

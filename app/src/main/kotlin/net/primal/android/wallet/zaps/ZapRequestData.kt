@@ -1,6 +1,6 @@
 package net.primal.android.wallet.zaps
 
-import net.primal.android.nostr.model.NostrEvent
+import net.primal.domain.nostr.NostrEvent
 
 data class ZapRequestData(
     val zapperUserId: String,

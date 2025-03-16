@@ -1,6 +1,6 @@
 package net.primal.android.networking.primal.api
 
-import net.primal.android.nostr.model.NostrEvent
+import net.primal.domain.nostr.NostrEvent
 
 interface PrimalImportApi {
 

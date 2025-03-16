@@ -3,11 +3,11 @@ package net.primal.android.notes.repository
 import androidx.room.withTransaction
 import java.time.Instant
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
 import net.primal.android.notes.api.model.FeedResponse
 import net.primal.android.notes.db.FeedPostDataCrossRef
 import net.primal.android.notes.db.FeedPostRemoteKey
+import net.primal.domain.nostr.NostrEvent
 
 class FeedProcessor(
     val feedSpec: String,

@@ -8,7 +8,6 @@ import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.user.api.model.BookmarksResponse
 import net.primal.android.user.api.model.FollowListRequestBody
 import net.primal.android.user.api.model.IsUserFollowingRequestBody
@@ -20,6 +19,7 @@ import net.primal.android.user.api.model.UserProfilesResponse
 import net.primal.android.user.api.model.UserRequestBody
 import net.primal.android.user.api.model.UsersRelaysResponse
 import net.primal.android.user.api.model.UsersRequestBody
+import net.primal.domain.nostr.NostrEventKind
 
 class UsersApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,

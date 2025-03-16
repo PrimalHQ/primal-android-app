@@ -1,7 +1,7 @@
 package net.primal.android.feeds.api
 
-import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.nostr.model.primal.PrimalEvent
+import net.primal.domain.PrimalEvent
+import net.primal.domain.nostr.NostrEvent
 
 data class DvmFeedsResponse(
     val scores: List<PrimalEvent> = emptyList(),

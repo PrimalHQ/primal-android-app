@@ -4,7 +4,6 @@ import java.io.IOException
 import java.net.UnknownHostException
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
-import kotlinx.serialization.encodeToString
 import net.primal.android.config.AppConfigHandler
 import net.primal.android.config.AppConfigProvider
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
@@ -17,8 +16,8 @@ import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.primal.upload.api.model.UploadChunkRequest
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.nostr.model.NostrEventKind
+import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrEventKind
 import okhttp3.OkHttpClient
 import timber.log.Timber
 

@@ -3,10 +3,10 @@ package net.primal.android.nostr.ext
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.events.db.EventZap
-import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.profile.db.ProfileData
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.LnInvoiceUtils
+import net.primal.domain.nostr.NostrEvent
 
 fun List<NostrEvent>.mapAsEventZapDO(profilesMap: Map<String, ProfileData>) =
     mapNotNull { zapReceipt ->

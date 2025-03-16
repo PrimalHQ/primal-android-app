@@ -1,7 +1,7 @@
 package net.primal.android.user.api.model
 
 import kotlinx.serialization.Serializable
-import net.primal.android.nostr.model.primal.PrimalEvent
+import net.primal.domain.PrimalEvent
 
 @Serializable
 data class UsersRelaysResponse(
