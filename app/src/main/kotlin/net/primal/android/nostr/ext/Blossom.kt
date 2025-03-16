@@ -1,7 +1,7 @@
 package net.primal.android.nostr.ext
 
 import net.primal.android.core.ext.asMapByKey
-import net.primal.android.nostr.model.NostrEvent
+import net.primal.domain.nostr.NostrEvent
 
 fun List<NostrEvent>.mapAsMapPubkeyToListOfBlossomServers() =
     this.asMapByKey { it.pubKey }.mapValues { event ->

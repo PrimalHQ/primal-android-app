@@ -29,10 +29,10 @@ import net.primal.android.networking.primal.upload.api.model.chunkUploadRequest
 import net.primal.android.networking.primal.upload.api.model.completeUploadRequest
 import net.primal.android.networking.primal.upload.domain.UploadResult
 import net.primal.android.networking.primal.upload.domain.UploadStatus
-import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.nostr.notary.signOrThrow
+import net.primal.domain.nostr.NostrEvent
 
 class PrimalFileUploader @Inject constructor(
     private val contentResolver: ContentResolver,

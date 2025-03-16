@@ -4,12 +4,12 @@ import net.primal.android.core.compose.profile.model.asPremiumProfileDataUi
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentLegendLeaderboardItem
 import net.primal.android.nostr.model.primal.content.ContentPremiumLeaderboardItem
 import net.primal.android.premium.leaderboard.domain.LeaderboardLegendEntry
 import net.primal.android.premium.leaderboard.domain.OGLeaderboardEntry
 import net.primal.android.profile.db.ProfileData
+import net.primal.domain.PrimalEvent
 
 fun PrimalEvent?.parseAndMapAsLeaderboardLegendEntries(profiles: Map<String, ProfileData>) =
     NostrJson.decodeFromStringOrNull<List<ContentLegendLeaderboardItem>>(this?.content)

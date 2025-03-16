@@ -3,7 +3,7 @@ package net.primal.android.core.utils
 import kotlinx.serialization.json.JsonArray
 import net.primal.android.nostr.ext.getTagValueOrNull
 import net.primal.android.nostr.ext.isHashtagTag
-import net.primal.android.nostr.model.NostrEvent
+import net.primal.domain.nostr.NostrEvent
 
 private val hashtagRegex = Regex("#\\w+")
 

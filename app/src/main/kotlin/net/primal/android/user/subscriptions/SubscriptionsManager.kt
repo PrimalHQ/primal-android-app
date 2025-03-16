@@ -29,8 +29,6 @@ import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.nostr.ext.asMessagesTotalCount
 import net.primal.android.nostr.ext.asNotificationSummary
 import net.primal.android.nostr.ext.takeContentOrNull
-import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.notifications.api.model.PubkeyRequestBody
 import net.primal.android.notifications.domain.NotificationsSummary
@@ -42,6 +40,8 @@ import net.primal.android.wallet.api.model.BalanceResponse
 import net.primal.android.wallet.api.model.LastUpdatedAtResponse
 import net.primal.android.wallet.api.model.WalletRequestBody
 import net.primal.android.wallet.domain.SubWallet
+import net.primal.domain.PrimalEvent
+import net.primal.domain.nostr.NostrEventKind
 
 @Singleton
 class SubscriptionsManager @Inject constructor(

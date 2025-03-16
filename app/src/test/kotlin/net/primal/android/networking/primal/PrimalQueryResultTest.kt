@@ -11,9 +11,9 @@ import net.primal.android.networking.sockets.toPrimalSubscriptionId
 import net.primal.android.nostr.ext.isNotPrimalEventKind
 import net.primal.android.nostr.ext.isNotUnknown
 import net.primal.android.nostr.ext.isPrimalEventKind
-import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.nostr.model.primal.PrimalEvent
+import net.primal.domain.PrimalEvent
+import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrEventKind
 import org.junit.Test
 
 class PrimalQueryResultTest {

@@ -13,9 +13,9 @@ import net.primal.android.config.FakeAppConfigProvider
 import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.primal.PrimalServerType
-import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrEventKind
 import okhttp3.OkHttpClient
 import org.junit.Rule
 import org.junit.Test

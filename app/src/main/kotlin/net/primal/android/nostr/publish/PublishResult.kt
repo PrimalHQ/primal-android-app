@@ -1,6 +1,6 @@
 package net.primal.android.nostr.publish
 
-import net.primal.android.nostr.model.NostrEvent
+import net.primal.domain.nostr.NostrEvent
 
 data class PublishResult(
     val nostrEvent: NostrEvent,

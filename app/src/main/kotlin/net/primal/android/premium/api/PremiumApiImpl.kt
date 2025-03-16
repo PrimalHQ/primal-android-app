@@ -13,8 +13,6 @@ import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.ext.takeContentOrNull
-import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.premium.api.model.CancelMembershipRequest
 import net.primal.android.premium.api.model.ChangeNameRequest
@@ -34,6 +32,8 @@ import net.primal.android.premium.api.model.ShowSupportUsResponse
 import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
 import net.primal.android.premium.domain.PremiumPurchaseOrder
 import net.primal.android.settings.api.model.AppSpecificDataRequest
+import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrEventKind
 
 class PremiumApiImpl @Inject constructor(
     @PrimalWalletApiClient private val primalWalletApiClient: PrimalApiClient,

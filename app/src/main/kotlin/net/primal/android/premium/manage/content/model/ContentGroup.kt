@@ -1,6 +1,6 @@
 package net.primal.android.premium.manage.content.model
 
-import net.primal.android.nostr.model.NostrEventKind
+import net.primal.domain.nostr.NostrEventKind
 
 enum class ContentGroup(val kinds: List<Int>?) {
     Notes(kinds = listOf(NostrEventKind.ShortTextNote.value)),

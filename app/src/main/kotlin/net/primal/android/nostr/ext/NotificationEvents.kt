@@ -5,11 +5,11 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
-import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentPrimalNotification
 import net.primal.android.notifications.db.NotificationData
 import net.primal.android.notifications.domain.NotificationType
 import net.primal.android.notifications.domain.NotificationsSummary
+import net.primal.domain.PrimalEvent
 
 fun PrimalEvent.asNotificationSummary(): NotificationsSummary {
     val summaryJsonObject = NostrJson.parseToJsonElement(this.content).jsonObject

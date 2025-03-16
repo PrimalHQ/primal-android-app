@@ -7,9 +7,9 @@ import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
-import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.RelayPermission
+import net.primal.domain.nostr.NostrEvent
 import timber.log.Timber
 
 val NostrJson = Json {

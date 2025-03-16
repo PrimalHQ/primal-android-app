@@ -1,7 +1,6 @@
 package net.primal.android.explore.api
 
 import javax.inject.Inject
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.float
 import kotlinx.serialization.json.jsonPrimitive
@@ -21,7 +20,7 @@ import net.primal.android.networking.primal.PrimalVerb.EXPLORE_TOPICS
 import net.primal.android.networking.primal.PrimalVerb.EXPLORE_ZAPS
 import net.primal.android.networking.primal.PrimalVerb.RECOMMENDED_USERS
 import net.primal.android.networking.primal.PrimalVerb.USER_SEARCH
-import net.primal.android.nostr.model.NostrEventKind
+import net.primal.domain.nostr.NostrEventKind
 
 class ExploreApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,

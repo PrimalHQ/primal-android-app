@@ -15,13 +15,13 @@ import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.user.api.model.UsersRelaysResponse
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.cleanWebSocketUrl
+import net.primal.domain.PrimalEvent
+import net.primal.domain.nostr.NostrEventKind
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule

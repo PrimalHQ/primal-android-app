@@ -1,7 +1,6 @@
 package net.primal.android.premium.manage.media.api
 
 import javax.inject.Inject
-import kotlinx.serialization.encodeToString
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.networking.di.PrimalCacheApiClient
@@ -10,12 +9,12 @@ import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.takeContentOrNull
-import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.premium.manage.media.api.model.MediaStorageStats
 import net.primal.android.premium.manage.media.api.model.MediaUploadsRequestBody
 import net.primal.android.premium.manage.media.api.model.MediaUploadsResponse
 import net.primal.android.settings.api.model.AppSpecificDataRequest
+import net.primal.domain.nostr.NostrEventKind
 
 class MediaManagementApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,

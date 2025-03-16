@@ -21,12 +21,12 @@ import net.primal.android.nostr.ext.mapNotNullAsPostDataPO
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
-import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.notes.api.FeedApi
 import net.primal.android.notes.repository.persistToDatabaseAsTransaction
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.credentials.CredentialsStore
+import net.primal.domain.PrimalEvent
+import net.primal.domain.nostr.NostrEvent
 import timber.log.Timber
 
 class MessagesProcessor @Inject constructor(

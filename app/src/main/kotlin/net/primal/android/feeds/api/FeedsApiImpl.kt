@@ -2,7 +2,6 @@ package net.primal.android.feeds.api
 
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.serialization.encodeToString
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.feeds.api.model.FeedsResponse
 import net.primal.android.feeds.api.model.SubSettingsAuthorization
@@ -13,10 +12,10 @@ import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.primal.PrimalVerb.GET_FEATURED_DVM_FEEDS
 import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.model.primal.content.ContentAppSubSettings
 import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
 import net.primal.android.nostr.notary.NostrNotary
+import net.primal.domain.nostr.NostrEventKind
 
 @Singleton
 class FeedsApiImpl @Inject constructor(
