@@ -1,7 +1,7 @@
 package net.primal.android.networking.relays.broadcast
 
 import kotlinx.serialization.Serializable
-import net.primal.android.nostr.model.NostrEvent
+import net.primal.domain.nostr.NostrEvent
 
 @Serializable
 data class BroadcastRequestBody(

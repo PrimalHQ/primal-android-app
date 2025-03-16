@@ -8,7 +8,6 @@ import net.primal.android.core.utils.parseHashtags
 import net.primal.android.core.utils.parseUris
 import net.primal.android.events.domain.CdnImage
 import net.primal.android.events.domain.CdnResource
-import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.model.primal.content.ContentProfilePremiumInfo
 import net.primal.android.profile.db.ProfileData
@@ -16,6 +15,7 @@ import net.primal.android.profile.domain.PrimalLegendProfile
 import net.primal.android.profile.domain.PrimalPremiumInfo
 import net.primal.android.wallet.api.decodeLNUrlOrNull
 import net.primal.android.wallet.api.parseAsLNUrlOrNull
+import net.primal.domain.nostr.NostrEvent
 
 fun List<NostrEvent>.mapAsProfileDataPO(
     cdnResources: List<CdnResource>,

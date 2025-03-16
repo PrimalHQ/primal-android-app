@@ -3,14 +3,14 @@ package net.primal.android.networking.sockets
 import io.kotest.matchers.should
 import io.kotest.matchers.types.beInstanceOf
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.put
 import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.nostr.model.NostrEvent
+import net.primal.domain.nostr.NostrEvent
 import org.junit.Test
 
 class NostrIncomingMessageParserTest {

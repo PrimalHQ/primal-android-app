@@ -16,8 +16,6 @@ import net.primal.android.events.domain.EventLinkPreviewData
 import net.primal.android.events.domain.EventUriNostrType
 import net.primal.android.events.ext.flatMapPostsAsEventUriPO
 import net.primal.android.messages.db.DirectMessageData
-import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nevent
 import net.primal.android.nostr.utils.Nip19TLV
@@ -30,6 +28,8 @@ import net.primal.android.notes.db.ReferencedUser
 import net.primal.android.notes.db.ReferencedZap
 import net.primal.android.profile.db.ProfileData
 import net.primal.android.wallet.utils.LnInvoiceUtils
+import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrEventKind
 import timber.log.Timber
 
 private const val NOSTR = "nostr:"

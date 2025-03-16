@@ -7,12 +7,12 @@ import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.editor.domain.NoteAttachment
-import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nevent
 import net.primal.android.nostr.utils.Nip19TLV
 import net.primal.android.nostr.utils.Nip19TLV.parseUriAsNeventOrNull
 import net.primal.android.nostr.utils.asATagValue
+import net.primal.domain.nostr.NostrEventKind
 
 fun List<JsonArray>.findFirstEventId() = firstOrNull { it.isEventIdTag() }?.getTagValueOrNull()
 

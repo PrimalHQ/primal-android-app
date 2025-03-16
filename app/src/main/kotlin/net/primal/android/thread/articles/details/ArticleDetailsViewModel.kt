@@ -36,7 +36,6 @@ import net.primal.android.nostr.ext.isNote
 import net.primal.android.nostr.ext.isNoteUri
 import net.primal.android.nostr.ext.nostrUriToNoteId
 import net.primal.android.nostr.ext.nostrUriToPubkey
-import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nevent
@@ -56,6 +55,7 @@ import net.primal.android.wallet.zaps.InvalidZapRequestException
 import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
+import net.primal.domain.nostr.NostrEventKind
 import timber.log.Timber
 
 @HiltViewModel

@@ -7,9 +7,9 @@ import net.primal.android.core.utils.parseHashtags
 import net.primal.android.core.utils.parseUris
 import net.primal.android.events.domain.CdnImage
 import net.primal.android.events.domain.CdnResource
-import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.nostr.model.primal.PrimalEvent
+import net.primal.domain.PrimalEvent
+import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrEventKind
 import timber.log.Timber
 
 fun List<NostrEvent>.mapNotNullAsArticleDataPO(

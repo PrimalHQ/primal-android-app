@@ -52,13 +52,13 @@ import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.utils.ifNotNull
 import net.primal.android.highlights.model.CommentUi
 import net.primal.android.highlights.model.JoinedHighlightsUi
-import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nevent
 import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import net.primal.android.nostr.utils.Nip19TLV.toNeventString
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
+import net.primal.domain.nostr.NostrEventKind
 
 internal val DARK_THEME_ACTION_BUTTON_COLOR = Color(0xFF282828)
 

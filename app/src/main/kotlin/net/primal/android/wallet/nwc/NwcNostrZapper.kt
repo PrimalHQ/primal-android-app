@@ -4,7 +4,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.io.IOException
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.wallet.nwc.api.NwcApi
@@ -13,6 +12,7 @@ import net.primal.android.wallet.nwc.model.LightningPayResponse
 import net.primal.android.wallet.zaps.NostrZapper
 import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapRequestData
+import net.primal.domain.nostr.NostrEvent
 
 class NwcNostrZapper @AssistedInject constructor(
     @Assisted private val nwcData: NostrWalletConnect,

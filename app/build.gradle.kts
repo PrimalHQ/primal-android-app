@@ -210,6 +210,10 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:utils"))
+    implementation(project(":domain:nostr"))
+    implementation(project(":domain:primal"))
+    implementation(project(":domain:primal-wallet"))
     implementation(project(":shared"))
 
     implementation(libs.core.ktx)

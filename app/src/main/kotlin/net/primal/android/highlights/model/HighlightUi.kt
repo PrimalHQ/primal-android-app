@@ -4,8 +4,8 @@ import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asFallbackProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.highlights.db.Highlight
-import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.utils.Nevent
+import net.primal.domain.nostr.NostrEventKind
 
 data class HighlightUi(
     val highlightId: String,

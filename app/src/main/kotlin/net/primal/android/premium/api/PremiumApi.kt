@@ -1,6 +1,5 @@
 package net.primal.android.premium.api
 
-import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.premium.api.model.CancelMembershipRequest
 import net.primal.android.premium.api.model.LegendLeaderboardOrderBy
 import net.primal.android.premium.api.model.LegendLeaderboardResponse
@@ -12,6 +11,7 @@ import net.primal.android.premium.api.model.PremiumLeaderboardResponse
 import net.primal.android.premium.api.model.PurchaseMembershipRequest
 import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
 import net.primal.android.premium.domain.PremiumPurchaseOrder
+import net.primal.domain.nostr.NostrEvent
 
 interface PremiumApi {
 

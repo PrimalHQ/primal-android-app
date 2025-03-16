@@ -12,9 +12,9 @@ import net.primal.android.networking.primal.PrimalCacheFilter
 import net.primal.android.networking.primal.PrimalSocketSubscription
 import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.nostr.ext.takeContentOrNull
-import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.premium.api.model.MembershipPurchaseMonitorRequestBody
 import net.primal.android.premium.api.model.MembershipPurchaseMonitorResponse
+import net.primal.domain.nostr.NostrEventKind
 
 class PurchaseMonitor @Inject constructor(
     @PrimalWalletApiClient private val walletApiClient: PrimalApiClient,

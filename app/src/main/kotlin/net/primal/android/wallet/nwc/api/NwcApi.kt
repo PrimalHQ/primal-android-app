@@ -5,15 +5,14 @@ import java.math.BigDecimal
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.encodeToString
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.core.serialization.json.toJsonObject
-import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.wallet.nwc.model.LightningPayRequest
 import net.primal.android.wallet.nwc.model.LightningPayResponse
 import net.primal.android.wallet.utils.LnInvoiceUtils
+import net.primal.domain.nostr.NostrEvent
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request

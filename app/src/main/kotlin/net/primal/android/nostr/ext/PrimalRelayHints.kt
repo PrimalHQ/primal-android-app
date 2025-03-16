@@ -1,7 +1,7 @@
 package net.primal.android.nostr.ext
 
 import net.primal.android.nostr.db.EventRelayHints
-import net.primal.android.nostr.model.primal.PrimalEvent
+import net.primal.domain.PrimalEvent
 
 fun List<PrimalEvent>.flatMapAsEventHintsPO(): List<EventRelayHints> {
     val map = mutableMapOf<String, String>()

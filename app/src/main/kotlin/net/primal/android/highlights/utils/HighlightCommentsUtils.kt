@@ -1,6 +1,5 @@
 package net.primal.android.highlights.utils
 
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.toJsonObject
@@ -11,8 +10,8 @@ import net.primal.android.nostr.ext.getTagValueOrNull
 import net.primal.android.nostr.ext.hasReplyMarker
 import net.primal.android.nostr.ext.hasRootMarker
 import net.primal.android.nostr.ext.isEventIdTag
-import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.notes.db.PostData
+import net.primal.domain.nostr.NostrEvent
 
 fun List<NostrEvent>.mapNotNullAsHighlightComments(highlights: List<HighlightData>): List<PostData> =
     this.mapNotNull { it.asHighlightComment(highlights = highlights) }

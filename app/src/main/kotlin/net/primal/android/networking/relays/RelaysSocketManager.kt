@@ -13,11 +13,11 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.mapToRelayDO
+import net.primal.domain.nostr.NostrEvent
 import okhttp3.OkHttpClient
 import timber.log.Timber
 

@@ -13,9 +13,9 @@ import net.primal.android.messages.db.DirectMessageData
 import net.primal.android.messages.domain.ConversationSummary
 import net.primal.android.messages.domain.ConversationsSummary
 import net.primal.android.messages.domain.MessagesUnreadCount
-import net.primal.android.nostr.model.NostrEvent
-import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.domain.PrimalEvent
+import net.primal.domain.nostr.NostrEvent
 import timber.log.Timber
 
 fun PrimalEvent.asMessagesTotalCount(): MessagesUnreadCount? {

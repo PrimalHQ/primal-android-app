@@ -12,10 +12,10 @@ import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.events.domain.CdnImage
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
-import net.primal.android.nostr.model.NostrEvent
 import net.primal.android.notes.db.FeedPost
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
+import net.primal.domain.nostr.NostrEvent
 
 data class FeedPostUi(
     val postId: String,

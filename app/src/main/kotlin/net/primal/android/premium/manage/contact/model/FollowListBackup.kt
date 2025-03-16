@@ -1,6 +1,6 @@
 package net.primal.android.premium.manage.contact.model
 
-import net.primal.android.nostr.model.NostrEvent
+import net.primal.domain.nostr.NostrEvent
 
 data class FollowListBackup(
     val event: NostrEvent,

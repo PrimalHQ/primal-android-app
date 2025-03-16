@@ -20,7 +20,6 @@ import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.primal.retryNetworkCall
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.takeContentOrNull
-import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.premium.manage.content.PremiumContentBackupContract.UiEvent
@@ -31,6 +30,7 @@ import net.primal.android.premium.manage.content.model.ContentType
 import net.primal.android.premium.manage.content.repository.BroadcastRepository
 import net.primal.android.settings.api.model.AppSpecificDataRequest
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.domain.nostr.NostrEventKind
 import timber.log.Timber
 
 @HiltViewModel

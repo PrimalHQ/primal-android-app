@@ -26,7 +26,6 @@ import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
 import net.primal.android.nostr.mappers.asContentArticleFeedData
-import net.primal.android.nostr.model.primal.PrimalEvent
 import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
 import net.primal.android.nostr.model.primal.content.ContentDvmFeedFollowsAction
 import net.primal.android.nostr.model.primal.content.ContentDvmFeedMetadata
@@ -34,6 +33,7 @@ import net.primal.android.nostr.model.primal.content.ContentPrimalDvmFeedMetadat
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventUserStats
 import net.primal.android.wallet.api.parseAsLNUrlOrNull
+import net.primal.domain.PrimalEvent
 
 class FeedsRepository @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,

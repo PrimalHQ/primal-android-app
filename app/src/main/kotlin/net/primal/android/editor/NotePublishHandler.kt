@@ -18,12 +18,12 @@ import net.primal.android.nostr.ext.parseEventTags
 import net.primal.android.nostr.ext.parseHashtagTags
 import net.primal.android.nostr.ext.parsePubkeyTags
 import net.primal.android.nostr.ext.parseReplaceableEventTags
-import net.primal.android.nostr.model.NostrEventKind
 import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.nostr.publish.PublishResult
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nevent
+import net.primal.domain.nostr.NostrEventKind
 
 class NotePublishHandler @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,

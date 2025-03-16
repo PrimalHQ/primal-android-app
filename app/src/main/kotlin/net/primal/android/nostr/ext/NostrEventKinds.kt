@@ -1,7 +1,7 @@
 package net.primal.android.nostr.ext
 
-import net.primal.android.nostr.model.NostrEventKind
-import net.primal.android.nostr.model.NostrEventKindRange
+import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.NostrEventKindRange
 
 fun NostrEventKind.isPrimalEventKind() = value in NostrEventKindRange.PrimalEvents
 
