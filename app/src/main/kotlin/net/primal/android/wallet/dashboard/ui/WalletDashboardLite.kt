@@ -21,6 +21,7 @@ fun WalletDashboardLite(
     actions: List<WalletAction>,
     onWalletAction: (WalletAction) -> Unit,
     currencyMode: CurrencyMode,
+    enabled: Boolean,
     onSwitchCurrencyMode: (currencyMode: CurrencyMode) -> Unit,
     exchangeBtcUsdRate: Double?,
 ) {
@@ -66,6 +67,7 @@ fun WalletDashboardLite(
             actionSize = 48.dp,
             showLabels = false,
             onWalletAction = onWalletAction,
+            enabled = enabled,
         )
     }
 }

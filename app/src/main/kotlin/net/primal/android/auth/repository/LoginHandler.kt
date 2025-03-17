@@ -19,21 +19,35 @@ class LoginHandler @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
     private val credentialsStore: CredentialsStore,
 ) {
+    enum class LoginType {
+        Npub,
+        Nsec,
+    }
 
-    suspend fun login(nostrKey: String) =
+    suspend fun login(nostrKey: String, loginType: LoginType) =
         withContext(dispatchers.io()) {
             runCatching {
-                val userId = credentialsStore.save(nostrKey = nostrKey)
+                val userId = when (loginType) {
+                    LoginType.Npub -> credentialsStore.saveNpub(npub = nostrKey)
+                    LoginType.Nsec -> credentialsStore.saveNsec(nostrKey = nostrKey)
+                }
 
                 userRepository.fetchAndUpdateUserAccount(userId = userId)
                 bookmarksRepository.fetchAndPersistPublicBookmarks(userId = userId)
                 settingsRepository.fetchAndPersistAppSettings(userId = userId)
                 mutedUserRepository.fetchAndPersistMuteList(userId = userId)
             }.onFailure { exception ->
-                credentialsStore.removeCredentialByNsec(nsec = nostrKey.assureValidNsec())
+                when (loginType) {
+                    LoginType.Nsec -> credentialsStore.removeCredentialByNsec(nsec = nostrKey.assureValidNsec())
+                    LoginType.Npub -> credentialsStore.removeCredentialByNpub(npub = nostrKey)
+                }
+
                 throw exception
             }.onSuccess {
-                authRepository.login(nostrKey = nostrKey)
+                when (loginType) {
+                    LoginType.Npub -> authRepository.loginWithNpub(npub = nostrKey)
+                    LoginType.Nsec -> authRepository.loginWithNsec(nostrKey = nostrKey)
+                }
             }
         }
 }

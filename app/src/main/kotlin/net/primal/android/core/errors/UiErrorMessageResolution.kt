@@ -10,6 +10,8 @@ fun UiError.resolveUiErrorMessage(context: Context): String {
             R.string.app_error_invalid_naddr,
         )
 
+        UiError.MissingPrivateKey -> context.getString(R.string.app_error_missing_private_key)
+
         is UiError.InvalidZapRequest -> context.getString(
             R.string.post_action_invalid_zap_request,
         )
