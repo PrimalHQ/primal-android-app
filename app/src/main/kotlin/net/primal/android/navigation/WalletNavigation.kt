@@ -194,7 +194,6 @@ private fun NavGraphBuilder.send(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onCreateTransaction = { draft ->
-            navController.popBackStack()
             navController.navigateToWalletCreateTransaction(draftTransaction = draft)
         },
     )
