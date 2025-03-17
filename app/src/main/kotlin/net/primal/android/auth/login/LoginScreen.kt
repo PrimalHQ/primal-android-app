@@ -190,10 +190,9 @@ fun LoginContent(
                 .wrapContentHeight(align = Alignment.Bottom),
             verticalArrangement = Arrangement.Bottom,
         ) {
-            val isValidNsec = state.loginInput.isValidNostrPrivateKey()
             OnboardingButton(
                 text = when {
-                    isValidNsec -> stringResource(id = R.string.login_button_sign_in)
+                    state.isValidKey -> stringResource(id = R.string.login_button_sign_in)
                     state.loginInput.isEmpty() -> stringResource(id = R.string.login_button_paste_your_key)
                     else -> stringResource(id = R.string.login_button_paste_new_key)
                 },
@@ -205,7 +204,7 @@ fun LoginContent(
                 enabled = !state.loading,
                 onClick = {
                     keyboardController?.hide()
-                    if (isValidNsec) {
+                    if (state.isValidKey) {
                         onLoginClick()
                     } else {
                         pasteFromClipboard()
@@ -259,6 +258,7 @@ private fun LoginInputFieldContent(
         ) {
             LoginInputField(
                 loginInput = state.loginInput,
+                isValidKey = state.isValidKey,
                 keyboardVisible = keyboardVisible,
                 onLoginInputChanged = onLoginInputChanged,
                 onLoginClick = onLoginClick,
@@ -270,12 +270,12 @@ private fun LoginInputFieldContent(
 @Composable
 private fun LoginInputField(
     modifier: Modifier = Modifier,
+    isValidKey: Boolean,
     loginInput: String,
     keyboardVisible: Boolean,
     onLoginInputChanged: (String) -> Unit,
     onLoginClick: () -> Unit,
 ) {
-    val isValidNsec = loginInput.isValidNostrPrivateKey()
     val keyboardController = LocalSoftwareKeyboardController.current
     val shape = if (keyboardVisible) AppTheme.shapes.medium else AppTheme.shapes.extraLarge
     Row(
@@ -294,7 +294,7 @@ private fun LoginInputField(
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     text = when {
-                        loginInput.isEmpty() -> stringResource(id = R.string.nsec)
+                        loginInput.isEmpty() -> stringResource(id = R.string.nsec_or_npub)
                         else -> "••••••••••••••••••••••••••••••••••••••"
                     },
                     textAlign = TextAlign.Center,
@@ -309,14 +309,14 @@ private fun LoginInputField(
                     },
                 )
             },
-            isError = loginInput.isNotEmpty() && !isValidNsec,
+            isError = loginInput.isNotEmpty() && !isValidKey,
             keyboardOptions = KeyboardOptions(
-                imeAction = if (isValidNsec) ImeAction.Go else ImeAction.Default,
+                imeAction = if (isValidKey) ImeAction.Go else ImeAction.Default,
                 keyboardType = KeyboardType.Password,
             ),
             keyboardActions = KeyboardActions(
                 onGo = {
-                    if (isValidNsec) {
+                    if (isValidKey) {
                         keyboardController?.hide()
                         onLoginClick()
                     }

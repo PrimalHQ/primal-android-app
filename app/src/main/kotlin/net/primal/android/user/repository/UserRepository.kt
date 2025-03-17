@@ -10,6 +10,7 @@ import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
+import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
@@ -17,6 +18,7 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.model.content.ContentMetadata
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.user.accounts.UserAccountFetcher
@@ -25,6 +27,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.copyFollowListIfNotNull
 import net.primal.android.user.accounts.copyIfNotNull
 import net.primal.android.user.api.UsersApi
+import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.db.Relay
 import net.primal.android.user.domain.ContentDisplaySettings
 import net.primal.android.user.domain.NostrWalletConnect
@@ -38,6 +41,7 @@ class UserRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
     private val userAccountFetcher: UserAccountFetcher,
     private val accountsStore: UserAccountsStore,
+    private val credentialsStore: CredentialsStore,
     private val activeAccountStore: ActiveAccountStore,
     private val fileUploader: PrimalFileUploader,
     private val usersApi: UsersApi,
@@ -48,6 +52,9 @@ class UserRepository @Inject constructor(
             accountsStore.getAndUpdateAccount(userId = userId) { copy(lastAccessedAt = Instant.now().epochSecond) }
             activeAccountStore.setActiveUserId(pubkey = userId)
         }
+
+    fun isNpubLogin(userId: String) =
+        runCatching { credentialsStore.isNpubLogin(npub = userId.hexToNpubHrp()) }.getOrDefault(false)
 
     suspend fun fetchAndUpdateUserAccount(userId: String): UserAccount {
         val userProfile = userAccountFetcher.fetchUserProfileOrNull(userId = userId)
@@ -116,7 +123,7 @@ class UserRepository @Inject constructor(
         accountsStore.deleteAccount(pubkey = pubkey)
     }
 
-    @Throws(UnsuccessfulFileUpload::class, NostrPublishException::class)
+    @Throws(UnsuccessfulFileUpload::class, NostrPublishException::class, MissingPrivateKeyException::class)
     suspend fun setProfileMetadata(userId: String, profileMetadata: ProfileMetadata) {
         val pictureUrl = profileMetadata.remotePictureUrl
             ?: if (profileMetadata.localPictureUri != null) {
@@ -147,7 +154,7 @@ class UserRepository @Inject constructor(
         )
     }
 
-    @Throws(NostrPublishException::class, WssException::class)
+    @Throws(NostrPublishException::class, WssException::class, MissingPrivateKeyException::class)
     suspend fun setNostrAddress(userId: String, nostrAddress: String) =
         withContext(dispatchers.io()) {
             val userProfileResponse = usersApi.getUserProfile(userId = userId)
@@ -160,7 +167,7 @@ class UserRepository @Inject constructor(
             )
         }
 
-    @Throws(NostrPublishException::class, WssException::class)
+    @Throws(NostrPublishException::class, WssException::class, MissingPrivateKeyException::class)
     suspend fun setLightningAddress(userId: String, lightningAddress: String) =
         withContext(dispatchers.io()) {
             val userProfileResponse = usersApi.getUserProfile(userId = userId)

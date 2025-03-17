@@ -63,8 +63,16 @@ private fun WalletActionButton(
             modifier = modifier,
             onClick = onClick,
             enabled = enabled,
-            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-            contentColor = AppTheme.colorScheme.onSurface,
+            containerColor = if (enabled) {
+                AppTheme.extraColorScheme.surfaceVariantAlt1
+            } else {
+                AppTheme.extraColorScheme.surfaceVariantAlt2
+            },
+            contentColor = if (enabled) {
+                AppTheme.colorScheme.onSurface
+            } else {
+                AppTheme.extraColorScheme.onSurfaceVariantAlt1
+            },
         ) {
             Icon(
                 modifier = Modifier.size(24.dp),

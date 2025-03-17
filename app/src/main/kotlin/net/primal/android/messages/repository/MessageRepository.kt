@@ -20,6 +20,7 @@ import net.primal.android.messages.db.DirectMessage
 import net.primal.android.messages.db.MessageConversation
 import net.primal.android.messages.db.MessageConversationData
 import net.primal.android.messages.domain.ConversationRelation
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.user.credentials.CredentialsStore
 
@@ -149,11 +150,12 @@ class MessageRepository @Inject constructor(
         receiverId: String,
         text: String,
     ) {
+        val nsec = credentialsStore.findOrThrow(npub = userId.hexToNpubHrp()).nsec
+            ?: throw MissingPrivateKeyException()
+
         val encryptedContent = CryptoUtils.encrypt(
             msg = text,
-            privateKey = credentialsStore
-                .findOrThrow(npub = userId.hexToNpubHrp())
-                .nsec.bechToBytesOrThrow(hrp = "nsec"),
+            privateKey = nsec.bechToBytesOrThrow(hrp = "nsec"),
             pubKey = receiverId.hexToNpubHrp().bechToBytesOrThrow(hrp = "npub"),
         )
 

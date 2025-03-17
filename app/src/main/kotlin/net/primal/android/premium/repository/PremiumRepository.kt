@@ -13,6 +13,7 @@ import net.primal.android.nostr.ext.parseAndFoldPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndFoldPrimalUserNames
 import net.primal.android.nostr.ext.parseAndMapAsLeaderboardLegendEntries
 import net.primal.android.nostr.ext.parseAndMapAsOGLeaderboardEntries
+import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.premium.api.PremiumApi
 import net.primal.android.premium.api.model.CancelMembershipRequest
 import net.primal.android.premium.api.model.LegendLeaderboardOrderBy
@@ -23,6 +24,7 @@ import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
 import net.primal.android.premium.domain.PremiumMembership
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
+import timber.log.Timber
 
 class PremiumRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
@@ -45,11 +47,16 @@ class PremiumRepository @Inject constructor(
 
     suspend fun fetchMembershipStatus(userId: String): PremiumMembership? =
         withContext(dispatchers.io()) {
-            premiumApi.getPremiumMembershipStatus(userId = userId)?.let { response ->
-                accountsStore.getAndUpdateAccount(userId = userId) {
-                    this.copy(premiumMembership = response.toPremiumMembership())
-                }
-            }?.premiumMembership
+            try {
+                premiumApi.getPremiumMembershipStatus(userId = userId)?.let { response ->
+                    accountsStore.getAndUpdateAccount(userId = userId) {
+                        this.copy(premiumMembership = response.toPremiumMembership())
+                    }
+                }?.premiumMembership
+            } catch (error: MissingPrivateKeyException) {
+                Timber.w(error)
+                null
+            }
         }
 
     suspend fun shouldShowSupportUsNotice() =

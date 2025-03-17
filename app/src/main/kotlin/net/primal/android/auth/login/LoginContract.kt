@@ -9,6 +9,8 @@ interface LoginContract {
         val loginInput: String = "",
         val profileDetails: ProfileDetailsUi? = null,
         val fetchingProfileDetails: Boolean = false,
+        val isValidKey: Boolean = false,
+        val isNpubLogin: Boolean? = null,
         val error: LoginError? = null,
     ) {
         sealed class LoginError {
