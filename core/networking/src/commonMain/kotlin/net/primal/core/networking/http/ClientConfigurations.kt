@@ -13,11 +13,9 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
-//import net.primal.PrimalLib
+// import net.primal.PrimalLib
 
-internal fun HttpClientConfig<*>.installSharedHttpClientConfiguration(
-    json: Json,
-) {
+internal fun HttpClientConfig<*>.installSharedHttpClientConfiguration(json: Json) {
     install(ContentNegotiation) {
         json(json = json)
     }
@@ -55,7 +53,6 @@ internal fun HttpClientConfig<*>.installWebSocketsHttpClientConfiguration() {
 //    }
 
     install(WebSockets) {
-        
     }
 
 //    HttpResponseValidator {

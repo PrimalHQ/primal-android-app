@@ -101,9 +101,10 @@ internal class PrimalApiClientImpl(
         return this == PrimalServerType.Caching || this == PrimalServerType.Wallet
     }
 
-    private suspend fun ensureSocketClientConnection() = socketClientMutex.withLock {
-        socketClient.ensureSocketConnection()
-    }
+    private suspend fun ensureSocketClientConnection() =
+        socketClientMutex.withLock {
+            socketClient.ensureSocketConnection()
+        }
 
     private suspend fun <T> retrySendMessage(times: Int, block: suspend (Int) -> T): T {
         repeat(times) {

@@ -12,7 +12,6 @@ import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.explore.api.model.UsersResponse
 import net.primal.android.explore.domain.UserProfileSearchItem
-import net.primal.android.networking.primal.retryNetworkCall
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.asEventIdTag
 import net.primal.android.nostr.ext.asProfileDataPO
@@ -37,6 +36,7 @@ import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.asUserAccountFromFollowListEvent
 import net.primal.android.user.repository.UserRepository
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.networking.primal.retryNetworkCall
 
 class ProfileRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,

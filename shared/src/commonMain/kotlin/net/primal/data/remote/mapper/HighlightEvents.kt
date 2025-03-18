@@ -1,9 +1,9 @@
 package net.primal.data.remote.mapper
 
 import net.primal.data.local.dao.reads.HighlightData
+import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.findFirstAltDescription
 import net.primal.domain.nostr.findFirstContextTag
 import net.primal.domain.nostr.findFirstProfileId

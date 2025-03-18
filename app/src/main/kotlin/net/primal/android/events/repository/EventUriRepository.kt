@@ -9,7 +9,7 @@ import net.primal.android.events.db.EventUri
 import net.primal.android.events.domain.EventUriType
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
-import net.primal.android.networking.primal.upload.domain.UploadResult
+import net.primal.domain.upload.UploadResult
 
 class EventUriRepository @Inject constructor(
     private val fileUploader: PrimalFileUploader,

@@ -7,7 +7,6 @@ import net.primal.core.networking.serialization.NetworkingJson
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 
-
 fun JsonObject?.asNostrEventOrNull(): NostrEvent? {
     return try {
         if (this != null) NetworkingJson.decodeFromJsonElement(this) else null

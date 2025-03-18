@@ -2,8 +2,8 @@ package net.primal.domain.model
 
 import kotlinx.datetime.Instant
 import net.primal.domain.EventLink
-import net.primal.domain.EventZap
 import net.primal.domain.EventUriNostrReference
+import net.primal.domain.EventZap
 
 data class FeedPost(
     val eventId: String,

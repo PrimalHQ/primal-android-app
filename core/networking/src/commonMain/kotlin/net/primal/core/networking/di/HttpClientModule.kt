@@ -1,15 +1,14 @@
 package net.primal.core.networking.di
 
-
-//object WebSocketHttpClient : Qualifier {
+// object WebSocketHttpClient : Qualifier {
 //    override val value = "WebSocketHttpClient"
-//}
+// }
 //
-//object RegularHttpClient : Qualifier {
+// object RegularHttpClient : Qualifier {
 //    override val value = "RegularHttpClient"
-//}
+// }
 //
-//internal val httpClientModule = module {
+// internal val httpClientModule = module {
 //    single<HttpClient>(WebSocketHttpClient) {
 //        HttpClient(createHttpClientEngine()) {
 //            installSharedHttpClientConfiguration(json = NostrJson)
@@ -29,4 +28,4 @@ package net.primal.core.networking.di
 //            .httpClient(client = get(RegularHttpClient))
 //            .build()
 //    }
-//}
+// }

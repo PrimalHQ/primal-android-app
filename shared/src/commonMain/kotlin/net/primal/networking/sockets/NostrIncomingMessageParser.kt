@@ -20,7 +20,7 @@ import net.primal.domain.nostr.isNotPrimalEventKind
 import net.primal.domain.nostr.isNotUnknown
 import net.primal.domain.nostr.isPrimalEventKind
 
-internal fun String.parseIncomingMessage(): NostrIncomingMessage? {
+fun String.parseIncomingMessage(): NostrIncomingMessage? {
     val jsonArray = NostrJson.decodeFromStringOrNull<JsonArray>(this)
     val verbElement = jsonArray?.elementAtOrNull(0) ?: return null
 

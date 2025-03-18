@@ -5,7 +5,6 @@ import dagger.assisted.AssistedInject
 import java.time.Instant
 import kotlin.time.Duration
 import net.primal.android.bookmarks.BookmarksRepository
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.nostr.notary.NostrSignUnauthorized
 import net.primal.android.premium.repository.PremiumRepository
@@ -13,6 +12,7 @@ import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.repository.WalletRepository
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 class UserDataUpdater @AssistedInject constructor(

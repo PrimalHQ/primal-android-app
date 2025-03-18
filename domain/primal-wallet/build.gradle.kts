@@ -58,13 +58,11 @@ kotlin {
 
         iosMain {
             dependencies {
-
             }
         }
 
         val desktopMain by getting
         desktopMain.dependencies {
-
         }
 
         commonTest {

@@ -3,7 +3,6 @@ package net.primal.android.core.serialization.room
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonArray
 import net.primal.android.core.serialization.json.NostrJson
 import org.junit.Test

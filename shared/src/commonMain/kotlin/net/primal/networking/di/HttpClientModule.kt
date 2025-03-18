@@ -2,10 +2,10 @@ package net.primal.networking.di
 
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
+import net.primal.data.serialization.NostrJson
 import net.primal.networking.http.createHttpClientEngine
 import net.primal.networking.http.installSharedHttpClientConfiguration
 import net.primal.networking.http.installWebSocketsHttpClientConfiguration
-import net.primal.data.serialization.NostrJson
 import org.koin.core.qualifier.Qualifier
 import org.koin.dsl.module
 

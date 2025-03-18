@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.premium.manage.contact.PremiumContactListContract.SideEffect
 import net.primal.android.premium.manage.contact.PremiumContactListContract.UiEvent
@@ -20,6 +19,7 @@ import net.primal.android.premium.manage.contact.model.FollowListBackup
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

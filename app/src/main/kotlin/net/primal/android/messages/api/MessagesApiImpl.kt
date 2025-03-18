@@ -10,12 +10,12 @@ import net.primal.android.messages.api.model.MessagesRequestBody
 import net.primal.android.messages.api.model.MessagesResponse
 import net.primal.android.messages.domain.ConversationRelation
 import net.primal.android.networking.di.PrimalCacheApiClient
-import net.primal.android.networking.primal.PrimalApiClient
-import net.primal.android.networking.primal.PrimalCacheFilter
-import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.nostr.ext.asMessageConversationsSummary
 import net.primal.android.nostr.notary.NostrNotary
+import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.networking.primal.PrimalApiClient
+import net.primal.networking.primal.PrimalCacheFilter
 
 class MessagesApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,

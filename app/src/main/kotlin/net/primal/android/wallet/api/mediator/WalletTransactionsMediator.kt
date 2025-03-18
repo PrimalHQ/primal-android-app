@@ -10,7 +10,6 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
@@ -27,6 +26,7 @@ import net.primal.android.wallet.db.WalletTransaction
 import net.primal.android.wallet.domain.SubWallet
 import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @ExperimentalPagingApi

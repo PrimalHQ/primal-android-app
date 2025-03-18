@@ -1,6 +1,7 @@
 package net.primal.data.remote.processors
 
 import net.primal.core.utils.asMapByKey
+import net.primal.core.utils.decodeFromStringOrNull
 import net.primal.data.local.dao.events.eventRelayHintsUpserter
 import net.primal.data.local.dao.threads.ArticleCommentCrossRef
 import net.primal.data.local.dao.threads.NoteConversationCrossRef
@@ -29,10 +30,9 @@ import net.primal.data.remote.mapper.parseAndMapPrimalLegendProfiles
 import net.primal.data.remote.mapper.parseAndMapPrimalPremiumInfo
 import net.primal.data.remote.mapper.parseAndMapPrimalUserNames
 import net.primal.data.serialization.NostrJson
-import net.primal.core.utils.decodeFromStringOrNull
 import net.primal.domain.nostr.NostrEvent
 
-suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database: PrimalDatabase) {
+internal suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database: PrimalDatabase) {
     val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
     val videoThumbnails = this.cdnResources.flatMapNotNullAsVideoThumbnailsMap()
     val linkPreviews = primalLinkPreviews.flatMapNotNullAsLinkPreviewResource().asMapByKey { it.url }
@@ -118,7 +118,7 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
     }
 }
 
-suspend fun FeedResponse.persistNoteRepliesAndArticleCommentsToDatabase(noteId: String, database: PrimalDatabase) {
+internal suspend fun FeedResponse.persistNoteRepliesAndArticleCommentsToDatabase(noteId: String, database: PrimalDatabase) {
     val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
     val articles = this.articles.mapNotNullAsArticleDataPO(cdnResources = cdnResources)
 

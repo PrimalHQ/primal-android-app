@@ -1,10 +1,10 @@
 package net.primal.data.remote.mapper
 
+import net.primal.core.utils.decodeFromStringOrNull
 import net.primal.data.local.dao.profiles.ProfileStats
 import net.primal.data.remote.model.ContentProfilePremiumInfo
 import net.primal.data.remote.model.ContentUserProfileStats
 import net.primal.data.serialization.NostrJson
-import net.primal.core.utils.decodeFromStringOrNull
 import net.primal.domain.PrimalEvent
 import net.primal.domain.PrimalLegendProfile
 

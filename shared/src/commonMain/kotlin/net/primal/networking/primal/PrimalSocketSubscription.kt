@@ -12,7 +12,7 @@ import net.primal.networking.sockets.NostrIncomingMessage
 import net.primal.networking.sockets.errors.WssException
 import net.primal.networking.sockets.toPrimalSubscriptionId
 
-internal class PrimalSocketSubscription<T> private constructor(
+class PrimalSocketSubscription<T> private constructor(
     private val scope: CoroutineScope,
     private val primalApiClient: PrimalApiClient,
     private val cacheFilter: PrimalCacheFilter,

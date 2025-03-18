@@ -15,5 +15,4 @@ interface PrimalApiClient {
     suspend fun subscribe(subscriptionId: String, message: PrimalCacheFilter): Flow<NostrIncomingMessage>
 
     suspend fun closeSubscription(subscriptionId: String): Boolean
-
 }

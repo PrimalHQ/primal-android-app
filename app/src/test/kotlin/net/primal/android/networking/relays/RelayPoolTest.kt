@@ -6,7 +6,6 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import java.util.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,14 +15,13 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import net.primal.android.core.coroutines.CoroutinesTestRule
-import net.primal.android.networking.primal.PrimalQueryResult
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.networking.sockets.NostrIncomingMessage
-import net.primal.android.networking.sockets.NostrSocketClient
-import net.primal.android.networking.sockets.toPrimalSubscriptionId
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.networking.primal.PrimalQueryResult
+import net.primal.networking.sockets.NostrIncomingMessage
+import net.primal.networking.sockets.NostrSocketClient
 import org.junit.Rule
 import org.junit.Test
 
@@ -97,7 +95,7 @@ class RelayPoolTest {
         runTest {
             val relayPool = RelayPool(
                 dispatchers = coroutinesTestRule.dispatcherProvider,
-                okHttpClient = mockk(relaxed = true),
+                nostrSocketClientFactory = mockk(relaxed = true),
                 primalApiClient = mockk(relaxed = true),
             )
             val eventId = "randomThrowId"
@@ -117,7 +115,7 @@ class RelayPoolTest {
         runTest {
             val relayPool = RelayPool(
                 dispatchers = coroutinesTestRule.dispatcherProvider,
-                okHttpClient = mockk(relaxed = true),
+                nostrSocketClientFactory = mockk(relaxed = true),
                 primalApiClient = mockk(relaxed = true),
             )
             val eventId = "randomSuccessId"
@@ -137,7 +135,7 @@ class RelayPoolTest {
         runTest {
             val relayPool = RelayPool(
                 dispatchers = coroutinesTestRule.dispatcherProvider,
-                okHttpClient = mockk(relaxed = true),
+                nostrSocketClientFactory = mockk(relaxed = true),
                 primalApiClient = mockk(relaxed = true),
             )
             val eventId = "randomSuccessId2"
@@ -159,7 +157,7 @@ class RelayPoolTest {
         runTest {
             val relayPool = RelayPool(
                 dispatchers = coroutinesTestRule.dispatcherProvider,
-                okHttpClient = mockk(relaxed = true),
+                nostrSocketClientFactory = mockk(relaxed = true),
                 primalApiClient = mockk(relaxed = true),
             )
             val eventId = "randomThrowId"
@@ -186,7 +184,7 @@ class RelayPoolTest {
         runTest {
             val relayPool = RelayPool(
                 dispatchers = coroutinesTestRule.dispatcherProvider,
-                okHttpClient = mockk(relaxed = true),
+                nostrSocketClientFactory = mockk(relaxed = true),
                 primalApiClient = mockk(relaxed = true),
             )
             val eventId = "randomTimeoutId"
@@ -216,7 +214,7 @@ class RelayPoolTest {
         runTest {
             val relayPool = RelayPool(
                 dispatchers = coroutinesTestRule.dispatcherProvider,
-                okHttpClient = mockk(relaxed = true),
+                nostrSocketClientFactory = mockk(relaxed = true),
                 primalApiClient = mockk(relaxed = true),
             ).apply {
                 socketClients = listOf(
@@ -249,11 +247,11 @@ class RelayPoolTest {
         runTest {
             val relayPool = RelayPool(
                 dispatchers = coroutinesTestRule.dispatcherProvider,
-                okHttpClient = mockk(relaxed = true),
+                nostrSocketClientFactory = mockk(relaxed = true),
                 primalApiClient = mockk(relaxed = true) {
                     coEvery { query(any()) } returns PrimalQueryResult(
                         terminationMessage = NostrIncomingMessage.EoseMessage(
-                            subscriptionId = UUID.randomUUID().toPrimalSubscriptionId(),
+                            subscriptionId = "subid",
                         ),
                     )
                 },
@@ -279,11 +277,11 @@ class RelayPoolTest {
             val eventId = "eventId"
             val relayPool = RelayPool(
                 dispatchers = coroutinesTestRule.dispatcherProvider,
-                okHttpClient = mockk(relaxed = true),
+                nostrSocketClientFactory = mockk(relaxed = true),
                 primalApiClient = mockk(relaxed = true) {
                     coEvery { query(any()) } returns PrimalQueryResult(
                         terminationMessage = NostrIncomingMessage.EoseMessage(
-                            subscriptionId = UUID.randomUUID().toPrimalSubscriptionId(),
+                            subscriptionId = "subid",
                         ),
                         primalEvents = listOf(
                             PrimalEvent(
@@ -315,11 +313,11 @@ class RelayPoolTest {
             val eventId = "eventId"
             val relayPool = RelayPool(
                 dispatchers = coroutinesTestRule.dispatcherProvider,
-                okHttpClient = mockk(relaxed = true),
+                nostrSocketClientFactory = mockk(relaxed = true),
                 primalApiClient = mockk(relaxed = true) {
                     coEvery { query(any()) } returns PrimalQueryResult(
                         terminationMessage = NostrIncomingMessage.EoseMessage(
-                            subscriptionId = UUID.randomUUID().toPrimalSubscriptionId(),
+                            subscriptionId = "subid",
                         ),
                         primalEvents = listOf(
                             PrimalEvent(
@@ -361,11 +359,11 @@ class RelayPoolTest {
             val eventId = "eventId"
             val relayPool = RelayPool(
                 dispatchers = coroutinesTestRule.dispatcherProvider,
-                okHttpClient = mockk(relaxed = true),
+                nostrSocketClientFactory = mockk(relaxed = true),
                 primalApiClient = mockk(relaxed = true) {
                     coEvery { query(any()) } returns PrimalQueryResult(
                         terminationMessage = NostrIncomingMessage.EoseMessage(
-                            subscriptionId = UUID.randomUUID().toPrimalSubscriptionId(),
+                            subscriptionId = "subid",
                         ),
                         primalEvents = listOf(
                             PrimalEvent(

@@ -17,31 +17,29 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.core.serialization.json.toJsonObject
-import net.primal.android.networking.UserAgentProvider
-import net.primal.android.networking.primal.PrimalApiClient
-import net.primal.android.networking.primal.PrimalCacheFilter
-import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.relays.broadcast.BroadcastEventResponse
 import net.primal.android.networking.relays.broadcast.BroadcastRequestBody
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.networking.sockets.NostrIncomingMessage
-import net.primal.android.networking.sockets.NostrSocketClient
-import net.primal.android.networking.sockets.SocketConnectionClosedCallback
-import net.primal.android.networking.sockets.SocketConnectionOpenedCallback
-import net.primal.android.networking.sockets.errors.NostrNoticeException
-import net.primal.android.networking.sockets.errors.WssException
-import net.primal.android.networking.sockets.filterByEventId
-import net.primal.android.networking.sockets.parseIncomingMessage
 import net.primal.android.user.domain.Relay
+import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
-import okhttp3.OkHttpClient
-import okhttp3.Request
+import net.primal.networking.primal.PrimalApiClient
+import net.primal.networking.primal.PrimalCacheFilter
+import net.primal.networking.sockets.NostrIncomingMessage
+import net.primal.networking.sockets.NostrSocketClient
+import net.primal.networking.sockets.NostrSocketClientFactory
+import net.primal.networking.sockets.SocketConnectionClosedCallback
+import net.primal.networking.sockets.SocketConnectionOpenedCallback
+import net.primal.networking.sockets.errors.NostrNoticeException
+import net.primal.networking.sockets.errors.WssException
+import net.primal.networking.sockets.filterByEventId
+import net.primal.networking.sockets.parseIncomingMessage
 import timber.log.Timber
 
 class RelayPool(
-    private val dispatchers: CoroutineDispatcherProvider,
-    private val okHttpClient: OkHttpClient,
+    dispatchers: CoroutineDispatcherProvider,
+    private val nostrSocketClientFactory: NostrSocketClientFactory,
     private val primalApiClient: PrimalApiClient,
 ) {
 
@@ -88,12 +86,12 @@ class RelayPool(
         }
 
         socketClients = newSocketClients
-        toRemoveSocketClients.forEach { it.close() }
+        toRemoveSocketClients.forEach { scope.launch { it.close() } }
         this.relays = relays
     }
 
     fun closePool() {
-        socketClients.forEach { it.close() }
+        socketClients.forEach { scope.launch { it.close() } }
         socketClients = emptyList()
         relays = emptyList()
     }
@@ -109,27 +107,12 @@ class RelayPool(
     }
 
     private fun List<Relay>.mapAsNostrSocketClient() =
-        this
-            .mapNotNull { it.toWssRequestOrNull() }
-            .map {
-                NostrSocketClient(
-                    dispatcherProvider = dispatchers,
-                    okHttpClient = okHttpClient,
-                    wssRequest = it,
-                    onSocketConnectionOpened = onSocketConnectionOpenedCallback,
-                    onSocketConnectionClosed = onSocketConnectionClosedCallback,
-                )
-            }
-
-    private fun Relay.toWssRequestOrNull() =
-        try {
-            Request.Builder()
-                .url(url)
-                .addHeader("User-Agent", UserAgentProvider.USER_AGENT)
-                .build()
-        } catch (error: IllegalArgumentException) {
-            Timber.w(error)
-            null
+        this.map {
+            nostrSocketClientFactory.create(
+                wssUrl = it.url,
+                onSocketConnectionOpened = onSocketConnectionOpenedCallback,
+                onSocketConnectionClosed = onSocketConnectionClosedCallback,
+            )
         }
 
     @Throws(NostrPublishException::class)

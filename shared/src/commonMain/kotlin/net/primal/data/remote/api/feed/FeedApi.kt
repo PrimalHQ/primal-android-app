@@ -4,7 +4,7 @@ import net.primal.data.remote.api.feed.model.FeedBySpecRequestBody
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.remote.api.feed.model.ThreadRequestBody
 
-interface FeedApi {
+internal interface FeedApi {
 
     suspend fun getFeedBySpec(body: FeedBySpecRequestBody): FeedResponse
 

@@ -3,9 +3,6 @@ package net.primal.android.settings.api
 import javax.inject.Inject
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.networking.di.PrimalCacheApiClient
-import net.primal.android.networking.primal.PrimalApiClient
-import net.primal.android.networking.primal.PrimalCacheFilter
-import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.nostr.model.primal.content.ContentAppSettings
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.settings.api.model.AppSpecificDataRequest
@@ -13,8 +10,11 @@ import net.primal.android.settings.api.model.GetAppSettingsResponse
 import net.primal.android.settings.api.model.GetMuteListRequest
 import net.primal.android.settings.api.model.GetMuteListResponse
 import net.primal.android.settings.api.model.SetAppSettingsRequest
+import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.networking.primal.PrimalApiClient
+import net.primal.networking.primal.PrimalCacheFilter
 
 class SettingsApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
