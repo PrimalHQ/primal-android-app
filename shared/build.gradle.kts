@@ -115,6 +115,9 @@ kotlin {
             dependencies {
                 // Networking
                 implementation(libs.ktor.client.darwin)
+
+                // Paging
+                implementation(libs.cash.app.paging.runtime.uikit)
             }
         }
 
