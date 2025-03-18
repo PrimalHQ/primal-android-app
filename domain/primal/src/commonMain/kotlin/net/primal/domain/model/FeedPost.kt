@@ -7,7 +7,7 @@ import net.primal.domain.EventZap
 
 data class FeedPost(
     val eventId: String,
-    val author: FeedPostAuthor?,
+    val author: FeedPostAuthor,
     val content: String,
     val timestamp: Instant,
     val rawNostrEvent: String,

@@ -7,6 +7,7 @@ data class FeedPostAuthor(
     val authorId: String,
     val handle: String,
     val displayName: String,
+    val rawNostrEvent: String? = null,
     val internetIdentifier: String? = null,
     val avatarCdnImage: CdnImage? = null,
     val legendProfile: PrimalLegendProfile? = null,
