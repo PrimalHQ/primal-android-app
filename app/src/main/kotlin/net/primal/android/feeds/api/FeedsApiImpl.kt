@@ -7,15 +7,14 @@ import net.primal.android.feeds.api.model.FeedsResponse
 import net.primal.android.feeds.api.model.SubSettingsAuthorization
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.networking.di.PrimalCacheApiClient
-import net.primal.android.networking.primal.PrimalApiClient
-import net.primal.android.networking.primal.PrimalCacheFilter
-import net.primal.android.networking.primal.PrimalVerb
-import net.primal.android.networking.primal.PrimalVerb.GET_FEATURED_DVM_FEEDS
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.primal.content.ContentAppSubSettings
 import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
 import net.primal.android.nostr.notary.NostrNotary
+import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.networking.primal.PrimalApiClient
+import net.primal.networking.primal.PrimalCacheFilter
+import net.primal.networking.sockets.errors.WssException
 
 @Singleton
 class FeedsApiImpl @Inject constructor(
@@ -26,7 +25,7 @@ class FeedsApiImpl @Inject constructor(
     override suspend fun getFeaturedFeeds(specKind: FeedSpecKind?, pubkey: String?): DvmFeedsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = GET_FEATURED_DVM_FEEDS,
+                primalVerb = PrimalVerb.GET_FEATURED_DVM_FEEDS,
                 optionsJson = NostrJson.encodeToString(
                     DvmFeedsRequestBody(
                         specKind = specKind?.id,

@@ -10,7 +10,7 @@ import okio.SYSTEM
 
 internal object AppConfigDataStoreFactory {
 
-    internal const val APP_CONFIG_DATA_STORE_NAME = "network_config.json"
+    internal const val APP_CONFIG_DATA_STORE_NAME = "app_config.json"
 
     fun createDataStore(producePath: () -> String): DataStore<AppConfig> =
         DataStoreFactory.create(

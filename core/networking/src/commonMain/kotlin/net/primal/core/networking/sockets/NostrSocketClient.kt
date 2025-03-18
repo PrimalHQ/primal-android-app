@@ -60,27 +60,28 @@ internal class NostrSocketClient(
             }
         }
 
-    private fun openWebSocketConnection(url: String) = scope.launch {
-        try {
-            httpClient.webSocket(
-                request = {
-                    url(url)
-                    // TODO Fix UserAgent
+    private fun openWebSocketConnection(url: String) =
+        scope.launch {
+            try {
+                httpClient.webSocket(
+                    request = {
+                        url(url)
+                        // TODO Fix UserAgent
 //                    PrimalLib.userAgent?.let {
 //                        headers.append("User-Agent", it)
 //                    }
-                },
-            ) {
-                webSocket = this
-                onSocketConnectionOpened?.invoke(url)
-                receiveSocketMessages()
+                    },
+                ) {
+                    webSocket = this
+                    onSocketConnectionOpened?.invoke(url)
+                    receiveSocketMessages()
+                }
+            } catch (error: Exception) {
+                Napier.w("NostrSocketClient::openWebSocketConnection($socketUrl) failed.", error)
+                this@NostrSocketClient.webSocket = null
+                onSocketConnectionClosed?.invoke(socketUrl, error)
             }
-        } catch (error: Exception) {
-            Napier.w("NostrSocketClient::openWebSocketConnection($socketUrl) failed.", error)
-            this@NostrSocketClient.webSocket = null
-            onSocketConnectionClosed?.invoke(socketUrl, error)
         }
-    }
 
     private suspend fun WebSocketSession.receiveSocketMessages() {
         try {
@@ -200,5 +201,4 @@ internal class NostrSocketClient(
             .replace("http://", "ws://", ignoreCase = true)
             .let { if (it.endsWith("/")) it.dropLast(1) else it }
     }
-
 }

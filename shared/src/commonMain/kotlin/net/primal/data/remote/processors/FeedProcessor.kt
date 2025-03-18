@@ -9,7 +9,7 @@ import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.remote.model.ContentPrimalPaging
 import net.primal.domain.nostr.NostrEvent
 
-class FeedProcessor(
+internal class FeedProcessor(
     val feedSpec: String,
     val database: PrimalDatabase,
 ) {

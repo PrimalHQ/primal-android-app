@@ -15,7 +15,6 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.notary.MissingPrivateKeyException
@@ -35,6 +34,7 @@ import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.domain.WalletSettings
+import net.primal.networking.sockets.errors.WssException
 
 class UserRepository @Inject constructor(
     private val database: PrimalDatabase,

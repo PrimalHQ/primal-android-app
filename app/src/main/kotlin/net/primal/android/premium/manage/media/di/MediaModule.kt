@@ -5,10 +5,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import net.primal.android.networking.di.PrimalCacheApiClient
-import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.premium.manage.media.api.MediaManagementApi
 import net.primal.android.premium.manage.media.api.MediaManagementApiImpl
+import net.primal.networking.primal.PrimalApiClient
 
 @Module
 @InstallIn(SingletonComponent::class)

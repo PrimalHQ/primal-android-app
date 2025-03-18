@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.premium.manage.media.PremiumMediaManagementContract.SideEffect
 import net.primal.android.premium.manage.media.PremiumMediaManagementContract.UiEvent
@@ -22,6 +21,7 @@ import net.primal.android.premium.manage.media.ui.MediaType
 import net.primal.android.premium.manage.media.ui.MediaUiItem
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

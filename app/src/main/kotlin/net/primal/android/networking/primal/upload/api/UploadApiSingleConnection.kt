@@ -5,15 +5,15 @@ import java.net.UnknownHostException
 import javax.inject.Inject
 import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
 import net.primal.android.networking.di.PrimalUploadApiClient
-import net.primal.android.networking.primal.PrimalApiClient
-import net.primal.android.networking.primal.PrimalCacheFilter
-import net.primal.android.networking.primal.PrimalQueryResult
-import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.primal.upload.api.model.UploadChunkRequest
-import net.primal.android.networking.sockets.errors.WssException
+import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.networking.primal.PrimalApiClient
+import net.primal.networking.primal.PrimalCacheFilter
+import net.primal.networking.primal.PrimalQueryResult
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 class UploadApiSingleConnection @Inject constructor(

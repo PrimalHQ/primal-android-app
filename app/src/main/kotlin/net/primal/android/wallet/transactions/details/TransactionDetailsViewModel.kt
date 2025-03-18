@@ -18,7 +18,6 @@ import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.navigation.transactionIdOrThrow
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
@@ -28,6 +27,7 @@ import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.details.TransactionDetailsContract.UiState
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

@@ -7,14 +7,14 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.networking.di.PrimalWalletApiClient
-import net.primal.android.networking.primal.PrimalApiClient
-import net.primal.android.networking.primal.PrimalCacheFilter
-import net.primal.android.networking.primal.PrimalSocketSubscription
-import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.nostr.ext.takeContentOrNull
 import net.primal.android.premium.api.model.MembershipPurchaseMonitorRequestBody
 import net.primal.android.premium.api.model.MembershipPurchaseMonitorResponse
+import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.networking.primal.PrimalApiClient
+import net.primal.networking.primal.PrimalCacheFilter
+import net.primal.networking.primal.PrimalSocketSubscription
 
 class PurchaseMonitor @Inject constructor(
     @PrimalWalletApiClient private val walletApiClient: PrimalApiClient,

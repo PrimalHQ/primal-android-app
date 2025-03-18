@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class FeedBySpecRequestBody(
+internal data class FeedBySpecRequestBody(
     @SerialName("spec") val spec: String,
     @SerialName("user_pubkey") val userPubKey: String,
     @SerialName("notes") val notes: String? = null,

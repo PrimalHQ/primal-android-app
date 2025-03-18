@@ -18,9 +18,6 @@ import net.primal.android.feeds.domain.isProfileAuthoredNoteRepliesFeedSpec
 import net.primal.android.feeds.domain.isProfileAuthoredNotesFeedSpec
 import net.primal.android.feeds.domain.supportsNoteReposts
 import net.primal.android.feeds.domain.supportsUpwardsNotesPagination
-import net.primal.android.networking.primal.retryNetworkCall
-import net.primal.android.networking.sockets.errors.NostrNoticeException
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.notes.api.FeedApi
 import net.primal.android.notes.api.model.FeedBySpecRequestBody
 import net.primal.android.notes.api.model.FeedResponse
@@ -30,6 +27,9 @@ import net.primal.android.notes.db.sql.ChronologicalFeedWithRepostsQueryBuilder
 import net.primal.android.notes.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.notes.db.sql.FeedQueryBuilder
 import net.primal.android.notes.repository.FeedProcessor
+import net.primal.networking.primal.retryNetworkCall
+import net.primal.networking.sockets.errors.NostrNoticeException
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @ExperimentalPagingApi

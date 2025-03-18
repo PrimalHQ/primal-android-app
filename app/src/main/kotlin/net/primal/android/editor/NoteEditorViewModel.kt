@@ -45,10 +45,8 @@ import net.primal.android.highlights.model.generateNevent
 import net.primal.android.highlights.repository.HighlightRepository
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
-import net.primal.android.networking.primal.upload.domain.UploadJob
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.nostr.repository.RelayHintsRepository
 import net.primal.android.nostr.utils.MAX_RELAY_HINTS
@@ -67,6 +65,8 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.repository.RelayRepository
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.upload.UploadJob
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 class NoteEditorViewModel @AssistedInject constructor(

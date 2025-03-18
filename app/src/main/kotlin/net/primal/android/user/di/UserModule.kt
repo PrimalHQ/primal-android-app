@@ -13,7 +13,6 @@ import javax.inject.Qualifier
 import javax.inject.Singleton
 import net.primal.android.core.serialization.datastore.StringSerializer
 import net.primal.android.networking.di.PrimalCacheApiClient
-import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.security.Encryption
 import net.primal.android.user.accounts.UserAccountsSerialization
 import net.primal.android.user.api.UsersApi
@@ -21,6 +20,7 @@ import net.primal.android.user.api.UsersApiImpl
 import net.primal.android.user.credentials.CredentialsSerialization
 import net.primal.android.user.domain.Credential
 import net.primal.android.user.domain.UserAccount
+import net.primal.networking.primal.PrimalApiClient
 
 @Module
 @InstallIn(SingletonComponent::class)

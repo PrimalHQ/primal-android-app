@@ -1,9 +1,9 @@
-package net.primal.networking.primal.upload.api.model
+package net.primal.data.remote.api.upload.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class UploadCancelContent(
+internal data class UploadCancelContent(
     @SerialName("upload_id") val uploadId: String,
 )

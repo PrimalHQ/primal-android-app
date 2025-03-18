@@ -8,7 +8,6 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.FALLBACK_RELAYS
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.user.accounts.parseNip65Relays
@@ -19,6 +18,7 @@ import net.primal.android.user.domain.UserRelays
 import net.primal.android.user.domain.cleanWebSocketUrl
 import net.primal.android.user.domain.mapToRelayPO
 import net.primal.android.user.domain.toRelay
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 class RelayRepository @Inject constructor(

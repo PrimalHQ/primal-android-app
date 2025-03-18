@@ -11,20 +11,20 @@ import kotlinx.coroutines.sync.withLock
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.di.PrimalCacheApiClient
-import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.mapToRelayDO
 import net.primal.domain.nostr.NostrEvent
-import okhttp3.OkHttpClient
+import net.primal.networking.primal.PrimalApiClient
+import net.primal.networking.sockets.NostrSocketClientFactory
 import timber.log.Timber
 
 @Singleton
 class RelaysSocketManager @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
-    private val okHttpClient: OkHttpClient,
+    private val nostrSocketClientFactory: NostrSocketClientFactory,
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
     private val activeAccountStore: ActiveAccountStore,
     private val primalDatabase: PrimalDatabase,
@@ -37,10 +37,9 @@ class RelaysSocketManager @Inject constructor(
     private fun buildRelayPool() =
         RelayPool(
             dispatchers = dispatchers,
-            okHttpClient = okHttpClient,
+            nostrSocketClientFactory = nostrSocketClientFactory,
             primalApiClient = primalApiClient,
         )
-
     private val userRelaysPool: RelayPool = buildRelayPool()
     private val nwcRelaysPool: RelayPool = buildRelayPool()
     private val fallbackRelaysPool: RelayPool = buildRelayPool()

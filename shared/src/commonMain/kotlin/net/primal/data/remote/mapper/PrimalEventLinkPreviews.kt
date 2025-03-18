@@ -1,8 +1,8 @@
 package net.primal.data.remote.mapper
 
+import net.primal.core.utils.decodeFromStringOrNull
 import net.primal.data.remote.model.ContentPrimalLinkPreviews
 import net.primal.data.serialization.NostrJson
-import net.primal.core.utils.decodeFromStringOrNull
 import net.primal.domain.EventLinkPreviewData
 import net.primal.domain.PrimalEvent
 

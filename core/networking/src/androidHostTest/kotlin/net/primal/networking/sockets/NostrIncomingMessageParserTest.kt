@@ -1,31 +1,32 @@
-package net.primal.android.networking.sockets
+package net.primal.networking.sockets
 
 import io.kotest.matchers.should
 import io.kotest.matchers.types.beInstanceOf
-import java.time.Instant
-import java.util.*
+import kotlin.uuid.Uuid
+import kotlinx.datetime.Clock
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.put
-import net.primal.android.core.serialization.json.NostrJson
+import net.primal.core.networking.serialization.NetworkingJson
+import net.primal.core.networking.sockets.NostrIncomingMessage
+import net.primal.core.networking.sockets.parseIncomingMessage
 import net.primal.domain.nostr.NostrEvent
-import org.junit.Test
 
 class NostrIncomingMessageParserTest {
 
-    @Test
+    @org.junit.Test
     fun `EVENT message parsed as EventMessage`() {
         val jsonMessage = buildJsonArray {
             add("EVENT")
-            add(UUID.randomUUID().toString())
+            add(Uuid.random().toString())
             add(
-                NostrJson.encodeToJsonElement(
+                NetworkingJson.encodeToJsonElement(
                     NostrEvent(
                         id = "invalidId",
                         pubKey = "pukey",
-                        createdAt = Instant.now().epochSecond,
+                        createdAt = Clock.System.now().epochSeconds,
                         kind = 1,
                         tags = emptyList(),
                         content = "",
@@ -39,18 +40,18 @@ class NostrIncomingMessageParserTest {
         actual should beInstanceOf<NostrIncomingMessage.EventMessage>()
     }
 
-    @Test
+    @org.junit.Test
     fun `EOSE message parsed as EoseMessage`() {
         val jsonMessage = buildJsonArray {
             add("EOSE")
-            add(UUID.randomUUID().toString())
+            add(Uuid.random().toString())
         }
 
         val actual = jsonMessage.toString().parseIncomingMessage()
         actual should beInstanceOf<NostrIncomingMessage.EoseMessage>()
     }
 
-    @Test
+    @org.junit.Test
     fun `NOTICE message parsed as NoticeMessage`() {
         val jsonMessage = buildJsonArray {
             add("NOTICE")
@@ -61,7 +62,7 @@ class NostrIncomingMessageParserTest {
         actual should beInstanceOf<NostrIncomingMessage.NoticeMessage>()
     }
 
-    @Test
+    @org.junit.Test
     fun `OK false message parsed as OkMessage`() {
         val jsonMessage = buildJsonArray {
             add("OK")
@@ -74,7 +75,7 @@ class NostrIncomingMessageParserTest {
         actual should beInstanceOf<NostrIncomingMessage.OkMessage>()
     }
 
-    @Test
+    @org.junit.Test
     fun `OK true message parsed as OkMessage`() {
         val jsonMessage = buildJsonArray {
             add("OK")
@@ -87,7 +88,7 @@ class NostrIncomingMessageParserTest {
         actual should beInstanceOf<NostrIncomingMessage.OkMessage>()
     }
 
-    @Test
+    @org.junit.Test
     fun `AUTH message parsed as AuthMessage`() {
         val jsonMessage = buildJsonArray {
             add("AUTH")
@@ -98,11 +99,11 @@ class NostrIncomingMessageParserTest {
         actual should beInstanceOf<NostrIncomingMessage.AuthMessage>()
     }
 
-    @Test
+    @org.junit.Test
     fun `COUNT message parsed as CountMessage`() {
         val jsonMessage = buildJsonArray {
             add("COUNT")
-            add(UUID.randomUUID().toString())
+            add(Uuid.random().toString())
             add(
                 buildJsonObject {
                     put("count", 123)

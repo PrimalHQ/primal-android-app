@@ -5,7 +5,6 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
-import kotlin.Suppress
 import net.primal.android.core.compose.icons.PrimalIcons
 
 val PrimalIcons.MediaGalleryFilled: ImageVector

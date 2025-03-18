@@ -25,7 +25,6 @@ import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.feeds.domain.isPremiumFeedSpec
 import net.primal.android.feeds.domain.supportsUpwardsNotesPagination
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.findFirstEventId
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
@@ -44,6 +43,7 @@ import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.domain.nostr.NostrEvent
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = NoteFeedViewModel.Factory::class)
