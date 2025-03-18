@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
 import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationContract.UiEvent
@@ -19,6 +18,7 @@ import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

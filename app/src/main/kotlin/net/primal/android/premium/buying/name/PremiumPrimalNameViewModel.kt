@@ -9,10 +9,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.buying.name.PremiumPrimalNameContract.UiEvent
 import net.primal.android.premium.buying.name.PremiumPrimalNameContract.UiState
 import net.primal.android.premium.repository.PremiumRepository
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

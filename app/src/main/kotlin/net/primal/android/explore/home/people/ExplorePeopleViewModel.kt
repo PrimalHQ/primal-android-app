@@ -16,10 +16,10 @@ import net.primal.android.explore.home.people.ExplorePeopleContract.UiState
 import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

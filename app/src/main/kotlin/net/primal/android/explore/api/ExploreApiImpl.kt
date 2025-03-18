@@ -13,14 +13,10 @@ import net.primal.android.explore.api.model.TrendingPeopleResponse
 import net.primal.android.explore.api.model.TrendingZapsResponse
 import net.primal.android.explore.api.model.UsersResponse
 import net.primal.android.networking.di.PrimalCacheApiClient
-import net.primal.android.networking.primal.PrimalApiClient
-import net.primal.android.networking.primal.PrimalCacheFilter
-import net.primal.android.networking.primal.PrimalVerb.EXPLORE_PEOPLE
-import net.primal.android.networking.primal.PrimalVerb.EXPLORE_TOPICS
-import net.primal.android.networking.primal.PrimalVerb.EXPLORE_ZAPS
-import net.primal.android.networking.primal.PrimalVerb.RECOMMENDED_USERS
-import net.primal.android.networking.primal.PrimalVerb.USER_SEARCH
+import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.networking.primal.PrimalApiClient
+import net.primal.networking.primal.PrimalCacheFilter
 
 class ExploreApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
@@ -29,7 +25,7 @@ class ExploreApiImpl @Inject constructor(
     override suspend fun getTrendingPeople(body: ExploreRequestBody): TrendingPeopleResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = EXPLORE_PEOPLE,
+                primalVerb = PrimalVerb.EXPLORE_PEOPLE,
                 optionsJson = NostrJson.encodeToString(body),
             ),
         )
@@ -53,7 +49,7 @@ class ExploreApiImpl @Inject constructor(
     override suspend fun getTrendingZaps(body: ExploreRequestBody): TrendingZapsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = EXPLORE_ZAPS,
+                primalVerb = PrimalVerb.EXPLORE_ZAPS,
                 optionsJson = NostrJson.encodeToString(body),
             ),
         )
@@ -77,7 +73,7 @@ class ExploreApiImpl @Inject constructor(
 
     override suspend fun getTrendingTopics(): List<TopicScore> {
         val queryResult = primalApiClient.query(
-            message = PrimalCacheFilter(primalVerb = EXPLORE_TOPICS),
+            message = PrimalCacheFilter(primalVerb = PrimalVerb.EXPLORE_TOPICS),
         )
 
         val trendingTopicsEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalTrendingTopics)
@@ -93,7 +89,7 @@ class ExploreApiImpl @Inject constructor(
 
     override suspend fun getPopularUsers(): UsersResponse {
         val queryResult = primalApiClient.query(
-            message = PrimalCacheFilter(primalVerb = RECOMMENDED_USERS),
+            message = PrimalCacheFilter(primalVerb = PrimalVerb.RECOMMENDED_USERS),
         )
 
         return UsersResponse(
@@ -111,7 +107,7 @@ class ExploreApiImpl @Inject constructor(
     override suspend fun searchUsers(body: SearchUsersRequestBody): UsersResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = USER_SEARCH,
+                primalVerb = PrimalVerb.USER_SEARCH,
                 optionsJson = NostrJson.encodeToString(body),
             ),
         )

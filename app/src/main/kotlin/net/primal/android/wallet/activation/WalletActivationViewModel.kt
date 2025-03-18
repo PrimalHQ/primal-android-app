@@ -18,7 +18,6 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.WalletPreference
@@ -35,6 +34,7 @@ import net.primal.android.wallet.activation.regions.WalletRegionJson
 import net.primal.android.wallet.api.model.GetActivationCodeRequestBody
 import net.primal.android.wallet.api.model.WalletActivationDetails
 import net.primal.android.wallet.repository.WalletRepository
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

@@ -7,7 +7,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.icons.PrimalIcons
-import kotlin.Suppress
 
 val PrimalIcons.ContextShowHighlightsOutlined: ImageVector
     get() {

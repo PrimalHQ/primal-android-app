@@ -1,4 +1,4 @@
-package net.primal.networking.primal.upload.api.model
+package net.primal.data.remote.api.upload.model
 
 //fun chunkUploadRequest(
 //    userId: String,

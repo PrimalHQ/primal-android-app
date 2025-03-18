@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.premium.domain.MembershipError
 import net.primal.android.premium.manage.order.PremiumOrderHistoryContract.UiEvent
@@ -19,6 +18,7 @@ import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

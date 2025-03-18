@@ -1,19 +1,20 @@
-package net.primal.android.networking.primal
+package net.primal.networking.primal
 
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import java.util.*
-import net.primal.android.networking.sockets.NostrIncomingMessage
-import net.primal.android.networking.sockets.toPrimalSubscriptionId
-import net.primal.android.nostr.ext.isNotPrimalEventKind
-import net.primal.android.nostr.ext.isNotUnknown
-import net.primal.android.nostr.ext.isPrimalEventKind
+import kotlin.uuid.Uuid
+import net.primal.core.networking.primal.PrimalQueryResult
+import net.primal.core.networking.sockets.NostrIncomingMessage
+import net.primal.core.networking.sockets.toPrimalSubscriptionId
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.isNotPrimalEventKind
+import net.primal.domain.nostr.isNotUnknown
+import net.primal.domain.nostr.isPrimalEventKind
 import org.junit.Test
 
 class PrimalQueryResultTest {
@@ -57,7 +58,7 @@ class PrimalQueryResultTest {
         primalEvents: List<PrimalEvent> = emptyList(),
     ) = PrimalQueryResult(
         terminationMessage = NostrIncomingMessage.EoseMessage(
-            subscriptionId = UUID.randomUUID().toPrimalSubscriptionId(),
+            subscriptionId = Uuid.random().toPrimalSubscriptionId(),
         ),
         nostrEvents = nostrEvents,
         primalEvents = primalEvents,

@@ -28,7 +28,6 @@ import net.primal.android.navigation.naddr
 import net.primal.android.navigation.primalName
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.asReplaceableEventTag
 import net.primal.android.nostr.ext.isNPub
 import net.primal.android.nostr.ext.isNPubUri
@@ -56,6 +55,7 @@ import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

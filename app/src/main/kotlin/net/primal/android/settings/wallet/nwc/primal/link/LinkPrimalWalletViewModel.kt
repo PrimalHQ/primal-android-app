@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.settings.wallet.domain.PrimalWalletNwc
 import net.primal.android.settings.wallet.nwc.primal.PrimalNwcDefaults.DEFAULT_APP_NAME
 import net.primal.android.settings.wallet.nwc.primal.link.LinkPrimalWalletContract.SideEffect
@@ -25,6 +24,7 @@ import net.primal.android.settings.wallet.nwc.primal.link.LinkPrimalWalletContra
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.repository.NwcWalletRepository
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = LinkPrimalWalletViewModel.Factory::class)

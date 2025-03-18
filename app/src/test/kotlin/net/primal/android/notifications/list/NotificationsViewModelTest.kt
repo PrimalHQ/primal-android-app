@@ -6,9 +6,9 @@ import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import net.primal.android.core.coroutines.CoroutinesTestRule
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.NostrSignUnauthorized
 import net.primal.android.notifications.repository.NotificationRepository
+import net.primal.networking.sockets.errors.WssException
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

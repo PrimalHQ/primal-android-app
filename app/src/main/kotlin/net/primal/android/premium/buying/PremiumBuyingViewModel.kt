@@ -19,7 +19,6 @@ import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.navigation.FROM_ORIGIN_PREMIUM_BADGE
 import net.primal.android.navigation.buyingPremiumFromOrigin
 import net.primal.android.navigation.extendExistingPremiumName
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.premium.buying.PremiumBuyingContract.PremiumStage
 import net.primal.android.premium.buying.PremiumBuyingContract.SideEffect
@@ -34,6 +33,7 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.InAppPurchaseException
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

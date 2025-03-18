@@ -7,7 +7,7 @@ object PrimalApiClientFactory {
 
     private val clients: MutableMap<PrimalServerType, PrimalApiClient> = mutableMapOf()
 
-    fun initPrimalAliClient(serverType: PrimalServerType) : PrimalApiClient {
+    fun initPrimalAliClient(serverType: PrimalServerType): PrimalApiClient {
         if (clients.contains(serverType)) {
             throw IllegalStateException("${serverType}PrimalApiClient already initialized.")
         }
@@ -16,7 +16,7 @@ object PrimalApiClientFactory {
         throw NotImplementedError()
     }
 
-    fun getDefault(serverType: PrimalServerType) : PrimalApiClient {
+    fun getDefault(serverType: PrimalServerType): PrimalApiClient {
         throw NotImplementedError()
 //        return clients.getOrPut(serverType) {
 //            when (serverType) {
@@ -38,7 +38,7 @@ object PrimalApiClientFactory {
 //        )
     }
 
-    private fun create(serverType: PrimalServerType) : PrimalApiClient {
+    private fun create(serverType: PrimalServerType): PrimalApiClient {
         throw NotImplementedError()
 //        val koin = PrimalLib.getKoin()
 //        return PrimalApiClientImpl(
@@ -49,7 +49,6 @@ object PrimalApiClientFactory {
 //            appConfigHandler = koin.get(),
 //        )
     }
-
 }
 
 //internal val socketsModule = module {

@@ -9,7 +9,6 @@ import java.time.Instant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.mapNotNullAsNotificationPO
 import net.primal.android.nostr.ext.mapNotNullAsProfileStatsPO
 import net.primal.android.notes.api.model.FeedResponse
@@ -18,6 +17,7 @@ import net.primal.android.notifications.api.NotificationsApi
 import net.primal.android.notifications.api.model.NotificationsRequestBody
 import net.primal.android.notifications.db.Notification
 import net.primal.android.notifications.db.NotificationData
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @ExperimentalPagingApi

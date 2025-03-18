@@ -31,6 +31,7 @@ import net.primal.networking.config.AppConfigProvider
 import net.primal.networking.config.observeApiUrlByType
 import net.primal.networking.sockets.NostrIncomingMessage
 import net.primal.networking.sockets.NostrSocketClient
+import net.primal.networking.sockets.NostrSocketClientImpl
 import net.primal.networking.sockets.errors.NostrNoticeException
 import net.primal.networking.sockets.errors.WssException
 import net.primal.networking.sockets.filterBySubscriptionId
@@ -79,8 +80,8 @@ internal class PrimalApiClientImpl(
             }
         }
 
-    private fun buildAndInitializeSocketClient(apiUrl: String): NostrSocketClient {
-        return NostrSocketClient(
+    private fun buildAndInitializeSocketClient(apiUrl: String): NostrSocketClientImpl {
+        return NostrSocketClientImpl(
             dispatcherProvider = dispatcherProvider,
             httpClient = httpClient,
             incomingCompressionEnabled = serverType.isIncomingCompressionSupported(),

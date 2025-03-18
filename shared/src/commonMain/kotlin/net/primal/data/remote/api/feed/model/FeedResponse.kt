@@ -4,7 +4,7 @@ import net.primal.data.remote.model.ContentPrimalPaging
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 
-data class FeedResponse(
+internal data class FeedResponse(
     val paging: ContentPrimalPaging?,
     val metadata: List<NostrEvent>,
     val notes: List<NostrEvent>,

@@ -5,7 +5,6 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.networking.primal.retryNetworkCall
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsProfileDataPO
 import net.primal.android.nostr.ext.parseAndFoldPrimalLegendProfiles
@@ -24,6 +23,7 @@ import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
 import net.primal.android.premium.domain.PremiumMembership
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
+import net.primal.networking.primal.retryNetworkCall
 import timber.log.Timber
 
 class PremiumRepository @Inject constructor(

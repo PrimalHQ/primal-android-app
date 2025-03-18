@@ -65,7 +65,6 @@ kotlin {
 
         iosMain {
             dependencies {
-
             }
         }
 

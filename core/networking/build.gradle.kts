@@ -15,6 +15,7 @@ kotlin {
         namespace = "net.primal"
         compileSdk = 35
         minSdk = 26
+        withHostTestBuilder {}
     }
 
     // JVM Target
@@ -93,10 +94,11 @@ kotlin {
 
         commonTest {
             dependencies {
-                implementation(libs.junit)
+                implementation(libs.kotlin.test)
                 implementation(libs.kotest.assertions.core)
                 implementation(libs.kotest.assertions.json)
                 implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.mockk)
             }
         }
     }
@@ -104,6 +106,8 @@ kotlin {
     // Opting in to the experimental @ObjCName annotation for native coroutines on iOS targets
     kotlin.sourceSets.all {
         languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
+        languageSettings.optIn("kotlin.uuid.ExperimentalUuidApi")
+        languageSettings.optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
     }
 }
 

@@ -16,8 +16,6 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.list.ui.model.asFeedUi
 import net.primal.android.feeds.repository.FeedsRepository
-import net.primal.android.networking.primal.retryNetworkCall
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.notes.home.HomeFeedContract.UiEvent
 import net.primal.android.notes.home.HomeFeedContract.UiState
@@ -26,6 +24,8 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.user.updater.UserDataUpdater
 import net.primal.android.user.updater.UserDataUpdaterFactory
+import net.primal.networking.primal.retryNetworkCall
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

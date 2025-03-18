@@ -16,10 +16,10 @@ import net.primal.android.feeds.domain.buildSpec
 import net.primal.android.feeds.dvm.ui.DvmFeedUi
 import net.primal.android.feeds.repository.DvmFeedListHandler
 import net.primal.android.feeds.repository.FeedsRepository
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

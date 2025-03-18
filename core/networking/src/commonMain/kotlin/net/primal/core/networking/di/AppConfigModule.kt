@@ -1,6 +1,6 @@
 package net.primal.core.networking.di
 
-//internal val appConfigModule = module {
+// internal val appConfigModule = module {
 //
 //    single<WellKnownApi> {
 //        get<Ktorfit>().createWellKnownApi()
@@ -27,4 +27,4 @@ package net.primal.core.networking.di
 //            wellKnownApi = get(),
 //        )
 //    }
-//}
+// }

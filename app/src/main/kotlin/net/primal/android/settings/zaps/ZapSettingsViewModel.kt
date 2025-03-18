@@ -12,13 +12,13 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.primal.content.ContentZapConfigItem
 import net.primal.android.nostr.model.primal.content.ContentZapDefault
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.settings.zaps.ZapSettingsContract.UiEvent
 import net.primal.android.settings.zaps.ZapSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

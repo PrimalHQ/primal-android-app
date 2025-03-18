@@ -13,16 +13,16 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.config.AppConfigHandler
 import net.primal.android.networking.di.PrimalCacheApiClient
-import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.networking.relays.RelaysSocketManager
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.settings.network.NetworkSettingsContract.UiEvent
 import net.primal.android.settings.network.NetworkSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
+import net.primal.networking.primal.PrimalApiClient
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

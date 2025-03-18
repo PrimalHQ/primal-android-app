@@ -6,6 +6,7 @@ import net.primal.data.serialization.NostrJson
 import net.primal.data.serialization.toJsonObject
 import net.primal.domain.CdnImage
 import net.primal.domain.CdnResource
+import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.findFirstIdentifier
@@ -14,7 +15,6 @@ import net.primal.domain.nostr.findFirstPublishedAt
 import net.primal.domain.nostr.findFirstSummary
 import net.primal.domain.nostr.findFirstTitle
 import net.primal.domain.nostr.utils.parseHashtags
-import net.primal.domain.PrimalEvent
 
 
 fun List<NostrEvent>.mapNotNullAsArticleDataPO(

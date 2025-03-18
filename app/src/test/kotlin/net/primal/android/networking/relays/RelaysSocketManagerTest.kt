@@ -9,14 +9,13 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import net.primal.android.core.advanceUntilIdleAndDelay
 import net.primal.android.core.coroutines.CoroutinesTestRule
-import net.primal.android.networking.primal.PrimalApiClient
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.mapToRelayPO
-import okhttp3.OkHttpClient
+import net.primal.networking.primal.PrimalApiClient
 import org.junit.Rule
 import org.junit.Test
 
@@ -51,6 +50,7 @@ class RelaysSocketManagerTest {
         runTest {
             RelaysSocketManager(
                 dispatchers = coroutinesTestRule.dispatcherProvider,
+                nostrSocketClientFactory = mockk(relaxed = true),
                 activeAccountStore = buildActiveAccountStore(),
                 primalDatabase = mockk(relaxed = true) {
                     every { relays() } returns mockk(relaxed = true) {
@@ -61,8 +61,7 @@ class RelaysSocketManagerTest {
                         )
                     }
                 },
-                okHttpClient = mockk<OkHttpClient>(),
-                primalApiClient = mockk<PrimalApiClient>(),
+                primalApiClient = mockk<PrimalApiClient>(relaxed = true),
             )
             advanceUntilIdleAndDelay()
         }

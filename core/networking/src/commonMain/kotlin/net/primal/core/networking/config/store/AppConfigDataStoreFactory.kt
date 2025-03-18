@@ -20,5 +20,4 @@ internal object AppConfigDataStoreFactory {
                 producePath = { producePath().toPath() },
             ),
         )
-
 }

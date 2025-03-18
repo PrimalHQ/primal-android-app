@@ -9,13 +9,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.premium.api.model.LegendLeaderboardOrderBy
 import net.primal.android.premium.leaderboard.legend.LegendLeaderboardContract.UiEvent
 import net.primal.android.premium.leaderboard.legend.LegendLeaderboardContract.UiState
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

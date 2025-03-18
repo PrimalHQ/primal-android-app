@@ -4,10 +4,6 @@ import javax.inject.Inject
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.networking.di.PrimalWalletApiClient
-import net.primal.android.networking.primal.PrimalApiClient
-import net.primal.android.networking.primal.PrimalCacheFilter
-import net.primal.android.networking.primal.PrimalVerb
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.wallet.api.model.EmptyRequestBody
 import net.primal.android.wallet.api.model.NwcConnectionCreatedResponse
@@ -15,7 +11,11 @@ import net.primal.android.wallet.api.model.NwcCreateNewConnectionRequestBody
 import net.primal.android.wallet.api.model.NwcRevokeConnectionRequestBody
 import net.primal.android.wallet.api.model.PrimalNwcConnectionInfo
 import net.primal.android.wallet.api.model.WalletOperationVerb
+import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.networking.primal.PrimalApiClient
+import net.primal.networking.primal.PrimalCacheFilter
+import net.primal.networking.sockets.errors.WssException
 
 class NwcPrimalWalletApiImpl @Inject constructor(
     @PrimalWalletApiClient private val primalApiClient: PrimalApiClient,

@@ -4,7 +4,7 @@ package net.primal.networking.sockets
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 
-internal fun Flow<NostrIncomingMessage>.filterBySubscriptionId(id: String) =
+fun Flow<NostrIncomingMessage>.filterBySubscriptionId(id: String) =
     filter {
         (it is NostrIncomingMessage.EventMessage && it.subscriptionId == id) ||
             (it is NostrIncomingMessage.EoseMessage && it.subscriptionId == id) ||
@@ -14,7 +14,7 @@ internal fun Flow<NostrIncomingMessage>.filterBySubscriptionId(id: String) =
     }
 
 
-internal fun Flow<NostrIncomingMessage>.filterByEventId(id: String) =
+fun Flow<NostrIncomingMessage>.filterByEventId(id: String) =
     filter {
         (it is NostrIncomingMessage.OkMessage && it.eventId == id) ||
             (it is NostrIncomingMessage.NoticeMessage)

@@ -4,7 +4,6 @@ import androidx.datastore.core.CorruptionException
 import java.io.InputStream
 import java.io.OutputStream
 import kotlinx.serialization.SerializationException
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import timber.log.Timber
 

@@ -1,7 +1,7 @@
 package net.primal.android.core.compose.icons
 
-import kotlin.collections.List as ____KtList
 import androidx.compose.ui.graphics.vector.ImageVector
+import kotlin.collections.List as ____KtList
 import net.primal.android.core.compose.icons.primaliconpack.AddAccount
 import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearch
 import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearchFilled

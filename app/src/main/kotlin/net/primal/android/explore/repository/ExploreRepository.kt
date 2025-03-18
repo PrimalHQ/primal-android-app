@@ -19,7 +19,6 @@ import net.primal.android.explore.api.model.UsersResponse
 import net.primal.android.explore.db.TrendingTopic
 import net.primal.android.explore.domain.ExploreZapNoteData
 import net.primal.android.explore.domain.UserProfileSearchItem
-import net.primal.android.networking.primal.retryNetworkCall
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.flatMapNotNullAsLinkPreviewResource
 import net.primal.android.nostr.ext.flatMapNotNullAsVideoThumbnailsMap
@@ -36,6 +35,7 @@ import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
 import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
 import net.primal.android.profile.db.ProfileStats
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
+import net.primal.networking.primal.retryNetworkCall
 
 class ExploreRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,

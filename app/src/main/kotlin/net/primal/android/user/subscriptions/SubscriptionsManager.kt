@@ -22,10 +22,6 @@ import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
 import net.primal.android.messages.domain.MessagesUnreadCount
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.di.PrimalWalletApiClient
-import net.primal.android.networking.primal.PrimalApiClient
-import net.primal.android.networking.primal.PrimalCacheFilter
-import net.primal.android.networking.primal.PrimalSocketSubscription
-import net.primal.android.networking.primal.PrimalVerb
 import net.primal.android.nostr.ext.asMessagesTotalCount
 import net.primal.android.nostr.ext.asNotificationSummary
 import net.primal.android.nostr.ext.takeContentOrNull
@@ -40,8 +36,12 @@ import net.primal.android.wallet.api.model.BalanceResponse
 import net.primal.android.wallet.api.model.LastUpdatedAtResponse
 import net.primal.android.wallet.api.model.WalletRequestBody
 import net.primal.android.wallet.domain.SubWallet
+import net.primal.data.remote.PrimalVerb
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.networking.primal.PrimalApiClient
+import net.primal.networking.primal.PrimalCacheFilter
+import net.primal.networking.primal.PrimalSocketSubscription
 
 @Singleton
 class SubscriptionsManager @Inject constructor(

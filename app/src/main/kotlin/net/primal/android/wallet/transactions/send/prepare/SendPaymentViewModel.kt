@@ -16,7 +16,6 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.navigation.sendPaymentTab
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.scanner.analysis.WalletTextParser
@@ -27,6 +26,7 @@ import net.primal.android.wallet.transactions.send.prepare.SendPaymentContract.U
 import net.primal.android.wallet.transactions.send.prepare.SendPaymentContract.UiState
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
 import net.primal.android.wallet.utils.isLightningAddress
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

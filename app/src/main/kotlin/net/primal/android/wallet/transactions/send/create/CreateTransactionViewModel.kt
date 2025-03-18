@@ -17,7 +17,6 @@ import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.getMaximumUsdAmount
 import net.primal.android.navigation.draftTransaction
 import net.primal.android.navigation.lnbc
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.profile.db.ProfileData
@@ -39,6 +38,7 @@ import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.android.wallet.utils.CurrencyConversionUtils.fromUsdToSats
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.isLightningAddress
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

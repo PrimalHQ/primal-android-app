@@ -25,11 +25,11 @@ import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
-import net.primal.android.networking.primal.upload.domain.UploadJob
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.profile.domain.ProfileMetadata
+import net.primal.domain.upload.UploadJob
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

@@ -6,6 +6,7 @@ import net.primal.data.local.dao.reads.ArticleData
 import net.primal.data.local.dao.reads.HighlightData
 import net.primal.data.serialization.NostrJson
 import net.primal.data.serialization.toJsonObject
+import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.getPubkeyFromReplyOrRootTag
@@ -16,7 +17,6 @@ import net.primal.domain.nostr.hasRootMarker
 import net.primal.domain.nostr.isEventIdTag
 import net.primal.domain.nostr.isIMetaTag
 import net.primal.domain.nostr.utils.parseHashtags
-import net.primal.domain.PrimalEvent
 
 fun List<NostrEvent>.mapAsPostDataPO(
     referencedPosts: List<PostData>,

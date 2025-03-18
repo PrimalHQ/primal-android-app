@@ -7,7 +7,6 @@ import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.events.ext.flatMapMessagesAsEventUriPO
 import net.primal.android.messages.db.DirectMessageData
-import net.primal.android.networking.sockets.errors.WssException
 import net.primal.android.nostr.ext.extractNoteId
 import net.primal.android.nostr.ext.extractProfileId
 import net.primal.android.nostr.ext.flatMapMessagesAsNostrResourcePO
@@ -27,6 +26,7 @@ import net.primal.android.user.api.UsersApi
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
+import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 class MessagesProcessor @Inject constructor(
