@@ -23,7 +23,9 @@ rootProject.name = "Primal"
 include(":app")
 
 include(":core:utils")
-include(":core:networking")
+include(":core:app-config")
+include(":core:networking-http")
+include(":core:networking-primal")
 
 include(":domain:common")
 include(":domain:nostr")
