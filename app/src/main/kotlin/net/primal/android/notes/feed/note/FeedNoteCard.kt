@@ -27,8 +27,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.layer.GraphicsLayer
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,8 +42,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import java.time.Instant
+import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.UniversalAvatarThumbnail
@@ -240,6 +250,9 @@ private fun FeedNoteCard(
     val avatarSizeDp = displaySettings.contentAppearance.noteAvatarSize
     val overflowIconSizeDp = 40.dp
 
+    val graphicsLayer = rememberGraphicsLayer()
+    val coroutineScope = rememberCoroutineScope()
+
     NoteSurfaceCard(
         modifier = modifier
             .wrapContentHeight()
@@ -288,6 +301,15 @@ private fun FeedNoteCard(
                 onReportContentClick = {
                     reportDialogVisible = true
                 },
+                onShareNoteAsImageClick = {
+                    coroutineScope.launch {
+                        val bitmap = graphicsLayer.toImageBitmap()
+                        val date = epochTimeMillisecondsFormat(LocalDate.now().toEpochDay())
+                            ?: epochTimeMillisecondsFormat(Clock.System.now().toEpochMilliseconds())
+
+//                        fileSharer.shareImageBitmap(bitmap = bitmap, name = fileName)
+                    }
+                }
             )
 
             Column {
@@ -375,6 +397,7 @@ private fun FeedNoteCard(
                         }
                     },
                     contentFooter = contentFooter,
+                    graphicsLayer = graphicsLayer,
                 )
             }
         }
@@ -402,6 +425,7 @@ private fun FeedNote(
     textSelectable: Boolean,
     showNoteStatCounts: Boolean,
     noteCallbacks: NoteCallbacks,
+    graphicsLayer: GraphicsLayer,
     onPostAction: ((FeedPostAction) -> Unit)? = null,
     onPostLongClickAction: ((FeedPostAction) -> Unit)? = null,
     contentFooter: @Composable () -> Unit = {},
@@ -428,58 +452,65 @@ private fun FeedNote(
         Column(
             modifier = Modifier.padding(start = 0.dp),
         ) {
-            FeedNoteHeader(
-                modifier = Modifier
-                    .padding(notePaddingValues)
-                    .padding(end = 4.dp)
-                    .fillMaxWidth(),
-                postTimestamp = data.timestamp,
-                singleLine = headerSingleLine,
-                authorAvatarVisible = fullWidthContent,
-                authorAvatarSize = avatarSizeDp,
-                authorDisplayName = data.authorName,
-                authorAvatarCdnImage = data.authorAvatarCdnImage,
-                authorInternetIdentifier = data.authorInternetIdentifier,
-                authorLegendaryCustomization = data.authorLegendaryCustomization,
-                replyToAuthor = if (showReplyTo) data.replyToAuthorHandle else null,
-                onAuthorAvatarClick = if (noteCallbacks.onProfileClick != null) {
-                    { noteCallbacks.onProfileClick.invoke(data.authorId) }
-                } else {
-                    null
-                },
-            )
-
-            val postAuthorGuessHeight = with(LocalDensity.current) { 128.dp.toPx() }
-            val launchRippleEffect: (Offset) -> Unit = {
-                uiScope.launch {
-                    val press = PressInteraction.Press(it.copy(y = it.y + postAuthorGuessHeight))
-                    interactionSource.emit(press)
-                    interactionSource.emit(PressInteraction.Release(press))
+            Column(
+                modifier = Modifier.drawWithContent {
+                    graphicsLayer.record { this@drawWithContent.drawContent() }
+                    drawLayer(graphicsLayer)
                 }
-            }
+            ) {
+                FeedNoteHeader(
+                    modifier = Modifier
+                        .padding(notePaddingValues)
+                        .padding(end = 4.dp)
+                        .fillMaxWidth(),
+                    postTimestamp = data.timestamp,
+                    singleLine = headerSingleLine,
+                    authorAvatarVisible = fullWidthContent,
+                    authorAvatarSize = avatarSizeDp,
+                    authorDisplayName = data.authorName,
+                    authorAvatarCdnImage = data.authorAvatarCdnImage,
+                    authorInternetIdentifier = data.authorInternetIdentifier,
+                    authorLegendaryCustomization = data.authorLegendaryCustomization,
+                    replyToAuthor = if (showReplyTo) data.replyToAuthorHandle else null,
+                    onAuthorAvatarClick = if (noteCallbacks.onProfileClick != null) {
+                        { noteCallbacks.onProfileClick.invoke(data.authorId) }
+                    } else {
+                        null
+                    },
+                )
 
-            NoteContent(
-                modifier = Modifier
-                    .padding(horizontal = if (fullWidthContent) 10.dp else 8.dp)
-                    .padding(start = if (forceContentIndent && fullWidthContent) avatarSizeDp + 6.dp else 0.dp)
-                    .padding(top = if (fullWidthContent || !headerSingleLine) 10.dp else 5.dp),
-                data = data.toNoteContentUi(),
-                expanded = expanded,
-                enableTweetsMode = enableTweetsMode,
-                textSelectable = textSelectable,
-                onClick = if (noteCallbacks.onNoteClick != null) {
-                    {
-                        launchRippleEffect(it)
-                        noteCallbacks.onNoteClick.invoke(data.postId)
+                val postAuthorGuessHeight = with(LocalDensity.current) { 128.dp.toPx() }
+                val launchRippleEffect: (Offset) -> Unit = {
+                    uiScope.launch {
+                        val press = PressInteraction.Press(it.copy(y = it.y + postAuthorGuessHeight))
+                        interactionSource.emit(press)
+                        interactionSource.emit(PressInteraction.Release(press))
                     }
-                } else {
-                    null
-                },
-                onUrlClick = { localUriHandler.openUriSafely(it) },
-                noteCallbacks = noteCallbacks,
-            )
+                }
 
-            contentFooter()
+                NoteContent(
+                    modifier = Modifier
+                        .padding(horizontal = if (fullWidthContent) 10.dp else 8.dp)
+                        .padding(start = if (forceContentIndent && fullWidthContent) avatarSizeDp + 6.dp else 0.dp)
+                        .padding(top = if (fullWidthContent || !headerSingleLine) 10.dp else 5.dp),
+                    data = data.toNoteContentUi(),
+                    expanded = expanded,
+                    enableTweetsMode = enableTweetsMode,
+                    textSelectable = textSelectable,
+                    onClick = if (noteCallbacks.onNoteClick != null) {
+                        {
+                            launchRippleEffect(it)
+                            noteCallbacks.onNoteClick.invoke(data.postId)
+                        }
+                    } else {
+                        null
+                    },
+                    onUrlClick = { localUriHandler.openUriSafely(it) },
+                    noteCallbacks = noteCallbacks,
+                )
+
+                contentFooter()
+            }
 
             if (!showNoteStatCounts) {
                 PrimalDivider(modifier = Modifier.padding(vertical = 4.dp))
@@ -697,4 +728,18 @@ fun PreviewFeedNoteListItemDarkForcedContentIndentSingleLineHeader(
             drawLineBelowAvatar = true,
         )
     }
+}
+
+fun epochTimeMillisecondsFormat(epochTimeMilliseconds: Long?): String? {
+    if (epochTimeMilliseconds == null) {
+        return null
+    }
+
+    val timeZone = TimeZone.currentSystemDefault()
+    val instant = kotlinx.datetime.Instant.fromEpochMilliseconds(epochTimeMilliseconds)
+    val localDateTime = instant.toLocalDateTime(timeZone)
+
+    return "${localDateTime.dayOfMonth.toString().padStart(2, '0')}.${
+        localDateTime.monthNumber.toString().padStart(2, '0')
+    }.${localDateTime.year}."
 }

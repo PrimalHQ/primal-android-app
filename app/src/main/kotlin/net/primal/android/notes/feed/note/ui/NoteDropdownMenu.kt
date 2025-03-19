@@ -15,10 +15,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import net.primal.android.R
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenuItem
@@ -34,6 +37,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextRemoveBookmar
 import net.primal.android.core.compose.icons.primaliconpack.ContextReportUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.More
+import net.primal.android.core.compose.icons.primaliconpack.Share
 import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.resolvePrimalNoteLink
 import net.primal.android.core.utils.systemShareText
@@ -57,6 +61,7 @@ fun NoteDropdownMenuIcon(
     onBookmarkClick: (() -> Unit)? = null,
     onMuteUserClick: (() -> Unit)? = null,
     onReportContentClick: (() -> Unit)? = null,
+    onShareNoteAsImageClick: (() -> Unit)? = null,
 ) {
     var menuVisible by remember { mutableStateOf(false) }
 
@@ -92,6 +97,14 @@ fun NoteDropdownMenuIcon(
                         context = context,
                         text = resolvePrimalNoteLink(noteId = noteId),
                     )
+                    menuVisible = false
+                },
+            )
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.ContextShare,
+                text = stringResource(id = R.string.feed_context_share_note_as_image),
+                onClick = {
+                    onShareNoteAsImageClick?.invoke()
                     menuVisible = false
                 },
             )

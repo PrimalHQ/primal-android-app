@@ -481,6 +481,7 @@
     </plurals>
 
     <string name="feed_context_share_note">Share note</string>
+    <string name="feed_context_share_note_as_image">Share note as image</string>
     <string name="feed_context_copy_note_link">Copy note link</string>
     <string name="feed_context_add_to_bookmark">Add to Bookmarks</string>
     <string name="feed_context_bookmark_added">Note added to your bookmarks.</string>
