@@ -1,12 +1,12 @@
 package net.primal.data.remote.api.upload.model
 
-//fun chunkUploadRequest(
+// fun chunkUploadRequest(
 //    userId: String,
 //    uploadId: String,
 //    fileSizeInBytes: Long,
 //    offsetInBytes: Int,
 //    data: ByteArray,
-//): NostrUnsignedEvent {
+// ): NostrUnsignedEvent {
 //    return NostrUnsignedEvent(
 //        pubKey = userId,
 //        kind = NostrEventKind.PrimalChunkedUploadRequest.value,
@@ -20,14 +20,14 @@ package net.primal.data.remote.api.upload.model
 //            ),
 //        ),
 //    )
-//}
+// }
 
-//fun completeUploadRequest(
+// fun completeUploadRequest(
 //    userId: String,
 //    uploadId: String,
 //    fileSizeInBytes: Long,
 //    hash: String,
-//): NostrUnsignedEvent {
+// ): NostrUnsignedEvent {
 //    return NostrUnsignedEvent(
 //        pubKey = userId,
 //        kind = NostrEventKind.PrimalChunkedUploadRequest.value,
@@ -40,15 +40,15 @@ package net.primal.data.remote.api.upload.model
 //            ),
 //        ),
 //    )
-//}
+// }
 
-//fun cancelUploadRequest(userId: String, uploadId: String): NostrUnsignedEvent {
+// fun cancelUploadRequest(userId: String, uploadId: String): NostrUnsignedEvent {
 //    return NostrUnsignedEvent(
 //        pubKey = userId,
 //        kind = NostrEventKind.PrimalChunkedUploadRequest.value,
 //        tags = listOf(userId.asPubkeyTag()),
 //        content = NostrJson.encodeToString(UploadCancelContent(uploadId = uploadId)),
 //    )
-//}
+// }
 
 private fun String.asOctetStream(): String = "data:application/octet-stream;base64,,$this"

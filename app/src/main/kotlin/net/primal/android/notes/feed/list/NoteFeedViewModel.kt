@@ -42,8 +42,8 @@ import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.nostr.NostrEvent
-import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = NoteFeedViewModel.Factory::class)

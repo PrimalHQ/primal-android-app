@@ -14,7 +14,7 @@ import net.primal.core.config.AppConfigHandler
 import net.primal.core.config.AppConfigProvider
 import net.primal.core.config.observeApiUrlByType
 import net.primal.core.networking.sockets.NostrIncomingMessage
-import net.primal.core.networking.sockets.NostrSocketClient
+import net.primal.core.networking.sockets.NostrSocketClientImpl
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.PrimalServerType
 
@@ -29,7 +29,7 @@ internal class ProxyPrimalApiClient(
     private val scope = CoroutineScope(dispatcherProvider.io())
 
     private lateinit var primalClient: BasePrimalApiClient
-    private lateinit var socketClient: NostrSocketClient
+    private lateinit var socketClient: NostrSocketClientImpl
     private var clientInitialized: Boolean = false
     private val clientMutex = Mutex()
 
@@ -68,8 +68,8 @@ internal class ProxyPrimalApiClient(
             }
         }
 
-    private fun buildAndInitializeSocketClient(apiUrl: String): NostrSocketClient {
-        return NostrSocketClient(
+    private fun buildAndInitializeSocketClient(apiUrl: String): NostrSocketClientImpl {
+        return NostrSocketClientImpl(
             dispatcherProvider = dispatcherProvider,
             httpClient = httpClient,
             incomingCompressionEnabled = serverType.isIncomingCompressionSupported(),

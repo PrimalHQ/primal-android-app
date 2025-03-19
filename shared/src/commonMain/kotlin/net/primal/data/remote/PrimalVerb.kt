@@ -1,6 +1,6 @@
 package net.primal.data.remote
 
-enum class PrimalVerb(val identifier: String) {
+enum class PrimalVerb(val id: String) {
     FOLLOW_LIST("contact_list"),
     USER_INFOS("user_infos"),
     USER_PROFILE("user_profile"),

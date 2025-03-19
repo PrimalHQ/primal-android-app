@@ -45,11 +45,12 @@ koinCompose = "4.0.2"
 kotlin = "2.1.10"
 kotlinx-coroutines = "1.10.1"
 kotlinx-datetime = "0.6.2"
+kotlinx-io = "0.7.0"
 kotlinx-serialization-json = "1.8.0"
 ksp = "2.1.10-1.0.31"
 ktlint_compose_rules = "0.3.17"
 ktor = "3.1.1"
-ktorfit = "2.4.0"
+ktorfit = "2.4.1"
 markwon = "4.6.2"
 material-icons = "1.7.8"
 media3-exoplayer = "1.5.1"
@@ -187,6 +188,7 @@ ktorfit-converters-flow = { module = "de.jensklingenberg.ktorfit:ktorfit-convert
 
 url-detector = { module = "io.github.url-detector:url-detector", version.ref = "url-detector" }
 
+kotlinx-io = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinx-io"}
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 

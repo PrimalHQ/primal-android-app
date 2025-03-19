@@ -3,9 +3,7 @@ package net.primal.data.repository.mapper
 import net.primal.data.local.dao.events.EventUriNostr
 import net.primal.domain.EventUriNostrReference
 
-internal fun EventUriNostr.asReferencedNostrUriDO(
-    forcePosition: Int? = null,
-): EventUriNostrReference {
+internal fun EventUriNostr.asReferencedNostrUriDO(forcePosition: Int? = null): EventUriNostrReference {
     return EventUriNostrReference(
         eventId = this.eventId,
         position = forcePosition ?: this.position,

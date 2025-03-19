@@ -12,6 +12,9 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.io.IOException
+import net.primal.core.networking.sockets.errors.NostrNoticeException
+import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notes.FeedPost
 import net.primal.data.local.dao.notes.FeedPostRemoteKey
@@ -28,9 +31,6 @@ import net.primal.domain.isProfileAuthoredNoteRepliesFeedSpec
 import net.primal.domain.isProfileAuthoredNotesFeedSpec
 import net.primal.domain.supportsNoteReposts
 import net.primal.domain.supportsUpwardsNotesPagination
-import net.primal.networking.primal.retryNetworkCall
-import net.primal.networking.sockets.errors.NostrNoticeException
-import net.primal.networking.sockets.errors.WssException
 
 @ExperimentalPagingApi
 internal class NoteFeedRemoteMediator(

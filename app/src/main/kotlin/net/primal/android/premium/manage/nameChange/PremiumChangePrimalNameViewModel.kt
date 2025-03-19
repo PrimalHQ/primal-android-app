@@ -19,7 +19,7 @@ import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameContr
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameContract.UiState
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

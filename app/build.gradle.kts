@@ -225,6 +225,7 @@ android {
 
 dependencies {
     implementation(project(":core:utils"))
+    implementation(project(":core:app-config"))
     implementation(project(":core:networking-primal"))
     implementation(project(":domain:nostr"))
     implementation(project(":domain:primal"))

@@ -25,7 +25,7 @@ import net.primal.android.core.utils.isValidNostrPublicKey
 import net.primal.android.crypto.bech32ToHexOrThrow
 import net.primal.android.crypto.extractKeyPairFromPrivateKeyOrThrow
 import net.primal.android.profile.repository.ProfileRepository
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

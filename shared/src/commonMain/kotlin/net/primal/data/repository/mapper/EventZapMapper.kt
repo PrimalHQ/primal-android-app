@@ -17,7 +17,7 @@ internal fun EventZapPO.asEventZapDO(): EventZapDO {
         zappedAt = this.zapRequestAt,
         message = this.message,
         // TODO Fix this once currency utils are ported
-        amountInSats = 8888.toULong(), //this.amountInBtc.toBigDecimal().toSats(),
+        amountInSats = 8888.toULong(), // this.amountInBtc.toBigDecimal().toSats(),
         zapperLegendProfile = this.zapSenderPrimalLegendProfile,
     )
 }

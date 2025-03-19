@@ -20,7 +20,7 @@ import net.primal.android.user.api.UsersApiImpl
 import net.primal.android.user.credentials.CredentialsSerialization
 import net.primal.android.user.domain.Credential
 import net.primal.android.user.domain.UserAccount
-import net.primal.networking.primal.PrimalApiClient
+import net.primal.core.networking.primal.PrimalApiClient
 
 @Module
 @InstallIn(SingletonComponent::class)

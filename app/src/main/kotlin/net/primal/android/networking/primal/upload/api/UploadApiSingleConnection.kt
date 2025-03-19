@@ -7,13 +7,13 @@ import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
 import net.primal.android.networking.di.PrimalUploadApiClient
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.primal.upload.api.model.UploadChunkRequest
+import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.networking.primal.PrimalCacheFilter
+import net.primal.core.networking.primal.PrimalQueryResult
+import net.primal.core.networking.sockets.errors.WssException
 import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.networking.primal.PrimalApiClient
-import net.primal.networking.primal.PrimalCacheFilter
-import net.primal.networking.primal.PrimalQueryResult
-import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 class UploadApiSingleConnection @Inject constructor(
@@ -39,7 +39,7 @@ class UploadApiSingleConnection @Inject constructor(
         uploadOrThrow {
             primalUploadClient.query(
                 message = PrimalCacheFilter(
-                    primalVerb = PrimalVerb.UPLOAD_CHUNK,
+                    primalVerb = PrimalVerb.UPLOAD_CHUNK.id,
                     optionsJson = NostrJsonEncodeDefaults.encodeToString(
                         UploadChunkRequest(event = eventBlock()),
                     ),
@@ -51,7 +51,7 @@ class UploadApiSingleConnection @Inject constructor(
         uploadOrThrow {
             primalUploadClient.query(
                 message = PrimalCacheFilter(
-                    primalVerb = PrimalVerb.UPLOAD_COMPLETE,
+                    primalVerb = PrimalVerb.UPLOAD_COMPLETE.id,
                     optionsJson = NostrJsonEncodeDefaults.encodeToString(
                         UploadChunkRequest(event = eventBlock()),
                     ),

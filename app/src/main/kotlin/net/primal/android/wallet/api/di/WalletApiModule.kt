@@ -10,7 +10,7 @@ import net.primal.android.wallet.api.NwcPrimalWalletApi
 import net.primal.android.wallet.api.NwcPrimalWalletApiImpl
 import net.primal.android.wallet.api.WalletApi
 import net.primal.android.wallet.api.WalletApiImpl
-import net.primal.networking.primal.PrimalApiClient
+import net.primal.core.networking.primal.PrimalApiClient
 
 @Module
 @InstallIn(SingletonComponent::class)

@@ -15,7 +15,7 @@ import net.primal.android.premium.leaderboard.legend.LegendLeaderboardContract.U
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

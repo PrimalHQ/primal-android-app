@@ -9,7 +9,6 @@ import net.primal.domain.nostr.findFirstEventId
 import net.primal.domain.nostr.findFirstProfileId
 import net.primal.domain.nostr.findFirstZapRequest
 
-
 fun List<NostrEvent>.mapAsEventZapDO(profilesMap: Map<String, ProfileData>) =
     mapNotNull { zapReceipt ->
         val zapRequest = zapReceipt.extractZapRequestOrNull()

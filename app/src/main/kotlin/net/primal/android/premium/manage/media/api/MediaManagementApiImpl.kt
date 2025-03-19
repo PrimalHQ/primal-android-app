@@ -10,11 +10,11 @@ import net.primal.android.premium.manage.media.api.model.MediaStorageStats
 import net.primal.android.premium.manage.media.api.model.MediaUploadsRequestBody
 import net.primal.android.premium.manage.media.api.model.MediaUploadsResponse
 import net.primal.android.settings.api.model.AppSpecificDataRequest
+import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.networking.primal.PrimalCacheFilter
+import net.primal.core.networking.sockets.errors.WssException
 import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.networking.primal.PrimalApiClient
-import net.primal.networking.primal.PrimalCacheFilter
-import net.primal.networking.sockets.errors.WssException
 
 class MediaManagementApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
@@ -24,7 +24,7 @@ class MediaManagementApiImpl @Inject constructor(
     override suspend fun getMediaStats(userId: String): MediaStorageStats {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MEDIA_MANAGEMENT_STATS,
+                primalVerb = PrimalVerb.MEDIA_MANAGEMENT_STATS.id,
                 optionsJson = NostrJson.encodeToString(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
@@ -44,7 +44,7 @@ class MediaManagementApiImpl @Inject constructor(
     override suspend fun getMediaUploads(userId: String): MediaUploadsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MEDIA_MANAGEMENT_UPLOADS,
+                primalVerb = PrimalVerb.MEDIA_MANAGEMENT_UPLOADS.id,
                 optionsJson = NostrJson.encodeToString(
                     MediaUploadsRequestBody(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(userId = userId, content = ""),
@@ -67,7 +67,7 @@ class MediaManagementApiImpl @Inject constructor(
     override suspend fun deleteMedia(userId: String, mediaUrl: String) {
         primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MEDIA_MANAGEMENT_DELETE,
+                primalVerb = PrimalVerb.MEDIA_MANAGEMENT_DELETE.id,
                 optionsJson = NostrJson.encodeToString(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(

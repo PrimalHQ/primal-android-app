@@ -11,7 +11,7 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.messages.api.MessagesApi
 import net.primal.android.messages.api.model.MessagesRequestBody
 import net.primal.android.messages.db.DirectMessage
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @ExperimentalPagingApi

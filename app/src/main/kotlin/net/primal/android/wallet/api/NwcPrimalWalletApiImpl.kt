@@ -11,11 +11,11 @@ import net.primal.android.wallet.api.model.NwcCreateNewConnectionRequestBody
 import net.primal.android.wallet.api.model.NwcRevokeConnectionRequestBody
 import net.primal.android.wallet.api.model.PrimalNwcConnectionInfo
 import net.primal.android.wallet.api.model.WalletOperationVerb
+import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.networking.primal.PrimalCacheFilter
+import net.primal.core.networking.sockets.errors.WssException
 import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.networking.primal.PrimalApiClient
-import net.primal.networking.primal.PrimalCacheFilter
-import net.primal.networking.sockets.errors.WssException
 
 class NwcPrimalWalletApiImpl @Inject constructor(
     @PrimalWalletApiClient private val primalApiClient: PrimalApiClient,
@@ -25,7 +25,7 @@ class NwcPrimalWalletApiImpl @Inject constructor(
     override suspend fun getConnections(userId: String): List<PrimalNwcConnectionInfo> {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET,
+                primalVerb = PrimalVerb.WALLET.id,
                 optionsJson = buildWalletOptionsJson(
                     userId = userId,
                     walletVerb = WalletOperationVerb.NWC_CONNECTIONS,
@@ -44,7 +44,7 @@ class NwcPrimalWalletApiImpl @Inject constructor(
     override suspend fun revokeConnection(userId: String, nwcPubkey: String) {
         primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET,
+                primalVerb = PrimalVerb.WALLET.id,
                 optionsJson = buildWalletOptionsJson(
                     userId = userId,
                     walletVerb = WalletOperationVerb.NWC_REVOKE_CONNECTION,
@@ -62,7 +62,7 @@ class NwcPrimalWalletApiImpl @Inject constructor(
     ): NwcConnectionCreatedResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET,
+                primalVerb = PrimalVerb.WALLET.id,
                 optionsJson = buildWalletOptionsJson(
                     userId = userId,
                     walletVerb = WalletOperationVerb.NWC_CREATE_NEW_CONNECTION,

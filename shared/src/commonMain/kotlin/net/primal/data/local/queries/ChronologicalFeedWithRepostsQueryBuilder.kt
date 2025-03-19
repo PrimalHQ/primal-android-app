@@ -78,7 +78,6 @@ class ChronologicalFeedWithRepostsQueryBuilder(
                 query.bindText(index = 6, value = userPubkey)
             },
         )
-
     }
 
     override fun newestFeedPostsQuery(limit: Int): RoomRawQuery {

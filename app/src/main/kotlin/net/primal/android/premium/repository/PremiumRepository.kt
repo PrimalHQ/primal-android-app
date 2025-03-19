@@ -23,7 +23,7 @@ import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
 import net.primal.android.premium.domain.PremiumMembership
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
-import net.primal.networking.primal.retryNetworkCall
+import net.primal.core.networking.utils.retryNetworkCall
 import timber.log.Timber
 
 class PremiumRepository @Inject constructor(

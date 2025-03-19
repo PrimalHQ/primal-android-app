@@ -37,12 +37,12 @@ import net.primal.android.wallet.api.model.WalletOperationVerb
 import net.primal.android.wallet.api.model.WalletUserInfoResponse
 import net.primal.android.wallet.api.model.WithdrawRequestBody
 import net.primal.android.wallet.domain.SubWallet
+import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.networking.primal.PrimalCacheFilter
+import net.primal.core.networking.sockets.errors.WssException
 import net.primal.data.remote.PrimalVerb
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.networking.primal.PrimalApiClient
-import net.primal.networking.primal.PrimalCacheFilter
-import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 class WalletApiImpl @Inject constructor(
@@ -53,7 +53,7 @@ class WalletApiImpl @Inject constructor(
     override suspend fun getWalletUserKycLevel(userId: String): Int {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET,
+                primalVerb = PrimalVerb.WALLET.id,
                 optionsJson = buildWalletOptionsJson(
                     userId = userId,
                     walletVerb = WalletOperationVerb.IS_USER,
@@ -70,7 +70,7 @@ class WalletApiImpl @Inject constructor(
     override suspend fun getWalletUserInfo(userId: String): WalletUserInfoResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET,
+                primalVerb = PrimalVerb.WALLET.id,
                 optionsJson = buildWalletOptionsJson(
                     userId = userId,
                     walletVerb = WalletOperationVerb.USER_INFO,
@@ -88,7 +88,7 @@ class WalletApiImpl @Inject constructor(
     override suspend fun requestActivationCodeToEmail(userId: String, body: GetActivationCodeRequestBody) {
         primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET,
+                primalVerb = PrimalVerb.WALLET.id,
                 optionsJson = buildWalletOptionsJson(
                     userId = userId,
                     walletVerb = WalletOperationVerb.GET_ACTIVATION_CODE,
@@ -102,7 +102,7 @@ class WalletApiImpl @Inject constructor(
     override suspend fun activateWallet(userId: String, code: String): String {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET,
+                primalVerb = PrimalVerb.WALLET.id,
                 optionsJson = buildWalletOptionsJson(
                     userId = userId,
                     walletVerb = WalletOperationVerb.ACTIVATE,
@@ -120,7 +120,7 @@ class WalletApiImpl @Inject constructor(
     override suspend fun getBalance(userId: String): BalanceResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET,
+                primalVerb = PrimalVerb.WALLET.id,
                 optionsJson = buildWalletOptionsJson(
                     userId = userId,
                     walletVerb = WalletOperationVerb.BALANCE,
@@ -138,7 +138,7 @@ class WalletApiImpl @Inject constructor(
     override suspend fun withdraw(userId: String, body: WithdrawRequestBody) {
         primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET,
+                primalVerb = PrimalVerb.WALLET.id,
                 optionsJson = buildWalletOptionsJson(
                     userId = userId,
                     walletVerb = WalletOperationVerb.WITHDRAW,
@@ -152,7 +152,7 @@ class WalletApiImpl @Inject constructor(
     override suspend fun createLightningInvoice(userId: String, body: DepositRequestBody): LightningInvoiceResponse {
         val response = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET,
+                primalVerb = PrimalVerb.WALLET.id,
                 optionsJson = buildWalletOptionsJson(
                     userId = userId,
                     walletVerb = WalletOperationVerb.DEPOSIT,
@@ -170,7 +170,7 @@ class WalletApiImpl @Inject constructor(
     override suspend fun createOnChainAddress(userId: String, body: DepositRequestBody): OnChainAddressResponse {
         val response = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET,
+                primalVerb = PrimalVerb.WALLET.id,
                 optionsJson = buildWalletOptionsJson(
                     userId = userId,
                     walletVerb = WalletOperationVerb.DEPOSIT,
@@ -188,7 +188,7 @@ class WalletApiImpl @Inject constructor(
     override suspend fun getTransactions(userId: String, body: TransactionsRequestBody): TransactionsResponse {
         val result = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET,
+                primalVerb = PrimalVerb.WALLET.id,
                 optionsJson = buildWalletOptionsJson(
                     userId = userId,
                     walletVerb = WalletOperationVerb.TRANSACTIONS,
@@ -227,7 +227,7 @@ class WalletApiImpl @Inject constructor(
     ): InAppPurchaseQuoteResponse {
         val result = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET,
+                primalVerb = PrimalVerb.WALLET.id,
                 optionsJson = buildWalletOptionsJson(
                     userId = userId,
                     walletVerb = WalletOperationVerb.IN_APP_PURCHASE_QUOTE,
@@ -254,7 +254,7 @@ class WalletApiImpl @Inject constructor(
     ) {
         primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET,
+                primalVerb = PrimalVerb.WALLET.id,
                 optionsJson = buildWalletOptionsJson(
                     userId = userId,
                     walletVerb = WalletOperationVerb.IN_APP_PURCHASE,
@@ -268,7 +268,7 @@ class WalletApiImpl @Inject constructor(
     override suspend fun parseLnUrl(userId: String, lnurl: String): ParsedLnUrlResponse {
         val result = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET,
+                primalVerb = PrimalVerb.WALLET.id,
                 optionsJson = buildWalletOptionsJson(
                     userId = userId,
                     walletVerb = WalletOperationVerb.PARSE_LNURL,
@@ -286,7 +286,7 @@ class WalletApiImpl @Inject constructor(
     override suspend fun parseLnInvoice(userId: String, lnbc: String): ParsedLnInvoiceResponse {
         val result = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET,
+                primalVerb = PrimalVerb.WALLET.id,
                 optionsJson = buildWalletOptionsJson(
                     userId = userId,
                     walletVerb = WalletOperationVerb.PARSE_LNINVOICE,
@@ -308,7 +308,7 @@ class WalletApiImpl @Inject constructor(
     ): List<MiningFeeTier> {
         val result = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET,
+                primalVerb = PrimalVerb.WALLET.id,
                 optionsJson = buildWalletOptionsJson(
                     userId = userId,
                     walletVerb = WalletOperationVerb.ONCHAIN_PAYMENT_TIERS,
@@ -341,7 +341,7 @@ class WalletApiImpl @Inject constructor(
     override suspend fun getExchangeRate(userId: String): Double {
         val result = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET,
+                primalVerb = PrimalVerb.WALLET.id,
                 optionsJson = buildWalletOptionsJson(
                     userId = userId,
                     walletVerb = WalletOperationVerb.EXCHANGE_RATE,

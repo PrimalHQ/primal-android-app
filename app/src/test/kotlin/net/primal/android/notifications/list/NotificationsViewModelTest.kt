@@ -8,7 +8,7 @@ import kotlinx.coroutines.test.runTest
 import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.nostr.notary.NostrSignUnauthorized
 import net.primal.android.notifications.repository.NotificationRepository
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

@@ -5,9 +5,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
-import net.primal.networking.primal.PrimalApiClientFactory
-import net.primal.networking.primal.PrimalServerType
-import net.primal.networking.sockets.NostrSocketClientFactory
+import net.primal.core.networking.factory.PrimalApiClientFactory
+import net.primal.core.networking.sockets.NostrSocketClientFactory
+import net.primal.domain.PrimalServerType
 
 @Module
 @InstallIn(SingletonComponent::class)

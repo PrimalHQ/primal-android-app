@@ -118,7 +118,10 @@ internal suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String,
     }
 }
 
-internal suspend fun FeedResponse.persistNoteRepliesAndArticleCommentsToDatabase(noteId: String, database: PrimalDatabase) {
+internal suspend fun FeedResponse.persistNoteRepliesAndArticleCommentsToDatabase(
+    noteId: String,
+    database: PrimalDatabase,
+) {
     val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
     val articles = this.articles.mapNotNullAsArticleDataPO(cdnResources = cdnResources)
 

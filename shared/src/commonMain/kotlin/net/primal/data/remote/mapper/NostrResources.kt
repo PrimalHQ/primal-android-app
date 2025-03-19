@@ -89,11 +89,11 @@ fun String.isNProfileUri() = lowercase().startsWith(NOSTR + NPROFILE)
 
 fun String.isNAddrUri() = lowercase().startsWith(NOSTR + NADDR)
 
-//fun String.parseNostrUris(): List<String> {
+// fun String.parseNostrUris(): List<String> {
 //    return nostrUriRegexPattern.findAll(this).map { matchResult ->
 //        matchResult.groupValues[1] + matchResult.groupValues[2] + matchResult.groupValues[3]
 //    }.filter { it.nostrUriToBytes() != null }.toList()
-//}
+// }
 
 fun String.detectUrls(): List<String> {
     return urlRegexPattern.findAll(this).map { matchResult ->
@@ -109,7 +109,7 @@ fun String.detectUrls(): List<String> {
     }.toList()
 }
 
-//private fun String.nostrUriToBytes(): ByteArray? {
+// private fun String.nostrUriToBytes(): ByteArray? {
 //    val matcher = nostrUriRegexPattern.matcher(this)
 //    if (!matcher.find()) return null
 //    val type = matcher.group(2)?.lowercase() ?: return null
@@ -120,23 +120,23 @@ fun String.detectUrls(): List<String> {
 //        Napier.w("", ignored)
 //        null
 //    }
-//}
+// }
 
-//fun String.nostrUriToNoteId() = nostrUriToBytes()?.toHex()
+// fun String.nostrUriToNoteId() = nostrUriToBytes()?.toHex()
 //
-//fun String.nostrUriToPubkey() = nostrUriToBytes()?.toHex()
+// fun String.nostrUriToPubkey() = nostrUriToBytes()?.toHex()
 
-//private fun String.nostrUriToIdAndRelay(): Pair<String?, String?> {
+// private fun String.nostrUriToIdAndRelay(): Pair<String?, String?> {
 //    val bytes = nostrUriToBytes() ?: return null to null
 //    val tlv = Nip19TLV.parse(bytes)
 //    val id = tlv[Nip19TLV.Type.SPECIAL.id]?.firstOrNull()?.toHex()
 //    val relayBytes = tlv[Nip19TLV.Type.RELAY.id]?.firstOrNull()
 //    return id to relayBytes?.let { String(it) }
-//}
+// }
 
-//fun String.nostrUriToNoteIdAndRelay() = nostrUriToIdAndRelay()
+// fun String.nostrUriToNoteIdAndRelay() = nostrUriToIdAndRelay()
 
-//fun String.nostrUriToPubkeyAndRelay() = nostrUriToIdAndRelay()
+// fun String.nostrUriToPubkeyAndRelay() = nostrUriToIdAndRelay()
 
 fun String.extractProfileId(): String? {
     return extract { bechPrefix: String?, key: String? ->
@@ -203,7 +203,7 @@ private fun String.extract(parser: (bechPrefix: String?, key: String?) -> String
 
 // TODO Rewire once NIP19 is implemented and put in correct package and/or module
 
-//fun String.takeAsNaddrOrNull(): String? {
+// fun String.takeAsNaddrOrNull(): String? {
 //    return if (isNAddr() || isNAddrUri()) {
 //        val result = runCatching {
 //            Nip19TLV.parseUriAsNaddrOrNull(this)
@@ -216,7 +216,7 @@ private fun String.extract(parser: (bechPrefix: String?, key: String?) -> String
 //    } else {
 //        null
 //    }
-//}
+// }
 
 fun String.takeAsNoteHexIdOrNull(): String? {
     return if (isNote() || isNoteUri() || isNEventUri() || isNEvent()) {
@@ -238,19 +238,20 @@ fun String.takeAsProfileHexIdOrNull(): String? {
     }
 }
 
-fun List<EventUriNostrReference>.mapReferencedNostrUriAsEventUriNostrPO() = map {
-    EventUriNostr(
-        eventId = it.eventId,
-        uri = it.uri,
-        type = it.type,
-        referencedEventAlt = it.referencedEventAlt,
-        referencedHighlight = it.referencedHighlight,
-        referencedNote = it.referencedNote,
-        referencedArticle = it.referencedArticle,
-        referencedUser = it.referencedUser,
-        referencedZap = it.referencedZap,
-    )
-}
+fun List<EventUriNostrReference>.mapReferencedNostrUriAsEventUriNostrPO() =
+    map {
+        EventUriNostr(
+            eventId = it.eventId,
+            uri = it.uri,
+            type = it.type,
+            referencedEventAlt = it.referencedEventAlt,
+            referencedHighlight = it.referencedHighlight,
+            referencedNote = it.referencedNote,
+            referencedArticle = it.referencedArticle,
+            referencedUser = it.referencedUser,
+            referencedZap = it.referencedZap,
+        )
+    }
 
 fun List<PostData>.flatMapPostsAsReferencedNostrUriDO(
     eventIdToNostrEvent: Map<String, NostrEvent>,
@@ -312,7 +313,7 @@ fun List<String>.mapAsReferencedNostrUriDO(
     val refPostAuthor = profileIdToProfileDataMap[refNote?.authorId]
 
     // Rewire once Nip19 is implemented for KMP
-    val refNaddr: Naddr? = null //Nip19TLV.parseUriAsNaddrOrNull(link)
+    val refNaddr: Naddr? = null // Nip19TLV.parseUriAsNaddrOrNull(link)
     val refArticle = articleIdToArticle[refNaddr?.identifier]
     val refArticleAuthor = profileIdToProfileDataMap[refNaddr?.userId]
 
@@ -437,7 +438,7 @@ private fun takeAsReferencedArticleOrNull(
 ) {
     // TODO Rewire once NIP19 is implemented
     ReferencedArticle(
-        naddr = "", //refNaddr.toNaddrString(),
+        naddr = "", // refNaddr.toNaddrString(),
         aTag = refArticle.aTag,
         eventId = refArticle.eventId,
         articleId = refArticle.articleId,
@@ -462,7 +463,7 @@ private fun takeAsReferencedHighlightOrNull(
     authorId: String?,
 ) = if (highlight?.isNotEmpty() == true && aTag != null) {
     // TODO Rewire once NIP19 is implemented
-    val nevent: Nevent? = null //Nip19TLV.parseUriAsNeventOrNull(neventUri = uri)
+    val nevent: Nevent? = null // Nip19TLV.parseUriAsNeventOrNull(neventUri = uri)
     ReferencedHighlight(
         text = highlight,
         aTag = aTag,

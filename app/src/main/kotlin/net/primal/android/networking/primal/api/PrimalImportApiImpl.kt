@@ -5,11 +5,11 @@ import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.toJsonArray
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.primal.api.model.ImportRequestBody
+import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.networking.primal.PrimalCacheFilter
+import net.primal.core.networking.sockets.NostrIncomingMessage
 import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEvent
-import net.primal.networking.primal.PrimalApiClient
-import net.primal.networking.primal.PrimalCacheFilter
-import net.primal.networking.sockets.NostrIncomingMessage
 
 class PrimalImportApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
@@ -18,7 +18,7 @@ class PrimalImportApiImpl @Inject constructor(
     override suspend fun importEvents(events: List<NostrEvent>): Boolean {
         val result = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.IMPORT_EVENTS,
+                primalVerb = PrimalVerb.IMPORT_EVENTS.id,
                 optionsJson = NostrJson.encodeToString(
                     ImportRequestBody(nostrEvents = events.toJsonArray()),
                 ),

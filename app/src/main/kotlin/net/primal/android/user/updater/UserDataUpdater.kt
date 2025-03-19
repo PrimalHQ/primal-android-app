@@ -12,7 +12,7 @@ import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.repository.WalletRepository
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber
 
 class UserDataUpdater @AssistedInject constructor(

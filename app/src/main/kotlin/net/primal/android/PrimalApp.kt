@@ -6,7 +6,7 @@ import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 import net.primal.android.core.crash.PrimalCrashReporter
 import net.primal.android.core.images.PrimalImageLoaderFactory
-import net.primal.android.networking.UserAgentProvider
+import net.primal.core.config.store.AppConfigInitializer
 import net.primal.core.init.PrimalInitializer
 import timber.log.Timber
 
@@ -24,10 +24,11 @@ class PrimalApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        AppConfigInitializer.init(this@PrimalApp)
         PrimalInitializer.init(
             context = this@PrimalApp,
-            appName = "android-${BuildConfig.VERSION_NAME}",
-            userAgent = UserAgentProvider.USER_AGENT,
+//            appName = "android-${BuildConfig.VERSION_NAME}",
+//            userAgent = UserAgentProvider.USER_AGENT,
             showLog = true,
         )
 
