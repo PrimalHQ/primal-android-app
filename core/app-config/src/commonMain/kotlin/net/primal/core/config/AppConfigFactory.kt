@@ -2,7 +2,6 @@ package net.primal.core.config
 
 import androidx.datastore.core.DataStore
 import de.jensklingenberg.ktorfit.Ktorfit
-import io.ktor.client.plugins.UserAgent
 import net.primal.core.config.api.WellKnownApi
 import net.primal.core.config.api.createWellKnownApi
 import net.primal.core.config.store.AppConfigDataStore
@@ -25,11 +24,7 @@ object AppConfigFactory {
 
     private val dispatcherProvider by lazy { DispatcherProviderFactory.create() }
 
-    private val httpClient = HttpClientFactory.createHttpClientWithDefaultConfig {
-        install(UserAgent) {
-            agent = "Primal-Android"
-        }
-    }
+    private val httpClient = HttpClientFactory.createHttpClientWithDefaultConfig()
 
     private val wellKnownApi: WellKnownApi by lazy {
         Ktorfit.Builder()
@@ -40,7 +35,7 @@ object AppConfigFactory {
     }
 
     private val persistence: DataStore<AppConfig> by lazy {
-        createAppConfigDataStorePersistence("app-config.json")
+        createAppConfigDataStorePersistence("app_config.json")
     }
 
     private val appConfigDataStore: AppConfigDataStore by lazy {

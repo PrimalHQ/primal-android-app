@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.config.AppConfigProvider
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
@@ -36,6 +35,7 @@ import net.primal.android.wallet.api.model.BalanceResponse
 import net.primal.android.wallet.api.model.LastUpdatedAtResponse
 import net.primal.android.wallet.api.model.WalletRequestBody
 import net.primal.android.wallet.domain.SubWallet
+import net.primal.core.config.AppConfigProvider
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.primal.PrimalSocketSubscription
