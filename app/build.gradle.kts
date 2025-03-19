@@ -52,6 +52,20 @@ fun extractSigningConfigProperties(storeName: String): SigningConfigProperties? 
     )
 }
 
+val appVersionCode = 221
+val appVersionName = "2.2.0"
+
+tasks.register("generateReleaseProperties") {
+    doLast {
+        val file = File("${project.rootDir}/release.properties")
+        file.writeText("version=$appVersionName")
+    }
+}
+
+tasks.named("preBuild").configure {
+    dependsOn("generateReleaseProperties")
+}
+
 android {
     namespace = "net.primal.android"
     compileSdk = 35
@@ -60,8 +74,8 @@ android {
         applicationId = "net.primal.android"
         minSdk = 26
         targetSdk = 35
-        versionCode = 221
-        versionName = "2.2.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -211,6 +225,7 @@ android {
 
 dependencies {
     implementation(project(":core:utils"))
+    implementation(project(":core:networking-primal"))
     implementation(project(":domain:nostr"))
     implementation(project(":domain:primal"))
     implementation(project(":domain:primal-wallet"))

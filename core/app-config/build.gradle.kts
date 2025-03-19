@@ -1,4 +1,3 @@
-import java.util.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
 plugins {
@@ -6,36 +5,10 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
     alias(libs.plugins.touchlab.skie)
+    alias(libs.plugins.ktorfit)
 }
 
-val buildConfigGenerator by tasks.registering(Sync::class) {
-    val releaseProperties = Properties().apply {
-        val file = rootProject.file("release.properties")
-        if (file.exists()) {
-            file.inputStream().use { load(it) }
-        }
-    }
-
-    from(
-        resources.text.fromString(
-            """
-            |package net.primal.core.utils
-            |
-            |object AndroidBuildConfig {
-            |  const val APP_VERSION = "${releaseProperties.getProperty("version", "unknown")}"
-            |}
-            |
-            """.trimMargin()
-        )
-    ) {
-        rename { "AndroidBuildConfig.kt" }
-        into("net/primal/core/utils")
-    }
-
-    into(layout.buildDirectory.dir("generated-src/kotlin/"))
-}
-
-private val xcfName = "PrimalCoreUtils"
+private val xcfName = "PrimalNetworking"
 
 kotlin {
     // Android target
@@ -43,6 +16,7 @@ kotlin {
         namespace = "net.primal"
         compileSdk = 35
         minSdk = 26
+        withHostTestBuilder {}
     }
 
     // JVM Target
@@ -62,33 +36,55 @@ kotlin {
     // Source set declarations (https://kotlinlang.org/docs/multiplatform-hierarchy.html)
     sourceSets {
         commonMain {
-            kotlin.srcDir(
-                buildConfigGenerator.map { it.destinationDir }
-            )
-
             dependencies {
+                implementation(project(":core:utils"))
+                implementation(project(":core:networking-http"))
+                implementation(project(":domain:primal"))
+
+
+                // Kotlin
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.kotlinx.serialization.json)
+
+                // Data Store
+                implementation(libs.datastore)
+
+                // Networking && Serialization
+                implementation(libs.okio)
+                implementation(libs.ktorfit.light)
+                implementation(libs.ktorfit.converters.response)
+                implementation(libs.ktorfit.converters.call)
+
+                // Logging
+                implementation(libs.napier)
+
+                // Swift interop
                 implementation(libs.skie.configuration.annotations)
             }
         }
 
         androidMain {
             dependencies {
+                // Kotlin
                 implementation(libs.kotlinx.coroutines.android)
+
+                // Networking
+                implementation(libs.ktor.client.okhttp)
             }
         }
 
         iosMain {
             dependencies {
-
+                // Networking
+                implementation(libs.ktor.client.darwin)
             }
         }
 
         val desktopMain by getting
         desktopMain.dependencies {
-
+            // Ktor
+            implementation(libs.ktor.client.cio)
         }
 
         commonTest {
@@ -97,6 +93,7 @@ kotlin {
                 implementation(libs.kotest.assertions.core)
                 implementation(libs.kotest.assertions.json)
                 implementation(libs.kotlinx.coroutines.test)
+//                implementation(libs.mockk)
             }
         }
     }
@@ -104,6 +101,8 @@ kotlin {
     // Opting in to the experimental @ObjCName annotation for native coroutines on iOS targets
     kotlin.sourceSets.all {
         languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
+        languageSettings.optIn("kotlin.uuid.ExperimentalUuidApi")
+        languageSettings.optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
     }
 }
 

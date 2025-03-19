@@ -12,7 +12,9 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/core" />
-            <option value="$PROJECT_DIR$/core/networking" />
+            <option value="$PROJECT_DIR$/core/app-config" />
+            <option value="$PROJECT_DIR$/core/networking-http" />
+            <option value="$PROJECT_DIR$/core/networking-primal" />
             <option value="$PROJECT_DIR$/core/utils" />
             <option value="$PROJECT_DIR$/domain" />
             <option value="$PROJECT_DIR$/domain/common" />
