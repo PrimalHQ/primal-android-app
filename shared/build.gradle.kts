@@ -42,7 +42,7 @@ kotlin {
             dependencies {
                 // Internal
                 implementation(project(":core:utils"))
-                implementation(project(":core:networking"))
+                implementation(project(":core:networking-primal"))
                 implementation(project(":domain:nostr"))
                 implementation(project(":domain:primal"))
 
