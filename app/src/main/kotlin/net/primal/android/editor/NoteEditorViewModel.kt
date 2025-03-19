@@ -64,9 +64,9 @@ import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.repository.RelayRepository
+import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.upload.UploadJob
-import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 class NoteEditorViewModel @AssistedInject constructor(

@@ -21,7 +21,7 @@ import net.primal.android.wallet.store.domain.SatsPurchaseQuote
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyContract.SideEffect
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyContract.UiEvent
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyContract.UiState
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

@@ -9,10 +9,10 @@ import net.primal.android.notifications.api.model.NotificationsRequestBody
 import net.primal.android.notifications.api.model.NotificationsResponse
 import net.primal.android.notifications.api.model.PubkeyRequestBody
 import net.primal.android.settings.api.model.AppSpecificDataRequest
+import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.networking.primal.PrimalApiClient
-import net.primal.networking.primal.PrimalCacheFilter
 
 class NotificationsApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
@@ -22,7 +22,7 @@ class NotificationsApiImpl @Inject constructor(
     override suspend fun getLastSeenTimestamp(userId: String): Instant? {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.GET_LAST_SEEN_NOTIFICATIONS,
+                primalVerb = PrimalVerb.GET_LAST_SEEN_NOTIFICATIONS.id,
                 optionsJson = NostrJson.encodeToString(PubkeyRequestBody(pubkey = userId)),
             ),
         )
@@ -42,7 +42,7 @@ class NotificationsApiImpl @Inject constructor(
     override suspend fun setLastSeenTimestamp(userId: String) {
         primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.SET_LAST_SEEN_NOTIFICATIONS,
+                primalVerb = PrimalVerb.SET_LAST_SEEN_NOTIFICATIONS.id,
                 optionsJson = NostrJson.encodeToString(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAuthorizationNostrEvent(
@@ -58,7 +58,7 @@ class NotificationsApiImpl @Inject constructor(
     override suspend fun getNotifications(body: NotificationsRequestBody): NotificationsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.GET_NOTIFICATIONS,
+                primalVerb = PrimalVerb.GET_NOTIFICATIONS.id,
                 optionsJson = NostrJson.encodeToString(body),
             ),
         )

@@ -22,7 +22,7 @@ import net.primal.android.settings.muted.list.MutedSettingsContract.UiState
 import net.primal.android.settings.muted.list.model.MutedUserUi
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

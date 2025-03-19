@@ -1,39 +1,34 @@
 package net.primal.core.networking.factory
 
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.websocket.WebSockets
 import net.primal.core.config.AppConfigFactory
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.ProxyPrimalApiClient
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.coroutines.DispatcherProviderFactory
 import net.primal.domain.PrimalServerType
+
+internal val defaultSocketsHttpClient by lazy {
+    HttpClientFactory.createHttpClientWithDefaultConfig {
+        install(WebSockets)
+    }
+}
 
 object PrimalApiClientFactory {
 
-    private val socketsHttpClient by lazy {
-        HttpClientFactory.createHttpClientWithDefaultConfig()
-    }
-
     private val clients: MutableMap<PrimalServerType, PrimalApiClient> = mutableMapOf()
 
-    fun getDefault(
-        dispatcherProvider: DispatcherProvider,
-        serverType: PrimalServerType,
-    ): PrimalApiClient {
+    fun getDefault(serverType: PrimalServerType): PrimalApiClient {
         return clients.getOrPut(serverType) {
-            create(
-                dispatcherProvider = dispatcherProvider,
-                serverType = serverType,
-            )
+            create(serverType = serverType)
         }
-}
+    }
 
-    fun create(
-        dispatcherProvider: DispatcherProvider,
-        serverType: PrimalServerType,
-    ): PrimalApiClient {
+    fun create(serverType: PrimalServerType): PrimalApiClient {
         return create(
-            dispatcherProvider = dispatcherProvider,
-            httpClient = socketsHttpClient,
+            dispatcherProvider = DispatcherProviderFactory.create(),
+            httpClient = defaultSocketsHttpClient,
             serverType = serverType,
         )
     }
@@ -47,8 +42,8 @@ object PrimalApiClientFactory {
             dispatcherProvider = dispatcherProvider,
             httpClient = httpClient,
             serverType = serverType,
-            appConfigProvider = AppConfigFactory.createAppConfigProvider(dispatcherProvider),
-            appConfigHandler = AppConfigFactory.createAppConfigHandler(dispatcherProvider),
+            appConfigProvider = AppConfigFactory.createAppConfigProvider(),
+            appConfigHandler = AppConfigFactory.createAppConfigHandler(),
         )
     }
 }

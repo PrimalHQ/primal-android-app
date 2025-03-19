@@ -18,7 +18,7 @@ import net.primal.android.user.domain.UserRelays
 import net.primal.android.user.domain.cleanWebSocketUrl
 import net.primal.android.user.domain.mapToRelayPO
 import net.primal.android.user.domain.toRelay
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber
 
 class RelayRepository @Inject constructor(

@@ -10,11 +10,11 @@ import net.primal.android.premium.manage.content.api.model.BroadcastingStatus
 import net.primal.android.premium.manage.content.api.model.ContentEventKindCount
 import net.primal.android.premium.manage.content.api.model.StartContentBroadcastRequest
 import net.primal.android.settings.api.model.AppSpecificDataRequest
+import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.networking.primal.PrimalCacheFilter
+import net.primal.core.networking.sockets.errors.WssException
 import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.networking.primal.PrimalApiClient
-import net.primal.networking.primal.PrimalCacheFilter
-import net.primal.networking.sockets.errors.WssException
 
 class BroadcastApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalCacheApiClient: PrimalApiClient,
@@ -24,7 +24,7 @@ class BroadcastApiImpl @Inject constructor(
     override suspend fun getContentStats(userId: String): Map<Int, Long> {
         val queryResult = primalCacheApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MEMBERSHIP_CONTENT_STATS,
+                primalVerb = PrimalVerb.MEMBERSHIP_CONTENT_STATS.id,
                 optionsJson = NostrJsonEncodeDefaults.encodeToString(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
@@ -44,7 +44,7 @@ class BroadcastApiImpl @Inject constructor(
     override suspend fun startContentRebroadcast(userId: String, kinds: List<Int>?) {
         primalCacheApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MEMBERSHIP_CONTENT_BROADCAST_START,
+                primalVerb = PrimalVerb.MEMBERSHIP_CONTENT_BROADCAST_START.id,
                 optionsJson = NostrJson.encodeToString(
                     StartContentBroadcastRequest(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
@@ -61,7 +61,7 @@ class BroadcastApiImpl @Inject constructor(
     override suspend fun cancelContentRebroadcast(userId: String) {
         primalCacheApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MEMBERSHIP_CONTENT_BROADCAST_CANCEL,
+                primalVerb = PrimalVerb.MEMBERSHIP_CONTENT_BROADCAST_CANCEL.id,
                 optionsJson = NostrJsonEncodeDefaults.encodeToString(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
@@ -77,7 +77,7 @@ class BroadcastApiImpl @Inject constructor(
     override suspend fun getContentRebroadcastStatus(userId: String): BroadcastingStatus {
         val queryResult = primalCacheApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MEMBERSHIP_CONTENT_BROADCAST_STATUS,
+                primalVerb = PrimalVerb.MEMBERSHIP_CONTENT_BROADCAST_STATUS.id,
                 optionsJson = NostrJsonEncodeDefaults.encodeToString(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(

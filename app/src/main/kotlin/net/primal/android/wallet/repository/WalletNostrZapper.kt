@@ -10,7 +10,7 @@ import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.zaps.NostrZapper
 import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapRequestData
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
 
 class WalletNostrZapper @Inject constructor(
     private val walletRepository: WalletRepository,

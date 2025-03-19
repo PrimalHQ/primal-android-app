@@ -102,5 +102,4 @@ internal class FeedRepositoryImpl(
     companion object {
         private const val PAGE_SIZE = 25
     }
-
 }

@@ -13,4 +13,3 @@ fun ProfileData.combinePremiumInfoIfLegend(profileData: ProfileData?): ProfileDa
     } else {
         this
     }
-

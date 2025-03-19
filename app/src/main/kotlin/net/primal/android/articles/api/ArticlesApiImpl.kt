@@ -10,10 +10,10 @@ import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.NostrJsonImplicitNulls
 import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.networking.di.PrimalCacheApiClient
+import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.networking.primal.PrimalApiClient
-import net.primal.networking.primal.PrimalCacheFilter
 
 class ArticlesApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
@@ -22,7 +22,7 @@ class ArticlesApiImpl @Inject constructor(
     override suspend fun getArticleDetails(body: ArticleDetailsRequestBody): ArticleResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.ARTICLE_THREAD_VIEW,
+                primalVerb = PrimalVerb.ARTICLE_THREAD_VIEW.id,
                 optionsJson = NostrJson.encodeToString(body),
             ),
         )
@@ -53,7 +53,7 @@ class ArticlesApiImpl @Inject constructor(
     override suspend fun getArticleFeed(body: ArticleFeedRequestBody): ArticleResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MEGA_FEED_DIRECTIVE,
+                primalVerb = PrimalVerb.MEGA_FEED_DIRECTIVE.id,
                 optionsJson = NostrJsonImplicitNulls.encodeToString(body),
             ),
         )
@@ -84,7 +84,7 @@ class ArticlesApiImpl @Inject constructor(
     override suspend fun getArticleHighlights(body: ArticleHighlightsRequestBody): ArticleHighlightsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.GET_HIGHLIGHTS,
+                primalVerb = PrimalVerb.GET_HIGHLIGHTS.id,
                 optionsJson = NostrJson.encodeToString(body),
             ),
         )

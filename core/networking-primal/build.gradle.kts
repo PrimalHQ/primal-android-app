@@ -48,18 +48,8 @@ kotlin {
                 implementation(libs.kotlinx.serialization.json)
 
                 // Networking && Serialization
-//                implementation(libs.ktor.client.core)
                 implementation(libs.ktor.client.websockets)
-//                implementation(libs.ktor.client.content.negotiation)
-//                implementation(libs.ktor.client.logging)
-//                implementation(libs.ktor.client.serialization.kotlinx.json)
-//                implementation(libs.kotlinx.serialization.json)
                 implementation(libs.okio)
-
-//                implementation(libs.ktorfit.light)
-//                implementation(libs.ktorfit.converters.response)
-//                implementation(libs.ktorfit.converters.call)
-//                implementation(libs.ktorfit.converters.flow)
 
                 // Logging
                 implementation(libs.napier)

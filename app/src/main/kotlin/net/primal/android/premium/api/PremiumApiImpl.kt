@@ -28,12 +28,12 @@ import net.primal.android.premium.api.model.ShowSupportUsResponse
 import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
 import net.primal.android.premium.domain.PremiumPurchaseOrder
 import net.primal.android.settings.api.model.AppSpecificDataRequest
+import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.networking.primal.PrimalCacheFilter
+import net.primal.core.networking.sockets.errors.WssException
 import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.networking.primal.PrimalApiClient
-import net.primal.networking.primal.PrimalCacheFilter
-import net.primal.networking.sockets.errors.WssException
 
 class PremiumApiImpl @Inject constructor(
     @PrimalWalletApiClient private val primalWalletApiClient: PrimalApiClient,
@@ -44,7 +44,7 @@ class PremiumApiImpl @Inject constructor(
     override suspend fun isPrimalNameAvailable(name: String): NameAvailableResponse {
         val queryResult = primalWalletApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET_MEMBERSHIP_NAME_AVAILABLE,
+                primalVerb = PrimalVerb.WALLET_MEMBERSHIP_NAME_AVAILABLE.id,
                 optionsJson = NostrJson.encodeToString(NameAvailableRequest(name = name)),
             ),
         )
@@ -57,7 +57,7 @@ class PremiumApiImpl @Inject constructor(
     override suspend fun changePrimalName(userId: String, name: String): NameAvailableResponse {
         val queryResult = primalWalletApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET_MEMBERSHIP_CHANGE_NAME,
+                primalVerb = PrimalVerb.WALLET_MEMBERSHIP_CHANGE_NAME.id,
                 optionsJson = NostrJsonEncodeDefaults.encodeToString(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
@@ -77,7 +77,7 @@ class PremiumApiImpl @Inject constructor(
     override suspend fun getPremiumMembershipStatus(userId: String): MembershipStatusResponse? {
         val queryResult = primalWalletApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET_MEMBERSHIP_STATUS,
+                primalVerb = PrimalVerb.WALLET_MEMBERSHIP_STATUS.id,
                 optionsJson = NostrJson.encodeToString(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAuthorizationNostrEvent(
@@ -96,7 +96,7 @@ class PremiumApiImpl @Inject constructor(
     override suspend fun purchaseMembership(userId: String, body: PurchaseMembershipRequest) {
         primalWalletApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET_PURCHASE_MEMBERSHIP,
+                primalVerb = PrimalVerb.WALLET_PURCHASE_MEMBERSHIP.id,
                 optionsJson = NostrJson.encodeToString(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
@@ -117,7 +117,7 @@ class PremiumApiImpl @Inject constructor(
     ): LegendPaymentInstructionsResponse {
         val result = primalWalletApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET_PURCHASE_MEMBERSHIP,
+                primalVerb = PrimalVerb.WALLET_PURCHASE_MEMBERSHIP.id,
                 optionsJson = NostrJson.encodeToString(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
@@ -145,7 +145,7 @@ class PremiumApiImpl @Inject constructor(
     override suspend fun getMembershipProducts() {
         primalWalletApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET_MEMBERSHIP_PRODUCTS,
+                primalVerb = PrimalVerb.WALLET_MEMBERSHIP_PRODUCTS.id,
                 optionsJson = NostrJson.encodeToString(MembershipProductsRequest(origin = "android")),
             ),
         )
@@ -176,7 +176,7 @@ class PremiumApiImpl @Inject constructor(
     override suspend fun cancelMembership(userId: String, body: CancelMembershipRequest) {
         primalWalletApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET_MEMBERSHIP_CANCEL,
+                primalVerb = PrimalVerb.WALLET_MEMBERSHIP_CANCEL.id,
                 optionsJson = NostrJson.encodeToString(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
@@ -190,7 +190,7 @@ class PremiumApiImpl @Inject constructor(
     }
 
     override suspend fun shouldShowSupportUs(): Boolean {
-        val result = primalCacheApiClient.query(message = PrimalCacheFilter(primalVerb = PrimalVerb.CLIENT_CONFIG))
+        val result = primalCacheApiClient.query(message = PrimalCacheFilter(primalVerb = PrimalVerb.CLIENT_CONFIG.id))
         val configEvent = result.findPrimalEvent(NostrEventKind.PrimalClientConfig)
         val response = NostrJson.decodeFromStringOrNull<ShowSupportUsResponse>(configEvent?.content)
         return response?.showSupportPrimal == true
@@ -199,7 +199,7 @@ class PremiumApiImpl @Inject constructor(
     override suspend fun getOrdersHistory(userId: String): List<PremiumPurchaseOrder> {
         val queryResult = primalWalletApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET_MEMBERSHIP_PURCHASE_HISTORY,
+                primalVerb = PrimalVerb.WALLET_MEMBERSHIP_PURCHASE_HISTORY.id,
                 optionsJson = NostrJsonEncodeDefaults.encodeToString(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
@@ -219,7 +219,7 @@ class PremiumApiImpl @Inject constructor(
     override suspend fun updateLegendProfile(userId: String, updateProfileRequest: UpdatePrimalLegendProfileRequest) {
         primalWalletApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.WALLET_MEMBERSHIP_LEGEND_CUSTOMIZATION,
+                primalVerb = PrimalVerb.WALLET_MEMBERSHIP_LEGEND_CUSTOMIZATION.id,
                 optionsJson = NostrJsonEncodeDefaults.encodeToString(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
@@ -238,7 +238,7 @@ class PremiumApiImpl @Inject constructor(
     ): LegendLeaderboardResponse {
         val queryResult = primalCacheApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MEMBERSHIP_LEGENDS_LEADERBOARD,
+                primalVerb = PrimalVerb.MEMBERSHIP_LEGENDS_LEADERBOARD.id,
                 optionsJson = NostrJsonEncodeDefaults.encodeToString(
                     LegendLeaderboardRequest(
                         orderBy = orderBy,
@@ -268,7 +268,7 @@ class PremiumApiImpl @Inject constructor(
     ): PremiumLeaderboardResponse {
         val queryResult = primalCacheApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MEMBERSHIP_PREMIUM_LEADERBOARD,
+                primalVerb = PrimalVerb.MEMBERSHIP_PREMIUM_LEADERBOARD.id,
                 optionsJson = NostrJsonImplicitNulls.encodeToString(
                     PremiumLeaderboardRequest(
                         orderBy = orderBy,
@@ -294,7 +294,7 @@ class PremiumApiImpl @Inject constructor(
     override suspend fun getRecoveryContactsList(userId: String): List<NostrEvent> {
         val queryResult = primalCacheApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MEMBERSHIP_RECOVERY_CONTACT_LISTS,
+                primalVerb = PrimalVerb.MEMBERSHIP_RECOVERY_CONTACT_LISTS.id,
                 optionsJson = NostrJsonEncodeDefaults.encodeToString(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(

@@ -26,7 +26,7 @@ import net.primal.android.wallet.transactions.send.prepare.SendPaymentContract.U
 import net.primal.android.wallet.transactions.send.prepare.SendPaymentContract.UiState
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
 import net.primal.android.wallet.utils.isLightningAddress
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

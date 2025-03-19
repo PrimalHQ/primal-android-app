@@ -24,13 +24,13 @@ import net.primal.android.premium.manage.content.model.ContentType
 import net.primal.android.premium.manage.content.repository.BroadcastRepository
 import net.primal.android.settings.api.model.AppSpecificDataRequest
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.networking.primal.PrimalCacheFilter
+import net.primal.core.networking.primal.PrimalSocketSubscription
+import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.networking.primal.PrimalApiClient
-import net.primal.networking.primal.PrimalCacheFilter
-import net.primal.networking.primal.PrimalSocketSubscription
-import net.primal.networking.primal.retryNetworkCall
-import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel
@@ -115,7 +115,7 @@ class PremiumContentBackupViewModel @Inject constructor(
             scope = viewModelScope,
             primalApiClient = primalCachingApiClient,
             cacheFilter = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MEMBERSHIP_MONITOR_CONTENT_BROADCAST_STATUS,
+                primalVerb = PrimalVerb.MEMBERSHIP_MONITOR_CONTENT_BROADCAST_STATUS.id,
                 optionsJson = NostrJson.encodeToString(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(

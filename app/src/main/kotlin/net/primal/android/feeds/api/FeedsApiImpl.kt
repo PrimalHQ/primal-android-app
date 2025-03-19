@@ -10,11 +10,11 @@ import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.nostr.model.primal.content.ContentAppSubSettings
 import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
 import net.primal.android.nostr.notary.NostrNotary
+import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.networking.primal.PrimalCacheFilter
+import net.primal.core.networking.sockets.errors.WssException
 import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.networking.primal.PrimalApiClient
-import net.primal.networking.primal.PrimalCacheFilter
-import net.primal.networking.sockets.errors.WssException
 
 @Singleton
 class FeedsApiImpl @Inject constructor(
@@ -25,7 +25,7 @@ class FeedsApiImpl @Inject constructor(
     override suspend fun getFeaturedFeeds(specKind: FeedSpecKind?, pubkey: String?): DvmFeedsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.GET_FEATURED_DVM_FEEDS,
+                primalVerb = PrimalVerb.GET_FEATURED_DVM_FEEDS.id,
                 optionsJson = NostrJson.encodeToString(
                     DvmFeedsRequestBody(
                         specKind = specKind?.id,
@@ -57,7 +57,7 @@ class FeedsApiImpl @Inject constructor(
         }
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.GET_DEFAULT_APP_SUB_SETTINGS,
+                primalVerb = PrimalVerb.GET_DEFAULT_APP_SUB_SETTINGS.id,
                 optionsJson = NostrJson.encodeToString(ContentAppSubSettings<String>(key = key)),
             ),
         )
@@ -83,7 +83,7 @@ class FeedsApiImpl @Inject constructor(
 
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.GET_APP_SUB_SETTINGS,
+                primalVerb = PrimalVerb.GET_APP_SUB_SETTINGS.id,
                 optionsJson = NostrJson.encodeToString(SubSettingsAuthorization(event = signedNostrEvent)),
             ),
         )
@@ -114,7 +114,7 @@ class FeedsApiImpl @Inject constructor(
 
         primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.SET_APP_SUB_SETTINGS,
+                primalVerb = PrimalVerb.SET_APP_SUB_SETTINGS.id,
                 optionsJson = NostrJson.encodeToString(SubSettingsAuthorization(event = signedNostrEvent)),
             ),
         )

@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.transformWhile
 import kotlinx.serialization.json.JsonObject
 import net.primal.core.networking.sockets.NostrIncomingMessage
-import net.primal.core.networking.sockets.NostrSocketClient
+import net.primal.core.networking.sockets.NostrSocketClientImpl
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.sockets.filterBySubscriptionId
@@ -26,7 +26,7 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 
 internal class BasePrimalApiClient(
     dispatcherProvider: DispatcherProvider,
-    private val socketClient: NostrSocketClient,
+    private val socketClient: NostrSocketClientImpl,
 )  {
 
     private val scope = CoroutineScope(dispatcherProvider.io())

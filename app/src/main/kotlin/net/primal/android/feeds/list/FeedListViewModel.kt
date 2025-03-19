@@ -29,7 +29,7 @@ import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = FeedListViewModel.Factory::class)

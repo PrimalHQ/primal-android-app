@@ -20,8 +20,8 @@ import net.primal.android.nostr.ext.mapNotNullAsArticleDataPO
 import net.primal.android.nostr.ext.orderByPagingIfNotNull
 import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
 import net.primal.android.notes.db.FeedPostRemoteKey
-import net.primal.networking.primal.retryNetworkCall
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.networking.utils.retryNetworkCall
 import timber.log.Timber
 
 @OptIn(ExperimentalPagingApi::class)

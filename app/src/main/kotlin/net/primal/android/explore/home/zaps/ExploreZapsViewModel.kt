@@ -18,7 +18,7 @@ import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

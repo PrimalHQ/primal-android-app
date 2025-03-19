@@ -36,12 +36,12 @@ import net.primal.android.wallet.api.model.BalanceResponse
 import net.primal.android.wallet.api.model.LastUpdatedAtResponse
 import net.primal.android.wallet.api.model.WalletRequestBody
 import net.primal.android.wallet.domain.SubWallet
+import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.networking.primal.PrimalCacheFilter
+import net.primal.core.networking.primal.PrimalSocketSubscription
 import net.primal.data.remote.PrimalVerb
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.networking.primal.PrimalApiClient
-import net.primal.networking.primal.PrimalCacheFilter
-import net.primal.networking.primal.PrimalSocketSubscription
 
 @Singleton
 class SubscriptionsManager @Inject constructor(
@@ -142,7 +142,7 @@ class SubscriptionsManager @Inject constructor(
             scope = scope,
             primalApiClient = cacheApiClient,
             cacheFilter = PrimalCacheFilter(
-                primalVerb = PrimalVerb.NEW_NOTIFICATIONS_COUNT,
+                primalVerb = PrimalVerb.NEW_NOTIFICATIONS_COUNT.id,
                 optionsJson = NostrJson.encodeToString(PubkeyRequestBody(pubkey = userId)),
             ),
             transformer = { primalEvent?.asNotificationSummary() },
@@ -157,7 +157,7 @@ class SubscriptionsManager @Inject constructor(
             scope = scope,
             primalApiClient = cacheApiClient,
             cacheFilter = PrimalCacheFilter(
-                primalVerb = PrimalVerb.NEW_DMS_COUNT,
+                primalVerb = PrimalVerb.NEW_DMS_COUNT.id,
                 optionsJson = NostrJson.encodeToString(PubkeyRequestBody(pubkey = userId)),
             ),
             transformer = { primalEvent?.asMessagesTotalCount() },
@@ -173,7 +173,7 @@ class SubscriptionsManager @Inject constructor(
                 scope = scope,
                 primalApiClient = walletApiClient,
                 cacheFilter = PrimalCacheFilter(
-                    primalVerb = PrimalVerb.WALLET_MONITOR,
+                    primalVerb = PrimalVerb.WALLET_MONITOR.id,
                     optionsJson = NostrJsonEncodeDefaults.encodeToString(
                         WalletRequestBody(
                             event = nostrNotary.signPrimalWalletOperationNostrEvent(

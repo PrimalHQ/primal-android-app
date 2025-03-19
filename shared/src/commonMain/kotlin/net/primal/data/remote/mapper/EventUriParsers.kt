@@ -18,30 +18,32 @@ fun List<PostData>.flatMapPostsAsEventUriPO(
     cdnResources: Map<String, CdnResource>,
     linkPreviews: Map<String, EventLinkPreviewData>,
     videoThumbnails: Map<String, String>,
-): List<EventUri> = flatMap { postData ->
-    postData.uris.map { uri -> EventIdUriPair(eventId = postData.postId, uri = uri) }
-}
-    .filterNot { it.uri.isNostrUri() }
-    .mapToEventUri(
-        cdnResources = cdnResources,
-        linkPreviews = linkPreviews,
-        videoThumbnails = videoThumbnails,
-    )
+): List<EventUri> =
+    flatMap { postData ->
+        postData.uris.map { uri -> EventIdUriPair(eventId = postData.postId, uri = uri) }
+    }
+        .filterNot { it.uri.isNostrUri() }
+        .mapToEventUri(
+            cdnResources = cdnResources,
+            linkPreviews = linkPreviews,
+            videoThumbnails = videoThumbnails,
+        )
 
-fun List<EventUri>.mapEventUriAsNoteLinkDO(): List<EventLink> = map { eventUri ->
-    EventLink(
-        eventId = eventUri.eventId,
-        position = eventUri.position,
-        url = eventUri.url,
-        type = eventUri.type,
-        mimeType = eventUri.mimeType,
-        variants = eventUri.variants,
-        title = eventUri.title,
-        description = eventUri.description,
-        thumbnail = eventUri.thumbnail,
-        authorAvatarUrl = eventUri.authorAvatarUrl,
-    )
-}
+fun List<EventUri>.mapEventUriAsNoteLinkDO(): List<EventLink> =
+    map { eventUri ->
+        EventLink(
+            eventId = eventUri.eventId,
+            position = eventUri.position,
+            url = eventUri.url,
+            type = eventUri.type,
+            mimeType = eventUri.mimeType,
+            variants = eventUri.variants,
+            title = eventUri.title,
+            description = eventUri.description,
+            thumbnail = eventUri.thumbnail,
+            authorAvatarUrl = eventUri.authorAvatarUrl,
+        )
+    }
 
 fun List<DirectMessageData>.flatMapMessagesAsEventUriPO() =
     flatMap { messageData ->

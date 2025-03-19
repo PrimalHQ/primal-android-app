@@ -12,7 +12,7 @@ fun ProfileData.usernameUiFriendly(): String = usernameUiFriendly(this.displayNa
 
 fun ProfileData.authorNameUiFriendly(): String = authorNameUiFriendly(this.displayName, this.handle, this.ownerId)
 
-//fun UserAccount.authorNameUiFriendly(): String =
+// fun UserAccount.authorNameUiFriendly(): String =
 //    authorNameUiFriendly(this.authorDisplayName, this.userDisplayName, this.pubkey)
 
 fun EventZap.usernameUiFriendly(): String =
@@ -35,14 +35,14 @@ fun ContentMetadata.authorNameUiFriendly(pubkey: String): String =
         pubkey,
     )
 
-//fun ProfileMetadata.usernameUiFriendly(userId: String): String =
+// fun ProfileMetadata.usernameUiFriendly(userId: String): String =
 //    usernameUiFriendly(
 //        displayName,
 //        username,
 //        userId,
 //    )
 //
-//fun ProfileMetadata.authorNameUiFriendly(userId: String): String =
+// fun ProfileMetadata.authorNameUiFriendly(userId: String): String =
 //    authorNameUiFriendly(
 //        displayName,
 //        username,

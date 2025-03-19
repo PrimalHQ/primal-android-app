@@ -21,8 +21,8 @@ import net.primal.android.settings.network.NetworkSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
-import net.primal.networking.primal.PrimalApiClient
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

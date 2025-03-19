@@ -62,25 +62,12 @@ kotlin {
                 implementation(libs.room.paging)
                 implementation(libs.jetpack.sqlite.framework)
 
-                // Data Store
-                implementation(libs.datastore)
-                implementation(libs.datastore.preferences)
-
                 // Paging
                 implementation(libs.paging.common)
 
-                // Networking && Serialization
-                implementation(libs.ktor.client.core)
-                implementation(libs.ktor.client.websockets)
-                implementation(libs.ktor.client.content.negotiation)
-                implementation(libs.ktor.client.logging)
-                implementation(libs.ktor.client.serialization.kotlinx.json)
+                // Serialization
                 implementation(libs.kotlinx.serialization.json)
-                implementation(libs.okio)
-                implementation(libs.ktorfit.light)
-                implementation(libs.ktorfit.converters.response)
-                implementation(libs.ktorfit.converters.call)
-                implementation(libs.ktorfit.converters.flow)
+                implementation(libs.kotlinx.io)
 
                 // Logging
                 implementation(libs.napier)
@@ -105,19 +92,13 @@ kotlin {
 
                 // Paging
                 implementation(libs.paging.runtime)
-
-                // Networking
-                implementation(libs.ktor.client.okhttp)
             }
         }
 
         iosMain {
             dependencies {
-                // Networking
-                implementation(libs.ktor.client.darwin)
-
                 // Paging
-                implementation(libs.cash.app.paging.runtime.uikit)
+                api(libs.cash.app.paging.runtime.uikit)
             }
         }
 

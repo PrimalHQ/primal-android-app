@@ -3,9 +3,7 @@ package net.primal.data.repository.mapper
 import net.primal.data.local.dao.events.EventUri
 import net.primal.domain.EventLink
 
-internal fun EventUri.asEventLinkDO(
-    forcePosition: Int? = null
-): EventLink {
+internal fun EventUri.asEventLinkDO(forcePosition: Int? = null): EventLink {
     return EventLink(
         eventId = this.eventId,
         position = forcePosition ?: this.position,

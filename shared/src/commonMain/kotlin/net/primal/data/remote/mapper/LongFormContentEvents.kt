@@ -16,7 +16,6 @@ import net.primal.domain.nostr.findFirstSummary
 import net.primal.domain.nostr.findFirstTitle
 import net.primal.domain.nostr.utils.parseHashtags
 
-
 fun List<NostrEvent>.mapNotNullAsArticleDataPO(
     wordsCountMap: Map<String, Int> = emptyMap(),
     cdnResources: Map<String, CdnResource> = emptyMap(),

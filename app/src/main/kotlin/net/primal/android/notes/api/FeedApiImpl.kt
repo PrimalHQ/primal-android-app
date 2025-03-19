@@ -8,10 +8,10 @@ import net.primal.android.notes.api.model.FeedBySpecRequestBody
 import net.primal.android.notes.api.model.FeedResponse
 import net.primal.android.notes.api.model.NotesRequestBody
 import net.primal.android.notes.api.model.ThreadRequestBody
+import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.networking.primal.PrimalApiClient
-import net.primal.networking.primal.PrimalCacheFilter
 
 class FeedApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
@@ -20,7 +20,7 @@ class FeedApiImpl @Inject constructor(
     override suspend fun getFeedBySpec(body: FeedBySpecRequestBody): FeedResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MEGA_FEED_DIRECTIVE,
+                primalVerb = PrimalVerb.MEGA_FEED_DIRECTIVE.id,
                 optionsJson = NostrJson.encodeToString(body),
             ),
         )
@@ -52,7 +52,7 @@ class FeedApiImpl @Inject constructor(
     override suspend fun getThread(body: ThreadRequestBody): FeedResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.THREAD_VIEW,
+                primalVerb = PrimalVerb.THREAD_VIEW.id,
                 optionsJson = NostrJson.encodeToString(body),
             ),
         )
@@ -84,7 +84,7 @@ class FeedApiImpl @Inject constructor(
     override suspend fun getNotes(noteIds: Set<String>, extendedResponse: Boolean): FeedResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.EVENTS,
+                primalVerb = PrimalVerb.EVENTS.id,
                 optionsJson = NostrJson.encodeToString(
                     NotesRequestBody(noteIds = noteIds.toList(), extendedResponse = true),
                 ),

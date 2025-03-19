@@ -1,5 +1,7 @@
 package net.primal.data.remote.api.feed
 
+import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.utils.decodeFromStringOrNull
 import net.primal.data.remote.PrimalVerb
 import net.primal.data.remote.api.feed.model.FeedBySpecRequestBody
@@ -8,8 +10,6 @@ import net.primal.data.remote.api.feed.model.NotesRequestBody
 import net.primal.data.remote.api.feed.model.ThreadRequestBody
 import net.primal.data.serialization.NostrJson
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.networking.primal.PrimalApiClient
-import net.primal.networking.primal.PrimalCacheFilter
 
 internal class FeedApiImpl(
     private val primalApiClient: PrimalApiClient,
@@ -18,7 +18,7 @@ internal class FeedApiImpl(
     override suspend fun getFeedBySpec(body: FeedBySpecRequestBody): FeedResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MEGA_FEED_DIRECTIVE,
+                primalVerb = PrimalVerb.MEGA_FEED_DIRECTIVE.id,
                 optionsJson = NostrJson.encodeToString(body),
             ),
         )
@@ -50,7 +50,7 @@ internal class FeedApiImpl(
     override suspend fun getThread(body: ThreadRequestBody): FeedResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.THREAD_VIEW,
+                primalVerb = PrimalVerb.THREAD_VIEW.id,
                 optionsJson = NostrJson.encodeToString(body),
             ),
         )
@@ -82,7 +82,7 @@ internal class FeedApiImpl(
     override suspend fun getNotes(noteIds: Set<String>, extendedResponse: Boolean): FeedResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.EVENTS,
+                primalVerb = PrimalVerb.EVENTS.id,
                 optionsJson = NostrJson.encodeToString(
                     NotesRequestBody(noteIds = noteIds.toList(), extendedResponse = true),
                 ),

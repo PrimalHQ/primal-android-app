@@ -31,7 +31,7 @@ import net.primal.android.wallet.utils.parseBitcoinPaymentInstructions
 import net.primal.android.wallet.utils.parseLightningPaymentInstructions
 import net.primal.android.wallet.utils.parseSatsToUsd
 import net.primal.android.wallet.utils.parseUsdToSats
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel
