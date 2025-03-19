@@ -63,6 +63,6 @@ fun PrimalEvent.takeContentAsPrimalUserFollowersCountsOrNull(): Map<String, Int>
     return NostrJson.decodeFromString(this.content)
 }
 
-//fun PrimalEvent.takeContentAsPrimalUserFollowStats(): Map<String, NewUserFollowStats> {
+// fun PrimalEvent.takeContentAsPrimalUserFollowStats(): Map<String, NewUserFollowStats> {
 //    return NostrJson.decodeFromString(this.content)
-//}
+// }

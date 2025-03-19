@@ -1,10 +1,9 @@
-package net.primal.networking.sockets
+package net.primal.core.networking.sockets
 
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.webSocket
-import io.ktor.client.request.url
 import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
 import io.ktor.websocket.WebSocketSession
@@ -22,7 +21,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonObject
-import net.primal.PrimalLib
 import net.primal.core.utils.coroutines.DispatcherProvider
 import okio.Buffer
 import okio.GzipSink
@@ -61,26 +59,20 @@ internal class NostrSocketClientImpl(
             }
         }
 
-    private fun openWebSocketConnection(url: String) = scope.launch {
-        try {
-            httpClient.webSocket(
-                request = {
-                    url(url)
-                    PrimalLib.userAgent?.let {
-                        headers.append("User-Agent", it)
-                    }
-                },
-            ) {
-                webSocket = this
-                onSocketConnectionOpened?.invoke(url)
-                receiveSocketMessages()
+    private fun openWebSocketConnection(url: String) =
+        scope.launch {
+            try {
+                httpClient.webSocket(urlString = url) {
+                    webSocket = this
+                    onSocketConnectionOpened?.invoke(url)
+                    receiveSocketMessages()
+                }
+            } catch (error: Exception) {
+                Napier.w("NostrSocketClient::openWebSocketConnection($socketUrl) failed.", error)
+                this@NostrSocketClientImpl.webSocket = null
+                onSocketConnectionClosed?.invoke(socketUrl, error)
             }
-        } catch (error: Exception) {
-            Napier.w("NostrSocketClient::openWebSocketConnection($socketUrl) failed.", error)
-            this@NostrSocketClientImpl.webSocket = null
-            onSocketConnectionClosed?.invoke(socketUrl, error)
         }
-    }
 
     private suspend fun WebSocketSession.receiveSocketMessages() {
         try {
@@ -200,5 +192,4 @@ internal class NostrSocketClientImpl(
             .replace("http://", "ws://", ignoreCase = true)
             .let { if (it.endsWith("/")) it.dropLast(1) else it }
     }
-
 }

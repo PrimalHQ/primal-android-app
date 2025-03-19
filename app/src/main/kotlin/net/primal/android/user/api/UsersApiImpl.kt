@@ -15,11 +15,11 @@ import net.primal.android.user.api.model.UserProfilesResponse
 import net.primal.android.user.api.model.UserRequestBody
 import net.primal.android.user.api.model.UsersRelaysResponse
 import net.primal.android.user.api.model.UsersRequestBody
+import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.networking.primal.PrimalCacheFilter
+import net.primal.core.networking.sockets.errors.WssException
 import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.networking.primal.PrimalApiClient
-import net.primal.networking.primal.PrimalCacheFilter
-import net.primal.networking.sockets.errors.WssException
 
 class UsersApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
@@ -28,7 +28,7 @@ class UsersApiImpl @Inject constructor(
     override suspend fun getUserProfile(userId: String): UserProfileResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.USER_PROFILE,
+                primalVerb = PrimalVerb.USER_PROFILE.id,
                 optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = userId)),
             ),
         )
@@ -51,7 +51,7 @@ class UsersApiImpl @Inject constructor(
     ): UserProfilesResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.USER_PROFILE_FOLLOWED_BY,
+                primalVerb = PrimalVerb.USER_PROFILE_FOLLOWED_BY.id,
                 optionsJson = NostrJson.encodeToString(
                     UserProfileFollowedByRequestBody(
                         profileId = profileId,
@@ -74,7 +74,7 @@ class UsersApiImpl @Inject constructor(
     override suspend fun getUserFollowList(userId: String): UserContactsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.FOLLOW_LIST,
+                primalVerb = PrimalVerb.FOLLOW_LIST.id,
                 optionsJson = NostrJson.encodeToString(
                     FollowListRequestBody(pubkey = userId, extendedResponse = false),
                 ),
@@ -95,7 +95,7 @@ class UsersApiImpl @Inject constructor(
     override suspend fun getUserProfilesMetadata(userIds: Set<String>): UserProfilesResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.USER_INFOS,
+                primalVerb = PrimalVerb.USER_INFOS.id,
                 optionsJson = NostrJson.encodeToString(
                     UserProfilesRequestBody(userIds = userIds),
                 ),
@@ -115,7 +115,7 @@ class UsersApiImpl @Inject constructor(
     override suspend fun getUserFollowing(userId: String): UsersResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.FOLLOW_LIST,
+                primalVerb = PrimalVerb.FOLLOW_LIST.id,
                 optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = userId)),
             ),
         )
@@ -135,7 +135,7 @@ class UsersApiImpl @Inject constructor(
     override suspend fun getUserFollowers(userId: String): UsersResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.USER_FOLLOWERS,
+                primalVerb = PrimalVerb.USER_FOLLOWERS.id,
                 optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = userId)),
             ),
         )
@@ -155,7 +155,7 @@ class UsersApiImpl @Inject constructor(
     override suspend fun getUserRelays(userIds: List<String>): UsersRelaysResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.USER_RELAYS_2,
+                primalVerb = PrimalVerb.USER_RELAYS_2.id,
                 optionsJson = NostrJson.encodeToString(UsersRequestBody(pubkeys = userIds)),
             ),
         )
@@ -167,7 +167,7 @@ class UsersApiImpl @Inject constructor(
 
     override suspend fun getDefaultRelays(): List<String> {
         val queryResult = primalApiClient.query(
-            message = PrimalCacheFilter(primalVerb = PrimalVerb.DEFAULT_RELAYS),
+            message = PrimalCacheFilter(primalVerb = PrimalVerb.DEFAULT_RELAYS.id),
         )
 
         val list = queryResult.findPrimalEvent(NostrEventKind.PrimalDefaultRelaysList)
@@ -180,7 +180,7 @@ class UsersApiImpl @Inject constructor(
     override suspend fun isUserFollowing(userId: String, targetUserId: String): Boolean {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.IS_USER_FOLLOWING,
+                primalVerb = PrimalVerb.IS_USER_FOLLOWING.id,
                 optionsJson = NostrJson.encodeToString(
                     IsUserFollowingRequestBody(userId = userId, targetUserId = targetUserId),
                 ),
@@ -196,7 +196,7 @@ class UsersApiImpl @Inject constructor(
     override suspend fun getUserBookmarksList(userId: String): BookmarksResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.GET_BOOKMARKS_LIST,
+                primalVerb = PrimalVerb.GET_BOOKMARKS_LIST.id,
                 optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = userId)),
             ),
         )

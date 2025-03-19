@@ -52,8 +52,8 @@ fun List<NostrEvent>.toJsonArray(): JsonArray {
     }
 }
 
-//fun List<Relay>.toNostrRelayMap(): Map<String, RelayPermission> {
+// fun List<Relay>.toNostrRelayMap(): Map<String, RelayPermission> {
 //    val map = mutableMapOf<String, RelayPermission>()
 //    this.forEach { map[it.url] = RelayPermission(read = it.read, write = it.write) }
 //    return map
-//}
+// }

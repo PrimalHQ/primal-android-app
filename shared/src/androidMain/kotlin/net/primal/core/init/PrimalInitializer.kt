@@ -9,14 +9,10 @@ import org.koin.android.ext.koin.androidContext
 object PrimalInitializer {
     fun init(
         context: Context,
-        appName: String? = null,
-        userAgent: String? = null,
         showLog: Boolean = false,
     ) {
         PrimalLib.apply {
             initKoin { androidContext(context) }
-            setAppName(appName)
-            setUserAgent(userAgent)
         }
 
         if (showLog) {

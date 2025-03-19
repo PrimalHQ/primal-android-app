@@ -26,7 +26,7 @@ import net.primal.android.wallet.db.WalletTransaction
 import net.primal.android.wallet.domain.SubWallet
 import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @ExperimentalPagingApi

@@ -1,6 +1,5 @@
 package net.primal.data.remote.api.upload
 
-
 import net.primal.domain.nostr.NostrEvent
 
 internal interface UploadApi {

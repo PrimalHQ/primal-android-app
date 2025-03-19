@@ -30,8 +30,8 @@ import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SatsPurchase
 import net.primal.android.wallet.transactions.list.TransactionListItemDataUi
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
-import net.primal.networking.sockets.errors.NostrNoticeException
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.NostrNoticeException
+import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

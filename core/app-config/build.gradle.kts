@@ -5,10 +5,11 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
     alias(libs.plugins.touchlab.skie)
+    alias(libs.plugins.ksp)
     alias(libs.plugins.ktorfit)
 }
 
-private val xcfName = "PrimalNetworking"
+private val xcfName = "PrimalAppConfig"
 
 kotlin {
     // Android target
@@ -40,7 +41,6 @@ kotlin {
                 implementation(project(":core:utils"))
                 implementation(project(":core:networking-http"))
                 implementation(project(":domain:primal"))
-
 
                 // Kotlin
                 implementation(libs.kotlinx.coroutines.core)

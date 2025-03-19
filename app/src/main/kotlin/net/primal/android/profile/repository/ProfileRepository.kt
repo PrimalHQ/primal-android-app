@@ -35,8 +35,8 @@ import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.asUserAccountFromFollowListEvent
 import net.primal.android.user.repository.UserRepository
+import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.networking.primal.retryNetworkCall
 
 class ProfileRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,

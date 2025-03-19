@@ -4,10 +4,11 @@ import androidx.datastore.core.DataStore
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.plugins.UserAgent
 import net.primal.core.config.api.WellKnownApi
+import net.primal.core.config.api.createWellKnownApi
 import net.primal.core.config.store.AppConfigDataStore
 import net.primal.core.config.store.createAppConfigDataStorePersistence
 import net.primal.core.networking.factory.HttpClientFactory
-import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.coroutines.DispatcherProviderFactory
 import net.primal.domain.AppConfig
 
 private const val CONFIG_CACHE_API = "wss://cache1.primal.net/v1"
@@ -22,54 +23,44 @@ internal val DEFAULT_APP_CONFIG = AppConfig(
 
 object AppConfigFactory {
 
+    private val dispatcherProvider by lazy { DispatcherProviderFactory.create() }
+
     private val httpClient = HttpClientFactory.createHttpClientWithDefaultConfig {
         install(UserAgent) {
             agent = "Primal-Android"
         }
     }
 
-    private val ktorfit = Ktorfit.Builder()
-        .baseUrl("https://primal.net/")
-        .httpClient(client = httpClient)
-        .build()
-
-
-    // TODO Fix this once build is success
     private val wellKnownApi: WellKnownApi by lazy {
-        throw NotImplementedError()
-//        ktorfit.createWellKnownApi()
+        Ktorfit.Builder()
+            .baseUrl("https://primal.net/")
+            .httpClient(client = httpClient)
+            .build()
+            .createWellKnownApi()
     }
 
     private val persistence: DataStore<AppConfig> by lazy {
         createAppConfigDataStorePersistence("app-config.json")
     }
 
-    private var appConfigDataStore: AppConfigDataStore? = null
-
-    private fun getOrCreateAppConfigDataStore(
-        dispatcherProvider: DispatcherProvider,
-    ): AppConfigDataStore {
-        return appConfigDataStore ?: AppConfigDataStore(
+    private val appConfigDataStore: AppConfigDataStore by lazy {
+        AppConfigDataStore(
             dispatcherProvider = dispatcherProvider,
             persistence = persistence,
-        ).also { appConfigDataStore = it }
+        )
     }
 
-    fun createAppConfigProvider(
-        dispatcherProvider: DispatcherProvider,
-    ): AppConfigProvider {
+    fun createAppConfigProvider(): AppConfigProvider {
         return DynamicAppConfigProvider(
-            appConfigStore = getOrCreateAppConfigDataStore(dispatcherProvider),
+            appConfigStore = appConfigDataStore,
             dispatcherProvider = dispatcherProvider,
         )
     }
 
-    fun createAppConfigHandler(
-        dispatcherProvider: DispatcherProvider,
-    ): AppConfigHandler {
+    fun createAppConfigHandler(): AppConfigHandler {
         return AppConfigHandlerImpl(
             dispatcherProvider = dispatcherProvider,
-            appConfigStore = getOrCreateAppConfigDataStore(dispatcherProvider),
+            appConfigStore = appConfigDataStore,
             wellKnownApi = wellKnownApi,
         )
     }

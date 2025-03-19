@@ -2,19 +2,19 @@ package net.primal.data.remote.uploader
 
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.channels.Channel
+import net.primal.core.networking.factory.PrimalApiClientFactory
+import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.networking.primal.PrimalCacheFilter
+import net.primal.core.networking.primal.PrimalQueryResult
+import net.primal.core.networking.sockets.errors.WssException
 import net.primal.data.remote.PrimalVerb
 import net.primal.data.remote.api.upload.UploadApi
 import net.primal.data.remote.api.upload.model.UploadChunkRequest
 import net.primal.data.repository.upload.UnsuccessfulFileUpload
 import net.primal.data.serialization.NostrJsonEncodeDefaults
+import net.primal.domain.PrimalServerType
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.networking.primal.PrimalApiClient
-import net.primal.networking.primal.PrimalApiClientFactory
-import net.primal.networking.primal.PrimalCacheFilter
-import net.primal.networking.primal.PrimalQueryResult
-import net.primal.networking.primal.PrimalServerType
-import net.primal.networking.sockets.errors.WssException
 
 internal class UploadApiConnectionsPool : UploadApi {
 
@@ -27,7 +27,9 @@ internal class UploadApiConnectionsPool : UploadApi {
     init {
         repeat(times = POOL_SIZE) {
             channel.trySend(
-                PrimalApiClientFactory.create(serverType = PrimalServerType.Upload),
+                PrimalApiClientFactory.create(
+                    serverType = PrimalServerType.Upload,
+                ),
             )
         }
     }
@@ -68,7 +70,7 @@ internal class UploadApiConnectionsPool : UploadApi {
         uploadOrThrow {
             this.query(
                 message = PrimalCacheFilter(
-                    primalVerb = PrimalVerb.UPLOAD_CHUNK,
+                    primalVerb = PrimalVerb.UPLOAD_CHUNK.id,
                     optionsJson = NostrJsonEncodeDefaults.encodeToString(
                         UploadChunkRequest(event = eventBlock()),
                     ),
@@ -80,7 +82,7 @@ internal class UploadApiConnectionsPool : UploadApi {
         uploadOrThrow {
             this.query(
                 message = PrimalCacheFilter(
-                    primalVerb = PrimalVerb.UPLOAD_COMPLETE,
+                    primalVerb = PrimalVerb.UPLOAD_COMPLETE.id,
                     optionsJson = NostrJsonEncodeDefaults.encodeToString(
                         UploadChunkRequest(event = eventBlock()),
                     ),

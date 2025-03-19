@@ -9,7 +9,7 @@ import net.primal.android.networking.di.PrimalWalletApiClient
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.premium.api.PremiumApi
 import net.primal.android.premium.api.PremiumApiImpl
-import net.primal.networking.primal.PrimalApiClient
+import net.primal.core.networking.primal.PrimalApiClient
 
 @Module
 @InstallIn(SingletonComponent::class)

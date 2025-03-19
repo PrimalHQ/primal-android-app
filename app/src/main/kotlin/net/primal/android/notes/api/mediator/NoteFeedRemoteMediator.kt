@@ -27,9 +27,9 @@ import net.primal.android.notes.db.sql.ChronologicalFeedWithRepostsQueryBuilder
 import net.primal.android.notes.db.sql.ExploreFeedQueryBuilder
 import net.primal.android.notes.db.sql.FeedQueryBuilder
 import net.primal.android.notes.repository.FeedProcessor
-import net.primal.networking.primal.retryNetworkCall
-import net.primal.networking.sockets.errors.NostrNoticeException
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.NostrNoticeException
+import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.networking.utils.retryNetworkCall
 import timber.log.Timber
 
 @ExperimentalPagingApi

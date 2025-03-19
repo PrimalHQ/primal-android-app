@@ -7,7 +7,7 @@ import dagger.hilt.components.SingletonComponent
 import net.primal.android.articles.api.ArticlesApi
 import net.primal.android.articles.api.ArticlesApiImpl
 import net.primal.android.networking.di.PrimalCacheApiClient
-import net.primal.networking.primal.PrimalApiClient
+import net.primal.core.networking.primal.PrimalApiClient
 
 @Module
 @InstallIn(SingletonComponent::class)

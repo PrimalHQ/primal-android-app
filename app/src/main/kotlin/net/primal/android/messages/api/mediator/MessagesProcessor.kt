@@ -24,9 +24,9 @@ import net.primal.android.notes.api.FeedApi
 import net.primal.android.notes.repository.persistToDatabaseAsTransaction
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.credentials.CredentialsStore
+import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
-import net.primal.networking.sockets.errors.WssException
 import timber.log.Timber
 
 class MessagesProcessor @Inject constructor(

@@ -17,7 +17,7 @@ import net.primal.android.notifications.api.NotificationsApi
 import net.primal.android.notifications.api.model.NotificationsRequestBody
 import net.primal.android.notifications.db.Notification
 import net.primal.android.notifications.db.NotificationData
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @ExperimentalPagingApi

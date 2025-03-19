@@ -1,6 +1,6 @@
 package net.primal.android.networking.relays
 
-import net.primal.networking.sockets.NostrIncomingMessage
+import net.primal.core.networking.sockets.NostrIncomingMessage
 
 data class NostrPublishResult(
     val result: NostrIncomingMessage? = null,

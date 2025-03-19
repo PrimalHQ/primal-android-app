@@ -18,8 +18,8 @@ import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
-import net.primal.networking.primal.retryNetworkCall
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.networking.utils.retryNetworkCall
 import timber.log.Timber
 
 @HiltViewModel

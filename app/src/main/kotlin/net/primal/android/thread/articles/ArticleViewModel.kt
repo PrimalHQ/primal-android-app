@@ -20,7 +20,7 @@ import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.thread.articles.ArticleContract.UiEvent
 import net.primal.android.thread.articles.ArticleContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

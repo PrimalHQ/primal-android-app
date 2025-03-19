@@ -33,7 +33,7 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.InAppPurchaseException
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

@@ -24,8 +24,8 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.user.updater.UserDataUpdater
 import net.primal.android.user.updater.UserDataUpdaterFactory
-import net.primal.networking.primal.retryNetworkCall
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.networking.utils.retryNetworkCall
 import timber.log.Timber
 
 @HiltViewModel

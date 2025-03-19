@@ -21,20 +21,20 @@ import net.primal.android.networking.relays.broadcast.BroadcastEventResponse
 import net.primal.android.networking.relays.broadcast.BroadcastRequestBody
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.user.domain.Relay
+import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.networking.primal.PrimalCacheFilter
+import net.primal.core.networking.sockets.NostrIncomingMessage
+import net.primal.core.networking.sockets.NostrSocketClient
+import net.primal.core.networking.sockets.NostrSocketClientFactory
+import net.primal.core.networking.sockets.SocketConnectionClosedCallback
+import net.primal.core.networking.sockets.SocketConnectionOpenedCallback
+import net.primal.core.networking.sockets.errors.NostrNoticeException
+import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.filterByEventId
+import net.primal.core.networking.sockets.parseIncomingMessage
 import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.networking.primal.PrimalApiClient
-import net.primal.networking.primal.PrimalCacheFilter
-import net.primal.networking.sockets.NostrIncomingMessage
-import net.primal.networking.sockets.NostrSocketClient
-import net.primal.networking.sockets.NostrSocketClientFactory
-import net.primal.networking.sockets.SocketConnectionClosedCallback
-import net.primal.networking.sockets.SocketConnectionOpenedCallback
-import net.primal.networking.sockets.errors.NostrNoticeException
-import net.primal.networking.sockets.errors.WssException
-import net.primal.networking.sockets.filterByEventId
-import net.primal.networking.sockets.parseIncomingMessage
 import timber.log.Timber
 
 class RelayPool(
@@ -128,7 +128,7 @@ class RelayPool(
         val result = try {
             val queryResult = primalApiClient.query(
                 message = PrimalCacheFilter(
-                    primalVerb = PrimalVerb.BROADCAST_EVENTS,
+                    primalVerb = PrimalVerb.BROADCAST_EVENTS.id,
                     optionsJson = NostrJson.encodeToString(
                         BroadcastRequestBody(
                             events = listOf(nostrEvent),

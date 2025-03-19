@@ -19,10 +19,10 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.api.model.UserContactsResponse
 import net.primal.android.user.api.model.UserProfileResponse
+import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.networking.sockets.errors.WssException
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule

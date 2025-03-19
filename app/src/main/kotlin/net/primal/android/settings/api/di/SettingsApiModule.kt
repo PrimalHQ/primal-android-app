@@ -8,7 +8,7 @@ import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.settings.api.SettingsApi
 import net.primal.android.settings.api.SettingsApiImpl
-import net.primal.networking.primal.PrimalApiClient
+import net.primal.core.networking.primal.PrimalApiClient
 
 @Module
 @InstallIn(SingletonComponent::class)

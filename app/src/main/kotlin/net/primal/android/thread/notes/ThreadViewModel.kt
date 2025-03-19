@@ -28,7 +28,7 @@ import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.thread.notes.ThreadContract.UiEvent
 import net.primal.android.thread.notes.ThreadContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber
 
 @HiltViewModel

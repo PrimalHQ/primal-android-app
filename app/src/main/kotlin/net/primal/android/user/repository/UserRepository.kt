@@ -34,7 +34,7 @@ import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.domain.WalletSettings
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
 
 class UserRepository @Inject constructor(
     private val database: PrimalDatabase,

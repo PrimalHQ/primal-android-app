@@ -15,7 +15,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.Credential
 import net.primal.android.user.repository.UserRepository
-import net.primal.networking.sockets.errors.WssException
+import net.primal.core.networking.sockets.errors.WssException
 import org.junit.Rule
 import org.junit.Test
 

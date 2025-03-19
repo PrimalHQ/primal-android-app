@@ -16,9 +16,9 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.mapToRelayDO
+import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.networking.sockets.NostrSocketClientFactory
 import net.primal.domain.nostr.NostrEvent
-import net.primal.networking.primal.PrimalApiClient
-import net.primal.networking.sockets.NostrSocketClientFactory
 import timber.log.Timber
 
 @Singleton
