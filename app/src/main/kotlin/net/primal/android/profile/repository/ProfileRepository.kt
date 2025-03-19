@@ -6,7 +6,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
-import net.primal.android.config.api.WellKnownApi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
@@ -28,6 +27,7 @@ import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.nostr.publish.NostrPublisher
+import net.primal.android.profile.api.ProfileWellKnownApi
 import net.primal.android.profile.db.ProfileData
 import net.primal.android.profile.db.ProfileInteraction
 import net.primal.android.profile.report.ReportType
@@ -42,7 +42,7 @@ class ProfileRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
     private val database: PrimalDatabase,
     private val usersApi: UsersApi,
-    private val wellKnownApi: WellKnownApi,
+    private val wellKnownApi: ProfileWellKnownApi,
     private val userRepository: UserRepository,
     private val userAccountFetcher: UserAccountFetcher,
     private val nostrPublisher: NostrPublisher,

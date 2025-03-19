@@ -1,4 +1,4 @@
-package net.primal.android.config
+package net.primal.core.config
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import net.primal.android.config.domain.DEFAULT_APP_CONFIG
 
 class FakeAppConfigProvider(
     private val startDelay: Long? = null,

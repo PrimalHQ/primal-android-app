@@ -9,6 +9,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.ElementsIntoSet
 import net.primal.android.core.crash.PrimalCrashReporter
+import net.primal.core.config.AppConfigFactory
+import net.primal.core.config.AppConfigHandler
+import net.primal.core.config.AppConfigProvider
 import okhttp3.OkHttpClient
 import timber.log.Timber
 
@@ -29,4 +32,10 @@ object CoreModule {
         PrimalCrashReporter(
             okHttpClient = okHttpClient,
         )
+
+    @Provides
+    fun appConfigHandler(): AppConfigHandler = AppConfigFactory.createAppConfigHandler()
+
+    @Provides
+    fun appConfigProvider(): AppConfigProvider = AppConfigFactory.createAppConfigProvider()
 }

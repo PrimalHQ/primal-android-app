@@ -1,8 +1,8 @@
-package net.primal.android.config.api
+package net.primal.android.profile.api
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class WellKnownProfileResponse(
+data class ProfileWellKnownProfileResponse(
     val names: Map<String, String>,
 )

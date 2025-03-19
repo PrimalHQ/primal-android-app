@@ -6,8 +6,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import net.primal.android.config.AppConfigHandler
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.core.config.AppConfigHandler
 
 @HiltViewModel
 class SplashViewModel @Inject constructor(
