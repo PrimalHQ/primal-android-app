@@ -13,7 +13,6 @@ import net.primal.android.settings.api.model.AppSpecificDataRequest
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEventKind
 
 class BroadcastApiImpl @Inject constructor(
@@ -24,7 +23,7 @@ class BroadcastApiImpl @Inject constructor(
     override suspend fun getContentStats(userId: String): Map<Int, Long> {
         val queryResult = primalCacheApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MEMBERSHIP_CONTENT_STATS.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.MEMBERSHIP_CONTENT_STATS.id,
                 optionsJson = NostrJsonEncodeDefaults.encodeToString(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
@@ -44,7 +43,7 @@ class BroadcastApiImpl @Inject constructor(
     override suspend fun startContentRebroadcast(userId: String, kinds: List<Int>?) {
         primalCacheApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MEMBERSHIP_CONTENT_BROADCAST_START.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.MEMBERSHIP_CONTENT_BROADCAST_START.id,
                 optionsJson = NostrJson.encodeToString(
                     StartContentBroadcastRequest(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
@@ -61,7 +60,7 @@ class BroadcastApiImpl @Inject constructor(
     override suspend fun cancelContentRebroadcast(userId: String) {
         primalCacheApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MEMBERSHIP_CONTENT_BROADCAST_CANCEL.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.MEMBERSHIP_CONTENT_BROADCAST_CANCEL.id,
                 optionsJson = NostrJsonEncodeDefaults.encodeToString(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
@@ -77,7 +76,7 @@ class BroadcastApiImpl @Inject constructor(
     override suspend fun getContentRebroadcastStatus(userId: String): BroadcastingStatus {
         val queryResult = primalCacheApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MEMBERSHIP_CONTENT_BROADCAST_STATUS.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.MEMBERSHIP_CONTENT_BROADCAST_STATUS.id,
                 optionsJson = NostrJsonEncodeDefaults.encodeToString(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(

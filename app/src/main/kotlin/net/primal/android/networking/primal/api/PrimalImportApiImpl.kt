@@ -8,7 +8,6 @@ import net.primal.android.networking.primal.api.model.ImportRequestBody
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.sockets.NostrIncomingMessage
-import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEvent
 
 class PrimalImportApiImpl @Inject constructor(
@@ -18,7 +17,7 @@ class PrimalImportApiImpl @Inject constructor(
     override suspend fun importEvents(events: List<NostrEvent>): Boolean {
         val result = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.IMPORT_EVENTS.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.IMPORT_EVENTS.id,
                 optionsJson = NostrJson.encodeToString(
                     ImportRequestBody(nostrEvents = events.toJsonArray()),
                 ),

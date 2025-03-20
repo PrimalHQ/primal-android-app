@@ -3,7 +3,7 @@ package net.primal.android.nostr.ext
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
+import net.primal.data.remote.model.ContentPrimalPaging
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 import timber.log.Timber

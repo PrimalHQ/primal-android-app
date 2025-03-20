@@ -18,10 +18,10 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.nostr.ext.mapNotNullAsArticleDataPO
 import net.primal.android.nostr.ext.orderByPagingIfNotNull
-import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
 import net.primal.android.notes.db.FeedPostRemoteKey
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.utils.retryNetworkCall
+import net.primal.data.remote.model.ContentPrimalPaging
 import timber.log.Timber
 
 @OptIn(ExperimentalPagingApi::class)
@@ -162,14 +162,16 @@ class ArticleFeedMediator(
     }
 
     private fun List<ArticleFeedCrossRef>.processRemoteKeys(pagingEvent: ContentPrimalPaging?) {
-        if (pagingEvent?.sinceId != null && pagingEvent.untilId != null) {
+        val sinceId = pagingEvent?.sinceId
+        val untilId = pagingEvent?.untilId
+        if (sinceId != null && untilId != null) {
             val remoteKeys = this.map {
                 FeedPostRemoteKey(
                     ownerId = userId,
                     eventId = it.articleATag,
                     directive = feedSpec,
-                    sinceId = pagingEvent.sinceId,
-                    untilId = pagingEvent.untilId,
+                    sinceId = sinceId,
+                    untilId = untilId,
                     cachedAt = Instant.now().epochSecond,
                 )
             }
