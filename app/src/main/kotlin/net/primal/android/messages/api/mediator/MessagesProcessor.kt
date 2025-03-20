@@ -20,11 +20,11 @@ import net.primal.android.nostr.ext.mapNotNullAsPostDataPO
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
-import net.primal.android.notes.api.FeedApi
 import net.primal.android.notes.repository.persistToDatabaseAsTransaction
 import net.primal.android.user.api.UsersApi
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.data.remote.api.feed.FeedApi
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 import timber.log.Timber

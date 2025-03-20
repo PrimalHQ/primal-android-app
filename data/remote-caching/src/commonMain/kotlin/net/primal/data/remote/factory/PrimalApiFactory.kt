@@ -1,15 +1,13 @@
 package net.primal.data.remote.factory
 
+import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.data.remote.api.feed.FeedApi
+import net.primal.data.remote.api.feed.FeedApiImpl
+
 object PrimalApiFactory {
 
-//    fun createFeedsApi(): FeedApi = PrimalLib.getKoin().get()
+    fun createFeedsApi(primalApiClient: PrimalApiClient): FeedApi = FeedApiImpl(primalApiClient)
 
-//    factory<FeedApi> {
-//        FeedApiImpl(
-//            primalApiClient = PrimalApiClientFactory.create(PrimalServerType.Caching),
-//        )
-//    }
-//
 //    factory<UploadApi> {
 //        UploadApiSingleConnection(
 //            primalUploadClient = PrimalApiClientFactory.create(PrimalServerType.Upload),

@@ -3,10 +3,10 @@ package net.primal.android.notes.repository
 import androidx.room.withTransaction
 import java.time.Instant
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.nostr.model.primal.content.ContentPrimalPaging
-import net.primal.android.notes.api.model.FeedResponse
 import net.primal.android.notes.db.FeedPostDataCrossRef
 import net.primal.android.notes.db.FeedPostRemoteKey
+import net.primal.data.remote.api.feed.model.FeedResponse
+import net.primal.data.remote.model.ContentPrimalPaging
 import net.primal.domain.nostr.NostrEvent
 
 class FeedProcessor(
@@ -34,15 +34,17 @@ class FeedProcessor(
     }
 
     private suspend fun List<NostrEvent>.processRemoteKeys(userId: String, pagingEvent: ContentPrimalPaging?) {
-        if (pagingEvent?.sinceId != null && pagingEvent.untilId != null) {
+        val sinceId = pagingEvent?.sinceId
+        val untilId = pagingEvent?.untilId
+        if (sinceId != null && untilId != null) {
             database.withTransaction {
                 val remoteKeys = this.map {
                     FeedPostRemoteKey(
                         ownerId = userId,
                         eventId = it.id,
                         directive = feedSpec,
-                        sinceId = pagingEvent.sinceId,
-                        untilId = pagingEvent.untilId,
+                        sinceId = sinceId,
+                        untilId = untilId,
                         cachedAt = Instant.now().epochSecond,
                     )
                 }

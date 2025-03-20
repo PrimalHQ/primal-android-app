@@ -26,9 +26,9 @@ import net.primal.android.nostr.ext.mapReferencedEventsAsHighlightDataPO
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
-import net.primal.android.notes.api.model.FeedResponse
 import net.primal.android.thread.db.ArticleCommentCrossRef
 import net.primal.android.thread.db.NoteConversationCrossRef
+import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.domain.nostr.NostrEvent
 
 suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database: PrimalDatabase) {

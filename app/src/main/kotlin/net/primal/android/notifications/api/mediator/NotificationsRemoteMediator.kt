@@ -11,13 +11,13 @@ import kotlinx.coroutines.withContext
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.nostr.ext.mapNotNullAsNotificationPO
 import net.primal.android.nostr.ext.mapNotNullAsProfileStatsPO
-import net.primal.android.notes.api.model.FeedResponse
 import net.primal.android.notes.repository.persistToDatabaseAsTransaction
 import net.primal.android.notifications.api.NotificationsApi
 import net.primal.android.notifications.api.model.NotificationsRequestBody
 import net.primal.android.notifications.db.Notification
 import net.primal.android.notifications.db.NotificationData
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.data.remote.api.feed.model.FeedResponse
 import timber.log.Timber
 
 @ExperimentalPagingApi

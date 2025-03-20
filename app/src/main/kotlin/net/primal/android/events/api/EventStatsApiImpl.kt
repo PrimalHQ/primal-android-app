@@ -10,7 +10,6 @@ import net.primal.android.events.api.model.EventZapsResponse
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
-import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEventKind
 
 class EventStatsApiImpl @Inject constructor(
@@ -20,7 +19,7 @@ class EventStatsApiImpl @Inject constructor(
     override suspend fun getEventZaps(body: EventZapsRequestBody): EventZapsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.EVENT_ZAPS.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.EVENT_ZAPS.id,
                 optionsJson = NostrJson.encodeToString(body),
             ),
         )
@@ -43,7 +42,7 @@ class EventStatsApiImpl @Inject constructor(
     override suspend fun getEventActions(body: EventActionsRequestBody): EventActionsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.EVENT_ACTIONS.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.EVENT_ACTIONS.id,
                 optionsJson = NostrJson.encodeToString(body),
             ),
         )

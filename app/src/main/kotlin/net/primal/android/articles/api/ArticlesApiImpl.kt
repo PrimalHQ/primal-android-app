@@ -12,7 +12,6 @@ import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
-import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEventKind
 
 class ArticlesApiImpl @Inject constructor(
@@ -22,7 +21,7 @@ class ArticlesApiImpl @Inject constructor(
     override suspend fun getArticleDetails(body: ArticleDetailsRequestBody): ArticleResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.ARTICLE_THREAD_VIEW.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.ARTICLE_THREAD_VIEW.id,
                 optionsJson = NostrJson.encodeToString(body),
             ),
         )
@@ -53,7 +52,7 @@ class ArticlesApiImpl @Inject constructor(
     override suspend fun getArticleFeed(body: ArticleFeedRequestBody): ArticleResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MEGA_FEED_DIRECTIVE.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.MEGA_FEED_DIRECTIVE.id,
                 optionsJson = NostrJsonImplicitNulls.encodeToString(body),
             ),
         )
@@ -84,7 +83,7 @@ class ArticlesApiImpl @Inject constructor(
     override suspend fun getArticleHighlights(body: ArticleHighlightsRequestBody): ArticleHighlightsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.GET_HIGHLIGHTS.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.GET_HIGHLIGHTS.id,
                 optionsJson = NostrJson.encodeToString(body),
             ),
         )

@@ -4,7 +4,6 @@ import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
-import net.primal.data.remote.PrimalVerb
 import net.primal.data.remote.api.feed.model.FeedBySpecRequestBody
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.remote.api.feed.model.NotesRequestBody
@@ -18,7 +17,7 @@ internal class FeedApiImpl(
     override suspend fun getFeedBySpec(body: FeedBySpecRequestBody): FeedResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MEGA_FEED_DIRECTIVE.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.MEGA_FEED_DIRECTIVE.id,
                 optionsJson = body.encodeToJsonString(),
             ),
         )
@@ -48,13 +47,13 @@ internal class FeedApiImpl(
     override suspend fun getThread(body: ThreadRequestBody): FeedResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.THREAD_VIEW.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.THREAD_VIEW.id,
                 optionsJson = body.encodeToJsonString(),
             ),
         )
 
         return FeedResponse(
-            paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging)?.content?.decodeFromJsonStringOrNull(),
+            paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging)?.content.decodeFromJsonStringOrNull(),
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
             articles = queryResult.filterNostrEvents(NostrEventKind.LongFormContent),
@@ -78,7 +77,7 @@ internal class FeedApiImpl(
     override suspend fun getNotes(noteIds: Set<String>, extendedResponse: Boolean): FeedResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.EVENTS.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.EVENTS.id,
                 optionsJson = NotesRequestBody(
                     noteIds = noteIds.toList(),
                     extendedResponse = true,
