@@ -3,7 +3,6 @@ package net.primal.domain.common.cryptography
 import fr.acinq.bitcoin.Bech32
 import fr.acinq.secp256k1.Hex
 
-
 fun String.assureValidNsec() = if (startsWith("nsec")) this else this.hexToNsecHrp()
 
 fun String.hexToNoteHrp() =
@@ -28,7 +27,7 @@ fun String.hexToNsecHrp() =
     )
 
 // TODO Check where this belongs
-//fun String.urlToLnUrlHrp() =
+// fun String.urlToLnUrlHrp() =
 //    Bech32.encodeBytes(
 //        hrp = "lnurl",
 //        data = this.toByteArray(),
@@ -50,7 +49,7 @@ fun String.bechToBytesOrThrow(hrp: String? = null): ByteArray {
 }
 
 // TODO Check if this function is needed in the shared library
-//fun String.extractKeyPairFromPrivateKeyOrThrow(): Pair<String, String> {
+// fun String.extractKeyPairFromPrivateKeyOrThrow(): Pair<String, String> {
 //    return try {
 //        val nsec = this.assureValidNsec()
 //        val decoded = Bech32.decodeBytes(nsec)
@@ -63,6 +62,6 @@ fun String.bechToBytesOrThrow(hrp: String? = null): ByteArray {
 //        Timber.w(error)
 //        throw InvalidNostrPrivateKeyException()
 //    }
-//}
+// }
 
-//class InvalidNostrPrivateKeyException : RuntimeException()
+// class InvalidNostrPrivateKeyException : RuntimeException()

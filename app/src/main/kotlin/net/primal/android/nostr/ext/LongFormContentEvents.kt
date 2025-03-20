@@ -3,9 +3,9 @@ package net.primal.android.nostr.ext
 import net.primal.android.articles.db.ArticleData
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.core.utils.parseUris
-import net.primal.android.events.domain.CdnImage
-import net.primal.android.events.domain.CdnResource
 import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.domain.CdnImage
+import net.primal.domain.CdnResource
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind

@@ -10,7 +10,7 @@ interface NostrSocketClient {
     suspend fun ensureSocketConnection()
     suspend fun sendAUTH(signedEvent: JsonObject)
     suspend fun sendCLOSE(subscriptionId: String)
-    suspend fun sendCOUNT(data: JsonObject) : String
+    suspend fun sendCOUNT(data: JsonObject): String
     suspend fun sendEVENT(signedEvent: JsonObject)
     suspend fun sendREQ(subscriptionId: String, data: JsonObject)
 }

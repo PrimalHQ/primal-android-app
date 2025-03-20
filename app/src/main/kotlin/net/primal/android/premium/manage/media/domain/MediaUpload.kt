@@ -1,6 +1,6 @@
 package net.primal.android.premium.manage.media.domain
 
-import net.primal.android.events.domain.CdnResource
+import net.primal.domain.CdnResource
 
 data class MediaUpload(
     val url: String,

@@ -1,7 +1,7 @@
 package net.primal.android.events.gallery
 
 import net.primal.android.core.compose.attachment.model.EventUriUi
-import net.primal.android.events.domain.EventUriType
+import net.primal.domain.EventUriType
 
 interface EventMediaGalleryContract {
     data class UiState(

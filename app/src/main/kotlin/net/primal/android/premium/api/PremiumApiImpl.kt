@@ -189,7 +189,9 @@ class PremiumApiImpl @Inject constructor(
     }
 
     override suspend fun shouldShowSupportUs(): Boolean {
-        val result = primalCacheApiClient.query(message = PrimalCacheFilter(primalVerb = net.primal.data.remote.PrimalVerb.CLIENT_CONFIG.id))
+        val result = primalCacheApiClient.query(
+            message = PrimalCacheFilter(primalVerb = net.primal.data.remote.PrimalVerb.CLIENT_CONFIG.id),
+        )
         val configEvent = result.findPrimalEvent(NostrEventKind.PrimalClientConfig)
         val response = CommonJson.decodeFromStringOrNull<ShowSupportUsResponse>(configEvent?.content)
         return response?.showSupportPrimal == true

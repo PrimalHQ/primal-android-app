@@ -6,9 +6,9 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.events.db.EventUri
-import net.primal.android.events.domain.EventUriType
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
+import net.primal.domain.EventUriType
 import net.primal.domain.upload.UploadResult
 
 class EventUriRepository @Inject constructor(

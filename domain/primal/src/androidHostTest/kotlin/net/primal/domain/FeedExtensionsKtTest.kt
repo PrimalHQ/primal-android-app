@@ -1,4 +1,4 @@
-package net.primal.android.feeds.domain
+package net.primal.domain
 
 import io.kotest.matchers.shouldBe
 import org.junit.Test

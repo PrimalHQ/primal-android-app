@@ -1,8 +1,8 @@
 package net.primal.android.feeds.repository
 
 import net.primal.android.feeds.db.Feed
-import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
+import net.primal.domain.FeedSpecKind
 
 fun ContentArticleFeedData.asFeedPO(ownerId: String, specKind: FeedSpecKind): Feed {
     return Feed(

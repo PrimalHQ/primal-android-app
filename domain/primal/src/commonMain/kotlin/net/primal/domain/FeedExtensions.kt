@@ -18,7 +18,7 @@ private fun String?.isValidProfileId(): Boolean {
     }
 }
 
-private fun String.extractPubkeyFromFeedSpec(prefix: String? = null, suffix: String? = null): String? {
+fun String.extractPubkeyFromFeedSpec(prefix: String? = null, suffix: String? = null): String? {
     val beforeProfileId = if (prefix != null) "$prefix,\"pubkey\":\"" else "\"pubkey\":\""
     val afterProfileId = if (suffix != null) "\"$suffix" else "\""
     return runCatching {
@@ -29,7 +29,7 @@ private fun String.extractPubkeyFromFeedSpec(prefix: String? = null, suffix: Str
     }.getOrNull()
 }
 
-private fun String.isPubkeyFeedSpec(prefix: String? = null, suffix: String? = null): Boolean {
+fun String.isPubkeyFeedSpec(prefix: String? = null, suffix: String? = null): Boolean {
     val beforeProfileId = if (prefix != null) "$prefix,\"pubkey\":\"" else "\"pubkey\":\""
     val afterProfileId = if (suffix != null) "\"$suffix" else "\""
     val profileId = this.extractPubkeyFromFeedSpec(prefix = prefix, suffix = suffix)
@@ -98,64 +98,6 @@ fun String.resolveFeedSpecKind(): FeedSpecKind? {
         else -> null
     }
 }
-
-//@Composable
-//fun String.resolveDefaultTitle(profileName: String? = null): String =
-//    runCatching {
-//        val topic = extractTopicFromFeedSpec()?.substringAfter("#")
-//        val advancedQuery = extractAdvancedSearchQuery()
-//        val simpleQuery = extractSimpleSearchQuery()
-//        val pubkey = extractPubkeyFromFeedSpec()
-//        when {
-//            topic != null -> {
-//                stringResource(R.string.explore_feed_topic_feed_title, topic)
-//            }
-//
-//            isAdvancedSearchFeedSpec() && advancedQuery != null -> {
-//                stringResource(R.string.explore_feed_advanced_search_feed_title)
-//            }
-//
-//            isSimpleSearchFeedSpec() && simpleQuery != null -> {
-//                stringResource(R.string.explore_feed_simple_search_feed_title, simpleQuery)
-//            }
-//
-//            pubkey != null -> {
-//                val name = profileName ?: pubkey.hexToNpubHrp().ellipsizeMiddle(size = 8)
-//                stringResource(R.string.explore_feed_user_feed_title, name)
-//            }
-//
-//            else -> ""
-//        }
-//    }.getOrDefault(defaultValue = "")
-//
-//@Composable
-//fun String.resolveDefaultDescription(): String =
-//    runCatching {
-//        val topic = extractTopicFromFeedSpec()?.substringAfter("#")
-//        return when {
-//            topic != null -> if (isNotesFeedSpec()) {
-//                stringResource(R.string.explore_feed_topic_notes_feed_description, topic)
-//            } else if (isReadsFeedSpec()) {
-//                stringResource(R.string.explore_feed_topic_reads_feed_description, topic)
-//            } else {
-//                stringResource(R.string.explore_feed_topic_feed_description, topic)
-//            }
-//
-//            isSearchFeedSpec() -> {
-//                stringResource(R.string.explore_feed_search_feed_description)
-//            }
-//
-//            isPubkeyFeedSpec() -> if (isNotesFeedSpec()) {
-//                stringResource(R.string.explore_feed_user_notes_feed_description)
-//            } else if (isReadsFeedSpec()) {
-//                stringResource(R.string.explore_feed_user_reads_feed_description)
-//            } else {
-//                stringResource(R.string.explore_feed_user_feed_description)
-//            }
-//
-//            else -> ""
-//        }
-//    }.getOrDefault(defaultValue = "")
 
 fun String.isNotesFeedSpec() = this.contains("\"kind\":\"notes\"") || this.contains("kind:1")
 

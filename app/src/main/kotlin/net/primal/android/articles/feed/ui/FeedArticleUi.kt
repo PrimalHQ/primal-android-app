@@ -4,13 +4,13 @@ import java.time.Instant
 import net.primal.android.articles.db.Article
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.events.domain.CdnImage
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
+import net.primal.domain.CdnImage
 import net.primal.domain.nostr.NostrEventKind
 
 data class FeedArticleUi(

@@ -3,12 +3,12 @@ package net.primal.android.events.ext
 import net.primal.android.articles.db.ArticleData
 import net.primal.android.core.utils.detectMimeType
 import net.primal.android.events.db.EventUri
-import net.primal.android.events.domain.CdnResource
-import net.primal.android.events.domain.EventLinkPreviewData
-import net.primal.android.events.domain.EventUriType
 import net.primal.android.messages.db.DirectMessageData
 import net.primal.android.nostr.ext.isNostrUri
 import net.primal.android.notes.db.PostData
+import net.primal.domain.CdnResource
+import net.primal.domain.EventLinkPreviewData
+import net.primal.domain.EventUriType
 
 private data class EventLink(
     val eventId: String,

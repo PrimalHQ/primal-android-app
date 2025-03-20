@@ -1,11 +1,11 @@
 package net.primal.android.core.compose.profile.model
 
 import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.events.domain.CdnImage
 import net.primal.android.explore.domain.UserProfileSearchItem
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.profile.db.ProfileData
+import net.primal.domain.CdnImage
 
 data class UserProfileItemUi(
     val profileId: String,

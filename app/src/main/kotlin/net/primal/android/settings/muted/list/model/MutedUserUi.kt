@@ -1,7 +1,7 @@
 package net.primal.android.settings.muted.list.model
 
-import net.primal.android.events.domain.CdnImage
 import net.primal.android.premium.legend.domain.LegendaryCustomization
+import net.primal.domain.CdnImage
 
 data class MutedUserUi(
     val userId: String,

@@ -1,7 +1,7 @@
 package net.primal.domain.nostr
 
-//import java.nio.ByteBuffer
-//import java.nio.ByteOrder
+// import java.nio.ByteBuffer
+// import java.nio.ByteOrder
 import net.primal.domain.common.cryptography.bechToBytesOrThrow
 
 // TODO Complete Nip19TLV. Port java.nio to Kotlin native

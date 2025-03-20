@@ -23,9 +23,6 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.utils.isValidHex
 import net.primal.android.crypto.bech32ToHexOrThrow
-import net.primal.android.feeds.domain.FEED_KIND_USER
-import net.primal.android.feeds.domain.FeedSpecKind
-import net.primal.android.feeds.domain.buildLatestNotesUserFeedSpec
 import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.navigation.primalName
 import net.primal.android.navigation.profileId
@@ -46,6 +43,9 @@ import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.FEED_KIND_USER
+import net.primal.domain.FeedSpecKind
+import net.primal.domain.buildLatestNotesUserFeedSpec
 import timber.log.Timber
 
 @HiltViewModel

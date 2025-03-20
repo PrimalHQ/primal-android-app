@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.feeds.domain.supportsNoteReposts
 import net.primal.android.notes.api.mediator.NoteFeedRemoteMediator
 import net.primal.android.notes.db.FeedPost
 import net.primal.android.notes.db.sql.ChronologicalFeedWithRepostsQueryBuilder
@@ -20,6 +19,7 @@ import net.primal.data.remote.api.feed.FeedApi
 import net.primal.data.remote.api.feed.model.FeedBySpecRequestBody
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.remote.api.feed.model.ThreadRequestBody
+import net.primal.domain.supportsNoteReposts
 
 class FeedRepository @Inject constructor(
     private val feedApi: FeedApi,

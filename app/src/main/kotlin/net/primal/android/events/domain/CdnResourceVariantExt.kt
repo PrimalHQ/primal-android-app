@@ -2,6 +2,7 @@ package net.primal.android.events.domain
 
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import net.primal.domain.CdnResourceVariant
 
 fun List<CdnResourceVariant>?.findNearestOrNull(maxWidthPx: Int): CdnResourceVariant? {
     return this?.sortedBy { it.width }?.find { it.width >= maxWidthPx }

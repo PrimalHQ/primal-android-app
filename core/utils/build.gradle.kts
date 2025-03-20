@@ -25,8 +25,8 @@ val buildConfigGenerator by tasks.registering(Sync::class) {
             |  const val APP_VERSION = "${releaseProperties.getProperty("version", "unknown")}"
             |}
             |
-            """.trimMargin()
-        )
+            """.trimMargin(),
+        ),
     ) {
         rename { "AndroidBuildConfig.kt" }
         into("net/primal/core/utils")
@@ -63,7 +63,7 @@ kotlin {
     sourceSets {
         commonMain {
             kotlin.srcDir(
-                buildConfigGenerator.map { it.destinationDir }
+                buildConfigGenerator.map { it.destinationDir },
             )
 
             dependencies {
@@ -82,13 +82,11 @@ kotlin {
 
         iosMain {
             dependencies {
-
             }
         }
 
         val desktopMain by getting
         desktopMain.dependencies {
-
         }
 
         commonTest {

@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.core.errors.UiError
 import net.primal.android.events.repository.EventRepository
-import net.primal.android.feeds.domain.DvmFeed
 import net.primal.android.feeds.dvm.DvmFeedListItemContract.UiEvent
 import net.primal.android.feeds.dvm.DvmFeedListItemContract.UiState
 import net.primal.android.networking.relays.errors.MissingRelaysException
@@ -24,6 +23,7 @@ import net.primal.android.wallet.zaps.InvalidZapRequestException
 import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
+import net.primal.domain.DvmFeed
 import net.primal.domain.nostr.NostrEventKind
 import timber.log.Timber
 
@@ -98,7 +98,8 @@ class DvmFeedListItemViewModel @Inject constructor(
 
     private fun onZapClick(zapAction: UiEvent.OnZapClick) =
         viewModelScope.launch {
-            if (zapAction.dvmFeed.data.dvmLnUrlDecoded == null) {
+            val dvmLnUrlDecoded = zapAction.dvmFeed.data.dvmLnUrlDecoded
+            if (dvmLnUrlDecoded == null) {
                 setState { copy(error = UiError.MissingLightningAddress(IllegalStateException("Missing ln url"))) }
                 return@launch
             }
@@ -113,7 +114,7 @@ class DvmFeedListItemViewModel @Inject constructor(
                         identifier = zapAction.dvmFeed.data.dvmId,
                         eventId = zapAction.dvmFeed.data.eventId,
                         eventAuthorId = zapAction.dvmFeed.data.dvmPubkey,
-                        eventAuthorLnUrlDecoded = zapAction.dvmFeed.data.dvmLnUrlDecoded,
+                        eventAuthorLnUrlDecoded = dvmLnUrlDecoded,
                     ),
                 )
             } catch (error: ZapFailureException) {

@@ -99,5 +99,4 @@ internal class ProxyPrimalApiClient(
     override suspend fun closeSubscription(subscriptionId: String): Boolean {
         return primalClient.closeSubscription(subscriptionId = subscriptionId)
     }
-
 }

@@ -4,8 +4,8 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
-import net.primal.android.events.domain.CdnResourceVariant
-import net.primal.android.events.domain.EventUriType
+import net.primal.domain.CdnResourceVariant
+import net.primal.domain.EventUriType
 
 @Entity(indices = [Index(value = ["eventId", "url"], unique = true)])
 @Serializable

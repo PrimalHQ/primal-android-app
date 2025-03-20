@@ -14,7 +14,6 @@ import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.asProfileDataPO
-import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.profile.domain.ProfileMetadata
@@ -35,6 +34,7 @@ import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.data.remote.api.users.UsersApi
+import net.primal.domain.nostr.ContentMetadata
 
 class UserRepository @Inject constructor(
     private val database: PrimalDatabase,

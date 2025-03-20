@@ -47,7 +47,6 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.ext.openUriSafely
-import net.primal.android.events.domain.CdnImage
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
@@ -67,6 +66,7 @@ import net.primal.android.profile.report.ReportUserDialog
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.zaps.canZap
+import net.primal.domain.CdnImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

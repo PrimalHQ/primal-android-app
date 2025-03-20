@@ -6,12 +6,12 @@ import net.primal.android.core.compose.attachment.model.asEventUriUiModel
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.events.db.EventUri
 import net.primal.android.events.db.EventUriNostr
-import net.primal.android.events.domain.CdnImage
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.profile.domain.PrimalLegendProfile
+import net.primal.domain.CdnImage
 
 @Serializable
 data class ReferencedNote(
