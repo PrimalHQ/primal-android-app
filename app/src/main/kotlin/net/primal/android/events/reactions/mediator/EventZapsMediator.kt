@@ -7,10 +7,10 @@ import androidx.paging.RemoteMediator
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.events.api.EventStatsApi
-import net.primal.android.events.api.model.EventZapsRequestBody
 import net.primal.android.events.db.EventZap
 import net.primal.android.events.repository.persistToDatabaseAsTransaction
+import net.primal.data.remote.api.events.EventStatsApi
+import net.primal.data.remote.api.events.model.EventZapsRequestBody
 
 @ExperimentalPagingApi
 class EventZapsMediator(
