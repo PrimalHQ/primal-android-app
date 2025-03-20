@@ -12,7 +12,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import net.primal.core.networking.mappers.asNostrEventOrNull
 import net.primal.core.networking.mappers.asPrimalEventOrNull
 import net.primal.core.networking.serialization.SocketsJson
-import net.primal.core.utils.decodeFromStringOrNull
+import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
