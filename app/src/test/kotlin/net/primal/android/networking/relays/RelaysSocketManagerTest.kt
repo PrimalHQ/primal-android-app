@@ -15,7 +15,7 @@ import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.mapToRelayPO
-import net.primal.networking.primal.PrimalApiClient
+import net.primal.core.networking.primal.PrimalApiClient
 import org.junit.Rule
 import org.junit.Test
 
