@@ -16,7 +16,7 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.nostr.publish.NostrPublisher
-import net.primal.android.user.api.UsersApi
+import net.primal.data.remote.api.users.UsersApi
 import net.primal.domain.nostr.NostrEventKind
 
 class BookmarksRepository @Inject constructor(

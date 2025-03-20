@@ -9,7 +9,6 @@ import kotlinx.serialization.json.JsonArray
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.explore.api.model.UsersResponse
 import net.primal.android.explore.domain.UserProfileSearchItem
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.asEventIdTag
@@ -27,22 +26,23 @@ import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.nostr.publish.NostrPublisher
-import net.primal.android.profile.api.ProfileWellKnownApi
 import net.primal.android.profile.db.ProfileData
 import net.primal.android.profile.db.ProfileInteraction
 import net.primal.android.profile.report.ReportType
 import net.primal.android.user.accounts.UserAccountFetcher
-import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.asUserAccountFromFollowListEvent
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.utils.retryNetworkCall
+import net.primal.data.remote.api.explore.model.UsersResponse
+import net.primal.data.remote.api.users.UserWellKnownApi
+import net.primal.data.remote.api.users.UsersApi
 import net.primal.domain.nostr.NostrEventKind
 
 class ProfileRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
     private val database: PrimalDatabase,
     private val usersApi: UsersApi,
-    private val wellKnownApi: ProfileWellKnownApi,
+    private val wellKnownApi: UserWellKnownApi,
     private val userRepository: UserRepository,
     private val userAccountFetcher: UserAccountFetcher,
     private val nostrPublisher: NostrPublisher,
