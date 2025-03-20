@@ -1,7 +1,6 @@
 package net.primal.android.nostr.publish
 
 import javax.inject.Inject
-import net.primal.android.networking.primal.api.PrimalImportApi
 import net.primal.android.networking.relays.RelaysSocketManager
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.model.content.ContentMetadata
@@ -11,6 +10,7 @@ import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.Relay
 import net.primal.android.wallet.nwc.model.LightningPayResponse
+import net.primal.data.remote.api.importing.PrimalImportApi
 import net.primal.domain.nostr.NostrEvent
 import timber.log.Timber
 
