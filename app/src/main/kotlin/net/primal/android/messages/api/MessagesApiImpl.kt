@@ -14,7 +14,6 @@ import net.primal.android.nostr.ext.asMessageConversationsSummary
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
-import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEventKind
 
 class MessagesApiImpl @Inject constructor(
@@ -25,7 +24,7 @@ class MessagesApiImpl @Inject constructor(
     override suspend fun getConversations(userId: String, relation: ConversationRelation): ConversationsResponse {
         val response = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.GET_DM_CONTACTS.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.GET_DM_CONTACTS.id,
                 optionsJson = NostrJson.encodeToString(
                     ConversationRequestBody(
                         userId = userId,
@@ -52,7 +51,7 @@ class MessagesApiImpl @Inject constructor(
     override suspend fun getMessages(body: MessagesRequestBody): MessagesResponse {
         val response = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.GET_DMS.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.GET_DMS.id,
                 optionsJson = NostrJson.encodeToString(body),
             ),
         )
@@ -73,7 +72,7 @@ class MessagesApiImpl @Inject constructor(
     override suspend fun markConversationAsRead(userId: String, conversationUserId: String) {
         primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MARK_DM_CONVERSATION_AS_READ.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.MARK_DM_CONVERSATION_AS_READ.id,
                 optionsJson = NostrJson.encodeToString(
                     MarkMessagesReadRequestBody(
                         authorization = nostrNotary.signAuthorizationNostrEvent(
@@ -90,7 +89,7 @@ class MessagesApiImpl @Inject constructor(
     override suspend fun markAllMessagesAsRead(userId: String) {
         primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MARK_ALL_DMS_AS_READ.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.MARK_ALL_DMS_AS_READ.id,
                 optionsJson = NostrJson.encodeToString(
                     MarkMessagesReadRequestBody(
                         authorization = nostrNotary.signAuthorizationNostrEvent(

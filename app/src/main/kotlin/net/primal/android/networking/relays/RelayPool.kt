@@ -32,7 +32,6 @@ import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.sockets.filterByEventId
 import net.primal.core.networking.sockets.parseIncomingMessage
-import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import timber.log.Timber
@@ -128,7 +127,7 @@ class RelayPool(
         val result = try {
             val queryResult = primalApiClient.query(
                 message = PrimalCacheFilter(
-                    primalVerb = PrimalVerb.BROADCAST_EVENTS.id,
+                    primalVerb = net.primal.data.remote.PrimalVerb.BROADCAST_EVENTS.id,
                     optionsJson = NostrJson.encodeToString(
                         BroadcastRequestBody(
                             events = listOf(nostrEvent),

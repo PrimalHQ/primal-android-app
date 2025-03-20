@@ -11,7 +11,6 @@ import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.primal.PrimalQueryResult
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.data.remote.PrimalVerb
 import net.primal.domain.PrimalServerType
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
@@ -69,7 +68,7 @@ class UploadApiConnectionsPool : UploadApi {
         uploadOrThrow {
             this.query(
                 message = PrimalCacheFilter(
-                    primalVerb = PrimalVerb.UPLOAD_CHUNK.id,
+                    primalVerb = net.primal.data.remote.PrimalVerb.UPLOAD_CHUNK.id,
                     optionsJson = NostrJsonEncodeDefaults.encodeToString(
                         UploadChunkRequest(event = eventBlock()),
                     ),
@@ -81,7 +80,7 @@ class UploadApiConnectionsPool : UploadApi {
         uploadOrThrow {
             this.query(
                 message = PrimalCacheFilter(
-                    primalVerb = PrimalVerb.UPLOAD_COMPLETE.id,
+                    primalVerb = net.primal.data.remote.PrimalVerb.UPLOAD_COMPLETE.id,
                     optionsJson = NostrJsonEncodeDefaults.encodeToString(
                         UploadChunkRequest(event = eventBlock()),
                     ),

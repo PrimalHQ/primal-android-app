@@ -29,7 +29,6 @@ import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.primal.PrimalSocketSubscription
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.utils.retryNetworkCall
-import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEventKind
 import timber.log.Timber
 
@@ -115,7 +114,7 @@ class PremiumContentBackupViewModel @Inject constructor(
             scope = viewModelScope,
             primalApiClient = primalCachingApiClient,
             cacheFilter = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MEMBERSHIP_MONITOR_CONTENT_BROADCAST_STATUS.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.MEMBERSHIP_MONITOR_CONTENT_BROADCAST_STATUS.id,
                 optionsJson = NostrJson.encodeToString(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(

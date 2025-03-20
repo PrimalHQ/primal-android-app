@@ -12,7 +12,6 @@ import net.primal.android.settings.api.model.GetMuteListResponse
 import net.primal.android.settings.api.model.SetAppSettingsRequest
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
-import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 
@@ -24,7 +23,7 @@ class SettingsApiImpl @Inject constructor(
     override suspend fun getAppSettings(pubkey: String): GetAppSettingsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.GET_APP_SETTINGS.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.GET_APP_SETTINGS.id,
                 optionsJson = NostrJson.encodeToString(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAuthorizationNostrEvent(
@@ -44,7 +43,7 @@ class SettingsApiImpl @Inject constructor(
 
     override suspend fun getDefaultAppSettings(pubkey: String): GetAppSettingsResponse {
         val queryResult = primalApiClient.query(
-            message = PrimalCacheFilter(primalVerb = PrimalVerb.GET_DEFAULT_APP_SETTINGS.id),
+            message = PrimalCacheFilter(primalVerb = net.primal.data.remote.PrimalVerb.GET_DEFAULT_APP_SETTINGS.id),
         )
 
         return GetAppSettingsResponse(
@@ -61,7 +60,7 @@ class SettingsApiImpl @Inject constructor(
 
         primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.SET_APP_SETTINGS.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.SET_APP_SETTINGS.id,
                 optionsJson = NostrJson.encodeToString(
                     SetAppSettingsRequest(settingsEvent = signedNostrEvent),
                 ),
@@ -74,7 +73,7 @@ class SettingsApiImpl @Inject constructor(
     override suspend fun getMuteList(userId: String): GetMuteListResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.MUTE_LIST.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.MUTE_LIST.id,
                 optionsJson = NostrJson.encodeToString(
                     GetMuteListRequest(pubkey = userId),
                 ),

@@ -13,7 +13,6 @@ import net.primal.android.premium.api.model.MembershipPurchaseMonitorResponse
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.primal.PrimalSocketSubscription
-import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEventKind
 
 class PurchaseMonitor @Inject constructor(
@@ -53,7 +52,7 @@ class PurchaseMonitor @Inject constructor(
         scope = scope,
         primalApiClient = walletApiClient,
         cacheFilter = PrimalCacheFilter(
-            primalVerb = PrimalVerb.WALLET_MEMBERSHIP_PURCHASE_MONITOR.id,
+            primalVerb = net.primal.data.remote.PrimalVerb.WALLET_MEMBERSHIP_PURCHASE_MONITOR.id,
             optionsJson = NostrJson.encodeToString(
                 MembershipPurchaseMonitorRequestBody(membershipQuoteId = quoteId),
             ),
