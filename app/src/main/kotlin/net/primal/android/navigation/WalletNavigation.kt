@@ -10,7 +10,6 @@ import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
-import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.wallet.activation.WalletActivationViewModel
 import net.primal.android.wallet.activation.ui.WalletActivationScreen
@@ -26,6 +25,7 @@ import net.primal.android.wallet.transactions.send.create.CreateTransactionViewM
 import net.primal.android.wallet.transactions.send.prepare.SendPaymentScreen
 import net.primal.android.wallet.transactions.send.prepare.SendPaymentViewModel
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
+import net.primal.core.utils.serialization.encodeToJsonString
 
 private fun NavController.navigateToWalletActivation() = navigate(route = "walletActivation")
 
@@ -37,7 +37,7 @@ fun NavController.navigateToWalletCreateTransaction(draftTransaction: DraftTx? =
     val tx = draftTransaction ?: DraftTx(lnInvoice = lnbc)
     navigate(
         route = "walletTransaction/create" +
-            "?$DRAFT_TRANSACTION=${NostrJson.encodeToString(tx).asBase64Encoded()}" +
+            "?$DRAFT_TRANSACTION=${tx.encodeToJsonString().asBase64Encoded()}" +
             if (lnbc != null) {
                 "&lnbc=$lnbc"
             } else {

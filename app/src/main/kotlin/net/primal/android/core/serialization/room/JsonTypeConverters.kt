@@ -2,21 +2,21 @@ package net.primal.android.core.serialization.room
 
 import androidx.room.TypeConverter
 import kotlinx.serialization.json.JsonArray
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.decodeFromStringOrNull
+import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.decodeFromStringOrNull
 
 class JsonTypeConverters {
 
     @TypeConverter
     fun stringToJsonArray(value: String?): JsonArray? {
-        return NostrJson.decodeFromStringOrNull<JsonArray>(value)
+        return CommonJson.decodeFromStringOrNull<JsonArray>(value)
     }
 
     @TypeConverter
     fun jsonArrayToString(jsonArray: JsonArray?): String? {
         return when (jsonArray) {
             null -> null
-            else -> NostrJson.encodeToString(jsonArray)
+            else -> CommonJson.encodeToString(jsonArray)
         }
     }
 }

@@ -3,9 +3,9 @@ package net.primal.android.attachments.db.serialization
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.events.db.serialization.EventUriTypeConverters
 import net.primal.android.events.domain.CdnResourceVariant
+import net.primal.core.utils.serialization.CommonJson
 import org.junit.Test
 
 class AttachmentsTypeConvertersTest {
@@ -19,7 +19,7 @@ class AttachmentsTypeConvertersTest {
                 mediaUrl = "https://image.png",
             ),
         )
-        val expected = NostrJson.encodeToString(input)
+        val expected = CommonJson.encodeToString(input)
 
         val actual = EventUriTypeConverters().listOfCdnResourceVariantToString(input)
         actual.shouldNotBeNull()
@@ -41,7 +41,7 @@ class AttachmentsTypeConvertersTest {
                 mediaUrl = "https://image.png",
             ),
         )
-        val jsonString = NostrJson.encodeToString(input)
+        val jsonString = CommonJson.encodeToString(input)
         val actual = EventUriTypeConverters().stringToListOfCdnResourceVariant(jsonString)
         actual shouldBe input
     }

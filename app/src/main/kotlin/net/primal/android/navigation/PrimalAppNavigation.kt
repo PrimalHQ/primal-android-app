@@ -44,7 +44,6 @@ import net.primal.android.bookmarks.list.BookmarksViewModel
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
-import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.editor.NoteEditorScreen
@@ -139,6 +138,7 @@ import net.primal.android.thread.articles.details.ArticleDetailsViewModel
 import net.primal.android.thread.notes.ThreadScreen
 import net.primal.android.thread.notes.ThreadViewModel
 import net.primal.android.wallet.activation.WalletActivationViewModel
+import net.primal.core.utils.serialization.encodeToJsonString
 
 private fun NavController.navigateToWelcome() =
     navigate(
@@ -165,7 +165,7 @@ private fun NavController.navigateToAdvancedSearch(
 ) = navigate(
     route = "asearch" +
         "?$INITIAL_QUERY=$initialQuery" +
-        "&$POSTED_BY=${NostrJson.encodeToString(initialPostedBy)}" +
+        "&$POSTED_BY=${initialPostedBy.encodeToJsonString()}" +
         "&$SEARCH_KIND=$initialSearchKind" +
         "&$ADV_SEARCH_SCOPE=$initialSearchScope",
 )

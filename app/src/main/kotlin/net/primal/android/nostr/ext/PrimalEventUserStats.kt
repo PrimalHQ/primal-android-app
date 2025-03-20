@@ -1,9 +1,9 @@
 package net.primal.android.nostr.ext
 
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.events.db.EventUserStats
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventUserStats
+import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.domain.PrimalEvent
 
 fun ContentPrimalEventUserStats.asEventUserStatsPO(userId: String) =
@@ -17,5 +17,5 @@ fun ContentPrimalEventUserStats.asEventUserStatsPO(userId: String) =
     )
 
 fun List<PrimalEvent>.mapNotNullAsEventUserStatsPO(userId: String) =
-    this.mapNotNull { NostrJson.decodeFromStringOrNull<ContentPrimalEventUserStats>(it.content) }
+    this.mapNotNull { CommonJson.decodeFromStringOrNull<ContentPrimalEventUserStats>(it.content) }
         .map { it.asEventUserStatsPO(userId = userId) }

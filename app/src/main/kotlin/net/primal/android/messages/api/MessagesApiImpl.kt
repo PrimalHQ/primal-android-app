@@ -1,8 +1,6 @@
 package net.primal.android.messages.api
 
 import javax.inject.Inject
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.messages.api.model.ConversationRequestBody
 import net.primal.android.messages.api.model.ConversationsResponse
 import net.primal.android.messages.api.model.MarkMessagesReadRequestBody
@@ -14,6 +12,8 @@ import net.primal.android.nostr.ext.asMessageConversationsSummary
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
+import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.domain.nostr.NostrEventKind
 
 class MessagesApiImpl @Inject constructor(
@@ -25,7 +25,7 @@ class MessagesApiImpl @Inject constructor(
         val response = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.GET_DM_CONTACTS.id,
-                optionsJson = NostrJson.encodeToString(
+                optionsJson = CommonJson.encodeToString(
                     ConversationRequestBody(
                         userId = userId,
                         relation = relation,
@@ -52,13 +52,13 @@ class MessagesApiImpl @Inject constructor(
         val response = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.GET_DMS.id,
-                optionsJson = NostrJson.encodeToString(body),
+                optionsJson = CommonJson.encodeToString(body),
             ),
         )
 
         return MessagesResponse(
             paging = response.findPrimalEvent(NostrEventKind.PrimalPaging)?.let {
-                NostrJson.decodeFromStringOrNull(it.content)
+                CommonJson.decodeFromStringOrNull(it.content)
             },
             messages = response.filterNostrEvents(NostrEventKind.EncryptedDirectMessages),
             profileMetadata = response.filterNostrEvents(NostrEventKind.Metadata),
@@ -73,7 +73,7 @@ class MessagesApiImpl @Inject constructor(
         primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.MARK_DM_CONVERSATION_AS_READ.id,
-                optionsJson = NostrJson.encodeToString(
+                optionsJson = CommonJson.encodeToString(
                     MarkMessagesReadRequestBody(
                         authorization = nostrNotary.signAuthorizationNostrEvent(
                             userId = userId,
@@ -90,7 +90,7 @@ class MessagesApiImpl @Inject constructor(
         primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.MARK_ALL_DMS_AS_READ.id,
-                optionsJson = NostrJson.encodeToString(
+                optionsJson = CommonJson.encodeToString(
                     MarkMessagesReadRequestBody(
                         authorization = nostrNotary.signAuthorizationNostrEvent(
                             userId = userId,

@@ -1,4 +1,4 @@
-package net.primal.android.articles.api.model
+package net.primal.data.remote.api.articles
 
 import kotlinx.serialization.Serializable
 import net.primal.domain.PrimalEvent

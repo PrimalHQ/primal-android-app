@@ -1,7 +1,6 @@
 package net.primal.android.user.api
 
 import javax.inject.Inject
-import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.explore.api.model.UsersResponse
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.user.api.model.BookmarksResponse
@@ -18,6 +17,7 @@ import net.primal.android.user.api.model.UsersRequestBody
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.serialization.CommonJson
 import net.primal.domain.nostr.NostrEventKind
 
 class UsersApiImpl @Inject constructor(
@@ -28,7 +28,7 @@ class UsersApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.USER_PROFILE.id,
-                optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = userId)),
+                optionsJson = CommonJson.encodeToString(UserRequestBody(pubkey = userId)),
             ),
         )
 
@@ -51,7 +51,7 @@ class UsersApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.USER_PROFILE_FOLLOWED_BY.id,
-                optionsJson = NostrJson.encodeToString(
+                optionsJson = CommonJson.encodeToString(
                     UserProfileFollowedByRequestBody(
                         profileId = profileId,
                         userId = userId,
@@ -74,7 +74,7 @@ class UsersApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.FOLLOW_LIST.id,
-                optionsJson = NostrJson.encodeToString(
+                optionsJson = CommonJson.encodeToString(
                     FollowListRequestBody(pubkey = userId, extendedResponse = false),
                 ),
             ),
@@ -95,7 +95,7 @@ class UsersApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.USER_INFOS.id,
-                optionsJson = NostrJson.encodeToString(
+                optionsJson = CommonJson.encodeToString(
                     UserProfilesRequestBody(userIds = userIds),
                 ),
             ),
@@ -115,7 +115,7 @@ class UsersApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.FOLLOW_LIST.id,
-                optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = userId)),
+                optionsJson = CommonJson.encodeToString(UserRequestBody(pubkey = userId)),
             ),
         )
 
@@ -135,7 +135,7 @@ class UsersApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.USER_FOLLOWERS.id,
-                optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = userId)),
+                optionsJson = CommonJson.encodeToString(UserRequestBody(pubkey = userId)),
             ),
         )
 
@@ -155,7 +155,7 @@ class UsersApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.USER_RELAYS_2.id,
-                optionsJson = NostrJson.encodeToString(UsersRequestBody(pubkeys = userIds)),
+                optionsJson = CommonJson.encodeToString(UsersRequestBody(pubkeys = userIds)),
             ),
         )
 
@@ -173,14 +173,14 @@ class UsersApiImpl @Inject constructor(
         val content = list?.content
         if (content.isNullOrEmpty()) throw WssException("Invalid content.")
 
-        return NostrJson.decodeFromString<List<String>>(list.content)
+        return CommonJson.decodeFromString<List<String>>(list.content)
     }
 
     override suspend fun isUserFollowing(userId: String, targetUserId: String): Boolean {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.IS_USER_FOLLOWING.id,
-                optionsJson = NostrJson.encodeToString(
+                optionsJson = CommonJson.encodeToString(
                     IsUserFollowingRequestBody(userId = userId, targetUserId = targetUserId),
                 ),
             ),
@@ -196,7 +196,7 @@ class UsersApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.GET_BOOKMARKS_LIST.id,
-                optionsJson = NostrJson.encodeToString(UserRequestBody(pubkey = userId)),
+                optionsJson = CommonJson.encodeToString(UserRequestBody(pubkey = userId)),
             ),
         )
         return BookmarksResponse(

@@ -6,13 +6,14 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.decodeFromStringOrNull
-import net.primal.android.core.serialization.json.toJsonObject
 import net.primal.android.wallet.nwc.model.LightningPayRequest
 import net.primal.android.wallet.nwc.model.LightningPayResponse
 import net.primal.android.wallet.utils.LnInvoiceUtils
+import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.serialization.toNostrJsonObject
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -37,7 +38,7 @@ class NwcApi @Inject constructor(
         val responseBody = response.body
         return if (responseBody != null) {
             val responseString = withContext(dispatcherProvider.io()) { responseBody.string() }
-            NostrJson.decodeFromStringOrNull(string = responseString)
+            CommonJson.decodeFromStringOrNull(string = responseString)
                 ?: throw IOException("Invalid body content.")
         } else {
             throw IOException("Empty response body.")
@@ -52,7 +53,7 @@ class NwcApi @Inject constructor(
     ): LightningPayResponse {
         require(request.allowsNostr == true)
 
-        val zapEventString = NostrJson.encodeToString(zapEvent.toJsonObject())
+        val zapEventString = zapEvent.toNostrJsonObject().encodeToJsonString()
 
         val builder = request.callback.toHttpUrl().newBuilder()
         builder.addQueryParameter("nostr", zapEventString)
@@ -69,7 +70,7 @@ class NwcApi @Inject constructor(
 
         val response = withContext(dispatcherProvider.io()) { okHttpClient.newCall(getRequest).execute() }
         val responseString = withContext(dispatcherProvider.io()) { response.body?.string() }
-        val decoded = NostrJson.decodeFromStringOrNull<LightningPayResponse>(responseString)
+        val decoded = CommonJson.decodeFromStringOrNull<LightningPayResponse>(responseString)
 
         val responseInvoiceAmountInMillis = decoded?.pr?.extractInvoiceAmountInMilliSats()
         val requestAmountInMillis = BigDecimal(satoshiAmountInMilliSats.toLong()).toLong()

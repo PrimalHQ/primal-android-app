@@ -1,8 +1,6 @@
 package net.primal.android.events.api
 
 import javax.inject.Inject
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.events.api.model.EventActionsRequestBody
 import net.primal.android.events.api.model.EventActionsResponse
 import net.primal.android.events.api.model.EventZapsRequestBody
@@ -10,6 +8,8 @@ import net.primal.android.events.api.model.EventZapsResponse
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
+import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.domain.nostr.NostrEventKind
 
 class EventStatsApiImpl @Inject constructor(
@@ -20,13 +20,13 @@ class EventStatsApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.EVENT_ZAPS.id,
-                optionsJson = NostrJson.encodeToString(body),
+                optionsJson = CommonJson.encodeToString(body),
             ),
         )
 
         return EventZapsResponse(
             paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging).let {
-                NostrJson.decodeFromStringOrNull(it?.content)
+                CommonJson.decodeFromStringOrNull(it?.content)
             },
             profiles = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
@@ -43,7 +43,7 @@ class EventStatsApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.EVENT_ACTIONS.id,
-                optionsJson = NostrJson.encodeToString(body),
+                optionsJson = CommonJson.encodeToString(body),
             ),
         )
 

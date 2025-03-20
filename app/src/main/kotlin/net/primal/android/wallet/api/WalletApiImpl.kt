@@ -3,8 +3,6 @@ package net.primal.android.wallet.api
 import javax.inject.Inject
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.decodeFromJsonElement
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.networking.di.PrimalWalletApiClient
 import net.primal.android.nostr.ext.takeContentOrNull
 import net.primal.android.nostr.model.primal.content.ContentWalletExchangeRate
@@ -40,6 +38,8 @@ import net.primal.android.wallet.domain.SubWallet
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEventKind
 import timber.log.Timber
@@ -200,10 +200,10 @@ class WalletApiImpl @Inject constructor(
         val transactionsEvent = result.findPrimalEvent(kind = NostrEventKind.PrimalWalletTransactions)
             ?: throw WssException("Missing or invalid content in response.")
 
-        val txJsonArray = NostrJson.decodeFromString<JsonArray>(transactionsEvent.content)
+        val txJsonArray = CommonJson.decodeFromString<JsonArray>(transactionsEvent.content)
         val transactions = txJsonArray.mapNotNull {
             try {
-                NostrJson.decodeFromJsonElement<ContentWalletTransaction>(it)
+                CommonJson.decodeFromJsonElement<ContentWalletTransaction>(it)
             } catch (error: IllegalArgumentException) {
                 Timber.w(error)
                 null
@@ -213,7 +213,7 @@ class WalletApiImpl @Inject constructor(
         return TransactionsResponse(
             transactions = transactions,
             paging = result.findPrimalEvent(kind = NostrEventKind.PrimalPaging)?.let {
-                NostrJson.decodeFromStringOrNull(it.content)
+                CommonJson.decodeFromStringOrNull(it.content)
             },
         )
     }

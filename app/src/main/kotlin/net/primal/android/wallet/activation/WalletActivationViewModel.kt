@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.MissingPrivateKeyException
@@ -35,6 +34,7 @@ import net.primal.android.wallet.api.model.GetActivationCodeRequestBody
 import net.primal.android.wallet.api.model.WalletActivationDetails
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.serialization.CommonJson
 import timber.log.Timber
 
 @HiltViewModel
@@ -84,7 +84,7 @@ class WalletActivationViewModel @Inject constructor(
 
     private fun loadAllCountries() =
         viewModelScope.launch {
-            val allCountries = NostrJson.decodeFromString<Regions>(WalletRegionJson).mapToListOfCountries()
+            val allCountries = CommonJson.decodeFromString<Regions>(WalletRegionJson).mapToListOfCountries()
             setState { copy(allCountries = allCountries) }
         }
 

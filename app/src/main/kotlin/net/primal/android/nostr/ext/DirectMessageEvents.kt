@@ -2,8 +2,6 @@ package net.primal.android.nostr.ext
 
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.toJsonObject
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.core.utils.parseUris
 import net.primal.android.crypto.CryptoUtils
@@ -14,8 +12,11 @@ import net.primal.android.messages.domain.ConversationSummary
 import net.primal.android.messages.domain.ConversationsSummary
 import net.primal.android.messages.domain.MessagesUnreadCount
 import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.serialization.toNostrJsonObject
 import timber.log.Timber
 
 fun PrimalEvent.asMessagesTotalCount(): MessagesUnreadCount? {
@@ -25,11 +26,11 @@ fun PrimalEvent.asMessagesTotalCount(): MessagesUnreadCount? {
 }
 
 fun PrimalEvent.asMessageConversationsSummary(): ConversationsSummary {
-    val jsonObject = NostrJson.parseToJsonElement(this.content).jsonObject
+    val jsonObject = CommonJson.parseToJsonElement(this.content).jsonObject
     val map = mutableMapOf<String, ConversationSummary>()
     jsonObject.keys.forEach {
         jsonObject[it]?.jsonObject?.let { summaryJson ->
-            val summary = NostrJson.decodeFromJsonElement<ConversationSummary>(summaryJson)
+            val summary = CommonJson.decodeFromJsonElement<ConversationSummary>(summaryJson)
             map[it] = summary
         }
     }
@@ -51,7 +52,7 @@ fun NostrEvent.mapAsMessageDataPO(userId: String, nsec: String?): DirectMessageD
             pubKey = participantId.hexToNpubHrp().bechToBytesOrThrow(hrp = "npub"),
         )
     }.getOrElse {
-        Timber.w(NostrJson.encodeToString(this.toJsonObject()))
+        Timber.w(this.toNostrJsonObject().encodeToJsonString())
         this.content
     }
 

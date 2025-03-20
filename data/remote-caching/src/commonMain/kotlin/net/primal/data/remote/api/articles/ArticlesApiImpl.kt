@@ -1,35 +1,26 @@
-package net.primal.android.articles.api
+package net.primal.data.remote.api.articles
 
-import javax.inject.Inject
-import net.primal.android.articles.api.model.ArticleDetailsRequestBody
-import net.primal.android.articles.api.model.ArticleFeedRequestBody
-import net.primal.android.articles.api.model.ArticleHighlightsRequestBody
-import net.primal.android.articles.api.model.ArticleHighlightsResponse
-import net.primal.android.articles.api.model.ArticleResponse
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.NostrJsonImplicitNulls
-import net.primal.android.core.serialization.json.decodeFromStringOrNull
-import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
+import net.primal.core.utils.serialization.CommonJsonImplicitNulls
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.NostrEventKind
 
-class ArticlesApiImpl @Inject constructor(
-    @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
+internal class ArticlesApiImpl(
+    private val primalApiClient: PrimalApiClient,
 ) : ArticlesApi {
 
     override suspend fun getArticleDetails(body: ArticleDetailsRequestBody): ArticleResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.ARTICLE_THREAD_VIEW.id,
-                optionsJson = NostrJson.encodeToString(body),
+                optionsJson = body.encodeToJsonString(),
             ),
         )
 
         return ArticleResponse(
-            paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging).let {
-                NostrJson.decodeFromStringOrNull(it?.content)
-            },
+            paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging)?.content.decodeFromJsonStringOrNull(),
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
             notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
@@ -53,14 +44,12 @@ class ArticlesApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.MEGA_FEED_DIRECTIVE.id,
-                optionsJson = NostrJsonImplicitNulls.encodeToString(body),
+                optionsJson = CommonJsonImplicitNulls.encodeToString(body),
             ),
         )
 
         return ArticleResponse(
-            paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging).let {
-                NostrJson.decodeFromStringOrNull(it?.content)
-            },
+            paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging)?.content.decodeFromJsonStringOrNull(),
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
             notes = emptyList(),
@@ -84,7 +73,7 @@ class ArticlesApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.GET_HIGHLIGHTS.id,
-                optionsJson = NostrJson.encodeToString(body),
+                optionsJson = body.encodeToJsonString(),
             ),
         )
 

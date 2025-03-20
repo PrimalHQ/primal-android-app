@@ -21,8 +21,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import net.primal.android.core.ext.asMapByKey
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.feeds.domain.isPremiumFeedSpec
 import net.primal.android.feeds.domain.supportsUpwardsNotesPagination
 import net.primal.android.nostr.ext.findFirstEventId
@@ -42,6 +40,8 @@ import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.domain.nostr.NostrEvent
 import timber.log.Timber
@@ -154,7 +154,7 @@ class NoteFeedViewModel @AssistedInject constructor(
 
     private fun FeedResponse.processSyncCount(newestLocalNote: FeedPost? = null) {
         val allReferencedNotes = this.referencedEvents.mapNotNull {
-            NostrJson.decodeFromStringOrNull<NostrEvent>(it.content)
+            CommonJson.decodeFromStringOrNull<NostrEvent>(it.content)
         }
 
         val repostedNotes = this.reposts

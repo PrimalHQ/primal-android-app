@@ -5,13 +5,13 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.user.domain.Relay
+import net.primal.core.utils.serialization.CommonJson
 import timber.log.Timber
 
 fun String.parseKind3Relays(): List<Relay> {
     val jsonContent = try {
-        NostrJson.parseToJsonElement(this)
+        CommonJson.parseToJsonElement(this)
     } catch (error: SerializationException) {
         Timber.w(error)
         null

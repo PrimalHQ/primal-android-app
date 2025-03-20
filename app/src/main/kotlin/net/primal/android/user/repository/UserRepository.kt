@@ -6,8 +6,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.crypto.hexToNpubHrp
@@ -35,6 +33,8 @@ import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.domain.WalletSettings
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.decodeFromStringOrNull
 
 class UserRepository @Inject constructor(
     private val database: PrimalDatabase,
@@ -158,7 +158,7 @@ class UserRepository @Inject constructor(
     suspend fun setNostrAddress(userId: String, nostrAddress: String) =
         withContext(dispatchers.io()) {
             val userProfileResponse = usersApi.getUserProfile(userId = userId)
-            val metadata = NostrJson.decodeFromStringOrNull<ContentMetadata>(userProfileResponse.metadata?.content)
+            val metadata = CommonJson.decodeFromStringOrNull<ContentMetadata>(userProfileResponse.metadata?.content)
                 ?: throw WssException("Profile Content Metadata not found.")
 
             setUserProfileAndUpdateLocally(
@@ -171,7 +171,7 @@ class UserRepository @Inject constructor(
     suspend fun setLightningAddress(userId: String, lightningAddress: String) =
         withContext(dispatchers.io()) {
             val userProfileResponse = usersApi.getUserProfile(userId = userId)
-            val metadata = NostrJson.decodeFromStringOrNull<ContentMetadata>(userProfileResponse.metadata?.content)
+            val metadata = CommonJson.decodeFromStringOrNull<ContentMetadata>(userProfileResponse.metadata?.content)
                 ?: throw WssException("Profile Content Metadata not found.")
 
             setUserProfileAndUpdateLocally(

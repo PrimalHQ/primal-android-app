@@ -2,8 +2,8 @@ package net.primal.android.editor.domain
 
 import androidx.compose.ui.text.input.TextFieldValue
 import kotlinx.serialization.Serializable
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.decodeFromStringOrNull
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.core.utils.serialization.encodeToJsonString
 
 @Serializable
 data class NoteEditorArgs(
@@ -17,11 +17,11 @@ data class NoteEditorArgs(
     val taggedUsers: List<NoteTaggedUser> = emptyList(),
     val isQuoting: Boolean = false,
 ) {
-    fun toJson(): String = NostrJson.encodeToString(this)
+    fun toJson(): String = this.encodeToJsonString()
 
     companion object {
         fun String.jsonAsNoteEditorArgs(): NoteEditorArgs? {
-            return NostrJson.decodeFromStringOrNull<NoteEditorArgs>(this)
+            return this.decodeFromJsonStringOrNull<NoteEditorArgs>()
         }
 
         fun TextFieldValue.asNoteEditorArgs(): NoteEditorArgs {

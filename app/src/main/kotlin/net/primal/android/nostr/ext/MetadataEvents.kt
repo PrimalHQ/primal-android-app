@@ -1,9 +1,6 @@
 package net.primal.android.nostr.ext
 
 import net.primal.android.core.ext.asMapByKey
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.decodeFromStringOrNull
-import net.primal.android.core.serialization.json.toJsonObject
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.core.utils.parseUris
 import net.primal.android.events.domain.CdnImage
@@ -15,7 +12,10 @@ import net.primal.android.profile.domain.PrimalLegendProfile
 import net.primal.android.profile.domain.PrimalPremiumInfo
 import net.primal.android.wallet.api.decodeLNUrlOrNull
 import net.primal.android.wallet.api.parseAsLNUrlOrNull
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.serialization.toNostrJsonObject
 
 fun List<NostrEvent>.mapAsProfileDataPO(
     cdnResources: List<CdnResource>,
@@ -57,14 +57,14 @@ fun NostrEvent.asProfileDataPO(
     primalLegendProfiles: Map<String, PrimalLegendProfile>,
     blossomServers: Map<String, List<String>>,
 ): ProfileData {
-    val metadata = NostrJson.decodeFromStringOrNull<ContentMetadata>(this.content)
+    val metadata = this.content.decodeFromJsonStringOrNull<ContentMetadata>()
     val premiumInfo = primalPremiumInfo[this.pubKey]
     val blossoms = blossomServers[this.pubKey]
     return ProfileData(
         eventId = this.id,
         ownerId = this.pubKey,
         createdAt = this.createdAt,
-        raw = NostrJson.encodeToString(this.toJsonObject()),
+        raw = this.toNostrJsonObject().encodeToJsonString(),
         handle = metadata?.name,
         internetIdentifier = metadata?.nip05,
         lightningAddress = metadata?.lud16,

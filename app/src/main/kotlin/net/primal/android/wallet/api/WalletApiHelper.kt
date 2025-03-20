@@ -5,12 +5,12 @@ import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
-import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.wallet.api.model.WalletOperationRequestBody
 import net.primal.android.wallet.api.model.WalletOperationVerb
 import net.primal.android.wallet.api.model.WalletRequestBody
+import net.primal.core.utils.serialization.CommonJson
 
 fun buildWalletOptionsJson(
     userId: String,
@@ -25,7 +25,7 @@ fun buildWalletOptionsJson(
                 content = buildJsonArray {
                     add(walletVerb.identifier)
                     add(
-                        NostrJson.encodeToJsonElement(requestBody).let {
+                        CommonJson.encodeToJsonElement(requestBody).let {
                             val map = it.jsonObject.toMutableMap()
                             map.remove("type")
                             JsonObject(map)
