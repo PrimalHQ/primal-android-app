@@ -16,10 +16,10 @@ import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.user.api.UsersApi
-import net.primal.android.user.api.model.UserContactsResponse
-import net.primal.android.user.api.model.UserProfileResponse
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.data.remote.api.users.UsersApi
+import net.primal.data.remote.api.users.model.UserContactsResponse
+import net.primal.data.remote.api.users.model.UserProfileResponse
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind

@@ -9,7 +9,6 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.user.accounts.UserAccountsStore
-import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.PrimalWallet
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.api.WalletApi
@@ -27,6 +26,7 @@ import net.primal.android.wallet.db.WalletTransaction
 import net.primal.android.wallet.domain.Network
 import net.primal.android.wallet.domain.SubWallet
 import net.primal.android.wallet.domain.WalletKycLevel
+import net.primal.data.remote.api.users.UsersApi
 
 @OptIn(ExperimentalPagingApi::class)
 class WalletRepository @Inject constructor(

@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.touchlab.skie)
+    alias(libs.plugins.ktorfit)
 }
 
 private val xcfName = "PrimalDataRemoteCaching"
@@ -39,6 +40,7 @@ kotlin {
             dependencies {
                 // Internal
                 implementation(project(":core:utils"))
+                implementation(project(":core:networking-http"))
                 implementation(project(":core:networking-primal"))
                 implementation(project(":domain:nostr"))
                 implementation(project(":domain:primal"))
@@ -50,6 +52,11 @@ kotlin {
                 // Serialization
                 implementation(libs.kotlinx.serialization.json)
                 implementation(libs.kotlinx.io)
+
+                // Ktorfit
+                implementation(libs.ktorfit.light)
+                implementation(libs.ktorfit.converters.response)
+                implementation(libs.ktorfit.converters.call)
 
                 // Logging
                 implementation(libs.napier)

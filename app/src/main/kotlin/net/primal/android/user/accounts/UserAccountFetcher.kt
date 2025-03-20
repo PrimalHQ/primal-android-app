@@ -15,9 +15,9 @@ import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
-import net.primal.android.user.api.UsersApi
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.asUserAccountFromFollowListEvent
+import net.primal.data.remote.api.users.UsersApi
 
 class UserAccountFetcher @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,

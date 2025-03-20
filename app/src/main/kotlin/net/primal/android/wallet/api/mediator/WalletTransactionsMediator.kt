@@ -18,8 +18,6 @@ import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.user.accounts.UserAccountsStore
-import net.primal.android.user.api.UsersApi
-import net.primal.android.user.api.model.UserProfilesResponse
 import net.primal.android.wallet.api.WalletApi
 import net.primal.android.wallet.api.model.TransactionsRequestBody
 import net.primal.android.wallet.db.WalletTransaction
@@ -27,6 +25,8 @@ import net.primal.android.wallet.domain.SubWallet
 import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.data.remote.api.users.UsersApi
+import net.primal.data.remote.api.users.model.UserProfilesResponse
 import timber.log.Timber
 
 @ExperimentalPagingApi

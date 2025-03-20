@@ -8,7 +8,6 @@ plugins {
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.jetpack.room)
-    alias(libs.plugins.ktorfit)
     alias(libs.plugins.touchlab.skie)
 }
 

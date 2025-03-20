@@ -23,7 +23,6 @@ import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.copyFollowListIfNotNull
 import net.primal.android.user.accounts.copyIfNotNull
-import net.primal.android.user.api.UsersApi
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.db.Relay
 import net.primal.android.user.domain.ContentDisplaySettings
@@ -35,6 +34,7 @@ import net.primal.android.wallet.domain.WalletSettings
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.data.remote.api.users.UsersApi
 
 class UserRepository @Inject constructor(
     private val database: PrimalDatabase,

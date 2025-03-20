@@ -10,12 +10,7 @@ import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.explore.api.ExploreApi
 import net.primal.android.explore.api.model.ExplorePeopleData
-import net.primal.android.explore.api.model.ExploreRequestBody
-import net.primal.android.explore.api.model.SearchUsersRequestBody
-import net.primal.android.explore.api.model.TopicScore
-import net.primal.android.explore.api.model.UsersResponse
 import net.primal.android.explore.db.TrendingTopic
 import net.primal.android.explore.domain.ExploreZapNoteData
 import net.primal.android.explore.domain.UserProfileSearchItem
@@ -36,6 +31,11 @@ import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
 import net.primal.android.profile.db.ProfileStats
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 import net.primal.core.networking.utils.retryNetworkCall
+import net.primal.data.remote.api.explore.ExploreApi
+import net.primal.data.remote.api.explore.model.ExploreRequestBody
+import net.primal.data.remote.api.explore.model.SearchUsersRequestBody
+import net.primal.data.remote.api.explore.model.TopicScore
+import net.primal.data.remote.api.explore.model.UsersResponse
 
 class ExploreRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
