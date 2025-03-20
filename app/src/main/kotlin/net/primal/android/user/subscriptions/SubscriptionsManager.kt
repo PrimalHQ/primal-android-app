@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
 import net.primal.android.messages.domain.MessagesUnreadCount
 import net.primal.android.networking.di.PrimalCacheApiClient
@@ -39,6 +38,7 @@ import net.primal.core.config.AppConfigProvider
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.primal.PrimalSocketSubscription
+import net.primal.core.utils.serialization.CommonJson
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEventKind
 
@@ -142,7 +142,7 @@ class SubscriptionsManager @Inject constructor(
             primalApiClient = cacheApiClient,
             cacheFilter = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.NEW_NOTIFICATIONS_COUNT.id,
-                optionsJson = NostrJson.encodeToString(PubkeyRequestBody(pubkey = userId)),
+                optionsJson = CommonJson.encodeToString(PubkeyRequestBody(pubkey = userId)),
             ),
             transformer = { primalEvent?.asNotificationSummary() },
         ) {
@@ -157,7 +157,7 @@ class SubscriptionsManager @Inject constructor(
             primalApiClient = cacheApiClient,
             cacheFilter = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.NEW_DMS_COUNT.id,
-                optionsJson = NostrJson.encodeToString(PubkeyRequestBody(pubkey = userId)),
+                optionsJson = CommonJson.encodeToString(PubkeyRequestBody(pubkey = userId)),
             ),
             transformer = { primalEvent?.asMessagesTotalCount() },
         ) {
@@ -177,7 +177,7 @@ class SubscriptionsManager @Inject constructor(
                         WalletRequestBody(
                             event = nostrNotary.signPrimalWalletOperationNostrEvent(
                                 userId = userId,
-                                content = NostrJson.encodeToString(
+                                content = CommonJson.encodeToString(
                                     BalanceRequestBody(subWallet = SubWallet.Open),
                                 ),
                             ),

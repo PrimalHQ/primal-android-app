@@ -2,12 +2,11 @@ package net.primal.android.navigation
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavBackStackEntry
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.explore.asearch.AdvancedSearchContract
 import net.primal.android.explore.search.ui.SearchScope
 import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 
 const val NOTE_ID = "noteId"
 inline val SavedStateHandle.noteIdOrThrow: String
@@ -47,9 +46,7 @@ inline val SavedStateHandle.initialQuery: String? get() = get(INITIAL_QUERY)
 
 const val POSTED_BY = "postedBy"
 inline val SavedStateHandle.postedBy: List<String>?
-    get() = get<String>(POSTED_BY)?.let {
-        NostrJson.decodeFromStringOrNull(it)
-    }
+    get() = get<String>(POSTED_BY)?.decodeFromJsonStringOrNull()
 
 const val SEARCH_KIND = "searchKind"
 inline val SavedStateHandle.searchKind: AdvancedSearchContract.SearchKind?
@@ -99,9 +96,8 @@ inline val SavedStateHandle.sendPaymentTab: SendPaymentTab?
 const val DRAFT_TRANSACTION = "draftTransaction"
 inline val SavedStateHandle.draftTransaction: DraftTx
     get() = get<String>(DRAFT_TRANSACTION)
-        ?.asBase64Decoded()?.let {
-            NostrJson.decodeFromStringOrNull(it)
-        } ?: throw IllegalArgumentException("Missing draft transaction.")
+        ?.asBase64Decoded()?.decodeFromJsonStringOrNull()
+        ?: throw IllegalArgumentException("Missing draft transaction.")
 
 const val LNBC = "lnbc"
 inline val SavedStateHandle.lnbc: String? get() = get<String>(LNBC)

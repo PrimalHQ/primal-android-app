@@ -1,15 +1,15 @@
 package net.primal.android.nostr.ext
 
 import net.primal.android.articles.db.ArticleData
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.toJsonObject
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.core.utils.parseUris
 import net.primal.android.events.domain.CdnImage
 import net.primal.android.events.domain.CdnResource
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.serialization.toNostrJsonObject
 import timber.log.Timber
 
 fun List<NostrEvent>.mapNotNullAsArticleDataPO(
@@ -32,7 +32,7 @@ fun List<PrimalEvent>.mapReferencedEventsAsArticleDataPO(
 private fun NostrEvent.asArticleData(wordsCount: Int?, cdnResources: Map<String, CdnResource>): ArticleData? {
     val identifier = tags.findFirstIdentifier()
     val title = tags.findFirstTitle()
-    val raw = NostrJson.encodeToString(this.toJsonObject())
+    val raw = this.toNostrJsonObject().encodeToJsonString()
 
     if (identifier == null || title == null) {
         Timber.w("Unable to parse long form content: $raw")

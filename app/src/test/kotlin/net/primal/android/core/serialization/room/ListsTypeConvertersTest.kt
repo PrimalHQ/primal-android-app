@@ -4,7 +4,7 @@ import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.serialization.json.JsonArray
-import net.primal.android.core.serialization.json.NostrJson
+import net.primal.core.utils.serialization.CommonJson
 import org.junit.Test
 
 class ListsTypeConvertersTest {
@@ -22,7 +22,7 @@ class ListsTypeConvertersTest {
     fun `listOfJsonArrayToString returns correct json String`() {
         val expectedJsonString = this.listOfJsonArrayJsonString
 
-        val inputJsonArray = NostrJson.decodeFromString<List<JsonArray>>(expectedJsonString)
+        val inputJsonArray = CommonJson.decodeFromString<List<JsonArray>>(expectedJsonString)
         val actualJsonString = ListsTypeConverters().listOfJsonArrayToString(inputJsonArray)
 
         actualJsonString.shouldNotBeNull()
@@ -38,7 +38,7 @@ class ListsTypeConvertersTest {
     @Test
     fun `stringToListOfJsonArray returns correct List`() {
         val jsonString = this.listOfJsonArrayJsonString
-        val expected = NostrJson.decodeFromString<List<JsonArray>>(jsonString)
+        val expected = CommonJson.decodeFromString<List<JsonArray>>(jsonString)
         val actual = ListsTypeConverters().stringToListOfJsonArray(jsonString)
         actual shouldBe expected
     }
@@ -58,7 +58,7 @@ class ListsTypeConvertersTest {
     @Test
     fun `listOfStringsToJsonString returns correct String`() {
         val input = listOf("https://primal.net", "wss://relay.primal.net")
-        val expected = NostrJson.encodeToString(input)
+        val expected = CommonJson.encodeToString(input)
         val actual = ListsTypeConverters().listOfStringsToJsonString(input)
 
         actual.shouldNotBeNull()
@@ -74,7 +74,7 @@ class ListsTypeConvertersTest {
     @Test
     fun `jsonStringToListOfStrings returns correct List`() {
         val expected = listOf("https://primal.net", "wss://relay.primal.net")
-        val jsonString = NostrJson.encodeToString(expected)
+        val jsonString = CommonJson.encodeToString(expected)
         val actual = ListsTypeConverters().jsonStringToListOfStrings(jsonString)
         actual shouldBe expected
     }

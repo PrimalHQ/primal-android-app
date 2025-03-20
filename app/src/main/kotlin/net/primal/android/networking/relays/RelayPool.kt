@@ -14,9 +14,6 @@ import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.decodeFromStringOrNull
-import net.primal.android.core.serialization.json.toJsonObject
 import net.primal.android.networking.relays.broadcast.BroadcastEventResponse
 import net.primal.android.networking.relays.broadcast.BroadcastRequestBody
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -32,8 +29,11 @@ import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.sockets.filterByEventId
 import net.primal.core.networking.sockets.parseIncomingMessage
+import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.serialization.toNostrJsonObject
 import timber.log.Timber
 
 class RelayPool(
@@ -128,7 +128,7 @@ class RelayPool(
             val queryResult = primalApiClient.query(
                 message = PrimalCacheFilter(
                     primalVerb = net.primal.data.remote.PrimalVerb.BROADCAST_EVENTS.id,
-                    optionsJson = NostrJson.encodeToString(
+                    optionsJson = CommonJson.encodeToString(
                         BroadcastRequestBody(
                             events = listOf(nostrEvent),
                             relays = relayUrls,
@@ -137,7 +137,7 @@ class RelayPool(
                 ),
             )
             val broadcastEvents = queryResult.findPrimalEvent(NostrEventKind.PrimalBroadcastResult)
-            NostrJson.decodeFromStringOrNull<List<BroadcastEventResponse>>(broadcastEvents?.content)
+            CommonJson.decodeFromStringOrNull<List<BroadcastEventResponse>>(broadcastEvents?.content)
         } catch (error: WssException) {
             Timber.w(error)
             null
@@ -169,7 +169,7 @@ class RelayPool(
                 with(nostrSocketClient) {
                     val sendEventResult = runCatching {
                         ensureSocketConnection()
-                        sendEVENT(nostrEvent.toJsonObject())
+                        sendEVENT(nostrEvent.toNostrJsonObject())
                         collectPublishResponse(eventId = nostrEvent.id)
                     }
                     sendEventResult.getOrNull()?.let {

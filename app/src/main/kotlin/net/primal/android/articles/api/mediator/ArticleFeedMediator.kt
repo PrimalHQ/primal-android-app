@@ -9,9 +9,6 @@ import java.time.Instant
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.withContext
-import net.primal.android.articles.api.ArticlesApi
-import net.primal.android.articles.api.model.ArticleFeedRequestBody
-import net.primal.android.articles.api.model.ArticleResponse
 import net.primal.android.articles.db.Article
 import net.primal.android.articles.db.ArticleFeedCrossRef
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
@@ -21,6 +18,9 @@ import net.primal.android.nostr.ext.orderByPagingIfNotNull
 import net.primal.android.notes.db.FeedPostRemoteKey
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.utils.retryNetworkCall
+import net.primal.data.remote.api.articles.ArticleFeedRequestBody
+import net.primal.data.remote.api.articles.ArticleResponse
+import net.primal.data.remote.api.articles.ArticlesApi
 import net.primal.data.remote.model.ContentPrimalPaging
 import timber.log.Timber
 

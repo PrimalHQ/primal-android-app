@@ -3,8 +3,6 @@ package net.primal.android.notes.feed.model
 import java.time.Instant
 import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.formatNip05Identifier
@@ -15,6 +13,8 @@ import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.notes.db.FeedPost
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
+import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.domain.nostr.NostrEvent
 
 data class FeedPostUi(
@@ -26,7 +26,7 @@ data class FeedPostUi(
     val content: String,
     val stats: EventStatsUi,
     val rawNostrEventJson: String,
-    val rawKind: Int? = NostrJson.decodeFromStringOrNull<NostrEvent>(rawNostrEventJson)?.kind,
+    val rawKind: Int? = CommonJson.decodeFromStringOrNull<NostrEvent>(rawNostrEventJson)?.kind,
     val repostId: String? = null,
     val repostAuthorId: String? = null,
     val repostAuthorName: String? = null,

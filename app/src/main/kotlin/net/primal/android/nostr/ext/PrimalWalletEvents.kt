@@ -1,16 +1,16 @@
 package net.primal.android.nostr.ext
 
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.nostr.model.primal.content.ContentWalletTransaction
 import net.primal.android.wallet.db.WalletTransactionData
+import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.domain.nostr.NostrEvent
 
 fun List<ContentWalletTransaction>.mapAsWalletTransactionPO(walletAddress: String) =
     map { it.asWalletTransactionPO(walletAddress) }
 
 fun ContentWalletTransaction.asWalletTransactionPO(walletAddress: String): WalletTransactionData {
-    val zapEvent = NostrJson.decodeFromStringOrNull<NostrEvent>(this.zapRequestRawJson)
+    val zapEvent = CommonJson.decodeFromStringOrNull<NostrEvent>(this.zapRequestRawJson)
     return WalletTransactionData(
         id = this.id,
         walletLightningAddress = walletAddress,

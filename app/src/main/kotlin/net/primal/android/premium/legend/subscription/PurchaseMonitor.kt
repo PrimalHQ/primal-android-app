@@ -5,7 +5,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.networking.di.PrimalWalletApiClient
 import net.primal.android.nostr.ext.takeContentOrNull
 import net.primal.android.premium.api.model.MembershipPurchaseMonitorRequestBody
@@ -13,6 +12,7 @@ import net.primal.android.premium.api.model.MembershipPurchaseMonitorResponse
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.primal.PrimalSocketSubscription
+import net.primal.core.utils.serialization.CommonJson
 import net.primal.domain.nostr.NostrEventKind
 
 class PurchaseMonitor @Inject constructor(
@@ -53,7 +53,7 @@ class PurchaseMonitor @Inject constructor(
         primalApiClient = walletApiClient,
         cacheFilter = PrimalCacheFilter(
             primalVerb = net.primal.data.remote.PrimalVerb.WALLET_MEMBERSHIP_PURCHASE_MONITOR.id,
-            optionsJson = NostrJson.encodeToString(
+            optionsJson = CommonJson.encodeToString(
                 MembershipPurchaseMonitorRequestBody(membershipQuoteId = quoteId),
             ),
         ),

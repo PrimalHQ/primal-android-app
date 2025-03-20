@@ -1,9 +1,9 @@
 package net.primal.android.networking.primal.upload.api.model
 
 import android.util.Base64
-import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.notary.NostrUnsignedEvent
+import net.primal.core.utils.serialization.CommonJson
 import net.primal.domain.nostr.NostrEventKind
 
 fun chunkUploadRequest(
@@ -17,7 +17,7 @@ fun chunkUploadRequest(
         pubKey = userId,
         kind = NostrEventKind.PrimalChunkedUploadRequest.value,
         tags = listOf(userId.asPubkeyTag()),
-        content = NostrJson.encodeToString(
+        content = CommonJson.encodeToString(
             UploadChunkContent(
                 uploadId = uploadId,
                 fileLength = fileSizeInBytes,
@@ -38,7 +38,7 @@ fun completeUploadRequest(
         pubKey = userId,
         kind = NostrEventKind.PrimalChunkedUploadRequest.value,
         tags = listOf(userId.asPubkeyTag()),
-        content = NostrJson.encodeToString(
+        content = CommonJson.encodeToString(
             UploadCompleteContent(
                 uploadId = uploadId,
                 fileLength = fileSizeInBytes,
@@ -53,7 +53,7 @@ fun cancelUploadRequest(userId: String, uploadId: String): NostrUnsignedEvent {
         pubKey = userId,
         kind = NostrEventKind.PrimalChunkedUploadRequest.value,
         tags = listOf(userId.asPubkeyTag()),
-        content = NostrJson.encodeToString(UploadCancelContent(uploadId = uploadId)),
+        content = CommonJson.encodeToString(UploadCancelContent(uploadId = uploadId)),
     )
 }
 

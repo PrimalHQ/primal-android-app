@@ -1,14 +1,13 @@
 package net.primal.android.nostr.ext
 
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.events.domain.CdnResource
 import net.primal.android.events.domain.CdnResourceVariant
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventResources
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.PrimalEvent
 
 private fun List<PrimalEvent>.flatMapNotNullAsContentPrimalEventResources() =
-    mapNotNull { NostrJson.decodeFromStringOrNull<ContentPrimalEventResources>(it.content) }
+    mapNotNull { it.content.decodeFromJsonStringOrNull<ContentPrimalEventResources>() }
 
 fun List<PrimalEvent>.flatMapNotNullAsCdnResource() =
     flatMapNotNullAsContentPrimalEventResources()

@@ -20,8 +20,6 @@ import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroupMember
 import net.primal.android.auth.repository.CreateAccountHandler
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
@@ -29,6 +27,7 @@ import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.upload.UploadJob
 import timber.log.Timber
 
@@ -117,9 +116,8 @@ class OnboardingViewModel @Inject constructor(
                             FollowGroupMember(
                                 name = member.name,
                                 userId = member.userId,
-                                metadata = NostrJson.decodeFromStringOrNull<ContentMetadata>(
-                                    string = response.metadata[member.userId]?.content,
-                                ),
+                                metadata = response.metadata[member.userId]?.content
+                                    .decodeFromJsonStringOrNull<ContentMetadata>(),
                             )
                         },
                     )

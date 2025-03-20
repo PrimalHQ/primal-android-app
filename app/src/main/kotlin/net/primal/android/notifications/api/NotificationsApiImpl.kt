@@ -2,7 +2,6 @@ package net.primal.android.notifications.api
 
 import java.time.Instant
 import javax.inject.Inject
-import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.notifications.api.model.NotificationsRequestBody
@@ -11,6 +10,7 @@ import net.primal.android.notifications.api.model.PubkeyRequestBody
 import net.primal.android.settings.api.model.AppSpecificDataRequest
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
+import net.primal.core.utils.serialization.CommonJson
 import net.primal.domain.nostr.NostrEventKind
 
 class NotificationsApiImpl @Inject constructor(
@@ -22,7 +22,7 @@ class NotificationsApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.GET_LAST_SEEN_NOTIFICATIONS.id,
-                optionsJson = NostrJson.encodeToString(PubkeyRequestBody(pubkey = userId)),
+                optionsJson = CommonJson.encodeToString(PubkeyRequestBody(pubkey = userId)),
             ),
         )
 
@@ -42,7 +42,7 @@ class NotificationsApiImpl @Inject constructor(
         primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.SET_LAST_SEEN_NOTIFICATIONS.id,
-                optionsJson = NostrJson.encodeToString(
+                optionsJson = CommonJson.encodeToString(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAuthorizationNostrEvent(
                             userId = userId,
@@ -58,7 +58,7 @@ class NotificationsApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.GET_NOTIFICATIONS.id,
-                optionsJson = NostrJson.encodeToString(body),
+                optionsJson = CommonJson.encodeToString(body),
             ),
         )
 

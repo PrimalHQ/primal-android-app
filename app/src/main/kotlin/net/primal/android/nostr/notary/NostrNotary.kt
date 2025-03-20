@@ -5,7 +5,6 @@ import javax.inject.Inject
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
-import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.serialization.json.NostrNotaryJson
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.crypto.toNpub
@@ -23,6 +22,7 @@ import net.primal.android.wallet.domain.ZapTarget
 import net.primal.android.wallet.domain.toTags
 import net.primal.android.wallet.nwc.model.NwcWalletRequest
 import net.primal.android.wallet.nwc.model.PayInvoiceRequest
+import net.primal.core.utils.serialization.CommonJson
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import timber.log.Timber
@@ -67,7 +67,7 @@ class NostrNotary @Inject constructor(
             pubKey = userId,
             kind = NostrEventKind.ApplicationSpecificData.value,
             tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()) + tags,
-            content = NostrJson.encodeToString(
+            content = CommonJson.encodeToString(
                 AppSettingsDescription(description = description),
             ),
         ).signOrThrow(nsec = findNsecOrThrow(userId))
@@ -78,7 +78,7 @@ class NostrNotary @Inject constructor(
             pubKey = userId,
             kind = NostrEventKind.ApplicationSpecificData.value,
             tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
-            content = NostrJson.encodeToString(appSettings),
+            content = CommonJson.encodeToString(appSettings),
         ).signOrThrow(nsec = findNsecOrThrow(userId))
     }
 

@@ -2,8 +2,6 @@ package net.primal.android.notes.repository
 
 import androidx.room.withTransaction
 import net.primal.android.core.ext.asMapByKey
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.events.ext.flatMapPostsAsEventUriPO
 import net.primal.android.nostr.db.eventRelayHintsUpserter
@@ -28,6 +26,8 @@ import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.thread.db.ArticleCommentCrossRef
 import net.primal.android.thread.db.NoteConversationCrossRef
+import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.domain.nostr.NostrEvent
 
@@ -84,7 +84,7 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
         videoThumbnails = videoThumbnails,
     )
 
-    val refEvents = referencedEvents.mapNotNull { NostrJson.decodeFromStringOrNull<NostrEvent>(it.content) }
+    val refEvents = referencedEvents.mapNotNull { CommonJson.decodeFromStringOrNull<NostrEvent>(it.content) }
 
     val noteNostrUris = allPosts.flatMapPostsAsNoteNostrUriPO(
         eventIdToNostrEvent = refEvents.associateBy { it.id },

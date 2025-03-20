@@ -1,7 +1,6 @@
 package net.primal.android.articles.api.mediator
 
 import androidx.room.withTransaction
-import net.primal.android.articles.api.model.ArticleHighlightsResponse
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.highlights.utils.mapNotNullAsHighlightComments
@@ -16,6 +15,7 @@ import net.primal.android.nostr.ext.mapNotNullAsEventStatsPO
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
+import net.primal.data.remote.api.articles.ArticleHighlightsResponse
 
 suspend fun ArticleHighlightsResponse.persistToDatabaseAsTransaction(database: PrimalDatabase) {
     val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }

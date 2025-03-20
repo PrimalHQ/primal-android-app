@@ -12,7 +12,10 @@ import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.long
+import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.serialization.toNostrJsonObject
 import org.junit.Test
 
 class NostrJsonTest {
@@ -30,7 +33,7 @@ class NostrJsonTest {
 
     @Test
     fun `decodeFromStringOrNull returns decoded object`() {
-        val actual = NostrJson.decodeFromStringOrNull<NostrEvent>(
+        val actual = CommonJson.decodeFromStringOrNull<NostrEvent>(
             """
                 {
                 	"id": "1c6a86ab9e68e3a32e6f1c8503890dd8fd62a124d081c75114faf3edcbe50384",
@@ -48,13 +51,13 @@ class NostrJsonTest {
 
     @Test
     fun `decodeFromStringOrNull returns null for null input`() {
-        val actual = NostrJson.decodeFromStringOrNull<NostrEvent>(null)
+        val actual = CommonJson.decodeFromStringOrNull<NostrEvent>(null)
         actual.shouldBeNull()
     }
 
     @Test
     fun `decodeFromStringOrNull returns null for invalid input`() {
-        val actual = NostrJson.decodeFromStringOrNull<NostrEvent>("invalid")
+        val actual = CommonJson.decodeFromStringOrNull<NostrEvent>("invalid")
         actual.shouldBeNull()
     }
 
@@ -67,14 +70,14 @@ class NostrJsonTest {
             },
         )
         val nostrEvent = buildNostrEvent(tags = tags)
-        val actual = nostrEvent.toJsonObject()
+        val actual = nostrEvent.toNostrJsonObject()
         actual shouldContainFieldsFrom nostrEvent
     }
 
     @Test
     fun `toJsonObject serializes tags as empty array if null`() {
         val nostrEvent = buildNostrEvent(tags = emptyList())
-        val actual = nostrEvent.toJsonObject()
+        val actual = nostrEvent.toNostrJsonObject()
         actual shouldContainFieldsFrom nostrEvent
     }
 
