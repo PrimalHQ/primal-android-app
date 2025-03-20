@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
@@ -42,12 +43,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import java.time.Instant
-import java.time.LocalDate
 import java.time.temporal.ChronoUnit
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import net.primal.android.LocalContentDisplaySettings
@@ -251,7 +248,6 @@ private fun FeedNoteCard(
     val overflowIconSizeDp = 40.dp
 
     val graphicsLayer = rememberGraphicsLayer()
-    val coroutineScope = rememberCoroutineScope()
 
     NoteSurfaceCard(
         modifier = modifier
@@ -292,6 +288,7 @@ private fun FeedNoteCard(
                 isBookmarked = data.isBookmarked,
                 relayHints = state.relayHints,
                 enabled = noteOptionsMenuEnabled,
+                noteGraphicsLayer = graphicsLayer,
                 onBookmarkClick = {
                     eventPublisher(UiEvent.BookmarkAction(noteId = data.postId))
                 },
@@ -301,15 +298,6 @@ private fun FeedNoteCard(
                 onReportContentClick = {
                     reportDialogVisible = true
                 },
-                onShareNoteAsImageClick = {
-                    coroutineScope.launch {
-                        val bitmap = graphicsLayer.toImageBitmap()
-                        val date = epochTimeMillisecondsFormat(LocalDate.now().toEpochDay())
-                            ?: epochTimeMillisecondsFormat(Clock.System.now().toEpochMilliseconds())
-
-//                        fileSharer.shareImageBitmap(bitmap = bitmap, name = fileName)
-                    }
-                }
             )
 
             Column {
@@ -456,7 +444,7 @@ private fun FeedNote(
                 modifier = Modifier.drawWithContent {
                     graphicsLayer.record { this@drawWithContent.drawContent() }
                     drawLayer(graphicsLayer)
-                }
+                },
             ) {
                 FeedNoteHeader(
                     modifier = Modifier
@@ -728,18 +716,4 @@ fun PreviewFeedNoteListItemDarkForcedContentIndentSingleLineHeader(
             drawLineBelowAvatar = true,
         )
     }
-}
-
-fun epochTimeMillisecondsFormat(epochTimeMilliseconds: Long?): String? {
-    if (epochTimeMilliseconds == null) {
-        return null
-    }
-
-    val timeZone = TimeZone.currentSystemDefault()
-    val instant = kotlinx.datetime.Instant.fromEpochMilliseconds(epochTimeMilliseconds)
-    val localDateTime = instant.toLocalDateTime(timeZone)
-
-    return "${localDateTime.dayOfMonth.toString().padStart(2, '0')}.${
-        localDateTime.monthNumber.toString().padStart(2, '0')
-    }.${localDateTime.year}."
 }
