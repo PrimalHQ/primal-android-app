@@ -230,6 +230,8 @@ dependencies {
     implementation(project(":domain:nostr"))
     implementation(project(":domain:primal"))
     implementation(project(":domain:primal-wallet"))
+
+    implementation(project(":data:remote-caching"))
     implementation(project(":shared"))
 
     implementation(libs.core.ktx)

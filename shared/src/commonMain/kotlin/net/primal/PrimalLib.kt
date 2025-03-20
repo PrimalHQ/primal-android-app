@@ -1,6 +1,5 @@
 package net.primal
 
-import net.primal.data.remote.di.remoteApiModule
 import net.primal.data.repository.di.repositoryModule
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
@@ -19,9 +18,6 @@ internal object PrimalLib {
 
                 // Repositories
                 repositoryModule,
-
-                // Apis
-                remoteApiModule,
             )
         }
     }

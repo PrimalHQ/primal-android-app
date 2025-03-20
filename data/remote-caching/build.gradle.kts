@@ -1,5 +1,4 @@
 import co.touchlab.skie.configuration.DefaultArgumentInterop
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
 plugins {
@@ -7,12 +6,10 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.jetpack.room)
-    alias(libs.plugins.ktorfit)
     alias(libs.plugins.touchlab.skie)
 }
 
-private val xcfName = "PrimalShared"
+private val xcfName = "PrimalDataRemoteCaching"
 
 kotlin {
     // Android target
@@ -43,28 +40,12 @@ kotlin {
                 // Internal
                 implementation(project(":core:utils"))
                 implementation(project(":core:networking-primal"))
-                implementation(project(":data:remote-caching"))
                 implementation(project(":domain:nostr"))
                 implementation(project(":domain:primal"))
 
                 // Core
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.datetime)
-
-                // Koin
-                implementation(project.dependencies.platform(libs.koin.bom))
-                implementation(libs.koin.core)
-//                implementation(libs.koin.compose)
-//                implementation(libs.koin.compose.viewmodel)
-//                implementation(libs.koin.compose.viewmodel.navigation)
-
-                // Room
-                implementation(libs.room.runtime)
-                implementation(libs.room.paging)
-                implementation(libs.jetpack.sqlite.framework)
-
-                // Paging
-                implementation(libs.paging.common)
 
                 // Serialization
                 implementation(libs.kotlinx.serialization.json)
@@ -82,43 +63,11 @@ kotlin {
             dependencies {
                 // Coroutines
                 implementation(libs.kotlinx.coroutines.android)
-
-                // Koin
-                implementation(libs.koin.android)
-                implementation(libs.koin.androidx.compose)
-
-                // Room
-                implementation(libs.room.runtime.android)
-                implementation(libs.jetpack.sqlite.framework.android)
-
-                // Paging
-                implementation(libs.paging.runtime)
             }
         }
 
         iosMain {
             dependencies {
-                // Paging
-                api(libs.cash.app.paging.runtime.uikit)
-            }
-        }
-
-        val iosArm64Main by getting {
-            dependencies {
-                // SQLite
-                implementation(libs.jetpack.sqlite.framework.iosarm64)
-            }
-        }
-        val iosSimulatorArm64Main by getting {
-            dependencies {
-                // SQLite
-                implementation(libs.jetpack.sqlite.framework.iossimulatorarm64)
-            }
-        }
-        val iosX64Main by getting {
-            dependencies {
-                // SQLite
-                implementation(libs.jetpack.sqlite.framework.iosx64)
             }
         }
 
@@ -143,15 +92,6 @@ kotlin {
         }
     }
 
-    // This tells the Kotlin/Native compiler to link against the system SQLite library
-    // and ensures that NativeSQLiteDriver (used on iOS targets) can find libsqlite3 at
-    // runtime without missing symbols.
-    targets.withType<KotlinNativeTarget> {
-        binaries.all {
-            linkerOpts("-lsqlite3")
-        }
-    }
-
     // Opting in to the experimental @ObjCName annotation for native coroutines on iOS targets
     kotlin.sourceSets.all {
         languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
@@ -160,14 +100,6 @@ kotlin {
 
 tasks.register("assembleXCFramework") {
     dependsOn("assemble${xcfName}ReleaseXCFramework")
-}
-
-tasks.register("compileTargets") {
-    dependsOn("compileKotlinIosArm64", "compileAndroidMain")
-}
-
-room {
-    schemaDirectory("$projectDir/schemas")
 }
 
 skie {
@@ -185,17 +117,5 @@ skie {
 
     analytics {
         enabled.set(false)
-    }
-}
-
-dependencies {
-    listOf(
-        "kspAndroid",
-//        "kspDesktop",
-        "kspIosSimulatorArm64",
-        "kspIosX64",
-        "kspIosArm64",
-    ).forEach {
-        add(it, libs.room.compiler)
     }
 }
