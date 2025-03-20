@@ -2,8 +2,8 @@ package net.primal.android.notes.db
 
 import kotlinx.serialization.Serializable
 import net.primal.android.events.db.EventUriNostr
-import net.primal.android.events.domain.CdnImage
 import net.primal.android.profile.domain.PrimalLegendProfile
+import net.primal.domain.CdnImage
 
 @Serializable
 data class ReferencedZap(

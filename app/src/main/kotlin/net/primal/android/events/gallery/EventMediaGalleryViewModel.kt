@@ -19,13 +19,13 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.files.MediaDownloader
 import net.primal.android.core.files.error.UnableToSaveContent
 import net.primal.android.core.files.error.UnsuccessfulFileDownload
-import net.primal.android.events.domain.EventUriType
 import net.primal.android.events.gallery.EventMediaGalleryContract.UiEvent
 import net.primal.android.events.gallery.EventMediaGalleryContract.UiState
 import net.primal.android.events.repository.EventUriRepository
 import net.primal.android.navigation.mediaPositionMs
 import net.primal.android.navigation.mediaUrl
 import net.primal.android.navigation.noteIdOrThrow
+import net.primal.domain.EventUriType
 import timber.log.Timber
 
 @HiltViewModel

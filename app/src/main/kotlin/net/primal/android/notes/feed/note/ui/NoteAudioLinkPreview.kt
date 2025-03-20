@@ -32,10 +32,10 @@ import net.primal.android.R
 import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Play
-import net.primal.android.events.domain.EventUriType
 import net.primal.android.notes.feed.note.ui.attachment.NoteImageErrorImage
 import net.primal.android.notes.feed.note.ui.attachment.NoteImageLoadingPlaceholder
 import net.primal.android.theme.AppTheme
+import net.primal.domain.EventUriType
 
 @Composable
 fun NoteAudioLinkPreview(

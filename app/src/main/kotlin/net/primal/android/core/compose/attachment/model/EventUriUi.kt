@@ -1,8 +1,8 @@
 package net.primal.android.core.compose.attachment.model
 
 import net.primal.android.events.db.EventUri
-import net.primal.android.events.domain.CdnResourceVariant
-import net.primal.android.events.domain.EventUriType
+import net.primal.domain.CdnResourceVariant
+import net.primal.domain.EventUriType
 
 data class EventUriUi(
     val eventId: String,

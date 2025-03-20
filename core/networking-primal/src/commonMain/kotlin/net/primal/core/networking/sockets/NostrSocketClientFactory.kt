@@ -35,5 +35,4 @@ object NostrSocketClientFactory {
         onSocketConnectionOpened = onSocketConnectionOpened,
         onSocketConnectionClosed = onSocketConnectionClosed,
     )
-
 }

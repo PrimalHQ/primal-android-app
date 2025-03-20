@@ -65,10 +65,6 @@ import net.primal.android.explore.home.ExploreHomeViewModel
 import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.explore.search.ui.SearchScope
 import net.primal.android.explore.search.ui.SearchScreen
-import net.primal.android.feeds.domain.buildAdvancedSearchNotesFeedSpec
-import net.primal.android.feeds.domain.buildAdvancedSearchNotificationsFeedSpec
-import net.primal.android.feeds.domain.buildAdvancedSearchReadsFeedSpec
-import net.primal.android.feeds.domain.buildReadsTopicFeedSpec
 import net.primal.android.media.MediaItemScreen
 import net.primal.android.media.MediaItemViewModel
 import net.primal.android.messages.chat.ChatScreen
@@ -139,6 +135,10 @@ import net.primal.android.thread.notes.ThreadScreen
 import net.primal.android.thread.notes.ThreadViewModel
 import net.primal.android.wallet.activation.WalletActivationViewModel
 import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.domain.buildAdvancedSearchNotesFeedSpec
+import net.primal.domain.buildAdvancedSearchNotificationsFeedSpec
+import net.primal.domain.buildAdvancedSearchReadsFeedSpec
+import net.primal.domain.buildReadsTopicFeedSpec
 
 private fun NavController.navigateToWelcome() =
     navigate(

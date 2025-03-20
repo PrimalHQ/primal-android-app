@@ -21,8 +21,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import net.primal.android.core.ext.asMapByKey
-import net.primal.android.feeds.domain.isPremiumFeedSpec
-import net.primal.android.feeds.domain.supportsUpwardsNotesPagination
 import net.primal.android.nostr.ext.findFirstEventId
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
@@ -43,7 +41,9 @@ import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.data.remote.api.feed.model.FeedResponse
+import net.primal.domain.isPremiumFeedSpec
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.supportsUpwardsNotesPagination
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = NoteFeedViewModel.Factory::class)

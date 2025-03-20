@@ -2,10 +2,10 @@ package net.primal.android.notifications.list
 
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
-import net.primal.android.events.domain.CdnImage
 import net.primal.android.notifications.list.ui.NotificationUi
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.user.domain.Badges
+import net.primal.domain.CdnImage
 
 interface NotificationsContract {
 

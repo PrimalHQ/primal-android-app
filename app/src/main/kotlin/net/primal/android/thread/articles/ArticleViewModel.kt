@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.bookmarks.BookmarksRepository
-import net.primal.android.bookmarks.domain.BookmarkType
 import net.primal.android.core.errors.UiError
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -21,6 +20,7 @@ import net.primal.android.thread.articles.ArticleContract.UiEvent
 import net.primal.android.thread.articles.ArticleContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.BookmarkType
 import timber.log.Timber
 
 @HiltViewModel

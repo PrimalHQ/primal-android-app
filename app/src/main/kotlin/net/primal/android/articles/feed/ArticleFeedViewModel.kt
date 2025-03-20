@@ -16,9 +16,9 @@ import kotlinx.coroutines.launch
 import net.primal.android.articles.ArticleRepository
 import net.primal.android.articles.feed.ArticleFeedContract.UiState
 import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
-import net.primal.android.feeds.domain.isPremiumFeedSpec
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.domain.isPremiumFeedSpec
 
 @HiltViewModel(assistedFactory = ArticleFeedViewModel.Factory::class)
 class ArticleFeedViewModel @AssistedInject constructor(

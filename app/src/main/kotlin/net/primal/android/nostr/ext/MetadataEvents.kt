@@ -3,9 +3,6 @@ package net.primal.android.nostr.ext
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.core.utils.parseUris
-import net.primal.android.events.domain.CdnImage
-import net.primal.android.events.domain.CdnResource
-import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.nostr.model.primal.content.ContentProfilePremiumInfo
 import net.primal.android.profile.db.ProfileData
 import net.primal.android.profile.domain.PrimalLegendProfile
@@ -14,6 +11,9 @@ import net.primal.android.wallet.api.decodeLNUrlOrNull
 import net.primal.android.wallet.api.parseAsLNUrlOrNull
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.domain.CdnImage
+import net.primal.domain.CdnResource
+import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.serialization.toNostrJsonObject
 

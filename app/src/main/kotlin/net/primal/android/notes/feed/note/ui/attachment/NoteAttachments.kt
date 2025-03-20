@@ -10,7 +10,6 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.core.compose.attachment.model.isMediaUri
-import net.primal.android.events.domain.EventUriType
 import net.primal.android.notes.feed.note.ui.NoteAudioSpotifyLinkPreview
 import net.primal.android.notes.feed.note.ui.NoteAudioTidalLinkPreview
 import net.primal.android.notes.feed.note.ui.NoteLinkLargePreview
@@ -18,6 +17,7 @@ import net.primal.android.notes.feed.note.ui.NoteLinkPreview
 import net.primal.android.notes.feed.note.ui.NoteVideoLinkPreview
 import net.primal.android.notes.feed.note.ui.NoteYouTubeLinkPreview
 import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
+import net.primal.domain.EventUriType
 
 @ExperimentalFoundationApi
 @Composable

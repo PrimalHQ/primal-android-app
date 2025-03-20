@@ -1,8 +1,8 @@
 package net.primal.android.feeds.list
 
-import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.feeds.dvm.ui.DvmFeedUi
 import net.primal.android.feeds.list.ui.model.FeedUi
+import net.primal.domain.FeedSpecKind
 
 interface FeedListContract {
     data class UiState(

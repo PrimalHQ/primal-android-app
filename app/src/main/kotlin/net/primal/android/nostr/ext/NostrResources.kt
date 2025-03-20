@@ -11,9 +11,6 @@ import net.primal.android.crypto.bech32ToHexOrThrow
 import net.primal.android.crypto.bechToBytesOrThrow
 import net.primal.android.crypto.toHex
 import net.primal.android.events.db.EventUriNostr
-import net.primal.android.events.domain.CdnResource
-import net.primal.android.events.domain.EventLinkPreviewData
-import net.primal.android.events.domain.EventUriNostrType
 import net.primal.android.events.ext.flatMapPostsAsEventUriPO
 import net.primal.android.messages.db.DirectMessageData
 import net.primal.android.nostr.utils.Naddr
@@ -28,6 +25,9 @@ import net.primal.android.notes.db.ReferencedUser
 import net.primal.android.notes.db.ReferencedZap
 import net.primal.android.profile.db.ProfileData
 import net.primal.android.wallet.utils.LnInvoiceUtils
+import net.primal.domain.CdnResource
+import net.primal.domain.EventLinkPreviewData
+import net.primal.domain.EventUriNostrType
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import timber.log.Timber

@@ -10,21 +10,16 @@ object HttpClientFactory {
 
     private val engine = createHttpClientEngine()
 
-    fun createHttpClient(
-        config: HttpClientConfig<*>.() -> Unit,
-    ): HttpClient {
+    fun createHttpClient(config: HttpClientConfig<*>.() -> Unit): HttpClient {
         return HttpClient(engine) {
             config()
         }
     }
 
-    fun createHttpClientWithDefaultConfig(
-        config: (HttpClientConfig<*>.() -> Unit)? = null,
-    ): HttpClient {
+    fun createHttpClientWithDefaultConfig(config: (HttpClientConfig<*>.() -> Unit)? = null): HttpClient {
         return HttpClient(engine) {
             installDefaultHttpClientConfiguration(json = NetworkingJson)
             config?.invoke(this)
         }
     }
-
 }

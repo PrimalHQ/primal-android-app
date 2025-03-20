@@ -12,6 +12,5 @@ import net.primal.data.remote.factory.PrimalApiFactory
 class ProfileWellKnownApiModule {
 
     @Provides
-    fun provideProfileWellKnownApi(): UserWellKnownApi =
-        PrimalApiFactory.createUserWellKnownApi()
+    fun provideProfileWellKnownApi(): UserWellKnownApi = PrimalApiFactory.createUserWellKnownApi()
 }

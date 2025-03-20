@@ -14,8 +14,8 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
-import net.primal.android.events.domain.EventUriType
 import net.primal.android.theme.AppTheme
+import net.primal.domain.EventUriType
 
 @Composable
 fun TopLevelDomainText(modifier: Modifier, eventUriType: EventUriType) {

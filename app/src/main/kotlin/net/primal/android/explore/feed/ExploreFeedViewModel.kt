@@ -18,9 +18,6 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent
 import net.primal.android.explore.feed.ExploreFeedContract.UiState
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
-import net.primal.android.feeds.domain.FEED_KIND_SEARCH
-import net.primal.android.feeds.domain.buildAdvancedSearchFeedSpec
-import net.primal.android.feeds.domain.resolveFeedSpecKind
 import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.navigation.advancedSearchFeedSpec
 import net.primal.android.navigation.exploreFeedSpec
@@ -29,6 +26,9 @@ import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.FEED_KIND_SEARCH
+import net.primal.domain.buildAdvancedSearchFeedSpec
+import net.primal.domain.resolveFeedSpecKind
 import timber.log.Timber
 
 @HiltViewModel

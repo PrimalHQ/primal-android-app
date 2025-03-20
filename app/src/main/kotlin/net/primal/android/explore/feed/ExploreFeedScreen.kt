@@ -42,15 +42,15 @@ import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.AddToUserFeeds
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.RemoveFromUserFeeds
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
-import net.primal.android.feeds.domain.FeedSpecKind
-import net.primal.android.feeds.domain.extractTopicFromFeedSpec
-import net.primal.android.feeds.domain.isSearchFeedSpec
-import net.primal.android.feeds.domain.resolveDefaultDescription
-import net.primal.android.feeds.domain.resolveDefaultTitle
+import net.primal.android.feeds.resolveDefaultDescription
+import net.primal.android.feeds.resolveDefaultTitle
 import net.primal.android.notes.feed.grid.MediaFeedGrid
 import net.primal.android.notes.feed.list.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
+import net.primal.domain.FeedSpecKind
+import net.primal.domain.extractTopicFromFeedSpec
+import net.primal.domain.isSearchFeedSpec
 
 @Composable
 fun ExploreFeedScreen(

@@ -5,7 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
-import net.primal.android.feeds.domain.FeedSpecKind
+import net.primal.domain.FeedSpecKind
 
 @Dao
 interface FeedDao {

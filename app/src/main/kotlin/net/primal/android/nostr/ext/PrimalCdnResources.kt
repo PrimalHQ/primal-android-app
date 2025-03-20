@@ -1,9 +1,9 @@
 package net.primal.android.nostr.ext
 
-import net.primal.android.events.domain.CdnResource
-import net.primal.android.events.domain.CdnResourceVariant
 import net.primal.android.nostr.model.primal.content.ContentPrimalEventResources
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.domain.CdnResource
+import net.primal.domain.CdnResourceVariant
 import net.primal.domain.PrimalEvent
 
 private fun List<PrimalEvent>.flatMapNotNullAsContentPrimalEventResources() =

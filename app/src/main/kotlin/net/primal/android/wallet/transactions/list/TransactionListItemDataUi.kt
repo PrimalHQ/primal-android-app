@@ -1,10 +1,10 @@
 package net.primal.android.wallet.transactions.list
 
 import java.time.Instant
-import net.primal.android.events.domain.CdnImage
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.wallet.domain.TxState
 import net.primal.android.wallet.domain.TxType
+import net.primal.domain.CdnImage
 
 data class TransactionListItemDataUi(
     val txId: String,

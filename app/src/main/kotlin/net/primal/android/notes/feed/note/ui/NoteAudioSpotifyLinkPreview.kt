@@ -17,8 +17,8 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import java.net.URL
 import kotlin.time.Duration.Companion.milliseconds
-import net.primal.android.events.domain.EventUriType
 import net.primal.android.theme.AppTheme
+import net.primal.domain.EventUriType
 
 private fun String.convertToSpotifyEmbedUrl(): String? =
     runCatching {

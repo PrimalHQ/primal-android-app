@@ -61,9 +61,9 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.utils.formatNip05Identifier
-import net.primal.android.events.domain.CdnImage
-import net.primal.android.nostr.model.content.ContentMetadata
 import net.primal.android.theme.AppTheme
+import net.primal.domain.CdnImage
+import net.primal.domain.nostr.ContentMetadata
 
 @ExperimentalMaterial3Api
 @Composable

@@ -438,7 +438,8 @@ private fun takeAsReferencedArticleOrNull(
 ) {
     // TODO Rewire once NIP19 is implemented
     ReferencedArticle(
-        naddr = "", // refNaddr.toNaddrString(),
+        // refNaddr.toNaddrString(),
+        naddr = "",
         aTag = refArticle.aTag,
         eventId = refArticle.eventId,
         articleId = refArticle.articleId,

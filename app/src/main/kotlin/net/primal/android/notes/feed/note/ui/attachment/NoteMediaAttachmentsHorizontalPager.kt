@@ -26,9 +26,9 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.HorizontalPagerIndicator
 import net.primal.android.core.compose.attachment.model.EventUriUi
-import net.primal.android.events.domain.EventUriType
 import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
 import net.primal.android.theme.AppTheme
+import net.primal.domain.EventUriType
 
 const val SINGLE_IMAGE = 1
 const val TWO_IMAGES = 2

@@ -50,7 +50,6 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedLikesFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
 import net.primal.android.core.errors.UiError
-import net.primal.android.events.domain.CdnImage
 import net.primal.android.feeds.dvm.DvmFeedListItemContract
 import net.primal.android.feeds.dvm.DvmFeedListItemViewModel
 import net.primal.android.notes.feed.note.ui.SingleEventStat
@@ -58,6 +57,7 @@ import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.zaps.canZap
+import net.primal.domain.CdnImage
 
 private val PaidBackground = Color(0xFFFC6337)
 
@@ -197,14 +197,14 @@ private fun DvmFeedListItem(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalAlignment = Alignment.Start,
                 ) {
-                    if (dvmFeed.data.description != null) {
+                    dvmFeed.data.description?.let { description ->
                         Text(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 6.dp),
                             style = AppTheme.typography.bodyMedium,
                             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                            text = dvmFeed.data.description,
+                            text = description,
                             maxLines = if (extended) 2 else 1,
                             overflow = TextOverflow.Ellipsis,
                         )

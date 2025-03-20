@@ -41,11 +41,11 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.errors.UiError
-import net.primal.android.feeds.domain.buildSpec
 import net.primal.android.feeds.dvm.ui.DvmFeedListItem
 import net.primal.android.feeds.dvm.ui.DvmFeedUi
 import net.primal.android.feeds.dvm.ui.DvmHeaderAndFeedList
 import net.primal.android.theme.AppTheme
+import net.primal.domain.buildSpec
 
 @Composable
 fun ExploreFeeds(

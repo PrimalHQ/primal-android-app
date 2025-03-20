@@ -1,6 +1,6 @@
 package net.primal.android.bookmarks.list
 
-import net.primal.android.feeds.domain.FeedSpecKind
+import net.primal.domain.FeedSpecKind
 
 interface BookmarksContract {
     data class UiState(

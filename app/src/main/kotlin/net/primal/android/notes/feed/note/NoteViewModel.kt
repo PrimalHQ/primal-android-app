@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.bookmarks.BookmarksRepository
-import net.primal.android.bookmarks.domain.BookmarkType
 import net.primal.android.core.errors.UiError
 import net.primal.android.events.repository.EventRepository
 import net.primal.android.networking.relays.errors.MissingRelaysException
@@ -30,6 +29,7 @@ import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.BookmarkType
 import net.primal.domain.nostr.NostrEventKind
 import timber.log.Timber
 

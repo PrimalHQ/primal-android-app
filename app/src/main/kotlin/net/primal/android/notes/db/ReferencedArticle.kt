@@ -3,10 +3,10 @@ package net.primal.android.notes.db
 import java.time.Instant
 import kotlinx.serialization.Serializable
 import net.primal.android.articles.feed.ui.FeedArticleUi
-import net.primal.android.events.domain.CdnImage
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.profile.domain.PrimalLegendProfile
+import net.primal.domain.CdnImage
 
 @Serializable
 data class ReferencedArticle(

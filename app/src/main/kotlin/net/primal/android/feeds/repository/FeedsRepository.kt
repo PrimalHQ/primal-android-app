@@ -9,10 +9,6 @@ import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.feeds.api.FeedsApi
 import net.primal.android.feeds.db.Feed
-import net.primal.android.feeds.domain.DvmFeed
-import net.primal.android.feeds.domain.FEED_KIND_DVM
-import net.primal.android.feeds.domain.FeedSpecKind
-import net.primal.android.feeds.domain.buildSpec
 import net.primal.android.nostr.ext.asEventStatsPO
 import net.primal.android.nostr.ext.asEventUserStatsPO
 import net.primal.android.nostr.ext.findFirstIdentifier
@@ -33,7 +29,11 @@ import net.primal.android.nostr.model.primal.content.ContentPrimalEventUserStats
 import net.primal.android.wallet.api.parseAsLNUrlOrNull
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.domain.DvmFeed
+import net.primal.domain.FEED_KIND_DVM
+import net.primal.domain.FeedSpecKind
 import net.primal.domain.PrimalEvent
+import net.primal.domain.buildSpec
 
 class FeedsRepository @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,

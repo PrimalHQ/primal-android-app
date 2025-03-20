@@ -14,13 +14,13 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notes.FeedPost as FeedPostPO
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.local.paging.NoteFeedRemoteMediator
+import net.primal.data.local.processors.persistNoteRepliesAndArticleCommentsToDatabase
+import net.primal.data.local.processors.persistToDatabaseAsTransaction
 import net.primal.data.local.queries.ChronologicalFeedWithRepostsQueryBuilder
 import net.primal.data.local.queries.ExploreFeedQueryBuilder
 import net.primal.data.local.queries.FeedQueryBuilder
 import net.primal.data.remote.api.feed.FeedApi
 import net.primal.data.remote.api.feed.model.ThreadRequestBody
-import net.primal.data.local.processors.persistNoteRepliesAndArticleCommentsToDatabase
-import net.primal.data.local.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mapper.mapAsFeedPostDO
 import net.primal.domain.model.FeedPost as FeedPostDO
 import net.primal.domain.repository.FeedRepository

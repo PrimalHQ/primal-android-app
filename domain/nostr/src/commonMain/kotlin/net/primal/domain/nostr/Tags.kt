@@ -155,7 +155,7 @@ fun Naddr.asReplaceableEventTag(marker: String? = null): JsonArray =
         marker = marker,
     )
 
-//fun NoteAttachment.asIMetaTag(): JsonArray {
+// fun NoteAttachment.asIMetaTag(): JsonArray {
 //    require(this.remoteUrl != null)
 //    return buildJsonArray {
 //        add("imeta")
@@ -166,9 +166,9 @@ fun Naddr.asReplaceableEventTag(marker: String? = null): JsonArray =
 //        this@asIMetaTag.uploadedSizeInBytes?.let { add("size $it") }
 //        this@asIMetaTag.dimensionInPixels?.let { add("dim $it") }
 //    }
-//}
+// }
 
-//fun String.parseEventTags(marker: String? = null): Set<JsonArray> =
+// fun String.parseEventTags(marker: String? = null): Set<JsonArray> =
 //    this.parseNostrUris().mapNotNull { uri ->
 //        when {
 //            uri.isNEventUri() || uri.isNEvent() ->
@@ -181,7 +181,7 @@ fun Naddr.asReplaceableEventTag(marker: String? = null): JsonArray =
 //        }
 //    }.toSet()
 
-//fun String.parsePubkeyTags(marker: String? = null): Set<JsonArray> =
+// fun String.parsePubkeyTags(marker: String? = null): Set<JsonArray> =
 //    parseNostrUris().mapNotNull {
 //        when {
 //            it.isNProfileUri() || it.isNProfile() -> {
@@ -198,7 +198,7 @@ fun Naddr.asReplaceableEventTag(marker: String? = null): JsonArray =
 //        }
 //    }.toSet()
 
-//fun String.parseReplaceableEventTags(marker: String? = null): Set<JsonArray> =
+// fun String.parseReplaceableEventTags(marker: String? = null): Set<JsonArray> =
 //    this.parseNostrUris().mapNotNull { uri ->
 //        when {
 //            uri.isNAddrUri() || uri.isNAddr() ->

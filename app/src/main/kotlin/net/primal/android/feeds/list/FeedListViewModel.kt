@@ -15,9 +15,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.feeds.db.Feed
-import net.primal.android.feeds.domain.DvmFeed
-import net.primal.android.feeds.domain.FeedSpecKind
-import net.primal.android.feeds.domain.buildSpec
 import net.primal.android.feeds.list.FeedListContract.UiEvent
 import net.primal.android.feeds.list.FeedListContract.UiState
 import net.primal.android.feeds.list.FeedListContract.UiState.FeedMarketplaceStage
@@ -30,6 +27,9 @@ import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.DvmFeed
+import net.primal.domain.FeedSpecKind
+import net.primal.domain.buildSpec
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = FeedListViewModel.Factory::class)
