@@ -16,6 +16,8 @@
             <option value="$PROJECT_DIR$/core/networking-http" />
             <option value="$PROJECT_DIR$/core/networking-primal" />
             <option value="$PROJECT_DIR$/core/utils" />
+            <option value="$PROJECT_DIR$/data" />
+            <option value="$PROJECT_DIR$/data/remote-caching" />
             <option value="$PROJECT_DIR$/domain" />
             <option value="$PROJECT_DIR$/domain/common" />
             <option value="$PROJECT_DIR$/domain/nostr" />

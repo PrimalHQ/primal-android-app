@@ -27,6 +27,8 @@ include(":core:app-config")
 include(":core:networking-http")
 include(":core:networking-primal")
 
+include(":data:remote-caching")
+
 include(":domain:common")
 include(":domain:nostr")
 include(":domain:primal")
