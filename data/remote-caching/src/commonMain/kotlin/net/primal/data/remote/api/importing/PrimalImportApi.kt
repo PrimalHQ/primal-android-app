@@ -1,4 +1,4 @@
-package net.primal.data.remote.api.import
+package net.primal.data.remote.api.importing
 
 import net.primal.domain.nostr.NostrEvent
 
