@@ -1,8 +1,12 @@
 package net.primal.android.auth.login
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.channels.Channel
@@ -18,8 +22,10 @@ import net.primal.android.auth.login.LoginContract.SideEffect
 import net.primal.android.auth.login.LoginContract.UiEvent
 import net.primal.android.auth.login.LoginContract.UiState
 import net.primal.android.auth.repository.LoginHandler
+import net.primal.android.auth.signer.Permission
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.core.utils.isValidNostrPrivateKey
 import net.primal.android.core.utils.isValidNostrPublicKey
 import net.primal.android.crypto.bech32ToHexOrThrow
@@ -30,6 +36,7 @@ import timber.log.Timber
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val profileRepository: ProfileRepository,
     private val loginHandler: LoginHandler,
@@ -63,8 +70,39 @@ class LoginViewModel @Inject constructor(
                 when (it) {
                     is UiEvent.LoginRequestEvent -> login(nostrKey = _state.value.loginInput)
                     is UiEvent.UpdateLoginInput -> changeLoginInput(input = it.newInput)
+                    UiEvent.LoginWithAmber -> loginWithAmber()
                 }
             }
+        }
+
+    private fun loginWithAmber() =
+        viewModelScope.launch {
+            /*
+            * this can be moved to screen but serves as an example of the typical pattern we are going to deal with
+            *  */
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("nostrsigner:"))
+            intent.`package` = "com.greenart7c3.nostrsigner"
+
+            val permissions = listOf(
+                Permission(
+                    type = "nip04_encrypt",
+                ),
+                Permission(
+                    type = "nip04_decrypt",
+                ),
+                Permission(
+                    type = "nip44_encrypt",
+                ),
+                Permission(
+                    type = "nip44_decrypt",
+                ),
+                Permission(
+                    type = "decrypt_zap_event",
+                ),
+            )
+            intent.putExtra("permissions", NostrJson.encodeToString(permissions))
+            intent.putExtra("type", "get_public_key")
+            setEffect(SideEffect.AskForSign(intent))
         }
 
     private fun login(nostrKey: String) =

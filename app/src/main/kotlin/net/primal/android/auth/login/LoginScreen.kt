@@ -1,7 +1,11 @@
 package net.primal.android.auth.login
 
+import android.app.Activity
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -57,6 +61,7 @@ import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.UiDensityMode
 import net.primal.android.core.compose.UniversalAvatarThumbnail
+import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.detectUiDensityModeFromMaxHeight
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -64,6 +69,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.isCompactOrLower
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.core.utils.isExternalSignerInstalled
 import net.primal.android.core.utils.isValidNostrPrivateKey
 import net.primal.android.core.utils.isValidNostrPublicKey
 import net.primal.android.theme.AppTheme
@@ -75,11 +81,24 @@ fun LoginScreen(
     onClose: () -> Unit,
     onLoginSuccess: () -> Unit,
 ) {
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+    ) { result ->
+        if (result.resultCode != Activity.RESULT_OK) {
+            /* TODO: handle reject? */
+        } else {
+            /* TODO: We should save that the login with amber happened, possibly propagate it to Credential instance. */
+            val pubkey = result.data?.getStringExtra("result")
+            viewModel.setEvent(LoginContract.UiEvent.UpdateLoginInput(pubkey ?: ""))
+        }
+    }
+    val activity = LocalActivity.current
     val keyboardController = LocalSoftwareKeyboardController.current
     LaunchedEffect(viewModel, onLoginSuccess) {
         viewModel.effect.collect {
             when (it) {
                 is LoginContract.SideEffect.LoginSuccess -> onLoginSuccess()
+                is LoginContract.SideEffect.AskForSign -> launcher.launch(it.intent)
             }
         }
     }
@@ -138,6 +157,7 @@ fun LoginScreen(
             uiMode = uiMode,
             onLoginInputChanged = { eventPublisher(LoginContract.UiEvent.UpdateLoginInput(newInput = it)) },
             onLoginClick = { eventPublisher(LoginContract.UiEvent.LoginRequestEvent) },
+            onLoginWithAmberClick = { eventPublisher(LoginContract.UiEvent.LoginWithAmber) },
         )
     }
 }
@@ -149,7 +169,9 @@ fun LoginContent(
     uiMode: UiDensityMode,
     onLoginInputChanged: (String) -> Unit,
     onLoginClick: () -> Unit,
+    onLoginWithAmberClick: () -> Unit,
 ) {
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val clipboardManager = LocalClipboardManager.current
     val keyboardVisible by keyboardVisibilityAsState()
@@ -188,7 +210,7 @@ fun LoginContent(
                 .fillMaxWidth()
                 .padding(vertical = 16.dp)
                 .wrapContentHeight(align = Alignment.Bottom),
-            verticalArrangement = Arrangement.Bottom,
+            verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.Bottom),
         ) {
             OnboardingButton(
                 text = when {
@@ -211,6 +233,19 @@ fun LoginContent(
                     }
                 },
             )
+
+            if (isExternalSignerInstalled(context = context)) {
+                PrimalLoadingButton(
+                    modifier = Modifier
+                        .height(56.dp)
+                        .fillMaxWidth(),
+                    containerColor = Color.Transparent,
+                    disabledContainerColor = Color.Black.copy(alpha = 0.20f),
+                    contentColor = Color.White,
+                    onClick = onLoginWithAmberClick,
+                    text = "Login with Amber",
+                )
+            }
         }
     }
 }
