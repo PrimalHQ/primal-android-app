@@ -7,7 +7,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.ElementsIntoSet
 import javax.inject.Singleton
-import net.primal.android.core.serialization.json.NostrJson
+import net.primal.core.utils.serialization.CommonJson
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -41,6 +41,6 @@ object NetworkingModule {
             .baseUrl("https://primal.net")
             .client(okHttpClient)
             .addConverterFactory(ScalarsConverterFactory.create())
-            .addConverterFactory(NostrJson.asConverterFactory("application/json".toMediaType()))
+            .addConverterFactory(CommonJson.asConverterFactory("application/json".toMediaType()))
             .build()
 }

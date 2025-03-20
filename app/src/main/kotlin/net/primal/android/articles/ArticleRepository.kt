@@ -11,15 +11,15 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
-import net.primal.android.articles.api.ArticlesApi
 import net.primal.android.articles.api.mediator.ArticleFeedMediator
 import net.primal.android.articles.api.mediator.persistArticleCommentsToDatabase
 import net.primal.android.articles.api.mediator.persistToDatabaseAsTransaction
-import net.primal.android.articles.api.model.ArticleDetailsRequestBody
-import net.primal.android.articles.api.model.ArticleHighlightsRequestBody
 import net.primal.android.articles.db.Article
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
+import net.primal.data.remote.api.articles.ArticleDetailsRequestBody
+import net.primal.data.remote.api.articles.ArticleHighlightsRequestBody
+import net.primal.data.remote.api.articles.ArticlesApi
 import net.primal.domain.nostr.NostrEventKind
 
 class ArticleRepository @Inject constructor(

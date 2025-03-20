@@ -1,13 +1,13 @@
 package net.primal.android.nostr.ext
 
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.notes.db.RepostData
+import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.domain.nostr.NostrEvent
 
 fun List<NostrEvent>.mapNotNullAsRepostDataPO() =
     mapNotNull {
-        val repostedPost = NostrJson.decodeFromStringOrNull<NostrEvent>(it.content)
+        val repostedPost = CommonJson.decodeFromStringOrNull<NostrEvent>(it.content)
 
         val repostedPostId = repostedPost?.id ?: it.tags.findFirstEventId()
         val repostedPostAuthorId = repostedPost?.pubKey ?: it.tags.findFirstProfileId()

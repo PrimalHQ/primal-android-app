@@ -1,12 +1,12 @@
 package net.primal.android.nostr.ext
 
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.explore.api.model.NewUserFollowStats
 import net.primal.android.nostr.model.primal.content.ContentProfilePremiumInfo
 import net.primal.android.nostr.model.primal.content.ContentUserProfileStats
 import net.primal.android.profile.db.ProfileStats
 import net.primal.android.profile.domain.PrimalLegendProfile
+import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.domain.PrimalEvent
 
 fun List<PrimalEvent>.mapNotNullAsProfileStatsPO() = mapNotNull { it.asProfileStatsPO() }
@@ -41,29 +41,29 @@ fun PrimalEvent.asProfileStatsPO(): ProfileStats? {
 }
 
 private fun PrimalEvent.takeContentAsUserProfileStatsOrNull(): ContentUserProfileStats? {
-    return NostrJson.decodeFromStringOrNull<ContentUserProfileStats>(this.content)
+    return CommonJson.decodeFromStringOrNull<ContentUserProfileStats>(this.content)
 }
 
 fun PrimalEvent.takeContentAsPrimalUserScoresOrNull(): Map<String, Float> {
-    return NostrJson.decodeFromString(this.content)
+    return CommonJson.decodeFromString(this.content)
 }
 
 fun PrimalEvent?.parseAndMapPrimalUserNames(): Map<String, String> {
-    return NostrJson.decodeFromStringOrNull<Map<String, String>>(this?.content) ?: emptyMap()
+    return CommonJson.decodeFromStringOrNull<Map<String, String>>(this?.content) ?: emptyMap()
 }
 
 fun PrimalEvent?.parseAndMapPrimalLegendProfiles(): Map<String, PrimalLegendProfile> {
-    return NostrJson.decodeFromStringOrNull<Map<String, PrimalLegendProfile>>(this?.content) ?: emptyMap()
+    return CommonJson.decodeFromStringOrNull<Map<String, PrimalLegendProfile>>(this?.content) ?: emptyMap()
 }
 
 fun PrimalEvent?.parseAndMapPrimalPremiumInfo(): Map<String, ContentProfilePremiumInfo> {
-    return NostrJson.decodeFromStringOrNull<Map<String, ContentProfilePremiumInfo>>(this?.content) ?: emptyMap()
+    return CommonJson.decodeFromStringOrNull<Map<String, ContentProfilePremiumInfo>>(this?.content) ?: emptyMap()
 }
 
 fun PrimalEvent.takeContentAsPrimalUserFollowersCountsOrNull(): Map<String, Int> {
-    return NostrJson.decodeFromString(this.content)
+    return CommonJson.decodeFromString(this.content)
 }
 
 fun PrimalEvent.takeContentAsPrimalUserFollowStats(): Map<String, NewUserFollowStats> {
-    return NostrJson.decodeFromString(this.content)
+    return CommonJson.decodeFromString(this.content)
 }

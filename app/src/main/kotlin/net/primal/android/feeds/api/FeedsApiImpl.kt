@@ -2,7 +2,6 @@ package net.primal.android.feeds.api
 
 import javax.inject.Inject
 import javax.inject.Singleton
-import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.feeds.api.model.FeedsResponse
 import net.primal.android.feeds.api.model.SubSettingsAuthorization
 import net.primal.android.feeds.domain.FeedSpecKind
@@ -13,6 +12,7 @@ import net.primal.android.nostr.notary.NostrNotary
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.serialization.CommonJson
 import net.primal.domain.nostr.NostrEventKind
 
 @Singleton
@@ -25,7 +25,7 @@ class FeedsApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.GET_FEATURED_DVM_FEEDS.id,
-                optionsJson = NostrJson.encodeToString(
+                optionsJson = CommonJson.encodeToString(
                     DvmFeedsRequestBody(
                         specKind = specKind?.id,
                         pubkey = pubkey,
@@ -57,7 +57,7 @@ class FeedsApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.GET_DEFAULT_APP_SUB_SETTINGS.id,
-                optionsJson = NostrJson.encodeToString(ContentAppSubSettings<String>(key = key)),
+                optionsJson = CommonJson.encodeToString(ContentAppSubSettings<String>(key = key)),
             ),
         )
 
@@ -75,7 +75,7 @@ class FeedsApiImpl @Inject constructor(
 
         val signedNostrEvent = nostrNotary.signAppSpecificDataNostrEvent(
             userId = userId,
-            content = NostrJson.encodeToString(
+            content = CommonJson.encodeToString(
                 ContentAppSubSettings<String>(key = key),
             ),
         )
@@ -83,7 +83,7 @@ class FeedsApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.GET_APP_SUB_SETTINGS.id,
-                optionsJson = NostrJson.encodeToString(SubSettingsAuthorization(event = signedNostrEvent)),
+                optionsJson = CommonJson.encodeToString(SubSettingsAuthorization(event = signedNostrEvent)),
             ),
         )
 
@@ -100,7 +100,7 @@ class FeedsApiImpl @Inject constructor(
     ) {
         val signedNostrEvent = nostrNotary.signAppSpecificDataNostrEvent(
             userId = userId,
-            content = NostrJson.encodeToString(
+            content = CommonJson.encodeToString(
                 ContentAppSubSettings(
                     key = when (specKind) {
                         FeedSpecKind.Reads -> "user-reads-feeds"
@@ -114,7 +114,7 @@ class FeedsApiImpl @Inject constructor(
         primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.SET_APP_SUB_SETTINGS.id,
-                optionsJson = NostrJson.encodeToString(SubSettingsAuthorization(event = signedNostrEvent)),
+                optionsJson = CommonJson.encodeToString(SubSettingsAuthorization(event = signedNostrEvent)),
             ),
         )
     }

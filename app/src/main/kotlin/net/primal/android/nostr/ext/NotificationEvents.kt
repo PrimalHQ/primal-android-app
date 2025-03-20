@@ -3,16 +3,16 @@ package net.primal.android.nostr.ext
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.nostr.model.primal.content.ContentPrimalNotification
 import net.primal.android.notifications.db.NotificationData
 import net.primal.android.notifications.domain.NotificationType
 import net.primal.android.notifications.domain.NotificationsSummary
+import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.domain.PrimalEvent
 
 fun PrimalEvent.asNotificationSummary(): NotificationsSummary {
-    val summaryJsonObject = NostrJson.parseToJsonElement(this.content).jsonObject
+    val summaryJsonObject = CommonJson.parseToJsonElement(this.content).jsonObject
     val pairs = NotificationType.values().mapNotNull {
         val count = summaryJsonObject[it.type.toString()]?.jsonPrimitive?.contentOrNull?.toInt()
         if (count != null) it to count else null
@@ -80,5 +80,5 @@ fun ContentPrimalNotification.asNotificationPOOrNull(): NotificationData? {
 }
 
 fun List<PrimalEvent>.mapNotNullAsNotificationPO() =
-    this.mapNotNull { NostrJson.decodeFromStringOrNull<ContentPrimalNotification>(it.content) }
+    this.mapNotNull { CommonJson.decodeFromStringOrNull<ContentPrimalNotification>(it.content) }
         .mapNotNull { it.asNotificationPOOrNull() }

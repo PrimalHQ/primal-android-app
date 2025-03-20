@@ -63,5 +63,5 @@ fun PrimalEvent.takeContentAsPrimalUserFollowersCountsOrNull(): Map<String, Int>
 }
 
 // fun PrimalEvent.takeContentAsPrimalUserFollowStats(): Map<String, NewUserFollowStats> {
-//    return NostrJson.decodeFromString(this.content)
+//    return CommonJson.decodeFromString(this.content)
 // }

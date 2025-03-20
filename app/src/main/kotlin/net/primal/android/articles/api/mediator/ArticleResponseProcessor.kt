@@ -1,7 +1,6 @@
 package net.primal.android.articles.api.mediator
 
 import androidx.room.withTransaction
-import net.primal.android.articles.api.model.ArticleResponse
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.events.ext.flatMapArticlesAsEventUriPO
@@ -24,6 +23,7 @@ import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.thread.db.ArticleCommentCrossRef
+import net.primal.data.remote.api.articles.ArticleResponse
 
 suspend fun ArticleResponse.persistToDatabaseAsTransaction(userId: String, database: PrimalDatabase) {
     val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }

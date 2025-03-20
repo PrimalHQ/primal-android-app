@@ -2,15 +2,15 @@ package net.primal.android.nostr.ext
 
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.articles.db.ArticleData
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.toJsonObject
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.core.utils.parseUris
 import net.primal.android.highlights.db.HighlightData
 import net.primal.android.notes.db.PostData
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.serialization.toNostrJsonObject
 
 fun List<NostrEvent>.mapAsPostDataPO(
     referencedPosts: List<PostData>,
@@ -74,7 +74,7 @@ private fun NostrEvent.shortTextNoteAsPost(
         uris = this.content.parseUris(),
         hashtags = this.parseHashtags(),
         sig = this.sig,
-        raw = NostrJson.encodeToString(this.toJsonObject()),
+        raw = this.toNostrJsonObject().encodeToJsonString(),
         replyToPostId = replyToPostId,
         replyToAuthorId = replyToAuthorId,
     )
@@ -93,7 +93,7 @@ private fun NostrEvent.pictureNoteAsPost(): PostData {
         uris = content.parseUris(),
         hashtags = emptyList(),
         sig = this.sig,
-        raw = NostrJson.encodeToString(this.toJsonObject()),
+        raw = this.toNostrJsonObject().encodeToJsonString(),
         replyToPostId = null,
         replyToAuthorId = null,
     )

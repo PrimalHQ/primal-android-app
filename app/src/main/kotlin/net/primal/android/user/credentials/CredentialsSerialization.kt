@@ -4,14 +4,14 @@ import androidx.datastore.core.Serializer
 import java.io.InputStream
 import java.io.OutputStream
 import kotlinx.serialization.json.Json
-import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.security.Encryption
 import net.primal.android.security.readDecrypted
 import net.primal.android.security.writeEncrypted
 import net.primal.android.user.domain.Credential
+import net.primal.core.utils.serialization.CommonJson
 
 class CredentialsSerialization(
-    private val json: Json = NostrJson,
+    private val json: Json = CommonJson,
     private val encryption: Encryption,
 ) : Serializer<Set<Credential>> {
 

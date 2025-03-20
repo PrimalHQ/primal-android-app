@@ -4,8 +4,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.serialization.json.NostrJson
-import net.primal.android.core.serialization.json.decodeFromStringOrNull
 import net.primal.android.nostr.model.primal.content.ContentAppSettings
 import net.primal.android.nostr.model.primal.content.ContentZapConfigItem
 import net.primal.android.nostr.model.primal.content.ContentZapDefault
@@ -15,6 +13,8 @@ import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.settings.api.SettingsApi
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.domain.UserAccount
+import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.decodeFromStringOrNull
 import timber.log.Timber
 
 class SettingsRepository @Inject constructor(
@@ -119,7 +119,7 @@ class SettingsRepository @Inject constructor(
     private suspend fun fetchAppSettings(userId: String): ContentAppSettings? =
         try {
             val response = settingsApi.getAppSettings(pubkey = userId)
-            NostrJson.decodeFromStringOrNull<ContentAppSettings>(
+            CommonJson.decodeFromStringOrNull<ContentAppSettings>(
                 string = response.userSettings?.content ?: response.defaultSettings?.content,
             )
         } catch (error: MissingPrivateKeyException) {
@@ -129,7 +129,7 @@ class SettingsRepository @Inject constructor(
 
     private suspend fun fetchDefaultAppSettings(userId: String): ContentAppSettings? {
         val response = settingsApi.getDefaultAppSettings(pubkey = userId)
-        return NostrJson.decodeFromStringOrNull<ContentAppSettings>(
+        return CommonJson.decodeFromStringOrNull<ContentAppSettings>(
             string = response.defaultSettings?.content,
         )
     }

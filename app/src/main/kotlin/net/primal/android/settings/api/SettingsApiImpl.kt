@@ -1,7 +1,6 @@
 package net.primal.android.settings.api
 
 import javax.inject.Inject
-import net.primal.android.core.serialization.json.NostrJson
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.nostr.model.primal.content.ContentAppSettings
 import net.primal.android.nostr.notary.NostrNotary
@@ -12,6 +11,7 @@ import net.primal.android.settings.api.model.GetMuteListResponse
 import net.primal.android.settings.api.model.SetAppSettingsRequest
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
+import net.primal.core.utils.serialization.CommonJson
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 
@@ -24,7 +24,7 @@ class SettingsApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.GET_APP_SETTINGS.id,
-                optionsJson = NostrJson.encodeToString(
+                optionsJson = CommonJson.encodeToString(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAuthorizationNostrEvent(
                             userId = pubkey,
@@ -61,7 +61,7 @@ class SettingsApiImpl @Inject constructor(
         primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.SET_APP_SETTINGS.id,
-                optionsJson = NostrJson.encodeToString(
+                optionsJson = CommonJson.encodeToString(
                     SetAppSettingsRequest(settingsEvent = signedNostrEvent),
                 ),
             ),
@@ -74,7 +74,7 @@ class SettingsApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.MUTE_LIST.id,
-                optionsJson = NostrJson.encodeToString(
+                optionsJson = CommonJson.encodeToString(
                     GetMuteListRequest(pubkey = userId),
                 ),
             ),
