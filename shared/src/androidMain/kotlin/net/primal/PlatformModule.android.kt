@@ -8,17 +8,17 @@ import net.primal.data.local.db.buildPrimalDatabase
 import net.primal.data.local.db.getDatabaseBuilder
 import org.koin.dsl.module
 
-internal actual fun platformModule() = module {
+internal actual fun platformModule() =
+    module {
+        single<DispatcherProvider> { AndroidDispatcherProvider() }
 
-    single<DispatcherProvider> { AndroidDispatcherProvider() }
-
-    single<PrimalDatabase> {
-        buildPrimalDatabase(
-            driver = AndroidSQLiteDriver(),
-            queryCoroutineContext = get<DispatcherProvider>().io(),
-            builder = getDatabaseBuilder(
-                context = get(),
-            ),
-        )
+        single<PrimalDatabase> {
+            buildPrimalDatabase(
+                driver = AndroidSQLiteDriver(),
+                queryCoroutineContext = get<DispatcherProvider>().io(),
+                builder = getDatabaseBuilder(
+                    context = get(),
+                ),
+            )
+        }
     }
-}
