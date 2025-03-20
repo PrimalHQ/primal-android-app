@@ -7,10 +7,7 @@ import net.primal.PrimalLib
 import org.koin.android.ext.koin.androidContext
 
 object PrimalInitializer {
-    fun init(
-        context: Context,
-        showLog: Boolean = false,
-    ) {
+    fun init(context: Context, showLog: Boolean = false) {
         PrimalLib.apply {
             initKoin { androidContext(context) }
         }

@@ -78,17 +78,6 @@ kotlin {
             }
         }
 
-//        val desktopMain by getting
-//        desktopMain.dependencies {
-//            // Add JVM-Desktop-specific dependencies here
-//
-//            // Room & SQLite
-//            implementation(libs.jetpack.sqlite.bundled.jvm)
-//
-//            // Ktor
-//            implementation(libs.ktor.client.cio)
-//        }
-
         commonTest {
             dependencies {
                 implementation(libs.junit)
