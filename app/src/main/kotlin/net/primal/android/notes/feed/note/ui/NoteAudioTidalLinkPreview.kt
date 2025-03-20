@@ -14,8 +14,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import kotlin.time.Duration.Companion.milliseconds
-import net.primal.android.events.domain.EventUriType
 import net.primal.android.theme.AppTheme
+import net.primal.domain.EventUriType
 
 private fun String.convertToTidalEmbedUrl(): String {
     var embedString = this

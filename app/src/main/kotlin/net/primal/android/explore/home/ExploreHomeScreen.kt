@@ -64,7 +64,6 @@ import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
-import net.primal.android.events.domain.CdnImage
 import net.primal.android.explore.home.feeds.ExploreFeeds
 import net.primal.android.explore.home.people.ExplorePeople
 import net.primal.android.explore.home.topics.ExploreTopics
@@ -76,12 +75,13 @@ import net.primal.android.explore.home.ui.PEOPLE_INDEX
 import net.primal.android.explore.home.ui.TOPICS_INDEX
 import net.primal.android.explore.home.ui.ZAPS_INDEX
 import net.primal.android.explore.home.zaps.ExploreZaps
-import net.primal.android.feeds.domain.exploreMediaFeedSpec
 import net.primal.android.notes.feed.grid.MediaFeedGrid
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.domain.CdnImage
+import net.primal.domain.exploreMediaFeedSpec
 
 @Composable
 fun ExploreHomeScreen(

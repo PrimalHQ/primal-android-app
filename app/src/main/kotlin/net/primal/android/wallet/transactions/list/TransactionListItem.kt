@@ -56,7 +56,6 @@ import net.primal.android.core.compose.icons.primaliconpack.WalletLightningPayme
 import net.primal.android.core.compose.icons.primaliconpack.WalletPay
 import net.primal.android.core.compose.icons.primaliconpack.WalletReceive
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.events.domain.CdnImage
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.domain.CurrencyMode
@@ -67,6 +66,7 @@ import net.primal.android.wallet.utils.CurrencyConversionUtils.toUsd
 import net.primal.android.wallet.walletDepositColor
 import net.primal.android.wallet.walletTransactionIconBackgroundColor
 import net.primal.android.wallet.walletWithdrawColor
+import net.primal.domain.CdnImage
 
 @Composable
 fun TransactionListItem(

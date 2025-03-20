@@ -1,9 +1,9 @@
 package net.primal.android.premium.legend.customization
 
-import net.primal.android.events.domain.CdnImage
 import net.primal.android.premium.domain.PremiumMembership
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.LegendaryStyle
+import net.primal.domain.CdnImage
 
 interface LegendaryProfileCustomizationContract {
 

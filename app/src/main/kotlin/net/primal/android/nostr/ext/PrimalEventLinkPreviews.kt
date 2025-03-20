@@ -1,8 +1,8 @@
 package net.primal.android.nostr.ext
 
-import net.primal.android.events.domain.EventLinkPreviewData
 import net.primal.android.nostr.model.primal.content.ContentPrimalLinkPreviews
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.domain.EventLinkPreviewData
 import net.primal.domain.PrimalEvent
 
 fun List<PrimalEvent>.flatMapNotNullAsLinkPreviewResource() =

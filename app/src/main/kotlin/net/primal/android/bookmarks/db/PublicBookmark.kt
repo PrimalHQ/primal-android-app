@@ -2,7 +2,7 @@ package net.primal.android.bookmarks.db
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import net.primal.android.bookmarks.domain.BookmarkType
+import net.primal.domain.BookmarkType
 
 @Entity
 data class PublicBookmark(

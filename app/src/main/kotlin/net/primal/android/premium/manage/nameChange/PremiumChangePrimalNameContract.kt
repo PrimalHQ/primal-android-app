@@ -1,7 +1,7 @@
 package net.primal.android.premium.manage.nameChange
 
-import net.primal.android.events.domain.CdnImage
 import net.primal.android.premium.legend.domain.LegendaryCustomization
+import net.primal.domain.CdnImage
 
 interface PremiumChangePrimalNameContract {
     data class UiState(

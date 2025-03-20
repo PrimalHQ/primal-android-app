@@ -1,6 +1,6 @@
 package net.primal.android.auth.onboarding.account.ui.model
 
-import net.primal.android.nostr.model.content.ContentMetadata
+import net.primal.domain.nostr.ContentMetadata
 
 data class FollowGroupMember(
     val name: String,

@@ -16,6 +16,6 @@ inline fun <reified T> String?.decodeFromJsonStringOrNull(): T? {
     return CommonJson.decodeFromStringOrNull(this)
 }
 
-inline fun <reified T> T.encodeToJsonString() : String {
+inline fun <reified T> T.encodeToJsonString(): String {
     return CommonJson.encodeToString(this)
 }

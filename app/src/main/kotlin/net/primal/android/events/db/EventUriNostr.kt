@@ -6,12 +6,12 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
-import net.primal.android.events.domain.EventUriNostrType
 import net.primal.android.notes.db.ReferencedArticle
 import net.primal.android.notes.db.ReferencedHighlight
 import net.primal.android.notes.db.ReferencedNote
 import net.primal.android.notes.db.ReferencedUser
 import net.primal.android.notes.db.ReferencedZap
+import net.primal.domain.EventUriNostrType
 
 @Entity(indices = [Index(value = ["eventId", "uri"], unique = true)])
 @Serializable

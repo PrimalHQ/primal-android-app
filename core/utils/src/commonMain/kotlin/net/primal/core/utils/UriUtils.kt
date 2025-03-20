@@ -1,17 +1,17 @@
 package net.primal.core.utils
 
-//import com.linkedin.urls.Url
-//import com.linkedin.urls.detection.UrlDetector
-//import com.linkedin.urls.detection.UrlDetectorOptions
-//import java.net.MalformedURLException
-//import java.net.URL
-//import net.primal.android.nostr.ext.detectUrls
-//import net.primal.android.nostr.ext.parseNostrUris
-//import timber.log.Timber
+// import com.linkedin.urls.Url
+// import com.linkedin.urls.detection.UrlDetector
+// import com.linkedin.urls.detection.UrlDetectorOptions
+// import java.net.MalformedURLException
+// import java.net.URL
+// import net.primal.android.nostr.ext.detectUrls
+// import net.primal.android.nostr.ext.parseNostrUris
+// import timber.log.Timber
 
 // TODO Port UriUtils to KotlinNative
 
-//fun String.parseUris(includeNostrUris: Boolean = true): List<String> {
+// fun String.parseUris(includeNostrUris: Boolean = true): List<String> {
 //    val urlDetector = UrlDetector(this, UrlDetectorOptions.JSON)
 //    val libUrls = urlDetector.detect()
 //        .filterInvalidTLDs()
@@ -25,13 +25,13 @@ package net.primal.core.utils
 //    } else {
 //        mergedUrls
 //    }
-//}
+// }
 //
-//private fun mergeUrls(
+// private fun mergeUrls(
 //    libUrls: List<String>,
 //    customUrls: List<String>,
 //    content: String,
-//): List<String> {
+// ): List<String> {
 //    val result = mutableListOf<String>()
 //    val allUrls = (libUrls + customUrls).distinct()
 //    val visited = mutableSetOf<String>()
@@ -54,23 +54,23 @@ package net.primal.core.utils
 //
 //    result.addAll(visited)
 //    return result
-//}
+// }
 //
-//private fun isRelativeMatch(url1: String, url2: String): Boolean {
+// private fun isRelativeMatch(url1: String, url2: String): Boolean {
 //    return url1.startsWith(url2) || url2.startsWith(url1)
-//}
+// }
 //
-//private fun String.containsUrl(url: String): Boolean {
+// private fun String.containsUrl(url: String): Boolean {
 //    return Regex("\\b${Regex.escape(url)}\\b").containsMatchIn(this)
-//}
+// }
 //
-//private fun List<Url>.filterInvalidTLDs() =
+// private fun List<Url>.filterInvalidTLDs() =
 //    filter {
 //        val tld = it.host.split(".").lastOrNull()
 //        tld != null && tld.all { char -> char.isLetter() }
 //    }
 //
-//private val extensionToMimeType = mapOf(
+// private val extensionToMimeType = mapOf(
 //    "jpeg" to "image/jpeg",
 //    "jpg" to "image/jpeg",
 //    "gif" to "image/gif",
@@ -121,16 +121,16 @@ package net.primal.core.utils
 //    "exe" to "application/x-msdownload",
 //    "dmg" to "application/x-apple-diskimage",
 //    "apk" to "application/vnd.android.package-archive",
-//)
+// )
 //
-//fun String?.detectMimeType(): String? {
+// fun String?.detectMimeType(): String? {
 //    return when {
 //        this == null -> null
 //        else -> extensionToMimeType[this.extractExtensionFromUrl().lowercase()]
 //    }
-//}
+// }
 //
-//fun String.extractExtensionFromUrl(): String {
+// fun String.extractExtensionFromUrl(): String {
 //    val file = try {
 //        URL(this).file
 //    } catch (error: MalformedURLException) {
@@ -138,11 +138,11 @@ package net.primal.core.utils
 //        this
 //    }
 //    return file.substringAfterLast(".", "")
-//}
+// }
 //
-//private val tldExtractionRegex = Regex("(?:https?://)?(?:www\\.)?([\\w\\d\\-]+\\.[\\w\\d\\-.]+)")
+// private val tldExtractionRegex = Regex("(?:https?://)?(?:www\\.)?([\\w\\d\\-]+\\.[\\w\\d\\-.]+)")
 //
-//fun String.extractTLD(): String? {
+// fun String.extractTLD(): String? {
 //    val matchResult = tldExtractionRegex.find(this)
 //    val tldCandidate = matchResult?.groupValues?.get(1)
 //    val parts = tldCandidate?.split(".").orEmpty()
@@ -152,4 +152,4 @@ package net.primal.core.utils
 //        partsCount == 2 -> tldCandidate
 //        else -> parts.drop(partsCount - 2).joinToString(".")
 //    }
-//}
+// }

@@ -3,10 +3,10 @@ package net.primal.android.events.db.serialization
 import androidx.room.TypeConverter
 import net.primal.android.events.db.EventUri
 import net.primal.android.events.db.EventUriNostr
-import net.primal.android.events.domain.CdnImage
-import net.primal.android.events.domain.CdnResourceVariant
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.domain.CdnImage
+import net.primal.domain.CdnResourceVariant
 
 class EventUriTypeConverters {
 

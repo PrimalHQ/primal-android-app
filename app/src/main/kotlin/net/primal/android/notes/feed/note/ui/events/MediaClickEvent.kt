@@ -1,6 +1,6 @@
 package net.primal.android.notes.feed.note.ui.events
 
-import net.primal.android.events.domain.EventUriType
+import net.primal.domain.EventUriType
 
 data class MediaClickEvent(
     val noteId: String,

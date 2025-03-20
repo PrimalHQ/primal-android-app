@@ -8,7 +8,6 @@ import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.bookmarks.db.PublicBookmark
-import net.primal.android.bookmarks.domain.BookmarkType
 import net.primal.android.bookmarks.domain.TagBookmark
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
@@ -17,6 +16,7 @@ import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.data.remote.api.users.UsersApi
+import net.primal.domain.BookmarkType
 import net.primal.domain.nostr.NostrEventKind
 
 class BookmarksRepository @Inject constructor(

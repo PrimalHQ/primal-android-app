@@ -36,7 +36,6 @@ import net.primal.android.core.compose.zaps.ReferencedNoteZap
 import net.primal.android.core.compose.zaps.ReferencedZap
 import net.primal.android.core.utils.TextMatch
 import net.primal.android.core.utils.TextMatcher
-import net.primal.android.events.domain.EventUriNostrType
 import net.primal.android.nostr.ext.cleanNostrUris
 import net.primal.android.notes.db.ReferencedNote
 import net.primal.android.notes.db.ReferencedUser
@@ -49,6 +48,7 @@ import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.domain.EventUriNostrType
 
 private const val PROFILE_ID_ANNOTATION_TAG = "profileId"
 private const val URL_ANNOTATION_TAG = "url"

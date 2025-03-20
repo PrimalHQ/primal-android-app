@@ -3,11 +3,11 @@ package net.primal.android.core.compose.profile.model
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
-import net.primal.android.events.domain.CdnImage
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.profile.db.ProfileData
 import net.primal.android.profile.details.ui.model.PremiumProfileDataUi
 import net.primal.android.profile.domain.PrimalPremiumInfo
+import net.primal.domain.CdnImage
 
 data class ProfileDetailsUi(
     val pubkey: String,

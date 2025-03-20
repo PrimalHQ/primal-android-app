@@ -12,7 +12,8 @@ fun String.parseAsLNUrlOrNull(): String? {
     return "https://$host/.well-known/lnurlp/$lnurlp"
 }
 
-fun String.decodeLNUrlOrNull(): String? = runCatching {
-    val byteArray = this.bechToBytesOrThrow(hrp = "lnurl")
-    byteArray.decodeToString()
-}.getOrNull()
+fun String.decodeLNUrlOrNull(): String? =
+    runCatching {
+        val byteArray = this.bechToBytesOrThrow(hrp = "lnurl")
+        byteArray.decodeToString()
+    }.getOrNull()

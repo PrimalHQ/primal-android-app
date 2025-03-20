@@ -1,8 +1,8 @@
 package net.primal.android.events.db
 
 import androidx.room.Entity
-import net.primal.android.events.domain.CdnImage
 import net.primal.android.profile.domain.PrimalLegendProfile
+import net.primal.domain.CdnImage
 
 @Entity(
     primaryKeys = [

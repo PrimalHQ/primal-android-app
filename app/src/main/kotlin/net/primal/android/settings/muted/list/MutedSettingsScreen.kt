@@ -30,10 +30,10 @@ import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.events.domain.CdnImage
 import net.primal.android.settings.muted.list.model.MutedUserUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.domain.CdnImage
 
 @Composable
 fun MutedSettingsScreen(

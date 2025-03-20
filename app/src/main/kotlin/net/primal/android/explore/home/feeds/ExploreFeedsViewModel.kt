@@ -11,8 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.explore.home.feeds.ExploreFeedsContract.UiState
-import net.primal.android.feeds.domain.DvmFeed
-import net.primal.android.feeds.domain.buildSpec
 import net.primal.android.feeds.dvm.ui.DvmFeedUi
 import net.primal.android.feeds.repository.DvmFeedListHandler
 import net.primal.android.feeds.repository.FeedsRepository
@@ -20,6 +18,8 @@ import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.DvmFeed
+import net.primal.domain.buildSpec
 import timber.log.Timber
 
 @HiltViewModel
@@ -78,11 +78,11 @@ class ExploreFeedsViewModel @Inject constructor(
     private fun addToUserFeeds(dvmFeed: DvmFeed) =
         viewModelScope.launch {
             try {
-                dvmFeed.kind?.let {
+                dvmFeed.kind?.let { feedSpecKind ->
                     feedsRepository.addDvmFeedLocally(
                         userId = activeAccountStore.activeUserId(),
                         dvmFeed = dvmFeed,
-                        specKind = dvmFeed.kind,
+                        specKind = feedSpecKind,
                     )
                 }
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
@@ -96,10 +96,10 @@ class ExploreFeedsViewModel @Inject constructor(
     private fun removeFromUserFeeds(dvmFeed: DvmFeed) =
         viewModelScope.launch {
             try {
-                dvmFeed.kind?.let {
+                dvmFeed.kind?.let { feedSpecKind ->
                     feedsRepository.removeFeedLocally(
                         userId = activeAccountStore.activeUserId(),
-                        feedSpec = dvmFeed.buildSpec(specKind = dvmFeed.kind),
+                        feedSpec = dvmFeed.buildSpec(specKind = feedSpecKind),
                     )
                 }
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())

@@ -27,8 +27,6 @@ class PrimalApp : Application() {
         AppConfigInitializer.init(this@PrimalApp)
         PrimalInitializer.init(
             context = this@PrimalApp,
-//            appName = "android-${BuildConfig.VERSION_NAME}",
-//            userAgent = UserAgentProvider.USER_AGENT,
             showLog = true,
         )
 

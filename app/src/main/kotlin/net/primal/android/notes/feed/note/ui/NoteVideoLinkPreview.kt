@@ -23,11 +23,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.events.domain.EventUriType
 import net.primal.android.notes.feed.note.ui.attachment.NoteImageLoadingPlaceholder
 import net.primal.android.notes.feed.note.ui.attachment.PlayButton
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.domain.EventUriType
 
 @Composable
 fun NoteVideoLinkPreview(

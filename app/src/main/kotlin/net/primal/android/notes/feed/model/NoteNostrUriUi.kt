@@ -1,12 +1,12 @@
 package net.primal.android.notes.feed.model
 
 import net.primal.android.events.db.EventUriNostr
-import net.primal.android.events.domain.EventUriNostrType
 import net.primal.android.notes.db.ReferencedArticle
 import net.primal.android.notes.db.ReferencedHighlight
 import net.primal.android.notes.db.ReferencedNote
 import net.primal.android.notes.db.ReferencedUser
 import net.primal.android.notes.db.ReferencedZap
+import net.primal.domain.EventUriNostrType
 
 data class NoteNostrUriUi(
     val uri: String,

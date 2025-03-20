@@ -27,7 +27,7 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 internal class BasePrimalApiClient(
     dispatcherProvider: DispatcherProvider,
     private val socketClient: NostrSocketClientImpl,
-)  {
+) {
 
     private val scope = CoroutineScope(dispatcherProvider.io())
 

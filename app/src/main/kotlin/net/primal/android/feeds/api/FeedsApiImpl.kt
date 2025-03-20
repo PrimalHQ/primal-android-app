@@ -4,7 +4,6 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import net.primal.android.feeds.api.model.FeedsResponse
 import net.primal.android.feeds.api.model.SubSettingsAuthorization
-import net.primal.android.feeds.domain.FeedSpecKind
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.nostr.model.primal.content.ContentAppSubSettings
 import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
@@ -13,6 +12,7 @@ import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.serialization.CommonJson
+import net.primal.domain.FeedSpecKind
 import net.primal.domain.nostr.NostrEventKind
 
 @Singleton

@@ -23,14 +23,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import net.primal.android.R
-import net.primal.android.feeds.domain.FeedSpecKind
-import net.primal.android.feeds.domain.buildSpec
 import net.primal.android.feeds.list.FeedListContract.UiState.FeedMarketplaceStage
 import net.primal.android.feeds.list.ui.DvmFeedDetails
 import net.primal.android.feeds.list.ui.DvmFeedMarketplace
 import net.primal.android.feeds.list.ui.FeedList
 import net.primal.android.feeds.list.ui.model.FeedUi
 import net.primal.android.theme.AppTheme
+import net.primal.domain.FeedSpecKind
+import net.primal.domain.buildSpec
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

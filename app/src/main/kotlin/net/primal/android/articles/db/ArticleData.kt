@@ -2,7 +2,7 @@ package net.primal.android.articles.db
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import net.primal.android.events.domain.CdnImage
+import net.primal.domain.CdnImage
 
 @Entity
 data class ArticleData(

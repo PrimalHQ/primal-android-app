@@ -13,11 +13,6 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.feeds.domain.isNotesBookmarkFeedSpec
-import net.primal.android.feeds.domain.isProfileAuthoredNoteRepliesFeedSpec
-import net.primal.android.feeds.domain.isProfileAuthoredNotesFeedSpec
-import net.primal.android.feeds.domain.supportsNoteReposts
-import net.primal.android.feeds.domain.supportsUpwardsNotesPagination
 import net.primal.android.notes.db.FeedPost
 import net.primal.android.notes.db.FeedPostRemoteKey
 import net.primal.android.notes.db.sql.ChronologicalFeedWithRepostsQueryBuilder
@@ -30,6 +25,11 @@ import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.data.remote.api.feed.FeedApi
 import net.primal.data.remote.api.feed.model.FeedBySpecRequestBody
 import net.primal.data.remote.api.feed.model.FeedResponse
+import net.primal.domain.isNotesBookmarkFeedSpec
+import net.primal.domain.isProfileAuthoredNoteRepliesFeedSpec
+import net.primal.domain.isProfileAuthoredNotesFeedSpec
+import net.primal.domain.supportsNoteReposts
+import net.primal.domain.supportsUpwardsNotesPagination
 import timber.log.Timber
 
 @ExperimentalPagingApi
