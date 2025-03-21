@@ -5,15 +5,16 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
-import java.time.Instant
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.notifications.api.NotificationsApi
 import net.primal.android.notifications.api.mediator.NotificationsRemoteMediator
 import net.primal.android.notifications.db.Notification
+import net.primal.data.remote.api.notifications.NotificationsApi
+import net.primal.domain.nostr.NostrEvent
 
 @OptIn(ExperimentalPagingApi::class)
 class NotificationRepository @Inject constructor(
@@ -22,14 +23,19 @@ class NotificationRepository @Inject constructor(
     private val notificationsApi: NotificationsApi,
 ) {
 
-    fun observeUnseenNotifications(ownerId: String) = database.notifications().allUnseenNotifications(ownerId = ownerId)
+    fun observeUnseenNotifications(ownerId: String) = database.notifications()
+        .allUnseenNotifications(ownerId = ownerId)
 
-    suspend fun markAllNotificationsAsSeen(userId: String) {
+    suspend fun markAllNotificationsAsSeen(authorization: NostrEvent) {
         withContext(dispatcherProvider.io()) {
-            val seenAt = Instant.now()
-            notificationsApi.setLastSeenTimestamp(userId = userId)
+            val seenAt = Clock.System.now()
+            val userId = authorization.pubKey
+            notificationsApi.setLastSeenTimestamp(authorization = authorization)
             constructRemoteMediator(userId = userId).updateLastSeenTimestamp(lastSeen = seenAt)
-            database.notifications().markAllUnseenNotificationsAsSeen(ownerId = userId, seenAt = seenAt.epochSecond)
+            database.notifications().markAllUnseenNotificationsAsSeen(
+                ownerId = userId,
+                seenAt = seenAt.epochSeconds,
+            )
         }
     }
 
