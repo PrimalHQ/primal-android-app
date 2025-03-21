@@ -1,4 +1,5 @@
 import co.touchlab.skie.configuration.DefaultArgumentInterop
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
 plugins {
@@ -30,6 +31,9 @@ kotlin {
         it.binaries.framework {
             baseName = xcfName
             xcfFramework.add(this)
+            export(project(":domain:nostr"))
+            export(project(":domain:primal"))
+            export(project(":data:repository-caching"))
         }
     }
 
@@ -38,9 +42,9 @@ kotlin {
         commonMain {
             dependencies {
                 // Internal
-                api(project(":data:repository-caching"))
                 api(project(":domain:nostr"))
                 api(project(":domain:primal"))
+                api(project(":data:repository-caching"))
 
                 // Core
                 implementation(libs.kotlinx.coroutines.core)
@@ -85,6 +89,15 @@ kotlin {
 //        desktopMain.dependencies {
 //            // Add JVM-Desktop-specific dependencies here
 //        }
+    }
+
+    // This tells the Kotlin/Native compiler to link against the system SQLite library
+    // and ensures that NativeSQLiteDriver (used on iOS targets) can find libsqlite3 at
+    // runtime without missing symbols.
+    targets.withType<KotlinNativeTarget> {
+        binaries.all {
+            linkerOpts("-lsqlite3")
+        }
     }
 
     // Opting in to the experimental @ObjCName annotation for native coroutines on iOS targets

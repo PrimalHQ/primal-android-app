@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
-    alias(libs.plugins.touchlab.skie)
 }
 
 private val xcfName = "PrimalNetworking"
@@ -53,9 +52,6 @@ kotlin {
 
                 // Logging
                 implementation(libs.napier)
-
-                // Swift interop
-                implementation(libs.skie.configuration.annotations)
             }
         }
 
@@ -103,22 +99,7 @@ kotlin {
 
     // Opting in to the experimental @ObjCName annotation for native coroutines on iOS targets
     kotlin.sourceSets.all {
-        languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
         languageSettings.optIn("kotlin.uuid.ExperimentalUuidApi")
         languageSettings.optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
-    }
-}
-
-tasks.register("assembleXCFramework") {
-    dependsOn("assemble${xcfName}ReleaseXCFramework")
-}
-
-skie {
-    build {
-        produceDistributableFramework()
-    }
-
-    analytics {
-        enabled.set(false)
     }
 }
