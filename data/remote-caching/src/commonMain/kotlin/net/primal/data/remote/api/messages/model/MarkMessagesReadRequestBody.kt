@@ -1,4 +1,4 @@
-package net.primal.android.messages.api.model
+package net.primal.data.remote.api.messages.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

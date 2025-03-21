@@ -1,18 +1,13 @@
 package net.primal.android.nostr.ext
 
-import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.jsonObject
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.core.utils.parseUris
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.crypto.bechToBytesOrThrow
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.messages.db.DirectMessageData
-import net.primal.android.messages.domain.ConversationSummary
-import net.primal.android.messages.domain.ConversationsSummary
 import net.primal.android.messages.domain.MessagesUnreadCount
 import net.primal.android.nostr.notary.MissingPrivateKeyException
-import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
@@ -23,18 +18,6 @@ fun PrimalEvent.asMessagesTotalCount(): MessagesUnreadCount? {
     return this.content.toIntOrNull()?.let {
         MessagesUnreadCount(count = it)
     }
-}
-
-fun PrimalEvent.asMessageConversationsSummary(): ConversationsSummary {
-    val jsonObject = CommonJson.parseToJsonElement(this.content).jsonObject
-    val map = mutableMapOf<String, ConversationSummary>()
-    jsonObject.keys.forEach {
-        jsonObject[it]?.jsonObject?.let { summaryJson ->
-            val summary = CommonJson.decodeFromJsonElement<ConversationSummary>(summaryJson)
-            map[it] = summary
-        }
-    }
-    return ConversationsSummary(summaryPerParticipantId = map)
 }
 
 fun List<NostrEvent>.mapAsMessageDataPO(userId: String, nsec: String?) =

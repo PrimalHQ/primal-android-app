@@ -8,10 +8,10 @@ import java.time.Instant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.messages.api.MessagesApi
-import net.primal.android.messages.api.model.MessagesRequestBody
 import net.primal.android.messages.db.DirectMessage
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.data.remote.api.messages.MessagesApi
+import net.primal.data.remote.api.messages.model.MessagesRequestBody
 import timber.log.Timber
 
 @ExperimentalPagingApi

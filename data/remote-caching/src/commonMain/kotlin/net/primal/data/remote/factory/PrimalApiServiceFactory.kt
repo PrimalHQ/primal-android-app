@@ -14,12 +14,14 @@ import net.primal.data.remote.api.feed.FeedApi
 import net.primal.data.remote.api.feed.FeedApiImpl
 import net.primal.data.remote.api.importing.PrimalImportApi
 import net.primal.data.remote.api.importing.PrimalImportApiImpl
+import net.primal.data.remote.api.messages.MessagesApi
+import net.primal.data.remote.api.messages.MessagesApiImpl
 import net.primal.data.remote.api.users.UserWellKnownApi
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.data.remote.api.users.UsersApiImpl
 import net.primal.data.remote.api.users.createUserWellKnownApi
 
-object PrimalApiFactory {
+object PrimalApiServiceFactory {
 
     private val defaultHttpClient = HttpClientFactory.createHttpClientWithDefaultConfig()
 
@@ -32,6 +34,8 @@ object PrimalApiFactory {
     fun createFeedApi(primalApiClient: PrimalApiClient): FeedApi = FeedApiImpl(primalApiClient)
 
     fun createImportApi(primalApiClient: PrimalApiClient): PrimalImportApi = PrimalImportApiImpl(primalApiClient)
+
+    fun createMessagesApi(primalApiClient: PrimalApiClient): MessagesApi = MessagesApiImpl(primalApiClient)
 
     fun createUsersApi(primalApiClient: PrimalApiClient): UsersApi = UsersApiImpl(primalApiClient)
 

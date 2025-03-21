@@ -20,7 +20,7 @@ import net.primal.android.user.domain.Credential
 import net.primal.android.user.domain.UserAccount
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.data.remote.api.users.UsersApi
-import net.primal.data.remote.factory.PrimalApiFactory
+import net.primal.data.remote.factory.PrimalApiServiceFactory
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -59,7 +59,7 @@ object UserModule {
 
     @Provides
     fun provideUsersApi(@PrimalCacheApiClient primalApiClient: PrimalApiClient): UsersApi =
-        PrimalApiFactory.createUsersApi(primalApiClient = primalApiClient)
+        PrimalApiServiceFactory.createUsersApi(primalApiClient = primalApiClient)
 }
 
 @Qualifier

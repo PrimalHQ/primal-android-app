@@ -6,7 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import net.primal.android.messages.domain.ConversationRelation
+import net.primal.domain.ConversationRelation
 
 @Dao
 interface MessageConversationDao {
