@@ -22,14 +22,15 @@ import net.primal.android.messages.conversation.MessageConversationListContract.
 import net.primal.android.messages.conversation.MessageConversationListContract.UiState
 import net.primal.android.messages.conversation.model.MessageConversationUi
 import net.primal.android.messages.db.MessageConversation
-import net.primal.android.messages.domain.ConversationRelation
 import net.primal.android.messages.repository.MessageRepository
 import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.ConversationRelation
 import timber.log.Timber
 
 @HiltViewModel
@@ -37,6 +38,7 @@ class MessageConversationListViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val subscriptionsManager: SubscriptionsManager,
     private val messageRepository: MessageRepository,
+    private val nostrNotary: NostrNotary,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -88,15 +90,16 @@ class MessageConversationListViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(loading = true) }
             try {
+                val userId = activeAccountStore.activeUserId()
                 when (state.value.activeRelation) {
                     ConversationRelation.Follows -> {
-                        messageRepository.fetchFollowConversations(userId = activeAccountStore.activeUserId())
-                        messageRepository.fetchNonFollowsConversations(userId = activeAccountStore.activeUserId())
+                        messageRepository.fetchFollowConversations(userId = userId)
+                        messageRepository.fetchNonFollowsConversations(userId = userId)
                     }
 
                     ConversationRelation.Other -> {
-                        messageRepository.fetchNonFollowsConversations(userId = activeAccountStore.activeUserId())
-                        messageRepository.fetchFollowConversations(userId = activeAccountStore.activeUserId())
+                        messageRepository.fetchNonFollowsConversations(userId = userId)
+                        messageRepository.fetchFollowConversations(userId = userId)
                     }
                 }
             } catch (error: WssException) {
@@ -120,7 +123,11 @@ class MessageConversationListViewModel @Inject constructor(
     private fun markAllConversationAsRead() =
         viewModelScope.launch {
             try {
-                messageRepository.markAllMessagesAsRead(userId = activeAccountStore.activeUserId())
+                val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
+                    userId = activeAccountStore.activeUserId(),
+                    description = "Mark all messages as read.",
+                )
+                messageRepository.markAllMessagesAsRead(authorization = authorizationEvent)
             } catch (error: MissingPrivateKeyException) {
                 Timber.w(error)
             } catch (error: WssException) {

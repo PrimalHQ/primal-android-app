@@ -1,8 +1,8 @@
-package net.primal.android.messages.api.model
+package net.primal.data.remote.api.messages.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import net.primal.android.messages.domain.ConversationRelation
+import net.primal.domain.ConversationRelation
 
 @Serializable
 data class ConversationRequestBody(

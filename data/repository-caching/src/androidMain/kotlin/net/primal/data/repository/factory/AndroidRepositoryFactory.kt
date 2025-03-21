@@ -6,7 +6,7 @@ import net.primal.core.networking.factory.PrimalApiClientFactory
 import net.primal.core.utils.coroutines.DispatcherProviderFactory
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.local.db.PrimalDatabaseFactory
-import net.primal.data.remote.factory.PrimalApiFactory
+import net.primal.data.remote.factory.PrimalApiServiceFactory
 import net.primal.data.repository.feed.FeedRepositoryImpl
 import net.primal.domain.PrimalServerType
 import net.primal.domain.repository.FeedRepository
@@ -30,7 +30,7 @@ object AndroidRepositoryFactory : RepositoryFactory {
     override fun createFeedRepository(): FeedRepository {
         return FeedRepositoryImpl(
             dispatcherProvider = DispatcherProviderFactory.create(),
-            feedApi = PrimalApiFactory.createFeedApi(cachingPrimalApiClient),
+            feedApi = PrimalApiServiceFactory.createFeedApi(cachingPrimalApiClient),
             database = cachingDatabase,
         )
     }

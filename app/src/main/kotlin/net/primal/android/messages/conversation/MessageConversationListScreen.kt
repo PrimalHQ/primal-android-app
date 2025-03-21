@@ -79,10 +79,10 @@ import net.primal.android.messages.conversation.MessageConversationListContract.
 import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent.ChangeRelation
 import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent.MarkAllConversationsAsRead
 import net.primal.android.messages.conversation.model.MessageConversationUi
-import net.primal.android.messages.domain.ConversationRelation
 import net.primal.android.notes.feed.model.NoteContentUi
 import net.primal.android.notes.feed.note.ui.renderContentAsAnnotatedString
 import net.primal.android.theme.AppTheme
+import net.primal.domain.ConversationRelation
 
 @Composable
 fun MessageListScreen(

@@ -6,26 +6,30 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.room.withTransaction
 import javax.inject.Inject
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.crypto.bechToBytesOrThrow
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.messages.api.MessagesApi
 import net.primal.android.messages.api.mediator.MessagesProcessor
 import net.primal.android.messages.api.mediator.MessagesRemoteMediator
-import net.primal.android.messages.api.model.MessagesRequestBody
 import net.primal.android.messages.db.DirectMessage
 import net.primal.android.messages.db.MessageConversation
 import net.primal.android.messages.db.MessageConversationData
-import net.primal.android.messages.domain.ConversationRelation
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.user.credentials.CredentialsStore
+import net.primal.data.remote.api.messages.MessagesApi
+import net.primal.data.remote.api.messages.model.ConversationRequestBody
+import net.primal.data.remote.api.messages.model.MarkMessagesReadRequestBody
+import net.primal.data.remote.api.messages.model.MessagesRequestBody
+import net.primal.domain.ConversationRelation
+import net.primal.domain.nostr.NostrEvent
 
 @OptIn(ExperimentalPagingApi::class)
 class MessageRepository @Inject constructor(
+    private val dispatcherProvider: CoroutineDispatcherProvider,
     private val credentialsStore: CredentialsStore,
     private val database: PrimalDatabase,
     private val messagesApi: MessagesApi,
@@ -44,10 +48,12 @@ class MessageRepository @Inject constructor(
         }.flow
 
     private suspend fun fetchConversations(userId: String, relation: ConversationRelation) {
-        val response = withContext(Dispatchers.IO) {
+        val response = withContext(dispatcherProvider.io()) {
             messagesApi.getConversations(
-                userId = userId,
-                relation = relation,
+                body = ConversationRequestBody(
+                    userId = userId,
+                    relation = relation,
+                ),
             )
         }
 
@@ -73,7 +79,7 @@ class MessageRepository @Inject constructor(
                 )
             }
 
-        withContext(Dispatchers.IO) {
+        withContext(dispatcherProvider.io()) {
             database.withTransaction {
                 messagesProcessor.processMessageEventsAndSave(
                     userId = userId,
@@ -103,7 +109,7 @@ class MessageRepository @Inject constructor(
         )
 
     suspend fun fetchNewConversationMessages(userId: String, conversationUserId: String) {
-        withContext(Dispatchers.IO) {
+        withContext(dispatcherProvider.io()) {
             val latestMessage = database.messages().firstByOwnerId(ownerId = userId, participantId = conversationUserId)
             val response = messagesApi.getMessages(
                 body = MessagesRequestBody(
@@ -125,23 +131,25 @@ class MessageRepository @Inject constructor(
         }
     }
 
-    suspend fun markConversationAsRead(userId: String, conversationUserId: String) {
-        withContext(Dispatchers.IO) {
+    suspend fun markConversationAsRead(authorization: NostrEvent, conversationUserId: String) {
+        withContext(dispatcherProvider.io()) {
             messagesApi.markConversationAsRead(
-                userId = userId,
-                conversationUserId = conversationUserId,
+                body = MarkMessagesReadRequestBody(
+                    authorization = authorization,
+                    conversationUserId = conversationUserId,
+                ),
             )
             database.messageConversations().markConversationAsRead(
-                ownerId = userId,
+                ownerId = authorization.pubKey,
                 participantId = conversationUserId,
             )
         }
     }
 
-    suspend fun markAllMessagesAsRead(userId: String) {
-        withContext(Dispatchers.IO) {
-            messagesApi.markAllMessagesAsRead(userId = userId)
-            database.messageConversations().markAllConversationAsRead(ownerId = userId)
+    suspend fun markAllMessagesAsRead(authorization: NostrEvent) {
+        withContext(dispatcherProvider.io()) {
+            messagesApi.markAllMessagesAsRead(authorization = authorization)
+            database.messageConversations().markAllConversationAsRead(ownerId = authorization.pubKey)
         }
     }
 
@@ -159,7 +167,7 @@ class MessageRepository @Inject constructor(
             pubKey = receiverId.hexToNpubHrp().bechToBytesOrThrow(hrp = "npub"),
         )
 
-        withContext(Dispatchers.IO) {
+        withContext(dispatcherProvider.io()) {
             val nostrEvent = nostrPublisher.publishDirectMessage(
                 userId = userId,
                 receiverId = receiverId,
