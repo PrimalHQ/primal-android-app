@@ -2,19 +2,18 @@ package net.primal.android.settings.repository
 
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.JsonObject
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.nostr.model.primal.content.ContentAppSettings
-import net.primal.android.nostr.model.primal.content.ContentZapConfigItem
-import net.primal.android.nostr.model.primal.content.ContentZapDefault
-import net.primal.android.nostr.model.primal.content.DEFAULT_ZAP_CONFIG
-import net.primal.android.nostr.model.primal.content.DEFAULT_ZAP_DEFAULT
 import net.primal.android.nostr.notary.MissingPrivateKeyException
-import net.primal.android.settings.api.SettingsApi
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.domain.UserAccount
 import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.data.remote.api.settings.SettingsApi
+import net.primal.domain.ContentAppSettings
+import net.primal.domain.DEFAULT_ZAP_CONFIG
+import net.primal.domain.DEFAULT_ZAP_DEFAULT
+import net.primal.domain.nostr.NostrEvent
 import timber.log.Timber
 
 class SettingsRepository @Inject constructor(
@@ -23,39 +22,30 @@ class SettingsRepository @Inject constructor(
     private val accountsStore: UserAccountsStore,
 ) {
 
-    suspend fun fetchAndPersistAppSettings(userId: String) {
-        val appSettings = fetchAppSettings(userId = userId) ?: return
+    suspend fun fetchAndPersistAppSettings(authorizationEvent: NostrEvent) {
+        val userId = authorizationEvent.pubKey
+        val appSettings = fetchAppSettings(authorizationEvent) ?: return
         persistAppSettingsLocally(userId = userId, appSettings = appSettings)
     }
 
-    suspend fun updateAndPersistZapDefault(userId: String, zapDefault: ContentZapDefault) {
-        fetchAndUpdateAndPublishAppSettings(userId = userId) {
-            copy(zapDefault = zapDefault)
-        }
-    }
-
-    suspend fun updateAndPersistZapPresetsConfig(
-        userId: String,
-        presetIndex: Int,
-        zapPreset: ContentZapConfigItem,
+    suspend fun fetchAndUpdateAndPublishAppSettings(
+        authorizationEvent: NostrEvent,
+        signer: ContentAppSettings.() -> NostrEvent,
     ) {
-        fetchAndUpdateAndPublishAppSettings(userId = userId) {
-            copy(
-                zapsConfig = this.zapsConfig.toMutableList().apply {
-                    this[presetIndex] = zapPreset
-                },
-            )
-        }
-    }
-
-    suspend fun updateAndPersistNotifications(userId: String, notifications: JsonObject) {
-        fetchAndUpdateAndPublishAppSettings(userId = userId) {
-            copy(notifications = notifications)
+        val userId = authorizationEvent.pubKey
+        withContext(dispatcherProvider.io()) {
+            val remoteAppSettings = fetchAppSettings(authorizationEvent) ?: return@withContext
+            persistAppSettingsLocally(userId = userId, appSettings = remoteAppSettings)
+            updateAndPublishAppSettings(userId = userId, signer = signer)
         }
     }
 
     @Suppress("MagicNumber")
-    suspend fun ensureZapConfig(userId: String) {
+    suspend fun ensureZapConfig(
+        authorizationEvent: NostrEvent,
+        signer: (ContentAppSettings) -> NostrEvent,
+    ) {
+        val userId = authorizationEvent.pubKey
         val userSettings = accountsStore.findByIdOrNull(userId)?.appSettings
         if (userSettings?.zapDefault != null && userSettings.zapsConfig.isNotEmpty()) return
 
@@ -68,8 +58,8 @@ class SettingsRepository @Inject constructor(
         val existingZapDefaultValue = userSettings?.defaultZapAmount
         val existingZapsConfigValues = userSettings?.zapOptions
 
-        fetchAndUpdateAndPublishAppSettings(userId = userId) {
-            this.copy(
+        fetchAndUpdateAndPublishAppSettings(authorizationEvent) {
+            val newAppSettings = this.copy(
                 zapDefault = defaultZapDefault.copy(
                     amount = existingZapDefaultValue?.toLong() ?: defaultZapDefault.amount,
                 ),
@@ -86,39 +76,33 @@ class SettingsRepository @Inject constructor(
                     }
                 },
             )
-        }
-    }
-
-    private suspend fun fetchAndUpdateAndPublishAppSettings(
-        userId: String,
-        reducer: ContentAppSettings.() -> ContentAppSettings,
-    ) {
-        withContext(dispatcherProvider.io()) {
-            val remoteAppSettings = fetchAppSettings(userId = userId) ?: return@withContext
-            persistAppSettingsLocally(userId = userId, appSettings = remoteAppSettings)
-            updateAndPublishAppSettings(userId = userId, reducer = reducer)
+            signer(newAppSettings)
         }
     }
 
     private suspend fun updateAndPublishAppSettings(
         userId: String,
-        reducer: ContentAppSettings.() -> ContentAppSettings,
+        signer: ContentAppSettings.() -> NostrEvent,
     ) {
         withContext(dispatcherProvider.io()) {
             val localAppSettings = accountsStore.findByIdOrNull(userId = userId)?.appSettings ?: return@withContext
-            val newAppSettings = localAppSettings.reducer()
-            publishAppSettings(userId = userId, newAppSettings = newAppSettings)
+            val settingsEvent = localAppSettings.signer()
+            publishAppSettings(settingsEvent)
         }
     }
 
-    private suspend fun publishAppSettings(userId: String, newAppSettings: ContentAppSettings) {
-        settingsApi.setAppSettings(userId = userId, appSettings = newAppSettings)
+    private suspend fun publishAppSettings(settingsEvent: NostrEvent) {
+        val userId = settingsEvent.pubKey
+        val newAppSettings = settingsEvent.getContentAppSettings()
+        checkNotNull(newAppSettings) { "Invalid settings event. Unable to get app settings." }
+
+        settingsApi.setAppSettings(settingsEvent)
         persistAppSettingsLocally(userId = userId, appSettings = newAppSettings)
     }
 
-    private suspend fun fetchAppSettings(userId: String): ContentAppSettings? =
+    private suspend fun fetchAppSettings(authorizationEvent: NostrEvent): ContentAppSettings? =
         try {
-            val response = settingsApi.getAppSettings(pubkey = userId)
+            val response = settingsApi.getAppSettings(authorizationEvent)
             CommonJson.decodeFromStringOrNull<ContentAppSettings>(
                 string = response.userSettings?.content ?: response.defaultSettings?.content,
             )
@@ -139,5 +123,9 @@ class SettingsRepository @Inject constructor(
             ?: UserAccount.buildLocal(pubkey = userId)
 
         accountsStore.upsertAccount(userAccount = currentUserAccount.copy(appSettings = appSettings))
+    }
+
+    private fun NostrEvent.getContentAppSettings(): ContentAppSettings? {
+        return this.content.decodeFromJsonStringOrNull<ContentAppSettings>()
     }
 }

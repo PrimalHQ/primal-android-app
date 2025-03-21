@@ -16,8 +16,8 @@ import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.publish.NostrPublisher
-import net.primal.android.settings.api.SettingsApi
 import net.primal.android.settings.muted.db.MutedUserData
+import net.primal.data.remote.api.settings.SettingsApi
 
 class MutedUserRepository @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,

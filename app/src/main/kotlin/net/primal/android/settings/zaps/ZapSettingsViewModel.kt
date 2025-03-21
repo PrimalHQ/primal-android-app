@@ -12,13 +12,14 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.nostr.model.primal.content.ContentZapConfigItem
-import net.primal.android.nostr.model.primal.content.ContentZapDefault
+import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.settings.zaps.ZapSettingsContract.UiEvent
 import net.primal.android.settings.zaps.ZapSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.ContentZapConfigItem
+import net.primal.domain.ContentZapDefault
 import timber.log.Timber
 
 @HiltViewModel
@@ -26,6 +27,7 @@ class ZapSettingsViewModel @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val settingsRepository: SettingsRepository,
+    private val nostrNotary: NostrNotary,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -84,22 +86,34 @@ class ZapSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 withContext(dispatcherProvider.io()) {
-                    settingsRepository.fetchAndPersistAppSettings(userId = activeAccountStore.activeUserId())
+                    val userId = activeAccountStore.activeUserId()
+                    val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
+                        userId = userId,
+                        description = "Sync app settings",
+                    )
+                    settingsRepository.fetchAndPersistAppSettings(authorizationEvent)
                 }
             } catch (error: WssException) {
                 Timber.w(error)
             }
         }
 
-    private suspend fun updateDefaultZapAmount(newZapDefault: ContentZapDefault) =
+    private fun updateDefaultZapAmount(newZapDefault: ContentZapDefault) =
         viewModelScope.launch {
             setState { copy(saving = true) }
             try {
-                val userAccount = activeAccountStore.activeUserAccount()
-                settingsRepository.updateAndPersistZapDefault(
-                    userId = userAccount.pubkey,
-                    zapDefault = newZapDefault,
+                val userId = activeAccountStore.activeUserId()
+                val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
+                    userId = userId,
+                    description = "Sync app settings",
                 )
+                settingsRepository.fetchAndUpdateAndPublishAppSettings(authorizationEvent) {
+                    val newAppSettings = copy(zapDefault = newZapDefault)
+                    nostrNotary.signAppSettingsNostrEvent(
+                        userId = userId,
+                        appSettings = newAppSettings,
+                    )
+                }
                 setState { copy(editPresetIndex = null) }
             } catch (error: WssException) {
                 Timber.w(error)
@@ -108,16 +122,27 @@ class ZapSettingsViewModel @Inject constructor(
             }
         }
 
-    private suspend fun updateZapPreset(presetIndex: Int, zapPreset: ContentZapConfigItem) =
+    private fun updateZapPreset(presetIndex: Int, zapPreset: ContentZapConfigItem) =
         viewModelScope.launch {
             setState { copy(saving = true) }
             try {
-                val userAccount = activeAccountStore.activeUserAccount()
-                settingsRepository.updateAndPersistZapPresetsConfig(
-                    userId = userAccount.pubkey,
-                    presetIndex = presetIndex,
-                    zapPreset = zapPreset,
+                val userId = activeAccountStore.activeUserId()
+                val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
+                    userId = userId,
+                    description = "Sync app settings",
                 )
+
+                settingsRepository.fetchAndUpdateAndPublishAppSettings(authorizationEvent) {
+                    val newAppSettings = this.copy(
+                        zapsConfig = this.zapsConfig.toMutableList().apply {
+                            this[presetIndex] = zapPreset
+                        },
+                    )
+                    nostrNotary.signAppSettingsNostrEvent(
+                        userId = userId,
+                        appSettings = newAppSettings,
+                    )
+                }
                 setState { copy(editPresetIndex = null) }
             } catch (error: WssException) {
                 Timber.w(error)

@@ -1,7 +1,7 @@
 package net.primal.android.settings.zaps
 
-import net.primal.android.nostr.model.primal.content.ContentZapConfigItem
-import net.primal.android.nostr.model.primal.content.ContentZapDefault
+import net.primal.domain.ContentZapConfigItem
+import net.primal.domain.ContentZapDefault
 
 interface ZapSettingsContract {
 

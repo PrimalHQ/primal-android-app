@@ -54,11 +54,11 @@ import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.utils.shortened
-import net.primal.android.nostr.model.primal.content.ContentZapConfigItem
-import net.primal.android.nostr.model.primal.content.DEFAULT_ZAP_CONFIG
 import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.settings.zaps.PRESETS_COUNT
 import net.primal.android.theme.AppTheme
+import net.primal.domain.ContentZapConfigItem
+import net.primal.domain.DEFAULT_ZAP_CONFIG
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

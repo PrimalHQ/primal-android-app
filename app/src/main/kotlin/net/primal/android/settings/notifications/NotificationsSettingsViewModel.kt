@@ -20,6 +20,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.notifications.domain.NotificationType
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiEvent.NotificationSettingChanged
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiState.ApiError.FetchAppSettingsError
@@ -34,7 +35,9 @@ class NotificationsSettingsViewModel @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val settingsRepository: SettingsRepository,
     private val activeAccountStore: ActiveAccountStore,
+    private val nostrNotary: NostrNotary,
 ) : ViewModel() {
+
     private val _state = MutableStateFlow(NotificationsSettingsContract.UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: NotificationsSettingsContract.UiState.() -> NotificationsSettingsContract.UiState) {
@@ -115,8 +118,14 @@ class NotificationsSettingsViewModel @Inject constructor(
     private fun fetchLatestAppSettings() =
         viewModelScope.launch {
             try {
+                val userId = activeAccountStore.activeUserId()
+                val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
+                    userId = userId,
+                    description = "Sync app settings",
+                )
+
                 withContext(dispatcherProvider.io()) {
-                    settingsRepository.fetchAndPersistAppSettings(userId = activeAccountStore.activeUserId())
+                    settingsRepository.fetchAndPersistAppSettings(authorizationEvent)
                 }
             } catch (error: WssException) {
                 Timber.w(error)
@@ -124,7 +133,7 @@ class NotificationsSettingsViewModel @Inject constructor(
             }
         }
 
-    private suspend fun updateNotificationsSettings(notifications: List<NotificationSwitchUi>) =
+    private fun updateNotificationsSettings(notifications: List<NotificationSwitchUi>) =
         viewModelScope.launch {
             val notificationsJsonObject = JsonObject(
                 content = notifications.associate {
@@ -133,10 +142,18 @@ class NotificationsSettingsViewModel @Inject constructor(
             )
 
             try {
-                settingsRepository.updateAndPersistNotifications(
-                    userId = activeAccountStore.activeUserId(),
-                    notifications = notificationsJsonObject,
+                val userId = activeAccountStore.activeUserId()
+                val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
+                    userId = userId,
+                    description = "Sync app settings",
                 )
+                settingsRepository.fetchAndUpdateAndPublishAppSettings(authorizationEvent) {
+                    val newAppSettings = this.copy(notifications = notificationsJsonObject)
+                    nostrNotary.signAppSettingsNostrEvent(
+                        userId = userId,
+                        appSettings = newAppSettings,
+                    )
+                }
             } catch (error: WssException) {
                 setState { copy(error = UpdateAppSettingsError(cause = error)) }
             }

@@ -5,6 +5,7 @@ import kotlinx.coroutines.withContext
 import net.primal.android.bookmarks.BookmarksRepository
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.crypto.assureValidNsec
+import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.credentials.CredentialsStore
@@ -18,6 +19,7 @@ class LoginHandler @Inject constructor(
     private val bookmarksRepository: BookmarksRepository,
     private val dispatchers: CoroutineDispatcherProvider,
     private val credentialsStore: CredentialsStore,
+    private val nostrNotary: NostrNotary,
 ) {
     enum class LoginType {
         Npub,
@@ -31,10 +33,14 @@ class LoginHandler @Inject constructor(
                     LoginType.Npub -> credentialsStore.saveNpub(npub = nostrKey)
                     LoginType.Nsec -> credentialsStore.saveNsec(nostrKey = nostrKey)
                 }
+                val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
+                    userId = userId,
+                    description = "Sync app settings",
+                )
 
                 userRepository.fetchAndUpdateUserAccount(userId = userId)
                 bookmarksRepository.fetchAndPersistPublicBookmarks(userId = userId)
-                settingsRepository.fetchAndPersistAppSettings(userId = userId)
+                settingsRepository.fetchAndPersistAppSettings(authorizationEvent)
                 mutedUserRepository.fetchAndPersistMuteList(userId = userId)
             }.onFailure { exception ->
                 when (loginType) {

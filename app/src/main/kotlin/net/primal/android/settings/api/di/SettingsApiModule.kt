@@ -5,10 +5,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import net.primal.android.networking.di.PrimalCacheApiClient
-import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.settings.api.SettingsApi
-import net.primal.android.settings.api.SettingsApiImpl
 import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.data.remote.api.settings.SettingsApi
+import net.primal.data.remote.factory.PrimalApiServiceFactory
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -17,10 +16,6 @@ object SettingsApiModule {
     @Provides
     fun provideSettingsApi(
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
-        nostrNotary: NostrNotary,
-    ): SettingsApi =
-        SettingsApiImpl(
-            primalApiClient = primalApiClient,
-            nostrNotary = nostrNotary,
-        )
+    ): SettingsApi = PrimalApiServiceFactory.createSettingsApi(primalApiClient)
+
 }
