@@ -232,7 +232,7 @@ dependencies {
     implementation(project(":domain:primal-wallet"))
 
     implementation(project(":data:remote-caching"))
-    implementation(project(":shared"))
+    implementation(project(":data:repository-caching"))
 
     implementation(libs.core.ktx)
     implementation(libs.core.splashscreen)

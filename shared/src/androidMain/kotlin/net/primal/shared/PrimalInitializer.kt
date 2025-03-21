@@ -1,9 +1,9 @@
-package net.primal.core.config.store
+package net.primal.shared
 
 import android.content.Context
 
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
-actual object AppConfigInitializer {
+actual object PrimalInitializer {
 
     internal var appContext: Context? = null
         private set
