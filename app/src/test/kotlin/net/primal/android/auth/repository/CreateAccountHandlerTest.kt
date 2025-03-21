@@ -5,6 +5,7 @@ import io.kotest.matchers.collections.shouldContainOnly
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -24,6 +25,8 @@ import net.primal.android.user.domain.Credential
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrEventKind
 import org.junit.Rule
 import org.junit.Test
 
@@ -64,6 +67,18 @@ class CreateAccountHandlerTest {
         activeAccountStore = activeAccountStore,
         userRepository = userRepository,
         accountsStore = accountsStore,
+    )
+
+    private fun createDummyNostrEvent(
+        userId: String,
+        kind: Int = NostrEventKind.ApplicationSpecificData.value,
+    ): NostrEvent = NostrEvent(
+        id = "",
+        pubKey = userId,
+        createdAt = 0,
+        kind = kind,
+        content = "",
+        sig = "",
     )
 
     @Test
@@ -222,9 +237,16 @@ class CreateAccountHandlerTest {
                 coEvery { saveNsec(any()) } returns keyPair.pubKey
             }
 
+            val expectedNostrEvent = createDummyNostrEvent(userId = keyPair.pubKey)
+
             val handler = createAccountHandler(
                 settingsRepository = settingsRepository,
                 credentialsStore = credentialsStore,
+                nostrNotary = mockk(relaxed = true) {
+                    every {
+                        signAuthorizationNostrEvent(keyPair.pubKey, any(), any())
+                    } returns expectedNostrEvent
+                },
             )
 
             handler.createNostrAccount(
@@ -235,7 +257,7 @@ class CreateAccountHandlerTest {
 
             coVerify {
                 settingsRepository.fetchAndPersistAppSettings(
-                    withArg { it shouldBe keyPair.pubKey },
+                    withArg { it.pubKey shouldBe keyPair.pubKey },
                 )
             }
         }
