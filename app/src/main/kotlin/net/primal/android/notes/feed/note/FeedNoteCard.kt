@@ -1,5 +1,6 @@
 package net.primal.android.notes.feed.note
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -30,10 +31,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,8 +44,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.launch
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.UniversalAvatarThumbnail
@@ -266,7 +263,13 @@ private fun FeedNoteCard(
         lineOffsetX = (avatarSizeDp / 2) + avatarPaddingDp + notePaddingDp + 2.dp,
     ) {
         Box(
-            modifier = Modifier.padding(all = notePaddingDp),
+            modifier = Modifier
+                .padding(all = notePaddingDp)
+                .drawWithContent {
+                    graphicsLayer.record { this@drawWithContent.drawContent() }
+                    drawLayer(graphicsLayer)
+                }
+                .background(color = AppTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.TopEnd,
         ) {
             NoteDropdownMenuIcon(
@@ -385,7 +388,6 @@ private fun FeedNoteCard(
                         }
                     },
                     contentFooter = contentFooter,
-                    graphicsLayer = graphicsLayer,
                 )
             }
         }
@@ -413,7 +415,6 @@ private fun FeedNote(
     textSelectable: Boolean,
     showNoteStatCounts: Boolean,
     noteCallbacks: NoteCallbacks,
-    graphicsLayer: GraphicsLayer,
     onPostAction: ((FeedPostAction) -> Unit)? = null,
     onPostLongClickAction: ((FeedPostAction) -> Unit)? = null,
     contentFooter: @Composable () -> Unit = {},
@@ -440,65 +441,58 @@ private fun FeedNote(
         Column(
             modifier = Modifier.padding(start = 0.dp),
         ) {
-            Column(
-                modifier = Modifier.drawWithContent {
-                    graphicsLayer.record { this@drawWithContent.drawContent() }
-                    drawLayer(graphicsLayer)
+            FeedNoteHeader(
+                modifier = Modifier
+                    .padding(notePaddingValues)
+                    .padding(end = 4.dp)
+                    .fillMaxWidth(),
+                postTimestamp = data.timestamp,
+                singleLine = headerSingleLine,
+                authorAvatarVisible = fullWidthContent,
+                authorAvatarSize = avatarSizeDp,
+                authorDisplayName = data.authorName,
+                authorAvatarCdnImage = data.authorAvatarCdnImage,
+                authorInternetIdentifier = data.authorInternetIdentifier,
+                authorLegendaryCustomization = data.authorLegendaryCustomization,
+                replyToAuthor = if (showReplyTo) data.replyToAuthorHandle else null,
+                onAuthorAvatarClick = if (noteCallbacks.onProfileClick != null) {
+                    { noteCallbacks.onProfileClick.invoke(data.authorId) }
+                } else {
+                    null
                 },
-            ) {
-                FeedNoteHeader(
-                    modifier = Modifier
-                        .padding(notePaddingValues)
-                        .padding(end = 4.dp)
-                        .fillMaxWidth(),
-                    postTimestamp = data.timestamp,
-                    singleLine = headerSingleLine,
-                    authorAvatarVisible = fullWidthContent,
-                    authorAvatarSize = avatarSizeDp,
-                    authorDisplayName = data.authorName,
-                    authorAvatarCdnImage = data.authorAvatarCdnImage,
-                    authorInternetIdentifier = data.authorInternetIdentifier,
-                    authorLegendaryCustomization = data.authorLegendaryCustomization,
-                    replyToAuthor = if (showReplyTo) data.replyToAuthorHandle else null,
-                    onAuthorAvatarClick = if (noteCallbacks.onProfileClick != null) {
-                        { noteCallbacks.onProfileClick.invoke(data.authorId) }
-                    } else {
-                        null
-                    },
-                )
+            )
 
-                val postAuthorGuessHeight = with(LocalDensity.current) { 128.dp.toPx() }
-                val launchRippleEffect: (Offset) -> Unit = {
-                    uiScope.launch {
-                        val press = PressInteraction.Press(it.copy(y = it.y + postAuthorGuessHeight))
-                        interactionSource.emit(press)
-                        interactionSource.emit(PressInteraction.Release(press))
-                    }
+            val postAuthorGuessHeight = with(LocalDensity.current) { 128.dp.toPx() }
+            val launchRippleEffect: (Offset) -> Unit = {
+                uiScope.launch {
+                    val press = PressInteraction.Press(it.copy(y = it.y + postAuthorGuessHeight))
+                    interactionSource.emit(press)
+                    interactionSource.emit(PressInteraction.Release(press))
                 }
-
-                NoteContent(
-                    modifier = Modifier
-                        .padding(horizontal = if (fullWidthContent) 10.dp else 8.dp)
-                        .padding(start = if (forceContentIndent && fullWidthContent) avatarSizeDp + 6.dp else 0.dp)
-                        .padding(top = if (fullWidthContent || !headerSingleLine) 10.dp else 5.dp),
-                    data = data.toNoteContentUi(),
-                    expanded = expanded,
-                    enableTweetsMode = enableTweetsMode,
-                    textSelectable = textSelectable,
-                    onClick = if (noteCallbacks.onNoteClick != null) {
-                        {
-                            launchRippleEffect(it)
-                            noteCallbacks.onNoteClick.invoke(data.postId)
-                        }
-                    } else {
-                        null
-                    },
-                    onUrlClick = { localUriHandler.openUriSafely(it) },
-                    noteCallbacks = noteCallbacks,
-                )
-
-                contentFooter()
             }
+
+            NoteContent(
+                modifier = Modifier
+                    .padding(horizontal = if (fullWidthContent) 10.dp else 8.dp)
+                    .padding(start = if (forceContentIndent && fullWidthContent) avatarSizeDp + 6.dp else 0.dp)
+                    .padding(top = if (fullWidthContent || !headerSingleLine) 10.dp else 5.dp),
+                data = data.toNoteContentUi(),
+                expanded = expanded,
+                enableTweetsMode = enableTweetsMode,
+                textSelectable = textSelectable,
+                onClick = if (noteCallbacks.onNoteClick != null) {
+                    {
+                        launchRippleEffect(it)
+                        noteCallbacks.onNoteClick.invoke(data.postId)
+                    }
+                } else {
+                    null
+                },
+                onUrlClick = { localUriHandler.openUriSafely(it) },
+                noteCallbacks = noteCallbacks,
+            )
+
+            contentFooter()
 
             if (!showNoteStatCounts) {
                 PrimalDivider(modifier = Modifier.padding(vertical = 4.dp))
