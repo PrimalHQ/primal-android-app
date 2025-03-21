@@ -17,6 +17,7 @@ import net.primal.data.remote.api.importing.PrimalImportApiImpl
 import net.primal.data.remote.api.users.UserWellKnownApi
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.data.remote.api.users.UsersApiImpl
+import net.primal.data.remote.api.users.createUserWellKnownApi
 
 object PrimalApiFactory {
 
@@ -39,5 +40,5 @@ object PrimalApiFactory {
             .baseUrl("https://primal.net/")
             .httpClient(client = httpClient)
             .build()
-            .create()
+            .createUserWellKnownApi()
 }
