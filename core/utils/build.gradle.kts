@@ -5,7 +5,6 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
-    alias(libs.plugins.touchlab.skie)
 }
 
 val buildConfigGenerator by tasks.registering(Sync::class) {
@@ -70,7 +69,6 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.kotlinx.serialization.json)
-                implementation(libs.skie.configuration.annotations)
             }
         }
 
@@ -97,24 +95,5 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.test)
             }
         }
-    }
-
-    // Opting in to the experimental @ObjCName annotation for native coroutines on iOS targets
-    kotlin.sourceSets.all {
-        languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
-    }
-}
-
-tasks.register("assembleXCFramework") {
-    dependsOn("assemble${xcfName}ReleaseXCFramework")
-}
-
-skie {
-    build {
-        produceDistributableFramework()
-    }
-
-    analytics {
-        enabled.set(false)
     }
 }
