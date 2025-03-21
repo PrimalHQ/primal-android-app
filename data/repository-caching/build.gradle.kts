@@ -1,4 +1,3 @@
-import co.touchlab.skie.configuration.DefaultArgumentInterop
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
 plugins {
@@ -6,10 +5,7 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.touchlab.skie)
 }
-
-private val xcfName = "PrimalShared"
 
 kotlin {
     // Android target
@@ -23,6 +19,7 @@ kotlin {
 //    jvm("desktop")
 
     // iOS Target
+    val xcfName = "PrimalDataRepositoryCaching"
     val xcfFramework = XCFramework(xcfName)
     val iosTargets = listOf(iosX64(), iosArm64(), iosSimulatorArm64())
 
@@ -38,25 +35,22 @@ kotlin {
         commonMain {
             dependencies {
                 // Internal
-                api(project(":data:repository-caching"))
-                api(project(":domain:nostr"))
-                api(project(":domain:primal"))
+                implementation(project(":core:utils"))
+                implementation(project(":domain:nostr"))
+                implementation(project(":domain:primal"))
+
+                // TODO Extract to domain exceptions to avoid dependency on networking?
+                implementation(project(":core:networking-primal"))
 
                 implementation(project(":data:local-caching"))
                 implementation(project(":data:remote-caching"))
-
-                implementation(project(":core:networking-primal"))
 
                 // Core
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.datetime)
 
-                // Koin
-//                implementation(project.dependencies.platform(libs.koin.bom))
-//                implementation(libs.koin.core)
-//                implementation(libs.koin.compose)
-//                implementation(libs.koin.compose.viewmodel)
-//                implementation(libs.koin.compose.viewmodel.navigation)
+                // Paging
+                implementation(libs.paging.common)
 
                 // Serialization
                 implementation(libs.kotlinx.serialization.json)
@@ -64,9 +58,6 @@ kotlin {
 
                 // Logging
                 implementation(libs.napier)
-
-                // Interop
-                implementation(libs.skie.configuration.annotations)
             }
         }
 
@@ -75,14 +66,15 @@ kotlin {
                 // Coroutines
                 implementation(libs.kotlinx.coroutines.android)
 
-                // Koin
-//                implementation(libs.koin.android)
-//                implementation(libs.koin.androidx.compose)
+                // Paging
+                implementation(libs.paging.runtime)
             }
         }
 
         iosMain {
             dependencies {
+                // Paging
+                api(libs.cash.app.paging.runtime.uikit)
             }
         }
 
@@ -90,36 +82,19 @@ kotlin {
 //        desktopMain.dependencies {
 //            // Add JVM-Desktop-specific dependencies here
 //        }
+
+        commonTest {
+            dependencies {
+                implementation(libs.junit)
+                implementation(libs.kotest.assertions.core)
+                implementation(libs.kotest.assertions.json)
+                implementation(libs.kotlinx.coroutines.test)
+            }
+        }
     }
 
     // Opting in to the experimental @ObjCName annotation for native coroutines on iOS targets
     kotlin.sourceSets.all {
         languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
-    }
-}
-
-tasks.register("assembleXCFramework") {
-    dependsOn("assemble${xcfName}ReleaseXCFramework")
-}
-
-tasks.register("compileTargets") {
-    dependsOn("compileKotlinIosArm64", "compileAndroidMain")
-}
-
-skie {
-    build {
-        produceDistributableFramework()
-    }
-
-    features {
-        enableFlowCombineConvertorPreview = true
-
-        group {
-            DefaultArgumentInterop.Enabled(false)
-        }
-    }
-
-    analytics {
-        enabled.set(false)
     }
 }
