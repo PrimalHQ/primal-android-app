@@ -41,6 +41,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -264,21 +265,7 @@ private fun FeedNoteCard(
         lineOffsetX = (avatarSizeDp / 2) + avatarPaddingDp + notePaddingDp + 2.dp,
     ) {
         Box(
-            modifier = Modifier
-                .padding(all = notePaddingDp)
-                .drawWithContent {
-                    graphicsLayer.record { this@drawWithContent.drawContent() }
-                    drawLayer(graphicsLayer)
-                }
-                .clip(
-                    RoundedCornerShape(
-                        topStart = AppTheme.shapes.medium.topStart,
-                        bottomStart = AppTheme.shapes.medium.bottomStart,
-                        topEnd = AppTheme.shapes.medium.topEnd,
-                        bottomEnd = AppTheme.shapes.medium.bottomEnd,
-                    ),
-                )
-                .background(color = AppTheme.colorScheme.surfaceVariant),
+            modifier = Modifier.padding(all = notePaddingDp),
             contentAlignment = Alignment.TopEnd,
         ) {
             NoteDropdownMenuIcon(
@@ -292,7 +279,8 @@ private fun FeedNoteCard(
                             else -> 13.dp
                         },
                     )
-                    .clip(CircleShape),
+                    .clip(CircleShape)
+                    .zIndex(1f),
                 noteId = data.postId,
                 noteContent = data.content,
                 noteRawData = data.rawNostrEventJson,
@@ -328,76 +316,93 @@ private fun FeedNoteCard(
                     )
                 }
 
-                FeedNote(
-                    data = data,
-                    fullWidthContent = fullWidthContent,
-                    avatarSizeDp = avatarSizeDp,
-                    avatarPaddingValues = PaddingValues(start = avatarPaddingDp, top = avatarPaddingDp),
-                    notePaddingValues = PaddingValues(
-                        start = 8.dp,
-                        top = avatarPaddingDp,
-                        end = overflowIconSizeDp - 8.dp,
-                    ),
-                    enableTweetsMode = enableTweetsMode,
-                    headerSingleLine = headerSingleLine,
-                    showReplyTo = showReplyTo,
-                    forceContentIndent = forceContentIndent,
-                    expanded = expanded,
-                    textSelectable = textSelectable,
-                    showNoteStatCounts = showNoteStatCounts,
-                    noteCallbacks = noteCallbacks,
-                    onPostAction = { postAction ->
-                        when (postAction) {
-                            FeedPostAction.Reply -> {
-                                noteCallbacks.onNoteReplyClick?.invoke(data.postId)
-                            }
+                Column(
+                    modifier = Modifier
+                        .drawWithContent {
+                            graphicsLayer.record { this@drawWithContent.drawContent() }
+                            drawLayer(graphicsLayer)
+                        }
+                        .clip(
+                            RoundedCornerShape(
+                                topStart = AppTheme.shapes.medium.topStart,
+                                bottomStart = AppTheme.shapes.medium.bottomStart,
+                                topEnd = AppTheme.shapes.medium.topEnd,
+                                bottomEnd = AppTheme.shapes.medium.bottomEnd,
+                            ),
+                        )
+                        .background(color = AppTheme.colorScheme.surfaceVariant),
+                ) {
+                    FeedNote(
+                        data = data,
+                        fullWidthContent = fullWidthContent,
+                        avatarSizeDp = avatarSizeDp,
+                        avatarPaddingValues = PaddingValues(start = avatarPaddingDp, top = avatarPaddingDp),
+                        notePaddingValues = PaddingValues(
+                            start = 8.dp,
+                            top = avatarPaddingDp,
+                            end = overflowIconSizeDp - 8.dp,
+                        ),
+                        enableTweetsMode = enableTweetsMode,
+                        headerSingleLine = headerSingleLine,
+                        showReplyTo = showReplyTo,
+                        forceContentIndent = forceContentIndent,
+                        expanded = expanded,
+                        textSelectable = textSelectable,
+                        showNoteStatCounts = showNoteStatCounts,
+                        noteCallbacks = noteCallbacks,
+                        onPostAction = { postAction ->
+                            when (postAction) {
+                                FeedPostAction.Reply -> {
+                                    noteCallbacks.onNoteReplyClick?.invoke(data.postId)
+                                }
 
-                            FeedPostAction.Zap -> {
-                                if (state.zappingState.canZap()) {
+                                FeedPostAction.Zap -> {
+                                    if (state.zappingState.canZap()) {
+                                        eventPublisher(
+                                            UiEvent.ZapAction(
+                                                postId = data.postId,
+                                                postAuthorId = data.authorId,
+                                            ),
+                                        )
+                                    } else {
+                                        showCantZapWarning = true
+                                    }
+                                }
+
+                                FeedPostAction.Like -> {
                                     eventPublisher(
-                                        UiEvent.ZapAction(
+                                        UiEvent.PostLikeAction(
                                             postId = data.postId,
                                             postAuthorId = data.authorId,
                                         ),
                                     )
-                                } else {
-                                    showCantZapWarning = true
+                                }
+
+                                FeedPostAction.Repost -> {
+                                    showRepostOrQuoteConfirmation = true
+                                }
+
+                                FeedPostAction.Bookmark -> {
+                                    eventPublisher(UiEvent.BookmarkAction(noteId = data.postId))
                                 }
                             }
-
-                            FeedPostAction.Like -> {
-                                eventPublisher(
-                                    UiEvent.PostLikeAction(
-                                        postId = data.postId,
-                                        postAuthorId = data.authorId,
-                                    ),
-                                )
-                            }
-
-                            FeedPostAction.Repost -> {
-                                showRepostOrQuoteConfirmation = true
-                            }
-
-                            FeedPostAction.Bookmark -> {
-                                eventPublisher(UiEvent.BookmarkAction(noteId = data.postId))
-                            }
-                        }
-                    },
-                    onPostLongClickAction = { postAction ->
-                        when (postAction) {
-                            FeedPostAction.Zap -> {
-                                if (state.zappingState.walletConnected) {
-                                    showZapOptions = true
-                                } else {
-                                    showCantZapWarning = true
+                        },
+                        onPostLongClickAction = { postAction ->
+                            when (postAction) {
+                                FeedPostAction.Zap -> {
+                                    if (state.zappingState.walletConnected) {
+                                        showZapOptions = true
+                                    } else {
+                                        showCantZapWarning = true
+                                    }
                                 }
-                            }
 
-                            else -> Unit
-                        }
-                    },
-                    contentFooter = contentFooter,
-                )
+                                else -> Unit
+                            }
+                        },
+                        contentFooter = contentFooter,
+                    )
+                }
             }
         }
     }
