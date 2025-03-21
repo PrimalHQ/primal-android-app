@@ -37,11 +37,10 @@ kotlin {
                 // Internal
                 implementation(project(":core:app-config"))
                 implementation(project(":core:utils"))
+                implementation(project(":core:networking-primal"))
+
                 implementation(project(":domain:nostr"))
                 implementation(project(":domain:primal"))
-
-                // TODO Extract to domain exceptions to avoid dependency on networking?
-                implementation(project(":core:networking-primal"))
 
                 implementation(project(":data:local-caching"))
                 implementation(project(":data:remote-caching"))
