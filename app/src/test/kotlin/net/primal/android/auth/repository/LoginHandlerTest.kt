@@ -18,6 +18,8 @@ import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.Credential
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrEventKind
 import org.junit.Rule
 import org.junit.Test
 
@@ -50,6 +52,18 @@ class LoginHandlerTest {
             credentialsStore = credentialsStore,
             nostrNotary = nostrNotary,
         )
+
+    private fun createDummyNostrEvent(
+        userId: String,
+        kind: Int = NostrEventKind.ApplicationSpecificData.value,
+    ): NostrEvent = NostrEvent(
+        id = "",
+        pubKey = userId,
+        createdAt = 0,
+        kind = kind,
+        content = "",
+        sig = "",
+    )
 
     @Test
     fun login_callsLoginFromAuthRepository_withGivenKey() =
@@ -89,10 +103,20 @@ class LoginHandlerTest {
                 coEvery { saveNsec(any()) } returns expectedUserId
             }
             val settingsRepository = mockk<SettingsRepository>(relaxed = true)
+            val expectedNostrEvent = createDummyNostrEvent(userId = expectedUserId)
+
             val loginHandler = createLoginHandler(
                 settingsRepository = settingsRepository,
                 credentialsStore = credentialsStore,
+                nostrNotary = mockk(relaxed = true) {
+                    coEvery {
+                        signAuthorizationNostrEvent(expectedUserId, any(), any())
+                    } returns expectedNostrEvent
+                }
             )
+
+
+
             loginHandler.login(
                 nostrKey = "nsec174p4ny7",
                 loginType = LoginHandler.LoginType.Nsec,
@@ -100,7 +124,9 @@ class LoginHandlerTest {
             advanceUntilIdle()
 
             coVerify {
-                settingsRepository.fetchAndPersistAppSettings(any())
+                settingsRepository.fetchAndPersistAppSettings(
+                    withArg { it.pubKey shouldBe expectedUserId }
+                )
             }
         }
 
