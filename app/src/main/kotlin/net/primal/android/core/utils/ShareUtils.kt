@@ -29,7 +29,8 @@ suspend fun systemShareImage(context: Context, bitmap: Bitmap) =
     runCatching {
         val file = withContext(Dispatchers.IO) {
             val shareDir = context.externalCacheDir
-            val imageFile = File(shareDir, "PrimalSharedImage.jpg")
+            val timestamp = System.currentTimeMillis()
+            val imageFile = File(shareDir, "PrimalSharedImage_$timestamp.png")
 
             FileOutputStream(imageFile).use { outputStream ->
                 bitmap.compress(Bitmap.CompressFormat.PNG, IMAGE_COMPRESSION_QUALITY, outputStream)
@@ -42,7 +43,7 @@ suspend fun systemShareImage(context: Context, bitmap: Bitmap) =
         val shareIntent = Intent().apply {
             action = Intent.ACTION_SEND
             putExtra(Intent.EXTRA_STREAM, uri)
-            type = "image/jpg"
+            type = "image/png"
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
 
