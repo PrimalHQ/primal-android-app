@@ -24,13 +24,13 @@ import net.primal.android.premium.api.model.PurchaseMembershipRequest
 import net.primal.android.premium.api.model.ShowSupportUsResponse
 import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
 import net.primal.android.premium.domain.PremiumPurchaseOrder
-import net.primal.android.settings.api.model.AppSpecificDataRequest
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.CommonJsonImplicitNulls
 import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.data.remote.model.AppSpecificDataRequest
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 

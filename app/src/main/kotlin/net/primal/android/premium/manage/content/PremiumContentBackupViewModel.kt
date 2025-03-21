@@ -21,7 +21,6 @@ import net.primal.android.premium.manage.content.api.model.BroadcastingStatus
 import net.primal.android.premium.manage.content.model.ContentGroup
 import net.primal.android.premium.manage.content.model.ContentType
 import net.primal.android.premium.manage.content.repository.BroadcastRepository
-import net.primal.android.settings.api.model.AppSpecificDataRequest
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
@@ -29,6 +28,7 @@ import net.primal.core.networking.primal.PrimalSocketSubscription
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.serialization.CommonJson
+import net.primal.data.remote.model.AppSpecificDataRequest
 import net.primal.domain.nostr.NostrEventKind
 import timber.log.Timber
 

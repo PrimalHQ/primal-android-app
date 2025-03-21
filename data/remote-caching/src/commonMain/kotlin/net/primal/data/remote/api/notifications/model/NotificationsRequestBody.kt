@@ -1,4 +1,4 @@
-package net.primal.android.notifications.api.model
+package net.primal.data.remote.api.notifications.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

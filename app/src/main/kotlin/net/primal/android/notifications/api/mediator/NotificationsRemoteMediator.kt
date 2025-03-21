@@ -5,19 +5,20 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
-import java.time.Instant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.nostr.ext.mapNotNullAsNotificationPO
 import net.primal.android.nostr.ext.mapNotNullAsProfileStatsPO
 import net.primal.android.notes.repository.persistToDatabaseAsTransaction
-import net.primal.android.notifications.api.NotificationsApi
-import net.primal.android.notifications.api.model.NotificationsRequestBody
 import net.primal.android.notifications.db.Notification
 import net.primal.android.notifications.db.NotificationData
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.data.remote.api.feed.model.FeedResponse
+import net.primal.data.remote.api.notifications.NotificationsApi
+import net.primal.data.remote.api.notifications.model.NotificationsRequestBody
 import timber.log.Timber
 
 @ExperimentalPagingApi
@@ -27,16 +28,16 @@ class NotificationsRemoteMediator(
     private val database: PrimalDatabase,
 ) : RemoteMediator<Int, Notification>() {
 
-    private var lastSeenTimestamp: Long = Instant.EPOCH.epochSecond
+    private var lastSeenTimestamp: Long = Instant.DISTANT_PAST.epochSeconds
 
     private val lastRequests: MutableMap<LoadType, NotificationsRequestBody> = mutableMapOf()
 
     fun updateLastSeenTimestamp(lastSeen: Instant) {
-        lastSeenTimestamp = lastSeen.epochSecond
+        lastSeenTimestamp = lastSeen.epochSeconds
     }
 
     private suspend fun ensureLastSeenTimestamp() {
-        if (lastSeenTimestamp == Instant.EPOCH.epochSecond) {
+        if (lastSeenTimestamp == Instant.DISTANT_PAST.epochSeconds) {
             notificationsApi.getLastSeenTimestamp(userId = userId)?.let {
                 updateLastSeenTimestamp(lastSeen = it)
             }
@@ -86,7 +87,7 @@ class NotificationsRemoteMediator(
             LoadType.REFRESH -> initialRequestBody
             LoadType.PREPEND -> initialRequestBody.copy(
                 since = timestamp,
-                until = Instant.now().epochSecond,
+                until = Clock.System.now().epochSeconds,
             )
 
             LoadType.APPEND -> initialRequestBody.copy(until = timestamp)
