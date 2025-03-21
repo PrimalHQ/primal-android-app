@@ -94,6 +94,8 @@ class ArticleDetailsViewModel @Inject constructor(
             if (naddr == null) {
                 setState { copy(error = UiError.InvalidNaddr) }
             } else {
+                setState { copy(naddr = naddr) }
+
                 observeArticle(naddr)
                 observeArticleComments(naddr = naddr)
             }
