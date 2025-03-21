@@ -13,6 +13,7 @@ import net.primal.android.auth.onboarding.account.ui.model.FollowGroupMember
 import net.primal.android.core.FakeDataStore
 import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.crypto.CryptoUtils
+import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.repository.SettingsRepository
@@ -39,6 +40,7 @@ class CreateAccountHandlerTest {
         profileRepository: ProfileRepository = mockk(relaxed = true),
         settingsRepository: SettingsRepository = mockk(relaxed = true),
         credentialsStore: CredentialsStore = mockk(relaxed = true),
+        nostrNotary: NostrNotary = mockk(relaxed = true),
     ): CreateAccountHandler {
         return CreateAccountHandler(
             authRepository = authRepository,
@@ -48,6 +50,7 @@ class CreateAccountHandlerTest {
             settingsRepository = settingsRepository,
             credentialsStore = credentialsStore,
             dispatchers = coroutinesTestRule.dispatcherProvider,
+            nostrNotary = nostrNotary,
         )
     }
 

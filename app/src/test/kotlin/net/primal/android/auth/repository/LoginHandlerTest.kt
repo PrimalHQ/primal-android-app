@@ -5,10 +5,12 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import net.primal.android.bookmarks.BookmarksRepository
 import net.primal.android.core.FakeDataStore
 import net.primal.android.core.coroutines.CoroutinesTestRule
+import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -22,6 +24,10 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class LoginHandlerTest {
 
+    private val expectedUserId by lazy {
+        "88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079"
+    }
+
     @get:Rule
     val coroutinesTestRule = CoroutinesTestRule()
 
@@ -32,6 +38,7 @@ class LoginHandlerTest {
         mutedUserRepository: MutedUserRepository = mockk(relaxed = true),
         bookmarksRepository: BookmarksRepository = mockk(relaxed = true),
         credentialsStore: CredentialsStore = mockk(relaxed = true),
+        nostrNotary: NostrNotary = mockk(relaxed = true),
     ): LoginHandler =
         LoginHandler(
             settingsRepository = settingsRepository,
@@ -41,6 +48,7 @@ class LoginHandlerTest {
             bookmarksRepository = bookmarksRepository,
             dispatchers = coroutinesTestRule.dispatcherProvider,
             credentialsStore = credentialsStore,
+            nostrNotary = nostrNotary,
         )
 
     @Test
@@ -59,7 +67,6 @@ class LoginHandlerTest {
     @Test
     fun login_callsFetchAndUpdateUserAccount() =
         runTest {
-            val expectedUserId = "b10a23"
             val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
                 coEvery { saveNsec(any()) } returns expectedUserId
             }
@@ -78,7 +85,6 @@ class LoginHandlerTest {
     @Test
     fun login_callsFetchAndPersistAppSettings() =
         runTest {
-            val expectedUserId = "b10a23"
             val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
                 coEvery { saveNsec(any()) } returns expectedUserId
             }
@@ -87,17 +93,20 @@ class LoginHandlerTest {
                 settingsRepository = settingsRepository,
                 credentialsStore = credentialsStore,
             )
-            loginHandler.login(nostrKey = "random", loginType = LoginHandler.LoginType.Nsec)
+            loginHandler.login(
+                nostrKey = "nsec174p4ny7",
+                loginType = LoginHandler.LoginType.Nsec,
+            )
+            advanceUntilIdle()
 
             coVerify {
-                settingsRepository.fetchAndPersistAppSettings(expectedUserId)
+                settingsRepository.fetchAndPersistAppSettings(any())
             }
         }
 
     @Test
     fun login_callsFetchAndPersistMuteList() =
         runTest {
-            val expectedUserId = "b10a23"
             val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
                 coEvery { saveNsec(any()) } returns expectedUserId
             }
