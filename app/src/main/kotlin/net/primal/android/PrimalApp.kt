@@ -7,6 +7,7 @@ import javax.inject.Inject
 import net.primal.android.core.crash.PrimalCrashReporter
 import net.primal.android.core.images.PrimalImageLoaderFactory
 import net.primal.core.config.store.AppConfigInitializer
+import net.primal.data.repository.factory.PrimalRepositoryFactory
 import timber.log.Timber
 
 @HiltAndroidApp
@@ -24,6 +25,7 @@ class PrimalApp : Application() {
     override fun onCreate() {
         super.onCreate()
         AppConfigInitializer.init(this@PrimalApp)
+        PrimalRepositoryFactory.init(this@PrimalApp)
 
         loggers.forEach {
             Timber.plant(it)

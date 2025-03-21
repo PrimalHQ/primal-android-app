@@ -28,7 +28,7 @@ object PrimalApiFactory {
 
     fun createExploreApi(primalApiClient: PrimalApiClient): ExploreApi = ExploreApiImpl(primalApiClient)
 
-    fun createFeedsApi(primalApiClient: PrimalApiClient): FeedApi = FeedApiImpl(primalApiClient)
+    fun createFeedApi(primalApiClient: PrimalApiClient): FeedApi = FeedApiImpl(primalApiClient)
 
     fun createImportApi(primalApiClient: PrimalApiClient): PrimalImportApi = PrimalImportApiImpl(primalApiClient)
 

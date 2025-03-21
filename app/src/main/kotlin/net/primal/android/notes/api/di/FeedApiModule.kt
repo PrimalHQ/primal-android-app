@@ -14,5 +14,5 @@ import net.primal.data.remote.factory.PrimalApiFactory
 object FeedApiModule {
     @Provides
     fun provideFeedApi(@PrimalCacheApiClient primalApiClient: PrimalApiClient): FeedApi =
-        PrimalApiFactory.createFeedsApi(primalApiClient)
+        PrimalApiFactory.createFeedApi(primalApiClient)
 }

@@ -42,11 +42,6 @@ kotlin {
                 api(project(":domain:nostr"))
                 api(project(":domain:primal"))
 
-                implementation(project(":data:local-caching"))
-                implementation(project(":data:remote-caching"))
-
-                implementation(project(":core:networking-primal"))
-
                 // Core
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.datetime)
