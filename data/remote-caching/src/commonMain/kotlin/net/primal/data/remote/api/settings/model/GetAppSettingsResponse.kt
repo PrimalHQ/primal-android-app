@@ -1,4 +1,4 @@
-package net.primal.android.settings.api.model
+package net.primal.data.remote.api.settings.model
 
 import kotlinx.serialization.Serializable
 import net.primal.domain.PrimalEvent

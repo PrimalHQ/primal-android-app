@@ -18,6 +18,8 @@ import net.primal.data.remote.api.messages.MessagesApi
 import net.primal.data.remote.api.messages.MessagesApiImpl
 import net.primal.data.remote.api.notifications.NotificationsApi
 import net.primal.data.remote.api.notifications.NotificationsApiImpl
+import net.primal.data.remote.api.settings.SettingsApi
+import net.primal.data.remote.api.settings.SettingsApiImpl
 import net.primal.data.remote.api.users.UserWellKnownApi
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.data.remote.api.users.UsersApiImpl
@@ -47,6 +49,9 @@ object PrimalApiServiceFactory {
 
     fun createNotificationsApi(primalApiClient: PrimalApiClient): NotificationsApi =
         NotificationsApiImpl(primalApiClient)
+
+    fun createSettingsApi(primalApiClient: PrimalApiClient): SettingsApi =
+        SettingsApiImpl(primalApiClient)
 
     fun createUsersApi(primalApiClient: PrimalApiClient): UsersApi =
         UsersApiImpl(primalApiClient)

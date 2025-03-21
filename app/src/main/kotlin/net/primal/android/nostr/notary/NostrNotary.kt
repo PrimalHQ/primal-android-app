@@ -11,8 +11,6 @@ import net.primal.android.crypto.toNpub
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.nostr.ext.asIdentifierTag
 import net.primal.android.nostr.ext.asPubkeyTag
-import net.primal.android.nostr.model.primal.content.ContentAppSettings
-import net.primal.android.settings.api.model.AppSettingsDescription
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.Relay
@@ -22,6 +20,8 @@ import net.primal.android.wallet.domain.toTags
 import net.primal.android.wallet.nwc.model.NwcWalletRequest
 import net.primal.android.wallet.nwc.model.PayInvoiceRequest
 import net.primal.core.utils.serialization.CommonJson
+import net.primal.data.remote.api.settings.model.AppSettingsDescription
+import net.primal.domain.ContentAppSettings
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind

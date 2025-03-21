@@ -6,6 +6,7 @@ import java.time.Instant
 import kotlin.time.Duration
 import net.primal.android.bookmarks.BookmarksRepository
 import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.nostr.notary.NostrSignUnauthorized
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.settings.repository.SettingsRepository
@@ -23,6 +24,7 @@ class UserDataUpdater @AssistedInject constructor(
     private val relayRepository: RelayRepository,
     private val bookmarksRepository: BookmarksRepository,
     private val premiumRepository: PremiumRepository,
+    private val nostrNotary: NostrNotary,
 ) {
 
     private var lastTimeFetched: Instant = Instant.EPOCH
@@ -47,8 +49,17 @@ class UserDataUpdater @AssistedInject constructor(
     }
 
     private suspend fun updateData() {
-        settingsRepository.fetchAndPersistAppSettings(userId = userId)
-        settingsRepository.ensureZapConfig(userId = userId)
+        val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
+            userId = userId,
+            description = "Sync app settings",
+        )
+        settingsRepository.fetchAndPersistAppSettings(authorizationEvent)
+        settingsRepository.ensureZapConfig(authorizationEvent) { appSettings ->
+            nostrNotary.signAppSettingsNostrEvent(
+                userId = userId,
+                appSettings = appSettings,
+            )
+        }
         premiumRepository.fetchMembershipStatus(userId = userId)
         relayRepository.fetchAndUpdateUserRelays(userId = userId)
         userRepository.fetchAndUpdateUserAccount(userId = userId)
