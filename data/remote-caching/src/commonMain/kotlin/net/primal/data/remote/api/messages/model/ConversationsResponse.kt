@@ -1,6 +1,6 @@
-package net.primal.android.messages.api.model
+package net.primal.data.remote.api.messages.model
 
-import net.primal.android.messages.domain.ConversationsSummary
+import net.primal.data.remote.model.ConversationsSummary
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 
