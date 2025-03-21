@@ -35,6 +35,7 @@ kotlin {
         commonMain {
             dependencies {
                 // Internal
+                implementation(project(":core:app-config"))
                 implementation(project(":core:utils"))
                 implementation(project(":domain:nostr"))
                 implementation(project(":domain:primal"))
