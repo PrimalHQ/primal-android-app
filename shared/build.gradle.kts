@@ -50,13 +50,6 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.datetime)
 
-                // Koin
-//                implementation(project.dependencies.platform(libs.koin.bom))
-//                implementation(libs.koin.core)
-//                implementation(libs.koin.compose)
-//                implementation(libs.koin.compose.viewmodel)
-//                implementation(libs.koin.compose.viewmodel.navigation)
-
                 // Serialization
                 implementation(libs.kotlinx.serialization.json)
                 implementation(libs.kotlinx.io)
@@ -73,10 +66,6 @@ kotlin {
             dependencies {
                 // Coroutines
                 implementation(libs.kotlinx.coroutines.android)
-
-                // Koin
-//                implementation(libs.koin.android)
-//                implementation(libs.koin.androidx.compose)
             }
         }
 
