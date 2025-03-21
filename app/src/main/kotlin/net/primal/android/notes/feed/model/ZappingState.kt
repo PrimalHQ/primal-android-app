@@ -1,10 +1,10 @@
 package net.primal.android.notes.feed.model
 
-import net.primal.android.nostr.model.primal.content.ContentZapConfigItem
-import net.primal.android.nostr.model.primal.content.ContentZapDefault
-import net.primal.android.nostr.model.primal.content.DEFAULT_ZAP_CONFIG
-import net.primal.android.nostr.model.primal.content.DEFAULT_ZAP_DEFAULT
 import net.primal.android.user.domain.WalletPreference
+import net.primal.domain.ContentZapConfigItem
+import net.primal.domain.ContentZapDefault
+import net.primal.domain.DEFAULT_ZAP_CONFIG
+import net.primal.domain.DEFAULT_ZAP_DEFAULT
 
 data class ZappingState(
     val walletConnected: Boolean = false,
