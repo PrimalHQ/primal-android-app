@@ -24,7 +24,6 @@ import net.primal.android.nostr.ext.asMessagesTotalCount
 import net.primal.android.nostr.ext.asNotificationSummary
 import net.primal.android.nostr.ext.takeContentOrNull
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.notifications.api.model.PubkeyRequestBody
 import net.primal.android.notifications.domain.NotificationsSummary
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.Badges
@@ -39,6 +38,7 @@ import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.primal.PrimalSocketSubscription
 import net.primal.core.utils.serialization.CommonJson
+import net.primal.data.remote.api.notifications.model.PubkeyRequestBody
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEventKind
 

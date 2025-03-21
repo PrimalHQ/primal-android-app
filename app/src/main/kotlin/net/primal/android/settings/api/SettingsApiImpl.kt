@@ -4,7 +4,6 @@ import javax.inject.Inject
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.nostr.model.primal.content.ContentAppSettings
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.settings.api.model.AppSpecificDataRequest
 import net.primal.android.settings.api.model.GetAppSettingsResponse
 import net.primal.android.settings.api.model.GetMuteListRequest
 import net.primal.android.settings.api.model.GetMuteListResponse
@@ -12,6 +11,7 @@ import net.primal.android.settings.api.model.SetAppSettingsRequest
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.utils.serialization.CommonJson
+import net.primal.data.remote.model.AppSpecificDataRequest
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 

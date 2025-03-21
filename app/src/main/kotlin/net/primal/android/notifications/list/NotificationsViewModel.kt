@@ -20,6 +20,7 @@ import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.nostr.notary.NostrSignUnauthorized
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
@@ -42,6 +43,7 @@ class NotificationsViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val notificationsRepository: NotificationRepository,
     private val subscriptionsManager: SubscriptionsManager,
+    private val nostrNotary: NostrNotary,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -134,7 +136,11 @@ class NotificationsViewModel @Inject constructor(
         // Launching in a new scope to survive view model destruction
         CoroutineScope(dispatcherProvider.io()).launch {
             try {
-                notificationsRepository.markAllNotificationsAsSeen(userId = activeAccountStore.activeUserId())
+                val authorization = nostrNotary.signAuthorizationNostrEvent(
+                    userId = activeAccountStore.activeUserId(),
+                    description = "Update notifications last seen timestamp.",
+                )
+                notificationsRepository.markAllNotificationsAsSeen(authorization)
             } catch (error: WssException) {
                 Timber.w(error)
             } catch (error: MissingPrivateKeyException) {

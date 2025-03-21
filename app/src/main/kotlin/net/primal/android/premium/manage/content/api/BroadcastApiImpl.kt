@@ -8,11 +8,11 @@ import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.premium.manage.content.api.model.BroadcastingStatus
 import net.primal.android.premium.manage.content.api.model.ContentEventKindCount
 import net.primal.android.premium.manage.content.api.model.StartContentBroadcastRequest
-import net.primal.android.settings.api.model.AppSpecificDataRequest
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.serialization.CommonJson
+import net.primal.data.remote.model.AppSpecificDataRequest
 import net.primal.domain.nostr.NostrEventKind
 
 class BroadcastApiImpl @Inject constructor(
