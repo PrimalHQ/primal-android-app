@@ -23,6 +23,14 @@
         android:name="android.hardware.camera.any"
         android:required="false" />
 
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="nostrsigner" />
+        </intent>
+    </queries>
+
     <application
         android:name=".PrimalApp"
         android:allowBackup="false"
@@ -55,8 +63,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="https"/>
-                <data android:host="primal.net"/>
+                <data android:scheme="https" />
+                <data android:host="primal.net" />
             </intent-filter>
 
             <intent-filter

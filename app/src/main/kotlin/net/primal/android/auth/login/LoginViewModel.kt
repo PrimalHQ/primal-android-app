@@ -24,8 +24,17 @@ import net.primal.android.core.utils.isValidNostrPrivateKey
 import net.primal.android.core.utils.isValidNostrPublicKey
 import net.primal.android.crypto.bech32ToHexOrThrow
 import net.primal.android.crypto.extractKeyPairFromPrivateKeyOrThrow
+import net.primal.android.networking.UserAgentProvider
+import net.primal.android.nostr.ext.extractProfileId
+import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.profile.repository.ProfileRepository
+import net.primal.android.user.domain.LoginType
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.serialization.CommonJson
+import net.primal.data.remote.api.settings.model.AppSettingsDescription
+import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.asIdentifierTag
 import timber.log.Timber
 
 @HiltViewModel
@@ -37,21 +46,14 @@ class LoginViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(UiState(loading = false))
     val state = _state.asStateFlow()
-    private fun setState(reducer: UiState.() -> UiState) {
-        _state.getAndUpdate { it.reducer() }
-    }
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
     private val _effect: Channel<SideEffect> = Channel()
     val effect = _effect.receiveAsFlow()
-    private fun setEffect(effect: SideEffect) =
-        viewModelScope.launch {
-            _effect.send(effect)
-        }
+    private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effect.send(effect) }
 
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
-    fun setEvent(event: UiEvent) {
-        viewModelScope.launch { events.emit(event) }
-    }
+    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
         observeEvents()
@@ -61,24 +63,44 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.LoginRequestEvent -> login(nostrKey = _state.value.loginInput)
+                    is UiEvent.LoginRequestEvent ->
+                        login(nostrKey = _state.value.loginInput, authorizationEvent = it.nostrEvent)
+
                     is UiEvent.UpdateLoginInput -> changeLoginInput(input = it.newInput)
+                    is UiEvent.LoginWithAmber -> loginWithAmber(pubkey = it.pubkey)
                 }
             }
         }
 
-    private fun login(nostrKey: String) =
+    private fun loginWithAmber(pubkey: String) =
+        viewModelScope.launch {
+            changeLoginInput(input = pubkey, loginType = LoginType.ExternalSigner)
+            setEffect(
+                SideEffect.RequestSign(
+                    event = NostrUnsignedEvent(
+                        pubKey = pubkey.extractProfileId() ?: "",
+                        kind = NostrEventKind.ApplicationSpecificData.value,
+                        tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
+                        content = CommonJson.encodeToString(
+                            AppSettingsDescription(description = "Sync app settings"),
+                        ),
+                    ),
+                ),
+            )
+        }
+
+    private fun login(nostrKey: String, authorizationEvent: NostrEvent?) =
         viewModelScope.launch {
             setState { copy(loading = true) }
             try {
-                val loginType = if (state.value.isNpubLogin == true) {
-                    LoginHandler.LoginType.Npub
-                } else {
-                    LoginHandler.LoginType.Nsec
+                state.value.loginType?.let { loginType ->
+                    loginHandler.login(
+                        nostrKey = nostrKey,
+                        loginType = loginType,
+                        authorizationEvent = authorizationEvent,
+                    )
+                    setEffect(SideEffect.LoginSuccess)
                 }
-
-                loginHandler.login(nostrKey = nostrKey, loginType = loginType)
-                setEffect(SideEffect.LoginSuccess)
             } catch (error: WssException) {
                 Timber.w(error)
                 setErrorState(error = UiState.LoginError.GenericError(error))
@@ -97,18 +119,18 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private fun changeLoginInput(input: String) {
+    private fun changeLoginInput(input: String, loginType: LoginType? = null) {
         setState { copy(loginInput = input) }
         viewModelScope.launch {
             when {
                 input.isValidNostrPrivateKey() -> {
-                    setState { copy(isValidKey = true, isNpubLogin = false) }
+                    setState { copy(isValidKey = true, loginType = loginType ?: LoginType.PrivateKey) }
                     val (_, npub) = input.extractKeyPairFromPrivateKeyOrThrow()
                     fetchProfileDetails(npub = npub)
                 }
 
                 input.isValidNostrPublicKey() -> {
-                    setState { copy(isValidKey = true, isNpubLogin = true) }
+                    setState { copy(isValidKey = true, loginType = loginType ?: LoginType.PublicKey) }
                     fetchProfileDetails(npub = input)
                 }
 
@@ -118,7 +140,7 @@ class LoginViewModel @Inject constructor(
                             fetchingProfileDetails = false,
                             profileDetails = null,
                             isValidKey = false,
-                            isNpubLogin = null,
+                            loginType = null,
                         )
                     }
                 }

@@ -9,7 +9,9 @@ import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.credentials.CredentialsStore
+import net.primal.android.user.domain.LoginType
 import net.primal.android.user.repository.UserRepository
+import net.primal.domain.nostr.NostrEvent
 
 class LoginHandler @Inject constructor(
     private val settingsRepository: SettingsRepository,
@@ -21,38 +23,43 @@ class LoginHandler @Inject constructor(
     private val credentialsStore: CredentialsStore,
     private val nostrNotary: NostrNotary,
 ) {
-    enum class LoginType {
-        Npub,
-        Nsec,
-    }
-
-    suspend fun login(nostrKey: String, loginType: LoginType) =
+    suspend fun login(nostrKey: String, loginType: LoginType, authorizationEvent: NostrEvent?) =
         withContext(dispatchers.io()) {
             runCatching {
                 val userId = when (loginType) {
-                    LoginType.Npub -> credentialsStore.saveNpub(npub = nostrKey)
-                    LoginType.Nsec -> credentialsStore.saveNsec(nostrKey = nostrKey)
+                    LoginType.PublicKey, LoginType.ExternalSigner ->
+                        credentialsStore.saveNpub(npub = nostrKey, loginType = loginType)
+
+                    LoginType.PrivateKey -> credentialsStore.saveNsec(nostrKey = nostrKey)
                 }
-                val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
-                    userId = userId,
-                    description = "Sync app settings",
-                )
+                val authorizationEvent = authorizationEvent ?: runCatching {
+                    nostrNotary.signAuthorizationNostrEvent(
+                        userId = userId,
+                        description = "Sync app settings",
+                    )
+                }.getOrNull()
 
                 userRepository.fetchAndUpdateUserAccount(userId = userId)
                 bookmarksRepository.fetchAndPersistPublicBookmarks(userId = userId)
-                settingsRepository.fetchAndPersistAppSettings(authorizationEvent)
+                authorizationEvent?.let {
+                    settingsRepository.fetchAndPersistAppSettings(authorizationEvent)
+                }
                 mutedUserRepository.fetchAndPersistMuteList(userId = userId)
             }.onFailure { exception ->
                 when (loginType) {
-                    LoginType.Nsec -> credentialsStore.removeCredentialByNsec(nsec = nostrKey.assureValidNsec())
-                    LoginType.Npub -> credentialsStore.removeCredentialByNpub(npub = nostrKey)
+                    LoginType.PublicKey, LoginType.ExternalSigner ->
+                        credentialsStore.removeCredentialByNpub(npub = nostrKey)
+
+                    LoginType.PrivateKey -> credentialsStore.removeCredentialByNsec(nsec = nostrKey.assureValidNsec())
                 }
 
                 throw exception
             }.onSuccess {
                 when (loginType) {
-                    LoginType.Npub -> authRepository.loginWithNpub(npub = nostrKey)
-                    LoginType.Nsec -> authRepository.loginWithNsec(nostrKey = nostrKey)
+                    LoginType.PublicKey, LoginType.ExternalSigner ->
+                        authRepository.loginWithNpub(npub = nostrKey, loginType = loginType)
+
+                    LoginType.PrivateKey -> authRepository.loginWithNsec(nostrKey = nostrKey)
                 }
             }
         }
