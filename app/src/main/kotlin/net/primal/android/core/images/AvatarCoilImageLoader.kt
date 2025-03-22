@@ -2,11 +2,12 @@ package net.primal.android.core.images
 
 import android.content.Context
 import android.os.Build
-import coil.ImageLoader
-import coil.decode.GifDecoder
-import coil.decode.ImageDecoderDecoder
-import coil.decode.VideoFrameDecoder
-import coil.disk.DiskCache
+import coil3.ImageLoader
+import coil3.disk.DiskCache
+import coil3.gif.AnimatedImageDecoder
+import coil3.gif.GifDecoder
+import coil3.video.VideoFrameDecoder
+import okio.Path.Companion.toOkioPath
 
 object AvatarCoilImageLoader {
     private var defaultImageLoader: ImageLoader? = null
@@ -26,7 +27,7 @@ object AvatarCoilImageLoader {
             .components {
                 // Gifs
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    add(ImageDecoderDecoder.Factory())
+                    add(AnimatedImageDecoder.Factory())
                 } else {
                     add(GifDecoder.Factory())
                 }
@@ -40,7 +41,7 @@ object AvatarCoilImageLoader {
         ImageLoader.Builder(context = context)
             .diskCache {
                 DiskCache.Builder()
-                    .directory(context.cacheDir.resolve("avatar_image_cache"))
+                    .directory(context.cacheDir.resolve("avatar_image_cache").toOkioPath())
                     .build()
             }
 }

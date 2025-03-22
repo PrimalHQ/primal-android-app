@@ -1,7 +1,7 @@
 package net.primal.android
 
 import android.app.Application
-import coil.Coil
+import coil3.SingletonImageLoader
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 import net.primal.android.core.crash.PrimalCrashReporter
@@ -31,7 +31,7 @@ class PrimalApp : Application() {
             Timber.plant(it)
         }
 
-        Coil.setImageLoader(imageLoaderFactory)
+        SingletonImageLoader.setSafe(imageLoaderFactory)
 
         if (BuildConfig.FEATURE_PRIMAL_CRASH_REPORTER) {
             crashReporter.init()
