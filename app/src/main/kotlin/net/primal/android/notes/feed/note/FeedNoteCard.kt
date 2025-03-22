@@ -1,5 +1,6 @@
 package net.primal.android.notes.feed.note
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,8 +29,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,6 +41,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -240,6 +246,8 @@ private fun FeedNoteCard(
     val avatarSizeDp = displaySettings.contentAppearance.noteAvatarSize
     val overflowIconSizeDp = 40.dp
 
+    val graphicsLayer = rememberGraphicsLayer()
+
     NoteSurfaceCard(
         modifier = modifier
             .wrapContentHeight()
@@ -271,7 +279,8 @@ private fun FeedNoteCard(
                             else -> 13.dp
                         },
                     )
-                    .clip(CircleShape),
+                    .clip(CircleShape)
+                    .zIndex(1f),
                 noteId = data.postId,
                 noteContent = data.content,
                 noteRawData = data.rawNostrEventJson,
@@ -279,6 +288,7 @@ private fun FeedNoteCard(
                 isBookmarked = data.isBookmarked,
                 relayHints = state.relayHints,
                 enabled = noteOptionsMenuEnabled,
+                noteGraphicsLayer = graphicsLayer,
                 onBookmarkClick = {
                     eventPublisher(UiEvent.BookmarkAction(noteId = data.postId))
                 },
@@ -306,76 +316,93 @@ private fun FeedNoteCard(
                     )
                 }
 
-                FeedNote(
-                    data = data,
-                    fullWidthContent = fullWidthContent,
-                    avatarSizeDp = avatarSizeDp,
-                    avatarPaddingValues = PaddingValues(start = avatarPaddingDp, top = avatarPaddingDp),
-                    notePaddingValues = PaddingValues(
-                        start = 8.dp,
-                        top = avatarPaddingDp,
-                        end = overflowIconSizeDp - 8.dp,
-                    ),
-                    enableTweetsMode = enableTweetsMode,
-                    headerSingleLine = headerSingleLine,
-                    showReplyTo = showReplyTo,
-                    forceContentIndent = forceContentIndent,
-                    expanded = expanded,
-                    textSelectable = textSelectable,
-                    showNoteStatCounts = showNoteStatCounts,
-                    noteCallbacks = noteCallbacks,
-                    onPostAction = { postAction ->
-                        when (postAction) {
-                            FeedPostAction.Reply -> {
-                                noteCallbacks.onNoteReplyClick?.invoke(data.postId)
-                            }
+                Column(
+                    modifier = Modifier
+                        .drawWithContent {
+                            graphicsLayer.record { this@drawWithContent.drawContent() }
+                            drawLayer(graphicsLayer)
+                        }
+                        .clip(
+                            RoundedCornerShape(
+                                topStart = AppTheme.shapes.medium.topStart,
+                                bottomStart = AppTheme.shapes.medium.bottomStart,
+                                topEnd = AppTheme.shapes.medium.topEnd,
+                                bottomEnd = AppTheme.shapes.medium.bottomEnd,
+                            ),
+                        )
+                        .background(color = AppTheme.colorScheme.surfaceVariant),
+                ) {
+                    FeedNote(
+                        data = data,
+                        fullWidthContent = fullWidthContent,
+                        avatarSizeDp = avatarSizeDp,
+                        avatarPaddingValues = PaddingValues(start = avatarPaddingDp, top = avatarPaddingDp),
+                        notePaddingValues = PaddingValues(
+                            start = 8.dp,
+                            top = avatarPaddingDp,
+                            end = overflowIconSizeDp - 8.dp,
+                        ),
+                        enableTweetsMode = enableTweetsMode,
+                        headerSingleLine = headerSingleLine,
+                        showReplyTo = showReplyTo,
+                        forceContentIndent = forceContentIndent,
+                        expanded = expanded,
+                        textSelectable = textSelectable,
+                        showNoteStatCounts = showNoteStatCounts,
+                        noteCallbacks = noteCallbacks,
+                        onPostAction = { postAction ->
+                            when (postAction) {
+                                FeedPostAction.Reply -> {
+                                    noteCallbacks.onNoteReplyClick?.invoke(data.postId)
+                                }
 
-                            FeedPostAction.Zap -> {
-                                if (state.zappingState.canZap()) {
+                                FeedPostAction.Zap -> {
+                                    if (state.zappingState.canZap()) {
+                                        eventPublisher(
+                                            UiEvent.ZapAction(
+                                                postId = data.postId,
+                                                postAuthorId = data.authorId,
+                                            ),
+                                        )
+                                    } else {
+                                        showCantZapWarning = true
+                                    }
+                                }
+
+                                FeedPostAction.Like -> {
                                     eventPublisher(
-                                        UiEvent.ZapAction(
+                                        UiEvent.PostLikeAction(
                                             postId = data.postId,
                                             postAuthorId = data.authorId,
                                         ),
                                     )
-                                } else {
-                                    showCantZapWarning = true
+                                }
+
+                                FeedPostAction.Repost -> {
+                                    showRepostOrQuoteConfirmation = true
+                                }
+
+                                FeedPostAction.Bookmark -> {
+                                    eventPublisher(UiEvent.BookmarkAction(noteId = data.postId))
                                 }
                             }
-
-                            FeedPostAction.Like -> {
-                                eventPublisher(
-                                    UiEvent.PostLikeAction(
-                                        postId = data.postId,
-                                        postAuthorId = data.authorId,
-                                    ),
-                                )
-                            }
-
-                            FeedPostAction.Repost -> {
-                                showRepostOrQuoteConfirmation = true
-                            }
-
-                            FeedPostAction.Bookmark -> {
-                                eventPublisher(UiEvent.BookmarkAction(noteId = data.postId))
-                            }
-                        }
-                    },
-                    onPostLongClickAction = { postAction ->
-                        when (postAction) {
-                            FeedPostAction.Zap -> {
-                                if (state.zappingState.walletConnected) {
-                                    showZapOptions = true
-                                } else {
-                                    showCantZapWarning = true
+                        },
+                        onPostLongClickAction = { postAction ->
+                            when (postAction) {
+                                FeedPostAction.Zap -> {
+                                    if (state.zappingState.walletConnected) {
+                                        showZapOptions = true
+                                    } else {
+                                        showCantZapWarning = true
+                                    }
                                 }
-                            }
 
-                            else -> Unit
-                        }
-                    },
-                    contentFooter = contentFooter,
-                )
+                                else -> Unit
+                            }
+                        },
+                        contentFooter = contentFooter,
+                    )
+                }
             }
         }
     }
