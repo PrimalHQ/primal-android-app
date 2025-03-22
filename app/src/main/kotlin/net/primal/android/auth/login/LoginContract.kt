@@ -1,7 +1,6 @@
 package net.primal.android.auth.login
 
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
-import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.user.domain.LoginType
 import net.primal.domain.nostr.NostrEvent
 
@@ -23,13 +22,11 @@ interface LoginContract {
     }
 
     sealed class UiEvent {
-        data class LoginWithAmber(val pubkey: String) : UiEvent()
         data class LoginRequestEvent(val nostrEvent: NostrEvent? = null) : UiEvent()
-        data class UpdateLoginInput(val newInput: String) : UiEvent()
+        data class UpdateLoginInput(val newInput: String, val loginType: LoginType? = null) : UiEvent()
     }
 
     sealed class SideEffect {
-        data class RequestSign(val event: NostrUnsignedEvent) : SideEffect()
         data object LoginSuccess : SideEffect()
     }
 }

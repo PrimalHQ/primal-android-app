@@ -69,13 +69,21 @@ import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.utils.isExternalSignerInstalled
 import net.primal.android.core.utils.isValidNostrPrivateKey
 import net.primal.android.core.utils.isValidNostrPublicKey
+import net.primal.android.networking.UserAgentProvider
+import net.primal.android.nostr.ext.extractProfileId
+import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.signer.launchGetPublicKey
 import net.primal.android.signer.launchSignEvent
 import net.primal.android.signer.rememberAmberLauncher
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.android.user.domain.LoginType
+import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.data.remote.api.settings.model.AppSettingsDescription
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.asIdentifierTag
 
 @Composable
 fun LoginScreen(
@@ -83,19 +91,12 @@ fun LoginScreen(
     onClose: () -> Unit,
     onLoginSuccess: () -> Unit,
 ) {
-    val signLauncher = rememberAmberLauncher { result ->
-        if (result.resultCode != Activity.RESULT_OK) return@rememberAmberLauncher
-
-        val nostrEvent = (result.data?.getStringExtra("event")).decodeFromJsonStringOrNull<NostrEvent>()
-        viewModel.setEvent(LoginContract.UiEvent.LoginRequestEvent(nostrEvent = nostrEvent))
-    }
 
     val keyboardController = LocalSoftwareKeyboardController.current
     LaunchedEffect(viewModel, onLoginSuccess) {
         viewModel.effect.collect {
             when (it) {
                 is LoginContract.SideEffect.LoginSuccess -> onLoginSuccess()
-                is LoginContract.SideEffect.RequestSign -> signLauncher.launchSignEvent(event = it.event)
             }
         }
     }
@@ -120,12 +121,28 @@ fun LoginScreen(
     eventPublisher: (LoginContract.UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
+    val signLauncher = rememberAmberLauncher { result ->
+        if (result.resultCode != Activity.RESULT_OK) return@rememberAmberLauncher
+
+        val nostrEvent = (result.data?.getStringExtra("event")).decodeFromJsonStringOrNull<NostrEvent>()
+        eventPublisher(LoginContract.UiEvent.LoginRequestEvent(nostrEvent = nostrEvent))
+    }
 
     val pubkeyLauncher = rememberAmberLauncher { result ->
         if (result.resultCode != Activity.RESULT_OK) return@rememberAmberLauncher
+        val pubkey = result.data?.getStringExtra("result") ?: return@rememberAmberLauncher
 
-        val pubkey = result.data?.getStringExtra("result")
-        eventPublisher(LoginContract.UiEvent.LoginWithAmber(pubkey = pubkey ?: ""))
+        eventPublisher(LoginContract.UiEvent.UpdateLoginInput(newInput = pubkey, loginType = LoginType.ExternalSigner))
+        signLauncher.launchSignEvent(
+            event = NostrUnsignedEvent(
+                pubKey = pubkey.extractProfileId() ?: "",
+                kind = NostrEventKind.ApplicationSpecificData.value,
+                tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
+                content = CommonJson.encodeToString(
+                    AppSettingsDescription(description = "Sync app settings"),
+                ),
+            ),
+        )
     }
 
     BackHandler(enabled = state.loading) { }

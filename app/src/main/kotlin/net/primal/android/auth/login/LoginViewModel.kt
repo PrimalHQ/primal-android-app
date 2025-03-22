@@ -24,17 +24,10 @@ import net.primal.android.core.utils.isValidNostrPrivateKey
 import net.primal.android.core.utils.isValidNostrPublicKey
 import net.primal.android.crypto.bech32ToHexOrThrow
 import net.primal.android.crypto.extractKeyPairFromPrivateKeyOrThrow
-import net.primal.android.networking.UserAgentProvider
-import net.primal.android.nostr.ext.extractProfileId
-import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.domain.LoginType
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.core.utils.serialization.CommonJson
-import net.primal.data.remote.api.settings.model.AppSettingsDescription
 import net.primal.domain.nostr.NostrEvent
-import net.primal.domain.nostr.NostrEventKind
-import net.primal.domain.nostr.asIdentifierTag
 import timber.log.Timber
 
 @HiltViewModel
@@ -66,27 +59,9 @@ class LoginViewModel @Inject constructor(
                     is UiEvent.LoginRequestEvent ->
                         login(nostrKey = _state.value.loginInput, authorizationEvent = it.nostrEvent)
 
-                    is UiEvent.UpdateLoginInput -> changeLoginInput(input = it.newInput)
-                    is UiEvent.LoginWithAmber -> loginWithAmber(pubkey = it.pubkey)
+                    is UiEvent.UpdateLoginInput -> changeLoginInput(input = it.newInput, loginType = it.loginType)
                 }
             }
-        }
-
-    private fun loginWithAmber(pubkey: String) =
-        viewModelScope.launch {
-            changeLoginInput(input = pubkey, loginType = LoginType.ExternalSigner)
-            setEffect(
-                SideEffect.RequestSign(
-                    event = NostrUnsignedEvent(
-                        pubKey = pubkey.extractProfileId() ?: "",
-                        kind = NostrEventKind.ApplicationSpecificData.value,
-                        tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
-                        content = CommonJson.encodeToString(
-                            AppSettingsDescription(description = "Sync app settings"),
-                        ),
-                    ),
-                ),
-            )
         }
 
     private fun login(nostrKey: String, authorizationEvent: NostrEvent?) =
