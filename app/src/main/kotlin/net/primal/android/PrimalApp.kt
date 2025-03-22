@@ -3,6 +3,8 @@ package net.primal.android
 import android.app.Application
 import coil.Coil
 import dagger.hilt.android.HiltAndroidApp
+import io.github.aakira.napier.Antilog
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import net.primal.android.core.crash.PrimalCrashReporter
 import net.primal.android.core.images.PrimalImageLoaderFactory
@@ -17,6 +19,9 @@ class PrimalApp : Application() {
     lateinit var loggers: Set<@JvmSuppressWildcards Timber.Tree>
 
     @Inject
+    lateinit var antilog: Set<@JvmSuppressWildcards Antilog>
+
+    @Inject
     lateinit var imageLoaderFactory: PrimalImageLoaderFactory
 
     @Inject
@@ -29,6 +34,10 @@ class PrimalApp : Application() {
 
         loggers.forEach {
             Timber.plant(it)
+        }
+
+        antilog.firstOrNull()?.let { antilog ->
+            Napier.base(antilog)
         }
 
         Coil.setImageLoader(imageLoaderFactory)
