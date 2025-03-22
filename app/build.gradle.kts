@@ -134,7 +134,7 @@ android {
             initWith(getByName("release"))
             signingConfig = try {
                 signingConfigs.getByName("playStore")
-            } catch (error: UnknownDomainObjectException) {
+            } catch (_: UnknownDomainObjectException) {
                 signingConfigs.getByName("debug")
             }
         }
@@ -143,7 +143,7 @@ android {
             initWith(getByName("release"))
             signingConfig = try {
                 signingConfigs.getByName("alternative")
-            } catch (error: UnknownDomainObjectException) {
+            } catch (_: UnknownDomainObjectException) {
                 signingConfigs.getByName("debug")
             }
         }
@@ -180,6 +180,7 @@ android {
         buildConfig = true
     }
 
+    @Suppress("UnstableApiUsage")
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.15"
     }
@@ -314,6 +315,7 @@ dependencies {
     implementation(libs.reorderable)
 
     implementation(libs.timber)
+    implementation(libs.napier)
 
     implementation(libs.lightning.kmp)
     implementation(libs.bitcoinj.core)
