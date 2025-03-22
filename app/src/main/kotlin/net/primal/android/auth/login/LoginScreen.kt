@@ -3,8 +3,6 @@ package net.primal.android.auth.login
 import android.app.Activity
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -71,6 +69,9 @@ import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.utils.isExternalSignerInstalled
 import net.primal.android.core.utils.isValidNostrPrivateKey
 import net.primal.android.core.utils.isValidNostrPublicKey
+import net.primal.android.signer.launchGetPublicKey
+import net.primal.android.signer.launchSignEvent
+import net.primal.android.signer.rememberAmberLauncher
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
@@ -82,10 +83,8 @@ fun LoginScreen(
     onClose: () -> Unit,
     onLoginSuccess: () -> Unit,
 ) {
-    val signLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult(),
-    ) { result ->
-        if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
+    val signLauncher = rememberAmberLauncher { result ->
+        if (result.resultCode != Activity.RESULT_OK) return@rememberAmberLauncher
 
         val nostrEvent = (result.data?.getStringExtra("event")).decodeFromJsonStringOrNull<NostrEvent>()
         viewModel.setEvent(LoginContract.UiEvent.LoginRequestEvent(nostrEvent = nostrEvent))
@@ -122,10 +121,8 @@ fun LoginScreen(
     onClose: () -> Unit,
 ) {
 
-    val pubkeyLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult(),
-    ) { result ->
-        if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
+    val pubkeyLauncher = rememberAmberLauncher { result ->
+        if (result.resultCode != Activity.RESULT_OK) return@rememberAmberLauncher
 
         val pubkey = result.data?.getStringExtra("result")
         eventPublisher(LoginContract.UiEvent.LoginWithAmber(pubkey = pubkey ?: ""))
@@ -248,7 +245,6 @@ fun LoginContent(
                         .height(56.dp)
                         .fillMaxWidth(),
                     containerColor = Color.Transparent,
-                    disabledContainerColor = Color.Black.copy(alpha = 0.20f),
                     contentColor = Color.White,
                     onClick = onLoginWithAmberClick,
                     text = "Login with Amber",
