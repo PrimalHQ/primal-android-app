@@ -15,6 +15,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -36,6 +38,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.resolvePrimalNoteLink
+import net.primal.android.core.utils.systemShareImage
 import net.primal.android.core.utils.systemShareText
 import net.primal.android.nostr.utils.Nevent
 import net.primal.android.nostr.utils.Nip19TLV.toNeventString
@@ -53,6 +56,7 @@ fun NoteDropdownMenuIcon(
     authorId: String,
     isBookmarked: Boolean,
     relayHints: List<String> = emptyList(),
+    noteGraphicsLayer: GraphicsLayer,
     enabled: Boolean = true,
     onBookmarkClick: (() -> Unit)? = null,
     onMuteUserClick: (() -> Unit)? = null,
@@ -92,6 +96,19 @@ fun NoteDropdownMenuIcon(
                         context = context,
                         text = resolvePrimalNoteLink(noteId = noteId),
                     )
+                    menuVisible = false
+                },
+            )
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.ContextShare,
+                text = stringResource(id = R.string.feed_context_share_note_as_image),
+                onClick = {
+                    uiScope.launch {
+                        systemShareImage(
+                            context = context,
+                            bitmap = noteGraphicsLayer.toImageBitmap().asAndroidBitmap(),
+                        )
+                    }
                     menuVisible = false
                 },
             )
