@@ -6,4 +6,11 @@ import kotlinx.serialization.Serializable
 data class Credential(
     val nsec: String?,
     val npub: String,
+    val type: LoginType = LoginType.PrivateKey,
 )
+
+enum class LoginType {
+    ExternalSigner,
+    PrivateKey,
+    PublicKey,
+}

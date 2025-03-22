@@ -6,6 +6,7 @@ import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
+import net.primal.android.user.domain.LoginType
 import net.primal.android.user.repository.UserRepository
 
 @Singleton
@@ -21,8 +22,8 @@ class AuthRepository @Inject constructor(
         return userId
     }
 
-    suspend fun loginWithNpub(npub: String): String {
-        val userId = credentialsStore.saveNpub(npub = npub)
+    suspend fun loginWithNpub(npub: String, loginType: LoginType): String {
+        val userId = credentialsStore.saveNpub(npub = npub, loginType = loginType)
         activeAccountStore.setActiveUserId(userId)
         return userId
     }
