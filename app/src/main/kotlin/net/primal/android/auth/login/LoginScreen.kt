@@ -73,8 +73,7 @@ import net.primal.android.core.utils.isValidNostrPrivateKey
 import net.primal.android.core.utils.isValidNostrPublicKey
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.core.utils.serialization.CommonJson
-import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.nostr.NostrEvent
 
 @Composable
@@ -88,7 +87,7 @@ fun LoginScreen(
     ) { result ->
         if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
 
-        val nostrEvent = CommonJson.decodeFromStringOrNull<NostrEvent>(result.data?.getStringExtra("event"))
+        val nostrEvent = (result.data?.getStringExtra("event")).decodeFromJsonStringOrNull<NostrEvent>()
         viewModel.setEvent(LoginContract.UiEvent.LoginRequestEvent(nostrEvent = nostrEvent))
     }
 

@@ -5,7 +5,7 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.core.net.toUri
 import net.primal.android.nostr.notary.NostrUnsignedEvent
-import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.encodeToJsonString
 
 const val PACKAGE_NAME = "com.greenart7c3.nostrsigner"
 const val URI_PREFIX = "nostrsigner:"
@@ -26,7 +26,7 @@ fun SignerLauncher.launchGetPublicKey() {
 }
 
 fun SignerLauncher.launchSignEvent(event: NostrUnsignedEvent) {
-    val intent = Intent(Intent.ACTION_VIEW, "$URI_PREFIX${CommonJson.encodeToString(event)}".toUri())
+    val intent = Intent(Intent.ACTION_VIEW, "$URI_PREFIX${event.encodeToJsonString()}".toUri())
     intent.`package` = PACKAGE_NAME
 
     intent.putExtra("current_user", event.pubKey)
