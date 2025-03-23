@@ -32,12 +32,9 @@ class CredentialsStore @Inject constructor(
 
     suspend fun clearCredentials() = persistence.updateData { emptySet() }
 
-    fun isNpubLogin(npub: String): Boolean = credentials.value
-        /*
-         * TODO: shouldn't return true for ExternalSigner.
-         *   For simplicity sake we are treating ExternalSigner login as Pubkey login for now.
-         *  */
-        .find { it.npub == npub }?.type in listOf(LoginType.PublicKey, LoginType.ExternalSigner)
+    fun isNpubLogin(npub: String): Boolean =
+        credentials.value
+            .find { it.npub == npub }?.type == LoginType.PublicKey
 
     suspend fun saveNsec(nostrKey: String): String {
         val (nsec, pubkey) = nostrKey.extractKeyPairFromPrivateKeyOrThrow()
