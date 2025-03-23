@@ -14,8 +14,6 @@ import net.primal.data.remote.factory.PrimalApiServiceFactory
 object MessagesApiModule {
 
     @Provides
-    fun provideMessagesApi(
-        @PrimalCacheApiClient primalApiClient: PrimalApiClient,
-    ): MessagesApi = PrimalApiServiceFactory.createMessagesApi(primalApiClient)
-
+    fun provideMessagesApi(@PrimalCacheApiClient primalApiClient: PrimalApiClient): MessagesApi =
+        PrimalApiServiceFactory.createMessagesApi(primalApiClient)
 }

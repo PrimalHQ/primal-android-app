@@ -83,7 +83,6 @@ fun LoginScreen(
     onClose: () -> Unit,
     onLoginSuccess: () -> Unit,
 ) {
-
     val keyboardController = LocalSoftwareKeyboardController.current
     LaunchedEffect(viewModel, onLoginSuccess) {
         viewModel.effect.collect {

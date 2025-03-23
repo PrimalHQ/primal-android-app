@@ -39,10 +39,7 @@ class SettingsRepository @Inject constructor(
     }
 
     @Suppress("MagicNumber")
-    suspend fun ensureZapConfig(
-        authorizationEvent: NostrEvent,
-        signer: (ContentAppSettings) -> NostrEvent,
-    ) {
+    suspend fun ensureZapConfig(authorizationEvent: NostrEvent, signer: (ContentAppSettings) -> NostrEvent) {
         val userId = authorizationEvent.pubKey
         val userSettings = accountsStore.findByIdOrNull(userId)?.appSettings
         if (userSettings?.zapDefault != null && userSettings.zapsConfig.isNotEmpty()) return
@@ -78,10 +75,7 @@ class SettingsRepository @Inject constructor(
         }
     }
 
-    private suspend fun updateAndPublishAppSettings(
-        userId: String,
-        signer: ContentAppSettings.() -> NostrEvent,
-    ) {
+    private suspend fun updateAndPublishAppSettings(userId: String, signer: ContentAppSettings.() -> NostrEvent) {
         withContext(dispatcherProvider.io()) {
             val localAppSettings = accountsStore.findByIdOrNull(userId = userId)?.appSettings ?: return@withContext
             val settingsEvent = localAppSettings.signer()

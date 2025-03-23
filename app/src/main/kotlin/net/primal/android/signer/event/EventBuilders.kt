@@ -8,7 +8,6 @@ import net.primal.data.remote.api.settings.model.AppSettingsDescription
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.asIdentifierTag
 
-
 fun buildAppSpecificDataEvent(pubkey: String) =
     NostrUnsignedEvent(
         pubKey = pubkey.extractProfileId() ?: "",

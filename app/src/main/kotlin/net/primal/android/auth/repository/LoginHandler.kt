@@ -23,44 +23,47 @@ class LoginHandler @Inject constructor(
     private val credentialsStore: CredentialsStore,
     private val nostrNotary: NostrNotary,
 ) {
-    suspend fun login(nostrKey: String, loginType: LoginType, authorizationEvent: NostrEvent?) =
-        withContext(dispatchers.io()) {
-            runCatching {
-                val userId = when (loginType) {
-                    LoginType.PublicKey, LoginType.ExternalSigner ->
-                        credentialsStore.saveNpub(npub = nostrKey, loginType = loginType)
+    suspend fun login(
+        nostrKey: String,
+        loginType: LoginType,
+        authorizationEvent: NostrEvent?,
+    ) = withContext(dispatchers.io()) {
+        runCatching {
+            val userId = when (loginType) {
+                LoginType.PublicKey, LoginType.ExternalSigner ->
+                    credentialsStore.saveNpub(npub = nostrKey, loginType = loginType)
 
-                    LoginType.PrivateKey -> credentialsStore.saveNsec(nostrKey = nostrKey)
-                }
-                val authorizationEvent = authorizationEvent ?: runCatching {
-                    nostrNotary.signAuthorizationNostrEvent(
-                        userId = userId,
-                        description = "Sync app settings",
-                    )
-                }.getOrNull()
+                LoginType.PrivateKey -> credentialsStore.saveNsec(nostrKey = nostrKey)
+            }
+            val authorizationEvent = authorizationEvent ?: runCatching {
+                nostrNotary.signAuthorizationNostrEvent(
+                    userId = userId,
+                    description = "Sync app settings",
+                )
+            }.getOrNull()
 
-                userRepository.fetchAndUpdateUserAccount(userId = userId)
-                bookmarksRepository.fetchAndPersistPublicBookmarks(userId = userId)
-                authorizationEvent?.let {
-                    settingsRepository.fetchAndPersistAppSettings(authorizationEvent)
-                }
-                mutedUserRepository.fetchAndPersistMuteList(userId = userId)
-            }.onFailure { exception ->
-                when (loginType) {
-                    LoginType.PublicKey, LoginType.ExternalSigner ->
-                        credentialsStore.removeCredentialByNpub(npub = nostrKey)
+            userRepository.fetchAndUpdateUserAccount(userId = userId)
+            bookmarksRepository.fetchAndPersistPublicBookmarks(userId = userId)
+            authorizationEvent?.let {
+                settingsRepository.fetchAndPersistAppSettings(authorizationEvent)
+            }
+            mutedUserRepository.fetchAndPersistMuteList(userId = userId)
+        }.onFailure { exception ->
+            when (loginType) {
+                LoginType.PublicKey, LoginType.ExternalSigner ->
+                    credentialsStore.removeCredentialByNpub(npub = nostrKey)
 
-                    LoginType.PrivateKey -> credentialsStore.removeCredentialByNsec(nsec = nostrKey.assureValidNsec())
-                }
+                LoginType.PrivateKey -> credentialsStore.removeCredentialByNsec(nsec = nostrKey.assureValidNsec())
+            }
 
-                throw exception
-            }.onSuccess {
-                when (loginType) {
-                    LoginType.PublicKey, LoginType.ExternalSigner ->
-                        authRepository.loginWithNpub(npub = nostrKey, loginType = loginType)
+            throw exception
+        }.onSuccess {
+            when (loginType) {
+                LoginType.PublicKey, LoginType.ExternalSigner ->
+                    authRepository.loginWithNpub(npub = nostrKey, loginType = loginType)
 
-                    LoginType.PrivateKey -> authRepository.loginWithNsec(nostrKey = nostrKey)
-                }
+                LoginType.PrivateKey -> authRepository.loginWithNsec(nostrKey = nostrKey)
             }
         }
+    }
 }

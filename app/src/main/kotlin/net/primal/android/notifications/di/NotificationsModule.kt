@@ -14,8 +14,6 @@ import net.primal.data.remote.factory.PrimalApiServiceFactory
 object NotificationsModule {
 
     @Provides
-    fun provideNotificationsApi(
-        @PrimalCacheApiClient primalApiClient: PrimalApiClient,
-    ): NotificationsApi = PrimalApiServiceFactory.createNotificationsApi(primalApiClient)
-
+    fun provideNotificationsApi(@PrimalCacheApiClient primalApiClient: PrimalApiClient): NotificationsApi =
+        PrimalApiServiceFactory.createNotificationsApi(primalApiClient)
 }

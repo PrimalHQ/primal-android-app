@@ -56,14 +56,15 @@ class LoginHandlerTest {
     private fun createDummyNostrEvent(
         userId: String,
         kind: Int = NostrEventKind.ApplicationSpecificData.value,
-    ): NostrEvent = NostrEvent(
-        id = "",
-        pubKey = userId,
-        createdAt = 0,
-        kind = kind,
-        content = "",
-        sig = "",
-    )
+    ): NostrEvent =
+        NostrEvent(
+            id = "",
+            pubKey = userId,
+            createdAt = 0,
+            kind = kind,
+            content = "",
+            sig = "",
+        )
 
     @Test
     fun login_callsLoginFromAuthRepository_withGivenKey() =
@@ -112,10 +113,8 @@ class LoginHandlerTest {
                     coEvery {
                         signAuthorizationNostrEvent(expectedUserId, any(), any())
                     } returns expectedNostrEvent
-                }
+                },
             )
-
-
 
             loginHandler.login(
                 nostrKey = "nsec174p4ny7",
@@ -125,7 +124,7 @@ class LoginHandlerTest {
 
             coVerify {
                 settingsRepository.fetchAndPersistAppSettings(
-                    withArg { it.pubKey shouldBe expectedUserId }
+                    withArg { it.pubKey shouldBe expectedUserId },
                 )
             }
         }
