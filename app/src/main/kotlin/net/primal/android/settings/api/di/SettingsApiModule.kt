@@ -14,8 +14,6 @@ import net.primal.data.remote.factory.PrimalApiServiceFactory
 object SettingsApiModule {
 
     @Provides
-    fun provideSettingsApi(
-        @PrimalCacheApiClient primalApiClient: PrimalApiClient,
-    ): SettingsApi = PrimalApiServiceFactory.createSettingsApi(primalApiClient)
-
+    fun provideSettingsApi(@PrimalCacheApiClient primalApiClient: PrimalApiClient): SettingsApi =
+        PrimalApiServiceFactory.createSettingsApi(primalApiClient)
 }

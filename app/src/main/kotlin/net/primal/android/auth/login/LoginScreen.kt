@@ -57,6 +57,7 @@ import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.UiDensityMode
 import net.primal.android.core.compose.UniversalAvatarThumbnail
+import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.detectUiDensityModeFromMaxHeight
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -64,10 +65,17 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.isCompactOrLower
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.core.utils.isExternalSignerInstalled
 import net.primal.android.core.utils.isValidNostrPrivateKey
 import net.primal.android.core.utils.isValidNostrPublicKey
+import net.primal.android.signer.event.buildAppSpecificDataEvent
+import net.primal.android.signer.launchGetPublicKey
+import net.primal.android.signer.launchSignEvent
+import net.primal.android.signer.rememberAmberPubkeyLauncher
+import net.primal.android.signer.rememberAmberSignerLauncher
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.android.user.domain.LoginType
 
 @Composable
 fun LoginScreen(
@@ -104,6 +112,15 @@ fun LoginScreen(
     eventPublisher: (LoginContract.UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
+    val signLauncher = rememberAmberSignerLauncher { nostrEvent ->
+        eventPublisher(LoginContract.UiEvent.LoginRequestEvent(nostrEvent = nostrEvent))
+    }
+
+    val pubkeyLauncher = rememberAmberPubkeyLauncher { pubkey ->
+        eventPublisher(LoginContract.UiEvent.UpdateLoginInput(newInput = pubkey, loginType = LoginType.ExternalSigner))
+        signLauncher.launchSignEvent(event = buildAppSpecificDataEvent(pubkey = pubkey))
+    }
+
     BackHandler(enabled = state.loading) { }
     ColumnWithBackground(
         backgroundPainter = painterResource(id = R.drawable.onboarding_spot2),
@@ -137,7 +154,8 @@ fun LoginScreen(
             state = state,
             uiMode = uiMode,
             onLoginInputChanged = { eventPublisher(LoginContract.UiEvent.UpdateLoginInput(newInput = it)) },
-            onLoginClick = { eventPublisher(LoginContract.UiEvent.LoginRequestEvent) },
+            onLoginClick = { eventPublisher(LoginContract.UiEvent.LoginRequestEvent()) },
+            onLoginWithAmberClick = { pubkeyLauncher.launchGetPublicKey() },
         )
     }
 }
@@ -149,7 +167,9 @@ fun LoginContent(
     uiMode: UiDensityMode,
     onLoginInputChanged: (String) -> Unit,
     onLoginClick: () -> Unit,
+    onLoginWithAmberClick: () -> Unit,
 ) {
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val clipboardManager = LocalClipboardManager.current
     val keyboardVisible by keyboardVisibilityAsState()
@@ -188,7 +208,7 @@ fun LoginContent(
                 .fillMaxWidth()
                 .padding(vertical = 16.dp)
                 .wrapContentHeight(align = Alignment.Bottom),
-            verticalArrangement = Arrangement.Bottom,
+            verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.Bottom),
         ) {
             OnboardingButton(
                 text = when {
@@ -211,6 +231,18 @@ fun LoginContent(
                     }
                 },
             )
+
+            if (isExternalSignerInstalled(context = context)) {
+                PrimalLoadingButton(
+                    modifier = Modifier
+                        .height(56.dp)
+                        .fillMaxWidth(),
+                    containerColor = Color.Transparent,
+                    contentColor = Color.White,
+                    onClick = onLoginWithAmberClick,
+                    text = "Login with Amber",
+                )
+            }
         }
     }
 }
