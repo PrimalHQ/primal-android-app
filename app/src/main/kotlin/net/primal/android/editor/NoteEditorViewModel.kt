@@ -237,10 +237,13 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private fun fetchNoteThreadFromNetwork(replyToNoteId: String) =
         viewModelScope.launch {
+            setState { copy(fetchingNoteThread = true) }
             try {
                 feedRepository.fetchReplies(userId = activeAccountStore.activeUserId(), noteId = replyToNoteId)
             } catch (error: WssException) {
                 Timber.w(error)
+            } finally {
+                setState { copy(fetchingNoteThread = false) }
             }
         }
 

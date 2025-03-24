@@ -147,7 +147,9 @@ fun NoteEditorScreen(
                         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 0.dp),
                         enabled = !state.publishing && !state.uploadingAttachments &&
                             state.attachments.none { it.uploadError != null } &&
-                            (state.content.text.isNotBlank() || state.attachments.isNotEmpty()),
+                            (state.content.text.isNotBlank() || state.attachments.isNotEmpty())
+                            && !state.fetchingNoteThread,
+                        loading = state.fetchingNoteThread,
                         onClick = { eventPublisher(UiEvent.PublishNote) },
                     )
                 },
