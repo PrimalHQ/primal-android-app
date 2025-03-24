@@ -16,6 +16,7 @@ import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.Credential
+import net.primal.android.user.domain.LoginType
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.nostr.NostrEvent
@@ -72,7 +73,11 @@ class LoginHandlerTest {
             val expectedKey = "random"
             val authRepository = mockk<AuthRepository>(relaxed = true)
             val loginHandler = createLoginHandler(authRepository = authRepository)
-            loginHandler.login(nostrKey = expectedKey, loginType = LoginHandler.LoginType.Nsec)
+            loginHandler.login(
+                nostrKey = expectedKey,
+                loginType = LoginType.PrivateKey,
+                authorizationEvent = null,
+            )
 
             coVerify {
                 authRepository.loginWithNsec(nostrKey = expectedKey)
@@ -90,7 +95,11 @@ class LoginHandlerTest {
                 userRepository = userRepository,
                 credentialsStore = credentialsStore,
             )
-            loginHandler.login(nostrKey = "random", loginType = LoginHandler.LoginType.Nsec)
+            loginHandler.login(
+                nostrKey = "random",
+                loginType = LoginType.PrivateKey,
+                authorizationEvent = null,
+            )
 
             coVerify {
                 userRepository.fetchAndUpdateUserAccount(expectedUserId)
@@ -118,7 +127,8 @@ class LoginHandlerTest {
 
             loginHandler.login(
                 nostrKey = "nsec174p4ny7",
-                loginType = LoginHandler.LoginType.Nsec,
+                loginType = LoginType.PrivateKey,
+                authorizationEvent = null,
             )
             advanceUntilIdle()
 
@@ -140,7 +150,11 @@ class LoginHandlerTest {
                 mutedUserRepository = mutedUserRepository,
                 credentialsStore = credentialsStore,
             )
-            loginHandler.login(nostrKey = "random", loginType = LoginHandler.LoginType.Nsec)
+            loginHandler.login(
+                nostrKey = "random",
+                loginType = LoginType.PrivateKey,
+                authorizationEvent = null,
+            )
 
             coVerify {
                 mutedUserRepository.fetchAndPersistMuteList(expectedUserId)
@@ -177,7 +191,11 @@ class LoginHandlerTest {
             )
 
             try {
-                loginHandler.login(nostrKey = nsec, loginType = LoginHandler.LoginType.Nsec)
+                loginHandler.login(
+                    nostrKey = nsec,
+                    loginType = LoginType.PrivateKey,
+                    authorizationEvent = null,
+                )
             } catch (_: WssException) {
             }
 
