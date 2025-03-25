@@ -32,9 +32,10 @@ class CredentialsStore @Inject constructor(
 
     suspend fun clearCredentials() = persistence.updateData { emptySet() }
 
-    fun isNpubLogin(npub: String): Boolean =
-        credentials.value
-            .find { it.npub == npub }?.type == LoginType.PublicKey
+    fun isNpubLogin(npub: String) = checkLoginType(npub = npub, loginType = LoginType.PublicKey)
+
+    private fun checkLoginType(npub: String, loginType: LoginType) =
+        credentials.value.find { it.npub == npub }?.type == loginType
 
     suspend fun saveNsec(nostrKey: String): String {
         val (nsec, pubkey) = nostrKey.extractKeyPairFromPrivateKeyOrThrow()
