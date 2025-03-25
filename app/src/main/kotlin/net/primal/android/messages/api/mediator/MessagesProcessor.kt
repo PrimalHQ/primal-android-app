@@ -3,10 +3,10 @@ package net.primal.android.messages.api.mediator
 import androidx.room.withTransaction
 import javax.inject.Inject
 import net.primal.android.core.ext.asMapByKey
-import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.events.ext.flatMapMessagesAsEventUriPO
 import net.primal.android.messages.db.DirectMessageData
+import net.primal.android.messages.security.MessagesCipher
 import net.primal.android.nostr.ext.extractNoteId
 import net.primal.android.nostr.ext.extractProfileId
 import net.primal.android.nostr.ext.flatMapMessagesAsNostrResourcePO
@@ -21,7 +21,6 @@ import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.notes.repository.persistToDatabaseAsTransaction
-import net.primal.android.user.credentials.CredentialsStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.data.remote.api.feed.FeedApi
 import net.primal.data.remote.api.users.UsersApi
@@ -33,7 +32,7 @@ class MessagesProcessor @Inject constructor(
     private val database: PrimalDatabase,
     private val feedApi: FeedApi,
     private val usersApi: UsersApi,
-    private val credentialsStore: CredentialsStore,
+    private val messagesCipher: MessagesCipher,
 ) {
 
     suspend fun processMessageEventsAndSave(
@@ -48,7 +47,7 @@ class MessagesProcessor @Inject constructor(
     ) {
         val messageDataList = messages.mapAsMessageDataPO(
             userId = userId,
-            nsec = credentialsStore.findOrThrow(npub = userId.hexToNpubHrp()).nsec,
+            onMessageDecrypt = messagesCipher::decryptMessage,
         )
 
         processNostrUrisAndSave(userId = userId, messageDataList = messageDataList)

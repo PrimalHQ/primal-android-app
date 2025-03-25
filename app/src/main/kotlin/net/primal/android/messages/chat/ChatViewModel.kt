@@ -27,6 +27,7 @@ import net.primal.android.messages.chat.ChatContract.UiEvent
 import net.primal.android.messages.chat.ChatContract.UiState
 import net.primal.android.messages.chat.model.ChatMessageUi
 import net.primal.android.messages.db.DirectMessage
+import net.primal.android.messages.exceptions.MessageEncryptException
 import net.primal.android.messages.repository.MessageRepository
 import net.primal.android.navigation.profileIdOrThrow
 import net.primal.android.networking.relays.errors.MissingRelaysException
@@ -159,6 +160,9 @@ class ChatViewModel @Inject constructor(
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setErrorState(error = UiState.ChatError.MissingRelaysConfiguration(error))
+            } catch (error: MessageEncryptException) {
+                Timber.w(error)
+                setErrorState(error = UiState.ChatError.PublishError(error))
             } finally {
                 setState { copy(sending = false) }
             }
