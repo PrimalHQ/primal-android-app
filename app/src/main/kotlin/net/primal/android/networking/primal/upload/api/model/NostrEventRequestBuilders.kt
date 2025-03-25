@@ -2,7 +2,7 @@ package net.primal.android.networking.primal.upload.api.model
 
 import android.util.Base64
 import net.primal.android.nostr.ext.asPubkeyTag
-import net.primal.android.nostr.notary.NostrUnsignedEvent
+import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.domain.nostr.NostrEventKind
 

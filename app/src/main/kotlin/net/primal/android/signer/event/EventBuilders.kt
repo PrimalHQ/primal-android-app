@@ -2,7 +2,7 @@ package net.primal.android.signer.event
 
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.nostr.ext.extractProfileId
-import net.primal.android.nostr.notary.NostrUnsignedEvent
+import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.data.remote.api.settings.model.AppSettingsDescription
 import net.primal.domain.nostr.NostrEventKind

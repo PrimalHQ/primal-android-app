@@ -14,7 +14,7 @@ import net.primal.android.nostr.ext.asHighlightData
 import net.primal.android.nostr.ext.asKindTag
 import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.ext.asReplaceableEventTag
-import net.primal.android.nostr.notary.NostrUnsignedEvent
+import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.nostr.utils.Nevent
 import net.primal.domain.nostr.NostrEventKind

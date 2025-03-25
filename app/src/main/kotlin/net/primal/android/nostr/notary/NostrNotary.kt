@@ -25,6 +25,7 @@ import net.primal.domain.ContentAppSettings
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.NostrUnsignedEvent
 import timber.log.Timber
 
 class NostrNotary @Inject constructor(

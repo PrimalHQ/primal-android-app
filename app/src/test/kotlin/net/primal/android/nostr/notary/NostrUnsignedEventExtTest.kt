@@ -4,6 +4,7 @@ import io.kotest.matchers.shouldBe
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.crypto.toHex
+import net.primal.domain.nostr.NostrUnsignedEvent
 import org.junit.Test
 
 class NostrUnsignedEventExtTest {
