@@ -1,5 +1,6 @@
 package net.primal.data.repository.mappers.remote
 
+import net.primal.core.utils.detectMimeType
 import net.primal.data.local.dao.events.EventUri
 import net.primal.data.local.dao.messages.DirectMessageData
 import net.primal.data.local.dao.notes.PostData
@@ -51,9 +52,7 @@ fun List<DirectMessageData>.flatMapMessagesAsEventUriPO() =
     }
         .filterNot { it.uri.isNostrUri() }
         .map { (eventId, uri) ->
-            // TODO Rewire when mimeType is ported
-            val mimeType: String? = null
-//            val mimeType = uri.detectMimeType()
+            val mimeType = uri.detectMimeType()
             EventUri(
                 eventId = eventId,
                 url = uri,
@@ -94,9 +93,7 @@ private fun List<EventIdUriPair>.mapToEventUri(
         val linkPreview = linkPreviews[uri]
         val linkThumbnailCdnResource = linkPreview?.thumbnailUrl?.let { cdnResources[it] }
         val videoThumbnail = videoThumbnails[uri]
-        // TODO Implement detectMimeType for KMP
-//        val mimeType = uri.detectMimeType() ?: uriCdnResource?.contentType ?: linkPreview?.mimeType
-        val mimeType = uriCdnResource?.contentType ?: linkPreview?.mimeType
+        val mimeType = uri.detectMimeType() ?: uriCdnResource?.contentType ?: linkPreview?.mimeType
         val type = detectEventUriType(url = uri, mimeType = mimeType)
 
         EventUri(

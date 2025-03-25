@@ -1,6 +1,7 @@
 package net.primal.data.repository.mappers.remote
 
 import net.primal.core.utils.asMapByKey
+import net.primal.core.utils.parseUris
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.local.dao.profiles.ProfileData
@@ -69,8 +70,7 @@ fun NostrEvent.asProfileDataPO(
         lightningAddress = metadata?.lud16,
         lnUrlDecoded = metadata?.lud16?.parseAsLNUrlOrNull() ?: metadata?.lud06?.decodeLNUrlOrNull(),
         about = metadata?.about,
-        // TODO Implement missing parsing of uris in shared library
-//        aboutUris = metadata?.about?.parseUris() ?: emptyList(),
+        aboutUris = metadata?.about?.parseUris() ?: emptyList(),
         aboutHashtags = metadata?.about?.parseHashtags() ?: emptyList(),
         displayName = metadata?.displayName,
         avatarCdnImage = metadata?.picture?.let {

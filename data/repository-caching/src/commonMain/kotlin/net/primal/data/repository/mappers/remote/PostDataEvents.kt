@@ -1,6 +1,7 @@
 package net.primal.data.repository.mappers.remote
 
 import kotlinx.serialization.json.jsonPrimitive
+import net.primal.core.utils.parseUris
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.local.dao.notes.PostData
 import net.primal.data.local.dao.reads.ArticleData
@@ -84,9 +85,7 @@ private fun NostrEvent.shortTextNoteAsPost(
         createdAt = this.createdAt,
         tags = this.tags,
         content = this.content,
-        // TODO Rewire with parseUris() when implemented
-//        uris = this.content.parseUris(),
-        uris = emptyList(),
+        uris = this.content.parseUris(),
         hashtags = this.parseHashtags(),
         sig = this.sig,
         raw = this.toNostrJsonObject().encodeToJsonString(),
@@ -105,9 +104,7 @@ private fun NostrEvent.pictureNoteAsPost(): PostData {
         createdAt = this.createdAt,
         tags = this.tags,
         content = content,
-        // TODO Rewire with parseUris() when implemented
-//        uris = content.parseUris(),
-        uris = emptyList(),
+        uris = content.parseUris(),
         hashtags = emptyList(),
         sig = this.sig,
         raw = this.toNostrJsonObject().encodeToJsonString(),

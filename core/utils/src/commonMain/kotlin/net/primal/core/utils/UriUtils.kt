@@ -6,7 +6,7 @@ import io.ktor.http.Url
 
 private val urlRegexPattern = Regex(
     "(https?://)?(www\\\\.)?[-a-zA-Z0-9@:%.+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()_@:%+.~#?&//=]*)",
-    RegexOption.IGNORE_CASE
+    RegexOption.IGNORE_CASE,
 )
 
 fun String.parseUris(includeNostrUris: Boolean = true): List<String> {
@@ -87,12 +87,12 @@ private val extensionToMimeType = mapOf(
     "apk" to "application/vnd.android.package-archive",
 )
 
- fun String?.detectMimeType(): String? {
+fun String?.detectMimeType(): String? {
     return when {
         this == null -> null
         else -> extensionToMimeType[this.extractExtensionFromUrl().lowercase()]
     }
- }
+}
 
 fun String.extractExtensionFromUrl(): String {
     val path = try {

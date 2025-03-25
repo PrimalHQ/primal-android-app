@@ -49,11 +49,6 @@ private val nostrUriRegexPattern: Regex = Regex(
     RegexOption.IGNORE_CASE,
 )
 
-private val urlRegexPattern: Regex = Regex(
-    "https?://(www\\.)?[-a-zA-Z0-9@:%.+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()_@:%+.~#?&//=]*)",
-    RegexOption.IGNORE_CASE,
-)
-
 fun String.isNostrUri(): Boolean {
     val uri = lowercase()
     return uri.startsWith(NOSTR) || uri.startsWith(NPUB) || uri.startsWith(NOTE) ||
@@ -88,26 +83,6 @@ fun String.isNPubUri() = lowercase().startsWith(NOSTR + NPUB)
 fun String.isNProfileUri() = lowercase().startsWith(NOSTR + NPROFILE)
 
 fun String.isNAddrUri() = lowercase().startsWith(NOSTR + NADDR)
-
-// fun String.parseNostrUris(): List<String> {
-//    return nostrUriRegexPattern.findAll(this).map { matchResult ->
-//        matchResult.groupValues[1] + matchResult.groupValues[2] + matchResult.groupValues[3]
-//    }.filter { it.nostrUriToBytes() != null }.toList()
-// }
-
-fun String.detectUrls(): List<String> {
-    return urlRegexPattern.findAll(this).map { matchResult ->
-        val url = matchResult.groupValues[0]
-        val startIndex = matchResult.range.first
-        val charBefore = this.getOrNull(startIndex - 1)
-
-        when (charBefore) {
-            '(' -> url.trimEnd(')')
-            '[' -> url.trimEnd(']')
-            else -> url
-        }
-    }.toList()
-}
 
 // private fun String.nostrUriToBytes(): ByteArray? {
 //    val matcher = nostrUriRegexPattern.matcher(this)
