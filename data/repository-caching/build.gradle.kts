@@ -92,9 +92,4 @@ kotlin {
             }
         }
     }
-
-    // Opting in to the experimental @ObjCName annotation for native coroutines on iOS targets
-    kotlin.sourceSets.all {
-        languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
-    }
 }

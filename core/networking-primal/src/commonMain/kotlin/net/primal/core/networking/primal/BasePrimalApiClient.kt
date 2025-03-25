@@ -4,13 +4,9 @@ import io.github.aakira.napier.Napier
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.flow.toList
@@ -22,60 +18,23 @@ import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.sockets.filterBySubscriptionId
 import net.primal.core.networking.sockets.toPrimalSubscriptionId
-import net.primal.core.utils.coroutines.DispatcherProvider
 
 internal class BasePrimalApiClient(
-    dispatcherProvider: DispatcherProvider,
     private val socketClient: NostrSocketClientImpl,
 ) {
 
-    private val scope = CoroutineScope(dispatcherProvider.io())
-
-    private suspend fun <T> retrySendMessage(times: Int, block: suspend (Int) -> T): T {
-        repeat(times) {
-            try {
-                return block(it)
-            } catch (error: SocketSendMessageException) {
-                Napier.w(error) { "PrimalApiClient.retry()" }
-                delay(RETRY_DELAY_MILLIS)
-            }
-        }
-        return block(times)
-    }
-
-    // TODO Revisit query solution; We should get rid of the `scope` in this class
-
     @OptIn(ExperimentalUuidApi::class)
     suspend fun query(message: PrimalCacheFilter): PrimalQueryResult {
-        val queryResult = runCatching {
-            retrySendMessage(MAX_RETRIES) {
+        return try {
+            coroutineScope {
                 socketClient.ensureSocketConnection()
                 val subscriptionId = Uuid.random().toPrimalSubscriptionId()
-                val deferredQueryResult = asyncQueryCollection(subscriptionId)
-
-                try {
-                    sendMessageOrThrow(subscriptionId = subscriptionId, data = message.toPrimalJsonObject())
-                } catch (error: SocketSendMessageException) {
-                    deferredQueryResult.cancel(CancellationException("Unable to send socket message."))
-                    throw error
-                }
-
+                val deferredQueryResult = async { collectQueryResult(subscriptionId) }
+                sendMessageOrThrow(subscriptionId = subscriptionId, data = message.toPrimalJsonObject())
                 deferredQueryResult.await()
             }
-        }
-        val result = queryResult.getOrNull()
-        val error = queryResult.exceptionOrNull().takeAsWssException()
-        return result ?: throw error
-    }
-
-    private fun asyncQueryCollection(subscriptionId: String): Deferred<PrimalQueryResult> {
-        // TODO Revisit try/catch; this is prevents proper coroutine cancellation
-        return scope.async(SupervisorJob()) {
-            try {
-                collectQueryResult(subscriptionId)
-            } catch (error: CancellationException) {
-                throw WssException(message = "Api query timed out.", cause = error)
-            }
+        } catch (error: Exception) {
+            throw error.takeAsWssException()
         }
     }
 
@@ -90,8 +49,8 @@ internal class BasePrimalApiClient(
     private fun Throwable?.takeAsWssException(): WssException {
         return when (this) {
             is WssException -> this
-            is NostrNoticeException -> WssException(message = this.reason, cause = this)
-            is SocketSendMessageException -> WssException(message = "Api unreachable at the moment.", cause = this)
+            is NostrNoticeException -> WssException(message = this.reason)
+            is SocketSendMessageException -> WssException(message = "Api unreachable at the moment.")
             else -> WssException(message = this?.message, cause = this)
         }
     }
@@ -99,9 +58,7 @@ internal class BasePrimalApiClient(
     suspend fun subscribe(subscriptionId: String, message: PrimalCacheFilter): Flow<NostrIncomingMessage> {
         socketClient.ensureSocketConnection()
         try {
-            retrySendMessage(MAX_RETRIES) {
-                sendMessageOrThrow(subscriptionId = subscriptionId, data = message.toPrimalJsonObject())
-            }
+            sendMessageOrThrow(subscriptionId = subscriptionId, data = message.toPrimalJsonObject())
         } catch (error: SocketSendMessageException) {
             Napier.w(error) { "Unable to subscribe." }
             throw WssException(message = "Api unreachable at the moment.", cause = error)
@@ -114,13 +71,12 @@ internal class BasePrimalApiClient(
         return try {
             socketClient.sendCLOSE(subscriptionId = subscriptionId)
             true
-        } catch (error: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
 
     @OptIn(FlowPreview::class)
-    @Throws(NostrNoticeException::class, kotlin.coroutines.cancellation.CancellationException::class)
     private suspend fun collectQueryResult(subscriptionId: String): PrimalQueryResult {
         val messages = socketClient.incomingMessages
             .filterBySubscriptionId(id = subscriptionId)
@@ -128,14 +84,9 @@ internal class BasePrimalApiClient(
             .timeout(15.seconds)
             .toList()
 
-        val terminationMessage = messages.last()
-
-        if (terminationMessage is NostrIncomingMessage.NoticeMessage) {
-            throw NostrNoticeException(
-                reason = terminationMessage.message,
-                subscriptionId = subscriptionId,
-            )
-        }
+        val terminationMessage = messages.lastOrNull()
+        terminationMessage.verifyOrThrow(subscriptionId)
+        checkNotNull(terminationMessage)
 
         val eventMessages = messages.filterIsInstance<NostrIncomingMessage.EventMessage>()
         val eventsMessage = messages.filterIsInstance<NostrIncomingMessage.EventsMessage>()
@@ -153,6 +104,19 @@ internal class BasePrimalApiClient(
         )
     }
 
+    private fun NostrIncomingMessage?.verifyOrThrow(subscriptionId: String) {
+        if (this == null) {
+            throw WssException("No messages received.")
+        }
+
+        if (this is NostrIncomingMessage.NoticeMessage) {
+            throw NostrNoticeException(
+                reason = this.message,
+                subscriptionId = subscriptionId,
+            )
+        }
+    }
+
     private fun Flow<NostrIncomingMessage>.transformWhileEventsAreIncoming() =
         transformWhile {
             emit(it)
@@ -160,9 +124,4 @@ internal class BasePrimalApiClient(
         }
 
     private class SocketSendMessageException(override val message: String?) : RuntimeException()
-
-    companion object {
-        const val MAX_RETRIES = 2
-        private const val RETRY_DELAY_MILLIS = 500L
-    }
 }

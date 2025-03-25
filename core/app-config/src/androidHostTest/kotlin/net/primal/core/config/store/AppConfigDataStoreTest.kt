@@ -1,12 +1,9 @@
 package net.primal.core.config.store
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import net.primal.core.coroutines.CoroutinesTestRule
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4::class)
 class AppConfigDataStoreTest {
 
     companion object {

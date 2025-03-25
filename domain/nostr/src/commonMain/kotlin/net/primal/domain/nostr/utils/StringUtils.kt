@@ -1,8 +1,8 @@
-package net.primal.domain.common.utils
+package net.primal.domain.nostr.utils
 
 import fr.acinq.secp256k1.Hex
 import net.primal.core.utils.ellipsizeMiddle
-import net.primal.domain.common.cryptography.toNpub
+import net.primal.domain.nostr.cryptography.toNpub
 
 fun String.asEllipsizedNpub(): String = Hex.decode(this).toNpub().ellipsizeMiddle(size = 8)
 

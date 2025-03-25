@@ -37,7 +37,7 @@ kotlin {
             dependencies {
                 // Internal
                 implementation(project(":core:utils"))
-                api(project(":domain:common"))
+                api(project(":domain:nostr"))
 
                 // Kotlin
                 implementation(libs.kotlinx.coroutines.core)

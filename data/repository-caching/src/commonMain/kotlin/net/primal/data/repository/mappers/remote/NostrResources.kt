@@ -18,19 +18,19 @@ import net.primal.domain.ReferencedHighlight
 import net.primal.domain.ReferencedNote
 import net.primal.domain.ReferencedUser
 import net.primal.domain.ReferencedZap
-import net.primal.domain.common.cryptography.bech32ToHexOrThrow
-import net.primal.domain.common.cryptography.bechToBytesOrThrow
-import net.primal.domain.common.cryptography.toHex
-import net.primal.domain.common.utils.asEllipsizedNpub
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.cryptography.bech32ToHexOrThrow
+import net.primal.domain.nostr.cryptography.bechToBytesOrThrow
+import net.primal.domain.nostr.cryptography.toHex
 import net.primal.domain.nostr.findFirstAltDescription
 import net.primal.domain.nostr.findFirstEventId
 import net.primal.domain.nostr.findFirstProfileId
 import net.primal.domain.nostr.isATag
+import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.utils.wordsCountToReadingTime
 
 // TODO Port missing helper functions and consider splitting this file

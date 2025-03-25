@@ -4,17 +4,22 @@ import io.kotest.matchers.should
 import io.kotest.matchers.types.beInstanceOf
 import kotlin.uuid.Uuid
 import kotlinx.datetime.Clock
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.put
-import net.primal.core.networking.serialization.NetworkingJson
 import net.primal.core.networking.sockets.NostrIncomingMessage
 import net.primal.core.networking.sockets.parseIncomingMessage
 import net.primal.domain.nostr.NostrEvent
 
 class NostrIncomingMessageParserTest {
+
+    private val json = Json {
+        ignoreUnknownKeys = true
+        coerceInputValues = true
+    }
 
     @org.junit.Test
     fun `EVENT message parsed as EventMessage`() {
@@ -22,7 +27,7 @@ class NostrIncomingMessageParserTest {
             add("EVENT")
             add(Uuid.random().toString())
             add(
-                NetworkingJson.encodeToJsonElement(
+                json.encodeToJsonElement(
                     NostrEvent(
                         id = "invalidId",
                         pubKey = "pukey",

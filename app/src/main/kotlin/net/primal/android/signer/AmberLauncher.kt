@@ -8,10 +8,10 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.core.net.toUri
-import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrUnsignedEvent
 
 private const val AMBER_PACKAGE_NAME = "com.greenart7c3.nostrsigner"
 private const val URI_PREFIX = "nostrsigner:"

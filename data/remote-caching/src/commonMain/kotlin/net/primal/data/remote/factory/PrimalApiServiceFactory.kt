@@ -29,32 +29,24 @@ object PrimalApiServiceFactory {
 
     private val defaultHttpClient = HttpClientFactory.createHttpClientWithDefaultConfig()
 
-    fun createArticlesApi(primalApiClient: PrimalApiClient): ArticlesApi =
-        ArticlesApiImpl(primalApiClient)
+    fun createArticlesApi(primalApiClient: PrimalApiClient): ArticlesApi = ArticlesApiImpl(primalApiClient)
 
-    fun createEventsApi(primalApiClient: PrimalApiClient): EventStatsApi =
-        EventStatsApiImpl(primalApiClient)
+    fun createEventsApi(primalApiClient: PrimalApiClient): EventStatsApi = EventStatsApiImpl(primalApiClient)
 
-    fun createExploreApi(primalApiClient: PrimalApiClient): ExploreApi =
-        ExploreApiImpl(primalApiClient)
+    fun createExploreApi(primalApiClient: PrimalApiClient): ExploreApi = ExploreApiImpl(primalApiClient)
 
-    fun createFeedApi(primalApiClient: PrimalApiClient): FeedApi =
-        FeedApiImpl(primalApiClient)
+    fun createFeedApi(primalApiClient: PrimalApiClient): FeedApi = FeedApiImpl(primalApiClient)
 
-    fun createImportApi(primalApiClient: PrimalApiClient): PrimalImportApi =
-        PrimalImportApiImpl(primalApiClient)
+    fun createImportApi(primalApiClient: PrimalApiClient): PrimalImportApi = PrimalImportApiImpl(primalApiClient)
 
-    fun createMessagesApi(primalApiClient: PrimalApiClient): MessagesApi =
-        MessagesApiImpl(primalApiClient)
+    fun createMessagesApi(primalApiClient: PrimalApiClient): MessagesApi = MessagesApiImpl(primalApiClient)
 
     fun createNotificationsApi(primalApiClient: PrimalApiClient): NotificationsApi =
         NotificationsApiImpl(primalApiClient)
 
-    fun createSettingsApi(primalApiClient: PrimalApiClient): SettingsApi =
-        SettingsApiImpl(primalApiClient)
+    fun createSettingsApi(primalApiClient: PrimalApiClient): SettingsApi = SettingsApiImpl(primalApiClient)
 
-    fun createUsersApi(primalApiClient: PrimalApiClient): UsersApi =
-        UsersApiImpl(primalApiClient)
+    fun createUsersApi(primalApiClient: PrimalApiClient): UsersApi = UsersApiImpl(primalApiClient)
 
     fun createUserWellKnownApi(httpClient: HttpClient = defaultHttpClient): UserWellKnownApi =
         Ktorfit.Builder()

@@ -2,8 +2,8 @@ package net.primal.data.repository.mappers
 
 import net.primal.data.local.dao.events.EventZap
 import net.primal.data.local.dao.profiles.ProfileData
-import net.primal.domain.common.utils.authorNameUiFriendly
-import net.primal.domain.common.utils.usernameUiFriendly
+import net.primal.domain.nostr.utils.authorNameUiFriendly
+import net.primal.domain.nostr.utils.usernameUiFriendly
 
 fun ProfileData.usernameUiFriendly(): String = usernameUiFriendly(this.displayName, this.handle, this.ownerId)
 

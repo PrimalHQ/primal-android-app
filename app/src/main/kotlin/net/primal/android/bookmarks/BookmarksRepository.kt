@@ -13,11 +13,11 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.MissingPrivateKeyException
-import net.primal.android.nostr.notary.NostrUnsignedEvent
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.domain.BookmarkType
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.NostrUnsignedEvent
 
 class BookmarksRepository @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,

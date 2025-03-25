@@ -1,4 +1,6 @@
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
+import org.jlleitschuh.gradle.ktlint.tasks.KtLintCheckTask
+import org.jlleitschuh.gradle.ktlint.tasks.KtLintFormatTask
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
@@ -27,16 +29,48 @@ dependencies {
 
 subprojects {
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
-    configure<KtlintExtension> {
-        version = "1.0.1"
-        android = true
-        verbose = true
+    plugins.withId("org.jlleitschuh.gradle.ktlint") {
+
+        tasks.withType<KtLintCheckTask>().configureEach {
+            exclude {
+                it.file.invariantSeparatorsPath.contains("/build/generated/ksp/")
+            }
+        }
+        tasks.withType<KtLintFormatTask>().configureEach {
+            exclude {
+                it.file.invariantSeparatorsPath.contains("/build/generated/ksp/")
+            }
+        }
+        configure<KtlintExtension> {
+            version = "1.0.1"
+            android = true
+            verbose = true
+
+            filter {
+                exclude {
+                    it.file.invariantSeparatorsPath.contains("/build/generated/ksp/")
+                }
+            }
+        }
     }
 
     apply(plugin = "io.gitlab.arturbosch.detekt")
-    detekt {
-        buildUponDefaultConfig = true
-        allRules = false
-        config.setFrom("$rootDir/detekt.yml")
+    plugins.withId("io.gitlab.arturbosch.detekt") {
+        detekt {
+            buildUponDefaultConfig = true
+            allRules = false
+            config.setFrom("$rootDir/detekt.yml")
+        }
+    }
+
+    afterEvaluate {
+        val kspTaskName = "kspCommonMainKotlinMetadata"
+        tasks.matching { it.name.startsWith("runKtlint") && it.name.contains("CommonMain") }
+            .configureEach {
+                val kspTask = tasks.findByName(kspTaskName)
+                if (kspTask != null) {
+                    dependsOn(kspTask)
+                }
+            }
     }
 }
