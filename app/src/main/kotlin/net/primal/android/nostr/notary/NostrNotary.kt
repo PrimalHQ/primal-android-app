@@ -1,5 +1,6 @@
 package net.primal.android.nostr.notary
 
+import android.content.ContentResolver
 import fr.acinq.secp256k1.Hex
 import javax.inject.Inject
 import kotlinx.serialization.json.JsonArray
@@ -7,10 +8,12 @@ import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.core.serialization.json.NostrNotaryJson
 import net.primal.android.crypto.CryptoUtils
+import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.crypto.toNpub
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.nostr.ext.asIdentifierTag
 import net.primal.android.nostr.ext.asPubkeyTag
+import net.primal.android.signer.signEventWithAmber
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.Relay
@@ -29,6 +32,7 @@ import net.primal.domain.nostr.NostrUnsignedEvent
 import timber.log.Timber
 
 class NostrNotary @Inject constructor(
+    private val contentResolver: ContentResolver,
     private val credentialsStore: CredentialsStore,
 ) {
 
@@ -43,6 +47,14 @@ class NostrNotary @Inject constructor(
     }
 
     fun signNostrEvent(userId: String, event: NostrUnsignedEvent): NostrEvent {
+        val isExternalSignerLogin = runCatching {
+            credentialsStore.isExternalSignerLogin(npub = userId.hexToNpubHrp())
+        }.getOrDefault(false)
+
+        if (isExternalSignerLogin) {
+            return contentResolver.signEventWithAmber(event = event) ?: throw NostrSignUnauthorized()
+        }
+
         return event.signOrThrow(nsec = findNsecOrThrow(userId))
     }
 
