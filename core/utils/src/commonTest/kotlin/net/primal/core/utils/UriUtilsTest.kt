@@ -97,7 +97,7 @@ class UriUtilsTest {
 
     @Test
     fun `parseUrls should not return urls with brackets`() {
-        val hugeContent = getResourceContent("/core/release_notes.txt")
+        val hugeContent = RELEASE_NOTE
         hugeContent.shouldNotBeNull()
 
         val urls = hugeContent.parseUris()
@@ -179,5 +179,3 @@ class UriUtilsTest {
         urlLink.extractExtensionFromUrl() shouldBe "jpg"
     }
 }
-
-expect fun getResourceContent(path: String): String?

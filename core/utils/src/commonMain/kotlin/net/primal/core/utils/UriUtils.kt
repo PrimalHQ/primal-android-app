@@ -2,7 +2,7 @@
 
 package net.primal.core.utils
 
-import com.bkahlert.kommons.uri.Uri
+import io.ktor.http.Url
 
 private val urlRegexPattern = Regex(
     "(https?://)?(www\\\\.)?[-a-zA-Z0-9@:%.+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()_@:%+.~#?&//=]*)",
@@ -94,14 +94,14 @@ private val extensionToMimeType = mapOf(
     }
  }
 
- fun String.extractExtensionFromUrl(): String {
-    val file = try {
-        Uri(this).path
+fun String.extractExtensionFromUrl(): String {
+    val path = try {
+        Url(this).encodedPath
     } catch (error: Exception) {
         this
     }
-    return file.substringAfterLast(".", "")
- }
+    return path.substringAfterLast(".", "")
+}
 
 private val tldExtractionRegex = Regex("(?:https?://)?(?:www\\.)?([\\w\\d\\-]+\\.[\\w\\d\\-.]+)")
 
