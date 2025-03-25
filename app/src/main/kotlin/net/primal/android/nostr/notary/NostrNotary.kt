@@ -63,12 +63,15 @@ class NostrNotary @Inject constructor(
         tags: List<JsonArray> = emptyList(),
         metadata: ContentMetadata,
     ): NostrEvent {
-        return NostrUnsignedEvent(
-            pubKey = userId,
-            kind = NostrEventKind.Metadata.value,
-            tags = tags,
-            content = NostrNotaryJson.encodeToString(metadata),
-        ).signOrThrow(nsec = findNsecOrThrow(userId))
+        return signNostrEvent(
+            userId = userId,
+            event = NostrUnsignedEvent(
+                pubKey = userId,
+                kind = NostrEventKind.Metadata.value,
+                tags = tags,
+                content = NostrNotaryJson.encodeToString(metadata),
+            ),
+        )
     }
 
     fun signAuthorizationNostrEvent(
@@ -76,32 +79,41 @@ class NostrNotary @Inject constructor(
         description: String,
         tags: List<JsonArray> = emptyList(),
     ): NostrEvent {
-        return NostrUnsignedEvent(
-            pubKey = userId,
-            kind = NostrEventKind.ApplicationSpecificData.value,
-            tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()) + tags,
-            content = CommonJson.encodeToString(
-                AppSettingsDescription(description = description),
+        return signNostrEvent(
+            userId = userId,
+            event = NostrUnsignedEvent(
+                pubKey = userId,
+                kind = NostrEventKind.ApplicationSpecificData.value,
+                tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()) + tags,
+                content = CommonJson.encodeToString(
+                    AppSettingsDescription(description = description),
+                ),
             ),
-        ).signOrThrow(nsec = findNsecOrThrow(userId))
+        )
     }
 
     fun signAppSettingsNostrEvent(userId: String, appSettings: ContentAppSettings): NostrEvent {
-        return NostrUnsignedEvent(
-            pubKey = userId,
-            kind = NostrEventKind.ApplicationSpecificData.value,
-            tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
-            content = CommonJson.encodeToString(appSettings),
-        ).signOrThrow(nsec = findNsecOrThrow(userId))
+        return signNostrEvent(
+            userId = userId,
+            event = NostrUnsignedEvent(
+                pubKey = userId,
+                kind = NostrEventKind.ApplicationSpecificData.value,
+                tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
+                content = CommonJson.encodeToString(appSettings),
+            ),
+        )
     }
 
     fun signAppSpecificDataNostrEvent(userId: String, content: String): NostrEvent {
-        return NostrUnsignedEvent(
-            pubKey = userId,
-            kind = NostrEventKind.ApplicationSpecificData.value,
-            tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
-            content = content,
-        ).signOrThrow(nsec = findNsecOrThrow(userId))
+        return signNostrEvent(
+            userId = userId,
+            event = NostrUnsignedEvent(
+                pubKey = userId,
+                kind = NostrEventKind.ApplicationSpecificData.value,
+                tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
+                content = content,
+            ),
+        )
     }
 
     fun signFollowListNostrEvent(
@@ -110,12 +122,15 @@ class NostrNotary @Inject constructor(
         content: String,
     ): NostrEvent {
         val tags = contacts.map { it.asPubkeyTag() }
-        return NostrUnsignedEvent(
-            pubKey = userId,
-            kind = NostrEventKind.FollowList.value,
-            content = content,
-            tags = tags,
-        ).signOrThrow(nsec = findNsecOrThrow(userId))
+        return signNostrEvent(
+            userId = userId,
+            event = NostrUnsignedEvent(
+                pubKey = userId,
+                kind = NostrEventKind.FollowList.value,
+                content = content,
+                tags = tags,
+            ),
+        )
     }
 
     fun signZapRequestNostrEvent(
@@ -124,12 +139,15 @@ class NostrNotary @Inject constructor(
         target: ZapTarget,
         relays: List<Relay>,
     ): NostrEvent {
-        return NostrUnsignedEvent(
-            pubKey = userId,
-            kind = NostrEventKind.ZapRequest.value,
-            content = comment,
-            tags = target.toTags() + listOf(relays.toZapTag()),
-        ).signOrThrow(nsec = findNsecOrThrow(userId))
+        return signNostrEvent(
+            userId = userId,
+            event = NostrUnsignedEvent(
+                pubKey = userId,
+                kind = NostrEventKind.ZapRequest.value,
+                content = comment,
+                tags = target.toTags() + listOf(relays.toZapTag()),
+            ),
+        )
     }
 
     fun signWalletInvoiceRequestNostrEvent(
@@ -144,22 +162,28 @@ class NostrNotary @Inject constructor(
             pubKey = Hex.decode(nwc.pubkey),
         )
 
-        return NostrUnsignedEvent(
-            pubKey = nwc.keypair.pubkey,
-            kind = NostrEventKind.WalletRequest.value,
-            content = encryptedMessage,
-            tags = tags,
-        ).signOrThrow(hexPrivateKey = Hex.decode(nwc.keypair.privateKey))
+        return signNostrEvent(
+            userId = nwc.keypair.pubkey,
+            event = NostrUnsignedEvent(
+                pubKey = nwc.keypair.pubkey,
+                kind = NostrEventKind.WalletRequest.value,
+                content = encryptedMessage,
+                tags = tags,
+            ),
+        )
     }
 
     fun signMuteListNostrEvent(userId: String, mutedUserIds: Set<String>): NostrEvent {
         val tags = mutedUserIds.map { it.asPubkeyTag() }
-        return NostrUnsignedEvent(
-            content = "",
-            pubKey = userId,
-            kind = NostrEventKind.MuteList.value,
-            tags = tags,
-        ).signOrThrow(nsec = findNsecOrThrow(pubkey = userId))
+        return signNostrEvent(
+            userId = userId,
+            event = NostrUnsignedEvent(
+                content = "",
+                pubKey = userId,
+                kind = NostrEventKind.MuteList.value,
+                tags = tags,
+            ),
+        )
     }
 
     fun signEncryptedDirectMessage(
@@ -167,39 +191,48 @@ class NostrNotary @Inject constructor(
         receiverId: String,
         encryptedContent: String,
     ): NostrEvent {
-        return NostrUnsignedEvent(
-            pubKey = userId,
-            content = encryptedContent,
-            kind = NostrEventKind.EncryptedDirectMessages.value,
-            tags = listOf(receiverId.asPubkeyTag()),
-        ).signOrThrow(nsec = findNsecOrThrow(pubkey = userId))
+        return signNostrEvent(
+            userId = userId,
+            event = NostrUnsignedEvent(
+                pubKey = userId,
+                content = encryptedContent,
+                kind = NostrEventKind.EncryptedDirectMessages.value,
+                tags = listOf(receiverId.asPubkeyTag()),
+            ),
+        )
     }
 
     fun signPrimalWalletOperationNostrEvent(userId: String, content: String): NostrEvent {
-        return NostrUnsignedEvent(
-            pubKey = userId,
-            content = content,
-            kind = NostrEventKind.PrimalWalletOperation.value,
-            tags = listOf(),
-        ).signOrThrow(nsec = findNsecOrThrow(pubkey = userId))
+        return signNostrEvent(
+            userId = userId,
+            event = NostrUnsignedEvent(
+                pubKey = userId,
+                content = content,
+                kind = NostrEventKind.PrimalWalletOperation.value,
+                tags = listOf(),
+            ),
+        )
     }
 
     fun signRelayListMetadata(userId: String, relays: List<Relay>): NostrEvent {
-        return NostrUnsignedEvent(
-            pubKey = userId,
-            content = "",
-            kind = NostrEventKind.RelayListMetadata.value,
-            tags = relays.map {
-                buildJsonArray {
-                    add("r")
-                    add(it.url)
-                    when {
-                        it.read && it.write -> Unit
-                        it.read -> add("read")
-                        it.write -> add("write")
+        return signNostrEvent(
+            userId = userId,
+            event = NostrUnsignedEvent(
+                pubKey = userId,
+                content = "",
+                kind = NostrEventKind.RelayListMetadata.value,
+                tags = relays.map {
+                    buildJsonArray {
+                        add("r")
+                        add(it.url)
+                        when {
+                            it.read && it.write -> Unit
+                            it.read -> add("read")
+                            it.write -> add("write")
+                        }
                     }
-                }
-            },
-        ).signOrThrow(nsec = findNsecOrThrow(pubkey = userId))
+                },
+            ),
+        )
     }
 }
