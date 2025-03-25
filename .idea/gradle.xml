@@ -21,7 +21,6 @@
             <option value="$PROJECT_DIR$/data/remote-caching" />
             <option value="$PROJECT_DIR$/data/repository-caching" />
             <option value="$PROJECT_DIR$/domain" />
-            <option value="$PROJECT_DIR$/domain/common" />
             <option value="$PROJECT_DIR$/domain/nostr" />
             <option value="$PROJECT_DIR$/domain/primal" />
             <option value="$PROJECT_DIR$/domain/primal-wallet" />

@@ -18,10 +18,10 @@ import net.primal.domain.ReferencedHighlight
 import net.primal.domain.ReferencedNote
 import net.primal.domain.ReferencedUser
 import net.primal.domain.ReferencedZap
-import net.primal.domain.common.cryptography.bech32ToHexOrThrow
-import net.primal.domain.common.cryptography.bechToBytesOrThrow
-import net.primal.domain.common.cryptography.toHex
-import net.primal.domain.common.utils.asEllipsizedNpub
+import net.primal.domain.nostr.cryptography.bech32ToHexOrThrow
+import net.primal.domain.nostr.cryptography.bechToBytesOrThrow
+import net.primal.domain.nostr.cryptography.toHex
+import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV

@@ -36,12 +36,16 @@ kotlin {
             dependencies {
                 // Internal
                 implementation(project(":core:utils"))
-                api(project(":domain:common"))
 
                 // Kotlin
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.kotlinx.serialization.json)
+
+                // Cryptography
+//                implementation(libs.lightning.kmp)
+                implementation(libs.bitcoin.kmp)
+                implementation(libs.secp256k1.kmp)
             }
         }
 
@@ -49,6 +53,56 @@ kotlin {
             dependencies {
                 // Kotlin
                 implementation(libs.kotlinx.coroutines.android)
+
+                // Cryptography
+                implementation(libs.secp256k1.kmp.jni.android)
+            }
+        }
+
+        iosMain {
+            dependencies {
+            }
+        }
+
+        val iosArm64Main by getting {
+            dependencies {
+                // Cryptography
+//                implementation(libs.lightning.kmp.iosarm64)
+                implementation(libs.bitcoin.kmp.iosarm64)
+                implementation(libs.secp256k1.kmp.iosarm64)
+            }
+        }
+        val iosSimulatorArm64Main by getting {
+            dependencies {
+                // Cryptography
+//                implementation(libs.lightning.kmp.iossimulatorarm64)
+                implementation(libs.bitcoin.kmp.iossimulatorarm64)
+                implementation(libs.secp256k1.kmp.iossimulatorarm64)
+            }
+        }
+        val iosX64Main by getting {
+            dependencies {
+                // Cryptography
+//                implementation(libs.lightning.kmp.iosx64)
+                implementation(libs.bitcoin.kmp.iosx64)
+                implementation(libs.secp256k1.kmp.iosx64)
+            }
+        }
+
+        val desktopMain by getting
+        desktopMain.dependencies {
+            // Cryptography
+//                implementation(libs.lightning.kmp.jvm)
+            implementation(libs.bitcoin.kmp.jvm)
+            implementation(libs.secp256k1.kmp.jvm)
+        }
+
+        commonTest {
+            dependencies {
+                implementation(libs.junit)
+                implementation(libs.kotest.assertions.core)
+                implementation(libs.kotest.assertions.json)
+                implementation(libs.kotlinx.coroutines.test)
             }
         }
     }

@@ -31,7 +31,6 @@ include(":data:local-caching")
 include(":data:remote-caching")
 include(":data:repository-caching")
 
-include(":domain:common")
 include(":domain:nostr")
 include(":domain:primal")
 include(":domain:primal-wallet")

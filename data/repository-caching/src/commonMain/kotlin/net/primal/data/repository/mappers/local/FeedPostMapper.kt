@@ -8,8 +8,8 @@ import net.primal.data.local.dao.notes.FeedPostUserStats
 import net.primal.data.repository.mappers.authorNameUiFriendly
 import net.primal.data.repository.mappers.usernameUiFriendly
 import net.primal.domain.EventZap
-import net.primal.domain.common.utils.asEllipsizedNpub
-import net.primal.domain.common.utils.formatNip05Identifier
+import net.primal.domain.nostr.utils.asEllipsizedNpub
+import net.primal.domain.nostr.utils.formatNip05Identifier
 import net.primal.domain.model.FeedPost as FeedPostDO
 import net.primal.domain.model.FeedPostAuthor
 import net.primal.domain.model.FeedPostRepostInfo

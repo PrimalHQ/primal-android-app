@@ -4,7 +4,7 @@ import net.primal.data.local.dao.events.EventZap as EventZapPO
 import net.primal.data.repository.mappers.authorNameUiFriendly
 import net.primal.data.repository.mappers.usernameUiFriendly
 import net.primal.domain.EventZap as EventZapDO
-import net.primal.domain.common.utils.formatNip05Identifier
+import net.primal.domain.nostr.utils.formatNip05Identifier
 
 internal fun EventZapPO.asEventZapDO(): EventZapDO {
     return EventZapDO(
