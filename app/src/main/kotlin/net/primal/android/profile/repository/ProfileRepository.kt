@@ -24,7 +24,6 @@ import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
 import net.primal.android.nostr.notary.MissingPrivateKeyException
-import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.profile.db.ProfileData
 import net.primal.android.profile.db.ProfileInteraction
@@ -37,6 +36,7 @@ import net.primal.data.remote.api.explore.model.UsersResponse
 import net.primal.data.remote.api.users.UserWellKnownApi
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.NostrUnsignedEvent
 
 class ProfileRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,

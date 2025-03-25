@@ -8,7 +8,6 @@ import io.kotest.matchers.shouldBe
 import kotlin.uuid.Uuid
 import net.primal.core.networking.primal.PrimalQueryResult
 import net.primal.core.networking.sockets.NostrIncomingMessage
-import net.primal.core.networking.sockets.toPrimalSubscriptionId
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
@@ -58,7 +57,7 @@ class PrimalQueryResultTest {
         primalEvents: List<PrimalEvent> = emptyList(),
     ) = PrimalQueryResult(
         terminationMessage = NostrIncomingMessage.EoseMessage(
-            subscriptionId = Uuid.random().toPrimalSubscriptionId(),
+            subscriptionId = Uuid.random().toString(),
         ),
         nostrEvents = nostrEvents,
         primalEvents = primalEvents,

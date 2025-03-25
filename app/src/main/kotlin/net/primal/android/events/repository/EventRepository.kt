@@ -27,12 +27,12 @@ import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
 import net.primal.android.nostr.notary.MissingPrivateKeyException
-import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.data.remote.api.events.EventStatsApi
 import net.primal.data.remote.api.events.model.EventActionsRequestBody
 import net.primal.data.remote.api.events.model.EventZapsRequestBody
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.NostrUnsignedEvent
 import timber.log.Timber
 
 class EventRepository @Inject constructor(

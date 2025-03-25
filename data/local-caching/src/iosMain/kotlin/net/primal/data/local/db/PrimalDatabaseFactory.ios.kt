@@ -42,5 +42,4 @@ actual object PrimalDatabaseFactory {
         )
         return requireNotNull(documentDirectory?.path)
     }
-
 }

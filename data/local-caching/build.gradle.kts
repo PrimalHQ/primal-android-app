@@ -1,4 +1,3 @@
-import co.touchlab.skie.configuration.DefaultArgumentInterop
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
@@ -8,7 +7,6 @@ plugins {
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.jetpack.room)
-    alias(libs.plugins.touchlab.skie)
 }
 
 private val xcfName = "PrimalDataLocalCaching"
@@ -130,41 +128,10 @@ kotlin {
             linkerOpts("-lsqlite3")
         }
     }
-
-    // Opting in to the experimental @ObjCName annotation for native coroutines on iOS targets
-    kotlin.sourceSets.all {
-        languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
-    }
-}
-
-tasks.register("assembleXCFramework") {
-    dependsOn("assemble${xcfName}ReleaseXCFramework")
-}
-
-tasks.register("compileTargets") {
-    dependsOn("compileKotlinIosArm64", "compileAndroidMain")
 }
 
 room {
     schemaDirectory("$projectDir/schemas")
-}
-
-skie {
-    build {
-        produceDistributableFramework()
-    }
-
-    features {
-        enableFlowCombineConvertorPreview = true
-
-        group {
-            DefaultArgumentInterop.Enabled(false)
-        }
-    }
-
-    analytics {
-        enabled.set(false)
-    }
 }
 
 dependencies {

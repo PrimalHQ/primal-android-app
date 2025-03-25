@@ -77,6 +77,20 @@ kotlin {
             implementation(libs.ktor.client.cio)
         }
 
+        getByName("androidHostTest") {
+            dependencies {
+                implementation(libs.junit)
+                implementation(libs.androidx.test.core)
+                implementation(libs.androidx.test.runner)
+                implementation(libs.androidx.test.ext.junit)
+                implementation(libs.androidx.test.ext.junit.ktx)
+                implementation(libs.androidx.arch.core.testing)
+                implementation(libs.mockk)
+                implementation(libs.kotest.assertions.core)
+                implementation(libs.kotest.assertions.json)
+            }
+        }
+
         commonTest {
             dependencies {
                 implementation(libs.kotlin.test)

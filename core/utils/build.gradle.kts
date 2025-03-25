@@ -21,7 +21,7 @@ val buildConfigGenerator by tasks.registering(Sync::class) {
             |package net.primal.core.utils
             |
             |object AndroidBuildConfig {
-            |  const val APP_VERSION = "${releaseProperties.getProperty("version", "unknown")}"
+            |    const val APP_VERSION = "${releaseProperties.getProperty("version", "unknown")}"
             |}
             |
             """.trimMargin(),
