@@ -1,14 +1,13 @@
-package net.primal.android.attachments.db.serialization
+package net.primal.android.events.db.serialization
 
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import net.primal.android.events.db.serialization.EventUriTypeConverters
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.domain.CdnResourceVariant
 import org.junit.Test
 
-class AttachmentsTypeConvertersTest {
+class EventUriTypeConvertersTest {
 
     @Test
     fun `listOfCdnResourceVariantToString returns correct String`() {
