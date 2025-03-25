@@ -32,6 +32,8 @@ class CredentialsStore @Inject constructor(
 
     suspend fun clearCredentials() = persistence.updateData { emptySet() }
 
+    fun isExternalSignerLogin(npub: String) = checkLoginType(npub = npub, loginType = LoginType.ExternalSigner)
+
     fun isNpubLogin(npub: String) = checkLoginType(npub = npub, loginType = LoginType.PublicKey)
 
     private fun checkLoginType(npub: String, loginType: LoginType) =
