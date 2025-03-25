@@ -1,3 +1,7 @@
+package net.primal.core.utils
+
+const val MARKDOWN_WITH_LINKS =
+"""
 An the first episode of Nostr Review on Bitcoin. Review is out!
 
 https://bitcoin.review/podcast/episode-39/
@@ -271,3 +275,4 @@ https://bitcoin.review/podcast/episode-39/
 
 ### Episode submission ideas
 - We're looking for ideas for interesting panel conversations. To send Bitcoin related questions, just go to [bitcoin.review](https://bitcoin.review/) and follow the contact links at the bottom of the page.
+"""

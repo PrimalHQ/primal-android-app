@@ -2,75 +2,37 @@
 
 package net.primal.core.utils
 
-// import com.linkedin.urls.Url
-// import com.linkedin.urls.detection.UrlDetector
-// import com.linkedin.urls.detection.UrlDetectorOptions
-// import java.net.MalformedURLException
-// import java.net.URL
-// import net.primal.android.nostr.ext.detectUrls
-// import net.primal.android.nostr.ext.parseNostrUris
-// import timber.log.Timber
+import io.ktor.http.Url
 
-// TODO Port UriUtils to KotlinNative
+private val urlRegexPattern = Regex(
+    "(https?://)?(www\\\\.)?[-a-zA-Z0-9@:%.+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()_@:%+.~#?&//=]*)",
+    RegexOption.IGNORE_CASE
+)
 
-// fun String.parseUris(includeNostrUris: Boolean = true): List<String> {
-//    val urlDetector = UrlDetector(this, UrlDetectorOptions.JSON)
-//    val libUrls = urlDetector.detect()
-//        .filterInvalidTLDs()
-//        .map { it.originalUrl }
-//    val customUrls = this.detectUrls()
-//    val mergedUrls = mergeUrls(libUrls, customUrls, this)
-//
-//    return if (includeNostrUris) {
-//        val nostr = this.parseNostrUris()
-//        nostr + mergedUrls
-//    } else {
-//        mergedUrls
-//    }
-// }
-//
-// private fun mergeUrls(
-//    libUrls: List<String>,
-//    customUrls: List<String>,
-//    content: String,
-// ): List<String> {
-//    val result = mutableListOf<String>()
-//    val allUrls = (libUrls + customUrls).distinct()
-//    val visited = mutableSetOf<String>()
-//
-//    for (originalUrl in allUrls) {
-//        val potentialDuplicateUrl = visited.find { existing -> isRelativeMatch(existing, originalUrl) }
-//
-//        if (potentialDuplicateUrl != null) {
-//            val bothUrlExists = content.containsUrl(potentialDuplicateUrl) && content.containsUrl(originalUrl)
-//            if (bothUrlExists) {
-//                visited.add(originalUrl)
-//            } else if (originalUrl.length > potentialDuplicateUrl.length) {
-//                visited.remove(potentialDuplicateUrl)
-//                visited.add(originalUrl)
-//            }
-//        } else {
-//            visited.add(originalUrl)
-//        }
-//    }
-//
-//    result.addAll(visited)
-//    return result
-// }
-//
-// private fun isRelativeMatch(url1: String, url2: String): Boolean {
-//    return url1.startsWith(url2) || url2.startsWith(url1)
-// }
-//
-// private fun String.containsUrl(url: String): Boolean {
-//    return Regex("\\b${Regex.escape(url)}\\b").containsMatchIn(this)
-// }
-//
-// private fun List<Url>.filterInvalidTLDs() =
-//    filter {
-//        val tld = it.host.split(".").lastOrNull()
-//        tld != null && tld.all { char -> char.isLetter() }
-//    }
+fun String.parseUris(includeNostrUris: Boolean = true): List<String> {
+    val detectedUrls = this.detectUrls()
+
+    return if (includeNostrUris) {
+        // TODO: handle nostrUris
+        detectedUrls + emptyList()
+    } else {
+        detectedUrls
+    }
+}
+
+private fun String.detectUrls(): List<String> {
+    return urlRegexPattern.findAll(this).map { matchResult ->
+        val url = matchResult.value
+        val startIndex = matchResult.range.first
+        val charBefore = this.getOrNull(startIndex - 1)
+
+        when (charBefore) {
+            '(' -> url.trimEnd(')')
+            '[' -> url.trimEnd(']')
+            else -> url
+        }
+    }.toList()
+}
 
 private val extensionToMimeType = mapOf(
     "jpeg" to "image/jpeg",
@@ -125,22 +87,21 @@ private val extensionToMimeType = mapOf(
     "apk" to "application/vnd.android.package-archive",
 )
 
-// fun String?.detectMimeType(): String? {
-//    return when {
-//        this == null -> null
-//        else -> extensionToMimeType[this.extractExtensionFromUrl().lowercase()]
-//    }
-// }
-//
-// fun String.extractExtensionFromUrl(): String {
-//    val file = try {
-//        URL(this).file
-//    } catch (error: MalformedURLException) {
-//        Timber.w(error)
-//        this
-//    }
-//    return file.substringAfterLast(".", "")
-// }
+ fun String?.detectMimeType(): String? {
+    return when {
+        this == null -> null
+        else -> extensionToMimeType[this.extractExtensionFromUrl().lowercase()]
+    }
+ }
+
+fun String.extractExtensionFromUrl(): String {
+    val path = try {
+        Url(this).encodedPath
+    } catch (error: Exception) {
+        this
+    }
+    return path.substringAfterLast(".", "")
+}
 
 private val tldExtractionRegex = Regex("(?:https?://)?(?:www\\.)?([\\w\\d\\-]+\\.[\\w\\d\\-.]+)")
 
