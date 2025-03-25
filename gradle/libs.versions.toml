@@ -74,6 +74,7 @@ sqlcipher-android = "4.6.1"
 telephoto = "0.14.0"
 timber = "5.0.1"
 url-detector = "0.1.23"
+kummons-uri = "2.8.0"
 
 [libraries]
 # Core libs
@@ -151,6 +152,9 @@ hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hilt" }
 hilt-compiler-dagger = { module = "com.google.dagger:hilt-compiler", version.ref = "dagger" }
 hilt-compiler-android = { module = "com.google.dagger:hilt-android-compiler", version.ref = "dagger" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "dagger" }
+
+# KMP Uri
+kummons-uri = { module = "com.bkahlert.kommons:kommons-uri", version.ref = "kummons-uri" }
 
 # KMP Koin DI
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }

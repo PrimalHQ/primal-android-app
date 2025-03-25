@@ -1,11 +1,11 @@
-package net.primal.android.core.utils
+package net.primal.core.utils
 
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldNotEndWith
-import org.junit.Test
+import kotlin.test.Test
 
 class UriUtilsTest {
 
@@ -53,12 +53,12 @@ class UriUtilsTest {
         val expectedUrls = content.parseUris()
 
         expectedUrls shouldBe listOf(
+            "https://en.m.wikipedia.org/wiki/Bit_(money)",
             "primal.net",
             "www.primal.net",
             "https://primal.net",
             "https://www.example.com/path/to/resource",
             "example.com",
-            "https://en.m.wikipedia.org/wiki/Bit_(money)",
             "https://example.com/page?(query)=1&sort=desc",
         )
         expectedUrls.size shouldBeExactly 7
@@ -97,7 +97,7 @@ class UriUtilsTest {
 
     @Test
     fun `parseUrls should not return urls with brackets`() {
-        val hugeContent = javaClass.getResource("/core/release_notes.txt")?.readText()
+        val hugeContent = getResourceContent("/core/release_notes.txt")
         hugeContent.shouldNotBeNull()
 
         val urls = hugeContent.parseUris()
@@ -179,3 +179,5 @@ class UriUtilsTest {
         urlLink.extractExtensionFromUrl() shouldBe "jpg"
     }
 }
+
+expect fun getResourceContent(path: String): String?
