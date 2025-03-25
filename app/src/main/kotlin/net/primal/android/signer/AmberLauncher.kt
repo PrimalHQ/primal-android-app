@@ -55,12 +55,22 @@ fun rememberAmberSignerLauncher(onResult: (NostrEvent?) -> Unit) =
 
 /**
  * Launches `get_public_key` method on `AmberLauncher`.  Should be used with
- * `rememberAmberPubkeyLauncher` to handle the result.
+ * `rememberAmberPubkeyLauncher` to handle the result.  Requests `nip04_encrypt`
+ * and `nip04_decrypt` permissions.
  */
 fun AmberLauncher.launchGetPublicKey() {
     val intent = Intent(Intent.ACTION_VIEW, URI_PREFIX.toUri())
     intent.`package` = AMBER_PACKAGE_NAME
+    val permissions = listOf(
+        Permission(
+            type = SignerMethod.NIP04_ENCRYPT,
+        ),
+        Permission(
+            type = SignerMethod.NIP04_DECRYPT,
+        ),
+    )
 
+    intent.putExtra("permissions", permissions.encodeToJsonString())
     intent.putExtra("type", SignerMethod.GET_PUBLIC_KEY.method)
     launch(intent)
 }
