@@ -1,6 +1,6 @@
 package net.primal.core.utils
 
-const val RELEASE_NOTE =
+const val MARKDOWN_WITH_LINKS =
 """
 An the first episode of Nostr Review on Bitcoin. Review is out!
 

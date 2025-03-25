@@ -97,7 +97,7 @@ class UriUtilsTest {
 
     @Test
     fun `parseUrls should not return urls with brackets`() {
-        val hugeContent = RELEASE_NOTE
+        val hugeContent = MARKDOWN_WITH_LINKS
         hugeContent.shouldNotBeNull()
 
         val urls = hugeContent.parseUris()
