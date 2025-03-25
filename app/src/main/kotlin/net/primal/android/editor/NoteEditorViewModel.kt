@@ -38,13 +38,13 @@ import net.primal.android.editor.NoteEditorContract.UiState
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteTaggedUser
-import net.primal.android.events.repository.EventUriRepository
 import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.highlights.model.asHighlightUi
 import net.primal.android.highlights.model.generateNevent
 import net.primal.android.highlights.repository.HighlightRepository
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
+import net.primal.android.networking.primal.upload.repository.FileUploadRepository
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.MissingPrivateKeyException
@@ -75,7 +75,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
     private val notePublishHandler: NotePublishHandler,
-    private val eventUriRepository: EventUriRepository,
+    private val fileUploadRepository: FileUploadRepository,
     private val highlightRepository: HighlightRepository,
     private val exploreRepository: ExploreRepository,
     private val profileRepository: ProfileRepository,
@@ -388,7 +388,7 @@ class NoteEditorViewModel @AssistedInject constructor(
             updatedAttachment = updatedAttachment.copy(uploadError = null)
             updateNoteAttachmentState(attachment = updatedAttachment)
 
-            val uploadResult = eventUriRepository.uploadNoteAttachment(
+            val uploadResult = fileUploadRepository.uploadNoteAttachment(
                 userId = activeAccountStore.activeUserId(),
                 attachment = attachment,
                 uploadId = uploadId,
@@ -453,7 +453,7 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             this@cancel.job.cancel()
             runCatching {
-                eventUriRepository.cancelNoteAttachmentUpload(
+                fileUploadRepository.cancelNoteAttachmentUpload(
                     userId = activeAccountStore.activeUserId(),
                     uploadId = this@cancel.id,
                 )
