@@ -58,10 +58,7 @@ internal class ProxyPrimalApiClient(
 
                     socketClient = buildAndInitializeSocketClient(apiUrl).apply {
                         ensureSocketConnection()
-                        primalClient = BasePrimalApiClient(
-                            dispatcherProvider = dispatcherProvider,
-                            socketClient = this,
-                        )
+                        primalClient = BasePrimalApiClient(socketClient = this)
                         clientInitialized = true
                     }
                 }
