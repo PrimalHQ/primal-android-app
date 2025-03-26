@@ -112,11 +112,15 @@ fun LoginScreen(
     eventPublisher: (LoginContract.UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
-    val signLauncher = rememberAmberSignerLauncher { nostrEvent ->
+    val signLauncher = rememberAmberSignerLauncher(
+        onFailure = { eventPublisher(LoginContract.UiEvent.ResetLoginState) },
+    ) { nostrEvent ->
         eventPublisher(LoginContract.UiEvent.LoginRequestEvent(nostrEvent = nostrEvent))
     }
 
-    val pubkeyLauncher = rememberAmberPubkeyLauncher { pubkey ->
+    val pubkeyLauncher = rememberAmberPubkeyLauncher(
+        onFailure = { eventPublisher(LoginContract.UiEvent.ResetLoginState) },
+    ) { pubkey ->
         eventPublisher(LoginContract.UiEvent.UpdateLoginInput(newInput = pubkey, loginType = LoginType.ExternalSigner))
         signLauncher.launchSignEvent(event = buildAppSpecificDataEvent(pubkey = pubkey))
     }
