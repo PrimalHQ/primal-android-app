@@ -2,6 +2,8 @@ package net.primal.domain.nostr
 
 // import java.nio.ByteBuffer
 // import java.nio.ByteOrder
+import io.ktor.utils.io.core.buildPacket
+import io.ktor.utils.io.core.writeFully
 import net.primal.domain.nostr.cryptography.bechToBytesOrThrow
 
 // TODO Complete Nip19TLV. Port java.nio to Kotlin native
@@ -14,10 +16,13 @@ object Nip19TLV {
         KIND(3),
     }
 
-//    fun toInt32(bytes: ByteArray): Int {
-//        require(bytes.size == 4) { "length must be 4, got: ${bytes.size}" }
-//        return ByteBuffer.wrap(bytes, 0, 4).order(ByteOrder.BIG_ENDIAN).int
-//    }
+    fun toInt32(bytes: ByteArray): Int {
+        require(bytes.size == 4) { "length must be 4, got: ${bytes.size}" }
+        val packet = buildPacket {
+            writeFully(bytes)
+        }
+        return packet.readInt()
+    }
 
     @Throws(IllegalArgumentException::class)
     fun parse(data: String) = parse(data.bechToBytesOrThrow())
