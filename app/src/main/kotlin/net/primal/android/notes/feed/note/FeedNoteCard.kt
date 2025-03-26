@@ -29,9 +29,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalDensity
@@ -247,6 +249,9 @@ private fun FeedNoteCard(
     val overflowIconSizeDp = 40.dp
 
     val graphicsLayer = rememberGraphicsLayer()
+    val outlineColor = AppTheme.colorScheme.outline
+    val lineOffsetX: Dp = 27.dp
+    val lineWidth: Dp = 2.dp
 
     NoteSurfaceCard(
         modifier = modifier
@@ -330,7 +335,32 @@ private fun FeedNoteCard(
                                 bottomEnd = AppTheme.shapes.medium.bottomEnd,
                             ),
                         )
-                        .background(color = AppTheme.colorScheme.surfaceVariant),
+                        .background(color = AppTheme.colorScheme.surfaceVariant)
+                        .drawWithCache {
+                            onDrawBehind {
+                                val connectionX = lineOffsetX.toPx()
+
+                                if (drawLineBelowAvatar) {
+                                    drawLine(
+                                        color = outlineColor,
+                                        start = Offset(x = connectionX, y = 16.dp.toPx()),
+                                        end = Offset(x = connectionX, y = size.height),
+                                        strokeWidth = lineWidth.toPx(),
+                                        cap = StrokeCap.Square,
+                                    )
+                                }
+
+                                if (drawLineAboveAvatar) {
+                                    drawLine(
+                                        color = outlineColor,
+                                        start = Offset(x = connectionX, y = 0f),
+                                        end = Offset(x = connectionX, y = 16.dp.toPx()),
+                                        strokeWidth = lineWidth.toPx(),
+                                        cap = StrokeCap.Square,
+                                    )
+                                }
+                            }
+                        },
                 ) {
                     FeedNote(
                         data = data,
