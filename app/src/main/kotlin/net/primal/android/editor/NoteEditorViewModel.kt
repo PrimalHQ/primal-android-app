@@ -60,10 +60,10 @@ import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.repository.RelayRepository
+import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.upload.UploadJob
@@ -78,7 +78,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val fileUploadRepository: FileUploadRepository,
     private val highlightRepository: HighlightRepository,
     private val exploreRepository: ExploreRepository,
-    private val profileRepository: ProfileRepository,
+    private val userRepository: UserRepository,
     private val articleRepository: ArticleRepository,
     private val relayRepository: RelayRepository,
     private val relayHintsRepository: RelayHintsRepository,
@@ -556,7 +556,7 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private fun markProfileInteraction(profileId: String) {
         viewModelScope.launch {
-            profileRepository.markAsInteracted(profileId = profileId, ownerId = activeAccountStore.activeUserId())
+            userRepository.markAsInteracted(profileId = profileId, ownerId = activeAccountStore.activeUserId())
         }
     }
 

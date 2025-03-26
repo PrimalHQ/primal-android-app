@@ -1,6 +1,6 @@
-package net.primal.android.explore.domain
+package net.primal.domain
 
-import net.primal.android.profile.db.ProfileData
+import net.primal.domain.model.ProfileData
 
 data class UserProfileSearchItem(
     val metadata: ProfileData,

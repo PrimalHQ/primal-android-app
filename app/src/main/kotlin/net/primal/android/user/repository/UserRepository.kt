@@ -5,6 +5,7 @@ import java.time.Instant
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
+import kotlinx.serialization.json.JsonArray
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
@@ -16,6 +17,7 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.nostr.publish.NostrPublisher
+import net.primal.android.profile.db.ProfileInteraction
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.accounts.UserAccountsStore
@@ -29,12 +31,15 @@ import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.WalletPreference
+import net.primal.android.user.domain.asUserAccountFromFollowListEvent
 import net.primal.android.wallet.domain.WalletSettings
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.domain.nostr.ContentMetadata
+import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.NostrUnsignedEvent
 
 class UserRepository @Inject constructor(
     private val database: PrimalDatabase,
@@ -258,4 +263,102 @@ class UserRepository @Inject constructor(
             copy(lastBuyPremiumTimestampInMillis = Clock.System.now().toEpochMilliseconds())
         }
     }
+
+    @Throws(FollowListNotFound::class, NostrPublishException::class, MissingPrivateKeyException::class)
+    suspend fun follow(
+        userId: String,
+        followedUserId: String,
+        forceUpdate: Boolean,
+    ) {
+        updateFollowList(userId = userId, forceUpdate = forceUpdate) {
+            toMutableSet().apply { add(followedUserId) }
+        }
+    }
+
+    @Throws(FollowListNotFound::class, NostrPublishException::class, MissingPrivateKeyException::class)
+    suspend fun unfollow(
+        userId: String,
+        unfollowedUserId: String,
+        forceUpdate: Boolean,
+    ) {
+        updateFollowList(userId = userId, forceUpdate = forceUpdate) {
+            toMutableSet().apply { remove(unfollowedUserId) }
+        }
+    }
+
+    @Throws(FollowListNotFound::class, NostrPublishException::class, MissingPrivateKeyException::class)
+    private suspend fun updateFollowList(
+        userId: String,
+        forceUpdate: Boolean,
+        reducer: Set<String>.() -> Set<String>,
+    ) = withContext(dispatchers.io()) {
+        val userFollowList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
+        val isEmptyFollowList = userFollowList == null || userFollowList.following.isEmpty()
+        if (isEmptyFollowList && !forceUpdate) {
+            throw FollowListNotFound()
+        }
+
+        if (userFollowList != null) {
+            updateFollowList(userId, userFollowList)
+        }
+
+        val existingFollowing = userFollowList?.following ?: emptySet()
+        setFollowList(
+            userId = userId,
+            contacts = existingFollowing.reducer(),
+            content = userFollowList?.followListEventContent ?: "",
+        )
+    }
+
+    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    suspend fun setFollowList(
+        userId: String,
+        contacts: Set<String>,
+        content: String = "",
+    ) = withContext(dispatchers.io()) {
+        val nostrEventResponse = nostrPublisher.publishUserFollowList(
+            userId = userId,
+            contacts = contacts,
+            content = content,
+        )
+        updateFollowList(
+            userId = userId,
+            contactsUserAccount = nostrEventResponse.asUserAccountFromFollowListEvent(),
+        )
+    }
+
+    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    suspend fun recoverFollowList(
+        userId: String,
+        tags: List<JsonArray>,
+        content: String,
+    ) = withContext(dispatchers.io()) {
+        val publishResult = nostrPublisher.signPublishImportNostrEvent(
+            userId = userId,
+            unsignedNostrEvent = NostrUnsignedEvent(
+                pubKey = userId,
+                kind = NostrEventKind.FollowList.value,
+                tags = tags,
+                content = content,
+            ),
+        )
+
+        updateFollowList(
+            userId = userId,
+            contactsUserAccount = publishResult.nostrEvent.asUserAccountFromFollowListEvent(),
+        )
+    }
+
+    suspend fun markAsInteracted(profileId: String, ownerId: String) =
+        withContext(dispatchers.io()) {
+            database.profileInteractions().upsert(
+                ProfileInteraction(
+                    profileId = profileId,
+                    lastInteractionAt = Instant.now().epochSecond,
+                    ownerId = ownerId,
+                ),
+            )
+        }
+
+    class FollowListNotFound : Exception()
 }

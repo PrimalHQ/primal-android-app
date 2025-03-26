@@ -19,6 +19,7 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber
 
@@ -27,6 +28,7 @@ class ExplorePeopleViewModel @Inject constructor(
     private val exploreRepository: ExploreRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val profileRepository: ProfileRepository,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -93,7 +95,7 @@ class ExplorePeopleViewModel @Inject constructor(
             updateStateProfileFollowAndClearApprovalFlag(profileId)
 
             val followResult = runCatching {
-                profileRepository.follow(
+                userRepository.follow(
                     userId = activeAccountStore.activeUserId(),
                     followedUserId = profileId,
                     forceUpdate = forceUpdate,
@@ -110,7 +112,7 @@ class ExplorePeopleViewModel @Inject constructor(
                         is WssException, is NostrPublishException ->
                             setState { copy(error = UiError.FailedToFollowUser(error)) }
 
-                        is ProfileRepository.FollowListNotFound -> setState {
+                        is UserRepository.FollowListNotFound -> setState {
                             copy(shouldApproveProfileAction = ProfileApproval.Follow(profileId = profileId))
                         }
 
@@ -128,7 +130,7 @@ class ExplorePeopleViewModel @Inject constructor(
             updateStateProfileUnfollowAndClearApprovalFlag(profileId)
 
             val unfollowResult = runCatching {
-                profileRepository.unfollow(
+                userRepository.unfollow(
                     userId = activeAccountStore.activeUserId(),
                     unfollowedUserId = profileId,
                     forceUpdate = forceUpdate,
@@ -143,7 +145,7 @@ class ExplorePeopleViewModel @Inject constructor(
                         is WssException, is NostrPublishException, is MissingPrivateKeyException ->
                             setState { copy(error = UiError.FailedToUnfollowUser(error)) }
 
-                        is ProfileRepository.FollowListNotFound -> setState {
+                        is UserRepository.FollowListNotFound -> setState {
                             copy(shouldApproveProfileAction = ProfileApproval.Unfollow(profileId = profileId))
                         }
 

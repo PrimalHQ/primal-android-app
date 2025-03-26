@@ -8,7 +8,6 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.crypto.assureValidNsec
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.profile.domain.ProfileMetadata
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.repository.RelayRepository
@@ -19,7 +18,6 @@ class CreateAccountHandler @Inject constructor(
     private val authRepository: AuthRepository,
     private val relayRepository: RelayRepository,
     private val userRepository: UserRepository,
-    private val profileRepository: ProfileRepository,
     private val settingsRepository: SettingsRepository,
     private val credentialsStore: CredentialsStore,
     private val dispatchers: CoroutineDispatcherProvider,
@@ -41,7 +39,7 @@ class CreateAccountHandler @Inject constructor(
             relayRepository.bootstrapUserRelays(userId)
             userRepository.setProfileMetadata(userId = userId, profileMetadata = profileMetadata)
             val contacts = setOf(userId) + interests.mapToContacts()
-            profileRepository.setFollowList(userId = userId, contacts = contacts)
+            userRepository.setFollowList(userId = userId, contacts = contacts)
             settingsRepository.fetchAndPersistAppSettings(authorizationEvent)
         }.onFailure { exception ->
             Timber.w(exception)

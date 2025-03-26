@@ -25,6 +25,7 @@ import net.primal.android.profile.follows.ProfileFollowsContract.UiEvent
 import net.primal.android.profile.follows.ProfileFollowsContract.UiState
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber
 
@@ -34,6 +35,7 @@ class ProfileFollowsViewModel @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val profileRepository: ProfileRepository,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
     private val profileId = savedStateHandle.profileIdOrThrow
@@ -142,7 +144,7 @@ class ProfileFollowsViewModel @Inject constructor(
         viewModelScope.launch {
             updateStateProfileFollowAndClearApprovalFlag(profileId)
             try {
-                profileRepository.follow(
+                userRepository.follow(
                     userId = activeAccountStore.activeUserId(),
                     followedUserId = profileId,
                     forceUpdate = forceUpdate,
@@ -163,7 +165,7 @@ class ProfileFollowsViewModel @Inject constructor(
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.MissingRelaysConfiguration(error))
                 updateStateProfileUnfollowAndClearApprovalFlag(profileId)
-            } catch (error: ProfileRepository.FollowListNotFound) {
+            } catch (error: UserRepository.FollowListNotFound) {
                 Timber.w(error)
                 updateStateProfileUnfollowAndClearApprovalFlag(profileId)
                 setState { copy(shouldApproveProfileAction = ProfileApproval.Follow(profileId = profileId)) }
@@ -174,7 +176,7 @@ class ProfileFollowsViewModel @Inject constructor(
         viewModelScope.launch {
             updateStateProfileUnfollowAndClearApprovalFlag(profileId)
             try {
-                profileRepository.unfollow(
+                userRepository.unfollow(
                     userId = activeAccountStore.activeUserId(),
                     unfollowedUserId = profileId,
                     forceUpdate = forceUpdate,
@@ -195,7 +197,7 @@ class ProfileFollowsViewModel @Inject constructor(
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.MissingRelaysConfiguration(error))
                 updateStateProfileFollowAndClearApprovalFlag(profileId)
-            } catch (error: ProfileRepository.FollowListNotFound) {
+            } catch (error: UserRepository.FollowListNotFound) {
                 Timber.w(error)
                 updateStateProfileFollowAndClearApprovalFlag(profileId)
                 setState { copy(shouldApproveProfileAction = ProfileApproval.Unfollow(profileId = profileId)) }
