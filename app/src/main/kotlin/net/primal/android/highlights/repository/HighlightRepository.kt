@@ -14,15 +14,15 @@ import net.primal.android.nostr.ext.asHighlightData
 import net.primal.android.nostr.ext.asKindTag
 import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.ext.asReplaceableEventTag
-import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.nostr.utils.Nevent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.publisher.PrimalPublisher
 
 class HighlightRepository @Inject constructor(
     private val database: PrimalDatabase,
     private val dispatchers: CoroutineDispatcherProvider,
-    private val nostrPublisher: NostrPublisher,
+    private val primalPublisher: PrimalPublisher,
 ) {
     companion object {
         const val DEFAULT_ALT_TAG =
@@ -43,8 +43,7 @@ class HighlightRepository @Inject constructor(
         alt: String = DEFAULT_ALT_TAG,
         createdAt: Long = Instant.now().epochSecond,
     ) = withContext(dispatchers.io()) {
-        val publishResult = nostrPublisher.signPublishImportNostrEvent(
-            userId = userId,
+        val publishResult = primalPublisher.signPublishImportNostrEvent(
             unsignedNostrEvent = NostrUnsignedEvent(
                 pubKey = userId,
                 kind = NostrEventKind.Highlight.value,
@@ -70,8 +69,7 @@ class HighlightRepository @Inject constructor(
 
     suspend fun publishDeleteHighlight(userId: String, highlightId: String) =
         withContext(dispatchers.io()) {
-            nostrPublisher.signPublishImportNostrEvent(
-                userId = userId,
+            primalPublisher.signPublishImportNostrEvent(
                 unsignedNostrEvent = NostrUnsignedEvent(
                     pubKey = userId,
                     kind = NostrEventKind.EventDeletion.value,
