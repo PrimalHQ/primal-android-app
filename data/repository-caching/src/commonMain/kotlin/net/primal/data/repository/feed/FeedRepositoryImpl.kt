@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notes.FeedPost as FeedPostPO
 import net.primal.data.local.db.PrimalDatabase
@@ -22,6 +23,7 @@ import net.primal.data.repository.feed.paging.NoteFeedRemoteMediator
 import net.primal.data.repository.feed.processors.persistNoteRepliesAndArticleCommentsToDatabase
 import net.primal.data.repository.feed.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.local.mapAsFeedPostDO
+import net.primal.domain.error.NetworkException
 import net.primal.domain.model.FeedPost as FeedPostDO
 import net.primal.domain.repository.FeedRepository
 import net.primal.domain.supportsNoteReposts
@@ -47,7 +49,11 @@ internal class FeedRepositoryImpl(
 
     override suspend fun fetchConversation(userId: String, noteId: String) {
         withContext(dispatcherProvider.io()) {
-            val response = feedApi.getThread(ThreadRequestBody(postId = noteId, userPubKey = userId, limit = 100))
+            val response = try {
+                feedApi.getThread(ThreadRequestBody(postId = noteId, userPubKey = userId, limit = 100))
+            } catch (error: WssException) {
+                throw NetworkException(message = error.message, cause = error)
+            }
             response.persistNoteRepliesAndArticleCommentsToDatabase(noteId = noteId, database = database)
             response.persistToDatabaseAsTransaction(userId = userId, database = database)
         }
