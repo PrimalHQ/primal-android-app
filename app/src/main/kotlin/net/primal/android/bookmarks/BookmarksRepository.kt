@@ -8,21 +8,21 @@ import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.bookmarks.db.PublicBookmark
-import net.primal.android.bookmarks.domain.TagBookmark
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.exceptions.SignException
-import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.domain.BookmarkType
+import net.primal.domain.TagBookmark
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.publisher.PrimalPublisher
 
 class BookmarksRepository @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val database: PrimalDatabase,
-    private val nostrPublisher: NostrPublisher,
+    private val primalPublisher: PrimalPublisher,
     private val usersApi: UsersApi,
 ) {
 
@@ -164,8 +164,7 @@ class BookmarksRepository @Inject constructor(
                     add(it.value)
                 }
             }
-            nostrPublisher.signPublishImportNostrEvent(
-                userId = userId,
+            primalPublisher.signPublishImportNostrEvent(
                 unsignedNostrEvent = NostrUnsignedEvent(
                     pubKey = userId,
                     kind = NostrEventKind.BookmarksList.value,
