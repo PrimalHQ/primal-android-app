@@ -10,8 +10,6 @@ import kotlinx.io.readString
 import net.primal.domain.nostr.cryptography.bechToBytesOrThrow
 import net.primal.domain.nostr.cryptography.toHex
 
-// TODO Complete Nip19TLV. Port java.nio to Kotlin native
-
 object Nip19TLV {
     enum class Type(val id: Byte) {
         SPECIAL(0),
@@ -203,7 +201,6 @@ object Nip19TLV {
         val kindBytes = buildPacket {
             writeInt(this@constructKindBytes)
         }.readByteArray()
-//        val kindBytes = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(this).array()
         return kindBytes.toTLVBytes(type = Type.KIND)
     }
 
