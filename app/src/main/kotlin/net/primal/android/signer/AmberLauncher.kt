@@ -13,7 +13,7 @@ import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
 
-private const val AMBER_PACKAGE_NAME = "com.greenart7c3.nostrsigner"
+internal const val AMBER_PACKAGE_NAME = "com.greenart7c3.nostrsigner"
 private const val URI_PREFIX = "nostrsigner:"
 
 typealias AmberLauncher = ManagedActivityResultLauncher<Intent, ActivityResult>
