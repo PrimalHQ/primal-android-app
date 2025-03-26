@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.WalletPreference
@@ -116,7 +116,7 @@ class WalletDashboardViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 walletRepository.fetchWalletBalance(userId = activeUserId)
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SignException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
@@ -155,7 +155,7 @@ class WalletDashboardViewModel @Inject constructor(
                     quoteId = purchase.quote.quoteId,
                     purchaseToken = purchase.purchaseToken,
                 )
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SignException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)

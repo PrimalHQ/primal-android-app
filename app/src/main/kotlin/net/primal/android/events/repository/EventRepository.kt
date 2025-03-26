@@ -25,7 +25,7 @@ import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
-import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.data.remote.api.events.EventStatsApi
 import net.primal.data.remote.api.events.model.EventActionsRequestBody
 import net.primal.data.remote.api.events.model.EventZapsRequestBody
@@ -47,7 +47,7 @@ class EventRepository @Inject constructor(
     fun observeUserEventStatus(eventIds: List<String>, userId: String) =
         database.eventUserStats().observeStats(eventIds, userId)
 
-    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(NostrPublishException::class, SignException::class)
     suspend fun likeEvent(
         userId: String,
         eventId: String,
@@ -75,14 +75,14 @@ class EventRepository @Inject constructor(
             Timber.w(error)
             statsUpdater.revertStats()
             throw error
-        } catch (error: MissingPrivateKeyException) {
+        } catch (error: SignException) {
             Timber.w(error)
             statsUpdater.revertStats()
             throw error
         }
     }
 
-    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(NostrPublishException::class, SignException::class)
     suspend fun repostEvent(
         userId: String,
         eventId: String,
@@ -116,7 +116,7 @@ class EventRepository @Inject constructor(
             Timber.w(error)
             statsUpdater.revertStats()
             throw error
-        } catch (error: MissingPrivateKeyException) {
+        } catch (error: SignException) {
             Timber.w(error)
             statsUpdater.revertStats()
             throw error

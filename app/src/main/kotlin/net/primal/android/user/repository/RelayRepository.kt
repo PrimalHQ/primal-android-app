@@ -8,7 +8,7 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.FALLBACK_RELAYS
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.user.accounts.parseNip65Relays
 import net.primal.android.user.domain.Relay as RelayDO
@@ -33,7 +33,7 @@ class RelayRepository @Inject constructor(
 
     fun findRelays(userId: String, kind: RelayKind) = primalDatabase.relays().findRelays(userId, kind)
 
-    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(NostrPublishException::class, SignException::class)
     suspend fun bootstrapUserRelays(userId: String) =
         withContext(dispatchers.io()) {
             val relays = try {

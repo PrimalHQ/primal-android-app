@@ -8,18 +8,14 @@ import androidx.room.withTransaction
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.crypto.CryptoUtils
-import net.primal.android.crypto.bechToBytesOrThrow
-import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.messages.api.mediator.MessagesProcessor
 import net.primal.android.messages.api.mediator.MessagesRemoteMediator
 import net.primal.android.messages.db.DirectMessage
 import net.primal.android.messages.db.MessageConversation
 import net.primal.android.messages.db.MessageConversationData
-import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.messages.security.MessagesCipher
 import net.primal.android.nostr.publish.NostrPublisher
-import net.primal.android.user.credentials.CredentialsStore
 import net.primal.data.remote.api.messages.MessagesApi
 import net.primal.data.remote.api.messages.model.ConversationRequestBody
 import net.primal.data.remote.api.messages.model.MarkMessagesReadRequestBody
@@ -29,8 +25,8 @@ import net.primal.domain.nostr.NostrEvent
 
 @OptIn(ExperimentalPagingApi::class)
 class MessageRepository @Inject constructor(
+    private val messagesCipher: MessagesCipher,
     private val dispatcherProvider: CoroutineDispatcherProvider,
-    private val credentialsStore: CredentialsStore,
     private val database: PrimalDatabase,
     private val messagesApi: MessagesApi,
     private val messagesProcessor: MessagesProcessor,
@@ -158,13 +154,10 @@ class MessageRepository @Inject constructor(
         receiverId: String,
         text: String,
     ) {
-        val nsec = credentialsStore.findOrThrow(npub = userId.hexToNpubHrp()).nsec
-            ?: throw MissingPrivateKeyException()
-
-        val encryptedContent = CryptoUtils.encrypt(
-            msg = text,
-            privateKey = nsec.bechToBytesOrThrow(hrp = "nsec"),
-            pubKey = receiverId.hexToNpubHrp().bechToBytesOrThrow(hrp = "npub"),
+        val encryptedContent = messagesCipher.encryptMessage(
+            userId = userId,
+            participantId = receiverId,
+            content = text,
         )
 
         withContext(dispatcherProvider.io()) {

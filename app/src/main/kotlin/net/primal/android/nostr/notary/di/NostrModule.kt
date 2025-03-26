@@ -1,5 +1,6 @@
 package net.primal.android.nostr.notary.di
 
+import android.content.ContentResolver
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,8 +13,9 @@ import net.primal.android.user.credentials.CredentialsStore
 object NostrModule {
 
     @Provides
-    fun provideNostrNotary(credentialsStore: CredentialsStore): NostrNotary =
+    fun provideNostrNotary(contentResolver: ContentResolver, credentialsStore: CredentialsStore): NostrNotary =
         NostrNotary(
+            contentResolver = contentResolver,
             credentialsStore = credentialsStore,
         )
 }

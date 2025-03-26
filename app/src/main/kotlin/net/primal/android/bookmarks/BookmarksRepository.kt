@@ -12,7 +12,7 @@ import net.primal.android.bookmarks.domain.TagBookmark
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.domain.BookmarkType
@@ -76,7 +76,7 @@ class BookmarksRepository @Inject constructor(
             database.publicBookmarks().findByTagValue(tagValue = tagValue) != null
         }
 
-    @Throws(BookmarksListNotFound::class, NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(BookmarksListNotFound::class, NostrPublishException::class, SignException::class)
     suspend fun addToBookmarks(
         userId: String,
         bookmarkType: BookmarkType,
@@ -102,7 +102,7 @@ class BookmarksRepository @Inject constructor(
         )
     }
 
-    @Throws(BookmarksListNotFound::class, NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(BookmarksListNotFound::class, NostrPublishException::class, SignException::class)
     suspend fun removeFromBookmarks(
         userId: String,
         bookmarkType: BookmarkType,
@@ -124,7 +124,7 @@ class BookmarksRepository @Inject constructor(
             BookmarkType.Article -> "a"
         }
 
-    @Throws(BookmarksListNotFound::class, NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(BookmarksListNotFound::class, NostrPublishException::class, SignException::class)
     private suspend fun publishAddBookmark(
         userId: String,
         forceUpdate: Boolean,
@@ -135,7 +135,7 @@ class BookmarksRepository @Inject constructor(
         }
     }
 
-    @Throws(BookmarksListNotFound::class, NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(BookmarksListNotFound::class, NostrPublishException::class, SignException::class)
     private suspend fun publishRemoveBookmark(
         userId: String,
         forceUpdate: Boolean,
@@ -146,7 +146,7 @@ class BookmarksRepository @Inject constructor(
         }
     }
 
-    @Throws(BookmarksListNotFound::class, NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(BookmarksListNotFound::class, NostrPublishException::class, SignException::class)
     private suspend fun publishBookmarksList(
         userId: String,
         forceUpdate: Boolean,

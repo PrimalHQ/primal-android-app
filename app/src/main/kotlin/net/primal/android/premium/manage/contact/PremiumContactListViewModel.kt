@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.manage.contact.PremiumContactListContract.SideEffect
 import net.primal.android.premium.manage.contact.PremiumContactListContract.UiEvent
 import net.primal.android.premium.manage.contact.PremiumContactListContract.UiState
@@ -59,7 +59,7 @@ class PremiumContactListViewModel @Inject constructor(
                     )
                 }.sortedByDescending { it.timestamp }
                 setState { copy(backups = backups) }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SignException) {
                 Timber.e(error)
             } catch (error: WssException) {
                 Timber.e(error)

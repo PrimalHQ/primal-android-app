@@ -3,8 +3,8 @@ package net.primal.android.nostr.publish
 import javax.inject.Inject
 import net.primal.android.networking.relays.RelaysSocketManager
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.nostr.notary.NostrNotary
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.Relay
 import net.primal.android.wallet.nwc.model.LightningPayResponse
@@ -29,7 +29,7 @@ class NostrPublisher @Inject constructor(
         return result.isSuccess
     }
 
-    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(NostrPublishException::class)
     private suspend fun publishAndImportEvent(
         signedNostrEvent: NostrEvent,
         outboxRelays: List<String> = emptyList(),
@@ -48,7 +48,7 @@ class NostrPublisher @Inject constructor(
         return importEvent(signedNostrEvent)
     }
 
-    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(NostrPublishException::class, SignException::class)
     @Deprecated("Please use signPublishImportNostrEvent(NoNostrUnsignedEvent, List<String>).")
     suspend fun signPublishImportNostrEvent(
         userId: String,
@@ -63,7 +63,7 @@ class NostrPublisher @Inject constructor(
         )
     }
 
-    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(NostrPublishException::class, SignException::class)
     override suspend fun signPublishImportNostrEvent(
         unsignedNostrEvent: NostrUnsignedEvent,
         outboxRelays: List<String>,
@@ -75,7 +75,7 @@ class NostrPublisher @Inject constructor(
         )
     }
 
-    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(NostrPublishException::class, SignException::class)
     suspend fun publishUserProfile(userId: String, contentMetadata: ContentMetadata): NostrEvent {
         val signedNostrEvent = nostrNotary.signMetadataNostrEvent(userId = userId, metadata = contentMetadata)
         relaysSocketManager.publishEvent(nostrEvent = signedNostrEvent)
@@ -83,7 +83,7 @@ class NostrPublisher @Inject constructor(
         return signedNostrEvent
     }
 
-    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(NostrPublishException::class, SignException::class)
     suspend fun publishUserFollowList(
         userId: String,
         contacts: Set<String>,
@@ -98,14 +98,14 @@ class NostrPublisher @Inject constructor(
         return signedNostrEvent
     }
 
-    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(NostrPublishException::class, SignException::class)
     suspend fun setMuteList(userId: String, muteList: Set<String>): NostrEvent {
         val signedNostrEvent = nostrNotary.signMuteListNostrEvent(userId = userId, mutedUserIds = muteList)
         publishAndImportEvent(signedNostrEvent)
         return signedNostrEvent
     }
 
-    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(NostrPublishException::class, SignException::class)
     suspend fun publishDirectMessage(
         userId: String,
         receiverId: String,
@@ -120,7 +120,7 @@ class NostrPublisher @Inject constructor(
         return signedNostrEvent
     }
 
-    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(NostrPublishException::class, SignException::class)
     suspend fun publishRelayList(userId: String, relays: List<Relay>): NostrEvent {
         val signedNostrEvent = nostrNotary.signRelayListMetadata(userId = userId, relays = relays)
         relaysSocketManager.publishEvent(nostrEvent = signedNostrEvent, relays = relays)
@@ -128,7 +128,7 @@ class NostrPublisher @Inject constructor(
         return signedNostrEvent
     }
 
-    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(NostrPublishException::class, SignException::class)
     suspend fun publishWalletRequest(invoice: LightningPayResponse, nwcData: NostrWalletConnect) {
         val walletPayNostrEvent = nostrNotary.signWalletInvoiceRequestNostrEvent(
             request = invoice.toWalletPayRequest(),

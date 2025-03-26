@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiEvent
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -86,7 +86,7 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
                         creatingSecret = false,
                     )
                 }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SignException) {
                 setState { copy(creatingSecret = false) }
                 Timber.w(error)
             } catch (error: WssException) {

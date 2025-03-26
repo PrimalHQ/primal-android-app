@@ -4,6 +4,8 @@ sealed class UiError {
     data object InvalidNaddr : UiError()
     data object MissingPrivateKey : UiError()
 
+    data object NostrSignUnauthorized : UiError()
+
     data class MissingLightningAddress(val cause: Throwable) : UiError()
     data class InvalidZapRequest(val cause: Throwable) : UiError()
 

@@ -15,7 +15,7 @@ import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.asProfileDataPO
-import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.profile.db.ProfileInteraction
 import net.primal.android.profile.domain.ProfileMetadata
@@ -128,7 +128,7 @@ class UserRepository @Inject constructor(
         accountsStore.deleteAccount(pubkey = pubkey)
     }
 
-    @Throws(UnsuccessfulFileUpload::class, NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(UnsuccessfulFileUpload::class, NostrPublishException::class, SignException::class)
     suspend fun setProfileMetadata(userId: String, profileMetadata: ProfileMetadata) {
         val pictureUrl = profileMetadata.remotePictureUrl
             ?: if (profileMetadata.localPictureUri != null) {
@@ -159,7 +159,7 @@ class UserRepository @Inject constructor(
         )
     }
 
-    @Throws(NostrPublishException::class, WssException::class, MissingPrivateKeyException::class)
+    @Throws(NostrPublishException::class, WssException::class, SignException::class)
     suspend fun setNostrAddress(userId: String, nostrAddress: String) =
         withContext(dispatchers.io()) {
             val userProfileResponse = usersApi.getUserProfile(userId = userId)
@@ -172,7 +172,7 @@ class UserRepository @Inject constructor(
             )
         }
 
-    @Throws(NostrPublishException::class, WssException::class, MissingPrivateKeyException::class)
+    @Throws(NostrPublishException::class, WssException::class, SignException::class)
     suspend fun setLightningAddress(userId: String, lightningAddress: String) =
         withContext(dispatchers.io()) {
             val userProfileResponse = usersApi.getUserProfile(userId = userId)
@@ -264,7 +264,7 @@ class UserRepository @Inject constructor(
         }
     }
 
-    @Throws(FollowListNotFound::class, NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(FollowListNotFound::class, NostrPublishException::class, SignException::class)
     suspend fun follow(
         userId: String,
         followedUserId: String,
@@ -275,7 +275,7 @@ class UserRepository @Inject constructor(
         }
     }
 
-    @Throws(FollowListNotFound::class, NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(FollowListNotFound::class, NostrPublishException::class, SignException::class)
     suspend fun unfollow(
         userId: String,
         unfollowedUserId: String,
@@ -286,7 +286,7 @@ class UserRepository @Inject constructor(
         }
     }
 
-    @Throws(FollowListNotFound::class, NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(FollowListNotFound::class, NostrPublishException::class, SignException::class)
     private suspend fun updateFollowList(
         userId: String,
         forceUpdate: Boolean,
@@ -310,7 +310,7 @@ class UserRepository @Inject constructor(
         )
     }
 
-    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(NostrPublishException::class, SignException::class)
     suspend fun setFollowList(
         userId: String,
         contacts: Set<String>,
@@ -327,7 +327,7 @@ class UserRepository @Inject constructor(
         )
     }
 
-    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(NostrPublishException::class, SignException::class)
     suspend fun recoverFollowList(
         userId: String,
         tags: List<JsonArray>,

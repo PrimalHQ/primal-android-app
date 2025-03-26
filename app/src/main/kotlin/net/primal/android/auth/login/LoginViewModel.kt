@@ -60,6 +60,7 @@ class LoginViewModel @Inject constructor(
                         login(nostrKey = _state.value.loginInput, authorizationEvent = it.nostrEvent)
 
                     is UiEvent.UpdateLoginInput -> changeLoginInput(input = it.newInput, loginType = it.loginType)
+                    UiEvent.ResetLoginState -> resetLoginState()
                 }
             }
         }
@@ -79,6 +80,9 @@ class LoginViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.w(error)
                 setErrorState(error = UiState.LoginError.GenericError(error))
+                if (state.value.loginType == LoginType.ExternalSigner) {
+                    resetLoginState()
+                }
             } finally {
                 setState { copy(loading = false) }
             }
@@ -93,6 +97,8 @@ class LoginViewModel @Inject constructor(
             }
         }
     }
+
+    private fun resetLoginState() = changeLoginInput(input = "")
 
     private fun changeLoginInput(input: String, loginType: LoginType? = null) {
         setState { copy(loginInput = input) }
