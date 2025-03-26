@@ -13,6 +13,8 @@ import net.primal.android.crypto.toNpub
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.nostr.ext.asIdentifierTag
 import net.primal.android.nostr.ext.asPubkeyTag
+import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
+import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
 import net.primal.android.signer.signEventWithAmber
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.NostrWalletConnect
@@ -39,7 +41,7 @@ class NostrNotary @Inject constructor(
     private fun findNsecOrThrow(pubkey: String): String {
         return try {
             val npub = Hex.decode(pubkey).toNpub()
-            credentialsStore.findOrThrow(npub = npub).nsec ?: throw MissingPrivateKeyException()
+            credentialsStore.findOrThrow(npub = npub).nsec ?: throw MissingPrivateKey()
         } catch (error: IllegalArgumentException) {
             Timber.w(error)
             throw NostrSignUnauthorized()

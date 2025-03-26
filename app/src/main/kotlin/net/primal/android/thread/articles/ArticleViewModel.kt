@@ -13,7 +13,7 @@ import net.primal.android.bookmarks.BookmarksRepository
 import net.primal.android.core.errors.UiError
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.thread.articles.ArticleContract.UiEvent
@@ -65,7 +65,7 @@ class ArticleViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToMuteUser(error)) }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: MissingPrivateKey) {
                 Timber.w(error)
                 setState { copy(error = UiError.MissingPrivateKey) }
             } catch (error: NostrPublishException) {
@@ -87,7 +87,7 @@ class ArticleViewModel @Inject constructor(
                     eventId = uiEvent.eventId,
                     articleId = uiEvent.articleId,
                 )
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: MissingPrivateKey) {
                 setState { copy(error = UiError.MissingPrivateKey) }
                 Timber.w(error)
             } catch (error: NostrPublishException) {
@@ -121,7 +121,7 @@ class ArticleViewModel @Inject constructor(
             } catch (error: BookmarksRepository.BookmarksListNotFound) {
                 Timber.w(error)
                 setState { copy(shouldApproveBookmark = true) }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: MissingPrivateKey) {
                 setState { copy(error = UiError.MissingPrivateKey) }
                 Timber.w(error)
             }

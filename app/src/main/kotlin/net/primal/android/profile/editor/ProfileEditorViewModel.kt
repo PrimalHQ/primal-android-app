@@ -18,7 +18,7 @@ import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.profile.editor.ProfileEditorContract.SideEffect
@@ -162,7 +162,7 @@ class ProfileEditorViewModel @Inject constructor(
                     }
                     setEffect(effect = SideEffect.AccountSuccessfulyEdited)
                 }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: MissingPrivateKey) {
                 Timber.w(error)
                 setErrorState(error = EditProfileError.FailedToPublishMetadata(error))
             } catch (error: NostrPublishException) {

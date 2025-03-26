@@ -6,7 +6,7 @@ import net.primal.android.crypto.CryptoUtils
 import net.primal.android.crypto.bechToBytesOrThrow
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.messages.exceptions.MessageEncryptException
-import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.signer.decryptNip04WithAmber
 import net.primal.android.signer.encryptNip04WithAmber
 import net.primal.android.user.credentials.CredentialsStore
@@ -31,10 +31,10 @@ class MessagesCipher @Inject constructor(
      * @return The encrypted message if successful.
      *
      * @throws IllegalArgumentException If the [userId] is invalid.
-     * @throws MissingPrivateKeyException If no private key is found for the user.
+     * @throws MissingPrivateKey If no private key is found for the user.
      * @throws MessageEncryptException If the encryption process fails (either from the external signer or locally).
      */
-    @Throws(IllegalArgumentException::class, MissingPrivateKeyException::class, MessageEncryptException::class)
+    @Throws(IllegalArgumentException::class, MissingPrivateKey::class, MessageEncryptException::class)
     fun encryptMessage(
         userId: String,
         participantId: String,
@@ -87,21 +87,21 @@ class MessagesCipher @Inject constructor(
                 CryptoUtils.decrypt(
                     message = content,
                     privateKey = credentialsStore.findOrThrow(npub = npub).nsec?.bechToBytesOrThrow(hrp = "nsec")
-                        ?: throw MissingPrivateKeyException(),
+                        ?: throw MissingPrivateKey(),
                     pubKey = participantId.hexToNpubHrp().bechToBytesOrThrow(hrp = "npub"),
                 )
             }.getOrDefault(content)
         }
     }
 
-    @Throws(IllegalArgumentException::class, MissingPrivateKeyException::class, MessageEncryptException::class)
+    @Throws(IllegalArgumentException::class, MissingPrivateKey::class, MessageEncryptException::class)
     private fun encryptMessageLocally(
         userId: String,
         participantId: String,
         content: String,
     ): String {
         val nsec = credentialsStore.findOrThrow(npub = userId.hexToNpubHrp()).nsec
-            ?: throw MissingPrivateKeyException()
+            ?: throw MissingPrivateKey()
 
         return try {
             CryptoUtils.encrypt(

@@ -5,9 +5,9 @@ import dagger.assisted.AssistedInject
 import java.time.Instant
 import kotlin.time.Duration
 import net.primal.android.bookmarks.BookmarksRepository
-import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.nostr.notary.NostrSignUnauthorized
+import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.repository.RelayRepository
@@ -40,7 +40,7 @@ class UserDataUpdater @AssistedInject constructor(
                 lastTimeFetched = Instant.now()
             } catch (error: WssException) {
                 Timber.w(error)
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: MissingPrivateKey) {
                 Timber.w(error)
             } catch (error: NostrSignUnauthorized) {
                 Timber.w(error)

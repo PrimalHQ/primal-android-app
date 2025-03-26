@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.store.PrimalBillingClient
@@ -83,7 +83,7 @@ class InAppPurchaseBuyViewModel @Inject constructor(
                             ),
                         )
                     }
-                } catch (error: MissingPrivateKeyException) {
+                } catch (error: MissingPrivateKey) {
                     Timber.w(error)
                     if (_state.value.quote == null) {
                         setState { copy(error = error) }

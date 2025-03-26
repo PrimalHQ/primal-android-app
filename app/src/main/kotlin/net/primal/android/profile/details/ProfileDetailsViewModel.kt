@@ -29,7 +29,7 @@ import net.primal.android.navigation.profileId
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.extractProfileId
-import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.utils.Nip19TLV
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
@@ -377,7 +377,7 @@ class ProfileDetailsViewModel @Inject constructor(
                 Timber.w(error)
                 updateStateProfileAsUnfollowedAndClearApprovalFlag()
                 setErrorState(error = UiError.FailedToFollowUser(error))
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: MissingPrivateKey) {
                 Timber.w(error)
                 updateStateProfileAsUnfollowedAndClearApprovalFlag()
                 setErrorState(error = UiError.MissingPrivateKey)
@@ -411,7 +411,7 @@ class ProfileDetailsViewModel @Inject constructor(
                 Timber.w(error)
                 updateStateProfileAsFollowedAndClearApprovalFlag()
                 setErrorState(error = UiError.FailedToUnfollowUser(error))
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: MissingPrivateKey) {
                 Timber.w(error)
                 updateStateProfileAsFollowedAndClearApprovalFlag()
                 setErrorState(error = UiError.MissingPrivateKey)
@@ -447,7 +447,7 @@ class ProfileDetailsViewModel @Inject constructor(
                 )
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
                 setEffect(ProfileDetailsContract.SideEffect.ProfileFeedAdded)
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: MissingPrivateKey) {
                 Timber.w(error)
                 setErrorState(error = UiError.MissingPrivateKey)
             } catch (error: WssException) {
@@ -466,7 +466,7 @@ class ProfileDetailsViewModel @Inject constructor(
                 )
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
                 setEffect(ProfileDetailsContract.SideEffect.ProfileFeedRemoved)
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: MissingPrivateKey) {
                 Timber.w(error)
                 setErrorState(error = UiError.MissingPrivateKey)
             } catch (error: WssException) {
@@ -486,7 +486,7 @@ class ProfileDetailsViewModel @Inject constructor(
                     )
                 }
                 setState { copy(isProfileMuted = true) }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: MissingPrivateKey) {
                 Timber.w(error)
                 setErrorState(error = UiError.MissingPrivateKey)
             } catch (error: NostrPublishException) {
@@ -511,7 +511,7 @@ class ProfileDetailsViewModel @Inject constructor(
                     )
                 }
                 setState { copy(isProfileMuted = false) }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: MissingPrivateKey) {
                 Timber.w(error)
                 setErrorState(error = UiError.MissingPrivateKey)
             } catch (error: NostrPublishException) {
@@ -537,7 +537,7 @@ class ProfileDetailsViewModel @Inject constructor(
                         eventId = event.noteId,
                     )
                 }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: MissingPrivateKey) {
                 Timber.w(error)
                 setErrorState(error = UiError.MissingPrivateKey)
             } catch (error: NostrPublishException) {

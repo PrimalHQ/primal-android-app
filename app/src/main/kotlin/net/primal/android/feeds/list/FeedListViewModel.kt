@@ -23,7 +23,7 @@ import net.primal.android.feeds.list.ui.model.asFeedPO
 import net.primal.android.feeds.list.ui.model.asFeedUi
 import net.primal.android.feeds.repository.DvmFeedListHandler
 import net.primal.android.feeds.repository.FeedsRepository
-import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
@@ -157,7 +157,7 @@ class FeedListViewModel @AssistedInject constructor(
                 )
                 setState { copy(isEditMode = false) }
                 updateFeedsState()
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: MissingPrivateKey) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
@@ -215,7 +215,7 @@ class FeedListViewModel @AssistedInject constructor(
                     givenDefaultFeeds = defaultFeeds,
                     specKind = specKind,
                 )
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: MissingPrivateKey) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
@@ -295,7 +295,7 @@ class FeedListViewModel @AssistedInject constructor(
                     feeds = currentFeeds,
                     specKind = specKind,
                 )
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: MissingPrivateKey) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)

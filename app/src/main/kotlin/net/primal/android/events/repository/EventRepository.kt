@@ -47,7 +47,7 @@ class EventRepository @Inject constructor(
     fun observeUserEventStatus(eventIds: List<String>, userId: String) =
         database.eventUserStats().observeStats(eventIds, userId)
 
-    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(NostrPublishException::class, MissingPrivateKey::class)
     suspend fun likeEvent(
         userId: String,
         eventId: String,
@@ -75,14 +75,14 @@ class EventRepository @Inject constructor(
             Timber.w(error)
             statsUpdater.revertStats()
             throw error
-        } catch (error: MissingPrivateKeyException) {
+        } catch (error: MissingPrivateKey) {
             Timber.w(error)
             statsUpdater.revertStats()
             throw error
         }
     }
 
-    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(NostrPublishException::class, MissingPrivateKey::class)
     suspend fun repostEvent(
         userId: String,
         eventId: String,
@@ -116,7 +116,7 @@ class EventRepository @Inject constructor(
             Timber.w(error)
             statsUpdater.revertStats()
             throw error
-        } catch (error: MissingPrivateKeyException) {
+        } catch (error: MissingPrivateKey) {
             Timber.w(error)
             statsUpdater.revertStats()
             throw error

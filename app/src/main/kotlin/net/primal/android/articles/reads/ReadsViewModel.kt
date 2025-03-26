@@ -13,7 +13,7 @@ import net.primal.android.articles.reads.ReadsScreenContract.UiEvent
 import net.primal.android.articles.reads.ReadsScreenContract.UiState
 import net.primal.android.feeds.list.ui.model.asFeedUi
 import net.primal.android.feeds.repository.FeedsRepository
-import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
@@ -77,7 +77,7 @@ class ReadsViewModel @Inject constructor(
                     givenDefaultFeeds = emptyList(),
                     specKind = FeedSpecKind.Reads,
                 )
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: MissingPrivateKey) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
@@ -93,7 +93,7 @@ class ReadsViewModel @Inject constructor(
                 retryNetworkCall {
                     feedsRepository.fetchAndPersistArticleFeeds(userId = activeAccountStore.activeUserId())
                 }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: MissingPrivateKey) {
                 restoreDefaultReadsFeeds()
                 Timber.w(error)
             } catch (error: WssException) {

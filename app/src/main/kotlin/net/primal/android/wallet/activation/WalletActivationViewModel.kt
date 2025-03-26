@@ -17,7 +17,7 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.repository.UserRepository
@@ -139,7 +139,7 @@ class WalletActivationViewModel @Inject constructor(
                     ),
                 )
                 setState { copy(status = WalletActivationStatus.PendingOtpVerification) }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: MissingPrivateKey) {
                 Timber.w(error)
                 setState { copy(error = error) }
             } catch (error: WssException) {
@@ -173,7 +173,7 @@ class WalletActivationViewModel @Inject constructor(
                 activeUser.primalWallet?.lightningAddress?.let {
                     try {
                         userRepository.setLightningAddress(userId = userId, lightningAddress = it)
-                    } catch (error: MissingPrivateKeyException) {
+                    } catch (error: MissingPrivateKey) {
                         Timber.w(error)
                     } catch (error: NostrPublishException) {
                         Timber.w(error)
