@@ -25,6 +25,7 @@ import net.primal.android.messages.db.MessageConversation
 import net.primal.android.messages.repository.MessageRepository
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.NostrNotary
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -128,7 +129,7 @@ class MessageConversationListViewModel @Inject constructor(
                     description = "Mark all messages as read.",
                 )
                 messageRepository.markAllMessagesAsRead(authorization = authorizationEvent)
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SignException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)

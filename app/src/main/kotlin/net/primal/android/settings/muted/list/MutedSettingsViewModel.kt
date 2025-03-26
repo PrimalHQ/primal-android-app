@@ -15,6 +15,7 @@ import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.settings.muted.db.MutedUser
 import net.primal.android.settings.muted.list.MutedSettingsContract.UiEvent
@@ -89,7 +90,7 @@ class MutedSettingsViewModel @Inject constructor(
                 setState {
                     copy(error = UiState.MutedSettingsError.FailedToUnmuteUserError(error))
                 }
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SignException) {
                 Timber.w(error)
             } catch (error: NostrPublishException) {
                 setState {

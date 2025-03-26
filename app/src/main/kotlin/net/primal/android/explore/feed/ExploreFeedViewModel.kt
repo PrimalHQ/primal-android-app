@@ -23,6 +23,7 @@ import net.primal.android.navigation.advancedSearchFeedSpec
 import net.primal.android.navigation.exploreFeedSpec
 import net.primal.android.navigation.renderType
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
@@ -109,8 +110,9 @@ class ExploreFeedViewModel @Inject constructor(
                 )
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
             }
-        } catch (error: MissingPrivateKey) {
+        } catch (error: SignException) {
             Timber.w(error)
+            setErrorState(error = ExploreFeedError.FailedToAddToFeed(error))
         } catch (error: WssException) {
             Timber.w(error)
             setErrorState(error = ExploreFeedError.FailedToAddToFeed(error))
@@ -121,8 +123,9 @@ class ExploreFeedViewModel @Inject constructor(
         try {
             feedsRepository.removeFeedLocally(userId = activeAccountStore.activeUserId(), feedSpec = feedSpec)
             feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
-        } catch (error: MissingPrivateKey) {
+        } catch (error: SignException) {
             Timber.w(error)
+            setErrorState(error = ExploreFeedError.FailedToRemoveFeed(error))
         } catch (error: WssException) {
             Timber.w(error)
             setErrorState(error = ExploreFeedError.FailedToRemoveFeed(error))

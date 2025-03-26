@@ -19,6 +19,7 @@ import net.primal.android.navigation.profileId
 import net.primal.android.nostr.ext.extractNoteId
 import net.primal.android.nostr.ext.extractProfileId
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.profile.qr.ProfileQrCodeContract.SideEffect
 import net.primal.android.profile.qr.ProfileQrCodeContract.UiEvent
 import net.primal.android.profile.qr.ProfileQrCodeContract.UiState
@@ -109,7 +110,7 @@ class ProfileQrCodeViewModel @Inject constructor(
             } else {
                 Timber.w("Unable to parse text. [text = $text]")
             }
-        } catch (error: MissingPrivateKey) {
+        } catch (error: SignException) {
             Timber.w(error)
         } catch (error: WssException) {
             Timber.w(error)

@@ -17,6 +17,7 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.asReplaceableEventTag
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
+import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.domain.ZapTarget
 import net.primal.android.wallet.zaps.InvalidZapRequestException
@@ -92,6 +93,9 @@ class DvmFeedListItemViewModel @Inject constructor(
                 Timber.w(error)
             } catch (error: MissingPrivateKey) {
                 setState { copy(error = UiError.MissingPrivateKey) }
+                Timber.w(error)
+            } catch (error: NostrSignUnauthorized) {
+                setState { copy(error = UiError.NostrSignUnauthorized) }
                 Timber.w(error)
             }
         }

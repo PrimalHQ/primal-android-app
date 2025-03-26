@@ -15,6 +15,8 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.feeds.list.ui.model.asFeedUi
 import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
+import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.notes.home.HomeFeedContract.UiEvent
 import net.primal.android.notes.home.HomeFeedContract.UiState
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
@@ -76,7 +78,7 @@ class HomeFeedViewModel @Inject constructor(
                     givenDefaultFeeds = emptyList(),
                     specKind = FeedSpecKind.Notes,
                 )
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SignException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
@@ -92,6 +94,8 @@ class HomeFeedViewModel @Inject constructor(
                 retryNetworkCall {
                     feedsRepository.fetchAndPersistNoteFeeds(userId = activeAccountStore.activeUserId())
                 }
+            } catch (error: NostrSignUnauthorized) {
+                Timber.w(error)
             } catch (error: MissingPrivateKey) {
                 restoreDefaultNoteFeeds()
                 Timber.w(error)

@@ -30,6 +30,7 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.extractProfileId
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
+import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
 import net.primal.android.nostr.utils.Nip19TLV
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
@@ -381,6 +382,10 @@ class ProfileDetailsViewModel @Inject constructor(
                 Timber.w(error)
                 updateStateProfileAsUnfollowedAndClearApprovalFlag()
                 setErrorState(error = UiError.MissingPrivateKey)
+            } catch (error: NostrSignUnauthorized) {
+                Timber.w(error)
+                updateStateProfileAsUnfollowedAndClearApprovalFlag()
+                setErrorState(error = UiError.NostrSignUnauthorized)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 updateStateProfileAsUnfollowedAndClearApprovalFlag()
@@ -415,6 +420,10 @@ class ProfileDetailsViewModel @Inject constructor(
                 Timber.w(error)
                 updateStateProfileAsFollowedAndClearApprovalFlag()
                 setErrorState(error = UiError.MissingPrivateKey)
+            } catch (error: NostrSignUnauthorized) {
+                Timber.w(error)
+                updateStateProfileAsFollowedAndClearApprovalFlag()
+                setErrorState(error = UiError.NostrSignUnauthorized)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 updateStateProfileAsFollowedAndClearApprovalFlag()
@@ -450,6 +459,9 @@ class ProfileDetailsViewModel @Inject constructor(
             } catch (error: MissingPrivateKey) {
                 Timber.w(error)
                 setErrorState(error = UiError.MissingPrivateKey)
+            } catch (error: NostrSignUnauthorized) {
+                Timber.w(error)
+                setErrorState(error = UiError.NostrSignUnauthorized)
             } catch (error: WssException) {
                 Timber.w(error)
                 setErrorState(error = UiError.FailedToAddToFeed(error))
@@ -469,6 +481,9 @@ class ProfileDetailsViewModel @Inject constructor(
             } catch (error: MissingPrivateKey) {
                 Timber.w(error)
                 setErrorState(error = UiError.MissingPrivateKey)
+            } catch (error: NostrSignUnauthorized) {
+                Timber.w(error)
+                setErrorState(error = UiError.NostrSignUnauthorized)
             } catch (error: WssException) {
                 Timber.w(error)
                 setErrorState(error = UiError.FailedToRemoveFeed(error))
@@ -489,6 +504,9 @@ class ProfileDetailsViewModel @Inject constructor(
             } catch (error: MissingPrivateKey) {
                 Timber.w(error)
                 setErrorState(error = UiError.MissingPrivateKey)
+            } catch (error: NostrSignUnauthorized) {
+                Timber.w(error)
+                setErrorState(error = UiError.NostrSignUnauthorized)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setErrorState(error = UiError.FailedToMuteUser(error))
@@ -514,6 +532,9 @@ class ProfileDetailsViewModel @Inject constructor(
             } catch (error: MissingPrivateKey) {
                 Timber.w(error)
                 setErrorState(error = UiError.MissingPrivateKey)
+            } catch (error: NostrSignUnauthorized) {
+                Timber.w(error)
+                setErrorState(error = UiError.NostrSignUnauthorized)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setErrorState(error = UiError.FailedToUnmuteUser(error))
@@ -540,6 +561,9 @@ class ProfileDetailsViewModel @Inject constructor(
             } catch (error: MissingPrivateKey) {
                 Timber.w(error)
                 setErrorState(error = UiError.MissingPrivateKey)
+            } catch (error: NostrSignUnauthorized) {
+                Timber.w(error)
+                setErrorState(error = UiError.NostrSignUnauthorized)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
             }

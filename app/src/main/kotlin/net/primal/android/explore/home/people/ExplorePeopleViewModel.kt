@@ -17,6 +17,8 @@ import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
+import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
@@ -109,6 +111,8 @@ class ExplorePeopleViewModel @Inject constructor(
                     when (error) {
                         is MissingPrivateKey -> setState { copy(error = UiError.MissingPrivateKey) }
 
+                        is NostrSignUnauthorized -> setState { copy(error = UiError.NostrSignUnauthorized) }
+
                         is WssException, is NostrPublishException ->
                             setState { copy(error = UiError.FailedToFollowUser(error)) }
 
@@ -142,7 +146,7 @@ class ExplorePeopleViewModel @Inject constructor(
                 unfollowResult.exceptionOrNull()?.let { error ->
                     Timber.w(error)
                     when (error) {
-                        is WssException, is NostrPublishException, is MissingPrivateKey ->
+                        is WssException, is NostrPublishException, is SignException ->
                             setState { copy(error = UiError.FailedToUnfollowUser(error)) }
 
                         is UserRepository.FollowListNotFound -> setState {

@@ -18,6 +18,7 @@ import net.primal.android.core.utils.getMaximumUsdAmount
 import net.primal.android.navigation.draftTransaction
 import net.primal.android.navigation.lnbc
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.profile.db.ProfileData
 import net.primal.android.profile.repository.ProfileRepository
@@ -218,7 +219,7 @@ class CreateTransactionViewModel @Inject constructor(
                         )
                     }
                 }
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SignException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
@@ -248,7 +249,7 @@ class CreateTransactionViewModel @Inject constructor(
             } else {
                 Timber.w("Unable to parse text. [text=$text]")
             }
-        } catch (error: MissingPrivateKey) {
+        } catch (error: SignException) {
             Timber.w(error)
         } catch (error: WssException) {
             Timber.w(error)
@@ -314,7 +315,7 @@ class CreateTransactionViewModel @Inject constructor(
                     ),
                 )
                 setState { copy(transaction = transaction.copy(status = DraftTxStatus.Sent)) }
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SignException) {
                 Timber.w(error)
                 setState {
                     copy(

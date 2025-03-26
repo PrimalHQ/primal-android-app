@@ -47,7 +47,7 @@ import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.primal.upload.repository.FileUploadRepository
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.nostr.repository.RelayHintsRepository
 import net.primal.android.nostr.utils.MAX_RELAY_HINTS
 import net.primal.android.nostr.utils.Naddr
@@ -297,7 +297,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                 resetState()
 
                 sendEffect(SideEffect.PostPublished)
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SignException) {
                 Timber.w(error)
                 setErrorState(error = UiState.NoteEditorError.PublishError(cause = error.cause))
             } catch (error: NostrPublishException) {
@@ -419,7 +419,7 @@ class NoteEditorViewModel @AssistedInject constructor(
         } catch (error: UnsuccessfulFileUpload) {
             Timber.w(error)
             updateNoteAttachmentState(attachment = updatedAttachment.copy(uploadError = error))
-        } catch (error: MissingPrivateKey) {
+        } catch (error: SignException) {
             Timber.w(error)
             updateNoteAttachmentState(attachment = updatedAttachment.copy(uploadError = error))
         }

@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.domain.MembershipError
 import net.primal.android.premium.manage.order.PremiumOrderHistoryContract.UiEvent
 import net.primal.android.premium.manage.order.PremiumOrderHistoryContract.UiState
@@ -50,7 +51,7 @@ class PremiumOrderHistoryViewModel @Inject constructor(
             try {
                 val orders = premiumRepository.fetchOrderHistory(userId = activeAccountStore.activeUserId())
                 setState { copy(orders = orders) }
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SignException) {
                 Timber.e(error)
             } catch (error: WssException) {
                 Timber.e(error)
@@ -102,7 +103,7 @@ class PremiumOrderHistoryViewModel @Inject constructor(
                 try {
                     premiumRepository.cancelSubscription(userId = userId, purchaseJson = purchase.playSubscriptionJson)
                     premiumRepository.fetchMembershipStatus(activeAccountStore.activeUserId())
-                } catch (error: MissingPrivateKey) {
+                } catch (error: SignException) {
                     Timber.w(error)
                 } catch (error: WssException) {
                     setState { copy(error = MembershipError.FailedToCancelSubscription(cause = error)) }

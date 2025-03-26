@@ -17,6 +17,7 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.navigation.sendPaymentTab
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.scanner.analysis.WalletTextParser
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -77,7 +78,7 @@ class SendPaymentViewModel @Inject constructor(
                 } else {
                     Timber.w("Unable to parse text. [text=$text]")
                 }
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SignException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)

@@ -13,8 +13,9 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.nostr.ext.takeContentOrNull
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.NostrNotary
+import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.manage.content.PremiumContentBackupContract.UiEvent
 import net.primal.android.premium.manage.content.PremiumContentBackupContract.UiState
 import net.primal.android.premium.manage.content.api.model.BroadcastingStatus
@@ -65,7 +66,7 @@ class PremiumContentBackupViewModel @Inject constructor(
                 handleBroadcastStatus(status)
             } catch (error: WssException) {
                 Timber.e(error)
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SignException) {
                 Timber.e(error)
             }
         }
@@ -90,7 +91,7 @@ class PremiumContentBackupViewModel @Inject constructor(
                 }
             } catch (error: WssException) {
                 Timber.e(error)
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SignException) {
                 Timber.e(error)
             }
         }
@@ -154,7 +155,7 @@ class PremiumContentBackupViewModel @Inject constructor(
                 if (monitorBroadcasting == null) {
                     try {
                         monitorBroadcasting = subscribeToBroadcastMonitor(userId = activeAccountStore.activeUserId())
-                    } catch (error: MissingPrivateKey) {
+                    } catch (error: SignException) {
                         Timber.w(error)
                     }
                 }
@@ -191,7 +192,7 @@ class PremiumContentBackupViewModel @Inject constructor(
                 }
             } catch (error: WssException) {
                 Timber.e(error)
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SignException) {
                 Timber.e(error)
             }
         }
@@ -203,7 +204,7 @@ class PremiumContentBackupViewModel @Inject constructor(
                 broadcastRepository.cancelBroadcast(userId = activeAccountStore.activeUserId())
             } catch (error: WssException) {
                 Timber.e(error)
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SignException) {
                 Timber.e(error)
             }
         }

@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameContract.ChangePrimalNameStage
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameContract.SideEffect
@@ -78,7 +78,7 @@ class PremiumChangePrimalNameViewModel @Inject constructor(
                     premiumRepository.fetchMembershipStatus(userId = activeAccountStore.activeUserId())
                     setEffect(SideEffect.PrimalNameChanged)
                 }
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SignException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)

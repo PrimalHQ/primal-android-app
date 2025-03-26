@@ -49,5 +49,7 @@ fun UiError.resolveUiErrorMessage(context: Context): String {
         is UiError.GenericError -> context.getString(R.string.app_generic_error)
 
         is UiError.FailedToRemoveFeed -> context.getString(R.string.app_error_removing_feed)
+
+        UiError.NostrSignUnauthorized -> context.getString(R.string.app_error_sign_unauthorized)
     }
 }

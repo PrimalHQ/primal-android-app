@@ -8,6 +8,7 @@ import net.primal.android.bookmarks.BookmarksRepository
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.repository.RelayRepository
@@ -40,9 +41,7 @@ class UserDataUpdater @AssistedInject constructor(
                 lastTimeFetched = Instant.now()
             } catch (error: WssException) {
                 Timber.w(error)
-            } catch (error: MissingPrivateKey) {
-                Timber.w(error)
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SignException) {
                 Timber.w(error)
             }
         }

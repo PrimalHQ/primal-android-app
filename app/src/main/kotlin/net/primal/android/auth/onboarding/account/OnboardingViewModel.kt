@@ -24,6 +24,7 @@ import net.primal.android.crypto.CryptoUtils
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
@@ -182,7 +183,7 @@ class OnboardingViewModel @Inject constructor(
                     Timber.w(error)
                 } catch (error: WssException) {
                     Timber.w(error)
-                } catch (error: MissingPrivateKey) {
+                } catch (error: SignException) {
                     Timber.w(error)
                 }
             }
@@ -206,7 +207,7 @@ class OnboardingViewModel @Inject constructor(
                     Timber.w(error)
                 } catch (error: WssException) {
                     Timber.w(error)
-                } catch (error: MissingPrivateKey) {
+                } catch (error: SignException) {
                     Timber.w(error)
                 }
             }

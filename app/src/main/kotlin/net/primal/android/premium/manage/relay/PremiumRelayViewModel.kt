@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.manage.relay.PremiumRelayContract.UiEvent
 import net.primal.android.premium.manage.relay.PremiumRelayContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -60,7 +61,7 @@ class PremiumRelayViewModel @Inject constructor(
                     userId = activeAccountStore.activeUserId(),
                     url = state.value.relayUrl,
                 )
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SignException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
