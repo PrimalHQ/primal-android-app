@@ -23,4 +23,3 @@ object SignerMethodSerializer : KSerializer<SignerMethod> {
             ?: throw IllegalArgumentException("Unknown method: $decoded")
     }
 }
-

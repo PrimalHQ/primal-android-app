@@ -14,7 +14,6 @@ import kotlinx.coroutines.sync.withLock
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.nostr.ext.takeContentOrNull
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.manage.content.PremiumContentBackupContract.UiEvent
 import net.primal.android.premium.manage.content.PremiumContentBackupContract.UiState

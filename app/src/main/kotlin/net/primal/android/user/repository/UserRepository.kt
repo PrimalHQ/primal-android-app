@@ -15,7 +15,6 @@ import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.asProfileDataPO
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.profile.db.ProfileInteraction

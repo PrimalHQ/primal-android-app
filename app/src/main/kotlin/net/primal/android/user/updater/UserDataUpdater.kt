@@ -5,9 +5,7 @@ import dagger.assisted.AssistedInject
 import java.time.Instant
 import kotlin.time.Duration
 import net.primal.android.bookmarks.BookmarksRepository
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
 import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.settings.repository.SettingsRepository

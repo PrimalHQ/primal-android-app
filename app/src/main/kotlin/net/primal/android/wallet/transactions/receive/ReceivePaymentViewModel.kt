@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.core.utils.getMaximumUsdAmount
 import net.primal.android.navigation.asUrlEncoded
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.domain.Network

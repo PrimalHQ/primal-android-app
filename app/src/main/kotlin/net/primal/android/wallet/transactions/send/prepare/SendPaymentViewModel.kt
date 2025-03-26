@@ -16,7 +16,6 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.navigation.sendPaymentTab
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.scanner.analysis.WalletTextParser

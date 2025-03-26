@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.navigation.FROM_ORIGIN_PREMIUM_BADGE
 import net.primal.android.navigation.buyingPremiumFromOrigin
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.Companion.LEGEND_THRESHOLD_IN_USD
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.UiEvent

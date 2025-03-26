@@ -23,7 +23,6 @@ import net.primal.android.messages.conversation.MessageConversationListContract.
 import net.primal.android.messages.conversation.model.MessageConversationUi
 import net.primal.android.messages.db.MessageConversation
 import net.primal.android.messages.repository.MessageRepository
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.notes.feed.model.asNoteNostrUriUi

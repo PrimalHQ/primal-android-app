@@ -19,7 +19,6 @@ import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.navigation.FROM_ORIGIN_PREMIUM_BADGE
 import net.primal.android.navigation.buyingPremiumFromOrigin
 import net.primal.android.navigation.extendExistingPremiumName
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.buying.PremiumBuyingContract.PremiumStage
 import net.primal.android.premium.buying.PremiumBuyingContract.SideEffect

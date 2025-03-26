@@ -38,22 +38,20 @@ private fun rememberAmberLauncher(onResult: (ActivityResult) -> Unit): AmberLaun
  * @return A launcher that can be used within a composable to initiate the public key retrieval flow.
  */
 @Composable
-fun rememberAmberPubkeyLauncher(
-    onFailure: ((ActivityResult) -> Unit)? = null,
-    onSuccess: (pubkey: String) -> Unit,
-) = rememberAmberLauncher { result ->
-    if (result.resultCode != Activity.RESULT_OK) {
-        onFailure?.invoke(result)
-        return@rememberAmberLauncher
-    }
+fun rememberAmberPubkeyLauncher(onFailure: ((ActivityResult) -> Unit)? = null, onSuccess: (pubkey: String) -> Unit) =
+    rememberAmberLauncher { result ->
+        if (result.resultCode != Activity.RESULT_OK) {
+            onFailure?.invoke(result)
+            return@rememberAmberLauncher
+        }
 
-    val pubkey = result.data?.getStringExtra("result") ?: run {
-        onFailure?.invoke(result)
-        return@rememberAmberLauncher
-    }
+        val pubkey = result.data?.getStringExtra("result") ?: run {
+            onFailure?.invoke(result)
+            return@rememberAmberLauncher
+        }
 
-    onSuccess(pubkey)
-}
+        onSuccess(pubkey)
+    }
 
 /**
  * Creates a [rememberAmberLauncher] for handling the result of a `sign_event` flow via Amber.
@@ -68,24 +66,22 @@ fun rememberAmberPubkeyLauncher(
  * @return A launcher that can be used within a composable to initiate the `sign_event` flow.
  */
 @Composable
-fun rememberAmberSignerLauncher(
-    onFailure: ((ActivityResult) -> Unit)? = null,
-    onSuccess: (NostrEvent) -> Unit,
-) = rememberAmberLauncher { result ->
-    if (result.resultCode != Activity.RESULT_OK) {
-        onFailure?.invoke(result)
-        return@rememberAmberLauncher
-    }
-
-    val nostrEvent = (result.data?.getStringExtra("event"))
-        .decodeFromJsonStringOrNull<NostrEvent>()
-        ?: run {
+fun rememberAmberSignerLauncher(onFailure: ((ActivityResult) -> Unit)? = null, onSuccess: (NostrEvent) -> Unit) =
+    rememberAmberLauncher { result ->
+        if (result.resultCode != Activity.RESULT_OK) {
             onFailure?.invoke(result)
             return@rememberAmberLauncher
         }
 
-    onSuccess(nostrEvent)
-}
+        val nostrEvent = (result.data?.getStringExtra("event"))
+            .decodeFromJsonStringOrNull<NostrEvent>()
+            ?: run {
+                onFailure?.invoke(result)
+                return@rememberAmberLauncher
+            }
+
+        onSuccess(nostrEvent)
+    }
 
 /**
  * Initiates the `get_public_key` flow on the Amber app.

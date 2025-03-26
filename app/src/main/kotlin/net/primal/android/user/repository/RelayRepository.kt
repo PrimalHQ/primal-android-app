@@ -8,7 +8,6 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.FALLBACK_RELAYS
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.user.accounts.parseNip65Relays

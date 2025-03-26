@@ -14,7 +14,6 @@ import kotlinx.coroutines.launch
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.relays.RelaysSocketManager
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.settings.network.NetworkSettingsContract.UiEvent
 import net.primal.android.settings.network.NetworkSettingsContract.UiState

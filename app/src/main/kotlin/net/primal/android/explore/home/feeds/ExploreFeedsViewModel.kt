@@ -14,7 +14,6 @@ import net.primal.android.explore.home.feeds.ExploreFeedsContract.UiState
 import net.primal.android.feeds.dvm.ui.DvmFeedUi
 import net.primal.android.feeds.repository.DvmFeedListHandler
 import net.primal.android.feeds.repository.FeedsRepository
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore

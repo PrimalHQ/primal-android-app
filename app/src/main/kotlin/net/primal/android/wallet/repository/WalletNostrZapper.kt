@@ -2,7 +2,6 @@ package net.primal.android.wallet.repository
 
 import javax.inject.Inject
 import net.primal.android.crypto.urlToLnUrlHrp
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.wallet.api.model.WithdrawRequestBody
 import net.primal.android.wallet.domain.SubWallet

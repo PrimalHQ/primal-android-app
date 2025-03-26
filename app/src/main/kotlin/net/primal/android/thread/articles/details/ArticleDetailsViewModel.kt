@@ -379,7 +379,12 @@ class ArticleDetailsViewModel @Inject constructor(
 
                         is NostrSignUnauthorized -> {
                             Timber.e(error)
-                            setState { copy(isAuthorFollowed = isAuthorFollowed, error = UiError.NostrSignUnauthorized) }
+                            setState {
+                                copy(
+                                    isAuthorFollowed = isAuthorFollowed,
+                                    error = UiError.NostrSignUnauthorized,
+                                )
+                            }
                         }
 
                         is MissingPrivateKey -> {
