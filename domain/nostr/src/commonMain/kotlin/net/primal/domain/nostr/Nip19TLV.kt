@@ -4,6 +4,7 @@ package net.primal.domain.nostr
 // import java.nio.ByteOrder
 import io.ktor.utils.io.core.buildPacket
 import io.ktor.utils.io.core.writeFully
+import kotlinx.io.readString
 import net.primal.domain.nostr.cryptography.bechToBytesOrThrow
 
 // TODO Complete Nip19TLV. Port java.nio to Kotlin native
@@ -23,6 +24,11 @@ object Nip19TLV {
         }
         return packet.readInt()
     }
+
+    private fun ByteArray.readAsString(): String =
+        buildPacket {
+            writeFully(this@readAsString)
+        }.readString()
 
     @Throws(IllegalArgumentException::class)
     fun parse(data: String) = parse(data.bechToBytesOrThrow())
