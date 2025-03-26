@@ -27,6 +27,7 @@
 /core/build
 /data/build
 /domain/build
+/domain/common/build
 /shared/build
 /captures
 .externalNativeBuild
