@@ -2,10 +2,12 @@ package net.primal.domain.nostr
 
 // import java.nio.ByteBuffer
 // import java.nio.ByteOrder
+import fr.acinq.bitcoin.Bech32
 import io.ktor.utils.io.core.buildPacket
 import io.ktor.utils.io.core.writeFully
 import kotlinx.io.readString
 import net.primal.domain.nostr.cryptography.bechToBytesOrThrow
+import net.primal.domain.nostr.cryptography.toHex
 
 // TODO Complete Nip19TLV. Port java.nio to Kotlin native
 
@@ -53,87 +55,29 @@ object Nip19TLV {
 
     private fun String.cleanNostrScheme(): String = this.removePrefix("nostr:")
 
-//    fun parseUriAsNprofileOrNull(nprofileUri: String): Nprofile? =
-//        runCatching {
-//            parseAsNprofile(nprofile = nprofileUri.cleanNostrScheme())
-//        }.getOrNull()
+    fun parseUriAsNprofileOrNull(nprofileUri: String): Nprofile? =
+        runCatching {
+            parseAsNprofile(nprofile = nprofileUri.cleanNostrScheme())
+        }.getOrNull()
 
-//    private fun parseAsNprofile(nprofile: String): Nprofile? {
-//        val tlv = parse(nprofile)
-//        val pubkey = tlv[Type.SPECIAL.id]?.first()?.toHex()
-//
-//        val relays = tlv[Type.RELAY.id]?.map {
-//            String(bytes = it, charset = Charsets.US_ASCII)
-//        } ?: emptyList()
-//
-//        return pubkey?.let {
-//            Nprofile(
-//                pubkey = pubkey,
-//                relays = relays,
-//            )
-//        }
-//    }
+    private fun parseAsNprofile(nprofile: String): Nprofile? {
+        val tlv = parse(nprofile)
+        val pubkey = tlv[Type.SPECIAL.id]?.first()?.toHex()
 
-//    fun parseUriAsNeventOrNull(neventUri: String): Nevent? =
-//        runCatching {
-//            parseAsNevent(nevent = neventUri.cleanNostrScheme())
-//        }.getOrNull()
+        val relays = tlv[Type.RELAY.id]?.map { it.readAsString() } ?: emptyList()
 
-//    private fun parseAsNevent(nevent: String): Nevent? {
-//        val tlv = parse(nevent)
-//        val eventId = tlv[Type.SPECIAL.id]?.first()?.toHex()
-//
-//        val relays = tlv[Type.RELAY.id]?.map {
-//            String(bytes = it, charset = Charsets.US_ASCII)
-//        } ?: emptyList()
-//
-//        val profileId = tlv[Type.AUTHOR.id]?.firstOrNull()?.toHex()
-//
-//        val kind = tlv[Type.KIND.id]?.firstOrNull()?.let {
-//            toInt32(it)
-//        }
-//
-//        return eventId?.let {
-//            Nevent(
-//                kind = kind,
-//                eventId = eventId,
-//                userId = profileId,
-//                relays = relays,
-//            )
-//        }
-//    }
+        return pubkey?.let {
+            Nprofile(
+                pubkey = pubkey,
+                relays = relays,
+            )
+        }
+    }
 
-//    fun parseUriAsNaddrOrNull(naddrUri: String) =
-//        runCatching {
-//            parseAsNaddrOrNull(naddr = naddrUri.cleanNostrScheme())
-//        }.getOrNull()
-//
-//    private fun parseAsNaddrOrNull(naddr: String): Naddr? {
-//        val tlv = parse(naddr)
-//        val identifier = tlv[Type.SPECIAL.id]?.first()?.let {
-//            String(bytes = it, charset = Charsets.US_ASCII)
-//        }
-//        val relays = tlv[Type.RELAY.id]?.map {
-//            String(bytes = it, charset = Charsets.US_ASCII)
-//        } ?: emptyList()
-//
-//        val profileId = tlv[Type.AUTHOR.id]?.first()?.toHex()
-//
-//        val kind = tlv[Type.KIND.id]?.first()?.let {
-//            toInt32(it)
-//        }
-//
-//        return if (identifier != null && profileId != null && kind != null) {
-//            Naddr(
-//                identifier = identifier,
-//                relays = relays,
-//                userId = profileId,
-//                kind = kind,
-//            )
-//        } else {
-//            null
-//        }
-//    }
+    fun parseUriAsNeventOrNull(neventUri: String): Nevent? =
+        runCatching {
+            parseAsNevent(nevent = neventUri.cleanNostrScheme())
+        }.getOrNull()
 
 //    fun Nprofile.toNprofileString(): String {
 //        val tlv = mutableListOf<Byte>()
@@ -152,7 +96,56 @@ object Nip19TLV {
 //            encoding = Bech32.Encoding.Bech32,
 //        )
 //    }
+    private fun parseAsNevent(nevent: String): Nevent? {
+        val tlv = parse(nevent)
+        val eventId = tlv[Type.SPECIAL.id]?.first()?.toHex()
 
+        val relays = tlv[Type.RELAY.id]?.map { it.readAsString() } ?: emptyList()
+
+        val profileId = tlv[Type.AUTHOR.id]?.firstOrNull()?.toHex()
+
+        val kind = tlv[Type.KIND.id]?.firstOrNull()?.let {
+            toInt32(it)
+        }
+
+        return eventId?.let {
+            Nevent(
+                kind = kind,
+                eventId = eventId,
+                userId = profileId,
+                relays = relays,
+            )
+        }
+    }
+
+    fun parseUriAsNaddrOrNull(naddrUri: String) =
+        runCatching {
+            parseAsNaddrOrNull(naddr = naddrUri.cleanNostrScheme())
+        }.getOrNull()
+
+    private fun parseAsNaddrOrNull(naddr: String): Naddr? {
+        val tlv = parse(naddr)
+        val identifier = tlv[Type.SPECIAL.id]?.first()?.readAsString()
+
+        val relays = tlv[Type.RELAY.id]?.map { it.readAsString() } ?: emptyList()
+
+        val profileId = tlv[Type.AUTHOR.id]?.first()?.toHex()
+
+        val kind = tlv[Type.KIND.id]?.first()?.let {
+            toInt32(it)
+        }
+
+        return if (identifier != null && profileId != null && kind != null) {
+            Naddr(
+                identifier = identifier,
+                relays = relays,
+                userId = profileId,
+                kind = kind,
+            )
+        } else {
+            null
+        }
+    }
 //    fun Nevent.toNeventString(): String {
 //        val tlv = mutableListOf<Byte>()
 //
