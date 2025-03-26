@@ -175,22 +175,6 @@ class NostrNotary @Inject constructor(
         )
     }
 
-    fun signEncryptedDirectMessage(
-        userId: String,
-        receiverId: String,
-        encryptedContent: String,
-    ): NostrEvent {
-        return signNostrEvent(
-            userId = userId,
-            event = NostrUnsignedEvent(
-                pubKey = userId,
-                content = encryptedContent,
-                kind = NostrEventKind.EncryptedDirectMessages.value,
-                tags = listOf(receiverId.asPubkeyTag()),
-            ),
-        )
-    }
-
     fun signPrimalWalletOperationNostrEvent(userId: String, content: String): NostrEvent {
         return signNostrEvent(
             userId = userId,

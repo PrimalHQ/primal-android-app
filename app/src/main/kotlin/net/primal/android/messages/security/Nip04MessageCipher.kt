@@ -10,11 +10,12 @@ import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.signer.decryptNip04WithAmber
 import net.primal.android.signer.encryptNip04WithAmber
 import net.primal.android.user.credentials.CredentialsStore
+import net.primal.domain.nostr.cryptography.MessageCipher
 
-class MessagesCipher @Inject constructor(
+class Nip04MessageCipher @Inject constructor(
     private val credentialsStore: CredentialsStore,
     private val contentResolver: ContentResolver,
-) {
+) : MessageCipher {
 
     /**
      * Encrypts the given [content] for the specified [userId] and [participantId].
@@ -35,7 +36,7 @@ class MessagesCipher @Inject constructor(
      * @throws MessageEncryptException If the encryption process fails (either from the external signer or locally).
      */
     @Throws(IllegalArgumentException::class, MissingPrivateKey::class, MessageEncryptException::class)
-    fun encryptMessage(
+    override fun encryptMessage(
         userId: String,
         participantId: String,
         content: String,
@@ -69,7 +70,7 @@ class MessagesCipher @Inject constructor(
      *
      * @return The decrypted message, or the original [content] if decryption could not be performed.
      */
-    fun decryptMessage(
+    override fun decryptMessage(
         userId: String,
         participantId: String,
         content: String,

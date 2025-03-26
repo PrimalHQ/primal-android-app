@@ -14,7 +14,6 @@ import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.publisher.NostrEventImporter
 import net.primal.domain.publisher.PrimalPublishResult
 import net.primal.domain.publisher.PrimalPublisher
-import org.bitcoinj.core.ECKey.MissingPrivateKeyException
 import timber.log.Timber
 
 class NostrPublisher @Inject constructor(
@@ -94,21 +93,6 @@ class NostrPublisher @Inject constructor(
             userId = userId,
             contacts = contacts,
             content = content,
-        )
-        publishAndImportEvent(signedNostrEvent)
-        return signedNostrEvent
-    }
-
-    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
-    suspend fun publishDirectMessage(
-        userId: String,
-        receiverId: String,
-        encryptedContent: String,
-    ): NostrEvent {
-        val signedNostrEvent = nostrNotary.signEncryptedDirectMessage(
-            userId = userId,
-            receiverId = receiverId,
-            encryptedContent = encryptedContent,
         )
         publishAndImportEvent(signedNostrEvent)
         return signedNostrEvent

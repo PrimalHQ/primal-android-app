@@ -6,7 +6,6 @@ import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.events.ext.flatMapMessagesAsEventUriPO
 import net.primal.android.messages.db.DirectMessageData
-import net.primal.android.messages.security.MessagesCipher
 import net.primal.android.nostr.ext.extractNoteId
 import net.primal.android.nostr.ext.extractProfileId
 import net.primal.android.nostr.ext.flatMapMessagesAsNostrResourcePO
@@ -26,13 +25,14 @@ import net.primal.data.remote.api.feed.FeedApi
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.cryptography.MessageCipher
 import timber.log.Timber
 
 class MessagesProcessor @Inject constructor(
     private val database: PrimalDatabase,
     private val feedApi: FeedApi,
     private val usersApi: UsersApi,
-    private val messagesCipher: MessagesCipher,
+    private val messageCipher: MessageCipher,
 ) {
 
     suspend fun processMessageEventsAndSave(
@@ -47,7 +47,7 @@ class MessagesProcessor @Inject constructor(
     ) {
         val messageDataList = messages.mapAsMessageDataPO(
             userId = userId,
-            onMessageDecrypt = messagesCipher::decryptMessage,
+            onMessageDecrypt = messageCipher::decryptMessage,
         )
 
         processNostrUrisAndSave(userId = userId, messageDataList = messageDataList)
