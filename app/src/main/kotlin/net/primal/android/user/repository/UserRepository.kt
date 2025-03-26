@@ -264,7 +264,7 @@ class UserRepository @Inject constructor(
         }
     }
 
-    @Throws(FollowListNotFound::class, NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(FollowListNotFound::class, NostrPublishException::class, SignException::class)
     suspend fun follow(
         userId: String,
         followedUserId: String,
@@ -275,7 +275,7 @@ class UserRepository @Inject constructor(
         }
     }
 
-    @Throws(FollowListNotFound::class, NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(FollowListNotFound::class, NostrPublishException::class, SignException::class)
     suspend fun unfollow(
         userId: String,
         unfollowedUserId: String,
@@ -286,7 +286,7 @@ class UserRepository @Inject constructor(
         }
     }
 
-    @Throws(FollowListNotFound::class, NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(FollowListNotFound::class, NostrPublishException::class, SignException::class)
     private suspend fun updateFollowList(
         userId: String,
         forceUpdate: Boolean,
@@ -310,7 +310,7 @@ class UserRepository @Inject constructor(
         )
     }
 
-    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(NostrPublishException::class, SignException::class)
     suspend fun setFollowList(
         userId: String,
         contacts: Set<String>,
@@ -327,7 +327,7 @@ class UserRepository @Inject constructor(
         )
     }
 
-    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(NostrPublishException::class, SignException::class)
     suspend fun recoverFollowList(
         userId: String,
         tags: List<JsonArray>,

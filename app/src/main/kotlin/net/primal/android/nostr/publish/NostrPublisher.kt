@@ -14,7 +14,6 @@ import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.publisher.NostrEventImporter
 import net.primal.domain.publisher.PrimalPublishResult
 import net.primal.domain.publisher.PrimalPublisher
-import org.bitcoinj.core.ECKey.MissingPrivateKeyException
 import timber.log.Timber
 
 class NostrPublisher @Inject constructor(
@@ -76,7 +75,7 @@ class NostrPublisher @Inject constructor(
         )
     }
 
-    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(NostrPublishException::class, SignException::class)
     suspend fun publishUserProfile(userId: String, contentMetadata: ContentMetadata): NostrEvent {
         val signedNostrEvent = nostrNotary.signMetadataNostrEvent(userId = userId, metadata = contentMetadata)
         relaysSocketManager.publishEvent(nostrEvent = signedNostrEvent)
