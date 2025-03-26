@@ -9,21 +9,26 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.errors.MissingRelaysException
+import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.asProfileDataPO
+import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
-import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.settings.muted.db.MutedUserData
 import net.primal.data.remote.api.settings.SettingsApi
+import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.publisher.PrimalPublisher
+import org.bitcoinj.core.ECKey.MissingPrivateKeyException
 
 class MutedUserRepository @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val database: PrimalDatabase,
     private val settingsApi: SettingsApi,
-    private val nostrPublisher: NostrPublisher,
+    private val primalPublisher: PrimalPublisher,
 ) {
 
     fun observeMutedUsersByOwnerId(ownerId: String) =
@@ -64,13 +69,24 @@ class MutedUserRepository @Inject constructor(
         }
     }
 
+    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
     private suspend fun updateAndPersistMuteList(
         userId: String,
         reducer: Set<MutedUserData>.() -> Set<MutedUserData>,
     ) = withContext(dispatcherProvider.io()) {
         val remoteMuteList = fetchMuteListAndPersistProfiles(userId = userId)
         val newMuteList = remoteMuteList.reducer()
-        nostrPublisher.setMuteList(userId = userId, muteList = newMuteList.map { it.userId }.toSet())
+        primalPublisher.signPublishImportNostrEvent(
+            NostrUnsignedEvent(
+                content = "",
+                pubKey = userId,
+                kind = NostrEventKind.MuteList.value,
+                tags = newMuteList
+                    .map { it.userId }
+                    .toSet()
+                    .map { it.asPubkeyTag() },
+            ),
+        )
         persistMuteList(ownerId = userId, muteList = newMuteList)
     }
 

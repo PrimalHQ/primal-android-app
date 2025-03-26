@@ -175,19 +175,6 @@ class NostrNotary @Inject constructor(
         )
     }
 
-    fun signMuteListNostrEvent(userId: String, mutedUserIds: Set<String>): NostrEvent {
-        val tags = mutedUserIds.map { it.asPubkeyTag() }
-        return signNostrEvent(
-            userId = userId,
-            event = NostrUnsignedEvent(
-                content = "",
-                pubKey = userId,
-                kind = NostrEventKind.MuteList.value,
-                tags = tags,
-            ),
-        )
-    }
-
     fun signEncryptedDirectMessage(
         userId: String,
         receiverId: String,

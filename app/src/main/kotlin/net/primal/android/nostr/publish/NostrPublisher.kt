@@ -14,6 +14,7 @@ import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.publisher.NostrEventImporter
 import net.primal.domain.publisher.PrimalPublishResult
 import net.primal.domain.publisher.PrimalPublisher
+import org.bitcoinj.core.ECKey.MissingPrivateKeyException
 import timber.log.Timber
 
 class NostrPublisher @Inject constructor(
@@ -98,14 +99,7 @@ class NostrPublisher @Inject constructor(
         return signedNostrEvent
     }
 
-    @Throws(NostrPublishException::class, SignException::class)
-    suspend fun setMuteList(userId: String, muteList: Set<String>): NostrEvent {
-        val signedNostrEvent = nostrNotary.signMuteListNostrEvent(userId = userId, mutedUserIds = muteList)
-        publishAndImportEvent(signedNostrEvent)
-        return signedNostrEvent
-    }
-
-    @Throws(NostrPublishException::class, SignException::class)
+    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
     suspend fun publishDirectMessage(
         userId: String,
         receiverId: String,
