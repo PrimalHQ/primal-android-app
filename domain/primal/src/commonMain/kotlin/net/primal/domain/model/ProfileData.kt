@@ -1,17 +1,13 @@
-package net.primal.android.profile.db
+package net.primal.domain.model
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import net.primal.domain.CdnImage
 import net.primal.domain.PrimalPremiumInfo
 
-@Entity
 data class ProfileData(
-    @PrimaryKey
-    val ownerId: String,
-    val eventId: String,
+    val profileId: String,
+    val metadataEventId: String,
     val createdAt: Long,
-    val raw: String,
+    val metadataRawEvent: String,
     val handle: String? = null,
     val displayName: String? = null,
     val internetIdentifier: String? = null,

@@ -1,8 +1,8 @@
-package net.primal.android.nostr.publish
+package net.primal.domain.publisher
 
 import net.primal.domain.nostr.NostrEvent
 
-data class PublishResult(
+data class PrimalPublishResult(
     val nostrEvent: NostrEvent,
     val imported: Boolean,
 )

@@ -1,9 +1,8 @@
-package net.primal.android.events.domain
+package net.primal.domain.model
 
-import net.primal.android.profile.db.ProfileData
 import net.primal.domain.nostr.NostrEvent
 
-data class EventAction(
+data class NostrEventAction(
     val profile: ProfileData,
     val score: Float,
     val actionEventData: NostrEvent,

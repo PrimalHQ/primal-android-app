@@ -7,8 +7,8 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
-import net.primal.android.profile.domain.PrimalPremiumInfo
 import net.primal.android.profile.utils.combinePremiumInfoIfLegend
+import net.primal.domain.PrimalPremiumInfo
 
 @Dao
 interface ProfileDataDao {

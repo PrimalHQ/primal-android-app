@@ -28,10 +28,7 @@ object CoreModule {
     fun provideContentResolver(@ApplicationContext context: Context): ContentResolver = context.contentResolver
 
     @Provides
-    fun provideCrashReporter(okHttpClient: OkHttpClient) =
-        PrimalCrashReporter(
-            okHttpClient = okHttpClient,
-        )
+    fun provideCrashReporter(okHttpClient: OkHttpClient) = PrimalCrashReporter(okHttpClient = okHttpClient)
 
     @Provides
     fun appConfigHandler(): AppConfigHandler = AppConfigFactory.createAppConfigHandler()

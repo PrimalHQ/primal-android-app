@@ -2,7 +2,7 @@ package net.primal.android.profile.utils
 
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.db.ProfileData
-import net.primal.android.profile.domain.PrimalPremiumInfo
+import net.primal.domain.PrimalPremiumInfo
 
 fun ProfileData.combinePremiumInfoIfLegend(profileData: ProfileData?): ProfileData =
     if (this.primalPremiumInfo?.tier.isPrimalLegendTier() == true ||

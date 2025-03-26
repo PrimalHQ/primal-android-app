@@ -14,7 +14,6 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.events.db.EventZap
-import net.primal.android.events.domain.EventAction
 import net.primal.android.events.reactions.mediator.EventZapsMediator
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.asEventIdTag
@@ -27,17 +26,18 @@ import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
 import net.primal.android.nostr.notary.MissingPrivateKeyException
-import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.data.remote.api.events.EventStatsApi
 import net.primal.data.remote.api.events.model.EventActionsRequestBody
 import net.primal.data.remote.api.events.model.EventZapsRequestBody
+import net.primal.domain.model.NostrEventAction
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.publisher.PrimalPublisher
 import timber.log.Timber
 
 class EventRepository @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
-    private val nostrPublisher: NostrPublisher,
+    private val primalPublisher: PrimalPublisher,
     private val eventStatsApi: EventStatsApi,
     private val database: PrimalDatabase,
 ) {
@@ -63,8 +63,7 @@ class EventRepository @Inject constructor(
 
         try {
             statsUpdater.increaseLikeStats()
-            nostrPublisher.signPublishImportNostrEvent(
-                userId = userId,
+            primalPublisher.signPublishImportNostrEvent(
                 unsignedNostrEvent = NostrUnsignedEvent(
                     pubKey = userId,
                     kind = NostrEventKind.Reaction.value,
@@ -101,8 +100,7 @@ class EventRepository @Inject constructor(
 
         try {
             statsUpdater.increaseRepostStats()
-            nostrPublisher.signPublishImportNostrEvent(
-                userId = userId,
+            primalPublisher.signPublishImportNostrEvent(
                 unsignedNostrEvent = NostrUnsignedEvent(
                     pubKey = userId,
                     kind = if (eventKind == NostrEventKind.ShortTextNote) {
@@ -125,7 +123,7 @@ class EventRepository @Inject constructor(
         }
     }
 
-    suspend fun fetchEventActions(eventId: String, kind: Int): List<EventAction> =
+    suspend fun fetchEventActions(eventId: String, kind: Int): List<NostrEventAction> =
         withContext(dispatcherProvider.io()) {
             val response = eventStatsApi.getEventActions(
                 body = EventActionsRequestBody(
@@ -155,8 +153,8 @@ class EventRepository @Inject constructor(
             val profilesMap = profiles.asMapByKey { it.ownerId }
             response.actions.mapNotNull { action ->
                 profilesMap[action.pubKey]?.let { profileData ->
-                    EventAction(
-                        profile = profileData,
+                    NostrEventAction(
+                        profile = profileData.asProfileDataDO(),
                         score = userScoresMap?.get(action.pubKey) ?: 0f,
                         actionEventData = action,
                         actionEventKind = action.kind,

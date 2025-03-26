@@ -1,10 +1,10 @@
 package net.primal.android.profile.db.serialization
 
 import androidx.room.TypeConverter
-import net.primal.android.profile.domain.PrimalLegendProfile
-import net.primal.android.profile.domain.PrimalPremiumInfo
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.domain.PrimalLegendProfile
+import net.primal.domain.PrimalPremiumInfo
 
 class ProfileTypeConverters {
 

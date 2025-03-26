@@ -8,21 +8,23 @@ import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.Relay
 import net.primal.android.wallet.nwc.model.LightningPayResponse
-import net.primal.data.remote.api.importing.PrimalImportApi
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.publisher.NostrEventImporter
+import net.primal.domain.publisher.PrimalPublishResult
+import net.primal.domain.publisher.PrimalPublisher
 import timber.log.Timber
 
 class NostrPublisher @Inject constructor(
     private val relaysSocketManager: RelaysSocketManager,
     private val nostrNotary: NostrNotary,
-    private val primalImportApi: PrimalImportApi,
-) {
+    private val primalEventsImporter: NostrEventImporter,
+) : PrimalPublisher {
 
     private suspend fun importEvent(event: NostrEvent): Boolean {
         val result = runCatching {
-            primalImportApi.importEvents(events = listOf(event))
+            primalEventsImporter.importEvents(events = listOf(event))
         }
         return result.isSuccess
     }
@@ -47,16 +49,29 @@ class NostrPublisher @Inject constructor(
     }
 
     @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    @Deprecated("Please use signPublishImportNostrEvent(NoNostrUnsignedEvent, List<String>).")
     suspend fun signPublishImportNostrEvent(
         userId: String,
         unsignedNostrEvent: NostrUnsignedEvent,
         outboxRelays: List<String> = emptyList(),
-    ): PublishResult {
+    ): PrimalPublishResult {
         val signedNostrEvent = nostrNotary.signNostrEvent(userId = userId, event = unsignedNostrEvent)
         val imported = publishAndImportEvent(signedNostrEvent = signedNostrEvent, outboxRelays = outboxRelays)
-        return PublishResult(
+        return PrimalPublishResult(
             nostrEvent = signedNostrEvent,
             imported = imported,
+        )
+    }
+
+    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    override suspend fun signPublishImportNostrEvent(
+        unsignedNostrEvent: NostrUnsignedEvent,
+        outboxRelays: List<String>,
+    ): PrimalPublishResult {
+        return signPublishImportNostrEvent(
+            userId = unsignedNostrEvent.pubKey,
+            unsignedNostrEvent = unsignedNostrEvent,
+            outboxRelays = outboxRelays,
         )
     }
 

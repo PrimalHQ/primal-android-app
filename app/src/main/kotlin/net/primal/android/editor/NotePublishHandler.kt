@@ -19,11 +19,11 @@ import net.primal.android.nostr.ext.parseHashtagTags
 import net.primal.android.nostr.ext.parsePubkeyTags
 import net.primal.android.nostr.ext.parseReplaceableEventTags
 import net.primal.android.nostr.publish.NostrPublisher
-import net.primal.android.nostr.publish.PublishResult
 import net.primal.android.nostr.utils.Naddr
 import net.primal.android.nostr.utils.Nevent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.publisher.PrimalPublishResult
 
 class NotePublishHandler @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
@@ -40,7 +40,7 @@ class NotePublishHandler @Inject constructor(
         rootArticleNaddr: Naddr? = null,
         rootHighlightNevent: Nevent? = null,
         replyToNoteNevent: Nevent? = null,
-    ): PublishResult {
+    ): PrimalPublishResult {
         val noteContent = content.ensureWhitespaceBeforeUserTag()
 
         /* Event mentions from content */
