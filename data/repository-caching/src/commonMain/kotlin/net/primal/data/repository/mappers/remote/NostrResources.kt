@@ -175,22 +175,20 @@ private fun String.extract(parser: (bechPrefix: String?, key: String?) -> String
     }
 }
 
-// TODO Rewire once NIP19 is implemented and put in correct package and/or module
-
-// fun String.takeAsNaddrOrNull(): String? {
-//    return if (isNAddr() || isNAddrUri()) {
-//        val result = runCatching {
-//            Nip19TLV.parseUriAsNaddrOrNull(this)
-//        }
-//        if (result.getOrNull() != null) {
-//            this
-//        } else {
-//            null
-//        }
-//    } else {
-//        null
-//    }
-// }
+fun String.takeAsNaddrOrNull(): String? {
+    return if (isNAddr() || isNAddrUri()) {
+        val result = runCatching {
+            Nip19TLV.parseUriAsNaddrOrNull(this)
+        }
+        if (result.getOrNull() != null) {
+            this
+        } else {
+            null
+        }
+    } else {
+        null
+    }
+}
 
 fun String.takeAsNoteHexIdOrNull(): String? {
     return if (isNote() || isNoteUri() || isNEventUri() || isNEvent()) {
@@ -410,10 +408,8 @@ private fun takeAsReferencedArticleOrNull(
     refArticle != null &&
     refArticleAuthor != null
 ) {
-    // TODO Rewire once NIP19 is implemented
     ReferencedArticle(
-        // refNaddr.toNaddrString(),
-        naddr = "",
+        naddr = refNaddr.toNaddrString(),
         aTag = refArticle.aTag,
         eventId = refArticle.eventId,
         articleId = refArticle.articleId,
@@ -437,8 +433,7 @@ private fun takeAsReferencedHighlightOrNull(
     aTag: JsonArray?,
     authorId: String?,
 ) = if (highlight?.isNotEmpty() == true && aTag != null) {
-    // TODO Rewire once NIP19 is implemented
-    val nevent: Nevent? = null // Nip19TLV.parseUriAsNeventOrNull(neventUri = uri)
+    val nevent = Nip19TLV.parseUriAsNeventOrNull(neventUri = uri)
     ReferencedHighlight(
         text = highlight,
         aTag = aTag,
