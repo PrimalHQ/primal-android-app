@@ -13,14 +13,12 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.bookmarks.BookmarksRepository
 import net.primal.android.core.errors.UiError
-import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
 import net.primal.android.nostr.repository.RelayHintsRepository
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.NoteContract.UiState
-import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.domain.ZapTarget
 import net.primal.android.wallet.zaps.InvalidZapRequestException
@@ -30,7 +28,9 @@ import net.primal.android.wallet.zaps.hasWallet
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.BookmarkType
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.repository.EventInteractionRepository
+import net.primal.domain.repository.MutedUserRepository
 import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 

@@ -10,6 +10,7 @@ import net.primal.domain.repository.EventInteractionRepository
 import net.primal.domain.repository.EventRepository
 import net.primal.domain.repository.EventUriRepository
 import net.primal.domain.repository.FeedRepository
+import net.primal.domain.repository.MutedUserRepository
 import net.primal.domain.repository.ProfileRepository
 
 @Module
@@ -32,4 +33,8 @@ object RepositoryCachingModule {
     @Provides
     fun provideProfileRepository(primalPublisher: PrimalPublisher): ProfileRepository =
         PrimalRepositoryFactory.createProfileRepository(primalPublisher)
+
+    @Provides
+    fun provideMutedUserRepository(primalPublisher: PrimalPublisher): MutedUserRepository =
+        PrimalRepositoryFactory.createMutedUserRepository(primalPublisher)
 }

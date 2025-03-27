@@ -6,12 +6,12 @@ import net.primal.android.bookmarks.BookmarksRepository
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.crypto.assureValidNsec
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.LoginType
 import net.primal.android.user.repository.UserRepository
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.repository.MutedUserRepository
 
 class LoginHandler @Inject constructor(
     private val settingsRepository: SettingsRepository,

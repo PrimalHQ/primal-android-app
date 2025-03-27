@@ -30,7 +30,6 @@ import net.primal.android.messages.db.DirectMessage
 import net.primal.android.messages.exceptions.MessageEncryptException
 import net.primal.android.messages.repository.MessageRepository
 import net.primal.android.navigation.profileIdOrThrow
-import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.nostr.notary.exceptions.SignException
@@ -38,6 +37,7 @@ import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 

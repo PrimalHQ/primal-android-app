@@ -16,7 +16,6 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
-import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.utils.hasPremiumMembership
@@ -30,6 +29,7 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.nwc.InvalidLud16Exception
 import net.primal.android.wallet.nwc.LightningAddressChecker
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 

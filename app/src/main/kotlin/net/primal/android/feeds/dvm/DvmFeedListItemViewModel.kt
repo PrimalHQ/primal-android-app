@@ -12,7 +12,6 @@ import kotlinx.coroutines.launch
 import net.primal.android.core.errors.UiError
 import net.primal.android.feeds.dvm.DvmFeedListItemContract.UiEvent
 import net.primal.android.feeds.dvm.DvmFeedListItemContract.UiState
-import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.asReplaceableEventTag
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
@@ -25,6 +24,7 @@ import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
 import net.primal.domain.DvmFeed
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.repository.EventInteractionRepository
 import timber.log.Timber
 

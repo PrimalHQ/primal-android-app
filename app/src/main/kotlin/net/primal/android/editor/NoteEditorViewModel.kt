@@ -45,7 +45,6 @@ import net.primal.android.highlights.repository.HighlightRepository
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.primal.upload.repository.FileUploadRepository
-import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.nostr.repository.RelayHintsRepository
@@ -65,6 +64,7 @@ import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.Nip19TLV.toNprofileString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.Nprofile
+import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.repository.FeedRepository
 import net.primal.domain.upload.UploadJob
 import timber.log.Timber
