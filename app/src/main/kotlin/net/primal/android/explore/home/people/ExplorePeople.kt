@@ -191,7 +191,8 @@ private fun ExplorePersonListItem(
                     avatarSize = 64.dp,
                     avatarCdnImage = person.profile.avatarCdnImage,
                     onClick = onItemClick,
-                    legendaryCustomization = person.profile.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
+                    legendaryCustomization = person.profile.primalPremiumInfo?.legendProfile
+                        ?.asLegendaryCustomization(),
                 )
             }
 
@@ -201,7 +202,8 @@ private fun ExplorePersonListItem(
                 NostrUserText(
                     displayName = person.profile.asProfileDetailsUi().userDisplayName,
                     internetIdentifier = person.profile.internetIdentifier,
-                    legendaryCustomization = person.profile.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
+                    legendaryCustomization = person.profile.primalPremiumInfo?.legendProfile
+                        ?.asLegendaryCustomization(),
                 )
                 person.profile.internetIdentifier?.let { internetIdentifier ->
                     Text(

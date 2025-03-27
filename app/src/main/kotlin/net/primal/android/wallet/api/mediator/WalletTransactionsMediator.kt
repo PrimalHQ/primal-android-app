@@ -18,9 +18,10 @@ import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.user.accounts.UserAccountsStore
+import net.primal.android.user.db.UsersDatabase
 import net.primal.android.wallet.api.WalletApi
 import net.primal.android.wallet.api.model.TransactionsRequestBody
-import net.primal.android.wallet.db.WalletTransaction
+import net.primal.android.wallet.db.WalletTransactionData
 import net.primal.android.wallet.domain.SubWallet
 import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
@@ -34,31 +35,32 @@ class WalletTransactionsMediator(
     private val dispatchers: CoroutineDispatcherProvider,
     private val userId: String,
     private val accountsStore: UserAccountsStore,
-    private val database: PrimalDatabase,
+    private val primalDatabase: PrimalDatabase,
+    private val usersDatabase: UsersDatabase,
     private val walletApi: WalletApi,
     private val usersApi: UsersApi,
-) : RemoteMediator<Int, WalletTransaction>() {
+) : RemoteMediator<Int, WalletTransactionData>() {
 
     private val lastRequests: MutableMap<LoadType, TransactionsRequestBody> = mutableMapOf()
 
-    override suspend fun load(loadType: LoadType, state: PagingState<Int, WalletTransaction>): MediatorResult {
+    override suspend fun load(loadType: LoadType, state: PagingState<Int, WalletTransactionData>): MediatorResult {
         val walletLightningAddress = accountsStore.findByIdOrNull(userId)?.primalWallet?.lightningAddress
             ?: return MediatorResult.Success(endOfPaginationReached = true)
 
         val timestamp: Long? = when (loadType) {
             LoadType.REFRESH -> null
             LoadType.PREPEND -> {
-                state.firstItemOrNull()?.data?.updatedAt
+                state.firstItemOrNull()?.updatedAt
                     ?: withContext(dispatchers.io()) {
-                        database.walletTransactions().firstByUserId(userId = userId)?.updatedAt
+                        usersDatabase.walletTransactions().firstByUserId(userId = userId)?.updatedAt
                     }
                     ?: return MediatorResult.Success(endOfPaginationReached = true)
             }
 
             LoadType.APPEND -> {
-                state.lastItemOrNull()?.data?.updatedAt
+                state.lastItemOrNull()?.updatedAt
                     ?: withContext(dispatchers.io()) {
-                        database.walletTransactions().lastByUserId(userId = userId)?.updatedAt
+                        usersDatabase.walletTransactions().lastByUserId(userId = userId)?.updatedAt
                     }
                     ?: return MediatorResult.Success(endOfPaginationReached = true)
             }
@@ -126,9 +128,9 @@ class WalletTransactionsMediator(
                 )
             }
 
-            database.withTransaction {
-                database.profiles().insertOrUpdateAll(data = profiles)
-                database.walletTransactions().upsertAll(data = transactions)
+            primalDatabase.withTransaction {
+                primalDatabase.profiles().insertOrUpdateAll(data = profiles)
+                usersDatabase.walletTransactions().upsertAll(data = transactions)
             }
         }
 
