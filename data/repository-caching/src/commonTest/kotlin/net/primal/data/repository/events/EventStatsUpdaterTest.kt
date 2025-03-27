@@ -1,6 +1,6 @@
-package net.primal.android.notes.repository
+package net.primal.data.repository.events
 
-import org.junit.Test
+import kotlin.test.Test
 
 @Suppress("EmptyFunctionBlock")
 class EventStatsUpdaterTest {

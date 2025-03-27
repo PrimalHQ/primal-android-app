@@ -5,12 +5,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import net.primal.android.core.ext.asMapByKey
-import net.primal.android.events.repository.EventRepository
 import net.primal.android.feeds.dvm.ui.DvmFeedUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.domain.FeedSpecKind
+import net.primal.domain.repository.EventRepository
 
 class DvmFeedListHandler @Inject constructor(
     private val feedsRepository: FeedsRepository,

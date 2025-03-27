@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.bookmarks.BookmarksRepository
 import net.primal.android.core.errors.UiError
-import net.primal.android.events.repository.EventRepository
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
@@ -32,6 +31,7 @@ import net.primal.android.wallet.zaps.hasWallet
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.BookmarkType
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.repository.EventInteractionRepository
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = NoteViewModel.Factory::class)
@@ -39,7 +39,7 @@ class NoteViewModel @AssistedInject constructor(
     @Assisted private val noteId: String?,
     private val activeAccountStore: ActiveAccountStore,
     private val zapHandler: ZapHandler,
-    private val eventRepository: EventRepository,
+    private val eventInteractionRepository: EventInteractionRepository,
     private val profileRepository: ProfileRepository,
     private val mutedUserRepository: MutedUserRepository,
     private val bookmarksRepository: BookmarksRepository,
@@ -110,7 +110,7 @@ class NoteViewModel @AssistedInject constructor(
     private fun likePost(postLikeAction: UiEvent.PostLikeAction) =
         viewModelScope.launch {
             try {
-                eventRepository.likeEvent(
+                eventInteractionRepository.likeEvent(
                     userId = activeAccountStore.activeUserId(),
                     eventId = postLikeAction.postId,
                     eventAuthorId = postLikeAction.postAuthorId,
@@ -133,11 +133,11 @@ class NoteViewModel @AssistedInject constructor(
     private fun repostPost(repostAction: UiEvent.RepostAction) =
         viewModelScope.launch {
             try {
-                eventRepository.repostEvent(
+                eventInteractionRepository.repostEvent(
                     userId = activeAccountStore.activeUserId(),
                     eventId = repostAction.postId,
                     eventAuthorId = repostAction.postAuthorId,
-                    eventKind = NostrEventKind.ShortTextNote,
+                    eventKind = NostrEventKind.ShortTextNote.value,
                     eventRawNostrEvent = repostAction.postNostrEvent,
                 )
             } catch (error: NostrPublishException) {

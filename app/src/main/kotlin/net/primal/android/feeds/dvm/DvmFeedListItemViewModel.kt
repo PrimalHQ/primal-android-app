@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.core.errors.UiError
-import net.primal.android.events.repository.EventRepository
 import net.primal.android.feeds.dvm.DvmFeedListItemContract.UiEvent
 import net.primal.android.feeds.dvm.DvmFeedListItemContract.UiState
 import net.primal.android.networking.relays.errors.MissingRelaysException
@@ -26,12 +25,13 @@ import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
 import net.primal.domain.DvmFeed
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.repository.EventInteractionRepository
 import timber.log.Timber
 
 @HiltViewModel
 class DvmFeedListItemViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
-    private val eventRepository: EventRepository,
+    private val eventInteractionRepository: EventInteractionRepository,
     private val zapHandler: ZapHandler,
 ) : ViewModel() {
 
@@ -79,7 +79,7 @@ class DvmFeedListItemViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val aTagValue = "${NostrEventKind.AppHandler.value}:${dvmFeed.dvmPubkey}:${dvmFeed.dvmId}"
-                eventRepository.likeEvent(
+                eventInteractionRepository.likeEvent(
                     userId = activeAccountStore.activeUserId(),
                     eventId = dvmFeed.eventId,
                     eventAuthorId = dvmFeed.dvmPubkey,
