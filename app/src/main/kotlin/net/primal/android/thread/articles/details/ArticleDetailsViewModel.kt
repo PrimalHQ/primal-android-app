@@ -17,7 +17,6 @@ import net.primal.android.articles.ArticleRepository
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.crypto.hexToNpubHrp
-import net.primal.android.events.repository.EventRepository
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.highlights.model.JoinedHighlightsUi
@@ -57,6 +56,7 @@ import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.asATagValue
+import net.primal.domain.repository.EventInteractionRepository
 import net.primal.domain.repository.FeedRepository
 import timber.log.Timber
 
@@ -69,7 +69,7 @@ class ArticleDetailsViewModel @Inject constructor(
     private val highlightRepository: HighlightRepository,
     private val profileRepository: ProfileRepository,
     private val userRepository: UserRepository,
-    private val eventRepository: EventRepository,
+    private val eventInteractionRepository: EventInteractionRepository,
     private val zapHandler: ZapHandler,
 ) : ViewModel() {
 
@@ -283,7 +283,7 @@ class ArticleDetailsViewModel @Inject constructor(
             val article = _state.value.article
             if (article != null) {
                 try {
-                    eventRepository.likeEvent(
+                    eventInteractionRepository.likeEvent(
                         userId = activeAccountStore.activeUserId(),
                         eventId = article.eventId,
                         eventAuthorId = article.authorId,
@@ -311,11 +311,11 @@ class ArticleDetailsViewModel @Inject constructor(
             val article = _state.value.article
             if (article != null) {
                 try {
-                    eventRepository.repostEvent(
+                    eventInteractionRepository.repostEvent(
                         userId = activeAccountStore.activeUserId(),
                         eventId = article.eventId,
                         eventAuthorId = article.authorId,
-                        eventKind = NostrEventKind.LongFormContent,
+                        eventKind = NostrEventKind.LongFormContent.value,
                         eventRawNostrEvent = article.eventRawNostrEvent,
                         optionalTags = listOf(
                             "${NostrEventKind.LongFormContent.value}:${article.authorId}:${article.articleId}"

@@ -5,7 +5,6 @@ import net.primal.android.core.utils.detectMimeType
 import net.primal.android.events.db.EventUri
 import net.primal.android.messages.db.DirectMessageData
 import net.primal.android.nostr.ext.isNostrUri
-import net.primal.android.notes.db.PostData
 import net.primal.domain.CdnResource
 import net.primal.domain.EventLinkPreviewData
 import net.primal.domain.EventUriType
@@ -14,20 +13,6 @@ private data class EventLink(
     val eventId: String,
     val uri: String,
 )
-
-fun List<PostData>.flatMapPostsAsEventUriPO(
-    cdnResources: Map<String, CdnResource>,
-    linkPreviews: Map<String, EventLinkPreviewData>,
-    videoThumbnails: Map<String, String>,
-) = flatMap { postData ->
-    postData.uris.map { uri -> EventLink(eventId = postData.postId, uri = uri) }
-}
-    .filterNot { it.uri.isNostrUri() }
-    .mapToEventUri(
-        cdnResources = cdnResources,
-        linkPreviews = linkPreviews,
-        videoThumbnails = videoThumbnails,
-    )
 
 fun List<DirectMessageData>.flatMapMessagesAsEventUriPO() =
     flatMap { messageData ->

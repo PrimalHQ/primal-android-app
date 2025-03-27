@@ -1,8 +1,14 @@
 package net.primal.data.repository.factory
 
+import net.primal.domain.publisher.PrimalPublisher
+import net.primal.domain.repository.EventInteractionRepository
+import net.primal.domain.repository.EventRepository
+import net.primal.domain.repository.EventUriRepository
 import net.primal.domain.repository.FeedRepository
 
 internal interface RepositoryFactory {
-
     fun createFeedRepository(): FeedRepository
+    fun createEventRepository(): EventRepository
+    fun createEventUriRepository(): EventUriRepository
+    fun createEventInteractionRepository(primalPublisher: PrimalPublisher): EventInteractionRepository
 }

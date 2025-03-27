@@ -1,12 +1,11 @@
-package net.primal.android.events.repository
+package net.primal.data.repository.events
 
-import androidx.room.withTransaction
-import kotlin.time.Duration.Companion.milliseconds
-import net.primal.android.db.PrimalDatabase
-import net.primal.android.events.db.EventStats
-import net.primal.android.events.db.EventUserStats
-import net.primal.android.events.db.EventZap
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
+import kotlinx.datetime.Clock
+import net.primal.data.local.dao.events.EventStats
+import net.primal.data.local.dao.events.EventUserStats
+import net.primal.data.local.dao.events.EventZap
+import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.withTransaction
 
 class EventStatsUpdater(
     val eventId: String,
@@ -15,31 +14,39 @@ class EventStatsUpdater(
     val database: PrimalDatabase,
 ) {
 
-    private val timestamp: Long = System.currentTimeMillis().milliseconds.inWholeSeconds
+    private val timestamp: Long = Clock.System.now().epochSeconds
 
-    private val eventStats: EventStats by lazy {
-        database.eventStats().find(eventId = eventId)
+    private suspend fun resolveEventStats(): EventStats {
+        return database.eventStats().find(eventId = eventId)
             ?: EventStats(eventId = eventId)
     }
 
-    private val eventUserStats: EventUserStats by lazy {
-        database.eventUserStats().find(eventId = eventId, userId = userId)
+    private suspend fun resolveEventUserStats(): EventUserStats {
+        return database.eventUserStats().find(eventId = eventId, userId = userId)
             ?: EventUserStats(eventId = eventId, userId = userId)
     }
 
-    suspend fun increaseLikeStats() =
+    suspend fun increaseLikeStats() {
+        val eventStats = resolveEventStats()
+        val eventUserStats = resolveEventUserStats()
         database.withTransaction {
             database.eventStats().upsert(data = eventStats.copy(likes = eventStats.likes + 1))
             database.eventUserStats().upsert(data = eventUserStats.copy(liked = true))
         }
+    }
 
-    suspend fun increaseRepostStats() =
+    suspend fun increaseRepostStats() {
+        val eventStats = resolveEventStats()
+        val eventUserStats = resolveEventUserStats()
         database.withTransaction {
             database.eventStats().upsert(data = eventStats.copy(reposts = eventStats.reposts + 1))
             database.eventUserStats().upsert(data = eventUserStats.copy(reposted = true))
         }
+    }
 
-    suspend fun increaseZapStats(amountInSats: Int, zapComment: String) =
+    suspend fun increaseZapStats(amountInSats: Int, zapComment: String) {
+        val eventStats = resolveEventStats()
+        val eventUserStats = resolveEventUserStats()
         database.withTransaction {
             val zapSender = database.profiles().findProfileData(profileId = userId)
             database.eventStats().upsert(
@@ -62,13 +69,18 @@ class EventStatsUpdater(
                     zapSenderDisplayName = zapSender?.displayName,
                     zapSenderInternetIdentifier = zapSender?.internetIdentifier,
                     zapSenderPrimalLegendProfile = zapSender?.primalPremiumInfo?.legendProfile,
-                    amountInBtc = amountInSats.toBtc(),
+                    // TODO Fix when conversion utils are merged
+                    amountInBtc = 0.toDouble(),
+//                    amountInBtc = amountInSats.toBtc(),
                     message = zapComment,
                 ),
             )
         }
+    }
 
-    suspend fun revertStats() =
+    suspend fun revertStats() {
+        val eventStats = resolveEventStats()
+        val eventUserStats = resolveEventUserStats()
         database.withTransaction {
             database.eventStats().upsert(data = eventStats)
             database.eventUserStats().upsert(data = eventUserStats)
@@ -79,4 +91,5 @@ class EventStatsUpdater(
                 timestamp = timestamp,
             )
         }
+    }
 }

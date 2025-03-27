@@ -7,8 +7,15 @@ import net.primal.core.utils.coroutines.DispatcherProviderFactory
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.local.db.PrimalDatabaseFactory
 import net.primal.data.remote.factory.PrimalApiServiceFactory
+import net.primal.data.repository.events.EventInteractionRepositoryImpl
+import net.primal.data.repository.events.EventRepositoryImpl
+import net.primal.data.repository.events.EventUriRepositoryImpl
 import net.primal.data.repository.feed.FeedRepositoryImpl
 import net.primal.domain.PrimalServerType
+import net.primal.domain.publisher.PrimalPublisher
+import net.primal.domain.repository.EventInteractionRepository
+import net.primal.domain.repository.EventRepository
+import net.primal.domain.repository.EventUriRepository
 import net.primal.domain.repository.FeedRepository
 
 object AndroidRepositoryFactory : RepositoryFactory {
@@ -16,6 +23,8 @@ object AndroidRepositoryFactory : RepositoryFactory {
     private var appContext: Context? = null
 
     private val cachingPrimalApiClient = PrimalApiClientFactory.create(PrimalServerType.Caching)
+
+    private val dispatcherProvider = DispatcherProviderFactory.create()
 
     private val cachingDatabase: PrimalDatabase by lazy {
         val appContext = appContext ?: error("You need to call init(ApplicationContext) first.")
@@ -29,8 +38,31 @@ object AndroidRepositoryFactory : RepositoryFactory {
 
     override fun createFeedRepository(): FeedRepository {
         return FeedRepositoryImpl(
-            dispatcherProvider = DispatcherProviderFactory.create(),
+            dispatcherProvider = dispatcherProvider,
             feedApi = PrimalApiServiceFactory.createFeedApi(cachingPrimalApiClient),
+            database = cachingDatabase,
+        )
+    }
+
+    override fun createEventRepository(): EventRepository {
+        return EventRepositoryImpl(
+            dispatcherProvider = dispatcherProvider,
+            eventStatsApi = PrimalApiServiceFactory.createEventsApi(cachingPrimalApiClient),
+            database = cachingDatabase,
+        )
+    }
+
+    override fun createEventUriRepository(): EventUriRepository {
+        return EventUriRepositoryImpl(
+            dispatcherProvider = dispatcherProvider,
+            database = cachingDatabase,
+        )
+    }
+
+    override fun createEventInteractionRepository(primalPublisher: PrimalPublisher): EventInteractionRepository {
+        return EventInteractionRepositoryImpl(
+            dispatcherProvider = dispatcherProvider,
+            primalPublisher = primalPublisher,
             database = cachingDatabase,
         )
     }
