@@ -39,3 +39,17 @@ fun EventZap.asEventZapUiModel() =
         amountInSats = this.amountInBtc.toBigDecimal().toSats(),
         zapperLegendaryCustomization = this.zapSenderPrimalLegendProfile?.asLegendaryCustomization(),
     )
+
+fun net.primal.domain.EventZap.asEventZapUiModel() =
+    EventZapUiModel(
+        id = this.id,
+        zapperAvatarCdnImage = this.zapperAvatarCdnImage,
+        zapperId = this.zapperId,
+        zapperName = this.zapperName,
+        zapperHandle = this.zapperHandle,
+        zapperInternetIdentifier = this.zapperInternetIdentifier,
+        zappedAt = this.zappedAt,
+        message = this.message,
+        amountInSats = this.amountInSats,
+        zapperLegendaryCustomization = this.zapperLegendProfile?.asLegendaryCustomization(),
+    )

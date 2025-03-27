@@ -18,7 +18,6 @@ import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.navigation.transactionIdOrThrow
 import net.primal.android.notes.feed.model.asFeedPostUi
-import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.db.WalletTransactionData
 import net.primal.android.wallet.repository.ExchangeRateHandler
@@ -26,6 +25,7 @@ import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.details.TransactionDetailsContract.UiState
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.repository.FeedRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -97,7 +97,7 @@ class TransactionDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             feedRepository.observeConversation(userId = activeAccountStore.activeUserId(), noteId = noteId)
                 .filter { it.isNotEmpty() }
-                .mapNotNull { conversation -> conversation.first { it.data.postId == noteId } }
+                .mapNotNull { conversation -> conversation.first { it.eventId == noteId } }
                 .collect {
                     setState { copy(feedPost = it.asFeedPostUi()) }
                 }

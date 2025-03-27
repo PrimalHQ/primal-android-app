@@ -69,6 +69,7 @@ internal fun FeedPostPO.mapAsFeedPostDO(): FeedPostDO {
             eventUriNostr.asReferencedNostrUriDO(forcePosition = index)
         },
         eventZaps = this.eventZaps.map { it.asEventZapDO() }.sortedWith(EventZap.DefaultComparator),
+        bookmark = this.bookmark?.asPublicBookmark(),
     )
 }
 

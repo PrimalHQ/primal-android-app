@@ -18,7 +18,6 @@ import net.primal.android.nostr.ext.mapNotNullAsPostDataPO
 import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
-import net.primal.android.notes.repository.persistToDatabaseAsTransaction
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.data.remote.api.feed.FeedApi
 import net.primal.data.remote.api.users.UsersApi
@@ -82,10 +81,11 @@ class MessagesProcessor @Inject constructor(
         val remoteNotes = if (missingEventIds.isNotEmpty()) {
             try {
                 val response = feedApi.getNotes(noteIds = missingEventIds)
-                response.persistToDatabaseAsTransaction(
-                    userId = userId,
-                    database = database,
-                )
+                // TODO Bring back persistToDatabaseAsTransaction when moved to repository-caching
+//                response.persistToDatabaseAsTransaction(
+//                    userId = userId,
+//                    database = database,
+//                )
                 val referencedPostsWithoutReplies = response.referencedEvents.mapNotNullAsPostDataPO()
                 val referencedPostsWithReplies = response.referencedEvents.mapNotNullAsPostDataPO(
                     referencedPostsWithoutReplies,

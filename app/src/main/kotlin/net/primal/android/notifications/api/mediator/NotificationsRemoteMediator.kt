@@ -12,11 +12,9 @@ import kotlinx.datetime.Instant
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.nostr.ext.mapNotNullAsNotificationPO
 import net.primal.android.nostr.ext.mapNotNullAsProfileStatsPO
-import net.primal.android.notes.repository.persistToDatabaseAsTransaction
 import net.primal.android.notifications.db.Notification
 import net.primal.android.notifications.db.NotificationData
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.remote.api.notifications.NotificationsApi
 import net.primal.data.remote.api.notifications.model.NotificationsRequestBody
 import timber.log.Timber
@@ -113,27 +111,28 @@ class NotificationsRemoteMediator(
         val notifications = response.primalNotifications.mapNotNullAsNotificationPO()
 
         withContext(Dispatchers.IO) {
-            FeedResponse(
-                paging = null,
-                metadata = response.metadata,
-                notes = response.notes,
-                articles = emptyList(),
-                reposts = emptyList(),
-                zaps = emptyList(),
-                referencedEvents = response.primalReferencedNotes,
-                primalEventStats = response.primalNoteStats,
-                primalEventUserStats = emptyList(),
-                cdnResources = response.cdnResources,
-                primalLinkPreviews = response.primalLinkPreviews,
-                primalRelayHints = response.primalRelayHints,
-                primalUserNames = response.primalUserNames,
-                primalLegendProfiles = response.primalLegendProfiles,
-                primalPremiumInfo = response.primalPremiumInfo,
-                blossomServers = response.blossomServers,
-            ).persistToDatabaseAsTransaction(
-                userId = userId,
-                database = database,
-            )
+            // TODO Bring back persistToDatabaseAsTransaction when ported
+//            FeedResponse(
+//                paging = null,
+//                metadata = response.metadata,
+//                notes = response.notes,
+//                articles = emptyList(),
+//                reposts = emptyList(),
+//                zaps = emptyList(),
+//                referencedEvents = response.primalReferencedNotes,
+//                primalEventStats = response.primalNoteStats,
+//                primalEventUserStats = emptyList(),
+//                cdnResources = response.cdnResources,
+//                primalLinkPreviews = response.primalLinkPreviews,
+//                primalRelayHints = response.primalRelayHints,
+//                primalUserNames = response.primalUserNames,
+//                primalLegendProfiles = response.primalLegendProfiles,
+//                primalPremiumInfo = response.primalPremiumInfo,
+//                blossomServers = response.blossomServers,
+//            ).persistToDatabaseAsTransaction(
+//                userId = userId,
+//                database = database,
+//            )
 
             database.withTransaction {
                 database.profileStats().upsertAll(data = userProfileStats)

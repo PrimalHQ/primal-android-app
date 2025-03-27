@@ -33,7 +33,6 @@ import net.primal.android.notes.feed.list.NoteFeedContract.UiEvent
 import net.primal.android.notes.feed.list.NoteFeedContract.UiState
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
 import net.primal.android.notes.feed.model.asFeedPostUi
-import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -43,6 +42,7 @@ import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.domain.isPremiumFeedSpec
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.repository.FeedRepository
 import net.primal.domain.supportsUpwardsNotesPagination
 import timber.log.Timber
 
@@ -139,17 +139,18 @@ class NoteFeedViewModel @AssistedInject constructor(
     }
 
     private suspend fun fetchLatestNotes() {
-        val feedResponse = feedRepository.fetchLatestNotes(
-            userId = activeAccountStore.activeUserId(),
-            feedSpec = feedSpec,
-        )
+        // TODO Bring back when fetchLatestNotes() is ported
+//        val feedResponse = feedRepository.fetchLatestNotes(
+//            userId = activeAccountStore.activeUserId(),
+//            feedSpec = feedSpec,
+//        )
 
-        latestFeedResponse = feedResponse
-        feedResponse.processSyncCount(
-            newestLocalNote = feedRepository
-                .findNewestPosts(userId = activeAccountStore.activeUserId(), feedDirective = feedSpec, limit = 1)
-                .firstOrNull(),
-        )
+//        latestFeedResponse = feedResponse
+//        feedResponse.processSyncCount(
+//            newestLocalNote = feedRepository
+//                .findNewestPosts(userId = activeAccountStore.activeUserId(), feedDirective = feedSpec, limit = 1)
+//                .firstOrNull(),
+//        )
     }
 
     private fun FeedResponse.processSyncCount(newestLocalNote: FeedPost? = null) {
@@ -217,11 +218,12 @@ class NoteFeedViewModel @AssistedInject constructor(
     private fun showLatestNotes() =
         viewModelScope.launch {
             latestFeedResponse?.let { latestFeed ->
-                feedRepository.replaceFeedSpec(
-                    userId = activeAccountStore.activeUserId(),
-                    feedSpec = feedSpec,
-                    response = latestFeed,
-                )
+                // TODO Bring back when replaceFeedSpec() is ported
+//                feedRepository.replaceFeedSpec(
+//                    userId = activeAccountStore.activeUserId(),
+//                    feedSpec = feedSpec,
+//                    response = latestFeed,
+//                )
 
                 delay(130.milliseconds)
                 setState { copy(syncStats = FeedPostsSyncStats(), shouldAnimateScrollToTop = true) }

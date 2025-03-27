@@ -23,11 +23,11 @@ import net.primal.android.navigation.advancedSearchFeedSpec
 import net.primal.android.navigation.exploreFeedSpec
 import net.primal.android.navigation.renderType
 import net.primal.android.nostr.notary.exceptions.SignException
-import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.FEED_KIND_SEARCH
 import net.primal.domain.buildAdvancedSearchFeedSpec
+import net.primal.domain.repository.FeedRepository
 import net.primal.domain.resolveFeedSpecKind
 import timber.log.Timber
 

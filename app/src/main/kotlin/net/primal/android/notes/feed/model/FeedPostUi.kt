@@ -69,3 +69,44 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
         authorBlossoms = this.author?.blossoms ?: emptyList(),
     )
 }
+
+fun net.primal.domain.model.FeedPost.asFeedPostUi(): FeedPostUi {
+    val repost = this.reposts.firstOrNull()
+    return FeedPostUi(
+        postId = this.eventId,
+        repostId = repost?.repostId,
+        repostAuthorId = repost?.repostAuthorId,
+        repostAuthorName = repost?.repostAuthorDisplayName,
+        authorId = this.author.authorId,
+        authorName = this.author.displayName,
+        authorHandle = this.author.handle,
+        authorInternetIdentifier = this.author.internetIdentifier?.formatNip05Identifier(),
+        authorAvatarCdnImage = this.author.avatarCdnImage,
+        timestamp = Instant.ofEpochSecond(this.timestamp.epochSeconds),
+        content = this.content,
+        uris = this.links.map { it.asEventUriUiModel() }.sortedBy { it.position },
+        nostrUris = this.nostrUris.map { it.asNoteNostrUriUi() }.sortedBy { it.position },
+        stats = this.stats?.let { stats ->
+            EventStatsUi(
+                repliesCount = stats.repliesCount,
+                userReplied = stats.userReplied,
+                zapsCount = stats.zapsCount,
+                satsZapped = stats.satsZapped,
+                userZapped = stats.userZapped,
+                likesCount = stats.likesCount,
+                userLiked = stats.userLiked,
+                repostsCount = stats.repostsCount,
+                userReposted = stats.userReposted,
+            )
+        } ?: EventStatsUi(),
+        hashtags = this.hashtags,
+        rawNostrEventJson = this.rawNostrEvent,
+        replyToAuthorHandle = this.replyToAuthor?.handle ?: this.replyToAuthor?.authorId?.asEllipsizedNpub(),
+        isBookmarked = this.bookmark != null,
+        eventZaps = this.eventZaps
+            .map { it.asEventZapUiModel() }
+            .sortedWith(EventZapUiModel.DefaultComparator),
+        authorLegendaryCustomization = this.author.legendProfile?.asLegendaryCustomization(),
+        authorBlossoms = this.author.blossomServers,
+    )
+}
