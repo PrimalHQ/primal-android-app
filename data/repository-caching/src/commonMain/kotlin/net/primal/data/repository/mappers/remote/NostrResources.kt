@@ -45,7 +45,7 @@ private const val NRELAY = "nrelay1"
 private const val NPROFILE = "nprofile1"
 
 private val nostrUriRegexPattern: Regex = Regex(
-    "($NOSTR)?@?($NSEC|$NPUB|$NEVENT|$NADDR|$NOTE|$NPROFILE|$NRELAY)([qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)([\\S]*)",
+    "($NOSTR)?@?($NSEC|$NPUB|$NEVENT|$NADDR|$NOTE|$NPROFILE|$NRELAY)([qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)(\\S*)",
     RegexOption.IGNORE_CASE,
 )
 
