@@ -16,13 +16,11 @@ import kotlinx.coroutines.withContext
 import net.primal.android.articles.ArticleRepository
 import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.navigation.transactionIdOrThrow
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
-import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.wallet.db.WalletTransaction
+import net.primal.android.wallet.db.WalletTransactionData
 import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.details.TransactionDetailsContract.UiState
@@ -59,11 +57,11 @@ class TransactionDetailsViewModel @Inject constructor(
                 walletRepository.findTransactionById(txId = transactionId)
             }
             setState { copy(loading = false, txData = tx?.mapAsTransactionDataUi()) }
-            tx?.data?.zapNoteId?.let {
+            tx?.zapNoteId?.let {
                 observeZappedNote(it)
                 fetchZappedNote(it)
-                observeZappedArticle(articleId = it, articleAuthorId = tx.data.zapNoteAuthorId)
-                fetchZappedArticle(articleId = it, articleAuthorId = tx.data.zapNoteAuthorId)
+                observeZappedArticle(articleId = it, articleAuthorId = tx.zapNoteAuthorId)
+                fetchZappedArticle(articleId = it, articleAuthorId = tx.zapNoteAuthorId)
             }
         }
 
@@ -135,28 +133,29 @@ class TransactionDetailsViewModel @Inject constructor(
             )
         }
 
-    private fun WalletTransaction.mapAsTransactionDataUi() =
+    private fun WalletTransactionData.mapAsTransactionDataUi() =
         TransactionDetailDataUi(
-            txId = this.data.id,
-            txType = this.data.type,
-            txState = this.data.state,
-            txAmountInSats = this.data.amountInBtc.toBigDecimal().abs().toSats(),
-            txAmountInUsd = this.data.amountInUsd,
-            txInstant = Instant.ofEpochSecond(this.data.completedAt ?: this.data.createdAt),
-            txNote = this.data.note,
-            invoice = this.data.invoice,
-            totalFeeInSats = this.data.totalFeeInBtc?.toBigDecimal()?.abs()?.toSats(),
-            exchangeRate = this.data.exchangeRate,
-            onChainAddress = this.data.onChainAddress,
-            onChainTxId = this.data.onChainTxId,
-            otherUserId = this.data.otherUserId,
-            otherUserAvatarCdnImage = this.otherProfileData?.avatarCdnImage,
-            otherUserDisplayName = this.otherProfileData?.authorNameUiFriendly(),
-            otherUserInternetIdentifier = this.otherProfileData?.internetIdentifier,
-            otherUserLightningAddress = this.data.otherLightningAddress,
-            otherUserLegendaryCustomization = this.otherProfileData?.primalPremiumInfo
-                ?.legendProfile?.asLegendaryCustomization(),
-            isZap = this.data.isZap,
-            isStorePurchase = this.data.isStorePurchase,
+            txId = this.id,
+            txType = this.type,
+            txState = this.state,
+            txAmountInSats = this.amountInBtc.toBigDecimal().abs().toSats(),
+            txAmountInUsd = this.amountInUsd,
+            txInstant = Instant.ofEpochSecond(this.completedAt ?: this.createdAt),
+            txNote = this.note,
+            invoice = this.invoice,
+            totalFeeInSats = this.totalFeeInBtc?.toBigDecimal()?.abs()?.toSats(),
+            exchangeRate = this.exchangeRate,
+            onChainAddress = this.onChainAddress,
+            onChainTxId = this.onChainTxId,
+            otherUserId = this.otherUserId,
+            // TODO We need to do TXs and ProfileData merging
+//            otherUserAvatarCdnImage = this.otherProfileData?.avatarCdnImage,
+//            otherUserDisplayName = this.otherProfileData?.authorNameUiFriendly(),
+//            otherUserInternetIdentifier = this.otherProfileData?.internetIdentifier,
+//            otherUserLegendaryCustomization = this.otherProfileData?.primalPremiumInfo
+//                ?.legendProfile?.asLegendaryCustomization(),
+            otherUserLightningAddress = this.otherLightningAddress,
+            isZap = this.isZap,
+            isStorePurchase = this.isStorePurchase,
         )
 }

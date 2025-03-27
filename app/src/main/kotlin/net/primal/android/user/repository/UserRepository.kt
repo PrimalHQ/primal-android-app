@@ -13,7 +13,6 @@ import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.events.repository.asProfileDataDO
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -29,6 +28,7 @@ import net.primal.android.user.accounts.copyFollowListIfNotNull
 import net.primal.android.user.accounts.copyIfNotNull
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.db.Relay
+import net.primal.android.user.db.UsersDatabase
 import net.primal.android.user.domain.ContentDisplaySettings
 import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.RelayKind
@@ -47,6 +47,7 @@ import net.primal.domain.nostr.NostrUnsignedEvent
 
 class UserRepository @Inject constructor(
     private val database: PrimalDatabase,
+    private val usersDatabase: UsersDatabase,
     private val dispatchers: CoroutineDispatcherProvider,
     private val userAccountFetcher: UserAccountFetcher,
     private val accountsStore: UserAccountsStore,
@@ -88,14 +89,17 @@ class UserRepository @Inject constructor(
                 database.messageConversations().deleteAllByOwnerId(ownerId = userId)
                 database.feeds().deleteAllByOwnerId(ownerId = userId)
                 database.mutedUsers().deleteAllByOwnerId(ownerId = userId)
-                database.profileInteractions().deleteAllByOwnerId(ownerId = userId)
-                database.walletTransactions().deleteAllTransactionsByUserId(userId = userId)
                 database.notifications().deleteAllByOwnerId(ownerId = userId)
                 database.articleFeedsConnections().deleteConnections(ownerId = userId)
                 database.feedsConnections().deleteConnections(ownerId = userId)
                 database.feedPostsRemoteKeys().deleteAllByOwnerId(ownerId = userId)
                 database.publicBookmarks().deleteAllBookmarks(userId = userId)
-                database.relays().deleteAll(userId = userId)
+            }
+
+            usersDatabase.withTransaction {
+                usersDatabase.profileInteractions().deleteAllByOwnerId(ownerId = userId)
+                usersDatabase.walletTransactions().deleteAllTransactionsByUserId(userId = userId)
+                usersDatabase.relays().deleteAll(userId = userId)
             }
         }
 
@@ -108,7 +112,7 @@ class UserRepository @Inject constructor(
 
     suspend fun connectNostrWallet(userId: String, nostrWalletConnect: NostrWalletConnect) {
         withContext(dispatchers.io()) {
-            database.relays().upsertAll(
+            usersDatabase.relays().upsertAll(
                 relays = nostrWalletConnect.relays.map {
                     Relay(userId = userId, kind = RelayKind.NwcRelay, url = it, read = false, write = true)
                 },
@@ -121,7 +125,7 @@ class UserRepository @Inject constructor(
 
     suspend fun disconnectNostrWallet(userId: String) {
         withContext(dispatchers.io()) {
-            database.relays().deleteAll(userId = userId, kind = RelayKind.NwcRelay)
+            usersDatabase.relays().deleteAll(userId = userId, kind = RelayKind.NwcRelay)
             accountsStore.getAndUpdateAccount(userId = userId) {
                 copy(nostrWallet = null)
             }
@@ -355,7 +359,7 @@ class UserRepository @Inject constructor(
 
     suspend fun markAsInteracted(profileId: String, ownerId: String) =
         withContext(dispatchers.io()) {
-            database.profileInteractions().upsert(
+            usersDatabase.profileInteractions().upsert(
                 ProfileInteraction(
                     profileId = profileId,
                     lastInteractionAt = Instant.now().epochSecond,
@@ -365,18 +369,20 @@ class UserRepository @Inject constructor(
         }
 
     fun observeRecentUsers(ownerId: String): Flow<List<UserProfileSearchItem>> {
-        return database.profileInteractions()
+        return usersDatabase.profileInteractions()
             .observeRecentProfilesByOwnerId(ownerId = ownerId)
             .map { recentProfiles ->
-                recentProfiles.mapNotNull { profile ->
-                    if (profile.metadata != null) {
-                        UserProfileSearchItem(
-                            metadata = profile.metadata.asProfileDataDO(),
-                            followersCount = profile.stats?.followers,
-                        )
-                    } else {
-                        null
-                    }
+                recentProfiles.mapNotNull { profileInteraction ->
+                    // TODO Fetch from repository-caching the profile data
+//                    if (profile.metadata != null) {
+//                        UserProfileSearchItem(
+//                            metadata = profile.metadata.asProfileDataDO(),
+//                            followersCount = profile.stats?.followers,
+//                        )
+//                    } else {
+//                        null
+//                    }
+                    null
                 }
             }
     }

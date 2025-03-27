@@ -49,8 +49,6 @@ import net.primal.android.notifications.db.NotificationDao
 import net.primal.android.notifications.db.NotificationData
 import net.primal.android.profile.db.ProfileData
 import net.primal.android.profile.db.ProfileDataDao
-import net.primal.android.profile.db.ProfileInteraction
-import net.primal.android.profile.db.ProfileInteractionDao
 import net.primal.android.profile.db.ProfileStats
 import net.primal.android.profile.db.ProfileStatsDao
 import net.primal.android.profile.db.serialization.ProfileTypeConverters
@@ -59,10 +57,6 @@ import net.primal.android.settings.muted.db.MutedUserData
 import net.primal.android.thread.db.ArticleCommentCrossRef
 import net.primal.android.thread.db.NoteConversationCrossRef
 import net.primal.android.thread.db.ThreadConversationDao
-import net.primal.android.user.db.Relay
-import net.primal.android.user.db.RelayDao
-import net.primal.android.wallet.db.WalletTransactionDao
-import net.primal.android.wallet.db.WalletTransactionData
 
 @Database(
     entities = [
@@ -85,16 +79,13 @@ import net.primal.android.wallet.db.WalletTransactionData
         MutedUserData::class,
         DirectMessageData::class,
         MessageConversationData::class,
-        WalletTransactionData::class,
-        Relay::class,
         PublicBookmark::class,
-        ProfileInteraction::class,
         ArticleData::class,
         ArticleCommentCrossRef::class,
         ArticleFeedCrossRef::class,
         HighlightData::class,
     ],
-    version = 60,
+    version = 61,
     exportSchema = true,
 )
 @TypeConverters(
@@ -144,13 +135,7 @@ abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun messageConversations(): MessageConversationDao
 
-    abstract fun walletTransactions(): WalletTransactionDao
-
-    abstract fun relays(): RelayDao
-
     abstract fun publicBookmarks(): PublicBookmarkDao
-
-    abstract fun profileInteractions(): ProfileInteractionDao
 
     abstract fun articles(): ArticleDao
 
