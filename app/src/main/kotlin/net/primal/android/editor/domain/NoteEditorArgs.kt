@@ -2,12 +2,13 @@ package net.primal.android.editor.domain
 
 import androidx.compose.ui.text.input.TextFieldValue
 import kotlinx.serialization.Serializable
+import net.primal.android.nostr.utils.Nevent
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 
 @Serializable
 data class NoteEditorArgs(
-    val referencedNoteId: String? = null,
+    val referencedNoteNevent: String? = null,
     val referencedArticleNaddr: String? = null,
     val referencedHighlightNevent: String? = null,
     val mediaUris: List<String> = emptyList(),

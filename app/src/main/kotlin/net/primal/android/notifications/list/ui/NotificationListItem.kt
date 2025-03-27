@@ -40,6 +40,8 @@ import net.primal.android.core.compose.notifications.toImagePainter
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.shortened
+import net.primal.android.nostr.utils.Nevent
+import net.primal.android.nostr.utils.Nip19TLV.toNeventString
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
@@ -52,6 +54,7 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme.Sunset
+import net.primal.domain.nostr.NostrEventKind
 
 @Composable
 fun NotificationListItem(
@@ -102,7 +105,14 @@ fun NotificationListItem(
         onPostAction = { postAction ->
             if (postData != null) {
                 when (postAction) {
-                    FeedPostAction.Reply -> if (onReplyClick != null) onReplyClick(postData.postId)
+                    FeedPostAction.Reply -> if (onReplyClick != null) onReplyClick(
+                        Nevent(
+                            eventId = postData.postId,
+                            kind = NostrEventKind.ShortTextNote.value,
+                            userId = postData.authorId,
+                            relays = emptyList()
+                        ).
+                        toNeventString())
                     FeedPostAction.Zap -> onDefaultZapClick?.invoke(postData)
                     FeedPostAction.Like -> onPostLikeClick?.invoke(postData)
                     FeedPostAction.Repost -> onRepostClick?.invoke(postData)

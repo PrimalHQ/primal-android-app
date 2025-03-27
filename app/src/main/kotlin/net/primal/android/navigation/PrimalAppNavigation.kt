@@ -314,11 +314,13 @@ fun accountSwitcherCallbacksHandler(navController: NavController) =
 fun noteCallbacksHandler(navController: NavController) =
     NoteCallbacks(
         onNoteClick = { noteId -> navController.navigateToThread(noteId = noteId) },
-        onNoteReplyClick = { noteId -> navController.navigateToNoteEditor(NoteEditorArgs(referencedNoteId = noteId)) },
-        onNoteQuoteClick = { noteId ->
+        onNoteReplyClick = { referencedNoteId ->
+            navController.navigateToNoteEditor(NoteEditorArgs(referencedNoteNevent = referencedNoteId))
+        },
+        onNoteQuoteClick = { referencedNoteId ->
             navController.navigateToNoteEditor(
                 args = NoteEditorArgs(
-                    referencedNoteId = noteId,
+                    referencedNoteNevent = referencedNoteId,
                     isQuoting = true,
                 ),
             )
