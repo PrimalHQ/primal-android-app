@@ -8,12 +8,14 @@ import net.primal.data.repository.events.EventInteractionRepositoryImpl
 import net.primal.data.repository.events.EventRepositoryImpl
 import net.primal.data.repository.events.EventUriRepositoryImpl
 import net.primal.data.repository.feed.FeedRepositoryImpl
+import net.primal.data.repository.profile.ProfileRepositoryImpl
 import net.primal.domain.PrimalServerType
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.repository.EventInteractionRepository
 import net.primal.domain.repository.EventRepository
 import net.primal.domain.repository.EventUriRepository
 import net.primal.domain.repository.FeedRepository
+import net.primal.domain.repository.ProfileRepository
 
 object IosRepositoryFactory : RepositoryFactory {
 
@@ -51,6 +53,16 @@ object IosRepositoryFactory : RepositoryFactory {
             dispatcherProvider = dispatcherProvider,
             primalPublisher = primalPublisher,
             database = cachingDatabase,
+        )
+    }
+
+    override fun createProfileRepository(primalPublisher: PrimalPublisher): ProfileRepository {
+        return ProfileRepositoryImpl(
+            dispatcherProvider = dispatcherProvider,
+            database = cachingDatabase,
+            usersApi = PrimalApiServiceFactory.createUsersApi(cachingPrimalApiClient),
+            wellKnownApi = PrimalApiServiceFactory.createUserWellKnownApi(),
+            primalPublisher = primalPublisher,
         )
     }
 }

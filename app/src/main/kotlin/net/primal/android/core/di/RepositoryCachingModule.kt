@@ -10,6 +10,7 @@ import net.primal.domain.repository.EventInteractionRepository
 import net.primal.domain.repository.EventRepository
 import net.primal.domain.repository.EventUriRepository
 import net.primal.domain.repository.FeedRepository
+import net.primal.domain.repository.ProfileRepository
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -27,4 +28,8 @@ object RepositoryCachingModule {
     @Provides
     fun provideEventInteractionRepository(primalPublisher: PrimalPublisher): EventInteractionRepository =
         PrimalRepositoryFactory.createEventInteractionRepository(primalPublisher)
+
+    @Provides
+    fun provideProfileRepository(primalPublisher: PrimalPublisher): ProfileRepository =
+        PrimalRepositoryFactory.createProfileRepository(primalPublisher)
 }

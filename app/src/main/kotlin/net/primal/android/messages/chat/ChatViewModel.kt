@@ -35,10 +35,10 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -101,9 +101,9 @@ class ChatViewModel @Inject constructor(
 
     private fun observeParticipant() =
         viewModelScope.launch {
-            profileRepository.observeProfile(profileId = participantId).collect {
+            profileRepository.observeProfileData(profileId = participantId).collect {
                 setState {
-                    copy(participantProfile = it.metadata?.asProfileDetailsUi() ?: this.participantProfile)
+                    copy(participantProfile = it.asProfileDetailsUi())
                 }
             }
         }

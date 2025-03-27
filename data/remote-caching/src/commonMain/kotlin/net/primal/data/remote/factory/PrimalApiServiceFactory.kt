@@ -1,7 +1,6 @@
 package net.primal.data.remote.factory
 
 import de.jensklingenberg.ktorfit.Ktorfit
-import io.ktor.client.HttpClient
 import net.primal.core.networking.factory.HttpClientFactory
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.data.remote.api.articles.ArticlesApi
@@ -48,10 +47,10 @@ object PrimalApiServiceFactory {
 
     fun createUsersApi(primalApiClient: PrimalApiClient): UsersApi = UsersApiImpl(primalApiClient)
 
-    fun createUserWellKnownApi(httpClient: HttpClient = defaultHttpClient): UserWellKnownApi =
+    fun createUserWellKnownApi(): UserWellKnownApi =
         Ktorfit.Builder()
             .baseUrl("https://primal.net/")
-            .httpClient(client = httpClient)
+            .httpClient(client = defaultHttpClient)
             .build()
             .createUserWellKnownApi()
 }

@@ -19,8 +19,6 @@ import net.primal.android.navigation.draftTransaction
 import net.primal.android.navigation.lnbc
 import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
-import net.primal.android.profile.db.ProfileData
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.scanner.analysis.WalletTextParser
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.api.model.MiningFeeTier
@@ -39,6 +37,8 @@ import net.primal.android.wallet.utils.CurrencyConversionUtils.fromUsdToSats
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.isLightningAddress
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.model.ProfileData
+import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -178,7 +178,7 @@ class CreateTransactionViewModel @Inject constructor(
             state.value.transaction.targetUserId?.let { targetUserId ->
                 try {
                     withContext(dispatchers.io()) {
-                        profileRepository.requestProfileUpdate(profileId = targetUserId)
+                        profileRepository.fetchProfile(profileId = targetUserId)
                     }
                 } catch (error: WssException) {
                     Timber.w(error)
@@ -261,8 +261,8 @@ class CreateTransactionViewModel @Inject constructor(
     private fun observeProfileData() =
         viewModelScope.launch {
             state.value.transaction.targetUserId?.let { targetUserId ->
-                profileRepository.observeProfile(targetUserId).collect { profile ->
-                    profile.metadata?.updateStateWithProfileData()
+                profileRepository.observeProfileData(targetUserId).collect { profile ->
+                    profile.updateStateWithProfileData()
                 }
             }
         }

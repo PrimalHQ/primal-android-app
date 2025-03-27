@@ -1,4 +1,4 @@
-package net.primal.android.profile.report
+package net.primal.domain.nostr
 
 enum class ReportType(val id: String) {
     Nudity(id = "nudity"),

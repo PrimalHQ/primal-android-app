@@ -23,10 +23,10 @@ import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.profile.follows.ProfileFollowsContract.UiEvent
 import net.primal.android.profile.follows.ProfileFollowsContract.UiState
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel
