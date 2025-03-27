@@ -33,14 +33,14 @@ import net.primal.android.nostr.ext.isATag
 import net.primal.android.nostr.ext.isEventIdTag
 import net.primal.android.nostr.ext.toNevent
 import net.primal.android.nostr.publish.NostrPublisher
-import net.primal.android.nostr.utils.Naddr
-import net.primal.android.nostr.utils.Nevent
-import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
-import net.primal.android.nostr.utils.Nip19TLV.toNeventString
-import net.primal.android.nostr.utils.asATagValue
 import net.primal.android.notes.db.PostDao
 import net.primal.android.notes.db.PostData
+import net.primal.domain.nostr.Naddr
+import net.primal.domain.nostr.Nevent
+import net.primal.domain.nostr.Nip19TLV.toNaddrString
+import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.asATagValue
 import org.junit.Rule
 import org.junit.Test
 

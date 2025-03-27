@@ -31,7 +31,6 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.extractProfileId
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
-import net.primal.android.nostr.utils.Nip19TLV
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
@@ -48,6 +47,7 @@ import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.FEED_KIND_USER
 import net.primal.domain.FeedSpecKind
 import net.primal.domain.buildLatestNotesUserFeedSpec
+import net.primal.domain.nostr.Nip19TLV
 import timber.log.Timber
 
 @HiltViewModel

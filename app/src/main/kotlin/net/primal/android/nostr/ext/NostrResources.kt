@@ -13,10 +13,6 @@ import net.primal.android.crypto.toHex
 import net.primal.android.events.db.EventUriNostr
 import net.primal.android.events.ext.flatMapPostsAsEventUriPO
 import net.primal.android.messages.db.DirectMessageData
-import net.primal.android.nostr.utils.Naddr
-import net.primal.android.nostr.utils.Nevent
-import net.primal.android.nostr.utils.Nip19TLV
-import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
 import net.primal.android.notes.db.PostData
 import net.primal.android.notes.db.ReferencedArticle
 import net.primal.android.notes.db.ReferencedHighlight
@@ -28,6 +24,10 @@ import net.primal.android.wallet.utils.LnInvoiceUtils
 import net.primal.domain.CdnResource
 import net.primal.domain.EventLinkPreviewData
 import net.primal.domain.EventUriNostrType
+import net.primal.domain.nostr.Naddr
+import net.primal.domain.nostr.Nevent
+import net.primal.domain.nostr.Nip19TLV
+import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import timber.log.Timber
