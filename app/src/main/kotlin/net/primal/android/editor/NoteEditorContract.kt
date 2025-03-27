@@ -32,8 +32,14 @@ interface NoteEditorContract {
         val recentUsers: List<UserProfileItemUi> = emptyList(),
         val popularUsers: List<UserProfileItemUi> = emptyList(),
         val fetchingNoteThread: Boolean = false,
+        val quotedNoteId: String? = null,
     ) {
-        val isReply: Boolean get() = conversation.isNotEmpty()
+        val isReply: Boolean
+            get() = if (conversation.size == 1 && conversation.first().postId == quotedNoteId) {
+                false
+            } else {
+                conversation.isNotEmpty()
+            }
         val replyToNote: FeedPostUi? = conversation.lastOrNull()
         val recommendedUsers: List<UserProfileItemUi> get() = recentUsers + popularUsers
         sealed class NoteEditorError {

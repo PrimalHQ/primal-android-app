@@ -114,6 +114,7 @@ class NoteEditorViewModel @AssistedInject constructor(
             setStateFromArgs()
 
             if (referencedNoteNevent != null) {
+                setState { copy(quotedNoteId = referencedNoteNevent.eventId) }
                 fetchNoteThreadFromNetwork(referencedNoteNevent.eventId)
                 observeThreadConversation(referencedNoteNevent.eventId)
                 observeArticleByCommentId(replyToNoteId = referencedNoteNevent.eventId)
@@ -211,6 +212,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                 .collect { conversation ->
                     val replyToNoteIndex = conversation.indexOfFirst { it.postId == replyToNoteId }
                     val thread = conversation.subList(0, replyToNoteIndex + 1)
+                    Timber.tag("replyingCheck").i(thread.toString())
                     setState { copy(conversation = thread) }
                 }
         }

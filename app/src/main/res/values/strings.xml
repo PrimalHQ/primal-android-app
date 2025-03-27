@@ -512,8 +512,10 @@
 
     <string name="note_editor_post_publish_button">Post</string>
     <string name="note_editor_reply_publish_button">Reply</string>
+    <string name="note_editor_quote_publish_button">Quote</string>
     <string name="note_editor_post_publishing_button">Posting…</string>
     <string name="note_editor_reply_publishing_button">Replying…</string>
+    <string name="note_editor_quoting_publishing_button">Quoting…</string>
     <string name="note_editor_uploading_attachments">Uploading…</string>
     <string name="note_editor_content_placeholder">Type your note here…</string>
     <string name="note_editor_nostr_publish_error">Unable to publish your note to Nostr. Please try again soon.</string>
