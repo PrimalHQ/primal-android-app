@@ -19,8 +19,8 @@ import net.primal.android.nostr.ext.parseHashtagTags
 import net.primal.android.nostr.ext.parsePubkeyTags
 import net.primal.android.nostr.ext.parseReplaceableEventTags
 import net.primal.android.nostr.publish.NostrPublisher
-import net.primal.android.nostr.utils.Naddr
-import net.primal.android.nostr.utils.Nevent
+import net.primal.domain.nostr.Naddr
+import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.publisher.PrimalPublishResult

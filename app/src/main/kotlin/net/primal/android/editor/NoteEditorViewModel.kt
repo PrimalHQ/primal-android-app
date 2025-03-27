@@ -49,13 +49,6 @@ import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.nostr.repository.RelayHintsRepository
-import net.primal.android.nostr.utils.MAX_RELAY_HINTS
-import net.primal.android.nostr.utils.Naddr
-import net.primal.android.nostr.utils.Nevent
-import net.primal.android.nostr.utils.Nip19TLV
-import net.primal.android.nostr.utils.Nip19TLV.toNeventString
-import net.primal.android.nostr.utils.Nip19TLV.toNprofileString
-import net.primal.android.nostr.utils.Nprofile
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.notes.repository.FeedRepository
@@ -65,7 +58,14 @@ import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.nostr.MAX_RELAY_HINTS
+import net.primal.domain.nostr.Naddr
+import net.primal.domain.nostr.Nevent
+import net.primal.domain.nostr.Nip19TLV
+import net.primal.domain.nostr.Nip19TLV.toNeventString
+import net.primal.domain.nostr.Nip19TLV.toNprofileString
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.Nprofile
 import net.primal.domain.upload.UploadJob
 import timber.log.Timber
 

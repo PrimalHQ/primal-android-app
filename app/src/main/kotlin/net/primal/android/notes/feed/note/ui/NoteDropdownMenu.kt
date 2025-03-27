@@ -40,12 +40,12 @@ import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.resolvePrimalNoteLink
 import net.primal.android.core.utils.systemShareImage
 import net.primal.android.core.utils.systemShareText
-import net.primal.android.nostr.utils.Nevent
-import net.primal.android.nostr.utils.Nip19TLV.toNeventString
-import net.primal.android.nostr.utils.Nip19TLV.toNprofileString
-import net.primal.android.nostr.utils.Nprofile
 import net.primal.android.theme.AppTheme
+import net.primal.domain.nostr.Nevent
+import net.primal.domain.nostr.Nip19TLV.toNeventString
+import net.primal.domain.nostr.Nip19TLV.toNprofileString
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.Nprofile
 
 @Composable
 fun NoteDropdownMenuIcon(

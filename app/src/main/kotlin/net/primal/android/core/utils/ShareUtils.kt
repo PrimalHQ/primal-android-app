@@ -9,10 +9,10 @@ import java.io.File
 import java.io.FileOutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.primal.android.nostr.utils.Nevent
-import net.primal.android.nostr.utils.Nip19TLV.toNeventString
-import net.primal.android.nostr.utils.Nip19TLV.toNprofileString
-import net.primal.android.nostr.utils.Nprofile
+import net.primal.domain.nostr.Nevent
+import net.primal.domain.nostr.Nip19TLV.toNeventString
+import net.primal.domain.nostr.Nip19TLV.toNprofileString
+import net.primal.domain.nostr.Nprofile
 
 fun systemShareText(context: Context, text: String) {
     val sendIntent: Intent = Intent().apply {
