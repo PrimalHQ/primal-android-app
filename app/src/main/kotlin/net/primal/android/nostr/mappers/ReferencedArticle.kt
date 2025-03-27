@@ -1,29 +1,10 @@
-package net.primal.android.notes.db
+package net.primal.android.nostr.mappers
 
 import java.time.Instant
-import kotlinx.serialization.Serializable
 import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
-import net.primal.domain.CdnImage
-import net.primal.domain.PrimalLegendProfile
-
-@Serializable
-data class ReferencedArticle(
-    val naddr: String,
-    val aTag: String,
-    val eventId: String,
-    val articleId: String,
-    val articleTitle: String,
-    val authorId: String,
-    val authorName: String,
-    val authorAvatarCdnImage: CdnImage?,
-    val authorLegendProfile: PrimalLegendProfile?,
-    val createdAt: Long,
-    val raw: String,
-    val articleImageCdnImage: CdnImage? = null,
-    val articleReadingTimeInMinutes: Int? = null,
-)
+import net.primal.domain.ReferencedArticle
 
 fun ReferencedArticle.asFeedArticleUi() =
     FeedArticleUi(

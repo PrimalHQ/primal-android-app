@@ -83,7 +83,7 @@ import net.primal.android.editor.ui.NoteAttachmentPreview
 import net.primal.android.editor.ui.NoteOutlinedTextField
 import net.primal.android.editor.ui.NoteTagUserLazyColumn
 import net.primal.android.highlights.model.HighlightUi
-import net.primal.android.notes.db.toReferencedHighlight
+import net.primal.android.nostr.mappers.toReferencedHighlight
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.notes.feed.note.ui.FeedNoteHeader

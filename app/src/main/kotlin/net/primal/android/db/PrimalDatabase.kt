@@ -23,6 +23,7 @@ import net.primal.android.events.db.EventUserStatsDao
 import net.primal.android.events.db.EventZap
 import net.primal.android.events.db.EventZapDao
 import net.primal.android.events.db.serialization.EventUriTypeConverters
+import net.primal.android.events.db.serialization.NostrReferenceTypeConverters
 import net.primal.android.explore.db.TrendingTopic
 import net.primal.android.explore.db.TrendingTopicDao
 import net.primal.android.feeds.db.Feed
@@ -93,10 +94,11 @@ import net.primal.android.wallet.db.WalletTransactionData
         ArticleFeedCrossRef::class,
         HighlightData::class,
     ],
-    version = 59,
+    version = 60,
     exportSchema = true,
 )
 @TypeConverters(
+    NostrReferenceTypeConverters::class,
     ListsTypeConverters::class,
     JsonTypeConverters::class,
     EventUriTypeConverters::class,

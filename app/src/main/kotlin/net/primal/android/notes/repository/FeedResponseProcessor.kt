@@ -3,13 +3,13 @@ package net.primal.android.notes.repository
 import androidx.room.withTransaction
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.events.db.EventUriNostr
 import net.primal.android.events.ext.flatMapPostsAsEventUriPO
 import net.primal.android.nostr.db.eventRelayHintsUpserter
 import net.primal.android.nostr.ext.flatMapAsEventHintsPO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.flatMapNotNullAsLinkPreviewResource
 import net.primal.android.nostr.ext.flatMapNotNullAsVideoThumbnailsMap
-import net.primal.android.nostr.ext.flatMapPostsAsNoteNostrUriPO
 import net.primal.android.nostr.ext.mapAsEventZapDO
 import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.android.nostr.ext.mapAsPostDataPO
@@ -86,15 +86,17 @@ suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database
 
     val refEvents = referencedEvents.mapNotNull { CommonJson.decodeFromStringOrNull<NostrEvent>(it.content) }
 
-    val noteNostrUris = allPosts.flatMapPostsAsNoteNostrUriPO(
-        eventIdToNostrEvent = refEvents.associateBy { it.id },
-        postIdToPostDataMap = allPosts.groupBy { it.postId }.mapValues { it.value.first() },
-        articleIdToArticle = allArticles.groupBy { it.articleId }.mapValues { it.value.first() },
-        profileIdToProfileDataMap = profileIdToProfileDataMap,
-        cdnResources = cdnResources,
-        videoThumbnails = videoThumbnails,
-        linkPreviews = linkPreviews,
-    )
+    // TODO When ported to repository-caching, use: flatMapPostsAsReferencedNostrUriDO
+//    val noteNostrUris = allPosts.flatMapPostsAsNoteNostrUriPO(
+//        eventIdToNostrEvent = refEvents.associateBy { it.id },
+//        postIdToPostDataMap = allPosts.groupBy { it.postId }.mapValues { it.value.first() },
+//        articleIdToArticle = allArticles.groupBy { it.articleId }.mapValues { it.value.first() },
+//        profileIdToProfileDataMap = profileIdToProfileDataMap,
+//        cdnResources = cdnResources,
+//        videoThumbnails = videoThumbnails,
+//        linkPreviews = linkPreviews,
+//    )
+    val noteNostrUris = emptyList<EventUriNostr>()
 
     val eventZaps = zaps.mapAsEventZapDO(profilesMap = profiles.associateBy { it.ownerId })
     val reposts = reposts.mapNotNullAsRepostDataPO()

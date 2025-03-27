@@ -1,18 +1,9 @@
-package net.primal.android.notes.db
+package net.primal.android.nostr.mappers
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.highlights.model.HighlightUi
 import net.primal.android.nostr.ext.asReplaceableEventTag
-
-@Serializable
-data class ReferencedHighlight(
-    val text: String,
-    val eventId: String?,
-    val authorId: String?,
-    val aTag: JsonArray,
-)
+import net.primal.domain.ReferencedHighlight
 
 fun HighlightUi.toReferencedHighlight() =
     ReferencedHighlight(

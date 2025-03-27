@@ -3,6 +3,8 @@ package net.primal.android.user.repository
 import androidx.room.withTransaction
 import java.time.Instant
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.JsonArray
@@ -11,6 +13,7 @@ import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.events.repository.asProfileDataDO
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -37,6 +40,7 @@ import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.data.remote.api.users.UsersApi
+import net.primal.domain.UserProfileSearchItem
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
@@ -359,6 +363,23 @@ class UserRepository @Inject constructor(
                 ),
             )
         }
+
+    fun observeRecentUsers(ownerId: String): Flow<List<UserProfileSearchItem>> {
+        return database.profileInteractions()
+            .observeRecentProfilesByOwnerId(ownerId = ownerId)
+            .map { recentProfiles ->
+                recentProfiles.mapNotNull { profile ->
+                    if (profile.metadata != null) {
+                        UserProfileSearchItem(
+                            metadata = profile.metadata.asProfileDataDO(),
+                            followersCount = profile.stats?.followers,
+                        )
+                    } else {
+                        null
+                    }
+                }
+            }
+    }
 
     class FollowListNotFound : Exception()
 }

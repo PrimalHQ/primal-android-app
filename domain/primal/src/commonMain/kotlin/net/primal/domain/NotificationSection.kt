@@ -1,4 +1,4 @@
-package net.primal.android.notifications.domain
+package net.primal.domain
 
 enum class NotificationSection {
     CORE_NOTIFICATIONS,

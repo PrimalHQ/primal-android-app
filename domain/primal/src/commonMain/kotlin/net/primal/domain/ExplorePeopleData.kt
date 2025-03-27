@@ -1,9 +1,9 @@
-package net.primal.android.explore.api.model
+package net.primal.domain
 
-import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.domain.model.ProfileData
 
 data class ExplorePeopleData(
-    val profile: ProfileDetailsUi,
+    val profile: ProfileData,
     val userScore: Float,
     val userFollowersCount: Int,
     val followersIncrease: Int,
