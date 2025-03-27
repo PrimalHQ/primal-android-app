@@ -1,33 +1,13 @@
-package net.primal.android.notes.db
+package net.primal.android.nostr.mappers
 
 import java.time.Instant
-import kotlinx.serialization.Serializable
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
 import net.primal.android.core.utils.parseHashtags
-import net.primal.android.events.db.EventUri
-import net.primal.android.events.db.EventUriNostr
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
-import net.primal.domain.CdnImage
-import net.primal.domain.PrimalLegendProfile
-
-@Serializable
-data class ReferencedNote(
-    val postId: String,
-    val createdAt: Long,
-    val content: String,
-    val authorId: String,
-    val authorName: String,
-    val authorAvatarCdnImage: CdnImage?,
-    val authorInternetIdentifier: String?,
-    val authorLightningAddress: String?,
-    val authorLegendProfile: PrimalLegendProfile?,
-    val attachments: List<EventUri>,
-    val nostrUris: List<EventUriNostr>,
-    val raw: String,
-)
+import net.primal.domain.ReferencedNote
 
 fun ReferencedNote.asFeedPostUi() =
     FeedPostUi(

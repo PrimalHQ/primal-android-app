@@ -1,17 +1,15 @@
 package net.primal.android.events.db
 
-import androidx.room.ColumnInfo
-import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
-import net.primal.android.notes.db.ReferencedArticle
-import net.primal.android.notes.db.ReferencedHighlight
-import net.primal.android.notes.db.ReferencedNote
-import net.primal.android.notes.db.ReferencedUser
-import net.primal.android.notes.db.ReferencedZap
 import net.primal.domain.EventUriNostrType
+import net.primal.domain.ReferencedArticle
+import net.primal.domain.ReferencedHighlight
+import net.primal.domain.ReferencedNote
+import net.primal.domain.ReferencedUser
+import net.primal.domain.ReferencedZap
 
 @Entity(indices = [Index(value = ["eventId", "uri"], unique = true)])
 @Serializable
@@ -21,10 +19,10 @@ data class EventUriNostr(
     val eventId: String,
     val uri: String,
     val type: EventUriNostrType,
-    @ColumnInfo("refEvent_alt") val referencedEventAlt: String? = null,
-    @Embedded(prefix = "refHighlight_") val referencedHighlight: ReferencedHighlight? = null,
-    @Embedded(prefix = "refNote_") val referencedNote: ReferencedNote? = null,
-    @Embedded(prefix = "refArticle_") val referencedArticle: ReferencedArticle? = null,
-    @Embedded(prefix = "refUser_") val referencedUser: ReferencedUser? = null,
-    @Embedded(prefix = "refZap_") val referencedZap: ReferencedZap? = null,
+    val referencedEventAlt: String? = null,
+    val referencedHighlight: ReferencedHighlight? = null,
+    val referencedNote: ReferencedNote? = null,
+    val referencedArticle: ReferencedArticle? = null,
+    val referencedUser: ReferencedUser? = null,
+    val referencedZap: ReferencedZap? = null,
 )

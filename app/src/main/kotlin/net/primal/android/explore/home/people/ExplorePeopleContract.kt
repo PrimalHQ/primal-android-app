@@ -2,7 +2,7 @@ package net.primal.android.explore.home.people
 
 import net.primal.android.core.compose.profile.approvals.ProfileApproval
 import net.primal.android.core.errors.UiError
-import net.primal.android.explore.api.model.ExplorePeopleData
+import net.primal.domain.ExplorePeopleData
 
 interface ExplorePeopleContract {
 

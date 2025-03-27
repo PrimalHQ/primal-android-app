@@ -80,7 +80,7 @@ class SearchViewModel @Inject constructor(
 
     private fun observeRecentUsers() {
         viewModelScope.launch {
-            exploreRepository.observeRecentUsers(ownerId = activeAccountStore.activeUserId())
+            userRepository.observeRecentUsers(ownerId = activeAccountStore.activeUserId())
                 .distinctUntilChanged()
                 .collect {
                     setState { copy(recentUsers = it.map { it.mapAsUserProfileUi() }) }

@@ -1,13 +1,8 @@
-package net.primal.android.notifications.db
+package net.primal.domain.model
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import net.primal.domain.NotificationType
 
-@Entity
-data class NotificationData(
-    @PrimaryKey
-    val notificationId: String,
+data class Notification(
     val ownerId: String,
     val createdAt: Long,
     val type: NotificationType,
@@ -15,4 +10,6 @@ data class NotificationData(
     val actionUserId: String? = null,
     val actionPostId: String? = null,
     val satsZapped: Long? = null,
+    val actionByUser: ProfileData?,
+    val actionOnPost: FeedPost?,
 )

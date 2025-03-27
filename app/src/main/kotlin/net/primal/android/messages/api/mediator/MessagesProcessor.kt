@@ -8,7 +8,6 @@ import net.primal.android.events.ext.flatMapMessagesAsEventUriPO
 import net.primal.android.messages.db.DirectMessageData
 import net.primal.android.nostr.ext.extractNoteId
 import net.primal.android.nostr.ext.extractProfileId
-import net.primal.android.nostr.ext.flatMapMessagesAsNostrResourcePO
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.isNostrUri
 import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
@@ -142,15 +141,17 @@ class MessagesProcessor @Inject constructor(
             .mapValues { it.value.first() }
 
         database.eventUris().upsertAllEventNostrUris(
-            data = messageDataList.flatMapMessagesAsNostrResourcePO(
-                eventIdToNostrEvent = emptyMap(),
-                postIdToPostDataMap = referencedNotesMap,
-                articleIdToArticle = emptyMap(),
-                profileIdToProfileDataMap = referencedProfilesMap,
-                cdnResources = emptyMap(),
-                linkPreviews = emptyMap(),
-                videoThumbnails = emptyMap(),
-            ),
+            // TODO When ported to repository-caching, use: flatMapPostsAsReferencedNostrUriDO
+//            data = messageDataList.flatMapMessagesAsNostrResourcePO(
+//                eventIdToNostrEvent = emptyMap(),
+//                postIdToPostDataMap = referencedNotesMap,
+//                articleIdToArticle = emptyMap(),
+//                profileIdToProfileDataMap = referencedProfilesMap,
+//                cdnResources = emptyMap(),
+//                linkPreviews = emptyMap(),
+//                videoThumbnails = emptyMap(),
+//            ),
+            data = emptyList(),
         )
     }
 }

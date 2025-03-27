@@ -3,6 +3,7 @@ package net.primal.android.explore.home.zaps
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Instant
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
-import net.primal.android.explore.domain.ExploreZapNoteData
 import net.primal.android.explore.home.zaps.ExploreZapsContract.UiEvent
 import net.primal.android.explore.home.zaps.ExploreZapsContract.UiState
 import net.primal.android.explore.home.zaps.ui.ExploreZapNoteUi
@@ -19,6 +19,7 @@ import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.ExploreZapNoteData
 import timber.log.Timber
 
 @HiltViewModel
@@ -70,7 +71,7 @@ class ExploreZapsViewModel @Inject constructor(
                 receiver = zapData.receiver?.asProfileDetailsUi(),
                 amountSats = zapData.amountSats,
                 zapMessage = zapData.zapMessage,
-                createdAt = zapData.createdAt,
+                createdAt = Instant.ofEpochSecond(zapData.createdAt.epochSeconds),
                 noteContentUi = zapData.noteData.toNoteContentUi(
                     nostrUris = zapData.noteNostrUris.map { it.asNoteNostrUriUi() },
                 ).copy(hashtags = emptyList()),
