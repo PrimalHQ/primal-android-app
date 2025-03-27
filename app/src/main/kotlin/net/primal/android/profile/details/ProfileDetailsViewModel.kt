@@ -26,7 +26,6 @@ import net.primal.android.crypto.bech32ToHexOrThrow
 import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.navigation.primalName
 import net.primal.android.navigation.profileId
-import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.extractProfileId
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
@@ -34,7 +33,6 @@ import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
-import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.domain.ZapTarget
@@ -47,6 +45,8 @@ import net.primal.domain.FEED_KIND_USER
 import net.primal.domain.FeedSpecKind
 import net.primal.domain.buildLatestNotesUserFeedSpec
 import net.primal.domain.nostr.Nip19TLV
+import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.repository.MutedUserRepository
 import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 
