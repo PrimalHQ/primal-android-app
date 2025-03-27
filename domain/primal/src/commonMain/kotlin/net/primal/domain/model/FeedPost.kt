@@ -18,4 +18,5 @@ data class FeedPost(
     val links: List<EventLink> = emptyList(),
     val nostrUris: List<EventUriNostrReference> = emptyList(),
     val eventZaps: List<EventZap> = emptyList(),
+    val bookmark: PublicBookmark? = null,
 )

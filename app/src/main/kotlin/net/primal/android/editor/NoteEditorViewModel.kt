@@ -51,7 +51,6 @@ import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.nostr.repository.RelayHintsRepository
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asFeedPostUi
-import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
@@ -66,6 +65,7 @@ import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.Nip19TLV.toNprofileString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.Nprofile
+import net.primal.domain.repository.FeedRepository
 import net.primal.domain.upload.UploadJob
 import timber.log.Timber
 

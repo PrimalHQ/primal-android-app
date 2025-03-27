@@ -42,6 +42,19 @@ internal class FeedRepositoryImpl(
         }.flow.map { it.map { feedPostPO -> feedPostPO.mapAsFeedPostDO() } }
     }
 
+    override suspend fun findNewestPosts(
+        userId: String,
+        feedDirective: String,
+        limit: Int,
+    ) = withContext(dispatcherProvider.io()) {
+        database.feedPosts().newestFeedPosts(
+            query = feedQueryBuilder(
+                userId = userId,
+                feedSpec = feedDirective,
+            ).newestFeedPostsQuery(limit = limit),
+        ).map { it.mapAsFeedPostDO() }
+    }
+
     override suspend fun findAllPostsByIds(postIds: List<String>): List<FeedPostDO> =
         withContext(dispatcherProvider.io()) {
             database.feedPosts().findAllPostsByIds(postIds).map { it.mapAsFeedPostDO() }
@@ -58,6 +71,20 @@ internal class FeedRepositoryImpl(
             response.persistToDatabaseAsTransaction(userId = userId, database = database)
         }
     }
+
+    override suspend fun fetchReplies(userId: String, noteId: String) =
+        withContext(dispatcherProvider.io()) {
+            val response = feedApi.getThread(ThreadRequestBody(postId = noteId, userPubKey = userId, limit = 100))
+            response.persistNoteRepliesAndArticleCommentsToDatabase(noteId = noteId, database = database)
+            response.persistToDatabaseAsTransaction(userId = userId, database = database)
+        }
+
+    override suspend fun removeFeedSpec(userId: String, feedSpec: String) =
+        withContext(dispatcherProvider.io()) {
+            database.feedPostsRemoteKeys().deleteByDirective(ownerId = userId, directive = feedSpec)
+            database.feedsConnections().deleteConnectionsByDirective(ownerId = userId, feedSpec = feedSpec)
+            database.articleFeedsConnections().deleteConnectionsBySpec(ownerId = userId, spec = feedSpec)
+        }
 
     override suspend fun findConversation(userId: String, noteId: String): List<FeedPostDO> {
         return observeConversation(userId = userId, noteId = noteId).firstOrNull() ?: emptyList()
