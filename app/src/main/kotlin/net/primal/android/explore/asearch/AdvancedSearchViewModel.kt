@@ -27,7 +27,7 @@ import net.primal.android.navigation.advSearchScope
 import net.primal.android.navigation.initialQuery
 import net.primal.android.navigation.postedBy
 import net.primal.android.navigation.searchKind
-import net.primal.android.profile.repository.ProfileRepository
+import net.primal.domain.repository.ProfileRepository
 
 @HiltViewModel
 class AdvancedSearchViewModel @Inject constructor(
@@ -102,7 +102,7 @@ class AdvancedSearchViewModel @Inject constructor(
     private fun fetchInitialPostedBy() =
         viewModelScope.launch {
             initialPostedBy?.let {
-                val profiles = profileRepository.findProfilesData(initialPostedBy)
+                val profiles = profileRepository.findProfileData(initialPostedBy)
                 setState { copy(postedBy = profiles.map { it.asUserProfileItemUi() }.toSet()) }
             }
         }
@@ -113,7 +113,7 @@ class AdvancedSearchViewModel @Inject constructor(
             val searchParams = listOf(
                 uiState.searchKind.toSearchCommand(),
                 uiState.includedWords,
-                uiState.excludedWords?.let { it.split(" ").map { "-$it" }.joinToString(separator = " ") },
+                uiState.excludedWords?.let { it.split(" ").joinToString(separator = " ") { "-$it" } },
                 uiState.postedBy.joinWithPrefix("from:"),
                 uiState.replyingTo.joinWithPrefix("to:"),
                 uiState.zappedBy.joinWithPrefix("zappedby:"),

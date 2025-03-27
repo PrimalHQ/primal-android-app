@@ -1,78 +1,89 @@
-package net.primal.android.profile.repository
+package net.primal.data.repository.profile
 
-import androidx.room.withTransaction
-import javax.inject.Inject
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.ext.asMapByKey
-import net.primal.android.db.PrimalDatabase
-import net.primal.android.events.repository.asProfileDataDO
-import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.ext.asEventIdTag
-import net.primal.android.nostr.ext.asProfileDataPO
-import net.primal.android.nostr.ext.asProfileStatsPO
-import net.primal.android.nostr.ext.asPubkeyTag
-import net.primal.android.nostr.ext.asReplaceableEventTag
-import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
-import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
-import net.primal.android.nostr.ext.mapAsProfileDataPO
-import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
-import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
-import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
-import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
-import net.primal.android.nostr.notary.exceptions.SignException
-import net.primal.android.profile.db.ProfileData
-import net.primal.android.profile.report.ReportType
 import net.primal.core.networking.utils.retryNetworkCall
+import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.explore.model.UsersResponse
 import net.primal.data.remote.api.users.UserWellKnownApi
 import net.primal.data.remote.api.users.UsersApi
+import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
+import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
+import net.primal.data.repository.mappers.local.asProfileDataDO
+import net.primal.data.repository.mappers.local.asProfileStatsDO
+import net.primal.data.repository.mappers.remote.asProfileDataPO
+import net.primal.data.repository.mappers.remote.asProfileStatsPO
+import net.primal.data.repository.mappers.remote.mapAsProfileDataPO
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
+import net.primal.data.repository.mappers.remote.takeContentAsPrimalUserFollowersCountsOrNull
 import net.primal.domain.UserProfileSearchItem
+import net.primal.domain.model.ProfileData
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.nostr.ReportType
+import net.primal.domain.nostr.asEventIdTag
+import net.primal.domain.nostr.asPubkeyTag
+import net.primal.domain.nostr.asReplaceableEventTag
 import net.primal.domain.publisher.PrimalPublisher
+import net.primal.domain.repository.ProfileRepository
 
-class ProfileRepository @Inject constructor(
-    private val dispatchers: CoroutineDispatcherProvider,
+class ProfileRepositoryImpl(
+    private val dispatcherProvider: DispatcherProvider,
     private val database: PrimalDatabase,
     private val usersApi: UsersApi,
     private val wellKnownApi: UserWellKnownApi,
     private val primalPublisher: PrimalPublisher,
-) {
+) : ProfileRepository {
 
-    suspend fun fetchProfileId(primalName: String): String? =
-        withContext(dispatchers.io()) {
+    override suspend fun fetchProfileId(primalName: String): String? =
+        withContext(dispatcherProvider.io()) {
             wellKnownApi.fetchProfileId(primalName = primalName).names[primalName]
         }
 
-    suspend fun findProfileDataOrNull(profileId: String) =
-        withContext(dispatchers.io()) {
-            database.profiles().findProfileData(profileId = profileId)
+    override suspend fun findProfileDataOrNull(profileId: String) =
+        withContext(dispatcherProvider.io()) {
+            database.profiles()
+                .findProfileData(profileId = profileId)
+                ?.asProfileDataDO()
         }
 
-    suspend fun findProfilesData(profileIds: List<String>) =
-        withContext(dispatchers.io()) {
+    override suspend fun findProfileData(profileIds: List<String>) =
+        withContext(dispatcherProvider.io()) {
             database.profiles().findProfileData(profileIds = profileIds)
+                .map { it.asProfileDataDO() }
         }
 
-    fun observeProfile(profileId: String) = database.profiles().observeProfile(profileId = profileId).filterNotNull()
+    override fun observeProfileData(profileId: String) =
+        database.profiles().observeProfileData(profileId = profileId)
+            .filterNotNull()
+            .map { it.asProfileDataDO() }
 
-    fun observeProfileData(profileId: String) =
-        database.profiles().observeProfileData(profileId = profileId).filterNotNull()
+    override fun observeProfileData(profileIds: List<String>) =
+        database.profiles().observeProfilesData(profileIds = profileIds)
+            .map { it.map { it.asProfileDataDO() } }
 
-    suspend fun fetchUserProfileFollowedBy(
+    override fun observeProfileStats(profileId: String) =
+        database.profileStats().observeProfileStats(profileId = profileId)
+            .filterNotNull()
+            .map { it.asProfileStatsDO() }
+
+    override suspend fun fetchUserProfileFollowedBy(
         profileId: String,
         userId: String,
         limit: Int,
     ): List<ProfileData> =
-        withContext(dispatchers.io()) {
+        withContext(dispatcherProvider.io()) {
             val users = usersApi.getUserProfileFollowedBy(profileId, userId, limit)
 
             val primalUserNames = users.primalUserNames.parseAndMapPrimalUserNames()
             val primalPremiumInfo = users.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
             val primalLegendProfiles = users.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
-            val cdnResources = users.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+            val cdnResources = users.cdnResources.flatMapNotNullAsCdnResource()
             val blossomServers = users.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
             val profiles = users.metadataEvents.mapAsProfileDataPO(
                 cdnResources = cdnResources,
@@ -82,21 +93,13 @@ class ProfileRepository @Inject constructor(
                 blossomServers = blossomServers,
             )
             database.profiles().insertOrUpdateAll(data = profiles)
-            profiles
+            profiles.map { it.asProfileDataDO() }
         }
 
-    suspend fun observeProfilesData(profileIds: List<String>) =
-        withContext(dispatchers.io()) {
-            database.profiles().observeProfilesData(profileIds = profileIds).filterNotNull()
-        }
-
-    fun observeProfileStats(profileId: String) =
-        database.profileStats().observeProfileStats(profileId = profileId).filterNotNull()
-
-    suspend fun requestProfileUpdate(profileId: String) =
-        withContext(dispatchers.io()) {
+    override suspend fun fetchProfile(profileId: String) =
+        withContext(dispatcherProvider.io()) {
             val response = retryNetworkCall { usersApi.getUserProfile(userId = profileId) }
-            val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+            val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource()
             val primalUserName = response.primalUserNames.parseAndMapPrimalUserNames()
             val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
             val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
@@ -122,12 +125,12 @@ class ProfileRepository @Inject constructor(
         }
 
     private suspend fun queryRemoteUsers(apiBlock: suspend () -> UsersResponse): List<UserProfileSearchItem> =
-        withContext(dispatchers.io()) {
+        withContext(dispatcherProvider.io()) {
             val response = apiBlock()
             val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
             val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
             val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
-            val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+            val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource()
             val blossomServers = response.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
             val profiles = response.contactsMetadata.mapAsProfileDataPO(
                 cdnResources = cdnResources,
@@ -146,25 +149,24 @@ class ProfileRepository @Inject constructor(
             }.sortedByDescending { it.followersCount }
         }
 
-    suspend fun fetchFollowers(userId: String) =
+    override suspend fun fetchFollowers(userId: String) =
         queryRemoteUsers {
             usersApi.getUserFollowers(userId = userId)
         }
 
-    suspend fun fetchFollowing(userId: String) =
+    override suspend fun fetchFollowing(userId: String) =
         queryRemoteUsers {
             usersApi.getUserFollowing(userId = userId)
         }
 
-    @Throws(NostrPublishException::class, SignException::class)
-    suspend fun reportAbuse(
+    override suspend fun reportAbuse(
         userId: String,
         reportType: ReportType,
         profileId: String,
-        eventId: String? = null,
-        articleId: String? = null,
+        eventId: String?,
+        articleId: String?,
     ) {
-        withContext(dispatchers.io()) {
+        withContext(dispatcherProvider.io()) {
             val profileTag = profileId.asPubkeyTag(optional = if (eventId == null) reportType.id else null)
             val eventTag = eventId?.asEventIdTag(marker = reportType.id)
             val articleTag = articleId?.let {
@@ -182,8 +184,8 @@ class ProfileRepository @Inject constructor(
         }
     }
 
-    suspend fun isUserFollowing(userId: String, targetUserId: String) =
-        withContext(dispatchers.io()) {
+    override suspend fun isUserFollowing(userId: String, targetUserId: String) =
+        withContext(dispatcherProvider.io()) {
             usersApi.isUserFollowing(userId, targetUserId)
         }
 }

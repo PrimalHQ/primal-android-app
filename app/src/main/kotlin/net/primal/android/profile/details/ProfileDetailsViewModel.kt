@@ -34,7 +34,6 @@ import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
@@ -48,6 +47,7 @@ import net.primal.domain.FEED_KIND_USER
 import net.primal.domain.FeedSpecKind
 import net.primal.domain.buildLatestNotesUserFeedSpec
 import net.primal.domain.nostr.Nip19TLV
+import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -278,11 +278,11 @@ class ProfileDetailsViewModel @Inject constructor(
 
     private fun observeReferencedProfilesData(profileId: String) =
         viewModelScope.launch {
-            profileRepository.observeProfile(profileId)
+            profileRepository.observeProfileData(profileId)
                 .mapNotNull { profile ->
-                    profile.metadata?.aboutUris
-                        ?.mapNotNull { it.extractProfileId() }
-                        ?.filter { it != profileId }
+                    profile.aboutUris
+                        .mapNotNull { it.extractProfileId() }
+                        .filter { it != profileId }
                 }
                 .distinctUntilChanged()
                 .collect { profileIds ->
@@ -294,7 +294,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private suspend fun requestProfileUpdates(profileIds: List<String>) {
         profileIds.forEach { profileId ->
             try {
-                profileRepository.requestProfileUpdate(profileId = profileId)
+                profileRepository.fetchProfile(profileId = profileId)
             } catch (error: WssException) {
                 Timber.w(error)
             }
@@ -304,7 +304,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private fun launchReferencedProfilesObserver(profileIds: List<String>) {
         referencedProfilesObserver?.cancel()
         referencedProfilesObserver = viewModelScope.launch {
-            profileRepository.observeProfilesData(profileIds = profileIds).collect { profilesData ->
+            profileRepository.observeProfileData(profileIds = profileIds).collect { profilesData ->
                 setState { copy(referencedProfilesData = profilesData.map { it.asProfileDetailsUi() }.toSet()) }
             }
         }
@@ -314,7 +314,7 @@ class ProfileDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             profileRepository.observeProfileStats(profileId = profileId).collect {
                 setState {
-                    copy(profileStats = it.asProfileStatsUi())
+                    copy(profileStats = it?.asProfileStatsUi())
                 }
             }
         }
@@ -348,9 +348,7 @@ class ProfileDetailsViewModel @Inject constructor(
 
     private suspend fun fetchLatestProfile(profileId: String) =
         try {
-            withContext(dispatcherProvider.io()) {
-                profileRepository.requestProfileUpdate(profileId = profileId)
-            }
+            profileRepository.fetchProfile(profileId = profileId)
         } catch (error: WssException) {
             Timber.w(error)
         }
@@ -550,14 +548,12 @@ class ProfileDetailsViewModel @Inject constructor(
     private fun reportAbuse(event: UiEvent.ReportAbuse) =
         viewModelScope.launch {
             try {
-                withContext(dispatcherProvider.io()) {
-                    profileRepository.reportAbuse(
-                        userId = activeAccountStore.activeUserId(),
-                        reportType = event.type,
-                        profileId = event.profileId,
-                        eventId = event.noteId,
-                    )
-                }
+                profileRepository.reportAbuse(
+                    userId = activeAccountStore.activeUserId(),
+                    reportType = event.type,
+                    profileId = event.profileId,
+                    eventId = event.noteId,
+                )
             } catch (error: MissingPrivateKey) {
                 Timber.w(error)
                 setErrorState(error = UiError.MissingPrivateKey)

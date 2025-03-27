@@ -20,7 +20,6 @@ import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
 import net.primal.android.nostr.repository.RelayHintsRepository
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.NoteContract.UiState
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.domain.ZapTarget
@@ -32,6 +31,7 @@ import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.BookmarkType
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.repository.EventInteractionRepository
+import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = NoteViewModel.Factory::class)
@@ -158,7 +158,8 @@ class NoteViewModel @AssistedInject constructor(
     private fun zapPost(zapAction: UiEvent.ZapAction) =
         viewModelScope.launch {
             val postAuthorProfileData = profileRepository.findProfileDataOrNull(profileId = zapAction.postAuthorId)
-            if (postAuthorProfileData?.lnUrlDecoded == null) {
+            val lnUrlDecoded = postAuthorProfileData?.lnUrlDecoded
+            if (lnUrlDecoded == null) {
                 setState { copy(error = UiError.MissingLightningAddress(IllegalStateException("Missing ln url"))) }
                 return@launch
             }
@@ -169,9 +170,9 @@ class NoteViewModel @AssistedInject constructor(
                     comment = zapAction.zapDescription,
                     amountInSats = zapAction.zapAmount,
                     target = ZapTarget.Event(
-                        zapAction.postId,
-                        zapAction.postAuthorId,
-                        postAuthorProfileData.lnUrlDecoded,
+                        eventId = zapAction.postId,
+                        eventAuthorId = zapAction.postAuthorId,
+                        eventAuthorLnUrlDecoded = lnUrlDecoded,
                     ),
                 )
             } catch (error: ZapFailureException) {

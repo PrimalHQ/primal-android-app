@@ -1,7 +1,7 @@
 package net.primal.android.thread.articles
 
 import net.primal.android.core.errors.UiError
-import net.primal.android.profile.report.ReportType
+import net.primal.domain.nostr.ReportType
 
 interface ArticleContract {
 

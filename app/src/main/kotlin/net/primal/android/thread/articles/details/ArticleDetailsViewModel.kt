@@ -37,7 +37,6 @@ import net.primal.android.nostr.ext.nostrUriToPubkey
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
 import net.primal.android.notes.feed.model.asFeedPostUi
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.thread.articles.details.ArticleDetailsContract.SideEffect
 import net.primal.android.thread.articles.details.ArticleDetailsContract.UiEvent
 import net.primal.android.thread.articles.details.ArticleDetailsContract.UiState
@@ -58,6 +57,7 @@ import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.asATagValue
 import net.primal.domain.repository.EventInteractionRepository
 import net.primal.domain.repository.FeedRepository
+import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -182,13 +182,13 @@ class ArticleDetailsViewModel @Inject constructor(
                     val nostrProfileUris = article.data.uris.filter { it.isNPubUri() || it.isNPub() }.toSet()
                     if (nostrProfileUris != referencedProfileUris) {
                         referencedProfileUris = nostrProfileUris
-                        val referencedProfiles = profileRepository.findProfilesData(
+                        val referencedProfiles = profileRepository.findProfileData(
                             profileIds = nostrProfileUris.mapNotNull { it.nostrUriToPubkey() },
                         )
                         setState {
                             copy(
                                 npubToDisplayNameMap = referencedProfiles
-                                    .associateBy { it.ownerId.hexToNpubHrp() }
+                                    .associateBy { it.profileId.hexToNpubHrp() }
                                     .mapValues { "@${it.value.authorNameUiFriendly()}" },
                             )
                         }
@@ -247,7 +247,8 @@ class ArticleDetailsViewModel @Inject constructor(
 
         viewModelScope.launch {
             val postAuthorProfileData = profileRepository.findProfileDataOrNull(profileId = article.authorId)
-            if (postAuthorProfileData?.lnUrlDecoded == null) {
+            val lnUrlDecoded = postAuthorProfileData?.lnUrlDecoded
+            if (lnUrlDecoded == null) {
                 setState { copy(error = UiError.MissingLightningAddress(IllegalStateException("Missing ln url"))) }
                 return@launch
             }
@@ -262,7 +263,7 @@ class ArticleDetailsViewModel @Inject constructor(
                         identifier = article.articleId,
                         eventId = article.eventId,
                         eventAuthorId = article.authorId,
-                        eventAuthorLnUrlDecoded = postAuthorProfileData.lnUrlDecoded,
+                        eventAuthorLnUrlDecoded = lnUrlDecoded,
                     ),
                 )
             } catch (error: ZapFailureException) {

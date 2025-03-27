@@ -17,7 +17,6 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.navigation.sendPaymentTab
 import net.primal.android.nostr.notary.exceptions.SignException
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.scanner.analysis.WalletTextParser
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.domain.DraftTx
@@ -27,6 +26,7 @@ import net.primal.android.wallet.transactions.send.prepare.SendPaymentContract.U
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
 import net.primal.android.wallet.utils.isLightningAddress
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -99,7 +99,7 @@ class SendPaymentViewModel @Inject constructor(
                     SideEffect.DraftTransactionReady(
                         draft = DraftTx(
                             targetLud16 = lud16,
-                            targetUserId = profileData.ownerId,
+                            targetUserId = profileData.profileId,
                         ),
                     ),
                 )

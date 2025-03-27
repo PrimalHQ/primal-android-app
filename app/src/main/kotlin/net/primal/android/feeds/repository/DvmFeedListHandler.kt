@@ -7,10 +7,10 @@ import kotlinx.coroutines.launch
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.feeds.dvm.ui.DvmFeedUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.domain.FeedSpecKind
 import net.primal.domain.repository.EventRepository
+import net.primal.domain.repository.ProfileRepository
 
 class DvmFeedListHandler @Inject constructor(
     private val feedsRepository: FeedsRepository,
@@ -34,7 +34,7 @@ class DvmFeedListHandler @Inject constructor(
             .asMapByKey { it.eventId }
 
         var feeds = dvmFeeds.map { dvmFeed ->
-            val actionUsers = profileRepository.findProfilesData(profileIds = dvmFeed.actionUserIds)
+            val actionUsers = profileRepository.findProfileData(profileIds = dvmFeed.actionUserIds)
             val avatarLegendaryCustomizationPair = actionUsers
                 .filter { it.avatarCdnImage != null }
                 .map { Pair(it.avatarCdnImage, it.primalPremiumInfo?.legendProfile?.asLegendaryCustomization()) }

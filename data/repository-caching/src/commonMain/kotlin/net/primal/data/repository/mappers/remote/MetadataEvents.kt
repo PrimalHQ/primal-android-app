@@ -51,6 +51,20 @@ fun List<NostrEvent>.mapAsProfileDataPO(
 }
 
 fun NostrEvent.asProfileDataPO(
+    cdnResources: List<CdnResource>,
+    primalUserNames: Map<String, String>,
+    primalPremiumInfo: Map<String, ContentProfilePremiumInfo>,
+    primalLegendProfiles: Map<String, PrimalLegendProfile>,
+    blossomServers: Map<String, List<String>>,
+) = asProfileDataPO(
+    cdnResources = cdnResources.asMapByKey { it.url },
+    primalUserNames = primalUserNames,
+    primalPremiumInfo = primalPremiumInfo,
+    primalLegendProfiles = primalLegendProfiles,
+    blossomServers = blossomServers,
+)
+
+fun NostrEvent.asProfileDataPO(
     cdnResources: Map<String, CdnResource>,
     primalUserNames: Map<String, String>,
     primalPremiumInfo: Map<String, ContentProfilePremiumInfo>,

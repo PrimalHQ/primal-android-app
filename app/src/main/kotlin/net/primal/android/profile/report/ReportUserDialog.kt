@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
+import net.primal.domain.nostr.ReportType
 
 @ExperimentalMaterial3Api
 @Composable
