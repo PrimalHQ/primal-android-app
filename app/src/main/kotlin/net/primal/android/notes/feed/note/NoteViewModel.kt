@@ -11,18 +11,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.bookmarks.BookmarksRepository
 import net.primal.android.core.errors.UiError
-import net.primal.android.events.repository.EventRepository
-import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
-import net.primal.android.nostr.repository.RelayHintsRepository
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.NoteContract.UiState
-import net.primal.android.profile.repository.ProfileRepository
-import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.domain.ZapTarget
 import net.primal.android.wallet.zaps.InvalidZapRequestException
@@ -32,6 +26,13 @@ import net.primal.android.wallet.zaps.hasWallet
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.BookmarkType
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.PublicBookmarksNotFoundException
+import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.repository.EventInteractionRepository
+import net.primal.domain.repository.EventRelayHintsRepository
+import net.primal.domain.repository.MutedUserRepository
+import net.primal.domain.repository.ProfileRepository
+import net.primal.domain.repository.PublicBookmarksRepository
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = NoteViewModel.Factory::class)
@@ -39,11 +40,11 @@ class NoteViewModel @AssistedInject constructor(
     @Assisted private val noteId: String?,
     private val activeAccountStore: ActiveAccountStore,
     private val zapHandler: ZapHandler,
-    private val eventRepository: EventRepository,
+    private val eventInteractionRepository: EventInteractionRepository,
     private val profileRepository: ProfileRepository,
     private val mutedUserRepository: MutedUserRepository,
-    private val bookmarksRepository: BookmarksRepository,
-    private val relayHintsRepository: RelayHintsRepository,
+    private val bookmarksRepository: PublicBookmarksRepository,
+    private val relayHintsRepository: EventRelayHintsRepository,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -110,7 +111,7 @@ class NoteViewModel @AssistedInject constructor(
     private fun likePost(postLikeAction: UiEvent.PostLikeAction) =
         viewModelScope.launch {
             try {
-                eventRepository.likeEvent(
+                eventInteractionRepository.likeEvent(
                     userId = activeAccountStore.activeUserId(),
                     eventId = postLikeAction.postId,
                     eventAuthorId = postLikeAction.postAuthorId,
@@ -133,11 +134,11 @@ class NoteViewModel @AssistedInject constructor(
     private fun repostPost(repostAction: UiEvent.RepostAction) =
         viewModelScope.launch {
             try {
-                eventRepository.repostEvent(
+                eventInteractionRepository.repostEvent(
                     userId = activeAccountStore.activeUserId(),
                     eventId = repostAction.postId,
                     eventAuthorId = repostAction.postAuthorId,
-                    eventKind = NostrEventKind.ShortTextNote,
+                    eventKind = NostrEventKind.ShortTextNote.value,
                     eventRawNostrEvent = repostAction.postNostrEvent,
                 )
             } catch (error: NostrPublishException) {
@@ -158,7 +159,8 @@ class NoteViewModel @AssistedInject constructor(
     private fun zapPost(zapAction: UiEvent.ZapAction) =
         viewModelScope.launch {
             val postAuthorProfileData = profileRepository.findProfileDataOrNull(profileId = zapAction.postAuthorId)
-            if (postAuthorProfileData?.lnUrlDecoded == null) {
+            val lnUrlDecoded = postAuthorProfileData?.lnUrlDecoded
+            if (lnUrlDecoded == null) {
                 setState { copy(error = UiError.MissingLightningAddress(IllegalStateException("Missing ln url"))) }
                 return@launch
             }
@@ -169,9 +171,9 @@ class NoteViewModel @AssistedInject constructor(
                     comment = zapAction.zapDescription,
                     amountInSats = zapAction.zapAmount,
                     target = ZapTarget.Event(
-                        zapAction.postId,
-                        zapAction.postAuthorId,
-                        postAuthorProfileData.lnUrlDecoded,
+                        eventId = zapAction.postId,
+                        eventAuthorId = zapAction.postAuthorId,
+                        eventAuthorLnUrlDecoded = lnUrlDecoded,
                     ),
                 )
             } catch (error: ZapFailureException) {
@@ -254,7 +256,7 @@ class NoteViewModel @AssistedInject constructor(
                 }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
-            } catch (error: BookmarksRepository.BookmarksListNotFound) {
+            } catch (error: PublicBookmarksNotFoundException) {
                 Timber.w(error)
                 setState { copy(shouldApproveBookmark = true) }
             } catch (error: MissingPrivateKey) {

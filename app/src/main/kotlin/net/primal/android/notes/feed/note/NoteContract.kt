@@ -2,8 +2,7 @@ package net.primal.android.notes.feed.note
 
 import net.primal.android.core.errors.UiError
 import net.primal.android.notes.feed.model.ZappingState
-import net.primal.android.profile.report.ReportType
-import net.primal.android.thread.articles.ArticleContract.UiEvent
+import net.primal.domain.nostr.ReportType
 
 interface NoteContract {
 

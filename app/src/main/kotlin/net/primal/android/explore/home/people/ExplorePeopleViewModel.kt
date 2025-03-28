@@ -13,16 +13,16 @@ import net.primal.android.core.compose.profile.approvals.ProfileApproval
 import net.primal.android.core.errors.UiError
 import net.primal.android.explore.home.people.ExplorePeopleContract.UiEvent
 import net.primal.android.explore.home.people.ExplorePeopleContract.UiState
-import net.primal.android.explore.repository.ExploreRepository
-import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
 import net.primal.android.nostr.notary.exceptions.SignException
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.repository.ExploreRepository
+import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -57,7 +57,7 @@ class ExplorePeopleViewModel @Inject constructor(
     private fun fetchFollowing() =
         viewModelScope.launch {
             try {
-                profileRepository.fetchFollowing(userId = activeAccountStore.activeUserId())
+                profileRepository.fetchFollowing(profileId = activeAccountStore.activeUserId())
             } catch (error: WssException) {
                 Timber.w(error)
             }

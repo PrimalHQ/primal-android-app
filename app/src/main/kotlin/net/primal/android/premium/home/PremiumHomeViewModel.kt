@@ -16,10 +16,10 @@ import net.primal.android.premium.home.PremiumHomeContract.UiEvent
 import net.primal.android.premium.home.PremiumHomeContract.UiState
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.repository.PremiumRepository
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -74,10 +74,10 @@ class PremiumHomeViewModel @Inject constructor(
 
     private fun observeProfile() {
         viewModelScope.launch {
-            profileRepository.observeProfile(profileId = activeAccountStore.activeUserId()).collect {
+            profileRepository.observeProfileData(profileId = activeAccountStore.activeUserId()).collect {
                 setState {
                     copy(
-                        avatarLegendaryCustomization = it.metadata?.primalPremiumInfo
+                        avatarLegendaryCustomization = it.primalPremiumInfo
                             ?.legendProfile?.asLegendaryCustomization(),
                     )
                 }

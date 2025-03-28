@@ -95,7 +95,6 @@ import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
-import net.primal.android.profile.report.ReportType
 import net.primal.android.theme.AppTheme
 import net.primal.android.thread.articles.ArticleContract
 import net.primal.android.thread.articles.ArticleViewModel
@@ -117,6 +116,7 @@ import net.primal.android.wallet.zaps.canZap
 import net.primal.domain.EventUriType
 import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.Nip19TLV.toNeventString
+import net.primal.domain.nostr.ReportType
 
 @Composable
 fun ArticleDetailsScreen(

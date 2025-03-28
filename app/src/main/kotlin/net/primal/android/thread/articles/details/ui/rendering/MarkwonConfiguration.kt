@@ -41,7 +41,7 @@ import io.noties.markwon.movement.MovementMethodPlugin
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
-import net.primal.android.highlights.model.JoinedHighlightsUi
+import net.primal.android.articles.highlights.JoinedHighlightsUi
 import net.primal.android.theme.AppTheme
 import org.commonmark.node.Heading
 import org.commonmark.node.Paragraph

@@ -27,13 +27,13 @@ import net.primal.android.premium.buying.PremiumBuyingContract.UiState
 import net.primal.android.premium.domain.MembershipError
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.premium.utils.hasPremiumMembership
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.InAppPurchaseException
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -145,11 +145,11 @@ class PremiumBuyingViewModel @Inject constructor(
 
     private fun observeActiveProfile() =
         viewModelScope.launch {
-            profileRepository.observeProfile(profileId = activeAccountStore.activeUserId()).collect {
+            profileRepository.observeProfileData(profileId = activeAccountStore.activeUserId()).collect {
                 setState {
                     copy(
-                        profile = it.metadata?.asProfileDetailsUi(),
-                        primalName = this.primalName ?: it.metadata?.handle,
+                        profile = it.asProfileDetailsUi(),
+                        primalName = this.primalName ?: it.handle,
                     )
                 }
             }

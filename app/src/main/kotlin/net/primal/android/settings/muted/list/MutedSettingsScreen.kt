@@ -30,7 +30,7 @@ import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.settings.muted.list.model.MutedUserUi
+import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.domain.CdnImage
@@ -77,14 +77,14 @@ fun MutedSettingsScreen(
             ) {
                 items(
                     items = state.mutedUsers,
-                    key = { it.userId },
+                    key = { it.pubkey },
                     contentType = { "MutedUser" },
                 ) { mutedUser ->
                     MutedUserListItem(
                         item = mutedUser,
                         onUnmuteClick = {
                             eventPublisher(
-                                MutedSettingsContract.UiEvent.UnmuteEvent(mutedUser.userId),
+                                MutedSettingsContract.UiEvent.UnmuteEvent(mutedUser.pubkey),
                             )
                         },
                         onProfileClick = onProfileClick,
@@ -110,7 +110,7 @@ fun MutedSettingsScreen(
 
 @Composable
 fun MutedUserListItem(
-    item: MutedUserUi,
+    item: ProfileDetailsUi,
     onUnmuteClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
 ) {
@@ -121,16 +121,16 @@ fun MutedUserListItem(
         leadingContent = {
             UniversalAvatarThumbnail(
                 avatarCdnImage = item.avatarCdnImage,
-                onClick = { onProfileClick(item.userId) },
-                legendaryCustomization = item.legendaryCustomization,
+                onClick = { onProfileClick(item.pubkey) },
+                legendaryCustomization = item.premiumDetails?.legendaryCustomization,
             )
         },
         headlineContent = {
             NostrUserText(
-                displayName = item.displayName,
+                displayName = item.authorDisplayName,
                 fontSize = 14.sp,
                 internetIdentifier = item.internetIdentifier,
-                legendaryCustomization = item.legendaryCustomization,
+                legendaryCustomization = item.premiumDetails?.legendaryCustomization,
             )
         },
         supportingContent = {
@@ -155,7 +155,7 @@ fun MutedUserListItem(
                 textStyle = AppTheme.typography.titleMedium.copy(
                     lineHeight = 18.sp,
                 ),
-                onClick = { onUnmuteClick(item.userId) },
+                onClick = { onUnmuteClick(item.pubkey) },
             ) {
                 Text(
                     text = stringResource(
@@ -174,33 +174,38 @@ fun PreviewMutedScreen() {
         MutedSettingsScreen(
             state = MutedSettingsContract.UiState(
                 mutedUsers = listOf(
-                    MutedUserUi(
-                        userId = "pubkey",
-                        displayName = "username",
+                    ProfileDetailsUi(
+                        pubkey = "pubkey",
+                        authorDisplayName = "username",
+                        userDisplayName = "username",
                         avatarCdnImage = null,
                         internetIdentifier = "nip05",
                     ),
-                    MutedUserUi(
-                        userId = "pubkey",
-                        displayName = "username",
+                    ProfileDetailsUi(
+                        pubkey = "pubkey",
+                        authorDisplayName = "username",
+                        userDisplayName = "username",
                         avatarCdnImage = CdnImage("avatarUrl"),
                         internetIdentifier = "nip05",
                     ),
-                    MutedUserUi(
-                        userId = "pubkey",
-                        displayName = "username",
+                    ProfileDetailsUi(
+                        pubkey = "pubkey",
+                        authorDisplayName = "username",
+                        userDisplayName = "username",
                         avatarCdnImage = null,
                         internetIdentifier = "nip05",
                     ),
-                    MutedUserUi(
-                        userId = "pubkey",
-                        displayName = "username",
+                    ProfileDetailsUi(
+                        pubkey = "pubkey",
+                        authorDisplayName = "username",
+                        userDisplayName = "username",
                         avatarCdnImage = null,
                         internetIdentifier = "nip05",
                     ),
-                    MutedUserUi(
-                        userId = "pubkey",
-                        displayName = "username",
+                    ProfileDetailsUi(
+                        pubkey = "pubkey",
+                        authorDisplayName = "username",
+                        userDisplayName = "username",
                         avatarCdnImage = CdnImage("avatarUrl"),
                         internetIdentifier = "nip05",
                     ),

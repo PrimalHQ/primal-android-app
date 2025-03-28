@@ -64,6 +64,7 @@ import java.util.*
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.FeedArticleListItem
 import net.primal.android.articles.feed.ui.FeedArticleUi
+import net.primal.android.articles.highlights.HighlightUi
 import net.primal.android.core.compose.ImportPhotosIconButton
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
@@ -82,8 +83,7 @@ import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.ui.NoteAttachmentPreview
 import net.primal.android.editor.ui.NoteOutlinedTextField
 import net.primal.android.editor.ui.NoteTagUserLazyColumn
-import net.primal.android.highlights.model.HighlightUi
-import net.primal.android.notes.db.toReferencedHighlight
+import net.primal.android.nostr.mappers.toReferencedHighlight
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.notes.feed.note.ui.FeedNoteHeader

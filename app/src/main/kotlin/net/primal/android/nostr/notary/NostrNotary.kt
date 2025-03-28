@@ -31,12 +31,24 @@ import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import timber.log.Timber
 
 class NostrNotary @Inject constructor(
     private val contentResolver: ContentResolver,
     private val credentialsStore: CredentialsStore,
-) {
+) : NostrEventSignatureHandler {
+
+    override fun signNostrEvent(unsignedNostrEvent: NostrUnsignedEvent): NostrEvent {
+        return signNostrEvent(
+            userId = unsignedNostrEvent.pubKey,
+            event = unsignedNostrEvent,
+        )
+    }
+
+    override fun verifySignature(nostrEvent: NostrEvent): Boolean {
+        throw NotImplementedError()
+    }
 
     private fun findNsecOrThrow(pubkey: String): String {
         return try {

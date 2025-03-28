@@ -7,11 +7,9 @@ import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import net.primal.android.bookmarks.BookmarksRepository
 import net.primal.android.core.FakeDataStore
 import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
@@ -21,6 +19,8 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.repository.MutedUserRepository
+import net.primal.domain.repository.PublicBookmarksRepository
 import org.junit.Rule
 import org.junit.Test
 
@@ -39,7 +39,7 @@ class LoginHandlerTest {
         authRepository: AuthRepository = mockk(relaxed = true),
         userRepository: UserRepository = mockk(relaxed = true),
         mutedUserRepository: MutedUserRepository = mockk(relaxed = true),
-        bookmarksRepository: BookmarksRepository = mockk(relaxed = true),
+        bookmarksRepository: PublicBookmarksRepository = mockk(relaxed = true),
         credentialsStore: CredentialsStore = mockk(relaxed = true),
         nostrNotary: NostrNotary = mockk(relaxed = true),
     ): LoginHandler =

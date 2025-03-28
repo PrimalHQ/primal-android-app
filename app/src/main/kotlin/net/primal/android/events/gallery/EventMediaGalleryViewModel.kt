@@ -21,11 +21,11 @@ import net.primal.android.core.files.error.UnableToSaveContent
 import net.primal.android.core.files.error.UnsuccessfulFileDownload
 import net.primal.android.events.gallery.EventMediaGalleryContract.UiEvent
 import net.primal.android.events.gallery.EventMediaGalleryContract.UiState
-import net.primal.android.events.repository.EventUriRepository
 import net.primal.android.navigation.mediaPositionMs
 import net.primal.android.navigation.mediaUrl
 import net.primal.android.navigation.noteIdOrThrow
 import net.primal.domain.EventUriType
+import net.primal.domain.repository.EventUriRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -70,7 +70,7 @@ class EventMediaGalleryViewModel @Inject constructor(
     private fun loadAttachments() =
         viewModelScope.launch {
             val attachments = withContext(dispatcherProvider.io()) {
-                eventUriRepository.loadEventUris(
+                eventUriRepository.loadEventLinks(
                     noteId = noteId,
                     types = listOf(EventUriType.Image, EventUriType.Video),
                 )

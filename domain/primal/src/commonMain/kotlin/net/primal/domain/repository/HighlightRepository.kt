@@ -7,6 +7,11 @@ import net.primal.domain.nostr.Nevent
 
 interface HighlightRepository {
 
+    private companion object {
+        const val DEFAULT_ALT_TAG =
+            "This is a highlight created in https://primal.net Android application"
+    }
+
     fun observeHighlightById(highlightId: String): Flow<Highlight>
 
     suspend fun publishAndSaveHighlight(
@@ -15,7 +20,7 @@ interface HighlightRepository {
         referencedEventATag: String?,
         referencedEventAuthorTag: String?,
         context: String?,
-        alt: String,
+        alt: String = DEFAULT_ALT_TAG,
         createdAt: Long = Clock.System.now().epochSeconds,
     ): Nevent
 

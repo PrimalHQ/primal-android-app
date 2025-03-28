@@ -27,9 +27,10 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import net.primal.android.articles.ArticleRepository
 import net.primal.android.articles.feed.ui.generateNaddr
 import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
+import net.primal.android.articles.highlights.asHighlightUi
+import net.primal.android.articles.highlights.generateNevent
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.core.files.FileAnalyser
 import net.primal.android.editor.NoteEditorContract.SideEffect
@@ -38,20 +39,13 @@ import net.primal.android.editor.NoteEditorContract.UiState
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteTaggedUser
-import net.primal.android.explore.repository.ExploreRepository
-import net.primal.android.highlights.model.asHighlightUi
-import net.primal.android.highlights.model.generateNevent
-import net.primal.android.highlights.repository.HighlightRepository
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.primal.upload.repository.FileUploadRepository
-import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.exceptions.SignException
-import net.primal.android.nostr.repository.RelayHintsRepository
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asFeedPostUi
-import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
@@ -66,6 +60,12 @@ import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.Nip19TLV.toNprofileString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.Nprofile
+import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.repository.ArticleRepository
+import net.primal.domain.repository.EventRelayHintsRepository
+import net.primal.domain.repository.ExploreRepository
+import net.primal.domain.repository.FeedRepository
+import net.primal.domain.repository.HighlightRepository
 import net.primal.domain.upload.UploadJob
 import timber.log.Timber
 
@@ -81,7 +81,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val userRepository: UserRepository,
     private val articleRepository: ArticleRepository,
     private val relayRepository: RelayRepository,
-    private val relayHintsRepository: RelayHintsRepository,
+    private val relayHintsRepository: EventRelayHintsRepository,
 ) : ViewModel() {
 
     private val referencedNoteId = args.referencedNoteId
@@ -505,7 +505,7 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private fun observeRecentUsers() {
         viewModelScope.launch {
-            exploreRepository.observeRecentUsers(ownerId = activeAccountStore.activeUserId())
+            userRepository.observeRecentUsers(ownerId = activeAccountStore.activeUserId())
                 .distinctUntilChanged()
                 .collect {
                     setState { copy(recentUsers = it.map { it.mapAsUserProfileUi() }) }

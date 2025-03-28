@@ -4,12 +4,9 @@ import java.time.Instant
 import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
 import net.primal.android.core.utils.asEllipsizedNpub
-import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.formatNip05Identifier
-import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
-import net.primal.android.notes.db.FeedPost
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.core.utils.serialization.CommonJson
@@ -42,30 +39,43 @@ data class FeedPostUi(
     val authorBlossoms: List<String> = emptyList(),
 )
 
-fun FeedPost.asFeedPostUi(): FeedPostUi {
+fun net.primal.domain.model.FeedPost.asFeedPostUi(): FeedPostUi {
+    val repost = this.reposts.firstOrNull()
     return FeedPostUi(
-        postId = this.data.postId,
-        repostId = this.data.repostId,
-        repostAuthorId = this.data.repostAuthorId,
-        repostAuthorName = this.repostAuthor?.authorNameUiFriendly() ?: this.data.repostAuthorId?.asEllipsizedNpub(),
-        authorId = this.author?.ownerId ?: this.data.authorId,
-        authorName = this.author?.authorNameUiFriendly() ?: this.data.authorId.asEllipsizedNpub(),
-        authorHandle = this.author?.usernameUiFriendly() ?: this.data.authorId.asEllipsizedNpub(),
-        authorInternetIdentifier = this.author?.internetIdentifier?.formatNip05Identifier(),
-        authorAvatarCdnImage = this.author?.avatarCdnImage,
-        timestamp = Instant.ofEpochSecond(this.data.createdAt),
-        content = this.data.content,
-        uris = this.uris.map { it.asEventUriUiModel() }.sortedBy { it.position },
+        postId = this.eventId,
+        repostId = repost?.repostId,
+        repostAuthorId = repost?.repostAuthorId,
+        repostAuthorName = repost?.repostAuthorDisplayName,
+        authorId = this.author.authorId,
+        authorName = this.author.displayName,
+        authorHandle = this.author.handle,
+        authorInternetIdentifier = this.author.internetIdentifier?.formatNip05Identifier(),
+        authorAvatarCdnImage = this.author.avatarCdnImage,
+        timestamp = Instant.ofEpochSecond(this.timestamp.epochSeconds),
+        content = this.content,
+        uris = this.links.map { it.asEventUriUiModel() }.sortedBy { it.position },
         nostrUris = this.nostrUris.map { it.asNoteNostrUriUi() }.sortedBy { it.position },
-        stats = EventStatsUi.from(eventStats = this.eventStats, feedPostUserStats = this.userStats),
-        hashtags = this.data.hashtags,
-        rawNostrEventJson = this.data.raw,
-        replyToAuthorHandle = this.replyToAuthor?.usernameUiFriendly() ?: this.data.replyToAuthorId?.asEllipsizedNpub(),
+        stats = this.stats?.let { stats ->
+            EventStatsUi(
+                repliesCount = stats.repliesCount,
+                userReplied = stats.userReplied,
+                zapsCount = stats.zapsCount,
+                satsZapped = stats.satsZapped,
+                userZapped = stats.userZapped,
+                likesCount = stats.likesCount,
+                userLiked = stats.userLiked,
+                repostsCount = stats.repostsCount,
+                userReposted = stats.userReposted,
+            )
+        } ?: EventStatsUi(),
+        hashtags = this.hashtags,
+        rawNostrEventJson = this.rawNostrEvent,
+        replyToAuthorHandle = this.replyToAuthor?.handle ?: this.replyToAuthor?.authorId?.asEllipsizedNpub(),
         isBookmarked = this.bookmark != null,
         eventZaps = this.eventZaps
             .map { it.asEventZapUiModel() }
             .sortedWith(EventZapUiModel.DefaultComparator),
-        authorLegendaryCustomization = this.author?.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
-        authorBlossoms = this.author?.blossoms ?: emptyList(),
+        authorLegendaryCustomization = this.author.legendProfile?.asLegendaryCustomization(),
+        authorBlossoms = this.author.blossomServers,
     )
 }

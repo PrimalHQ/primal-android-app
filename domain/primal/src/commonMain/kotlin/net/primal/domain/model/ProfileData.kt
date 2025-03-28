@@ -5,9 +5,9 @@ import net.primal.domain.PrimalPremiumInfo
 
 data class ProfileData(
     val profileId: String,
-    val metadataEventId: String,
-    val createdAt: Long,
-    val metadataRawEvent: String,
+    val metadataEventId: String? = null,
+    val createdAt: Long? = null,
+    val metadataRawEvent: String? = null,
     val handle: String? = null,
     val displayName: String? = null,
     val internetIdentifier: String? = null,

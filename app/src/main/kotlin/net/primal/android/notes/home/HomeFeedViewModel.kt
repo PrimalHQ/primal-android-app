@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.feeds.list.ui.model.asFeedUi
-import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
 import net.primal.android.nostr.notary.exceptions.SignException
@@ -28,6 +27,7 @@ import net.primal.core.config.AppConfigHandler
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.domain.FeedSpecKind
+import net.primal.domain.repository.FeedsRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -73,10 +73,11 @@ class HomeFeedViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 setState { copy(loading = true) }
+                val userId = activeAccountStore.activeUserId()
                 feedsRepository.fetchAndPersistDefaultFeeds(
-                    userId = activeAccountStore.activeUserId(),
-                    givenDefaultFeeds = emptyList(),
+                    userId = userId,
                     specKind = FeedSpecKind.Notes,
+                    givenDefaultFeeds = emptyList(),
                 )
             } catch (error: SignException) {
                 Timber.w(error)
@@ -91,8 +92,9 @@ class HomeFeedViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(loading = true) }
             try {
+                val userId = activeAccountStore.activeUserId()
                 retryNetworkCall {
-                    feedsRepository.fetchAndPersistNoteFeeds(userId = activeAccountStore.activeUserId())
+                    feedsRepository.fetchAndPersistNoteFeeds(userId = userId)
                 }
             } catch (error: NostrSignUnauthorized) {
                 Timber.w(error)

@@ -43,11 +43,11 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.notifications.toImagePainter
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.notifications.domain.NotificationSection
-import net.primal.android.notifications.domain.NotificationType
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiState.ApiError
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.domain.NotificationSection
+import net.primal.domain.NotificationType
 
 @Composable
 fun NotificationsSettingsScreen(viewModel: NotificationsSettingsViewModel, onClose: () -> Unit) {

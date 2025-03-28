@@ -8,8 +8,8 @@ import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.profile.domain.ProfileFeedSpec
 import net.primal.android.profile.domain.ProfileFollowsType
-import net.primal.android.profile.report.ReportType
 import net.primal.android.wallet.domain.DraftTx
+import net.primal.domain.nostr.ReportType
 
 interface ProfileDetailsContract {
     data class UiState(

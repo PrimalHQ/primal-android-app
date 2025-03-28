@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import net.primal.android.notes.db.asFeedPostUi
+import net.primal.android.nostr.mappers.asFeedPostUi
 import net.primal.android.notes.feed.model.NoteNostrUriUi
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 

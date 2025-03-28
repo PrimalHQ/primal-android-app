@@ -6,8 +6,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
 import net.primal.android.core.compose.attachment.model.EventUriUi
-import net.primal.android.events.domain.calculateImageSize
-import net.primal.android.events.domain.findNearestOrNull
+import net.primal.android.events.ui.calculateImageSize
+import net.primal.android.events.ui.findNearestOrNull
 import net.primal.domain.CdnResourceVariant
 
 private const val MAX_SCREEN_HEIGHT_VISIBLE_AREA = 0.77
