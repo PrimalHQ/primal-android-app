@@ -1,4 +1,4 @@
-package net.primal.android.nostr.model.primal.content
+package net.primal.data.repository.mappers.remote
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

@@ -3,7 +3,7 @@ package net.primal.android.highlights.model
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asFallbackProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
-import net.primal.android.highlights.db.Highlight
+import net.primal.domain.model.Highlight
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.NostrEventKind
 
@@ -41,7 +41,7 @@ fun Highlight.asHighlightUi() =
         referencedEventATag = this.data.referencedEventATag,
         referencedEventAuthorId = this.data.referencedEventAuthorId,
         createdAt = this.data.createdAt,
-        comments = this.comments.map { it.toCommentUi() },
+        comments = this.comments.map { it.toHighlightCommentUi() },
     )
 
 operator fun JoinedHighlightsUi.plus(element: JoinedHighlightsUi): JoinedHighlightsUi =
@@ -65,7 +65,7 @@ fun Highlight.asJoinedHighlightsUi() =
         highlightId = this.data.highlightId,
         authors = setOf(this.author?.asProfileDetailsUi() ?: this.data.authorId.asFallbackProfileDetailsUi()),
         content = this.data.content,
-        comments = this.comments.map { it.toCommentUi() },
+        comments = this.comments.map { it.toHighlightCommentUi() },
         referencedEventATag = this.data.referencedEventATag,
         referencedEventAuthorId = this.data.referencedEventAuthorId,
         context = this.data.context,

@@ -1,6 +1,5 @@
-package net.primal.android.nostr.ext
+package net.primal.data.repository.mappers.remote
 
-import net.primal.android.nostr.model.primal.content.ContentPrimalWordCount
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.domain.PrimalEvent

@@ -1,73 +1,53 @@
-package net.primal.android.articles
+package net.primal.data.repository.articles
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
-import javax.inject.Inject
+import androidx.paging.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import net.primal.android.articles.api.mediator.ArticleFeedMediator
-import net.primal.android.articles.api.mediator.persistArticleCommentsToDatabase
-import net.primal.android.articles.api.mediator.persistToDatabaseAsTransaction
-import net.primal.android.articles.db.Article
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.db.PrimalDatabase
+import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.data.local.dao.reads.Article as ArticlePO
+import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.remote.api.articles.ArticleDetailsRequestBody
 import net.primal.data.remote.api.articles.ArticleHighlightsRequestBody
 import net.primal.data.remote.api.articles.ArticlesApi
+import net.primal.data.repository.articles.paging.ArticleFeedMediator
+import net.primal.data.repository.articles.processors.persistArticleCommentsToDatabase
+import net.primal.data.repository.articles.processors.persistToDatabaseAsTransaction
+import net.primal.data.repository.mappers.local.asArticleDO
+import net.primal.data.repository.mappers.local.mapAsFeedPostDO
+import net.primal.domain.model.Article as ArticleDO
+import net.primal.domain.model.FeedPost
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.repository.ArticleRepository
 
-class ArticleRepository @Inject constructor(
-    private val dispatchers: CoroutineDispatcherProvider,
+class ArticleRepositoryImpl(
+    private val dispatcherProvider: DispatcherProvider,
     private val articlesApi: ArticlesApi,
     private val database: PrimalDatabase,
-) {
+) : ArticleRepository {
 
-    companion object {
-        private const val PAGE_SIZE = 25
-    }
-
-    fun feedBySpec(userId: String, feedSpec: String): Flow<PagingData<Article>> {
+    override fun feedBySpec(userId: String, feedSpec: String): Flow<PagingData<ArticleDO>> {
         return createPager(userId = userId, feedSpec = feedSpec) {
             database.articles().feed(
                 spec = feedSpec,
                 userId = userId,
             )
-        }.flow
+        }.flow.map { it.map { it.asArticleDO() } }
     }
 
-    @OptIn(ExperimentalPagingApi::class)
-    private fun createPager(
-        userId: String,
-        feedSpec: String,
-        pagingSourceFactory: () -> PagingSource<Int, Article>,
-    ) = Pager(
-        config = PagingConfig(
-            pageSize = PAGE_SIZE,
-            prefetchDistance = PAGE_SIZE * 2,
-            initialLoadSize = PAGE_SIZE * 5,
-            enablePlaceholders = true,
-        ),
-        remoteMediator = ArticleFeedMediator(
-            userId = userId,
-            feedSpec = feedSpec,
-            articlesApi = articlesApi,
-            database = database,
-            dispatcherProvider = dispatchers,
-        ),
-        pagingSourceFactory = pagingSourceFactory,
-    )
-
-    suspend fun fetchArticleAndComments(
+    override suspend fun fetchArticleAndComments(
         userId: String,
         articleId: String,
         articleAuthorId: String,
-    ) = withContext(dispatchers.io()) {
+    ) = withContext(dispatcherProvider.io()) {
         val response = articlesApi.getArticleDetails(
             body = ArticleDetailsRequestBody(
                 userId = userId,
@@ -85,11 +65,11 @@ class ArticleRepository @Inject constructor(
         )
     }
 
-    suspend fun fetchArticleHighlights(
+    override suspend fun fetchArticleHighlights(
         userId: String,
         articleId: String,
         articleAuthorId: String,
-    ) = withContext(dispatchers.io()) {
+    ) = withContext(dispatcherProvider.io()) {
         val highlightsResponse = articlesApi.getArticleHighlights(
             body = ArticleHighlightsRequestBody(
                 userId = userId,
@@ -102,34 +82,37 @@ class ArticleRepository @Inject constructor(
         highlightsResponse.persistToDatabaseAsTransaction(database = database)
     }
 
-    suspend fun observeArticle(articleId: String, articleAuthorId: String) =
-        withContext(dispatchers.io()) {
+    override suspend fun observeArticle(articleId: String, articleAuthorId: String): Flow<ArticleDO> =
+        withContext(dispatcherProvider.io()) {
             database.articles().observeArticle(articleId = articleId, authorId = articleAuthorId)
                 .distinctUntilChanged()
                 .filterNotNull()
+                .map { it.asArticleDO() }
         }
 
-    suspend fun observeArticleByEventId(eventId: String, articleAuthorId: String) =
-        withContext(dispatchers.io()) {
+    override suspend fun observeArticleByEventId(eventId: String, articleAuthorId: String): Flow<ArticleDO> =
+        withContext(dispatcherProvider.io()) {
             database.articles().observeArticleByEventId(eventId = eventId, authorId = articleAuthorId)
                 .distinctUntilChanged()
                 .filterNotNull()
+                .map { it.asArticleDO() }
         }
 
-    suspend fun observeArticleComments(
+    override suspend fun observeArticleComments(
         userId: String,
         articleId: String,
         articleAuthorId: String,
-    ) = withContext(dispatchers.io()) {
-        database.threadConversations().observeArticleComments(
-            articleId = articleId,
-            articleAuthorId = articleAuthorId,
-            userId = userId,
-        )
-    }
+    ): Flow<List<FeedPost>> =
+        withContext(dispatcherProvider.io()) {
+            database.threadConversations().observeArticleComments(
+                articleId = articleId,
+                articleAuthorId = articleAuthorId,
+                userId = userId,
+            ).map { it.map { it.mapAsFeedPostDO() } }
+        }
 
-    suspend fun observeArticleByCommentId(commentNoteId: String): Flow<Article?> =
-        withContext(dispatchers.io()) {
+    override suspend fun observeArticleByCommentId(commentNoteId: String): Flow<ArticleDO?> =
+        withContext(dispatcherProvider.io()) {
             val crossRef = database.threadConversations().findCrossRefByCommentId(commentNoteId = commentNoteId)
             if (crossRef != null) {
                 database.articles()
@@ -138,8 +121,35 @@ class ArticleRepository @Inject constructor(
                         authorId = crossRef.articleAuthorId,
                     )
                     .distinctUntilChanged()
+                    .map { it?.asArticleDO() }
             } else {
                 flowOf(null)
             }
         }
+
+    @OptIn(ExperimentalPagingApi::class)
+    private fun createPager(
+        userId: String,
+        feedSpec: String,
+        pagingSourceFactory: () -> PagingSource<Int, ArticlePO>,
+    ) = Pager(
+        config = PagingConfig(
+            pageSize = PAGE_SIZE,
+            prefetchDistance = PAGE_SIZE * 2,
+            initialLoadSize = PAGE_SIZE * 5,
+            enablePlaceholders = true,
+        ),
+        remoteMediator = ArticleFeedMediator(
+            userId = userId,
+            feedSpec = feedSpec,
+            articlesApi = articlesApi,
+            database = database,
+            dispatcherProvider = dispatcherProvider,
+        ),
+        pagingSourceFactory = pagingSourceFactory,
+    )
+
+    companion object {
+        private const val PAGE_SIZE = 25
+    }
 }

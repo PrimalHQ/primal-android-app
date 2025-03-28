@@ -1,24 +1,23 @@
-package net.primal.android.articles.api.mediator
+package net.primal.data.repository.articles.processors
 
-import androidx.room.withTransaction
-import net.primal.android.core.ext.asMapByKey
-import net.primal.android.db.PrimalDatabase
-import net.primal.android.highlights.utils.mapNotNullAsHighlightComments
-import net.primal.android.nostr.db.eventRelayHintsUpserter
-import net.primal.android.nostr.ext.asHighlightData
-import net.primal.android.nostr.ext.flatMapAsEventHintsPO
-import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
-import net.primal.android.nostr.ext.mapAsEventZapDO
-import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
-import net.primal.android.nostr.ext.mapAsProfileDataPO
-import net.primal.android.nostr.ext.mapNotNullAsEventStatsPO
-import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
-import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
-import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
+import net.primal.data.local.dao.events.eventRelayHintsUpserter
+import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.articles.ArticleHighlightsResponse
+import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
+import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
+import net.primal.data.repository.mappers.remote.asHighlightData
+import net.primal.data.repository.mappers.remote.flatMapAsEventHintsPO
+import net.primal.data.repository.mappers.remote.mapAsEventZapDO
+import net.primal.data.repository.mappers.remote.mapAsProfileDataPO
+import net.primal.data.repository.mappers.remote.mapNotNullAsEventStatsPO
+import net.primal.data.repository.mappers.remote.mapNotNullAsHighlightComments
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 
 suspend fun ArticleHighlightsResponse.persistToDatabaseAsTransaction(database: PrimalDatabase) {
-    val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+    val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource()
     val eventHints = this.relayHints.flatMapAsEventHintsPO()
 
     val primalUserNames = this.primalUserNames.parseAndMapPrimalUserNames()

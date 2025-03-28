@@ -13,12 +13,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import net.primal.android.articles.ArticleRepository
 import net.primal.android.articles.feed.ArticleFeedContract.UiState
 import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.domain.isPremiumFeedSpec
+import net.primal.domain.repository.ArticleRepository
 
 @HiltViewModel(assistedFactory = ArticleFeedViewModel.Factory::class)
 class ArticleFeedViewModel @AssistedInject constructor(

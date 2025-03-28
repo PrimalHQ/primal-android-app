@@ -1,6 +1,7 @@
 package net.primal.data.repository.mappers.remote
 
 import io.github.aakira.napier.Napier
+import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.parseUris
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.local.dao.reads.ArticleData
@@ -17,6 +18,19 @@ import net.primal.domain.nostr.findFirstTitle
 import net.primal.domain.nostr.serialization.toNostrJsonObject
 import net.primal.domain.nostr.utils.parseHashtags
 import net.primal.domain.serialization.takeContentOrNull
+
+fun List<NostrEvent>.mapNotNullAsArticleDataPO(
+    wordsCountMap: Map<String, Int> = emptyMap(),
+    cdnResources: List<CdnResource> = emptyList(),
+): List<ArticleData> {
+    val cdnResourcesByUrl = cdnResources.asMapByKey { it.url }
+    return this.mapNotNull { event ->
+        event.asArticleData(
+            wordsCount = wordsCountMap[event.id],
+            cdnResources = cdnResourcesByUrl,
+        )
+    }
+}
 
 fun List<NostrEvent>.mapNotNullAsArticleDataPO(
     wordsCountMap: Map<String, Int> = emptyMap(),

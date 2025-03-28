@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import net.primal.android.articles.ArticleRepository
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.crypto.hexToNpubHrp
@@ -21,7 +20,6 @@ import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.highlights.model.JoinedHighlightsUi
 import net.primal.android.highlights.model.joinOnContent
-import net.primal.android.highlights.repository.HighlightRepository
 import net.primal.android.navigation.articleId
 import net.primal.android.navigation.naddr
 import net.primal.android.navigation.primalName
@@ -55,8 +53,10 @@ import net.primal.domain.nostr.Nip19TLV
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.asATagValue
 import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.repository.ArticleRepository
 import net.primal.domain.repository.EventInteractionRepository
 import net.primal.domain.repository.FeedRepository
+import net.primal.domain.repository.HighlightRepository
 import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 
@@ -166,7 +166,7 @@ class ArticleDetailsViewModel @Inject constructor(
             var referencedProfileUris: Set<String> = emptySet()
             articleRepository.observeArticle(articleId = naddr.identifier, articleAuthorId = naddr.userId)
                 .collect { article ->
-                    val nostrNoteUris = article.data.uris.filter { it.isNoteUri() || it.isNote() }.toSet()
+                    val nostrNoteUris = article.uris.filter { it.isNoteUri() || it.isNote() }.toSet()
                     if (nostrNoteUris != referencedNotesUris) {
                         referencedNotesUris = nostrNoteUris
                         val referencedNotes = feedRepository.findAllPostsByIds(
@@ -179,7 +179,7 @@ class ArticleDetailsViewModel @Inject constructor(
                         }
                     }
 
-                    val nostrProfileUris = article.data.uris.filter { it.isNPubUri() || it.isNPub() }.toSet()
+                    val nostrProfileUris = article.uris.filter { it.isNPubUri() || it.isNPub() }.toSet()
                     if (nostrProfileUris != referencedProfileUris) {
                         referencedProfileUris = nostrProfileUris
                         val referencedProfiles = profileRepository.findProfileData(

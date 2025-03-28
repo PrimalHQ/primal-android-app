@@ -7,6 +7,8 @@ import net.primal.core.utils.coroutines.DispatcherProviderFactory
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.local.db.PrimalDatabaseFactory
 import net.primal.data.remote.factory.PrimalApiServiceFactory
+import net.primal.data.repository.articles.ArticleRepositoryImpl
+import net.primal.data.repository.articles.HighlightRepositoryImpl
 import net.primal.data.repository.bookmarks.PublicBookmarksRepositoryImpl
 import net.primal.data.repository.events.EventInteractionRepositoryImpl
 import net.primal.data.repository.events.EventRelayHintsRepositoryImpl
@@ -19,12 +21,14 @@ import net.primal.data.repository.profile.ProfileRepositoryImpl
 import net.primal.domain.PrimalServerType
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.publisher.PrimalPublisher
+import net.primal.domain.repository.ArticleRepository
 import net.primal.domain.repository.EventInteractionRepository
 import net.primal.domain.repository.EventRelayHintsRepository
 import net.primal.domain.repository.EventRepository
 import net.primal.domain.repository.EventUriRepository
 import net.primal.domain.repository.FeedRepository
 import net.primal.domain.repository.FeedsRepository
+import net.primal.domain.repository.HighlightRepository
 import net.primal.domain.repository.MutedUserRepository
 import net.primal.domain.repository.ProfileRepository
 import net.primal.domain.repository.PublicBookmarksRepository
@@ -45,6 +49,22 @@ object AndroidRepositoryFactory : RepositoryFactory {
     fun init(context: Context) {
         appContext = context.applicationContext
         AppConfigInitializer.init(context)
+    }
+
+    override fun createArticleRepository(): ArticleRepository {
+        return ArticleRepositoryImpl(
+            dispatcherProvider = dispatcherProvider,
+            articlesApi = PrimalApiServiceFactory.createArticlesApi(cachingPrimalApiClient),
+            database = cachingDatabase,
+        )
+    }
+
+    override fun createArticleHighlightsRepository(primalPublisher: PrimalPublisher): HighlightRepository {
+        return HighlightRepositoryImpl(
+            dispatcherProvider = dispatcherProvider,
+            database = cachingDatabase,
+            primalPublisher = primalPublisher,
+        )
     }
 
     override fun createFeedRepository(): FeedRepository {
