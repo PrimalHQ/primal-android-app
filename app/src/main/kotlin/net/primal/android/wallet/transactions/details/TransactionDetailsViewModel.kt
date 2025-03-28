@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.articles.ArticleRepository
 import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.navigation.transactionIdOrThrow
@@ -25,6 +24,7 @@ import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.details.TransactionDetailsContract.UiState
 import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.repository.ArticleRepository
 import net.primal.domain.repository.FeedRepository
 import timber.log.Timber
 

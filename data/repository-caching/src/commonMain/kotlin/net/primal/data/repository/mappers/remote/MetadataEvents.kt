@@ -23,15 +23,17 @@ fun List<NostrEvent>.mapAsProfileDataPO(
     primalPremiumInfo: Map<String, ContentProfilePremiumInfo>,
     primalLegendProfiles: Map<String, PrimalLegendProfile>,
     blossomServers: Map<String, List<String>>,
-) = map { nostrEvent ->
-    nostrEvent.asProfileDataPO(
-        cdnResources = cdnResources.asMapByKey { it.url },
-        primalUserNames = primalUserNames,
-        primalPremiumInfo = primalPremiumInfo,
-        primalLegendProfiles = primalLegendProfiles,
-        blossomServers = blossomServers,
-
-    )
+): List<ProfileData> {
+    val cdnResourcesMapByUrl = cdnResources.asMapByKey { it.url }
+    return this.map { nostrEvent ->
+        nostrEvent.asProfileDataPO(
+            cdnResources = cdnResourcesMapByUrl,
+            primalUserNames = primalUserNames,
+            primalPremiumInfo = primalPremiumInfo,
+            primalLegendProfiles = primalLegendProfiles,
+            blossomServers = blossomServers,
+        )
+    }
 }
 
 fun List<NostrEvent>.mapAsProfileDataPO(
@@ -40,15 +42,16 @@ fun List<NostrEvent>.mapAsProfileDataPO(
     primalPremiumInfo: Map<String, ContentProfilePremiumInfo>,
     primalLegendProfiles: Map<String, PrimalLegendProfile>,
     blossomServers: Map<String, List<String>>,
-) = map {
-    it.asProfileDataPO(
-        cdnResources = cdnResourcesMap,
-        primalUserNames = primalUserNames,
-        primalPremiumInfo = primalPremiumInfo,
-        primalLegendProfiles = primalLegendProfiles,
-        blossomServers = blossomServers,
-    )
-}
+): List<ProfileData> =
+    map {
+        it.asProfileDataPO(
+            cdnResources = cdnResourcesMap,
+            primalUserNames = primalUserNames,
+            primalPremiumInfo = primalPremiumInfo,
+            primalLegendProfiles = primalLegendProfiles,
+            blossomServers = blossomServers,
+        )
+    }
 
 fun NostrEvent.asProfileDataPO(
     cdnResources: List<CdnResource>,

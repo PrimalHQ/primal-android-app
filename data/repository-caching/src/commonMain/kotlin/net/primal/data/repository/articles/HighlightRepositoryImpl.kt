@@ -1,48 +1,46 @@
-package net.primal.android.highlights.repository
+package net.primal.data.repository.articles
 
-import java.time.Instant
-import javax.inject.Inject
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.db.PrimalDatabase
-import net.primal.android.nostr.ext.asAltTag
-import net.primal.android.nostr.ext.asContextTag
-import net.primal.android.nostr.ext.asEventIdTag
-import net.primal.android.nostr.ext.asHighlightData
-import net.primal.android.nostr.ext.asKindTag
-import net.primal.android.nostr.ext.asPubkeyTag
-import net.primal.android.nostr.ext.asReplaceableEventTag
+import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.repository.mappers.local.asHighlightDO
+import net.primal.data.repository.mappers.remote.asHighlightData
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.nostr.asAltTag
+import net.primal.domain.nostr.asContextTag
+import net.primal.domain.nostr.asEventIdTag
+import net.primal.domain.nostr.asKindTag
+import net.primal.domain.nostr.asPubkeyTag
+import net.primal.domain.nostr.asReplaceableEventTag
 import net.primal.domain.publisher.PrimalPublisher
+import net.primal.domain.repository.HighlightRepository
 
-class HighlightRepository @Inject constructor(
+class HighlightRepositoryImpl(
+    private val dispatcherProvider: DispatcherProvider,
     private val database: PrimalDatabase,
-    private val dispatchers: CoroutineDispatcherProvider,
     private val primalPublisher: PrimalPublisher,
-) {
-    companion object {
-        const val DEFAULT_ALT_TAG =
-            "This is a highlight created in https://primal.net Android application"
-    }
+) : HighlightRepository {
 
-    fun observeHighlightById(highlightId: String) =
+    override fun observeHighlightById(highlightId: String) =
         database.highlights().observeById(highlightId = highlightId)
             .distinctUntilChanged()
             .filterNotNull()
+            .map { it.asHighlightDO() }
 
-    suspend fun publishAndSaveHighlight(
+    override suspend fun publishAndSaveHighlight(
         userId: String,
         content: String,
         referencedEventATag: String?,
         referencedEventAuthorTag: String?,
         context: String?,
-        alt: String = DEFAULT_ALT_TAG,
-        createdAt: Long = Instant.now().epochSecond,
-    ) = withContext(dispatchers.io()) {
+        alt: String,
+        createdAt: Long,
+    ) = withContext(dispatcherProvider.io()) {
         val publishResult = primalPublisher.signPublishImportNostrEvent(
             unsignedNostrEvent = NostrUnsignedEvent(
                 pubKey = userId,
@@ -67,8 +65,8 @@ class HighlightRepository @Inject constructor(
         )
     }
 
-    suspend fun publishDeleteHighlight(userId: String, highlightId: String) =
-        withContext(dispatchers.io()) {
+    override suspend fun publishDeleteHighlight(userId: String, highlightId: String) =
+        withContext(dispatcherProvider.io()) {
             primalPublisher.signPublishImportNostrEvent(
                 unsignedNostrEvent = NostrUnsignedEvent(
                     pubKey = userId,

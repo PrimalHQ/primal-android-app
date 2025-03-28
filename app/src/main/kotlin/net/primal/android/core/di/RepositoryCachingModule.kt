@@ -7,12 +7,14 @@ import dagger.hilt.components.SingletonComponent
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.data.repository.factory.PrimalRepositoryFactory
 import net.primal.domain.publisher.PrimalPublisher
+import net.primal.domain.repository.ArticleRepository
 import net.primal.domain.repository.EventInteractionRepository
 import net.primal.domain.repository.EventRelayHintsRepository
 import net.primal.domain.repository.EventRepository
 import net.primal.domain.repository.EventUriRepository
 import net.primal.domain.repository.FeedRepository
 import net.primal.domain.repository.FeedsRepository
+import net.primal.domain.repository.HighlightRepository
 import net.primal.domain.repository.MutedUserRepository
 import net.primal.domain.repository.ProfileRepository
 import net.primal.domain.repository.PublicBookmarksRepository
@@ -53,4 +55,11 @@ object RepositoryCachingModule {
     @Provides
     fun providesEventRelayHintsRepository(): EventRelayHintsRepository =
         PrimalRepositoryFactory.createEventRelayHintsRepository()
+
+    @Provides
+    fun providesArticleRepository(): ArticleRepository = PrimalRepositoryFactory.createArticleRepository()
+
+    @Provides
+    fun providesHighlightsRepository(primalPublisher: PrimalPublisher): HighlightRepository =
+        PrimalRepositoryFactory.createArticleHighlightsRepository(primalPublisher)
 }

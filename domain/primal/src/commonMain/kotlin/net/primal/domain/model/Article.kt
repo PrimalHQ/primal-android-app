@@ -21,7 +21,7 @@ data class Article(
     val hashtags: List<String> = emptyList(),
     val author: ProfileData? = null,
     val eventStats: NostrEventStats? = null,
-    val userEventStats: NostrEventStats? = null,
+    val userEventStats: NostrEventUserStats? = null,
     val eventZaps: List<EventZap> = emptyList(),
     val bookmark: PublicBookmark? = null,
     val highlights: List<Highlight> = emptyList(),

@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import net.primal.android.articles.ArticleRepository
 import net.primal.android.articles.feed.ui.generateNaddr
 import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
@@ -41,7 +40,6 @@ import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.highlights.model.asHighlightUi
 import net.primal.android.highlights.model.generateNevent
-import net.primal.android.highlights.repository.HighlightRepository
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.primal.upload.repository.FileUploadRepository
@@ -64,8 +62,10 @@ import net.primal.domain.nostr.Nip19TLV.toNprofileString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.Nprofile
 import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.repository.ArticleRepository
 import net.primal.domain.repository.EventRelayHintsRepository
 import net.primal.domain.repository.FeedRepository
+import net.primal.domain.repository.HighlightRepository
 import net.primal.domain.upload.UploadJob
 import timber.log.Timber
 

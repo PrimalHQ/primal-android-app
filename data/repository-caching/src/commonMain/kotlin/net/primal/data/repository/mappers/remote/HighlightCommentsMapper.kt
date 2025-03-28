@@ -1,22 +1,22 @@
-package net.primal.android.highlights.utils
+package net.primal.data.repository.mappers.remote
 
 import kotlinx.serialization.json.JsonArray
-import net.primal.android.core.utils.parseHashtags
-import net.primal.android.core.utils.parseUris
-import net.primal.android.highlights.db.HighlightData
-import net.primal.android.nostr.ext.getTagValueOrNull
-import net.primal.android.nostr.ext.hasReplyMarker
-import net.primal.android.nostr.ext.hasRootMarker
-import net.primal.android.nostr.ext.isEventIdTag
-import net.primal.android.notes.db.PostData
+import net.primal.core.utils.parseUris
 import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.data.local.dao.notes.PostData
+import net.primal.data.local.dao.reads.HighlightData
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.getTagValueOrNull
+import net.primal.domain.nostr.hasReplyMarker
+import net.primal.domain.nostr.hasRootMarker
+import net.primal.domain.nostr.isEventIdTag
 import net.primal.domain.nostr.serialization.toNostrJsonObject
+import net.primal.domain.nostr.utils.parseHashtags
 
 fun List<NostrEvent>.mapNotNullAsHighlightComments(highlights: List<HighlightData>): List<PostData> =
     this.mapNotNull { it.asHighlightComment(highlights = highlights) }
 
-fun NostrEvent.asHighlightComment(highlights: List<HighlightData>): PostData? {
+private fun NostrEvent.asHighlightComment(highlights: List<HighlightData>): PostData? {
     if (!this.tags.containsRootOrReplyTag()) {
         return null
     }

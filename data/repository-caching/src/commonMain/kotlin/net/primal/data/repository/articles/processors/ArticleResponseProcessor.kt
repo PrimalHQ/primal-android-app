@@ -1,32 +1,32 @@
-package net.primal.android.articles.api.mediator
+package net.primal.data.repository.articles.processors
 
-import androidx.room.withTransaction
-import net.primal.android.core.ext.asMapByKey
-import net.primal.android.db.PrimalDatabase
-import net.primal.android.events.ext.flatMapArticlesAsEventUriPO
-import net.primal.android.nostr.db.eventRelayHintsUpserter
-import net.primal.android.nostr.ext.flatMapAsEventHintsPO
-import net.primal.android.nostr.ext.flatMapAsWordCount
-import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
-import net.primal.android.nostr.ext.flatMapNotNullAsLinkPreviewResource
-import net.primal.android.nostr.ext.flatMapNotNullAsVideoThumbnailsMap
-import net.primal.android.nostr.ext.mapAsEventZapDO
-import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
-import net.primal.android.nostr.ext.mapAsPostDataPO
-import net.primal.android.nostr.ext.mapAsProfileDataPO
-import net.primal.android.nostr.ext.mapNotNullAsArticleDataPO
-import net.primal.android.nostr.ext.mapNotNullAsEventStatsPO
-import net.primal.android.nostr.ext.mapNotNullAsEventUserStatsPO
-import net.primal.android.nostr.ext.mapNotNullAsPostDataPO
-import net.primal.android.nostr.ext.mapReferencedEventsAsHighlightDataPO
-import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
-import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
-import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
-import net.primal.android.thread.db.ArticleCommentCrossRef
+import net.primal.core.utils.asMapByKey
+import net.primal.data.local.dao.events.eventRelayHintsUpserter
+import net.primal.data.local.dao.threads.ArticleCommentCrossRef
+import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.articles.ArticleResponse
+import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
+import net.primal.data.remote.mapper.flatMapNotNullAsLinkPreviewResource
+import net.primal.data.remote.mapper.flatMapNotNullAsVideoThumbnailsMap
+import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
+import net.primal.data.repository.mappers.remote.flatMapArticlesAsEventUriPO
+import net.primal.data.repository.mappers.remote.flatMapAsEventHintsPO
+import net.primal.data.repository.mappers.remote.flatMapAsWordCount
+import net.primal.data.repository.mappers.remote.mapAsEventZapDO
+import net.primal.data.repository.mappers.remote.mapAsPostDataPO
+import net.primal.data.repository.mappers.remote.mapAsProfileDataPO
+import net.primal.data.repository.mappers.remote.mapNotNullAsArticleDataPO
+import net.primal.data.repository.mappers.remote.mapNotNullAsEventStatsPO
+import net.primal.data.repository.mappers.remote.mapNotNullAsEventUserStatsPO
+import net.primal.data.repository.mappers.remote.mapNotNullAsPostDataPO
+import net.primal.data.repository.mappers.remote.mapReferencedEventsAsHighlightDataPO
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 
 suspend fun ArticleResponse.persistToDatabaseAsTransaction(userId: String, database: PrimalDatabase) {
-    val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+    val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource()
     val eventHints = this.primalRelayHints.flatMapAsEventHintsPO()
     val wordsCountMap = this.primalLongFormWords.flatMapAsWordCount()
 
