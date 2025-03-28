@@ -1,4 +1,4 @@
-package net.primal.android.feeds.api
+package net.primal.data.remote.api.feeds.model
 
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent

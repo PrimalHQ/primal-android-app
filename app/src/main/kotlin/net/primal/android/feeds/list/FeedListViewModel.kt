@@ -14,22 +14,22 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.feeds.db.Feed
+import net.primal.android.feeds.DvmFeedListHandler
 import net.primal.android.feeds.list.FeedListContract.UiEvent
 import net.primal.android.feeds.list.FeedListContract.UiState
 import net.primal.android.feeds.list.FeedListContract.UiState.FeedMarketplaceStage
 import net.primal.android.feeds.list.ui.model.FeedUi
-import net.primal.android.feeds.list.ui.model.asFeedPO
 import net.primal.android.feeds.list.ui.model.asFeedUi
-import net.primal.android.feeds.repository.DvmFeedListHandler
-import net.primal.android.feeds.repository.FeedsRepository
+import net.primal.android.feeds.list.ui.model.asPrimalFeed
 import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.DvmFeed
 import net.primal.domain.FeedSpecKind
 import net.primal.domain.buildSpec
+import net.primal.domain.model.PrimalFeed
 import net.primal.domain.repository.FeedRepository
+import net.primal.domain.repository.FeedsRepository
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = FeedListViewModel.Factory::class)
@@ -55,7 +55,7 @@ class FeedListViewModel @AssistedInject constructor(
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     private var allFeeds: List<FeedUi> = emptyList()
-    private var defaultFeeds: List<Feed> = emptyList()
+    private var defaultFeeds: List<PrimalFeed> = emptyList()
 
     private var dvmFeedsJob: Job? = null
 
@@ -150,10 +150,11 @@ class FeedListViewModel @AssistedInject constructor(
     private fun restoreDefaultPrimalFeeds() =
         viewModelScope.launch {
             try {
+                val userId = activeAccountStore.activeUserId()
                 feedsRepository.fetchAndPersistDefaultFeeds(
-                    userId = activeAccountStore.activeUserId(),
-                    givenDefaultFeeds = defaultFeeds,
+                    userId = userId,
                     specKind = specKind,
+                    givenDefaultFeeds = defaultFeeds,
                 )
                 setState { copy(isEditMode = false) }
                 updateFeedsState()
@@ -200,20 +201,18 @@ class FeedListViewModel @AssistedInject constructor(
 
     private fun fetchAndProcessDefaultFeeds() =
         viewModelScope.launch {
+            val userId = activeAccountStore.activeUserId()
             try {
-                defaultFeeds = feedsRepository.fetchDefaultFeeds(
-                    userId = activeAccountStore.activeUserId(),
-                    specKind = specKind,
-                ) ?: emptyList()
+                defaultFeeds = feedsRepository.fetchDefaultFeeds(userId = userId, specKind = specKind) ?: emptyList()
             } catch (error: WssException) {
                 Timber.w(error)
             }
 
             try {
                 feedsRepository.persistNewDefaultFeeds(
-                    userId = activeAccountStore.activeUserId(),
-                    givenDefaultFeeds = defaultFeeds,
+                    userId = userId,
                     specKind = specKind,
+                    givenDefaultFeeds = defaultFeeds,
                 )
             } catch (error: SignException) {
                 Timber.w(error)
@@ -288,12 +287,13 @@ class FeedListViewModel @AssistedInject constructor(
 
     private fun persistRemotelyFeeds() =
         viewModelScope.launch {
-            val currentFeeds = allFeeds.map { it.asFeedPO() }
+            val currentFeeds = allFeeds.map { it.asPrimalFeed() }
             try {
+                val userId = activeAccountStore.activeUserId()
                 feedsRepository.persistLocallyAndRemotelyUserFeeds(
-                    userId = activeAccountStore.activeUserId(),
-                    feeds = currentFeeds,
+                    userId = userId,
                     specKind = specKind,
+                    feeds = currentFeeds,
                 )
             } catch (error: SignException) {
                 Timber.w(error)

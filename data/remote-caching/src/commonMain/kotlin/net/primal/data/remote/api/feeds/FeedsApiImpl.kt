@@ -1,36 +1,31 @@
-package net.primal.android.feeds.api
+package net.primal.data.remote.api.feeds
 
-import javax.inject.Inject
-import javax.inject.Singleton
-import net.primal.android.feeds.api.model.FeedsResponse
-import net.primal.android.feeds.api.model.SubSettingsAuthorization
-import net.primal.android.networking.di.PrimalCacheApiClient
-import net.primal.android.nostr.model.primal.content.ContentAppSubSettings
-import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
-import net.primal.android.nostr.notary.NostrNotary
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.data.remote.PrimalVerb
+import net.primal.data.remote.api.feeds.model.DvmFeedsRequestBody
+import net.primal.data.remote.api.feeds.model.DvmFeedsResponse
+import net.primal.data.remote.api.feeds.model.FeedsResponse
+import net.primal.data.remote.api.feeds.model.SubSettingsAuthorization
+import net.primal.data.remote.model.ContentAppSubSettings
 import net.primal.domain.FeedSpecKind
+import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 
-@Singleton
-class FeedsApiImpl @Inject constructor(
-    @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
-    private val nostrNotary: NostrNotary,
+internal class FeedsApiImpl(
+    private val primalApiClient: PrimalApiClient,
 ) : FeedsApi {
 
     override suspend fun getFeaturedFeeds(specKind: FeedSpecKind?, pubkey: String?): DvmFeedsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = net.primal.data.remote.PrimalVerb.GET_FEATURED_DVM_FEEDS.id,
-                optionsJson = CommonJson.encodeToString(
-                    DvmFeedsRequestBody(
-                        specKind = specKind?.id,
-                        pubkey = pubkey,
-                    ),
-                ),
+                primalVerb = PrimalVerb.GET_FEATURED_DVM_FEEDS.id,
+                optionsJson = DvmFeedsRequestBody(
+                    specKind = specKind?.id,
+                    pubkey = pubkey,
+                ).encodeToJsonString(),
             ),
         )
 
@@ -56,8 +51,8 @@ class FeedsApiImpl @Inject constructor(
         }
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = net.primal.data.remote.PrimalVerb.GET_DEFAULT_APP_SUB_SETTINGS.id,
-                optionsJson = CommonJson.encodeToString(ContentAppSubSettings<String>(key = key)),
+                primalVerb = PrimalVerb.GET_DEFAULT_APP_SUB_SETTINGS.id,
+                optionsJson = ContentAppSubSettings<String>(key = key).encodeToJsonString(),
             ),
         )
 
@@ -67,23 +62,21 @@ class FeedsApiImpl @Inject constructor(
         return FeedsResponse(articleFeeds = articleFeeds)
     }
 
-    override suspend fun getUserFeeds(userId: String, specKind: FeedSpecKind): FeedsResponse {
+    override suspend fun getUserFeeds(authorization: NostrEvent, specKind: FeedSpecKind): FeedsResponse {
         val key = when (specKind) {
             FeedSpecKind.Reads -> "user-reads-feeds"
             FeedSpecKind.Notes -> "user-home-feeds"
         }
 
-        val signedNostrEvent = nostrNotary.signAppSpecificDataNostrEvent(
-            userId = userId,
-            content = CommonJson.encodeToString(
-                ContentAppSubSettings<String>(key = key),
-            ),
-        )
+//        val signedNostrEvent = nostrNotary.signAppSpecificDataNostrEvent(
+//            userId = userId,
+//            content = ContentAppSubSettings<String>(key = key).encodeToJsonString(),
+//        )
 
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = net.primal.data.remote.PrimalVerb.GET_APP_SUB_SETTINGS.id,
-                optionsJson = CommonJson.encodeToString(SubSettingsAuthorization(event = signedNostrEvent)),
+                primalVerb = PrimalVerb.GET_APP_SUB_SETTINGS.id,
+                optionsJson = SubSettingsAuthorization(event = authorization).encodeToJsonString(),
             ),
         )
 
@@ -94,27 +87,26 @@ class FeedsApiImpl @Inject constructor(
     }
 
     override suspend fun setUserFeeds(
-        userId: String,
-        specKind: FeedSpecKind,
-        feeds: List<ContentArticleFeedData>,
+//        userId: String,
+//        specKind: FeedSpecKind,
+//        feeds: List<ContentArticleFeedData>,
+        userFeedsNostrEvent: NostrEvent,
     ) {
-        val signedNostrEvent = nostrNotary.signAppSpecificDataNostrEvent(
-            userId = userId,
-            content = CommonJson.encodeToString(
-                ContentAppSubSettings(
-                    key = when (specKind) {
-                        FeedSpecKind.Reads -> "user-reads-feeds"
-                        FeedSpecKind.Notes -> "user-home-feeds"
-                    },
-                    settings = feeds,
-                ),
-            ),
-        )
+//        val signedNostrEvent = nostrNotary.signAppSpecificDataNostrEvent(
+//            userId = userId,
+//            content = ContentAppSubSettings(
+//                key = when (specKind) {
+//                    FeedSpecKind.Reads -> "user-reads-feeds"
+//                    FeedSpecKind.Notes -> "user-home-feeds"
+//                },
+//                settings = feeds,
+//            ).encodeToJsonString(),
+//        )
 
         primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = net.primal.data.remote.PrimalVerb.SET_APP_SUB_SETTINGS.id,
-                optionsJson = CommonJson.encodeToString(SubSettingsAuthorization(event = signedNostrEvent)),
+                primalVerb = PrimalVerb.SET_APP_SUB_SETTINGS.id,
+                optionsJson = SubSettingsAuthorization(event = userFeedsNostrEvent).encodeToJsonString(),
             ),
         )
     }

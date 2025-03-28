@@ -10,15 +10,18 @@ import net.primal.data.repository.events.EventRelayHintsRepositoryImpl
 import net.primal.data.repository.events.EventRepositoryImpl
 import net.primal.data.repository.events.EventUriRepositoryImpl
 import net.primal.data.repository.feed.FeedRepositoryImpl
+import net.primal.data.repository.feeds.FeedsRepositoryImpl
 import net.primal.data.repository.mute.MutedUserRepositoryImpl
 import net.primal.data.repository.profile.ProfileRepositoryImpl
 import net.primal.domain.PrimalServerType
+import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.repository.EventInteractionRepository
 import net.primal.domain.repository.EventRelayHintsRepository
 import net.primal.domain.repository.EventRepository
 import net.primal.domain.repository.EventUriRepository
 import net.primal.domain.repository.FeedRepository
+import net.primal.domain.repository.FeedsRepository
 import net.primal.domain.repository.MutedUserRepository
 import net.primal.domain.repository.ProfileRepository
 import net.primal.domain.repository.PublicBookmarksRepository
@@ -36,6 +39,15 @@ object IosRepositoryFactory : RepositoryFactory {
             dispatcherProvider = dispatcherProvider,
             feedApi = PrimalApiServiceFactory.createFeedApi(cachingPrimalApiClient),
             database = cachingDatabase,
+        )
+    }
+
+    override fun createFeedsRepository(signatureHandler: NostrEventSignatureHandler): FeedsRepository {
+        return FeedsRepositoryImpl(
+            dispatcherProvider = dispatcherProvider,
+            feedsApi = PrimalApiServiceFactory.createFeedsApi(cachingPrimalApiClient),
+            database = cachingDatabase,
+            signatureHandler = signatureHandler,
         )
     }
 

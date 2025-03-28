@@ -15,7 +15,7 @@ interface FeedsRepository {
 
     fun observeFeeds(userId: String, specKind: FeedSpecKind): Flow<List<PrimalFeed>>
 
-    fun observeContainsFeedSpec(userId: String, feedSpec: String): Boolean
+    fun observeContainsFeedSpec(userId: String, feedSpec: String): Flow<Boolean>
 
     suspend fun fetchAndPersistArticleFeeds(userId: String)
 
@@ -23,8 +23,8 @@ interface FeedsRepository {
 
     suspend fun persistNewDefaultFeeds(
         userId: String,
-        givenDefaultFeeds: List<PrimalFeed>,
         specKind: FeedSpecKind,
+        givenDefaultFeeds: List<PrimalFeed>,
     )
 
     suspend fun fetchDefaultFeeds(userId: String, specKind: FeedSpecKind): List<PrimalFeed>?
@@ -33,14 +33,14 @@ interface FeedsRepository {
 
     suspend fun persistLocallyAndRemotelyUserFeeds(
         userId: String,
-        feeds: List<PrimalFeed>,
         specKind: FeedSpecKind,
+        feeds: List<PrimalFeed>,
     )
 
     suspend fun fetchAndPersistDefaultFeeds(
         userId: String,
-        givenDefaultFeeds: List<PrimalFeed>,
         specKind: FeedSpecKind,
+        givenDefaultFeeds: List<PrimalFeed>,
     )
 
     suspend fun fetchRecommendedDvmFeeds(userId: String, specKind: FeedSpecKind? = null): List<DvmFeed>

@@ -23,7 +23,6 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.utils.isValidHex
 import net.primal.android.crypto.bech32ToHexOrThrow
-import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.navigation.primalName
 import net.primal.android.navigation.profileId
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -46,6 +45,7 @@ import net.primal.domain.FeedSpecKind
 import net.primal.domain.buildLatestNotesUserFeedSpec
 import net.primal.domain.nostr.Nip19TLV
 import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.repository.FeedsRepository
 import net.primal.domain.repository.MutedUserRepository
 import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
@@ -444,15 +444,16 @@ class ProfileDetailsViewModel @Inject constructor(
     private fun addProfileFeed(action: UiEvent.AddProfileFeedAction) {
         viewModelScope.launch {
             try {
+                val userId = activeAccountStore.activeUserId()
                 feedsRepository.addFeedLocally(
-                    userId = activeAccountStore.activeUserId(),
+                    userId = userId,
                     feedSpec = buildLatestNotesUserFeedSpec(userId = action.profileId),
                     title = action.feedTitle,
                     description = action.feedDescription,
                     feedSpecKind = FeedSpecKind.Notes,
                     feedKind = FEED_KIND_USER,
                 )
-                feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
+                feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
                 setEffect(ProfileDetailsContract.SideEffect.ProfileFeedAdded)
             } catch (error: MissingPrivateKey) {
                 Timber.w(error)
@@ -470,11 +471,12 @@ class ProfileDetailsViewModel @Inject constructor(
     private fun removeProfileFeed(action: UiEvent.RemoveProfileFeedAction) {
         viewModelScope.launch {
             try {
+                val userId = activeAccountStore.activeUserId()
                 feedsRepository.removeFeedLocally(
-                    userId = activeAccountStore.activeUserId(),
+                    userId = userId,
                     feedSpec = buildLatestNotesUserFeedSpec(userId = action.profileId),
                 )
-                feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
+                feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
                 setEffect(ProfileDetailsContract.SideEffect.ProfileFeedRemoved)
             } catch (error: MissingPrivateKey) {
                 Timber.w(error)

@@ -1,72 +1,101 @@
-package net.primal.android.feeds.repository
+package net.primal.data.repository.feeds
 
-import androidx.room.withTransaction
-import javax.inject.Inject
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.ext.asMapByKey
-import net.primal.android.db.PrimalDatabase
-import net.primal.android.feeds.api.FeedsApi
-import net.primal.android.feeds.db.Feed
-import net.primal.android.nostr.ext.asEventStatsPO
-import net.primal.android.nostr.ext.asEventUserStatsPO
-import net.primal.android.nostr.ext.findFirstIdentifier
-import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
-import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
-import net.primal.android.nostr.ext.mapAsProfileDataPO
-import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
-import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
-import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
-import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
-import net.primal.android.nostr.mappers.asContentArticleFeedData
-import net.primal.android.nostr.model.primal.content.ContentArticleFeedData
-import net.primal.android.nostr.model.primal.content.ContentDvmFeedFollowsAction
-import net.primal.android.nostr.model.primal.content.ContentDvmFeedMetadata
-import net.primal.android.nostr.model.primal.content.ContentPrimalDvmFeedMetadata
-import net.primal.android.nostr.model.primal.content.ContentPrimalEventStats
-import net.primal.android.nostr.model.primal.content.ContentPrimalEventUserStats
-import net.primal.android.wallet.api.parseAsLNUrlOrNull
+import net.primal.core.utils.AppBuildHelper
+import net.primal.core.utils.asMapByKey
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.data.local.dao.feeds.Feed
+import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.withTransaction
+import net.primal.data.remote.api.feeds.FeedsApi
+import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
+import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
+import net.primal.data.remote.model.ContentAppSubSettings
+import net.primal.data.remote.model.ContentDvmFeedFollowsAction
+import net.primal.data.remote.model.ContentDvmFeedMetadata
+import net.primal.data.remote.model.ContentPrimalDvmFeedMetadata
+import net.primal.data.remote.model.ContentPrimalEventStats
+import net.primal.data.remote.model.ContentPrimalEventUserStats
+import net.primal.data.remote.model.ContentPrimalFeedData
+import net.primal.data.repository.mappers.local.asContentPrimalFeedData
+import net.primal.data.repository.mappers.local.asFeedPO
+import net.primal.data.repository.mappers.local.asPrimalFeedDO
+import net.primal.data.repository.mappers.remote.asEventStatsPO
+import net.primal.data.repository.mappers.remote.asEventUserStatsPO
+import net.primal.data.repository.mappers.remote.asFeedPO
+import net.primal.data.repository.mappers.remote.mapAsProfileDataPO
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
+import net.primal.data.repository.mappers.remote.takeContentAsPrimalUserScoresOrNull
 import net.primal.domain.DvmFeed
 import net.primal.domain.FEED_KIND_DVM
 import net.primal.domain.FeedSpecKind
 import net.primal.domain.PrimalEvent
 import net.primal.domain.buildSpec
+import net.primal.domain.model.PrimalFeed
+import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.nostr.asIdentifierTag
+import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
+import net.primal.domain.nostr.findFirstIdentifier
+import net.primal.domain.nostr.utils.parseAsLNUrlOrNull
+import net.primal.domain.repository.FeedsRepository
 
-class FeedsRepository @Inject constructor(
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+// TODO Consider splitting the repository into smaller ones
+class FeedsRepositoryImpl(
+    private val dispatcherProvider: DispatcherProvider,
     private val feedsApi: FeedsApi,
     private val database: PrimalDatabase,
-) {
-    fun observeAllFeeds(userId: String) = database.feeds().observeAllFeeds(ownerId = userId).distinctUntilChanged()
+    private val signatureHandler: NostrEventSignatureHandler,
+) : FeedsRepository {
 
-    fun observeReadsFeeds(userId: String) =
+    override fun observeAllFeeds(userId: String) =
+        database.feeds().observeAllFeeds(ownerId = userId)
+            .distinctUntilChanged()
+            .map { it.map { it.asPrimalFeedDO() } }
+
+    override fun observeReadsFeeds(userId: String) =
         database.feeds().observeAllFeedsBySpecKind(ownerId = userId, specKind = FeedSpecKind.Reads)
             .distinctUntilChanged()
+            .map { it.map { it.asPrimalFeedDO() } }
 
-    fun observeNotesFeeds(userId: String) =
+    override fun observeNotesFeeds(userId: String) =
         database.feeds().observeAllFeedsBySpecKind(ownerId = userId, specKind = FeedSpecKind.Notes)
             .distinctUntilChanged()
+            .map { it.map { it.asPrimalFeedDO() } }
 
-    fun observeFeeds(userId: String, specKind: FeedSpecKind) =
+    override fun observeFeeds(userId: String, specKind: FeedSpecKind) =
         database.feeds().observeAllFeedsBySpecKind(ownerId = userId, specKind = specKind)
             .distinctUntilChanged()
+            .map { it.map { it.asPrimalFeedDO() } }
 
-    fun observeContainsFeedSpec(userId: String, feedSpec: String) =
+    override fun observeContainsFeedSpec(userId: String, feedSpec: String) =
         database.feeds().observeContainsFeed(ownerId = userId, feedSpec)
 
-    suspend fun fetchAndPersistArticleFeeds(userId: String) =
+    override suspend fun fetchAndPersistArticleFeeds(userId: String) =
         fetchAndPersistFeeds(userId = userId, specKind = FeedSpecKind.Reads)
 
-    suspend fun fetchAndPersistNoteFeeds(userId: String) =
+    override suspend fun fetchAndPersistNoteFeeds(userId: String) =
         fetchAndPersistFeeds(userId = userId, specKind = FeedSpecKind.Notes)
 
     private suspend fun fetchAndPersistFeeds(userId: String, specKind: FeedSpecKind) {
         withContext(dispatcherProvider.io()) {
-            val response = feedsApi.getUserFeeds(userId = userId, specKind = specKind)
-            val content = CommonJson.decodeFromStringOrNull<List<ContentArticleFeedData>>(
+            val authorization = signatureHandler.signNostrEvent(
+                unsignedNostrEvent = NostrUnsignedEvent(
+                    pubKey = userId,
+                    kind = NostrEventKind.ApplicationSpecificData.value,
+                    tags = listOf("${AppBuildHelper.getAppName()} App".asIdentifierTag()),
+                    content = ContentAppSubSettings<String>(key = specKind.settingsKey).encodeToJsonString(),
+                ),
+            )
+            val response = feedsApi.getUserFeeds(authorization = authorization, specKind = specKind)
+            val content = CommonJson.decodeFromStringOrNull<List<ContentPrimalFeedData>>(
                 string = response.articleFeeds.content,
             )
             val feeds = content?.map { it.asFeedPO(ownerId = userId, specKind = specKind) }
@@ -80,13 +109,14 @@ class FeedsRepository @Inject constructor(
         }
     }
 
-    suspend fun persistNewDefaultFeeds(
+    override suspend fun persistNewDefaultFeeds(
         userId: String,
-        givenDefaultFeeds: List<Feed>,
         specKind: FeedSpecKind,
+        givenDefaultFeeds: List<PrimalFeed>,
     ) {
         val localFeeds = withContext(dispatcherProvider.io()) {
             database.feeds().getAllFeedsBySpecKind(ownerId = userId, specKind = specKind)
+                .map { it.asPrimalFeedDO() }
         }
         val defaultFeeds = givenDefaultFeeds
             .ifEmpty { fetchDefaultFeeds(userId = userId, specKind = specKind) ?: emptyList() }
@@ -97,70 +127,90 @@ class FeedsRepository @Inject constructor(
         if (newFeeds.isNotEmpty()) {
             val disabledNewFeeds = newFeeds.map { it.copy(enabled = false) }
             val mergedFeeds = localFeeds + disabledNewFeeds
-            persistLocallyAndRemotelyUserFeeds(userId = userId, feeds = mergedFeeds, specKind = specKind)
+            persistLocallyAndRemotelyUserFeeds(
+                userId = userId,
+                specKind = specKind,
+                feeds = mergedFeeds,
+            )
         }
     }
 
-    suspend fun fetchDefaultFeeds(userId: String, specKind: FeedSpecKind): List<Feed>? {
+    override suspend fun fetchDefaultFeeds(userId: String, specKind: FeedSpecKind): List<PrimalFeed>? {
         return withContext(dispatcherProvider.io()) {
             val response = feedsApi.getDefaultUserFeeds(specKind = specKind)
-            val content = CommonJson.decodeFromStringOrNull<List<ContentArticleFeedData>>(
+            val content = CommonJson.decodeFromStringOrNull<List<ContentPrimalFeedData>>(
                 string = response.articleFeeds.content,
             )
 
             content?.map { it.asFeedPO(ownerId = userId, specKind = specKind) }
+                ?.map { it.asPrimalFeedDO() }
         }
     }
 
-    suspend fun persistRemotelyAllLocalUserFeeds(userId: String) {
+    override suspend fun persistRemotelyAllLocalUserFeeds(userId: String) {
         persistRemotelyLocalUserFeedsBySpecKind(userId = userId, specKind = FeedSpecKind.Notes)
         persistRemotelyLocalUserFeedsBySpecKind(userId = userId, specKind = FeedSpecKind.Reads)
     }
 
-    private suspend fun persistRemotelyLocalUserFeedsBySpecKind(userId: String, specKind: FeedSpecKind) {
-        val feeds = withContext(dispatcherProvider.io()) {
-            database.feeds().getAllFeedsBySpecKind(ownerId = userId, specKind = specKind)
-        }
-
-        feedsApi.setUserFeeds(
-            userId = userId,
-            specKind = specKind,
-            feeds = feeds.map { it.asContentArticleFeedData() },
-        )
-    }
-
-    suspend fun persistLocallyAndRemotelyUserFeeds(
-        userId: String,
-        feeds: List<Feed>,
-        specKind: FeedSpecKind,
-    ) {
+    private suspend fun persistRemotelyLocalUserFeedsBySpecKind(userId: String, specKind: FeedSpecKind) =
         withContext(dispatcherProvider.io()) {
-            database.withTransaction {
-                database.feeds().deleteAllByOwnerIdAndSpecKind(ownerId = userId, specKind = specKind)
-                database.feeds().upsertAll(data = feeds)
-            }
+            val feeds = database.feeds()
+                .getAllFeedsBySpecKind(ownerId = userId, specKind = specKind)
+                .map { it.asPrimalFeedDO() }
 
-            val apiFeeds = feeds.map { it.asContentArticleFeedData() }
-
-            feedsApi.setUserFeeds(
-                userId = userId,
-                specKind = specKind,
-                feeds = apiFeeds,
+            val signedEvent = signatureHandler.signNostrEvent(
+                unsignedNostrEvent = NostrUnsignedEvent(
+                    pubKey = userId,
+                    kind = NostrEventKind.ApplicationSpecificData.value,
+                    tags = listOf("${AppBuildHelper.getAppName()} App".asIdentifierTag()),
+                    content = ContentAppSubSettings(
+                        key = specKind.settingsKey,
+                        settings = feeds.map { it.asContentPrimalFeedData() },
+                    ).encodeToJsonString(),
+                ),
             )
+
+            feedsApi.setUserFeeds(userFeedsNostrEvent = signedEvent)
         }
-    }
 
-    suspend fun fetchAndPersistDefaultFeeds(
+    override suspend fun persistLocallyAndRemotelyUserFeeds(
         userId: String,
-        givenDefaultFeeds: List<Feed>,
         specKind: FeedSpecKind,
+        feeds: List<PrimalFeed>,
     ) = withContext(dispatcherProvider.io()) {
-        val feeds = givenDefaultFeeds
-            .ifEmpty { fetchDefaultFeeds(userId = userId, specKind = specKind) ?: return@withContext }
-        persistLocallyAndRemotelyUserFeeds(userId = userId, feeds = feeds, specKind = specKind)
+        database.withTransaction {
+            database.feeds().deleteAllByOwnerIdAndSpecKind(ownerId = userId, specKind = specKind)
+            database.feeds().upsertAll(data = feeds.map { it.asFeedPO() })
+        }
+
+        val signedEvent = signatureHandler.signNostrEvent(
+            unsignedNostrEvent = NostrUnsignedEvent(
+                pubKey = userId,
+                kind = NostrEventKind.ApplicationSpecificData.value,
+                tags = listOf("${AppBuildHelper.getAppName()} App".asIdentifierTag()),
+                content = ContentAppSubSettings(
+                    key = specKind.settingsKey,
+                    settings = feeds.map { it.asContentPrimalFeedData() },
+                ).encodeToJsonString(),
+            ),
+        )
+
+        feedsApi.setUserFeeds(userFeedsNostrEvent = signedEvent)
     }
 
-    suspend fun fetchRecommendedDvmFeeds(userId: String, specKind: FeedSpecKind? = null): List<DvmFeed> {
+    override suspend fun fetchAndPersistDefaultFeeds(
+        userId: String,
+        specKind: FeedSpecKind,
+        givenDefaultFeeds: List<PrimalFeed>,
+    ) = withContext(dispatcherProvider.io()) {
+        val feeds = givenDefaultFeeds.ifEmpty {
+            fetchDefaultFeeds(userId = userId, specKind = specKind) ?: return@withContext
+        }
+        persistLocallyAndRemotelyUserFeeds(userId = userId, specKind = specKind, feeds = feeds)
+    }
+
+    override suspend fun fetchRecommendedDvmFeeds(userId: String, specKind: FeedSpecKind?): List<DvmFeed> {
+        // TODO This looks an api call and should be places in remote-caching
         val response = withContext(dispatcherProvider.io()) {
             feedsApi.getFeaturedFeeds(specKind = specKind, pubkey = userId)
         }
@@ -172,7 +222,7 @@ class FeedsRepository @Inject constructor(
         val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
         val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
         val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
-        val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+        val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource()
         val blossomServers = response.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
         val profiles = response.userMetadata.mapAsProfileDataPO(
             cdnResources = cdnResources,
@@ -229,7 +279,7 @@ class FeedsRepository @Inject constructor(
         return dvmFeeds
     }
 
-    suspend fun addDvmFeedLocally(
+    override suspend fun addDvmFeedLocally(
         userId: String,
         dvmFeed: DvmFeed,
         specKind: FeedSpecKind,
@@ -247,7 +297,7 @@ class FeedsRepository @Inject constructor(
         }
     }
 
-    suspend fun addFeedLocally(
+    override suspend fun addFeedLocally(
         userId: String,
         feedSpec: String,
         title: String,
@@ -269,14 +319,14 @@ class FeedsRepository @Inject constructor(
         }
     }
 
-    suspend fun removeFeedLocally(userId: String, feedSpec: String) {
+    override suspend fun removeFeedLocally(userId: String, feedSpec: String) {
         withContext(dispatcherProvider.io()) {
             database.feeds().deleteAllByOwnerIdAndSpec(ownerId = userId, spec = feedSpec)
         }
     }
-}
 
-inline fun <reified T> List<PrimalEvent>.parseAndMapContentByKey(key: T.() -> String): Map<String, T> =
-    this.mapNotNull { primalEvent ->
-        CommonJson.decodeFromStringOrNull<T>(primalEvent.content)
-    }.asMapByKey { it.key() }
+    inline fun <reified T> List<PrimalEvent>.parseAndMapContentByKey(key: T.() -> String): Map<String, T> =
+        this.mapNotNull { primalEvent ->
+            CommonJson.decodeFromStringOrNull<T>(primalEvent.content)
+        }.asMapByKey { it.key() }
+}

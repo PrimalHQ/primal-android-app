@@ -12,7 +12,6 @@ import kotlinx.coroutines.launch
 import net.primal.android.articles.reads.ReadsScreenContract.UiEvent
 import net.primal.android.articles.reads.ReadsScreenContract.UiState
 import net.primal.android.feeds.list.ui.model.asFeedUi
-import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
 import net.primal.android.nostr.notary.exceptions.SignException
@@ -22,6 +21,7 @@ import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.domain.FeedSpecKind
+import net.primal.domain.repository.FeedsRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -74,10 +74,11 @@ class ReadsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 setState { copy(loading = true) }
+                val userId = activeAccountStore.activeUserId()
                 feedsRepository.fetchAndPersistDefaultFeeds(
-                    userId = activeAccountStore.activeUserId(),
-                    givenDefaultFeeds = emptyList(),
+                    userId = userId,
                     specKind = FeedSpecKind.Reads,
+                    givenDefaultFeeds = emptyList(),
                 )
             } catch (error: SignException) {
                 Timber.w(error)
@@ -91,9 +92,10 @@ class ReadsViewModel @Inject constructor(
     private fun fetchAndPersistReadsFeeds() =
         viewModelScope.launch {
             setState { copy(loading = true) }
+            val userId = activeAccountStore.activeUserId()
             try {
                 retryNetworkCall {
-                    feedsRepository.fetchAndPersistArticleFeeds(userId = activeAccountStore.activeUserId())
+                    feedsRepository.fetchAndPersistArticleFeeds(userId = userId)
                 }
             } catch (error: NostrSignUnauthorized) {
                 Timber.w(error)
