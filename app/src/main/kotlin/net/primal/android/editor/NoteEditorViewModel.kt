@@ -47,7 +47,6 @@ import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.primal.upload.repository.FileUploadRepository
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.exceptions.SignException
-import net.primal.android.nostr.repository.RelayHintsRepository
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
@@ -65,6 +64,7 @@ import net.primal.domain.nostr.Nip19TLV.toNprofileString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.Nprofile
 import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.repository.EventRelayHintsRepository
 import net.primal.domain.repository.FeedRepository
 import net.primal.domain.upload.UploadJob
 import timber.log.Timber
@@ -81,7 +81,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val userRepository: UserRepository,
     private val articleRepository: ArticleRepository,
     private val relayRepository: RelayRepository,
-    private val relayHintsRepository: RelayHintsRepository,
+    private val relayHintsRepository: EventRelayHintsRepository,
 ) : ViewModel() {
 
     private val referencedNoteId = args.referencedNoteId
