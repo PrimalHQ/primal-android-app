@@ -10,12 +10,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import net.primal.android.explore.db.TrendingTopic
 import net.primal.android.explore.home.topics.ExploreTopicsContract.UiEvent
 import net.primal.android.explore.home.topics.ExploreTopicsContract.UiState
 import net.primal.android.explore.home.topics.ui.TopicUi
-import net.primal.android.explore.repository.ExploreRepository
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.model.ExploreTrendingTopic
+import net.primal.domain.repository.ExploreRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -65,5 +65,5 @@ class ExploreTopicsViewModel @Inject constructor(
                 }
         }
 
-    private fun TrendingTopic.asTopicUi() = TopicUi(name = this.topic, score = this.score)
+    private fun ExploreTrendingTopic.asTopicUi() = TopicUi(name = this.topic, score = this.score)
 }

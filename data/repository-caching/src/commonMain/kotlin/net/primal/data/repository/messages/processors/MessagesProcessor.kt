@@ -139,7 +139,7 @@ internal class MessagesProcessor(
             .mapValues { it.value.first() }
 
         database.eventUris().upsertAllEventNostrUris(
-            // TODO When ported to repository-caching, use: flatMapPostsAsReferencedNostrUriDO
+            // TODO When ported to repository-caching, use: flatMapMessagesAsReferencedNostrUriDO
 //            data = messageDataList.flatMapMessagesAsNostrResourcePO(
 //                eventIdToNostrEvent = emptyMap(),
 //                postIdToPostDataMap = referencedNotesMap,

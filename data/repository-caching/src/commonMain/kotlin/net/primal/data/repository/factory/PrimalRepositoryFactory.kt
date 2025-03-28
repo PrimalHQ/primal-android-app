@@ -9,6 +9,7 @@ import net.primal.domain.repository.EventInteractionRepository
 import net.primal.domain.repository.EventRelayHintsRepository
 import net.primal.domain.repository.EventRepository
 import net.primal.domain.repository.EventUriRepository
+import net.primal.domain.repository.ExploreRepository
 import net.primal.domain.repository.FeedRepository
 import net.primal.domain.repository.FeedsRepository
 import net.primal.domain.repository.HighlightRepository
@@ -37,6 +38,8 @@ expect object PrimalRepositoryFactory : RepositoryFactory {
     override fun createEventInteractionRepository(primalPublisher: PrimalPublisher): EventInteractionRepository
 
     override fun createEventRelayHintsRepository(): EventRelayHintsRepository
+
+    override fun createExploreRepository(): ExploreRepository
 
     override fun createMutedUserRepository(primalPublisher: PrimalPublisher): MutedUserRepository
 
