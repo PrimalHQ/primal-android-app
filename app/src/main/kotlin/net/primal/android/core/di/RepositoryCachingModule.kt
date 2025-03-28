@@ -7,6 +7,7 @@ import dagger.hilt.components.SingletonComponent
 import net.primal.data.repository.factory.PrimalRepositoryFactory
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.repository.EventInteractionRepository
+import net.primal.domain.repository.EventRelayHintsRepository
 import net.primal.domain.repository.EventRepository
 import net.primal.domain.repository.EventUriRepository
 import net.primal.domain.repository.FeedRepository
@@ -42,4 +43,8 @@ object RepositoryCachingModule {
     @Provides
     fun providesPublicBookmarksRepository(primalPublisher: PrimalPublisher): PublicBookmarksRepository =
         PrimalRepositoryFactory.createPublicBookmarksRepository(primalPublisher)
+
+    @Provides
+    fun providesEventRelayHintsRepository(): EventRelayHintsRepository =
+        PrimalRepositoryFactory.createEventRelayHintsRepository()
 }

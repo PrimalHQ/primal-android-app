@@ -2,6 +2,7 @@ package net.primal.data.repository.factory
 
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.repository.EventInteractionRepository
+import net.primal.domain.repository.EventRelayHintsRepository
 import net.primal.domain.repository.EventRepository
 import net.primal.domain.repository.EventUriRepository
 import net.primal.domain.repository.FeedRepository
@@ -15,6 +16,7 @@ expect object PrimalRepositoryFactory : RepositoryFactory {
     override fun createEventRepository(): EventRepository
     override fun createEventUriRepository(): EventUriRepository
     override fun createEventInteractionRepository(primalPublisher: PrimalPublisher): EventInteractionRepository
+    override fun createEventRelayHintsRepository(): EventRelayHintsRepository
     override fun createMutedUserRepository(primalPublisher: PrimalPublisher): MutedUserRepository
     override fun createProfileRepository(primalPublisher: PrimalPublisher): ProfileRepository
     override fun createPublicBookmarksRepository(primalPublisher: PrimalPublisher): PublicBookmarksRepository

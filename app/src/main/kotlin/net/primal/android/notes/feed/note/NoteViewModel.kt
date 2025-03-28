@@ -15,7 +15,6 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
-import net.primal.android.nostr.repository.RelayHintsRepository
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.NoteContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -30,6 +29,7 @@ import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.PublicBookmarksNotFoundException
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.repository.EventInteractionRepository
+import net.primal.domain.repository.EventRelayHintsRepository
 import net.primal.domain.repository.MutedUserRepository
 import net.primal.domain.repository.ProfileRepository
 import net.primal.domain.repository.PublicBookmarksRepository
@@ -44,7 +44,7 @@ class NoteViewModel @AssistedInject constructor(
     private val profileRepository: ProfileRepository,
     private val mutedUserRepository: MutedUserRepository,
     private val bookmarksRepository: PublicBookmarksRepository,
-    private val relayHintsRepository: RelayHintsRepository,
+    private val relayHintsRepository: EventRelayHintsRepository,
 ) : ViewModel() {
 
     @AssistedFactory

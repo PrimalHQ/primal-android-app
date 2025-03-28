@@ -6,6 +6,7 @@ import net.primal.data.local.db.PrimalDatabaseFactory
 import net.primal.data.remote.factory.PrimalApiServiceFactory
 import net.primal.data.repository.bookmarks.PublicBookmarksRepositoryImpl
 import net.primal.data.repository.events.EventInteractionRepositoryImpl
+import net.primal.data.repository.events.EventRelayHintsRepositoryImpl
 import net.primal.data.repository.events.EventRepositoryImpl
 import net.primal.data.repository.events.EventUriRepositoryImpl
 import net.primal.data.repository.feed.FeedRepositoryImpl
@@ -14,6 +15,7 @@ import net.primal.data.repository.profile.ProfileRepositoryImpl
 import net.primal.domain.PrimalServerType
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.repository.EventInteractionRepository
+import net.primal.domain.repository.EventRelayHintsRepository
 import net.primal.domain.repository.EventRepository
 import net.primal.domain.repository.EventUriRepository
 import net.primal.domain.repository.FeedRepository
@@ -56,6 +58,13 @@ object IosRepositoryFactory : RepositoryFactory {
         return EventInteractionRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             primalPublisher = primalPublisher,
+            database = cachingDatabase,
+        )
+    }
+
+    override fun createEventRelayHintsRepository(): EventRelayHintsRepository {
+        return EventRelayHintsRepositoryImpl(
+            dispatcherProvider = dispatcherProvider,
             database = cachingDatabase,
         )
     }
