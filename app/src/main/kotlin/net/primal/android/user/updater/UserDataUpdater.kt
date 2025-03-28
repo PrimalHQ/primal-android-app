@@ -4,7 +4,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.time.Instant
 import kotlin.time.Duration
-import net.primal.android.bookmarks.BookmarksRepository
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.repository.PremiumRepository
@@ -13,6 +12,7 @@ import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.repository.PublicBookmarksRepository
 import timber.log.Timber
 
 class UserDataUpdater @AssistedInject constructor(
@@ -21,7 +21,7 @@ class UserDataUpdater @AssistedInject constructor(
     private val userRepository: UserRepository,
     private val walletRepository: WalletRepository,
     private val relayRepository: RelayRepository,
-    private val bookmarksRepository: BookmarksRepository,
+    private val bookmarksRepository: PublicBookmarksRepository,
     private val premiumRepository: PremiumRepository,
     private val nostrNotary: NostrNotary,
 ) {
@@ -60,7 +60,7 @@ class UserDataUpdater @AssistedInject constructor(
         premiumRepository.fetchMembershipStatus(userId = userId)
         relayRepository.fetchAndUpdateUserRelays(userId = userId)
         userRepository.fetchAndUpdateUserAccount(userId = userId)
-        bookmarksRepository.fetchAndPersistPublicBookmarks(userId = userId)
+        bookmarksRepository.fetchAndPersistBookmarks(userId = userId)
         walletRepository.fetchUserWalletInfoAndUpdateUserAccount(userId = userId)
     }
 }

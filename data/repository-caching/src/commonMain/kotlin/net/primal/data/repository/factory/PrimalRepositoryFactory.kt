@@ -7,6 +7,7 @@ import net.primal.domain.repository.EventUriRepository
 import net.primal.domain.repository.FeedRepository
 import net.primal.domain.repository.MutedUserRepository
 import net.primal.domain.repository.ProfileRepository
+import net.primal.domain.repository.PublicBookmarksRepository
 
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 expect object PrimalRepositoryFactory : RepositoryFactory {
@@ -14,6 +15,7 @@ expect object PrimalRepositoryFactory : RepositoryFactory {
     override fun createEventRepository(): EventRepository
     override fun createEventUriRepository(): EventUriRepository
     override fun createEventInteractionRepository(primalPublisher: PrimalPublisher): EventInteractionRepository
-    override fun createProfileRepository(primalPublisher: PrimalPublisher): ProfileRepository
     override fun createMutedUserRepository(primalPublisher: PrimalPublisher): MutedUserRepository
+    override fun createProfileRepository(primalPublisher: PrimalPublisher): ProfileRepository
+    override fun createPublicBookmarksRepository(primalPublisher: PrimalPublisher): PublicBookmarksRepository
 }

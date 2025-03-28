@@ -7,6 +7,7 @@ import net.primal.core.utils.coroutines.DispatcherProviderFactory
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.local.db.PrimalDatabaseFactory
 import net.primal.data.remote.factory.PrimalApiServiceFactory
+import net.primal.data.repository.bookmarks.PublicBookmarksRepositoryImpl
 import net.primal.data.repository.events.EventInteractionRepositoryImpl
 import net.primal.data.repository.events.EventRepositoryImpl
 import net.primal.data.repository.events.EventUriRepositoryImpl
@@ -21,6 +22,7 @@ import net.primal.domain.repository.EventUriRepository
 import net.primal.domain.repository.FeedRepository
 import net.primal.domain.repository.MutedUserRepository
 import net.primal.domain.repository.ProfileRepository
+import net.primal.domain.repository.PublicBookmarksRepository
 
 object AndroidRepositoryFactory : RepositoryFactory {
 
@@ -71,6 +73,15 @@ object AndroidRepositoryFactory : RepositoryFactory {
         )
     }
 
+    override fun createMutedUserRepository(primalPublisher: PrimalPublisher): MutedUserRepository {
+        return MutedUserRepositoryImpl(
+            dispatcherProvider = dispatcherProvider,
+            database = cachingDatabase,
+            settingsApi = PrimalApiServiceFactory.createSettingsApi(cachingPrimalApiClient),
+            primalPublisher = primalPublisher,
+        )
+    }
+
     override fun createProfileRepository(primalPublisher: PrimalPublisher): ProfileRepository {
         return ProfileRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
@@ -81,12 +92,12 @@ object AndroidRepositoryFactory : RepositoryFactory {
         )
     }
 
-    override fun createMutedUserRepository(primalPublisher: PrimalPublisher): MutedUserRepository {
-        return MutedUserRepositoryImpl(
+    override fun createPublicBookmarksRepository(primalPublisher: PrimalPublisher): PublicBookmarksRepository {
+        return PublicBookmarksRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             database = cachingDatabase,
-            settingsApi = PrimalApiServiceFactory.createSettingsApi(cachingPrimalApiClient),
             primalPublisher = primalPublisher,
+            usersApi = PrimalApiServiceFactory.createUsersApi(cachingPrimalApiClient),
         )
     }
 }

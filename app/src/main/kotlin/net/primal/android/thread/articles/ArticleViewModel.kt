@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.bookmarks.BookmarksRepository
 import net.primal.android.core.errors.UiError
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
@@ -19,9 +18,11 @@ import net.primal.android.thread.articles.ArticleContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.BookmarkType
+import net.primal.domain.nostr.PublicBookmarksNotFoundException
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.repository.MutedUserRepository
 import net.primal.domain.repository.ProfileRepository
+import net.primal.domain.repository.PublicBookmarksRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -29,7 +30,7 @@ class ArticleViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val profileRepository: ProfileRepository,
     private val mutedUserRepository: MutedUserRepository,
-    private val bookmarksRepository: BookmarksRepository,
+    private val bookmarksRepository: PublicBookmarksRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -125,7 +126,7 @@ class ArticleViewModel @Inject constructor(
                 }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
-            } catch (error: BookmarksRepository.BookmarksListNotFound) {
+            } catch (error: PublicBookmarksNotFoundException) {
                 Timber.w(error)
                 setState { copy(shouldApproveBookmark = true) }
             } catch (error: MissingPrivateKey) {
