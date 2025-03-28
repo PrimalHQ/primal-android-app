@@ -26,9 +26,7 @@ import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.messages.chat.ChatContract.UiEvent
 import net.primal.android.messages.chat.ChatContract.UiState
 import net.primal.android.messages.chat.model.ChatMessageUi
-import net.primal.android.messages.db.DirectMessage
 import net.primal.android.messages.exceptions.MessageEncryptException
-import net.primal.android.messages.repository.MessageRepository
 import net.primal.android.navigation.profileIdOrThrow
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.NostrNotary
@@ -37,7 +35,9 @@ import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.model.DirectMessage
 import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.repository.ChatRepository
 import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 
@@ -46,7 +46,7 @@ class ChatViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     activeAccountStore: ActiveAccountStore,
     private val subscriptionsManager: SubscriptionsManager,
-    private val messageRepository: MessageRepository,
+    private val chatRepository: ChatRepository,
     private val profileRepository: ProfileRepository,
     private val nostrNotary: NostrNotary,
 ) : ViewModel() {
@@ -57,7 +57,7 @@ class ChatViewModel @Inject constructor(
     private val _state = MutableStateFlow(
         UiState(
             participantId = participantId,
-            messages = messageRepository
+            messages = chatRepository
                 .newestMessages(userId = userId, participantId = participantId)
                 .mapAsPagingDataOfChatMessageUi(),
         ),
@@ -115,7 +115,7 @@ class ChatViewModel @Inject constructor(
                 .distinctUntilChanged()
                 .collect {
                     try {
-                        messageRepository.fetchNewConversationMessages(userId, participantId)
+                        chatRepository.fetchNewConversationMessages(userId, participantId)
                     } catch (error: WssException) {
                         Timber.w(error)
                     }
@@ -129,7 +129,7 @@ class ChatViewModel @Inject constructor(
                     userId = userId,
                     description = "Mark conversation with $participantId as read.",
                 )
-                messageRepository.markConversationAsRead(
+                chatRepository.markConversationAsRead(
                     authorization = authorizationEvent,
                     conversationUserId = participantId,
                 )
@@ -145,7 +145,7 @@ class ChatViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(sending = true) }
             try {
-                messageRepository.sendMessage(
+                chatRepository.sendMessage(
                     userId = userId,
                     receiverId = participantId,
                     text = state.value.newMessageText,
@@ -173,14 +173,14 @@ class ChatViewModel @Inject constructor(
 
     private fun DirectMessage.mapAsChatMessageUi() =
         ChatMessageUi(
-            messageId = this.data.messageId,
-            isUserMessage = userId == this.data.senderId,
-            senderId = this.data.senderId,
-            timestamp = Instant.ofEpochSecond(this.data.createdAt),
-            content = this.data.content,
-            uris = this.eventUris.map { it.asEventUriUiModel() },
-            nostrUris = this.eventNostrUris.map { it.asNoteNostrUriUi() },
-            hashtags = this.data.hashtags,
+            messageId = this.messageId,
+            isUserMessage = userId == this.senderId,
+            senderId = this.senderId,
+            timestamp = Instant.ofEpochSecond(this.createdAt),
+            content = this.content,
+            hashtags = this.hashtags,
+            uris = this.links.map { it.asEventUriUiModel() },
+            nostrUris = this.nostrUris.map { it.asNoteNostrUriUi() },
         )
 
     private fun setErrorState(error: UiState.ChatError) {

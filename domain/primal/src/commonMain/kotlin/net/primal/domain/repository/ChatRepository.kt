@@ -7,7 +7,7 @@ import net.primal.domain.model.DMConversation
 import net.primal.domain.model.DirectMessage
 import net.primal.domain.nostr.NostrEvent
 
-interface MessagesRepository {
+interface ChatRepository {
 
     fun newestConversations(userId: String, relation: ConversationRelation): Flow<PagingData<DMConversation>>
 

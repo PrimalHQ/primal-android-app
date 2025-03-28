@@ -1,23 +1,25 @@
-package net.primal.android.messages.api.mediator
+package net.primal.data.repository.messages.paging
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import java.time.Instant
-import kotlinx.coroutines.Dispatchers
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.withContext
-import net.primal.android.db.PrimalDatabase
-import net.primal.android.messages.db.DirectMessage
+import kotlinx.datetime.Clock
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.data.local.dao.messages.DirectMessage
+import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.remote.api.messages.MessagesApi
 import net.primal.data.remote.api.messages.model.MessagesRequestBody
-import timber.log.Timber
+import net.primal.data.repository.messages.processors.MessagesProcessor
 
 @ExperimentalPagingApi
-class MessagesRemoteMediator(
+internal class MessagesRemoteMediator(
     private val userId: String,
     private val participantId: String,
+    private val dispatcherProvider: DispatcherProvider,
     private val database: PrimalDatabase,
     private val messagesApi: MessagesApi,
     private val messagesProcessor: MessagesProcessor,
@@ -30,7 +32,7 @@ class MessagesRemoteMediator(
             LoadType.REFRESH -> null
             LoadType.PREPEND -> {
                 state.firstItemOrNull()?.data?.createdAt
-                    ?: withContext(Dispatchers.IO) {
+                    ?: withContext(dispatcherProvider.io()) {
                         database.messages().firstByOwnerId(ownerId = userId)?.createdAt
                     }
                     ?: return MediatorResult.Success(endOfPaginationReached = true)
@@ -38,7 +40,7 @@ class MessagesRemoteMediator(
 
             LoadType.APPEND -> {
                 state.lastItemOrNull()?.data?.createdAt
-                    ?: withContext(Dispatchers.IO) {
+                    ?: withContext(dispatcherProvider.io()) {
                         database.messages().lastByOwnerId(ownerId = userId)?.createdAt
                     }
                     ?: return MediatorResult.Success(endOfPaginationReached = true)
@@ -59,7 +61,7 @@ class MessagesRemoteMediator(
             LoadType.REFRESH -> initialRequestBody
             LoadType.PREPEND -> initialRequestBody.copy(
                 since = timestamp,
-                until = Instant.now().epochSecond,
+                until = Clock.System.now().epochSeconds,
             )
 
             LoadType.APPEND -> initialRequestBody.copy(until = timestamp)
@@ -70,17 +72,17 @@ class MessagesRemoteMediator(
         }
 
         val response = try {
-            withContext(Dispatchers.IO) {
+            withContext(dispatcherProvider.io()) {
                 messagesApi.getMessages(body = requestBody)
             }
         } catch (error: WssException) {
-            Timber.w(error)
+            Napier.w(error) { "Failed to get remote messages." }
             return MediatorResult.Error(error)
         }
 
         lastRequests[loadType] = requestBody
 
-        withContext(Dispatchers.IO) {
+        withContext(dispatcherProvider.io()) {
             messagesProcessor.processMessageEventsAndSave(
                 userId = userId,
                 messages = response.messages,

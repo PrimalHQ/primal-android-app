@@ -6,8 +6,10 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.data.repository.factory.PrimalRepositoryFactory
+import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.repository.ArticleRepository
+import net.primal.domain.repository.ChatRepository
 import net.primal.domain.repository.EventInteractionRepository
 import net.primal.domain.repository.EventRelayHintsRepository
 import net.primal.domain.repository.EventRepository
@@ -22,6 +24,17 @@ import net.primal.domain.repository.PublicBookmarksRepository
 @Module
 @InstallIn(SingletonComponent::class)
 object RepositoryCachingModule {
+
+    @Provides
+    fun providesArticleRepository(): ArticleRepository = PrimalRepositoryFactory.createArticleRepository()
+
+    @Provides
+    fun providesArticleHighlightsRepository(primalPublisher: PrimalPublisher): HighlightRepository =
+        PrimalRepositoryFactory.createArticleHighlightsRepository(primalPublisher)
+
+    @Provides
+    fun provideChatRepository(messageCipher: MessageCipher, primalPublisher: PrimalPublisher): ChatRepository =
+        PrimalRepositoryFactory.createChatRepository(messageCipher = messageCipher, primalPublisher = primalPublisher)
 
     @Provides
     fun provideFeedRepository(): FeedRepository = PrimalRepositoryFactory.createFeedRepository()
@@ -55,11 +68,4 @@ object RepositoryCachingModule {
     @Provides
     fun providesEventRelayHintsRepository(): EventRelayHintsRepository =
         PrimalRepositoryFactory.createEventRelayHintsRepository()
-
-    @Provides
-    fun providesArticleRepository(): ArticleRepository = PrimalRepositoryFactory.createArticleRepository()
-
-    @Provides
-    fun providesHighlightsRepository(primalPublisher: PrimalPublisher): HighlightRepository =
-        PrimalRepositoryFactory.createArticleHighlightsRepository(primalPublisher)
 }
