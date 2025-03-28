@@ -53,8 +53,8 @@ import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.zaps.ZappersAvatarThumbnailRow
-import net.primal.android.events.domain.findNearestOrNull
 import net.primal.android.events.ui.EventZapUiModel
+import net.primal.android.events.ui.findNearestOrNull
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.Naddr

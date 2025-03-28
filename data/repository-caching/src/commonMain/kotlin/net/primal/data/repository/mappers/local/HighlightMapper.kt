@@ -35,6 +35,7 @@ fun HighlightPO.asHighlightDO(): HighlightDO {
                     blossomServers = it.author?.blossoms ?: emptyList(),
                 ),
                 content = it.post.content,
+                tags = it.post.tags,
                 timestamp = Instant.fromEpochSeconds(it.post.createdAt),
                 rawNostrEvent = it.post.raw,
                 hashtags = it.post.hashtags,

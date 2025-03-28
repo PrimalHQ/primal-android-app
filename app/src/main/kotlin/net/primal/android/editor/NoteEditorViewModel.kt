@@ -29,6 +29,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.articles.feed.ui.generateNaddr
 import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
+import net.primal.android.articles.highlights.asHighlightUi
+import net.primal.android.articles.highlights.generateNevent
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.core.files.FileAnalyser
 import net.primal.android.editor.NoteEditorContract.SideEffect
@@ -37,8 +39,6 @@ import net.primal.android.editor.NoteEditorContract.UiState
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteTaggedUser
-import net.primal.android.highlights.model.asHighlightUi
-import net.primal.android.highlights.model.generateNevent
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.primal.upload.repository.FileUploadRepository

@@ -1,8 +1,8 @@
 package net.primal.android.thread.articles.details
 
+import net.primal.android.articles.highlights.JoinedHighlightsUi
 import net.primal.android.core.errors.UiError
 import net.primal.android.events.ui.EventZapUiModel
-import net.primal.android.highlights.model.JoinedHighlightsUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.thread.articles.details.ui.ArticleDetailsUi

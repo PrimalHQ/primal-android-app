@@ -28,6 +28,7 @@ fun NotificationPO.asNotificationDO(): NotificationDO {
                     displayName = post.authorId.asEllipsizedNpub(),
                 ),
                 content = post.content,
+                tags = post.tags,
                 timestamp = Instant.fromEpochSeconds(post.createdAt),
                 rawNostrEvent = post.raw,
                 hashtags = post.hashtags,

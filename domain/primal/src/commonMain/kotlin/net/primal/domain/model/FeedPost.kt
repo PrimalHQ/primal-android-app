@@ -1,6 +1,7 @@
 package net.primal.domain.model
 
 import kotlinx.datetime.Instant
+import kotlinx.serialization.json.JsonArray
 import net.primal.domain.EventLink
 import net.primal.domain.EventUriNostrReference
 import net.primal.domain.EventZap
@@ -9,6 +10,7 @@ data class FeedPost(
     val eventId: String,
     val author: FeedPostAuthor,
     val content: String,
+    val tags: List<JsonArray>,
     val timestamp: Instant,
     val rawNostrEvent: String,
     val hashtags: List<String> = emptyList(),

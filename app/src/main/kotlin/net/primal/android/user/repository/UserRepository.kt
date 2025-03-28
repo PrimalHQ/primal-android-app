@@ -9,17 +9,12 @@ import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.JsonArray
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.crypto.hexToNpubHrp
-import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.ext.asProfileDataPO
 import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.nostr.publish.NostrPublisher
-import net.primal.android.profile.db.ProfileInteraction
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.accounts.UserAccountsStore
@@ -28,6 +23,7 @@ import net.primal.android.user.accounts.copyFollowListIfNotNull
 import net.primal.android.user.accounts.copyIfNotNull
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.db.Relay
+import net.primal.android.user.db.UserProfileInteraction
 import net.primal.android.user.db.UsersDatabase
 import net.primal.android.user.domain.ContentDisplaySettings
 import net.primal.android.user.domain.NostrWalletConnect
@@ -46,7 +42,6 @@ import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 
 class UserRepository @Inject constructor(
-    private val database: PrimalDatabase,
     private val usersDatabase: UsersDatabase,
     private val dispatchers: CoroutineDispatcherProvider,
     private val userAccountFetcher: UserAccountFetcher,
@@ -84,20 +79,21 @@ class UserRepository @Inject constructor(
 
     suspend fun clearAllUserRelatedData(userId: String) =
         withContext(dispatchers.io()) {
-            database.withTransaction {
-                database.messages().deleteAllByOwnerId(ownerId = userId)
-                database.messageConversations().deleteAllByOwnerId(ownerId = userId)
-                database.feeds().deleteAllByOwnerId(ownerId = userId)
-                database.mutedUsers().deleteAllByOwnerId(ownerId = userId)
-                database.notifications().deleteAllByOwnerId(ownerId = userId)
-                database.articleFeedsConnections().deleteConnections(ownerId = userId)
-                database.feedsConnections().deleteConnections(ownerId = userId)
-                database.feedPostsRemoteKeys().deleteAllByOwnerId(ownerId = userId)
-                database.publicBookmarks().deleteAllBookmarks(userId = userId)
-            }
+            // TODO Implement api in data:repository-caching to manage data per userId
+//            database.withTransaction {
+//                database.messages().deleteAllByOwnerId(ownerId = userId)
+//                database.messageConversations().deleteAllByOwnerId(ownerId = userId)
+//                database.feeds().deleteAllByOwnerId(ownerId = userId)
+//                database.mutedUsers().deleteAllByOwnerId(ownerId = userId)
+//                database.notifications().deleteAllByOwnerId(ownerId = userId)
+//                database.articleFeedsConnections().deleteConnections(ownerId = userId)
+//                database.feedsConnections().deleteConnections(ownerId = userId)
+//                database.feedPostsRemoteKeys().deleteAllByOwnerId(ownerId = userId)
+//                database.publicBookmarks().deleteAllBookmarks(userId = userId)
+//            }
 
             usersDatabase.withTransaction {
-                usersDatabase.profileInteractions().deleteAllByOwnerId(ownerId = userId)
+                usersDatabase.userProfileInteractions().deleteAllByOwnerId(ownerId = userId)
                 usersDatabase.walletTransactions().deleteAllTransactionsByUserId(userId = userId)
                 usersDatabase.relays().deleteAll(userId = userId)
             }
@@ -194,28 +190,30 @@ class UserRepository @Inject constructor(
         }
 
     private suspend fun setUserProfileAndUpdateLocally(userId: String, contentMetadata: ContentMetadata) {
-        val profileMetadataNostrEvent = nostrPublisher.publishUserProfile(
-            userId = userId,
-            contentMetadata = contentMetadata,
-        )
-        val profileData = profileMetadataNostrEvent.asProfileDataPO(
-            cdnResources = emptyMap(),
-            primalUserNames = emptyMap(),
-            primalPremiumInfo = emptyMap(),
-            primalLegendProfiles = emptyMap(),
-            blossomServers = emptyMap(),
-        )
-        database.profiles().insertOrUpdateAll(data = listOf(profileData))
-
-        accountsStore.getAndUpdateAccount(userId = userId) {
-            this.copy(
-                authorDisplayName = profileData.authorNameUiFriendly(),
-                userDisplayName = profileData.usernameUiFriendly(),
-                avatarCdnImage = profileData.avatarCdnImage,
-                internetIdentifier = profileData.internetIdentifier,
-                lightningAddress = profileData.lightningAddress,
-            )
-        }
+        throw NostrPublishException(cause = NotImplementedError())
+        // TODO Implement api to import a profile NostrEvent into caching database
+//        val profileMetadataNostrEvent = nostrPublisher.publishUserProfile(
+//            userId = userId,
+//            contentMetadata = contentMetadata,
+//        )
+//        val profileData = profileMetadataNostrEvent.asProfileDataPO(
+//            cdnResources = emptyMap(),
+//            primalUserNames = emptyMap(),
+//            primalPremiumInfo = emptyMap(),
+//            primalLegendProfiles = emptyMap(),
+//            blossomServers = emptyMap(),
+//        )
+//        database.profiles().insertOrUpdateAll(data = listOf(profileData))
+//
+//        accountsStore.getAndUpdateAccount(userId = userId) {
+//            this.copy(
+//                authorDisplayName = profileData.authorNameUiFriendly(),
+//                userDisplayName = profileData.usernameUiFriendly(),
+//                avatarCdnImage = profileData.avatarCdnImage,
+//                internetIdentifier = profileData.internetIdentifier,
+//                lightningAddress = profileData.lightningAddress,
+//            )
+//        }
     }
 
     suspend fun updateWalletPreference(userId: String, walletPreference: WalletPreference) {
@@ -359,8 +357,8 @@ class UserRepository @Inject constructor(
 
     suspend fun markAsInteracted(profileId: String, ownerId: String) =
         withContext(dispatchers.io()) {
-            usersDatabase.profileInteractions().upsert(
-                ProfileInteraction(
+            usersDatabase.userProfileInteractions().upsert(
+                UserProfileInteraction(
                     profileId = profileId,
                     lastInteractionAt = Instant.now().epochSecond,
                     ownerId = ownerId,
@@ -369,7 +367,7 @@ class UserRepository @Inject constructor(
         }
 
     fun observeRecentUsers(ownerId: String): Flow<List<UserProfileSearchItem>> {
-        return usersDatabase.profileInteractions()
+        return usersDatabase.userProfileInteractions()
             .observeRecentProfilesByOwnerId(ownerId = ownerId)
             .map { recentProfiles ->
                 recentProfiles.mapNotNull { profileInteraction ->

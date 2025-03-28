@@ -2,10 +2,10 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "f898cefe5a20021e741b97617e9bb4ac",
+    "identityHash": "14c95d172f5285953da4258ca57d569c",
     "entities": [
       {
-        "tableName": "ProfileInteraction",
+        "tableName": "UserProfileInteraction",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`profileId` TEXT NOT NULL, `ownerId` TEXT NOT NULL, `lastInteractionAt` INTEGER NOT NULL, PRIMARY KEY(`profileId`, `ownerId`))",
         "fields": [
           {
@@ -230,7 +230,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f898cefe5a20021e741b97617e9bb4ac')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '14c95d172f5285953da4258ca57d569c')"
     ]
   }
 }

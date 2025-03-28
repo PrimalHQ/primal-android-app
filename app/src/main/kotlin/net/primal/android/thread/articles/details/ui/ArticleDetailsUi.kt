@@ -1,10 +1,10 @@
 package net.primal.android.thread.articles.details.ui
 
 import java.time.Instant
+import net.primal.android.articles.highlights.HighlightUi
+import net.primal.android.articles.highlights.asHighlightUi
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.highlights.model.HighlightUi
-import net.primal.android.highlights.model.asHighlightUi
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
