@@ -17,8 +17,8 @@ import net.primal.android.premium.manage.contact.PremiumContactListContract.UiEv
 import net.primal.android.premium.manage.contact.PremiumContactListContract.UiState
 import net.primal.android.premium.manage.contact.model.FollowListBackup
 import net.primal.android.premium.repository.PremiumRepository
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber
 
@@ -26,7 +26,7 @@ import timber.log.Timber
 class PremiumContactListViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val premiumRepository: PremiumRepository,
-    private val profileRepository: ProfileRepository,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -82,7 +82,7 @@ class PremiumContactListViewModel @Inject constructor(
     private fun recoverFollowList(backup: FollowListBackup) {
         viewModelScope.launch {
             try {
-                profileRepository.recoverFollowList(
+                userRepository.recoverFollowList(
                     userId = activeAccountStore.activeUserId(),
                     tags = backup.event.tags,
                     content = backup.event.content,

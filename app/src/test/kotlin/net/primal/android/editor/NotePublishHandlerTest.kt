@@ -171,6 +171,7 @@ class NotePublishHandlerTest {
                 nostrPublisher.signPublishImportNostrEvent(
                     withArg { it shouldBe expectedUserId },
                     any(),
+                    any(),
                 )
             }
         }
@@ -187,6 +188,7 @@ class NotePublishHandlerTest {
                 nostrPublisher.signPublishImportNostrEvent(
                     any(),
                     withArg { it.pubKey shouldBe expectedUserId },
+                    any(),
                 )
             }
         }
@@ -214,6 +216,7 @@ class NotePublishHandlerTest {
                     withArg {
                         it.content shouldBe givenContent
                     },
+                    any(),
                 )
             }
         }
@@ -239,6 +242,7 @@ class NotePublishHandlerTest {
                         it.content shouldStartWith givenContent
                         it.content shouldEndWith expectedRemoteUrl
                     },
+                    any(),
                 )
             }
         }
@@ -269,6 +273,7 @@ class NotePublishHandlerTest {
                         it.content shouldStartWith givenContent
                         it.content shouldEndWith expectedUrlsAppendix
                     },
+                    any(),
                 )
             }
         }
@@ -296,6 +301,7 @@ class NotePublishHandlerTest {
                         breakLines[1] shouldBe '\n'
                         breakLines[2] shouldNotBe '\n'
                     },
+                    any(),
                 )
             }
         }
@@ -324,6 +330,7 @@ class NotePublishHandlerTest {
                         val iMetaTagCount = it.tags.count { tag -> tag[0].jsonPrimitive.content == "imeta" }
                         iMetaTagCount shouldBe expectedAttachments.size
                     },
+                    any(),
                 )
             }
         }
@@ -351,6 +358,7 @@ class NotePublishHandlerTest {
                         val tTagCount = it.tags.count { tag -> tag[0].jsonPrimitive.content == "t" }
                         tTagCount shouldBe hashtags.size
                     },
+                    any(),
                 )
             }
         }
@@ -374,6 +382,7 @@ class NotePublishHandlerTest {
                         val tagValues = event.tags.map { tag -> tag[1].jsonPrimitive.content }
                         tagValues shouldBe hashtags.map { it.removePrefix("#") }
                     },
+                    any(),
                 )
             }
         }
@@ -406,6 +415,7 @@ class NotePublishHandlerTest {
                     withArg { event ->
                         event.content shouldBe expectedOutput
                     },
+                    any(),
                 )
             }
         }
@@ -435,6 +445,7 @@ class NotePublishHandlerTest {
                     withArg { event ->
                         event.content shouldBe expectedOutput
                     },
+                    any(),
                 )
             }
         }
@@ -459,6 +470,7 @@ class NotePublishHandlerTest {
                     withArg { event ->
                         event.content shouldBe content
                     },
+                    any(),
                 )
             }
         }
@@ -482,6 +494,7 @@ class NotePublishHandlerTest {
                     withArg { event ->
                         event.content shouldBe content
                     },
+                    any(),
                 )
             }
         }
@@ -508,6 +521,7 @@ class NotePublishHandlerTest {
                         val pubkeyTagsCount = event.tags.count { tag -> tag[0].jsonPrimitive.content == "p" }
                         pubkeyTagsCount shouldBe expectedMentionedUser.size
                     },
+                    any(),
                 )
             }
         }
@@ -553,6 +567,7 @@ class NotePublishHandlerTest {
                             actualRelayHint shouldBe expectedRelay
                         }
                     },
+                    any(),
                 )
             }
         }
@@ -588,6 +603,7 @@ class NotePublishHandlerTest {
                         it.content shouldBe expectedContent
                         it.tags shouldContain expectedTags
                     },
+                    any(),
                 )
             }
         }
@@ -626,6 +642,7 @@ class NotePublishHandlerTest {
                         it.content shouldBe expectedContent
                         it.tags shouldContainAll expectedTags
                     },
+                    any(),
                 )
             }
         }
@@ -660,6 +677,7 @@ class NotePublishHandlerTest {
                         it.content shouldBe expectedContent
                         it.tags shouldBe expectedTags
                     },
+                    any(),
                 )
             }
         }
@@ -700,6 +718,7 @@ class NotePublishHandlerTest {
                         it.content shouldBe expectedContent
                         it.tags shouldContain expectedTag
                     },
+                    any(),
                 )
             }
         }
@@ -745,6 +764,7 @@ class NotePublishHandlerTest {
                         it.content shouldBe expectedContent
                         it.tags shouldContainAll expectedTags
                     },
+                    any(),
                 )
             }
         }
@@ -783,6 +803,7 @@ class NotePublishHandlerTest {
                         it.content shouldBe expectedContent
                         it.tags shouldBe expectedTags
                     },
+                    any(),
                 )
             }
         }
@@ -822,6 +843,7 @@ class NotePublishHandlerTest {
                         rootTag[0].jsonPrimitive.content shouldBe "e"
                         rootTag[1].jsonPrimitive.content shouldBe highlightNevent.eventId
                     },
+                    any(),
                 )
             }
         }
@@ -857,6 +879,7 @@ class NotePublishHandlerTest {
                         rootTag[0].jsonPrimitive.content shouldBe "a"
                         rootTag[1].jsonPrimitive.content shouldBe articleNaddr.asATagValue()
                     },
+                    any(),
                 )
             }
         }
@@ -890,6 +913,7 @@ class NotePublishHandlerTest {
                         rootTag[0].jsonPrimitive.content shouldBe "e"
                         rootTag[1].jsonPrimitive.content shouldBe noteNevent.eventId
                     },
+                    any(),
                 )
             }
         }
@@ -926,6 +950,7 @@ class NotePublishHandlerTest {
                         rootTag[0].jsonPrimitive.content shouldBe "e"
                         rootTag[1].jsonPrimitive.content shouldBe noteNevent.eventId
                     },
+                    any(),
                 )
             }
         }
@@ -972,6 +997,7 @@ class NotePublishHandlerTest {
                         replyTag[0].jsonPrimitive.content shouldBe "e"
                         replyTag[1].jsonPrimitive.content shouldBe replyToNoteNevent.eventId
                     },
+                    any(),
                 )
             }
         }
@@ -1019,6 +1045,7 @@ class NotePublishHandlerTest {
                         replyTag[0].jsonPrimitive.content shouldBe "e"
                         replyTag[1].jsonPrimitive.content shouldBe noteNevent.eventId
                     },
+                    any(),
                 )
             }
         }
@@ -1068,6 +1095,7 @@ class NotePublishHandlerTest {
                         replyTag[0].jsonPrimitive.content shouldBe "e"
                         replyTag[1].jsonPrimitive.content shouldBe noteNevent.eventId
                     },
+                    any(),
                 )
             }
         }
@@ -1139,6 +1167,7 @@ class NotePublishHandlerTest {
                         it.content shouldBe expectedContent
                         it.tags shouldBe expectedTags
                     },
+                    any(),
                 )
             }
         }
@@ -1177,6 +1206,7 @@ class NotePublishHandlerTest {
                         it.content shouldBe expectedContent
                         it.tags shouldBe expectedTags
                     },
+                    any(),
                 )
             }
         }
@@ -1212,6 +1242,7 @@ class NotePublishHandlerTest {
                         it.content shouldBe expectedContent
                         it.tags shouldBe expectedTags
                     },
+                    any(),
                 )
             }
         }
@@ -1258,6 +1289,7 @@ class NotePublishHandlerTest {
                         it.content shouldBe expectedContent
                         it.tags shouldContainAll expectedTags
                     },
+                    any(),
                 )
             }
         }
@@ -1311,6 +1343,7 @@ class NotePublishHandlerTest {
                         it.content shouldBe expectedContent
                         it.tags shouldContainAll expectedTags
                     },
+                    any(),
                 )
             }
         }
@@ -1358,6 +1391,7 @@ class NotePublishHandlerTest {
                         it.content shouldBe expectedContent
                         it.tags shouldBe expectedTags
                     },
+                    any(),
                 )
             }
         }

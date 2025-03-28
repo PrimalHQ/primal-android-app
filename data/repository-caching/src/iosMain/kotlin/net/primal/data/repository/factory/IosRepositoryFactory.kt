@@ -23,5 +23,4 @@ object IosRepositoryFactory : RepositoryFactory {
             database = cachingDatabase,
         )
     }
-
 }

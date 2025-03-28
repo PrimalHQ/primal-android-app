@@ -4,11 +4,11 @@ import java.time.Instant
 import kotlinx.serialization.Serializable
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.premium.domain.PremiumMembership
-import net.primal.android.profile.domain.PrimalLegendProfile
 import net.primal.android.wallet.domain.WalletSettings
 import net.primal.android.wallet.domain.WalletState
 import net.primal.domain.CdnImage
 import net.primal.domain.ContentAppSettings
+import net.primal.domain.PrimalLegendProfile
 
 @Serializable
 data class UserAccount(

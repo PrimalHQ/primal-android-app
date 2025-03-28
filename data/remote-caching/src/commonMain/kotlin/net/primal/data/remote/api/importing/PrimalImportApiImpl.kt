@@ -8,10 +8,11 @@ import net.primal.data.remote.PrimalVerb
 import net.primal.data.remote.api.importing.model.ImportRequestBody
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.serialization.toNostrJsonArray
+import net.primal.domain.publisher.NostrEventImporter
 
 internal class PrimalImportApiImpl(
     private val primalApiClient: PrimalApiClient,
-) : PrimalImportApi {
+) : PrimalImportApi, NostrEventImporter {
 
     override suspend fun importEvents(events: List<NostrEvent>): Boolean {
         val result = primalApiClient.query(

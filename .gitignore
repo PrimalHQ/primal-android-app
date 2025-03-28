@@ -24,6 +24,10 @@
 /.idea/AndroidProjectSystem.xml
 .DS_Store
 /build
+/core/build
+/data/build
+/domain/build
+/shared/build
 /captures
 .externalNativeBuild
 .cxx

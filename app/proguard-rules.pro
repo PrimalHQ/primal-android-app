@@ -14,17 +14,14 @@
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+-keepattributes SourceFile,LineNumberTable
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
-#-renamesourcefileattribute SourceFile
-
-# Uncomment this to preserve the line number information for debugging stack traces.
--keepattributes SourceFile,LineNumberTable
-
-# If you keep the line number information, uncomment this to hide the original source file name.
 -renamesourcefileattribute SourceFile
+
+# Avoid class/method name obfuscation for your own code
+-keepnames class net.primal.** { *; }
 
 -keep class fr.acinq.secp256k1.** { *; }
 

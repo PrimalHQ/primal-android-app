@@ -21,7 +21,7 @@ val buildConfigGenerator by tasks.registering(Sync::class) {
             |package net.primal.core.utils
             |
             |object AndroidBuildConfig {
-            |  const val APP_VERSION = "${releaseProperties.getProperty("version", "unknown")}"
+            |    const val APP_VERSION = "${releaseProperties.getProperty("version", "unknown")}"
             |}
             |
             """.trimMargin(),
@@ -42,6 +42,7 @@ kotlin {
         namespace = "net.primal"
         compileSdk = 35
         minSdk = 26
+        withHostTestBuilder {}
     }
 
     // JVM Target
@@ -69,6 +70,7 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.kotlinx.serialization.json)
+                implementation(libs.ktor.http)
             }
         }
 
@@ -85,6 +87,20 @@ kotlin {
 
         val desktopMain by getting
         desktopMain.dependencies {
+        }
+
+        getByName("androidHostTest") {
+            dependencies {
+                implementation(libs.junit)
+                implementation(libs.androidx.test.core)
+                implementation(libs.androidx.test.runner)
+                implementation(libs.androidx.test.ext.junit)
+                implementation(libs.androidx.test.ext.junit.ktx)
+                implementation(libs.androidx.arch.core.testing)
+                implementation(libs.mockk)
+                implementation(libs.kotest.assertions.core)
+                implementation(libs.kotest.assertions.json)
+            }
         }
 
         commonTest {

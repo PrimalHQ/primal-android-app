@@ -31,5 +31,4 @@ actual object PrimalDatabaseFactory {
             name = dbFile.absolutePath,
         )
     }
-
 }

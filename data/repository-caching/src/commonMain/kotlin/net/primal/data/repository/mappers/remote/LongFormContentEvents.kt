@@ -1,6 +1,7 @@
 package net.primal.data.repository.mappers.remote
 
 import io.github.aakira.napier.Napier
+import net.primal.core.utils.parseUris
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.local.dao.reads.ArticleData
 import net.primal.domain.CdnImage
@@ -53,9 +54,7 @@ private fun NostrEvent.asArticleData(wordsCount: Int?, cdnResources: Map<String,
         createdAt = this.createdAt,
         publishedAt = tags.findFirstPublishedAt()?.toLongOrNull() ?: this.createdAt,
         content = this.content,
-        // TODO Rewire uri parsing once is implemented for KMP
-        uris = emptyList(),
-//        uris = this.content.parseUris(),
+        uris = this.content.parseUris(),
         hashtags = this.parseHashtags(),
         raw = raw,
         imageCdnImage = tags.findFirstImage()?.let { imageUrl ->

@@ -1,4 +1,3 @@
-import co.touchlab.skie.configuration.DefaultArgumentInterop
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
 plugins {
@@ -6,7 +5,6 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.touchlab.skie)
     alias(libs.plugins.ktorfit)
 }
 
@@ -60,9 +58,6 @@ kotlin {
 
                 // Logging
                 implementation(libs.napier)
-
-                // Interop
-                implementation(libs.skie.configuration.annotations)
             }
         }
 
@@ -91,27 +86,5 @@ kotlin {
     // Opting in to the experimental @ObjCName annotation for native coroutines on iOS targets
     kotlin.sourceSets.all {
         languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
-    }
-}
-
-tasks.register("assembleXCFramework") {
-    dependsOn("assemble${xcfName}ReleaseXCFramework")
-}
-
-skie {
-    build {
-        produceDistributableFramework()
-    }
-
-    features {
-        enableFlowCombineConvertorPreview = true
-
-        group {
-            DefaultArgumentInterop.Enabled(false)
-        }
-    }
-
-    analytics {
-        enabled.set(false)
     }
 }

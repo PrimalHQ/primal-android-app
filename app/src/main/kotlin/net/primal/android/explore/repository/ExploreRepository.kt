@@ -10,10 +10,10 @@ import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
+import net.primal.android.events.repository.asProfileDataDO
 import net.primal.android.explore.api.model.ExplorePeopleData
 import net.primal.android.explore.db.TrendingTopic
 import net.primal.android.explore.domain.ExploreZapNoteData
-import net.primal.android.explore.domain.UserProfileSearchItem
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.flatMapNotNullAsLinkPreviewResource
 import net.primal.android.nostr.ext.flatMapNotNullAsVideoThumbnailsMap
@@ -36,6 +36,7 @@ import net.primal.data.remote.api.explore.model.ExploreRequestBody
 import net.primal.data.remote.api.explore.model.SearchUsersRequestBody
 import net.primal.data.remote.api.explore.model.TopicScore
 import net.primal.data.remote.api.explore.model.UsersResponse
+import net.primal.domain.UserProfileSearchItem
 
 class ExploreRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
@@ -181,14 +182,14 @@ class ExploreRepository @Inject constructor(
             val userScoresMap = response.userScores?.takeContentAsPrimalUserScoresOrNull()
             val result = profiles.map {
                 val score = userScoresMap?.get(it.ownerId)
-                UserProfileSearchItem(metadata = it, score = score, followersCount = score?.toInt())
+                UserProfileSearchItem(metadata = it.asProfileDataDO(), score = score, followersCount = score?.toInt())
             }.sortedByDescending { it.score }
 
             database.withTransaction {
                 database.profiles().insertOrUpdateAll(data = profiles)
                 database.profileStats().insertOrIgnore(
                     data = result.map {
-                        ProfileStats(profileId = it.metadata.ownerId, followers = it.followersCount)
+                        ProfileStats(profileId = it.metadata.profileId, followers = it.followersCount)
                     },
                 )
             }
@@ -213,7 +214,7 @@ class ExploreRepository @Inject constructor(
                 recentProfiles.mapNotNull { profile ->
                     if (profile.metadata != null) {
                         UserProfileSearchItem(
-                            metadata = profile.metadata,
+                            metadata = profile.metadata.asProfileDataDO(),
                             followersCount = profile.stats?.followers,
                         )
                     } else {

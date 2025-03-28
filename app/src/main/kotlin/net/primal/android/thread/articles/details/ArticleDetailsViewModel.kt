@@ -49,6 +49,7 @@ import net.primal.android.thread.articles.details.ArticleDetailsContract.UiState
 import net.primal.android.thread.articles.details.ui.mapAsArticleDetailsUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
+import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.domain.ZapTarget
 import net.primal.android.wallet.zaps.InvalidZapRequestException
 import net.primal.android.wallet.zaps.ZapFailureException
@@ -66,6 +67,7 @@ class ArticleDetailsViewModel @Inject constructor(
     private val feedRepository: FeedRepository,
     private val highlightRepository: HighlightRepository,
     private val profileRepository: ProfileRepository,
+    private val userRepository: UserRepository,
     private val eventRepository: EventRepository,
     private val zapHandler: ZapHandler,
 ) : ViewModel() {
@@ -335,13 +337,13 @@ class ArticleDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             val followUnfollowResult = runCatching {
                 if (isAuthorFollowed) {
-                    profileRepository.unfollow(
+                    userRepository.unfollow(
                         userId = activeAccountStore.activeUserId(),
                         unfollowedUserId = article.authorId,
                         forceUpdate = false,
                     )
                 } else {
-                    profileRepository.follow(
+                    userRepository.follow(
                         userId = activeAccountStore.activeUserId(),
                         followedUserId = article.authorId,
                         forceUpdate = false,
@@ -352,7 +354,7 @@ class ArticleDetailsViewModel @Inject constructor(
             if (followUnfollowResult.isFailure) {
                 followUnfollowResult.exceptionOrNull()?.let { error ->
                     when (error) {
-                        is WssException, is ProfileRepository.FollowListNotFound,
+                        is WssException, is UserRepository.FollowListNotFound,
                         is NostrPublishException,
                         -> {
                             Timber.e(error)

@@ -1,15 +1,13 @@
 package net.primal.android.profile.repository
 
 import androidx.room.withTransaction
-import java.time.Instant
 import javax.inject.Inject
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.JsonArray
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.db.PrimalDatabase
-import net.primal.android.explore.domain.UserProfileSearchItem
+import net.primal.android.events.repository.asProfileDataDO
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.asEventIdTag
 import net.primal.android.nostr.ext.asProfileDataPO
@@ -24,28 +22,23 @@ import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
 import net.primal.android.nostr.notary.MissingPrivateKeyException
-import net.primal.android.nostr.notary.NostrUnsignedEvent
-import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.profile.db.ProfileData
-import net.primal.android.profile.db.ProfileInteraction
 import net.primal.android.profile.report.ReportType
-import net.primal.android.user.accounts.UserAccountFetcher
-import net.primal.android.user.domain.asUserAccountFromFollowListEvent
-import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.data.remote.api.explore.model.UsersResponse
 import net.primal.data.remote.api.users.UserWellKnownApi
 import net.primal.data.remote.api.users.UsersApi
+import net.primal.domain.UserProfileSearchItem
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.publisher.PrimalPublisher
 
 class ProfileRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
     private val database: PrimalDatabase,
     private val usersApi: UsersApi,
     private val wellKnownApi: UserWellKnownApi,
-    private val userRepository: UserRepository,
-    private val userAccountFetcher: UserAccountFetcher,
-    private val nostrPublisher: NostrPublisher,
+    private val primalPublisher: PrimalPublisher,
 ) {
 
     suspend fun fetchProfileId(primalName: String): String? =
@@ -128,91 +121,6 @@ class ProfileRepository @Inject constructor(
             }
         }
 
-    @Throws(FollowListNotFound::class, NostrPublishException::class, MissingPrivateKeyException::class)
-    suspend fun follow(
-        userId: String,
-        followedUserId: String,
-        forceUpdate: Boolean,
-    ) {
-        updateFollowList(userId = userId, forceUpdate = forceUpdate) {
-            toMutableSet().apply { add(followedUserId) }
-        }
-    }
-
-    @Throws(FollowListNotFound::class, NostrPublishException::class, MissingPrivateKeyException::class)
-    suspend fun unfollow(
-        userId: String,
-        unfollowedUserId: String,
-        forceUpdate: Boolean,
-    ) {
-        updateFollowList(userId = userId, forceUpdate = forceUpdate) {
-            toMutableSet().apply { remove(unfollowedUserId) }
-        }
-    }
-
-    @Throws(FollowListNotFound::class, NostrPublishException::class, MissingPrivateKeyException::class)
-    private suspend fun updateFollowList(
-        userId: String,
-        forceUpdate: Boolean,
-        reducer: Set<String>.() -> Set<String>,
-    ) = withContext(dispatchers.io()) {
-        val userFollowList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
-        val isEmptyFollowList = userFollowList == null || userFollowList.following.isEmpty()
-        if (isEmptyFollowList && !forceUpdate) {
-            throw FollowListNotFound()
-        }
-
-        if (userFollowList != null) {
-            userRepository.updateFollowList(userId, userFollowList)
-        }
-
-        val existingFollowing = userFollowList?.following ?: emptySet()
-        setFollowList(
-            userId = userId,
-            contacts = existingFollowing.reducer(),
-            content = userFollowList?.followListEventContent ?: "",
-        )
-    }
-
-    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
-    suspend fun setFollowList(
-        userId: String,
-        contacts: Set<String>,
-        content: String = "",
-    ) = withContext(dispatchers.io()) {
-        val nostrEventResponse = nostrPublisher.publishUserFollowList(
-            userId = userId,
-            contacts = contacts,
-            content = content,
-        )
-        userRepository.updateFollowList(
-            userId = userId,
-            contactsUserAccount = nostrEventResponse.asUserAccountFromFollowListEvent(),
-        )
-    }
-
-    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
-    suspend fun recoverFollowList(
-        userId: String,
-        tags: List<JsonArray>,
-        content: String,
-    ) = withContext(dispatchers.io()) {
-        val publishResult = nostrPublisher.signPublishImportNostrEvent(
-            userId = userId,
-            unsignedNostrEvent = NostrUnsignedEvent(
-                pubKey = userId,
-                kind = NostrEventKind.FollowList.value,
-                tags = tags,
-                content = content,
-            ),
-        )
-
-        userRepository.updateFollowList(
-            userId = userId,
-            contactsUserAccount = publishResult.nostrEvent.asUserAccountFromFollowListEvent(),
-        )
-    }
-
     private suspend fun queryRemoteUsers(apiBlock: suspend () -> UsersResponse): List<UserProfileSearchItem> =
         withContext(dispatchers.io()) {
             val response = apiBlock()
@@ -234,7 +142,7 @@ class ProfileRepository @Inject constructor(
 
             profiles.map {
                 val score = followersCountsMap?.get(it.ownerId)
-                UserProfileSearchItem(metadata = it, followersCount = score)
+                UserProfileSearchItem(metadata = it.asProfileDataDO(), followersCount = score)
             }.sortedByDescending { it.followersCount }
         }
 
@@ -263,8 +171,7 @@ class ProfileRepository @Inject constructor(
                 "${NostrEventKind.LongFormContent.value}:$profileId:$articleId".asReplaceableEventTag()
             }
 
-            nostrPublisher.signPublishImportNostrEvent(
-                userId = userId,
+            primalPublisher.signPublishImportNostrEvent(
                 unsignedNostrEvent = NostrUnsignedEvent(
                     pubKey = userId,
                     content = "",
@@ -279,17 +186,4 @@ class ProfileRepository @Inject constructor(
         withContext(dispatchers.io()) {
             usersApi.isUserFollowing(userId, targetUserId)
         }
-
-    suspend fun markAsInteracted(profileId: String, ownerId: String) =
-        withContext(dispatchers.io()) {
-            database.profileInteractions().upsert(
-                ProfileInteraction(
-                    profileId = profileId,
-                    lastInteractionAt = Instant.now().epochSecond,
-                    ownerId = ownerId,
-                ),
-            )
-        }
-
-    class FollowListNotFound : Exception()
 }

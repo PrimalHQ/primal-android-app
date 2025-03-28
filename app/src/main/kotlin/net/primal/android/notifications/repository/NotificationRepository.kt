@@ -23,8 +23,9 @@ class NotificationRepository @Inject constructor(
     private val notificationsApi: NotificationsApi,
 ) {
 
-    fun observeUnseenNotifications(ownerId: String) = database.notifications()
-        .allUnseenNotifications(ownerId = ownerId)
+    fun observeUnseenNotifications(ownerId: String) =
+        database.notifications()
+            .allUnseenNotifications(ownerId = ownerId)
 
     suspend fun markAllNotificationsAsSeen(authorization: NostrEvent) {
         withContext(dispatcherProvider.io()) {

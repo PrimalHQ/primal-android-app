@@ -1,6 +1,7 @@
 package net.primal.data.repository.mappers.remote
 
 import net.primal.core.utils.asMapByKey
+import net.primal.core.utils.parseUris
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.local.dao.profiles.ProfileData
@@ -9,11 +10,11 @@ import net.primal.domain.CdnImage
 import net.primal.domain.CdnResource
 import net.primal.domain.PrimalLegendProfile
 import net.primal.domain.PrimalPremiumInfo
-import net.primal.domain.common.utils.decodeLNUrlOrNull
-import net.primal.domain.common.utils.parseAsLNUrlOrNull
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.serialization.toNostrJsonObject
+import net.primal.domain.nostr.utils.decodeLNUrlOrNull
+import net.primal.domain.nostr.utils.parseAsLNUrlOrNull
 import net.primal.domain.nostr.utils.parseHashtags
 
 fun List<NostrEvent>.mapAsProfileDataPO(
@@ -69,8 +70,7 @@ fun NostrEvent.asProfileDataPO(
         lightningAddress = metadata?.lud16,
         lnUrlDecoded = metadata?.lud16?.parseAsLNUrlOrNull() ?: metadata?.lud06?.decodeLNUrlOrNull(),
         about = metadata?.about,
-        // TODO Implement missing parsing of uris in shared library
-//        aboutUris = metadata?.about?.parseUris() ?: emptyList(),
+        aboutUris = metadata?.about?.parseUris() ?: emptyList(),
         aboutHashtags = metadata?.about?.parseHashtags() ?: emptyList(),
         displayName = metadata?.displayName,
         avatarCdnImage = metadata?.picture?.let {

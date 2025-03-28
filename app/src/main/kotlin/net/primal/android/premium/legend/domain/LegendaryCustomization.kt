@@ -1,6 +1,6 @@
 package net.primal.android.premium.legend.domain
 
-import net.primal.android.profile.domain.PrimalLegendProfile
+import net.primal.domain.PrimalLegendProfile
 
 data class LegendaryCustomization(
     val avatarGlow: Boolean = false,

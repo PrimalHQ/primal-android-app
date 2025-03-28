@@ -3,7 +3,6 @@ package net.primal.core.networking.primal
 import io.github.aakira.napier.Napier
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.transform
@@ -42,9 +41,7 @@ class PrimalSocketSubscription<T> private constructor(
                     try {
                         subscribe()
                     } catch (error: WssException) {
-                        Napier.w(error) { "subscription failed" }
-                    } catch (error: CancellationException) {
-                        Napier.w(error) { "subscription cancelled" }
+                        Napier.w(error) { "Subscription failed." }
                     }
                 }
             }

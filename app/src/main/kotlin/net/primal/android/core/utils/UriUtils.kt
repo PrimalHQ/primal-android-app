@@ -5,9 +5,14 @@ import com.linkedin.urls.detection.UrlDetector
 import com.linkedin.urls.detection.UrlDetectorOptions
 import java.net.MalformedURLException
 import java.net.URL
-import net.primal.android.nostr.ext.detectUrls
+import java.util.regex.Pattern
 import net.primal.android.nostr.ext.parseNostrUris
 import timber.log.Timber
+
+private val urlRegexPattern: Pattern = Pattern.compile(
+    "https?://(www\\.)?[-a-zA-Z0-9@:%.+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()_@:%+.~#?&//=]*)",
+    Pattern.CASE_INSENSITIVE,
+)
 
 fun String.parseUris(includeNostrUris: Boolean = true): List<String> {
     val urlDetector = UrlDetector(this, UrlDetectorOptions.JSON)
@@ -23,6 +28,21 @@ fun String.parseUris(includeNostrUris: Boolean = true): List<String> {
     } else {
         mergedUrls
     }
+}
+
+private fun String.detectUrls(): List<String> {
+    val urlRegex = urlRegexPattern.toRegex()
+    return urlRegex.findAll(this).map { matchResult ->
+        val url = matchResult.groupValues[0]
+        val startIndex = matchResult.range.first
+        val charBefore = this.getOrNull(startIndex - 1)
+
+        when (charBefore) {
+            '(' -> url.trimEnd(')')
+            '[' -> url.trimEnd(']')
+            else -> url
+        }
+    }.toList()
 }
 
 private fun mergeUrls(

@@ -3,11 +3,11 @@ package net.primal.android.nostr.ext
 import net.primal.android.nostr.model.primal.content.ContentProfilePremiumInfo
 import net.primal.android.nostr.model.primal.content.ContentUserProfileStats
 import net.primal.android.profile.db.ProfileStats
-import net.primal.android.profile.domain.PrimalLegendProfile
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.data.remote.api.explore.model.NewUserFollowStats
 import net.primal.domain.PrimalEvent
+import net.primal.domain.PrimalLegendProfile
 
 fun List<PrimalEvent>.mapNotNullAsProfileStatsPO() = mapNotNull { it.asProfileStatsPO() }
 

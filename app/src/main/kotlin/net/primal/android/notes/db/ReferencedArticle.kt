@@ -5,8 +5,8 @@ import kotlinx.serialization.Serializable
 import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
-import net.primal.android.profile.domain.PrimalLegendProfile
 import net.primal.domain.CdnImage
+import net.primal.domain.PrimalLegendProfile
 
 @Serializable
 data class ReferencedArticle(

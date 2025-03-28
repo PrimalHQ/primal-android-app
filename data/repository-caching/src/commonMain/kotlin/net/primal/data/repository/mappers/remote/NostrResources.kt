@@ -18,19 +18,19 @@ import net.primal.domain.ReferencedHighlight
 import net.primal.domain.ReferencedNote
 import net.primal.domain.ReferencedUser
 import net.primal.domain.ReferencedZap
-import net.primal.domain.common.cryptography.bech32ToHexOrThrow
-import net.primal.domain.common.cryptography.bechToBytesOrThrow
-import net.primal.domain.common.cryptography.toHex
-import net.primal.domain.common.utils.asEllipsizedNpub
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.cryptography.bech32ToHexOrThrow
+import net.primal.domain.nostr.cryptography.bechToBytesOrThrow
+import net.primal.domain.nostr.cryptography.toHex
 import net.primal.domain.nostr.findFirstAltDescription
 import net.primal.domain.nostr.findFirstEventId
 import net.primal.domain.nostr.findFirstProfileId
 import net.primal.domain.nostr.isATag
+import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.utils.wordsCountToReadingTime
 
 // TODO Port missing helper functions and consider splitting this file
@@ -46,11 +46,6 @@ private const val NPROFILE = "nprofile1"
 
 private val nostrUriRegexPattern: Regex = Regex(
     "($NOSTR)?@?($NSEC|$NPUB|$NEVENT|$NADDR|$NOTE|$NPROFILE|$NRELAY)([qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)([\\S]*)",
-    RegexOption.IGNORE_CASE,
-)
-
-private val urlRegexPattern: Regex = Regex(
-    "https?://(www\\.)?[-a-zA-Z0-9@:%.+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()_@:%+.~#?&//=]*)",
     RegexOption.IGNORE_CASE,
 )
 
@@ -88,26 +83,6 @@ fun String.isNPubUri() = lowercase().startsWith(NOSTR + NPUB)
 fun String.isNProfileUri() = lowercase().startsWith(NOSTR + NPROFILE)
 
 fun String.isNAddrUri() = lowercase().startsWith(NOSTR + NADDR)
-
-// fun String.parseNostrUris(): List<String> {
-//    return nostrUriRegexPattern.findAll(this).map { matchResult ->
-//        matchResult.groupValues[1] + matchResult.groupValues[2] + matchResult.groupValues[3]
-//    }.filter { it.nostrUriToBytes() != null }.toList()
-// }
-
-fun String.detectUrls(): List<String> {
-    return urlRegexPattern.findAll(this).map { matchResult ->
-        val url = matchResult.groupValues[0]
-        val startIndex = matchResult.range.first
-        val charBefore = this.getOrNull(startIndex - 1)
-
-        when (charBefore) {
-            '(' -> url.trimEnd(')')
-            '[' -> url.trimEnd(']')
-            else -> url
-        }
-    }.toList()
-}
 
 // private fun String.nostrUriToBytes(): ByteArray? {
 //    val matcher = nostrUriRegexPattern.matcher(this)
