@@ -37,7 +37,6 @@ import net.primal.android.editor.NoteEditorContract.UiState
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteTaggedUser
-import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.highlights.model.asHighlightUi
 import net.primal.android.highlights.model.generateNevent
 import net.primal.android.networking.primal.upload.PrimalFileUploader
@@ -64,6 +63,7 @@ import net.primal.domain.nostr.Nprofile
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.repository.ArticleRepository
 import net.primal.domain.repository.EventRelayHintsRepository
+import net.primal.domain.repository.ExploreRepository
 import net.primal.domain.repository.FeedRepository
 import net.primal.domain.repository.HighlightRepository
 import net.primal.domain.upload.UploadJob

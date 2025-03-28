@@ -14,6 +14,7 @@ import net.primal.data.repository.events.EventInteractionRepositoryImpl
 import net.primal.data.repository.events.EventRelayHintsRepositoryImpl
 import net.primal.data.repository.events.EventRepositoryImpl
 import net.primal.data.repository.events.EventUriRepositoryImpl
+import net.primal.data.repository.explore.ExploreRepositoryImpl
 import net.primal.data.repository.feed.FeedRepositoryImpl
 import net.primal.data.repository.feeds.FeedsRepositoryImpl
 import net.primal.data.repository.messages.ChatRepositoryImpl
@@ -31,6 +32,7 @@ import net.primal.domain.repository.EventInteractionRepository
 import net.primal.domain.repository.EventRelayHintsRepository
 import net.primal.domain.repository.EventRepository
 import net.primal.domain.repository.EventUriRepository
+import net.primal.domain.repository.ExploreRepository
 import net.primal.domain.repository.FeedRepository
 import net.primal.domain.repository.FeedsRepository
 import net.primal.domain.repository.HighlightRepository
@@ -132,6 +134,14 @@ object AndroidRepositoryFactory : RepositoryFactory {
     override fun createEventRelayHintsRepository(): EventRelayHintsRepository {
         return EventRelayHintsRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
+            database = cachingDatabase,
+        )
+    }
+
+    override fun createExploreRepository(): ExploreRepository {
+        return ExploreRepositoryImpl(
+            dispatcherProvider = dispatcherProvider,
+            exploreApi = PrimalApiServiceFactory.createExploreApi(cachingPrimalApiClient),
             database = cachingDatabase,
         )
     }

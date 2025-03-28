@@ -14,12 +14,12 @@ import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.explore.home.zaps.ExploreZapsContract.UiEvent
 import net.primal.android.explore.home.zaps.ExploreZapsContract.UiState
 import net.primal.android.explore.home.zaps.ui.ExploreZapNoteUi
-import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.ExploreZapNoteData
+import net.primal.domain.repository.ExploreRepository
 import timber.log.Timber
 
 @HiltViewModel

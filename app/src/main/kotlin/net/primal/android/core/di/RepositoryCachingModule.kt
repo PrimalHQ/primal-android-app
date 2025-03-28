@@ -14,6 +14,7 @@ import net.primal.domain.repository.EventInteractionRepository
 import net.primal.domain.repository.EventRelayHintsRepository
 import net.primal.domain.repository.EventRepository
 import net.primal.domain.repository.EventUriRepository
+import net.primal.domain.repository.ExploreRepository
 import net.primal.domain.repository.FeedRepository
 import net.primal.domain.repository.FeedsRepository
 import net.primal.domain.repository.HighlightRepository
@@ -53,6 +54,9 @@ object RepositoryCachingModule {
     @Provides
     fun provideEventInteractionRepository(primalPublisher: PrimalPublisher): EventInteractionRepository =
         PrimalRepositoryFactory.createEventInteractionRepository(primalPublisher)
+
+    @Provides
+    fun provideExploreRepository(): ExploreRepository = PrimalRepositoryFactory.createExploreRepository()
 
     @Provides
     fun provideProfileRepository(primalPublisher: PrimalPublisher): ProfileRepository =
