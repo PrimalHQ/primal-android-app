@@ -1,4 +1,4 @@
-package net.primal.android.feeds.api.model
+package net.primal.data.remote.api.feeds.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

@@ -1,4 +1,4 @@
-package net.primal.android.feeds.repository
+package net.primal.android.feeds
 
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -10,6 +10,7 @@ import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.domain.FeedSpecKind
 import net.primal.domain.repository.EventRepository
+import net.primal.domain.repository.FeedsRepository
 import net.primal.domain.repository.ProfileRepository
 
 class DvmFeedListHandler @Inject constructor(

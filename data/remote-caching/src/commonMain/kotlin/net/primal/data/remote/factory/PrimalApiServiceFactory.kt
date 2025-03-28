@@ -11,6 +11,8 @@ import net.primal.data.remote.api.explore.ExploreApi
 import net.primal.data.remote.api.explore.ExploreApiImpl
 import net.primal.data.remote.api.feed.FeedApi
 import net.primal.data.remote.api.feed.FeedApiImpl
+import net.primal.data.remote.api.feeds.FeedsApi
+import net.primal.data.remote.api.feeds.FeedsApiImpl
 import net.primal.data.remote.api.importing.PrimalImportApi
 import net.primal.data.remote.api.importing.PrimalImportApiImpl
 import net.primal.data.remote.api.messages.MessagesApi
@@ -35,6 +37,8 @@ object PrimalApiServiceFactory {
     fun createExploreApi(primalApiClient: PrimalApiClient): ExploreApi = ExploreApiImpl(primalApiClient)
 
     fun createFeedApi(primalApiClient: PrimalApiClient): FeedApi = FeedApiImpl(primalApiClient)
+
+    fun createFeedsApi(primalApiClient: PrimalApiClient): FeedsApi = FeedsApiImpl(primalApiClient)
 
     fun createImportApi(primalApiClient: PrimalApiClient): PrimalImportApi = PrimalImportApiImpl(primalApiClient)
 
