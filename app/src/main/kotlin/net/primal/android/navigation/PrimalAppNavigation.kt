@@ -317,10 +317,10 @@ fun noteCallbacksHandler(navController: NavController) =
         onNoteReplyClick = { referencedNoteId ->
             navController.navigateToNoteEditor(NoteEditorArgs(referencedNoteNevent = referencedNoteId))
         },
-        onNoteQuoteClick = { referencedNoteId ->
+        onNoteQuoteClick = { noteNevent ->
             navController.navigateToNoteEditor(
                 args = NoteEditorArgs(
-                    referencedNoteNevent = referencedNoteId,
+                    referencedNoteNevent = noteNevent,
                     isQuoting = true,
                 ),
             )

@@ -105,14 +105,14 @@ fun NotificationListItem(
         onPostAction = { postAction ->
             if (postData != null) {
                 when (postAction) {
-                    FeedPostAction.Reply -> if (onReplyClick != null) onReplyClick(
+                    FeedPostAction.Reply -> onReplyClick?.invoke(
                         Nevent(
                             eventId = postData.postId,
                             kind = NostrEventKind.ShortTextNote.value,
                             userId = postData.authorId,
                             relays = emptyList()
-                        ).
-                        toNeventString())
+                        ).toNeventString()
+                    )
                     FeedPostAction.Zap -> onDefaultZapClick?.invoke(postData)
                     FeedPostAction.Like -> onPostLikeClick?.invoke(postData)
                     FeedPostAction.Repost -> onRepostClick?.invoke(postData)

@@ -212,7 +212,6 @@ class NoteEditorViewModel @AssistedInject constructor(
                 .collect { conversation ->
                     val replyToNoteIndex = conversation.indexOfFirst { it.postId == replyToNoteId }
                     val thread = conversation.subList(0, replyToNoteIndex + 1)
-                    Timber.tag("replyingCheck").i(thread.toString())
                     setState { copy(conversation = thread) }
                 }
         }
@@ -238,13 +237,10 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private fun fetchNoteThreadFromNetwork(replyToNoteId: String) =
         viewModelScope.launch {
-            setState { copy(fetchingNoteThread = true) }
             try {
                 feedRepository.fetchReplies(userId = activeAccountStore.activeUserId(), noteId = replyToNoteId)
             } catch (error: WssException) {
                 Timber.w(error)
-            } finally {
-                setState { copy(fetchingNoteThread = false) }
             }
         }
 

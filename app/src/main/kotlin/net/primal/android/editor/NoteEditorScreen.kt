@@ -147,9 +147,7 @@ fun NoteEditorScreen(
                         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 0.dp),
                         enabled = !state.publishing && !state.uploadingAttachments &&
                             state.attachments.none { it.uploadError != null } &&
-                            (state.content.text.isNotBlank() || state.attachments.isNotEmpty())
-                            && !state.fetchingNoteThread,
-                        loading = state.fetchingNoteThread,
+                            (state.content.text.isNotBlank() || state.attachments.isNotEmpty()),
                         onClick = { eventPublisher(UiEvent.PublishNote) },
                     )
                 },
@@ -174,20 +172,20 @@ fun NoteEditorScreen(
 @Composable
 private fun NoteEditorContract.UiState.resolvePublishNoteButtonText() =
     when {
-        publishing -> if (isReply) {
-            stringResource(id = R.string.note_editor_reply_publishing_button)
-        } else if (isQuoting) {
+        publishing -> if (isQuoting) {
             stringResource(id = R.string.note_editor_quoting_publishing_button)
+        }  else if (isReply) {
+            stringResource(id = R.string.note_editor_reply_publishing_button)
         } else {
             stringResource(id = R.string.note_editor_post_publishing_button)
         }
 
         uploadingAttachments -> stringResource(id = R.string.note_editor_uploading_attachments)
 
-        else -> if (isReply) {
-            stringResource(id = R.string.note_editor_reply_publish_button)
-        } else if (isQuoting) {
+        else -> if (isQuoting) {
             stringResource(id = R.string.note_editor_quote_publish_button)
+        } else if (isReply) {
+            stringResource(id = R.string.note_editor_reply_publish_button)
         } else {
             stringResource(id = R.string.note_editor_post_publish_button)
         }
