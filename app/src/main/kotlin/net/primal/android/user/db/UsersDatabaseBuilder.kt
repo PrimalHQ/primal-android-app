@@ -13,6 +13,8 @@ class UsersDatabaseBuilder @Inject constructor(
 
     init {
         System.loadLibrary("sqlcipher")
+        context.deleteDatabase("primal.db")
+        context.deleteDatabase("primal_v2.db")
     }
 
     fun build(): UsersDatabase {
