@@ -4,7 +4,6 @@ import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
-import net.primal.android.profile.db.ProfileData as ProfileDataPO
 import net.primal.android.profile.details.ui.model.PremiumProfileDataUi
 import net.primal.domain.CdnImage
 import net.primal.domain.PrimalPremiumInfo
@@ -26,24 +25,6 @@ data class ProfileDetailsUi(
     val lnUrlDecoded: String? = null,
     val premiumDetails: PremiumProfileDataUi? = null,
 )
-
-fun ProfileDataPO.asProfileDetailsUi() =
-    ProfileDetailsUi(
-        pubkey = this.ownerId,
-        authorDisplayName = this.authorNameUiFriendly(),
-        userDisplayName = this.usernameUiFriendly(),
-        coverCdnImage = this.bannerCdnImage,
-        avatarCdnImage = this.avatarCdnImage,
-        internetIdentifier = this.internetIdentifier,
-        lightningAddress = this.lightningAddress,
-        about = this.about,
-        aboutHashtags = this.aboutHashtags,
-        aboutUris = this.aboutUris,
-        website = this.website,
-        primalName = this.primalPremiumInfo?.primalName,
-        lnUrlDecoded = this.lnUrlDecoded,
-        premiumDetails = this.primalPremiumInfo?.asPremiumProfileDataUi(),
-    )
 
 fun ProfileDataDO.asProfileDetailsUi() =
     ProfileDetailsUi(

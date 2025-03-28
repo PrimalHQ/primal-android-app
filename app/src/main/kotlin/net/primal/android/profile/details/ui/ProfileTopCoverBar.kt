@@ -54,7 +54,7 @@ import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Search
-import net.primal.android.events.domain.findNearestOrNull
+import net.primal.android.events.ui.findNearestOrNull
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.theme.AppTheme
 

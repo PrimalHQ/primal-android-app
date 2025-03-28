@@ -13,13 +13,13 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import net.primal.android.articles.highlights.JoinedHighlightsUi
+import net.primal.android.articles.highlights.joinOnContent
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
-import net.primal.android.highlights.model.JoinedHighlightsUi
-import net.primal.android.highlights.model.joinOnContent
 import net.primal.android.navigation.articleId
 import net.primal.android.navigation.naddr
 import net.primal.android.navigation.primalName

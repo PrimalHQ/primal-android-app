@@ -60,6 +60,11 @@ internal class FeedRepositoryImpl(
             database.feedPosts().findAllPostsByIds(postIds).map { it.mapAsFeedPostDO() }
         }
 
+    override suspend fun findPostsById(postId: String): FeedPostDO? =
+        withContext(dispatcherProvider.io()) {
+            database.feedPosts().findAllPostsByIds(listOf(postId)).firstOrNull()?.mapAsFeedPostDO()
+        }
+
     override suspend fun fetchConversation(userId: String, noteId: String) {
         withContext(dispatcherProvider.io()) {
             val response = try {
