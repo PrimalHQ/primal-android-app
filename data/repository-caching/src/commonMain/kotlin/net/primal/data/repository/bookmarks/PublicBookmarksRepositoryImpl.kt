@@ -1,30 +1,29 @@
-package net.primal.android.bookmarks
+package net.primal.data.repository.bookmarks
 
-import androidx.room.withTransaction
-import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.jsonPrimitive
-import net.primal.android.bookmarks.db.PublicBookmark
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.db.PrimalDatabase
-import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.notary.exceptions.SignException
+import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.data.local.dao.bookmarks.PublicBookmark as PublicBookmarkPO
+import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.domain.BookmarkType
 import net.primal.domain.TagBookmark
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.nostr.PublicBookmarksNotFoundException
 import net.primal.domain.publisher.PrimalPublisher
+import net.primal.domain.repository.PublicBookmarksRepository
 
-class BookmarksRepository @Inject constructor(
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+class PublicBookmarksRepositoryImpl(
+    private val dispatcherProvider: DispatcherProvider,
     private val database: PrimalDatabase,
     private val primalPublisher: PrimalPublisher,
     private val usersApi: UsersApi,
-) {
+) : PublicBookmarksRepository {
 
     private suspend fun fetchLatestPublicBookmarks(userId: String): Set<TagBookmark>? {
         val bookmarksResponse = withContext(dispatcherProvider.io()) {
@@ -33,7 +32,7 @@ class BookmarksRepository @Inject constructor(
         return bookmarksResponse.bookmarksListEvent?.tags?.parseAsPublicBookmarks()
     }
 
-    suspend fun fetchAndPersistPublicBookmarks(userId: String) {
+    override suspend fun fetchAndPersistBookmarks(userId: String) {
         val bookmarks = fetchLatestPublicBookmarks(userId = userId)
         persistUserBookmarks(userId = userId, bookmarks = bookmarks)
     }
@@ -42,7 +41,7 @@ class BookmarksRepository @Inject constructor(
         withContext(dispatcherProvider.io()) {
             val bookmarksDao = database.publicBookmarks()
             val notesBookmarks = bookmarks?.filter { it.type == "e" }?.map {
-                PublicBookmark(
+                PublicBookmarkPO(
                     ownerId = userId,
                     bookmarkType = BookmarkType.Note,
                     tagType = it.type,
@@ -53,7 +52,7 @@ class BookmarksRepository @Inject constructor(
             val articleBookmarks = bookmarks?.filter { it.type == "a" }?.mapNotNull {
                 val kind = it.value.split(":").getOrNull(index = 0)?.toIntOrNull()
                 if (kind == NostrEventKind.LongFormContent.value) {
-                    PublicBookmark(
+                    PublicBookmarkPO(
                         ownerId = userId,
                         bookmarkType = BookmarkType.Article,
                         tagType = it.type,
@@ -71,13 +70,12 @@ class BookmarksRepository @Inject constructor(
         }
     }
 
-    suspend fun isBookmarked(tagValue: String) =
+    override suspend fun isBookmarked(tagValue: String) =
         withContext(dispatcherProvider.io()) {
             database.publicBookmarks().findByTagValue(tagValue = tagValue) != null
         }
 
-    @Throws(BookmarksListNotFound::class, NostrPublishException::class, SignException::class)
-    suspend fun addToBookmarks(
+    override suspend fun addToBookmarks(
         userId: String,
         bookmarkType: BookmarkType,
         tagValue: String,
@@ -92,7 +90,7 @@ class BookmarksRepository @Inject constructor(
 
         database.publicBookmarks().upsertBookmarks(
             data = listOf(
-                PublicBookmark(
+                PublicBookmarkPO(
                     ownerId = userId,
                     bookmarkType = BookmarkType.Article,
                     tagType = tagType,
@@ -102,8 +100,7 @@ class BookmarksRepository @Inject constructor(
         )
     }
 
-    @Throws(BookmarksListNotFound::class, NostrPublishException::class, SignException::class)
-    suspend fun removeFromBookmarks(
+    override suspend fun removeFromBookmarks(
         userId: String,
         bookmarkType: BookmarkType,
         tagValue: String,
@@ -124,7 +121,6 @@ class BookmarksRepository @Inject constructor(
             BookmarkType.Article -> "a"
         }
 
-    @Throws(BookmarksListNotFound::class, NostrPublishException::class, SignException::class)
     private suspend fun publishAddBookmark(
         userId: String,
         forceUpdate: Boolean,
@@ -135,7 +131,6 @@ class BookmarksRepository @Inject constructor(
         }
     }
 
-    @Throws(BookmarksListNotFound::class, NostrPublishException::class, SignException::class)
     private suspend fun publishRemoveBookmark(
         userId: String,
         forceUpdate: Boolean,
@@ -146,14 +141,13 @@ class BookmarksRepository @Inject constructor(
         }
     }
 
-    @Throws(BookmarksListNotFound::class, NostrPublishException::class, SignException::class)
     private suspend fun publishBookmarksList(
         userId: String,
         forceUpdate: Boolean,
         reducer: Set<TagBookmark>.() -> Set<TagBookmark>,
     ) {
         val latestBookmarks = fetchLatestPublicBookmarks(userId = userId)
-            ?: if (forceUpdate) emptySet() else throw BookmarksListNotFound()
+            ?: if (forceUpdate) emptySet() else throw PublicBookmarksNotFoundException()
 
         val updatedBookmarks = latestBookmarks.reducer()
 
@@ -188,6 +182,4 @@ class BookmarksRepository @Inject constructor(
             }
         }.toSet()
     }
-
-    class BookmarksListNotFound : Exception()
 }

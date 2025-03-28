@@ -2,7 +2,6 @@ package net.primal.android.auth.repository
 
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
-import net.primal.android.bookmarks.BookmarksRepository
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.crypto.assureValidNsec
 import net.primal.android.nostr.notary.NostrNotary
@@ -12,13 +11,14 @@ import net.primal.android.user.domain.LoginType
 import net.primal.android.user.repository.UserRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.repository.MutedUserRepository
+import net.primal.domain.repository.PublicBookmarksRepository
 
 class LoginHandler @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
     private val mutedUserRepository: MutedUserRepository,
-    private val bookmarksRepository: BookmarksRepository,
+    private val bookmarksRepository: PublicBookmarksRepository,
     private val dispatchers: CoroutineDispatcherProvider,
     private val credentialsStore: CredentialsStore,
     private val nostrNotary: NostrNotary,
@@ -43,7 +43,7 @@ class LoginHandler @Inject constructor(
             }.getOrNull()
 
             userRepository.fetchAndUpdateUserAccount(userId = userId)
-            bookmarksRepository.fetchAndPersistPublicBookmarks(userId = userId)
+            bookmarksRepository.fetchAndPersistBookmarks(userId = userId)
             authorizationEvent?.let {
                 settingsRepository.fetchAndPersistAppSettings(authorizationEvent)
             }
