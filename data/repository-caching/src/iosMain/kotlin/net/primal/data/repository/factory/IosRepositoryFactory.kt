@@ -13,12 +13,16 @@ import net.primal.data.repository.events.EventRepositoryImpl
 import net.primal.data.repository.events.EventUriRepositoryImpl
 import net.primal.data.repository.feed.FeedRepositoryImpl
 import net.primal.data.repository.feeds.FeedsRepositoryImpl
+import net.primal.data.repository.messages.ChatRepositoryImpl
+import net.primal.data.repository.messages.processors.MessagesProcessor
 import net.primal.data.repository.mute.MutedUserRepositoryImpl
 import net.primal.data.repository.profile.ProfileRepositoryImpl
 import net.primal.domain.PrimalServerType
+import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.repository.ArticleRepository
+import net.primal.domain.repository.ChatRepository
 import net.primal.domain.repository.EventInteractionRepository
 import net.primal.domain.repository.EventRelayHintsRepository
 import net.primal.domain.repository.EventRepository
@@ -50,6 +54,22 @@ object IosRepositoryFactory : RepositoryFactory {
         return HighlightRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             database = cachingDatabase,
+            primalPublisher = primalPublisher,
+        )
+    }
+
+    override fun createChatRepository(messageCipher: MessageCipher, primalPublisher: PrimalPublisher): ChatRepository {
+        return ChatRepositoryImpl(
+            dispatcherProvider = dispatcherProvider,
+            database = cachingDatabase,
+            messageCipher = messageCipher,
+            messagesApi = PrimalApiServiceFactory.createMessagesApi(cachingPrimalApiClient),
+            messagesProcessor = MessagesProcessor(
+                database = cachingDatabase,
+                feedApi = PrimalApiServiceFactory.createFeedApi(cachingPrimalApiClient),
+                usersApi = PrimalApiServiceFactory.createUsersApi(cachingPrimalApiClient),
+                messageCipher = messageCipher,
+            ),
             primalPublisher = primalPublisher,
         )
     }

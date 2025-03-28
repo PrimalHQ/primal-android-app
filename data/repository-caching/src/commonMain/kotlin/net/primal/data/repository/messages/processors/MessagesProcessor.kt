@@ -1,32 +1,31 @@
-package net.primal.android.messages.api.mediator
+package net.primal.data.repository.messages.processors
 
-import androidx.room.withTransaction
-import javax.inject.Inject
-import net.primal.android.core.ext.asMapByKey
-import net.primal.android.db.PrimalDatabase
-import net.primal.android.events.ext.flatMapMessagesAsEventUriPO
-import net.primal.android.messages.db.DirectMessageData
-import net.primal.android.nostr.ext.extractNoteId
-import net.primal.android.nostr.ext.extractProfileId
-import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
-import net.primal.android.nostr.ext.isNostrUri
-import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
-import net.primal.android.nostr.ext.mapAsMessageDataPO
-import net.primal.android.nostr.ext.mapAsPostDataPO
-import net.primal.android.nostr.ext.mapAsProfileDataPO
-import net.primal.android.nostr.ext.mapNotNullAsPostDataPO
-import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
-import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
-import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
+import io.github.aakira.napier.Napier
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.data.local.dao.messages.DirectMessageData
+import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.feed.FeedApi
 import net.primal.data.remote.api.users.UsersApi
+import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
+import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
+import net.primal.data.repository.feed.processors.persistToDatabaseAsTransaction
+import net.primal.data.repository.mappers.remote.extractNoteId
+import net.primal.data.repository.mappers.remote.extractProfileId
+import net.primal.data.repository.mappers.remote.flatMapMessagesAsEventUriPO
+import net.primal.data.repository.mappers.remote.isNostrUri
+import net.primal.data.repository.mappers.remote.mapAsMessageDataPO
+import net.primal.data.repository.mappers.remote.mapAsPostDataPO
+import net.primal.data.repository.mappers.remote.mapAsProfileDataPO
+import net.primal.data.repository.mappers.remote.mapNotNullAsPostDataPO
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.cryptography.MessageCipher
-import timber.log.Timber
 
-class MessagesProcessor @Inject constructor(
+internal class MessagesProcessor(
     private val database: PrimalDatabase,
     private val feedApi: FeedApi,
     private val usersApi: UsersApi,
@@ -50,7 +49,7 @@ class MessagesProcessor @Inject constructor(
 
         processNostrUrisAndSave(userId = userId, messageDataList = messageDataList)
 
-        val cdnResources = mediaResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+        val cdnResources = mediaResources.flatMapNotNullAsCdnResource()
         val primalUserNamesMap = primalUserNames.parseAndMapPrimalUserNames()
         val primalPremiumInfoMap = primalPremiumInfo.parseAndMapPrimalPremiumInfo()
         val primalLegendProfilesMap = primalLegendProfiles.parseAndMapPrimalLegendProfiles()
@@ -81,11 +80,10 @@ class MessagesProcessor @Inject constructor(
         val remoteNotes = if (missingEventIds.isNotEmpty()) {
             try {
                 val response = feedApi.getNotes(noteIds = missingEventIds)
-                // TODO Bring back persistToDatabaseAsTransaction when moved to repository-caching
-//                response.persistToDatabaseAsTransaction(
-//                    userId = userId,
-//                    database = database,
-//                )
+                response.persistToDatabaseAsTransaction(
+                    userId = userId,
+                    database = database,
+                )
                 val referencedPostsWithoutReplies = response.referencedEvents.mapNotNullAsPostDataPO()
                 val referencedPostsWithReplies = response.referencedEvents.mapNotNullAsPostDataPO(
                     referencedPostsWithoutReplies,
@@ -96,7 +94,7 @@ class MessagesProcessor @Inject constructor(
                     referencedHighlights = emptyList(),
                 )
             } catch (error: WssException) {
-                Timber.w(error)
+                Napier.w(error) { "Failed to get notes for DMs." }
                 emptyList()
             }
         } else {
@@ -117,7 +115,7 @@ class MessagesProcessor @Inject constructor(
                 val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
                 val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
                 val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
-                val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+                val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource()
                 val blossomServers = response.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
                 val profiles = response.metadataEvents.mapAsProfileDataPO(
                     cdnResources = cdnResources,
@@ -129,7 +127,7 @@ class MessagesProcessor @Inject constructor(
                 database.profiles().insertOrUpdateAll(data = profiles)
                 profiles
             } catch (error: WssException) {
-                Timber.w(error)
+                Napier.w(error) { "Failed to get user profiles for DM messages." }
                 emptyList()
             }
         } else {

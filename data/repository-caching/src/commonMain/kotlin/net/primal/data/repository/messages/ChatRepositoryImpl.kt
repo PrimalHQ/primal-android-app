@@ -1,50 +1,54 @@
-package net.primal.android.messages.repository
+package net.primal.data.repository.messages
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
-import androidx.room.withTransaction
-import javax.inject.Inject
+import androidx.paging.map
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.db.PrimalDatabase
-import net.primal.android.messages.api.mediator.MessagesProcessor
-import net.primal.android.messages.api.mediator.MessagesRemoteMediator
-import net.primal.android.messages.db.DirectMessage
-import net.primal.android.messages.db.MessageConversation
-import net.primal.android.messages.db.MessageConversationData
-import net.primal.android.nostr.ext.asPubkeyTag
+import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.data.local.dao.messages.DirectMessage
+import net.primal.data.local.dao.messages.MessageConversation
+import net.primal.data.local.dao.messages.MessageConversationData
+import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.messages.MessagesApi
 import net.primal.data.remote.api.messages.model.ConversationRequestBody
 import net.primal.data.remote.api.messages.model.MarkMessagesReadRequestBody
 import net.primal.data.remote.api.messages.model.MessagesRequestBody
+import net.primal.data.repository.mappers.local.asDMConversation
+import net.primal.data.repository.mappers.local.asDirectMessageDO
+import net.primal.data.repository.messages.paging.MessagesRemoteMediator
+import net.primal.data.repository.messages.processors.MessagesProcessor
 import net.primal.domain.ConversationRelation
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.nostr.asPubkeyTag
 import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.publisher.PrimalPublisher
+import net.primal.domain.repository.ChatRepository
 
 @OptIn(ExperimentalPagingApi::class)
-class MessageRepository @Inject constructor(
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+internal class ChatRepositoryImpl(
+    private val dispatcherProvider: DispatcherProvider,
     private val database: PrimalDatabase,
     private val messageCipher: MessageCipher,
     private val messagesApi: MessagesApi,
     private val messagesProcessor: MessagesProcessor,
     private val primalPublisher: PrimalPublisher,
-) {
+) : ChatRepository {
 
-    fun newestConversations(userId: String, relation: ConversationRelation) =
+    override fun newestConversations(userId: String, relation: ConversationRelation) =
         createConversationsPager {
             database.messageConversations().newestConversationsPagedByOwnerId(ownerId = userId, relation = relation)
-        }.flow
+        }.flow.map { it.map { it.asDMConversation() } }
 
-    fun newestMessages(userId: String, participantId: String) =
+    override fun newestMessages(userId: String, participantId: String) =
         createMessagesPager(userId = userId, participantId = participantId) {
             database.messages().newestMessagesPagedByOwnerId(ownerId = userId, participantId = participantId)
-        }.flow
+        }.flow.map { it.map { it.asDirectMessageDO() } }
 
     private suspend fun fetchConversations(userId: String, relation: ConversationRelation) {
         val response = withContext(dispatcherProvider.io()) {
@@ -95,19 +99,19 @@ class MessageRepository @Inject constructor(
         }
     }
 
-    suspend fun fetchFollowConversations(userId: String) =
+    override suspend fun fetchFollowConversations(userId: String) =
         fetchConversations(
             userId = userId,
             relation = ConversationRelation.Follows,
         )
 
-    suspend fun fetchNonFollowsConversations(userId: String) =
+    override suspend fun fetchNonFollowsConversations(userId: String) =
         fetchConversations(
             userId = userId,
             relation = ConversationRelation.Other,
         )
 
-    suspend fun fetchNewConversationMessages(userId: String, conversationUserId: String) {
+    override suspend fun fetchNewConversationMessages(userId: String, conversationUserId: String) {
         withContext(dispatcherProvider.io()) {
             val latestMessage = database.messages().firstByOwnerId(ownerId = userId, participantId = conversationUserId)
             val response = messagesApi.getMessages(
@@ -130,7 +134,7 @@ class MessageRepository @Inject constructor(
         }
     }
 
-    suspend fun markConversationAsRead(authorization: NostrEvent, conversationUserId: String) {
+    override suspend fun markConversationAsRead(authorization: NostrEvent, conversationUserId: String) {
         withContext(dispatcherProvider.io()) {
             messagesApi.markConversationAsRead(
                 body = MarkMessagesReadRequestBody(
@@ -145,14 +149,14 @@ class MessageRepository @Inject constructor(
         }
     }
 
-    suspend fun markAllMessagesAsRead(authorization: NostrEvent) {
+    override suspend fun markAllMessagesAsRead(authorization: NostrEvent) {
         withContext(dispatcherProvider.io()) {
             messagesApi.markAllMessagesAsRead(authorization = authorization)
             database.messageConversations().markAllConversationAsRead(ownerId = authorization.pubKey)
         }
     }
 
-    suspend fun sendMessage(
+    override suspend fun sendMessage(
         userId: String,
         receiverId: String,
         text: String,
@@ -210,6 +214,7 @@ class MessageRepository @Inject constructor(
         remoteMediator = MessagesRemoteMediator(
             userId = userId,
             participantId = participantId,
+            dispatcherProvider = dispatcherProvider,
             database = database,
             messagesApi = messagesApi,
             messagesProcessor = messagesProcessor,
