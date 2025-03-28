@@ -3,6 +3,7 @@ package net.primal.domain.model
 import net.primal.domain.NotificationType
 
 data class Notification(
+    val notificationId: String,
     val ownerId: String,
     val createdAt: Long,
     val type: NotificationType,

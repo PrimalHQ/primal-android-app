@@ -3,6 +3,7 @@ package net.primal.android.notes.feed.model
 import net.primal.android.events.db.EventStats
 import net.primal.android.events.db.EventUserStats
 import net.primal.android.notes.db.FeedPostUserStats
+import net.primal.domain.model.FeedPostStats
 import net.primal.domain.model.NostrEventStats
 import net.primal.domain.model.NostrEventUserStats
 
@@ -55,6 +56,19 @@ data class EventStatsUi(
                 userLiked = userStats?.liked ?: false,
                 repostsCount = eventStats?.reposts ?: 0,
                 userReposted = userStats?.reposted ?: false,
+            )
+
+        fun from(stats: FeedPostStats?) =
+            EventStatsUi(
+                repliesCount = stats?.repliesCount ?: 0,
+                userReplied = stats?.userReplied == true,
+                zapsCount = stats?.zapsCount ?: 0,
+                satsZapped = stats?.satsZapped ?: 0,
+                userZapped = stats?.userZapped == true,
+                likesCount = stats?.likesCount ?: 0,
+                userLiked = stats?.userLiked == true,
+                repostsCount = stats?.repostsCount ?: 0,
+                userReposted = stats?.userReposted == true,
             )
     }
 }

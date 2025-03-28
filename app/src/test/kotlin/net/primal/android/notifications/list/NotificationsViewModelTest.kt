@@ -7,8 +7,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
-import net.primal.android.notifications.repository.NotificationRepository
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.repository.NotificationRepository
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -26,7 +26,7 @@ class NotificationsViewModelTest {
         return NotificationsViewModel(
             dispatcherProvider = coroutineTestRule.dispatcherProvider,
             activeAccountStore = mockk(relaxed = true),
-            notificationsRepository = notificationsRepository,
+            notificationRepository = notificationsRepository,
             subscriptionsManager = mockk(relaxed = true),
             nostrNotary = mockk(relaxed = true),
         )

@@ -13,6 +13,7 @@ import net.primal.domain.repository.FeedRepository
 import net.primal.domain.repository.FeedsRepository
 import net.primal.domain.repository.HighlightRepository
 import net.primal.domain.repository.MutedUserRepository
+import net.primal.domain.repository.NotificationRepository
 import net.primal.domain.repository.ProfileRepository
 import net.primal.domain.repository.PublicBookmarksRepository
 
@@ -38,6 +39,8 @@ expect object PrimalRepositoryFactory : RepositoryFactory {
     override fun createEventRelayHintsRepository(): EventRelayHintsRepository
 
     override fun createMutedUserRepository(primalPublisher: PrimalPublisher): MutedUserRepository
+
+    override fun createNotificationRepository(): NotificationRepository
 
     override fun createProfileRepository(primalPublisher: PrimalPublisher): ProfileRepository
 
