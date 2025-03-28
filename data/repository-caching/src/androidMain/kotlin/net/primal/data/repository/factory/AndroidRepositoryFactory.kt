@@ -19,6 +19,7 @@ import net.primal.data.repository.feeds.FeedsRepositoryImpl
 import net.primal.data.repository.messages.ChatRepositoryImpl
 import net.primal.data.repository.messages.processors.MessagesProcessor
 import net.primal.data.repository.mute.MutedUserRepositoryImpl
+import net.primal.data.repository.notifications.NotificationRepositoryImpl
 import net.primal.data.repository.profile.ProfileRepositoryImpl
 import net.primal.domain.PrimalServerType
 import net.primal.domain.nostr.cryptography.MessageCipher
@@ -34,6 +35,7 @@ import net.primal.domain.repository.FeedRepository
 import net.primal.domain.repository.FeedsRepository
 import net.primal.domain.repository.HighlightRepository
 import net.primal.domain.repository.MutedUserRepository
+import net.primal.domain.repository.NotificationRepository
 import net.primal.domain.repository.ProfileRepository
 import net.primal.domain.repository.PublicBookmarksRepository
 
@@ -140,6 +142,14 @@ object AndroidRepositoryFactory : RepositoryFactory {
             database = cachingDatabase,
             settingsApi = PrimalApiServiceFactory.createSettingsApi(cachingPrimalApiClient),
             primalPublisher = primalPublisher,
+        )
+    }
+
+    override fun createNotificationRepository(): NotificationRepository {
+        return NotificationRepositoryImpl(
+            dispatcherProvider = dispatcherProvider,
+            database = cachingDatabase,
+            notificationsApi = PrimalApiServiceFactory.createNotificationsApi(cachingPrimalApiClient),
         )
     }
 

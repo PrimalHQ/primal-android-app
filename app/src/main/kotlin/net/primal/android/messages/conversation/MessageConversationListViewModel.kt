@@ -147,9 +147,9 @@ class MessageConversationListViewModel @Inject constructor(
             lastMessageNostrUris = this.lastMessage?.nostrUris?.map { it.asNoteNostrUriUi() } ?: emptyList(),
             lastMessageAt = this.lastMessage?.createdAt?.let { Instant.ofEpochSecond(it) },
             isLastMessageFromUser = this.lastMessage?.senderId == activeAccountStore.activeUserId(),
-            participantInternetIdentifier = this.participant?.internetIdentifier,
-            participantAvatarCdnImage = this.participant?.avatarCdnImage,
-            participantLegendaryCustomization = this.participant?.primalPremiumInfo
+            participantInternetIdentifier = this.participant.internetIdentifier,
+            participantAvatarCdnImage = this.participant.avatarCdnImage,
+            participantLegendaryCustomization = this.participant.primalPremiumInfo
                 ?.legendProfile?.asLegendaryCustomization(),
             unreadMessagesCount = this.unreadMessagesCount,
         )

@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.datetime.toJavaInstant
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.asEllipsizedNpub
@@ -24,30 +25,30 @@ import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
-import net.primal.android.notifications.db.Notification
 import net.primal.android.notifications.list.NotificationsContract.UiEvent
 import net.primal.android.notifications.list.NotificationsContract.UiEvent.NotificationsSeen
 import net.primal.android.notifications.list.NotificationsContract.UiState
 import net.primal.android.notifications.list.ui.NotificationUi
-import net.primal.android.notifications.repository.NotificationRepository
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.model.Notification
+import net.primal.domain.repository.NotificationRepository
 import timber.log.Timber
 
 @HiltViewModel
 class NotificationsViewModel @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
-    private val notificationsRepository: NotificationRepository,
+    private val notificationRepository: NotificationRepository,
     private val subscriptionsManager: SubscriptionsManager,
     private val nostrNotary: NostrNotary,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
         UiState(
-            seenNotifications = notificationsRepository
+            seenNotifications = notificationRepository
                 .observeSeenNotifications(userId = activeAccountStore.activeUserId())
                 .map { it.map { notification -> notification.asNotificationUi() } }
                 .cachedIn(viewModelScope),
@@ -98,16 +99,16 @@ class NotificationsViewModel @Inject constructor(
 
     private fun observeUnseenNotifications() =
         viewModelScope.launch {
-            notificationsRepository.observeUnseenNotifications(ownerId = activeAccountStore.activeUserId())
+            notificationRepository.observeUnseenNotifications(ownerId = activeAccountStore.activeUserId())
                 .collect { newUnseenNotifications ->
                     setState {
                         val unseenNotifications = mutableListOf<List<Notification>>()
-                        val groupByType = newUnseenNotifications.groupBy { it.data.type }
+                        val groupByType = newUnseenNotifications.groupBy { it.type }
                         groupByType.keys.forEach { notificationType ->
                             groupByType[notificationType]?.let { notificationsByType ->
                                 when (notificationType.collapsable) {
                                     true -> {
-                                        val groupByPostId = notificationsByType.groupBy { it.data.actionPostId }
+                                        val groupByPostId = notificationsByType.groupBy { it.actionPostId }
                                         groupByPostId.keys.forEach { postId ->
                                             groupByPostId[postId]?.let {
                                                 unseenNotifications.add(it)
@@ -139,7 +140,7 @@ class NotificationsViewModel @Inject constructor(
                     userId = activeAccountStore.activeUserId(),
                     description = "Update notifications last seen timestamp.",
                 )
-                notificationsRepository.markAllNotificationsAsSeen(authorization)
+                notificationRepository.markAllNotificationsAsSeen(authorization)
             } catch (error: WssException) {
                 Timber.w(error)
             } catch (error: SignException) {
@@ -152,44 +153,41 @@ class NotificationsViewModel @Inject constructor(
 
     private fun Notification.asNotificationUi(): NotificationUi {
         return NotificationUi(
-            notificationId = this.data.notificationId,
-            ownerId = this.data.ownerId,
-            notificationType = this.data.type,
-            createdAt = Instant.ofEpochSecond(this.data.createdAt),
-            actionUserId = this.data.actionUserId,
+            notificationId = this.notificationId,
+            ownerId = this.ownerId,
+            notificationType = this.type,
+            createdAt = Instant.ofEpochSecond(this.createdAt),
+            actionUserId = this.actionUserId,
             actionUserDisplayName = this.actionByUser?.authorNameUiFriendly()
-                ?: this.data.actionUserId?.asEllipsizedNpub(),
+                ?: this.actionUserId?.asEllipsizedNpub(),
             actionUserInternetIdentifier = this.actionByUser?.internetIdentifier,
             actionUserAvatarCdnImage = this.actionByUser?.avatarCdnImage,
             actionUserLegendaryCustomization = this.actionByUser?.primalPremiumInfo
                 ?.legendProfile?.asLegendaryCustomization(),
-            actionUserSatsZapped = this.data.satsZapped,
+            actionUserSatsZapped = this.satsZapped,
             actionPost = this.extractFeedPostUi(),
         )
     }
 
     private fun Notification.extractFeedPostUi(): FeedPostUi? {
-        if (this.actionPost == null) return null
-
-        return FeedPostUi(
-            postId = this.actionPost.postId,
-            authorId = this.actionPost.authorId,
-            authorName = this.actionByUser?.authorNameUiFriendly()
-                ?: this.actionPost.authorId.asEllipsizedNpub(),
-            authorHandle = this.actionByUser?.usernameUiFriendly()
-                ?: this.actionPost.authorId.asEllipsizedNpub(),
-            authorInternetIdentifier = this.actionByUser?.internetIdentifier,
-            authorAvatarCdnImage = this.actionByUser?.avatarCdnImage,
-            timestamp = Instant.ofEpochSecond(this.actionPost.createdAt),
-            content = this.actionPost.content,
-            uris = this.actionPostUris.map { it.asEventUriUiModel() },
-            nostrUris = this.actionPostNostrUris.map { it.asNoteNostrUriUi() },
-            stats = EventStatsUi.from(
-                eventStats = this.actionEventStats,
-                userStats = this.actionPostUserStats,
-            ),
-            hashtags = this.actionPost.hashtags,
-            rawNostrEventJson = this.actionPost.raw,
-        )
+        return this.actionOnPost?.let { actionOnPost ->
+            FeedPostUi(
+                postId = actionOnPost.eventId,
+                authorId = actionOnPost.author.authorId,
+                authorName = this.actionByUser?.authorNameUiFriendly()
+                    ?: actionOnPost.author.displayName,
+                authorHandle = this.actionByUser?.usernameUiFriendly()
+                    ?: actionOnPost.author.handle,
+                authorInternetIdentifier = this.actionByUser?.internetIdentifier,
+                authorAvatarCdnImage = this.actionByUser?.avatarCdnImage,
+                timestamp = actionOnPost.timestamp.toJavaInstant(),
+                content = actionOnPost.content,
+                uris = actionOnPost.links.map { it.asEventUriUiModel() },
+                nostrUris = actionOnPost.nostrUris.map { it.asNoteNostrUriUi() },
+                stats = EventStatsUi.from(actionOnPost.stats),
+                hashtags = actionOnPost.hashtags,
+                rawNostrEventJson = actionOnPost.rawNostrEvent,
+            )
+        }
     }
 }

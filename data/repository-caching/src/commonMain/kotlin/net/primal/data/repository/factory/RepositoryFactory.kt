@@ -13,6 +13,7 @@ import net.primal.domain.repository.FeedRepository
 import net.primal.domain.repository.FeedsRepository
 import net.primal.domain.repository.HighlightRepository
 import net.primal.domain.repository.MutedUserRepository
+import net.primal.domain.repository.NotificationRepository
 import net.primal.domain.repository.ProfileRepository
 import net.primal.domain.repository.PublicBookmarksRepository
 
@@ -27,6 +28,7 @@ internal interface RepositoryFactory {
     fun createEventInteractionRepository(primalPublisher: PrimalPublisher): EventInteractionRepository
     fun createEventRelayHintsRepository(): EventRelayHintsRepository
     fun createMutedUserRepository(primalPublisher: PrimalPublisher): MutedUserRepository
+    fun createNotificationRepository(): NotificationRepository
     fun createProfileRepository(primalPublisher: PrimalPublisher): ProfileRepository
     fun createPublicBookmarksRepository(primalPublisher: PrimalPublisher): PublicBookmarksRepository
 }

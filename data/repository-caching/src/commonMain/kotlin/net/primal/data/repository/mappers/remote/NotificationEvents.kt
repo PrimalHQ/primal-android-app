@@ -1,27 +1,10 @@
-package net.primal.android.nostr.ext
+package net.primal.data.repository.mappers.remote
 
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import net.primal.android.nostr.model.primal.content.ContentPrimalNotification
-import net.primal.android.notifications.db.NotificationData
-import net.primal.android.notifications.domain.NotificationsSummary
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.data.local.dao.notifications.NotificationData
 import net.primal.domain.NotificationType
 import net.primal.domain.PrimalEvent
-
-fun PrimalEvent.asNotificationSummary(): NotificationsSummary {
-    val summaryJsonObject = CommonJson.parseToJsonElement(this.content).jsonObject
-    val pairs = NotificationType.values().mapNotNull {
-        val count = summaryJsonObject[it.type.toString()]?.jsonPrimitive?.contentOrNull?.toInt()
-        if (count != null) it to count else null
-    }
-    return NotificationsSummary(
-        count = pairs.sumOf { it.second },
-        countPerType = pairs.toMap(),
-    )
-}
 
 private fun ContentPrimalNotification.parseActionUserId(type: NotificationType): String? {
     return when (type) {

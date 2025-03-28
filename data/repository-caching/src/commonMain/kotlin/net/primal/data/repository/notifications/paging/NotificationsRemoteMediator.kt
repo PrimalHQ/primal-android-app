@@ -1,27 +1,30 @@
-package net.primal.android.notifications.api.mediator
+package net.primal.data.repository.notifications.paging
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import androidx.room.withTransaction
-import kotlinx.coroutines.Dispatchers
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import net.primal.android.db.PrimalDatabase
-import net.primal.android.nostr.ext.mapNotNullAsNotificationPO
-import net.primal.android.nostr.ext.mapNotNullAsProfileStatsPO
-import net.primal.android.notifications.db.Notification
-import net.primal.android.notifications.db.NotificationData
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.data.local.dao.notifications.Notification
+import net.primal.data.local.dao.notifications.NotificationData
+import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.withTransaction
+import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.remote.api.notifications.NotificationsApi
 import net.primal.data.remote.api.notifications.model.NotificationsRequestBody
-import timber.log.Timber
+import net.primal.data.repository.feed.processors.persistToDatabaseAsTransaction
+import net.primal.data.repository.mappers.remote.mapNotNullAsNotificationPO
+import net.primal.data.repository.mappers.remote.mapNotNullAsProfileStatsPO
 
 @ExperimentalPagingApi
 class NotificationsRemoteMediator(
     private val userId: String,
+    private val dispatcherProvider: DispatcherProvider,
     private val notificationsApi: NotificationsApi,
     private val database: PrimalDatabase,
 ) : RemoteMediator<Int, Notification>() {
@@ -43,7 +46,8 @@ class NotificationsRemoteMediator(
     }
 
     override suspend fun initialize(): InitializeAction {
-        val notificationsCount = withContext(Dispatchers.IO) { database.notifications().allCount(ownerId = userId) }
+        val notificationsCount =
+            withContext(dispatcherProvider.io()) { database.notifications().allCount(ownerId = userId) }
         return if (notificationsCount == 0) {
             InitializeAction.LAUNCH_INITIAL_REFRESH
         } else {
@@ -56,7 +60,7 @@ class NotificationsRemoteMediator(
             LoadType.REFRESH -> null
             LoadType.PREPEND -> {
                 state.firstItemOrNull()?.data?.createdAt
-                    ?: withContext(Dispatchers.IO) {
+                    ?: withContext(dispatcherProvider.io()) {
                         database.notifications().first(ownerId = userId)?.createdAt
                     }
                     ?: return MediatorResult.Success(endOfPaginationReached = true)
@@ -64,7 +68,7 @@ class NotificationsRemoteMediator(
 
             LoadType.APPEND -> {
                 state.lastItemOrNull()?.data?.createdAt
-                    ?: withContext(Dispatchers.IO) {
+                    ?: withContext(dispatcherProvider.io()) {
                         database.notifications().last(ownerId = userId)?.createdAt
                     }
                     ?: return MediatorResult.Success(endOfPaginationReached = true)
@@ -96,12 +100,12 @@ class NotificationsRemoteMediator(
         }
 
         val response = try {
-            withContext(Dispatchers.IO) {
+            withContext(dispatcherProvider.io()) {
                 ensureLastSeenTimestamp()
                 notificationsApi.getNotifications(body = requestBody)
             }
         } catch (error: WssException) {
-            Timber.w(error)
+            Napier.w(error) { "Failed to get notifications." }
             return MediatorResult.Error(error)
         }
 
@@ -110,29 +114,28 @@ class NotificationsRemoteMediator(
         val userProfileStats = response.primalUserProfileStats.mapNotNullAsProfileStatsPO()
         val notifications = response.primalNotifications.mapNotNullAsNotificationPO()
 
-        withContext(Dispatchers.IO) {
-            // TODO Bring back persistToDatabaseAsTransaction when ported
-//            FeedResponse(
-//                paging = null,
-//                metadata = response.metadata,
-//                notes = response.notes,
-//                articles = emptyList(),
-//                reposts = emptyList(),
-//                zaps = emptyList(),
-//                referencedEvents = response.primalReferencedNotes,
-//                primalEventStats = response.primalNoteStats,
-//                primalEventUserStats = emptyList(),
-//                cdnResources = response.cdnResources,
-//                primalLinkPreviews = response.primalLinkPreviews,
-//                primalRelayHints = response.primalRelayHints,
-//                primalUserNames = response.primalUserNames,
-//                primalLegendProfiles = response.primalLegendProfiles,
-//                primalPremiumInfo = response.primalPremiumInfo,
-//                blossomServers = response.blossomServers,
-//            ).persistToDatabaseAsTransaction(
-//                userId = userId,
-//                database = database,
-//            )
+        withContext(dispatcherProvider.io()) {
+            FeedResponse(
+                paging = null,
+                metadata = response.metadata,
+                notes = response.notes,
+                articles = emptyList(),
+                reposts = emptyList(),
+                zaps = emptyList(),
+                referencedEvents = response.primalReferencedNotes,
+                primalEventStats = response.primalNoteStats,
+                primalEventUserStats = emptyList(),
+                cdnResources = response.cdnResources,
+                primalLinkPreviews = response.primalLinkPreviews,
+                primalRelayHints = response.primalRelayHints,
+                primalUserNames = response.primalUserNames,
+                primalLegendProfiles = response.primalLegendProfiles,
+                primalPremiumInfo = response.primalPremiumInfo,
+                blossomServers = response.blossomServers,
+            ).persistToDatabaseAsTransaction(
+                userId = userId,
+                database = database,
+            )
 
             database.withTransaction {
                 database.profileStats().upsertAll(data = userProfileStats)
