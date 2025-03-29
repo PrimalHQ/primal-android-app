@@ -27,12 +27,13 @@ import net.primal.android.messages.chat.ChatContract.UiEvent
 import net.primal.android.messages.chat.ChatContract.UiState
 import net.primal.android.messages.chat.model.ChatMessageUi
 import net.primal.android.messages.db.DirectMessage
+import net.primal.android.messages.exceptions.MessageEncryptException
 import net.primal.android.messages.repository.MessageRepository
 import net.primal.android.navigation.profileIdOrThrow
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.nostr.notary.NostrNotary
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -132,7 +133,7 @@ class ChatViewModel @Inject constructor(
                     authorization = authorizationEvent,
                     conversationUserId = participantId,
                 )
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SignException) {
                 Timber.w(error)
                 setErrorState(error = UiState.ChatError.PublishError(error))
             } catch (error: WssException) {
@@ -150,7 +151,7 @@ class ChatViewModel @Inject constructor(
                     text = state.value.newMessageText,
                 )
                 setState { copy(newMessageText = "") }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SignException) {
                 Timber.w(error)
                 setErrorState(error = UiState.ChatError.PublishError(error))
             } catch (error: NostrPublishException) {
@@ -159,6 +160,9 @@ class ChatViewModel @Inject constructor(
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setErrorState(error = UiState.ChatError.MissingRelaysConfiguration(error))
+            } catch (error: MessageEncryptException) {
+                Timber.w(error)
+                setErrorState(error = UiState.ChatError.PublishError(error))
             } finally {
                 setState { copy(sending = false) }
             }

@@ -12,7 +12,7 @@ import net.primal.android.nostr.ext.parseAndFoldPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndFoldPrimalUserNames
 import net.primal.android.nostr.ext.parseAndMapAsLeaderboardLegendEntries
 import net.primal.android.nostr.ext.parseAndMapAsOGLeaderboardEntries
-import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.api.PremiumApi
 import net.primal.android.premium.api.model.CancelMembershipRequest
 import net.primal.android.premium.api.model.LegendLeaderboardOrderBy
@@ -53,7 +53,7 @@ class PremiumRepository @Inject constructor(
                         this.copy(premiumMembership = response.toPremiumMembership())
                     }
                 }?.premiumMembership
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SignException) {
                 Timber.w(error)
                 null
             }

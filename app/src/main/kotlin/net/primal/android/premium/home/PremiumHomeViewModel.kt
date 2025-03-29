@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.domain.MembershipError
 import net.primal.android.premium.home.PremiumHomeContract.UiEvent
 import net.primal.android.premium.home.PremiumHomeContract.UiState
@@ -95,7 +95,7 @@ class PremiumHomeViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.w(error)
                 setState { copy(error = MembershipError.ProfileMetadataNotFound) }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SignException) {
                 Timber.w(error)
                 setState { copy(error = MembershipError.FailedToApplyNostrAddress) }
             } catch (error: NostrPublishException) {
@@ -114,7 +114,7 @@ class PremiumHomeViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.w(error)
                 setState { copy(error = MembershipError.ProfileMetadataNotFound) }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SignException) {
                 Timber.w(error)
                 setState { copy(error = MembershipError.FailedToApplyLightningAddress) }
             } catch (error: NostrPublishException) {

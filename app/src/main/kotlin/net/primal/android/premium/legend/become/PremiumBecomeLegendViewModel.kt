@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.navigation.FROM_ORIGIN_PREMIUM_BADGE
 import net.primal.android.navigation.buyingPremiumFromOrigin
-import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.Companion.LEGEND_THRESHOLD_IN_USD
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.UiEvent
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.UiState
@@ -145,7 +145,7 @@ class PremiumBecomeLegendViewModel @Inject constructor(
                         exchangeBtcUsdRate = btcRate,
                     )
                 }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SignException) {
                 Timber.e(error)
             } catch (error: WssException) {
                 Timber.e(error)
@@ -175,7 +175,7 @@ class PremiumBecomeLegendViewModel @Inject constructor(
                 updatePaymentAmount(amount = minAmount)
 
                 startPurchaseMonitor()
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SignException) {
                 Timber.e(error)
             } catch (error: WssException) {
                 Timber.e(error)

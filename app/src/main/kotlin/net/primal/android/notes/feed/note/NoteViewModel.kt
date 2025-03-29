@@ -16,7 +16,8 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.events.repository.EventRepository
 import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
+import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
 import net.primal.android.nostr.repository.RelayHintsRepository
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.NoteContract.UiState
@@ -120,8 +121,11 @@ class NoteViewModel @AssistedInject constructor(
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: MissingPrivateKey) {
                 setState { copy(error = UiError.MissingPrivateKey) }
+                Timber.w(error)
+            } catch (error: NostrSignUnauthorized) {
+                setState { copy(error = UiError.NostrSignUnauthorized) }
                 Timber.w(error)
             }
         }
@@ -142,8 +146,11 @@ class NoteViewModel @AssistedInject constructor(
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: MissingPrivateKey) {
                 setState { copy(error = UiError.MissingPrivateKey) }
+                Timber.w(error)
+            } catch (error: NostrSignUnauthorized) {
+                setState { copy(error = UiError.NostrSignUnauthorized) }
                 Timber.w(error)
             }
         }
@@ -189,9 +196,12 @@ class NoteViewModel @AssistedInject constructor(
             } catch (error: WssException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToMuteUser(error)) }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: MissingPrivateKey) {
                 Timber.w(error)
                 setState { copy(error = UiError.MissingPrivateKey) }
+            } catch (error: NostrSignUnauthorized) {
+                Timber.w(error)
+                setState { copy(error = UiError.NostrSignUnauthorized) }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToMuteUser(error)) }
@@ -210,9 +220,12 @@ class NoteViewModel @AssistedInject constructor(
                     profileId = event.profileId,
                     eventId = event.noteId,
                 )
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: MissingPrivateKey) {
                 Timber.w(error)
                 setState { copy(error = UiError.MissingPrivateKey) }
+            } catch (error: NostrSignUnauthorized) {
+                Timber.w(error)
+                setState { copy(error = UiError.NostrSignUnauthorized) }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
             }
@@ -244,8 +257,11 @@ class NoteViewModel @AssistedInject constructor(
             } catch (error: BookmarksRepository.BookmarksListNotFound) {
                 Timber.w(error)
                 setState { copy(shouldApproveBookmark = true) }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: MissingPrivateKey) {
                 setState { copy(error = UiError.MissingPrivateKey) }
+                Timber.w(error)
+            } catch (error: NostrSignUnauthorized) {
+                setState { copy(error = UiError.NostrSignUnauthorized) }
                 Timber.w(error)
             }
         }

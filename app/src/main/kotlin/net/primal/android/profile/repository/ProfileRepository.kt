@@ -21,7 +21,7 @@ import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
-import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.profile.db.ProfileData
 import net.primal.android.profile.report.ReportType
 import net.primal.core.networking.utils.retryNetworkCall
@@ -156,7 +156,7 @@ class ProfileRepository @Inject constructor(
             usersApi.getUserFollowing(userId = userId)
         }
 
-    @Throws(NostrPublishException::class, MissingPrivateKeyException::class)
+    @Throws(NostrPublishException::class, SignException::class)
     suspend fun reportAbuse(
         userId: String,
         reportType: ReportType,

@@ -3,7 +3,6 @@ package net.primal.android.messages.api.mediator
 import androidx.room.withTransaction
 import javax.inject.Inject
 import net.primal.android.core.ext.asMapByKey
-import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.db.PrimalDatabase
 import net.primal.android.events.ext.flatMapMessagesAsEventUriPO
 import net.primal.android.messages.db.DirectMessageData
@@ -21,19 +20,19 @@ import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
 import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
 import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
 import net.primal.android.notes.repository.persistToDatabaseAsTransaction
-import net.primal.android.user.credentials.CredentialsStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.data.remote.api.feed.FeedApi
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.cryptography.MessageCipher
 import timber.log.Timber
 
 class MessagesProcessor @Inject constructor(
     private val database: PrimalDatabase,
     private val feedApi: FeedApi,
     private val usersApi: UsersApi,
-    private val credentialsStore: CredentialsStore,
+    private val messageCipher: MessageCipher,
 ) {
 
     suspend fun processMessageEventsAndSave(
@@ -48,7 +47,7 @@ class MessagesProcessor @Inject constructor(
     ) {
         val messageDataList = messages.mapAsMessageDataPO(
             userId = userId,
-            nsec = credentialsStore.findOrThrow(npub = userId.hexToNpubHrp()).nsec,
+            onMessageDecrypt = messageCipher::decryptMessage,
         )
 
         processNostrUrisAndSave(userId = userId, messageDataList = messageDataList)

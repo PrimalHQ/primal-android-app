@@ -21,6 +21,8 @@ import net.primal.domain.ReferencedZap
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV
+import net.primal.domain.nostr.Nip19TLV.readAsString
+import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.cryptography.bech32ToHexOrThrow
@@ -33,8 +35,6 @@ import net.primal.domain.nostr.isATag
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.utils.wordsCountToReadingTime
 
-// TODO Port missing helper functions and consider splitting this file
-
 private const val NOSTR = "nostr:"
 private const val NPUB = "npub1"
 private const val NSEC = "nsec1"
@@ -45,7 +45,7 @@ private const val NRELAY = "nrelay1"
 private const val NPROFILE = "nprofile1"
 
 private val nostrUriRegexPattern: Regex = Regex(
-    "($NOSTR)?@?($NSEC|$NPUB|$NEVENT|$NADDR|$NOTE|$NPROFILE|$NRELAY)([qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)([\\S]*)",
+    "($NOSTR)?@?($NSEC|$NPUB|$NEVENT|$NADDR|$NOTE|$NPROFILE|$NRELAY)([qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)(\\S*)",
     RegexOption.IGNORE_CASE,
 )
 
@@ -84,34 +84,33 @@ fun String.isNProfileUri() = lowercase().startsWith(NOSTR + NPROFILE)
 
 fun String.isNAddrUri() = lowercase().startsWith(NOSTR + NADDR)
 
-// private fun String.nostrUriToBytes(): ByteArray? {
-//    val matcher = nostrUriRegexPattern.matcher(this)
-//    if (!matcher.find()) return null
-//    val type = matcher.group(2)?.lowercase() ?: return null
-//    val key = matcher.group(3)?.lowercase() ?: return null
-//    return try {
-//        (type + key).bechToBytesOrThrow()
-//    } catch (ignored: Exception) {
-//        Napier.w("", ignored)
-//        null
-//    }
-// }
+private fun String.nostrUriToBytes(): ByteArray? {
+    val matchResult = nostrUriRegexPattern.find(this) ?: return null
+    val type = matchResult.groupValues[2].takeIf { it.isNotEmpty() }?.lowercase() ?: return null
+    val key = matchResult.groupValues[3].takeIf { it.isNotEmpty() }?.lowercase() ?: return null
+    return try {
+        (type + key).bechToBytesOrThrow()
+    } catch (ignored: Exception) {
+        Napier.w("", ignored)
+        null
+    }
+}
 
-// fun String.nostrUriToNoteId() = nostrUriToBytes()?.toHex()
-//
-// fun String.nostrUriToPubkey() = nostrUriToBytes()?.toHex()
+fun String.nostrUriToNoteId() = nostrUriToBytes()?.toHex()
 
-// private fun String.nostrUriToIdAndRelay(): Pair<String?, String?> {
-//    val bytes = nostrUriToBytes() ?: return null to null
-//    val tlv = Nip19TLV.parse(bytes)
-//    val id = tlv[Nip19TLV.Type.SPECIAL.id]?.firstOrNull()?.toHex()
-//    val relayBytes = tlv[Nip19TLV.Type.RELAY.id]?.firstOrNull()
-//    return id to relayBytes?.let { String(it) }
-// }
+fun String.nostrUriToPubkey() = nostrUriToBytes()?.toHex()
 
-// fun String.nostrUriToNoteIdAndRelay() = nostrUriToIdAndRelay()
+private fun String.nostrUriToIdAndRelay(): Pair<String?, String?> {
+    val bytes = nostrUriToBytes() ?: return null to null
+    val tlv = Nip19TLV.parse(bytes)
+    val id = tlv[Nip19TLV.Type.SPECIAL.id]?.firstOrNull()?.toHex()
+    val relayBytes = tlv[Nip19TLV.Type.RELAY.id]?.firstOrNull()
+    return id to relayBytes?.readAsString()
+}
 
-// fun String.nostrUriToPubkeyAndRelay() = nostrUriToIdAndRelay()
+fun String.nostrUriToNoteIdAndRelay() = nostrUriToIdAndRelay()
+
+fun String.nostrUriToPubkeyAndRelay() = nostrUriToIdAndRelay()
 
 fun String.extractProfileId(): String? {
     return extract { bechPrefix: String?, key: String? ->
@@ -176,22 +175,20 @@ private fun String.extract(parser: (bechPrefix: String?, key: String?) -> String
     }
 }
 
-// TODO Rewire once NIP19 is implemented and put in correct package and/or module
-
-// fun String.takeAsNaddrOrNull(): String? {
-//    return if (isNAddr() || isNAddrUri()) {
-//        val result = runCatching {
-//            Nip19TLV.parseUriAsNaddrOrNull(this)
-//        }
-//        if (result.getOrNull() != null) {
-//            this
-//        } else {
-//            null
-//        }
-//    } else {
-//        null
-//    }
-// }
+fun String.takeAsNaddrOrNull(): String? {
+    return if (isNAddr() || isNAddrUri()) {
+        val result = runCatching {
+            Nip19TLV.parseUriAsNaddrOrNull(this)
+        }
+        if (result.getOrNull() != null) {
+            this
+        } else {
+            null
+        }
+    } else {
+        null
+    }
+}
 
 fun String.takeAsNoteHexIdOrNull(): String? {
     return if (isNote() || isNoteUri() || isNEventUri() || isNEvent()) {
@@ -411,10 +408,8 @@ private fun takeAsReferencedArticleOrNull(
     refArticle != null &&
     refArticleAuthor != null
 ) {
-    // TODO Rewire once NIP19 is implemented
     ReferencedArticle(
-        // refNaddr.toNaddrString(),
-        naddr = "",
+        naddr = refNaddr.toNaddrString(),
         aTag = refArticle.aTag,
         eventId = refArticle.eventId,
         articleId = refArticle.articleId,
@@ -438,8 +433,7 @@ private fun takeAsReferencedHighlightOrNull(
     aTag: JsonArray?,
     authorId: String?,
 ) = if (highlight?.isNotEmpty() == true && aTag != null) {
-    // TODO Rewire once NIP19 is implemented
-    val nevent: Nevent? = null // Nip19TLV.parseUriAsNeventOrNull(neventUri = uri)
+    val nevent = Nip19TLV.parseUriAsNeventOrNull(neventUri = uri)
     ReferencedHighlight(
         text = highlight,
         aTag = aTag,

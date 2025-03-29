@@ -19,7 +19,7 @@ import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.navigation.FROM_ORIGIN_PREMIUM_BADGE
 import net.primal.android.navigation.buyingPremiumFromOrigin
 import net.primal.android.navigation.extendExistingPremiumName
-import net.primal.android.nostr.notary.MissingPrivateKeyException
+import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.buying.PremiumBuyingContract.PremiumStage
 import net.primal.android.premium.buying.PremiumBuyingContract.SideEffect
 import net.primal.android.premium.buying.PremiumBuyingContract.UiEvent
@@ -167,7 +167,7 @@ class PremiumBuyingViewModel @Inject constructor(
                             purchase = purchase,
                         )
                         setState { copy(stage = PremiumStage.Success) }
-                    } catch (error: MissingPrivateKeyException) {
+                    } catch (error: SignException) {
                         Timber.w(error)
                     } catch (error: WssException) {
                         Timber.e(error)
@@ -219,7 +219,7 @@ class PremiumBuyingViewModel @Inject constructor(
                     )
                     setState { copy(stage = PremiumStage.Success) }
                     premiumRepository.fetchMembershipStatus(userId = userId)
-                } catch (error: MissingPrivateKeyException) {
+                } catch (error: SignException) {
                     Timber.e(error)
                 } catch (error: WssException) {
                     Timber.e(error)

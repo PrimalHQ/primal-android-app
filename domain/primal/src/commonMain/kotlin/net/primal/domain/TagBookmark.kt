@@ -1,4 +1,4 @@
-package net.primal.android.bookmarks.domain
+package net.primal.domain
 
 import kotlinx.serialization.Serializable
 

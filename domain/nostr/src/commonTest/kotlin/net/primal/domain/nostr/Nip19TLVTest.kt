@@ -1,14 +1,15 @@
-package net.primal.android.nostr.utils
+package net.primal.domain.nostr
 
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.instanceOf
-import net.primal.android.crypto.toHex
-import net.primal.android.crypto.toNpub
-import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
-import net.primal.android.nostr.utils.Nip19TLV.toNeventString
-import net.primal.android.nostr.utils.Nip19TLV.toNprofileString
-import org.junit.Test
+import kotlin.test.Test
+import net.primal.domain.nostr.Nip19TLV.readAsString
+import net.primal.domain.nostr.Nip19TLV.toNaddrString
+import net.primal.domain.nostr.Nip19TLV.toNeventString
+import net.primal.domain.nostr.Nip19TLV.toNprofileString
+import net.primal.domain.nostr.cryptography.toHex
+import net.primal.domain.nostr.cryptography.toNpub
 
 class Nip19TLVTest {
 
@@ -30,9 +31,7 @@ class Nip19TLVTest {
         val actualEventId = tlv[Nip19TLV.Type.SPECIAL.id]?.first()?.toHex()
         actualEventId shouldBe expectedEventId
 
-        val actualRelay = tlv[Nip19TLV.Type.RELAY.id]?.first()?.let {
-            String(bytes = it, charset = Charsets.US_ASCII)
-        }
+        val actualRelay = tlv[Nip19TLV.Type.RELAY.id]?.first()?.readAsString()
         actualRelay shouldBe expectedRelays
     }
 
@@ -47,14 +46,10 @@ class Nip19TLVTest {
         val expectedKind = 30023
 
         val tlv = Nip19TLV.parse(naddr)
-        val actualIdentifier = tlv[Nip19TLV.Type.SPECIAL.id]?.first()?.let {
-            String(bytes = it, charset = Charsets.US_ASCII)
-        }
+        val actualIdentifier = tlv[Nip19TLV.Type.SPECIAL.id]?.first()?.readAsString()
         actualIdentifier shouldBe expectedIdentifier
 
-        val actualRelays = tlv[Nip19TLV.Type.RELAY.id]?.first()?.let {
-            String(bytes = it, charset = Charsets.US_ASCII)
-        }
+        val actualRelays = tlv[Nip19TLV.Type.RELAY.id]?.first()?.readAsString()
         actualRelays shouldBe expectedRelays
 
         val actualProfileId = tlv[Nip19TLV.Type.AUTHOR.id]?.first()?.toNpub()

@@ -22,6 +22,7 @@ interface LoginContract {
     }
 
     sealed class UiEvent {
+        data object ResetLoginState : UiEvent()
         data class LoginRequestEvent(val nostrEvent: NostrEvent? = null) : UiEvent()
         data class UpdateLoginInput(val newInput: String, val loginType: LoginType? = null) : UiEvent()
     }

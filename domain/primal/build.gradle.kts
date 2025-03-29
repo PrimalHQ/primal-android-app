@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
 plugins {
@@ -68,6 +69,12 @@ kotlin {
                 implementation(libs.kotest.assertions.core)
                 implementation(libs.kotest.assertions.json)
             }
+        }
+    }
+
+    targets.withType<KotlinNativeTarget> {
+        compilations.all {
+            kotlinOptions.freeCompilerArgs += "-Xexport-kdoc"
         }
     }
 }

@@ -82,8 +82,6 @@ import net.primal.android.nostr.ext.isNEventUri
 import net.primal.android.nostr.ext.isNostrUri
 import net.primal.android.nostr.ext.isNote
 import net.primal.android.nostr.ext.takeAsNoteHexIdOrNull
-import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
-import net.primal.android.nostr.utils.Nip19TLV.toNeventString
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
@@ -117,6 +115,8 @@ import net.primal.android.thread.articles.details.ui.rendering.splitMarkdownByIn
 import net.primal.android.thread.articles.details.ui.rendering.splitMarkdownByNostrUris
 import net.primal.android.wallet.zaps.canZap
 import net.primal.domain.EventUriType
+import net.primal.domain.nostr.Nip19TLV.toNaddrString
+import net.primal.domain.nostr.Nip19TLV.toNeventString
 
 @Composable
 fun ArticleDetailsScreen(
