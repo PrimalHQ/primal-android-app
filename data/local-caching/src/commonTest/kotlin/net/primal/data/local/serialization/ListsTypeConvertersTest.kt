@@ -1,11 +1,11 @@
-package net.primal.android.core.serialization.room
+package net.primal.data.local.serialization
 
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import kotlin.test.Test
 import kotlinx.serialization.json.JsonArray
 import net.primal.core.utils.serialization.CommonJson
-import org.junit.Test
 
 class ListsTypeConvertersTest {
 
