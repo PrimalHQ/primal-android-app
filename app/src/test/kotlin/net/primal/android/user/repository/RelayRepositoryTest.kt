@@ -1,6 +1,5 @@
 package net.primal.android.user.repository
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.add
@@ -9,10 +8,9 @@ import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEventKind
 import org.junit.Rule
-import org.junit.runner.RunWith
 
+// @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(AndroidJUnit4::class)
 class RelayRepositoryTest {
 
     /* TODO: resolve database, uncomment the rest */
