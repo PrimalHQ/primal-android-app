@@ -39,7 +39,7 @@ import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.settings.wallet.domain.NwcConnectionInfo
 import net.primal.android.settings.wallet.settings.WalletSettingsContract
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 
 @Composable
 fun ConnectedAppsSettings(

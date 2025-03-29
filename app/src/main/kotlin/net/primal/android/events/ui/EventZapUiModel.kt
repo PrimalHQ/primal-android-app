@@ -6,7 +6,7 @@ import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.events.db.EventZap
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.domain.CdnImage
 
 data class EventZapUiModel(

@@ -15,7 +15,7 @@ import net.primal.android.wallet.dashboard.ui.BtcAmountText
 import net.primal.android.wallet.dashboard.ui.FiatAmountTextFromUsd
 import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.repository.isValidExchangeRate
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 
 @Composable
 fun TransactionAmountText(

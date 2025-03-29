@@ -29,7 +29,7 @@ import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SatsPurchase
 import net.primal.android.wallet.transactions.list.TransactionListItemDataUi
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber

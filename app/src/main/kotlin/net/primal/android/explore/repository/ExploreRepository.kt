@@ -29,7 +29,7 @@ import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowStats
 import net.primal.android.nostr.ext.takeContentAsPrimalUserFollowersCountsOrNull
 import net.primal.android.nostr.ext.takeContentAsPrimalUserScoresOrNull
 import net.primal.android.profile.db.ProfileStats
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.data.remote.api.explore.ExploreApi
 import net.primal.data.remote.api.explore.model.ExploreRequestBody

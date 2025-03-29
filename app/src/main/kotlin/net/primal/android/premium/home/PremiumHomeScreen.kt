@@ -48,7 +48,7 @@ import net.primal.android.premium.ui.toHumanReadableString
 import net.primal.android.premium.utils.isPremiumFreeTier
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.domain.CdnImage
 
 @Composable

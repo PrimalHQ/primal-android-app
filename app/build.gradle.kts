@@ -235,6 +235,7 @@ dependencies {
     implementation(project(":data:remote-caching"))
     implementation(project(":data:repository-caching"))
 
+    implementation(libs.bignum)
     implementation(libs.core.ktx)
     implementation(libs.core.splashscreen)
     implementation(libs.lifecycle.runtime.ktx)

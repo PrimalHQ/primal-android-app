@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.core.utils.getMaximumUsdAmount
+import net.primal.core.utils.getMaximumUsdAmount
 import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.legend.contribute.LegendContributeContract.LegendContributeState
 import net.primal.android.premium.legend.contribute.LegendContributeContract.PaymentMethod
@@ -25,7 +25,7 @@ import net.primal.android.wallet.domain.SubWallet
 import net.primal.android.wallet.domain.not
 import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.repository.WalletRepository
-import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
+import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.android.wallet.utils.formatUsdZeros
 import net.primal.android.wallet.utils.parseBitcoinPaymentInstructions
 import net.primal.android.wallet.utils.parseLightningPaymentInstructions

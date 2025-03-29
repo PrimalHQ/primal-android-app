@@ -43,7 +43,7 @@ import net.primal.android.premium.legend.contribute.LegendContributeContract.UiS
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.domain.Network
 import net.primal.android.wallet.transactions.receive.QrCodeBox
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
+import net.primal.core.utils.CurrencyConversionUtils.toBtc
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

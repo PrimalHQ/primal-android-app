@@ -5,8 +5,8 @@ package net.primal.android.wallet.utils
 import android.util.Patterns
 import java.math.BigDecimal
 import net.primal.android.navigation.asUrlDecoded
-import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
-import net.primal.android.wallet.utils.CurrencyConversionUtils.fromUsdToSats
+import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
+import net.primal.core.utils.CurrencyConversionUtils.fromUsdToSats
 import org.bitcoinj.core.Address
 import org.bitcoinj.params.MainNetParams
 

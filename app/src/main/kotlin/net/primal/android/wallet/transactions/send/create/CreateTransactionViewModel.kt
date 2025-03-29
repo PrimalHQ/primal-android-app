@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.core.utils.getMaximumUsdAmount
+import net.primal.core.utils.getMaximumUsdAmount
 import net.primal.android.navigation.draftTransaction
 import net.primal.android.navigation.lnbc
 import net.primal.android.nostr.notary.exceptions.SignException
@@ -33,10 +33,10 @@ import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract.UiEvent
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract.UiState
 import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
-import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
-import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
-import net.primal.android.wallet.utils.CurrencyConversionUtils.fromUsdToSats
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
+import net.primal.core.utils.CurrencyConversionUtils.formatAsString
+import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
+import net.primal.core.utils.CurrencyConversionUtils.fromUsdToSats
+import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.isLightningAddress
 import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber

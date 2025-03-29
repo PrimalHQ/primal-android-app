@@ -71,6 +71,7 @@ kotlin {
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.kotlinx.serialization.json)
                 implementation(libs.ktor.http)
+                implementation(libs.bignum)
             }
         }
 

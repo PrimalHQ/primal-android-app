@@ -115,8 +115,8 @@ import net.primal.android.wallet.domain.TxType
 import net.primal.android.wallet.repository.isValidExchangeRate
 import net.primal.android.wallet.transactions.details.TransactionDetailsContract.UiState
 import net.primal.android.wallet.transactions.list.TransactionIcon
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toUsd
+import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.core.utils.CurrencyConversionUtils.toUsd
 import net.primal.android.wallet.walletDepositColor
 import net.primal.android.wallet.walletTransactionIconBackgroundColor
 import net.primal.android.wallet.walletWithdrawColor

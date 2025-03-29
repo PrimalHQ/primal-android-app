@@ -1,6 +1,6 @@
 package net.primal.android.wallet.transactions.receive
 
-import java.math.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.domain.Network
 import net.primal.android.wallet.transactions.receive.model.NetworkDetails

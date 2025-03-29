@@ -8,7 +8,7 @@ import net.primal.android.navigation.asUrlDecoded
 import net.primal.android.wallet.api.parseAsLNUrlOrNull
 import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.repository.WalletRepository
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.android.wallet.utils.isBitcoinAddress
 import net.primal.android.wallet.utils.isBitcoinUri
 import net.primal.android.wallet.utils.isLightningAddress

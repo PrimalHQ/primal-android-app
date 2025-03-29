@@ -38,7 +38,7 @@ import java.text.NumberFormat
 import net.primal.android.R
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 
 @ExperimentalMaterial3Api
 @Composable

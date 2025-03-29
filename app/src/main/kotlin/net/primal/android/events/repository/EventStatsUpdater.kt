@@ -6,7 +6,7 @@ import net.primal.android.db.PrimalDatabase
 import net.primal.android.events.db.EventStats
 import net.primal.android.events.db.EventUserStats
 import net.primal.android.events.db.EventZap
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
+import net.primal.core.utils.CurrencyConversionUtils.toBtc
 
 class EventStatsUpdater(
     val eventId: String,

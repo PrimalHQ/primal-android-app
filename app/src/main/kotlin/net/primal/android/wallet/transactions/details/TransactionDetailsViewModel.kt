@@ -26,7 +26,7 @@ import net.primal.android.wallet.db.WalletTransaction
 import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.details.TransactionDetailsContract.UiState
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.networking.sockets.errors.WssException
 import timber.log.Timber
 

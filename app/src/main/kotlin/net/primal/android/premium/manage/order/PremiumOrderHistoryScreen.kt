@@ -45,7 +45,7 @@ import net.primal.android.premium.ui.ManagePremiumTableRow
 import net.primal.android.premium.utils.isOriginAndroid
 import net.primal.android.premium.utils.isOriginIOS
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 
 @Composable
 fun PremiumOrderHistoryScreen(

@@ -100,11 +100,11 @@ import net.primal.android.wallet.transactions.receive.tabs.ReceivePaymentTab
 import net.primal.android.wallet.ui.TransactionAmountText
 import net.primal.android.wallet.ui.WalletTabsBar
 import net.primal.android.wallet.ui.WalletTabsHeight
-import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
-import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
-import net.primal.android.wallet.utils.CurrencyConversionUtils.fromUsdToSats
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.CurrencyConversionUtils.formatAsString
+import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
+import net.primal.core.utils.CurrencyConversionUtils.fromUsdToSats
+import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
