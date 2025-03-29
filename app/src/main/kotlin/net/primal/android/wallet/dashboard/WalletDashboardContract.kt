@@ -1,7 +1,7 @@
 package net.primal.android.wallet.dashboard
 
 import androidx.paging.PagingData
-import java.math.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import kotlinx.coroutines.flow.Flow
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.user.domain.Badges

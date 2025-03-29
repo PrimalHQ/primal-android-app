@@ -3,6 +3,7 @@ package net.primal.android.wallet.transactions.details
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import javax.inject.Inject
@@ -22,8 +23,8 @@ import net.primal.android.wallet.db.WalletTransactionData
 import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.details.TransactionDetailsContract.UiState
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.domain.repository.ArticleRepository
 import net.primal.domain.repository.FeedRepository
 import timber.log.Timber

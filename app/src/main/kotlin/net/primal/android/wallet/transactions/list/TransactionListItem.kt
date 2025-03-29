@@ -41,7 +41,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
-import java.math.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import java.text.NumberFormat
 import java.time.Instant
 import java.time.ZoneId
@@ -61,11 +62,11 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.domain.TxState
 import net.primal.android.wallet.domain.TxType
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toUsd
 import net.primal.android.wallet.walletDepositColor
 import net.primal.android.wallet.walletTransactionIconBackgroundColor
 import net.primal.android.wallet.walletWithdrawColor
+import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.core.utils.CurrencyConversionUtils.toUsd
 import net.primal.domain.CdnImage
 
 @Composable
@@ -131,7 +132,7 @@ fun TransactionListItem(
         trailingContent = {
             TransactionTrailingContent(
                 txType = data.txType,
-                txAmountInSats = BigDecimal.valueOf(data.txAmountInSats.toLong()),
+                txAmountInSats = data.txAmountInSats.toLong().toBigDecimal(),
                 currencyMode = currencyMode,
                 numberFormat = numberFormat,
                 exchangeBtcUsdRate = exchangeBtcUsdRate,
@@ -264,10 +265,10 @@ private fun TransactionTrailingContent(
                 horizontalAlignment = Alignment.End,
             ) {
                 val text = if (targetCurrencyMode == CurrencyMode.FIAT) {
-                    BigDecimal.valueOf(txAmountInSats.toBtc()).toUsd(exchangeBtcUsdRate)
-                        .let { numberFormat.format(it.toFloat()) }
+                    txAmountInSats.toBtc().toUsd(exchangeBtcUsdRate)
+                        .let { numberFormat.format(it.floatValue()) }
                 } else {
-                    numberFormat.format(txAmountInSats.toLong())
+                    numberFormat.format(txAmountInSats.longValue())
                 }
                 val suffix = if (targetCurrencyMode == CurrencyMode.FIAT) {
                     R.string.wallet_usd_suffix

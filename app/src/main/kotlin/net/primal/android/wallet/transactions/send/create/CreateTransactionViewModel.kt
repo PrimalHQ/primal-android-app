@@ -3,8 +3,8 @@ package net.primal.android.wallet.transactions.send.create
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.math.BigDecimal
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +14,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.core.utils.getMaximumUsdAmount
 import net.primal.android.navigation.draftTransaction
 import net.primal.android.navigation.lnbc
 import net.primal.android.nostr.notary.exceptions.SignException
@@ -31,12 +30,13 @@ import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract.UiEvent
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract.UiState
 import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
-import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
-import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
-import net.primal.android.wallet.utils.CurrencyConversionUtils.fromUsdToSats
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.isLightningAddress
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.CurrencyConversionUtils.formatAsString
+import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
+import net.primal.core.utils.CurrencyConversionUtils.fromUsdToSats
+import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.core.utils.getMaximumUsdAmount
 import net.primal.domain.model.ProfileData
 import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
@@ -86,15 +86,9 @@ class CreateTransactionViewModel @Inject constructor(
                     copy(
                         currentExchangeRate = it,
                         maximumUsdAmount = getMaximumUsdAmount(it),
-                        amountInUsd = BigDecimal(_state.value.transaction.amountSats)
+                        amountInUsd = BigDecimal.parseString(_state.value.transaction.amountSats)
                             .fromSatsToUsd(it)
-                            .let { amount ->
-                                if (amount.compareTo(BigDecimal.ZERO) == 0) {
-                                    "0"
-                                } else {
-                                    amount.toString()
-                                }
-                            },
+                            .toPlainString(),
                     )
                 }
             }
@@ -149,10 +143,8 @@ class CreateTransactionViewModel @Inject constructor(
                 setState {
                     copy(
                         transaction = transaction.copy(amountSats = amount),
-                        amountInUsd = BigDecimal(amount.toDouble())
+                        amountInUsd = BigDecimal.parseString(amount)
                             .fromSatsToUsd(state.value.currentExchangeRate)
-                            .stripTrailingZeros()
-                            .let { if (it.compareTo(BigDecimal.ZERO) == 0) BigDecimal.ZERO else it }
                             .toPlainString(),
                     )
                 }
@@ -163,7 +155,7 @@ class CreateTransactionViewModel @Inject constructor(
                     copy(
                         amountInUsd = amount,
                         transaction = transaction.copy(
-                            amountSats = BigDecimal(amount)
+                            amountSats = BigDecimal.parseString(amount)
                                 .fromUsdToSats(state.value.currentExchangeRate)
                                 .toString(),
                         ),

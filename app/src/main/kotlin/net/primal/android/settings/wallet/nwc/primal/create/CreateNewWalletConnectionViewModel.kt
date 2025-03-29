@@ -15,8 +15,8 @@ import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConne
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.repository.NwcWalletRepository
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import timber.log.Timber
 
 @HiltViewModel

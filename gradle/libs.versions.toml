@@ -7,6 +7,7 @@ acinq-bitcoin-kmp = "0.22.1"
 acinq-secp256k1-kmp = "0.17.1"
 agp = "8.9.1"
 appcompat = "1.7.0"
+bignum = "0.3.10"
 bitcoinj-core = "0.16.3"
 biometric = "1.4.0-alpha02"
 camera = "1.4.1"
@@ -78,6 +79,7 @@ url-detector = "0.1.23"
 [libraries]
 # Core libs
 androidx-webkit = { module = "androidx.webkit:webkit", version.ref = "jetpack-webkit" }
+bignum = { module = "com.ionspin.kotlin:bignum", version.ref = "bignum" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "core-splashscreen" }
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "jetpack-lifecycle" }

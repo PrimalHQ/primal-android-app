@@ -1,10 +1,11 @@
-package net.primal.android.wallet.utils
+package net.primal.core.utils
 
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import io.kotest.matchers.shouldBe
-import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
-import org.junit.Test
+import kotlin.test.Test
+import net.primal.core.utils.CurrencyConversionUtils.formatAsString
+import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 
 class CurrencyConversionUtilsTest {
 
