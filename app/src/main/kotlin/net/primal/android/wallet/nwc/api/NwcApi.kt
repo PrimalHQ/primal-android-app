@@ -1,19 +1,20 @@
 package net.primal.android.wallet.nwc.api
 
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import java.io.IOException
-import java.math.BigDecimal
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.wallet.nwc.model.LightningPayRequest
 import net.primal.android.wallet.nwc.model.LightningPayResponse
-import net.primal.android.wallet.utils.LnInvoiceUtils
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.serialization.toNostrJsonObject
+import net.primal.domain.nostr.utils.LnInvoiceUtils
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -73,7 +74,7 @@ class NwcApi @Inject constructor(
         val decoded = CommonJson.decodeFromStringOrNull<LightningPayResponse>(responseString)
 
         val responseInvoiceAmountInMillis = decoded?.pr?.extractInvoiceAmountInMilliSats()
-        val requestAmountInMillis = BigDecimal(satoshiAmountInMilliSats.toLong()).toLong()
+        val requestAmountInMillis = satoshiAmountInMilliSats.toLong().toBigDecimal().longValue()
 
         if (decoded == null || requestAmountInMillis != responseInvoiceAmountInMillis) {
             throw IOException("Invalid invoice response.")
@@ -82,13 +83,13 @@ class NwcApi @Inject constructor(
         return decoded
     }
 
-    private val thousandAsBigDecimal = BigDecimal(1000)
+    private val thousandAsBigDecimal = BigDecimal.fromInt(1_000)
 
     private fun String.extractInvoiceAmountInMilliSats(): Long? {
         return try {
             LnInvoiceUtils.getAmountInSats(this)
                 .multiply(thousandAsBigDecimal)
-                .toLong()
+                .longValue()
         } catch (error: LnInvoiceUtils.AddressFormatException) {
             Timber.w(error)
             null

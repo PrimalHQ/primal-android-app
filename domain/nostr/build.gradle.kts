@@ -48,6 +48,9 @@ kotlin {
                 implementation(libs.secp256k1.kmp)
 
                 implementation(libs.ktor.io)
+
+                implementation(libs.napier)
+                implementation(libs.bignum)
             }
         }
 
