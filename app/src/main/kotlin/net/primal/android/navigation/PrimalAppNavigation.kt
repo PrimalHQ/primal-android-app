@@ -1077,7 +1077,10 @@ private fun NavGraphBuilder.noteEditor(
     LockToOrientationPortrait()
     NoteEditorScreen(
         viewModel = viewModel,
-        onClose = { navController.navigateUp() },
+        onClose = {
+            activity?.intent?.removeExtra(Intent.EXTRA_STREAM)
+            navController.navigateUp()
+        },
     )
 }
 
