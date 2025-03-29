@@ -1,9 +1,11 @@
 package net.primal.data.repository.explore
 
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import net.primal.core.networking.utils.retryNetworkCall
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.db.PrimalDatabase
@@ -102,9 +104,7 @@ class ExploreRepositoryImpl(
                         sender = profilesMap[zapEvent.zapSenderId]?.asProfileDataDO(),
                         receiver = profilesMap[zapEvent.zapReceiverId]?.asProfileDataDO(),
                         noteData = noteData.mapAsFeedPostDO(),
-                        // TODO Fix this when CurrencyUtils is ported
-//                        amountSats = zapEvent.amountInBtc.toBigDecimal().toSats(),
-                        amountSats = 8888.toULong(),
+                        amountSats = zapEvent.amountInBtc.toBigDecimal().toSats(),
                         zapMessage = zapEvent.message,
                         createdAt = Instant.fromEpochSeconds(zapEvent.zapReceiptAt),
                         noteNostrUris = nostrUris.filter { it.eventId == noteData.postId },
