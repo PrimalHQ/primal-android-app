@@ -43,9 +43,12 @@ import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.findFirstAltDescription
+import net.primal.domain.nostr.findFirstBolt11
 import net.primal.domain.nostr.findFirstEventId
 import net.primal.domain.nostr.findFirstProfileId
+import net.primal.domain.nostr.findFirstZapAmount
 import net.primal.domain.nostr.isATag
+import net.primal.domain.nostr.utils.LnInvoiceUtils
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.utils.wordsCountToReadingTime
 
@@ -397,10 +400,8 @@ private fun takeAsReferencedZapOrNull(
     val noteId = event?.tags?.findFirstEventId()
         ?: zapRequest?.tags?.findFirstEventId()
 
-    // TODO Rewire once LN utils are implemented in KMP
-    val amountInSats = 888888
-//    val amountInSats = (event?.tags?.findFirstBolt11() ?: zapRequest?.tags?.findFirstZapAmount())
-//        ?.let(LnInvoiceUtils::getAmountInSats)
+    val amountInSats = (event?.tags?.findFirstBolt11() ?: zapRequest?.tags?.findFirstZapAmount())
+        ?.let(LnInvoiceUtils::getAmountInSats)
 
     if (receiverId == null || senderId == null || amountInSats == null) return null
 
@@ -426,7 +427,7 @@ private fun takeAsReferencedZapOrNull(
         receiverDisplayName = receiver?.displayName ?: receiver?.handle,
         receiverAvatarCdnImage = receiver?.avatarCdnImage,
         receiverPrimalLegendProfile = receiver?.primalPremiumInfo?.legendProfile,
-        amountInSats = amountInSats.toDouble(),
+        amountInSats = amountInSats.doubleValue(),
         message = zapRequest.content,
         zappedEventId = noteId,
         zappedEventContent = zappedPost?.content,
