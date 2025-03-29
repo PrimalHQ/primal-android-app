@@ -4,7 +4,7 @@ import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.domain.WalletKycLevel
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 
 fun UserAccount.hasWallet(): Boolean {
     return when (walletPreference) {

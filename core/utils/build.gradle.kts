@@ -73,6 +73,7 @@ kotlin {
                 implementation(libs.ktor.http)
 
                 implementation(libs.napier)
+                implementation(libs.bignum)
 
                 // Cryptography
                 implementation(libs.bitcoin.kmp)

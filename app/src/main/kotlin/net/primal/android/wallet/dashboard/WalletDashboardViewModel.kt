@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.map
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import javax.inject.Inject
@@ -28,9 +29,9 @@ import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SatsPurchase
 import net.primal.android.wallet.transactions.list.TransactionListItemDataUi
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 import timber.log.Timber
 
 @HiltViewModel

@@ -11,11 +11,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
 import net.primal.android.wallet.dashboard.ui.FiatAmountTextFromUsd
 import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.repository.isValidExchangeRate
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 
 @Composable
 fun TransactionAmountText(
@@ -42,7 +43,7 @@ fun TransactionAmountText(
                     modifier = Modifier
                         .padding(start = 32.dp)
                         .height(72.dp),
-                    amountInBtc = amountInBtc.toBigDecimal(),
+                    amountInBtc = BigDecimal.parseString(amountInBtc),
                     textSize = 48.sp,
                 )
             }

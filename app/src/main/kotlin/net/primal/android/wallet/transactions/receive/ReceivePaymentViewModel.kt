@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.core.utils.getMaximumUsdAmount
 import net.primal.android.navigation.asUrlEncoded
 import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -21,6 +20,7 @@ import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiS
 import net.primal.android.wallet.transactions.receive.model.PaymentDetails
 import net.primal.android.wallet.transactions.receive.tabs.ReceivePaymentTab
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.getMaximumUsdAmount
 import timber.log.Timber
 
 @HiltViewModel
