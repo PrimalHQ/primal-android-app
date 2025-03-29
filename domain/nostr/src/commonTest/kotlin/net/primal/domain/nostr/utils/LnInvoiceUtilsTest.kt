@@ -1,7 +1,8 @@
-package net.primal.android.wallet.utils
+package net.primal.domain.nostr.utils
 
 import io.kotest.matchers.shouldBe
-import org.junit.Test
+import kotlin.test.Test
+import kotlin.test.assertFailsWith
 
 class LnInvoiceUtilsTest {
 
@@ -34,7 +35,7 @@ class LnInvoiceUtilsTest {
 
         val amount = LnInvoiceUtils.getAmountInSats(validLnInvoice)
 
-        amount.toInt() shouldBe expectedValue
+        amount.intValue() shouldBe expectedValue
     }
 
     @Test
@@ -43,16 +44,20 @@ class LnInvoiceUtilsTest {
 
         val amount = LnInvoiceUtils.getAmountInSats(validLnInvoiceNoAmount)
 
-        amount.toInt() shouldBe expectedValue
+        amount.intValue() shouldBe expectedValue
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test
     fun getAmountInSatsInvalidInvoice() {
-        LnInvoiceUtils.getAmountInSats(invalidLnInvoice)
+        assertFailsWith(IllegalArgumentException::class) {
+            LnInvoiceUtils.getAmountInSats(invalidLnInvoice)
+        }
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test
     fun getAmountInSatsInvalidCharacter() {
-        LnInvoiceUtils.getAmountInSats(invoiceInvalidCharacter)
+        assertFailsWith(IllegalArgumentException::class) {
+            LnInvoiceUtils.getAmountInSats(invoiceInvalidCharacter)
+        }
     }
 }
