@@ -71,9 +71,10 @@ import com.github.alexzhirkevich.customqrgenerator.vector.style.QrVectorFrameSha
 import com.github.alexzhirkevich.customqrgenerator.vector.style.QrVectorLogoPadding
 import com.github.alexzhirkevich.customqrgenerator.vector.style.QrVectorLogoShape
 import com.github.alexzhirkevich.customqrgenerator.vector.style.QrVectorPixelShape
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import com.wajahatkarim.flippable.Flippable
 import com.wajahatkarim.flippable.rememberFlipController
-import java.math.BigDecimal
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
@@ -100,11 +101,11 @@ import net.primal.android.wallet.transactions.receive.tabs.ReceivePaymentTab
 import net.primal.android.wallet.ui.TransactionAmountText
 import net.primal.android.wallet.ui.WalletTabsBar
 import net.primal.android.wallet.ui.WalletTabsHeight
-import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
-import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
-import net.primal.android.wallet.utils.CurrencyConversionUtils.fromUsdToSats
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.CurrencyConversionUtils.formatAsString
+import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
+import net.primal.core.utils.CurrencyConversionUtils.fromUsdToSats
+import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -325,7 +326,7 @@ private fun ReceivePaymentViewer(
                 modifier = Modifier
                     .padding(start = 32.dp)
                     .height(72.dp),
-                amountInBtc = state.paymentDetails.amountInBtc.toBigDecimal(),
+                amountInBtc = BigDecimal.parseString(state.paymentDetails.amountInBtc),
                 textSize = when (state.paymentDetails.amountInBtc.toSats().toString().length) {
                     in (0..8) -> 48.sp
                     else -> 40.sp
@@ -636,6 +637,7 @@ private fun ReceivePaymentEditor(
                                 amountInBtc = it.toULong().toBtc().formatAsString()
                                 amountInUsd = calculateUsdFromBtc(amountInBtc, currentExchangeRate)
                             }
+
                             CurrencyMode.FIAT -> {
                                 amountInUsd = it
                                 amountInBtc = calculateBtcFromUsd(amountInUsd, currentExchangeRate)
@@ -699,15 +701,14 @@ private fun TransactionActionRow(
 }
 
 private fun calculateUsdFromBtc(btc: String, currentExchangeRate: Double?): String {
-    return BigDecimal(btc.toSats().toDouble())
+    return btc.toSats().toDouble()
+        .toBigDecimal()
         .fromSatsToUsd(currentExchangeRate)
-        .stripTrailingZeros()
-        .let { value -> if (value.compareTo(BigDecimal.ZERO) == 0) BigDecimal.ZERO else value }
         .toPlainString()
 }
 
 private fun calculateBtcFromUsd(usd: String, currentExchangeRate: Double?): String {
-    return BigDecimal(usd)
+    return BigDecimal.parseString(usd)
         .fromUsdToSats(currentExchangeRate)
         .toBtc()
         .formatAsString()
