@@ -53,8 +53,6 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.ext.openUriSafely
-import net.primal.android.nostr.utils.Nevent
-import net.primal.android.nostr.utils.Nip19TLV.toNeventString
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
@@ -75,6 +73,8 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.zaps.canZap
 import net.primal.domain.CdnImage
+import net.primal.domain.nostr.Nevent
+import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.NostrEventKind
 
 @OptIn(ExperimentalMaterial3Api::class)

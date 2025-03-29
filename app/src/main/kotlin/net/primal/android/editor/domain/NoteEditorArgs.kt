@@ -2,7 +2,6 @@ package net.primal.android.editor.domain
 
 import androidx.compose.ui.text.input.TextFieldValue
 import kotlinx.serialization.Serializable
-import net.primal.android.nostr.utils.Nevent
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 

@@ -59,8 +59,6 @@ import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
-import net.primal.android.nostr.utils.Nevent
-import net.primal.android.nostr.utils.Nip19TLV.toNeventString
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.NoteContract
@@ -72,6 +70,8 @@ import net.primal.android.notifications.list.ui.NotificationListItem
 import net.primal.android.notifications.list.ui.NotificationUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.zaps.canZap
+import net.primal.domain.nostr.Nevent
+import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.NostrEventKind
 
 @Composable
@@ -421,6 +421,8 @@ private fun NotificationsList(
                         )
                     }
                 }
+
+                else -> {}
             }
         }
 
