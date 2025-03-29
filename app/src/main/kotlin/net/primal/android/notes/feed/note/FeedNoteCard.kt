@@ -73,6 +73,9 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.zaps.canZap
 import net.primal.domain.CdnImage
+import net.primal.domain.nostr.Nevent
+import net.primal.domain.nostr.Nip19TLV.toNeventString
+import net.primal.domain.nostr.NostrEventKind
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -220,7 +223,15 @@ private fun FeedNoteCard(
                     ),
                 )
             },
-            onPostQuoteClick = { noteCallbacks.onNoteQuoteClick?.invoke(data.postId) },
+            onPostQuoteClick = { noteCallbacks.onNoteQuoteClick?.invoke(
+                Nevent(
+                    eventId = data.postId,
+                    kind = NostrEventKind.ShortTextNote.value,
+                    userId = data.authorId,
+                    relays = emptyList()
+                ).
+                toNeventString())
+           },
         )
     }
 
@@ -353,7 +364,14 @@ private fun FeedNoteCard(
                         onPostAction = { postAction ->
                             when (postAction) {
                                 FeedPostAction.Reply -> {
-                                    noteCallbacks.onNoteReplyClick?.invoke(data.postId)
+                                    noteCallbacks.onNoteReplyClick?.invoke(
+                                        Nevent(
+                                            eventId = data.postId,
+                                            kind = NostrEventKind.ShortTextNote.value,
+                                            userId = data.authorId,
+                                            relays = emptyList()
+                                        ).
+                                        toNeventString())
                                 }
 
                                 FeedPostAction.Zap -> {

@@ -102,6 +102,9 @@ import net.primal.android.notes.feed.note.ui.ThreadNoteStatsRow
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.domain.nostr.Nevent
+import net.primal.domain.nostr.Nip19TLV.toNeventString
+import net.primal.domain.nostr.NostrEventKind
 
 @Composable
 fun ThreadScreen(
@@ -145,7 +148,15 @@ fun ThreadScreen(
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
-    val noteEditorViewModel = noteEditorViewModel(args = NoteEditorArgs(referencedNoteId = state.highlightPostId))
+    val noteEditorViewModel = noteEditorViewModel(args = NoteEditorArgs(referencedNoteNevent =
+        Nevent(
+            eventId = state.highlightPostId,
+            kind = NostrEventKind.ShortTextNote.value,
+            userId = state.highlightNote?.authorId,
+            relays = emptyList()
+        ).toNeventString())
+    )
+
     val replyState by noteEditorViewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -238,7 +249,7 @@ fun ThreadScreen(
                     onExpandReply = { mediaUris ->
                         onExpandReply(
                             NoteEditorArgs(
-                                referencedNoteId = state.highlightPostId,
+                                referencedNoteNevent = state.highlightPostId,
                                 mediaUris = mediaUris.map { it.toString() },
                                 content = replyState.content.text,
                                 contentSelectionStart = replyState.content.selection.start,

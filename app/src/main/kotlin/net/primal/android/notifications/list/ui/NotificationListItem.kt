@@ -52,6 +52,9 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme.Sunset
+import net.primal.domain.nostr.Nevent
+import net.primal.domain.nostr.Nip19TLV.toNeventString
+import net.primal.domain.nostr.NostrEventKind
 
 @Composable
 fun NotificationListItem(
@@ -102,7 +105,14 @@ fun NotificationListItem(
         onPostAction = { postAction ->
             if (postData != null) {
                 when (postAction) {
-                    FeedPostAction.Reply -> if (onReplyClick != null) onReplyClick(postData.postId)
+                    FeedPostAction.Reply -> onReplyClick?.invoke(
+                        Nevent(
+                            eventId = postData.postId,
+                            kind = NostrEventKind.ShortTextNote.value,
+                            userId = postData.authorId,
+                            relays = emptyList()
+                        ).toNeventString()
+                    )
                     FeedPostAction.Zap -> onDefaultZapClick?.invoke(postData)
                     FeedPostAction.Like -> onPostLikeClick?.invoke(postData)
                     FeedPostAction.Repost -> onRepostClick?.invoke(postData)
