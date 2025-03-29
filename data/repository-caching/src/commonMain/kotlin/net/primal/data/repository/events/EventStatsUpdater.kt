@@ -1,6 +1,7 @@
 package net.primal.data.repository.events
 
 import kotlinx.datetime.Clock
+import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.data.local.dao.events.EventStats
 import net.primal.data.local.dao.events.EventUserStats
 import net.primal.data.local.dao.events.EventZap
@@ -69,9 +70,7 @@ class EventStatsUpdater(
                     zapSenderDisplayName = zapSender?.displayName,
                     zapSenderInternetIdentifier = zapSender?.internetIdentifier,
                     zapSenderPrimalLegendProfile = zapSender?.primalPremiumInfo?.legendProfile,
-                    // TODO Fix when conversion utils are merged
-                    amountInBtc = 0.toDouble(),
-//                    amountInBtc = amountInSats.toBtc(),
+                    amountInBtc = amountInSats.toBtc(),
                     message = zapComment,
                 ),
             )

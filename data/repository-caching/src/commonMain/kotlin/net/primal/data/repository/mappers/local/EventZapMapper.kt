@@ -1,5 +1,7 @@
 package net.primal.data.repository.mappers.local
 
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.data.local.dao.events.EventZap as EventZapPO
 import net.primal.data.repository.mappers.authorNameUiFriendly
 import net.primal.data.repository.mappers.usernameUiFriendly
@@ -16,9 +18,7 @@ internal fun EventZapPO.asEventZapDO(): EventZapDO {
         zapperInternetIdentifier = this.zapSenderInternetIdentifier?.formatNip05Identifier(),
         zappedAt = this.zapRequestAt,
         message = this.message,
-        // TODO Fix this once currency utils are ported
-        // this.amountInBtc.toBigDecimal().toSats(),
-        amountInSats = 8888.toULong(),
+        amountInSats = this.amountInBtc.toBigDecimal().toSats(),
         zapperLegendProfile = this.zapSenderPrimalLegendProfile,
     )
 }

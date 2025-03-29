@@ -58,6 +58,8 @@ kotlin {
 
                 // Logging
                 implementation(libs.napier)
+
+                implementation(libs.bignum)
             }
         }
 
