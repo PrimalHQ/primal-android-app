@@ -1,18 +1,14 @@
-package net.primal.android.wallet.utils
+package net.primal.domain.nostr.utils
 
-import java.math.BigDecimal
-import java.util.*
-import java.util.regex.Pattern
-import timber.log.Timber
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import io.github.aakira.napier.Napier
+import kotlin.text.get
 
-// Made by Vitor Pamplona
-// https://github.com/vitorpamplona/amethyst/blob/main/quartz/src/main/java/com/vitorpamplona/quartz/encoders/LnInvoiceUtil.kt
 /** based on litecoinj */
 @Suppress("MagicNumber", "UnusedPrivateProperty")
 object LnInvoiceUtils {
-    private val invoicePattern = Pattern.compile(
+    private val invoicePattern = Regex(
         "lnbc((?<amount>\\d+)(?<multiplier>[munp])?)?1[^1\\s]+",
-        Pattern.CASE_INSENSITIVE,
     )
 
     /** The Bech32 character set for encoding.  */
@@ -61,9 +57,7 @@ object LnInvoiceUtils {
     /** Verify a checksum.  */
     private fun verifyChecksum(hrp: String, values: ByteArray): Boolean {
         val hrpExpanded: ByteArray = expandHrp(hrp)
-        val combined = ByteArray(hrpExpanded.size + values.size)
-        System.arraycopy(hrpExpanded, 0, combined, 0, hrpExpanded.size)
-        System.arraycopy(values, 0, combined, hrpExpanded.size, values.size)
+        val combined = hrpExpanded + values
         return polymod(combined) == 1
     }
 
@@ -102,7 +96,7 @@ object LnInvoiceUtils {
             }
             values[i] = CHARSET_REV[c.code]
         }
-        val hrp = invoice.substring(0, pos).lowercase(Locale.ROOT)
+        val hrp = invoice.substring(0, pos).lowercase()
         if (!verifyChecksum(hrp, values)) throw AddressFormatException("Invalid Checksum")
         return true
     }
@@ -117,37 +111,44 @@ object LnInvoiceUtils {
         try {
             decodeUnlimitedLength(invoice) // checksum must match
         } catch (error: AddressFormatException) {
-            Timber.w(error)
+            Napier.w(error) { "cannot decode invoice." }
             throw IllegalArgumentException("Cannot decode invoice: $invoice", error)
         }
 
-        val matcher = invoicePattern.matcher(invoice)
-        require(matcher.matches()) { "Failed to match HRP pattern" }
-        val amountGroup = matcher.group("amount")
-        val multiplierGroup = matcher.group("multiplier")
+        // Use matchEntire to ensure the whole string matches
+        val matchResult = invoicePattern.matchEntire(invoice)
+            ?: throw IllegalArgumentException("Failed to match HRP pattern")
+
+        // Extract named groups
+        val amountGroup = matchResult.groups["amount"]?.value
+        val multiplierGroup = matchResult.groups["multiplier"]?.value
+
         if (amountGroup == null) {
             return BigDecimal.ZERO
         }
-        val amount = BigDecimal(amountGroup)
+
+        val amount = BigDecimal.parseString(amountGroup)
         if (multiplierGroup == null) {
             return amount
         }
-        require(!(multiplierGroup == "p" && amountGroup[amountGroup.length - 1] != '0')) {
+
+        require(!(multiplierGroup == "p" && amountGroup.last() != '0')) {
             "sub-millisatoshi amount"
         }
+
         return amount.multiply(multiplier(multiplierGroup))
     }
 
     fun getAmountInSats(invoice: String): BigDecimal {
-        return getAmount(invoice).multiply(BigDecimal(100000000))
+        return getAmount(invoice).multiply(BigDecimal.fromInt(100_000_000))
     }
 
     private fun multiplier(multiplier: String): BigDecimal {
         return when (multiplier.lowercase()) {
-            "m" -> BigDecimal("0.001")
-            "u" -> BigDecimal("0.000001")
-            "n" -> BigDecimal("0.000000001")
-            "p" -> BigDecimal("0.000000000001")
+            "m" -> BigDecimal.parseString("0.001")
+            "u" -> BigDecimal.parseString("0.000001")
+            "n" -> BigDecimal.parseString("0.000000001")
+            "p" -> BigDecimal.parseString("0.000000000001")
             else -> throw IllegalArgumentException("Invalid multiplier: $multiplier")
         }
     }
@@ -159,17 +160,7 @@ object LnInvoiceUtils {
      *
      * @return the invoice if it was found. null for null input or if no invoice is found
      */
-    fun findInvoice(input: String?): String? {
-        if (input == null) {
-            return null
-        }
-        val matcher = invoicePattern.matcher(input)
-        return if (matcher.find()) {
-            matcher.group()
-        } else {
-            null
-        }
-    }
+    fun findInvoice(input: String?): String? = input?.let { invoicePattern.find(input)?.value }
 
     /**
      * If the string contains an LN invoice, returns a Pair of the start and end
@@ -177,15 +168,8 @@ object LnInvoiceUtils {
      * used to ensure we don't accidentally cut an invoice in the middle when taking
      * only a portion of the available text.
      */
-    fun locateInvoice(input: String?): Pair<Int, Int> {
-        if (input == null) {
-            return Pair(0, 0)
-        }
-        val matcher = invoicePattern.matcher(input)
-        return if (matcher.find()) {
-            Pair(matcher.start(), matcher.end())
-        } else {
-            Pair(0, 0)
-        }
-    }
+    fun locateInvoice(input: String?): Pair<Int, Int> =
+        input?.let { invoicePattern.find(input) }
+            ?.let { it.range.first to it.range.last + 1 }
+            ?: (0 to 0)
 }
