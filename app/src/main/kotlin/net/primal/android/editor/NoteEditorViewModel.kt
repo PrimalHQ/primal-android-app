@@ -114,7 +114,6 @@ class NoteEditorViewModel @AssistedInject constructor(
             setStateFromArgs()
 
             if (referencedNoteNevent != null) {
-                setState { copy(quotedNoteId = referencedNoteNevent.eventId) }
                 fetchNoteThreadFromNetwork(referencedNoteNevent.eventId)
                 observeThreadConversation(referencedNoteNevent.eventId)
                 observeArticleByCommentId(replyToNoteId = referencedNoteNevent.eventId)
