@@ -1,6 +1,5 @@
 package net.primal.android.user.accounts
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -11,10 +10,9 @@ import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import org.junit.Rule
-import org.junit.runner.RunWith
 
+// @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(AndroidJUnit4::class)
 class UserAccountFetcherTest {
 
     @get:Rule
