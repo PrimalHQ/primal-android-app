@@ -9,12 +9,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.manage.relay.PremiumRelayContract.UiEvent
 import net.primal.android.premium.manage.relay.PremiumRelayContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.RelayRepository
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
 @HiltViewModel
@@ -60,7 +60,7 @@ class PremiumRelayViewModel @Inject constructor(
                     userId = activeAccountStore.activeUserId(),
                     url = state.value.relayUrl,
                 )
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)

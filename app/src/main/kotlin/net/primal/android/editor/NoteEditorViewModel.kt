@@ -43,7 +43,6 @@ import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.primal.upload.repository.FileUploadRepository
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
@@ -60,6 +59,7 @@ import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.Nip19TLV.toNprofileString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.Nprofile
+import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.repository.ArticleRepository
 import net.primal.domain.repository.EventRelayHintsRepository
@@ -297,7 +297,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                 resetState()
 
                 sendEffect(SideEffect.PostPublished)
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
                 setErrorState(error = UiState.NoteEditorError.PublishError(cause = error.cause))
             } catch (error: NostrPublishException) {
@@ -419,7 +419,7 @@ class NoteEditorViewModel @AssistedInject constructor(
         } catch (error: UnsuccessfulFileUpload) {
             Timber.w(error)
             updateNoteAttachmentState(attachment = updatedAttachment.copy(uploadError = error))
-        } catch (error: SignException) {
+        } catch (error: SignatureException) {
             Timber.w(error)
             updateNoteAttachmentState(attachment = updatedAttachment.copy(uploadError = error))
         }

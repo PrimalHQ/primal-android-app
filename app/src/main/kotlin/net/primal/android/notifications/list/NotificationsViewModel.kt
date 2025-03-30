@@ -21,7 +21,6 @@ import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
@@ -34,6 +33,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.model.Notification
+import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.repository.NotificationRepository
 import timber.log.Timber
 
@@ -143,7 +143,7 @@ class NotificationsViewModel @Inject constructor(
                 notificationRepository.markAllNotificationsAsSeen(authorization)
             } catch (error: WssException) {
                 Timber.w(error)
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 // If user logs out on notifications screen local account gets cleared
                 // and when this is called there is no authenticated user and signing fails
                 Timber.w(error)

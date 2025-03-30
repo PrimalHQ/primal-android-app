@@ -12,15 +12,15 @@ import kotlinx.coroutines.launch
 import net.primal.android.articles.reads.ReadsScreenContract.UiEvent
 import net.primal.android.articles.reads.ReadsScreenContract.UiState
 import net.primal.android.feeds.list.ui.model.asFeedUi
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
-import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.domain.FeedSpecKind
+import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
+import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.repository.FeedsRepository
 import timber.log.Timber
 
@@ -80,7 +80,7 @@ class ReadsViewModel @Inject constructor(
                     specKind = FeedSpecKind.Reads,
                     givenDefaultFeeds = emptyList(),
                 )
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
@@ -97,9 +97,9 @@ class ReadsViewModel @Inject constructor(
                 retryNetworkCall {
                     feedsRepository.fetchAndPersistArticleFeeds(userId = userId)
                 }
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 Timber.w(error)
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 restoreDefaultReadsFeeds()
                 Timber.w(error)
             } catch (error: WssException) {

@@ -11,14 +11,14 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.core.errors.UiError
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
-import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
 import net.primal.android.thread.articles.ArticleContract.UiEvent
 import net.primal.android.thread.articles.ArticleContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.BookmarkType
 import net.primal.domain.nostr.PublicBookmarksNotFoundException
+import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
+import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.repository.MutedUserRepository
 import net.primal.domain.repository.ProfileRepository
@@ -67,10 +67,10 @@ class ArticleViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToMuteUser(error)) }
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 Timber.w(error)
                 setState { copy(error = UiError.MissingPrivateKey) }
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 Timber.w(error)
                 setState { copy(error = UiError.NostrSignUnauthorized) }
             } catch (error: NostrPublishException) {
@@ -92,10 +92,10 @@ class ArticleViewModel @Inject constructor(
                     eventId = uiEvent.eventId,
                     articleId = uiEvent.articleId,
                 )
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 setState { copy(error = UiError.MissingPrivateKey) }
                 Timber.w(error)
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 setState { copy(error = UiError.NostrSignUnauthorized) }
                 Timber.w(error)
             } catch (error: NostrPublishException) {
@@ -129,10 +129,10 @@ class ArticleViewModel @Inject constructor(
             } catch (error: PublicBookmarksNotFoundException) {
                 Timber.w(error)
                 setState { copy(shouldApproveBookmark = true) }
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 setState { copy(error = UiError.MissingPrivateKey) }
                 Timber.w(error)
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 setState { copy(error = UiError.NostrSignUnauthorized) }
                 Timber.w(error)
             }

@@ -13,9 +13,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.feeds.list.ui.model.asFeedUi
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
-import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.notes.home.HomeFeedContract.UiEvent
 import net.primal.android.notes.home.HomeFeedContract.UiState
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
@@ -27,6 +24,9 @@ import net.primal.core.config.AppConfigHandler
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.domain.FeedSpecKind
+import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
+import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.repository.FeedsRepository
 import timber.log.Timber
 
@@ -79,7 +79,7 @@ class HomeFeedViewModel @Inject constructor(
                     specKind = FeedSpecKind.Notes,
                     givenDefaultFeeds = emptyList(),
                 )
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
@@ -96,9 +96,9 @@ class HomeFeedViewModel @Inject constructor(
                 retryNetworkCall {
                     feedsRepository.fetchAndPersistNoteFeeds(userId = userId)
                 }
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 Timber.w(error)
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 restoreDefaultNoteFeeds()
                 Timber.w(error)
             } catch (error: WssException) {

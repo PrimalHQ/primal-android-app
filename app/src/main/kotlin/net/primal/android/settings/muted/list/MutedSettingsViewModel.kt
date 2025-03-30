@@ -13,11 +13,11 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.settings.muted.list.MutedSettingsContract.UiEvent
 import net.primal.android.settings.muted.list.MutedSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.repository.MutedUserRepository
 import timber.log.Timber
 
@@ -85,7 +85,7 @@ class MutedSettingsViewModel @Inject constructor(
                 setState {
                     copy(error = UiState.MutedSettingsError.FailedToUnmuteUserError(error))
                 }
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
             } catch (error: NostrPublishException) {
                 setState {
