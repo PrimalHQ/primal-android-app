@@ -87,7 +87,7 @@ import net.primal.data.local.serialization.ProfileTypeConverters
         ArticleFeedCrossRef::class,
         HighlightData::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -160,6 +160,7 @@ internal fun buildPrimalDatabase(
 ): PrimalDatabase {
     return builder
         .fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)
+        .fallbackToDestructiveMigration(true)
         .setDriver(driver)
         .setQueryCoroutineContext(queryCoroutineContext)
         .build()
