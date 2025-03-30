@@ -43,6 +43,7 @@ import net.primal.android.core.utils.shortened
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.model.asNeventString
 import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.notes.feed.note.ui.FeedNoteActionsRow
 import net.primal.android.notes.feed.note.ui.NoteContent
@@ -52,9 +53,6 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme.Sunset
-import net.primal.domain.nostr.Nevent
-import net.primal.domain.nostr.Nip19TLV.toNeventString
-import net.primal.domain.nostr.NostrEventKind
 
 @Composable
 fun NotificationListItem(
@@ -106,12 +104,7 @@ fun NotificationListItem(
             if (postData != null) {
                 when (postAction) {
                     FeedPostAction.Reply -> onReplyClick?.invoke(
-                        Nevent(
-                            eventId = postData.postId,
-                            kind = NostrEventKind.ShortTextNote.value,
-                            userId = postData.authorId,
-                            relays = emptyList(),
-                        ).toNeventString(),
+                        postData.asNeventString(),
                     )
                     FeedPostAction.Zap -> onDefaultZapClick?.invoke(postData)
                     FeedPostAction.Like -> onPostLikeClick?.invoke(postData)

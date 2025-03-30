@@ -15,7 +15,10 @@ import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.domain.CdnImage
+import net.primal.domain.nostr.Nevent
+import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrEventKind
 
 data class FeedPostUi(
     val postId: String,
@@ -68,4 +71,13 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
         authorLegendaryCustomization = this.author?.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
         authorBlossoms = this.author?.blossoms ?: emptyList(),
     )
+}
+
+fun FeedPostUi.asNeventString(): String {
+    return Nevent(
+        eventId = this.postId,
+        kind = NostrEventKind.ShortTextNote.value,
+        userId = this.authorId,
+        relays = emptyList(),
+    ).toNeventString()
 }

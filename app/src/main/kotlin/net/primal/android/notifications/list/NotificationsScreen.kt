@@ -61,6 +61,7 @@ import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.model.asNeventString
 import net.primal.android.notes.feed.note.NoteContract
 import net.primal.android.notes.feed.note.NoteViewModel
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
@@ -70,9 +71,6 @@ import net.primal.android.notifications.list.ui.NotificationListItem
 import net.primal.android.notifications.list.ui.NotificationUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.zaps.canZap
-import net.primal.domain.nostr.Nevent
-import net.primal.domain.nostr.Nip19TLV.toNeventString
-import net.primal.domain.nostr.NostrEventKind
 
 @Composable
 fun NotificationsScreen(
@@ -225,13 +223,7 @@ fun NotificationsScreen(
                 },
                 onPostQuoteClick = {
                     noteCallbacks.onNoteQuoteClick?.invoke(
-                        Nevent(
-                            eventId = it.postId,
-                            kind = NostrEventKind.ShortTextNote.value,
-                            userId = it.authorId,
-                            relays = emptyList(),
-                        )
-                            .toNeventString(),
+                        it.asNeventString(),
                     )
                 },
                 onBookmarkClick = {
@@ -422,8 +414,6 @@ private fun NotificationsList(
                         )
                     }
                 }
-
-                else -> {}
             }
         }
 

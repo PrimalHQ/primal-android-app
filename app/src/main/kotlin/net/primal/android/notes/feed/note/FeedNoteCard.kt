@@ -57,6 +57,7 @@ import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.model.asNeventString
 import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.ui.FeedNoteActionsRow
@@ -73,9 +74,6 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.zaps.canZap
 import net.primal.domain.CdnImage
-import net.primal.domain.nostr.Nevent
-import net.primal.domain.nostr.Nip19TLV.toNeventString
-import net.primal.domain.nostr.NostrEventKind
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -225,13 +223,7 @@ private fun FeedNoteCard(
             },
             onPostQuoteClick = {
                 noteCallbacks.onNoteQuoteClick?.invoke(
-                    Nevent(
-                        eventId = data.postId,
-                        kind = NostrEventKind.ShortTextNote.value,
-                        userId = data.authorId,
-                        relays = emptyList(),
-                    )
-                        .toNeventString(),
+                    data.asNeventString(),
                 )
             },
         )
@@ -367,13 +359,7 @@ private fun FeedNoteCard(
                             when (postAction) {
                                 FeedPostAction.Reply -> {
                                     noteCallbacks.onNoteReplyClick?.invoke(
-                                        Nevent(
-                                            eventId = data.postId,
-                                            kind = NostrEventKind.ShortTextNote.value,
-                                            userId = data.authorId,
-                                            relays = emptyList(),
-                                        )
-                                            .toNeventString(),
+                                        data.asNeventString(),
                                     )
                                 }
 
