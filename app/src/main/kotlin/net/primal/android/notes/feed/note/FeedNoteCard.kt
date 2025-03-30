@@ -223,15 +223,17 @@ private fun FeedNoteCard(
                     ),
                 )
             },
-            onPostQuoteClick = { noteCallbacks.onNoteQuoteClick?.invoke(
-                Nevent(
-                    eventId = data.postId,
-                    kind = NostrEventKind.ShortTextNote.value,
-                    userId = data.authorId,
-                    relays = emptyList()
-                ).
-                toNeventString())
-           },
+            onPostQuoteClick = {
+                noteCallbacks.onNoteQuoteClick?.invoke(
+                    Nevent(
+                        eventId = data.postId,
+                        kind = NostrEventKind.ShortTextNote.value,
+                        userId = data.authorId,
+                        relays = emptyList(),
+                    )
+                        .toNeventString(),
+                )
+            },
         )
     }
 
@@ -369,9 +371,10 @@ private fun FeedNoteCard(
                                             eventId = data.postId,
                                             kind = NostrEventKind.ShortTextNote.value,
                                             userId = data.authorId,
-                                            relays = emptyList()
-                                        ).
-                                        toNeventString())
+                                            relays = emptyList(),
+                                        )
+                                            .toNeventString(),
+                                    )
                                 }
 
                                 FeedPostAction.Zap -> {

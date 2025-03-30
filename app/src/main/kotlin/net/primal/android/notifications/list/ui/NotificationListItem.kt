@@ -110,8 +110,8 @@ fun NotificationListItem(
                             eventId = postData.postId,
                             kind = NostrEventKind.ShortTextNote.value,
                             userId = postData.authorId,
-                            relays = emptyList()
-                        ).toNeventString()
+                            relays = emptyList(),
+                        ).toNeventString(),
                     )
                     FeedPostAction.Zap -> onDefaultZapClick?.invoke(postData)
                     FeedPostAction.Like -> onPostLikeClick?.invoke(postData)

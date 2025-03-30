@@ -148,13 +148,16 @@ fun ThreadScreen(
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
-    val noteEditorViewModel = noteEditorViewModel(args = NoteEditorArgs(referencedNoteNevent =
-        Nevent(
-            eventId = state.highlightPostId,
-            kind = NostrEventKind.ShortTextNote.value,
-            userId = state.highlightNote?.authorId,
-            relays = emptyList()
-        ).toNeventString())
+    val noteEditorViewModel = noteEditorViewModel(
+        args = NoteEditorArgs(
+            referencedNoteNevent =
+            Nevent(
+                eventId = state.highlightPostId,
+                kind = NostrEventKind.ShortTextNote.value,
+                userId = state.highlightNote?.authorId,
+                relays = emptyList(),
+            ).toNeventString(),
+        ),
     )
 
     val replyState by noteEditorViewModel.state.collectAsState()
@@ -249,7 +252,13 @@ fun ThreadScreen(
                     onExpandReply = { mediaUris ->
                         onExpandReply(
                             NoteEditorArgs(
-                                referencedNoteNevent = state.highlightPostId,
+                                referencedNoteNevent = Nevent(
+                                    eventId = state.highlightPostId,
+                                    kind = NostrEventKind.ShortTextNote.value,
+                                    userId = state.highlightNote?.authorId,
+                                    relays = emptyList(),
+                                )
+                                    .toNeventString(),
                                 mediaUris = mediaUris.map { it.toString() },
                                 content = replyState.content.text,
                                 contentSelectionStart = replyState.content.selection.start,

@@ -229,9 +229,10 @@ fun NotificationsScreen(
                             eventId = it.postId,
                             kind = NostrEventKind.ShortTextNote.value,
                             userId = it.authorId,
-                            relays = emptyList()
-                        ).
-                        toNeventString())
+                            relays = emptyList(),
+                        )
+                            .toNeventString(),
+                    )
                 },
                 onBookmarkClick = {
                     noteEventPublisher(NoteContract.UiEvent.BookmarkAction(noteId = it.postId))

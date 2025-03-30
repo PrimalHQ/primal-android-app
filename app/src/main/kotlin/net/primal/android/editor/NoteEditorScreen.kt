@@ -174,7 +174,7 @@ private fun NoteEditorContract.UiState.resolvePublishNoteButtonText() =
     when {
         publishing -> if (isQuoting) {
             stringResource(id = R.string.note_editor_quoting_publishing_button)
-        }  else if (isReply) {
+        } else if (isReply) {
             stringResource(id = R.string.note_editor_reply_publishing_button)
         } else {
             stringResource(id = R.string.note_editor_post_publishing_button)
