@@ -3,7 +3,6 @@ package net.primal.android.wallet.transactions.send.create
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -35,6 +34,7 @@ import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.core.utils.CurrencyConversionUtils.fromUsdToSats
+import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.getMaximumUsdAmount
 import net.primal.domain.model.ProfileData
@@ -86,7 +86,8 @@ class CreateTransactionViewModel @Inject constructor(
                     copy(
                         currentExchangeRate = it,
                         maximumUsdAmount = getMaximumUsdAmount(it),
-                        amountInUsd = BigDecimal.parseString(_state.value.transaction.amountSats)
+                        amountInUsd = _state.value.transaction.amountSats
+                            .toBigDecimal()
                             .fromSatsToUsd(it)
                             .toPlainString(),
                     )
@@ -143,7 +144,7 @@ class CreateTransactionViewModel @Inject constructor(
                 setState {
                     copy(
                         transaction = transaction.copy(amountSats = amount),
-                        amountInUsd = BigDecimal.parseString(amount)
+                        amountInUsd = amount.toBigDecimal()
                             .fromSatsToUsd(state.value.currentExchangeRate)
                             .toPlainString(),
                     )
@@ -155,7 +156,7 @@ class CreateTransactionViewModel @Inject constructor(
                     copy(
                         amountInUsd = amount,
                         transaction = transaction.copy(
-                            amountSats = BigDecimal.parseString(amount)
+                            amountSats = amount.toBigDecimal()
                                 .fromUsdToSats(state.value.currentExchangeRate)
                                 .toString(),
                         ),
