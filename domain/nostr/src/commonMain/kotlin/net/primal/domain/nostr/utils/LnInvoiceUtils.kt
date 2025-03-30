@@ -3,6 +3,7 @@ package net.primal.domain.nostr.utils
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import io.github.aakira.napier.Napier
 import kotlin.text.get
+import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
 
 /** based on litecoinj */
 @Suppress("MagicNumber", "UnusedPrivateProperty")
@@ -127,7 +128,7 @@ object LnInvoiceUtils {
             return BigDecimal.ZERO
         }
 
-        val amount = BigDecimal.parseString(amountGroup)
+        val amount = amountGroup.toBigDecimal()
         if (multiplierGroup == null) {
             return amount
         }
@@ -145,10 +146,10 @@ object LnInvoiceUtils {
 
     private fun multiplier(multiplier: String): BigDecimal {
         return when (multiplier.lowercase()) {
-            "m" -> BigDecimal.parseString("0.001")
-            "u" -> BigDecimal.parseString("0.000001")
-            "n" -> BigDecimal.parseString("0.000000001")
-            "p" -> BigDecimal.parseString("0.000000000001")
+            "m" -> "0.001".toBigDecimal()
+            "u" -> "0.000001".toBigDecimal()
+            "n" -> "0.000000001".toBigDecimal()
+            "p" -> "0.000000000001".toBigDecimal()
             else -> throw IllegalArgumentException("Invalid multiplier: $multiplier")
         }
     }

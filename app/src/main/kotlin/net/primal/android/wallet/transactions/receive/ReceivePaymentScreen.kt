@@ -104,6 +104,7 @@ import net.primal.android.wallet.ui.WalletTabsHeight
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.core.utils.CurrencyConversionUtils.fromUsdToSats
+import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 
@@ -326,7 +327,7 @@ private fun ReceivePaymentViewer(
                 modifier = Modifier
                     .padding(start = 32.dp)
                     .height(72.dp),
-                amountInBtc = BigDecimal.parseString(state.paymentDetails.amountInBtc),
+                amountInBtc = state.paymentDetails.amountInBtc.toBigDecimal(),
                 textSize = when (state.paymentDetails.amountInBtc.toSats().toString().length) {
                     in (0..8) -> 48.sp
                     else -> 40.sp
@@ -708,7 +709,7 @@ private fun calculateUsdFromBtc(btc: String, currentExchangeRate: Double?): Stri
 }
 
 private fun calculateBtcFromUsd(usd: String, currentExchangeRate: Double?): String {
-    return BigDecimal.parseString(usd)
+    return usd.toBigDecimal()
         .fromUsdToSats(currentExchangeRate)
         .toBtc()
         .formatAsString()
