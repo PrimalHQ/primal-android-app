@@ -2,6 +2,7 @@ package net.primal.data.repository.messages.processors
 
 import io.github.aakira.napier.Napier
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.isNostrUri
 import net.primal.data.local.dao.messages.DirectMessageData
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.local.db.withTransaction
@@ -13,7 +14,6 @@ import net.primal.data.repository.feed.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.remote.extractNoteId
 import net.primal.data.repository.mappers.remote.extractProfileId
 import net.primal.data.repository.mappers.remote.flatMapMessagesAsEventUriPO
-import net.primal.data.repository.mappers.remote.isNostrUri
 import net.primal.data.repository.mappers.remote.mapAsMessageDataPO
 import net.primal.data.repository.mappers.remote.mapAsPostDataPO
 import net.primal.data.repository.mappers.remote.mapAsProfileDataPO

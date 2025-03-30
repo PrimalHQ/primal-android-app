@@ -13,8 +13,7 @@ fun String.parseUris(includeNostrUris: Boolean = true): List<String> {
     val detectedUrls = this.detectUrls()
 
     return if (includeNostrUris) {
-        // TODO: handle nostrUris
-        detectedUrls + emptyList()
+        this.parseNostrUris() + detectedUrls
     } else {
         detectedUrls
     }

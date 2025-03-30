@@ -8,8 +8,8 @@ import net.primal.domain.nostr.Nip19TLV.readAsString
 import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.Nip19TLV.toNprofileString
-import net.primal.domain.nostr.cryptography.toHex
-import net.primal.domain.nostr.cryptography.toNpub
+import net.primal.core.utils.toHex
+import net.primal.core.utils.toNpub
 
 class Nip19TLVTest {
 
