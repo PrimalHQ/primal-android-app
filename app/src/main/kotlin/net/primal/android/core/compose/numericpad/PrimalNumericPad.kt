@@ -31,6 +31,7 @@ import net.primal.android.core.compose.numericpad.PrimalNumericPadContract.UiEve
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.domain.CurrencyMode
+import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
 
 private val PadButtonMargin = 16.dp
 
@@ -59,7 +60,7 @@ fun PrimalNumericPad(
 
     val onNumberClick: (Int) -> Unit = {
         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-        val newAmount = BigDecimal.parseString((amountInSats + it.toString()))
+        val newAmount = (amountInSats + it.toString()).toBigDecimal()
         when (currencyMode) {
             CurrencyMode.FIAT -> {
                 if (maximumUsdAmount == null || newAmount <= maximumUsdAmount) {

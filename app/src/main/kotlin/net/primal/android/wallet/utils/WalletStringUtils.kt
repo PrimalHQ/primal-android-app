@@ -3,10 +3,10 @@
 package net.primal.android.wallet.utils
 
 import android.util.Patterns
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import net.primal.android.navigation.asUrlDecoded
 import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.core.utils.CurrencyConversionUtils.fromUsdToSats
+import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
 import org.bitcoinj.core.Address
 import org.bitcoinj.params.MainNetParams
 
@@ -85,13 +85,13 @@ fun String.parseBitcoinPaymentInstructions(): BitcoinPaymentInstruction? {
 }
 
 fun String.parseSatsToUsd(currentExchangeRate: Double?): String {
-    return BigDecimal.parseString(this)
+    return this.toBigDecimal()
         .fromSatsToUsd(currentExchangeRate)
         .toPlainString()
 }
 
 fun String.parseUsdToSats(currentExchangeRate: Double?): String {
-    return BigDecimal.parseString(this)
+    return this.toBigDecimal()
         .fromUsdToSats(currentExchangeRate)
         .toString()
 }
