@@ -49,7 +49,7 @@ fun String.isNostrUri(): Boolean {
         uri.startsWith(NEVENT) || uri.startsWith(NPROFILE)
 }
 
-fun String.cleanNostrUris(): String =
+fun String.clearAtSignFromNostrUris(): String =
     this
         .replace("@$NOSTR", NOSTR)
         .replace("@$NPUB", NPUB)
