@@ -14,7 +14,6 @@ import kotlinx.coroutines.sync.withLock
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.nostr.ext.takeContentOrNull
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.manage.content.PremiumContentBackupContract.UiEvent
 import net.primal.android.premium.manage.content.PremiumContentBackupContract.UiState
 import net.primal.android.premium.manage.content.api.model.BroadcastingStatus
@@ -30,6 +29,7 @@ import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.data.remote.model.AppSpecificDataRequest
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
 @HiltViewModel
@@ -65,7 +65,7 @@ class PremiumContentBackupViewModel @Inject constructor(
                 handleBroadcastStatus(status)
             } catch (error: WssException) {
                 Timber.e(error)
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.e(error)
             }
         }
@@ -90,7 +90,7 @@ class PremiumContentBackupViewModel @Inject constructor(
                 }
             } catch (error: WssException) {
                 Timber.e(error)
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.e(error)
             }
         }
@@ -154,7 +154,7 @@ class PremiumContentBackupViewModel @Inject constructor(
                 if (monitorBroadcasting == null) {
                     try {
                         monitorBroadcasting = subscribeToBroadcastMonitor(userId = activeAccountStore.activeUserId())
-                    } catch (error: SignException) {
+                    } catch (error: SignatureException) {
                         Timber.w(error)
                     }
                 }
@@ -191,7 +191,7 @@ class PremiumContentBackupViewModel @Inject constructor(
                 }
             } catch (error: WssException) {
                 Timber.e(error)
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.e(error)
             }
         }
@@ -203,7 +203,7 @@ class PremiumContentBackupViewModel @Inject constructor(
                 broadcastRepository.cancelBroadcast(userId = activeAccountStore.activeUserId())
             } catch (error: WssException) {
                 Timber.e(error)
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.e(error)
             }
         }

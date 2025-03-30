@@ -14,7 +14,6 @@ import kotlinx.coroutines.launch
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.relays.RelaysSocketManager
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.settings.network.NetworkSettingsContract.UiEvent
 import net.primal.android.settings.network.NetworkSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -23,6 +22,7 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.core.config.AppConfigHandler
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
 @HiltViewModel
@@ -141,7 +141,7 @@ class NetworkSettingsViewModel @Inject constructor(
             changeRelayList { userId ->
                 try {
                     relayRepository.bootstrapUserRelays(userId = userId)
-                } catch (error: SignException) {
+                } catch (error: SignatureException) {
                     Timber.w(error)
                 } catch (error: NostrPublishException) {
                     Timber.w(error)
@@ -174,7 +174,7 @@ class NetworkSettingsViewModel @Inject constructor(
         } catch (error: WssException) {
             Timber.w(error)
             setState { copy(error = UiState.NetworkSettingsError.FailedToAddRelay(error)) }
-        } catch (error: SignException) {
+        } catch (error: SignatureException) {
             Timber.w(error)
             setState { copy(error = UiState.NetworkSettingsError.FailedToAddRelay(error)) }
         } catch (error: NostrPublishException) {

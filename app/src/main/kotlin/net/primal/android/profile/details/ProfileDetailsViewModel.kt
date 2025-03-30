@@ -27,8 +27,6 @@ import net.primal.android.navigation.primalName
 import net.primal.android.navigation.profileId
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.extractProfileId
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
-import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
@@ -44,6 +42,8 @@ import net.primal.domain.FEED_KIND_USER
 import net.primal.domain.FeedSpecKind
 import net.primal.domain.buildLatestNotesUserFeedSpec
 import net.primal.domain.nostr.Nip19TLV
+import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
+import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.repository.FeedsRepository
 import net.primal.domain.repository.MutedUserRepository
@@ -376,11 +376,11 @@ class ProfileDetailsViewModel @Inject constructor(
                 Timber.w(error)
                 updateStateProfileAsUnfollowedAndClearApprovalFlag()
                 setErrorState(error = UiError.FailedToFollowUser(error))
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 Timber.w(error)
                 updateStateProfileAsUnfollowedAndClearApprovalFlag()
                 setErrorState(error = UiError.MissingPrivateKey)
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 Timber.w(error)
                 updateStateProfileAsUnfollowedAndClearApprovalFlag()
                 setErrorState(error = UiError.NostrSignUnauthorized)
@@ -414,11 +414,11 @@ class ProfileDetailsViewModel @Inject constructor(
                 Timber.w(error)
                 updateStateProfileAsFollowedAndClearApprovalFlag()
                 setErrorState(error = UiError.FailedToUnfollowUser(error))
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 Timber.w(error)
                 updateStateProfileAsFollowedAndClearApprovalFlag()
                 setErrorState(error = UiError.MissingPrivateKey)
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 Timber.w(error)
                 updateStateProfileAsFollowedAndClearApprovalFlag()
                 setErrorState(error = UiError.NostrSignUnauthorized)
@@ -455,10 +455,10 @@ class ProfileDetailsViewModel @Inject constructor(
                 )
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
                 setEffect(ProfileDetailsContract.SideEffect.ProfileFeedAdded)
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 Timber.w(error)
                 setErrorState(error = UiError.MissingPrivateKey)
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 Timber.w(error)
                 setErrorState(error = UiError.NostrSignUnauthorized)
             } catch (error: WssException) {
@@ -478,10 +478,10 @@ class ProfileDetailsViewModel @Inject constructor(
                 )
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
                 setEffect(ProfileDetailsContract.SideEffect.ProfileFeedRemoved)
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 Timber.w(error)
                 setErrorState(error = UiError.MissingPrivateKey)
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 Timber.w(error)
                 setErrorState(error = UiError.NostrSignUnauthorized)
             } catch (error: WssException) {
@@ -501,10 +501,10 @@ class ProfileDetailsViewModel @Inject constructor(
                     )
                 }
                 setState { copy(isProfileMuted = true) }
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 Timber.w(error)
                 setErrorState(error = UiError.MissingPrivateKey)
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 Timber.w(error)
                 setErrorState(error = UiError.NostrSignUnauthorized)
             } catch (error: NostrPublishException) {
@@ -529,10 +529,10 @@ class ProfileDetailsViewModel @Inject constructor(
                     )
                 }
                 setState { copy(isProfileMuted = false) }
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 Timber.w(error)
                 setErrorState(error = UiError.MissingPrivateKey)
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 Timber.w(error)
                 setErrorState(error = UiError.NostrSignUnauthorized)
             } catch (error: NostrPublishException) {
@@ -556,10 +556,10 @@ class ProfileDetailsViewModel @Inject constructor(
                     profileId = event.profileId,
                     eventId = event.noteId,
                 )
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 Timber.w(error)
                 setErrorState(error = UiError.MissingPrivateKey)
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 Timber.w(error)
                 setErrorState(error = UiError.NostrSignUnauthorized)
             } catch (error: NostrPublishException) {

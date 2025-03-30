@@ -5,13 +5,13 @@ import dagger.assisted.AssistedInject
 import java.time.Instant
 import kotlin.time.Duration
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.repository.PublicBookmarksRepository
 import timber.log.Timber
 
@@ -39,7 +39,7 @@ class UserDataUpdater @AssistedInject constructor(
                 lastTimeFetched = Instant.now()
             } catch (error: WssException) {
                 Timber.w(error)
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
             }
         }

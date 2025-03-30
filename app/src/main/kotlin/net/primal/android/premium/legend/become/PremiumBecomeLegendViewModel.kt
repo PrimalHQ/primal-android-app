@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.navigation.FROM_ORIGIN_PREMIUM_BADGE
 import net.primal.android.navigation.buyingPremiumFromOrigin
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.Companion.LEGEND_THRESHOLD_IN_USD
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.UiEvent
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.UiState
@@ -24,6 +23,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.utils.parseBitcoinPaymentInstructions
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
 @HiltViewModel
@@ -145,7 +145,7 @@ class PremiumBecomeLegendViewModel @Inject constructor(
                         exchangeBtcUsdRate = btcRate,
                     )
                 }
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.e(error)
             } catch (error: WssException) {
                 Timber.e(error)
@@ -175,7 +175,7 @@ class PremiumBecomeLegendViewModel @Inject constructor(
                 updatePaymentAmount(amount = minAmount)
 
                 startPurchaseMonitor()
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.e(error)
             } catch (error: WssException) {
                 Timber.e(error)
