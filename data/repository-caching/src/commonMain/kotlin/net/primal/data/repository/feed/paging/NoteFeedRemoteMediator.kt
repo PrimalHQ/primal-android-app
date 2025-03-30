@@ -259,19 +259,21 @@ internal class NoteFeedRemoteMediator(
 //    }
 
     private suspend fun findLastFeedPostRemoteKey(state: PagingState<Int, FeedPost>): FeedPostRemoteKey? {
-        val lastItem = state.lastItemOrNull()
-            ?: oldestFeedPostInDatabaseOrNull()
-            ?: throw NoSuchFeedPostException()
+        val (lastItemId, lastItemRepostId) =
+            state.lastItemOrNull()?.let {
+                (state.lastItemOrNull()?.data?.postId to state.lastItemOrNull()?.data?.repostId)
+            } ?: oldestFeedPostInDatabaseOrNull()
+                ?: throw NoSuchFeedPostException()
 
         return withContext(dispatcherProvider.io()) {
             Napier.i(
-                "feed_spec $feedSpec looking for lastItem postId=${lastItem.data.postId}" +
-                    " and repostId=${lastItem.data.repostId}",
+                "feed_spec $feedSpec looking for lastItem postId=$lastItemId" +
+                    " and repostId=$lastItemRepostId",
             )
             database.feedPostsRemoteKeys().find(
                 ownerId = userId,
-                postId = lastItem.data.postId,
-                repostId = lastItem.data.repostId,
+                postId = lastItemId,
+                repostId = lastItemRepostId,
                 directive = feedSpec,
             )
         }
@@ -279,9 +281,7 @@ internal class NoteFeedRemoteMediator(
 
     private suspend fun oldestFeedPostInDatabaseOrNull() =
         withContext(dispatcherProvider.io()) {
-            database.feedPosts()
-                .oldestFeedPosts(query = feedQueryBuilder.oldestFeedPostsQuery(limit = 1))
-                .firstOrNull()
+            database.feedsConnections().findLastBySpec(ownerId = userId, spec = feedSpec)?.let { it.eventId to null }
         }
 
     private inner class NoSuchFeedPostException : RuntimeException()

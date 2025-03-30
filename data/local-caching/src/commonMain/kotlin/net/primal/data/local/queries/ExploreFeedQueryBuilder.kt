@@ -38,7 +38,7 @@ class ExploreFeedQueryBuilder(
     }
 
     private val orderByClause = when {
-        else -> "ORDER BY FeedPostDataCrossRef.orderIndex"
+        else -> "ORDER BY FeedPostDataCrossRef.position"
     }
 
     override fun feedQuery(): RoomRawQuery {
