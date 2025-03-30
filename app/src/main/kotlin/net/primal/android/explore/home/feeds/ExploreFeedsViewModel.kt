@@ -13,11 +13,11 @@ import kotlinx.coroutines.launch
 import net.primal.android.explore.home.feeds.ExploreFeedsContract.UiState
 import net.primal.android.feeds.DvmFeedListHandler
 import net.primal.android.feeds.dvm.ui.DvmFeedUi
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.DvmFeed
 import net.primal.domain.buildSpec
+import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.repository.FeedRepository
 import net.primal.domain.repository.FeedsRepository
 import timber.log.Timber
@@ -87,7 +87,7 @@ class ExploreFeedsViewModel @Inject constructor(
                     )
                 }
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
@@ -105,7 +105,7 @@ class ExploreFeedsViewModel @Inject constructor(
                     )
                 }
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)

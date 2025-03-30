@@ -15,7 +15,6 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.navigation.draftTransaction
 import net.primal.android.navigation.lnbc
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.scanner.analysis.WalletTextParser
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -38,6 +37,7 @@ import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.getMaximumUsdAmount
 import net.primal.domain.model.ProfileData
+import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 
@@ -211,7 +211,7 @@ class CreateTransactionViewModel @Inject constructor(
                         )
                     }
                 }
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
@@ -241,7 +241,7 @@ class CreateTransactionViewModel @Inject constructor(
             } else {
                 Timber.w("Unable to parse text. [text=$text]")
             }
-        } catch (error: SignException) {
+        } catch (error: SignatureException) {
             Timber.w(error)
         } catch (error: WssException) {
             Timber.w(error)
@@ -307,7 +307,7 @@ class CreateTransactionViewModel @Inject constructor(
                     ),
                 )
                 setState { copy(transaction = transaction.copy(status = DraftTxStatus.Sent)) }
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
                 setState {
                     copy(

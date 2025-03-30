@@ -18,7 +18,6 @@ import net.primal.android.crypto.bech32ToHexOrThrow
 import net.primal.android.navigation.profileId
 import net.primal.android.nostr.ext.extractNoteId
 import net.primal.android.nostr.ext.extractProfileId
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.profile.qr.ProfileQrCodeContract.SideEffect
 import net.primal.android.profile.qr.ProfileQrCodeContract.UiEvent
 import net.primal.android.profile.qr.ProfileQrCodeContract.UiState
@@ -27,6 +26,7 @@ import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 
@@ -109,7 +109,7 @@ class ProfileQrCodeViewModel @Inject constructor(
             } else {
                 Timber.w("Unable to parse text. [text = $text]")
             }
-        } catch (error: SignException) {
+        } catch (error: SignatureException) {
             Timber.w(error)
         } catch (error: WssException) {
             Timber.w(error)

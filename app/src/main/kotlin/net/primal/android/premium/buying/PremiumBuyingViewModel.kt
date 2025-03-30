@@ -19,7 +19,6 @@ import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.navigation.FROM_ORIGIN_PREMIUM_BADGE
 import net.primal.android.navigation.buyingPremiumFromOrigin
 import net.primal.android.navigation.extendExistingPremiumName
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.buying.PremiumBuyingContract.PremiumStage
 import net.primal.android.premium.buying.PremiumBuyingContract.SideEffect
 import net.primal.android.premium.buying.PremiumBuyingContract.UiEvent
@@ -33,6 +32,7 @@ import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.InAppPurchaseException
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 
@@ -167,7 +167,7 @@ class PremiumBuyingViewModel @Inject constructor(
                             purchase = purchase,
                         )
                         setState { copy(stage = PremiumStage.Success) }
-                    } catch (error: SignException) {
+                    } catch (error: SignatureException) {
                         Timber.w(error)
                     } catch (error: WssException) {
                         Timber.e(error)
@@ -219,7 +219,7 @@ class PremiumBuyingViewModel @Inject constructor(
                     )
                     setState { copy(stage = PremiumStage.Success) }
                     premiumRepository.fetchMembershipStatus(userId = userId)
-                } catch (error: SignException) {
+                } catch (error: SignatureException) {
                     Timber.e(error)
                 } catch (error: WssException) {
                     Timber.e(error)

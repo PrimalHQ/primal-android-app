@@ -31,8 +31,6 @@ import net.primal.android.nostr.ext.isNote
 import net.primal.android.nostr.ext.isNoteUri
 import net.primal.android.nostr.ext.nostrUriToNoteId
 import net.primal.android.nostr.ext.nostrUriToPubkey
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
-import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.thread.articles.details.ArticleDetailsContract.SideEffect
 import net.primal.android.thread.articles.details.ArticleDetailsContract.UiEvent
@@ -52,6 +50,8 @@ import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.asATagValue
+import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
+import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.repository.ArticleRepository
 import net.primal.domain.repository.EventInteractionRepository
@@ -297,10 +297,10 @@ class ArticleDetailsViewModel @Inject constructor(
                     Timber.w(error)
                 } catch (error: MissingRelaysException) {
                     Timber.w(error)
-                } catch (error: MissingPrivateKey) {
+                } catch (error: SigningKeyNotFoundException) {
                     setState { copy(error = UiError.MissingPrivateKey) }
                     Timber.w(error)
-                } catch (error: NostrSignUnauthorized) {
+                } catch (error: SigningRejectedException) {
                     setState { copy(error = UiError.NostrSignUnauthorized) }
                     Timber.w(error)
                 }
@@ -327,10 +327,10 @@ class ArticleDetailsViewModel @Inject constructor(
                     Timber.w(error)
                 } catch (error: MissingRelaysException) {
                     Timber.w(error)
-                } catch (error: MissingPrivateKey) {
+                } catch (error: SigningKeyNotFoundException) {
                     setState { copy(error = UiError.MissingPrivateKey) }
                     Timber.w(error)
-                } catch (error: NostrSignUnauthorized) {
+                } catch (error: SigningRejectedException) {
                     setState { copy(error = UiError.NostrSignUnauthorized) }
                     Timber.w(error)
                 }
@@ -378,7 +378,7 @@ class ArticleDetailsViewModel @Inject constructor(
                             }
                         }
 
-                        is NostrSignUnauthorized -> {
+                        is SigningRejectedException -> {
                             Timber.e(error)
                             setState {
                                 copy(
@@ -388,7 +388,7 @@ class ArticleDetailsViewModel @Inject constructor(
                             }
                         }
 
-                        is MissingPrivateKey -> {
+                        is SigningKeyNotFoundException -> {
                             Timber.e(error)
                             setState { copy(isAuthorFollowed = isAuthorFollowed, error = UiError.MissingPrivateKey) }
                         }
@@ -441,10 +441,10 @@ class ArticleDetailsViewModel @Inject constructor(
             )
             setState { copy(isHighlighted = true) }
             onSuccess?.invoke(highlightNevent)
-        } catch (error: MissingPrivateKey) {
+        } catch (error: SigningKeyNotFoundException) {
             setState { copy(error = UiError.MissingPrivateKey) }
             Timber.w(error)
-        } catch (error: NostrSignUnauthorized) {
+        } catch (error: SigningRejectedException) {
             setState { copy(error = UiError.NostrSignUnauthorized) }
             Timber.w(error)
         } catch (error: NostrPublishException) {
@@ -476,10 +476,10 @@ class ArticleDetailsViewModel @Inject constructor(
                 )
 
                 setState { copy(isHighlighted = false) }
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 setState { copy(error = UiError.MissingPrivateKey) }
                 Timber.w(error)
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 setState { copy(error = UiError.NostrSignUnauthorized) }
                 Timber.w(error)
             } catch (error: NostrPublishException) {

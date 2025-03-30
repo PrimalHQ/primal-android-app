@@ -21,11 +21,11 @@ import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedEr
 import net.primal.android.navigation.advancedSearchFeedSpec
 import net.primal.android.navigation.exploreFeedSpec
 import net.primal.android.navigation.renderType
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.FEED_KIND_SEARCH
 import net.primal.domain.buildAdvancedSearchFeedSpec
+import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.repository.FeedRepository
 import net.primal.domain.repository.FeedsRepository
 import net.primal.domain.resolveFeedSpecKind
@@ -110,7 +110,7 @@ class ExploreFeedViewModel @Inject constructor(
                 )
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
             }
-        } catch (error: SignException) {
+        } catch (error: SignatureException) {
             Timber.w(error)
             setErrorState(error = ExploreFeedError.FailedToAddToFeed(error))
         } catch (error: WssException) {
@@ -124,7 +124,7 @@ class ExploreFeedViewModel @Inject constructor(
             val userId = activeAccountStore.activeUserId()
             feedsRepository.removeFeedLocally(userId = userId, feedSpec = feedSpec)
             feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
-        } catch (error: SignException) {
+        } catch (error: SignatureException) {
             Timber.w(error)
             setErrorState(error = ExploreFeedError.FailedToRemoveFeed(error))
         } catch (error: WssException) {

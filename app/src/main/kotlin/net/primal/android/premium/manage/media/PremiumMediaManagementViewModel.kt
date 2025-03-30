@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.manage.media.PremiumMediaManagementContract.SideEffect
 import net.primal.android.premium.manage.media.PremiumMediaManagementContract.UiEvent
 import net.primal.android.premium.manage.media.PremiumMediaManagementContract.UiState
@@ -22,6 +21,7 @@ import net.primal.android.premium.manage.media.ui.MediaUiItem
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
 @HiltViewModel
@@ -96,7 +96,7 @@ class PremiumMediaManagementViewModel @Inject constructor(
                 }
 
                 setState { copy(mediaItems = uploads) }
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.e(error)
             } catch (error: WssException) {
                 Timber.e(error)
@@ -116,7 +116,7 @@ class PremiumMediaManagementViewModel @Inject constructor(
                         otherInBytes = stats.otherFilesInBytes,
                     )
                 }
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.e(error)
             } catch (error: WssException) {
                 Timber.e(error)
@@ -142,7 +142,7 @@ class PremiumMediaManagementViewModel @Inject constructor(
 
                 fetchMediaStats()
                 premiumRepository.fetchMembershipStatus(userId = userId)
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.e(error)
             } catch (error: WssException) {
                 Timber.e(error)

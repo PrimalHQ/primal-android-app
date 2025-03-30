@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.legend.contribute.LegendContributeContract.LegendContributeState
 import net.primal.android.premium.legend.contribute.LegendContributeContract.PaymentMethod
 import net.primal.android.premium.legend.contribute.LegendContributeContract.UiEvent
@@ -31,6 +30,7 @@ import net.primal.android.wallet.utils.parseUsdToSats
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.core.utils.getMaximumUsdAmount
+import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
 @HiltViewModel
@@ -179,7 +179,7 @@ class LegendContributeViewModel @Inject constructor(
                 }
 
                 startPurchaseMonitor()
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.e(error)
             } catch (error: WssException) {
                 Timber.e(error)
@@ -197,7 +197,7 @@ class LegendContributeViewModel @Inject constructor(
                     PaymentMethod.BitcoinLightning -> executeLightningPayment()
                     null -> Unit
                 }
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 setState {
                     copy(
                         error = UiState.ContributionUiError.WithdrawViaPrimalWalletFailed(error),

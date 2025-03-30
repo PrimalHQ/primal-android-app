@@ -21,7 +21,6 @@ import net.primal.android.messages.conversation.MessageConversationListContract.
 import net.primal.android.messages.conversation.MessageConversationListContract.UiState
 import net.primal.android.messages.conversation.model.MessageConversationUi
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -29,6 +28,7 @@ import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.ConversationRelation
 import net.primal.domain.model.DMConversation
+import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.repository.ChatRepository
 import timber.log.Timber
 
@@ -127,7 +127,7 @@ class MessageConversationListViewModel @Inject constructor(
                     description = "Mark all messages as read.",
                 )
                 chatRepository.markAllMessagesAsRead(authorization = authorizationEvent)
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
