@@ -1,6 +1,6 @@
 package net.primal.domain
 
-import net.primal.domain.nostr.cryptography.hexToNpubHrp
+import net.primal.core.utils.hexToNpubHrp
 
 fun String.isUserNotesFeedSpec(): Boolean {
     return this == "{\"id\":\"latest\",\"kind\":\"notes\"}"

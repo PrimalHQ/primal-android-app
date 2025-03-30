@@ -1,4 +1,4 @@
-package net.primal.domain.nostr.cryptography
+package net.primal.core.utils
 
 import fr.acinq.bitcoin.Bech32
 import fr.acinq.secp256k1.Hex

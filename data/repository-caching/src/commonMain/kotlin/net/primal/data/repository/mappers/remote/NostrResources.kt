@@ -1,7 +1,24 @@
 package net.primal.data.repository.mappers.remote
 
-import io.github.aakira.napier.Napier
 import kotlinx.serialization.json.JsonArray
+import net.primal.core.utils.NEVENT
+import net.primal.core.utils.NOTE
+import net.primal.core.utils.NPROFILE
+import net.primal.core.utils.NPUB
+import net.primal.core.utils.bech32ToHexOrThrow
+import net.primal.core.utils.bechToBytesOrThrow
+import net.primal.core.utils.extract
+import net.primal.core.utils.isNAddr
+import net.primal.core.utils.isNAddrUri
+import net.primal.core.utils.isNEvent
+import net.primal.core.utils.isNEventUri
+import net.primal.core.utils.isNPub
+import net.primal.core.utils.isNPubUri
+import net.primal.core.utils.isNostrUri
+import net.primal.core.utils.isNote
+import net.primal.core.utils.isNoteUri
+import net.primal.core.utils.nostrUriToBytes
+import net.primal.core.utils.toHex
 import net.primal.data.local.dao.events.EventUriNostr
 import net.primal.data.local.dao.messages.DirectMessageData
 import net.primal.data.local.dao.notes.PostData
@@ -25,80 +42,12 @@ import net.primal.domain.nostr.Nip19TLV.readAsString
 import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.domain.nostr.cryptography.bech32ToHexOrThrow
-import net.primal.domain.nostr.cryptography.bechToBytesOrThrow
-import net.primal.domain.nostr.cryptography.toHex
 import net.primal.domain.nostr.findFirstAltDescription
 import net.primal.domain.nostr.findFirstEventId
 import net.primal.domain.nostr.findFirstProfileId
 import net.primal.domain.nostr.isATag
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.utils.wordsCountToReadingTime
-
-private const val NOSTR = "nostr:"
-private const val NPUB = "npub1"
-private const val NSEC = "nsec1"
-private const val NEVENT = "nevent1"
-private const val NADDR = "naddr1"
-private const val NOTE = "note1"
-private const val NRELAY = "nrelay1"
-private const val NPROFILE = "nprofile1"
-
-private val nostrUriRegexPattern: Regex = Regex(
-    "($NOSTR)?@?($NSEC|$NPUB|$NEVENT|$NADDR|$NOTE|$NPROFILE|$NRELAY)([qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)(\\S*)",
-    RegexOption.IGNORE_CASE,
-)
-
-fun String.isNostrUri(): Boolean {
-    val uri = lowercase()
-    return uri.startsWith(NOSTR) || uri.startsWith(NPUB) || uri.startsWith(NOTE) ||
-        uri.startsWith(NEVENT) || uri.startsWith(NPROFILE)
-}
-
-fun String.cleanNostrUris(): String =
-    this
-        .replace("@$NOSTR", NOSTR)
-        .replace("@$NPUB", NPUB)
-        .replace("@$NOTE", NOTE)
-        .replace("@$NEVENT", NEVENT)
-        .replace("@$NADDR", NADDR)
-        .replace("@$NPROFILE", NPROFILE)
-
-fun String.isNote() = lowercase().startsWith(NOTE)
-
-fun String.isNPub() = lowercase().startsWith(NPUB)
-
-fun String.isNProfile() = lowercase().startsWith(NPROFILE)
-
-fun String.isNAddr() = lowercase().startsWith(NADDR)
-
-fun String.isNEvent() = lowercase().startsWith(NEVENT)
-
-fun String.isNoteUri() = lowercase().startsWith(NOSTR + NOTE)
-
-fun String.isNEventUri() = lowercase().startsWith(NOSTR + NEVENT)
-
-fun String.isNPubUri() = lowercase().startsWith(NOSTR + NPUB)
-
-fun String.isNProfileUri() = lowercase().startsWith(NOSTR + NPROFILE)
-
-fun String.isNAddrUri() = lowercase().startsWith(NOSTR + NADDR)
-
-private fun String.nostrUriToBytes(): ByteArray? {
-    val matchResult = nostrUriRegexPattern.find(this) ?: return null
-    val type = matchResult.groupValues[2].takeIf { it.isNotEmpty() }?.lowercase() ?: return null
-    val key = matchResult.groupValues[3].takeIf { it.isNotEmpty() }?.lowercase() ?: return null
-    return try {
-        (type + key).bechToBytesOrThrow()
-    } catch (ignored: Exception) {
-        Napier.w("", ignored)
-        null
-    }
-}
-
-fun String.nostrUriToNoteId() = nostrUriToBytes()?.toHex()
-
-fun String.nostrUriToPubkey() = nostrUriToBytes()?.toHex()
 
 private fun String.nostrUriToIdAndRelay(): Pair<String?, String?> {
     val bytes = nostrUriToBytes() ?: return null to null
@@ -160,20 +109,6 @@ fun PostData.toNevent() =
         kind = NostrEventKind.ShortTextNote.value,
         relays = emptyList(),
     )
-
-private fun String.extract(parser: (bechPrefix: String?, key: String?) -> String?): String? {
-    val matchResult = nostrUriRegexPattern.find(this) ?: return null
-
-    val bechPrefix = matchResult.groupValues.getOrNull(2)
-    val key = matchResult.groupValues.getOrNull(3)
-
-    return try {
-        parser(bechPrefix, key)
-    } catch (ignored: Exception) {
-        Napier.w("", ignored)
-        null
-    }
-}
 
 fun String.takeAsNaddrOrNull(): String? {
     return if (isNAddr() || isNAddrUri()) {
@@ -284,8 +219,7 @@ fun List<String>.mapAsReferencedNostrUriDO(
     val refNote = postIdToPostDataMap[refNoteId]
     val refPostAuthor = profileIdToProfileDataMap[refNote?.authorId]
 
-    // Rewire once Nip19 is implemented for KMP
-    val refNaddr: Naddr? = null // Nip19TLV.parseUriAsNaddrOrNull(link)
+    val refNaddr: Naddr? = Nip19TLV.parseUriAsNaddrOrNull(link)
     val refArticle = articleIdToArticle[refNaddr?.identifier]
     val refArticleAuthor = profileIdToProfileDataMap[refNaddr?.userId]
 

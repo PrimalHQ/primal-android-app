@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import org.junit.Test
 import org.spongycastle.util.encoders.DecoderException
 
+/* TODO: move this file to `core:utils` as well. `DecoderException` is left to be resolved. */
 class ConversionUtilsTest {
 
     @Test
