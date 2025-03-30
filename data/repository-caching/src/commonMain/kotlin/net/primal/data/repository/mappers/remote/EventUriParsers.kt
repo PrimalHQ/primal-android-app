@@ -2,6 +2,7 @@ package net.primal.data.repository.mappers.remote
 
 import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.detectMimeType
+import net.primal.core.utils.isNostrUri
 import net.primal.data.local.dao.events.EventUri
 import net.primal.data.local.dao.messages.DirectMessageData
 import net.primal.data.local.dao.notes.PostData
