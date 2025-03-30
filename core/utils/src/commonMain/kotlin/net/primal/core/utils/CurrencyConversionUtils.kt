@@ -45,4 +45,6 @@ object CurrencyConversionUtils {
     }
 
     fun Double.formatAsString() = this.toBigDecimal().toStringExpanded()
+
+    fun String.toBigDecimal() = BigDecimal.parseString(this)
 }
