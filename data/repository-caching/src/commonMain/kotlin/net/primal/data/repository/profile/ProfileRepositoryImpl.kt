@@ -52,6 +52,9 @@ class ProfileRepositoryImpl(
                 ?.asProfileDataDO()
         }
 
+    override suspend fun findProfileStats(profileId: String) =
+        database.profileStats().findProfileStats(profileId = profileId)?.asProfileStatsDO()
+
     override suspend fun findProfileData(profileIds: List<String>) =
         withContext(dispatcherProvider.io()) {
             database.profiles().findProfileData(profileIds = profileIds)

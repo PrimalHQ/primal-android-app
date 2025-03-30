@@ -40,6 +40,7 @@ import net.primal.domain.UserProfileSearchItem
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.repository.ProfileRepository
 
 class UserRepository @Inject constructor(
     private val usersDatabase: UsersDatabase,
@@ -51,6 +52,7 @@ class UserRepository @Inject constructor(
     private val fileUploader: PrimalFileUploader,
     private val usersApi: UsersApi,
     private val nostrPublisher: NostrPublisher,
+    private val profileRepository: ProfileRepository,
 ) {
     suspend fun setActiveAccount(userId: String) =
         withContext(dispatchers.io()) {
@@ -366,24 +368,23 @@ class UserRepository @Inject constructor(
             )
         }
 
-    fun observeRecentUsers(ownerId: String): Flow<List<UserProfileSearchItem>> {
-        return usersDatabase.userProfileInteractions()
-            .observeRecentProfilesByOwnerId(ownerId = ownerId)
+    fun observeRecentUsers(ownerId: String): Flow<List<UserProfileSearchItem>> =
+        usersDatabase.userProfileInteractions()
+            .observeRecentProfilesByOwnerId(ownerId)
             .map { recentProfiles ->
                 recentProfiles.mapNotNull { profileInteraction ->
-                    // TODO Fetch from repository-caching the profile data
-//                    if (profile.metadata != null) {
-//                        UserProfileSearchItem(
-//                            metadata = profile.metadata.asProfileDataDO(),
-//                            followersCount = profile.stats?.followers,
-//                        )
-//                    } else {
-//                        null
-//                    }
-                    null
+                    withContext(dispatchers.io()) {
+                        profileRepository.findProfileDataOrNull(profileInteraction.profileId)?.let { profile ->
+                            val stats = profileRepository.findProfileStats(profileInteraction.profileId)
+
+                            UserProfileSearchItem(
+                                metadata = profile,
+                                followersCount = stats?.followers,
+                            )
+                        }
+                    }
                 }
             }
-    }
 
     class FollowListNotFound : Exception()
 }

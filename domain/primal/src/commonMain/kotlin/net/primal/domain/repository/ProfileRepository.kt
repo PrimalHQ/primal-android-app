@@ -14,6 +14,7 @@ interface ProfileRepository {
     suspend fun fetchProfileId(primalName: String): String?
     suspend fun findProfileDataOrNull(profileId: String): ProfileData?
     suspend fun findProfileData(profileIds: List<String>): List<ProfileData>
+    suspend fun findProfileStats(profileId: String): ProfileStats?
     fun observeProfileData(profileId: String): Flow<ProfileData>
     fun observeProfileData(profileIds: List<String>): Flow<List<ProfileData>>
     fun observeProfileStats(profileId: String): Flow<ProfileStats?>
