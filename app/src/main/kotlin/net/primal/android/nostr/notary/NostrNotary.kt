@@ -13,8 +13,6 @@ import net.primal.android.crypto.toNpub
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.nostr.ext.asIdentifierTag
 import net.primal.android.nostr.ext.asPubkeyTag
-import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
-import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.android.signer.signEventWithAmber
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.NostrWalletConnect
@@ -32,7 +30,8 @@ import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
-import timber.log.Timber
+import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
+import net.primal.domain.nostr.cryptography.SigningRejectedException
 
 class NostrNotary @Inject constructor(
     private val contentResolver: ContentResolver,
@@ -50,15 +49,11 @@ class NostrNotary @Inject constructor(
         throw NotImplementedError()
     }
 
-    private fun findNsecOrThrow(pubkey: String): String {
-        return try {
+    private fun findNsecOrThrow(pubkey: String): String =
+        runCatching {
             val npub = Hex.decode(pubkey).toNpub()
-            credentialsStore.findOrThrow(npub = npub).nsec ?: throw SigningKeyNotFoundException()
-        } catch (error: IllegalArgumentException) {
-            Timber.w(error)
-            throw SigningRejectedException()
-        }
-    }
+            credentialsStore.findOrThrow(npub = npub).nsec
+        }.getOrNull() ?: throw SigningKeyNotFoundException()
 
     fun signNostrEvent(userId: String, event: NostrUnsignedEvent): NostrEvent {
         val isExternalSignerLogin = runCatching {
