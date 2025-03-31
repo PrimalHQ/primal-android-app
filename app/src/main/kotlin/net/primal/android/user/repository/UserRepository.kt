@@ -3,6 +3,7 @@ package net.primal.android.user.repository
 import androidx.room.withTransaction
 import java.time.Instant
 import javax.inject.Inject
+import kotlin.collections.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -372,16 +373,15 @@ class UserRepository @Inject constructor(
         usersDatabase.userProfileInteractions()
             .observeRecentProfilesByOwnerId(ownerId)
             .map { recentProfiles ->
-                recentProfiles.mapNotNull { profileInteraction ->
-                    withContext(dispatchers.io()) {
-                        profileRepository.findProfileDataOrNull(profileInteraction.profileId)?.let { profile ->
-                            val stats = profileRepository.findProfileStats(profileInteraction.profileId)
+                val profileIds = recentProfiles.map { it.profileId }
 
-                            UserProfileSearchItem(
-                                metadata = profile,
-                                followersCount = stats?.followers,
-                            )
-                        }
+                val profiles = profileRepository.findProfileData(profileIds).associateBy { it.profileId }
+                val statsMap = profileRepository.findProfileStats(profileIds).associateBy { it.profileId }
+
+                profileIds.mapNotNull { profileId ->
+                    profiles[profileId]?.let { profile ->
+                        val stats = statsMap[profileId]
+                        UserProfileSearchItem(metadata = profile, followersCount = stats?.followers)
                     }
                 }
             }

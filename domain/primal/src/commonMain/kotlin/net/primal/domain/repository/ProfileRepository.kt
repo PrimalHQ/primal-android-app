@@ -2,6 +2,7 @@ package net.primal.domain.repository
 
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.descriptors.StructureKind.LIST
 import net.primal.domain.UserProfileSearchItem
 import net.primal.domain.model.ProfileData
 import net.primal.domain.model.ProfileStats
@@ -14,7 +15,8 @@ interface ProfileRepository {
     suspend fun fetchProfileId(primalName: String): String?
     suspend fun findProfileDataOrNull(profileId: String): ProfileData?
     suspend fun findProfileData(profileIds: List<String>): List<ProfileData>
-    suspend fun findProfileStats(profileId: String): ProfileStats?
+    suspend fun findProfileStats(profileIds: List<String>): List<ProfileStats>
+
     fun observeProfileData(profileId: String): Flow<ProfileData>
     fun observeProfileData(profileIds: List<String>): Flow<List<ProfileData>>
     fun observeProfileStats(profileId: String): Flow<ProfileStats?>

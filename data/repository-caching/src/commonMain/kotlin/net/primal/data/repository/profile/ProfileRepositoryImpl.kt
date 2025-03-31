@@ -23,6 +23,7 @@ import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.data.repository.mappers.remote.takeContentAsPrimalUserFollowersCountsOrNull
 import net.primal.domain.UserProfileSearchItem
 import net.primal.domain.model.ProfileData
+import net.primal.domain.model.ProfileStats
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.ReportType
@@ -52,8 +53,11 @@ class ProfileRepositoryImpl(
                 ?.asProfileDataDO()
         }
 
-    override suspend fun findProfileStats(profileId: String) =
-        database.profileStats().findProfileStats(profileId = profileId)?.asProfileStatsDO()
+    override suspend fun findProfileStats(profileIds: List<String>): List<ProfileStats> =
+        withContext(dispatcherProvider.io()) {
+            database.profileStats().findProfileStatss(profileIds = profileIds)
+                .map { it.asProfileStatsDO() }
+        }
 
     override suspend fun findProfileData(profileIds: List<String>) =
         withContext(dispatcherProvider.io()) {
