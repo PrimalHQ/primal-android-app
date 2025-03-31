@@ -2,6 +2,7 @@ package net.primal.core.networking.primal
 
 import io.ktor.client.HttpClient
 import kotlin.time.Duration.Companion.minutes
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +28,7 @@ internal class ProxyPrimalApiClient(
 ) : PrimalApiClient {
 
     private val scope = CoroutineScope(dispatcherProvider.io())
+    private val clientReadyDeferred = CompletableDeferred<Unit>()
 
     private lateinit var primalClient: BasePrimalApiClient
     private lateinit var socketClient: NostrSocketClientImpl
@@ -60,6 +62,9 @@ internal class ProxyPrimalApiClient(
                         ensureSocketConnection()
                         primalClient = BasePrimalApiClient(socketClient = this)
                         clientInitialized = true
+                        if (!clientReadyDeferred.isCompleted) {
+                            clientReadyDeferred.complete(Unit)
+                        }
                     }
                 }
             }
@@ -86,14 +91,17 @@ internal class ProxyPrimalApiClient(
     }
 
     override suspend fun query(message: PrimalCacheFilter): PrimalQueryResult {
+        clientReadyDeferred.await()
         return primalClient.query(message = message)
     }
 
     override suspend fun subscribe(subscriptionId: String, message: PrimalCacheFilter): Flow<NostrIncomingMessage> {
+        clientReadyDeferred.await()
         return primalClient.subscribe(subscriptionId = subscriptionId, message = message)
     }
 
     override suspend fun closeSubscription(subscriptionId: String): Boolean {
+        clientReadyDeferred.await()
         return primalClient.closeSubscription(subscriptionId = subscriptionId)
     }
 }
