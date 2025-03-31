@@ -55,7 +55,7 @@ class ProfileRepositoryImpl(
 
     override suspend fun findProfileStats(profileIds: List<String>): List<ProfileStats> =
         withContext(dispatcherProvider.io()) {
-            database.profileStats().findProfileStatss(profileIds = profileIds)
+            database.profileStats().findProfileStats(profileIds = profileIds)
                 .map { it.asProfileStatsDO() }
         }
 

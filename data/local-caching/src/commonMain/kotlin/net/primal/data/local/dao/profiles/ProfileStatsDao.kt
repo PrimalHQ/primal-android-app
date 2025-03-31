@@ -18,11 +18,8 @@ interface ProfileStatsDao {
     @Query("SELECT * FROM ProfileStats WHERE profileId = :profileId")
     fun observeProfileStats(profileId: String): Flow<ProfileStats?>
 
-    @Query("SELECT * FROM ProfileStats WHERE profileId = :profileId")
-    fun findProfileStats(profileId: String): ProfileStats?
-
     @Query("SELECT * FROM ProfileStats WHERE profileId IN (:profileIds)")
-    suspend fun findProfileStatss(profileIds: List<String>): List<ProfileStats>
+    suspend fun findProfileStats(profileIds: List<String>): List<ProfileStats>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertOrIgnore(data: List<ProfileStats>)
