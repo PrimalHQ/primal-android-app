@@ -5,12 +5,12 @@ import javax.inject.Inject
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.crypto.bechToBytesOrThrow
 import net.primal.android.crypto.hexToNpubHrp
-import net.primal.android.messages.exceptions.MessageEncryptException
 import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
 import net.primal.android.signer.decryptNip04WithAmber
 import net.primal.android.signer.encryptNip04WithAmber
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.domain.nostr.cryptography.MessageCipher
+import net.primal.domain.nostr.cryptography.MessageEncryptException
 
 class Nip04MessageCipher @Inject constructor(
     private val credentialsStore: CredentialsStore,
