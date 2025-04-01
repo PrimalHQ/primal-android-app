@@ -3,6 +3,7 @@ package net.primal.domain.nostr.utils
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
+import net.primal.core.utils.toInt
 
 class LnInvoiceUtilsTest {
 
@@ -35,7 +36,7 @@ class LnInvoiceUtilsTest {
 
         val amount = LnInvoiceUtils.getAmountInSats(validLnInvoice)
 
-        amount.intValue() shouldBe expectedValue
+        amount.toInt() shouldBe expectedValue
     }
 
     @Test
@@ -44,7 +45,7 @@ class LnInvoiceUtilsTest {
 
         val amount = LnInvoiceUtils.getAmountInSats(validLnInvoiceNoAmount)
 
-        amount.intValue() shouldBe expectedValue
+        amount.toInt() shouldBe expectedValue
     }
 
     @Test
