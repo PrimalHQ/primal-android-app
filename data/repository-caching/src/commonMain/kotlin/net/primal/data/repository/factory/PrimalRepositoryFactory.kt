@@ -17,6 +17,7 @@ import net.primal.domain.repository.MutedUserRepository
 import net.primal.domain.repository.NotificationRepository
 import net.primal.domain.repository.ProfileRepository
 import net.primal.domain.repository.PublicBookmarksRepository
+import net.primal.domain.repository.UserDataCleanupRepository
 
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 expect object PrimalRepositoryFactory : RepositoryFactory {
@@ -48,4 +49,6 @@ expect object PrimalRepositoryFactory : RepositoryFactory {
     override fun createProfileRepository(primalPublisher: PrimalPublisher): ProfileRepository
 
     override fun createPublicBookmarksRepository(primalPublisher: PrimalPublisher): PublicBookmarksRepository
+
+    override fun createUserDataCleanupRepository(): UserDataCleanupRepository
 }

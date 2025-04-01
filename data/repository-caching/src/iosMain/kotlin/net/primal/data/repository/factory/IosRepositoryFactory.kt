@@ -4,6 +4,7 @@ import net.primal.core.networking.factory.PrimalApiClientFactory
 import net.primal.core.utils.coroutines.DispatcherProviderFactory
 import net.primal.data.local.db.PrimalDatabaseFactory
 import net.primal.data.remote.factory.PrimalApiServiceFactory
+import net.primal.data.repository.UserDataCleanupRepositoryImpl
 import net.primal.data.repository.articles.ArticleRepositoryImpl
 import net.primal.data.repository.articles.HighlightRepositoryImpl
 import net.primal.data.repository.bookmarks.PublicBookmarksRepositoryImpl
@@ -37,6 +38,7 @@ import net.primal.domain.repository.MutedUserRepository
 import net.primal.domain.repository.NotificationRepository
 import net.primal.domain.repository.ProfileRepository
 import net.primal.domain.repository.PublicBookmarksRepository
+import net.primal.domain.repository.UserDataCleanupRepository
 
 object IosRepositoryFactory : RepositoryFactory {
 
@@ -166,6 +168,12 @@ object IosRepositoryFactory : RepositoryFactory {
             database = cachingDatabase,
             primalPublisher = primalPublisher,
             usersApi = PrimalApiServiceFactory.createUsersApi(cachingPrimalApiClient),
+        )
+    }
+
+    override fun createUserDataCleanupRepository(): UserDataCleanupRepository {
+        return UserDataCleanupRepositoryImpl(
+            database = cachingDatabase,
         )
     }
 }

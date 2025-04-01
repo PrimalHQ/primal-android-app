@@ -3,7 +3,6 @@ package net.primal.android.user.repository
 import androidx.room.withTransaction
 import java.time.Instant
 import javax.inject.Inject
-import kotlin.collections.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -42,6 +41,7 @@ import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.repository.ProfileRepository
+import net.primal.domain.repository.UserDataCleanupRepository
 
 class UserRepository @Inject constructor(
     private val usersDatabase: UsersDatabase,
@@ -54,6 +54,7 @@ class UserRepository @Inject constructor(
     private val usersApi: UsersApi,
     private val nostrPublisher: NostrPublisher,
     private val profileRepository: ProfileRepository,
+    private val userDataCleanupRepository: UserDataCleanupRepository,
 ) {
     suspend fun setActiveAccount(userId: String) =
         withContext(dispatchers.io()) {
@@ -82,19 +83,7 @@ class UserRepository @Inject constructor(
 
     suspend fun clearAllUserRelatedData(userId: String) =
         withContext(dispatchers.io()) {
-            // TODO Implement api in data:repository-caching to manage data per userId
-//            database.withTransaction {
-//                database.messages().deleteAllByOwnerId(ownerId = userId)
-//                database.messageConversations().deleteAllByOwnerId(ownerId = userId)
-//                database.feeds().deleteAllByOwnerId(ownerId = userId)
-//                database.mutedUsers().deleteAllByOwnerId(ownerId = userId)
-//                database.notifications().deleteAllByOwnerId(ownerId = userId)
-//                database.articleFeedsConnections().deleteConnections(ownerId = userId)
-//                database.feedsConnections().deleteConnections(ownerId = userId)
-//                database.feedPostsRemoteKeys().deleteAllByOwnerId(ownerId = userId)
-//                database.publicBookmarks().deleteAllBookmarks(userId = userId)
-//            }
-
+            userDataCleanupRepository.clearUserData(userId)
             usersDatabase.withTransaction {
                 usersDatabase.userProfileInteractions().deleteAllByOwnerId(ownerId = userId)
                 usersDatabase.walletTransactions().deleteAllTransactionsByUserId(userId = userId)
