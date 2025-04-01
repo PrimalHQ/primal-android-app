@@ -67,6 +67,8 @@ import net.primal.android.wallet.walletTransactionIconBackgroundColor
 import net.primal.android.wallet.walletWithdrawColor
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.CurrencyConversionUtils.toUsd
+import net.primal.core.utils.toFloat
+import net.primal.core.utils.toLong
 import net.primal.domain.CdnImage
 
 @Composable
@@ -266,9 +268,9 @@ private fun TransactionTrailingContent(
             ) {
                 val text = if (targetCurrencyMode == CurrencyMode.FIAT) {
                     txAmountInSats.toBtc().toUsd(exchangeBtcUsdRate)
-                        .let { numberFormat.format(it.floatValue()) }
+                        .let { numberFormat.format(it.toFloat()) }
                 } else {
-                    numberFormat.format(txAmountInSats.longValue())
+                    numberFormat.format(txAmountInSats.toLong())
                 }
                 val suffix = if (targetCurrencyMode == CurrencyMode.FIAT) {
                     R.string.wallet_usd_suffix

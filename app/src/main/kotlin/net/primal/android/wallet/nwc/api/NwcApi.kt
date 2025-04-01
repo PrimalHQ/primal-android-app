@@ -12,6 +12,7 @@ import net.primal.android.wallet.nwc.model.LightningPayResponse
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.core.utils.toLong
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.serialization.toNostrJsonObject
 import net.primal.domain.nostr.utils.LnInvoiceUtils
@@ -74,7 +75,7 @@ class NwcApi @Inject constructor(
         val decoded = CommonJson.decodeFromStringOrNull<LightningPayResponse>(responseString)
 
         val responseInvoiceAmountInMillis = decoded?.pr?.extractInvoiceAmountInMilliSats()
-        val requestAmountInMillis = satoshiAmountInMilliSats.toLong().toBigDecimal().longValue()
+        val requestAmountInMillis = satoshiAmountInMilliSats.toLong().toBigDecimal().toLong()
 
         if (decoded == null || requestAmountInMillis != responseInvoiceAmountInMillis) {
             throw IOException("Invalid invoice response.")
@@ -89,7 +90,7 @@ class NwcApi @Inject constructor(
         return try {
             LnInvoiceUtils.getAmountInSats(this)
                 .multiply(thousandAsBigDecimal)
-                .longValue()
+                .toLong()
         } catch (error: LnInvoiceUtils.AddressFormatException) {
             Timber.w(error)
             null
