@@ -14,12 +14,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.premium.api.paging.PremiumLeaderboardPagingSource
-import net.primal.android.premium.leaderboard.domain.OGLeaderboardEntry
 import net.primal.android.premium.leaderboard.ogs.OGLeaderboardContract.UiState
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.premium.utils.isPremiumTier
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.domain.OGLeaderboardEntry
 
 @HiltViewModel
 class OGLeaderboardViewModel @Inject constructor(
