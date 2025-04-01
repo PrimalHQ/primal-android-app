@@ -26,7 +26,6 @@ import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.messages.chat.ChatContract.UiEvent
 import net.primal.android.messages.chat.ChatContract.UiState
 import net.primal.android.messages.chat.model.ChatMessageUi
-import net.primal.android.messages.exceptions.MessageEncryptException
 import net.primal.android.navigation.profileIdOrThrow
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.NostrNotary
@@ -36,6 +35,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.model.DirectMessage
+import net.primal.domain.nostr.cryptography.MessageEncryptException
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.repository.ChatRepository
 import net.primal.domain.repository.ProfileRepository
