@@ -17,6 +17,7 @@ import net.primal.domain.repository.MutedUserRepository
 import net.primal.domain.repository.NotificationRepository
 import net.primal.domain.repository.ProfileRepository
 import net.primal.domain.repository.PublicBookmarksRepository
+import net.primal.domain.repository.UserDataCleanupRepository
 
 internal interface RepositoryFactory {
     fun createArticleRepository(): ArticleRepository
@@ -33,4 +34,5 @@ internal interface RepositoryFactory {
     fun createNotificationRepository(): NotificationRepository
     fun createProfileRepository(primalPublisher: PrimalPublisher): ProfileRepository
     fun createPublicBookmarksRepository(primalPublisher: PrimalPublisher): PublicBookmarksRepository
+    fun createUserDataCleanupRepository(): UserDataCleanupRepository
 }

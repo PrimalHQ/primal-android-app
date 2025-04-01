@@ -22,6 +22,7 @@ import net.primal.domain.repository.MutedUserRepository
 import net.primal.domain.repository.NotificationRepository
 import net.primal.domain.repository.ProfileRepository
 import net.primal.domain.repository.PublicBookmarksRepository
+import net.primal.domain.repository.UserDataCleanupRepository
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -76,4 +77,8 @@ object RepositoryCachingModule {
     @Provides
     fun providesEventRelayHintsRepository(): EventRelayHintsRepository =
         PrimalRepositoryFactory.createEventRelayHintsRepository()
+
+    @Provides
+    fun provideUserDataCleanupRepository(): UserDataCleanupRepository =
+        PrimalRepositoryFactory.createUserDataCleanupRepository()
 }
