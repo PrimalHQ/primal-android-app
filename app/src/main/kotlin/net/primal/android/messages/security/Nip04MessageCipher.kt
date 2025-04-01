@@ -32,7 +32,7 @@ class Nip04MessageCipher @Inject constructor(
      * @return The encrypted message if successful.
      *
      * @throws IllegalArgumentException If the [userId] is invalid.
-     * @throws MissingPrivateKey If no private key is found for the user.
+     * @throws SigningKeyNotFoundException If no private key is found for the user.
      * @throws MessageEncryptException If the encryption process fails (either from the external signer or locally).
      */
     @Throws(IllegalArgumentException::class, SigningKeyNotFoundException::class, MessageEncryptException::class)
