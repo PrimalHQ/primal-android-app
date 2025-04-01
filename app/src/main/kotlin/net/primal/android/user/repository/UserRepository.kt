@@ -3,6 +3,7 @@ package net.primal.android.user.repository
 import androidx.room.withTransaction
 import java.time.Instant
 import javax.inject.Inject
+import kotlin.collections.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -40,6 +41,7 @@ import net.primal.domain.UserProfileSearchItem
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.repository.ProfileRepository
 
 class UserRepository @Inject constructor(
     private val usersDatabase: UsersDatabase,
@@ -51,6 +53,7 @@ class UserRepository @Inject constructor(
     private val fileUploader: PrimalFileUploader,
     private val usersApi: UsersApi,
     private val nostrPublisher: NostrPublisher,
+    private val profileRepository: ProfileRepository,
 ) {
     suspend fun setActiveAccount(userId: String) =
         withContext(dispatchers.io()) {
@@ -366,24 +369,22 @@ class UserRepository @Inject constructor(
             )
         }
 
-    fun observeRecentUsers(ownerId: String): Flow<List<UserProfileSearchItem>> {
-        return usersDatabase.userProfileInteractions()
-            .observeRecentProfilesByOwnerId(ownerId = ownerId)
+    fun observeRecentUsers(ownerId: String): Flow<List<UserProfileSearchItem>> =
+        usersDatabase.userProfileInteractions()
+            .observeRecentProfilesByOwnerId(ownerId)
             .map { recentProfiles ->
-                recentProfiles.mapNotNull { profileInteraction ->
-                    // TODO Fetch from repository-caching the profile data
-//                    if (profile.metadata != null) {
-//                        UserProfileSearchItem(
-//                            metadata = profile.metadata.asProfileDataDO(),
-//                            followersCount = profile.stats?.followers,
-//                        )
-//                    } else {
-//                        null
-//                    }
-                    null
+                val profileIds = recentProfiles.map { it.profileId }
+
+                val profiles = profileRepository.findProfileData(profileIds).associateBy { it.profileId }
+                val statsMap = profileRepository.findProfileStats(profileIds).associateBy { it.profileId }
+
+                profileIds.mapNotNull { profileId ->
+                    profiles[profileId]?.let { profile ->
+                        val stats = statsMap[profileId]
+                        UserProfileSearchItem(metadata = profile, followersCount = stats?.followers)
+                    }
                 }
             }
-    }
 
     class FollowListNotFound : Exception()
 }
