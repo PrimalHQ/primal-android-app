@@ -6,6 +6,7 @@ import net.primal.domain.ConversationRelation
 import net.primal.domain.model.DMConversation
 import net.primal.domain.model.DirectMessage
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.cryptography.MessageEncryptException
 
 interface ChatRepository {
 
@@ -23,6 +24,7 @@ interface ChatRepository {
 
     suspend fun markAllMessagesAsRead(authorization: NostrEvent)
 
+    @Throws(MessageEncryptException::class)
     suspend fun sendMessage(
         userId: String,
         receiverId: String,
