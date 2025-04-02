@@ -5,6 +5,7 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import io.github.aakira.napier.Napier
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.withContext
@@ -85,7 +86,7 @@ internal class ArticleFeedMediator(
         }
     }
 
-    @Throws(RepeatingRequestBodyException::class)
+    @Throws(RepeatingRequestBodyException::class, CancellationException::class)
     private suspend fun fetchArticles(
         pageSize: Int,
         nextUntil: Long?,
