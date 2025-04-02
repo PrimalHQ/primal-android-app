@@ -24,7 +24,9 @@ dagger = "2.55"
 detekt = "1.23.8"
 emoji2 = "1.5.0"
 espresso-core = "3.6.1"
+firebase = "33.12.0"
 flippable = "1.5.4"
+google-services = "4.4.2"
 guava = "33.0.0-android" # do not upgrade (added with zap settings, should be removed)
 hilt = "1.2.0"
 jetpack-arch-core-testing = "2.2.0"
@@ -89,9 +91,12 @@ androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "a
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "material-icons" }
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activity-ktx" }
 
-# Play
+# Google
 play-billing = { module = "com.android.billingclient:billing", version.ref = "play-billing" }
 play-billing-ktx = { module = "com.android.billingclient:billing-ktx", version.ref = "play-billing" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref="firebase" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
+kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref="kotlinx-coroutines" }
 
 # UI libs
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
@@ -304,3 +309,4 @@ android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.
 jetpack-room = { id = "androidx.room", version.ref = "jetpack-room" }
 ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit" }
 touchlab-skie = { id = "co.touchlab.skie", version.ref = "skie" }
+google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
