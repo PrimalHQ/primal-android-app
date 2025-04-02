@@ -170,8 +170,7 @@ internal class UsersApiImpl(
         val content = list?.content
         if (content.isNullOrEmpty()) throw WssException("Invalid content.")
 
-        // TODO: decoder that is not null
-        return CommonJson.decodeFromString<List<String>>(list.content)
+        return list.content.decodeFromJsonStringOrNull<List<String>>() ?: emptyList()
     }
 
     override suspend fun isUserFollowing(userId: String, targetUserId: String): Boolean {
