@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.play.publishing)
+    alias(libs.plugins.google.services)
 }
 
 val configProperties by lazy {
@@ -331,6 +332,9 @@ dependencies {
 
     "googleImplementation"(libs.play.billing)
     "googleImplementation"(libs.play.billing.ktx)
+    "googleImplementation"(platform(libs.firebase.bom))
+    "googleImplementation"(libs.firebase.messaging)
+    "googleImplementation"(libs.kotlinx.coroutines.play.services)
 
     implementation(libs.qrcode.generator)
 
