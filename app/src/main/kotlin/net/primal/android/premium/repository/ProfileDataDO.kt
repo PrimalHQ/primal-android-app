@@ -1,4 +1,4 @@
-package net.primal.android.nostr.mappers
+package net.primal.android.premium.repository
 
 import net.primal.android.nostr.model.primal.content.ContentProfilePremiumInfo
 import net.primal.core.utils.asMapByKey

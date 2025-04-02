@@ -3,7 +3,6 @@ package net.primal.android.premium.repository
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.nostr.mappers.mapAsProfileDataDO
 import net.primal.android.premium.api.PremiumApi
 import net.primal.android.premium.api.model.CancelMembershipRequest
 import net.primal.android.premium.api.model.LegendLeaderboardOrderBy
@@ -15,11 +14,11 @@ import net.primal.android.premium.domain.PremiumMembership
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
 import net.primal.core.networking.utils.retryNetworkCall
-import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.core.utils.asMapByKey
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.domain.LeaderboardLegendEntry
 import net.primal.domain.OGLeaderboardEntry
+import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
 class PremiumRepository @Inject constructor(
