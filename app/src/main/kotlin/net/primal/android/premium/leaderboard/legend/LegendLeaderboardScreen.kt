@@ -32,12 +32,12 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.premium.api.model.LegendLeaderboardOrderBy
-import net.primal.android.premium.leaderboard.domain.LeaderboardLegendEntry
 import net.primal.android.premium.leaderboard.legend.ui.CONTRIBUTION_INDEX
 import net.primal.android.premium.leaderboard.legend.ui.LATEST_INDEX
 import net.primal.android.premium.leaderboard.legend.ui.LeaderboardTabs
 import net.primal.android.premium.leaderboard.legend.ui.LegendLeaderboardItem
 import net.primal.android.premium.leaderboard.legend.ui.PAGE_COUNT
+import net.primal.android.premium.leaderboard.legend.ui.model.LeaderboardUiLegend
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -107,7 +107,7 @@ private fun LegendLeaderboardScreen(
 }
 
 @Composable
-private fun LeaderboardList(entries: List<LeaderboardLegendEntry>, onProfileClick: (String) -> Unit) {
+private fun LeaderboardList(entries: List<LeaderboardUiLegend>, onProfileClick: (String) -> Unit) {
     LazyColumn {
         itemsIndexed(
             items = entries,
