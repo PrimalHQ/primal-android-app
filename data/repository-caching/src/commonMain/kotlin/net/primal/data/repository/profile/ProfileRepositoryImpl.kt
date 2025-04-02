@@ -129,6 +129,8 @@ class ProfileRepositoryImpl(
                     database.profileStats().upsert(data = profileStats)
                 }
             }
+
+            profileMetadata?.asProfileDataDO()
         }
 
     private suspend fun queryRemoteUsers(apiBlock: suspend () -> UsersResponse): List<UserProfileSearchItem> =
