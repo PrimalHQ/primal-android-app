@@ -25,7 +25,6 @@ class CoroutinesTestRule(
         dispatcherProvider = mockk {
             every { io() } returns testDispatcher
             every { main() } returns testDispatcher
-//            every { default() } returns testDispatcher
         }
     }
 

@@ -11,7 +11,6 @@ class CoroutineDispatcherProviderTest {
     private class TestDispatcherProvider : DispatcherProvider {
         override fun io(): CoroutineDispatcher = Dispatchers.IO
         override fun main(): CoroutineDispatcher = Dispatchers.Main
-        fun default(): CoroutineDispatcher = Dispatchers.Default
     }
 
     private val dispatcherProvider = TestDispatcherProvider()
@@ -24,10 +23,5 @@ class CoroutineDispatcherProviderTest {
     @Test
     fun coroutineDispatcherProvider_returnsProperMainDispatcher() {
         dispatcherProvider.main() shouldBe Dispatchers.Main
-    }
-
-    @Test
-    fun coroutineDispatcherProvider_returnsProperDefaultDispatcher() {
-        dispatcherProvider.default() shouldBe Dispatchers.Default
     }
 }
