@@ -4,6 +4,7 @@ import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.explore.model.UsersResponse
 import net.primal.data.remote.api.users.model.BookmarksResponse
@@ -169,6 +170,7 @@ internal class UsersApiImpl(
         val content = list?.content
         if (content.isNullOrEmpty()) throw WssException("Invalid content.")
 
+        // TODO: decoder that is not null
         return CommonJson.decodeFromString<List<String>>(list.content)
     }
 

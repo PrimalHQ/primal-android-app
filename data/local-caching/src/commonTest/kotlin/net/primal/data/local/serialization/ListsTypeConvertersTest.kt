@@ -5,7 +5,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 import kotlinx.serialization.json.JsonArray
-import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 
 class ListsTypeConvertersTest {
@@ -23,7 +23,7 @@ class ListsTypeConvertersTest {
     fun `listOfJsonArrayToString returns correct json String`() {
         val expectedJsonString = this.listOfJsonArrayJsonString
 
-        val inputJsonArray = CommonJson.decodeFromString<List<JsonArray>>(expectedJsonString)
+        val inputJsonArray = expectedJsonString.decodeFromJsonStringOrNull<List<JsonArray>>()
         val actualJsonString = ListsTypeConverters().listOfJsonArrayToString(inputJsonArray)
 
         actualJsonString.shouldNotBeNull()
@@ -39,7 +39,7 @@ class ListsTypeConvertersTest {
     @Test
     fun `stringToListOfJsonArray returns correct List`() {
         val jsonString = this.listOfJsonArrayJsonString
-        val expected = CommonJson.decodeFromString<List<JsonArray>>(jsonString)
+        val expected = jsonString.decodeFromJsonStringOrNull<List<JsonArray>>()
         val actual = ListsTypeConverters().stringToListOfJsonArray(jsonString)
         actual shouldBe expected
     }

@@ -5,9 +5,7 @@ import kotlinx.serialization.json.float
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
-import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
-import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.explore.model.ExploreRequestBody
 import net.primal.data.remote.api.explore.model.SearchUsersRequestBody
@@ -31,7 +29,7 @@ internal class ExploreApiImpl(
 
         return TrendingPeopleResponse(
             paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging).let {
-                CommonJson.decodeFromStringOrNull(it?.content)
+                it?.content.decodeFromJsonStringOrNull()
             },
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
@@ -55,7 +53,7 @@ internal class ExploreApiImpl(
 
         return TrendingZapsResponse(
             paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging).let {
-                CommonJson.decodeFromStringOrNull(it?.content)
+                it?.content.decodeFromJsonStringOrNull()
             },
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),

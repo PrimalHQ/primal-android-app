@@ -2,8 +2,7 @@ package net.primal.data.remote.api.events
 
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
-import net.primal.core.utils.serialization.CommonJson
-import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.events.model.EventActionsRequestBody
 import net.primal.data.remote.api.events.model.EventActionsResponse
@@ -25,7 +24,7 @@ internal class EventStatsApiImpl(
 
         return EventZapsResponse(
             paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging).let {
-                CommonJson.decodeFromStringOrNull(it?.content)
+                it?.content.decodeFromJsonStringOrNull()
             },
             profiles = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),

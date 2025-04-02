@@ -39,7 +39,7 @@ import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.serialization.CommonJson
-import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEventKind
 import timber.log.Timber
@@ -200,8 +200,8 @@ class WalletApiImpl @Inject constructor(
         val transactionsEvent = result.findPrimalEvent(kind = NostrEventKind.PrimalWalletTransactions)
             ?: throw WssException("Missing or invalid content in response.")
 
-        val txJsonArray = CommonJson.decodeFromString<JsonArray>(transactionsEvent.content)
-        val transactions = txJsonArray.mapNotNull {
+        val txJsonArray = transactionsEvent.content.decodeFromJsonStringOrNull<JsonArray>()
+        val transactions = txJsonArray!!.mapNotNull {
             try {
                 CommonJson.decodeFromJsonElement<ContentWalletTransaction>(it)
             } catch (error: IllegalArgumentException) {
@@ -213,7 +213,7 @@ class WalletApiImpl @Inject constructor(
         return TransactionsResponse(
             transactions = transactions,
             paging = result.findPrimalEvent(kind = NostrEventKind.PrimalPaging)?.let {
-                CommonJson.decodeFromStringOrNull(it.content)
+                it.content.decodeFromJsonStringOrNull()
             },
         )
     }

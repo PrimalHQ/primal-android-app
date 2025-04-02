@@ -9,9 +9,7 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.wallet.nwc.model.LightningPayRequest
 import net.primal.android.wallet.nwc.model.LightningPayResponse
-import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
-import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.core.utils.toLong
 import net.primal.domain.nostr.NostrEvent
@@ -41,7 +39,8 @@ class NwcApi @Inject constructor(
         val responseBody = response.body
         return if (responseBody != null) {
             val responseString = withContext(dispatcherProvider.io()) { responseBody.string() }
-            CommonJson.decodeFromStringOrNull(string = responseString)
+            responseString.decodeFromJsonStringOrNull()
+
                 ?: throw IOException("Invalid body content.")
         } else {
             throw IOException("Empty response body.")
