@@ -2,7 +2,6 @@ package net.primal.core.utils
 
 import io.github.aakira.napier.Napier
 
-
 private val nostrUriRegexPattern = Regex(
     "($NOSTR)?@?($NSEC|$NPUB|$NEVENT|$NADDR|$NOTE|$NPROFILE|$NRELAY)([qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)([\\S]*)",
     RegexOption.IGNORE_CASE,
@@ -41,7 +40,6 @@ fun String.extract(parser: (bechPrefix: String?, key: String?) -> String?): Stri
         null
     }
 }
-
 
 fun String.isNostrUri(): Boolean {
     val uri = lowercase()
