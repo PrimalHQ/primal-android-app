@@ -1,6 +1,4 @@
-package net.primal.android.premium.leaderboard.domain
-
-import net.primal.domain.CdnImage
+package net.primal.domain
 
 data class OGLeaderboardEntry(
     val index: Int,
