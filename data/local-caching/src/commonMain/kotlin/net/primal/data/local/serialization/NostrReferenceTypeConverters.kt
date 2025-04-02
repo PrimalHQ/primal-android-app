@@ -1,8 +1,7 @@
 package net.primal.data.local.serialization
 
 import androidx.room.TypeConverter
-import net.primal.core.utils.serialization.CommonJson
-import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.ReferencedArticle
 import net.primal.domain.ReferencedHighlight
@@ -14,7 +13,7 @@ class NostrReferenceTypeConverters {
 
     @TypeConverter
     fun stringToReferencedNote(value: String?): ReferencedNote? {
-        return CommonJson.decodeFromStringOrNull<ReferencedNote>(value)
+        return value.decodeFromJsonStringOrNull<ReferencedNote>()
     }
 
     @TypeConverter
@@ -27,7 +26,7 @@ class NostrReferenceTypeConverters {
 
     @TypeConverter
     fun stringToReferencedArticle(value: String?): ReferencedArticle? {
-        return CommonJson.decodeFromStringOrNull<ReferencedArticle>(value)
+        return value.decodeFromJsonStringOrNull<ReferencedArticle>()
     }
 
     @TypeConverter
@@ -40,7 +39,7 @@ class NostrReferenceTypeConverters {
 
     @TypeConverter
     fun stringToReferencedHighlight(value: String?): ReferencedHighlight? {
-        return CommonJson.decodeFromStringOrNull<ReferencedHighlight>(value)
+        return value.decodeFromJsonStringOrNull<ReferencedHighlight>()
     }
 
     @TypeConverter
@@ -53,7 +52,7 @@ class NostrReferenceTypeConverters {
 
     @TypeConverter
     fun stringToReferencedUser(value: String?): ReferencedUser? {
-        return CommonJson.decodeFromStringOrNull<ReferencedUser>(value)
+        return value.decodeFromJsonStringOrNull<ReferencedUser>()
     }
 
     @TypeConverter
@@ -66,7 +65,7 @@ class NostrReferenceTypeConverters {
 
     @TypeConverter
     fun stringToReferencedZap(value: String?): ReferencedZap? {
-        return CommonJson.decodeFromStringOrNull<ReferencedZap>(value)
+        return value.decodeFromJsonStringOrNull<ReferencedZap>()
     }
 
     @TypeConverter

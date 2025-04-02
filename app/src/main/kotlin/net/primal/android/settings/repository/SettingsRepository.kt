@@ -5,9 +5,7 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.domain.UserAccount
-import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
-import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.data.remote.api.settings.SettingsApi
 import net.primal.domain.ContentAppSettings
 import net.primal.domain.DEFAULT_ZAP_CONFIG
@@ -94,16 +92,13 @@ class SettingsRepository @Inject constructor(
 
     private suspend fun fetchAppSettings(authorizationEvent: NostrEvent): ContentAppSettings? {
         val response = settingsApi.getAppSettings(authorizationEvent)
-        return CommonJson.decodeFromStringOrNull<ContentAppSettings>(
-            string = response.userSettings?.content ?: response.defaultSettings?.content,
-        )
+        return (response.userSettings?.content ?: response.defaultSettings?.content)
+            .decodeFromJsonStringOrNull<ContentAppSettings>()
     }
 
     private suspend fun fetchDefaultAppSettings(userId: String): ContentAppSettings? {
         val response = settingsApi.getDefaultAppSettings(pubkey = userId)
-        return CommonJson.decodeFromStringOrNull<ContentAppSettings>(
-            string = response.defaultSettings?.content,
-        )
+        return response.defaultSettings?.content.decodeFromJsonStringOrNull<ContentAppSettings>()
     }
 
     private suspend fun persistAppSettingsLocally(userId: String, appSettings: ContentAppSettings) {

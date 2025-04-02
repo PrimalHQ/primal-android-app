@@ -6,6 +6,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.explore.model.ExploreRequestBody
@@ -75,7 +76,7 @@ internal class ExploreApiImpl(
         )
 
         val trendingTopicsEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalTrendingTopics)
-        val topics = CommonJson.decodeFromStringOrNull<JsonObject>(trendingTopicsEvent?.content)
+        val topics = trendingTopicsEvent?.content.decodeFromJsonStringOrNull<JsonObject>()
 
         val result = mutableListOf<TopicScore>()
         topics?.forEach { (topic, score) ->

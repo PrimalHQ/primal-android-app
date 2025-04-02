@@ -32,8 +32,7 @@ import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.domain.asUserAccountFromFollowListEvent
 import net.primal.android.wallet.domain.WalletSettings
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.core.utils.serialization.CommonJson
-import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.domain.UserProfileSearchItem
 import net.primal.domain.nostr.ContentMetadata
@@ -159,7 +158,7 @@ class UserRepository @Inject constructor(
     suspend fun setNostrAddress(userId: String, nostrAddress: String) =
         withContext(dispatchers.io()) {
             val userProfileResponse = usersApi.getUserProfile(userId = userId)
-            val metadata = CommonJson.decodeFromStringOrNull<ContentMetadata>(userProfileResponse.metadata?.content)
+            val metadata = userProfileResponse.metadata?.content.decodeFromJsonStringOrNull<ContentMetadata>()
                 ?: throw WssException("Profile Content Metadata not found.")
 
             setUserProfileAndUpdateLocally(
@@ -172,7 +171,7 @@ class UserRepository @Inject constructor(
     suspend fun setLightningAddress(userId: String, lightningAddress: String) =
         withContext(dispatchers.io()) {
             val userProfileResponse = usersApi.getUserProfile(userId = userId)
-            val metadata = CommonJson.decodeFromStringOrNull<ContentMetadata>(userProfileResponse.metadata?.content)
+            val metadata = userProfileResponse.metadata?.content.decodeFromJsonStringOrNull<ContentMetadata>()
                 ?: throw WssException("Profile Content Metadata not found.")
 
             setUserProfileAndUpdateLocally(

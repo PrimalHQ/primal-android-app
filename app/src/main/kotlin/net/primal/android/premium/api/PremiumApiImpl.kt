@@ -27,9 +27,8 @@ import net.primal.android.premium.domain.PremiumPurchaseOrder
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.CommonJsonImplicitNulls
-import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.model.AppSpecificDataRequest
 import net.primal.domain.nostr.NostrEvent
@@ -50,7 +49,7 @@ class PremiumApiImpl @Inject constructor(
         )
 
         val event = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalMembershipNameAvailable)
-        return CommonJson.decodeFromStringOrNull<NameAvailableResponse>(event?.content)
+        return event?.content.decodeFromJsonStringOrNull<NameAvailableResponse>()
             ?: throw WssException("Invalid content")
     }
 
@@ -70,7 +69,7 @@ class PremiumApiImpl @Inject constructor(
         )
 
         val event = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalMembershipNameAvailable)
-        return CommonJson.decodeFromStringOrNull<NameAvailableResponse>(event?.content)
+        return event?.content.decodeFromJsonStringOrNull<NameAvailableResponse>()
             ?: throw WssException("Invalid content")
     }
 
@@ -88,7 +87,7 @@ class PremiumApiImpl @Inject constructor(
             ),
         )
         val statusEvent = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalMembershipStatus)
-        return CommonJson.decodeFromStringOrNull<MembershipStatusResponse>(statusEvent?.content)
+        return statusEvent?.content.decodeFromJsonStringOrNull<MembershipStatusResponse>()
     }
 
     override suspend fun purchaseMembership(userId: String, body: PurchaseMembershipRequest) {
@@ -185,7 +184,7 @@ class PremiumApiImpl @Inject constructor(
             message = PrimalCacheFilter(primalVerb = net.primal.data.remote.PrimalVerb.CLIENT_CONFIG.id),
         )
         val configEvent = result.findPrimalEvent(NostrEventKind.PrimalClientConfig)
-        val response = CommonJson.decodeFromStringOrNull<ShowSupportUsResponse>(configEvent?.content)
+        val response = configEvent?.content.decodeFromJsonStringOrNull<ShowSupportUsResponse>()
         return response?.showSupportPrimal == true
     }
 

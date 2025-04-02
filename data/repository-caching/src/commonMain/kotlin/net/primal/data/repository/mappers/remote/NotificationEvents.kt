@@ -1,7 +1,6 @@
 package net.primal.data.repository.mappers.remote
 
-import net.primal.core.utils.serialization.CommonJson
-import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.local.dao.notifications.NotificationData
 import net.primal.domain.NotificationType
 import net.primal.domain.PrimalEvent
@@ -63,5 +62,5 @@ fun ContentPrimalNotification.asNotificationPOOrNull(): NotificationData? {
 }
 
 fun List<PrimalEvent>.mapNotNullAsNotificationPO() =
-    this.mapNotNull { CommonJson.decodeFromStringOrNull<ContentPrimalNotification>(it.content) }
+    this.mapNotNull { it.content.decodeFromJsonStringOrNull<ContentPrimalNotification>() }
         .mapNotNull { it.asNotificationPOOrNull() }

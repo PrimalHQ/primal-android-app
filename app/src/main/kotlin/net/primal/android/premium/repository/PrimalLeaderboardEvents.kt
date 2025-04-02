@@ -6,13 +6,12 @@ import net.primal.android.nostr.model.primal.content.ContentLegendLeaderboardIte
 import net.primal.android.nostr.model.primal.content.ContentPremiumLeaderboardItem
 import net.primal.android.premium.leaderboard.domain.LeaderboardLegendEntry
 import net.primal.android.premium.leaderboard.domain.OGLeaderboardEntry
-import net.primal.core.utils.serialization.CommonJson
-import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.PrimalEvent
 import net.primal.domain.model.ProfileData
 
 fun PrimalEvent?.parseAndMapAsLeaderboardLegendEntries(profiles: Map<String, ProfileData>) =
-    CommonJson.decodeFromStringOrNull<List<ContentLegendLeaderboardItem>>(this?.content)
+    this?.content.decodeFromJsonStringOrNull<List<ContentLegendLeaderboardItem>>()
         ?.mapNotNull { item ->
             profiles[item.pubkey]?.let { profile ->
                 LeaderboardLegendEntry(
@@ -27,7 +26,7 @@ fun PrimalEvent?.parseAndMapAsLeaderboardLegendEntries(profiles: Map<String, Pro
         } ?: emptyList()
 
 fun PrimalEvent?.parseAndMapAsOGLeaderboardEntries(profiles: Map<String, ProfileData>) =
-    CommonJson.decodeFromStringOrNull<List<ContentPremiumLeaderboardItem>>(this?.content)
+    this?.content.decodeFromJsonStringOrNull<List<ContentPremiumLeaderboardItem>>()
         ?.mapNotNull { item ->
             profiles[item.pubkey]?.let { profile ->
                 OGLeaderboardEntry(

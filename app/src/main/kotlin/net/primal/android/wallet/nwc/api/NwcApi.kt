@@ -10,6 +10,7 @@ import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.wallet.nwc.model.LightningPayRequest
 import net.primal.android.wallet.nwc.model.LightningPayResponse
 import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.core.utils.toLong
@@ -72,7 +73,7 @@ class NwcApi @Inject constructor(
 
         val response = withContext(dispatcherProvider.io()) { okHttpClient.newCall(getRequest).execute() }
         val responseString = withContext(dispatcherProvider.io()) { response.body?.string() }
-        val decoded = CommonJson.decodeFromStringOrNull<LightningPayResponse>(responseString)
+        val decoded = responseString.decodeFromJsonStringOrNull<LightningPayResponse>()
 
         val responseInvoiceAmountInMillis = decoded?.pr?.extractInvoiceAmountInMilliSats()
         val requestAmountInMillis = satoshiAmountInMilliSats.toLong().toBigDecimal().toLong()
