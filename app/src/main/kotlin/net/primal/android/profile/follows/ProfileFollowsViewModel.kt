@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.profile.approvals.ProfileApproval
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.navigation.followsType
 import net.primal.android.navigation.profileIdOrThrow
@@ -24,6 +23,7 @@ import net.primal.android.profile.follows.ProfileFollowsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.repository.ProfileRepository
@@ -32,7 +32,7 @@ import timber.log.Timber
 @HiltViewModel
 class ProfileFollowsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val profileRepository: ProfileRepository,
     private val userRepository: UserRepository,

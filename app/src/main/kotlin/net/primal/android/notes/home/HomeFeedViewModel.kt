@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.feeds.list.ui.model.asFeedUi
 import net.primal.android.notes.home.HomeFeedContract.UiEvent
 import net.primal.android.notes.home.HomeFeedContract.UiState
@@ -23,6 +22,7 @@ import net.primal.android.user.updater.UserDataUpdaterFactory
 import net.primal.core.config.AppConfigHandler
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.utils.retryNetworkCall
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.FeedSpecKind
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
@@ -32,7 +32,7 @@ import timber.log.Timber
 
 @HiltViewModel
 class HomeFeedViewModel @Inject constructor(
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val appConfigHandler: AppConfigHandler,
     private val subscriptionsManager: SubscriptionsManager,

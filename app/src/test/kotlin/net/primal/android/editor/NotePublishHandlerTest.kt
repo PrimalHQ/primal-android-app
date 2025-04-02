@@ -61,7 +61,7 @@ class NotePublishHandlerTest {
         )
 
 //    private fun buildNotePublishHandler(
-//        dispatcherProvider: CoroutineDispatcherProvider = coroutinesTestRule.dispatcherProvider,
+//        dispatcherProvider: DispatcherProvider = coroutinesTestRule.dispatcherProvider,
 //        nostrPublisher: NostrPublisher = mockk(),
 //        database: PrimalDatabase = mockkPrimalDatabase(),
 //    ) = NotePublishHandler(

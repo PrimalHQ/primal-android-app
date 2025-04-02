@@ -1,12 +1,12 @@
 package net.primal.android.user.accounts
 
 import javax.inject.Inject
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.user.domain.UserAccount
+import net.primal.core.utils.coroutines.DispatcherProvider
 
 // TODO Reimplement UserAccountFetcher to use repositories
 class UserAccountFetcher @Inject constructor(
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
 ) {
 
     suspend fun fetchUserProfileOrNull(userId: String): UserAccount? {

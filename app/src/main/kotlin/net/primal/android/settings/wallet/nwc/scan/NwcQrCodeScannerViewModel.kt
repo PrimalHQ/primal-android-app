@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -17,11 +16,12 @@ import net.primal.android.user.domain.NWCParseException
 import net.primal.android.user.domain.isNwcUrl
 import net.primal.android.user.domain.parseNWCUrl
 import net.primal.android.user.repository.UserRepository
+import net.primal.core.utils.coroutines.DispatcherProvider
 import timber.log.Timber
 
 @HiltViewModel
 class NwcQrCodeScannerViewModel @Inject constructor(
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val userRepository: UserRepository,
 ) : ViewModel() {

@@ -2,15 +2,15 @@ package net.primal.android.networking.primal.upload.repository
 
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.upload.UploadResult
 
 class FileUploadRepository @Inject constructor(
     private val fileUploader: PrimalFileUploader,
-    private val dispatchers: CoroutineDispatcherProvider,
+    private val dispatchers: DispatcherProvider,
 ) {
 
     @Throws(UnsuccessfulFileUpload::class)

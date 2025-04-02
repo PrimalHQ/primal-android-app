@@ -7,7 +7,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.play.PlayBillingClient
 
@@ -19,7 +18,7 @@ object PlayBillingModule {
     @Singleton
     fun providePlayBillingClient(
         @ApplicationContext appContext: Context,
-        dispatchers: CoroutineDispatcherProvider,
+        dispatchers: DispatcherProvider,
     ): PrimalBillingClient =
         PlayBillingClient(
             appContext = appContext,

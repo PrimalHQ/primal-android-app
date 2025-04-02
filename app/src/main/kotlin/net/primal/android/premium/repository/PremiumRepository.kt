@@ -2,7 +2,6 @@ package net.primal.android.premium.repository
 
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.premium.api.PremiumApi
 import net.primal.android.premium.api.model.CancelMembershipRequest
 import net.primal.android.premium.api.model.LegendLeaderboardOrderBy
@@ -16,11 +15,12 @@ import net.primal.android.premium.leaderboard.domain.OGLeaderboardEntry
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
 import net.primal.core.networking.utils.retryNetworkCall
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
 class PremiumRepository @Inject constructor(
-    private val dispatchers: CoroutineDispatcherProvider,
+    private val dispatchers: DispatcherProvider,
     private val premiumApi: PremiumApi,
     private val accountsStore: UserAccountsStore,
 ) {

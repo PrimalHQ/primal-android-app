@@ -4,7 +4,6 @@ import androidx.room.withTransaction
 import javax.inject.Inject
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.networking.relays.FALLBACK_RELAYS
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.publish.NostrPublisher
@@ -17,12 +16,13 @@ import net.primal.android.user.domain.cleanWebSocketUrl
 import net.primal.android.user.domain.mapToRelayPO
 import net.primal.android.user.domain.toRelay
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
 class RelayRepository @Inject constructor(
-    private val dispatchers: CoroutineDispatcherProvider,
+    private val dispatchers: DispatcherProvider,
     private val usersDatabase: UsersDatabase,
     private val usersApi: UsersApi,
     private val nostrPublisher: NostrPublisher,

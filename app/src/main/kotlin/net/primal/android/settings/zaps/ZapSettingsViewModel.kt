@@ -11,20 +11,20 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.settings.zaps.ZapSettingsContract.UiEvent
 import net.primal.android.settings.zaps.ZapSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.ContentZapConfigItem
 import net.primal.domain.ContentZapDefault
 import timber.log.Timber
 
 @HiltViewModel
 class ZapSettingsViewModel @Inject constructor(
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val settingsRepository: SettingsRepository,
     private val nostrNotary: NostrNotary,

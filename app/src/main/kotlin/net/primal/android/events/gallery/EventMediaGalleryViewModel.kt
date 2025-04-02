@@ -15,7 +15,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.files.MediaDownloader
 import net.primal.android.core.files.error.UnableToSaveContent
 import net.primal.android.core.files.error.UnsuccessfulFileDownload
@@ -24,6 +23,7 @@ import net.primal.android.events.gallery.EventMediaGalleryContract.UiState
 import net.primal.android.navigation.mediaPositionMs
 import net.primal.android.navigation.mediaUrl
 import net.primal.android.navigation.noteIdOrThrow
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.EventUriType
 import net.primal.domain.repository.EventUriRepository
 import timber.log.Timber
@@ -31,7 +31,7 @@ import timber.log.Timber
 @HiltViewModel
 class EventMediaGalleryViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val mediaDownloader: MediaDownloader,
     private val eventUriRepository: EventUriRepository,
 ) : ViewModel() {

@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.JsonArray
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
@@ -32,6 +31,7 @@ import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.domain.asUserAccountFromFollowListEvent
 import net.primal.android.wallet.domain.WalletSettings
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.data.remote.api.users.UsersApi
@@ -45,7 +45,7 @@ import net.primal.domain.repository.UserDataCleanupRepository
 
 class UserRepository @Inject constructor(
     private val usersDatabase: UsersDatabase,
-    private val dispatchers: CoroutineDispatcherProvider,
+    private val dispatchers: DispatcherProvider,
     private val userAccountFetcher: UserAccountFetcher,
     private val accountsStore: UserAccountsStore,
     private val credentialsStore: CredentialsStore,

@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.navigation.draftTransaction
 import net.primal.android.navigation.lnbc
@@ -35,6 +34,7 @@ import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.core.utils.CurrencyConversionUtils.fromUsdToSats
 import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.getMaximumUsdAmount
 import net.primal.domain.model.ProfileData
 import net.primal.domain.nostr.cryptography.SignatureException
@@ -44,7 +44,7 @@ import timber.log.Timber
 @HiltViewModel
 class CreateTransactionViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val dispatchers: CoroutineDispatcherProvider,
+    private val dispatchers: DispatcherProvider,
     private val activeUserStore: ActiveAccountStore,
     private val profileRepository: ProfileRepository,
     private val walletRepository: WalletRepository,
