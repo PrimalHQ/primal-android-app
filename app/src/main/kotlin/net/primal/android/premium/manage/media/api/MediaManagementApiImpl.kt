@@ -12,6 +12,7 @@ import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.model.AppSpecificDataRequest
 import net.primal.domain.nostr.NostrEventKind
 
@@ -24,14 +25,12 @@ class MediaManagementApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.MEDIA_MANAGEMENT_STATS.id,
-                optionsJson = CommonJson.encodeToString(
-                    AppSpecificDataRequest(
-                        eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
-                            userId = userId,
-                            content = "",
-                        ),
+                optionsJson = AppSpecificDataRequest(
+                    eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
+                        userId = userId,
+                        content = "",
                     ),
-                ),
+                ).encodeToJsonString(),
             ),
         )
 
@@ -44,13 +43,11 @@ class MediaManagementApiImpl @Inject constructor(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.MEDIA_MANAGEMENT_UPLOADS.id,
-                optionsJson = CommonJson.encodeToString(
-                    MediaUploadsRequestBody(
-                        eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(userId = userId, content = ""),
-                        since = 0,
-                        limit = 1_000,
-                    ),
-                ),
+                optionsJson = MediaUploadsRequestBody(
+                    eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(userId = userId, content = ""),
+                    since = 0,
+                    limit = 1_000,
+                ).encodeToJsonString(),
             ),
         )
 
@@ -67,14 +64,12 @@ class MediaManagementApiImpl @Inject constructor(
         primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.MEDIA_MANAGEMENT_DELETE.id,
-                optionsJson = CommonJson.encodeToString(
-                    AppSpecificDataRequest(
-                        eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
-                            userId = userId,
-                            content = "{\"url\":\"$mediaUrl\"}",
-                        ),
+                optionsJson = AppSpecificDataRequest(
+                    eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
+                        userId = userId,
+                        content = "{\"url\":\"$mediaUrl\"}",
                     ),
-                ),
+                ).encodeToJsonString(),
             ),
         )
     }

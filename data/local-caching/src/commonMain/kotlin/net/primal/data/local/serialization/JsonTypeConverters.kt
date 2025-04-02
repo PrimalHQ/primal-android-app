@@ -4,6 +4,7 @@ import androidx.room.TypeConverter
 import kotlinx.serialization.json.JsonArray
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.serialization.encodeToJsonString
 
 class JsonTypeConverters {
 
@@ -16,7 +17,7 @@ class JsonTypeConverters {
     fun jsonArrayToString(jsonArray: JsonArray?): String? {
         return when (jsonArray) {
             null -> null
-            else -> CommonJson.encodeToString(jsonArray)
+            else -> jsonArray.encodeToJsonString()
         }
     }
 }

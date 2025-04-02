@@ -3,6 +3,7 @@ package net.primal.data.local.serialization
 import androidx.room.TypeConverter
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.ReferencedArticle
 import net.primal.domain.ReferencedHighlight
 import net.primal.domain.ReferencedNote
@@ -20,7 +21,7 @@ class NostrReferenceTypeConverters {
     fun referencedNoteToString(refNote: ReferencedNote?): String? {
         return when (refNote) {
             null -> null
-            else -> CommonJson.encodeToString(refNote)
+            else -> refNote.encodeToJsonString()
         }
     }
 
@@ -33,7 +34,7 @@ class NostrReferenceTypeConverters {
     fun referencedArticleToString(refNote: ReferencedArticle?): String? {
         return when (refNote) {
             null -> null
-            else -> CommonJson.encodeToString(refNote)
+            else -> refNote.encodeToJsonString()
         }
     }
 
@@ -46,7 +47,7 @@ class NostrReferenceTypeConverters {
     fun referencedHighlightToString(refNote: ReferencedHighlight?): String? {
         return when (refNote) {
             null -> null
-            else -> CommonJson.encodeToString(refNote)
+            else -> refNote.encodeToJsonString()
         }
     }
 
@@ -59,7 +60,7 @@ class NostrReferenceTypeConverters {
     fun referencedUserToString(refNote: ReferencedUser?): String? {
         return when (refNote) {
             null -> null
-            else -> CommonJson.encodeToString(refNote)
+            else -> refNote.encodeToJsonString()
         }
     }
 
@@ -72,7 +73,7 @@ class NostrReferenceTypeConverters {
     fun referencedZapToString(refNote: ReferencedZap?): String? {
         return when (refNote) {
             null -> null
-            else -> CommonJson.encodeToString(refNote)
+            else -> refNote.encodeToJsonString()
         }
     }
 }

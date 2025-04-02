@@ -22,7 +22,7 @@ import net.primal.android.wallet.domain.ZapTarget
 import net.primal.android.wallet.domain.toTags
 import net.primal.android.wallet.nwc.model.NwcWalletRequest
 import net.primal.android.wallet.nwc.model.PayInvoiceRequest
-import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.settings.model.AppSettingsDescription
 import net.primal.domain.ContentAppSettings
 import net.primal.domain.nostr.ContentMetadata
@@ -94,9 +94,7 @@ class NostrNotary @Inject constructor(
                 pubKey = userId,
                 kind = NostrEventKind.ApplicationSpecificData.value,
                 tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()) + tags,
-                content = CommonJson.encodeToString(
-                    AppSettingsDescription(description = description),
-                ),
+                content = AppSettingsDescription(description = description).encodeToJsonString(),
             ),
         )
     }
@@ -108,7 +106,7 @@ class NostrNotary @Inject constructor(
                 pubKey = userId,
                 kind = NostrEventKind.ApplicationSpecificData.value,
                 tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
-                content = CommonJson.encodeToString(appSettings),
+                content = appSettings.encodeToJsonString(),
             ),
         )
     }

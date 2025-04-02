@@ -31,6 +31,7 @@ import net.primal.core.networking.sockets.filterByEventId
 import net.primal.core.networking.sockets.parseIncomingMessage
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.serialization.toNostrJsonObject
@@ -128,12 +129,10 @@ class RelayPool(
             val queryResult = primalApiClient.query(
                 message = PrimalCacheFilter(
                     primalVerb = net.primal.data.remote.PrimalVerb.BROADCAST_EVENTS.id,
-                    optionsJson = CommonJson.encodeToString(
-                        BroadcastRequestBody(
-                            events = listOf(nostrEvent),
-                            relays = relayUrls,
-                        ),
-                    ),
+                    optionsJson = BroadcastRequestBody(
+                        events = listOf(nostrEvent),
+                        relays = relayUrls,
+                    ).encodeToJsonString(),
                 ),
             )
             val broadcastEvents = queryResult.findPrimalEvent(NostrEventKind.PrimalBroadcastResult)

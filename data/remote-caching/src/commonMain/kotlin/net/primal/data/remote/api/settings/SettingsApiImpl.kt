@@ -2,7 +2,6 @@ package net.primal.data.remote.api.settings
 
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
-import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.PrimalVerb
 import net.primal.data.remote.api.settings.model.GetAppSettingsResponse
@@ -46,9 +45,7 @@ class SettingsApiImpl(
         primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.SET_APP_SETTINGS.id,
-                optionsJson = CommonJson.encodeToString(
-                    SetAppSettingsRequest(settingsEvent = settingsEvent),
-                ),
+                optionsJson = SetAppSettingsRequest(settingsEvent = settingsEvent).encodeToJsonString(),
             ),
         )
     }
@@ -57,9 +54,7 @@ class SettingsApiImpl(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.MUTE_LIST.id,
-                optionsJson = CommonJson.encodeToString(
-                    GetMuteListRequest(pubkey = userId),
-                ),
+                optionsJson = GetMuteListRequest(pubkey = userId).encodeToJsonString(),
             ),
         )
 

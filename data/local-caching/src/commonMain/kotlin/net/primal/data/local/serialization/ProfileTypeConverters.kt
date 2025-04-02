@@ -3,6 +3,7 @@ package net.primal.data.local.serialization
 import androidx.room.TypeConverter
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.PrimalLegendProfile
 import net.primal.domain.PrimalPremiumInfo
 
@@ -17,7 +18,7 @@ class ProfileTypeConverters {
     fun primalLegendProfileToString(data: PrimalLegendProfile?): String? {
         return when (data) {
             null -> null
-            else -> CommonJson.encodeToString(data)
+            else -> data.encodeToJsonString()
         }
     }
 
@@ -30,7 +31,7 @@ class ProfileTypeConverters {
     fun primalPrimalPremiumInfo(data: PrimalPremiumInfo?): String? {
         return when (data) {
             null -> null
-            else -> CommonJson.encodeToString(data)
+            else -> data.encodeToJsonString()
         }
     }
 }

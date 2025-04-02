@@ -2,7 +2,6 @@ package net.primal.domain.repository
 
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.Flow
-import kotlinx.serialization.descriptors.StructureKind.LIST
 import net.primal.domain.UserProfileSearchItem
 import net.primal.domain.model.ProfileData
 import net.primal.domain.model.ProfileStats

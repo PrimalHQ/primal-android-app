@@ -7,6 +7,7 @@ import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.explore.model.ExploreRequestBody
 import net.primal.data.remote.api.explore.model.SearchUsersRequestBody
 import net.primal.data.remote.api.explore.model.TopicScore
@@ -23,7 +24,7 @@ internal class ExploreApiImpl(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.EXPLORE_PEOPLE.id,
-                optionsJson = CommonJson.encodeToString(body),
+                optionsJson = body.encodeToJsonString(),
             ),
         )
 
@@ -47,7 +48,7 @@ internal class ExploreApiImpl(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.EXPLORE_ZAPS.id,
-                optionsJson = CommonJson.encodeToString(body),
+                optionsJson = body.encodeToJsonString(),
             ),
         )
 
@@ -105,7 +106,7 @@ internal class ExploreApiImpl(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.USER_SEARCH.id,
-                optionsJson = CommonJson.encodeToString(body),
+                optionsJson = body.encodeToJsonString(),
             ),
         )
 
