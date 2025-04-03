@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.WalletPreference
@@ -22,8 +23,8 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState
-import net.primal.android.wallet.db.WalletTransactionData
 import net.primal.android.wallet.repository.ExchangeRateHandler
+import net.primal.android.wallet.repository.TransactionProfileData
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SatsPurchase
@@ -49,7 +50,7 @@ class WalletDashboardViewModel @Inject constructor(
     private val _state = MutableStateFlow(
         value = UiState(
             transactions = walletRepository
-                .latestTransactions(userId = activeUserId)
+                .getLatestTransactions(userId = activeUserId)
                 .mapAsPagingDataOfTransactionUi(),
             isNpubLogin = userRepository.isNpubLogin(userId = activeUserId),
         ),
@@ -172,27 +173,26 @@ class WalletDashboardViewModel @Inject constructor(
         setState { copy(error = error) }
     }
 
-    private fun Flow<PagingData<WalletTransactionData>>.mapAsPagingDataOfTransactionUi() =
+    private fun Flow<PagingData<TransactionProfileData>>.mapAsPagingDataOfTransactionUi() =
         map { pagingData -> pagingData.map { it.mapAsTransactionDataUi() } }
 
-    private fun WalletTransactionData.mapAsTransactionDataUi() =
+    private fun TransactionProfileData.mapAsTransactionDataUi() =
         TransactionListItemDataUi(
-            txId = this.id,
-            txType = this.type,
-            txState = this.state,
-            txAmountInSats = this.amountInBtc.toBigDecimal().abs().toSats(),
-            txCreatedAt = Instant.ofEpochSecond(this.createdAt),
-            txUpdatedAt = Instant.ofEpochSecond(this.updatedAt),
-            txCompletedAt = this.completedAt?.let { Instant.ofEpochSecond(it) },
-            txNote = this.note,
-            otherUserId = this.otherUserId,
-            // TODO We need to do TXs and ProfileData merging
-//            otherUserAvatarCdnImage = this.otherProfileData?.avatarCdnImage,
-//            otherUserDisplayName = this.otherProfileData?.authorNameUiFriendly(),
-//            otherUserLegendaryCustomization = this.otherProfileData?.primalPremiumInfo
-//                ?.legendProfile?.asLegendaryCustomization(),
-            isZap = this.isZap,
-            isStorePurchase = this.isStorePurchase,
-            isOnChainPayment = this.onChainAddress != null,
+            txId = this.transaction.id,
+            txType = this.transaction.type,
+            txState = this.transaction.state,
+            txAmountInSats = this.transaction.amountInBtc.toBigDecimal().abs().toSats(),
+            txCreatedAt = Instant.ofEpochSecond(this.transaction.createdAt),
+            txUpdatedAt = Instant.ofEpochSecond(this.transaction.updatedAt),
+            txCompletedAt = this.transaction.completedAt?.let { Instant.ofEpochSecond(it) },
+            txNote = this.transaction.note,
+            otherUserId = this.transaction.otherUserId,
+            otherUserAvatarCdnImage = this.otherProfileData?.avatarCdnImage,
+            otherUserDisplayName = this.otherProfileData?.authorNameUiFriendly(),
+            otherUserLegendaryCustomization = this.otherProfileData?.primalPremiumInfo
+                ?.legendProfile?.asLegendaryCustomization(),
+            isZap = this.transaction.isZap,
+            isStorePurchase = this.transaction.isStorePurchase,
+            isOnChainPayment = this.transaction.onChainAddress != null,
         )
 }

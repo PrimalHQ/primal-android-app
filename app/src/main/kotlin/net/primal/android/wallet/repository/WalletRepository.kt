@@ -3,8 +3,12 @@ package net.primal.android.wallet.repository
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import androidx.paging.PagingSource
+import androidx.paging.map
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.db.UsersDatabase
@@ -38,12 +42,39 @@ class WalletRepository @Inject constructor(
     private val profileRepository: ProfileRepository,
 ) {
 
-    fun latestTransactions(userId: String) =
+    private fun latestTransactions(userId: String) =
         createTransactionsPager(userId) {
             usersDatabase.walletTransactions().latestTransactionsPagedByUserId(userId = userId)
         }.flow
 
-    fun findTransactionById(txId: String) = usersDatabase.walletTransactions().findTransactionById(txId = txId)
+    /*
+     *  TODO: this should become a use case.  Could be migrated out with `findTransactionByIdOrNull` to
+     *   form some Interactor/Handler to deal with merging transactions with profiles.
+     */
+    fun getLatestTransactions(userId: String): Flow<PagingData<TransactionProfileData>> =
+        latestTransactions(userId = userId).map {
+            it.map {
+                val otherProfile = it.otherUserId?.let { profileRepository.findProfileDataOrNull(it) }
+                TransactionProfileData(
+                    transaction = it,
+                    otherProfileData = otherProfile,
+                )
+            }
+        }
+
+    suspend fun findTransactionByIdOrNull(txId: String): TransactionProfileData? =
+        withContext(dispatcherProvider.io()) {
+            val transaction = usersDatabase.walletTransactions().findTransactionById(txId = txId)
+                ?: return@withContext null
+
+            val profile = transaction.otherUserId
+                ?.let { profileRepository.findProfileDataOrNull(profileId = transaction.otherUserId) }
+
+            TransactionProfileData(
+                transaction = transaction,
+                otherProfileData = profile,
+            )
+        }
 
     suspend fun fetchUserWalletInfoAndUpdateUserAccount(userId: String) {
         val response = walletApi.getWalletUserInfo(userId)
