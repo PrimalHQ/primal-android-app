@@ -84,8 +84,11 @@ class WalletActivationViewModel @Inject constructor(
 
     private fun loadAllCountries() =
         viewModelScope.launch {
-            val allCountries = WalletRegionJson.decodeFromJsonStringOrNull<Regions>()!!.mapToListOfCountries()
-            setState { copy(allCountries = allCountries) }
+            val allCountries = WalletRegionJson
+                .decodeFromJsonStringOrNull<Regions>()
+                ?.mapToListOfCountries()
+
+            setState { copy(allCountries = allCountries ?: emptyList()) }
         }
 
     private fun Regions.mapToListOfCountries(): List<Country> {

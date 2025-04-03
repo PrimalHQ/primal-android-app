@@ -201,7 +201,9 @@ class WalletApiImpl @Inject constructor(
             ?: throw WssException("Missing or invalid content in response.")
 
         val txJsonArray = transactionsEvent.content.decodeFromJsonStringOrNull<JsonArray>()
-        val transactions = txJsonArray!!.mapNotNull {
+            ?: throw WssException("Invalid content in 10_000_304 event.")
+
+        val transactions = txJsonArray.mapNotNull {
             try {
                 CommonJson.decodeFromJsonElement<ContentWalletTransaction>(it)
             } catch (error: IllegalArgumentException) {
