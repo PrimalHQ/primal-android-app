@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
@@ -32,8 +33,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalDensity
@@ -249,9 +252,6 @@ private fun FeedNoteCard(
     val overflowIconSizeDp = 40.dp
 
     val graphicsLayer = rememberGraphicsLayer()
-    val outlineColor = AppTheme.colorScheme.outline
-    val lineOffsetX: Dp = (avatarSizeDp / 2) + avatarPaddingDp + 2.dp
-    val lineWidth: Dp = 2.dp
 
     NoteSurfaceCard(
         modifier = modifier
@@ -320,44 +320,14 @@ private fun FeedNoteCard(
 
                 Column(
                     modifier = Modifier
-                        .drawWithContent {
-                            graphicsLayer.record { this@drawWithContent.drawContent() }
-                            drawLayer(graphicsLayer)
-                        }
-                        .clip(
-                            RoundedCornerShape(
-                                topStart = AppTheme.shapes.medium.topStart,
-                                bottomStart = AppTheme.shapes.medium.bottomStart,
-                                topEnd = AppTheme.shapes.medium.topEnd,
-                                bottomEnd = AppTheme.shapes.medium.bottomEnd,
-                            ),
+                        .shareableGraphics(
+                            graphicsLayer = graphicsLayer,
+                            drawLineAboveAvatar = drawLineAboveAvatar,
+                            drawLineBelowAvatar = drawLineBelowAvatar,
+                            outlineColor = AppTheme.colorScheme.outline,
+                            lineOffsetX = (avatarSizeDp / 2) + avatarPaddingDp + 2.dp,
+                            lineWidth = 2.dp,
                         )
-                        .background(color = AppTheme.colorScheme.surfaceVariant)
-                        .drawWithCache {
-                            onDrawBehind {
-                                val connectionX = lineOffsetX.toPx()
-
-                                if (drawLineBelowAvatar) {
-                                    drawLine(
-                                        color = outlineColor,
-                                        start = Offset(x = connectionX, y = 16.dp.toPx()),
-                                        end = Offset(x = connectionX, y = size.height * 2),
-                                        strokeWidth = lineWidth.toPx(),
-                                        cap = StrokeCap.Square,
-                                    )
-                                }
-
-                                if (drawLineAboveAvatar) {
-                                    drawLine(
-                                        color = outlineColor,
-                                        start = Offset(x = connectionX, y = 0f),
-                                        end = Offset(x = connectionX, y = 16.dp.toPx()),
-                                        strokeWidth = lineWidth.toPx(),
-                                        cap = StrokeCap.Square,
-                                    )
-                                }
-                            }
-                        }
                         .padding(
                             top = if (data.repostAuthorName == null) notePaddingDp else 0.dp,
                             bottom = notePaddingDp,
@@ -438,6 +408,49 @@ private fun FeedNoteCard(
         }
     }
 }
+
+@Composable
+private fun Modifier.shareableGraphics(
+    graphicsLayer: GraphicsLayer = rememberGraphicsLayer(),
+    clip: Shape = RoundedCornerShape(corner = CornerSize(size = 16.dp)),
+    outlineColor: Color? = null,
+    backgroundColor: Color = AppTheme.colorScheme.surfaceVariant,
+    drawLineBelowAvatar: Boolean = false,
+    drawLineAboveAvatar: Boolean = false,
+    lineOffsetX: Dp = 0.dp,
+    lineWidth: Dp = 0.dp,
+) = this
+    .drawWithContent {
+        graphicsLayer.record { this@drawWithContent.drawContent() }
+        drawLayer(graphicsLayer)
+    }
+    .clip(clip)
+    .background(color = backgroundColor)
+    .drawWithCache {
+        onDrawBehind {
+            val connectionX = lineOffsetX.toPx()
+
+            if (drawLineBelowAvatar && outlineColor != null) {
+                drawLine(
+                    color = outlineColor,
+                    start = Offset(x = connectionX, y = 16.dp.toPx()),
+                    end = Offset(x = connectionX, y = size.height * 2),
+                    strokeWidth = lineWidth.toPx(),
+                    cap = StrokeCap.Square,
+                )
+            }
+
+            if (drawLineAboveAvatar && outlineColor != null) {
+                drawLine(
+                    color = outlineColor,
+                    start = Offset(x = connectionX, y = 0f),
+                    end = Offset(x = connectionX, y = 16.dp.toPx()),
+                    strokeWidth = lineWidth.toPx(),
+                    cap = StrokeCap.Square,
+                )
+            }
+        }
+    }
 
 @Composable
 private fun noteCardColors() =
