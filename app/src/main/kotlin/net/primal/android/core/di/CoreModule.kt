@@ -13,6 +13,8 @@ import net.primal.android.messages.security.Nip04MessageCipher
 import net.primal.core.config.AppConfigFactory
 import net.primal.core.config.AppConfigHandler
 import net.primal.core.config.AppConfigProvider
+import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.coroutines.DispatcherProviderFactory
 import net.primal.domain.nostr.cryptography.MessageCipher
 import okhttp3.OkHttpClient
 import timber.log.Timber
@@ -40,4 +42,7 @@ object CoreModule {
 
     @Provides
     fun messagesCipher(nip04MessageCipher: Nip04MessageCipher): MessageCipher = nip04MessageCipher
+
+    @Provides
+    fun provideDispatcher(): DispatcherProvider = DispatcherProviderFactory.create()
 }

@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent
 import net.primal.android.explore.feed.ExploreFeedContract.UiState
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
@@ -23,6 +22,7 @@ import net.primal.android.navigation.exploreFeedSpec
 import net.primal.android.navigation.renderType
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.FEED_KIND_SEARCH
 import net.primal.domain.buildAdvancedSearchFeedSpec
 import net.primal.domain.nostr.cryptography.SignatureException
@@ -34,7 +34,7 @@ import timber.log.Timber
 @HiltViewModel
 class ExploreFeedViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val feedRepository: FeedRepository,
     private val feedsRepository: FeedsRepository,
     private val activeAccountStore: ActiveAccountStore,

@@ -2,7 +2,6 @@ package net.primal.android.scanner.analysis
 
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.crypto.urlToLnUrlHrp
 import net.primal.android.navigation.asUrlDecoded
 import net.primal.android.wallet.api.parseAsLNUrlOrNull
@@ -16,9 +15,10 @@ import net.primal.android.wallet.utils.isLnInvoice
 import net.primal.android.wallet.utils.isLnUrl
 import net.primal.android.wallet.utils.parseBitcoinPaymentInstructions
 import net.primal.core.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.coroutines.DispatcherProvider
 
 class WalletTextParser @Inject constructor(
-    private val dispatchers: CoroutineDispatcherProvider,
+    private val dispatchers: DispatcherProvider,
     private val walletRepository: WalletRepository,
 ) {
 

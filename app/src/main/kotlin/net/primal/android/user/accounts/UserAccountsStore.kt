@@ -10,12 +10,12 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.user.domain.UserAccount
+import net.primal.core.utils.coroutines.DispatcherProvider
 
 @Singleton
 class UserAccountsStore @Inject constructor(
-    dispatchers: CoroutineDispatcherProvider,
+    dispatchers: DispatcherProvider,
     private val persistence: DataStore<List<UserAccount>>,
 ) {
     private val scope = CoroutineScope(dispatchers.io())

@@ -4,7 +4,6 @@ import java.io.IOException
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.crypto.assureValidNsec
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.profile.domain.ProfileMetadata
@@ -12,6 +11,7 @@ import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
+import net.primal.core.utils.coroutines.DispatcherProvider
 import timber.log.Timber
 
 class CreateAccountHandler @Inject constructor(
@@ -20,7 +20,7 @@ class CreateAccountHandler @Inject constructor(
     private val userRepository: UserRepository,
     private val settingsRepository: SettingsRepository,
     private val credentialsStore: CredentialsStore,
-    private val dispatchers: CoroutineDispatcherProvider,
+    private val dispatchers: DispatcherProvider,
     private val nostrNotary: NostrNotary,
 ) {
 

@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
 import net.primal.android.messages.domain.MessagesUnreadCount
 import net.primal.android.networking.di.PrimalCacheApiClient
@@ -37,6 +36,7 @@ import net.primal.core.config.AppConfigProvider
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.primal.PrimalSocketSubscription
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.notifications.model.PubkeyRequestBody
 import net.primal.domain.PrimalEvent
@@ -44,7 +44,7 @@ import net.primal.domain.nostr.NostrEventKind
 
 @Singleton
 class SubscriptionsManager @Inject constructor(
-    dispatcherProvider: CoroutineDispatcherProvider,
+    dispatcherProvider: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val userRepository: UserRepository,
     private val nostrNotary: NostrNotary,

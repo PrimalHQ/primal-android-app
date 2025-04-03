@@ -11,19 +11,19 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.settings.muted.list.MutedSettingsContract.UiEvent
 import net.primal.android.settings.muted.list.MutedSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.repository.MutedUserRepository
 import timber.log.Timber
 
 @HiltViewModel
 class MutedSettingsViewModel @Inject constructor(
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val mutedUserRepository: MutedUserRepository,
 ) : ViewModel() {
