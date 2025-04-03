@@ -5,6 +5,11 @@ import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.utils.serialization.CommonJsonImplicitNulls
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.data.remote.api.articles.model.ArticleDetailsRequestBody
+import net.primal.data.remote.api.articles.model.ArticleFeedRequestBody
+import net.primal.data.remote.api.articles.model.ArticleHighlightsRequestBody
+import net.primal.data.remote.api.articles.model.ArticleHighlightsResponse
+import net.primal.data.remote.api.articles.model.ArticleResponse
 import net.primal.domain.nostr.NostrEventKind
 
 internal class ArticlesApiImpl(

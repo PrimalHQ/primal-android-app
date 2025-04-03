@@ -9,9 +9,9 @@ import net.primal.domain.PrimalLegendProfile
 fun List<PrimalEvent>.parseAndFoldPrimalUserNames() =
     map { it.parseAndMapPrimalUserNames() }.fold(emptyMap<String, String>()) { acc, curr -> acc + curr }
 
-// fun List<PrimalEvent>.parseAndFoldPrimalPremiumInfo() =
-//    map { it.parseAndMapPrimalPremiumInfo() }
-//        .fold(emptyMap<String, ContentProfilePremiumInfo>()) { acc, curr -> acc + curr }
+fun List<PrimalEvent>.parseAndFoldPrimalPremiumInfo() =
+    map { it.parseAndMapPrimalPremiumInfo() }
+        .fold(emptyMap<String, ContentProfilePremiumInfo>()) { acc, curr -> acc + curr }
 
 fun List<PrimalEvent>.parseAndFoldPrimalLegendProfiles() =
     map { it.parseAndMapPrimalLegendProfiles() }

@@ -2,7 +2,6 @@ package net.primal.domain.nostr.utils
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import io.github.aakira.napier.Napier
-import kotlin.text.get
 import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
 
 /** based on litecoinj */

@@ -2,9 +2,9 @@ package net.primal.android.premium.api.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import net.primal.android.premium.leaderboard.domain.OGLeaderboardEntry
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.OGLeaderboardEntry
 
 class PremiumLeaderboardPagingSource(
     private val premiumRepository: PremiumRepository,

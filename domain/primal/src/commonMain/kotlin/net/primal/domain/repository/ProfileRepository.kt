@@ -19,7 +19,10 @@ interface ProfileRepository {
     fun observeProfileData(profileId: String): Flow<ProfileData>
     fun observeProfileData(profileIds: List<String>): Flow<List<ProfileData>>
     fun observeProfileStats(profileId: String): Flow<ProfileStats?>
-    suspend fun fetchProfile(profileId: String)
+    suspend fun fetchProfile(profileId: String): ProfileData?
+
+    @Throws(CancellationException::class)
+    suspend fun fetchProfiles(profileIds: List<String>): List<ProfileData>
 
     suspend fun fetchUserProfileFollowedBy(
         profileId: String,

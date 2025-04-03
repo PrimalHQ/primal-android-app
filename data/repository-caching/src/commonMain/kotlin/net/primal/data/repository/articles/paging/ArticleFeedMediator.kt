@@ -5,6 +5,7 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import io.github.aakira.napier.Napier
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.withContext
@@ -17,9 +18,9 @@ import net.primal.data.local.dao.reads.Article as ArticlePO
 import net.primal.data.local.dao.reads.ArticleFeedCrossRef
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.local.db.withTransaction
-import net.primal.data.remote.api.articles.ArticleFeedRequestBody
-import net.primal.data.remote.api.articles.ArticleResponse
 import net.primal.data.remote.api.articles.ArticlesApi
+import net.primal.data.remote.api.articles.model.ArticleFeedRequestBody
+import net.primal.data.remote.api.articles.model.ArticleResponse
 import net.primal.data.remote.model.ContentPrimalPaging
 import net.primal.data.repository.articles.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.remote.mapNotNullAsArticleDataPO
@@ -85,7 +86,7 @@ internal class ArticleFeedMediator(
         }
     }
 
-    @Throws(RepeatingRequestBodyException::class)
+    @Throws(RepeatingRequestBodyException::class, CancellationException::class)
     private suspend fun fetchArticles(
         pageSize: Int,
         nextUntil: Long?,

@@ -4,6 +4,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.time.Instant
 import kotlin.time.Duration
+import net.primal.android.core.push.PushNotificationsTokenUpdater
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.settings.repository.SettingsRepository
@@ -24,6 +25,7 @@ class UserDataUpdater @AssistedInject constructor(
     private val bookmarksRepository: PublicBookmarksRepository,
     private val premiumRepository: PremiumRepository,
     private val nostrNotary: NostrNotary,
+    private val pushNotificationsTokenUpdater: PushNotificationsTokenUpdater,
 ) {
 
     private var lastTimeFetched: Instant = Instant.EPOCH
@@ -62,5 +64,6 @@ class UserDataUpdater @AssistedInject constructor(
         userRepository.fetchAndUpdateUserAccount(userId = userId)
         bookmarksRepository.fetchAndPersistBookmarks(userId = userId)
         walletRepository.fetchUserWalletInfoAndUpdateUserAccount(userId = userId)
+        pushNotificationsTokenUpdater.updateTokenForAllUsers()
     }
 }

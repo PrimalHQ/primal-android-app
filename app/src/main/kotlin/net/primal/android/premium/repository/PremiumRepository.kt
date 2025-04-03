@@ -10,12 +10,14 @@ import net.primal.android.premium.api.model.PremiumLeaderboardOrderBy
 import net.primal.android.premium.api.model.PurchaseMembershipRequest
 import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
 import net.primal.android.premium.domain.PremiumMembership
-import net.primal.android.premium.leaderboard.domain.LeaderboardLegendEntry
-import net.primal.android.premium.leaderboard.domain.OGLeaderboardEntry
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.asMapByKey
+import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
+import net.primal.domain.LeaderboardLegendEntry
+import net.primal.domain.OGLeaderboardEntry
 import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
@@ -97,27 +99,24 @@ class PremiumRepository @Inject constructor(
                 until = until,
             )
 
-            // TODO Fix mapping for OG leaderboard
+            val primalUserNames = response.primalUsernames.parseAndFoldPrimalUserNames()
+            val primalPremiumInfo = response.primalPremiumInfoEvents.parseAndFoldPrimalPremiumInfo()
+            val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource()
 
-//        val primalUserNames = response.primalUsernames.parseAndFoldPrimalUserNames()
-//        val primalPremiumInfo = response.primalPremiumInfoEvents.parseAndFoldPrimalPremiumInfo()
-//        val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+            val profiles = response.profileMetadatas.mapAsProfileDataDO(
+                cdnResources = cdnResources,
+                primalUserNames = primalUserNames,
+                primalPremiumInfo = primalPremiumInfo,
+                primalLegendProfiles = emptyMap(),
+                blossomServers = emptyMap(),
+            )
 
-//        val profiles = response.profileMetadatas.mapAsProfileDataPO(
-//            cdnResourcesMap = cdnResources,
-//            primalUserNames = primalUserNames,
-//            primalPremiumInfo = primalPremiumInfo,
-//            primalLegendProfiles = emptyMap(),
-//            blossomServers = emptyMap(),
-//        )
-
+            /* TODO: cache profiles in db. */
 //        database.profiles().insertOrUpdateAll(profiles)
 
-//        response.orderedPremiumLeaderboardEvent.parseAndMapAsOGLeaderboardEntries(
-//            profiles = profiles.asMapByKey { it.ownerId },
-//        )
-
-            emptyList()
+            response.orderedPremiumLeaderboardEvent.parseAndMapAsOGLeaderboardEntries(
+                profiles = profiles.asMapByKey { it.profileId },
+            )
         }
 
     suspend fun fetchLegendLeaderboard(
@@ -127,26 +126,24 @@ class PremiumRepository @Inject constructor(
         withContext(dispatchers.io()) {
             val response = premiumApi.getLegendLeaderboard(orderBy = orderBy, limit = limit)
 
-            // TODO Fix mapping for Legend leaderboard
-//            val primalUserNames = response.primalUsernames.parseAndFoldPrimalUserNames()
-//            val primalPremiumInfo = response.primalPremiumInfoEvents.parseAndFoldPrimalPremiumInfo()
-//            val primalLegendProfiles = response.primalLegendProfiles.parseAndFoldPrimalLegendProfiles()
-//            val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-//            val profiles = response.profileMetadatas.mapAsProfileDataPO(
-//                cdnResources = cdnResources,
-//                primalUserNames = primalUserNames,
-//                primalPremiumInfo = primalPremiumInfo,
-//                primalLegendProfiles = primalLegendProfiles,
-//                blossomServers = emptyMap(),
-//            )
-//
-//            database.profiles().insertOrUpdateAll(profiles)
-//
-//            response.orderedLegendLeaderboardEvent.parseAndMapAsLeaderboardLegendEntries(
-//                profiles = profiles.asMapByKey { it.ownerId },
-//            )
+            val primalUserNames = response.primalUsernames.parseAndFoldPrimalUserNames()
+            val primalPremiumInfo = response.primalPremiumInfoEvents.parseAndFoldPrimalPremiumInfo()
+            val primalLegendProfiles = response.primalLegendProfiles.parseAndFoldPrimalLegendProfiles()
+            val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource()
+            val profiles = response.profileMetadatas.mapAsProfileDataDO(
+                cdnResources = cdnResources,
+                primalUserNames = primalUserNames,
+                primalPremiumInfo = primalPremiumInfo,
+                primalLegendProfiles = primalLegendProfiles,
+                blossomServers = emptyMap(),
+            )
 
-            emptyList()
+            /* TODO: cache profiles in db. */
+//            database.profiles().insertOrUpdateAll(profiles)
+
+            response.orderedLegendLeaderboardEvent.parseAndMapAsLeaderboardLegendEntries(
+                profiles = profiles.asMapByKey { it.profileId },
+            )
         }
 
     suspend fun cancelSubscription(userId: String, purchaseJson: String) {
