@@ -15,9 +15,9 @@ import kotlinx.coroutines.withContext
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.reads.Article as ArticlePO
 import net.primal.data.local.db.PrimalDatabase
-import net.primal.data.remote.api.articles.ArticleDetailsRequestBody
-import net.primal.data.remote.api.articles.ArticleHighlightsRequestBody
 import net.primal.data.remote.api.articles.ArticlesApi
+import net.primal.data.remote.api.articles.model.ArticleDetailsRequestBody
+import net.primal.data.remote.api.articles.model.ArticleHighlightsRequestBody
 import net.primal.data.repository.articles.paging.ArticleFeedMediator
 import net.primal.data.repository.articles.processors.persistArticleCommentsToDatabase
 import net.primal.data.repository.articles.processors.persistToDatabaseAsTransaction

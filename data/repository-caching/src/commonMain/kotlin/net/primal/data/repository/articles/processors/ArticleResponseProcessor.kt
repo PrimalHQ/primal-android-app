@@ -5,7 +5,7 @@ import net.primal.data.local.dao.events.eventRelayHintsUpserter
 import net.primal.data.local.dao.threads.ArticleCommentCrossRef
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.local.db.withTransaction
-import net.primal.data.remote.api.articles.ArticleResponse
+import net.primal.data.remote.api.articles.model.ArticleResponse
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.flatMapNotNullAsLinkPreviewResource
 import net.primal.data.remote.mapper.flatMapNotNullAsVideoThumbnailsMap

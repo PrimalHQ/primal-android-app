@@ -1,4 +1,4 @@
-package net.primal.data.remote.api.articles
+package net.primal.data.remote.api.articles.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

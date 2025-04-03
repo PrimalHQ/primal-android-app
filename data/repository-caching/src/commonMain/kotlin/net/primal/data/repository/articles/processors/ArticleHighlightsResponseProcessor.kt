@@ -3,7 +3,7 @@ package net.primal.data.repository.articles.processors
 import net.primal.data.local.dao.events.eventRelayHintsUpserter
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.local.db.withTransaction
-import net.primal.data.remote.api.articles.ArticleHighlightsResponse
+import net.primal.data.remote.api.articles.model.ArticleHighlightsResponse
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.data.repository.mappers.remote.asHighlightData
