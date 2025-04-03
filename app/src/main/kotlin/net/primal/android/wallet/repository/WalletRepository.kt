@@ -26,6 +26,7 @@ import net.primal.android.wallet.db.WalletTransactionData
 import net.primal.android.wallet.domain.Network
 import net.primal.android.wallet.domain.SubWallet
 import net.primal.android.wallet.domain.WalletKycLevel
+import net.primal.domain.repository.ProfileRepository
 
 @OptIn(ExperimentalPagingApi::class)
 class WalletRepository @Inject constructor(
@@ -34,6 +35,7 @@ class WalletRepository @Inject constructor(
     private val walletApi: WalletApi,
     private val usersDatabase: UsersDatabase,
     private val userRepository: UserRepository,
+    private val profileRepository: ProfileRepository,
 ) {
 
     fun latestTransactions(userId: String) =
@@ -195,6 +197,7 @@ class WalletRepository @Inject constructor(
             accountsStore = accountsStore,
             usersDatabase = usersDatabase,
             walletApi = walletApi,
+            profileRepository = profileRepository,
         ),
         pagingSourceFactory = pagingSourceFactory,
     )
