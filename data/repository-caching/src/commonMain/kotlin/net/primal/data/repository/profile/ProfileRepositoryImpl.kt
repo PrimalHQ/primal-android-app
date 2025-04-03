@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import net.primal.core.networking.utils.retryNetworkCall
+import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.local.db.withTransaction
@@ -131,6 +132,30 @@ class ProfileRepositoryImpl(
             }
 
             profileMetadata?.asProfileDataDO()
+        }
+
+    override suspend fun fetchProfiles(profileIds: Set<String>): List<ProfileData> =
+        withContext(dispatcherProvider.io()) {
+            val response = retryNetworkCall { usersApi.getUserProfilesMetadata(userIds = profileIds) }
+
+            val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
+            val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
+            val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
+            val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+            val blossomServers = response.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
+            val profiles = response.metadataEvents.map {
+                it.asProfileDataPO(
+                    cdnResources = cdnResources,
+                    primalUserNames = primalUserNames,
+                    primalPremiumInfo = primalPremiumInfo,
+                    primalLegendProfiles = primalLegendProfiles,
+                    blossomServers = blossomServers,
+                )
+            }
+
+            database.profiles().insertOrUpdateAll(data = profiles)
+
+            profiles.map { it.asProfileDataDO() }
         }
 
     private suspend fun queryRemoteUsers(apiBlock: suspend () -> UsersResponse): List<UserProfileSearchItem> =
