@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.navigation.transactionIdOrThrow
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -25,6 +24,7 @@ import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.details.TransactionDetailsContract.UiState
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.repository.ArticleRepository
 import net.primal.domain.repository.FeedRepository
 import timber.log.Timber
@@ -32,7 +32,7 @@ import timber.log.Timber
 @HiltViewModel
 class TransactionDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val walletRepository: WalletRepository,
     private val feedRepository: FeedRepository,

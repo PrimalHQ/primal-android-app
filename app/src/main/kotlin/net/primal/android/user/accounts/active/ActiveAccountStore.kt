@@ -11,15 +11,15 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.runBlocking
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.di.ActiveAccountDataStore
 import net.primal.android.user.domain.UserAccount
+import net.primal.core.utils.coroutines.DispatcherProvider
 
 @Singleton
 class ActiveAccountStore @Inject constructor(
     accountsStore: UserAccountsStore,
-    dispatchers: CoroutineDispatcherProvider,
+    dispatchers: DispatcherProvider,
     @ActiveAccountDataStore private val persistence: DataStore<String>,
 ) {
 

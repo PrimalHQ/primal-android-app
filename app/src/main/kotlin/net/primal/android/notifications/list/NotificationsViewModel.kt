@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.datetime.toJavaInstant
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
@@ -32,6 +31,7 @@ import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.model.Notification
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.repository.NotificationRepository
@@ -39,7 +39,7 @@ import timber.log.Timber
 
 @HiltViewModel
 class NotificationsViewModel @Inject constructor(
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val notificationRepository: NotificationRepository,
     private val subscriptionsManager: SubscriptionsManager,

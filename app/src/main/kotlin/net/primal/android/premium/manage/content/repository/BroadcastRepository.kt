@@ -2,11 +2,11 @@ package net.primal.android.premium.manage.content.repository
 
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.premium.manage.content.api.BroadcastApi
+import net.primal.core.utils.coroutines.DispatcherProvider
 
 class BroadcastRepository @Inject constructor(
-    private val dispatchers: CoroutineDispatcherProvider,
+    private val dispatchers: DispatcherProvider,
     private val broadcastApi: BroadcastApi,
 ) {
 

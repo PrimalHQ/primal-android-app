@@ -6,7 +6,6 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.db.UsersDatabase
 import net.primal.android.user.domain.PrimalWallet
@@ -26,11 +25,12 @@ import net.primal.android.wallet.db.WalletTransactionData
 import net.primal.android.wallet.domain.Network
 import net.primal.android.wallet.domain.SubWallet
 import net.primal.android.wallet.domain.WalletKycLevel
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.repository.ProfileRepository
 
 @OptIn(ExperimentalPagingApi::class)
 class WalletRepository @Inject constructor(
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val accountsStore: UserAccountsStore,
     private val walletApi: WalletApi,
     private val usersDatabase: UsersDatabase,

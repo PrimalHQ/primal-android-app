@@ -2,7 +2,6 @@ package net.primal.android.wallet.zaps
 
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.networking.relays.FALLBACK_RELAYS
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.accounts.UserAccountsStore
@@ -17,10 +16,11 @@ import net.primal.android.wallet.domain.lnUrlDecoded
 import net.primal.android.wallet.domain.userId
 import net.primal.android.wallet.nwc.NwcNostrZapperFactory
 import net.primal.android.wallet.repository.WalletNostrZapper
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.repository.events.EventStatsUpdater
 
 class ZapHandler @Inject constructor(
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val accountsStore: UserAccountsStore,
     private val nwcNostrZapperFactory: NwcNostrZapperFactory,
     private val primalWalletZapper: WalletNostrZapper,

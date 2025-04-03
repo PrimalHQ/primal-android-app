@@ -6,7 +6,6 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import java.time.Instant
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.nostr.ext.mapAsWalletTransactionPO
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.db.UsersDatabase
@@ -17,13 +16,14 @@ import net.primal.android.wallet.domain.SubWallet
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 
 @ExperimentalPagingApi
 class WalletTransactionsMediator(
     private val userId: String,
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val accountsStore: UserAccountsStore,
     private val usersDatabase: UsersDatabase,
     private val walletApi: WalletApi,
