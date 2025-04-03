@@ -1,6 +1,7 @@
 package net.primal.domain.repository
 
 import androidx.paging.PagingData
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.Flow
 import net.primal.domain.ConversationRelation
 import net.primal.domain.model.DMConversation
@@ -24,7 +25,7 @@ interface ChatRepository {
 
     suspend fun markAllMessagesAsRead(authorization: NostrEvent)
 
-    @Throws(MessageEncryptException::class)
+    @Throws(MessageEncryptException::class, CancellationException::class)
     suspend fun sendMessage(
         userId: String,
         receiverId: String,

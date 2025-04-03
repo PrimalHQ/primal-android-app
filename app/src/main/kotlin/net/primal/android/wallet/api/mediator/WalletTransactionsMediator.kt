@@ -17,6 +17,7 @@ import net.primal.android.wallet.domain.SubWallet
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 
 @ExperimentalPagingApi
@@ -26,6 +27,7 @@ class WalletTransactionsMediator(
     private val accountsStore: UserAccountsStore,
     private val usersDatabase: UsersDatabase,
     private val walletApi: WalletApi,
+    private val profileRepository: ProfileRepository,
 ) : RemoteMediator<Int, WalletTransactionData>() {
 
     private val lastRequests: MutableMap<LoadType, TransactionsRequestBody> = mutableMapOf()
@@ -86,38 +88,15 @@ class WalletTransactionsMediator(
 
         lastRequests[loadType] = requestBody
 
-        withContext(dispatcherProvider.io()) {
-            val transactions = response.transactions.mapAsWalletTransactionPO(walletAddress = walletLightningAddress)
-            usersDatabase.walletTransactions().upsertAll(data = transactions)
+        val transactions = response.transactions
+            .mapAsWalletTransactionPO(walletAddress = walletLightningAddress)
 
-            // TODO Add this option to ProfileRepository and then use it here
-//            val mentionedUserIds = transactions.mapNotNull { it.otherUserId }.toSet()
-//            val profilesResponse = if (mentionedUserIds.isNotEmpty()) {
-//                try {
-//                    usersApi.getUserProfilesMetadata(userIds = mentionedUserIds)
-//                } catch (error: WssException) {
-//                    Timber.w(error)
-//                    UserProfilesResponse()
-//                }
-//            } else {
-//                UserProfilesResponse()
-//            }
-//            val primalUserNames = profilesResponse.primalUserNames.parseAndMapPrimalUserNames()
-//            val primalPremiumInfo = profilesResponse.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
-//            val primalLegendProfiles = profilesResponse.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
-//            val cdnResources = profilesResponse.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-//            val blossomServers = profilesResponse.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
-//            val profiles = profilesResponse.metadataEvents.map {
-//                it.asProfileDataPO(
-//                    cdnResources = cdnResources,
-//                    primalUserNames = primalUserNames,
-//                    primalPremiumInfo = primalPremiumInfo,
-//                    primalLegendProfiles = primalLegendProfiles,
-//                    blossomServers = blossomServers,
-//                )
-//            }
-//            primalDatabase.profiles().insertOrUpdateAll(data = profiles)
+        withContext(dispatcherProvider.io()) {
+            usersDatabase.walletTransactions().upsertAll(data = transactions)
         }
+
+        val mentionedUserIds = transactions.mapNotNull { it.otherUserId }
+        profileRepository.fetchProfiles(profileIds = mentionedUserIds)
 
         return MediatorResult.Success(endOfPaginationReached = false)
     }

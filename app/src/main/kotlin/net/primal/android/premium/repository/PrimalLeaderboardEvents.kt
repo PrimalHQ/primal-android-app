@@ -1,12 +1,11 @@
 package net.primal.android.premium.repository
 
-import net.primal.android.core.compose.profile.model.asPremiumProfileDataUi
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.nostr.model.primal.content.ContentLegendLeaderboardItem
 import net.primal.android.nostr.model.primal.content.ContentPremiumLeaderboardItem
-import net.primal.android.premium.leaderboard.domain.LeaderboardLegendEntry
-import net.primal.android.premium.leaderboard.domain.OGLeaderboardEntry
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.domain.LeaderboardLegendEntry
+import net.primal.domain.OGLeaderboardEntry
 import net.primal.domain.PrimalEvent
 import net.primal.domain.model.ProfileData
 
@@ -19,7 +18,8 @@ fun PrimalEvent?.parseAndMapAsLeaderboardLegendEntries(profiles: Map<String, Pro
                     avatarCdnImage = profile.avatarCdnImage,
                     displayName = profile.authorNameUiFriendly(),
                     internetIdentifier = profile.internetIdentifier,
-                    premiumProfileDataUi = profile.primalPremiumInfo?.asPremiumProfileDataUi(),
+                    legendSince = profile.primalPremiumInfo?.legendSince,
+                    primalLegendProfile = profile.primalPremiumInfo?.legendProfile,
                     donatedSats = item.donatedSats.toULong(),
                 )
             }

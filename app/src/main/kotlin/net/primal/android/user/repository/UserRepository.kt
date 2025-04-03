@@ -9,13 +9,14 @@ import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.JsonArray
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
+import net.primal.android.core.utils.authorNameUiFriendly
+import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.profile.domain.ProfileMetadata
-import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.copyFollowListIfNotNull
@@ -45,7 +46,6 @@ import net.primal.domain.repository.UserDataCleanupRepository
 class UserRepository @Inject constructor(
     private val usersDatabase: UsersDatabase,
     private val dispatchers: CoroutineDispatcherProvider,
-    private val userAccountFetcher: UserAccountFetcher,
     private val accountsStore: UserAccountsStore,
     private val credentialsStore: CredentialsStore,
     private val activeAccountStore: ActiveAccountStore,
@@ -65,11 +65,11 @@ class UserRepository @Inject constructor(
         runCatching { credentialsStore.isNpubLogin(npub = userId.hexToNpubHrp()) }.getOrDefault(false)
 
     suspend fun fetchAndUpdateUserAccount(userId: String): UserAccount {
-        val userProfile = userAccountFetcher.fetchUserProfileOrNull(userId = userId)
+        val userProfile = fetchUserProfileOrNull(userId = userId)
         val userStats = userProfile?.takeIf {
             it.followersCount != null && it.followingCount != null && it.notesCount != null
         }
-        val followList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
+        val followList = fetchUserFollowListOrNull(userId = userId)
 
         return accountsStore.getAndUpdateAccount(userId = userId) {
             copyIfNotNull(
@@ -79,6 +79,36 @@ class UserRepository @Inject constructor(
             )
         }
     }
+
+    private suspend fun fetchUserProfileOrNull(userId: String): UserAccount? =
+        withContext(dispatchers.io()) {
+            val userData = profileRepository.fetchProfile(profileId = userId)
+                ?: return@withContext null
+
+            val userStats = profileRepository.findProfileStats(profileIds = listOf(userId))
+                .firstOrNull { it.profileId == userId }
+
+            UserAccount(
+                pubkey = userId,
+                authorDisplayName = userData.authorNameUiFriendly(),
+                userDisplayName = userData.usernameUiFriendly(),
+                avatarCdnImage = userData.avatarCdnImage,
+                internetIdentifier = userData.internetIdentifier,
+                lightningAddress = userData.lightningAddress,
+                followersCount = userStats?.followers,
+                followingCount = userStats?.following,
+                notesCount = userStats?.notesCount,
+                repliesCount = userStats?.repliesCount,
+                primalLegendProfile = userData.primalPremiumInfo?.legendProfile,
+            )
+        }
+
+    private suspend fun fetchUserFollowListOrNull(userId: String): UserAccount? =
+        withContext(dispatchers.io()) {
+            val contactsResponse = usersApi.getUserFollowList(userId = userId)
+
+            contactsResponse.followListEvent?.asUserAccountFromFollowListEvent()
+        }
 
     suspend fun clearAllUserRelatedData(userId: String) =
         withContext(dispatchers.io()) {
@@ -289,7 +319,7 @@ class UserRepository @Inject constructor(
         forceUpdate: Boolean,
         reducer: Set<String>.() -> Set<String>,
     ) = withContext(dispatchers.io()) {
-        val userFollowList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
+        val userFollowList = fetchUserFollowListOrNull(userId = userId)
         val isEmptyFollowList = userFollowList == null || userFollowList.following.isEmpty()
         if (isEmptyFollowList && !forceUpdate) {
             throw FollowListNotFound()

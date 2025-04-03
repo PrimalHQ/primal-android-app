@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.premium.api.model.LegendLeaderboardOrderBy
 import net.primal.android.premium.leaderboard.legend.LegendLeaderboardContract.UiEvent
 import net.primal.android.premium.leaderboard.legend.LegendLeaderboardContract.UiState
+import net.primal.android.premium.leaderboard.legend.ui.model.toUiModel
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -66,7 +67,9 @@ class LegendLeaderboardViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(loading = true, error = null) }
             try {
-                val entries = premiumRepository.fetchLegendLeaderboard(orderBy = orderBy, limit = 300)
+                val entries = premiumRepository
+                    .fetchLegendLeaderboard(orderBy = orderBy, limit = 300)
+                    .map { it.toUiModel() }
                 setState { copy(leaderboardEntries = leaderboardEntries + (orderBy to entries)) }
             } catch (error: WssException) {
                 Timber.w(error)
