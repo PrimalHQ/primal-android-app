@@ -434,7 +434,7 @@ private fun Modifier.shareableGraphics(
                 drawLine(
                     color = outlineColor,
                     start = Offset(x = connectionX, y = 16.dp.toPx()),
-                    end = Offset(x = connectionX, y = size.height * 2),
+                    end = Offset(x = connectionX, y = size.height),
                     strokeWidth = lineWidth.toPx(),
                     cap = StrokeCap.Square,
                 )
