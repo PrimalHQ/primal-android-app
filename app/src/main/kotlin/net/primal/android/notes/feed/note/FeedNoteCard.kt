@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
@@ -29,9 +30,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalDensity
@@ -260,12 +265,9 @@ private fun FeedNoteCard(
             ),
         shape = shape,
         colors = colors,
-        drawLineAboveAvatar = drawLineAboveAvatar,
-        drawLineBelowAvatar = drawLineBelowAvatar,
-        lineOffsetX = (avatarSizeDp / 2) + avatarPaddingDp + notePaddingDp + 2.dp,
     ) {
         Box(
-            modifier = Modifier.padding(all = notePaddingDp),
+            modifier = Modifier.padding(horizontal = notePaddingDp),
             contentAlignment = Alignment.TopEnd,
         ) {
             NoteDropdownMenuIcon(
@@ -274,9 +276,9 @@ private fun FeedNoteCard(
                     .size(overflowIconSizeDp)
                     .padding(
                         top = when {
-                            data.repostAuthorName != null -> 4.dp
-                            !fullWidthContent -> 6.dp
-                            else -> 13.dp
+                            data.repostAuthorName != null -> 7.dp
+                            !fullWidthContent -> 11.dp
+                            else -> 14.dp
                         },
                     )
                     .clip(CircleShape)
@@ -306,7 +308,7 @@ private fun FeedNoteCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = avatarPaddingDp)
-                            .padding(top = 4.dp),
+                            .padding(top = notePaddingDp * 2),
                         repostedByAuthor = data.repostAuthorName,
                         onRepostAuthorClick = if (data.repostAuthorId != null && noteCallbacks.onProfileClick != null) {
                             { noteCallbacks.onProfileClick.invoke(data.repostAuthorId) }
@@ -318,19 +320,18 @@ private fun FeedNoteCard(
 
                 Column(
                     modifier = Modifier
-                        .drawWithContent {
-                            graphicsLayer.record { this@drawWithContent.drawContent() }
-                            drawLayer(graphicsLayer)
-                        }
-                        .clip(
-                            RoundedCornerShape(
-                                topStart = AppTheme.shapes.medium.topStart,
-                                bottomStart = AppTheme.shapes.medium.bottomStart,
-                                topEnd = AppTheme.shapes.medium.topEnd,
-                                bottomEnd = AppTheme.shapes.medium.bottomEnd,
-                            ),
+                        .shareableGraphics(
+                            graphicsLayer = graphicsLayer,
+                            drawLineAboveAvatar = drawLineAboveAvatar,
+                            drawLineBelowAvatar = drawLineBelowAvatar,
+                            outlineColor = AppTheme.colorScheme.outline,
+                            lineOffsetX = (avatarSizeDp / 2) + avatarPaddingDp + 2.dp,
+                            lineWidth = 2.dp,
                         )
-                        .background(color = AppTheme.colorScheme.surfaceVariant),
+                        .padding(
+                            top = if (data.repostAuthorName == null) notePaddingDp + 2.dp else 0.dp,
+                            bottom = notePaddingDp,
+                        ),
                 ) {
                     FeedNote(
                         data = data,
@@ -407,6 +408,49 @@ private fun FeedNoteCard(
         }
     }
 }
+
+@Composable
+private fun Modifier.shareableGraphics(
+    graphicsLayer: GraphicsLayer = rememberGraphicsLayer(),
+    clip: Shape = RoundedCornerShape(corner = CornerSize(size = 16.dp)),
+    outlineColor: Color? = null,
+    backgroundColor: Color = AppTheme.colorScheme.surfaceVariant,
+    drawLineBelowAvatar: Boolean = false,
+    drawLineAboveAvatar: Boolean = false,
+    lineOffsetX: Dp = 0.dp,
+    lineWidth: Dp = 0.dp,
+) = this
+    .drawWithContent {
+        graphicsLayer.record { this@drawWithContent.drawContent() }
+        drawLayer(graphicsLayer)
+    }
+    .clip(clip)
+    .background(color = backgroundColor)
+    .drawWithCache {
+        onDrawBehind {
+            val connectionX = lineOffsetX.toPx()
+
+            if (drawLineBelowAvatar && outlineColor != null) {
+                drawLine(
+                    color = outlineColor,
+                    start = Offset(x = connectionX, y = 16.dp.toPx()),
+                    end = Offset(x = connectionX, y = size.height),
+                    strokeWidth = lineWidth.toPx(),
+                    cap = StrokeCap.Square,
+                )
+            }
+
+            if (drawLineAboveAvatar && outlineColor != null) {
+                drawLine(
+                    color = outlineColor,
+                    start = Offset(x = connectionX, y = 0f),
+                    end = Offset(x = connectionX, y = 16.dp.toPx()),
+                    strokeWidth = lineWidth.toPx(),
+                    cap = StrokeCap.Square,
+                )
+            }
+        }
+    }
 
 @Composable
 private fun noteCardColors() =
