@@ -329,7 +329,7 @@ private fun FeedNoteCard(
                             lineWidth = 2.dp,
                         )
                         .padding(
-                            top = if (data.repostAuthorName == null) notePaddingDp else 0.dp,
+                            top = if (data.repostAuthorName == null) notePaddingDp + 2.dp else 0.dp,
                             bottom = notePaddingDp,
                         ),
                 ) {
