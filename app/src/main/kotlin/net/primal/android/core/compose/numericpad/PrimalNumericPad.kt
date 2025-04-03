@@ -23,7 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import java.math.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Subtract
@@ -31,6 +31,7 @@ import net.primal.android.core.compose.numericpad.PrimalNumericPadContract.UiEve
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.domain.CurrencyMode
+import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
 
 private val PadButtonMargin = 16.dp
 
@@ -59,10 +60,10 @@ fun PrimalNumericPad(
 
     val onNumberClick: (Int) -> Unit = {
         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-        val newAmount = BigDecimal.valueOf((amountInSats + it.toString()).toDouble())
+        val newAmount = (amountInSats + it.toString()).toBigDecimal()
         when (currencyMode) {
             CurrencyMode.FIAT -> {
-                if (newAmount <= maximumUsdAmount) {
+                if (maximumUsdAmount == null || newAmount <= maximumUsdAmount) {
                     val decimalPart = amountInSats.split(".")
                     val isDecimalValid = decimalPart.size != 2 || decimalPart[1].length < 2
 
@@ -71,6 +72,7 @@ fun PrimalNumericPad(
                     }
                 }
             }
+
             CurrencyMode.SATS -> {
                 viewModel.setEvent(NumericInputEvent.DigitInputEvent(it))
             }
@@ -282,7 +284,7 @@ fun PreviewPrimalNumericPad() {
                 amountInSats = "0",
                 onAmountInSatsChanged = {},
                 currencyMode = CurrencyMode.SATS,
-                maximumUsdAmount = BigDecimal(94000),
+                maximumUsdAmount = BigDecimal.fromInt(94_000),
             )
         }
     }

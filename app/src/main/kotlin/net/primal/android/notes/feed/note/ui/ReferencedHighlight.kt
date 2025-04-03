@@ -12,10 +12,10 @@ import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
-import net.primal.android.nostr.utils.aTagToNaddr
-import net.primal.android.notes.db.ReferencedHighlight
 import net.primal.android.theme.AppTheme
+import net.primal.domain.ReferencedHighlight
+import net.primal.domain.nostr.Nip19TLV.toNaddrString
+import net.primal.domain.nostr.aTagToNaddr
 
 val HighlightBackgroundDark = Color(0xFF2E3726)
 val HighlightBackgroundLight = Color(0xFFE8F3E8)

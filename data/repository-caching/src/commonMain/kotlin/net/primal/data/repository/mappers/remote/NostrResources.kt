@@ -1,7 +1,24 @@
 package net.primal.data.repository.mappers.remote
 
-import io.github.aakira.napier.Napier
 import kotlinx.serialization.json.JsonArray
+import net.primal.core.utils.NEVENT
+import net.primal.core.utils.NOTE
+import net.primal.core.utils.NPROFILE
+import net.primal.core.utils.NPUB
+import net.primal.core.utils.bech32ToHexOrThrow
+import net.primal.core.utils.bechToBytesOrThrow
+import net.primal.core.utils.extract
+import net.primal.core.utils.isNAddr
+import net.primal.core.utils.isNAddrUri
+import net.primal.core.utils.isNEvent
+import net.primal.core.utils.isNEventUri
+import net.primal.core.utils.isNPub
+import net.primal.core.utils.isNPubUri
+import net.primal.core.utils.isNostrUri
+import net.primal.core.utils.isNote
+import net.primal.core.utils.isNoteUri
+import net.primal.core.utils.nostrUriToBytes
+import net.primal.core.utils.toHex
 import net.primal.data.local.dao.events.EventUriNostr
 import net.primal.data.local.dao.messages.DirectMessageData
 import net.primal.data.local.dao.notes.PostData
@@ -21,97 +38,31 @@ import net.primal.domain.ReferencedZap
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV
+import net.primal.domain.nostr.Nip19TLV.readAsString
+import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.domain.nostr.cryptography.bech32ToHexOrThrow
-import net.primal.domain.nostr.cryptography.bechToBytesOrThrow
-import net.primal.domain.nostr.cryptography.toHex
 import net.primal.domain.nostr.findFirstAltDescription
+import net.primal.domain.nostr.findFirstBolt11
 import net.primal.domain.nostr.findFirstEventId
 import net.primal.domain.nostr.findFirstProfileId
+import net.primal.domain.nostr.findFirstZapAmount
 import net.primal.domain.nostr.isATag
+import net.primal.domain.nostr.utils.LnInvoiceUtils
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.utils.wordsCountToReadingTime
 
-// TODO Port missing helper functions and consider splitting this file
-
-private const val NOSTR = "nostr:"
-private const val NPUB = "npub1"
-private const val NSEC = "nsec1"
-private const val NEVENT = "nevent1"
-private const val NADDR = "naddr1"
-private const val NOTE = "note1"
-private const val NRELAY = "nrelay1"
-private const val NPROFILE = "nprofile1"
-
-private val nostrUriRegexPattern: Regex = Regex(
-    "($NOSTR)?@?($NSEC|$NPUB|$NEVENT|$NADDR|$NOTE|$NPROFILE|$NRELAY)([qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)([\\S]*)",
-    RegexOption.IGNORE_CASE,
-)
-
-fun String.isNostrUri(): Boolean {
-    val uri = lowercase()
-    return uri.startsWith(NOSTR) || uri.startsWith(NPUB) || uri.startsWith(NOTE) ||
-        uri.startsWith(NEVENT) || uri.startsWith(NPROFILE)
+private fun String.nostrUriToIdAndRelay(): Pair<String?, String?> {
+    val bytes = nostrUriToBytes() ?: return null to null
+    val tlv = Nip19TLV.parse(bytes)
+    val id = tlv[Nip19TLV.Type.SPECIAL.id]?.firstOrNull()?.toHex()
+    val relayBytes = tlv[Nip19TLV.Type.RELAY.id]?.firstOrNull()
+    return id to relayBytes?.readAsString()
 }
 
-fun String.cleanNostrUris(): String =
-    this
-        .replace("@$NOSTR", NOSTR)
-        .replace("@$NPUB", NPUB)
-        .replace("@$NOTE", NOTE)
-        .replace("@$NEVENT", NEVENT)
-        .replace("@$NADDR", NADDR)
-        .replace("@$NPROFILE", NPROFILE)
+fun String.nostrUriToNoteIdAndRelay() = nostrUriToIdAndRelay()
 
-fun String.isNote() = lowercase().startsWith(NOTE)
-
-fun String.isNPub() = lowercase().startsWith(NPUB)
-
-fun String.isNProfile() = lowercase().startsWith(NPROFILE)
-
-fun String.isNAddr() = lowercase().startsWith(NADDR)
-
-fun String.isNEvent() = lowercase().startsWith(NEVENT)
-
-fun String.isNoteUri() = lowercase().startsWith(NOSTR + NOTE)
-
-fun String.isNEventUri() = lowercase().startsWith(NOSTR + NEVENT)
-
-fun String.isNPubUri() = lowercase().startsWith(NOSTR + NPUB)
-
-fun String.isNProfileUri() = lowercase().startsWith(NOSTR + NPROFILE)
-
-fun String.isNAddrUri() = lowercase().startsWith(NOSTR + NADDR)
-
-// private fun String.nostrUriToBytes(): ByteArray? {
-//    val matcher = nostrUriRegexPattern.matcher(this)
-//    if (!matcher.find()) return null
-//    val type = matcher.group(2)?.lowercase() ?: return null
-//    val key = matcher.group(3)?.lowercase() ?: return null
-//    return try {
-//        (type + key).bechToBytesOrThrow()
-//    } catch (ignored: Exception) {
-//        Napier.w("", ignored)
-//        null
-//    }
-// }
-
-// fun String.nostrUriToNoteId() = nostrUriToBytes()?.toHex()
-//
-// fun String.nostrUriToPubkey() = nostrUriToBytes()?.toHex()
-
-// private fun String.nostrUriToIdAndRelay(): Pair<String?, String?> {
-//    val bytes = nostrUriToBytes() ?: return null to null
-//    val tlv = Nip19TLV.parse(bytes)
-//    val id = tlv[Nip19TLV.Type.SPECIAL.id]?.firstOrNull()?.toHex()
-//    val relayBytes = tlv[Nip19TLV.Type.RELAY.id]?.firstOrNull()
-//    return id to relayBytes?.let { String(it) }
-// }
-
-// fun String.nostrUriToNoteIdAndRelay() = nostrUriToIdAndRelay()
-
-// fun String.nostrUriToPubkeyAndRelay() = nostrUriToIdAndRelay()
+fun String.nostrUriToPubkeyAndRelay() = nostrUriToIdAndRelay()
 
 fun String.extractProfileId(): String? {
     return extract { bechPrefix: String?, key: String? ->
@@ -162,36 +113,20 @@ fun PostData.toNevent() =
         relays = emptyList(),
     )
 
-private fun String.extract(parser: (bechPrefix: String?, key: String?) -> String?): String? {
-    val matchResult = nostrUriRegexPattern.find(this) ?: return null
-
-    val bechPrefix = matchResult.groupValues.getOrNull(2)
-    val key = matchResult.groupValues.getOrNull(3)
-
-    return try {
-        parser(bechPrefix, key)
-    } catch (ignored: Exception) {
-        Napier.w("", ignored)
+fun String.takeAsNaddrOrNull(): String? {
+    return if (isNAddr() || isNAddrUri()) {
+        val result = runCatching {
+            Nip19TLV.parseUriAsNaddrOrNull(this)
+        }
+        if (result.getOrNull() != null) {
+            this
+        } else {
+            null
+        }
+    } else {
         null
     }
 }
-
-// TODO Rewire once NIP19 is implemented and put in correct package and/or module
-
-// fun String.takeAsNaddrOrNull(): String? {
-//    return if (isNAddr() || isNAddrUri()) {
-//        val result = runCatching {
-//            Nip19TLV.parseUriAsNaddrOrNull(this)
-//        }
-//        if (result.getOrNull() != null) {
-//            this
-//        } else {
-//            null
-//        }
-//    } else {
-//        null
-//    }
-// }
 
 fun String.takeAsNoteHexIdOrNull(): String? {
     return if (isNote() || isNoteUri() || isNEventUri() || isNEvent()) {
@@ -287,8 +222,7 @@ fun List<String>.mapAsReferencedNostrUriDO(
     val refNote = postIdToPostDataMap[refNoteId]
     val refPostAuthor = profileIdToProfileDataMap[refNote?.authorId]
 
-    // Rewire once Nip19 is implemented for KMP
-    val refNaddr: Naddr? = null // Nip19TLV.parseUriAsNaddrOrNull(link)
+    val refNaddr: Naddr? = Nip19TLV.parseUriAsNaddrOrNull(link)
     val refArticle = articleIdToArticle[refNaddr?.identifier]
     val refArticleAuthor = profileIdToProfileDataMap[refNaddr?.userId]
 
@@ -411,10 +345,8 @@ private fun takeAsReferencedArticleOrNull(
     refArticle != null &&
     refArticleAuthor != null
 ) {
-    // TODO Rewire once NIP19 is implemented
     ReferencedArticle(
-        // refNaddr.toNaddrString(),
-        naddr = "",
+        naddr = refNaddr.toNaddrString(),
         aTag = refArticle.aTag,
         eventId = refArticle.eventId,
         articleId = refArticle.articleId,
@@ -438,8 +370,7 @@ private fun takeAsReferencedHighlightOrNull(
     aTag: JsonArray?,
     authorId: String?,
 ) = if (highlight?.isNotEmpty() == true && aTag != null) {
-    // TODO Rewire once NIP19 is implemented
-    val nevent: Nevent? = null // Nip19TLV.parseUriAsNeventOrNull(neventUri = uri)
+    val nevent = Nip19TLV.parseUriAsNeventOrNull(neventUri = uri)
     ReferencedHighlight(
         text = highlight,
         aTag = aTag,
@@ -469,10 +400,8 @@ private fun takeAsReferencedZapOrNull(
     val noteId = event?.tags?.findFirstEventId()
         ?: zapRequest?.tags?.findFirstEventId()
 
-    // TODO Rewire once LN utils are implemented in KMP
-    val amountInSats = 888888
-//    val amountInSats = (event?.tags?.findFirstBolt11() ?: zapRequest?.tags?.findFirstZapAmount())
-//        ?.let(LnInvoiceUtils::getAmountInSats)
+    val amountInSats = (event?.tags?.findFirstBolt11() ?: zapRequest?.tags?.findFirstZapAmount())
+        ?.let(LnInvoiceUtils::getAmountInSats)
 
     if (receiverId == null || senderId == null || amountInSats == null) return null
 
@@ -498,7 +427,7 @@ private fun takeAsReferencedZapOrNull(
         receiverDisplayName = receiver?.displayName ?: receiver?.handle,
         receiverAvatarCdnImage = receiver?.avatarCdnImage,
         receiverPrimalLegendProfile = receiver?.primalPremiumInfo?.legendProfile,
-        amountInSats = amountInSats.toDouble(),
+        amountInSats = amountInSats.doubleValue(),
         message = zapRequest.content,
         zappedEventId = noteId,
         zappedEventContent = zappedPost?.content,

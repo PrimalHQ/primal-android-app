@@ -47,11 +47,11 @@ import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.notes.feed.note.ui.FeedNoteActionsRow
 import net.primal.android.notes.feed.note.ui.NoteContent
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
-import net.primal.android.notifications.domain.NotificationType
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme.Sunset
+import net.primal.domain.NotificationType
 
 @Composable
 fun NotificationListItem(

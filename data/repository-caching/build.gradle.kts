@@ -58,6 +58,8 @@ kotlin {
 
                 // Logging
                 implementation(libs.napier)
+
+                implementation(libs.bignum)
             }
         }
 
@@ -73,8 +75,6 @@ kotlin {
 
         iosMain {
             dependencies {
-                // Paging
-                api(libs.cash.app.paging.runtime.uikit)
             }
         }
 

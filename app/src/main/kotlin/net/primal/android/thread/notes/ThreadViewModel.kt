@@ -16,19 +16,19 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.articles.ArticleRepository
 import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.crypto.bech32ToHexOrThrow
-import net.primal.android.events.repository.EventRepository
 import net.primal.android.navigation.noteIdOrThrow
-import net.primal.android.nostr.utils.Nip19TLV
 import net.primal.android.notes.feed.model.asFeedPostUi
-import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.thread.notes.ThreadContract.UiEvent
 import net.primal.android.thread.notes.ThreadContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.nostr.Nip19TLV
+import net.primal.domain.repository.ArticleRepository
+import net.primal.domain.repository.EventRepository
+import net.primal.domain.repository.FeedRepository
 import timber.log.Timber
 
 @HiltViewModel

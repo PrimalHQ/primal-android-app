@@ -7,6 +7,7 @@ import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.remote.model.ContentPrimalPaging
+import net.primal.data.repository.mappers.remote.orderByPagingIfNotNull
 import net.primal.domain.nostr.NostrEvent
 
 internal class FeedProcessor(
@@ -29,7 +30,8 @@ internal class FeedProcessor(
             response.persistToDatabaseAsTransaction(userId = userId, database = database)
             val feedEvents = response.notes + response.reposts
             feedEvents.processRemoteKeys(userId = userId, pagingEvent = pagingEvent)
-            feedEvents.processFeedConnections(userId = userId)
+            feedEvents.orderByPagingIfNotNull(pagingEvent = pagingEvent)
+                .processFeedConnections(userId = userId)
         }
     }
 
@@ -56,15 +58,12 @@ internal class FeedProcessor(
 
     private suspend fun List<NostrEvent>.processFeedConnections(userId: String) {
         database.withTransaction {
-            val maxIndex = database.feedsConnections().getOrderIndexForFeedSpec(ownerId = userId, feedSpec = feedSpec)
-            val indexOffset = maxIndex?.plus(other = 1) ?: 0
             database.feedsConnections().connect(
-                data = this.mapIndexed { index, nostrEvent ->
+                data = this.map { nostrEvent ->
                     FeedPostDataCrossRef(
                         ownerId = userId,
                         feedSpec = feedSpec,
                         eventId = nostrEvent.id,
-                        orderIndex = indexOffset + index,
                     )
                 },
             )

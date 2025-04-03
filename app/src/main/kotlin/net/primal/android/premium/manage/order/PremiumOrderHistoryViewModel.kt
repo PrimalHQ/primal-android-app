@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.premium.domain.MembershipError
 import net.primal.android.premium.manage.order.PremiumOrderHistoryContract.UiEvent
 import net.primal.android.premium.manage.order.PremiumOrderHistoryContract.UiState
@@ -19,6 +18,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
 @HiltViewModel
@@ -50,7 +50,7 @@ class PremiumOrderHistoryViewModel @Inject constructor(
             try {
                 val orders = premiumRepository.fetchOrderHistory(userId = activeAccountStore.activeUserId())
                 setState { copy(orders = orders) }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SignatureException) {
                 Timber.e(error)
             } catch (error: WssException) {
                 Timber.e(error)
@@ -102,7 +102,7 @@ class PremiumOrderHistoryViewModel @Inject constructor(
                 try {
                     premiumRepository.cancelSubscription(userId = userId, purchaseJson = purchase.playSubscriptionJson)
                     premiumRepository.fetchMembershipStatus(activeAccountStore.activeUserId())
-                } catch (error: MissingPrivateKeyException) {
+                } catch (error: SignatureException) {
                     Timber.w(error)
                 } catch (error: WssException) {
                     setState { copy(error = MembershipError.FailedToCancelSubscription(cause = error)) }

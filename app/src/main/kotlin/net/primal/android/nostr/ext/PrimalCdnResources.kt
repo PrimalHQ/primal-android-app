@@ -26,13 +26,3 @@ fun List<PrimalEvent>.flatMapNotNullAsCdnResource() =
                 )
             }
         }
-
-fun List<PrimalEvent>.flatMapNotNullAsVideoThumbnailsMap(): Map<String, String> {
-    val thumbnailsMap = hashMapOf<String, String>()
-    flatMapNotNullAsContentPrimalEventResources()
-        .map { it.videoThumbnails }
-        .fold(thumbnailsMap) { finalMap, currentMap ->
-            finalMap.apply { putAll(currentMap) }
-        }
-    return thumbnailsMap
-}

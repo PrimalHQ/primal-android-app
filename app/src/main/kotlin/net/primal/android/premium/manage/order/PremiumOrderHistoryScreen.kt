@@ -30,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import java.time.Instant
 import java.time.format.FormatStyle
 import kotlinx.datetime.Clock
@@ -45,7 +46,7 @@ import net.primal.android.premium.ui.ManagePremiumTableRow
 import net.primal.android.premium.utils.isOriginAndroid
 import net.primal.android.premium.utils.isOriginIOS
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 
 @Composable
 fun PremiumOrderHistoryScreen(

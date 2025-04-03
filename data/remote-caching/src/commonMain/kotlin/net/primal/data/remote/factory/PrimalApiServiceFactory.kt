@@ -1,7 +1,6 @@
 package net.primal.data.remote.factory
 
 import de.jensklingenberg.ktorfit.Ktorfit
-import io.ktor.client.HttpClient
 import net.primal.core.networking.factory.HttpClientFactory
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.data.remote.api.articles.ArticlesApi
@@ -12,6 +11,8 @@ import net.primal.data.remote.api.explore.ExploreApi
 import net.primal.data.remote.api.explore.ExploreApiImpl
 import net.primal.data.remote.api.feed.FeedApi
 import net.primal.data.remote.api.feed.FeedApiImpl
+import net.primal.data.remote.api.feeds.FeedsApi
+import net.primal.data.remote.api.feeds.FeedsApiImpl
 import net.primal.data.remote.api.importing.PrimalImportApi
 import net.primal.data.remote.api.importing.PrimalImportApiImpl
 import net.primal.data.remote.api.messages.MessagesApi
@@ -37,6 +38,8 @@ object PrimalApiServiceFactory {
 
     fun createFeedApi(primalApiClient: PrimalApiClient): FeedApi = FeedApiImpl(primalApiClient)
 
+    fun createFeedsApi(primalApiClient: PrimalApiClient): FeedsApi = FeedsApiImpl(primalApiClient)
+
     fun createImportApi(primalApiClient: PrimalApiClient): PrimalImportApi = PrimalImportApiImpl(primalApiClient)
 
     fun createMessagesApi(primalApiClient: PrimalApiClient): MessagesApi = MessagesApiImpl(primalApiClient)
@@ -48,10 +51,10 @@ object PrimalApiServiceFactory {
 
     fun createUsersApi(primalApiClient: PrimalApiClient): UsersApi = UsersApiImpl(primalApiClient)
 
-    fun createUserWellKnownApi(httpClient: HttpClient = defaultHttpClient): UserWellKnownApi =
+    fun createUserWellKnownApi(): UserWellKnownApi =
         Ktorfit.Builder()
             .baseUrl("https://primal.net/")
-            .httpClient(client = httpClient)
+            .httpClient(client = defaultHttpClient)
             .build()
             .createUserWellKnownApi()
 }

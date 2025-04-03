@@ -16,7 +16,6 @@ import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.profile.domain.ProfileMetadata
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -40,7 +39,6 @@ class CreateAccountHandlerTest {
         authRepository: AuthRepository = mockk(relaxed = true),
         relayRepository: RelayRepository = mockk(relaxed = true),
         userRepository: UserRepository = mockk(relaxed = true),
-        profileRepository: ProfileRepository = mockk(relaxed = true),
         settingsRepository: SettingsRepository = mockk(relaxed = true),
         credentialsStore: CredentialsStore = mockk(relaxed = true),
         nostrNotary: NostrNotary = mockk(relaxed = true),
@@ -49,7 +47,6 @@ class CreateAccountHandlerTest {
             authRepository = authRepository,
             relayRepository = relayRepository,
             userRepository = userRepository,
-            profileRepository = profileRepository,
             settingsRepository = settingsRepository,
             credentialsStore = credentialsStore,
             dispatchers = coroutinesTestRule.dispatcherProvider,
@@ -136,14 +133,14 @@ class CreateAccountHandlerTest {
     fun createNostrAccount_alwaysFollowsSelf() =
         runTest {
             val keyPair = CryptoUtils.generateHexEncodedKeypair()
-            val profileRepository = mockk<ProfileRepository>(relaxed = true)
+            val userRepository = mockk<UserRepository>(relaxed = true)
             val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
                 coEvery { saveNsec(any()) } returns keyPair.pubKey
             }
 
             val handler = createAccountHandler(
                 authRepository = createAuthRepository(),
-                profileRepository = profileRepository,
+                userRepository = userRepository,
                 credentialsStore = credentialsStore,
             )
 
@@ -154,7 +151,7 @@ class CreateAccountHandlerTest {
             )
 
             coVerify {
-                profileRepository.setFollowList(
+                userRepository.setFollowList(
                     withArg { it shouldBe keyPair.pubKey },
                     withArg { it shouldContain keyPair.pubKey },
                 )
@@ -165,13 +162,13 @@ class CreateAccountHandlerTest {
     fun createNostrAccount_followsEveryFollowedProfileFromInterestsLists() =
         runTest {
             val keyPair = CryptoUtils.generateHexEncodedKeypair()
-            val profileRepository = mockk<ProfileRepository>(relaxed = true)
+            val userRepository = mockk<UserRepository>(relaxed = true)
             val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
                 coEvery { saveNsec(any()) } returns keyPair.pubKey
             }
 
             val handler = createAccountHandler(
-                profileRepository = profileRepository,
+                userRepository = userRepository,
                 credentialsStore = credentialsStore,
             )
 
@@ -191,7 +188,7 @@ class CreateAccountHandlerTest {
             )
 
             coVerify {
-                profileRepository.setFollowList(
+                userRepository.setFollowList(
                     withArg { it shouldBe keyPair.pubKey },
                     withArg {
                         println(it)
@@ -281,12 +278,12 @@ class CreateAccountHandlerTest {
                 credentialsStore = credentialsStore,
                 activeAccountStore = activeAccountStore,
             )
-            val profileRepository = mockk<ProfileRepository>(relaxed = true) {
+            val userRepository = mockk<UserRepository>(relaxed = true) {
                 coEvery { setFollowList(any(), any()) } throws WssException()
             }
             val handler = createAccountHandler(
                 authRepository = authRepository,
-                profileRepository = profileRepository,
+                userRepository = userRepository,
             )
 
             try {

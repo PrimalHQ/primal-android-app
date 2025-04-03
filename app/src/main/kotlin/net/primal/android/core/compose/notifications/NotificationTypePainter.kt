@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import net.primal.android.R
 import net.primal.android.core.compose.res.painterResource
-import net.primal.android.notifications.domain.NotificationType
+import net.primal.domain.NotificationType
 
 @Composable
 fun NotificationType.toImagePainter(): Painter =

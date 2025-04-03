@@ -1,6 +1,6 @@
 package net.primal.android.settings.notifications
 
-import net.primal.android.notifications.domain.NotificationType
+import net.primal.domain.NotificationType
 
 data class NotificationSwitchUi(
     val notificationType: NotificationType,

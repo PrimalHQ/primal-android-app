@@ -3,16 +3,6 @@ package net.primal.android.premium.repository
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.core.ext.asMapByKey
-import net.primal.android.db.PrimalDatabase
-import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
-import net.primal.android.nostr.ext.mapAsProfileDataPO
-import net.primal.android.nostr.ext.parseAndFoldPrimalLegendProfiles
-import net.primal.android.nostr.ext.parseAndFoldPrimalPremiumInfo
-import net.primal.android.nostr.ext.parseAndFoldPrimalUserNames
-import net.primal.android.nostr.ext.parseAndMapAsLeaderboardLegendEntries
-import net.primal.android.nostr.ext.parseAndMapAsOGLeaderboardEntries
-import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.premium.api.PremiumApi
 import net.primal.android.premium.api.model.CancelMembershipRequest
 import net.primal.android.premium.api.model.LegendLeaderboardOrderBy
@@ -24,13 +14,17 @@ import net.primal.android.premium.domain.PremiumMembership
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
 import net.primal.core.networking.utils.retryNetworkCall
+import net.primal.core.utils.asMapByKey
+import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
+import net.primal.domain.LeaderboardLegendEntry
+import net.primal.domain.OGLeaderboardEntry
+import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
 class PremiumRepository @Inject constructor(
     private val dispatchers: CoroutineDispatcherProvider,
     private val premiumApi: PremiumApi,
     private val accountsStore: UserAccountsStore,
-    private val database: PrimalDatabase,
 ) {
     suspend fun isPrimalNameAvailable(name: String): Boolean =
         withContext(dispatchers.io()) {
@@ -53,7 +47,7 @@ class PremiumRepository @Inject constructor(
                         this.copy(premiumMembership = response.toPremiumMembership())
                     }
                 }?.premiumMembership
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
                 null
             }
@@ -96,36 +90,47 @@ class PremiumRepository @Inject constructor(
         since: Long? = null,
         until: Long? = null,
         limit: Int = 100,
-    ) = withContext(dispatchers.io()) {
-        val response = premiumApi.getPremiumLeaderboard(orderBy = orderBy, limit = limit, since = since, until = until)
+    ): List<OGLeaderboardEntry> =
+        withContext(dispatchers.io()) {
+            val response = premiumApi.getPremiumLeaderboard(
+                orderBy = orderBy,
+                limit = limit,
+                since = since,
+                until = until,
+            )
 
-        val primalUserNames = response.primalUsernames.parseAndFoldPrimalUserNames()
-        val primalPremiumInfo = response.primalPremiumInfoEvents.parseAndFoldPrimalPremiumInfo()
-        val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-        val profiles = response.profileMetadatas.mapAsProfileDataPO(
-            cdnResources = cdnResources,
-            primalUserNames = primalUserNames,
-            primalPremiumInfo = primalPremiumInfo,
-            primalLegendProfiles = emptyMap(),
-            blossomServers = emptyMap(),
-        )
+            val primalUserNames = response.primalUsernames.parseAndFoldPrimalUserNames()
+            val primalPremiumInfo = response.primalPremiumInfoEvents.parseAndFoldPrimalPremiumInfo()
+            val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource()
 
-        database.profiles().insertOrUpdateAll(profiles)
+            val profiles = response.profileMetadatas.mapAsProfileDataDO(
+                cdnResources = cdnResources,
+                primalUserNames = primalUserNames,
+                primalPremiumInfo = primalPremiumInfo,
+                primalLegendProfiles = emptyMap(),
+                blossomServers = emptyMap(),
+            )
 
-        response.orderedPremiumLeaderboardEvent.parseAndMapAsOGLeaderboardEntries(
-            profiles = profiles.asMapByKey { it.ownerId },
-        )
-    }
+            /* TODO: cache profiles in db. */
+//        database.profiles().insertOrUpdateAll(profiles)
 
-    suspend fun fetchLegendLeaderboard(orderBy: LegendLeaderboardOrderBy, limit: Int = 1000) =
+            response.orderedPremiumLeaderboardEvent.parseAndMapAsOGLeaderboardEntries(
+                profiles = profiles.asMapByKey { it.profileId },
+            )
+        }
+
+    suspend fun fetchLegendLeaderboard(
+        orderBy: LegendLeaderboardOrderBy,
+        limit: Int = 1000,
+    ): List<LeaderboardLegendEntry> =
         withContext(dispatchers.io()) {
             val response = premiumApi.getLegendLeaderboard(orderBy = orderBy, limit = limit)
 
             val primalUserNames = response.primalUsernames.parseAndFoldPrimalUserNames()
             val primalPremiumInfo = response.primalPremiumInfoEvents.parseAndFoldPrimalPremiumInfo()
             val primalLegendProfiles = response.primalLegendProfiles.parseAndFoldPrimalLegendProfiles()
-            val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-            val profiles = response.profileMetadatas.mapAsProfileDataPO(
+            val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource()
+            val profiles = response.profileMetadatas.mapAsProfileDataDO(
                 cdnResources = cdnResources,
                 primalUserNames = primalUserNames,
                 primalPremiumInfo = primalPremiumInfo,
@@ -133,10 +138,11 @@ class PremiumRepository @Inject constructor(
                 blossomServers = emptyMap(),
             )
 
-            database.profiles().insertOrUpdateAll(profiles)
+            /* TODO: cache profiles in db. */
+//            database.profiles().insertOrUpdateAll(profiles)
 
             response.orderedLegendLeaderboardEvent.parseAndMapAsLeaderboardLegendEntries(
-                profiles = profiles.asMapByKey { it.ownerId },
+                profiles = profiles.asMapByKey { it.profileId },
             )
         }
 

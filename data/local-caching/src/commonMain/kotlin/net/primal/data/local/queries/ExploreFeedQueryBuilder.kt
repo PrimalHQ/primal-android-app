@@ -14,6 +14,7 @@ class ExploreFeedQueryBuilder(
                 PostData.authorId,
                 PostData.createdAt,
                 PostData.content,
+                PostData.tags,
                 PostData.raw,
                 PostData.authorMetadataId,
                 PostData.hashtags,
@@ -37,7 +38,7 @@ class ExploreFeedQueryBuilder(
     }
 
     private val orderByClause = when {
-        else -> "ORDER BY FeedPostDataCrossRef.orderIndex"
+        else -> "ORDER BY FeedPostDataCrossRef.position"
     }
 
     override fun feedQuery(): RoomRawQuery {

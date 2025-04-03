@@ -3,8 +3,8 @@ package net.primal.android.notes.feed.model
 import fr.acinq.lightning.payment.Bolt11Invoice
 import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.messages.chat.model.ChatMessageUi
-import net.primal.android.notes.db.PostData
-import net.primal.android.wallet.utils.LnInvoiceUtils
+import net.primal.domain.model.FeedPost
+import net.primal.domain.nostr.utils.LnInvoiceUtils
 
 data class NoteContentUi(
     val noteId: String,
@@ -44,9 +44,9 @@ fun ChatMessageUi.toNoteContentUi(): NoteContentUi {
     )
 }
 
-fun PostData.toNoteContentUi(nostrUris: List<NoteNostrUriUi> = emptyList()): NoteContentUi {
+fun FeedPost.toNoteContentUi(nostrUris: List<NoteNostrUriUi> = emptyList()): NoteContentUi {
     return NoteContentUi(
-        noteId = this.postId,
+        noteId = this.eventId,
         content = this.content,
         nostrUris = nostrUris.sortedBy { it.position },
         hashtags = this.hashtags,

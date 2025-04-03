@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
+import net.primal.android.articles.highlights.JoinedHighlightsUi
 import net.primal.android.core.compose.AvatarOverlap
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.NostrUserText
@@ -50,14 +51,13 @@ import net.primal.android.core.compose.icons.primaliconpack.Quote
 import net.primal.android.core.compose.icons.primaliconpack.RemoveHighlight
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.utils.ifNotNull
-import net.primal.android.highlights.model.CommentUi
-import net.primal.android.highlights.model.JoinedHighlightsUi
-import net.primal.android.nostr.utils.Naddr
-import net.primal.android.nostr.utils.Nevent
-import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
-import net.primal.android.nostr.utils.Nip19TLV.toNeventString
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
+import net.primal.android.thread.articles.details.ui.model.HighlightCommentUi
+import net.primal.domain.nostr.Naddr
+import net.primal.domain.nostr.Nevent
+import net.primal.domain.nostr.Nip19TLV.toNaddrString
+import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.NostrEventKind
 
 internal val DARK_THEME_ACTION_BUTTON_COLOR = Color(0xFF282828)
@@ -145,7 +145,7 @@ fun HighlightActivityBottomSheet(
 }
 
 @Composable
-fun CommentRow(modifier: Modifier = Modifier, comment: CommentUi) {
+fun CommentRow(modifier: Modifier = Modifier, comment: HighlightCommentUi) {
     PrimalDivider()
     Column(
         modifier = Modifier.padding(vertical = 12.dp),

@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.math.BigDecimal
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,13 +13,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.core.utils.getMaximumUsdAmount
 import net.primal.android.navigation.draftTransaction
 import net.primal.android.navigation.lnbc
-import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
-import net.primal.android.profile.db.ProfileData
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.scanner.analysis.WalletTextParser
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.api.model.MiningFeeTier
@@ -33,12 +28,17 @@ import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract.UiEvent
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract.UiState
 import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
-import net.primal.android.wallet.utils.CurrencyConversionUtils.formatAsString
-import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
-import net.primal.android.wallet.utils.CurrencyConversionUtils.fromUsdToSats
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.android.wallet.utils.isLightningAddress
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.CurrencyConversionUtils.formatAsString
+import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
+import net.primal.core.utils.CurrencyConversionUtils.fromUsdToSats
+import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
+import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.core.utils.getMaximumUsdAmount
+import net.primal.domain.model.ProfileData
+import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -86,15 +86,10 @@ class CreateTransactionViewModel @Inject constructor(
                     copy(
                         currentExchangeRate = it,
                         maximumUsdAmount = getMaximumUsdAmount(it),
-                        amountInUsd = BigDecimal(_state.value.transaction.amountSats)
+                        amountInUsd = _state.value.transaction.amountSats
+                            .toBigDecimal()
                             .fromSatsToUsd(it)
-                            .let { amount ->
-                                if (amount.compareTo(BigDecimal.ZERO) == 0) {
-                                    "0"
-                                } else {
-                                    amount.toString()
-                                }
-                            },
+                            .toPlainString(),
                     )
                 }
             }
@@ -149,10 +144,8 @@ class CreateTransactionViewModel @Inject constructor(
                 setState {
                     copy(
                         transaction = transaction.copy(amountSats = amount),
-                        amountInUsd = BigDecimal(amount.toDouble())
+                        amountInUsd = amount.toBigDecimal()
                             .fromSatsToUsd(state.value.currentExchangeRate)
-                            .stripTrailingZeros()
-                            .let { if (it.compareTo(BigDecimal.ZERO) == 0) BigDecimal.ZERO else it }
                             .toPlainString(),
                     )
                 }
@@ -163,7 +156,7 @@ class CreateTransactionViewModel @Inject constructor(
                     copy(
                         amountInUsd = amount,
                         transaction = transaction.copy(
-                            amountSats = BigDecimal(amount)
+                            amountSats = amount.toBigDecimal()
                                 .fromUsdToSats(state.value.currentExchangeRate)
                                 .toString(),
                         ),
@@ -178,7 +171,7 @@ class CreateTransactionViewModel @Inject constructor(
             state.value.transaction.targetUserId?.let { targetUserId ->
                 try {
                     withContext(dispatchers.io()) {
-                        profileRepository.requestProfileUpdate(profileId = targetUserId)
+                        profileRepository.fetchProfile(profileId = targetUserId)
                     }
                 } catch (error: WssException) {
                     Timber.w(error)
@@ -218,7 +211,7 @@ class CreateTransactionViewModel @Inject constructor(
                         )
                     }
                 }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
@@ -248,7 +241,7 @@ class CreateTransactionViewModel @Inject constructor(
             } else {
                 Timber.w("Unable to parse text. [text=$text]")
             }
-        } catch (error: MissingPrivateKeyException) {
+        } catch (error: SignatureException) {
             Timber.w(error)
         } catch (error: WssException) {
             Timber.w(error)
@@ -261,8 +254,8 @@ class CreateTransactionViewModel @Inject constructor(
     private fun observeProfileData() =
         viewModelScope.launch {
             state.value.transaction.targetUserId?.let { targetUserId ->
-                profileRepository.observeProfile(targetUserId).collect { profile ->
-                    profile.metadata?.updateStateWithProfileData()
+                profileRepository.observeProfileData(targetUserId).collect { profile ->
+                    profile.updateStateWithProfileData()
                 }
             }
         }
@@ -314,7 +307,7 @@ class CreateTransactionViewModel @Inject constructor(
                     ),
                 )
                 setState { copy(transaction = transaction.copy(status = DraftTxStatus.Sent)) }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
                 setState {
                     copy(

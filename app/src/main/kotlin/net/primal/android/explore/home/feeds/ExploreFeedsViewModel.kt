@@ -11,15 +11,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.explore.home.feeds.ExploreFeedsContract.UiState
+import net.primal.android.feeds.DvmFeedListHandler
 import net.primal.android.feeds.dvm.ui.DvmFeedUi
-import net.primal.android.feeds.repository.DvmFeedListHandler
-import net.primal.android.feeds.repository.FeedsRepository
-import net.primal.android.nostr.notary.MissingPrivateKeyException
-import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.DvmFeed
 import net.primal.domain.buildSpec
+import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.repository.FeedRepository
+import net.primal.domain.repository.FeedsRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -78,15 +78,16 @@ class ExploreFeedsViewModel @Inject constructor(
     private fun addToUserFeeds(dvmFeed: DvmFeed) =
         viewModelScope.launch {
             try {
+                val userId = activeAccountStore.activeUserId()
                 dvmFeed.kind?.let { feedSpecKind ->
                     feedsRepository.addDvmFeedLocally(
-                        userId = activeAccountStore.activeUserId(),
+                        userId = userId,
                         dvmFeed = dvmFeed,
                         specKind = feedSpecKind,
                     )
                 }
-                feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
-            } catch (error: MissingPrivateKeyException) {
+                feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
+            } catch (error: SignatureException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
@@ -96,14 +97,15 @@ class ExploreFeedsViewModel @Inject constructor(
     private fun removeFromUserFeeds(dvmFeed: DvmFeed) =
         viewModelScope.launch {
             try {
+                val userId = activeAccountStore.activeUserId()
                 dvmFeed.kind?.let { feedSpecKind ->
                     feedsRepository.removeFeedLocally(
-                        userId = activeAccountStore.activeUserId(),
+                        userId = userId,
                         feedSpec = dvmFeed.buildSpec(specKind = feedSpecKind),
                     )
                 }
-                feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
-            } catch (error: MissingPrivateKeyException) {
+                feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
+            } catch (error: SignatureException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)

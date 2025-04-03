@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.map
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import javax.inject.Inject
@@ -14,8 +15,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.WalletPreference
@@ -23,15 +22,16 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState
-import net.primal.android.wallet.db.WalletTransaction
+import net.primal.android.wallet.db.WalletTransactionData
 import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SatsPurchase
 import net.primal.android.wallet.transactions.list.TransactionListItemDataUi
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.CurrencyConversionUtils.toSats
+import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
 @HiltViewModel
@@ -116,7 +116,7 @@ class WalletDashboardViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 walletRepository.fetchWalletBalance(userId = activeUserId)
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
@@ -155,7 +155,7 @@ class WalletDashboardViewModel @Inject constructor(
                     quoteId = purchase.quote.quoteId,
                     purchaseToken = purchase.purchaseToken,
                 )
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
@@ -172,26 +172,27 @@ class WalletDashboardViewModel @Inject constructor(
         setState { copy(error = error) }
     }
 
-    private fun Flow<PagingData<WalletTransaction>>.mapAsPagingDataOfTransactionUi() =
+    private fun Flow<PagingData<WalletTransactionData>>.mapAsPagingDataOfTransactionUi() =
         map { pagingData -> pagingData.map { it.mapAsTransactionDataUi() } }
 
-    private fun WalletTransaction.mapAsTransactionDataUi() =
+    private fun WalletTransactionData.mapAsTransactionDataUi() =
         TransactionListItemDataUi(
-            txId = this.data.id,
-            txType = this.data.type,
-            txState = this.data.state,
-            txAmountInSats = this.data.amountInBtc.toBigDecimal().abs().toSats(),
-            txCreatedAt = Instant.ofEpochSecond(this.data.createdAt),
-            txUpdatedAt = Instant.ofEpochSecond(this.data.updatedAt),
-            txCompletedAt = this.data.completedAt?.let { Instant.ofEpochSecond(it) },
-            txNote = this.data.note,
-            otherUserId = this.data.otherUserId,
-            otherUserAvatarCdnImage = this.otherProfileData?.avatarCdnImage,
-            otherUserDisplayName = this.otherProfileData?.authorNameUiFriendly(),
-            otherUserLegendaryCustomization = this.otherProfileData?.primalPremiumInfo
-                ?.legendProfile?.asLegendaryCustomization(),
-            isZap = this.data.isZap,
-            isStorePurchase = this.data.isStorePurchase,
-            isOnChainPayment = this.data.onChainAddress != null,
+            txId = this.id,
+            txType = this.type,
+            txState = this.state,
+            txAmountInSats = this.amountInBtc.toBigDecimal().abs().toSats(),
+            txCreatedAt = Instant.ofEpochSecond(this.createdAt),
+            txUpdatedAt = Instant.ofEpochSecond(this.updatedAt),
+            txCompletedAt = this.completedAt?.let { Instant.ofEpochSecond(it) },
+            txNote = this.note,
+            otherUserId = this.otherUserId,
+            // TODO We need to do TXs and ProfileData merging
+//            otherUserAvatarCdnImage = this.otherProfileData?.avatarCdnImage,
+//            otherUserDisplayName = this.otherProfileData?.authorNameUiFriendly(),
+//            otherUserLegendaryCustomization = this.otherProfileData?.primalPremiumInfo
+//                ?.legendProfile?.asLegendaryCustomization(),
+            isZap = this.isZap,
+            isStorePurchase = this.isStorePurchase,
+            isOnChainPayment = this.onChainAddress != null,
         )
 }

@@ -43,12 +43,14 @@ import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.FollowUnfollowButton
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.approvals.ApproveFollowUnfollowProfileAlertDialog
-import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.utils.shortened
-import net.primal.android.explore.api.model.ExplorePeopleData
+import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.domain.ExplorePeopleData
+import net.primal.domain.model.ProfileData
 
 @Composable
 fun ExplorePeople(
@@ -130,19 +132,19 @@ fun ExplorePeople(
 
             items(
                 items = state.people,
-                key = { it.profile.pubkey },
+                key = { it.profile.profileId },
             ) { item ->
                 ExplorePersonListItem(
                     modifier = Modifier
                         .fillMaxWidth()
                         .wrapContentHeight(),
                     person = item,
-                    isFollowed = state.userFollowing.contains(item.profile.pubkey),
-                    onItemClick = { onProfileClick(item.profile.pubkey) },
+                    isFollowed = state.userFollowing.contains(item.profile.profileId),
+                    onItemClick = { onProfileClick(item.profile.profileId) },
                     onFollowClick = {
                         eventPublisher(
                             ExplorePeopleContract.UiEvent.FollowUser(
-                                userId = item.profile.pubkey,
+                                userId = item.profile.profileId,
                                 forceUpdate = false,
                             ),
                         )
@@ -150,7 +152,7 @@ fun ExplorePeople(
                     onUnfollowClick = {
                         eventPublisher(
                             ExplorePeopleContract.UiEvent.UnfollowUser(
-                                userId = item.profile.pubkey,
+                                userId = item.profile.profileId,
                                 forceUpdate = false,
                             ),
                         )
@@ -189,7 +191,8 @@ private fun ExplorePersonListItem(
                     avatarSize = 64.dp,
                     avatarCdnImage = person.profile.avatarCdnImage,
                     onClick = onItemClick,
-                    legendaryCustomization = person.profile.premiumDetails?.legendaryCustomization,
+                    legendaryCustomization = person.profile.primalPremiumInfo?.legendProfile
+                        ?.asLegendaryCustomization(),
                 )
             }
 
@@ -197,24 +200,25 @@ private fun ExplorePersonListItem(
                 modifier = Modifier.padding(end = 16.dp),
             ) {
                 NostrUserText(
-                    displayName = person.profile.userDisplayName,
+                    displayName = person.profile.asProfileDetailsUi().userDisplayName,
                     internetIdentifier = person.profile.internetIdentifier,
-                    legendaryCustomization = person.profile.premiumDetails?.legendaryCustomization,
+                    legendaryCustomization = person.profile.primalPremiumInfo?.legendProfile
+                        ?.asLegendaryCustomization(),
                 )
-                person.profile.internetIdentifier?.let {
+                person.profile.internetIdentifier?.let { internetIdentifier ->
                     Text(
                         modifier = Modifier.padding(top = 2.dp),
-                        text = person.profile.internetIdentifier,
+                        text = internetIdentifier,
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                         style = AppTheme.typography.bodySmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-                person.profile.about?.let {
+                person.profile.about?.let { about ->
                     Text(
                         modifier = Modifier.padding(top = 8.dp),
-                        text = person.profile.about,
+                        text = about,
                         style = AppTheme.typography.bodySmall,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
@@ -291,10 +295,13 @@ fun PreviewExplorePersonListItem() {
                         .fillMaxWidth()
                         .wrapContentHeight(),
                     person = ExplorePeopleData(
-                        profile = ProfileDetailsUi(
-                            pubkey = "",
-                            authorDisplayName = "miljan",
-                            userDisplayName = "miljan",
+                        profile = ProfileData(
+                            profileId = "",
+                            metadataEventId = "",
+                            createdAt = 0,
+                            metadataRawEvent = "",
+                            displayName = "miljan",
+                            handle = "miljan",
                             lightningAddress = "miljan@primal.net",
                             internetIdentifier = "miljan@primal.net",
                             about = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, " +

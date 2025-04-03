@@ -15,10 +15,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.notes.feed.grid.MediaFeedContract.UiState
 import net.primal.android.notes.feed.model.asFeedPostUi
-import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.domain.isPremiumFeedSpec
+import net.primal.domain.repository.FeedRepository
 
 @HiltViewModel(assistedFactory = MediaFeedViewModel.Factory::class)
 class MediaFeedViewModel @AssistedInject constructor(

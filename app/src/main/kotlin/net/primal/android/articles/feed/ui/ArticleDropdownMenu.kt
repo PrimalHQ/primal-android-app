@@ -35,12 +35,12 @@ import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.resolvePrimalArticleLink
 import net.primal.android.core.utils.systemShareText
 import net.primal.android.crypto.hexToNpubHrp
-import net.primal.android.nostr.utils.Naddr
-import net.primal.android.nostr.utils.Nip19TLV.toNaddrString
-import net.primal.android.profile.report.ReportType
 import net.primal.android.profile.report.ReportUserDialog
 import net.primal.android.theme.AppTheme
+import net.primal.domain.nostr.Naddr
+import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.ReportType
 
 @ExperimentalMaterial3Api
 @Composable

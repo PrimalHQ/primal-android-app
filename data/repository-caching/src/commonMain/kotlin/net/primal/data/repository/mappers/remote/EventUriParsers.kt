@@ -1,6 +1,8 @@
 package net.primal.data.repository.mappers.remote
 
+import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.detectMimeType
+import net.primal.core.utils.isNostrUri
 import net.primal.data.local.dao.events.EventUri
 import net.primal.data.local.dao.messages.DirectMessageData
 import net.primal.data.local.dao.notes.PostData
@@ -62,26 +64,40 @@ fun List<DirectMessageData>.flatMapMessagesAsEventUriPO() =
         }
 
 fun List<ArticleData>.flatMapArticlesAsEventUriPO(
-    cdnResources: Map<String, CdnResource>,
+    cdnResources: List<CdnResource>,
     linkPreviews: Map<String, EventLinkPreviewData>,
     videoThumbnails: Map<String, String>,
-) = flatMap { articleData ->
-    val uriAttachments = articleData.uris.map { uri ->
-        EventIdUriPair(eventId = articleData.eventId, uri = uri)
-    }
-
-    val imageAttachment = articleData.imageCdnImage?.sourceUrl?.let { imageUrl ->
-        listOf(EventIdUriPair(eventId = articleData.eventId, uri = imageUrl))
-    } ?: emptyList()
-
-    imageAttachment + uriAttachments
-}
-    .filterNot { it.uri.isNostrUri() }
-    .mapToEventUri(
-        cdnResources = cdnResources,
+): List<EventUri> {
+    val cdnResourcesByUrl = cdnResources.asMapByKey { it.url }
+    return flatMapArticlesAsEventUriPO(
+        cdnResources = cdnResourcesByUrl,
         linkPreviews = linkPreviews,
         videoThumbnails = videoThumbnails,
     )
+}
+
+fun List<ArticleData>.flatMapArticlesAsEventUriPO(
+    cdnResources: Map<String, CdnResource>,
+    linkPreviews: Map<String, EventLinkPreviewData>,
+    videoThumbnails: Map<String, String>,
+): List<EventUri> =
+    flatMap { articleData ->
+        val uriAttachments = articleData.uris.map { uri ->
+            EventIdUriPair(eventId = articleData.eventId, uri = uri)
+        }
+
+        val imageAttachment = articleData.imageCdnImage?.sourceUrl?.let { imageUrl ->
+            listOf(EventIdUriPair(eventId = articleData.eventId, uri = imageUrl))
+        } ?: emptyList()
+
+        imageAttachment + uriAttachments
+    }
+        .filterNot { it.uri.isNostrUri() }
+        .mapToEventUri(
+            cdnResources = cdnResources,
+            linkPreviews = linkPreviews,
+            videoThumbnails = videoThumbnails,
+        )
 
 private fun List<EventIdUriPair>.mapToEventUri(
     cdnResources: Map<String, CdnResource>,

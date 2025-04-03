@@ -4,10 +4,10 @@ import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
-import net.primal.android.profile.db.ProfileData
 import net.primal.android.profile.details.ui.model.PremiumProfileDataUi
-import net.primal.android.profile.domain.PrimalPremiumInfo
 import net.primal.domain.CdnImage
+import net.primal.domain.PrimalPremiumInfo
+import net.primal.domain.model.ProfileData as ProfileDataDO
 
 data class ProfileDetailsUi(
     val pubkey: String,
@@ -26,9 +26,9 @@ data class ProfileDetailsUi(
     val premiumDetails: PremiumProfileDataUi? = null,
 )
 
-fun ProfileData.asProfileDetailsUi() =
+fun ProfileDataDO.asProfileDetailsUi() =
     ProfileDetailsUi(
-        pubkey = this.ownerId,
+        pubkey = this.profileId,
         authorDisplayName = this.authorNameUiFriendly(),
         userDisplayName = this.usernameUiFriendly(),
         coverCdnImage = this.bannerCdnImage,

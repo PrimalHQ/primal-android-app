@@ -1,11 +1,11 @@
 package net.primal.android.core.compose.profile.model
 
 import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.explore.domain.UserProfileSearchItem
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
-import net.primal.android.profile.db.ProfileData
 import net.primal.domain.CdnImage
+import net.primal.domain.UserProfileSearchItem
+import net.primal.domain.model.ProfileData as ProfileDataDO
 
 data class UserProfileItemUi(
     val profileId: String,
@@ -20,7 +20,7 @@ data class UserProfileItemUi(
 
 fun UserProfileSearchItem.mapAsUserProfileUi() =
     UserProfileItemUi(
-        profileId = this.metadata.ownerId,
+        profileId = this.metadata.profileId,
         displayName = this.metadata.authorNameUiFriendly(),
         internetIdentifier = this.metadata.internetIdentifier,
         avatarCdnImage = this.metadata.avatarCdnImage,
@@ -29,9 +29,9 @@ fun UserProfileSearchItem.mapAsUserProfileUi() =
         legendaryCustomization = this.metadata.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
     )
 
-fun ProfileData.asUserProfileItemUi() =
+fun ProfileDataDO.asUserProfileItemUi() =
     UserProfileItemUi(
-        profileId = this.ownerId,
+        profileId = this.profileId,
         displayName = this.authorNameUiFriendly(),
         internetIdentifier = this.internetIdentifier,
         avatarCdnImage = this.avatarCdnImage,

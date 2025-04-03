@@ -72,8 +72,8 @@ import net.primal.android.wallet.transactions.send.create.ellipsizeLnUrl
 import net.primal.android.wallet.transactions.send.create.ellipsizeOnChainAddress
 import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
 import net.primal.android.wallet.ui.TransactionAmountText
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 
 @ExperimentalMaterial3Api
 @ExperimentalComposeUiApi

@@ -2,16 +2,14 @@ package net.primal.android.premium.legend.contribute
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.math.BigDecimal
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.core.utils.getMaximumUsdAmount
-import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.premium.legend.contribute.LegendContributeContract.LegendContributeState
 import net.primal.android.premium.legend.contribute.LegendContributeContract.PaymentMethod
 import net.primal.android.premium.legend.contribute.LegendContributeContract.UiEvent
@@ -25,13 +23,14 @@ import net.primal.android.wallet.domain.SubWallet
 import net.primal.android.wallet.domain.not
 import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.repository.WalletRepository
-import net.primal.android.wallet.utils.CurrencyConversionUtils.fromSatsToUsd
-import net.primal.android.wallet.utils.formatUsdZeros
 import net.primal.android.wallet.utils.parseBitcoinPaymentInstructions
 import net.primal.android.wallet.utils.parseLightningPaymentInstructions
 import net.primal.android.wallet.utils.parseSatsToUsd
 import net.primal.android.wallet.utils.parseUsdToSats
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
+import net.primal.core.utils.getMaximumUsdAmount
+import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
 @HiltViewModel
@@ -127,9 +126,10 @@ class LegendContributeViewModel @Inject constructor(
                     copy(
                         currentExchangeRate = it,
                         maximumUsdAmount = getMaximumUsdAmount(it),
-                        amountInUsd = BigDecimal(_state.value.amountInSats)
+                        amountInUsd = _state.value.amountInSats
+                            .toBigDecimal()
                             .fromSatsToUsd(it)
-                            .formatUsdZeros(),
+                            .toPlainString(),
                     )
                 }
             }
@@ -179,7 +179,7 @@ class LegendContributeViewModel @Inject constructor(
                 }
 
                 startPurchaseMonitor()
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SignatureException) {
                 Timber.e(error)
             } catch (error: WssException) {
                 Timber.e(error)
@@ -197,7 +197,7 @@ class LegendContributeViewModel @Inject constructor(
                     PaymentMethod.BitcoinLightning -> executeLightningPayment()
                     null -> Unit
                 }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SignatureException) {
                 setState {
                     copy(
                         error = UiState.ContributionUiError.WithdrawViaPrimalWalletFailed(error),

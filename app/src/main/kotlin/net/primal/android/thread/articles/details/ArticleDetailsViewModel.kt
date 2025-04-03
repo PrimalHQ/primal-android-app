@@ -13,20 +13,16 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import net.primal.android.articles.ArticleRepository
+import net.primal.android.articles.highlights.JoinedHighlightsUi
+import net.primal.android.articles.highlights.joinOnContent
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.crypto.hexToNpubHrp
-import net.primal.android.events.repository.EventRepository
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
-import net.primal.android.highlights.model.JoinedHighlightsUi
-import net.primal.android.highlights.model.joinOnContent
-import net.primal.android.highlights.repository.HighlightRepository
 import net.primal.android.navigation.articleId
 import net.primal.android.navigation.naddr
 import net.primal.android.navigation.primalName
-import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.asReplaceableEventTag
 import net.primal.android.nostr.ext.isNPub
@@ -35,27 +31,33 @@ import net.primal.android.nostr.ext.isNote
 import net.primal.android.nostr.ext.isNoteUri
 import net.primal.android.nostr.ext.nostrUriToNoteId
 import net.primal.android.nostr.ext.nostrUriToPubkey
-import net.primal.android.nostr.notary.MissingPrivateKeyException
-import net.primal.android.nostr.utils.Naddr
-import net.primal.android.nostr.utils.Nevent
-import net.primal.android.nostr.utils.Nip19TLV
-import net.primal.android.nostr.utils.asATagValue
 import net.primal.android.notes.feed.model.asFeedPostUi
-import net.primal.android.notes.repository.FeedRepository
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.thread.articles.details.ArticleDetailsContract.SideEffect
 import net.primal.android.thread.articles.details.ArticleDetailsContract.UiEvent
 import net.primal.android.thread.articles.details.ArticleDetailsContract.UiState
 import net.primal.android.thread.articles.details.ui.mapAsArticleDetailsUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
+import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.domain.ZapTarget
 import net.primal.android.wallet.zaps.InvalidZapRequestException
 import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.nostr.Naddr
+import net.primal.domain.nostr.Nevent
+import net.primal.domain.nostr.Nip19TLV
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.asATagValue
+import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
+import net.primal.domain.nostr.cryptography.SigningRejectedException
+import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.repository.ArticleRepository
+import net.primal.domain.repository.EventInteractionRepository
+import net.primal.domain.repository.FeedRepository
+import net.primal.domain.repository.HighlightRepository
+import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -66,7 +68,8 @@ class ArticleDetailsViewModel @Inject constructor(
     private val feedRepository: FeedRepository,
     private val highlightRepository: HighlightRepository,
     private val profileRepository: ProfileRepository,
-    private val eventRepository: EventRepository,
+    private val userRepository: UserRepository,
+    private val eventInteractionRepository: EventInteractionRepository,
     private val zapHandler: ZapHandler,
 ) : ViewModel() {
 
@@ -163,7 +166,7 @@ class ArticleDetailsViewModel @Inject constructor(
             var referencedProfileUris: Set<String> = emptySet()
             articleRepository.observeArticle(articleId = naddr.identifier, articleAuthorId = naddr.userId)
                 .collect { article ->
-                    val nostrNoteUris = article.data.uris.filter { it.isNoteUri() || it.isNote() }.toSet()
+                    val nostrNoteUris = article.uris.filter { it.isNoteUri() || it.isNote() }.toSet()
                     if (nostrNoteUris != referencedNotesUris) {
                         referencedNotesUris = nostrNoteUris
                         val referencedNotes = feedRepository.findAllPostsByIds(
@@ -176,16 +179,16 @@ class ArticleDetailsViewModel @Inject constructor(
                         }
                     }
 
-                    val nostrProfileUris = article.data.uris.filter { it.isNPubUri() || it.isNPub() }.toSet()
+                    val nostrProfileUris = article.uris.filter { it.isNPubUri() || it.isNPub() }.toSet()
                     if (nostrProfileUris != referencedProfileUris) {
                         referencedProfileUris = nostrProfileUris
-                        val referencedProfiles = profileRepository.findProfilesData(
+                        val referencedProfiles = profileRepository.findProfileData(
                             profileIds = nostrProfileUris.mapNotNull { it.nostrUriToPubkey() },
                         )
                         setState {
                             copy(
                                 npubToDisplayNameMap = referencedProfiles
-                                    .associateBy { it.ownerId.hexToNpubHrp() }
+                                    .associateBy { it.profileId.hexToNpubHrp() }
                                     .mapValues { "@${it.value.authorNameUiFriendly()}" },
                             )
                         }
@@ -244,7 +247,8 @@ class ArticleDetailsViewModel @Inject constructor(
 
         viewModelScope.launch {
             val postAuthorProfileData = profileRepository.findProfileDataOrNull(profileId = article.authorId)
-            if (postAuthorProfileData?.lnUrlDecoded == null) {
+            val lnUrlDecoded = postAuthorProfileData?.lnUrlDecoded
+            if (lnUrlDecoded == null) {
                 setState { copy(error = UiError.MissingLightningAddress(IllegalStateException("Missing ln url"))) }
                 return@launch
             }
@@ -259,7 +263,7 @@ class ArticleDetailsViewModel @Inject constructor(
                         identifier = article.articleId,
                         eventId = article.eventId,
                         eventAuthorId = article.authorId,
-                        eventAuthorLnUrlDecoded = postAuthorProfileData.lnUrlDecoded,
+                        eventAuthorLnUrlDecoded = lnUrlDecoded,
                     ),
                 )
             } catch (error: ZapFailureException) {
@@ -280,7 +284,7 @@ class ArticleDetailsViewModel @Inject constructor(
             val article = _state.value.article
             if (article != null) {
                 try {
-                    eventRepository.likeEvent(
+                    eventInteractionRepository.likeEvent(
                         userId = activeAccountStore.activeUserId(),
                         eventId = article.eventId,
                         eventAuthorId = article.authorId,
@@ -293,8 +297,11 @@ class ArticleDetailsViewModel @Inject constructor(
                     Timber.w(error)
                 } catch (error: MissingRelaysException) {
                     Timber.w(error)
-                } catch (error: MissingPrivateKeyException) {
+                } catch (error: SigningKeyNotFoundException) {
                     setState { copy(error = UiError.MissingPrivateKey) }
+                    Timber.w(error)
+                } catch (error: SigningRejectedException) {
+                    setState { copy(error = UiError.NostrSignUnauthorized) }
                     Timber.w(error)
                 }
             }
@@ -305,11 +312,11 @@ class ArticleDetailsViewModel @Inject constructor(
             val article = _state.value.article
             if (article != null) {
                 try {
-                    eventRepository.repostEvent(
+                    eventInteractionRepository.repostEvent(
                         userId = activeAccountStore.activeUserId(),
                         eventId = article.eventId,
                         eventAuthorId = article.authorId,
-                        eventKind = NostrEventKind.LongFormContent,
+                        eventKind = NostrEventKind.LongFormContent.value,
                         eventRawNostrEvent = article.eventRawNostrEvent,
                         optionalTags = listOf(
                             "${NostrEventKind.LongFormContent.value}:${article.authorId}:${article.articleId}"
@@ -320,8 +327,11 @@ class ArticleDetailsViewModel @Inject constructor(
                     Timber.w(error)
                 } catch (error: MissingRelaysException) {
                     Timber.w(error)
-                } catch (error: MissingPrivateKeyException) {
+                } catch (error: SigningKeyNotFoundException) {
                     setState { copy(error = UiError.MissingPrivateKey) }
+                    Timber.w(error)
+                } catch (error: SigningRejectedException) {
+                    setState { copy(error = UiError.NostrSignUnauthorized) }
                     Timber.w(error)
                 }
             }
@@ -335,13 +345,13 @@ class ArticleDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             val followUnfollowResult = runCatching {
                 if (isAuthorFollowed) {
-                    profileRepository.unfollow(
+                    userRepository.unfollow(
                         userId = activeAccountStore.activeUserId(),
                         unfollowedUserId = article.authorId,
                         forceUpdate = false,
                     )
                 } else {
-                    profileRepository.follow(
+                    userRepository.follow(
                         userId = activeAccountStore.activeUserId(),
                         followedUserId = article.authorId,
                         forceUpdate = false,
@@ -352,7 +362,7 @@ class ArticleDetailsViewModel @Inject constructor(
             if (followUnfollowResult.isFailure) {
                 followUnfollowResult.exceptionOrNull()?.let { error ->
                     when (error) {
-                        is WssException, is ProfileRepository.FollowListNotFound,
+                        is WssException, is UserRepository.FollowListNotFound,
                         is NostrPublishException,
                         -> {
                             Timber.e(error)
@@ -368,7 +378,17 @@ class ArticleDetailsViewModel @Inject constructor(
                             }
                         }
 
-                        is MissingPrivateKeyException -> {
+                        is SigningRejectedException -> {
+                            Timber.e(error)
+                            setState {
+                                copy(
+                                    isAuthorFollowed = isAuthorFollowed,
+                                    error = UiError.NostrSignUnauthorized,
+                                )
+                            }
+                        }
+
+                        is SigningKeyNotFoundException -> {
                             Timber.e(error)
                             setState { copy(isAuthorFollowed = isAuthorFollowed, error = UiError.MissingPrivateKey) }
                         }
@@ -421,8 +441,11 @@ class ArticleDetailsViewModel @Inject constructor(
             )
             setState { copy(isHighlighted = true) }
             onSuccess?.invoke(highlightNevent)
-        } catch (error: MissingPrivateKeyException) {
+        } catch (error: SigningKeyNotFoundException) {
             setState { copy(error = UiError.MissingPrivateKey) }
+            Timber.w(error)
+        } catch (error: SigningRejectedException) {
+            setState { copy(error = UiError.NostrSignUnauthorized) }
             Timber.w(error)
         } catch (error: NostrPublishException) {
             Timber.w(error)
@@ -453,8 +476,11 @@ class ArticleDetailsViewModel @Inject constructor(
                 )
 
                 setState { copy(isHighlighted = false) }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SigningKeyNotFoundException) {
                 setState { copy(error = UiError.MissingPrivateKey) }
+                Timber.w(error)
+            } catch (error: SigningRejectedException) {
+                setState { copy(error = UiError.NostrSignUnauthorized) }
                 Timber.w(error)
             } catch (error: NostrPublishException) {
                 Timber.w(error)

@@ -78,8 +78,6 @@ kotlin {
 
         iosMain {
             dependencies {
-                // Paging
-                api(libs.cash.app.paging.runtime.uikit)
             }
         }
 

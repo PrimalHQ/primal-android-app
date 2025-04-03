@@ -3,8 +3,6 @@ package net.primal.android.wallet.zaps
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.db.PrimalDatabase
-import net.primal.android.events.repository.EventStatsUpdater
 import net.primal.android.networking.relays.FALLBACK_RELAYS
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.accounts.UserAccountsStore
@@ -19,6 +17,7 @@ import net.primal.android.wallet.domain.lnUrlDecoded
 import net.primal.android.wallet.domain.userId
 import net.primal.android.wallet.nwc.NwcNostrZapperFactory
 import net.primal.android.wallet.repository.WalletNostrZapper
+import net.primal.data.repository.events.EventStatsUpdater
 
 class ZapHandler @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
@@ -27,7 +26,6 @@ class ZapHandler @Inject constructor(
     private val primalWalletZapper: WalletNostrZapper,
     private val relayRepository: RelayRepository,
     private val notary: NostrNotary,
-    private val database: PrimalDatabase,
 ) {
 
     @Throws(ZapFailureException::class)
@@ -100,22 +98,24 @@ class ZapHandler @Inject constructor(
         }
     }
 
-    private fun ZapTarget.buildPostStatsUpdaterIfApplicable(userId: String) =
-        when (this) {
-            is ZapTarget.Event -> EventStatsUpdater(
-                userId = userId,
-                eventId = this.eventId,
-                eventAuthorId = this.eventAuthorId,
-                database = database,
-            )
-
-            is ZapTarget.ReplaceableEvent -> EventStatsUpdater(
-                userId = userId,
-                eventId = this.eventId,
-                eventAuthorId = this.eventAuthorId,
-                database = database,
-            )
-
-            is ZapTarget.Profile -> null
-        }
+    private fun ZapTarget.buildPostStatsUpdaterIfApplicable(userId: String): EventStatsUpdater? =
+        // TODO Refactor EventStatsUpdater() to work without database
+        null
+//        when (this) {
+//            is ZapTarget.Event -> EventStatsUpdater(
+//                userId = userId,
+//                eventId = this.eventId,
+//                eventAuthorId = this.eventAuthorId,
+//                database = database,
+//            )
+//
+//            is ZapTarget.ReplaceableEvent -> EventStatsUpdater(
+//                userId = userId,
+//                eventId = this.eventId,
+//                eventAuthorId = this.eventAuthorId,
+//                database = database,
+//            )
+//
+//            is ZapTarget.Profile -> null
+//        }
 }

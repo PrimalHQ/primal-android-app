@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.settings.wallet.domain.NwcConnectionInfo
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEvent
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiState
@@ -25,6 +24,7 @@ import net.primal.android.wallet.domain.WalletKycLevel
 import net.primal.android.wallet.repository.NwcWalletRepository
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = WalletSettingsViewModel.Factory::class)
@@ -78,7 +78,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                         connectionsState = WalletSettingsContract.ConnectionsState.Loaded,
                     )
                 }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
@@ -115,7 +115,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                 val updatedConnections = nwcConnections.filterNot { it.nwcPubkey == nwcPubkey }
                 setState { copy(nwcConnectionsInfo = updatedConnections) }
                 nwcWalletRepository.revokeConnection(activeAccountStore.activeUserId(), nwcPubkey)
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)

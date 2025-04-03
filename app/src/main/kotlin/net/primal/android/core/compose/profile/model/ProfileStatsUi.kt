@@ -1,6 +1,6 @@
 package net.primal.android.core.compose.profile.model
 
-import net.primal.android.profile.db.ProfileStats
+import net.primal.domain.model.ProfileStats as ProfileStatsDO
 
 data class ProfileStatsUi(
     val followingCount: Int? = null,
@@ -11,7 +11,7 @@ data class ProfileStatsUi(
     val mediaCount: Int? = null,
 )
 
-fun ProfileStats.asProfileStatsUi() =
+fun ProfileStatsDO.asProfileStatsUi() =
     ProfileStatsUi(
         followingCount = this.following,
         followersCount = this.followers,

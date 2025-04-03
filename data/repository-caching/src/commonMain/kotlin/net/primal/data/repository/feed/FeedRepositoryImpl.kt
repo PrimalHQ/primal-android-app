@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notes.FeedPost as FeedPostPO
 import net.primal.data.local.db.PrimalDatabase
@@ -22,6 +23,7 @@ import net.primal.data.repository.feed.paging.NoteFeedRemoteMediator
 import net.primal.data.repository.feed.processors.persistNoteRepliesAndArticleCommentsToDatabase
 import net.primal.data.repository.feed.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.local.mapAsFeedPostDO
+import net.primal.domain.error.NetworkException
 import net.primal.domain.model.FeedPost as FeedPostDO
 import net.primal.domain.repository.FeedRepository
 import net.primal.domain.supportsNoteReposts
@@ -40,18 +42,54 @@ internal class FeedRepositoryImpl(
         }.flow.map { it.map { feedPostPO -> feedPostPO.mapAsFeedPostDO() } }
     }
 
+    override suspend fun findNewestPosts(
+        userId: String,
+        feedDirective: String,
+        limit: Int,
+    ) = withContext(dispatcherProvider.io()) {
+        database.feedPosts().newestFeedPosts(
+            query = feedQueryBuilder(
+                userId = userId,
+                feedSpec = feedDirective,
+            ).newestFeedPostsQuery(limit = limit),
+        ).map { it.mapAsFeedPostDO() }
+    }
+
     override suspend fun findAllPostsByIds(postIds: List<String>): List<FeedPostDO> =
         withContext(dispatcherProvider.io()) {
             database.feedPosts().findAllPostsByIds(postIds).map { it.mapAsFeedPostDO() }
         }
 
+    override suspend fun findPostsById(postId: String): FeedPostDO? =
+        withContext(dispatcherProvider.io()) {
+            database.feedPosts().findAllPostsByIds(listOf(postId)).firstOrNull()?.mapAsFeedPostDO()
+        }
+
     override suspend fun fetchConversation(userId: String, noteId: String) {
+        withContext(dispatcherProvider.io()) {
+            val response = try {
+                feedApi.getThread(ThreadRequestBody(postId = noteId, userPubKey = userId, limit = 100))
+            } catch (error: WssException) {
+                throw NetworkException(message = error.message, cause = error)
+            }
+            response.persistNoteRepliesAndArticleCommentsToDatabase(noteId = noteId, database = database)
+            response.persistToDatabaseAsTransaction(userId = userId, database = database)
+        }
+    }
+
+    override suspend fun fetchReplies(userId: String, noteId: String) =
         withContext(dispatcherProvider.io()) {
             val response = feedApi.getThread(ThreadRequestBody(postId = noteId, userPubKey = userId, limit = 100))
             response.persistNoteRepliesAndArticleCommentsToDatabase(noteId = noteId, database = database)
             response.persistToDatabaseAsTransaction(userId = userId, database = database)
         }
-    }
+
+    override suspend fun removeFeedSpec(userId: String, feedSpec: String) =
+        withContext(dispatcherProvider.io()) {
+            database.feedPostsRemoteKeys().deleteByDirective(ownerId = userId, directive = feedSpec)
+            database.feedsConnections().deleteConnectionsByDirective(ownerId = userId, feedSpec = feedSpec)
+            database.articleFeedsConnections().deleteConnectionsBySpec(ownerId = userId, spec = feedSpec)
+        }
 
     override suspend fun findConversation(userId: String, noteId: String): List<FeedPostDO> {
         return observeConversation(userId = userId, noteId = noteId).firstOrNull() ?: emptyList()

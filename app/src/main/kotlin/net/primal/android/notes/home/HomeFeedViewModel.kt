@@ -13,8 +13,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.feeds.list.ui.model.asFeedUi
-import net.primal.android.feeds.repository.FeedsRepository
-import net.primal.android.nostr.notary.MissingPrivateKeyException
 import net.primal.android.notes.home.HomeFeedContract.UiEvent
 import net.primal.android.notes.home.HomeFeedContract.UiState
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
@@ -26,6 +24,10 @@ import net.primal.core.config.AppConfigHandler
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.domain.FeedSpecKind
+import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
+import net.primal.domain.nostr.cryptography.SigningRejectedException
+import net.primal.domain.repository.FeedsRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -71,12 +73,13 @@ class HomeFeedViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 setState { copy(loading = true) }
+                val userId = activeAccountStore.activeUserId()
                 feedsRepository.fetchAndPersistDefaultFeeds(
-                    userId = activeAccountStore.activeUserId(),
-                    givenDefaultFeeds = emptyList(),
+                    userId = userId,
                     specKind = FeedSpecKind.Notes,
+                    givenDefaultFeeds = emptyList(),
                 )
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
@@ -89,10 +92,13 @@ class HomeFeedViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(loading = true) }
             try {
+                val userId = activeAccountStore.activeUserId()
                 retryNetworkCall {
-                    feedsRepository.fetchAndPersistNoteFeeds(userId = activeAccountStore.activeUserId())
+                    feedsRepository.fetchAndPersistNoteFeeds(userId = userId)
                 }
-            } catch (error: MissingPrivateKeyException) {
+            } catch (error: SigningRejectedException) {
+                Timber.w(error)
+            } catch (error: SigningKeyNotFoundException) {
                 restoreDefaultNoteFeeds()
                 Timber.w(error)
             } catch (error: WssException) {

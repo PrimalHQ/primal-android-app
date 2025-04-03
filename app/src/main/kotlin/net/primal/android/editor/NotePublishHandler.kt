@@ -6,7 +6,6 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.db.PrimalDatabase
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.asEventTag
@@ -19,16 +18,19 @@ import net.primal.android.nostr.ext.parseHashtagTags
 import net.primal.android.nostr.ext.parsePubkeyTags
 import net.primal.android.nostr.ext.parseReplaceableEventTags
 import net.primal.android.nostr.publish.NostrPublisher
-import net.primal.android.nostr.publish.PublishResult
-import net.primal.android.nostr.utils.Naddr
-import net.primal.android.nostr.utils.Nevent
+import net.primal.domain.nostr.Naddr
+import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.publisher.PrimalPublishResult
+import net.primal.domain.repository.EventRelayHintsRepository
+import net.primal.domain.repository.FeedRepository
 
 class NotePublishHandler @Inject constructor(
     private val dispatcherProvider: CoroutineDispatcherProvider,
     private val nostrPublisher: NostrPublisher,
-    private val database: PrimalDatabase,
+    private val eventRelayHintsRepository: EventRelayHintsRepository,
+    private val feedRepository: FeedRepository,
 ) {
 
     @Throws(NostrPublishException::class)
@@ -40,7 +42,7 @@ class NotePublishHandler @Inject constructor(
         rootArticleNaddr: Naddr? = null,
         rootHighlightNevent: Nevent? = null,
         replyToNoteNevent: Nevent? = null,
-    ): PublishResult {
+    ): PrimalPublishResult {
         val noteContent = content.ensureWhitespaceBeforeUserTag()
 
         /* Event mentions from content */
@@ -81,7 +83,7 @@ class NotePublishHandler @Inject constructor(
         val allReferenceTags = (allMentionedEventTags + allPubkeyTags + replyEventTag + rootTag).filterNotNull().toSet()
         val relayHintsMap = withContext(dispatcherProvider.io()) {
             val tagNoteIds = allReferenceTags.map { it.get(index = 1).jsonPrimitive.content }
-            val hints = database.eventHints().findById(eventIds = tagNoteIds)
+            val hints = eventRelayHintsRepository.findRelaysByIds(eventIds = tagNoteIds)
             hints.associate { it.eventId to it.relays.first() }
         }
         val allReferenceTagsWithRelays = allReferenceTags.insertRelayHints(relayHintsMap = relayHintsMap)
@@ -144,9 +146,7 @@ class NotePublishHandler @Inject constructor(
         replyToNoteNevent: Nevent?,
     ): Set<JsonArray> {
         val replyToPostData = replyToNoteNevent?.let {
-            withContext(dispatcherProvider.io()) {
-                database.posts().findByPostId(postId = it.eventId)
-            }
+            feedRepository.findPostsById(postId = it.eventId)
         }
 
         val replyToExistingPubkeyTags = replyToPostData?.tags?.filter { it.isPubKeyTag() }?.toSet() ?: emptySet()

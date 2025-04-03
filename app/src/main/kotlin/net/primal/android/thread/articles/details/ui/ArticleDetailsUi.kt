@@ -1,15 +1,15 @@
 package net.primal.android.thread.articles.details.ui
 
 import java.time.Instant
-import net.primal.android.articles.db.Article
+import net.primal.android.articles.highlights.HighlightUi
+import net.primal.android.articles.highlights.asHighlightUi
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.highlights.model.HighlightUi
-import net.primal.android.highlights.model.asHighlightUi
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.domain.CdnImage
+import net.primal.domain.model.Article
 
 data class ArticleDetailsUi(
     val aTag: String,
@@ -35,21 +35,21 @@ data class ArticleDetailsUi(
 
 fun Article.mapAsArticleDetailsUi(): ArticleDetailsUi {
     return ArticleDetailsUi(
-        aTag = this.data.aTag,
-        eventId = this.data.eventId,
-        articleId = this.data.articleId,
-        authorId = this.data.authorId,
-        title = this.data.title,
-        content = this.data.content,
-        summary = this.data.summary,
-        publishedAt = Instant.ofEpochSecond(this.data.publishedAt),
-        authorDisplayName = this.author?.authorNameUiFriendly() ?: this.data.authorId.asEllipsizedNpub(),
-        eventRawNostrEvent = this.data.raw,
+        aTag = this.aTag,
+        eventId = this.eventId,
+        articleId = this.articleId,
+        authorId = this.authorId,
+        title = this.title,
+        content = this.content,
+        summary = this.summary,
+        publishedAt = Instant.ofEpochSecond(this.publishedAt),
+        authorDisplayName = this.author?.authorNameUiFriendly() ?: this.authorId.asEllipsizedNpub(),
+        eventRawNostrEvent = this.articleRawJson,
         authorInternetIdentifier = this.author?.internetIdentifier,
         authorAvatarCdnImage = this.author?.avatarCdnImage,
-        coverImageCdnImage = this.data.imageCdnImage ?: this.author?.avatarCdnImage,
-        readingTimeInMinutes = ((this.data.wordsCount ?: 1) / 200) + 1,
-        hashtags = this.data.hashtags,
+        coverImageCdnImage = this.imageCdnImage ?: this.author?.avatarCdnImage,
+        readingTimeInMinutes = ((this.wordsCount ?: 1) / 200) + 1,
+        hashtags = this.hashtags,
         isBookmarked = this.bookmark != null,
         eventStatsUi = EventStatsUi.from(eventStats = this.eventStats, userStats = this.userEventStats),
         authorLegendaryCustomization = this.author?.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),

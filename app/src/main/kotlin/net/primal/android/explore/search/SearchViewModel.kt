@@ -15,18 +15,18 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
-import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.explore.search.SearchContract.UiEvent
 import net.primal.android.explore.search.SearchContract.UiState
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.repository.ExploreRepository
 import timber.log.Timber
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val exploreRepository: ExploreRepository,
-    private val profileRepository: ProfileRepository,
+    private val userRepository: UserRepository,
     private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
 
@@ -80,7 +80,7 @@ class SearchViewModel @Inject constructor(
 
     private fun observeRecentUsers() {
         viewModelScope.launch {
-            exploreRepository.observeRecentUsers(ownerId = activeAccountStore.activeUserId())
+            userRepository.observeRecentUsers(ownerId = activeAccountStore.activeUserId())
                 .distinctUntilChanged()
                 .collect {
                     setState { copy(recentUsers = it.map { it.mapAsUserProfileUi() }) }
@@ -100,7 +100,7 @@ class SearchViewModel @Inject constructor(
 
     private fun markProfileInteraction(profileId: String) {
         viewModelScope.launch {
-            profileRepository.markAsInteracted(profileId = profileId, ownerId = activeAccountStore.activeUserId())
+            userRepository.markAsInteracted(profileId = profileId, ownerId = activeAccountStore.activeUserId())
         }
     }
 }
