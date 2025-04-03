@@ -19,7 +19,6 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.profile.approvals.ProfileApproval
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileStatsUi
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.utils.isValidHex
 import net.primal.android.crypto.bech32ToHexOrThrow
@@ -38,6 +37,7 @@ import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.FEED_KIND_USER
 import net.primal.domain.FeedSpecKind
 import net.primal.domain.buildLatestNotesUserFeedSpec
@@ -53,7 +53,7 @@ import timber.log.Timber
 @HiltViewModel
 class ProfileDetailsViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val feedsRepository: FeedsRepository,
     private val profileRepository: ProfileRepository,

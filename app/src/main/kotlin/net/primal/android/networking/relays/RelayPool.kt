@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.networking.relays.broadcast.BroadcastEventResponse
 import net.primal.android.networking.relays.broadcast.BroadcastRequestBody
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -29,6 +28,7 @@ import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.sockets.filterByEventId
 import net.primal.core.networking.sockets.parseIncomingMessage
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.domain.nostr.NostrEvent
@@ -37,7 +37,7 @@ import net.primal.domain.nostr.serialization.toNostrJsonObject
 import timber.log.Timber
 
 class RelayPool(
-    dispatchers: CoroutineDispatcherProvider,
+    dispatchers: DispatcherProvider,
     private val nostrSocketClientFactory: NostrSocketClientFactory,
     private val primalApiClient: PrimalApiClient,
 ) {

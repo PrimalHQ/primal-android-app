@@ -2,9 +2,9 @@ package net.primal.android.settings.repository
 
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.domain.UserAccount
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.decodeFromStringOrNull
@@ -15,7 +15,7 @@ import net.primal.domain.DEFAULT_ZAP_DEFAULT
 import net.primal.domain.nostr.NostrEvent
 
 class SettingsRepository @Inject constructor(
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val settingsApi: SettingsApi,
     private val accountsStore: UserAccountsStore,
 ) {

@@ -5,7 +5,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.ext.asEventTag
@@ -18,6 +17,7 @@ import net.primal.android.nostr.ext.parseHashtagTags
 import net.primal.android.nostr.ext.parsePubkeyTags
 import net.primal.android.nostr.ext.parseReplaceableEventTags
 import net.primal.android.nostr.publish.NostrPublisher
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.NostrEventKind
@@ -27,7 +27,7 @@ import net.primal.domain.repository.EventRelayHintsRepository
 import net.primal.domain.repository.FeedRepository
 
 class NotePublishHandler @Inject constructor(
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val nostrPublisher: NostrPublisher,
     private val eventRelayHintsRepository: EventRelayHintsRepository,
     private val feedRepository: FeedRepository,

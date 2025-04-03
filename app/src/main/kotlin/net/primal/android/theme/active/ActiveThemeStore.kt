@@ -10,13 +10,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.runBlocking
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.theme.active.di.ActiveThemeDataStore
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.core.utils.coroutines.DispatcherProvider
 
 @Singleton
 class ActiveThemeStore @Inject constructor(
-    dispatchers: CoroutineDispatcherProvider,
+    dispatchers: DispatcherProvider,
     @ActiveThemeDataStore private val persistence: DataStore<String>,
 ) {
 

@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.files.MediaDownloader
 import net.primal.android.core.files.error.UnableToSaveContent
 import net.primal.android.core.files.error.UnsuccessfulFileDownload
@@ -22,12 +21,13 @@ import net.primal.android.media.MediaItemContract.UiEvent
 import net.primal.android.media.MediaItemContract.UiState
 import net.primal.android.navigation.asUrlDecodedNonNullable
 import net.primal.android.navigation.mediaUrlOrThrow
+import net.primal.core.utils.coroutines.DispatcherProvider
 import timber.log.Timber
 
 @HiltViewModel
 class MediaItemViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val mediaDownloader: MediaDownloader,
 ) : ViewModel() {
 
