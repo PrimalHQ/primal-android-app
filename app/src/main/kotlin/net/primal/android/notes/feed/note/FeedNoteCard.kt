@@ -250,7 +250,7 @@ private fun FeedNoteCard(
 
     val graphicsLayer = rememberGraphicsLayer()
     val outlineColor = AppTheme.colorScheme.outline
-    val lineOffsetX: Dp = 27.dp
+    val lineOffsetX: Dp = (avatarSizeDp / 2) + avatarPaddingDp + 2.dp
     val lineWidth: Dp = 2.dp
 
     NoteSurfaceCard(
@@ -265,12 +265,9 @@ private fun FeedNoteCard(
             ),
         shape = shape,
         colors = colors,
-        drawLineAboveAvatar = drawLineAboveAvatar,
-        drawLineBelowAvatar = drawLineBelowAvatar,
-        lineOffsetX = (avatarSizeDp / 2) + avatarPaddingDp + notePaddingDp + 2.dp,
     ) {
         Box(
-            modifier = Modifier.padding(all = notePaddingDp),
+            modifier = Modifier.padding(horizontal = notePaddingDp),
             contentAlignment = Alignment.TopEnd,
         ) {
             NoteDropdownMenuIcon(
@@ -279,9 +276,9 @@ private fun FeedNoteCard(
                     .size(overflowIconSizeDp)
                     .padding(
                         top = when {
-                            data.repostAuthorName != null -> 4.dp
-                            !fullWidthContent -> 6.dp
-                            else -> 13.dp
+                            data.repostAuthorName != null -> 7.dp
+                            !fullWidthContent -> 11.dp
+                            else -> 14.dp
                         },
                     )
                     .clip(CircleShape)
@@ -311,7 +308,7 @@ private fun FeedNoteCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = avatarPaddingDp)
-                            .padding(top = 4.dp),
+                            .padding(top = notePaddingDp * 2),
                         repostedByAuthor = data.repostAuthorName,
                         onRepostAuthorClick = if (data.repostAuthorId != null && noteCallbacks.onProfileClick != null) {
                             { noteCallbacks.onProfileClick.invoke(data.repostAuthorId) }
@@ -344,7 +341,7 @@ private fun FeedNoteCard(
                                     drawLine(
                                         color = outlineColor,
                                         start = Offset(x = connectionX, y = 16.dp.toPx()),
-                                        end = Offset(x = connectionX, y = size.height),
+                                        end = Offset(x = connectionX, y = size.height * 2),
                                         strokeWidth = lineWidth.toPx(),
                                         cap = StrokeCap.Square,
                                     )
@@ -360,7 +357,11 @@ private fun FeedNoteCard(
                                     )
                                 }
                             }
-                        },
+                        }
+                        .padding(
+                            top = if (data.repostAuthorName == null) notePaddingDp else 0.dp,
+                            bottom = notePaddingDp,
+                        ),
                 ) {
                     FeedNote(
                         data = data,
