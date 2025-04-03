@@ -18,9 +18,9 @@ import net.primal.data.local.dao.reads.Article as ArticlePO
 import net.primal.data.local.dao.reads.ArticleFeedCrossRef
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.local.db.withTransaction
-import net.primal.data.remote.api.articles.ArticleFeedRequestBody
-import net.primal.data.remote.api.articles.ArticleResponse
 import net.primal.data.remote.api.articles.ArticlesApi
+import net.primal.data.remote.api.articles.model.ArticleFeedRequestBody
+import net.primal.data.remote.api.articles.model.ArticleResponse
 import net.primal.data.remote.model.ContentPrimalPaging
 import net.primal.data.repository.articles.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.remote.mapNotNullAsArticleDataPO
