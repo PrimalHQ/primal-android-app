@@ -104,10 +104,12 @@ fun NoteDropdownMenuIcon(
                 text = stringResource(id = R.string.feed_context_share_note_as_image),
                 onClick = {
                     uiScope.launch {
-                        systemShareImage(
-                            context = context,
-                            bitmap = noteGraphicsLayer.toImageBitmap().asAndroidBitmap(),
-                        )
+                        runCatching {
+                            systemShareImage(
+                                context = context,
+                                bitmap = noteGraphicsLayer.toImageBitmap().asAndroidBitmap(),
+                            )
+                        }
                     }
                     menuVisible = false
                 },
