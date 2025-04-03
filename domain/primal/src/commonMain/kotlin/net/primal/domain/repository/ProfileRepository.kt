@@ -22,7 +22,7 @@ interface ProfileRepository {
     suspend fun fetchProfile(profileId: String): ProfileData?
 
     @Throws(CancellationException::class)
-    suspend fun fetchProfiles(profileIds: Set<String>): List<ProfileData>
+    suspend fun fetchProfiles(profileIds: List<String>): List<ProfileData>
 
     suspend fun fetchUserProfileFollowedBy(
         profileId: String,

@@ -134,9 +134,9 @@ class ProfileRepositoryImpl(
             profileMetadata?.asProfileDataDO()
         }
 
-    override suspend fun fetchProfiles(profileIds: Set<String>): List<ProfileData> =
+    override suspend fun fetchProfiles(profileIds: List<String>): List<ProfileData> =
         withContext(dispatcherProvider.io()) {
-            val response = retryNetworkCall { usersApi.getUserProfilesMetadata(userIds = profileIds) }
+            val response = retryNetworkCall { usersApi.getUserProfilesMetadata(userIds = profileIds.toSet()) }
 
             val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
             val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()

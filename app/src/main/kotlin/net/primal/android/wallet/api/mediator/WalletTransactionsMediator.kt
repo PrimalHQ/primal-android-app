@@ -95,7 +95,7 @@ class WalletTransactionsMediator(
             usersDatabase.walletTransactions().upsertAll(data = transactions)
         }
 
-        val mentionedUserIds = transactions.mapNotNull { it.otherUserId }.toSet()
+        val mentionedUserIds = transactions.mapNotNull { it.otherUserId }
         profileRepository.fetchProfiles(profileIds = mentionedUserIds)
 
         return MediatorResult.Success(endOfPaginationReached = false)
