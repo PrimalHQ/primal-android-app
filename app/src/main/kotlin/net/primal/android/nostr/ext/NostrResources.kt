@@ -1,10 +1,10 @@
 package net.primal.android.nostr.ext
 
 import java.util.regex.Pattern
-import net.primal.android.crypto.bech32ToHexOrThrow
-import net.primal.android.crypto.bechToBytesOrThrow
-import net.primal.android.crypto.toHex
 import net.primal.domain.nostr.Nip19TLV
+import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
+import net.primal.domain.nostr.cryptography.utils.bechToBytesOrThrow
+import net.primal.domain.nostr.cryptography.utils.toHex
 import timber.log.Timber
 
 private const val NOSTR = "nostr:"

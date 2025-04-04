@@ -72,9 +72,9 @@ import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.core.utils.formatNip05Identifier
-import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.nostr.ext.isNPub
 import net.primal.android.theme.AppTheme
+import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 
 @Composable
 fun ProfileQrCodeViewer(

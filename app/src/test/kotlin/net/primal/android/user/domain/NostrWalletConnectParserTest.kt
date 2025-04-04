@@ -4,8 +4,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import fr.acinq.secp256k1.Hex
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import net.primal.android.crypto.CryptoUtils
-import net.primal.android.crypto.toHex
+import net.primal.domain.nostr.cryptography.utils.CryptoUtils
+import net.primal.domain.nostr.cryptography.utils.toHex
 import org.junit.Test
 import org.junit.runner.RunWith
 

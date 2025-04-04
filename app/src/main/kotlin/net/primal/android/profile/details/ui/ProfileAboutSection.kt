@@ -9,9 +9,9 @@ import androidx.compose.ui.text.buildAnnotatedString
 import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.utils.TextMatcher
-import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.nostr.ext.isNostrUri
 import net.primal.android.theme.AppTheme
+import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 
 private const val PROFILE_ID_ANNOTATION_TAG = "profileId"
 private const val URL_ANNOTATION_TAG = "url"

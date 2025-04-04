@@ -19,7 +19,6 @@ import net.primal.android.auth.onboarding.account.api.OnboardingApi
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroupMember
 import net.primal.android.auth.repository.CreateAccountHandler
-import net.primal.android.crypto.CryptoUtils
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.profile.domain.ProfileMetadata
@@ -28,6 +27,7 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.cryptography.utils.CryptoUtils
 import net.primal.domain.upload.UploadJob
 import timber.log.Timber
 

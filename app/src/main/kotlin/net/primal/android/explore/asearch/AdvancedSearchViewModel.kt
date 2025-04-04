@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
 import net.primal.android.core.compose.profile.model.asUserProfileItemUi
-import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.explore.asearch.AdvancedSearchContract.Orientation
 import net.primal.android.explore.asearch.AdvancedSearchContract.SearchFilter
 import net.primal.android.explore.asearch.AdvancedSearchContract.UiEvent
@@ -27,6 +26,7 @@ import net.primal.android.navigation.advSearchScope
 import net.primal.android.navigation.initialQuery
 import net.primal.android.navigation.postedBy
 import net.primal.android.navigation.searchKind
+import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import net.primal.domain.repository.ProfileRepository
 
 @HiltViewModel
