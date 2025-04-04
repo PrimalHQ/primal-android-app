@@ -10,9 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
@@ -32,7 +30,6 @@ import net.primal.android.wallet.api.model.BalanceResponse
 import net.primal.android.wallet.api.model.LastUpdatedAtResponse
 import net.primal.android.wallet.api.model.WalletRequestBody
 import net.primal.android.wallet.domain.SubWallet
-import net.primal.core.config.AppConfigProvider
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.primal.PrimalSocketSubscription
@@ -48,7 +45,6 @@ class SubscriptionsManager @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val userRepository: UserRepository,
     private val nostrNotary: NostrNotary,
-    private val appConfigProvider: AppConfigProvider,
     @PrimalCacheApiClient private val cacheApiClient: PrimalApiClient,
     @PrimalWalletApiClient private val walletApiClient: PrimalApiClient,
 ) {
@@ -80,7 +76,6 @@ class SubscriptionsManager @Inject constructor(
 
     private fun observeActiveAccount() =
         scope.launch {
-            appConfigProvider.waitForCacheAndWalletConfigsUrls()
             activeAccountStore.activeUserId.collect { newActiveUserId ->
                 emitBadgesUpdate { Badges() }
                 unsubscribeAll()
@@ -100,10 +95,6 @@ class SubscriptionsManager @Inject constructor(
                 }
             }
         }
-
-    private suspend fun AppConfigProvider.waitForCacheAndWalletConfigsUrls() {
-        combine(cacheUrl(), walletUrl()) { array -> array.toList() }.first()
-    }
 
     private val lifecycleEventObserver = LifecycleEventObserver { _, event ->
         when (event) {
