@@ -1,7 +1,7 @@
 package net.primal.android
 
 import android.app.Application
-import coil.Coil
+import coil3.SingletonImageLoader
 import dagger.hilt.android.HiltAndroidApp
 import io.github.aakira.napier.Antilog
 import io.github.aakira.napier.Napier
@@ -36,11 +36,10 @@ class PrimalApp : Application() {
             Timber.plant(it)
         }
 
+        SingletonImageLoader.setSafe(imageLoaderFactory)
         antilog.firstOrNull()?.let { antilog ->
             Napier.base(antilog)
         }
-
-        Coil.setImageLoader(imageLoaderFactory)
 
         if (BuildConfig.FEATURE_PRIMAL_CRASH_REPORTER) {
             crashReporter.init()

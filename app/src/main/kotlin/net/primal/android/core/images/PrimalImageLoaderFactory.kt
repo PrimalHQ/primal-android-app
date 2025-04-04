@@ -1,31 +1,29 @@
 package net.primal.android.core.images
 
-import android.content.Context
 import android.os.Build
-import coil.ImageLoader
-import coil.ImageLoaderFactory
-import coil.decode.GifDecoder
-import coil.decode.ImageDecoderDecoder
-import coil.decode.VideoFrameDecoder
-import coil.disk.DiskCache
-import dagger.hilt.android.qualifiers.ApplicationContext
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.SingletonImageLoader
+import coil3.disk.DiskCache
+import coil3.gif.AnimatedImageDecoder
+import coil3.gif.GifDecoder
+import coil3.video.VideoFrameDecoder
 import javax.inject.Inject
 import javax.inject.Singleton
+import okio.Path.Companion.toOkioPath
 
 @Singleton
-class PrimalImageLoaderFactory @Inject constructor(
-    @ApplicationContext context: Context,
-) : ImageLoaderFactory {
+class PrimalImageLoaderFactory @Inject constructor() : SingletonImageLoader.Factory {
 
-    private val defaultBuilder by lazy { ImageLoader.Builder(context) }
-    private val imageCacheDir by lazy { context.cacheDir.resolve("image_cache") }
+    override fun newImageLoader(context: PlatformContext): ImageLoader {
+        val defaultBuilder = ImageLoader.Builder(context)
+        val imageCacheDir = context.cacheDir.resolve("image_cache").toOkioPath()
 
-    override fun newImageLoader(): ImageLoader {
         return defaultBuilder
             .components {
                 // Gifs
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    add(ImageDecoderDecoder.Factory())
+                    add(AnimatedImageDecoder.Factory())
                 } else {
                     add(GifDecoder.Factory())
                 }
