@@ -1,7 +1,6 @@
 package net.primal.android
 
 import android.app.Application
-import coil.Coil
 import coil3.SingletonImageLoader
 import dagger.hilt.android.HiltAndroidApp
 import io.github.aakira.napier.Antilog
