@@ -173,7 +173,7 @@ private fun ProfilePreviewBottomBar(
             AccountCreationStep.AccountCreated -> stringResource(id = R.string.onboarding_button_continue)
             AccountCreationStep.ZapsIntroduction -> stringResource(id = R.string.onboarding_button_activate_wallet)
         },
-        buttonEnabled =  !isWorking,
+        buttonEnabled = !isWorking,
         buttonLoading = isWorking,
         onButtonClick = {
             when (accountCreationStep) {
