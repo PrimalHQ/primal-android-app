@@ -5,8 +5,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
-import net.primal.android.crypto.CryptoUtils
-import net.primal.android.crypto.hexToNsecHrp
+import net.primal.domain.nostr.cryptography.utils.CryptoUtils
+import net.primal.domain.nostr.cryptography.utils.hexToNsecHrp
 
 @Singleton
 class PrimalDatabasePasswordProvider @Inject constructor(
