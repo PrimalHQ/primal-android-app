@@ -11,8 +11,8 @@ import io.ktor.websocket.close
 import io.ktor.websocket.readReason
 import io.ktor.websocket.readText
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -24,7 +24,8 @@ import kotlinx.serialization.json.JsonObject
 import net.primal.core.utils.coroutines.DispatcherProvider
 import okio.Buffer
 import okio.GzipSink
-import okio.GzipSource
+import okio.Inflater
+import okio.InflaterSource
 import okio.buffer
 import okio.use
 
@@ -37,8 +38,6 @@ internal class NostrSocketClientImpl(
     private val onSocketConnectionClosed: SocketConnectionClosedCallback? = null,
 ) : NostrSocketClient {
 
-    override val socketUrl = wssUrl.cleanWebSocketUrl()
-
     private val scope = CoroutineScope(dispatcherProvider.io())
 
     private val webSocketMutex = Mutex()
@@ -47,7 +46,8 @@ internal class NostrSocketClientImpl(
     private val _incomingMessages = MutableSharedFlow<NostrIncomingMessage>()
     override val incomingMessages = _incomingMessages.asSharedFlow()
 
-    @OptIn(ExperimentalUuidApi::class)
+    override val socketUrl = wssUrl.cleanWebSocketUrl()
+
     override suspend fun ensureSocketConnection() =
         webSocketMutex.withLock {
             if (webSocket == null) {
@@ -59,20 +59,25 @@ internal class NostrSocketClientImpl(
             }
         }
 
-    private fun openWebSocketConnection(url: String) =
+    private suspend fun openWebSocketConnection(url: String) {
+        val connectionAcquired = CompletableDeferred<Boolean>()
         scope.launch {
             try {
                 httpClient.webSocket(urlString = url) {
                     webSocket = this
                     onSocketConnectionOpened?.invoke(url)
+                    connectionAcquired.complete(true)
                     receiveSocketMessages()
                 }
             } catch (error: Exception) {
                 Napier.w("NostrSocketClient::openWebSocketConnection($socketUrl) failed.", error)
                 this@NostrSocketClientImpl.webSocket = null
                 onSocketConnectionClosed?.invoke(socketUrl, error)
+                connectionAcquired.completeExceptionally(error)
             }
         }
+        connectionAcquired.await()
+    }
 
     private suspend fun WebSocketSession.receiveSocketMessages() {
         try {
@@ -139,7 +144,6 @@ internal class NostrSocketClientImpl(
         return sendMessage(text = reqMessage)
     }
 
-    @OptIn(ExperimentalUuidApi::class)
     override suspend fun sendCOUNT(data: JsonObject): String {
         val subscriptionId: String = Uuid.random().toPrimalSubscriptionId()
         val reqMessage = data.buildNostrCOUNTMessage(subscriptionId)
@@ -182,7 +186,7 @@ internal class NostrSocketClientImpl(
 
     private fun decompressMessage(compressedMessage: ByteArray): String {
         val buffer = Buffer().write(compressedMessage)
-        GzipSource(buffer).buffer().use { source ->
+        InflaterSource(buffer, Inflater(false)).buffer().use { source ->
             return source.readUtf8()
         }
     }
