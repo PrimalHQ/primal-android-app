@@ -1,6 +1,8 @@
 @file:Suppress("MagicNumber")
 
-package net.primal.android.crypto
+package net.primal.domain.nostr.cryptography.utils
+
+import kotlin.jvm.JvmStatic
 
 /*
  * Copyright 2020 ACINQ SAS

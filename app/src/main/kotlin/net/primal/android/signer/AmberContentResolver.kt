@@ -2,11 +2,11 @@ package net.primal.android.signer
 
 import android.content.ContentResolver
 import androidx.core.net.toUri
-import net.primal.android.crypto.hexToNpubHrp
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 
 private const val AMBER_PREFIX = "content://com.greenart7c3.nostrsigner."
 

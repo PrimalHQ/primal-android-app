@@ -2,15 +2,16 @@ package net.primal.android.messages.security
 
 import android.content.ContentResolver
 import javax.inject.Inject
-import net.primal.android.crypto.CryptoUtils
-import net.primal.android.crypto.bechToBytesOrThrow
-import net.primal.android.crypto.hexToNpubHrp
+import kotlin.io.encoding.ExperimentalEncodingApi
 import net.primal.android.signer.decryptNip04WithAmber
 import net.primal.android.signer.encryptNip04WithAmber
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.nostr.cryptography.MessageEncryptException
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
+import net.primal.domain.nostr.cryptography.utils.CryptoUtils
+import net.primal.domain.nostr.cryptography.utils.bechToBytesOrThrow
+import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 
 class Nip04MessageCipher @Inject constructor(
     private val credentialsStore: CredentialsStore,
@@ -70,6 +71,7 @@ class Nip04MessageCipher @Inject constructor(
      *
      * @return The decrypted message, or the original [content] if decryption could not be performed.
      */
+    @OptIn(ExperimentalEncodingApi::class)
     override fun decryptMessage(
         userId: String,
         participantId: String,
@@ -95,6 +97,7 @@ class Nip04MessageCipher @Inject constructor(
         }
     }
 
+    @OptIn(ExperimentalEncodingApi::class)
     @Throws(IllegalArgumentException::class, SigningKeyNotFoundException::class, MessageEncryptException::class)
     private fun encryptMessageLocally(
         userId: String,

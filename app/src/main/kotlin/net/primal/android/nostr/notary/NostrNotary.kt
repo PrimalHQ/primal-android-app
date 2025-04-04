@@ -3,13 +3,11 @@ package net.primal.android.nostr.notary
 import android.content.ContentResolver
 import fr.acinq.secp256k1.Hex
 import javax.inject.Inject
+import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.core.serialization.json.NostrNotaryJson
-import net.primal.android.crypto.CryptoUtils
-import net.primal.android.crypto.hexToNpubHrp
-import net.primal.android.crypto.toNpub
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.nostr.ext.asIdentifierTag
 import net.primal.android.nostr.ext.asPubkeyTag
@@ -32,6 +30,9 @@ import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
+import net.primal.domain.nostr.cryptography.utils.CryptoUtils
+import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
+import net.primal.domain.nostr.cryptography.utils.toNpub
 
 class NostrNotary @Inject constructor(
     private val contentResolver: ContentResolver,
@@ -157,6 +158,7 @@ class NostrNotary @Inject constructor(
         )
     }
 
+    @OptIn(ExperimentalEncodingApi::class)
     fun signWalletInvoiceRequestNostrEvent(
         request: NwcWalletRequest<PayInvoiceRequest>,
         nwc: NostrWalletConnect,

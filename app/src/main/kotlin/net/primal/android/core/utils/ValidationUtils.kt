@@ -2,9 +2,9 @@ package net.primal.android.core.utils
 
 import android.util.Patterns
 import java.util.regex.Pattern
-import net.primal.android.crypto.Bech32
-import net.primal.android.crypto.hexToNpubHrp
-import net.primal.android.crypto.hexToNsecHrp
+import net.primal.domain.nostr.cryptography.utils.Bech32
+import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
+import net.primal.domain.nostr.cryptography.utils.hexToNsecHrp
 import org.spongycastle.util.encoders.DecoderException
 import timber.log.Timber
 

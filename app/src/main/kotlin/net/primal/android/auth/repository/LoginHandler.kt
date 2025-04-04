@@ -2,7 +2,6 @@ package net.primal.android.auth.repository
 
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
-import net.primal.android.crypto.assureValidNsec
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.credentials.CredentialsStore
@@ -10,6 +9,7 @@ import net.primal.android.user.domain.LoginType
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.cryptography.utils.assureValidNsec
 import net.primal.domain.repository.MutedUserRepository
 import net.primal.domain.repository.PublicBookmarksRepository
 
