@@ -48,6 +48,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -518,8 +519,9 @@ private fun ProfileSummary(modifier: Modifier = Modifier, profile: ProfileDetail
             UniversalAvatarThumbnail(
                 modifier = Modifier
                     .alpha(avatarSizeAndAlphaProgress.value)
-                    .rotate(avatarRotation.value),
-                avatarSize = (avatarSizeAndAlphaProgress.value * 145).dp,
+                    .rotate(avatarRotation.value)
+                    .scale(avatarSizeAndAlphaProgress.value.coerceAtLeast(0.01f)),
+                avatarSize = 145.dp,
                 avatarCdnImage = profile.avatarCdnImage,
                 legendaryCustomization = profile.premiumDetails?.legendaryCustomization,
                 hasInnerBorderOverride = false,
