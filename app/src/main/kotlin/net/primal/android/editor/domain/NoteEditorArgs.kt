@@ -7,7 +7,7 @@ import net.primal.core.utils.serialization.encodeToJsonString
 
 @Serializable
 data class NoteEditorArgs(
-    val referencedNoteId: String? = null,
+    val referencedNoteNevent: String? = null,
     val referencedArticleNaddr: String? = null,
     val referencedHighlightNevent: String? = null,
     val mediaUris: List<String> = emptyList(),

@@ -62,7 +62,6 @@ import net.primal.domain.nostr.MAX_RELAY_HINTS
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV
-import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.Nip19TLV.toNprofileString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.Nprofile
@@ -84,9 +83,9 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val relayHintsRepository: RelayHintsRepository,
 ) : ViewModel() {
 
-    private val referencedNoteId = args.referencedNoteId
     private val referencedArticleNaddr = args.referencedArticleNaddr?.let(Nip19TLV::parseUriAsNaddrOrNull)
     private val referencedHighlightNevent = args.referencedHighlightNevent?.let(Nip19TLV::parseUriAsNeventOrNull)
+    private val referencedNoteNevent = args.referencedNoteNevent?.let(Nip19TLV::parseUriAsNeventOrNull)
 
     private val _state = MutableStateFlow(UiState(isQuoting = args.isQuoting))
     val state = _state.asStateFlow()
@@ -114,10 +113,10 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             setStateFromArgs()
 
-            if (!referencedNoteId.isNullOrEmpty()) {
-                fetchNoteThreadFromNetwork(referencedNoteId)
-                observeThreadConversation(referencedNoteId)
-                observeArticleByCommentId(replyToNoteId = referencedNoteId)
+            if (referencedNoteNevent != null) {
+                fetchNoteThreadFromNetwork(referencedNoteNevent.eventId)
+                observeThreadConversation(referencedNoteNevent.eventId)
+                observeArticleByCommentId(replyToNoteId = referencedNoteNevent.eventId)
             } else if (referencedArticleNaddr != null) {
                 fetchArticleDetailsFromNetwork(referencedArticleNaddr)
                 observeArticleByNaddr(naddr = referencedArticleNaddr)
@@ -286,7 +285,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                     )
                 }
 
-                if (referencedNoteId != null) {
+                if (referencedNoteNevent != null) {
                     if (publishResult.imported) {
                         fetchNoteReplies()
                     } else {
@@ -312,8 +311,8 @@ class NoteEditorViewModel @AssistedInject constructor(
         }
 
     private fun fetchNoteReplies() {
-        if (referencedNoteId != null) {
-            fetchNoteThreadFromNetwork(referencedNoteId)
+        if (referencedNoteNevent != null) {
+            fetchNoteThreadFromNetwork(referencedNoteNevent.eventId)
         }
     }
 
@@ -572,13 +571,9 @@ class NoteEditorViewModel @AssistedInject constructor(
         )
     }
 
-    private suspend fun String.concatenateReferencedEvents(): String {
-        val referencedNoteNevent = referencedNoteId?.let { refNote ->
-            state.value.conversation.first { it.postId == refNote }
-        }?.asNevent()
-
+    private fun String.concatenateReferencedEvents(): String {
         return this + listOfNotNull(
-            referencedNoteNevent?.toNeventString(),
+            args.referencedNoteNevent,
             args.referencedHighlightNevent,
             args.referencedArticleNaddr,
         ).joinToString(separator = " \n\n", prefix = " \n\n") { "nostr:$it" }

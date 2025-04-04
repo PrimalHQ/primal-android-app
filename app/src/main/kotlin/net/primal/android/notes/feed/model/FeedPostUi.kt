@@ -9,13 +9,18 @@ import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
+import net.primal.android.nostr.db.EventRelayHints
 import net.primal.android.notes.db.FeedPost
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromStringOrNull
 import net.primal.domain.CdnImage
+import net.primal.domain.nostr.MAX_RELAY_HINTS
+import net.primal.domain.nostr.Nevent
+import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrEventKind
 
 data class FeedPostUi(
     val postId: String,
@@ -40,6 +45,7 @@ data class FeedPostUi(
     val eventZaps: List<EventZapUiModel> = emptyList(),
     val authorLegendaryCustomization: LegendaryCustomization? = null,
     val authorBlossoms: List<String> = emptyList(),
+    val eventRelayHints: List<String> = emptyList(),
 )
 
 fun FeedPost.asFeedPostUi(): FeedPostUi {
@@ -67,5 +73,15 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
             .sortedWith(EventZapUiModel.DefaultComparator),
         authorLegendaryCustomization = this.author?.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
         authorBlossoms = this.author?.blossoms ?: emptyList(),
+        eventRelayHints = this.eventRelayHints?.relays ?: emptyList(),
     )
+}
+
+fun FeedPostUi.asNeventString(): String {
+    return Nevent(
+        eventId = this.postId,
+        kind = NostrEventKind.ShortTextNote.value,
+        userId = this.authorId,
+        relays = this.eventRelayHints.take(MAX_RELAY_HINTS),
+    ).toNeventString()
 }

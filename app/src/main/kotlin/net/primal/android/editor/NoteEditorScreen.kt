@@ -172,7 +172,9 @@ fun NoteEditorScreen(
 @Composable
 private fun NoteEditorContract.UiState.resolvePublishNoteButtonText() =
     when {
-        publishing -> if (isReply) {
+        publishing -> if (isQuoting) {
+            stringResource(id = R.string.note_editor_quoting_publishing_button)
+        } else if (isReply) {
             stringResource(id = R.string.note_editor_reply_publishing_button)
         } else {
             stringResource(id = R.string.note_editor_post_publishing_button)
@@ -180,7 +182,9 @@ private fun NoteEditorContract.UiState.resolvePublishNoteButtonText() =
 
         uploadingAttachments -> stringResource(id = R.string.note_editor_uploading_attachments)
 
-        else -> if (isReply) {
+        else -> if (isQuoting) {
+            stringResource(id = R.string.note_editor_quote_publish_button)
+        } else if (isReply) {
             stringResource(id = R.string.note_editor_reply_publish_button)
         } else {
             stringResource(id = R.string.note_editor_post_publish_button)

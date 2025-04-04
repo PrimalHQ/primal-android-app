@@ -43,6 +43,7 @@ import net.primal.android.core.utils.shortened
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.model.asNeventString
 import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.notes.feed.note.ui.FeedNoteActionsRow
 import net.primal.android.notes.feed.note.ui.NoteContent
@@ -102,7 +103,9 @@ fun NotificationListItem(
         onPostAction = { postAction ->
             if (postData != null) {
                 when (postAction) {
-                    FeedPostAction.Reply -> if (onReplyClick != null) onReplyClick(postData.postId)
+                    FeedPostAction.Reply -> onReplyClick?.invoke(
+                        postData.asNeventString(),
+                    )
                     FeedPostAction.Zap -> onDefaultZapClick?.invoke(postData)
                     FeedPostAction.Like -> onPostLikeClick?.invoke(postData)
                     FeedPostAction.Repost -> onRepostClick?.invoke(postData)
