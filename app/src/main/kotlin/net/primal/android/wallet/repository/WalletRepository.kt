@@ -47,10 +47,6 @@ class WalletRepository @Inject constructor(
             usersDatabase.walletTransactions().latestTransactionsPagedByUserId(userId = userId)
         }.flow
 
-    /*
-     *  TODO: this should become a use case.  Could be migrated out with `findTransactionByIdOrNull` to
-     *   form some Interactor/Handler to deal with merging transactions with profiles.
-     */
     fun getLatestTransactions(userId: String): Flow<PagingData<TransactionProfileData>> =
         latestTransactions(userId = userId).map {
             it.map {
