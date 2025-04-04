@@ -26,7 +26,7 @@ import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.primal.PrimalSocketSubscription
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.utils.retryNetworkCall
-import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.model.AppSpecificDataRequest
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.cryptography.SignatureException
@@ -115,14 +115,12 @@ class PremiumContentBackupViewModel @Inject constructor(
             primalApiClient = primalCachingApiClient,
             cacheFilter = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.MEMBERSHIP_MONITOR_CONTENT_BROADCAST_STATUS.id,
-                optionsJson = CommonJson.encodeToString(
-                    AppSpecificDataRequest(
-                        eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
-                            userId = userId,
-                            content = "",
-                        ),
+                optionsJson = AppSpecificDataRequest(
+                    eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
+                        userId = userId,
+                        content = "",
                     ),
-                ),
+                ).encodeToJsonString(),
             ),
             transformer = {
                 if (primalEvent?.kind == NostrEventKind.PrimalContentBroadcastStatus.value) {

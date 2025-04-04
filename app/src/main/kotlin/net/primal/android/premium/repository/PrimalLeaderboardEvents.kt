@@ -10,7 +10,7 @@ import net.primal.domain.PrimalEvent
 import net.primal.domain.model.ProfileData
 
 fun PrimalEvent?.parseAndMapAsLeaderboardLegendEntries(profiles: Map<String, ProfileData>) =
-    this?.content?.decodeFromJsonStringOrNull<List<ContentLegendLeaderboardItem>>()
+    this?.content.decodeFromJsonStringOrNull<List<ContentLegendLeaderboardItem>>()
         ?.mapNotNull { item ->
             profiles[item.pubkey]?.let { profile ->
                 LeaderboardLegendEntry(
@@ -26,7 +26,7 @@ fun PrimalEvent?.parseAndMapAsLeaderboardLegendEntries(profiles: Map<String, Pro
         } ?: emptyList()
 
 fun PrimalEvent?.parseAndMapAsOGLeaderboardEntries(profiles: Map<String, ProfileData>) =
-    this?.content?.decodeFromJsonStringOrNull<List<ContentPremiumLeaderboardItem>>()
+    this?.content.decodeFromJsonStringOrNull<List<ContentPremiumLeaderboardItem>>()
         ?.mapNotNull { item ->
             profiles[item.pubkey]?.let { profile ->
                 OGLeaderboardEntry(

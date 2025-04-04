@@ -2,8 +2,8 @@ package net.primal.data.remote.api.events
 
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
-import net.primal.core.utils.serialization.CommonJson
-import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.events.model.EventActionsRequestBody
 import net.primal.data.remote.api.events.model.EventActionsResponse
 import net.primal.data.remote.api.events.model.EventZapsRequestBody
@@ -18,13 +18,13 @@ internal class EventStatsApiImpl(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.EVENT_ZAPS.id,
-                optionsJson = CommonJson.encodeToString(body),
+                optionsJson = body.encodeToJsonString(),
             ),
         )
 
         return EventZapsResponse(
             paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging).let {
-                CommonJson.decodeFromStringOrNull(it?.content)
+                it?.content.decodeFromJsonStringOrNull()
             },
             profiles = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
@@ -41,7 +41,7 @@ internal class EventStatsApiImpl(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.EVENT_ACTIONS.id,
-                optionsJson = CommonJson.encodeToString(body),
+                optionsJson = body.encodeToJsonString(),
             ),
         )
 

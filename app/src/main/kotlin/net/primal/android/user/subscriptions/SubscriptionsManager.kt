@@ -37,7 +37,7 @@ import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.primal.PrimalSocketSubscription
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.notifications.model.PubkeyRequestBody
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEventKind
@@ -142,7 +142,7 @@ class SubscriptionsManager @Inject constructor(
             primalApiClient = cacheApiClient,
             cacheFilter = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.NEW_NOTIFICATIONS_COUNT.id,
-                optionsJson = CommonJson.encodeToString(PubkeyRequestBody(pubkey = userId)),
+                optionsJson = PubkeyRequestBody(pubkey = userId).encodeToJsonString(),
             ),
             transformer = { primalEvent?.asNotificationSummary() },
         ) {
@@ -157,7 +157,7 @@ class SubscriptionsManager @Inject constructor(
             primalApiClient = cacheApiClient,
             cacheFilter = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.NEW_DMS_COUNT.id,
-                optionsJson = CommonJson.encodeToString(PubkeyRequestBody(pubkey = userId)),
+                optionsJson = PubkeyRequestBody(pubkey = userId).encodeToJsonString(),
             ),
             transformer = { primalEvent?.asMessagesTotalCount() },
         ) {
@@ -177,9 +177,7 @@ class SubscriptionsManager @Inject constructor(
                         WalletRequestBody(
                             event = nostrNotary.signPrimalWalletOperationNostrEvent(
                                 userId = userId,
-                                content = CommonJson.encodeToString(
-                                    BalanceRequestBody(subWallet = SubWallet.Open),
-                                ),
+                                content = BalanceRequestBody(subWallet = SubWallet.Open).encodeToJsonString(),
                             ),
                         ),
                     ),

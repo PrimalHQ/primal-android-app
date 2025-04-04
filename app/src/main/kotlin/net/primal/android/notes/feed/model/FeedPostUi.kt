@@ -9,8 +9,7 @@ import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
-import net.primal.core.utils.serialization.CommonJson
-import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.CdnImage
 import net.primal.domain.nostr.NostrEvent
 
@@ -23,7 +22,7 @@ data class FeedPostUi(
     val content: String,
     val stats: EventStatsUi,
     val rawNostrEventJson: String,
-    val rawKind: Int? = CommonJson.decodeFromStringOrNull<NostrEvent>(rawNostrEventJson)?.kind,
+    val rawKind: Int? = rawNostrEventJson.decodeFromJsonStringOrNull<NostrEvent>()?.kind,
     val repostId: String? = null,
     val repostAuthorId: String? = null,
     val repostAuthorName: String? = null,

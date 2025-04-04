@@ -27,9 +27,9 @@ import net.primal.android.premium.domain.PremiumPurchaseOrder
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.CommonJsonImplicitNulls
-import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.model.AppSpecificDataRequest
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
@@ -44,12 +44,12 @@ class PremiumApiImpl @Inject constructor(
         val queryResult = primalWalletApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.WALLET_MEMBERSHIP_NAME_AVAILABLE.id,
-                optionsJson = CommonJson.encodeToString(NameAvailableRequest(name = name)),
+                optionsJson = NameAvailableRequest(name = name).encodeToJsonString(),
             ),
         )
 
         val event = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalMembershipNameAvailable)
-        return CommonJson.decodeFromStringOrNull<NameAvailableResponse>(event?.content)
+        return event?.content.decodeFromJsonStringOrNull<NameAvailableResponse>()
             ?: throw WssException("Invalid content")
     }
 
@@ -61,7 +61,7 @@ class PremiumApiImpl @Inject constructor(
                     AppSpecificDataRequest(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
                             userId = userId,
-                            content = CommonJson.encodeToString(ChangeNameRequest(name = name)),
+                            content = ChangeNameRequest(name = name).encodeToJsonString(),
                         ),
                     ),
                 ),
@@ -69,7 +69,7 @@ class PremiumApiImpl @Inject constructor(
         )
 
         val event = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalMembershipNameAvailable)
-        return CommonJson.decodeFromStringOrNull<NameAvailableResponse>(event?.content)
+        return event?.content.decodeFromJsonStringOrNull<NameAvailableResponse>()
             ?: throw WssException("Invalid content")
     }
 
@@ -77,33 +77,29 @@ class PremiumApiImpl @Inject constructor(
         val queryResult = primalWalletApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.WALLET_MEMBERSHIP_STATUS.id,
-                optionsJson = CommonJson.encodeToString(
-                    AppSpecificDataRequest(
-                        eventFromUser = nostrNotary.signAuthorizationNostrEvent(
-                            userId = userId,
-                            description = "Check Primal Premium membership status",
-                            tags = listOf(userId.asPubkeyTag()),
-                        ),
+                optionsJson = AppSpecificDataRequest(
+                    eventFromUser = nostrNotary.signAuthorizationNostrEvent(
+                        userId = userId,
+                        description = "Check Primal Premium membership status",
+                        tags = listOf(userId.asPubkeyTag()),
                     ),
-                ),
+                ).encodeToJsonString(),
             ),
         )
         val statusEvent = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalMembershipStatus)
-        return CommonJson.decodeFromStringOrNull<MembershipStatusResponse>(statusEvent?.content)
+        return statusEvent?.content.decodeFromJsonStringOrNull<MembershipStatusResponse>()
     }
 
     override suspend fun purchaseMembership(userId: String, body: PurchaseMembershipRequest) {
         primalWalletApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.WALLET_PURCHASE_MEMBERSHIP.id,
-                optionsJson = CommonJson.encodeToString(
-                    AppSpecificDataRequest(
-                        eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
-                            userId = userId,
-                            content = CommonJson.encodeToString(body),
-                        ),
+                optionsJson = AppSpecificDataRequest(
+                    eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
+                        userId = userId,
+                        content = body.encodeToJsonString(),
                     ),
-                ),
+                ).encodeToJsonString(),
             ),
         )
     }
@@ -117,22 +113,19 @@ class PremiumApiImpl @Inject constructor(
         val result = primalWalletApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.WALLET_PURCHASE_MEMBERSHIP.id,
-                optionsJson = CommonJson.encodeToString(
-                    AppSpecificDataRequest(
-                        eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
-                            userId = userId,
-                            content = CommonJson.encodeToString(
-                                PurchaseMembershipRequest(
-                                    primalProductId = "legend-premium",
-                                    name = primalName,
-                                    receiverUserId = userId,
-                                    onChain = onChain,
-                                    amountUsd = amountUsd,
-                                ),
-                            ),
-                        ),
+                optionsJson = AppSpecificDataRequest(
+                    eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
+                        userId = userId,
+                        content =
+                        PurchaseMembershipRequest(
+                            primalProductId = "legend-premium",
+                            name = primalName,
+                            receiverUserId = userId,
+                            onChain = onChain,
+                            amountUsd = amountUsd,
+                        ).encodeToJsonString(),
                     ),
-                ),
+                ).encodeToJsonString(),
             ),
         )
 
@@ -145,7 +138,7 @@ class PremiumApiImpl @Inject constructor(
         primalWalletApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.WALLET_MEMBERSHIP_PRODUCTS.id,
-                optionsJson = CommonJson.encodeToString(MembershipProductsRequest(origin = "android")),
+                optionsJson = MembershipProductsRequest(origin = "android").encodeToJsonString(),
             ),
         )
 
@@ -176,14 +169,12 @@ class PremiumApiImpl @Inject constructor(
         primalWalletApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.WALLET_MEMBERSHIP_CANCEL.id,
-                optionsJson = CommonJson.encodeToString(
-                    AppSpecificDataRequest(
-                        eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
-                            userId = userId,
-                            content = CommonJson.encodeToString(body),
-                        ),
+                optionsJson = AppSpecificDataRequest(
+                    eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
+                        userId = userId,
+                        content = body.encodeToJsonString(),
                     ),
-                ),
+                ).encodeToJsonString(),
             ),
         )
     }
@@ -193,7 +184,7 @@ class PremiumApiImpl @Inject constructor(
             message = PrimalCacheFilter(primalVerb = net.primal.data.remote.PrimalVerb.CLIENT_CONFIG.id),
         )
         val configEvent = result.findPrimalEvent(NostrEventKind.PrimalClientConfig)
-        val response = CommonJson.decodeFromStringOrNull<ShowSupportUsResponse>(configEvent?.content)
+        val response = configEvent?.content.decodeFromJsonStringOrNull<ShowSupportUsResponse>()
         return response?.showSupportPrimal == true
     }
 

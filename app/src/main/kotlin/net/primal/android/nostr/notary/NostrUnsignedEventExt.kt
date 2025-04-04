@@ -6,7 +6,7 @@ import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.crypto.Bech32
 import net.primal.android.crypto.CryptoUtils
 import net.primal.android.crypto.toHex
-import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
 
@@ -40,6 +40,6 @@ fun NostrUnsignedEvent.calculateEventId(): ByteArray {
         addJsonArray { tags.forEach { add(it) } }
         add(content)
     }
-    val rawEventJson = CommonJson.encodeToString(json)
+    val rawEventJson = json.encodeToJsonString()
     return CryptoUtils.sha256(rawEventJson.toByteArray())
 }
