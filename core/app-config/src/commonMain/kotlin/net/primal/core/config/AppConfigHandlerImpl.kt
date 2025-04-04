@@ -2,6 +2,8 @@ package net.primal.core.config
 
 import io.github.aakira.napier.Napier
 import kotlin.time.Duration
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -16,29 +18,32 @@ internal class AppConfigHandlerImpl(
     private val wellKnownApi: WellKnownApi,
 ) : AppConfigHandler {
 
+    private val fetchMutex = Mutex()
     private var lastTimeFetched: Instant = Instant.DISTANT_PAST
 
     private fun isAppConfigSyncedInLast(duration: Duration): Boolean {
         return lastTimeFetched < Clock.System.now().minus(duration)
     }
 
-    override suspend fun updateAppConfigOrFailSilently() {
-        val response = fetchAppConfigOrNull() ?: return
-        lastTimeFetched = Clock.System.now()
-        appConfigStore.updateConfig {
-            copy(
-                cacheUrl = response.cacheServers.firstOrNull() ?: this.cacheUrl,
-                uploadUrl = response.uploadServers.firstOrNull() ?: this.uploadUrl,
-                walletUrl = response.walletServers.firstOrNull() ?: this.walletUrl,
-            )
+    override suspend fun updateAppConfigOrFailSilently() =
+        fetchMutex.withLock {
+            val response = fetchAppConfigOrNull() ?: return@withLock
+            lastTimeFetched = Clock.System.now()
+            appConfigStore.updateConfig {
+                copy(
+                    cacheUrl = response.cacheServers.firstOrNull() ?: this.cacheUrl,
+                    uploadUrl = response.uploadServers.firstOrNull() ?: this.uploadUrl,
+                    walletUrl = response.walletServers.firstOrNull() ?: this.walletUrl,
+                )
+            }
         }
-    }
 
-    override suspend fun updateAppConfigWithDebounce(duration: Duration) {
-        if (isAppConfigSyncedInLast(duration)) {
-            updateAppConfigOrFailSilently()
+    override suspend fun updateAppConfigWithDebounce(duration: Duration) =
+        fetchMutex.withLock {
+            if (isAppConfigSyncedInLast(duration)) {
+                updateAppConfigOrFailSilently()
+            }
         }
-    }
 
     private suspend fun fetchAppConfigOrNull(): ApiConfigResponse? {
         val result = runCatching {
