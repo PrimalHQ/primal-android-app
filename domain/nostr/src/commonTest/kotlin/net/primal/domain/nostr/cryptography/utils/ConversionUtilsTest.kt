@@ -1,11 +1,9 @@
-package net.primal.android.crypto
+package net.primal.domain.nostr.cryptography.utils
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import org.junit.Test
-import org.spongycastle.util.encoders.DecoderException
+import kotlin.test.Test
 
-/* TODO: move this file to `core:utils` as well. `DecoderException` is left to be resolved. */
 class ConversionUtilsTest {
 
     @Test
@@ -17,8 +15,8 @@ class ConversionUtilsTest {
     }
 
     @Test
-    fun `hexToNoteHrp throws DecoderException`() {
-        shouldThrow<DecoderException> {
+    fun `hexToNoteHrp throws IllegalArgumentException`() {
+        shouldThrow<IllegalArgumentException> {
             "invalid".hexToNoteHrp()
         }
     }
@@ -33,7 +31,7 @@ class ConversionUtilsTest {
 
     @Test
     fun `hexToNpubHrp throws DecoderException`() {
-        shouldThrow<DecoderException> {
+        shouldThrow<IllegalArgumentException> {
             "invalid".hexToNpubHrp()
         }
     }
@@ -48,7 +46,7 @@ class ConversionUtilsTest {
 
     @Test
     fun `hexToNsecHrp throws DecoderException`() {
-        shouldThrow<DecoderException> {
+        shouldThrow<IllegalArgumentException> {
             "invalid".hexToNsecHrp()
         }
     }
