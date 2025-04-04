@@ -6,8 +6,7 @@ import kotlinx.coroutines.withContext
 import net.primal.core.utils.AppBuildHelper
 import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.core.utils.serialization.CommonJson
-import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.local.dao.feeds.Feed
 import net.primal.data.local.db.PrimalDatabase
@@ -95,9 +94,7 @@ class FeedsRepositoryImpl(
                 ),
             )
             val response = feedsApi.getUserFeeds(authorization = authorization, specKind = specKind)
-            val content = CommonJson.decodeFromStringOrNull<List<ContentPrimalFeedData>>(
-                string = response.articleFeeds.content,
-            )
+            val content = response.articleFeeds.content.decodeFromJsonStringOrNull<List<ContentPrimalFeedData>>()
             val feeds = content?.map { it.asFeedPO(ownerId = userId, specKind = specKind) }
 
             if (feeds != null) {
@@ -138,9 +135,7 @@ class FeedsRepositoryImpl(
     override suspend fun fetchDefaultFeeds(userId: String, specKind: FeedSpecKind): List<PrimalFeed>? {
         return withContext(dispatcherProvider.io()) {
             val response = feedsApi.getDefaultUserFeeds(specKind = specKind)
-            val content = CommonJson.decodeFromStringOrNull<List<ContentPrimalFeedData>>(
-                string = response.articleFeeds.content,
-            )
+            val content = response.articleFeeds.content.decodeFromJsonStringOrNull<List<ContentPrimalFeedData>>()
 
             content?.map { it.asFeedPO(ownerId = userId, specKind = specKind) }
                 ?.map { it.asPrimalFeedDO() }
@@ -243,7 +238,7 @@ class FeedsRepositoryImpl(
         val dvmFeeds = response.dvmHandlers
             .filter { it.content.isNotEmpty() }
             .mapNotNull { nostrEvent ->
-                val dvmMetadata = CommonJson.decodeFromStringOrNull<ContentPrimalDvmFeedMetadata>(nostrEvent.content)
+                val dvmMetadata = nostrEvent.content.decodeFromJsonStringOrNull<ContentPrimalDvmFeedMetadata>()
                 val dvmId = nostrEvent.tags.findFirstIdentifier()
                 val dvmTitle = dvmMetadata?.name
 
@@ -327,6 +322,6 @@ class FeedsRepositoryImpl(
 
     inline fun <reified T> List<PrimalEvent>.parseAndMapContentByKey(key: T.() -> String): Map<String, T> =
         this.mapNotNull { primalEvent ->
-            CommonJson.decodeFromStringOrNull<T>(primalEvent.content)
+            primalEvent.content.decodeFromJsonStringOrNull<T>()
         }.asMapByKey { it.key() }
 }

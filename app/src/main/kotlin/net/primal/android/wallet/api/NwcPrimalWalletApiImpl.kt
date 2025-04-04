@@ -12,8 +12,7 @@ import net.primal.android.wallet.api.model.WalletOperationVerb
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.core.utils.serialization.CommonJson
-import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.nostr.NostrEventKind
 
 class NwcPrimalWalletApiImpl @Inject constructor(
@@ -36,7 +35,7 @@ class NwcPrimalWalletApiImpl @Inject constructor(
         val info = queryResult.findPrimalEvent(NostrEventKind.PrimalWalletNwcConnectionList)
             ?: throw WssException("Event with kind 10000321 not found.")
 
-        return CommonJson.decodeFromStringOrNull<List<PrimalNwcConnectionInfo>>(info.content)
+        return info.content.decodeFromJsonStringOrNull<List<PrimalNwcConnectionInfo>>()
             ?: throw WssException("Invalid event with kind 10000321.")
     }
 
@@ -74,7 +73,7 @@ class NwcPrimalWalletApiImpl @Inject constructor(
         val info = queryResult.findPrimalEvent(NostrEventKind.PrimalWalletNwcConnectionCreated)
             ?: throw WssException("Event with kind 10000319 not found.")
 
-        return CommonJson.decodeFromStringOrNull<NwcConnectionCreatedResponse>(info.content)
+        return info.content.decodeFromJsonStringOrNull<NwcConnectionCreatedResponse>()
             ?: throw WssException("Invalid event with kind 10000319.")
     }
 }

@@ -3,7 +3,6 @@ package net.primal.data.remote.api.notifications
 import kotlinx.datetime.Instant
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
-import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.PrimalVerb
 import net.primal.data.remote.api.notifications.model.NotificationsRequestBody
@@ -21,7 +20,7 @@ class NotificationsApiImpl(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.GET_LAST_SEEN_NOTIFICATIONS.id,
-                optionsJson = CommonJson.encodeToString(PubkeyRequestBody(pubkey = userId)),
+                optionsJson = PubkeyRequestBody(pubkey = userId).encodeToJsonString(),
             ),
         )
 
@@ -50,7 +49,7 @@ class NotificationsApiImpl(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.GET_NOTIFICATIONS.id,
-                optionsJson = CommonJson.encodeToString(body),
+                optionsJson = body.encodeToJsonString(),
             ),
         )
 

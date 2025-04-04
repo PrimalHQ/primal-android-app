@@ -32,7 +32,7 @@ import net.primal.android.wallet.api.model.WalletActivationDetails
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import timber.log.Timber
@@ -84,8 +84,11 @@ class WalletActivationViewModel @Inject constructor(
 
     private fun loadAllCountries() =
         viewModelScope.launch {
-            val allCountries = CommonJson.decodeFromString<Regions>(WalletRegionJson).mapToListOfCountries()
-            setState { copy(allCountries = allCountries) }
+            val allCountries = WalletRegionJson
+                .decodeFromJsonStringOrNull<Regions>()
+                ?.mapToListOfCountries()
+
+            setState { copy(allCountries = allCountries ?: emptyList()) }
         }
 
     private fun Regions.mapToListOfCountries(): List<Country> {

@@ -11,7 +11,7 @@ import net.primal.android.premium.manage.content.api.model.StartContentBroadcast
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.model.AppSpecificDataRequest
 import net.primal.domain.nostr.NostrEventKind
 
@@ -44,15 +44,13 @@ class BroadcastApiImpl @Inject constructor(
         primalCacheApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.MEMBERSHIP_CONTENT_BROADCAST_START.id,
-                optionsJson = CommonJson.encodeToString(
-                    StartContentBroadcastRequest(
-                        eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
-                            userId = userId,
-                            content = "{}",
-                        ),
-                        kinds = kinds,
+                optionsJson = StartContentBroadcastRequest(
+                    eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
+                        userId = userId,
+                        content = "{}",
                     ),
-                ),
+                    kinds = kinds,
+                ).encodeToJsonString(),
             ),
         )
     }

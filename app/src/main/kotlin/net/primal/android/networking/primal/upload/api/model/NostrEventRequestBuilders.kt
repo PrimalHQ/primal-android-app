@@ -2,7 +2,7 @@ package net.primal.android.networking.primal.upload.api.model
 
 import android.util.Base64
 import net.primal.android.nostr.ext.asPubkeyTag
-import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 
@@ -17,14 +17,12 @@ fun chunkUploadRequest(
         pubKey = userId,
         kind = NostrEventKind.PrimalChunkedUploadRequest.value,
         tags = listOf(userId.asPubkeyTag()),
-        content = CommonJson.encodeToString(
-            UploadChunkContent(
-                uploadId = uploadId,
-                fileLength = fileSizeInBytes,
-                offset = offsetInBytes,
-                base64Data = Base64.encodeToString(data, Base64.NO_WRAP).asOctetStream(),
-            ),
-        ),
+        content = UploadChunkContent(
+            uploadId = uploadId,
+            fileLength = fileSizeInBytes,
+            offset = offsetInBytes,
+            base64Data = Base64.encodeToString(data, Base64.NO_WRAP).asOctetStream(),
+        ).encodeToJsonString(),
     )
 }
 
@@ -38,13 +36,11 @@ fun completeUploadRequest(
         pubKey = userId,
         kind = NostrEventKind.PrimalChunkedUploadRequest.value,
         tags = listOf(userId.asPubkeyTag()),
-        content = CommonJson.encodeToString(
-            UploadCompleteContent(
-                uploadId = uploadId,
-                fileLength = fileSizeInBytes,
-                hash = hash,
-            ),
-        ),
+        content = UploadCompleteContent(
+            uploadId = uploadId,
+            fileLength = fileSizeInBytes,
+            hash = hash,
+        ).encodeToJsonString(),
     )
 }
 
@@ -53,7 +49,7 @@ fun cancelUploadRequest(userId: String, uploadId: String): NostrUnsignedEvent {
         pubKey = userId,
         kind = NostrEventKind.PrimalChunkedUploadRequest.value,
         tags = listOf(userId.asPubkeyTag()),
-        content = CommonJson.encodeToString(UploadCancelContent(uploadId = uploadId)),
+        content = UploadCancelContent(uploadId = uploadId).encodeToJsonString(),
     )
 }
 
