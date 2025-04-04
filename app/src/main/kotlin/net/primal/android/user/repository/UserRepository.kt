@@ -10,7 +10,6 @@ import kotlinx.datetime.Clock
 import kotlinx.serialization.json.JsonArray
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
-import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -40,6 +39,7 @@ import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import net.primal.domain.repository.ProfileRepository
 import net.primal.domain.repository.UserDataCleanupRepository
 

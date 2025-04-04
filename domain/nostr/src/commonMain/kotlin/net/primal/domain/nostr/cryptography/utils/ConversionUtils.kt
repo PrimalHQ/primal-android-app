@@ -1,8 +1,8 @@
-package net.primal.android.crypto
+package net.primal.domain.nostr.cryptography.utils
 
-import org.spongycastle.util.encoders.DecoderException
-import org.spongycastle.util.encoders.Hex
-import timber.log.Timber
+import fr.acinq.secp256k1.Hex
+import io.github.aakira.napier.Napier
+import io.ktor.utils.io.core.toByteArray
 
 fun String.assureValidNsec() = if (startsWith("nsec")) this else this.hexToNsecHrp()
 
@@ -34,12 +34,12 @@ fun String.urlToLnUrlHrp() =
         encoding = Bech32.Encoding.Bech32,
     )
 
-@Throws(IllegalArgumentException::class)
 fun String.bech32ToHexOrThrow() = Bech32.decodeBytes(bech32 = this).second.toHex()
 
 fun ByteArray.toNpub() = Bech32.encodeBytes(hrp = "npub", this, Bech32.Encoding.Bech32)
 
-fun ByteArray.toHex() = String(Hex.encode(this))
+@OptIn(ExperimentalStdlibApi::class)
+fun ByteArray.toHex() = Hex.encode(this)
 
 @Throws(IllegalArgumentException::class)
 fun String.bechToBytesOrThrow(hrp: String? = null): ByteArray {
@@ -55,10 +55,7 @@ fun String.extractKeyPairFromPrivateKeyOrThrow(): Pair<String, String> {
         val pubkey = CryptoUtils.publicKeyCreate(decoded.second)
         nsec to pubkey.toNpub()
     } catch (error: IllegalArgumentException) {
-        Timber.w(error)
-        throw InvalidNostrPrivateKeyException()
-    } catch (error: DecoderException) {
-        Timber.w(error)
+        Napier.w(error) { error.message ?: "" }
         throw InvalidNostrPrivateKeyException()
     }
 }

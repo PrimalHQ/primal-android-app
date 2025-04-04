@@ -5,7 +5,7 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import net.primal.android.crypto.bech32ToHexOrThrow
+import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
 import org.junit.Test
 
 class NostrResourcesTest {

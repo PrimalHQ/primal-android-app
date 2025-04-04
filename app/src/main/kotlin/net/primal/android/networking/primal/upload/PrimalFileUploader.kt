@@ -18,8 +18,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.withIndex
 import kotlinx.coroutines.withContext
 import net.primal.android.BuildConfig
-import net.primal.android.crypto.NostrKeyPair
-import net.primal.android.crypto.hexToNsecHrp
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.networking.primal.upload.api.UploadApi
 import net.primal.android.networking.primal.upload.api.UploadApiConnectionsPool
@@ -31,6 +29,8 @@ import net.primal.android.nostr.notary.signOrThrow
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.nostr.cryptography.NostrKeyPair
+import net.primal.domain.nostr.cryptography.utils.hexToNsecHrp
 import net.primal.domain.upload.UploadResult
 import net.primal.domain.upload.UploadStatus
 

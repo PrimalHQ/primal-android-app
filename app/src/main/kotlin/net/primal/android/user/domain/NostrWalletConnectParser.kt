@@ -2,8 +2,8 @@ package net.primal.android.user.domain
 
 import android.net.Uri
 import fr.acinq.secp256k1.Hex
-import net.primal.android.crypto.CryptoUtils
-import net.primal.android.crypto.toHex
+import net.primal.domain.nostr.cryptography.utils.CryptoUtils
+import net.primal.domain.nostr.cryptography.utils.toHex
 
 fun String.parseNWCUrl(): NostrWalletConnect {
     val uri = Uri.parse(this)

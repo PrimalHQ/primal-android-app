@@ -13,7 +13,6 @@ import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroupMember
 import net.primal.android.core.FakeDataStore
 import net.primal.android.core.coroutines.CoroutinesTestRule
-import net.primal.android.crypto.CryptoUtils
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.settings.repository.SettingsRepository
@@ -26,6 +25,7 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.cryptography.utils.CryptoUtils
 import org.junit.Rule
 import org.junit.Test
 

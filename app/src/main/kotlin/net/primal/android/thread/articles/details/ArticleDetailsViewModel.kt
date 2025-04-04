@@ -17,7 +17,6 @@ import net.primal.android.articles.highlights.JoinedHighlightsUi
 import net.primal.android.articles.highlights.joinOnContent
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.crypto.hexToNpubHrp
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.navigation.articleId
@@ -52,6 +51,7 @@ import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.asATagValue
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
+import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.repository.ArticleRepository
 import net.primal.domain.repository.EventInteractionRepository

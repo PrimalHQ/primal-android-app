@@ -1,6 +1,6 @@
 package net.primal.android.core.utils
 
-import net.primal.android.crypto.toNpub
+import net.primal.domain.nostr.cryptography.utils.toNpub
 import org.spongycastle.util.encoders.Hex
 
 fun String.ellipsizeMiddle(size: Int): String {
