@@ -45,7 +45,7 @@ data class FeedPostUi(
     val eventZaps: List<EventZapUiModel> = emptyList(),
     val authorLegendaryCustomization: LegendaryCustomization? = null,
     val authorBlossoms: List<String> = emptyList(),
-    val eventRelayHints: EventRelayHints? = null,
+    val eventRelayHints: List<String> = emptyList(),
 )
 
 fun FeedPost.asFeedPostUi(): FeedPostUi {
@@ -73,7 +73,7 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
             .sortedWith(EventZapUiModel.DefaultComparator),
         authorLegendaryCustomization = this.author?.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
         authorBlossoms = this.author?.blossoms ?: emptyList(),
-        eventRelayHints = this.eventRelayHints,
+        eventRelayHints = this.eventRelayHints?.relays ?: emptyList(),
     )
 }
 
@@ -82,6 +82,6 @@ fun FeedPostUi.asNeventString(): String {
         eventId = this.postId,
         kind = NostrEventKind.ShortTextNote.value,
         userId = this.authorId,
-        relays = this.eventRelayHints?.relays?.take(MAX_RELAY_HINTS) ?: emptyList(),
+        relays = this.eventRelayHints.take(MAX_RELAY_HINTS),
     ).toNeventString()
 }
