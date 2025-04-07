@@ -72,7 +72,6 @@ security-app-authenticator = "1.0.0-beta01"
 security-crypto = "1.1.0-alpha06"
 security-identity-credential = "1.0.0-alpha03"
 skie = "0.10.1"
-spongycastle = "1.58.0.0"
 sqlcipher-android = "4.6.1"
 telephoto = "0.14.0"
 timber = "5.0.1"
@@ -258,7 +257,6 @@ secp256k1-kmp-iosx64 = { module = "fr.acinq.secp256k1:secp256k1-kmp-iosx64", ver
 secp256k1-kmp-jvm = { module = "fr.acinq.secp256k1:secp256k1-kmp-jvm", version.ref = "acinq-secp256k1-kmp" }
 secp256k1-kmp-jni-android = { module = "fr.acinq.secp256k1:secp256k1-kmp-jni-android", version.ref = "acinq-secp256k1-kmp" }
 secp256k1-kmp-jni-jvm = { module = "fr.acinq.secp256k1:secp256k1-kmp-jni-jvm", version.ref = "acinq-secp256k1-kmp" }
-spongycastle-core = { module = "com.madgag.spongycastle:core", version.ref = "spongycastle" }
 bitcoinj-core = { module = "org.bitcoinj:bitcoinj-core", version.ref = "bitcoinj-core" }
 
 #Security

@@ -1,7 +1,6 @@
 package net.primal.android.articles.feed.ui
 
 import java.time.Instant
-import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
@@ -12,6 +11,7 @@ import net.primal.domain.CdnImage
 import net.primal.domain.model.Article
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.utils.asEllipsizedNpub
 
 data class FeedArticleUi(
     val aTag: String,

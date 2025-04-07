@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.datetime.toJavaInstant
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
-import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.nostr.notary.NostrNotary
@@ -34,6 +33,7 @@ import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.model.Notification
 import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.repository.NotificationRepository
 import timber.log.Timber
 
