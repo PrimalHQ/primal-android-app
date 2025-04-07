@@ -325,7 +325,6 @@ dependencies {
     implementation(libs.secp256k1.kmp.jvm)
     implementation(libs.secp256k1.kmp.jni.android)
     testImplementation(libs.secp256k1.kmp.jni.jvm)
-    implementation(libs.spongycastle.core)
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.biometric)
 
