@@ -6,6 +6,7 @@ import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.user.domain.UserAccount
 import net.primal.domain.model.ProfileData as ProfileDataDO
 import net.primal.domain.nostr.ContentMetadata
+import net.primal.domain.nostr.utils.asEllipsizedNpub
 
 fun ProfileDataDO.usernameUiFriendly(): String = usernameUiFriendly(this.displayName, this.handle, this.profileId)
 

@@ -3,7 +3,6 @@ package net.primal.android.notes.feed.model
 import java.time.Instant
 import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
-import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
@@ -12,6 +11,7 @@ import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.CdnImage
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.utils.asEllipsizedNpub
 
 data class FeedPostUi(
     val postId: String,

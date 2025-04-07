@@ -3,13 +3,13 @@ package net.primal.android.thread.articles.details.ui
 import java.time.Instant
 import net.primal.android.articles.highlights.HighlightUi
 import net.primal.android.articles.highlights.asHighlightUi
-import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.domain.CdnImage
 import net.primal.domain.model.Article
+import net.primal.domain.nostr.utils.asEllipsizedNpub
 
 data class ArticleDetailsUi(
     val aTag: String,
