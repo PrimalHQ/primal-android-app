@@ -14,10 +14,12 @@ import net.primal.data.repository.feed.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.remote.extractNoteId
 import net.primal.data.repository.mappers.remote.extractProfileId
 import net.primal.data.repository.mappers.remote.flatMapMessagesAsEventUriPO
+import net.primal.data.repository.mappers.remote.flatMapMessagesAsReferencedNostrUriDO
 import net.primal.data.repository.mappers.remote.mapAsMessageDataPO
 import net.primal.data.repository.mappers.remote.mapAsPostDataPO
 import net.primal.data.repository.mappers.remote.mapAsProfileDataPO
 import net.primal.data.repository.mappers.remote.mapNotNullAsPostDataPO
+import net.primal.data.repository.mappers.remote.mapReferencedNostrUriAsEventUriNostrPO
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
@@ -139,17 +141,15 @@ internal class MessagesProcessor(
             .mapValues { it.value.first() }
 
         database.eventUris().upsertAllEventNostrUris(
-            // TODO When ported to repository-caching, use: flatMapMessagesAsReferencedNostrUriDO
-//            data = messageDataList.flatMapMessagesAsNostrResourcePO(
-//                eventIdToNostrEvent = emptyMap(),
-//                postIdToPostDataMap = referencedNotesMap,
-//                articleIdToArticle = emptyMap(),
-//                profileIdToProfileDataMap = referencedProfilesMap,
-//                cdnResources = emptyMap(),
-//                linkPreviews = emptyMap(),
-//                videoThumbnails = emptyMap(),
-//            ),
-            data = emptyList(),
+            data = messageDataList.flatMapMessagesAsReferencedNostrUriDO(
+                eventIdToNostrEvent = emptyMap(),
+                postIdToPostDataMap = referencedNotesMap,
+                articleIdToArticle = emptyMap(),
+                profileIdToProfileDataMap = referencedProfilesMap,
+                cdnResources = emptyMap(),
+                linkPreviews = emptyMap(),
+                videoThumbnails = emptyMap(),
+            ).mapReferencedNostrUriAsEventUriNostrPO(),
         )
     }
 }
