@@ -18,6 +18,7 @@ import net.primal.core.utils.isNostrUri
 import net.primal.core.utils.isNote
 import net.primal.core.utils.isNoteUri
 import net.primal.core.utils.nostrUriToBytes
+import net.primal.core.utils.toDouble
 import net.primal.core.utils.toHex
 import net.primal.data.local.dao.events.EventUriNostr
 import net.primal.data.local.dao.messages.DirectMessageData
@@ -427,7 +428,7 @@ private fun takeAsReferencedZapOrNull(
         receiverDisplayName = receiver?.displayName ?: receiver?.handle,
         receiverAvatarCdnImage = receiver?.avatarCdnImage,
         receiverPrimalLegendProfile = receiver?.primalPremiumInfo?.legendProfile,
-        amountInSats = amountInSats.doubleValue(),
+        amountInSats = amountInSats.toDouble(),
         message = zapRequest.content,
         zappedEventId = noteId,
         zappedEventContent = zappedPost?.content,
