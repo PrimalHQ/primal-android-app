@@ -861,6 +861,8 @@
     <string name="settings_muted_accounts_unmute_button">Unmute</string>
     <string name="settings_muted_accounts_no_content">Your muted accounts will appear here.</string>
 
+    <string name="settings_media_uploads_title">Media Uploads</string>
+
     <string name="settings_version_title">Version</string>
 
     <string name="biometric_prompt_title">Authenticate</string>
