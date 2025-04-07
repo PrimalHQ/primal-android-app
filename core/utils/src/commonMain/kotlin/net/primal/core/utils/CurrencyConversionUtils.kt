@@ -25,7 +25,7 @@ object CurrencyConversionUtils {
 
     fun String.toSats(): ULong = this.toBigDecimal().toSats()
 
-    fun BigDecimal.toSats(): ULong = multiply(BTC_IN_SATS.toBigDecimal()).ulongValue()
+    fun BigDecimal.toSats(): ULong = multiply(BTC_IN_SATS.toBigDecimal()).toULong()
 
     fun BigDecimal.toUsd(exchangeBtcUsdRate: Double?): BigDecimal {
         val rate = exchangeBtcUsdRate ?: 0.0
