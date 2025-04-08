@@ -1,6 +1,7 @@
 package net.primal.android.core.utils
 
 import io.kotest.matchers.shouldBe
+import net.primal.domain.nostr.utils.asEllipsizedNpub
 import org.junit.Test
 
 class StringUtilsTest {
