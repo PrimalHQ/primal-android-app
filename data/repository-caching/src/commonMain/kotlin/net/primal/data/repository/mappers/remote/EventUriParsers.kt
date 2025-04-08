@@ -2,7 +2,6 @@ package net.primal.data.repository.mappers.remote
 
 import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.detectMimeType
-import net.primal.core.utils.isNostrUri
 import net.primal.data.local.dao.events.EventUri
 import net.primal.data.local.dao.messages.DirectMessageData
 import net.primal.data.local.dao.notes.PostData
@@ -11,6 +10,7 @@ import net.primal.domain.CdnResource
 import net.primal.domain.EventLink
 import net.primal.domain.EventLinkPreviewData
 import net.primal.domain.EventUriType
+import net.primal.domain.nostr.utils.isNostrUri
 
 private data class EventIdUriPair(
     val eventId: String,

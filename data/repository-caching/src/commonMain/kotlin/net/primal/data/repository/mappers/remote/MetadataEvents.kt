@@ -1,7 +1,7 @@
 package net.primal.data.repository.mappers.remote
 
 import net.primal.core.utils.asMapByKey
-import net.primal.core.utils.parseUris
+import net.primal.core.utils.detectUrls
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.local.dao.profiles.ProfileData
@@ -16,6 +16,7 @@ import net.primal.domain.nostr.serialization.toNostrJsonObject
 import net.primal.domain.nostr.utils.decodeLNUrlOrNull
 import net.primal.domain.nostr.utils.parseAsLNUrlOrNull
 import net.primal.domain.nostr.utils.parseHashtags
+import net.primal.domain.nostr.utils.parseNostrUris
 
 fun List<NostrEvent>.mapAsProfileDataPO(
     cdnResources: List<CdnResource>,
@@ -87,7 +88,7 @@ fun NostrEvent.asProfileDataPO(
         lightningAddress = metadata?.lud16,
         lnUrlDecoded = metadata?.lud16?.parseAsLNUrlOrNull() ?: metadata?.lud06?.decodeLNUrlOrNull(),
         about = metadata?.about,
-        aboutUris = metadata?.about?.parseUris() ?: emptyList(),
+        aboutUris = metadata?.about?.let { it.detectUrls() + it.parseNostrUris() } ?: emptyList(),
         aboutHashtags = metadata?.about?.parseHashtags() ?: emptyList(),
         displayName = metadata?.displayName,
         avatarCdnImage = metadata?.picture?.let {
