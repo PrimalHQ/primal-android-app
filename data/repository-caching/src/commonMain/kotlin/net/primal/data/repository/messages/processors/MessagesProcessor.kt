@@ -2,7 +2,6 @@ package net.primal.data.repository.messages.processors
 
 import io.github.aakira.napier.Napier
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.core.utils.isNostrUri
 import net.primal.data.local.dao.messages.DirectMessageData
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.local.db.withTransaction
@@ -26,6 +25,7 @@ import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.cryptography.MessageCipher
+import net.primal.domain.nostr.utils.isNostrUri
 
 internal class MessagesProcessor(
     private val database: PrimalDatabase,

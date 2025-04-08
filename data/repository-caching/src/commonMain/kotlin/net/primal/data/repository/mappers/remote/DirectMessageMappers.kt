@@ -1,10 +1,11 @@
 package net.primal.data.repository.mappers.remote
 
-import net.primal.core.utils.parseUris
+import net.primal.core.utils.detectUrls
 import net.primal.data.local.dao.messages.DirectMessageData
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.findFirstProfileId
 import net.primal.domain.nostr.utils.parseHashtags
+import net.primal.domain.nostr.utils.parseNostrUris
 
 fun List<NostrEvent>.mapAsMessageDataPO(
     userId: String,
@@ -29,7 +30,7 @@ fun NostrEvent.mapAsMessageDataPO(
         participantId = participantId,
         createdAt = this.createdAt,
         content = decryptedMessage,
-        uris = decryptedMessage.parseUris(),
+        uris = decryptedMessage.detectUrls() + decryptedMessage.parseNostrUris(),
         hashtags = decryptedMessage.parseHashtags(),
     )
 }

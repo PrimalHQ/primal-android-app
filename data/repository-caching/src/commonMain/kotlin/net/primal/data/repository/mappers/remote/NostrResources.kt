@@ -5,21 +5,7 @@ import net.primal.core.utils.NEVENT
 import net.primal.core.utils.NOTE
 import net.primal.core.utils.NPROFILE
 import net.primal.core.utils.NPUB
-import net.primal.core.utils.bech32ToHexOrThrow
-import net.primal.core.utils.bechToBytesOrThrow
-import net.primal.core.utils.extract
-import net.primal.core.utils.isNAddr
-import net.primal.core.utils.isNAddrUri
-import net.primal.core.utils.isNEvent
-import net.primal.core.utils.isNEventUri
-import net.primal.core.utils.isNPub
-import net.primal.core.utils.isNPubUri
-import net.primal.core.utils.isNostrUri
-import net.primal.core.utils.isNote
-import net.primal.core.utils.isNoteUri
-import net.primal.core.utils.nostrUriToBytes
 import net.primal.core.utils.toDouble
-import net.primal.core.utils.toHex
 import net.primal.data.local.dao.events.EventUriNostr
 import net.primal.data.local.dao.messages.DirectMessageData
 import net.primal.data.local.dao.notes.PostData
@@ -43,6 +29,9 @@ import net.primal.domain.nostr.Nip19TLV.readAsString
 import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
+import net.primal.domain.nostr.cryptography.utils.bechToBytesOrThrow
+import net.primal.domain.nostr.cryptography.utils.toHex
 import net.primal.domain.nostr.findFirstAltDescription
 import net.primal.domain.nostr.findFirstBolt11
 import net.primal.domain.nostr.findFirstEventId
@@ -51,6 +40,17 @@ import net.primal.domain.nostr.findFirstZapAmount
 import net.primal.domain.nostr.isATag
 import net.primal.domain.nostr.utils.LnInvoiceUtils
 import net.primal.domain.nostr.utils.asEllipsizedNpub
+import net.primal.domain.nostr.utils.extract
+import net.primal.domain.nostr.utils.isNAddr
+import net.primal.domain.nostr.utils.isNAddrUri
+import net.primal.domain.nostr.utils.isNEvent
+import net.primal.domain.nostr.utils.isNEventUri
+import net.primal.domain.nostr.utils.isNPub
+import net.primal.domain.nostr.utils.isNPubUri
+import net.primal.domain.nostr.utils.isNostrUri
+import net.primal.domain.nostr.utils.isNote
+import net.primal.domain.nostr.utils.isNoteUri
+import net.primal.domain.nostr.utils.nostrUriToBytes
 import net.primal.domain.utils.wordsCountToReadingTime
 
 private fun String.nostrUriToIdAndRelay(): Pair<String?, String?> {
