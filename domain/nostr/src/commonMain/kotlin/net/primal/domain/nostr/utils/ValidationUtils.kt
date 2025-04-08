@@ -1,4 +1,4 @@
-package net.primal.android.core.utils
+package net.primal.domain.nostr.utils
 
 import io.github.aakira.napier.Napier
 import net.primal.domain.nostr.cryptography.utils.Bech32
