@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
@@ -23,6 +24,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -73,6 +75,7 @@ private fun MediaUploadsSettingsScreen(
                 modifier = Modifier
                     .background(color = AppTheme.colorScheme.surfaceVariant)
                     .fillMaxWidth()
+                    .fillMaxHeight()
                     .padding(paddingValues)
                     .imePadding(),
                 state = state,
@@ -90,11 +93,11 @@ private fun MediaUploadsLazyColumn(
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    LazyColumn(modifier = modifier) {
-        val isEditMainBlossom = state.mode == MediaUploadsMode.EditBlossomServer
-        val isEditMirrorBlossom = state.mode == MediaUploadsMode.EditBlossomMirrorServer
-        val isViewMode = state.mode == MediaUploadsMode.View
+    val isEditMainBlossom = state.mode == MediaUploadsMode.EditBlossomServer
+    val isEditMirrorBlossom = state.mode == MediaUploadsMode.EditBlossomMirrorServer
+    val isViewMode = state.mode == MediaUploadsMode.View
 
+    LazyColumn(modifier = modifier) {
         if (isViewMode) {
             blossomMainServerSection(state.blossomServerUrl)
         }
@@ -211,6 +214,9 @@ private fun SuggestedServerItem(server: String, onClick: () -> Unit) {
                 appBarIconContentDescription = "",
             )
         },
+        colors = ListItemDefaults.colors(
+            containerColor = Color.Transparent,
+        ),
     )
 }
 
