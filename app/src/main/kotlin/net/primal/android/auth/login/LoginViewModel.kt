@@ -19,14 +19,14 @@ import net.primal.android.auth.login.LoginContract.UiEvent
 import net.primal.android.auth.login.LoginContract.UiState
 import net.primal.android.auth.repository.LoginHandler
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
-import net.primal.android.core.utils.isValidNostrPrivateKey
-import net.primal.android.core.utils.isValidNostrPublicKey
 import net.primal.android.user.domain.LoginType
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
 import net.primal.domain.nostr.cryptography.utils.extractKeyPairFromPrivateKeyOrThrow
+import net.primal.domain.nostr.utils.isValidNostrPrivateKey
+import net.primal.domain.nostr.utils.isValidNostrPublicKey
 import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 

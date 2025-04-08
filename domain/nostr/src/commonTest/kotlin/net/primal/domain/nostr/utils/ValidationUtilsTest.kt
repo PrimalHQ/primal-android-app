@@ -1,7 +1,7 @@
-package net.primal.android.core.utils
+package net.primal.domain.nostr.utils
 
 import io.kotest.matchers.shouldBe
-import org.junit.Test
+import kotlin.test.Test
 
 class ValidationUtilsTest {
 
