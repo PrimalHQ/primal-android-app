@@ -1,9 +1,13 @@
 package net.primal.domain.repository
 
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Clock
+import net.primal.domain.error.NetworkException
 import net.primal.domain.model.Highlight
 import net.primal.domain.nostr.Nevent
+import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.publisher.NostrPublishException
 
 interface HighlightRepository {
 
@@ -14,6 +18,12 @@ interface HighlightRepository {
 
     fun observeHighlightById(highlightId: String): Flow<Highlight>
 
+    @Throws(
+        NostrPublishException::class,
+        SignatureException::class,
+        NetworkException::class,
+        CancellationException::class,
+    )
     suspend fun publishAndSaveHighlight(
         userId: String,
         content: String,
@@ -24,5 +34,11 @@ interface HighlightRepository {
         createdAt: Long = Clock.System.now().epochSeconds,
     ): Nevent
 
+    @Throws(
+        NostrPublishException::class,
+        SignatureException::class,
+        NetworkException::class,
+        CancellationException::class,
+    )
     suspend fun publishDeleteHighlight(userId: String, highlightId: String)
 }
