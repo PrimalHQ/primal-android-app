@@ -1,6 +1,16 @@
-package net.primal.core.utils
+package net.primal.domain.nostr.utils
 
 import io.github.aakira.napier.Napier
+import net.primal.core.utils.NADDR
+import net.primal.core.utils.NEVENT
+import net.primal.core.utils.NOSTR
+import net.primal.core.utils.NOTE
+import net.primal.core.utils.NPROFILE
+import net.primal.core.utils.NPUB
+import net.primal.core.utils.NRELAY
+import net.primal.core.utils.NSEC
+import net.primal.domain.nostr.cryptography.utils.bechToBytesOrThrow
+import net.primal.domain.nostr.cryptography.utils.toHex
 
 private val nostrUriRegexPattern = Regex(
     "($NOSTR)?@?($NSEC|$NPUB|$NEVENT|$NADDR|$NOTE|$NPROFILE|$NRELAY)([qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)([\\S]*)",

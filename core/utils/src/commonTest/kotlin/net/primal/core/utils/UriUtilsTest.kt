@@ -19,7 +19,7 @@ class UriUtilsTest {
             https://www.bitcoinops.org/en/newsletters/2023/06/07/
         """.trimIndent()
 
-        val expectedUrls = content.parseUris()
+        val expectedUrls = content.detectUrls()
 
         expectedUrls.shouldNotBeNull()
         expectedUrls.size shouldBeExactly 4
@@ -32,7 +32,7 @@ class UriUtilsTest {
             https://en.m.wikipedia.org/wiki/Bit_(money)
         """.trimIndent()
 
-        val expectedUrls = content.parseUris()
+        val expectedUrls = content.detectUrls()
 
         expectedUrls shouldBe listOf("https://en.m.wikipedia.org/wiki/Bit_(money)")
         expectedUrls.size shouldBeExactly 1
@@ -50,7 +50,7 @@ class UriUtilsTest {
         Don't forget the test with brackets: https://example.com/page?(query)=1&sort=desc
         """.trimIndent()
 
-        val expectedUrls = content.parseUris()
+        val expectedUrls = content.detectUrls()
 
         expectedUrls shouldBe listOf(
             "https://en.m.wikipedia.org/wiki/Bit_(money)",
@@ -71,7 +71,7 @@ class UriUtilsTest {
         https://www.example.com:443/resource
         """.trimIndent()
 
-        val expectedUrls = content.parseUris()
+        val expectedUrls = content.detectUrls()
 
         expectedUrls.shouldNotBeNull()
         expectedUrls shouldContainExactly listOf(
@@ -89,7 +89,7 @@ class UriUtilsTest {
         example@com
         """.trimIndent()
 
-        val expectedUrls = content.parseUris()
+        val expectedUrls = content.detectUrls()
 
         expectedUrls.shouldNotBeNull()
         expectedUrls.size shouldBe 0
@@ -100,7 +100,7 @@ class UriUtilsTest {
         val hugeContent = MARKDOWN_WITH_LINKS
         hugeContent.shouldNotBeNull()
 
-        val urls = hugeContent.parseUris()
+        val urls = hugeContent.detectUrls()
         urls.shouldNotBeNull()
         urls.forEach {
             it.shouldNotEndWith(")")

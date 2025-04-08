@@ -1,6 +1,6 @@
 package net.primal.domain.nostr.utils
 
-import net.primal.core.utils.bechToBytesOrThrow
+import net.primal.domain.nostr.cryptography.utils.bechToBytesOrThrow
 
 fun String.parseAsLNUrlOrNull(): String? {
     val parts = this.split("@")

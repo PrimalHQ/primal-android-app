@@ -1,7 +1,7 @@
 package net.primal.data.repository.mappers.remote
 
 import kotlinx.serialization.json.JsonArray
-import net.primal.core.utils.parseUris
+import net.primal.core.utils.detectUrls
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.local.dao.notes.PostData
 import net.primal.data.local.dao.reads.HighlightData
@@ -12,6 +12,7 @@ import net.primal.domain.nostr.hasRootMarker
 import net.primal.domain.nostr.isEventIdTag
 import net.primal.domain.nostr.serialization.toNostrJsonObject
 import net.primal.domain.nostr.utils.parseHashtags
+import net.primal.domain.nostr.utils.parseNostrUris
 
 fun List<NostrEvent>.mapNotNullAsHighlightComments(highlights: List<HighlightData>): List<PostData> =
     this.mapNotNull { it.asHighlightComment(highlights = highlights) }
@@ -31,7 +32,7 @@ private fun NostrEvent.asHighlightComment(highlights: List<HighlightData>): Post
         createdAt = this.createdAt,
         tags = this.tags,
         content = this.content,
-        uris = this.content.parseUris(),
+        uris = this.content.detectUrls() + this.content.parseNostrUris(),
         hashtags = this.parseHashtags(),
         sig = this.sig,
         raw = this.toNostrJsonObject().encodeToJsonString(),

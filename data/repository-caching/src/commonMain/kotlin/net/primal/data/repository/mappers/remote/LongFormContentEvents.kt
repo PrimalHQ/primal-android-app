@@ -2,7 +2,7 @@ package net.primal.data.repository.mappers.remote
 
 import io.github.aakira.napier.Napier
 import net.primal.core.utils.asMapByKey
-import net.primal.core.utils.parseUris
+import net.primal.core.utils.detectUrls
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.local.dao.reads.ArticleData
 import net.primal.domain.CdnImage
@@ -17,6 +17,7 @@ import net.primal.domain.nostr.findFirstSummary
 import net.primal.domain.nostr.findFirstTitle
 import net.primal.domain.nostr.serialization.toNostrJsonObject
 import net.primal.domain.nostr.utils.parseHashtags
+import net.primal.domain.nostr.utils.parseNostrUris
 import net.primal.domain.serialization.takeContentOrNull
 
 fun List<NostrEvent>.mapNotNullAsArticleDataPO(
@@ -68,7 +69,7 @@ private fun NostrEvent.asArticleData(wordsCount: Int?, cdnResources: Map<String,
         createdAt = this.createdAt,
         publishedAt = tags.findFirstPublishedAt()?.toLongOrNull() ?: this.createdAt,
         content = this.content,
-        uris = this.content.parseUris(),
+        uris = this.content.detectUrls() + this.content.parseNostrUris(),
         hashtags = this.parseHashtags(),
         raw = raw,
         imageCdnImage = tags.findFirstImage()?.let { imageUrl ->
