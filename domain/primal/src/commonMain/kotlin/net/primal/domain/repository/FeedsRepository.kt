@@ -1,9 +1,12 @@
 package net.primal.domain.repository
 
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.Flow
 import net.primal.domain.DvmFeed
 import net.primal.domain.FeedSpecKind
+import net.primal.domain.error.NetworkException
 import net.primal.domain.model.PrimalFeed
+import net.primal.domain.nostr.cryptography.SignatureException
 
 interface FeedsRepository {
 
@@ -17,32 +20,64 @@ interface FeedsRepository {
 
     fun observeContainsFeedSpec(userId: String, feedSpec: String): Flow<Boolean>
 
+    @Throws(
+        SignatureException::class,
+        NetworkException::class,
+        CancellationException::class,
+    )
     suspend fun fetchAndPersistArticleFeeds(userId: String)
 
+    @Throws(
+        SignatureException::class,
+        NetworkException::class,
+        CancellationException::class,
+    )
     suspend fun fetchAndPersistNoteFeeds(userId: String)
 
+    @Throws(
+        SignatureException::class,
+        NetworkException::class,
+        CancellationException::class,
+    )
     suspend fun persistNewDefaultFeeds(
         userId: String,
         specKind: FeedSpecKind,
         givenDefaultFeeds: List<PrimalFeed>,
     )
 
+    @Throws(NetworkException::class, CancellationException::class)
     suspend fun fetchDefaultFeeds(userId: String, specKind: FeedSpecKind): List<PrimalFeed>?
 
+    @Throws(
+        SignatureException::class,
+        NetworkException::class,
+        CancellationException::class,
+    )
     suspend fun persistRemotelyAllLocalUserFeeds(userId: String)
 
+    @Throws(
+        SignatureException::class,
+        NetworkException::class,
+        CancellationException::class,
+    )
     suspend fun persistLocallyAndRemotelyUserFeeds(
         userId: String,
         specKind: FeedSpecKind,
         feeds: List<PrimalFeed>,
     )
 
+    @Throws(
+        SignatureException::class,
+        NetworkException::class,
+        CancellationException::class,
+    )
     suspend fun fetchAndPersistDefaultFeeds(
         userId: String,
         specKind: FeedSpecKind,
         givenDefaultFeeds: List<PrimalFeed>,
     )
 
+    @Throws(NetworkException::class, CancellationException::class)
     suspend fun fetchRecommendedDvmFeeds(userId: String, specKind: FeedSpecKind? = null): List<DvmFeed>
 
     suspend fun addDvmFeedLocally(
