@@ -1,5 +1,7 @@
 package net.primal.android.settings.media
 
+import net.primal.android.core.errors.UiError
+
 interface MediaUploadsSettingsContract {
     data class UiState(
         val blossomServerUrl: String = "blossom.primal.net",
@@ -8,13 +10,9 @@ interface MediaUploadsSettingsContract {
         val newBlossomServerMirrorUrl: String = "",
         val suggestedBlossomServers: List<String> = listOf<String>("cdn.satellite.earth", "cdn.nostrcheck.me"),
         val blossomMirrorEnabled: Boolean = true,
-        val error: MediaUploadsSettingsError? = null,
         val mode: MediaUploadsMode = MediaUploadsMode.View,
-    ) {
-        sealed class MediaUploadsSettingsError {
-            data class FailedToFetch(val error: Throwable) : MediaUploadsSettingsError()
-        }
-    }
+        val error: UiError? = null,
+    )
 
     sealed class UiEvent {
         data class UpdateNewBlossomServerUrl(val url: String) : UiEvent()
