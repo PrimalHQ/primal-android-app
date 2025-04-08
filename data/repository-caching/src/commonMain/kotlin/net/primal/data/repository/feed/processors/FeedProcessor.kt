@@ -6,14 +6,26 @@ import net.primal.data.local.dao.notes.FeedPostRemoteKey
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.feed.model.FeedResponse
-import net.primal.data.remote.model.ContentPrimalPaging
+import net.primal.data.repository.mappers.remote.asFeedResponse
 import net.primal.data.repository.mappers.remote.orderByPagingIfNotNull
+import net.primal.domain.ContentPrimalPaging
+import net.primal.domain.model.FeedPageSnapshot
 import net.primal.domain.nostr.NostrEvent
 
 internal class FeedProcessor(
     val feedSpec: String,
     val database: PrimalDatabase,
 ) {
+
+    suspend fun processAndPersistToDatabase(
+        userId: String,
+        snapshot: FeedPageSnapshot,
+        clearFeed: Boolean,
+    ) = processAndPersistToDatabase(
+        userId = userId,
+        response = snapshot.asFeedResponse(),
+        clearFeed = clearFeed,
+    )
 
     suspend fun processAndPersistToDatabase(
         userId: String,

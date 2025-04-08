@@ -18,14 +18,19 @@ import net.primal.data.local.queries.ChronologicalFeedWithRepostsQueryBuilder
 import net.primal.data.local.queries.ExploreFeedQueryBuilder
 import net.primal.data.local.queries.FeedQueryBuilder
 import net.primal.data.remote.api.feed.FeedApi
+import net.primal.data.remote.api.feed.model.FeedBySpecRequestBody
 import net.primal.data.remote.api.feed.model.ThreadRequestBody
 import net.primal.data.repository.feed.paging.NoteFeedRemoteMediator
+import net.primal.data.repository.feed.processors.FeedProcessor
 import net.primal.data.repository.feed.processors.persistNoteRepliesAndArticleCommentsToDatabase
 import net.primal.data.repository.feed.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.local.mapAsFeedPostDO
+import net.primal.data.repository.mappers.remote.asFeedPageSnapshot
 import net.primal.domain.error.NetworkException
+import net.primal.domain.model.FeedPageSnapshot
 import net.primal.domain.model.FeedPost as FeedPostDO
 import net.primal.domain.repository.FeedRepository
+import net.primal.domain.repository.FeedRepository.Companion.DEFAULT_PAGE_SIZE
 import net.primal.domain.supportsNoteReposts
 
 internal class FeedRepositoryImpl(
@@ -91,6 +96,43 @@ internal class FeedRepositoryImpl(
             database.articleFeedsConnections().deleteConnectionsBySpec(ownerId = userId, spec = feedSpec)
         }
 
+    override suspend fun replaceFeed(
+        userId: String,
+        feedSpec: String,
+        snapshot: FeedPageSnapshot,
+    ) = withContext(dispatcherProvider.io()) {
+        FeedProcessor(
+            feedSpec = feedSpec,
+            database = database,
+        ).processAndPersistToDatabase(
+            userId = userId,
+            snapshot = snapshot,
+            clearFeed = true,
+        )
+    }
+
+    override suspend fun fetchFeedPageSnapshot(
+        userId: String,
+        feedSpec: String,
+        notes: String?,
+        until: Long?,
+        since: Long?,
+        order: String?,
+        limit: Int,
+    ): FeedPageSnapshot = withContext(dispatcherProvider.io()) {
+        feedApi.getFeedBySpec(
+            body = FeedBySpecRequestBody(
+                spec = feedSpec,
+                userPubKey = userId,
+                notes = notes,
+                until = until,
+                since = since,
+                order = order,
+                limit = limit,
+            ),
+        ).asFeedPageSnapshot()
+    }
+
     override suspend fun findConversation(userId: String, noteId: String): List<FeedPostDO> {
         return observeConversation(userId = userId, noteId = noteId).firstOrNull() ?: emptyList()
     }
@@ -109,9 +151,9 @@ internal class FeedRepositoryImpl(
         pagingSourceFactory: () -> PagingSource<Int, FeedPostPO>,
     ) = Pager(
         config = PagingConfig(
-            pageSize = PAGE_SIZE,
-            prefetchDistance = PAGE_SIZE,
-            initialLoadSize = PAGE_SIZE * 3,
+            pageSize = DEFAULT_PAGE_SIZE,
+            prefetchDistance = DEFAULT_PAGE_SIZE,
+            initialLoadSize = DEFAULT_PAGE_SIZE * 3,
             enablePlaceholders = true,
         ),
         remoteMediator = NoteFeedRemoteMediator(
@@ -136,8 +178,4 @@ internal class FeedRepositoryImpl(
                 userPubkey = userId,
             )
         }
-
-    companion object {
-        private const val PAGE_SIZE = 25
-    }
 }

@@ -1,12 +1,12 @@
 package net.primal.android.premium.repository
 
-import net.primal.android.nostr.model.primal.content.ContentProfilePremiumInfo
 import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.parseUris
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.CdnImage
 import net.primal.domain.CdnResource
+import net.primal.domain.ContentProfilePremiumInfo
 import net.primal.domain.PrimalLegendProfile
 import net.primal.domain.PrimalPremiumInfo
 import net.primal.domain.model.ProfileData

@@ -21,10 +21,10 @@ import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.articles.ArticlesApi
 import net.primal.data.remote.api.articles.model.ArticleFeedRequestBody
 import net.primal.data.remote.api.articles.model.ArticleResponse
-import net.primal.data.remote.model.ContentPrimalPaging
 import net.primal.data.repository.articles.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.remote.mapNotNullAsArticleDataPO
 import net.primal.data.repository.mappers.remote.orderByPagingIfNotNull
+import net.primal.domain.ContentPrimalPaging
 
 @ExperimentalPagingApi
 internal class ArticleFeedMediator(

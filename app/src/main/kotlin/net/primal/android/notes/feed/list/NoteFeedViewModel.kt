@@ -20,25 +20,26 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import net.primal.android.core.ext.asMapByKey
-import net.primal.android.nostr.ext.findFirstEventId
-import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
-import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.android.notes.feed.list.NoteFeedContract.UiEvent
 import net.primal.android.notes.feed.list.NoteFeedContract.UiState
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
 import net.primal.android.notes.feed.model.asFeedPostUi
-import net.primal.android.premium.repository.parseAndMapPrimalLegendProfiles
-import net.primal.android.premium.repository.parseAndMapPrimalPremiumInfo
-import net.primal.android.premium.repository.parseAndMapPrimalUserNames
+import net.primal.android.premium.legend.domain.asLegendaryCustomization
+import net.primal.android.premium.repository.mapAsProfileDataDO
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
-import net.primal.data.remote.api.feed.model.FeedResponse
+import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
+import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.domain.isPremiumFeedSpec
+import net.primal.domain.model.FeedPageSnapshot
 import net.primal.domain.model.FeedPost
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.findFirstEventId
 import net.primal.domain.repository.FeedRepository
 import net.primal.domain.supportsUpwardsNotesPagination
 import timber.log.Timber
@@ -67,7 +68,7 @@ class NoteFeedViewModel @AssistedInject constructor(
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
-    private var latestFeedResponse: FeedResponse? = null
+    private var latestFeedResponse: FeedPageSnapshot? = null
     private var topVisibleNote: Pair<String, String?>? = null
 
     private var pollingJob: Job? = null
@@ -136,22 +137,24 @@ class NoteFeedViewModel @AssistedInject constructor(
     }
 
     private suspend fun fetchLatestNotes() {
-        // TODO Bring back when fetchLatestNotes() is ported (New Posts Pill)
-//        val feedResponse = feedRepository.fetchLatestNotes(
-//            userId = activeAccountStore.activeUserId(),
-//            feedSpec = feedSpec,
-//        )
+        val latestFeedPageResponse = feedRepository.fetchFeedPageSnapshot(
+            userId = activeAccountStore.activeUserId(),
+            feedSpec = feedSpec,
+        )
 
-//        latestFeedResponse = feedResponse
-//        feedResponse.processSyncCount(
-//            newestLocalNote = feedRepository
-//                .findNewestPosts(userId = activeAccountStore.activeUserId(), feedDirective = feedSpec, limit = 1)
-//                .firstOrNull(),
-//        )
+        latestFeedResponse = latestFeedPageResponse
+        latestFeedPageResponse.processSyncCount(
+            newestLocalNote = feedRepository
+                .findNewestPosts(
+                    userId = activeAccountStore.activeUserId(),
+                    feedDirective = feedSpec,
+                    limit = 1,
+                )
+                .firstOrNull(),
+        )
     }
 
-    // TODO Bring back when fetchLatestNotes() is ported (New Posts Pill)
-    private fun FeedResponse.processSyncCount(newestLocalNote: FeedPost? = null) {
+    private fun FeedPageSnapshot.processSyncCount(newestLocalNote: FeedPost? = null) {
         val allReferencedNotes = this.referencedEvents.mapNotNull {
             it.content.decodeFromJsonStringOrNull<NostrEvent>()
         }
@@ -175,54 +178,53 @@ class NoteFeedViewModel @AssistedInject constructor(
             .map { it.second }
             .toMutableSet()
 
-        val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+        val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource()
         val primalUserNames = this.primalUserNames.parseAndMapPrimalUserNames()
         val primalPremiumInfo = this.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
         val primalLegendProfiles = this.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
         val blossomServers = this.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
-//        val profiles = this.metadata.mapAsProfileDataPO(
-//            cdnResources = cdnResources,
-//            primalUserNames = primalUserNames,
-//            primalPremiumInfo = primalPremiumInfo,
-//            primalLegendProfiles = primalLegendProfiles,
-//            blossomServers = blossomServers,
-//        )
-//
-//        val avatarCdnImagesAndLegendaryCustomizations = allNotes
-//            .mapNotNull { note -> profiles.find { it.ownerId == note.pubKey } }
-//            .map { profileData ->
-//                Pair(
-//                    profileData.avatarCdnImage,
-//                    profileData.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
-//                )
-//            }
-//            .distinct()
+        val profiles = this.metadata.mapAsProfileDataDO(
+            cdnResources = cdnResources,
+            primalUserNames = primalUserNames,
+            primalPremiumInfo = primalPremiumInfo,
+            primalLegendProfiles = primalLegendProfiles,
+            blossomServers = blossomServers,
+        )
 
-//        val limit = avatarCdnImagesAndLegendaryCustomizations.count().coerceAtMost(MAX_AVATARS)
+        val avatarCdnImagesAndLegendaryCustomizations = allNotes
+            .mapNotNull { note -> profiles.find { it.profileId == note.pubKey } }
+            .map { profileData ->
+                Pair(
+                    profileData.avatarCdnImage,
+                    profileData.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
+                )
+            }
+            .distinct()
 
-//        val newSyncStats = FeedPostsSyncStats(
-//            latestNoteIds = allNotes.map { it.id },
-//            latestAvatarCdnImages = avatarCdnImagesAndLegendaryCustomizations
-//                .map { it.first }
-//                .take(limit),
-//        )
+        val limit = avatarCdnImagesAndLegendaryCustomizations.count().coerceAtMost(MAX_AVATARS)
 
-//        if (newSyncStats.isTopVisibleNoteTheLatestNote()) {
-//            setState { copy(syncStats = FeedPostsSyncStats()) }
-//        } else {
-//            setState { copy(syncStats = newSyncStats) }
-//        }
+        val newSyncStats = FeedPostsSyncStats(
+            latestNoteIds = allNotes.map { it.id },
+            latestAvatarCdnImages = avatarCdnImagesAndLegendaryCustomizations
+                .map { it.first }
+                .take(limit),
+        )
+
+        if (newSyncStats.isTopVisibleNoteTheLatestNote()) {
+            setState { copy(syncStats = FeedPostsSyncStats()) }
+        } else {
+            setState { copy(syncStats = newSyncStats) }
+        }
     }
 
     private fun showLatestNotes() =
         viewModelScope.launch {
             latestFeedResponse?.let { latestFeed ->
-                // TODO Bring back when replaceFeedSpec() is ported (New Posts Pill)
-//                feedRepository.replaceFeedSpec(
-//                    userId = activeAccountStore.activeUserId(),
-//                    feedSpec = feedSpec,
-//                    response = latestFeed,
-//                )
+                feedRepository.replaceFeed(
+                    userId = activeAccountStore.activeUserId(),
+                    feedSpec = feedSpec,
+                    snapshot = latestFeed,
+                )
 
                 delay(130.milliseconds)
                 setState { copy(syncStats = FeedPostsSyncStats(), shouldAnimateScrollToTop = true) }

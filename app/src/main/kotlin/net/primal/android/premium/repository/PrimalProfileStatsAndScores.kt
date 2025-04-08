@@ -1,7 +1,7 @@
 package net.primal.android.premium.repository
 
-import net.primal.android.nostr.model.primal.content.ContentProfilePremiumInfo
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.domain.ContentProfilePremiumInfo
 import net.primal.domain.PrimalEvent
 import net.primal.domain.PrimalLegendProfile
 

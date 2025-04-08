@@ -19,9 +19,6 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notes.FeedPost
 import net.primal.data.local.dao.notes.FeedPostRemoteKey
 import net.primal.data.local.db.PrimalDatabase
-import net.primal.data.local.queries.ChronologicalFeedWithRepostsQueryBuilder
-import net.primal.data.local.queries.ExploreFeedQueryBuilder
-import net.primal.data.local.queries.FeedQueryBuilder
 import net.primal.data.remote.api.feed.FeedApi
 import net.primal.data.remote.api.feed.model.FeedBySpecRequestBody
 import net.primal.data.remote.api.feed.model.FeedResponse
@@ -29,7 +26,6 @@ import net.primal.data.repository.feed.processors.FeedProcessor
 import net.primal.domain.isNotesBookmarkFeedSpec
 import net.primal.domain.isProfileAuthoredNoteRepliesFeedSpec
 import net.primal.domain.isProfileAuthoredNotesFeedSpec
-import net.primal.domain.supportsNoteReposts
 import net.primal.domain.supportsUpwardsNotesPagination
 
 @ExperimentalPagingApi
@@ -40,18 +36,6 @@ internal class NoteFeedRemoteMediator(
     private val feedApi: FeedApi,
     private val database: PrimalDatabase,
 ) : RemoteMediator<Int, FeedPost>() {
-
-    private val feedQueryBuilder: FeedQueryBuilder = when {
-        feedSpec.supportsNoteReposts() -> ChronologicalFeedWithRepostsQueryBuilder(
-            feedSpec = feedSpec,
-            userPubkey = userId,
-        )
-
-        else -> ExploreFeedQueryBuilder(
-            feedSpec = feedSpec,
-            userPubkey = userId,
-        )
-    }
 
     private val lastRequests: MutableMap<LoadType, Pair<FeedBySpecRequestBody, Long>> = mutableMapOf()
 

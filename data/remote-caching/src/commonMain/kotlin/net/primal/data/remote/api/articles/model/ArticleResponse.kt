@@ -1,7 +1,7 @@
 package net.primal.data.remote.api.articles.model
 
 import kotlinx.serialization.Serializable
-import net.primal.data.remote.model.ContentPrimalPaging
+import net.primal.domain.ContentPrimalPaging
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 
