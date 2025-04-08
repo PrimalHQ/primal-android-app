@@ -1,19 +1,45 @@
 package net.primal.android.settings.media
 
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemColors
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import net.primal.android.R
+import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.ConnectRelay
+import net.primal.android.core.compose.settings.DecoratedSettingsOutlinedTextField
+import net.primal.android.settings.network.TextSection
+import net.primal.android.theme.AppTheme
 
 @Composable
 fun MediaUploadsSettingsScreen(viewModel: MediaUploadsSettingsViewModel, onClose: () -> Unit) {
@@ -43,13 +69,308 @@ private fun MediaUploadsSettingsScreen(
             )
         },
         content = { paddingValues ->
-            LazyColumn(
+            MediaUploadsLazyColumn(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .background(color = AppTheme.colorScheme.surfaceVariant)
+                    .fillMaxWidth()
                     .padding(paddingValues)
                     .imePadding(),
-            ) {
-            }
+                state = state,
+                eventPublisher = eventPublisher,
+            )
         },
+    )
+}
+
+@Composable
+private fun MediaUploadsLazyColumn(
+    modifier: Modifier,
+    state: MediaUploadsSettingsContract.UiState,
+    eventPublisher: (MediaUploadsSettingsContract.UiEvent) -> Unit,
+) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    LazyColumn(modifier = modifier) {
+        val isEditMainBlossom = state.mode == MediaUploadsMode.EditBlossomServer
+        val isEditMirrorBlossom = state.mode == MediaUploadsMode.EditBlossomMirrorServer
+        val isViewMode = state.mode == MediaUploadsMode.View
+
+        if (isViewMode) {
+            blossomMainServerSection(state.blossomServerUrl)
+        }
+
+        if (isEditMainBlossom || isViewMode) {
+            blossomServerInput(state, eventPublisher, keyboardController)
+            item { PrimalDivider() }
+        }
+
+        if (isViewMode) {
+            blossomMirrorServerSection(
+                blossomMirrorEnabled = state.blossomMirrorEnabled,
+                onBlossomMirrorCheckedChange = {
+                    eventPublisher(
+                        MediaUploadsSettingsContract.UiEvent.UpdateBlossomMirrorEnabled(it)
+                    )
+                },
+            )
+        }
+
+        if (state.blossomMirrorEnabled) {
+            if (isViewMode) {
+                item {
+                    BlossomServerDestination(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        destinationUrl = state.blossomServerMirrorUrl,
+                    )
+                }
+            }
+
+            if (isEditMirrorBlossom || isViewMode) {
+                blossomMirrorServerInput(state, eventPublisher, keyboardController)
+            }
+
+            if (isEditMirrorBlossom) {
+                item { PrimalDivider() }
+            }
+        }
+
+        if (isEditMainBlossom || isEditMirrorBlossom) {
+            suggestedBlossomServersSection(
+                suggestedBlossomServerUrls = state.suggestedBlossomServers,
+                confirmBlossomServerUrl = { url ->
+                    val event = if (isEditMainBlossom) {
+                        MediaUploadsSettingsContract.UiEvent.ConfirmBlossomServerUrl(url)
+                    } else {
+                        MediaUploadsSettingsContract.UiEvent.ConfirmBlossomMirrorServerUrl(url)
+                    }
+                    eventPublisher(event)
+                }
+            )
+        }
+    }
+}
+
+private fun LazyListScope.suggestedBlossomServersSection(
+    suggestedBlossomServerUrls: List<String>,
+    confirmBlossomServerUrl: (String) -> Unit,
+) {
+    item {
+        Column {
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                text = stringResource(id = R.string.settings_media_uploads_suggested_blossoms_title),
+                style = AppTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+    }
+
+    item {
+        Column {
+            suggestedBlossomServerUrls.forEach { it ->
+                SuggestedServerItem(
+                    server = it,
+                    onClick = {
+                        confirmBlossomServerUrl(it)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SuggestedServerItem(server: String, onClick: () -> Unit ) {
+    val success = AppTheme.extraColorScheme.successBright
+
+    ListItem(
+        modifier = Modifier.clickable { onClick() },
+        leadingContent = {
+            Box(
+                modifier = Modifier
+                    .padding(start = 2.dp, top = 2.dp)
+                    .size(10.dp)
+                    .drawWithCache {
+                        onDrawWithContent {
+                            drawCircle(color = success)
+                        }
+                    },
+            )
+        },
+        headlineContent = {
+            Text(text = server, color = AppTheme.extraColorScheme.onSurfaceVariantAlt1)
+        },
+        trailingContent = {
+            AppBarIcon(
+                modifier = Modifier.padding(bottom = 4.dp, start = 8.dp),
+                icon = PrimalIcons.ConnectRelay,
+                tint = AppTheme.colorScheme.primary,
+                iconSize = 19.dp,
+                onClick = onClick,
+                appBarIconContentDescription = "",
+            )
+        },
+    )
+}
+
+private fun LazyListScope.blossomMainServerSection(blossomServerUrl: String) {
+    item {
+        Column {
+            Spacer(modifier = Modifier.height(24.dp))
+            TextSection(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                text = stringResource(id = R.string.settings_media_uploads_blossom_server_section_title).uppercase(),
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            BlossomServerDestination(destinationUrl = blossomServerUrl)
+        }
+    }
+}
+
+private fun LazyListScope.blossomServerInput(
+    state: MediaUploadsSettingsContract.UiState,
+    eventPublisher: (MediaUploadsSettingsContract.UiEvent) -> Unit,
+    keyboardController: SoftwareKeyboardController?,
+) {
+    item {
+        DecoratedSettingsOutlinedTextField(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            title = stringResource(id = R.string.settings_media_uploads_switch_blossom_server),
+            placeholderText = stringResource(id = R.string.settings_media_uploads_switch_blossom_server_placeholder),
+            value = state.newBlossomServerUrl,
+            onValueChanged = {
+                eventPublisher(MediaUploadsSettingsContract.UiEvent.UpdateNewBlossomServerUrl(url = it))
+            },
+            supportingActionText = stringResource(R.string.settings_media_uploads_restore_default_blossom_server),
+            onSupportActionClick = {
+                eventPublisher(MediaUploadsSettingsContract.UiEvent.RestoreDefaultBlossomServer)
+            },
+            hideSupportContent = state.mode == MediaUploadsMode.View,
+            buttonEnabled = state.newBlossomServerUrl != state.blossomServerUrl &&
+                state.newBlossomServerUrl != state.blossomServerMirrorUrl &&
+                state.newBlossomServerUrl.isNotEmpty(),
+            onActionClick = {
+                keyboardController?.hide()
+                eventPublisher(
+                    MediaUploadsSettingsContract.UiEvent.ConfirmBlossomServerUrl(url = state.newBlossomServerUrl),
+                )
+            },
+        )
+    }
+}
+
+private fun LazyListScope.blossomMirrorServerInput(
+    state: MediaUploadsSettingsContract.UiState,
+    eventPublisher: (MediaUploadsSettingsContract.UiEvent) -> Unit,
+    keyboardController: SoftwareKeyboardController?,
+) {
+    item {
+        DecoratedSettingsOutlinedTextField(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            title = stringResource(id = R.string.settings_media_uploads_switch_blossom_mirror_server),
+            placeholderText = stringResource(id = R.string.settings_media_uploads_switch_blossom_server_placeholder),
+            value = state.newBlossomServerMirrorUrl,
+            onValueChanged = {
+                eventPublisher(MediaUploadsSettingsContract.UiEvent.UpdateNewBlossomMirrorServerUrl(url = it))
+            },
+            supportingActionText = "",
+            onSupportActionClick = {},
+            hideSupportContent = true,
+            buttonEnabled = state.newBlossomServerMirrorUrl != state.blossomServerUrl &&
+                state.newBlossomServerMirrorUrl != state.blossomServerMirrorUrl &&
+                state.newBlossomServerMirrorUrl.isNotEmpty(),
+            onActionClick = {
+                keyboardController?.hide()
+                eventPublisher(
+                    MediaUploadsSettingsContract.UiEvent.ConfirmBlossomMirrorServerUrl(
+                        url = state.newBlossomServerMirrorUrl,
+                    ),
+                )
+            },
+        )
+    }
+}
+
+private fun LazyListScope.blossomMirrorServerSection(
+    blossomMirrorEnabled: Boolean,
+    onBlossomMirrorCheckedChange: (Boolean) -> Unit,
+) {
+    item {
+        Column {
+            Spacer(modifier = Modifier.height(24.dp))
+            TextSection(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                text = stringResource(
+                    id = R.string.settings_media_uploads_blossom_mirror_server_section_title,
+                ).uppercase(),
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            ListItem(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .clip(AppTheme.shapes.medium),
+                headlineContent = {
+                    Text(
+                        text = stringResource(
+                            id = R.string.settings_media_uploads_blossom_mirror_server_switcher_title,
+                        ),
+                        style = AppTheme.typography.bodyLarge,
+                        color = AppTheme.colorScheme.onPrimary,
+                    )
+                },
+                trailingContent = {
+                    PrimalSwitch(
+                        checked = blossomMirrorEnabled,
+                        onCheckedChange = onBlossomMirrorCheckedChange,
+                    )
+                },
+                colors = ListItemDefaults.colors(
+                    containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                ),
+            )
+            Text(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                text = stringResource(id = R.string.settings_media_uploads_blossom_mirror_server_enabled_notice),
+                style = AppTheme.typography.bodySmall,
+                lineHeight = 20.sp,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+            )
+        }
+    }
+}
+
+@Composable
+private fun BlossomServerDestination(
+    modifier: Modifier = Modifier,
+    destinationUrl: String,
+    connected: Boolean = true,
+    colors: ListItemColors = ListItemDefaults.colors(
+        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+    ),
+) {
+    val success = AppTheme.extraColorScheme.successBright
+    val failed = AppTheme.colorScheme.error
+
+    ListItem(
+        modifier = modifier
+            .padding(horizontal = 16.dp)
+            .clip(AppTheme.shapes.medium),
+        leadingContent = {
+            Box(
+                modifier = Modifier
+                    .padding(start = 2.dp, top = 2.dp)
+                    .size(10.dp)
+                    .drawWithCache {
+                        this.onDrawWithContent {
+                            drawCircle(color = if (connected) success else failed)
+                        }
+                    },
+            )
+        },
+        headlineContent = {
+            Text(text = destinationUrl)
+        },
+        colors = colors,
     )
 }
