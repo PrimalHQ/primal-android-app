@@ -20,7 +20,6 @@ import net.primal.android.core.compose.profile.approvals.ProfileApproval
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileStatsUi
 import net.primal.android.core.errors.UiError
-import net.primal.android.core.utils.isValidHex
 import net.primal.android.navigation.primalName
 import net.primal.android.navigation.profileId
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -45,6 +44,7 @@ import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
 import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.nostr.utils.isValidHex
 import net.primal.domain.repository.FeedsRepository
 import net.primal.domain.repository.MutedUserRepository
 import net.primal.domain.repository.ProfileRepository
