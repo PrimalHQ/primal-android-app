@@ -1,6 +1,6 @@
 package net.primal.domain.nostr.publisher
 
-import kotlinx.coroutines.CancellationException
+import kotlin.coroutines.cancellation.CancellationException
 import net.primal.domain.nostr.NostrEvent
 
 interface NostrEventPublisher {
