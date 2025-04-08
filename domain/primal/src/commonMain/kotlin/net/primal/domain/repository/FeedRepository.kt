@@ -21,6 +21,7 @@ interface FeedRepository {
 
     suspend fun findPostsById(postId: String): FeedPost?
 
+    @Throws(NetworkException::class, CancellationException::class)
     suspend fun fetchReplies(userId: String, noteId: String)
 
     fun observeConversation(userId: String, noteId: String): Flow<List<FeedPost>>
