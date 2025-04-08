@@ -109,7 +109,7 @@ private fun MediaUploadsLazyColumn(
                 blossomMirrorEnabled = state.blossomMirrorEnabled,
                 onBlossomMirrorCheckedChange = {
                     eventPublisher(
-                        MediaUploadsSettingsContract.UiEvent.UpdateBlossomMirrorEnabled(it)
+                        MediaUploadsSettingsContract.UiEvent.UpdateBlossomMirrorEnabled(it),
                     )
                 },
             )
@@ -144,7 +144,7 @@ private fun MediaUploadsLazyColumn(
                         MediaUploadsSettingsContract.UiEvent.ConfirmBlossomMirrorServerUrl(url)
                     }
                     eventPublisher(event)
-                }
+                },
             )
         }
     }
@@ -168,12 +168,12 @@ private fun LazyListScope.suggestedBlossomServersSection(
 
     item {
         Column {
-            suggestedBlossomServerUrls.forEach { it ->
+            suggestedBlossomServerUrls.forEach {
                 SuggestedServerItem(
                     server = it,
                     onClick = {
                         confirmBlossomServerUrl(it)
-                    }
+                    },
                 )
             }
         }
@@ -181,7 +181,7 @@ private fun LazyListScope.suggestedBlossomServersSection(
 }
 
 @Composable
-private fun SuggestedServerItem(server: String, onClick: () -> Unit ) {
+private fun SuggestedServerItem(server: String, onClick: () -> Unit) {
     val success = AppTheme.extraColorScheme.successBright
 
     ListItem(
@@ -233,7 +233,7 @@ private fun LazyListScope.blossomServerInput(
     eventPublisher: (MediaUploadsSettingsContract.UiEvent) -> Unit,
     keyboardController: SoftwareKeyboardController?,
 ) {
-    item {
+    item(key = "blossom_main_input") {
         DecoratedSettingsOutlinedTextField(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             title = stringResource(id = R.string.settings_media_uploads_switch_blossom_server),
@@ -246,10 +246,10 @@ private fun LazyListScope.blossomServerInput(
             onSupportActionClick = {
                 eventPublisher(MediaUploadsSettingsContract.UiEvent.RestoreDefaultBlossomServer)
             },
-            hideSupportContent = state.mode == MediaUploadsMode.View,
+            showSupportContent = state.mode == MediaUploadsMode.View,
             buttonEnabled = state.newBlossomServerUrl != state.blossomServerUrl &&
                 state.newBlossomServerUrl != state.blossomServerMirrorUrl &&
-                state.newBlossomServerUrl.isNotEmpty(),
+                state.newBlossomServerUrl.isValidBlossomUrl(),
             onActionClick = {
                 keyboardController?.hide()
                 eventPublisher(
@@ -258,6 +258,12 @@ private fun LazyListScope.blossomServerInput(
             },
         )
     }
+
+    if (state.mode == MediaUploadsMode.EditBlossomServer) {
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+    }
 }
 
 private fun LazyListScope.blossomMirrorServerInput(
@@ -265,9 +271,9 @@ private fun LazyListScope.blossomMirrorServerInput(
     eventPublisher: (MediaUploadsSettingsContract.UiEvent) -> Unit,
     keyboardController: SoftwareKeyboardController?,
 ) {
-    item {
+    item(key = "blossom_mirror_input") {
         DecoratedSettingsOutlinedTextField(
-            modifier = Modifier.padding(horizontal = 16.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             title = stringResource(id = R.string.settings_media_uploads_switch_blossom_mirror_server),
             placeholderText = stringResource(id = R.string.settings_media_uploads_switch_blossom_server_placeholder),
             value = state.newBlossomServerMirrorUrl,
@@ -276,10 +282,10 @@ private fun LazyListScope.blossomMirrorServerInput(
             },
             supportingActionText = "",
             onSupportActionClick = {},
-            hideSupportContent = true,
+            showSupportContent = false,
             buttonEnabled = state.newBlossomServerMirrorUrl != state.blossomServerUrl &&
                 state.newBlossomServerMirrorUrl != state.blossomServerMirrorUrl &&
-                state.newBlossomServerMirrorUrl.isNotEmpty(),
+                state.newBlossomServerMirrorUrl.isValidBlossomUrl(),
             onActionClick = {
                 keyboardController?.hide()
                 eventPublisher(
@@ -289,6 +295,12 @@ private fun LazyListScope.blossomMirrorServerInput(
                 )
             },
         )
+    }
+
+    if (state.mode == MediaUploadsMode.EditBlossomMirrorServer) {
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+        }
     }
 }
 
@@ -374,3 +386,7 @@ private fun BlossomServerDestination(
         colors = colors,
     )
 }
+
+private fun String.isValidBlossomUrl() =
+    (startsWith("http://") || startsWith("https://")) &&
+        !this.split("://").lastOrNull().isNullOrEmpty()

@@ -38,7 +38,7 @@ fun DecoratedSettingsOutlinedTextField(
     onSupportActionClick: () -> Unit,
     buttonEnabled: Boolean,
     placeholderText: String,
-    hideSupportContent: Boolean = false,
+    showSupportContent: Boolean = false,
 ) {
     Column(modifier = modifier) {
         TextSubSection(
@@ -55,7 +55,7 @@ fun DecoratedSettingsOutlinedTextField(
             placeholderText = placeholderText,
         )
 
-        if (hideSupportContent) {
+        if (showSupportContent) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
