@@ -45,7 +45,7 @@ fun DecoratedSettingsOutlinedTextField(
             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
             text = title.uppercase(),
         )
-        RelayOutlinedTextField(
+        SettingsOutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = value,
             buttonEnabled = buttonEnabled,
@@ -74,7 +74,7 @@ fun DecoratedSettingsOutlinedTextField(
 }
 
 @Composable
-private fun RelayOutlinedTextField(
+private fun SettingsOutlinedTextField(
     modifier: Modifier,
     value: String,
     onValueChange: (String) -> Unit,
