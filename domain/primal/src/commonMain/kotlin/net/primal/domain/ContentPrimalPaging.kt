@@ -1,4 +1,4 @@
-package net.primal.data.remote.model
+package net.primal.domain
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

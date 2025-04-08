@@ -5,9 +5,9 @@ import net.primal.core.utils.parseUris
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.local.dao.profiles.ProfileData
-import net.primal.data.remote.model.ContentProfilePremiumInfo
 import net.primal.domain.CdnImage
 import net.primal.domain.CdnResource
+import net.primal.domain.ContentProfilePremiumInfo
 import net.primal.domain.PrimalLegendProfile
 import net.primal.domain.PrimalPremiumInfo
 import net.primal.domain.nostr.ContentMetadata

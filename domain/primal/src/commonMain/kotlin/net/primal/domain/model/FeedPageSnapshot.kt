@@ -1,10 +1,10 @@
-package net.primal.data.remote.api.feed.model
+package net.primal.domain.model
 
 import net.primal.domain.ContentPrimalPaging
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 
-data class FeedResponse(
+data class FeedPageSnapshot(
     val paging: ContentPrimalPaging?,
     val metadata: List<NostrEvent>,
     val notes: List<NostrEvent>,
