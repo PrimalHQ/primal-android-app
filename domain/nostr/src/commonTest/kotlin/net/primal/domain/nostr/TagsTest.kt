@@ -1,26 +1,15 @@
-package net.primal.android.nostr.ext
+package net.primal.domain.nostr
 
-import android.net.Uri
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.instanceOf
+import kotlin.test.Test
 import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
-import net.primal.android.editor.domain.NoteAttachment
-import net.primal.domain.nostr.Naddr
-import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV.toNaddrString
-import net.primal.domain.nostr.NostrEventKind
-import net.primal.domain.nostr.asATagValue
-import org.junit.Test
-import org.junit.runner.RunWith
 
 @Suppress("LargeClass")
-@RunWith(AndroidJUnit4::class)
 class TagsTest {
 
     @Test
@@ -718,55 +707,55 @@ class TagsTest {
         actualFirst[2].jsonPrimitive.content shouldBe naddr.relays.first()
     }
 
-    private fun createNoteAttachment(
-        uri: Uri = Uri.EMPTY,
-        remoteUrl: String? = "https://uploads.primal.net/image.jpg",
-        mimeType: String? = null,
-        originalHash: String? = null,
-        uploadedHash: String? = null,
-        sizeInBytes: Int? = null,
-        dimensionInPixels: String? = null,
-        uploadError: Throwable? = null,
-    ): NoteAttachment {
-        return NoteAttachment(
-            localUri = uri,
-            remoteUrl = remoteUrl,
-            mimeType = mimeType,
-            originalHash = originalHash,
-            uploadedHash = uploadedHash,
-            uploadedSizeInBytes = sizeInBytes,
-            dimensionInPixels = dimensionInPixels,
-            uploadError = uploadError,
-        )
-    }
-
-    @Test
-    fun createsIMetaTag_withMimeTypeIfAvailable() {
-        createNoteAttachment(mimeType = "image/jpeg").asIMetaTag()
-            .shouldContain(JsonPrimitive("m image/jpeg"))
-    }
-
-    @Test
-    fun createsIMetaTag_withDimensionsIfAvailable() {
-        createNoteAttachment(dimensionInPixels = "100x200").asIMetaTag()
-            .shouldContain(JsonPrimitive("dim 100x200"))
-    }
-
-    @Test
-    fun createsIMetaTag_withSizeInBytesIfAvailable() {
-        createNoteAttachment(sizeInBytes = 6425281).asIMetaTag()
-            .shouldContain(JsonPrimitive("size 6425281"))
-    }
-
-    @Test
-    fun createsIMetaTag_withOriginalHashIfAvailable() {
-        createNoteAttachment(originalHash = "original").asIMetaTag()
-            .shouldContain(JsonPrimitive("ox original"))
-    }
-
-    @Test
-    fun createsIMetaTag_withUploadedHashIfAvailable() {
-        createNoteAttachment(uploadedHash = "uploaded").asIMetaTag()
-            .shouldContain(JsonPrimitive("x uploaded"))
-    }
+//    private fun createnoteattachment(
+//        uri: uri = uri.empty,
+//        remoteurl: string? = "https://uploads.primal.net/image.jpg",
+//        mimetype: string? = null,
+//        originalhash: string? = null,
+//        uploadedhash: string? = null,
+//        sizeinbytes: int? = null,
+//        dimensioninpixels: string? = null,
+//        uploaderror: throwable? = null,
+//    ): noteattachment {
+//        return NoteAttachment(
+//            localUri = uri,
+//            remoteUrl = remoteUrl,
+//            mimeType = mimeType,
+//            originalHash = originalHash,
+//            uploadedHash = uploadedHash,
+//            uploadedSizeInBytes = sizeInBytes,
+//            dimensionInPixels = dimensionInPixels,
+//            uploadError = uploadError,
+//        )
+//    }
+//
+//    @Test
+//    fun createsIMetaTag_withMimeTypeIfAvailable() {
+//        createNoteAttachment(mimeType = "image/jpeg").asIMetaTag()
+//            .shouldContain(JsonPrimitive("m image/jpeg"))
+//    }
+//
+//    @Test
+//    fun createsIMetaTag_withDimensionsIfAvailable() {
+//        createNoteAttachment(dimensionInPixels = "100x200").asIMetaTag()
+//            .shouldContain(JsonPrimitive("dim 100x200"))
+//    }
+//
+//    @Test
+//    fun createsIMetaTag_withSizeInBytesIfAvailable() {
+//        createNoteAttachment(sizeInBytes = 6425281).asIMetaTag()
+//            .shouldContain(JsonPrimitive("size 6425281"))
+//    }
+//
+//    @Test
+//    fun createsIMetaTag_withOriginalHashIfAvailable() {
+//        createNoteAttachment(originalHash = "original").asIMetaTag()
+//            .shouldContain(JsonPrimitive("ox original"))
+//    }
+//
+//    @Test
+//    fun createsIMetaTag_withUploadedHashIfAvailable() {
+//        createNoteAttachment(uploadedHash = "uploaded").asIMetaTag()
+//            .shouldContain(JsonPrimitive("x uploaded"))
+//    }
 }

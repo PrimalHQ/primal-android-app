@@ -5,9 +5,22 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.jsonPrimitive
+import net.primal.domain.nostr.Nip19TLV.parseUriAsNeventOrNull
+import net.primal.domain.nostr.utils.isNAddr
+import net.primal.domain.nostr.utils.isNAddrUri
+import net.primal.domain.nostr.utils.isNEvent
+import net.primal.domain.nostr.utils.isNEventUri
+import net.primal.domain.nostr.utils.isNProfile
+import net.primal.domain.nostr.utils.isNProfileUri
+import net.primal.domain.nostr.utils.isNPub
+import net.primal.domain.nostr.utils.isNPubUri
+import net.primal.domain.nostr.utils.isNote
+import net.primal.domain.nostr.utils.isNoteUri
+import net.primal.domain.nostr.utils.nostrUriToNoteId
+import net.primal.domain.nostr.utils.nostrUriToPubkey
+import net.primal.domain.nostr.utils.nostrUriToPubkeyAndRelay
 import net.primal.domain.nostr.utils.parseHashtags
-
-// TODO Port missing helper functions
+import net.primal.domain.nostr.utils.parseNostrUris
 
 fun List<JsonArray>.findFirstEventId() = firstOrNull { it.isEventIdTag() }?.getTagValueOrNull()
 
@@ -155,58 +168,45 @@ fun Naddr.asReplaceableEventTag(marker: String? = null): JsonArray =
         marker = marker,
     )
 
-// fun NoteAttachment.asIMetaTag(): JsonArray {
-//    require(this.remoteUrl != null)
-//    return buildJsonArray {
-//        add("imeta")
-//        add("url ${this@asIMetaTag.remoteUrl}")
-//        this@asIMetaTag.mimeType?.let { add("m $it") }
-//        this@asIMetaTag.uploadedHash?.let { add("x $it") }
-//        this@asIMetaTag.originalHash?.let { add("ox $it") }
-//        this@asIMetaTag.uploadedSizeInBytes?.let { add("size $it") }
-//        this@asIMetaTag.dimensionInPixels?.let { add("dim $it") }
-//    }
-// }
+fun String.parseEventTags(marker: String? = null): Set<JsonArray> =
+    this.parseNostrUris().mapNotNull { uri ->
+        when {
+            uri.isNEventUri() || uri.isNEvent() ->
+                parseUriAsNeventOrNull(uri)?.asEventTag(marker = marker)
 
-// fun String.parseEventTags(marker: String? = null): Set<JsonArray> =
-//    this.parseNostrUris().mapNotNull { uri ->
-//        when {
-//            uri.isNEventUri() || uri.isNEvent() ->
-//                parseUriAsNeventOrNull(uri)?.asEventTag(marker = marker)
-//
-//            uri.isNoteUri() || uri.isNote() ->
-//                uri.nostrUriToNoteId()?.asEventIdTag(marker = marker)
-//
-//            else -> null
-//        }
-//    }.toSet()
+            uri.isNoteUri() || uri.isNote() ->
+                uri.nostrUriToNoteId()?.asEventIdTag(marker = marker)
 
-// fun String.parsePubkeyTags(marker: String? = null): Set<JsonArray> =
-//    parseNostrUris().mapNotNull {
-//        when {
-//            it.isNProfileUri() || it.isNProfile() -> {
-//                val result = it.nostrUriToPubkeyAndRelay()
-//                val pubkey = result.first
-//                val relayUrl = result.second
-//                pubkey?.asPubkeyTag(relayHint = relayUrl, optional = marker)
-//            }
-//
-//            it.isNPubUri() || it.isNPub() ->
-//                it.nostrUriToPubkey()?.asPubkeyTag(optional = marker)
-//
-//            else -> null
-//        }
-//    }.toSet()
+            else -> null
+        }
+    }.toSet()
 
-// fun String.parseReplaceableEventTags(marker: String? = null): Set<JsonArray> =
-//    this.parseNostrUris().mapNotNull { uri ->
-//        when {
-//            uri.isNAddrUri() || uri.isNAddr() ->
-//                Nip19TLV.parseUriAsNaddrOrNull(uri)?.asReplaceableEventTag(marker = marker)
-//
-//            else -> null
-//        }
-//    }.toSet()
+fun String.parsePubkeyTags(marker: String? = null): Set<JsonArray> =
+    parseNostrUris().mapNotNull {
+        when {
+            it.isNProfileUri() || it.isNProfile() -> {
+                val result = it.nostrUriToPubkeyAndRelay()
+                val pubkey = result.first
+                val relayUrl = result.second
+                pubkey?.asPubkeyTag(relayHint = relayUrl, optional = marker)
+            }
+
+            it.isNPubUri() || it.isNPub() ->
+                it.nostrUriToPubkey()?.asPubkeyTag(optional = marker)
+
+            else -> null
+        }
+    }.toSet()
+
+fun String.parseReplaceableEventTags(marker: String? = null): Set<JsonArray> =
+    this.parseNostrUris().mapNotNull { uri ->
+        when {
+            uri.isNAddrUri() || uri.isNAddr() ->
+                Nip19TLV.parseUriAsNaddrOrNull(uri)?.asReplaceableEventTag(marker = marker)
+
+            else -> null
+        }
+    }.toSet()
 
 fun String.parseHashtagTags(): List<JsonArray> =
     parseHashtags().map {

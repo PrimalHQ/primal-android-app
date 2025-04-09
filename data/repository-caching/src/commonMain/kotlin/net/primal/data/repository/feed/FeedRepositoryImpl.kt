@@ -119,19 +119,20 @@ internal class FeedRepositoryImpl(
         since: Long?,
         order: String?,
         limit: Int,
-    ): FeedPageSnapshot = withContext(dispatcherProvider.io()) {
-        feedApi.getFeedBySpec(
-            body = FeedBySpecRequestBody(
-                spec = feedSpec,
-                userPubKey = userId,
-                notes = notes,
-                until = until,
-                since = since,
-                order = order,
-                limit = limit,
-            ),
-        ).asFeedPageSnapshot()
-    }
+    ): FeedPageSnapshot =
+        withContext(dispatcherProvider.io()) {
+            feedApi.getFeedBySpec(
+                body = FeedBySpecRequestBody(
+                    spec = feedSpec,
+                    userPubKey = userId,
+                    notes = notes,
+                    until = until,
+                    since = since,
+                    order = order,
+                    limit = limit,
+                ),
+            ).asFeedPageSnapshot()
+        }
 
     override suspend fun findConversation(userId: String, noteId: String): List<FeedPostDO> {
         return observeConversation(userId = userId, noteId = noteId).firstOrNull() ?: emptyList()

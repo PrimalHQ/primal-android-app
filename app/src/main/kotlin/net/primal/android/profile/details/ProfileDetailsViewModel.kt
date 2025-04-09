@@ -23,7 +23,6 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.navigation.primalName
 import net.primal.android.navigation.profileId
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.ext.extractProfileId
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
@@ -44,6 +43,7 @@ import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
 import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.nostr.utils.extractProfileId
 import net.primal.domain.nostr.utils.isValidHex
 import net.primal.domain.repository.FeedsRepository
 import net.primal.domain.repository.MutedUserRepository

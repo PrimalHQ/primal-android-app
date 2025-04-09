@@ -15,8 +15,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.navigation.profileId
-import net.primal.android.nostr.ext.extractNoteId
-import net.primal.android.nostr.ext.extractProfileId
 import net.primal.android.profile.qr.ProfileQrCodeContract.SideEffect
 import net.primal.android.profile.qr.ProfileQrCodeContract.UiEvent
 import net.primal.android.profile.qr.ProfileQrCodeContract.UiState
@@ -27,6 +25,8 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
+import net.primal.domain.nostr.utils.extractNoteId
+import net.primal.domain.nostr.utils.extractProfileId
 import net.primal.domain.repository.ProfileRepository
 import timber.log.Timber
 

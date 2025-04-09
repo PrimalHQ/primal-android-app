@@ -4,7 +4,6 @@ import javax.inject.Inject
 import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.di.PrimalWalletApiClient
-import net.primal.android.nostr.ext.asPubkeyTag
 import net.primal.android.nostr.ext.takeContentOrNull
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.premium.api.model.CancelMembershipRequest
@@ -33,6 +32,7 @@ import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.model.AppSpecificDataRequest
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.asPubkeyTag
 
 class PremiumApiImpl @Inject constructor(
     @PrimalWalletApiClient private val primalWalletApiClient: PrimalApiClient,
