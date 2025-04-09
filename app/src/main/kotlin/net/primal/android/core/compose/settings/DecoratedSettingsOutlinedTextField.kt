@@ -33,12 +33,12 @@ fun DecoratedSettingsOutlinedTextField(
     value: String,
     onValueChanged: (String) -> Unit,
     title: String,
-    supportingActionText: String,
     onActionClick: () -> Unit,
-    onSupportActionClick: () -> Unit,
     buttonEnabled: Boolean,
     placeholderText: String,
+    onSupportActionClick: () -> Unit = {},
     showSupportContent: Boolean = false,
+    supportingActionText: String = "",
 ) {
     Column(modifier = modifier) {
         TextSubSection(

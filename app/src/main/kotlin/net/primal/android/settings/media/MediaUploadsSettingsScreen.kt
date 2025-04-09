@@ -283,9 +283,6 @@ private fun LazyListScope.blossomMirrorServerInputItem(
             onValueChanged = {
                 eventPublisher(MediaUploadsSettingsContract.UiEvent.UpdateNewBlossomMirrorServerUrl(url = it))
             },
-            supportingActionText = "",
-            onSupportActionClick = {},
-            showSupportContent = false,
             buttonEnabled = state.newBlossomServerMirrorUrl != state.blossomServerUrl &&
                 state.newBlossomServerMirrorUrl != state.blossomServerMirrorUrl &&
                 state.newBlossomServerMirrorUrl.isValidBlossomUrl(),
