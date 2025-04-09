@@ -253,6 +253,7 @@ private fun LazyListScope.relaysSectionItems(
                 eventsPublisher(NetworkSettingsContract.UiEvent.UpdateNewRelayUrl(it))
             },
             title = stringResource(id = R.string.settings_network_add_a_relay_section),
+            showSupportContent = true,
             supportingActionText = stringResource(R.string.settings_network_restore_default_relays_text_button),
             onSupportActionClick = onRestoreDefaultRelaysClick,
             buttonEnabled = !state.updatingRelays && state.newRelayUrl.isValidRelayUrl(),
@@ -290,6 +291,7 @@ private fun LazyListScope.cachingServiceSectionItems(
                 eventsPublisher(NetworkSettingsContract.UiEvent.UpdateNewCachingServiceUrl(it))
             },
             title = stringResource(id = R.string.settings_network_switch_caching_service),
+            showSupportContent = true,
             supportingActionText = stringResource(
                 R.string.settings_network_restore_default_caching_service_text_button,
             ),
