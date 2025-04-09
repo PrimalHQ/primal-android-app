@@ -4,12 +4,12 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.instanceOf
 import kotlin.test.Test
-import net.primal.core.utils.toHex
-import net.primal.core.utils.toNpub
 import net.primal.domain.nostr.Nip19TLV.readAsString
 import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.Nip19TLV.toNprofileString
+import net.primal.domain.nostr.cryptography.utils.toHex
+import net.primal.domain.nostr.cryptography.utils.toNpub
 
 class Nip19TLVTest {
 
