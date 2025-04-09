@@ -31,9 +31,6 @@ import net.primal.android.thread.articles.details.ui.mapAsArticleDetailsUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.repository.UserRepository
-import net.primal.android.wallet.domain.ZapTarget
-import net.primal.android.wallet.zaps.InvalidZapRequestException
-import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
 import net.primal.core.networking.sockets.errors.WssException
@@ -53,6 +50,9 @@ import net.primal.domain.nostr.utils.isNote
 import net.primal.domain.nostr.utils.isNoteUri
 import net.primal.domain.nostr.utils.nostrUriToNoteId
 import net.primal.domain.nostr.utils.nostrUriToPubkey
+import net.primal.domain.nostr.zaps.ZapFailureException
+import net.primal.domain.nostr.zaps.ZapRequestException
+import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.repository.ArticleRepository
 import net.primal.domain.repository.EventInteractionRepository
 import net.primal.domain.repository.FeedRepository
@@ -272,7 +272,7 @@ class ArticleDetailsViewModel @Inject constructor(
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
-            } catch (error: InvalidZapRequestException) {
+            } catch (error: ZapRequestException) {
                 Timber.w(error)
                 setState { copy(error = UiError.InvalidZapRequest(error)) }
             }

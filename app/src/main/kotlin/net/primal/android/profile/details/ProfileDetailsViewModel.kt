@@ -28,9 +28,6 @@ import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
-import net.primal.android.wallet.domain.ZapTarget
-import net.primal.android.wallet.zaps.InvalidZapRequestException
-import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
 import net.primal.core.networking.sockets.errors.WssException
@@ -45,6 +42,9 @@ import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.nostr.utils.extractProfileId
 import net.primal.domain.nostr.utils.isValidHex
+import net.primal.domain.nostr.zaps.ZapFailureException
+import net.primal.domain.nostr.zaps.ZapRequestException
+import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.repository.FeedsRepository
 import net.primal.domain.repository.MutedUserRepository
 import net.primal.domain.repository.ProfileRepository
@@ -180,7 +180,7 @@ class ProfileDetailsViewModel @Inject constructor(
         } catch (error: MissingRelaysException) {
             setState { copy(zapError = UiError.MissingRelaysConfiguration(error)) }
             Timber.w(error)
-        } catch (error: InvalidZapRequestException) {
+        } catch (error: ZapRequestException) {
             setState { copy(zapError = UiError.InvalidZapRequest(error)) }
             Timber.w(error)
         }

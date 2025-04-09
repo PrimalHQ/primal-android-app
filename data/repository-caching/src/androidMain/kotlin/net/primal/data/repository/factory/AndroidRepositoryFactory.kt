@@ -26,6 +26,7 @@ import net.primal.data.repository.profile.ProfileRepositoryImpl
 import net.primal.domain.PrimalServerType
 import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
+import net.primal.domain.nostr.zaps.NostrZapperFactory
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.repository.ArticleRepository
 import net.primal.domain.repository.ChatRepository
@@ -125,10 +126,14 @@ object AndroidRepositoryFactory : RepositoryFactory {
         )
     }
 
-    override fun createEventInteractionRepository(primalPublisher: PrimalPublisher): EventInteractionRepository {
+    override fun createEventInteractionRepository(
+        primalPublisher: PrimalPublisher,
+        nostrZapperFactory: NostrZapperFactory,
+    ): EventInteractionRepository {
         return EventInteractionRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             primalPublisher = primalPublisher,
+            nostrZapperFactory = nostrZapperFactory,
             database = cachingDatabase,
         )
     }

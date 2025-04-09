@@ -14,8 +14,6 @@ import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.toZapTag
-import net.primal.android.wallet.domain.ZapTarget
-import net.primal.android.wallet.domain.toTags
 import net.primal.android.wallet.nwc.model.NwcWalletRequest
 import net.primal.android.wallet.nwc.model.PayInvoiceRequest
 import net.primal.core.utils.serialization.encodeToJsonString
@@ -33,6 +31,8 @@ import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.cryptography.utils.CryptoUtils
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import net.primal.domain.nostr.cryptography.utils.toNpub
+import net.primal.domain.nostr.zaps.ZapTarget
+import net.primal.domain.nostr.zaps.toTags
 
 class NostrNotary @Inject constructor(
     private val contentResolver: ContentResolver,

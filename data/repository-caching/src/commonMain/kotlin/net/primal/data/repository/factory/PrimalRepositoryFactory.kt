@@ -2,6 +2,7 @@ package net.primal.data.repository.factory
 
 import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
+import net.primal.domain.nostr.zaps.NostrZapperFactory
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.repository.ArticleRepository
 import net.primal.domain.repository.ChatRepository
@@ -36,7 +37,10 @@ expect object PrimalRepositoryFactory : RepositoryFactory {
 
     override fun createEventUriRepository(): EventUriRepository
 
-    override fun createEventInteractionRepository(primalPublisher: PrimalPublisher): EventInteractionRepository
+    override fun createEventInteractionRepository(
+        primalPublisher: PrimalPublisher,
+        nostrZapperFactory: NostrZapperFactory,
+    ): EventInteractionRepository
 
     override fun createEventRelayHintsRepository(): EventRelayHintsRepository
 

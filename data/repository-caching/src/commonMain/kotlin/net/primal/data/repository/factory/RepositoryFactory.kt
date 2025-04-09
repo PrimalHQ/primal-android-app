@@ -2,6 +2,7 @@ package net.primal.data.repository.factory
 
 import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
+import net.primal.domain.nostr.zaps.NostrZapperFactory
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.repository.ArticleRepository
 import net.primal.domain.repository.ChatRepository
@@ -27,7 +28,12 @@ internal interface RepositoryFactory {
     fun createFeedsRepository(signatureHandler: NostrEventSignatureHandler): FeedsRepository
     fun createEventRepository(): EventRepository
     fun createEventUriRepository(): EventUriRepository
-    fun createEventInteractionRepository(primalPublisher: PrimalPublisher): EventInteractionRepository
+
+    fun createEventInteractionRepository(
+        primalPublisher: PrimalPublisher,
+        nostrZapperFactory: NostrZapperFactory,
+    ): EventInteractionRepository
+
     fun createEventRelayHintsRepository(): EventRelayHintsRepository
     fun createExploreRepository(): ExploreRepository
     fun createMutedUserRepository(primalPublisher: PrimalPublisher): MutedUserRepository

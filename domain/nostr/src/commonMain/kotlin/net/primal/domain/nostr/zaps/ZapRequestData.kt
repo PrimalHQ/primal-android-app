@@ -1,4 +1,4 @@
-package net.primal.android.wallet.zaps
+package net.primal.domain.nostr.zaps
 
 import net.primal.domain.nostr.NostrEvent
 
