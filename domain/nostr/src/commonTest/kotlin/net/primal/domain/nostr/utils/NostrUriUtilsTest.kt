@@ -1,14 +1,14 @@
-package net.primal.android.nostr.ext
+package net.primal.domain.nostr.utils
 
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import kotlin.test.Test
 import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
-import org.junit.Test
 
-class NostrResourcesTest {
+class NostrUriUtilsTest {
 
     @Test
     fun nostrUriToPubkey_returnsCorrectPubkeyHexValue() {
