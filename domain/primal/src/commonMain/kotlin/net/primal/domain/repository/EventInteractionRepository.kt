@@ -2,8 +2,11 @@ package net.primal.domain.repository
 
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.serialization.json.JsonArray
+import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.publisher.NostrPublishException
+import net.primal.domain.nostr.zaps.ZapException
+import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.publisher.PrimalPublishResult
 
 interface EventInteractionRepository {
@@ -33,4 +36,16 @@ interface EventInteractionRepository {
         eventRawNostrEvent: String,
         optionalTags: List<JsonArray> = emptyList(),
     ): PrimalPublishResult
+
+    @Throws(
+        ZapException::class,
+        CancellationException::class,
+    )
+    suspend fun zapEvent(
+        userId: String,
+        amountInSats: ULong,
+        comment: String,
+        target: ZapTarget,
+        zapRequestEvent: NostrEvent,
+    )
 }

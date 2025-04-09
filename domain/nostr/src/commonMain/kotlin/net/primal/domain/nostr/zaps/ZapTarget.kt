@@ -1,4 +1,4 @@
-package net.primal.android.wallet.domain
+package net.primal.domain.nostr.zaps
 
 import kotlinx.serialization.json.JsonArray
 import net.primal.domain.nostr.asEventIdTag

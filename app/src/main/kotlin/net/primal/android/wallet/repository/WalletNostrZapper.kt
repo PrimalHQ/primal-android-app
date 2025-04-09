@@ -3,14 +3,14 @@ package net.primal.android.wallet.repository
 import javax.inject.Inject
 import net.primal.android.wallet.api.model.WithdrawRequestBody
 import net.primal.android.wallet.domain.SubWallet
-import net.primal.android.wallet.zaps.NostrZapper
-import net.primal.android.wallet.zaps.ZapFailureException
-import net.primal.android.wallet.zaps.ZapRequestData
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.utils.urlToLnUrlHrp
+import net.primal.domain.nostr.zaps.NostrZapper
+import net.primal.domain.nostr.zaps.ZapFailureException
+import net.primal.domain.nostr.zaps.ZapRequestData
 
 class WalletNostrZapper @Inject constructor(
     private val walletRepository: WalletRepository,

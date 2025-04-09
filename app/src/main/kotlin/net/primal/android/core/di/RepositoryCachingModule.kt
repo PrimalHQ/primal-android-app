@@ -7,6 +7,7 @@ import dagger.hilt.components.SingletonComponent
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.data.repository.factory.PrimalRepositoryFactory
 import net.primal.domain.nostr.cryptography.MessageCipher
+import net.primal.domain.nostr.zaps.NostrZapperFactory
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.repository.ArticleRepository
 import net.primal.domain.repository.ChatRepository
@@ -53,8 +54,14 @@ object RepositoryCachingModule {
     fun provideEventUriRepository(): EventUriRepository = PrimalRepositoryFactory.createEventUriRepository()
 
     @Provides
-    fun provideEventInteractionRepository(primalPublisher: PrimalPublisher): EventInteractionRepository =
-        PrimalRepositoryFactory.createEventInteractionRepository(primalPublisher)
+    fun provideEventInteractionRepository(
+        primalPublisher: PrimalPublisher,
+        nostrZapperFactory: NostrZapperFactory,
+    ): EventInteractionRepository =
+        PrimalRepositoryFactory.createEventInteractionRepository(
+            primalPublisher = primalPublisher,
+            nostrZapperFactory = nostrZapperFactory,
+        )
 
     @Provides
     fun provideExploreRepository(): ExploreRepository = PrimalRepositoryFactory.createExploreRepository()

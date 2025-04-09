@@ -14,9 +14,6 @@ import net.primal.android.feeds.dvm.DvmFeedListItemContract.UiEvent
 import net.primal.android.feeds.dvm.DvmFeedListItemContract.UiState
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.wallet.domain.ZapTarget
-import net.primal.android.wallet.zaps.InvalidZapRequestException
-import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
 import net.primal.domain.DvmFeed
@@ -25,6 +22,9 @@ import net.primal.domain.nostr.asReplaceableEventTag
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.nostr.zaps.ZapFailureException
+import net.primal.domain.nostr.zaps.ZapRequestException
+import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.repository.EventInteractionRepository
 import timber.log.Timber
 
@@ -127,7 +127,7 @@ class DvmFeedListItemViewModel @Inject constructor(
             } catch (error: MissingRelaysException) {
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
                 Timber.w(error)
-            } catch (error: InvalidZapRequestException) {
+            } catch (error: ZapRequestException) {
                 setState { copy(error = UiError.InvalidZapRequest(error)) }
                 Timber.w(error)
             }
