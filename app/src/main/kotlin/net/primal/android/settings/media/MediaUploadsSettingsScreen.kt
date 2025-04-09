@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -68,39 +69,6 @@ private fun MediaUploadsSettingsScreen(
     eventPublisher: (MediaUploadsSettingsContract.UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
-    Scaffold(
-        modifier = Modifier,
-        topBar = {
-            PrimalTopAppBar(
-                title = stringResource(id = R.string.settings_media_uploads_title),
-                navigationIcon = PrimalIcons.ArrowBack,
-                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
-                onNavigationIconClick = onClose,
-            )
-        },
-        content = { paddingValues ->
-            MediaUploadsLazyColumn(
-                modifier = Modifier
-                    .background(color = AppTheme.colorScheme.surfaceVariant)
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-                    .padding(paddingValues)
-                    .imePadding(),
-                state = state,
-                eventPublisher = eventPublisher,
-                onClose = onClose,
-            )
-        },
-    )
-}
-
-@Composable
-private fun MediaUploadsLazyColumn(
-    modifier: Modifier,
-    state: MediaUploadsSettingsContract.UiState,
-    eventPublisher: (MediaUploadsSettingsContract.UiEvent) -> Unit,
-    onClose: () -> Unit,
-) {
     val focusManager = LocalFocusManager.current
 
     val backSequence = {
@@ -114,10 +82,43 @@ private fun MediaUploadsLazyColumn(
         }
     }
 
-    BackHandler {
+    BackHandler(true) {
         backSequence()
     }
 
+    Scaffold(
+        modifier = Modifier,
+        topBar = {
+            PrimalTopAppBar(
+                title = stringResource(id = R.string.settings_media_uploads_title),
+                navigationIcon = PrimalIcons.ArrowBack,
+                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
+                onNavigationIconClick = backSequence,
+            )
+        },
+        content = { paddingValues ->
+            MediaUploadsLazyColumn(
+                modifier = Modifier
+                    .background(color = AppTheme.colorScheme.surfaceVariant)
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .padding(paddingValues)
+                    .imePadding(),
+                state = state,
+                focusManager = focusManager,
+                eventPublisher = eventPublisher,
+            )
+        },
+    )
+}
+
+@Composable
+private fun MediaUploadsLazyColumn(
+    modifier: Modifier,
+    state: MediaUploadsSettingsContract.UiState,
+    focusManager: FocusManager,
+    eventPublisher: (MediaUploadsSettingsContract.UiEvent) -> Unit,
+) {
     var confirmingRestoreDefaultBlossomServerDialog by remember { mutableStateOf(false) }
     if (confirmingRestoreDefaultBlossomServerDialog) {
         ConfirmActionAlertDialog(
