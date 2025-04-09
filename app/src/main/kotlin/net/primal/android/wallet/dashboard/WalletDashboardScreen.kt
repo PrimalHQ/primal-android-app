@@ -308,7 +308,7 @@ fun WalletDashboardScreen(
                             .padding(horizontal = 32.dp)
                             .padding(bottom = 32.dp)
                             .navigationBarsPadding(),
-                        message = stringResource(id = R.string.wallet_dashboard_npub_login),
+                        message = stringResource(id = R.string.app_npub_login_error),
                     )
                 }
 

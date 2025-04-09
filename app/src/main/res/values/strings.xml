@@ -27,6 +27,7 @@
     <string name="app_error_unable_to_unfollow_profile">Unable to unfollow profile. Please try again.</string>
     <string name="app_error_unable_to_set_nostr_address">Unable to set nostr address. Please try again.</string>
     <string name="app_error_unable_to_set_lightning_address">Unable to set lightning address. Please try again.</string>
+    <string name="app_npub_login_error">Primal is in read only mode because you are signed in via your public key. To enable all options, please sign in with your private key.</string>
 
     <string name="welcome_sign_in_button_title">Sign In</string>
     <string name="welcome_create_account_button_title">Create Account</string>
@@ -973,7 +974,6 @@
     <string name="wallet_dashboard_enable_wallet_notice_hint">External wallet is currently enabled via Nostr Wallet Connect</string>
     <string name="wallet_dashboard_enable_wallet_button">Enable Primal Wallet</string>
     <string name="wallet_dashboard_no_transactions_hint">You need sats to zap people on Nostr</string>
-    <string name="wallet_dashboard_npub_login">Primal is in read only mode because you are signed in via your public key. To enable all options, please sign in with your private key.</string>
     <string name="wallet_dashboard_low_sats_hint">You are running low on sats</string>
     <string name="wallet_dashboard_buy_sats_button">Buy Sats Now</string>
 
