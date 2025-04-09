@@ -6,6 +6,7 @@ import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.zaps.NostrZapperFactory
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.repository.ArticleRepository
+import net.primal.domain.repository.CachingImportRepository
 import net.primal.domain.repository.ChatRepository
 import net.primal.domain.repository.EventInteractionRepository
 import net.primal.domain.repository.EventRelayHintsRepository
@@ -30,6 +31,8 @@ expect object PrimalRepositoryFactory : RepositoryFactory {
         cachingPrimalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,
     ): HighlightRepository
+
+    override fun createCachingImportRepository(): CachingImportRepository
 
     override fun createChatRepository(
         cachingPrimalApiClient: PrimalApiClient,

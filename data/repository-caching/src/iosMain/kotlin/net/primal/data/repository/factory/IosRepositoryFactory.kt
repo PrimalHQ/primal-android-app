@@ -15,6 +15,7 @@ import net.primal.data.repository.events.EventUriRepositoryImpl
 import net.primal.data.repository.explore.ExploreRepositoryImpl
 import net.primal.data.repository.feed.FeedRepositoryImpl
 import net.primal.data.repository.feeds.FeedsRepositoryImpl
+import net.primal.data.repository.importer.CachingImportRepositoryImpl
 import net.primal.data.repository.messages.ChatRepositoryImpl
 import net.primal.data.repository.messages.processors.MessagesProcessor
 import net.primal.data.repository.mute.MutedUserRepositoryImpl
@@ -25,6 +26,7 @@ import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.zaps.NostrZapperFactory
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.repository.ArticleRepository
+import net.primal.domain.repository.CachingImportRepository
 import net.primal.domain.repository.ChatRepository
 import net.primal.domain.repository.EventInteractionRepository
 import net.primal.domain.repository.EventRelayHintsRepository
@@ -62,6 +64,13 @@ object IosRepositoryFactory : RepositoryFactory {
             dispatcherProvider = dispatcherProvider,
             database = cachingDatabase,
             primalPublisher = primalPublisher,
+        )
+    }
+
+    override fun createCachingImportRepository(): CachingImportRepository {
+        return CachingImportRepositoryImpl(
+            dispatcherProvider = dispatcherProvider,
+            database = cachingDatabase,
         )
     }
 

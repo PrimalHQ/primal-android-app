@@ -6,6 +6,7 @@ import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.zaps.NostrZapperFactory
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.repository.ArticleRepository
+import net.primal.domain.repository.CachingImportRepository
 import net.primal.domain.repository.ChatRepository
 import net.primal.domain.repository.EventInteractionRepository
 import net.primal.domain.repository.EventRelayHintsRepository
@@ -22,12 +23,15 @@ import net.primal.domain.repository.PublicBookmarksRepository
 import net.primal.domain.repository.UserDataCleanupRepository
 
 internal interface RepositoryFactory {
+
     fun createArticleRepository(cachingPrimalApiClient: PrimalApiClient): ArticleRepository
 
     fun createArticleHighlightsRepository(
         cachingPrimalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,
     ): HighlightRepository
+
+    fun createCachingImportRepository(): CachingImportRepository
 
     fun createChatRepository(
         cachingPrimalApiClient: PrimalApiClient,

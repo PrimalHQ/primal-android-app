@@ -12,6 +12,7 @@ import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.nostr.zaps.NostrZapperFactory
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.repository.ArticleRepository
+import net.primal.domain.repository.CachingImportRepository
 import net.primal.domain.repository.ChatRepository
 import net.primal.domain.repository.EventInteractionRepository
 import net.primal.domain.repository.EventRelayHintsRepository
@@ -45,6 +46,11 @@ object RepositoryCachingModule {
             cachingPrimalApiClient = primalApiClient,
             primalPublisher = primalPublisher,
         )
+    }
+
+    @Provides
+    fun providesCachingImporterRepository(): CachingImportRepository {
+        return PrimalRepositoryFactory.createCachingImportRepository()
     }
 
     @Provides
