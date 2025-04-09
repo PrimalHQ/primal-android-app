@@ -1,5 +1,6 @@
 package net.primal.data.repository.factory
 
+import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.zaps.NostrZapperFactory
@@ -23,36 +24,56 @@ import net.primal.domain.repository.UserDataCleanupRepository
 @Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 expect object PrimalRepositoryFactory : RepositoryFactory {
 
-    override fun createArticleRepository(): ArticleRepository
+    override fun createArticleRepository(cachingPrimalApiClient: PrimalApiClient): ArticleRepository
 
-    override fun createArticleHighlightsRepository(primalPublisher: PrimalPublisher): HighlightRepository
+    override fun createArticleHighlightsRepository(
+        cachingPrimalApiClient: PrimalApiClient,
+        primalPublisher: PrimalPublisher,
+    ): HighlightRepository
 
-    override fun createChatRepository(messageCipher: MessageCipher, primalPublisher: PrimalPublisher): ChatRepository
+    override fun createChatRepository(
+        cachingPrimalApiClient: PrimalApiClient,
+        messageCipher: MessageCipher,
+        primalPublisher: PrimalPublisher,
+    ): ChatRepository
 
-    override fun createFeedRepository(): FeedRepository
+    override fun createFeedRepository(cachingPrimalApiClient: PrimalApiClient): FeedRepository
 
-    override fun createFeedsRepository(signatureHandler: NostrEventSignatureHandler): FeedsRepository
+    override fun createFeedsRepository(
+        cachingPrimalApiClient: PrimalApiClient,
+        signatureHandler: NostrEventSignatureHandler,
+    ): FeedsRepository
 
-    override fun createEventRepository(): EventRepository
+    override fun createEventRepository(cachingPrimalApiClient: PrimalApiClient): EventRepository
 
-    override fun createEventUriRepository(): EventUriRepository
+    override fun createEventUriRepository(cachingPrimalApiClient: PrimalApiClient): EventUriRepository
 
     override fun createEventInteractionRepository(
+        cachingPrimalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,
         nostrZapperFactory: NostrZapperFactory,
     ): EventInteractionRepository
 
-    override fun createEventRelayHintsRepository(): EventRelayHintsRepository
+    override fun createEventRelayHintsRepository(cachingPrimalApiClient: PrimalApiClient): EventRelayHintsRepository
 
-    override fun createExploreRepository(): ExploreRepository
+    override fun createExploreRepository(cachingPrimalApiClient: PrimalApiClient): ExploreRepository
 
-    override fun createMutedUserRepository(primalPublisher: PrimalPublisher): MutedUserRepository
+    override fun createMutedUserRepository(
+        cachingPrimalApiClient: PrimalApiClient,
+        primalPublisher: PrimalPublisher,
+    ): MutedUserRepository
 
-    override fun createNotificationRepository(): NotificationRepository
+    override fun createNotificationRepository(cachingPrimalApiClient: PrimalApiClient): NotificationRepository
 
-    override fun createProfileRepository(primalPublisher: PrimalPublisher): ProfileRepository
+    override fun createProfileRepository(
+        cachingPrimalApiClient: PrimalApiClient,
+        primalPublisher: PrimalPublisher,
+    ): ProfileRepository
 
-    override fun createPublicBookmarksRepository(primalPublisher: PrimalPublisher): PublicBookmarksRepository
+    override fun createPublicBookmarksRepository(
+        cachingPrimalApiClient: PrimalApiClient,
+        primalPublisher: PrimalPublisher,
+    ): PublicBookmarksRepository
 
-    override fun createUserDataCleanupRepository(): UserDataCleanupRepository
+    override fun createUserDataCleanupRepository(cachingPrimalApiClient: PrimalApiClient): UserDataCleanupRepository
 }

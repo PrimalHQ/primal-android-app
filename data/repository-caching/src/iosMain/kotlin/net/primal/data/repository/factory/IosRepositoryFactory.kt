@@ -1,6 +1,6 @@
 package net.primal.data.repository.factory
 
-import net.primal.core.networking.factory.PrimalApiClientFactory
+import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.utils.coroutines.DispatcherProviderFactory
 import net.primal.data.local.db.PrimalDatabaseFactory
 import net.primal.data.remote.factory.PrimalApiServiceFactory
@@ -20,7 +20,6 @@ import net.primal.data.repository.messages.processors.MessagesProcessor
 import net.primal.data.repository.mute.MutedUserRepositoryImpl
 import net.primal.data.repository.notifications.NotificationRepositoryImpl
 import net.primal.data.repository.profile.ProfileRepositoryImpl
-import net.primal.domain.PrimalServerType
 import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.zaps.NostrZapperFactory
@@ -45,11 +44,9 @@ object IosRepositoryFactory : RepositoryFactory {
 
     private val dispatcherProvider = DispatcherProviderFactory.create()
 
-    private val cachingPrimalApiClient = PrimalApiClientFactory.create(PrimalServerType.Caching)
-
     private val cachingDatabase by lazy { PrimalDatabaseFactory.getDefaultDatabase() }
 
-    override fun createArticleRepository(): ArticleRepository {
+    override fun createArticleRepository(cachingPrimalApiClient: PrimalApiClient): ArticleRepository {
         return ArticleRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             articlesApi = PrimalApiServiceFactory.createArticlesApi(cachingPrimalApiClient),
@@ -57,7 +54,10 @@ object IosRepositoryFactory : RepositoryFactory {
         )
     }
 
-    override fun createArticleHighlightsRepository(primalPublisher: PrimalPublisher): HighlightRepository {
+    override fun createArticleHighlightsRepository(
+        cachingPrimalApiClient: PrimalApiClient,
+        primalPublisher: PrimalPublisher,
+    ): HighlightRepository {
         return HighlightRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             database = cachingDatabase,
@@ -65,7 +65,11 @@ object IosRepositoryFactory : RepositoryFactory {
         )
     }
 
-    override fun createChatRepository(messageCipher: MessageCipher, primalPublisher: PrimalPublisher): ChatRepository {
+    override fun createChatRepository(
+        cachingPrimalApiClient: PrimalApiClient,
+        messageCipher: MessageCipher,
+        primalPublisher: PrimalPublisher,
+    ): ChatRepository {
         return ChatRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             database = cachingDatabase,
@@ -81,7 +85,7 @@ object IosRepositoryFactory : RepositoryFactory {
         )
     }
 
-    override fun createFeedRepository(): FeedRepository {
+    override fun createFeedRepository(cachingPrimalApiClient: PrimalApiClient): FeedRepository {
         return FeedRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             feedApi = PrimalApiServiceFactory.createFeedApi(cachingPrimalApiClient),
@@ -89,7 +93,10 @@ object IosRepositoryFactory : RepositoryFactory {
         )
     }
 
-    override fun createFeedsRepository(signatureHandler: NostrEventSignatureHandler): FeedsRepository {
+    override fun createFeedsRepository(
+        cachingPrimalApiClient: PrimalApiClient,
+        signatureHandler: NostrEventSignatureHandler,
+    ): FeedsRepository {
         return FeedsRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             feedsApi = PrimalApiServiceFactory.createFeedsApi(cachingPrimalApiClient),
@@ -98,7 +105,7 @@ object IosRepositoryFactory : RepositoryFactory {
         )
     }
 
-    override fun createEventRepository(): EventRepository {
+    override fun createEventRepository(cachingPrimalApiClient: PrimalApiClient): EventRepository {
         return EventRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             eventStatsApi = PrimalApiServiceFactory.createEventsApi(cachingPrimalApiClient),
@@ -106,7 +113,7 @@ object IosRepositoryFactory : RepositoryFactory {
         )
     }
 
-    override fun createEventUriRepository(): EventUriRepository {
+    override fun createEventUriRepository(cachingPrimalApiClient: PrimalApiClient): EventUriRepository {
         return EventUriRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             database = cachingDatabase,
@@ -114,6 +121,7 @@ object IosRepositoryFactory : RepositoryFactory {
     }
 
     override fun createEventInteractionRepository(
+        cachingPrimalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,
         nostrZapperFactory: NostrZapperFactory,
     ): EventInteractionRepository {
@@ -125,14 +133,14 @@ object IosRepositoryFactory : RepositoryFactory {
         )
     }
 
-    override fun createEventRelayHintsRepository(): EventRelayHintsRepository {
+    override fun createEventRelayHintsRepository(cachingPrimalApiClient: PrimalApiClient): EventRelayHintsRepository {
         return EventRelayHintsRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             database = cachingDatabase,
         )
     }
 
-    override fun createExploreRepository(): ExploreRepository {
+    override fun createExploreRepository(cachingPrimalApiClient: PrimalApiClient): ExploreRepository {
         return ExploreRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             exploreApi = PrimalApiServiceFactory.createExploreApi(cachingPrimalApiClient),
@@ -140,7 +148,10 @@ object IosRepositoryFactory : RepositoryFactory {
         )
     }
 
-    override fun createMutedUserRepository(primalPublisher: PrimalPublisher): MutedUserRepository {
+    override fun createMutedUserRepository(
+        cachingPrimalApiClient: PrimalApiClient,
+        primalPublisher: PrimalPublisher,
+    ): MutedUserRepository {
         return MutedUserRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             database = cachingDatabase,
@@ -149,7 +160,7 @@ object IosRepositoryFactory : RepositoryFactory {
         )
     }
 
-    override fun createNotificationRepository(): NotificationRepository {
+    override fun createNotificationRepository(cachingPrimalApiClient: PrimalApiClient): NotificationRepository {
         return NotificationRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             database = cachingDatabase,
@@ -157,7 +168,10 @@ object IosRepositoryFactory : RepositoryFactory {
         )
     }
 
-    override fun createProfileRepository(primalPublisher: PrimalPublisher): ProfileRepository {
+    override fun createProfileRepository(
+        cachingPrimalApiClient: PrimalApiClient,
+        primalPublisher: PrimalPublisher,
+    ): ProfileRepository {
         return ProfileRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             database = cachingDatabase,
@@ -167,7 +181,10 @@ object IosRepositoryFactory : RepositoryFactory {
         )
     }
 
-    override fun createPublicBookmarksRepository(primalPublisher: PrimalPublisher): PublicBookmarksRepository {
+    override fun createPublicBookmarksRepository(
+        cachingPrimalApiClient: PrimalApiClient,
+        primalPublisher: PrimalPublisher,
+    ): PublicBookmarksRepository {
         return PublicBookmarksRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             database = cachingDatabase,
@@ -176,7 +193,7 @@ object IosRepositoryFactory : RepositoryFactory {
         )
     }
 
-    override fun createUserDataCleanupRepository(): UserDataCleanupRepository {
+    override fun createUserDataCleanupRepository(cachingPrimalApiClient: PrimalApiClient): UserDataCleanupRepository {
         return UserDataCleanupRepositoryImpl(
             database = cachingDatabase,
         )

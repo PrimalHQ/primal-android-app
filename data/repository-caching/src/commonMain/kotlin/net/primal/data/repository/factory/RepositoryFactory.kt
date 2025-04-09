@@ -1,5 +1,6 @@
 package net.primal.data.repository.factory
 
+import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.zaps.NostrZapperFactory
@@ -21,24 +22,56 @@ import net.primal.domain.repository.PublicBookmarksRepository
 import net.primal.domain.repository.UserDataCleanupRepository
 
 internal interface RepositoryFactory {
-    fun createArticleRepository(): ArticleRepository
-    fun createArticleHighlightsRepository(primalPublisher: PrimalPublisher): HighlightRepository
-    fun createChatRepository(messageCipher: MessageCipher, primalPublisher: PrimalPublisher): ChatRepository
-    fun createFeedRepository(): FeedRepository
-    fun createFeedsRepository(signatureHandler: NostrEventSignatureHandler): FeedsRepository
-    fun createEventRepository(): EventRepository
-    fun createEventUriRepository(): EventUriRepository
+    fun createArticleRepository(cachingPrimalApiClient: PrimalApiClient): ArticleRepository
+
+    fun createArticleHighlightsRepository(
+        cachingPrimalApiClient: PrimalApiClient,
+        primalPublisher: PrimalPublisher,
+    ): HighlightRepository
+
+    fun createChatRepository(
+        cachingPrimalApiClient: PrimalApiClient,
+        messageCipher: MessageCipher,
+        primalPublisher: PrimalPublisher,
+    ): ChatRepository
+
+    fun createFeedRepository(cachingPrimalApiClient: PrimalApiClient): FeedRepository
+
+    fun createFeedsRepository(
+        cachingPrimalApiClient: PrimalApiClient,
+        signatureHandler: NostrEventSignatureHandler,
+    ): FeedsRepository
+
+    fun createEventRepository(cachingPrimalApiClient: PrimalApiClient): EventRepository
+
+    fun createEventUriRepository(cachingPrimalApiClient: PrimalApiClient): EventUriRepository
 
     fun createEventInteractionRepository(
+        cachingPrimalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,
         nostrZapperFactory: NostrZapperFactory,
     ): EventInteractionRepository
 
-    fun createEventRelayHintsRepository(): EventRelayHintsRepository
-    fun createExploreRepository(): ExploreRepository
-    fun createMutedUserRepository(primalPublisher: PrimalPublisher): MutedUserRepository
-    fun createNotificationRepository(): NotificationRepository
-    fun createProfileRepository(primalPublisher: PrimalPublisher): ProfileRepository
-    fun createPublicBookmarksRepository(primalPublisher: PrimalPublisher): PublicBookmarksRepository
-    fun createUserDataCleanupRepository(): UserDataCleanupRepository
+    fun createEventRelayHintsRepository(cachingPrimalApiClient: PrimalApiClient): EventRelayHintsRepository
+
+    fun createExploreRepository(cachingPrimalApiClient: PrimalApiClient): ExploreRepository
+
+    fun createMutedUserRepository(
+        cachingPrimalApiClient: PrimalApiClient,
+        primalPublisher: PrimalPublisher,
+    ): MutedUserRepository
+
+    fun createNotificationRepository(cachingPrimalApiClient: PrimalApiClient): NotificationRepository
+
+    fun createProfileRepository(
+        cachingPrimalApiClient: PrimalApiClient,
+        primalPublisher: PrimalPublisher,
+    ): ProfileRepository
+
+    fun createPublicBookmarksRepository(
+        cachingPrimalApiClient: PrimalApiClient,
+        primalPublisher: PrimalPublisher,
+    ): PublicBookmarksRepository
+
+    fun createUserDataCleanupRepository(cachingPrimalApiClient: PrimalApiClient): UserDataCleanupRepository
 }
