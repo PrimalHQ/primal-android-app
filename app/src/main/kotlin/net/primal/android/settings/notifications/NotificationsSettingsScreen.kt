@@ -39,6 +39,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.SignatureErrorColumn
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.notifications.toImagePainter
@@ -79,33 +80,51 @@ fun NotificationsSettingsScreen(
             )
         },
         content = { paddingValues ->
-            LazyColumn(
-                modifier = Modifier
-                    .background(color = AppTheme.colorScheme.surfaceVariant)
-                    .padding(paddingValues)
-                    .padding(top = 6.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
+            SignatureErrorColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = paddingValues,
+                signatureUiError = state.signatureError,
             ) {
-                state.notificationSwitches
-                    .groupBy { it.notificationType.section }
-                    .forEach { (section, notifications) ->
-                        item {
-                            NotificationsSettingsBlock(
-                                section = section,
-                                notifications = notifications,
-                                eventPublisher = eventPublisher,
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-                    }
-
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
+                NotificationsColumn(
+                    modifier = Modifier.padding(paddingValues),
+                    state = state,
+                    eventPublisher = eventPublisher,
+                )
             }
         },
     )
+}
+
+@Composable
+private fun NotificationsColumn(
+    modifier: Modifier = Modifier,
+    state: NotificationsSettingsContract.UiState,
+    eventPublisher: (NotificationsSettingsContract.UiEvent) -> Unit,
+) {
+    LazyColumn(
+        modifier = modifier
+            .background(color = AppTheme.colorScheme.surfaceVariant)
+            .padding(top = 6.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        state.notificationSwitches
+            .groupBy { it.notificationType.section }
+            .forEach { (section, notifications) ->
+                item {
+                    NotificationsSettingsBlock(
+                        section = section,
+                        notifications = notifications,
+                        eventPublisher = eventPublisher,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
 }
 
 @Composable

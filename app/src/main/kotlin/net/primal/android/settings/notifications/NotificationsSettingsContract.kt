@@ -1,11 +1,13 @@
 package net.primal.android.settings.notifications
 
+import net.primal.android.core.errors.SignatureUiError
 import net.primal.domain.NotificationType
 
 interface NotificationsSettingsContract {
     data class UiState(
         val notificationSwitches: List<NotificationSwitchUi> = emptyList(),
         val error: ApiError? = null,
+        val signatureError: SignatureUiError? = null,
     ) {
         sealed class ApiError {
             data class FetchAppSettingsError(val cause: Throwable) : ApiError()
