@@ -13,7 +13,6 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.feeds.dvm.DvmFeedListItemContract.UiEvent
 import net.primal.android.feeds.dvm.DvmFeedListItemContract.UiState
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.ext.asReplaceableEventTag
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.domain.ZapTarget
 import net.primal.android.wallet.zaps.InvalidZapRequestException
@@ -22,6 +21,7 @@ import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
 import net.primal.domain.DvmFeed
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.asReplaceableEventTag
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.publisher.MissingRelaysException

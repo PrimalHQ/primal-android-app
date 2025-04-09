@@ -43,10 +43,10 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.explore.search.SearchContract
 import net.primal.android.explore.search.SearchViewModel
-import net.primal.android.nostr.ext.takeAsNaddrOrNull
-import net.primal.android.nostr.ext.takeAsNoteHexIdOrNull
-import net.primal.android.nostr.ext.takeAsProfileHexIdOrNull
 import net.primal.android.theme.AppTheme
+import net.primal.domain.nostr.utils.takeAsNaddrOrNull
+import net.primal.domain.nostr.utils.takeAsNoteHexIdOrNull
+import net.primal.domain.nostr.utils.takeAsProfileHexIdOrNull
 
 @Composable
 fun SearchScreen(

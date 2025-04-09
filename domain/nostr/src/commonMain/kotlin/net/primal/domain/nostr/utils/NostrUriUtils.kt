@@ -9,6 +9,9 @@ import net.primal.core.utils.NPROFILE
 import net.primal.core.utils.NPUB
 import net.primal.core.utils.NRELAY
 import net.primal.core.utils.NSEC
+import net.primal.domain.nostr.Nip19TLV
+import net.primal.domain.nostr.Nip19TLV.readAsString
+import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
 import net.primal.domain.nostr.cryptography.utils.bechToBytesOrThrow
 import net.primal.domain.nostr.cryptography.utils.toHex
 
@@ -37,7 +40,7 @@ fun String.nostrUriToBytes(): ByteArray? {
     }
 }
 
-fun String.extract(parser: (bechPrefix: String?, key: String?) -> String?): String? {
+private fun String.extract(parser: (bechPrefix: String?, key: String?) -> String?): String? {
     val matchResult = nostrUriRegexPattern.find(this) ?: return null
 
     val bechPrefix = matchResult.groupValues.getOrNull(2)
@@ -89,3 +92,91 @@ fun String.isNAddrUri() = lowercase().startsWith(NOSTR + NADDR)
 fun String.nostrUriToNoteId() = nostrUriToBytes()?.toHex()
 
 fun String.nostrUriToPubkey() = nostrUriToBytes()?.toHex()
+
+private fun String.nostrUriToIdAndRelay(): Pair<String?, String?> {
+    val bytes = nostrUriToBytes() ?: return null to null
+    val tlv = Nip19TLV.parse(bytes)
+    val id = tlv[Nip19TLV.Type.SPECIAL.id]?.firstOrNull()?.toHex()
+    val relayBytes = tlv[Nip19TLV.Type.RELAY.id]?.firstOrNull()
+    return id to relayBytes?.readAsString()
+}
+
+fun String.nostrUriToNoteIdAndRelay() = nostrUriToIdAndRelay()
+
+fun String.nostrUriToPubkeyAndRelay() = nostrUriToIdAndRelay()
+
+fun String.extractProfileId(): String? {
+    return extract { bechPrefix: String?, key: String? ->
+        when (bechPrefix?.lowercase()) {
+            NPUB -> (bechPrefix + key).bechToBytesOrThrow().toHex()
+            NPROFILE -> {
+                val tlv = Nip19TLV.parse((bechPrefix + key).bechToBytesOrThrow())
+                tlv[Nip19TLV.Type.SPECIAL.id]?.first()?.toHex()
+            }
+
+            else -> null
+        }
+    }
+}
+
+fun String.extractNoteId(): String? {
+    return extract { bechPrefix: String?, key: String? ->
+        when (bechPrefix?.lowercase()) {
+            NOTE -> (bechPrefix + key).bechToBytesOrThrow().toHex()
+            NEVENT -> {
+                val tlv = Nip19TLV.parse((bechPrefix + key).bechToBytesOrThrow())
+                tlv[Nip19TLV.Type.SPECIAL.id]?.first()?.toHex()
+            }
+
+            else -> null
+        }
+    }
+}
+
+fun String.extractEventId(): String? {
+    return extract { bechPrefix: String?, key: String? ->
+        when (bechPrefix?.lowercase()) {
+            NEVENT -> {
+                val tlv = Nip19TLV.parse((bechPrefix + key).bechToBytesOrThrow())
+                tlv[Nip19TLV.Type.SPECIAL.id]?.first()?.toHex()
+            }
+
+            else -> (bechPrefix + key).bechToBytesOrThrow().toHex()
+        }
+    }
+}
+
+fun String.takeAsNaddrOrNull(): String? {
+    return if (isNAddr() || isNAddrUri()) {
+        val result = runCatching {
+            Nip19TLV.parseUriAsNaddrOrNull(this)
+        }
+        if (result.getOrNull() != null) {
+            this
+        } else {
+            null
+        }
+    } else {
+        null
+    }
+}
+
+fun String.takeAsNoteHexIdOrNull(): String? {
+    return if (isNote() || isNoteUri() || isNEventUri() || isNEvent()) {
+        val result = runCatching { this.extractNoteId() }
+        result.getOrNull()
+    } else {
+        null
+    }
+}
+
+fun String.takeAsProfileHexIdOrNull(): String? {
+    return if (isNPub() || isNPubUri()) {
+        val result = runCatching {
+            this.bech32ToHexOrThrow()
+        }
+        result.getOrNull()
+    } else {
+        null
+    }
+}

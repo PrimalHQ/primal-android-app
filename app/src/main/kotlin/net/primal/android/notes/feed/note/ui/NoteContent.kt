@@ -36,7 +36,6 @@ import net.primal.android.core.compose.zaps.ReferencedNoteZap
 import net.primal.android.core.compose.zaps.ReferencedZap
 import net.primal.android.core.utils.TextMatch
 import net.primal.android.core.utils.TextMatcher
-import net.primal.android.nostr.ext.cleanNostrUris
 import net.primal.android.notes.feed.model.NoteContentUi
 import net.primal.android.notes.feed.model.NoteNostrUriUi
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
@@ -49,6 +48,7 @@ import net.primal.android.theme.domain.PrimalTheme
 import net.primal.domain.EventUriNostrType
 import net.primal.domain.ReferencedNote
 import net.primal.domain.ReferencedUser
+import net.primal.domain.nostr.utils.clearAtSignFromNostrUris
 
 private const val PROFILE_ID_ANNOTATION_TAG = "profileId"
 private const val URL_ANNOTATION_TAG = "url"
@@ -409,7 +409,7 @@ fun renderContentAsAnnotatedString(
     val unhandledNostrAddressUris = data.nostrUris.filterUnhandledNostrAddressUris()
 
     val refinedContent = data.content
-        .cleanNostrUris()
+        .clearAtSignFromNostrUris()
         .replaceNostrProfileUrisWithHandles(resources = mentionedUsers)
         .remove(texts = mediaAttachments.map { it.url })
         .remove(texts = if (!shouldKeepNostrNoteUris) data.nostrUris.map { it.uri } else emptyList())

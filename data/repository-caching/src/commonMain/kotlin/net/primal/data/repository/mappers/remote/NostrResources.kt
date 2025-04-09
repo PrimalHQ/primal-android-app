@@ -1,10 +1,6 @@
 package net.primal.data.repository.mappers.remote
 
 import kotlinx.serialization.json.JsonArray
-import net.primal.core.utils.NEVENT
-import net.primal.core.utils.NOTE
-import net.primal.core.utils.NPROFILE
-import net.primal.core.utils.NPUB
 import net.primal.core.utils.toDouble
 import net.primal.data.local.dao.events.EventUriNostr
 import net.primal.data.local.dao.messages.DirectMessageData
@@ -25,13 +21,9 @@ import net.primal.domain.ReferencedZap
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV
-import net.primal.domain.nostr.Nip19TLV.readAsString
 import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
-import net.primal.domain.nostr.cryptography.utils.bechToBytesOrThrow
-import net.primal.domain.nostr.cryptography.utils.toHex
 import net.primal.domain.nostr.findFirstAltDescription
 import net.primal.domain.nostr.findFirstBolt11
 import net.primal.domain.nostr.findFirstEventId
@@ -40,71 +32,11 @@ import net.primal.domain.nostr.findFirstZapAmount
 import net.primal.domain.nostr.isATag
 import net.primal.domain.nostr.utils.LnInvoiceUtils
 import net.primal.domain.nostr.utils.asEllipsizedNpub
-import net.primal.domain.nostr.utils.extract
-import net.primal.domain.nostr.utils.isNAddr
-import net.primal.domain.nostr.utils.isNAddrUri
-import net.primal.domain.nostr.utils.isNEvent
-import net.primal.domain.nostr.utils.isNEventUri
-import net.primal.domain.nostr.utils.isNPub
-import net.primal.domain.nostr.utils.isNPubUri
+import net.primal.domain.nostr.utils.extractEventId
+import net.primal.domain.nostr.utils.extractNoteId
+import net.primal.domain.nostr.utils.extractProfileId
 import net.primal.domain.nostr.utils.isNostrUri
-import net.primal.domain.nostr.utils.isNote
-import net.primal.domain.nostr.utils.isNoteUri
-import net.primal.domain.nostr.utils.nostrUriToBytes
 import net.primal.domain.utils.wordsCountToReadingTime
-
-private fun String.nostrUriToIdAndRelay(): Pair<String?, String?> {
-    val bytes = nostrUriToBytes() ?: return null to null
-    val tlv = Nip19TLV.parse(bytes)
-    val id = tlv[Nip19TLV.Type.SPECIAL.id]?.firstOrNull()?.toHex()
-    val relayBytes = tlv[Nip19TLV.Type.RELAY.id]?.firstOrNull()
-    return id to relayBytes?.readAsString()
-}
-
-fun String.nostrUriToNoteIdAndRelay() = nostrUriToIdAndRelay()
-
-fun String.nostrUriToPubkeyAndRelay() = nostrUriToIdAndRelay()
-
-fun String.extractProfileId(): String? {
-    return extract { bechPrefix: String?, key: String? ->
-        when (bechPrefix?.lowercase()) {
-            NPUB -> (bechPrefix + key).bechToBytesOrThrow().toHex()
-            NPROFILE -> {
-                val tlv = Nip19TLV.parse((bechPrefix + key).bechToBytesOrThrow())
-                tlv[Nip19TLV.Type.SPECIAL.id]?.first()?.toHex()
-            }
-
-            else -> null
-        }
-    }
-}
-
-fun String.extractNoteId(): String? {
-    return extract { bechPrefix: String?, key: String? ->
-        when (bechPrefix?.lowercase()) {
-            NOTE -> (bechPrefix + key).bechToBytesOrThrow().toHex()
-            NEVENT -> {
-                val tlv = Nip19TLV.parse((bechPrefix + key).bechToBytesOrThrow())
-                tlv[Nip19TLV.Type.SPECIAL.id]?.first()?.toHex()
-            }
-
-            else -> null
-        }
-    }
-}
-
-fun String.extractEventId(): String? {
-    return extract { bechPrefix: String?, key: String? ->
-        when (bechPrefix?.lowercase()) {
-            NEVENT -> {
-                val tlv = Nip19TLV.parse((bechPrefix + key).bechToBytesOrThrow())
-                tlv[Nip19TLV.Type.SPECIAL.id]?.first()?.toHex()
-            }
-
-            else -> (bechPrefix + key).bechToBytesOrThrow().toHex()
-        }
-    }
-}
 
 fun PostData.toNevent() =
     Nevent(
@@ -113,41 +45,6 @@ fun PostData.toNevent() =
         kind = NostrEventKind.ShortTextNote.value,
         relays = emptyList(),
     )
-
-fun String.takeAsNaddrOrNull(): String? {
-    return if (isNAddr() || isNAddrUri()) {
-        val result = runCatching {
-            Nip19TLV.parseUriAsNaddrOrNull(this)
-        }
-        if (result.getOrNull() != null) {
-            this
-        } else {
-            null
-        }
-    } else {
-        null
-    }
-}
-
-fun String.takeAsNoteHexIdOrNull(): String? {
-    return if (isNote() || isNoteUri() || isNEventUri() || isNEvent()) {
-        val result = runCatching { this.extractNoteId() }
-        result.getOrNull()
-    } else {
-        null
-    }
-}
-
-fun String.takeAsProfileHexIdOrNull(): String? {
-    return if (isNPub() || isNPubUri()) {
-        val result = runCatching {
-            this.bech32ToHexOrThrow()
-        }
-        result.getOrNull()
-    } else {
-        null
-    }
-}
 
 fun List<EventUriNostrReference>.mapReferencedNostrUriAsEventUriNostrPO() =
     map {
