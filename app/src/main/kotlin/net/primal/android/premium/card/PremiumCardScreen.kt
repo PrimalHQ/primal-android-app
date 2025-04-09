@@ -520,7 +520,7 @@ private fun ProfileSummary(modifier: Modifier = Modifier, profile: ProfileDetail
                 modifier = Modifier
                     .alpha(avatarSizeAndAlphaProgress.value)
                     .rotate(avatarRotation.value)
-                    .scale(avatarSizeAndAlphaProgress.value.coerceAtLeast(0.01f)),
+                    .scale(avatarSizeAndAlphaProgress.value.coerceAtLeast(minimumValue = 0.01f)),
                 avatarSize = 145.dp,
                 avatarCdnImage = profile.avatarCdnImage,
                 legendaryCustomization = profile.premiumDetails?.legendaryCustomization,

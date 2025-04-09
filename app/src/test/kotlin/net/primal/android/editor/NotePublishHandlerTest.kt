@@ -11,7 +11,7 @@ import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.NostrEventKind
 import org.junit.Rule
 
-@Suppress("LargeClass")
+@Suppress("LargeClass", "UnusedPrivateMember", "MaxLineLength", "ForbiddenComment")
 @OptIn(ExperimentalCoroutinesApi::class)
 class NotePublishHandlerTest {
 

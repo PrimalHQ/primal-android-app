@@ -11,6 +11,7 @@ import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import org.junit.Rule
 
+@Suppress("LargeClass", "UnusedPrivateMember", "MaxLineLength", "ForbiddenComment")
 // @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class UserAccountFetcherTest {
