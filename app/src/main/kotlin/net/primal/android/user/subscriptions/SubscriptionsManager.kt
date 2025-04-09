@@ -3,6 +3,7 @@ package net.primal.android.user.subscriptions
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.flowWithLifecycle
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
@@ -49,6 +50,7 @@ class SubscriptionsManager @Inject constructor(
     @PrimalWalletApiClient private val walletApiClient: PrimalApiClient,
 ) {
 
+    private val lifecycle: Lifecycle = ProcessLifecycleOwner.get().lifecycle
     private val scope = CoroutineScope(dispatcherProvider.io())
     private var subscriptionsActive = false
 
@@ -76,24 +78,26 @@ class SubscriptionsManager @Inject constructor(
 
     private fun observeActiveAccount() =
         scope.launch {
-            activeAccountStore.activeUserId.collect { newActiveUserId ->
-                emitBadgesUpdate { Badges() }
-                unsubscribeAll()
-                when {
-                    newActiveUserId.isEmpty() -> {
-                        withContext(Dispatchers.Main) {
-                            ProcessLifecycleOwner.get().lifecycle.removeObserver(lifecycleEventObserver)
+            activeAccountStore.activeUserId
+                .flowWithLifecycle(lifecycle = lifecycle, minActiveState = Lifecycle.State.STARTED)
+                .collect { newActiveUserId ->
+                    emitBadgesUpdate { Badges() }
+                    unsubscribeAll()
+                    when {
+                        newActiveUserId.isEmpty() -> {
+                            withContext(Dispatchers.Main) {
+                                lifecycle.removeObserver(lifecycleEventObserver)
+                            }
                         }
-                    }
 
-                    else -> {
-                        subscribeAll(userId = newActiveUserId)
-                        withContext(Dispatchers.Main) {
-                            ProcessLifecycleOwner.get().lifecycle.addObserver(lifecycleEventObserver)
+                        else -> {
+                            subscribeAll(userId = newActiveUserId)
+                            withContext(Dispatchers.Main) {
+                                lifecycle.addObserver(lifecycleEventObserver)
+                            }
                         }
                     }
                 }
-            }
         }
 
     private val lifecycleEventObserver = LifecycleEventObserver { _, event ->
