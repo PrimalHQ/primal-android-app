@@ -4,6 +4,8 @@ import net.primal.android.nostr.model.primal.content.ContentWalletTransaction
 import net.primal.android.wallet.db.WalletTransactionData
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.findFirstEventId
+import net.primal.domain.nostr.findFirstProfileId
 
 fun List<ContentWalletTransaction>.mapAsWalletTransactionPO(walletAddress: String) =
     map { it.asWalletTransactionPO(walletAddress) }

@@ -1,9 +1,9 @@
 package net.primal.android.thread.articles.details.ui.rendering
 
 import android.net.Uri
-import net.primal.android.nostr.ext.takeAsNaddrOrNull
-import net.primal.android.nostr.ext.takeAsNoteHexIdOrNull
-import net.primal.android.nostr.ext.takeAsProfileHexIdOrNull
+import net.primal.domain.nostr.utils.takeAsNaddrOrNull
+import net.primal.domain.nostr.utils.takeAsNoteHexIdOrNull
+import net.primal.domain.nostr.utils.takeAsProfileHexIdOrNull
 
 fun String.handleArticleLinkClick(
     onProfileClick: ((profileId: String) -> Unit)?,

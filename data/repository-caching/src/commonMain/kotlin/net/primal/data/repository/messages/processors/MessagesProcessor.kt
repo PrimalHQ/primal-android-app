@@ -10,8 +10,6 @@ import net.primal.data.remote.api.users.UsersApi
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.data.repository.feed.processors.persistToDatabaseAsTransaction
-import net.primal.data.repository.mappers.remote.extractNoteId
-import net.primal.data.repository.mappers.remote.extractProfileId
 import net.primal.data.repository.mappers.remote.flatMapMessagesAsEventUriPO
 import net.primal.data.repository.mappers.remote.flatMapMessagesAsReferencedNostrUriDO
 import net.primal.data.repository.mappers.remote.mapAsMessageDataPO
@@ -25,6 +23,8 @@ import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.domain.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.cryptography.MessageCipher
+import net.primal.domain.nostr.utils.extractNoteId
+import net.primal.domain.nostr.utils.extractProfileId
 import net.primal.domain.nostr.utils.isNostrUri
 
 internal class MessagesProcessor(

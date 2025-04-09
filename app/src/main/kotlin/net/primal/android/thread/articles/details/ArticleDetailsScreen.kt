@@ -77,11 +77,6 @@ import net.primal.android.core.compose.zaps.ArticleTopZapsSection
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
-import net.primal.android.nostr.ext.isNEvent
-import net.primal.android.nostr.ext.isNEventUri
-import net.primal.android.nostr.ext.isNostrUri
-import net.primal.android.nostr.ext.isNote
-import net.primal.android.nostr.ext.takeAsNoteHexIdOrNull
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
@@ -117,6 +112,11 @@ import net.primal.domain.EventUriType
 import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.ReportType
+import net.primal.domain.nostr.utils.isNEvent
+import net.primal.domain.nostr.utils.isNEventUri
+import net.primal.domain.nostr.utils.isNostrUri
+import net.primal.domain.nostr.utils.isNote
+import net.primal.domain.nostr.utils.takeAsNoteHexIdOrNull
 
 @Composable
 fun ArticleDetailsScreen(

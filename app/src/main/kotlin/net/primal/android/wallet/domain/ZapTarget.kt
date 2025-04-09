@@ -1,9 +1,9 @@
 package net.primal.android.wallet.domain
 
 import kotlinx.serialization.json.JsonArray
-import net.primal.android.nostr.ext.asEventIdTag
-import net.primal.android.nostr.ext.asPubkeyTag
-import net.primal.android.nostr.ext.asReplaceableEventTag
+import net.primal.domain.nostr.asEventIdTag
+import net.primal.domain.nostr.asPubkeyTag
+import net.primal.domain.nostr.asReplaceableEventTag
 
 sealed class ZapTarget {
     data class Profile(
