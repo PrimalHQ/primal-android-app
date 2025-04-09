@@ -19,6 +19,8 @@ import net.primal.android.settings.home.SettingsHomeScreen
 import net.primal.android.settings.home.SettingsHomeViewModel
 import net.primal.android.settings.keys.KeysSettingsScreen
 import net.primal.android.settings.keys.KeysSettingsViewModel
+import net.primal.android.settings.media.MediaUploadsSettingsScreen
+import net.primal.android.settings.media.MediaUploadsSettingsViewModel
 import net.primal.android.settings.muted.list.MutedSettingsScreen
 import net.primal.android.settings.muted.list.MutedSettingsViewModel
 import net.primal.android.settings.network.NetworkSettingsScreen
@@ -48,6 +50,7 @@ private fun NavController.navigateToContentDisplaySettings() = navigate(route = 
 fun NavController.navigateToNotificationsSettings() = navigate(route = "notifications_settings")
 private fun NavController.navigateToZapsSettings() = navigate(route = "zaps_settings")
 private fun NavController.navigateToMutedAccounts() = navigate(route = "muted_accounts_settings")
+private fun NavController.navigateToMediaUploads() = navigate(route = "media_uploads_settings")
 fun NavController.navigateToLinkPrimalWallet(
     appName: String? = null,
     appIcon: String? = null,
@@ -74,6 +77,7 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
                     PrimalSettingsSection.Notifications -> navController.navigateToNotificationsSettings()
                     PrimalSettingsSection.Zaps -> navController.navigateToZapsSettings()
                     PrimalSettingsSection.MutedAccounts -> navController.navigateToMutedAccounts()
+                    PrimalSettingsSection.MediaUploads -> navController.navigateToMediaUploads()
                 }
             },
         )
@@ -109,6 +113,7 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
         appearance(route = "appearance_settings", navController = navController)
         contentDisplay(route = "content_display", navController = navController)
         mutedAccounts(route = "muted_accounts_settings", navController = navController)
+        mediaUploads(route = "media_uploads_settings", navController = navController)
         notifications(route = "notifications_settings", navController = navController)
         zaps(route = "zaps_settings", navController = navController)
     }
@@ -333,5 +338,21 @@ private fun NavGraphBuilder.mutedAccounts(route: String, navController: NavContr
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
             onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+        )
+    }
+
+private fun NavGraphBuilder.mediaUploads(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        val viewModel = hiltViewModel<MediaUploadsSettingsViewModel>(it)
+        LockToOrientationPortrait()
+        MediaUploadsSettingsScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
         )
     }
