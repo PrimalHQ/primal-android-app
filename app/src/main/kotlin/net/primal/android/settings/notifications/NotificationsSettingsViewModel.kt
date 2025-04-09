@@ -19,6 +19,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.jsonPrimitive
+import net.primal.android.core.errors.asSignatureUiError
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiEvent.NotificationSettingChanged
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiState.ApiError.FetchAppSettingsError
@@ -28,6 +29,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.NotificationType
+import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
 @HiltViewModel
@@ -130,6 +132,9 @@ class NotificationsSettingsViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.w(error)
                 setState { copy(error = FetchAppSettingsError(cause = error)) }
+            } catch (error: SignatureException) {
+                Timber.w(error)
+                setState { copy(signatureError = error.asSignatureUiError()) }
             }
         }
 
