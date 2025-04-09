@@ -31,9 +31,9 @@ class MediaUploadsSettingsViewModel @Inject constructor() : ViewModel() {
             events.collect {
                 when (it) {
                     is UiEvent.UpdateMediaUploadsMode -> setState { copy(mode = it.mode) }
-                    is UiEvent.UpdateNewBlossomServerUrl -> updateBlossomUrlAndMode(it.url)
+                    is UiEvent.UpdateNewBlossomServerUrl -> setState { copy(newBlossomServerUrl = it.url) }
                     is UiEvent.ConfirmBlossomServerUrl -> confirmBlossomServerUrl(it.url)
-                    is UiEvent.UpdateNewBlossomMirrorServerUrl -> updateBlossomMirrorUrlAndMode(it.url)
+                    is UiEvent.UpdateNewBlossomMirrorServerUrl -> setState { copy(newBlossomServerMirrorUrl = it.url) }
                     is UiEvent.ConfirmBlossomMirrorServerUrl -> confirmBlossomMirrorServerUrl(it.url)
                     is UiEvent.UpdateBlossomMirrorEnabled -> setState { copy(blossomMirrorEnabled = it.enabled) }
                     UiEvent.RestoreDefaultBlossomServer -> restoreDefaultBlossomServer()
@@ -47,30 +47,6 @@ class MediaUploadsSettingsViewModel @Inject constructor() : ViewModel() {
                 blossomServerUrl = url.removeHttpPrefix(),
                 newBlossomServerMirrorUrl = "",
                 mode = MediaUploadsMode.View,
-            )
-        }
-
-    private fun updateBlossomMirrorUrlAndMode(url: String) =
-        setState {
-            copy(
-                newBlossomServerMirrorUrl = url,
-                mode = if (url.isEmpty()) {
-                    MediaUploadsMode.View
-                } else {
-                    MediaUploadsMode.EditBlossomMirrorServer
-                },
-            )
-        }
-
-    private fun updateBlossomUrlAndMode(url: String) =
-        setState {
-            copy(
-                newBlossomServerUrl = url,
-                mode = if (url.isEmpty()) {
-                    MediaUploadsMode.View
-                } else {
-                    MediaUploadsMode.EditBlossomServer
-                },
             )
         }
 

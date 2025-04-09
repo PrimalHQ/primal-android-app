@@ -245,8 +245,16 @@ private fun LazyListScope.blossomMainServerInputItem(
             onValueChanged = {
                 eventPublisher(MediaUploadsSettingsContract.UiEvent.UpdateNewBlossomServerUrl(url = it))
             },
+            onFocus = {
+                eventPublisher(
+                    MediaUploadsSettingsContract.UiEvent.UpdateMediaUploadsMode(
+                        mode = MediaUploadsMode.EditBlossomServer,
+                    ),
+                )
+            },
             supportingActionText = stringResource(R.string.settings_media_uploads_restore_default_blossom_server),
             onSupportActionClick = {
+                keyboardController?.hide()
                 eventPublisher(MediaUploadsSettingsContract.UiEvent.RestoreDefaultBlossomServer)
             },
             showSupportContent = state.mode == MediaUploadsMode.View,
@@ -282,6 +290,13 @@ private fun LazyListScope.blossomMirrorServerInputItem(
             value = state.newBlossomServerMirrorUrl,
             onValueChanged = {
                 eventPublisher(MediaUploadsSettingsContract.UiEvent.UpdateNewBlossomMirrorServerUrl(url = it))
+            },
+            onFocus = {
+                eventPublisher(
+                    MediaUploadsSettingsContract.UiEvent.UpdateMediaUploadsMode(
+                        mode = MediaUploadsMode.EditBlossomMirrorServer,
+                    ),
+                )
             },
             buttonEnabled = state.newBlossomServerMirrorUrl != state.blossomServerUrl &&
                 state.newBlossomServerMirrorUrl != state.blossomServerMirrorUrl &&

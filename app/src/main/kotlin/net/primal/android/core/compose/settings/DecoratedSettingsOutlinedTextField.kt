@@ -13,7 +13,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -37,9 +39,12 @@ fun DecoratedSettingsOutlinedTextField(
     buttonEnabled: Boolean,
     placeholderText: String,
     onSupportActionClick: () -> Unit = {},
+    onFocus: (() -> Unit)? = null,
     showSupportContent: Boolean = false,
     supportingActionText: String = "",
 ) {
+    val focusManager = LocalFocusManager.current
+
     Column(modifier = modifier) {
         TextSubSection(
             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
@@ -51,7 +56,11 @@ fun DecoratedSettingsOutlinedTextField(
             buttonEnabled = buttonEnabled,
             buttonContentDescription = stringResource(id = R.string.accessibility_connect_relay),
             onValueChange = onValueChanged,
-            onButtonClick = onActionClick,
+            onButtonClick = {
+                focusManager.clearFocus()
+                onActionClick()
+            },
+            onFocus = onFocus,
             placeholderText = placeholderText,
         )
 
@@ -63,7 +72,10 @@ fun DecoratedSettingsOutlinedTextField(
                 horizontalArrangement = Arrangement.End,
             ) {
                 Text(
-                    modifier = Modifier.clickable { onSupportActionClick() },
+                    modifier = Modifier.clickable {
+                        focusManager.clearFocus()
+                        onSupportActionClick()
+                    },
                     text = supportingActionText.lowercase(),
                     style = AppTheme.typography.bodyMedium,
                     color = AppTheme.colorScheme.secondary,
@@ -82,13 +94,20 @@ private fun SettingsOutlinedTextField(
     buttonContentDescription: String,
     onButtonClick: () -> Unit,
     placeholderText: String,
+    onFocus: (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.Bottom,
     ) {
         OutlinedTextField(
-            modifier = Modifier.weight(1.0f),
+            modifier = Modifier
+                .weight(1.0f)
+                .onFocusChanged { focusState ->
+                    if (focusState.isFocused) {
+                        onFocus?.invoke()
+                    }
+                },
             colors = PrimalDefaults.outlinedTextFieldColors(),
             shape = AppTheme.shapes.medium,
             value = value,
