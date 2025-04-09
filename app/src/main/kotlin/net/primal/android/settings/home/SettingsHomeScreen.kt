@@ -160,6 +160,7 @@ private fun PrimalSettingsSection.title(): String {
         PrimalSettingsSection.Notifications -> stringResource(id = R.string.settings_notifications_title)
         PrimalSettingsSection.Zaps -> stringResource(id = R.string.settings_zaps_title)
         PrimalSettingsSection.MutedAccounts -> stringResource(id = R.string.settings_muted_accounts_title)
+        PrimalSettingsSection.MediaUploads -> stringResource(id = R.string.settings_media_uploads_title)
     }
 }
 
