@@ -1,5 +1,6 @@
 package net.primal.android.profile.db
 
+@Suppress("LargeClass", "UnusedPrivateMember", "MaxLineLength", "ForbiddenComment")
 class ProfileDataExtTests {
     /* TODO: port `buildProfileData`, uncomment the rest. */
 //    private fun buildProfileData(

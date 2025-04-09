@@ -13,6 +13,7 @@ import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.UserAccount
 import org.junit.Rule
 
+@Suppress("LargeClass", "UnusedPrivateMember", "MaxLineLength", "ForbiddenComment")
 @OptIn(ExperimentalCoroutinesApi::class)
 class RelaysSocketManagerTest {
 

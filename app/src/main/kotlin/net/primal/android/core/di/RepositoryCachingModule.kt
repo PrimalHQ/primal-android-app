@@ -28,6 +28,7 @@ import net.primal.domain.repository.ProfileRepository
 import net.primal.domain.repository.PublicBookmarksRepository
 import net.primal.domain.repository.UserDataCleanupRepository
 
+@Suppress("TooManyFunctions")
 @Module
 @InstallIn(SingletonComponent::class)
 object RepositoryCachingModule {

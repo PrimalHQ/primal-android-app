@@ -1,5 +1,6 @@
 package net.primal.android.events.db.serialization
 
+@Suppress("LargeClass", "UnusedPrivateMember", "MaxLineLength", "ForbiddenComment")
 class EventUriTypeConvertersTest {
 
     /* TODO: resolve `EventUriTypeConverters()` */
