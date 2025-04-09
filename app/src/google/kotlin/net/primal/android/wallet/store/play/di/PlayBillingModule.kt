@@ -9,6 +9,7 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.play.PlayBillingClient
+import net.primal.core.utils.coroutines.DispatcherProvider
 
 @Module
 @InstallIn(SingletonComponent::class)
