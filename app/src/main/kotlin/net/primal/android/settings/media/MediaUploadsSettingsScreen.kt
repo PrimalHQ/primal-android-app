@@ -82,7 +82,7 @@ private fun MediaUploadsSettingsScreen(
         }
     }
 
-    BackHandler(true) {
+    BackHandler {
         backSequence()
     }
 
