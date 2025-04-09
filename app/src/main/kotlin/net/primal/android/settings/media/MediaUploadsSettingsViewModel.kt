@@ -44,7 +44,7 @@ class MediaUploadsSettingsViewModel @Inject constructor() : ViewModel() {
     private fun confirmBlossomMirrorServerUrl(url: String) =
         setState {
             copy(
-                blossomServerUrl = url.removeHttpPrefix(),
+                blossomServerMirrorUrl = url.removeHttpPrefix(),
                 newBlossomServerMirrorUrl = "",
                 mode = MediaUploadsMode.View,
             )
