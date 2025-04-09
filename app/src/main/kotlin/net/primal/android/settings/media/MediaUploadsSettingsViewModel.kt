@@ -97,5 +97,4 @@ class MediaUploadsSettingsViewModel @Inject constructor() : ViewModel() {
     }
 }
 
-private fun String.removeHttpPrefix() =
-    this.removePrefix("https://").removePrefix("http://")
+private fun String.removeHttpPrefix() = this.removePrefix("https://").removePrefix("http://")

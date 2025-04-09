@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemColors
@@ -99,16 +100,16 @@ private fun MediaUploadsLazyColumn(
 
     LazyColumn(modifier = modifier) {
         if (isViewMode) {
-            blossomMainServerSection(state.blossomServerUrl)
+            blossomMainServerSectionItem(state.blossomServerUrl)
         }
 
         if (isEditMainBlossom || isViewMode) {
-            blossomServerInput(state, eventPublisher, keyboardController)
+            blossomMainServerInputItem(state, eventPublisher, keyboardController)
             item { PrimalDivider() }
         }
 
         if (isViewMode) {
-            blossomMirrorServerSection(
+            blossomMirrorServerSectionItem(
                 blossomMirrorEnabled = state.blossomMirrorEnabled,
                 onBlossomMirrorCheckedChange = {
                     eventPublisher(
@@ -129,7 +130,7 @@ private fun MediaUploadsLazyColumn(
             }
 
             if (isEditMirrorBlossom || isViewMode) {
-                blossomMirrorServerInput(state, eventPublisher, keyboardController)
+                blossomMirrorServerInputItem(state, eventPublisher, keyboardController)
             }
 
             if (isEditMirrorBlossom) {
@@ -138,7 +139,7 @@ private fun MediaUploadsLazyColumn(
         }
 
         if (isEditMainBlossom || isEditMirrorBlossom) {
-            suggestedBlossomServersSection(
+            suggestedBlossomServersSectionItems(
                 suggestedBlossomServerUrls = state.suggestedBlossomServers,
                 confirmBlossomServerUrl = { url ->
                     val event = if (isEditMainBlossom) {
@@ -153,7 +154,7 @@ private fun MediaUploadsLazyColumn(
     }
 }
 
-private fun LazyListScope.suggestedBlossomServersSection(
+private fun LazyListScope.suggestedBlossomServersSectionItems(
     suggestedBlossomServerUrls: List<String>,
     confirmBlossomServerUrl: (String) -> Unit,
 ) {
@@ -169,17 +170,13 @@ private fun LazyListScope.suggestedBlossomServersSection(
         }
     }
 
-    item {
-        Column {
-            suggestedBlossomServerUrls.forEach {
-                SuggestedServerItem(
-                    server = it,
-                    onClick = {
-                        confirmBlossomServerUrl(it)
-                    },
-                )
-            }
-        }
+    items(suggestedBlossomServerUrls) { server ->
+        SuggestedServerItem(
+            server = server,
+            onClick = {
+                confirmBlossomServerUrl(server)
+            },
+        )
     }
 }
 
@@ -220,7 +217,7 @@ private fun SuggestedServerItem(server: String, onClick: () -> Unit) {
     )
 }
 
-private fun LazyListScope.blossomMainServerSection(blossomServerUrl: String) {
+private fun LazyListScope.blossomMainServerSectionItem(blossomServerUrl: String) {
     item {
         Column {
             Spacer(modifier = Modifier.height(24.dp))
@@ -234,7 +231,7 @@ private fun LazyListScope.blossomMainServerSection(blossomServerUrl: String) {
     }
 }
 
-private fun LazyListScope.blossomServerInput(
+private fun LazyListScope.blossomMainServerInputItem(
     state: MediaUploadsSettingsContract.UiState,
     eventPublisher: (MediaUploadsSettingsContract.UiEvent) -> Unit,
     keyboardController: SoftwareKeyboardController?,
@@ -272,7 +269,7 @@ private fun LazyListScope.blossomServerInput(
     }
 }
 
-private fun LazyListScope.blossomMirrorServerInput(
+private fun LazyListScope.blossomMirrorServerInputItem(
     state: MediaUploadsSettingsContract.UiState,
     eventPublisher: (MediaUploadsSettingsContract.UiEvent) -> Unit,
     keyboardController: SoftwareKeyboardController?,
@@ -310,7 +307,7 @@ private fun LazyListScope.blossomMirrorServerInput(
     }
 }
 
-private fun LazyListScope.blossomMirrorServerSection(
+private fun LazyListScope.blossomMirrorServerSectionItem(
     blossomMirrorEnabled: Boolean,
     onBlossomMirrorCheckedChange: (Boolean) -> Unit,
 ) {
