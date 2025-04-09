@@ -1,5 +1,6 @@
 package net.primal.android.settings.zaps
 
+import net.primal.android.core.errors.SignatureUiError
 import net.primal.domain.ContentZapConfigItem
 import net.primal.domain.ContentZapDefault
 
@@ -10,6 +11,7 @@ interface ZapSettingsContract {
         val saving: Boolean = false,
         val zapDefault: ContentZapDefault? = null,
         val zapConfig: List<ContentZapConfigItem> = emptyList(),
+        val signatureError: SignatureUiError? = null,
     )
 
     sealed class UiEvent {

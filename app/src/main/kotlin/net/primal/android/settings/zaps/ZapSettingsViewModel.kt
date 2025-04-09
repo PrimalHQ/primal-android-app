@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.primal.android.core.errors.asSignatureUiError
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.settings.zaps.ZapSettingsContract.UiEvent
@@ -20,6 +21,7 @@ import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.ContentZapConfigItem
 import net.primal.domain.ContentZapDefault
+import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
 @HiltViewModel
@@ -95,6 +97,9 @@ class ZapSettingsViewModel @Inject constructor(
                 }
             } catch (error: WssException) {
                 Timber.w(error)
+            } catch (error: SignatureException) {
+                Timber.w(error)
+                setState { copy(signatureError = error.asSignatureUiError()) }
             }
         }
 
