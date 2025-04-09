@@ -14,6 +14,7 @@ import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.publish.NostrPublisher
+import net.primal.android.premium.repository.asProfileDataDO
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -40,6 +41,7 @@ import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
+import net.primal.domain.repository.CachingImportRepository
 import net.primal.domain.repository.ProfileRepository
 import net.primal.domain.repository.UserDataCleanupRepository
 
@@ -54,6 +56,7 @@ class UserRepository @Inject constructor(
     private val nostrPublisher: NostrPublisher,
     private val profileRepository: ProfileRepository,
     private val userDataCleanupRepository: UserDataCleanupRepository,
+    private val cachingImportRepository: CachingImportRepository,
 ) {
     suspend fun setActiveAccount(userId: String) =
         withContext(dispatchers.io()) {
@@ -211,30 +214,28 @@ class UserRepository @Inject constructor(
         }
 
     private suspend fun setUserProfileAndUpdateLocally(userId: String, contentMetadata: ContentMetadata) {
-        throw NostrPublishException(cause = NotImplementedError())
-        // TODO Implement api to import a profile NostrEvent into caching database
-//        val profileMetadataNostrEvent = nostrPublisher.publishUserProfile(
-//            userId = userId,
-//            contentMetadata = contentMetadata,
-//        )
-//        val profileData = profileMetadataNostrEvent.asProfileDataPO(
-//            cdnResources = emptyMap(),
-//            primalUserNames = emptyMap(),
-//            primalPremiumInfo = emptyMap(),
-//            primalLegendProfiles = emptyMap(),
-//            blossomServers = emptyMap(),
-//        )
-//        database.profiles().insertOrUpdateAll(data = listOf(profileData))
-//
-//        accountsStore.getAndUpdateAccount(userId = userId) {
-//            this.copy(
-//                authorDisplayName = profileData.authorNameUiFriendly(),
-//                userDisplayName = profileData.usernameUiFriendly(),
-//                avatarCdnImage = profileData.avatarCdnImage,
-//                internetIdentifier = profileData.internetIdentifier,
-//                lightningAddress = profileData.lightningAddress,
-//            )
-//        }
+        val profileMetadataNostrEvent = nostrPublisher.publishUserProfile(
+            userId = userId,
+            contentMetadata = contentMetadata,
+        )
+        val profileData = profileMetadataNostrEvent.asProfileDataDO(
+            cdnResources = emptyMap(),
+            primalUserNames = emptyMap(),
+            primalPremiumInfo = emptyMap(),
+            primalLegendProfiles = emptyMap(),
+            blossomServers = emptyMap(),
+        )
+
+        cachingImportRepository.cacheNostrEvents(profileMetadataNostrEvent)
+        accountsStore.getAndUpdateAccount(userId = userId) {
+            this.copy(
+                authorDisplayName = profileData.authorNameUiFriendly(),
+                userDisplayName = profileData.usernameUiFriendly(),
+                avatarCdnImage = profileData.avatarCdnImage,
+                internetIdentifier = profileData.internetIdentifier,
+                lightningAddress = profileData.lightningAddress,
+            )
+        }
     }
 
     suspend fun updateWalletPreference(userId: String, walletPreference: WalletPreference) {

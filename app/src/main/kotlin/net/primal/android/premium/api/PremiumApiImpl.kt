@@ -241,6 +241,8 @@ class PremiumApiImpl @Inject constructor(
         )
 
         return LegendLeaderboardResponse(
+            nostrEvents = queryResult.nostrEvents,
+            primalEvents = queryResult.primalEvents,
             orderedLegendLeaderboardEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendLeaderboard),
             primalPremiumInfoEvents = queryResult.filterPrimalEvents(NostrEventKind.PrimalPremiumInfo),
             primalLegendProfiles = queryResult.filterPrimalEvents(NostrEventKind.PrimalLegendProfiles),
@@ -273,6 +275,8 @@ class PremiumApiImpl @Inject constructor(
         )
 
         return PremiumLeaderboardResponse(
+            nostrEvents = queryResult.nostrEvents,
+            primalEvents = queryResult.primalEvents,
             orderedPremiumLeaderboardEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumLeaderboard),
             primalPremiumInfoEvents = queryResult.filterPrimalEvents(NostrEventKind.PrimalPremiumInfo),
             primalUsernames = queryResult.filterPrimalEvents(NostrEventKind.PrimalUserNames),

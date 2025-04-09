@@ -19,12 +19,14 @@ import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.domain.LeaderboardLegendEntry
 import net.primal.domain.OGLeaderboardEntry
 import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.repository.CachingImportRepository
 import timber.log.Timber
 
 class PremiumRepository @Inject constructor(
     private val dispatchers: DispatcherProvider,
     private val premiumApi: PremiumApi,
     private val accountsStore: UserAccountsStore,
+    private val cachingImportRepository: CachingImportRepository,
 ) {
     suspend fun isPrimalNameAvailable(name: String): Boolean =
         withContext(dispatchers.io()) {
@@ -111,8 +113,10 @@ class PremiumRepository @Inject constructor(
                 blossomServers = emptyMap(),
             )
 
-            /* TODO: cache profiles in db. */
-//        database.profiles().insertOrUpdateAll(profiles)
+            cachingImportRepository.cacheEvents(
+                nostrEvents = response.nostrEvents,
+                primalEvents = response.primalEvents,
+            )
 
             response.orderedPremiumLeaderboardEvent.parseAndMapAsOGLeaderboardEntries(
                 profiles = profiles.asMapByKey { it.profileId },
@@ -138,8 +142,10 @@ class PremiumRepository @Inject constructor(
                 blossomServers = emptyMap(),
             )
 
-            /* TODO: cache profiles in db. */
-//            database.profiles().insertOrUpdateAll(profiles)
+            cachingImportRepository.cacheEvents(
+                nostrEvents = response.nostrEvents,
+                primalEvents = response.primalEvents,
+            )
 
             response.orderedLegendLeaderboardEvent.parseAndMapAsLeaderboardLegendEntries(
                 profiles = profiles.asMapByKey { it.profileId },
