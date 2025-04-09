@@ -23,6 +23,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
@@ -43,6 +47,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.ConnectRelay
 import net.primal.android.core.compose.settings.DecoratedSettingsOutlinedTextField
+import net.primal.android.settings.network.ConfirmActionAlertDialog
 import net.primal.android.settings.network.TextSection
 import net.primal.android.theme.AppTheme
 
@@ -59,6 +64,39 @@ fun MediaUploadsSettingsScreen(viewModel: MediaUploadsSettingsViewModel, onClose
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MediaUploadsSettingsScreen(
+    state: MediaUploadsSettingsContract.UiState,
+    eventPublisher: (MediaUploadsSettingsContract.UiEvent) -> Unit,
+    onClose: () -> Unit,
+) {
+    Scaffold(
+        modifier = Modifier,
+        topBar = {
+            PrimalTopAppBar(
+                title = stringResource(id = R.string.settings_media_uploads_title),
+                navigationIcon = PrimalIcons.ArrowBack,
+                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
+                onNavigationIconClick = onClose,
+            )
+        },
+        content = { paddingValues ->
+            MediaUploadsLazyColumn(
+                modifier = Modifier
+                    .background(color = AppTheme.colorScheme.surfaceVariant)
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .padding(paddingValues)
+                    .imePadding(),
+                state = state,
+                eventPublisher = eventPublisher,
+                onClose = onClose,
+            )
+        },
+    )
+}
+
+@Composable
+private fun MediaUploadsLazyColumn(
+    modifier: Modifier,
     state: MediaUploadsSettingsContract.UiState,
     eventPublisher: (MediaUploadsSettingsContract.UiEvent) -> Unit,
     onClose: () -> Unit,
@@ -80,37 +118,23 @@ private fun MediaUploadsSettingsScreen(
         backSequence()
     }
 
-    Scaffold(
-        modifier = Modifier,
-        topBar = {
-            PrimalTopAppBar(
-                title = stringResource(id = R.string.settings_media_uploads_title),
-                navigationIcon = PrimalIcons.ArrowBack,
-                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
-                onNavigationIconClick = onClose,
-            )
-        },
-        content = { paddingValues ->
-            MediaUploadsLazyColumn(
-                modifier = Modifier
-                    .background(color = AppTheme.colorScheme.surfaceVariant)
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-                    .padding(paddingValues)
-                    .imePadding(),
-                state = state,
-                eventPublisher = eventPublisher,
-            )
-        },
-    )
-}
+    var confirmingRestoreDefaultBlossomServerDialog by remember { mutableStateOf(false) }
+    if (confirmingRestoreDefaultBlossomServerDialog) {
+        ConfirmActionAlertDialog(
+            dialogTitle = stringResource(id = R.string.settings_media_uploads_restore_default_blossom_server_title),
+            dialogText = stringResource(
+                id = R.string.settings_media_uploads_restore_default_blossom_server_description,
+            ),
+            onDismissRequest = {
+                confirmingRestoreDefaultBlossomServerDialog = false
+            },
+            onConfirmation = {
+                confirmingRestoreDefaultBlossomServerDialog = false
+                eventPublisher(MediaUploadsSettingsContract.UiEvent.RestoreDefaultBlossomServer)
+            },
+        )
+    }
 
-@Composable
-private fun MediaUploadsLazyColumn(
-    modifier: Modifier,
-    state: MediaUploadsSettingsContract.UiState,
-    eventPublisher: (MediaUploadsSettingsContract.UiEvent) -> Unit,
-) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
     val isEditMainBlossom = state.mode == MediaUploadsMode.EditBlossomServer
@@ -123,7 +147,12 @@ private fun MediaUploadsLazyColumn(
         }
 
         if (isEditMainBlossom || isViewMode) {
-            blossomMainServerInputItem(state, eventPublisher, keyboardController)
+            blossomMainServerInputItem(
+                state = state,
+                eventPublisher = eventPublisher,
+                keyboardController = keyboardController,
+                onRestoreDefaultBlossomServer = { confirmingRestoreDefaultBlossomServerDialog = true },
+            )
             item { PrimalDivider() }
         }
 
@@ -166,6 +195,7 @@ private fun MediaUploadsLazyColumn(
                     } else {
                         MediaUploadsSettingsContract.UiEvent.ConfirmBlossomMirrorServerUrl(url)
                     }
+                    focusManager.clearFocus()
                     eventPublisher(event)
                 },
             )
@@ -254,6 +284,7 @@ private fun LazyListScope.blossomMainServerInputItem(
     state: MediaUploadsSettingsContract.UiState,
     eventPublisher: (MediaUploadsSettingsContract.UiEvent) -> Unit,
     keyboardController: SoftwareKeyboardController?,
+    onRestoreDefaultBlossomServer: () -> Unit,
 ) {
     item(key = "blossom_main_input") {
         DecoratedSettingsOutlinedTextField(
@@ -274,7 +305,7 @@ private fun LazyListScope.blossomMainServerInputItem(
             supportingActionText = stringResource(R.string.settings_media_uploads_restore_default_blossom_server),
             onSupportActionClick = {
                 keyboardController?.hide()
-                eventPublisher(MediaUploadsSettingsContract.UiEvent.RestoreDefaultBlossomServer)
+                onRestoreDefaultBlossomServer()
             },
             showSupportContent = state.mode == MediaUploadsMode.View,
             buttonEnabled = state.newBlossomServerUrl != state.blossomServerUrl &&

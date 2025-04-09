@@ -871,7 +871,8 @@
     <string name="settings_media_uploads_blossom_mirror_server_enabled_notice">When enabled, your uploads to the primary blossom server will be automatically copied to the mirror.</string>
     <string name="settings_media_uploads_switch_blossom_mirror_server">Switch Blossom Mirror Server</string>
     <string name="settings_media_uploads_suggested_blossoms_title">Suggested blossom servers</string>
-
+    <string name="settings_media_uploads_restore_default_blossom_server_title">Restore Default</string>
+    <string name="settings_media_uploads_restore_default_blossom_server_description">Are you sure you want to restore default blossom server?</string>
     <string name="settings_version_title">Version</string>
 
     <string name="biometric_prompt_title">Authenticate</string>
