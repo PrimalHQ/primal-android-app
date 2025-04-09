@@ -252,7 +252,7 @@ private fun LazyListScope.blossomMainServerInputItem(
             showSupportContent = state.mode == MediaUploadsMode.View,
             buttonEnabled = state.newBlossomServerUrl != state.blossomServerUrl &&
                 state.newBlossomServerUrl != state.blossomServerMirrorUrl &&
-                state.newBlossomServerUrl.isValidBlossomUrl(),
+                state.newBlossomServerUrl.isNotEmpty(),
             onActionClick = {
                 keyboardController?.hide()
                 eventPublisher(
@@ -285,7 +285,7 @@ private fun LazyListScope.blossomMirrorServerInputItem(
             },
             buttonEnabled = state.newBlossomServerMirrorUrl != state.blossomServerUrl &&
                 state.newBlossomServerMirrorUrl != state.blossomServerMirrorUrl &&
-                state.newBlossomServerMirrorUrl.isValidBlossomUrl(),
+                state.newBlossomServerMirrorUrl.isNotEmpty(),
             onActionClick = {
                 keyboardController?.hide()
                 eventPublisher(
@@ -386,7 +386,3 @@ private fun BlossomServerDestination(
         colors = colors,
     )
 }
-
-private fun String.isValidBlossomUrl() =
-    (startsWith("http://") || startsWith("https://")) &&
-        !this.split("://").lastOrNull().isNullOrEmpty()
