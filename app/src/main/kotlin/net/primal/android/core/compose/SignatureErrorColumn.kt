@@ -39,6 +39,6 @@ fun SignatureErrorColumn(
             )
         }
 
-        null -> content
+        null -> content()
     }
 }
