@@ -23,6 +23,10 @@ class PrimalBlossomFileUploader @Inject constructor(
     private val uploadApi: BlossomUploadApi,
     private val nostrNotary: NostrNotary,
 ) {
+    private companion object {
+        private const val MILLISECONDS_IN_SECOND = 1000
+        private const val ONE_HOUR_IN_SECONDS = 3600
+    }
 
     suspend fun uploadFile(
         uri: Uri,
@@ -71,7 +75,10 @@ class PrimalBlossomFileUploader @Inject constructor(
             tags = listOf(
                 listOf("t", "upload"),
                 listOf("x", hash),
-                listOf("expiration", (System.currentTimeMillis() / 1000 + 3600).toString()),
+                listOf(
+                    "expiration",
+                    (System.currentTimeMillis() / MILLISECONDS_IN_SECOND + ONE_HOUR_IN_SECONDS).toString(),
+                ),
             ).map { tagList -> JsonArray(tagList.map { JsonPrimitive(it) }) },
         )
         val signed = nostrNotary.signNostrEvent(pubkey, unsignedEvent)
