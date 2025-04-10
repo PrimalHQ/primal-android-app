@@ -26,6 +26,11 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
 
+    - name: Unpack secrets
+      run: |
+        openssl base64 -d -out app/src/aosp/google-services.json <<< "${{ secrets.GOOGLE_SERVICES_FLAVOR_AOSP }}"
+        openssl base64 -d -out app/src/google/google-services.json <<< "${{ secrets.GOOGLE_SERVICES_FLAVOR_GOOGLE }}"
+
     - name: Check detekt
       run: ./gradlew detekt
 

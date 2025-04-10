@@ -36,6 +36,8 @@ jobs:
         openssl base64 -d -out config.properties <<< "${{ secrets.CONFIG_PROPERTIES }}"
         openssl base64 -d -out app/primal_alternative_android.jks <<< "${{ secrets.CERT_ALTERNATIVE }}"
         openssl base64 -d -out app/primal_googlePlay_android.jks <<< "${{ secrets.CERT_PLAYSTORE }}"
+        openssl base64 -d -out app/src/aosp/google-services.json <<< "${{ secrets.GOOGLE_SERVICES_FLAVOR_AOSP }}"
+        openssl base64 -d -out app/src/google/google-services.json <<< "${{ secrets.GOOGLE_SERVICES_FLAVOR_GOOGLE }}"
 
     - name: Build & Sign APK artifacts
       run: |
