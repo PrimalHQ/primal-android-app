@@ -81,7 +81,7 @@ internal class ProxyPrimalApiClient(
     }
 
     private fun PrimalServerType.isIncomingCompressionSupported(): Boolean {
-        return this == PrimalServerType.Caching || this == PrimalServerType.Wallet
+        return this == PrimalServerType.Caching
     }
 
     override suspend fun query(message: PrimalCacheFilter): PrimalQueryResult {
