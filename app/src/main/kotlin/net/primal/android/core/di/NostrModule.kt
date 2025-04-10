@@ -11,6 +11,7 @@ import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.data.remote.factory.PublisherFactory
+import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.publisher.NostrEventImporter
 import net.primal.domain.publisher.PrimalPublisher
 
@@ -31,4 +32,7 @@ object NostrModule {
             contentResolver = contentResolver,
             credentialsStore = credentialsStore,
         )
+
+    @Provides
+    fun provideNostrEventSignatureHandler(nostrNotary: NostrNotary): NostrEventSignatureHandler = nostrNotary
 }

@@ -66,5 +66,5 @@ enum class PrimalVerb(val id: String) {
     MEMBERSHIP_LEGENDS_LEADERBOARD("membership_legends_leaderboard"),
     MEMBERSHIP_PREMIUM_LEADERBOARD("membership_premium_leaderboard"),
     MEMBERSHIP_MONITOR_CONTENT_BROADCAST_STATUS("rebroadcasting_status"),
-    UPDATE_NOTIFICATION_TOKEN("update_notification_token"),
+    UPDATE_PUSH_NOTIFICATION_TOKEN("update_push_notification_token"),
 }

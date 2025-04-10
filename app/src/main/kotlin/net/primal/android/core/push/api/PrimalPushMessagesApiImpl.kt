@@ -6,17 +6,18 @@ import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.PrimalVerb
+import net.primal.domain.nostr.NostrEvent
 
 class PrimalPushMessagesApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalCacheApiClient: PrimalApiClient,
 ) : PrimalPushMessagesApi {
 
-    override suspend fun updateNotificationsToken(userIds: List<String>, token: String) {
+    override suspend fun updateNotificationsToken(authorizationEvents: List<NostrEvent>, token: String) {
         primalCacheApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.UPDATE_NOTIFICATION_TOKEN.id,
+                primalVerb = PrimalVerb.UPDATE_PUSH_NOTIFICATION_TOKEN.id,
                 optionsJson = UpdateNotificationTokenRequest(
-                    userIds = userIds,
+                    authorizationEvents = authorizationEvents,
                     platform = "android",
                     token = token,
                 ).encodeToJsonString(),
