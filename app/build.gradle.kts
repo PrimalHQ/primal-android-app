@@ -229,6 +229,7 @@ dependencies {
     implementation(project(":core:utils"))
     implementation(project(":core:app-config"))
     implementation(project(":core:networking-primal"))
+    implementation(project(":core:networking-upload"))
     implementation(project(":domain:nostr"))
     implementation(project(":domain:primal"))
     implementation(project(":domain:primal-wallet"))

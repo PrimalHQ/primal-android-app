@@ -37,7 +37,12 @@ kotlin {
                 implementation(project(":core:utils"))
                 implementation(project(":core:networking-http"))
                 implementation(project(":domain:nostr"))
+                implementation(libs.kotlinx.serialization.json)
                 implementation(libs.kotlinx.coroutines.core)
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.content.negotiation)
+                implementation(libs.kotlinx.coroutines.core)
+                implementation(libs.ktor.client.serialization.kotlinx.json)
             }
         }
 
