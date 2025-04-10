@@ -11,10 +11,7 @@ import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.repository.WalletRepository
-import net.primal.core.networking.sockets.errors.WssException
-import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.repository.PublicBookmarksRepository
-import timber.log.Timber
 
 class UserDataUpdater @AssistedInject constructor(
     @Assisted val userId: String,
@@ -36,34 +33,30 @@ class UserDataUpdater @AssistedInject constructor(
 
     suspend fun updateUserDataWithDebounce(duration: Duration) {
         if (isUserDataSyncedInLast(duration)) {
-            try {
-                updateData()
-                lastTimeFetched = Instant.now()
-            } catch (error: WssException) {
-                Timber.w(error)
-            } catch (error: SignatureException) {
-                Timber.w(error)
-            }
+            updateData()
+            lastTimeFetched = Instant.now()
         }
     }
 
     private suspend fun updateData() {
-        val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
-            userId = userId,
-            description = "Sync app settings",
-        )
-        settingsRepository.fetchAndPersistAppSettings(authorizationEvent)
-        settingsRepository.ensureZapConfig(authorizationEvent) { appSettings ->
-            nostrNotary.signAppSettingsNostrEvent(
+        runCatching {
+            val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
                 userId = userId,
-                appSettings = appSettings,
+                description = "Sync app settings",
             )
+            settingsRepository.fetchAndPersistAppSettings(authorizationEvent)
+            settingsRepository.ensureZapConfig(authorizationEvent) { appSettings ->
+                nostrNotary.signAppSettingsNostrEvent(
+                    userId = userId,
+                    appSettings = appSettings,
+                )
+            }
         }
-        premiumRepository.fetchMembershipStatus(userId = userId)
-        relayRepository.fetchAndUpdateUserRelays(userId = userId)
-        userRepository.fetchAndUpdateUserAccount(userId = userId)
-        bookmarksRepository.fetchAndPersistBookmarks(userId = userId)
-        walletRepository.fetchUserWalletInfoAndUpdateUserAccount(userId = userId)
-        pushNotificationsTokenUpdater.updateTokenForAllUsers()
+        runCatching { premiumRepository.fetchMembershipStatus(userId = userId) }
+        runCatching { relayRepository.fetchAndUpdateUserRelays(userId = userId) }
+        runCatching { userRepository.fetchAndUpdateUserAccount(userId = userId) }
+        runCatching { bookmarksRepository.fetchAndPersistBookmarks(userId = userId) }
+        runCatching { walletRepository.fetchUserWalletInfoAndUpdateUserAccount(userId = userId) }
+        runCatching { pushNotificationsTokenUpdater.updateTokenForAllUsers() }
     }
 }
