@@ -182,7 +182,7 @@ class PrimalFileUploader @Inject constructor(
                 uploadsMap[uploadId] = UploadStatus.UploadCompleted
                 UploadResult(
                     remoteUrl = remoteUrl,
-                    originalFileSize = fileSizeInBytes.toInt(),
+                    originalFileSize = fileSizeInBytes,
                     originalHash = hash,
                 )
             }
