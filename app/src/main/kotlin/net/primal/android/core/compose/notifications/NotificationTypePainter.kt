@@ -83,4 +83,8 @@ fun NotificationType.toImagePainter(): Painter =
             darkResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_replied_to_dark,
             lightResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_replied_to_light,
         )
+
+        // TODO Add icon support for 3xx notifications
+        NotificationType.YOUR_POST_WAS_HIGHLIGHTED -> throw NotImplementedError()
+        NotificationType.YOUR_POST_WAS_BOOKMARKED -> throw NotImplementedError()
     }
