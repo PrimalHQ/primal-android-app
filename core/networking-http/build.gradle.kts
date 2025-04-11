@@ -43,11 +43,11 @@ kotlin {
                 implementation(libs.kotlinx.serialization.json)
 
                 // Networking && Serialization
-                implementation(libs.ktor.client.core)
+                api(libs.kotlinx.serialization.json)
+                api(libs.ktor.client.core)
                 implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.ktor.client.logging)
                 implementation(libs.ktor.client.serialization.kotlinx.json)
-                implementation(libs.kotlinx.serialization.json)
 
                 // Logging
                 implementation(libs.napier)
@@ -60,21 +60,21 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.android)
 
                 // Networking
-                implementation(libs.ktor.client.okhttp)
+                api(libs.ktor.client.okhttp)
             }
         }
 
         iosMain {
             dependencies {
                 // Networking
-                implementation(libs.ktor.client.darwin)
+                api(libs.ktor.client.darwin)
             }
         }
 
         val desktopMain by getting
         desktopMain.dependencies {
             // Ktor
-            implementation(libs.ktor.client.cio)
+            api(libs.ktor.client.cio)
         }
 
         getByName("androidHostTest") {

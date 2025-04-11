@@ -40,9 +40,8 @@ import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.networking.primal.upload.PrimalFileUploader
-import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
-import net.primal.android.networking.primal.upload.repository.FileUploadRepository
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.networking.upload.FileUploadRepository
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
@@ -50,6 +49,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
+import net.primal.core.networking.primal.api.UnsuccessfulFileUpload
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.nostr.MAX_RELAY_HINTS
 import net.primal.domain.nostr.Naddr
@@ -388,9 +388,9 @@ class NoteEditorViewModel @AssistedInject constructor(
             updatedAttachment = updatedAttachment.copy(uploadError = null)
             updateNoteAttachmentState(attachment = updatedAttachment)
 
-            val uploadResult = fileUploadRepository.uploadNoteAttachment(
+            val uploadResult = fileUploadRepository.upload(
+                uri = attachment.localUri,
                 userId = activeAccountStore.activeUserId(),
-                attachment = attachment,
                 uploadId = uploadId,
                 onProgress = { uploadedBytes, totalBytes ->
                     updatedAttachment = updatedAttachment.copy(
@@ -404,7 +404,7 @@ class NoteEditorViewModel @AssistedInject constructor(
             updatedAttachment = updatedAttachment.copy(
                 remoteUrl = uploadResult.remoteUrl,
                 originalHash = uploadResult.originalHash,
-                originalSizeInBytes = uploadResult.originalFileSize,
+                originalSizeInBytes = uploadResult.originalFileSize.toInt(),
             )
             updateNoteAttachmentState(attachment = updatedAttachment)
 
