@@ -9,6 +9,7 @@ import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.core.serialization.json.NostrNotaryJson
 import net.primal.android.networking.UserAgentProvider
+import net.primal.android.signer.AmberSignResult
 import net.primal.android.signer.signEventWithAmber
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.NostrWalletConnect
@@ -62,7 +63,11 @@ class NostrNotary @Inject constructor(
         }.getOrDefault(false)
 
         if (isExternalSignerLogin) {
-            return contentResolver.signEventWithAmber(event = event) ?: throw SigningRejectedException()
+            val result = contentResolver.signEventWithAmber(event = event)
+            return when (result) {
+                AmberSignResult.Rejected, AmberSignResult.Undecided -> throw SigningRejectedException()
+                is AmberSignResult.Signed -> result.nostrEvent
+            }
         }
 
         return event.signOrThrow(nsec = findNsecOrThrow(userId))
