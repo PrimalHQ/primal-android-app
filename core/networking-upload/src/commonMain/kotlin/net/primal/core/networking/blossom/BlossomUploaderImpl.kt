@@ -1,11 +1,10 @@
-package net.primal.core.networking.primal.api
+package net.primal.core.networking.blossom
 
 import kotlin.time.Duration.Companion.hours
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import net.primal.core.networking.factory.HttpClientFactory
-import net.primal.core.networking.primal.api.model.BlobDescriptor
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import okio.BufferedSource
@@ -33,7 +32,7 @@ internal class BlossomUploaderImpl(
         val descriptor: BlobDescriptor = throw NotImplementedError()
 
         if (uploadFileMetadata.sizeInBytes != descriptor.sizeInBytes) {
-            throw UnsuccessfulFileUpload(
+            throw UnsuccessfulBlossomUpload(
                 cause = RuntimeException("Different file size on the server."),
             )
         }

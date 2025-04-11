@@ -1,4 +1,4 @@
-package net.primal.core.networking.primal.api
+package net.primal.core.networking.blossom
 
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 

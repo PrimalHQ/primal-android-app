@@ -7,8 +7,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.ElementsIntoSet
 import javax.inject.Singleton
-import net.primal.core.networking.primal.api.BlossomUploader
-import net.primal.core.networking.primal.api.BlossomUploaderFactory
+import net.primal.core.networking.blossom.BlossomUploader
+import net.primal.core.networking.blossom.BlossomUploaderFactory
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import okhttp3.Interceptor

@@ -1,4 +1,4 @@
-package net.primal.core.networking.primal.api.model
+package net.primal.core.networking.blossom
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

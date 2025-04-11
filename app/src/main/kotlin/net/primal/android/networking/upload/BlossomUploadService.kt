@@ -5,20 +5,20 @@ import android.net.Uri
 import java.io.IOException
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
-import net.primal.core.networking.primal.api.BlossomUploader
-import net.primal.core.networking.primal.api.UnsuccessfulFileUpload
+import net.primal.core.networking.blossom.BlossomUploader
+import net.primal.core.networking.blossom.UnsuccessfulBlossomUpload
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.upload.UploadResult
 import okio.buffer
 import okio.source
 
-class FileUploadRepository @Inject constructor(
+class BlossomUploadService @Inject constructor(
     private val dispatchers: DispatcherProvider,
     private val contentResolver: ContentResolver,
     private val blossomUploader: BlossomUploader,
 ) {
 
-    @Throws(UnsuccessfulFileUpload::class)
+    @Throws(UnsuccessfulBlossomUpload::class)
     suspend fun upload(
         uri: Uri,
         userId: String,
@@ -43,7 +43,5 @@ class FileUploadRepository @Inject constructor(
             )
         }
 
-    suspend fun cancelNoteAttachmentUpload(userId: String, uploadId: String) {
-        // TODO Remove this and clean the code
-    }
+    suspend fun cancelOrDelete(userId: String, uploadId: String) = Unit
 }

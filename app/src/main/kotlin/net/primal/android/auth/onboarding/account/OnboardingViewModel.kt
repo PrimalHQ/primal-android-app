@@ -21,7 +21,7 @@ import net.primal.android.auth.onboarding.account.ui.model.FollowGroupMember
 import net.primal.android.auth.repository.CreateAccountHandler
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.profile.domain.ProfileMetadata
-import net.primal.core.networking.primal.api.UnsuccessfulFileUpload
+import net.primal.core.networking.blossom.UnsuccessfulBlossomUpload
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
@@ -155,7 +155,7 @@ class OnboardingViewModel @Inject constructor(
                     interests = uiState.selectedSuggestions,
                 )
                 setState { copy(accountCreated = true, accountCreationStep = AccountCreationStep.AccountCreated) }
-            } catch (error: UnsuccessfulFileUpload) {
+            } catch (error: UnsuccessfulBlossomUpload) {
                 Timber.w(error)
                 setState { copy(error = UiState.OnboardingError.ImageUploadFailed(error)) }
             } catch (error: CreateAccountHandler.AccountCreationException) {
@@ -178,7 +178,7 @@ class OnboardingViewModel @Inject constructor(
                         fileUploader.uploadFile(keyPair = keyPair, uri = avatarUri)
                     }
                     setState { copy(avatarRemoteUrl = uploadResult.remoteUrl) }
-                } catch (error: UnsuccessfulFileUpload) {
+                } catch (error: UnsuccessfulBlossomUpload) {
                     Timber.w(error)
                 } catch (error: WssException) {
                     Timber.w(error)
@@ -202,7 +202,7 @@ class OnboardingViewModel @Inject constructor(
                         fileUploader.uploadFile(keyPair = keyPair, uri = bannerUri)
                     }
                     setState { copy(bannerRemoteUrl = uploadResult.remoteUrl) }
-                } catch (error: UnsuccessfulFileUpload) {
+                } catch (error: UnsuccessfulBlossomUpload) {
                     Timber.w(error)
                 } catch (error: WssException) {
                     Timber.w(error)

@@ -1,6 +1,5 @@
-package net.primal.core.networking.primal.api
+package net.primal.core.networking.blossom
 
-import net.primal.core.networking.primal.api.model.BlobDescriptor
 import okio.BufferedSource
 
 interface BlossomUploader {

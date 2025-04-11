@@ -41,7 +41,7 @@ import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.networking.upload.FileUploadRepository
+import net.primal.android.networking.upload.BlossomUploadService
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
@@ -49,7 +49,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
-import net.primal.core.networking.primal.api.UnsuccessfulFileUpload
+import net.primal.core.networking.blossom.UnsuccessfulBlossomUpload
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.nostr.MAX_RELAY_HINTS
 import net.primal.domain.nostr.Naddr
@@ -75,7 +75,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
     private val notePublishHandler: NotePublishHandler,
-    private val fileUploadRepository: FileUploadRepository,
+    private val blossomUploadService: BlossomUploadService,
     private val highlightRepository: HighlightRepository,
     private val exploreRepository: ExploreRepository,
     private val userRepository: UserRepository,
@@ -388,7 +388,7 @@ class NoteEditorViewModel @AssistedInject constructor(
             updatedAttachment = updatedAttachment.copy(uploadError = null)
             updateNoteAttachmentState(attachment = updatedAttachment)
 
-            val uploadResult = fileUploadRepository.upload(
+            val uploadResult = blossomUploadService.upload(
                 uri = attachment.localUri,
                 userId = activeAccountStore.activeUserId(),
                 uploadId = uploadId,
@@ -416,7 +416,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                 )
                 updateNoteAttachmentState(updatedAttachment)
             }
-        } catch (error: UnsuccessfulFileUpload) {
+        } catch (error: UnsuccessfulBlossomUpload) {
             Timber.w(error)
             updateNoteAttachmentState(attachment = updatedAttachment.copy(uploadError = error))
         } catch (error: SignatureException) {
@@ -453,7 +453,7 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             this@cancel.job.cancel()
             runCatching {
-                fileUploadRepository.cancelNoteAttachmentUpload(
+                blossomUploadService.cancelOrDelete(
                     userId = activeAccountStore.activeUserId(),
                     uploadId = this@cancel.id,
                 )
