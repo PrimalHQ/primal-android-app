@@ -15,14 +15,14 @@ import net.primal.android.thread.articles.ArticleContract.UiEvent
 import net.primal.android.thread.articles.ArticleContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.domain.BookmarkType
+import net.primal.domain.bookmarks.BookmarkType
+import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.nostr.PublicBookmarksNotFoundException
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.publisher.MissingRelaysException
-import net.primal.domain.repository.MutedUserRepository
-import net.primal.domain.repository.ProfileRepository
-import net.primal.domain.repository.PublicBookmarksRepository
+import net.primal.domain.profile.MutedUserRepository
+import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel

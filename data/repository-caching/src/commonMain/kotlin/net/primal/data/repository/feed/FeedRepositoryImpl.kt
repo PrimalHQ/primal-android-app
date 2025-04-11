@@ -26,12 +26,12 @@ import net.primal.data.repository.feed.processors.persistNoteRepliesAndArticleCo
 import net.primal.data.repository.feed.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.local.mapAsFeedPostDO
 import net.primal.data.repository.mappers.remote.asFeedPageSnapshot
-import net.primal.domain.error.NetworkException
-import net.primal.domain.model.FeedPageSnapshot
-import net.primal.domain.model.FeedPost as FeedPostDO
-import net.primal.domain.repository.FeedRepository
-import net.primal.domain.repository.FeedRepository.Companion.DEFAULT_PAGE_SIZE
-import net.primal.domain.supportsNoteReposts
+import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.feeds.supportsNoteReposts
+import net.primal.domain.posts.FeedPageSnapshot
+import net.primal.domain.posts.FeedPost as FeedPostDO
+import net.primal.domain.posts.FeedRepository
+import net.primal.domain.posts.FeedRepository.Companion.DEFAULT_PAGE_SIZE
 
 internal class FeedRepositoryImpl(
     private val feedApi: FeedApi,

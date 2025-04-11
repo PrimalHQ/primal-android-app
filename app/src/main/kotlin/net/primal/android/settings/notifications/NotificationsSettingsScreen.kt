@@ -47,8 +47,8 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiState.ApiError
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.domain.NotificationSection
-import net.primal.domain.NotificationType
+import net.primal.domain.notifications.NotificationSection
+import net.primal.domain.notifications.NotificationType
 
 @Composable
 fun NotificationsSettingsScreen(viewModel: NotificationsSettingsViewModel, onClose: () -> Unit) {
@@ -321,7 +321,14 @@ fun LaunchedErrorHandler(viewModel: NotificationsSettingsViewModel) {
 fun PreviewNotificationsSettingsScreen() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         NotificationsSettingsScreen(
-            state = NotificationsSettingsContract.UiState(),
+            state = NotificationsSettingsContract.UiState(
+                notificationSwitches = listOf(
+                    NotificationSwitchUi(
+                        notificationType = NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED,
+                        enabled = true,
+                    ),
+                ),
+            ),
             onClose = {},
             eventPublisher = {},
         )

@@ -8,7 +8,7 @@ import net.primal.android.user.domain.Badges
 import net.primal.android.user.domain.PrimalWallet
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.transactions.list.TransactionListItemDataUi
-import net.primal.domain.CdnImage
+import net.primal.domain.links.CdnImage
 
 interface WalletDashboardContract {
     data class UiState(

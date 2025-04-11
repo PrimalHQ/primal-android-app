@@ -9,15 +9,15 @@ import net.primal.data.local.dao.profiles.ProfileData
 import net.primal.data.local.dao.reads.ArticleData
 import net.primal.data.repository.mappers.authorNameUiFriendly
 import net.primal.data.repository.mappers.usernameUiFriendly
-import net.primal.domain.CdnResource
-import net.primal.domain.EventLinkPreviewData
-import net.primal.domain.EventUriNostrReference
-import net.primal.domain.EventUriNostrType
-import net.primal.domain.ReferencedArticle
-import net.primal.domain.ReferencedHighlight
-import net.primal.domain.ReferencedNote
-import net.primal.domain.ReferencedUser
-import net.primal.domain.ReferencedZap
+import net.primal.domain.links.CdnResource
+import net.primal.domain.links.EventLinkPreviewData
+import net.primal.domain.links.EventUriNostrReference
+import net.primal.domain.links.EventUriNostrType
+import net.primal.domain.links.ReferencedArticle
+import net.primal.domain.links.ReferencedHighlight
+import net.primal.domain.links.ReferencedNote
+import net.primal.domain.links.ReferencedUser
+import net.primal.domain.links.ReferencedZap
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV
@@ -36,7 +36,7 @@ import net.primal.domain.nostr.utils.extractEventId
 import net.primal.domain.nostr.utils.extractNoteId
 import net.primal.domain.nostr.utils.extractProfileId
 import net.primal.domain.nostr.utils.isNostrUri
-import net.primal.domain.utils.wordsCountToReadingTime
+import net.primal.domain.reads.wordsCountToReadingTime
 
 fun PostData.toNevent() =
     Nevent(

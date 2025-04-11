@@ -51,7 +51,7 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme.Sunset
-import net.primal.domain.NotificationType
+import net.primal.domain.notifications.NotificationType
 
 @Composable
 fun NotificationListItem(

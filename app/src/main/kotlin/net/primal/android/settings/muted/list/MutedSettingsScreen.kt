@@ -33,7 +33,7 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.domain.CdnImage
+import net.primal.domain.links.CdnImage
 
 @Composable
 fun MutedSettingsScreen(

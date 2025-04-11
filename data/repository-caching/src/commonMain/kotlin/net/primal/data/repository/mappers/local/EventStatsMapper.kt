@@ -1,7 +1,7 @@
 package net.primal.data.repository.mappers.local
 
 import net.primal.data.local.dao.events.EventStats
-import net.primal.domain.model.NostrEventStats
+import net.primal.domain.events.NostrEventStats
 
 fun EventStats.asNostrEventStats(): NostrEventStats {
     return NostrEventStats(

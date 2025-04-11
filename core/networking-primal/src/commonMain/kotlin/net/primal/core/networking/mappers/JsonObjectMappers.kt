@@ -4,7 +4,7 @@ import io.github.aakira.napier.Napier
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 import net.primal.core.networking.serialization.SocketsJson
-import net.primal.domain.PrimalEvent
+import net.primal.domain.common.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 
 fun JsonObject?.asNostrEventOrNull(): NostrEvent? {

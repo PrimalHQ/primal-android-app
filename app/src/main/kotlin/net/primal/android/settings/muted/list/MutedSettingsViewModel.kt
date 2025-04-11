@@ -18,7 +18,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.nostr.cryptography.SignatureException
-import net.primal.domain.repository.MutedUserRepository
+import net.primal.domain.profile.MutedUserRepository
 import timber.log.Timber
 
 @HiltViewModel

@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import kotlin.time.Duration.Companion.milliseconds
 import net.primal.android.theme.AppTheme
-import net.primal.domain.EventUriType
+import net.primal.domain.links.EventUriType
 
 private fun String.convertToTidalEmbedUrl(): String {
     var embedString = this

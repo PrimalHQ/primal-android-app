@@ -8,25 +8,25 @@ import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.data.repository.factory.PrimalRepositoryFactory
+import net.primal.domain.bookmarks.PublicBookmarksRepository
+import net.primal.domain.events.EventInteractionRepository
+import net.primal.domain.events.EventRelayHintsRepository
+import net.primal.domain.events.EventRepository
+import net.primal.domain.explore.ExploreRepository
+import net.primal.domain.feeds.FeedsRepository
+import net.primal.domain.global.CachingImportRepository
+import net.primal.domain.links.EventUriRepository
+import net.primal.domain.messages.ChatRepository
 import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.nostr.zaps.NostrZapperFactory
+import net.primal.domain.notifications.NotificationRepository
+import net.primal.domain.posts.FeedRepository
+import net.primal.domain.profile.MutedUserRepository
+import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.publisher.PrimalPublisher
-import net.primal.domain.repository.ArticleRepository
-import net.primal.domain.repository.CachingImportRepository
-import net.primal.domain.repository.ChatRepository
-import net.primal.domain.repository.EventInteractionRepository
-import net.primal.domain.repository.EventRelayHintsRepository
-import net.primal.domain.repository.EventRepository
-import net.primal.domain.repository.EventUriRepository
-import net.primal.domain.repository.ExploreRepository
-import net.primal.domain.repository.FeedRepository
-import net.primal.domain.repository.FeedsRepository
-import net.primal.domain.repository.HighlightRepository
-import net.primal.domain.repository.MutedUserRepository
-import net.primal.domain.repository.NotificationRepository
-import net.primal.domain.repository.ProfileRepository
-import net.primal.domain.repository.PublicBookmarksRepository
-import net.primal.domain.repository.UserDataCleanupRepository
+import net.primal.domain.reads.ArticleRepository
+import net.primal.domain.reads.HighlightRepository
+import net.primal.domain.user.UserDataCleanupRepository
 
 @Suppress("TooManyFunctions")
 @Module

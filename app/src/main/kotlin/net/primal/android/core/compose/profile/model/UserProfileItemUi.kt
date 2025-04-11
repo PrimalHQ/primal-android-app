@@ -3,9 +3,9 @@ package net.primal.android.core.compose.profile.model
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
-import net.primal.domain.CdnImage
-import net.primal.domain.UserProfileSearchItem
-import net.primal.domain.model.ProfileData as ProfileDataDO
+import net.primal.domain.common.UserProfileSearchItem
+import net.primal.domain.links.CdnImage
+import net.primal.domain.profile.ProfileData as ProfileDataDO
 
 data class UserProfileItemUi(
     val profileId: String,

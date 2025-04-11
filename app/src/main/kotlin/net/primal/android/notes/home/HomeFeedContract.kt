@@ -3,7 +3,7 @@ package net.primal.android.notes.home
 import net.primal.android.feeds.list.ui.model.FeedUi
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.user.domain.Badges
-import net.primal.domain.CdnImage
+import net.primal.domain.links.CdnImage
 
 interface HomeFeedContract {
 

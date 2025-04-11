@@ -23,10 +23,10 @@ import net.primal.data.remote.api.feed.FeedApi
 import net.primal.data.remote.api.feed.model.FeedBySpecRequestBody
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.repository.feed.processors.FeedProcessor
-import net.primal.domain.isNotesBookmarkFeedSpec
-import net.primal.domain.isProfileAuthoredNoteRepliesFeedSpec
-import net.primal.domain.isProfileAuthoredNotesFeedSpec
-import net.primal.domain.supportsUpwardsNotesPagination
+import net.primal.domain.feeds.isNotesBookmarkFeedSpec
+import net.primal.domain.feeds.isProfileAuthoredNoteRepliesFeedSpec
+import net.primal.domain.feeds.isProfileAuthoredNotesFeedSpec
+import net.primal.domain.feeds.supportsUpwardsNotesPagination
 
 @ExperimentalPagingApi
 internal class NoteFeedRemoteMediator(

@@ -18,7 +18,7 @@ import net.primal.domain.nostr.asKindTag
 import net.primal.domain.nostr.asPubkeyTag
 import net.primal.domain.nostr.asReplaceableEventTag
 import net.primal.domain.publisher.PrimalPublisher
-import net.primal.domain.repository.HighlightRepository
+import net.primal.domain.reads.HighlightRepository
 
 class HighlightRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,

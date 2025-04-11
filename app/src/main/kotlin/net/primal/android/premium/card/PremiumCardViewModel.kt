@@ -13,7 +13,7 @@ import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.navigation.profileIdOrThrow
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.domain.repository.ProfileRepository
+import net.primal.domain.profile.ProfileRepository
 
 @HiltViewModel
 class PremiumCardViewModel @Inject constructor(

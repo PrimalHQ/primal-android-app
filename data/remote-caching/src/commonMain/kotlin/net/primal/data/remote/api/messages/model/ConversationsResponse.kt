@@ -1,7 +1,7 @@
 package net.primal.data.remote.api.messages.model
 
 import net.primal.data.remote.model.ConversationsSummary
-import net.primal.domain.PrimalEvent
+import net.primal.domain.common.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 
 data class ConversationsResponse(

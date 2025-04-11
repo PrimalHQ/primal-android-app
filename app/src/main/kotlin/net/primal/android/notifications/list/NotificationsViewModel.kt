@@ -31,10 +31,10 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.domain.model.Notification
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.utils.asEllipsizedNpub
-import net.primal.domain.repository.NotificationRepository
+import net.primal.domain.notifications.Notification
+import net.primal.domain.notifications.NotificationRepository
 import timber.log.Timber
 
 @HiltViewModel

@@ -35,13 +35,13 @@ import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
-import net.primal.domain.isPremiumFeedSpec
-import net.primal.domain.model.FeedPageSnapshot
-import net.primal.domain.model.FeedPost
+import net.primal.domain.feeds.isPremiumFeedSpec
+import net.primal.domain.feeds.supportsUpwardsNotesPagination
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.findFirstEventId
-import net.primal.domain.repository.FeedRepository
-import net.primal.domain.supportsUpwardsNotesPagination
+import net.primal.domain.posts.FeedPageSnapshot
+import net.primal.domain.posts.FeedPost
+import net.primal.domain.posts.FeedRepository
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = NoteFeedViewModel.Factory::class)

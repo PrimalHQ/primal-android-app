@@ -3,8 +3,8 @@ package net.primal.data.local.serialization
 import androidx.room.TypeConverter
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
-import net.primal.domain.CdnImage
-import net.primal.domain.CdnResourceVariant
+import net.primal.domain.links.CdnImage
+import net.primal.domain.links.CdnResourceVariant
 
 class CdnTypeConverters {
 

@@ -69,7 +69,7 @@ import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.CurrencyConversionUtils.toUsd
 import net.primal.core.utils.toFloat
 import net.primal.core.utils.toLong
-import net.primal.domain.CdnImage
+import net.primal.domain.links.CdnImage
 
 @Composable
 fun TransactionListItem(

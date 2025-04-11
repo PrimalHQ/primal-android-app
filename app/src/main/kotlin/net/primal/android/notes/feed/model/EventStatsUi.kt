@@ -1,8 +1,8 @@
 package net.primal.android.notes.feed.model
 
-import net.primal.domain.model.FeedPostStats
-import net.primal.domain.model.NostrEventStats
-import net.primal.domain.model.NostrEventUserStats
+import net.primal.domain.events.NostrEventStats
+import net.primal.domain.events.NostrEventUserStats
+import net.primal.domain.posts.FeedPostStats
 
 data class EventStatsUi(
     val repliesCount: Long = 0,

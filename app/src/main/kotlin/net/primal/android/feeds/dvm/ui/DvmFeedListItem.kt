@@ -57,7 +57,7 @@ import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.zaps.canZap
-import net.primal.domain.CdnImage
+import net.primal.domain.links.CdnImage
 
 private val PaidBackground = Color(0xFFFC6337)
 

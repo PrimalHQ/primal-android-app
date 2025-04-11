@@ -2,8 +2,8 @@ package net.primal.data.repository.mappers.remote
 
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.local.dao.notifications.NotificationData
-import net.primal.domain.NotificationType
-import net.primal.domain.PrimalEvent
+import net.primal.domain.common.PrimalEvent
+import net.primal.domain.notifications.NotificationType
 
 private fun ContentPrimalNotification.parseActionUserId(type: NotificationType): String? {
     return when (type) {

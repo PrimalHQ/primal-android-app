@@ -2,7 +2,7 @@ package net.primal.data.local.dao.reads
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import net.primal.domain.CdnImage
+import net.primal.domain.links.CdnImage
 
 @Entity
 data class ArticleData(

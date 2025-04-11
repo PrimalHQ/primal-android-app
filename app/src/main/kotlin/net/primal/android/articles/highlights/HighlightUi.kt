@@ -5,9 +5,9 @@ import net.primal.android.core.compose.profile.model.asFallbackProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.thread.articles.details.ui.model.HighlightCommentUi
 import net.primal.android.thread.articles.details.ui.model.toHighlightCommentUi
-import net.primal.domain.model.Highlight
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.reads.Highlight
 
 data class HighlightUi(
     val highlightId: String,

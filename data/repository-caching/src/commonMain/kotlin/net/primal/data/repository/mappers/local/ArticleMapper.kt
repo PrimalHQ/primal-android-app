@@ -1,7 +1,7 @@
 package net.primal.data.repository.mappers.local
 
 import net.primal.data.local.dao.reads.Article as ArticlePO
-import net.primal.domain.model.Article as ArticleDO
+import net.primal.domain.reads.Article as ArticleDO
 
 fun ArticlePO.asArticleDO(): ArticleDO {
     return ArticleDO(

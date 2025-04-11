@@ -53,8 +53,8 @@ import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.feeds.list.FeedsBottomSheet
 import net.primal.android.feeds.list.ui.model.FeedUi
 import net.primal.android.premium.legend.domain.LegendaryCustomization
-import net.primal.domain.CdnImage
-import net.primal.domain.FeedSpecKind
+import net.primal.domain.feeds.FeedSpecKind
+import net.primal.domain.links.CdnImage
 
 @Composable
 fun ReadsScreen(

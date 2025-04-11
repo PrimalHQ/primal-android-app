@@ -17,10 +17,10 @@ import net.primal.android.user.domain.Credential
 import net.primal.android.user.domain.LoginType
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.domain.repository.MutedUserRepository
-import net.primal.domain.repository.PublicBookmarksRepository
+import net.primal.domain.profile.MutedUserRepository
 import org.junit.Rule
 import org.junit.Test
 

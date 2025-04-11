@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import net.primal.android.notifications.list.ui.NotificationUi
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.user.domain.Badges
-import net.primal.domain.CdnImage
+import net.primal.domain.links.CdnImage
 
 interface NotificationsContract {
 

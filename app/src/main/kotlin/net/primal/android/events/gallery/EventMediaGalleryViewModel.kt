@@ -24,8 +24,8 @@ import net.primal.android.navigation.mediaPositionMs
 import net.primal.android.navigation.mediaUrl
 import net.primal.android.navigation.noteIdOrThrow
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.domain.EventUriType
-import net.primal.domain.repository.EventUriRepository
+import net.primal.domain.links.EventUriRepository
+import net.primal.domain.links.EventUriType
 import timber.log.Timber
 
 @HiltViewModel

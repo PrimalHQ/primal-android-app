@@ -1,6 +1,6 @@
 package net.primal.android.explore.feed
 
-import net.primal.domain.FeedSpecKind
+import net.primal.domain.feeds.FeedSpecKind
 
 interface ExploreFeedContract {
     data class UiState(

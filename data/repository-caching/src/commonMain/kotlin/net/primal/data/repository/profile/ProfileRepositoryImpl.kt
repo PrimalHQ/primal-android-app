@@ -22,17 +22,17 @@ import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.data.repository.mappers.remote.takeContentAsPrimalUserFollowersCountsOrNull
-import net.primal.domain.UserProfileSearchItem
-import net.primal.domain.model.ProfileData
-import net.primal.domain.model.ProfileStats
+import net.primal.domain.common.UserProfileSearchItem
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.ReportType
 import net.primal.domain.nostr.asEventIdTag
 import net.primal.domain.nostr.asPubkeyTag
 import net.primal.domain.nostr.asReplaceableEventTag
+import net.primal.domain.profile.ProfileData
+import net.primal.domain.profile.ProfileRepository
+import net.primal.domain.profile.ProfileStats
 import net.primal.domain.publisher.PrimalPublisher
-import net.primal.domain.repository.ProfileRepository
 
 class ProfileRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,

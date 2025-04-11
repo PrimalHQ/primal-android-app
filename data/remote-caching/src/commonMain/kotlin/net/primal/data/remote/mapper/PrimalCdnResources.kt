@@ -2,9 +2,9 @@ package net.primal.data.remote.mapper
 
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.remote.model.ContentPrimalEventResources
-import net.primal.domain.CdnResource
-import net.primal.domain.CdnResourceVariant
-import net.primal.domain.PrimalEvent
+import net.primal.domain.common.PrimalEvent
+import net.primal.domain.links.CdnResource
+import net.primal.domain.links.CdnResourceVariant
 
 private fun List<PrimalEvent>.flatMapNotNullAsContentPrimalEventResources(): List<ContentPrimalEventResources> =
     mapNotNull { it.content.decodeFromJsonStringOrNull<ContentPrimalEventResources>() }

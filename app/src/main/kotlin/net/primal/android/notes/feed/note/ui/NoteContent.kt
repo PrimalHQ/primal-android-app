@@ -45,9 +45,9 @@ import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.domain.EventUriNostrType
-import net.primal.domain.ReferencedNote
-import net.primal.domain.ReferencedUser
+import net.primal.domain.links.EventUriNostrType
+import net.primal.domain.links.ReferencedNote
+import net.primal.domain.links.ReferencedUser
 import net.primal.domain.nostr.utils.clearAtSignFromNostrUris
 
 private const val PROFILE_ID_ANNOTATION_TAG = "profileId"

@@ -28,8 +28,8 @@ import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.domain.NotificationType
 import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.notifications.NotificationType
 import timber.log.Timber
 
 @HiltViewModel

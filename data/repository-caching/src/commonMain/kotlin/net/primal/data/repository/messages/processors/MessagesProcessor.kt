@@ -20,7 +20,7 @@ import net.primal.data.repository.mappers.remote.mapReferencedNostrUriAsEventUri
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
-import net.primal.domain.PrimalEvent
+import net.primal.domain.common.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.nostr.utils.extractNoteId

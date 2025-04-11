@@ -35,7 +35,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.domain.ContentDisplaySettings
-import net.primal.domain.CdnImage
+import net.primal.domain.links.CdnImage
 
 @Composable
 fun FeedNoteHeader(

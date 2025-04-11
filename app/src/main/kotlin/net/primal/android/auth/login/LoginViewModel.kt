@@ -27,7 +27,7 @@ import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
 import net.primal.domain.nostr.cryptography.utils.extractKeyPairFromPrivateKeyOrThrow
 import net.primal.domain.nostr.utils.isValidNostrPrivateKey
 import net.primal.domain.nostr.utils.isValidNostrPublicKey
-import net.primal.domain.repository.ProfileRepository
+import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel

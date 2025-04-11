@@ -36,9 +36,9 @@ import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.getMaximumUsdAmount
-import net.primal.domain.model.ProfileData
 import net.primal.domain.nostr.cryptography.SignatureException
-import net.primal.domain.repository.ProfileRepository
+import net.primal.domain.profile.ProfileData
+import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel

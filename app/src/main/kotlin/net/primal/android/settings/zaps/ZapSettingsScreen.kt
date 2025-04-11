@@ -67,10 +67,10 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
-import net.primal.domain.ContentZapConfigItem
-import net.primal.domain.ContentZapDefault
-import net.primal.domain.DEFAULT_ZAP_CONFIG
-import net.primal.domain.DEFAULT_ZAP_DEFAULT
+import net.primal.domain.notifications.ContentZapConfigItem
+import net.primal.domain.notifications.ContentZapDefault
+import net.primal.domain.notifications.DEFAULT_ZAP_CONFIG
+import net.primal.domain.notifications.DEFAULT_ZAP_DEFAULT
 
 @Composable
 fun ZapSettingsScreen(viewModel: ZapSettingsViewModel, onClose: () -> Unit) {

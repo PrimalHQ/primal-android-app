@@ -19,7 +19,10 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.domain.BookmarkType
+import net.primal.domain.bookmarks.BookmarkType
+import net.primal.domain.bookmarks.PublicBookmarksRepository
+import net.primal.domain.events.EventInteractionRepository
+import net.primal.domain.events.EventRelayHintsRepository
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.PublicBookmarksNotFoundException
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
@@ -28,11 +31,8 @@ import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.nostr.zaps.ZapFailureException
 import net.primal.domain.nostr.zaps.ZapRequestException
 import net.primal.domain.nostr.zaps.ZapTarget
-import net.primal.domain.repository.EventInteractionRepository
-import net.primal.domain.repository.EventRelayHintsRepository
-import net.primal.domain.repository.MutedUserRepository
-import net.primal.domain.repository.ProfileRepository
-import net.primal.domain.repository.PublicBookmarksRepository
+import net.primal.domain.profile.MutedUserRepository
+import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = NoteViewModel.Factory::class)

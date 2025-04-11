@@ -24,7 +24,7 @@ import net.primal.data.remote.api.articles.model.ArticleResponse
 import net.primal.data.repository.articles.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.remote.mapNotNullAsArticleDataPO
 import net.primal.data.repository.mappers.remote.orderByPagingIfNotNull
-import net.primal.domain.ContentPrimalPaging
+import net.primal.domain.common.ContentPrimalPaging
 
 @ExperimentalPagingApi
 internal class ArticleFeedMediator(

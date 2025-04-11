@@ -36,7 +36,7 @@ import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.ext.onFocusSelectAll
 import net.primal.android.theme.AppTheme
-import net.primal.domain.FeedSpecKind
+import net.primal.domain.feeds.FeedSpecKind
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

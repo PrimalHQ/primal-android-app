@@ -11,7 +11,7 @@ import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.primal.PrimalQueryResult
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.domain.PrimalServerType
+import net.primal.domain.global.PrimalServerType
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import timber.log.Timber

@@ -4,12 +4,8 @@ import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.detectUrls
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
-import net.primal.domain.CdnImage
-import net.primal.domain.CdnResource
-import net.primal.domain.ContentProfilePremiumInfo
-import net.primal.domain.PrimalLegendProfile
-import net.primal.domain.PrimalPremiumInfo
-import net.primal.domain.model.ProfileData
+import net.primal.domain.links.CdnImage
+import net.primal.domain.links.CdnResource
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.serialization.toNostrJsonObject
@@ -17,6 +13,10 @@ import net.primal.domain.nostr.utils.decodeLNUrlOrNull
 import net.primal.domain.nostr.utils.parseAsLNUrlOrNull
 import net.primal.domain.nostr.utils.parseHashtags
 import net.primal.domain.nostr.utils.parseNostrUris
+import net.primal.domain.premium.ContentProfilePremiumInfo
+import net.primal.domain.premium.PrimalLegendProfile
+import net.primal.domain.premium.PrimalPremiumInfo
+import net.primal.domain.profile.ProfileData
 
 fun List<NostrEvent>.mapAsProfileDataDO(
     cdnResources: List<CdnResource>,

@@ -135,10 +135,10 @@ import net.primal.android.thread.notes.ThreadScreen
 import net.primal.android.thread.notes.ThreadViewModel
 import net.primal.android.wallet.activation.WalletActivationViewModel
 import net.primal.core.utils.serialization.encodeToJsonString
-import net.primal.domain.buildAdvancedSearchNotesFeedSpec
-import net.primal.domain.buildAdvancedSearchNotificationsFeedSpec
-import net.primal.domain.buildAdvancedSearchReadsFeedSpec
-import net.primal.domain.buildReadsTopicFeedSpec
+import net.primal.domain.feeds.buildAdvancedSearchNotesFeedSpec
+import net.primal.domain.feeds.buildAdvancedSearchNotificationsFeedSpec
+import net.primal.domain.feeds.buildAdvancedSearchReadsFeedSpec
+import net.primal.domain.feeds.buildReadsTopicFeedSpec
 
 private fun NavController.navigateToWelcome() =
     navigate(

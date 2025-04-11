@@ -17,8 +17,8 @@ import net.primal.android.notes.feed.grid.MediaFeedContract.UiState
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.domain.isPremiumFeedSpec
-import net.primal.domain.repository.FeedRepository
+import net.primal.domain.feeds.isPremiumFeedSpec
+import net.primal.domain.posts.FeedRepository
 
 @HiltViewModel(assistedFactory = MediaFeedViewModel.Factory::class)
 class MediaFeedViewModel @AssistedInject constructor(

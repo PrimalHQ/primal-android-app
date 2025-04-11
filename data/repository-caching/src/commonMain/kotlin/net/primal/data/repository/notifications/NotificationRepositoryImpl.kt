@@ -16,9 +16,9 @@ import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.remote.api.notifications.NotificationsApi
 import net.primal.data.repository.mappers.local.asNotificationDO
 import net.primal.data.repository.notifications.paging.NotificationsRemoteMediator
-import net.primal.domain.model.Notification as NotificationDO
 import net.primal.domain.nostr.NostrEvent
-import net.primal.domain.repository.NotificationRepository
+import net.primal.domain.notifications.Notification as NotificationDO
+import net.primal.domain.notifications.NotificationRepository
 
 @OptIn(ExperimentalPagingApi::class)
 class NotificationRepositoryImpl(

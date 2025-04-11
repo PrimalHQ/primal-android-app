@@ -2,7 +2,7 @@ package net.primal.android.explore.home
 
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.user.domain.Badges
-import net.primal.domain.CdnImage
+import net.primal.domain.links.CdnImage
 
 interface ExploreHomeContract {
     data class UiState(

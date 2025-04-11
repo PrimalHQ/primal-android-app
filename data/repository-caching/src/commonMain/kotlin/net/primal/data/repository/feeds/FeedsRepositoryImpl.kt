@@ -32,19 +32,19 @@ import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.data.repository.mappers.remote.takeContentAsPrimalUserScoresOrNull
-import net.primal.domain.DvmFeed
-import net.primal.domain.FEED_KIND_DVM
-import net.primal.domain.FeedSpecKind
-import net.primal.domain.PrimalEvent
-import net.primal.domain.buildSpec
-import net.primal.domain.model.PrimalFeed
+import net.primal.domain.common.PrimalEvent
+import net.primal.domain.feeds.DvmFeed
+import net.primal.domain.feeds.FEED_KIND_DVM
+import net.primal.domain.feeds.FeedSpecKind
+import net.primal.domain.feeds.FeedsRepository
+import net.primal.domain.feeds.PrimalFeed
+import net.primal.domain.feeds.buildSpec
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asIdentifierTag
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.findFirstIdentifier
 import net.primal.domain.nostr.utils.parseAsLNUrlOrNull
-import net.primal.domain.repository.FeedsRepository
 
 // TODO Consider splitting the repository into smaller ones
 class FeedsRepositoryImpl(

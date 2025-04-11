@@ -37,7 +37,7 @@ import net.primal.core.networking.primal.PrimalSocketSubscription
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.notifications.model.PubkeyRequestBody
-import net.primal.domain.PrimalEvent
+import net.primal.domain.common.PrimalEvent
 import net.primal.domain.nostr.NostrEventKind
 
 @Singleton

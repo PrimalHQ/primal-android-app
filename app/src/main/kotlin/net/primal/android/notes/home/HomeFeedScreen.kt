@@ -58,8 +58,8 @@ import net.primal.android.notes.feed.list.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedContract.UiEvent
 import net.primal.android.premium.legend.domain.LegendaryCustomization
-import net.primal.domain.CdnImage
-import net.primal.domain.FeedSpecKind
+import net.primal.domain.feeds.FeedSpecKind
+import net.primal.domain.links.CdnImage
 
 @Composable
 fun HomeFeedScreen(

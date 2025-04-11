@@ -9,10 +9,10 @@ import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.mapToRelayDO
 import net.primal.android.user.repository.RelayRepository
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.events.EventInteractionRepository
 import net.primal.domain.nostr.zaps.ZapFailureException
 import net.primal.domain.nostr.zaps.ZapRequestException
 import net.primal.domain.nostr.zaps.ZapTarget
-import net.primal.domain.repository.EventInteractionRepository
 
 class ZapHandler @Inject constructor(
     private val dispatcherProvider: DispatcherProvider,

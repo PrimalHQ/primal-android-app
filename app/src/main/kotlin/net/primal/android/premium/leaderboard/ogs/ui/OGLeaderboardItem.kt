@@ -23,7 +23,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.utils.formatToDefaultDateFormat
 import net.primal.android.theme.AppTheme
-import net.primal.domain.OGLeaderboardEntry
+import net.primal.domain.premium.OGLeaderboardEntry
 
 @Composable
 fun OGLeaderboardItem(

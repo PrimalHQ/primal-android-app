@@ -4,7 +4,7 @@ import java.time.Instant
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.wallet.domain.TxState
 import net.primal.android.wallet.domain.TxType
-import net.primal.domain.CdnImage
+import net.primal.domain.links.CdnImage
 
 data class TransactionListItemDataUi(
     val txId: String,

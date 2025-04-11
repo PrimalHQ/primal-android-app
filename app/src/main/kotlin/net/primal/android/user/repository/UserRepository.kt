@@ -35,15 +35,15 @@ import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.remote.api.users.UsersApi
-import net.primal.domain.UserProfileSearchItem
+import net.primal.domain.common.UserProfileSearchItem
+import net.primal.domain.global.CachingImportRepository
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
-import net.primal.domain.repository.CachingImportRepository
-import net.primal.domain.repository.ProfileRepository
-import net.primal.domain.repository.UserDataCleanupRepository
+import net.primal.domain.profile.ProfileRepository
+import net.primal.domain.user.UserDataCleanupRepository
 
 class UserRepository @Inject constructor(
     private val usersDatabase: UsersDatabase,

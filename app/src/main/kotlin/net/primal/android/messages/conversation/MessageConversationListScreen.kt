@@ -82,7 +82,7 @@ import net.primal.android.messages.conversation.model.MessageConversationUi
 import net.primal.android.notes.feed.model.NoteContentUi
 import net.primal.android.notes.feed.note.ui.renderContentAsAnnotatedString
 import net.primal.android.theme.AppTheme
-import net.primal.domain.ConversationRelation
+import net.primal.domain.messages.ConversationRelation
 
 @Composable
 fun MessageListScreen(

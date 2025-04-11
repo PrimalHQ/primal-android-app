@@ -51,6 +51,8 @@ import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.events.EventRelayHintsRepository
+import net.primal.domain.explore.ExploreRepository
 import net.primal.domain.nostr.MAX_RELAY_HINTS
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
@@ -61,11 +63,9 @@ import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.Nprofile
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.publisher.MissingRelaysException
-import net.primal.domain.repository.ArticleRepository
-import net.primal.domain.repository.EventRelayHintsRepository
-import net.primal.domain.repository.ExploreRepository
-import net.primal.domain.repository.FeedRepository
-import net.primal.domain.repository.HighlightRepository
+import net.primal.domain.posts.FeedRepository
+import net.primal.domain.reads.ArticleRepository
+import net.primal.domain.reads.HighlightRepository
 import net.primal.domain.upload.UploadJob
 import timber.log.Timber
 

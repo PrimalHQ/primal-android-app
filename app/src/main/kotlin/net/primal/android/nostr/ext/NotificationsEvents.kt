@@ -5,8 +5,8 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.notifications.domain.NotificationsSummary
 import net.primal.core.utils.serialization.CommonJson
-import net.primal.domain.NotificationType
-import net.primal.domain.PrimalEvent
+import net.primal.domain.common.PrimalEvent
+import net.primal.domain.notifications.NotificationType
 
 fun PrimalEvent.asNotificationSummary(): NotificationsSummary {
     val summaryJsonObject = CommonJson.parseToJsonElement(this.content).jsonObject

@@ -18,8 +18,8 @@ import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.domain.ExploreZapNoteData
-import net.primal.domain.repository.ExploreRepository
+import net.primal.domain.explore.ExploreRepository
+import net.primal.domain.explore.ExploreZapNoteData
 import timber.log.Timber
 
 @HiltViewModel

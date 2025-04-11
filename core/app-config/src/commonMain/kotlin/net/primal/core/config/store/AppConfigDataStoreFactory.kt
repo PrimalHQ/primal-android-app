@@ -3,7 +3,7 @@ package net.primal.core.config.store
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioStorage
-import net.primal.domain.AppConfig
+import net.primal.domain.global.AppConfig
 import okio.FileSystem
 import okio.Path.Companion.toPath
 import okio.SYSTEM

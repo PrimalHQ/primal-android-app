@@ -2,7 +2,7 @@ package net.primal.data.repository.mappers.local
 
 import net.primal.data.local.dao.messages.DirectMessage as DirectMessagePO
 import net.primal.data.local.dao.messages.DirectMessageData
-import net.primal.domain.model.DirectMessage as DirectMessageDO
+import net.primal.domain.messages.DirectMessage as DirectMessageDO
 
 fun DirectMessagePO.asDirectMessageDO(): DirectMessageDO {
     return this.data.asDirectMessageDO().copy(

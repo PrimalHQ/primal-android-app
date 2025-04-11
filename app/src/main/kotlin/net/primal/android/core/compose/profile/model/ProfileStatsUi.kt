@@ -1,6 +1,6 @@
 package net.primal.android.core.compose.profile.model
 
-import net.primal.domain.model.ProfileStats as ProfileStatsDO
+import net.primal.domain.profile.ProfileStats as ProfileStatsDO
 
 data class ProfileStatsUi(
     val followingCount: Int? = null,

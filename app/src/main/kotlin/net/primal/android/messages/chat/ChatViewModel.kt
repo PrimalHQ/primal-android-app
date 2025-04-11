@@ -33,12 +33,12 @@ import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.domain.model.DirectMessage
+import net.primal.domain.messages.ChatRepository
+import net.primal.domain.messages.DirectMessage
 import net.primal.domain.nostr.cryptography.MessageEncryptException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.publisher.MissingRelaysException
-import net.primal.domain.repository.ChatRepository
-import net.primal.domain.repository.ProfileRepository
+import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel

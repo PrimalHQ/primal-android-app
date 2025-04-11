@@ -1,7 +1,7 @@
 package net.primal.android.settings.keys
 
 import net.primal.android.premium.legend.domain.LegendaryCustomization
-import net.primal.domain.CdnImage
+import net.primal.domain.links.CdnImage
 
 interface KeysSettingsContract {
     data class UiState(

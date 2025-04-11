@@ -29,8 +29,8 @@ import net.primal.android.feeds.list.ui.DvmFeedMarketplace
 import net.primal.android.feeds.list.ui.FeedList
 import net.primal.android.feeds.list.ui.model.FeedUi
 import net.primal.android.theme.AppTheme
-import net.primal.domain.FeedSpecKind
-import net.primal.domain.buildSpec
+import net.primal.domain.feeds.FeedSpecKind
+import net.primal.domain.feeds.buildSpec
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

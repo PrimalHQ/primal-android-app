@@ -27,7 +27,7 @@ import net.primal.android.navigation.initialQuery
 import net.primal.android.navigation.postedBy
 import net.primal.android.navigation.searchKind
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
-import net.primal.domain.repository.ProfileRepository
+import net.primal.domain.profile.ProfileRepository
 
 @HiltViewModel
 class AdvancedSearchViewModel @Inject constructor(

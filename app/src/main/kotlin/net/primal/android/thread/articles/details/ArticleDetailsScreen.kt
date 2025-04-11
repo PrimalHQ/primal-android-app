@@ -108,7 +108,7 @@ import net.primal.android.thread.articles.details.ui.rendering.replaceProfileNos
 import net.primal.android.thread.articles.details.ui.rendering.splitMarkdownByInlineImages
 import net.primal.android.thread.articles.details.ui.rendering.splitMarkdownByNostrUris
 import net.primal.android.wallet.zaps.canZap
-import net.primal.domain.EventUriType
+import net.primal.domain.links.EventUriType
 import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.ReportType

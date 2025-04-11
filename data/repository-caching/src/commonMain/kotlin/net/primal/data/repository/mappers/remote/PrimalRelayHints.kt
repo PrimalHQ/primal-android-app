@@ -1,8 +1,8 @@
 package net.primal.data.repository.mappers.remote
 
 import net.primal.data.local.dao.events.EventRelayHints
-import net.primal.domain.PrimalEvent
-import net.primal.domain.serialization.takeContentOrNull
+import net.primal.domain.common.PrimalEvent
+import net.primal.domain.common.util.takeContentOrNull
 
 fun List<PrimalEvent>.flatMapAsEventHintsPO(): List<EventRelayHints> {
     val map = mutableMapOf<String, String>()

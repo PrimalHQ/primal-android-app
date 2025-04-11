@@ -1,10 +1,11 @@
 package net.primal.android.settings.notifications
 
 import net.primal.android.core.errors.SignatureUiError
-import net.primal.domain.NotificationType
+import net.primal.domain.notifications.NotificationType
 
 interface NotificationsSettingsContract {
     data class UiState(
+        val enabledPushNotifications: Boolean = false,
         val notificationSwitches: List<NotificationSwitchUi> = emptyList(),
         val error: ApiError? = null,
         val signatureError: SignatureUiError? = null,

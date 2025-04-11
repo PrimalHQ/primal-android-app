@@ -6,7 +6,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.data.remote.api.users.model.UserProfileResponse
-import net.primal.domain.PrimalEvent
+import net.primal.domain.common.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import org.junit.Rule

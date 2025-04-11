@@ -12,9 +12,9 @@ import kotlinx.coroutines.launch
 import net.primal.android.bookmarks.list.BookmarksContract.UiEvent
 import net.primal.android.bookmarks.list.BookmarksContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.domain.FeedSpecKind
-import net.primal.domain.buildArticleBookmarksFeedSpec
-import net.primal.domain.buildNotesBookmarksFeedSpec
+import net.primal.domain.feeds.FeedSpecKind
+import net.primal.domain.feeds.buildArticleBookmarksFeedSpec
+import net.primal.domain.feeds.buildNotesBookmarksFeedSpec
 
 @HiltViewModel
 class BookmarksViewModel @Inject constructor(

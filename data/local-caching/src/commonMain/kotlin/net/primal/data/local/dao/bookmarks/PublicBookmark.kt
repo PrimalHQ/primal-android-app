@@ -2,7 +2,7 @@ package net.primal.data.local.dao.bookmarks
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import net.primal.domain.BookmarkType
+import net.primal.domain.bookmarks.BookmarkType
 
 @Entity
 data class PublicBookmark(

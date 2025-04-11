@@ -7,14 +7,14 @@ import net.primal.data.local.dao.notes.FeedPostUserStats
 import net.primal.data.local.dao.notes.PostData
 import net.primal.data.repository.mappers.authorNameUiFriendly
 import net.primal.data.repository.mappers.usernameUiFriendly
-import net.primal.domain.EventZap
-import net.primal.domain.model.FeedPost
-import net.primal.domain.model.FeedPost as FeedPostDO
-import net.primal.domain.model.FeedPostAuthor
-import net.primal.domain.model.FeedPostRepostInfo
-import net.primal.domain.model.FeedPostStats
+import net.primal.domain.events.EventZap
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.nostr.utils.formatNip05Identifier
+import net.primal.domain.posts.FeedPost
+import net.primal.domain.posts.FeedPost as FeedPostDO
+import net.primal.domain.posts.FeedPostAuthor
+import net.primal.domain.posts.FeedPostRepostInfo
+import net.primal.domain.posts.FeedPostStats
 
 internal fun PostData.mapAsFeedPostDO(): FeedPost {
     return FeedPost(

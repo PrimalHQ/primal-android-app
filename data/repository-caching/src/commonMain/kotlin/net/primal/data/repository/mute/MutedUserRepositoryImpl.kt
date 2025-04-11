@@ -19,8 +19,8 @@ import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asPubkeyTag
+import net.primal.domain.profile.MutedUserRepository
 import net.primal.domain.publisher.PrimalPublisher
-import net.primal.domain.repository.MutedUserRepository
 
 class MutedUserRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
