@@ -1,5 +1,10 @@
 package net.primal.android.settings.notifications
 
+import android.app.NotificationManager
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,7 +27,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,6 +44,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
@@ -46,6 +61,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.res.painterResource
+import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiEvent.NotificationSettingsChanged
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiState.ApiError
 import net.primal.android.settings.notifications.ui.NotificationSwitchUi
@@ -99,6 +115,7 @@ fun NotificationsSettingsScreen(
     )
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 private fun NotificationsColumn(
     modifier: Modifier = Modifier,
@@ -111,15 +128,12 @@ private fun NotificationsColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         item {
-            EnablePushNotificationSection(
+            PushNotificationSection(
                 modifier = Modifier.padding(vertical = 12.dp),
-                enabled = true,
-                onClick = {
-                },
             )
         }
 
-        if (state.enabledPushNotifications || true) {
+        if (true) {
             item {
                 NotificationsSettingsBlock(
                     section = NotificationSettingsSection.PUSH_NOTIFICATIONS,
@@ -220,7 +234,7 @@ private fun NotificationSettingsRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onCheckedChange?.invoke(!enabled) }
+            .clickable(enabled = onCheckedChange != null, onClick = { onCheckedChange?.invoke(!enabled) })
             .padding(horizontal = 16.dp)
             .padding(vertical = if (longTitleText) 8.dp else 0.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -255,12 +269,41 @@ private fun NotificationSettingsRow(
     }
 }
 
+@ExperimentalPermissionsApi
 @Composable
-private fun EnablePushNotificationSection(
-    modifier: Modifier,
-    enabled: Boolean,
-    onClick: () -> Unit,
-) {
+private fun PushNotificationSection(modifier: Modifier) {
+    val context = LocalContext.current
+    var returningFromOtherScreenTimestamp by remember { mutableLongStateOf(0) }
+    var deviceEnabledPushNotifications by remember { mutableStateOf(false) }
+    val notificationPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        rememberPermissionState(permission = android.Manifest.permission.POST_NOTIFICATIONS)
+    } else {
+        null
+    }
+
+    DisposableLifecycleObserverEffect(Unit) {
+        if (it == Lifecycle.Event.ON_RESUME) {
+            returningFromOtherScreenTimestamp = System.currentTimeMillis()
+        }
+    }
+
+    LaunchedEffect(context, notificationPermission?.status, returningFromOtherScreenTimestamp) {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val locallyEnabled = notificationManager.areNotificationsEnabled()
+        deviceEnabledPushNotifications = if (notificationPermission == null) {
+            locallyEnabled
+        } else {
+            locallyEnabled && notificationPermission.status.isGranted == true
+        }
+    }
+
+    fun openSystemSettings() {
+        val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+        }
+        context.startActivity(intent)
+    }
+
     Column(modifier = modifier) {
         Box(
             modifier = Modifier
@@ -270,16 +313,32 @@ private fun EnablePushNotificationSection(
                     shape = RoundedCornerShape(12.dp),
                 )
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(size = 12.dp))
-                .clickable {
-                    onClick()
-                },
+                .clip(RoundedCornerShape(size = 12.dp)),
             contentAlignment = Alignment.Center,
         ) {
             NotificationSettingsRow(
                 modifier = Modifier.height(48.dp),
                 title = stringResource(R.string.settings_notifications_enable_push_notifications),
-                enabled = enabled,
+                enabled = deviceEnabledPushNotifications,
+                onCheckedChange = { newEnabled ->
+                    if (newEnabled) {
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                            notificationPermission?.status == PermissionStatus.Granted
+                        ) {
+                            if (!deviceEnabledPushNotifications) {
+                                openSystemSettings()
+                            }
+                        } else {
+                            if ((notificationPermission?.status as PermissionStatus.Denied).shouldShowRationale) {
+                                notificationPermission.launchPermissionRequest()
+                            } else {
+                                openSystemSettings()
+                            }
+                        }
+                    } else {
+                        openSystemSettings()
+                    }
+                },
             )
         }
 

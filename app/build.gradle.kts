@@ -257,6 +257,8 @@ dependencies {
     implementation(libs.compose.constraintlayout)
     implementation(libs.constraintlayout)
 
+    implementation(libs.permissions.accompanist)
+
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.emoji2)
     implementation(libs.androidx.emoji2.emojipicker)

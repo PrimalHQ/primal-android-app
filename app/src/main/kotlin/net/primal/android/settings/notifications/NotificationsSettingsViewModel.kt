@@ -19,6 +19,7 @@ import net.primal.android.core.errors.asSignatureUiError
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiEvent.DismissErrors
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiEvent.NotificationSettingsChanged
+import net.primal.android.settings.notifications.NotificationsSettingsContract.UiState
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiState.ApiError.FetchAppSettingsError
 import net.primal.android.settings.notifications.ui.NotificationSwitchUi
 import net.primal.android.settings.notifications.ui.mapAsNotificationsPreferences
@@ -40,9 +41,9 @@ class NotificationsSettingsViewModel @Inject constructor(
     private val nostrNotary: NostrNotary,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(NotificationsSettingsContract.UiState())
+    private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
-    private fun setState(reducer: NotificationsSettingsContract.UiState.() -> NotificationsSettingsContract.UiState) {
+    private fun setState(reducer: UiState.() -> UiState) {
         _state.getAndUpdate { it.reducer() }
     }
 

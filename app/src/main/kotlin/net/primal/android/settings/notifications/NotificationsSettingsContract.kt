@@ -9,7 +9,6 @@ import net.primal.domain.notifications.NotificationSettingsType.TabNotifications
 
 interface NotificationsSettingsContract {
     data class UiState(
-        val enabledPushNotifications: Boolean = false,
         val pushNotificationsSettings: List<NotificationSwitchUi<PushNotifications>> = emptyList(),
         val tabNotificationsSettings: List<NotificationSwitchUi<TabNotifications>> = emptyList(),
         val preferencesSettings: List<NotificationSwitchUi<Preferences>> = emptyList(),
