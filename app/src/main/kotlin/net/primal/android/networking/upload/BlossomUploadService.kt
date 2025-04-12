@@ -3,8 +3,11 @@ package net.primal.android.networking.upload
 import android.content.ContentResolver
 import android.net.Uri
 import java.io.IOException
+import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
+import net.primal.android.BuildConfig
+import net.primal.android.networking.UserAgentProvider
 import net.primal.core.networking.blossom.BlossomUploader
 import net.primal.core.networking.blossom.UnsuccessfulBlossomUpload
 import net.primal.core.utils.coroutines.DispatcherProvider
@@ -17,12 +20,17 @@ class BlossomUploadService @Inject constructor(
     private val contentResolver: ContentResolver,
     private val blossomUploader: BlossomUploader,
 ) {
+    companion object {
+        fun generateRandomUploadId(): String {
+            val uploadFriendlyVersionName = BuildConfig.VERSION_NAME.replace(".", "_")
+            return "${UUID.randomUUID()}-${UserAgentProvider.APP_NAME}-$uploadFriendlyVersionName"
+        }
+    }
 
     @Throws(UnsuccessfulBlossomUpload::class)
     suspend fun upload(
         uri: Uri,
         userId: String,
-        uploadId: String,
         onProgress: ((uploadedBytes: Int, totalBytes: Int) -> Unit)? = null,
     ): UploadResult =
         withContext(dispatchers.io()) {

@@ -10,9 +10,9 @@ import kotlinx.datetime.Clock
 import kotlinx.serialization.json.JsonArray
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
-import net.primal.android.networking.primal.upload.PrimalFileUploader
-import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.networking.upload.BlossomUploadService
+import net.primal.android.networking.upload.UnsuccessfulFileUpload
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.premium.repository.asProfileDataDO
 import net.primal.android.profile.domain.ProfileMetadata
@@ -51,7 +51,7 @@ class UserRepository @Inject constructor(
     private val accountsStore: UserAccountsStore,
     private val credentialsStore: CredentialsStore,
     private val activeAccountStore: ActiveAccountStore,
-    private val fileUploader: PrimalFileUploader,
+    private val fileUploader: BlossomUploadService,
     private val usersApi: UsersApi,
     private val nostrPublisher: NostrPublisher,
     private val profileRepository: ProfileRepository,
@@ -160,14 +160,20 @@ class UserRepository @Inject constructor(
     suspend fun setProfileMetadata(userId: String, profileMetadata: ProfileMetadata) {
         val pictureUrl = profileMetadata.remotePictureUrl
             ?: if (profileMetadata.localPictureUri != null) {
-                fileUploader.uploadFile(userId = userId, uri = profileMetadata.localPictureUri).remoteUrl
+                fileUploader.upload(
+                    uri = profileMetadata.localPictureUri,
+                    userId = userId,
+                ).remoteUrl
             } else {
                 null
             }
 
         val bannerUrl = profileMetadata.remoteBannerUrl
             ?: if (profileMetadata.localBannerUri != null) {
-                fileUploader.uploadFile(userId = userId, uri = profileMetadata.localBannerUri).remoteUrl
+                fileUploader.upload(
+                    uri = profileMetadata.localBannerUri,
+                    userId = userId,
+                ).remoteUrl
             } else {
                 null
             }

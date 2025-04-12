@@ -22,6 +22,7 @@ enum class NostrEventKind(val value: Int) {
     ChannelMuteUser(value = 44),
     FileMetadata(value = 1063),
     Reporting(value = 1984),
+    BlossomUploadBlob(value = 24242),
     ZapRequest(value = 9734),
     Zap(value = 9735),
     Highlight(value = 9802),

@@ -39,7 +39,6 @@ import net.primal.android.editor.NoteEditorContract.UiState
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteTaggedUser
-import net.primal.android.networking.primal.upload.PrimalFileUploader
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.upload.BlossomUploadService
 import net.primal.android.notes.feed.model.FeedPostUi
@@ -366,9 +365,9 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             newAttachments
                 .map {
-                    val uploadId = PrimalFileUploader.generateRandomUploadId()
+                    val uploadId = BlossomUploadService.generateRandomUploadId()
                     val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
-                        uploadAttachment(attachment = it, uploadId = uploadId)
+                        uploadAttachment(attachment = it)
                     }
                     val uploadJob = UploadJob(job = job, id = uploadId)
                     attachmentUploads[it.id] = uploadJob
@@ -381,7 +380,7 @@ class NoteEditorViewModel @AssistedInject constructor(
         }
     }
 
-    private suspend fun uploadAttachment(attachment: NoteAttachment, uploadId: String) {
+    private suspend fun uploadAttachment(attachment: NoteAttachment) {
         var updatedAttachment = attachment
         try {
             setState { copy(uploadingAttachments = true) }
@@ -391,7 +390,6 @@ class NoteEditorViewModel @AssistedInject constructor(
             val uploadResult = blossomUploadService.upload(
                 uri = attachment.localUri,
                 userId = activeAccountStore.activeUserId(),
-                uploadId = uploadId,
                 onProgress = { uploadedBytes, totalBytes ->
                     updatedAttachment = updatedAttachment.copy(
                         originalUploadedInBytes = uploadedBytes,
@@ -465,9 +463,9 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             val noteAttachment = _state.value.attachments.firstOrNull { it.id == attachmentId }
             if (noteAttachment != null) {
-                val uploadId = PrimalFileUploader.generateRandomUploadId()
+                val uploadId = BlossomUploadService.generateRandomUploadId()
                 val job = viewModelScope.launch {
-                    uploadAttachment(attachment = noteAttachment, uploadId = uploadId)
+                    uploadAttachment(attachment = noteAttachment)
                 }
                 attachmentUploads[attachmentId] = UploadJob(job = job, id = uploadId)
                 job.join()

@@ -19,9 +19,9 @@ import net.primal.android.auth.onboarding.account.api.OnboardingApi
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroupMember
 import net.primal.android.auth.repository.CreateAccountHandler
-import net.primal.android.networking.primal.upload.PrimalFileUploader
+import net.primal.android.networking.upload.BlossomUploadService
+import net.primal.android.networking.upload.UnsuccessfulFileUpload
 import net.primal.android.profile.domain.ProfileMetadata
-import net.primal.core.networking.blossom.UnsuccessfulBlossomUpload
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
@@ -36,7 +36,7 @@ class OnboardingViewModel @Inject constructor(
     private val dispatcherProvider: DispatcherProvider,
     private val onboardingApi: OnboardingApi,
     private val createAccountHandler: CreateAccountHandler,
-    private val fileUploader: PrimalFileUploader,
+    private val fileUploader: BlossomUploadService,
 ) : ViewModel() {
 
     private val keyPair = CryptoUtils.generateHexEncodedKeypair()
@@ -155,7 +155,7 @@ class OnboardingViewModel @Inject constructor(
                     interests = uiState.selectedSuggestions,
                 )
                 setState { copy(accountCreated = true, accountCreationStep = AccountCreationStep.AccountCreated) }
-            } catch (error: UnsuccessfulBlossomUpload) {
+            } catch (error: UnsuccessfulFileUpload) {
                 Timber.w(error)
                 setState { copy(error = UiState.OnboardingError.ImageUploadFailed(error)) }
             } catch (error: CreateAccountHandler.AccountCreationException) {
@@ -171,14 +171,17 @@ class OnboardingViewModel @Inject constructor(
         avatarUploadJob.cancel()
         avatarUploadJob = null
         if (avatarUri != null) {
-            val uploadId = PrimalFileUploader.generateRandomUploadId()
+            val uploadId = BlossomUploadService.generateRandomUploadId()
             val job = viewModelScope.launch {
                 try {
                     val uploadResult = withContext(dispatcherProvider.io()) {
-                        fileUploader.uploadFile(keyPair = keyPair, uri = avatarUri)
+                        fileUploader.upload(
+                            uri = avatarUri,
+                            userId = keyPair.pubKey,
+                        )
                     }
                     setState { copy(avatarRemoteUrl = uploadResult.remoteUrl) }
-                } catch (error: UnsuccessfulBlossomUpload) {
+                } catch (error: UnsuccessfulFileUpload) {
                     Timber.w(error)
                 } catch (error: WssException) {
                     Timber.w(error)
@@ -195,14 +198,17 @@ class OnboardingViewModel @Inject constructor(
         bannerUploadJob.cancel()
         bannerUploadJob = null
         if (bannerUri != null) {
-            val uploadId = PrimalFileUploader.generateRandomUploadId()
+            val uploadId = BlossomUploadService.generateRandomUploadId()
             val job = viewModelScope.launch {
                 try {
                     val uploadResult = withContext(dispatcherProvider.io()) {
-                        fileUploader.uploadFile(keyPair = keyPair, uri = bannerUri)
+                        fileUploader.upload(
+                            uri = bannerUri,
+                            userId = keyPair.pubKey,
+                        )
                     }
                     setState { copy(bannerRemoteUrl = uploadResult.remoteUrl) }
-                } catch (error: UnsuccessfulBlossomUpload) {
+                } catch (error: UnsuccessfulFileUpload) {
                     Timber.w(error)
                 } catch (error: WssException) {
                     Timber.w(error)
@@ -235,7 +241,8 @@ class OnboardingViewModel @Inject constructor(
         viewModelScope.launch {
             this@cancel.job.cancel()
             runCatching {
-                fileUploader.cancelUpload(keyPair = keyPair, uploadId = this@cancel.id)
+                // TODO: implement or consider how to cancel upload
+//                fileUploader.cancelUpload(keyPair = keyPair, uploadId = this@cancel.id)
             }
         }
     }

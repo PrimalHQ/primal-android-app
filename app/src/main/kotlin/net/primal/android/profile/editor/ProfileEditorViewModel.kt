@@ -14,8 +14,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.utils.isPrimalIdentifier
-import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.networking.upload.UnsuccessfulFileUpload
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.profile.editor.ProfileEditorContract.SideEffect

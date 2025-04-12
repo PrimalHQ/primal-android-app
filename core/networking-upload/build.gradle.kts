@@ -42,6 +42,7 @@ kotlin {
                 implementation(libs.kotlinx.datetime)
 
                 implementation(libs.okio)
+                implementation(libs.napier)
             }
         }
 
