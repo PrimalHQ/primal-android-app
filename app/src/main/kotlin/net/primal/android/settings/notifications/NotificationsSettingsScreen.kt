@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -105,14 +106,17 @@ private fun NotificationsColumn(
     eventPublisher: (NotificationsSettingsContract.UiEvent) -> Unit,
 ) {
     LazyColumn(
-        modifier = modifier
-            .background(color = AppTheme.colorScheme.surfaceVariant)
-            .padding(top = 6.dp),
+        modifier = modifier.background(color = AppTheme.colorScheme.surfaceVariant),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         item {
-            // TODO Implement push notifications render
+            EnablePushNotificationSection(
+                modifier = Modifier.padding(vertical = 12.dp),
+                enabled = true,
+                onClick = {
+                },
+            )
         }
 
         if (state.enabledPushNotifications || true) {
@@ -181,63 +185,111 @@ fun <T : NotificationSettingsType> NotificationsSettingsBlock(
             horizontalAlignment = Alignment.Start,
         ) {
             notifications.forEachIndexed { index, notificationSwitchUi ->
-                val isLargerRow = notificationSwitchUi.settingsType is NotificationSettingsType.Preferences
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            eventPublisher(
-                                NotificationSettingsChanged(
-                                    type = notificationSwitchUi.settingsType,
-                                    value = !notificationSwitchUi.enabled,
-                                ),
-                            )
-                        }
-                        .padding(horizontal = 16.dp)
-                        .padding(vertical = if (isLargerRow) 8.dp else 0.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    val painter = notificationSwitchUi.settingsType.toImagePainter()
-                    if (painter != null) {
-                        Image(
-                            modifier = Modifier.size(32.dp),
-                            painter = painter,
-                            contentDescription = null,
+                NotificationSettingsRow(
+                    title = notificationSwitchUi.settingsType.toTitle(),
+                    longTitleText = notificationSwitchUi.settingsType is NotificationSettingsType.Preferences,
+                    enabled = notificationSwitchUi.enabled,
+                    painter = notificationSwitchUi.settingsType.toImagePainter(),
+                    onCheckedChange = {
+                        eventPublisher(
+                            NotificationSettingsChanged(
+                                type = notificationSwitchUi.settingsType,
+                                value = it,
+                            ),
                         )
-                    }
-
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth(fraction = 0.75f)
-                            .padding(top = 2.dp),
-                        text = notificationSwitchUi.settingsType.toTitle(),
-                        fontWeight = FontWeight.W400,
-                        fontSize = 16.sp,
-                        lineHeight = 20.sp,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-
-                    PrimalSwitch(
-                        checked = notificationSwitchUi.enabled,
-                        onCheckedChange = {
-                            eventPublisher(
-                                NotificationSettingsChanged(
-                                    type = notificationSwitchUi.settingsType,
-                                    value = it,
-                                ),
-                            )
-                        },
-                    )
-                }
+                    },
+                )
 
                 if (index < notifications.size - 1) {
                     PrimalDivider()
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun NotificationSettingsRow(
+    title: String,
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+    longTitleText: Boolean = false,
+    painter: Painter? = null,
+    onCheckedChange: ((Boolean) -> Unit)? = null,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onCheckedChange?.invoke(!enabled) }
+            .padding(horizontal = 16.dp)
+            .padding(vertical = if (longTitleText) 8.dp else 0.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (painter != null) {
+            Image(
+                modifier = Modifier.size(32.dp),
+                painter = painter,
+                contentDescription = null,
+            )
+        }
+
+        Text(
+            modifier = Modifier
+                .fillMaxWidth(fraction = 0.75f)
+                .padding(top = 2.dp)
+                .padding(end = if (longTitleText) 6.dp else 0.dp),
+            text = title,
+            fontWeight = FontWeight.W400,
+            fontSize = 16.sp,
+            lineHeight = 20.sp,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+
+        PrimalSwitch(
+            checked = enabled,
+            onCheckedChange = onCheckedChange,
+        )
+    }
+}
+
+@Composable
+private fun EnablePushNotificationSection(
+    modifier: Modifier,
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
+    Column(modifier = modifier) {
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 12.dp)
+                .background(
+                    color = AppTheme.extraColorScheme.surfaceVariantAlt3,
+                    shape = RoundedCornerShape(12.dp),
+                )
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(size = 12.dp))
+                .clickable {
+                    onClick()
+                },
+            contentAlignment = Alignment.Center,
+        ) {
+            NotificationSettingsRow(
+                modifier = Modifier.height(48.dp),
+                title = stringResource(R.string.settings_notifications_enable_push_notifications),
+                enabled = enabled,
+            )
+        }
+
+        Text(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 8.dp),
+            text = stringResource(R.string.settings_notifications_enable_push_notifications_description),
+            style = AppTheme.typography.bodySmall,
+        )
     }
 }
 
@@ -280,49 +332,64 @@ private fun NotificationSettingsType.toTitle(): String =
         NotificationSettingsType.Preferences.DMsFromFollows -> stringResource(
             R.string.settings_notifications_group_preferences_DMS_from_follows,
         )
+
         NotificationSettingsType.Preferences.HellThread -> stringResource(
             R.string.settings_notifications_group_preferences_hell_thread,
         )
+
         NotificationSettingsType.Preferences.ReactionsFromFollows -> stringResource(
             R.string.settings_notifications_group_preferences_reactions_from_follows,
         )
+
         NotificationSettingsType.PushNotifications.DirectMessages -> stringResource(
             R.string.settings_notifications_group_direct_messages,
         )
+
         NotificationSettingsType.PushNotifications.Mentions -> stringResource(
             R.string.settings_notifications_group_mentions,
         )
+
         NotificationSettingsType.PushNotifications.NewFollows -> stringResource(
             R.string.settings_notifications_group_new_followers,
         )
+
         NotificationSettingsType.PushNotifications.Reactions -> stringResource(
             R.string.settings_notifications_group_reactions,
         )
+
         NotificationSettingsType.PushNotifications.Replies -> stringResource(
             R.string.settings_notifications_group_replies,
         )
+
         NotificationSettingsType.PushNotifications.Reposts -> stringResource(
             R.string.settings_notifications_group_reposts,
         )
+
         NotificationSettingsType.PushNotifications.WalletTransactions -> stringResource(
             R.string.settings_notifications_group_wallet_txs,
         )
+
         NotificationSettingsType.PushNotifications.Zaps -> stringResource(R.string.settings_notifications_group_zaps)
         NotificationSettingsType.TabNotifications.Mentions -> stringResource(
             R.string.settings_notifications_group_mentions,
         )
+
         NotificationSettingsType.TabNotifications.NewFollows -> stringResource(
             R.string.settings_notifications_group_new_followers,
         )
+
         NotificationSettingsType.TabNotifications.Reactions -> stringResource(
             R.string.settings_notifications_group_reactions,
         )
+
         NotificationSettingsType.TabNotifications.Replies -> stringResource(
             R.string.settings_notifications_group_replies,
         )
+
         NotificationSettingsType.TabNotifications.Reposts -> stringResource(
             R.string.settings_notifications_group_reposts,
         )
+
         NotificationSettingsType.TabNotifications.Zaps -> stringResource(R.string.settings_notifications_group_zaps)
     }
 

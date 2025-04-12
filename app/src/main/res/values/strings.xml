@@ -812,6 +812,8 @@
     <string name="settings_notifications_group_preferences_hell_thread">Ignore notes with more than 10 user mentions</string>
     <string name="settings_notifications_group_preferences_DMS_from_follows">Only show DM notifications from users I follow</string>
     <string name="settings_notifications_group_preferences_reactions_from_follows">Only show reactions from users I follow</string>
+    <string name="settings_notifications_enable_push_notifications">Enable Push Notifications</string>
+    <string name="settings_notifications_enable_push_notifications_description">Get system notifications from Primal. You can also configure this in your system settings.</string>
 
     <string name="settings_appearance_title">Appearance</string>
     <string name="settings_appearance_theme_section_title">Theme</string>
