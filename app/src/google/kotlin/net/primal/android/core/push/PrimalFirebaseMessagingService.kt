@@ -18,7 +18,7 @@ class PrimalFirebaseMessagingService : FirebaseMessagingService() {
 
     init {
         val defaultChannelId = "all_app_events"
-        val defaultChannelName = getString(R.string.settings_notifications_channel_name_all_app_events)
+        val defaultChannelName = application.getString(R.string.settings_notifications_channel_name_all_app_events)
         val channel = NotificationChannel(
             defaultChannelId,
             defaultChannelName,
