@@ -8,7 +8,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import net.primal.android.R
 
 @AndroidEntryPoint
 class PrimalFirebaseMessagingService : FirebaseMessagingService() {
@@ -18,7 +17,7 @@ class PrimalFirebaseMessagingService : FirebaseMessagingService() {
 
     init {
         val defaultChannelId = "all_app_events"
-        val defaultChannelName = application.getString(R.string.settings_notifications_channel_name_all_app_events)
+        val defaultChannelName = "Primal App Events"
         val channel = NotificationChannel(
             defaultChannelId,
             defaultChannelName,
