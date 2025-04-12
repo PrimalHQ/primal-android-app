@@ -9,5 +9,5 @@ data class BlobDescriptor(
     val sha256: String,
     @SerialName("size") val sizeInBytes: Long,
     val type: String? = null,
-    @SerialName("created") val uploaded: Long,
+    val uploaded: Long,
 )
