@@ -814,6 +814,7 @@
     <string name="settings_notifications_group_preferences_reactions_from_follows">Only show reactions from users I follow</string>
     <string name="settings_notifications_enable_push_notifications">Enable Push Notifications</string>
     <string name="settings_notifications_enable_push_notifications_description">Get system notifications from Primal. You can also configure this in your system settings.</string>
+    <string name="settings_notifications_channel_name_all_app_events">Primal app notifications</string>
 
     <string name="settings_appearance_title">Appearance</string>
     <string name="settings_appearance_theme_section_title">Theme</string>
