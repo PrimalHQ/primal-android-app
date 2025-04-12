@@ -22,13 +22,12 @@ private fun ContentPrimalNotification.parseActionUserId(type: NotificationType):
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED -> this.whoLikedIt
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED -> this.whoRepostedIt
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO -> this.whoRepliedToIt
-        // TODO Fix handling 3xx types
+        // TODO Fix parseActionUserId for 3xx types
         NotificationType.YOUR_POST_WAS_HIGHLIGHTED -> throw NotImplementedError()
         NotificationType.YOUR_POST_WAS_BOOKMARKED -> throw NotImplementedError()
     }
 }
 
-// TODO Fix handling 3xx types
 private fun ContentPrimalNotification.parseActionPostId(type: NotificationType): String? {
     return when (type) {
         NotificationType.YOUR_POST_WAS_ZAPPED -> this.yourPost
@@ -45,6 +44,9 @@ private fun ContentPrimalNotification.parseActionPostId(type: NotificationType):
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED -> this.postYourPostWasMentionedIn
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED -> this.postYourPostWasMentionedIn
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO -> this.reply
+        // TODO Fix parseActionPostId for 3xx types
+        NotificationType.YOUR_POST_WAS_HIGHLIGHTED -> throw NotImplementedError()
+        NotificationType.YOUR_POST_WAS_BOOKMARKED -> throw NotImplementedError()
         else -> null
     }
 }

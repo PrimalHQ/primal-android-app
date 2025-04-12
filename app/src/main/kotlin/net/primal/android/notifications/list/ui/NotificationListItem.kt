@@ -529,9 +529,13 @@ private fun NotificationType.toSuffixText(usersZappedCount: Int = 0, totalSatsZa
             id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_replied_to,
         )
 
-        // TODO Add support for 3xx notifications
-        NotificationType.YOUR_POST_WAS_HIGHLIGHTED -> throw NotImplementedError()
-        NotificationType.YOUR_POST_WAS_BOOKMARKED -> throw NotImplementedError()
+        NotificationType.YOUR_POST_WAS_HIGHLIGHTED -> stringResource(
+            id = R.string.notification_list_item_highlighted_your_article,
+        )
+
+        NotificationType.YOUR_POST_WAS_BOOKMARKED -> stringResource(
+            id = R.string.notification_list_item_bookmarked_your_post,
+        )
     }
 
 private val PreviewExamplePost = FeedPostUi(

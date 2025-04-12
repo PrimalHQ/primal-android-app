@@ -331,10 +331,9 @@ private fun NotificationSettingsType.toImagePainter(): Painter? =
     when (this) {
         is NotificationSettingsType.Preferences -> null
         NotificationSettingsType.PushNotifications.DirectMessages ->
-            // TODO Update icon
             painterResource(
-                darkResId = R.drawable.notification_type_new_user_followed_you_dark,
-                lightResId = R.drawable.notification_type_new_user_followed_you_light,
+                darkResId = R.drawable.notification_push_type_dms_dark,
+                lightResId = R.drawable.notification_push_type_dms_dark,
             )
 
         NotificationSettingsType.PushNotifications.Mentions ->
@@ -344,10 +343,9 @@ private fun NotificationSettingsType.toImagePainter(): Painter? =
             )
 
         NotificationSettingsType.PushNotifications.NewFollows ->
-            // TODO Update icon
             painterResource(
-                darkResId = R.drawable.notification_type_new_user_followed_you_dark,
-                lightResId = R.drawable.notification_type_new_user_followed_you_light,
+                darkResId = R.drawable.notification_type_followed_dark,
+                lightResId = R.drawable.notification_type_followed_light,
             )
 
         NotificationSettingsType.PushNotifications.Reactions ->
@@ -369,10 +367,9 @@ private fun NotificationSettingsType.toImagePainter(): Painter? =
             )
 
         NotificationSettingsType.PushNotifications.WalletTransactions ->
-            // TODO Update icon
             painterResource(
-                darkResId = R.drawable.notification_type_new_user_followed_you_dark,
-                lightResId = R.drawable.notification_type_new_user_followed_you_light,
+                darkResId = R.drawable.notification_push_type_wallet_tx_dark,
+                lightResId = R.drawable.notification_push_type_wallet_tx_dark,
             )
 
         NotificationSettingsType.PushNotifications.Zaps ->
@@ -388,10 +385,9 @@ private fun NotificationSettingsType.toImagePainter(): Painter? =
             )
 
         NotificationSettingsType.TabNotifications.NewFollows ->
-            // TODO Update icon
             painterResource(
-                darkResId = R.drawable.notification_type_new_user_followed_you_dark,
-                lightResId = R.drawable.notification_type_new_user_followed_you_light,
+                darkResId = R.drawable.notification_type_followed_dark,
+                lightResId = R.drawable.notification_type_followed_light,
             )
 
         NotificationSettingsType.TabNotifications.Reactions ->
