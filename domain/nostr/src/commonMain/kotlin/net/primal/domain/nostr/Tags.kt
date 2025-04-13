@@ -180,6 +180,12 @@ fun Long.asExpirationTag(): JsonArray =
         add(this@asExpirationTag.toString())
     }
 
+fun String.asServerTag(): JsonArray =
+    buildJsonArray {
+        add("server")
+        add(this@asServerTag)
+    }
+
 fun Naddr.asReplaceableEventTag(marker: String? = null): JsonArray =
     this.asATagValue().asReplaceableEventTag(
         relayHint = this.relays.firstOrNull(),

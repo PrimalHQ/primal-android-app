@@ -299,6 +299,12 @@ class UserRepository @Inject constructor(
         }
     }
 
+    suspend fun updateBlossomServers(userId: String, blossomServers: List<String>) {
+        accountsStore.getAndUpdateAccount(userId) {
+            copy(blossomServers = blossomServers)
+        }
+    }
+
     @Throws(FollowListNotFound::class, NostrPublishException::class, SignatureException::class)
     suspend fun follow(
         userId: String,
