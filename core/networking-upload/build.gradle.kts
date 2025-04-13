@@ -37,7 +37,12 @@ kotlin {
                 implementation(project(":core:utils"))
                 implementation(project(":core:networking-http"))
                 implementation(project(":domain:nostr"))
+
                 implementation(libs.kotlinx.coroutines.core)
+                implementation(libs.kotlinx.datetime)
+
+                implementation(libs.okio)
+                implementation(libs.napier)
             }
         }
 

@@ -10,9 +10,8 @@ import kotlinx.datetime.Clock
 import kotlinx.serialization.json.JsonArray
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
-import net.primal.android.networking.primal.upload.PrimalFileUploader
-import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.networking.upload.PrimalUploadService
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.premium.repository.asProfileDataDO
 import net.primal.android.profile.domain.ProfileMetadata
@@ -31,6 +30,7 @@ import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.domain.asUserAccountFromFollowListEvent
 import net.primal.android.wallet.domain.WalletSettings
+import net.primal.core.networking.blossom.UnsuccessfulBlossomUpload
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
@@ -51,7 +51,7 @@ class UserRepository @Inject constructor(
     private val accountsStore: UserAccountsStore,
     private val credentialsStore: CredentialsStore,
     private val activeAccountStore: ActiveAccountStore,
-    private val fileUploader: PrimalFileUploader,
+    private val primalUploadService: PrimalUploadService,
     private val usersApi: UsersApi,
     private val nostrPublisher: NostrPublisher,
     private val profileRepository: ProfileRepository,
@@ -156,18 +156,24 @@ class UserRepository @Inject constructor(
         accountsStore.deleteAccount(pubkey = pubkey)
     }
 
-    @Throws(UnsuccessfulFileUpload::class, NostrPublishException::class, SignatureException::class)
+    @Throws(UnsuccessfulBlossomUpload::class, NostrPublishException::class, SignatureException::class)
     suspend fun setProfileMetadata(userId: String, profileMetadata: ProfileMetadata) {
         val pictureUrl = profileMetadata.remotePictureUrl
             ?: if (profileMetadata.localPictureUri != null) {
-                fileUploader.uploadFile(userId = userId, uri = profileMetadata.localPictureUri).remoteUrl
+                primalUploadService.upload(
+                    uri = profileMetadata.localPictureUri,
+                    userId = userId,
+                ).remoteUrl
             } else {
                 null
             }
 
         val bannerUrl = profileMetadata.remoteBannerUrl
             ?: if (profileMetadata.localBannerUri != null) {
-                fileUploader.uploadFile(userId = userId, uri = profileMetadata.localBannerUri).remoteUrl
+                primalUploadService.upload(
+                    uri = profileMetadata.localBannerUri,
+                    userId = userId,
+                ).remoteUrl
             } else {
                 null
             }

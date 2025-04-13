@@ -162,6 +162,24 @@ fun String.asReplaceableEventTag(relayHint: String? = null, marker: String? = nu
         add(marker ?: "")
     }.removeTrailingEmptyStrings()
 
+fun String.asHashtagTag(): JsonArray =
+    buildJsonArray {
+        add("t")
+        add(this@asHashtagTag)
+    }
+
+fun String.asSha256Tag(): JsonArray =
+    buildJsonArray {
+        add("x")
+        add(this@asSha256Tag)
+    }
+
+fun Long.asExpirationTag(): JsonArray =
+    buildJsonArray {
+        add("expiration")
+        add(this@asExpirationTag.toString())
+    }
+
 fun Naddr.asReplaceableEventTag(marker: String? = null): JsonArray =
     this.asATagValue().asReplaceableEventTag(
         relayHint = this.relays.firstOrNull(),

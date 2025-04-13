@@ -39,10 +39,9 @@ import net.primal.android.editor.NoteEditorContract.UiState
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteTaggedUser
-import net.primal.android.networking.primal.upload.PrimalFileUploader
-import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
-import net.primal.android.networking.primal.upload.repository.FileUploadRepository
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.networking.upload.PrimalUploadService
+import net.primal.android.networking.upload.UploadJob
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
@@ -50,6 +49,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
+import net.primal.core.networking.blossom.UnsuccessfulBlossomUpload
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.events.EventRelayHintsRepository
 import net.primal.domain.explore.ExploreRepository
@@ -66,7 +66,6 @@ import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.posts.FeedRepository
 import net.primal.domain.reads.ArticleRepository
 import net.primal.domain.reads.HighlightRepository
-import net.primal.domain.upload.UploadJob
 import timber.log.Timber
 
 class NoteEditorViewModel @AssistedInject constructor(
@@ -75,7 +74,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
     private val notePublishHandler: NotePublishHandler,
-    private val fileUploadRepository: FileUploadRepository,
+    private val primalUploadService: PrimalUploadService,
     private val highlightRepository: HighlightRepository,
     private val exploreRepository: ExploreRepository,
     private val userRepository: UserRepository,
@@ -366,11 +365,10 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             newAttachments
                 .map {
-                    val uploadId = PrimalFileUploader.generateRandomUploadId()
                     val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
-                        uploadAttachment(attachment = it, uploadId = uploadId)
+                        uploadAttachment(attachment = it)
                     }
-                    val uploadJob = UploadJob(job = job, id = uploadId)
+                    val uploadJob = UploadJob(job = job)
                     attachmentUploads[it.id] = uploadJob
                     uploadJob
                 }.forEach {
@@ -381,17 +379,16 @@ class NoteEditorViewModel @AssistedInject constructor(
         }
     }
 
-    private suspend fun uploadAttachment(attachment: NoteAttachment, uploadId: String) {
+    private suspend fun uploadAttachment(attachment: NoteAttachment) {
         var updatedAttachment = attachment
         try {
             setState { copy(uploadingAttachments = true) }
             updatedAttachment = updatedAttachment.copy(uploadError = null)
             updateNoteAttachmentState(attachment = updatedAttachment)
 
-            val uploadResult = fileUploadRepository.uploadNoteAttachment(
+            val uploadResult = primalUploadService.upload(
+                uri = attachment.localUri,
                 userId = activeAccountStore.activeUserId(),
-                attachment = attachment,
-                uploadId = uploadId,
                 onProgress = { uploadedBytes, totalBytes ->
                     updatedAttachment = updatedAttachment.copy(
                         originalUploadedInBytes = uploadedBytes,
@@ -404,7 +401,7 @@ class NoteEditorViewModel @AssistedInject constructor(
             updatedAttachment = updatedAttachment.copy(
                 remoteUrl = uploadResult.remoteUrl,
                 originalHash = uploadResult.originalHash,
-                originalSizeInBytes = uploadResult.originalFileSize,
+                originalSizeInBytes = uploadResult.originalFileSize.toInt(),
             )
             updateNoteAttachmentState(attachment = updatedAttachment)
 
@@ -416,7 +413,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                 )
                 updateNoteAttachmentState(updatedAttachment)
             }
-        } catch (error: UnsuccessfulFileUpload) {
+        } catch (error: UnsuccessfulBlossomUpload) {
             Timber.w(error)
             updateNoteAttachmentState(attachment = updatedAttachment.copy(uploadError = error))
         } catch (error: SignatureException) {
@@ -447,29 +444,16 @@ class NoteEditorViewModel @AssistedInject constructor(
             }
         }
 
-    private fun UploadJob?.cancel() {
-        if (this == null) return
-
-        viewModelScope.launch {
-            this@cancel.job.cancel()
-            runCatching {
-                fileUploadRepository.cancelNoteAttachmentUpload(
-                    userId = activeAccountStore.activeUserId(),
-                    uploadId = this@cancel.id,
-                )
-            }
-        }
-    }
+    private fun UploadJob?.cancel() = this?.job?.cancel()
 
     private fun retryAttachmentUpload(attachmentId: UUID) =
         viewModelScope.launch {
             val noteAttachment = _state.value.attachments.firstOrNull { it.id == attachmentId }
             if (noteAttachment != null) {
-                val uploadId = PrimalFileUploader.generateRandomUploadId()
                 val job = viewModelScope.launch {
-                    uploadAttachment(attachment = noteAttachment, uploadId = uploadId)
+                    uploadAttachment(attachment = noteAttachment)
                 }
-                attachmentUploads[attachmentId] = UploadJob(job = job, id = uploadId)
+                attachmentUploads[attachmentId] = UploadJob(job = job)
                 job.join()
                 checkUploadQueueAndDisableFlagIfCompleted()
             }

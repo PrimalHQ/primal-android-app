@@ -35,6 +35,7 @@ enum class NostrEventKind(val value: Int) {
     WalletRequest(value = 23_194),
     WalletResponse(value = 23_195),
     NostrConnect(value = 24_133),
+    BlossomUploadBlob(value = 24_242),
     CategorizedPeopleList(value = 30_000),
     CategorizedBookmarkList(value = 30_001),
     ProfileBadges(value = 30_008),
