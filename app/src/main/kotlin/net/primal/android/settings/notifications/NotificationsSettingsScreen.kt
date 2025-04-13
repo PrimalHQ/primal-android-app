@@ -91,6 +91,7 @@ fun NotificationsSettingsScreen(
     eventPublisher: (NotificationsSettingsContract.UiEvent) -> Unit,
 ) {
     Scaffold(
+        containerColor = AppTheme.colorScheme.surfaceVariant,
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.settings_notifications_title),
@@ -122,18 +123,22 @@ private fun NotificationsColumn(
     state: NotificationsSettingsContract.UiState,
     eventPublisher: (NotificationsSettingsContract.UiEvent) -> Unit,
 ) {
+    var pushNotificationsEnabled by remember { mutableStateOf(false) }
     LazyColumn(
-        modifier = modifier.background(color = AppTheme.colorScheme.surfaceVariant),
-        verticalArrangement = Arrangement.Center,
+        modifier = modifier
+            .fillMaxSize()
+            .background(color = AppTheme.colorScheme.surfaceVariant),
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         item {
             PushNotificationSection(
                 modifier = Modifier.padding(vertical = 12.dp),
+                onChange = { enabled -> pushNotificationsEnabled = enabled },
             )
         }
 
-        if (true) {
+        if (pushNotificationsEnabled) {
             item {
                 NotificationsSettingsBlock(
                     section = NotificationSettingsSection.PUSH_NOTIFICATIONS,
@@ -271,7 +276,7 @@ private fun NotificationSettingsRow(
 
 @ExperimentalPermissionsApi
 @Composable
-private fun PushNotificationSection(modifier: Modifier) {
+private fun PushNotificationSection(modifier: Modifier, onChange: (Boolean) -> Unit) {
     val context = LocalContext.current
     var returningFromOtherScreenTimestamp by remember { mutableLongStateOf(0) }
     var deviceEnabledPushNotifications by remember { mutableStateOf(false) }
@@ -295,6 +300,7 @@ private fun PushNotificationSection(modifier: Modifier) {
         } else {
             locallyEnabled && notificationPermission.status.isGranted == true
         }
+        onChange(deviceEnabledPushNotifications)
     }
 
     fun openSystemSettings() {
