@@ -51,4 +51,8 @@ class BlossomRepository @Inject constructor(
     suspend fun fetchSuggestedBlossomList(): List<String> {
         return listOf("https://blossom.primal.net", "https://blossom.nostr.com")
     }
+
+    fun getBlossomServers(userId: String): List<String> {
+        return userAccountsStore.findByIdOrNull(userId)?.blossomServers ?: DEFAULT_BLOSSOM_LIST
+    }
 }

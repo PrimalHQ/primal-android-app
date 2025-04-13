@@ -9,6 +9,7 @@ import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import net.primal.android.nostr.notary.signOrThrow
+import net.primal.android.user.repository.BlossomRepository
 import net.primal.core.networking.blossom.BlossomApiFactory
 import net.primal.core.networking.blossom.FileMetadata
 import net.primal.core.networking.blossom.UnsuccessfulBlossomUpload
@@ -34,9 +35,11 @@ import okio.source
 class PrimalUploadService @Inject constructor(
     private val dispatchers: DispatcherProvider,
     private val contentResolver: ContentResolver,
+    private val blossomRepository: BlossomRepository,
     private val signatureHandler: NostrEventSignatureHandler,
 ) {
 
+    @Deprecated("Remove when switching to `userBlossomServers`")
     private val blossomApi = BlossomApiFactory.create(baseBlossomUrl = "https://blossom.primal.net")
 
     @SuppressLint("Recycle")
@@ -97,6 +100,15 @@ class PrimalUploadService @Inject constructor(
             val jsonPayload = signed.encodeToJsonString()
             val base64Encoded = jsonPayload.encodeUtf8().base64()
             val authorizationHeader = "Nostr $base64Encoded"
+
+            val userBlossomServers = blossomRepository.getBlossomServers(userId).mapNotNull {
+                runCatching { BlossomApiFactory.create(baseBlossomUrl = it) }.getOrNull()
+            }.ifEmpty {
+                throw UnsuccessfulBlossomUpload(cause = IllegalStateException("Invalid blossom server list."))
+            }
+
+            // Use this list of blossom apis instead of blossomApi field
+            userBlossomServers.toString()
 
             val descriptor = blossomApi.putUpload(
                 authorization = authorizationHeader,
