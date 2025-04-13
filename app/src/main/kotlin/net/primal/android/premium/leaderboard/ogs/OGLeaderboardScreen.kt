@@ -39,7 +39,7 @@ import net.primal.android.premium.leaderboard.ogs.ui.OGLeaderboardItem
 import net.primal.android.premium.leaderboard.ogs.ui.OGLeaderboardTabs
 import net.primal.android.premium.leaderboard.ogs.ui.PAGE_COUNT
 import net.primal.android.theme.AppTheme
-import net.primal.domain.OGLeaderboardEntry
+import net.primal.domain.premium.OGLeaderboardEntry
 import timber.log.Timber
 
 @Composable

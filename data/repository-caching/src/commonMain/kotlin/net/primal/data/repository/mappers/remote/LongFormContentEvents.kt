@@ -5,9 +5,10 @@ import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.detectUrls
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.local.dao.reads.ArticleData
-import net.primal.domain.CdnImage
-import net.primal.domain.CdnResource
-import net.primal.domain.PrimalEvent
+import net.primal.domain.common.PrimalEvent
+import net.primal.domain.common.util.takeContentOrNull
+import net.primal.domain.links.CdnImage
+import net.primal.domain.links.CdnResource
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.findFirstIdentifier
@@ -18,7 +19,6 @@ import net.primal.domain.nostr.findFirstTitle
 import net.primal.domain.nostr.serialization.toNostrJsonObject
 import net.primal.domain.nostr.utils.parseHashtags
 import net.primal.domain.nostr.utils.parseNostrUris
-import net.primal.domain.serialization.takeContentOrNull
 
 fun List<NostrEvent>.mapNotNullAsArticleDataPO(
     wordsCountMap: Map<String, Int> = emptyMap(),

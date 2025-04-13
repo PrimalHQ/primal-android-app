@@ -9,10 +9,10 @@ import net.primal.data.repository.mappers.remote.mapAsProfileDataPO
 import net.primal.data.repository.mappers.remote.parseAndFoldPrimalLegendProfiles
 import net.primal.data.repository.mappers.remote.parseAndFoldPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndFoldPrimalUserNames
-import net.primal.domain.PrimalEvent
+import net.primal.domain.common.PrimalEvent
+import net.primal.domain.global.CachingImportRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.domain.repository.CachingImportRepository
 
 class CachingImportRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,

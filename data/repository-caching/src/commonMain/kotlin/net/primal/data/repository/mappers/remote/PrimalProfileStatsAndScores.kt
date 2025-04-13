@@ -4,9 +4,9 @@ import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.local.dao.profiles.ProfileStats
 import net.primal.data.remote.api.explore.model.NewUserFollowStats
 import net.primal.data.remote.model.ContentUserProfileStats
-import net.primal.domain.ContentProfilePremiumInfo
-import net.primal.domain.PrimalEvent
-import net.primal.domain.PrimalLegendProfile
+import net.primal.domain.common.PrimalEvent
+import net.primal.domain.premium.ContentProfilePremiumInfo
+import net.primal.domain.premium.PrimalLegendProfile
 
 fun List<PrimalEvent>.mapNotNullAsProfileStatsPO() = mapNotNull { it.asProfileStatsPO() }
 

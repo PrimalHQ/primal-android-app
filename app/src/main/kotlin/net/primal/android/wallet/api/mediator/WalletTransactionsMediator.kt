@@ -17,7 +17,7 @@ import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.domain.repository.ProfileRepository
+import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
 
 @ExperimentalPagingApi

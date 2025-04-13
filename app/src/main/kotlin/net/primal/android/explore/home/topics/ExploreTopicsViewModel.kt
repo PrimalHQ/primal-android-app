@@ -14,8 +14,8 @@ import net.primal.android.explore.home.topics.ExploreTopicsContract.UiEvent
 import net.primal.android.explore.home.topics.ExploreTopicsContract.UiState
 import net.primal.android.explore.home.topics.ui.TopicUi
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.domain.model.ExploreTrendingTopic
-import net.primal.domain.repository.ExploreRepository
+import net.primal.domain.explore.ExploreRepository
+import net.primal.domain.explore.ExploreTrendingTopic
 import timber.log.Timber
 
 @HiltViewModel

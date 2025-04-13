@@ -1,6 +1,6 @@
 package net.primal.data.remote.api.events.model
 
-import net.primal.domain.PrimalEvent
+import net.primal.domain.common.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 
 data class EventActionsResponse(

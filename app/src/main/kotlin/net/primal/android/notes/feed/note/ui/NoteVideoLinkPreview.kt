@@ -27,7 +27,7 @@ import net.primal.android.notes.feed.note.ui.attachment.NoteImageLoadingPlacehol
 import net.primal.android.notes.feed.note.ui.attachment.PlayButton
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.domain.EventUriType
+import net.primal.domain.links.EventUriType
 
 @Composable
 fun NoteVideoLinkPreview(

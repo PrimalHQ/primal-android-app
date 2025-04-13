@@ -2,11 +2,11 @@ package net.primal.data.repository.mappers.local
 
 import kotlinx.datetime.Instant
 import net.primal.data.local.dao.reads.Highlight as HighlightPO
-import net.primal.domain.model.FeedPost
-import net.primal.domain.model.FeedPostAuthor
-import net.primal.domain.model.Highlight as HighlightDO
-import net.primal.domain.model.HighlightData
 import net.primal.domain.nostr.utils.asEllipsizedNpub
+import net.primal.domain.posts.FeedPost
+import net.primal.domain.posts.FeedPostAuthor
+import net.primal.domain.reads.Highlight as HighlightDO
+import net.primal.domain.reads.HighlightData
 
 fun HighlightPO.asHighlightDO(): HighlightDO {
     return HighlightDO(

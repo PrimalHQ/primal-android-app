@@ -27,8 +27,8 @@ import net.primal.android.wallet.transactions.details.TransactionDetailsContract
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.domain.repository.ArticleRepository
-import net.primal.domain.repository.FeedRepository
+import net.primal.domain.posts.FeedRepository
+import net.primal.domain.reads.ArticleRepository
 import timber.log.Timber
 
 @HiltViewModel

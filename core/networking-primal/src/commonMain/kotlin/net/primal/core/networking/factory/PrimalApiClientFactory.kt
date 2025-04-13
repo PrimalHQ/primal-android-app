@@ -7,7 +7,7 @@ import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.ProxyPrimalApiClient
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.coroutines.DispatcherProviderFactory
-import net.primal.domain.PrimalServerType
+import net.primal.domain.global.PrimalServerType
 
 internal val defaultSocketsHttpClient by lazy {
     HttpClientFactory.createHttpClientWithDefaultConfig {

@@ -5,7 +5,7 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
-import net.primal.domain.CdnImage
+import net.primal.domain.links.CdnImage
 
 interface CreateTransactionContract {
 

@@ -1,7 +1,7 @@
 package net.primal.data.repository.mappers.local
 
 import net.primal.data.local.dao.profiles.ProfileData as ProfileDataPO
-import net.primal.domain.model.ProfileData as ProfileDataDO
+import net.primal.domain.profile.ProfileData as ProfileDataDO
 
 fun ProfileDataPO.asProfileDataDO(): ProfileDataDO {
     return ProfileDataDO(

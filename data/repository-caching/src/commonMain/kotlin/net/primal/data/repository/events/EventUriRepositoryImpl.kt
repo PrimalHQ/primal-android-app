@@ -4,9 +4,9 @@ import kotlinx.coroutines.withContext
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.repository.mappers.local.asEventLinkDO
-import net.primal.domain.EventLink
-import net.primal.domain.EventUriType
-import net.primal.domain.repository.EventUriRepository
+import net.primal.domain.links.EventLink
+import net.primal.domain.links.EventUriRepository
+import net.primal.domain.links.EventUriType
 
 class EventUriRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,

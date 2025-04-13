@@ -3,8 +3,8 @@ package net.primal.android.notifications.list.ui
 import java.time.Instant
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.premium.legend.domain.LegendaryCustomization
-import net.primal.domain.CdnImage
-import net.primal.domain.NotificationType
+import net.primal.domain.links.CdnImage
+import net.primal.domain.notifications.NotificationType
 
 data class NotificationUi(
     val notificationId: String,

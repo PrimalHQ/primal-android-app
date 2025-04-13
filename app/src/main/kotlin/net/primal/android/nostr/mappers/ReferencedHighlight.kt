@@ -2,7 +2,7 @@ package net.primal.android.nostr.mappers
 
 import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.articles.highlights.HighlightUi
-import net.primal.domain.ReferencedHighlight
+import net.primal.domain.links.ReferencedHighlight
 import net.primal.domain.nostr.asReplaceableEventTag
 
 fun HighlightUi.toReferencedHighlight() =

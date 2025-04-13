@@ -86,7 +86,7 @@ import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.utils.copyBitmapToClipboard
 import net.primal.android.core.utils.copyText
 import net.primal.android.theme.AppTheme
-import net.primal.domain.EventUriType
+import net.primal.domain.links.EventUriType
 
 @Composable
 fun EventMediaGalleryScreen(viewModel: EventMediaGalleryViewModel, onClose: () -> Unit) {

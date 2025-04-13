@@ -32,9 +32,10 @@ import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.domain.FEED_KIND_USER
-import net.primal.domain.FeedSpecKind
-import net.primal.domain.buildLatestNotesUserFeedSpec
+import net.primal.domain.feeds.FEED_KIND_USER
+import net.primal.domain.feeds.FeedSpecKind
+import net.primal.domain.feeds.FeedsRepository
+import net.primal.domain.feeds.buildLatestNotesUserFeedSpec
 import net.primal.domain.nostr.Nip19TLV
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
@@ -45,9 +46,8 @@ import net.primal.domain.nostr.utils.isValidHex
 import net.primal.domain.nostr.zaps.ZapFailureException
 import net.primal.domain.nostr.zaps.ZapRequestException
 import net.primal.domain.nostr.zaps.ZapTarget
-import net.primal.domain.repository.FeedsRepository
-import net.primal.domain.repository.MutedUserRepository
-import net.primal.domain.repository.ProfileRepository
+import net.primal.domain.profile.MutedUserRepository
+import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel

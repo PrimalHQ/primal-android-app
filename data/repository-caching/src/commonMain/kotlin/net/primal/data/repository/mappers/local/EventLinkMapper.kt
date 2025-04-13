@@ -1,7 +1,7 @@
 package net.primal.data.repository.mappers.local
 
 import net.primal.data.local.dao.events.EventUri
-import net.primal.domain.EventLink
+import net.primal.domain.links.EventLink
 
 internal fun EventUri.asEventLinkDO(forcePosition: Int? = null): EventLink {
     return EventLink(

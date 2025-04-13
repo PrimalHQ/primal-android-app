@@ -30,7 +30,7 @@ import net.primal.android.wallet.domain.Network
 import net.primal.android.wallet.domain.SubWallet
 import net.primal.android.wallet.domain.WalletKycLevel
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.domain.repository.ProfileRepository
+import net.primal.domain.profile.ProfileRepository
 
 @OptIn(ExperimentalPagingApi::class)
 class WalletRepository @Inject constructor(

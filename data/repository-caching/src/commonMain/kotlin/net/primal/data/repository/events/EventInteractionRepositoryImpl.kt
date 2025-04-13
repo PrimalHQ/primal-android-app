@@ -5,6 +5,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.db.PrimalDatabase
+import net.primal.domain.events.EventInteractionRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
@@ -20,7 +21,6 @@ import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.nostr.zaps.lnUrlDecoded
 import net.primal.domain.nostr.zaps.userId
 import net.primal.domain.publisher.PrimalPublisher
-import net.primal.domain.repository.EventInteractionRepository
 
 class EventInteractionRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,

@@ -77,7 +77,7 @@ import net.primal.android.profile.report.ReportUserDialog
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.zaps.canZap
-import net.primal.domain.CdnImage
+import net.primal.domain.links.CdnImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

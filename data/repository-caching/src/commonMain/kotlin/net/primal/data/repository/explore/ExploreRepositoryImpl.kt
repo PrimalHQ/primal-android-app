@@ -33,10 +33,10 @@ import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.data.repository.mappers.remote.takeContentAsPrimalUserFollowStats
 import net.primal.data.repository.mappers.remote.takeContentAsPrimalUserFollowersCountsOrNull
 import net.primal.data.repository.mappers.remote.takeContentAsPrimalUserScoresOrNull
-import net.primal.domain.ExplorePeopleData
-import net.primal.domain.ExploreZapNoteData
-import net.primal.domain.UserProfileSearchItem
-import net.primal.domain.repository.ExploreRepository
+import net.primal.domain.common.UserProfileSearchItem
+import net.primal.domain.explore.ExplorePeopleData
+import net.primal.domain.explore.ExploreRepository
+import net.primal.domain.explore.ExploreZapNoteData
 
 class ExploreRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,

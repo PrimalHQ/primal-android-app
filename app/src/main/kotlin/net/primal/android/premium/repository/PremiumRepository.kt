@@ -16,10 +16,10 @@ import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
-import net.primal.domain.LeaderboardLegendEntry
-import net.primal.domain.OGLeaderboardEntry
+import net.primal.domain.global.CachingImportRepository
 import net.primal.domain.nostr.cryptography.SignatureException
-import net.primal.domain.repository.CachingImportRepository
+import net.primal.domain.premium.LeaderboardLegendEntry
+import net.primal.domain.premium.OGLeaderboardEntry
 import timber.log.Timber
 
 class PremiumRepository @Inject constructor(

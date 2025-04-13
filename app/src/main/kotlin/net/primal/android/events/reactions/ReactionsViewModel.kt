@@ -18,9 +18,9 @@ import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.navigation.noteIdOrThrow
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.domain.model.NostrEventAction
+import net.primal.domain.events.EventRepository
+import net.primal.domain.events.NostrEventAction
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.domain.repository.EventRepository
 import timber.log.Timber
 
 @HiltViewModel

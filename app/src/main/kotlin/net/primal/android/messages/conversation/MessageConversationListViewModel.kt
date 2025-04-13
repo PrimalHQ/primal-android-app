@@ -26,10 +26,10 @@ import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.domain.ConversationRelation
-import net.primal.domain.model.DMConversation
+import net.primal.domain.messages.ChatRepository
+import net.primal.domain.messages.ConversationRelation
+import net.primal.domain.messages.DMConversation
 import net.primal.domain.nostr.cryptography.SignatureException
-import net.primal.domain.repository.ChatRepository
 import timber.log.Timber
 
 @HiltViewModel

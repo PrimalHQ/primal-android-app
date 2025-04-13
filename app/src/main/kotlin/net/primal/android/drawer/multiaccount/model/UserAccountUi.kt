@@ -4,7 +4,7 @@ import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.domain.UserAccount
-import net.primal.domain.CdnImage
+import net.primal.domain.links.CdnImage
 
 data class UserAccountUi(
     val pubkey: String,

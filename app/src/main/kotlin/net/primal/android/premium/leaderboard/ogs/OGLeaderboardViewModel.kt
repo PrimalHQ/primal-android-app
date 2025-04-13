@@ -19,7 +19,7 @@ import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.premium.utils.isPremiumTier
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.domain.OGLeaderboardEntry
+import net.primal.domain.premium.OGLeaderboardEntry
 
 @HiltViewModel
 class OGLeaderboardViewModel @Inject constructor(

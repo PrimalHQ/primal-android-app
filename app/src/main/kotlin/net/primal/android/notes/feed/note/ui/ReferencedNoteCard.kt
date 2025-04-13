@@ -22,7 +22,7 @@ import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.domain.CdnImage
+import net.primal.domain.links.CdnImage
 import net.primal.domain.nostr.NostrEventKind
 
 @Composable

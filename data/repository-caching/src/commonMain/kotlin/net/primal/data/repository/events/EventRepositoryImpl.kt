@@ -30,9 +30,9 @@ import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.data.repository.mappers.remote.takeContentAsPrimalUserScoresOrNull
-import net.primal.domain.EventZap as EventZapDO
-import net.primal.domain.model.NostrEventAction
-import net.primal.domain.repository.EventRepository
+import net.primal.domain.events.EventRepository
+import net.primal.domain.events.EventZap as EventZapDO
+import net.primal.domain.events.NostrEventAction
 
 class EventRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,

@@ -34,6 +34,7 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.events.EventInteractionRepository
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV
@@ -53,11 +54,10 @@ import net.primal.domain.nostr.utils.nostrUriToPubkey
 import net.primal.domain.nostr.zaps.ZapFailureException
 import net.primal.domain.nostr.zaps.ZapRequestException
 import net.primal.domain.nostr.zaps.ZapTarget
-import net.primal.domain.repository.ArticleRepository
-import net.primal.domain.repository.EventInteractionRepository
-import net.primal.domain.repository.FeedRepository
-import net.primal.domain.repository.HighlightRepository
-import net.primal.domain.repository.ProfileRepository
+import net.primal.domain.posts.FeedRepository
+import net.primal.domain.profile.ProfileRepository
+import net.primal.domain.reads.ArticleRepository
+import net.primal.domain.reads.HighlightRepository
 import timber.log.Timber
 
 @HiltViewModel

@@ -10,6 +10,7 @@ import net.primal.android.editor.domain.asIMetaTag
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.events.EventRelayHintsRepository
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.NostrEventKind
@@ -22,9 +23,8 @@ import net.primal.domain.nostr.parseEventTags
 import net.primal.domain.nostr.parseHashtagTags
 import net.primal.domain.nostr.parsePubkeyTags
 import net.primal.domain.nostr.parseReplaceableEventTags
+import net.primal.domain.posts.FeedRepository
 import net.primal.domain.publisher.PrimalPublishResult
-import net.primal.domain.repository.EventRelayHintsRepository
-import net.primal.domain.repository.FeedRepository
 
 class NotePublishHandler @Inject constructor(
     private val dispatcherProvider: DispatcherProvider,

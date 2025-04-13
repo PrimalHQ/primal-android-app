@@ -2,8 +2,8 @@ package net.primal.data.repository.mappers.remote
 
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.local.dao.notifications.NotificationData
-import net.primal.domain.NotificationType
-import net.primal.domain.PrimalEvent
+import net.primal.domain.common.PrimalEvent
+import net.primal.domain.notifications.NotificationType
 
 private fun ContentPrimalNotification.parseActionUserId(type: NotificationType): String? {
     return when (type) {
@@ -22,6 +22,8 @@ private fun ContentPrimalNotification.parseActionUserId(type: NotificationType):
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED -> this.whoLikedIt
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED -> this.whoRepostedIt
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO -> this.whoRepliedToIt
+        NotificationType.YOUR_POST_WAS_HIGHLIGHTED -> this.whoHighlightedIt
+        NotificationType.YOUR_POST_WAS_BOOKMARKED -> this.whoBookmarkedIt
     }
 }
 
@@ -41,6 +43,8 @@ private fun ContentPrimalNotification.parseActionPostId(type: NotificationType):
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED -> this.postYourPostWasMentionedIn
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED -> this.postYourPostWasMentionedIn
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO -> this.reply
+        NotificationType.YOUR_POST_WAS_HIGHLIGHTED -> this.yourPost
+        NotificationType.YOUR_POST_WAS_BOOKMARKED -> this.yourPost
         else -> null
     }
 }

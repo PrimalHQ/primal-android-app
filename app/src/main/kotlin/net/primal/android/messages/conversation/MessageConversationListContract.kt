@@ -3,7 +3,7 @@ package net.primal.android.messages.conversation
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import net.primal.android.messages.conversation.model.MessageConversationUi
-import net.primal.domain.ConversationRelation
+import net.primal.domain.messages.ConversationRelation
 
 interface MessageConversationListContract {
     data class UiState(

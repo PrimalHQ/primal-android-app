@@ -23,10 +23,10 @@ import net.primal.data.repository.articles.processors.persistArticleCommentsToDa
 import net.primal.data.repository.articles.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.local.asArticleDO
 import net.primal.data.repository.mappers.local.mapAsFeedPostDO
-import net.primal.domain.model.Article as ArticleDO
-import net.primal.domain.model.FeedPost
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.domain.repository.ArticleRepository
+import net.primal.domain.posts.FeedPost
+import net.primal.domain.reads.Article as ArticleDO
+import net.primal.domain.reads.ArticleRepository
 
 class ArticleRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,

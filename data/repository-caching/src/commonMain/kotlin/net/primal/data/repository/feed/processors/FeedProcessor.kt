@@ -8,9 +8,9 @@ import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.repository.mappers.remote.asFeedResponse
 import net.primal.data.repository.mappers.remote.orderByPagingIfNotNull
-import net.primal.domain.ContentPrimalPaging
-import net.primal.domain.model.FeedPageSnapshot
+import net.primal.domain.common.ContentPrimalPaging
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.posts.FeedPageSnapshot
 
 internal class FeedProcessor(
     val feedSpec: String,

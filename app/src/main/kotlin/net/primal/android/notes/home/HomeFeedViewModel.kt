@@ -23,11 +23,11 @@ import net.primal.core.config.AppConfigHandler
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.domain.FeedSpecKind
+import net.primal.domain.feeds.FeedSpecKind
+import net.primal.domain.feeds.FeedsRepository
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
-import net.primal.domain.repository.FeedsRepository
 import timber.log.Timber
 
 @HiltViewModel

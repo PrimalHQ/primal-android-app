@@ -20,7 +20,7 @@ import net.primal.android.explore.search.SearchContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.domain.repository.ExploreRepository
+import net.primal.domain.explore.ExploreRepository
 import timber.log.Timber
 
 @HiltViewModel

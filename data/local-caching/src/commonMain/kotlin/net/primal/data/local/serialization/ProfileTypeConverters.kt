@@ -3,8 +3,8 @@ package net.primal.data.local.serialization
 import androidx.room.TypeConverter
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
-import net.primal.domain.PrimalLegendProfile
-import net.primal.domain.PrimalPremiumInfo
+import net.primal.domain.premium.PrimalLegendProfile
+import net.primal.domain.premium.PrimalPremiumInfo
 
 class ProfileTypeConverters {
 

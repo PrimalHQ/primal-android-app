@@ -4,14 +4,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import net.primal.android.R
 import net.primal.android.core.compose.res.painterResource
-import net.primal.domain.NotificationType
+import net.primal.domain.notifications.NotificationType
 
 @Composable
 fun NotificationType.toImagePainter(): Painter =
     when (this) {
         NotificationType.NEW_USER_FOLLOWED_YOU -> painterResource(
-            darkResId = R.drawable.notification_type_new_user_followed_you_dark,
-            lightResId = R.drawable.notification_type_new_user_followed_you_light,
+            darkResId = R.drawable.notification_type_followed_dark,
+            lightResId = R.drawable.notification_type_followed_light,
         )
 
         NotificationType.YOUR_POST_WAS_ZAPPED -> painterResource(
@@ -82,5 +82,15 @@ fun NotificationType.toImagePainter(): Painter =
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO -> painterResource(
             darkResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_replied_to_dark,
             lightResId = R.drawable.notification_type_post_your_post_was_mentioned_in_was_replied_to_light,
+        )
+
+        NotificationType.YOUR_POST_WAS_HIGHLIGHTED -> painterResource(
+            darkResId = R.drawable.notification_type_highlighted_dark,
+            lightResId = R.drawable.notification_type_highlighted_light,
+        )
+
+        NotificationType.YOUR_POST_WAS_BOOKMARKED -> painterResource(
+            darkResId = R.drawable.notification_type_bookmarked_dark,
+            lightResId = R.drawable.notification_type_bookmarked_light,
         )
     }

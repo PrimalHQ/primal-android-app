@@ -49,8 +49,8 @@ import net.primal.android.core.utils.shortened
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.domain.ExplorePeopleData
-import net.primal.domain.model.ProfileData
+import net.primal.domain.explore.ExplorePeopleData
+import net.primal.domain.profile.ProfileData
 
 @Composable
 fun ExplorePeople(

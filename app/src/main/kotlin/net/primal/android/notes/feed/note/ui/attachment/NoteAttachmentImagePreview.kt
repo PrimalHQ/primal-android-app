@@ -24,7 +24,7 @@ import io.github.fornewid.placeholder.material3.placeholder
 import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.events.ui.findNearestOrNull
 import net.primal.android.theme.AppTheme
-import net.primal.domain.EventUriType
+import net.primal.domain.links.EventUriType
 
 @Composable
 fun NoteAttachmentImagePreview(

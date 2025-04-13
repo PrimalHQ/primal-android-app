@@ -51,7 +51,7 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme.Sunset
-import net.primal.domain.NotificationType
+import net.primal.domain.notifications.NotificationType
 
 @Composable
 fun NotificationListItem(
@@ -527,6 +527,14 @@ private fun NotificationType.toSuffixText(usersZappedCount: Int = 0, totalSatsZa
 
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO -> stringResource(
             id = R.string.notification_list_item_post_where_you_post_was_mentioned_was_replied_to,
+        )
+
+        NotificationType.YOUR_POST_WAS_HIGHLIGHTED -> stringResource(
+            id = R.string.notification_list_item_highlighted_your_article,
+        )
+
+        NotificationType.YOUR_POST_WAS_BOOKMARKED -> stringResource(
+            id = R.string.notification_list_item_bookmarked_your_post,
         )
     }
 

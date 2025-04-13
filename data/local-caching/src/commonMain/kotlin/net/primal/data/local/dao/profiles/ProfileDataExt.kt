@@ -1,7 +1,7 @@
 package net.primal.data.local.dao.profiles
 
-import net.primal.domain.plus
-import net.primal.domain.utils.isPrimalLegendTier
+import net.primal.domain.premium.isPrimalLegendTier
+import net.primal.domain.premium.plus
 
 fun ProfileData.combinePremiumInfoIfLegend(profileData: ProfileData?): ProfileData =
     if (this.primalPremiumInfo?.tier.isPrimalLegendTier() == true ||

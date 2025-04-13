@@ -4,8 +4,8 @@ import java.time.Instant
 import kotlinx.datetime.toJavaInstant
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
-import net.primal.domain.CdnImage
-import net.primal.domain.model.FeedPost
+import net.primal.domain.links.CdnImage
+import net.primal.domain.posts.FeedPost
 
 data class HighlightCommentUi(
     val commentId: String,

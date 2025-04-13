@@ -19,7 +19,7 @@ import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.ui.PremiumPrimalNameTable
 import net.primal.android.theme.AppTheme
-import net.primal.domain.CdnImage
+import net.primal.domain.links.CdnImage
 
 @Composable
 fun ConfirmNameChangeStage(

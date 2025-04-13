@@ -23,12 +23,12 @@ import net.primal.android.navigation.renderType
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.domain.FEED_KIND_SEARCH
-import net.primal.domain.buildAdvancedSearchFeedSpec
+import net.primal.domain.feeds.FEED_KIND_SEARCH
+import net.primal.domain.feeds.FeedsRepository
+import net.primal.domain.feeds.buildAdvancedSearchFeedSpec
+import net.primal.domain.feeds.resolveFeedSpecKind
 import net.primal.domain.nostr.cryptography.SignatureException
-import net.primal.domain.repository.FeedRepository
-import net.primal.domain.repository.FeedsRepository
-import net.primal.domain.resolveFeedSpecKind
+import net.primal.domain.posts.FeedRepository
 import timber.log.Timber
 
 @HiltViewModel

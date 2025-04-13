@@ -33,7 +33,7 @@ import net.primal.android.wallet.store.domain.InAppPurchaseException
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.nostr.cryptography.SignatureException
-import net.primal.domain.repository.ProfileRepository
+import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel

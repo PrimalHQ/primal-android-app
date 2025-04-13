@@ -45,7 +45,7 @@ import net.primal.android.feeds.dvm.ui.DvmFeedListItem
 import net.primal.android.feeds.dvm.ui.DvmFeedUi
 import net.primal.android.feeds.dvm.ui.DvmHeaderAndFeedList
 import net.primal.android.theme.AppTheme
-import net.primal.domain.buildSpec
+import net.primal.domain.feeds.buildSpec
 
 @Composable
 fun ExploreFeeds(

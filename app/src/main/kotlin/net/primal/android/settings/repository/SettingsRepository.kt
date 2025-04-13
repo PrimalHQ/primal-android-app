@@ -7,10 +7,10 @@ import net.primal.android.user.domain.UserAccount
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.remote.api.settings.SettingsApi
-import net.primal.domain.ContentAppSettings
-import net.primal.domain.DEFAULT_ZAP_CONFIG
-import net.primal.domain.DEFAULT_ZAP_DEFAULT
+import net.primal.domain.global.ContentAppSettings
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.notifications.DEFAULT_ZAP_CONFIG
+import net.primal.domain.notifications.DEFAULT_ZAP_DEFAULT
 
 class SettingsRepository @Inject constructor(
     private val dispatcherProvider: DispatcherProvider,

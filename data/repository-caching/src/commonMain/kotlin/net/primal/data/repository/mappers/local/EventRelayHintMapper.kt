@@ -1,7 +1,7 @@
 package net.primal.data.repository.mappers.local
 
 import net.primal.data.local.dao.events.EventRelayHints as EventRelayHintsPO
-import net.primal.domain.model.EventRelayHints as EventRelayHintsDO
+import net.primal.domain.events.EventRelayHints as EventRelayHintsDO
 
 fun EventRelayHintsPO.asEventRelayHintsDO(): EventRelayHintsDO {
     return EventRelayHintsDO(

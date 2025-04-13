@@ -1,6 +1,8 @@
 package net.primal.android
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import coil3.SingletonImageLoader
 import dagger.hilt.android.HiltAndroidApp
 import io.github.aakira.napier.Antilog
@@ -8,6 +10,7 @@ import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import net.primal.android.core.crash.PrimalCrashReporter
 import net.primal.android.core.images.PrimalImageLoaderFactory
+import net.primal.android.core.utils.isGoogleBuild
 import net.primal.core.config.store.AppConfigInitializer
 import net.primal.data.repository.factory.PrimalRepositoryFactory
 import timber.log.Timber
@@ -44,5 +47,21 @@ class PrimalApp : Application() {
         if (BuildConfig.FEATURE_PRIMAL_CRASH_REPORTER) {
             crashReporter.init()
         }
+
+        if (isGoogleBuild()) {
+            initNotificationChannels()
+        }
+    }
+
+    private fun initNotificationChannels() {
+        val defaultChannelId = "all_app_events"
+        val defaultChannelName = getString(R.string.settings_notifications_channel_name_all_app_events)
+        val channel = NotificationChannel(
+            defaultChannelId,
+            defaultChannelName,
+            NotificationManager.IMPORTANCE_DEFAULT,
+        )
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
     }
 }

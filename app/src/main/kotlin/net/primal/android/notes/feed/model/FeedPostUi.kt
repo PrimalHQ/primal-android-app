@@ -9,9 +9,10 @@ import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
-import net.primal.domain.CdnImage
+import net.primal.domain.links.CdnImage
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.utils.asEllipsizedNpub
+import net.primal.domain.posts.FeedPost
 
 data class FeedPostUi(
     val postId: String,
@@ -38,7 +39,7 @@ data class FeedPostUi(
     val authorBlossoms: List<String> = emptyList(),
 )
 
-fun net.primal.domain.model.FeedPost.asFeedPostUi(): FeedPostUi {
+fun FeedPost.asFeedPostUi(): FeedPostUi {
     val repost = this.reposts.firstOrNull()
     return FeedPostUi(
         postId = this.eventId,

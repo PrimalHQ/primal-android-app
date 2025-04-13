@@ -1,6 +1,6 @@
 package net.primal.core.networking.sockets
 
-import net.primal.domain.PrimalEvent
+import net.primal.domain.common.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 
 sealed class NostrIncomingMessage {

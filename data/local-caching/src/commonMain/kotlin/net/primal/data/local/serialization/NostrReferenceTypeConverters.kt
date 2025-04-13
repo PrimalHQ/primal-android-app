@@ -3,11 +3,11 @@ package net.primal.data.local.serialization
 import androidx.room.TypeConverter
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
-import net.primal.domain.ReferencedArticle
-import net.primal.domain.ReferencedHighlight
-import net.primal.domain.ReferencedNote
-import net.primal.domain.ReferencedUser
-import net.primal.domain.ReferencedZap
+import net.primal.domain.links.ReferencedArticle
+import net.primal.domain.links.ReferencedHighlight
+import net.primal.domain.links.ReferencedNote
+import net.primal.domain.links.ReferencedUser
+import net.primal.domain.links.ReferencedZap
 
 class NostrReferenceTypeConverters {
 

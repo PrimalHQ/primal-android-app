@@ -10,7 +10,7 @@ import net.primal.data.remote.api.feeds.model.DvmFeedsResponse
 import net.primal.data.remote.api.feeds.model.FeedsResponse
 import net.primal.data.remote.api.feeds.model.SubSettingsAuthorization
 import net.primal.data.remote.model.ContentAppSubSettings
-import net.primal.domain.FeedSpecKind
+import net.primal.domain.feeds.FeedSpecKind
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 

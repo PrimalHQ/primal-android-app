@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.runBlocking
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.domain.AppConfig
+import net.primal.domain.global.AppConfig
 
 internal class AppConfigDataStore(
     dispatcherProvider: DispatcherProvider,

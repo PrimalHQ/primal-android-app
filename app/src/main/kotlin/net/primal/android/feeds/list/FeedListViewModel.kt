@@ -23,13 +23,13 @@ import net.primal.android.feeds.list.ui.model.asFeedUi
 import net.primal.android.feeds.list.ui.model.asPrimalFeed
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.domain.DvmFeed
-import net.primal.domain.FeedSpecKind
-import net.primal.domain.buildSpec
-import net.primal.domain.model.PrimalFeed
+import net.primal.domain.feeds.DvmFeed
+import net.primal.domain.feeds.FeedSpecKind
+import net.primal.domain.feeds.FeedsRepository
+import net.primal.domain.feeds.PrimalFeed
+import net.primal.domain.feeds.buildSpec
 import net.primal.domain.nostr.cryptography.SignatureException
-import net.primal.domain.repository.FeedRepository
-import net.primal.domain.repository.FeedsRepository
+import net.primal.domain.posts.FeedRepository
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = FeedListViewModel.Factory::class)

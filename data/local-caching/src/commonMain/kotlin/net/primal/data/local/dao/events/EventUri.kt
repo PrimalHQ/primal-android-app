@@ -3,8 +3,8 @@ package net.primal.data.local.dao.events
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import net.primal.domain.CdnResourceVariant
-import net.primal.domain.EventUriType
+import net.primal.domain.links.CdnResourceVariant
+import net.primal.domain.links.EventUriType
 
 @Entity(indices = [Index(value = ["eventId", "url"], unique = true)])
 data class EventUri(

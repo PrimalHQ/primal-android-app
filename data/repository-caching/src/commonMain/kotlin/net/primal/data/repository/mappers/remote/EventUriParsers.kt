@@ -6,10 +6,10 @@ import net.primal.data.local.dao.events.EventUri
 import net.primal.data.local.dao.messages.DirectMessageData
 import net.primal.data.local.dao.notes.PostData
 import net.primal.data.local.dao.reads.ArticleData
-import net.primal.domain.CdnResource
-import net.primal.domain.EventLink
-import net.primal.domain.EventLinkPreviewData
-import net.primal.domain.EventUriType
+import net.primal.domain.links.CdnResource
+import net.primal.domain.links.EventLink
+import net.primal.domain.links.EventLinkPreviewData
+import net.primal.domain.links.EventUriType
 import net.primal.domain.nostr.utils.isNostrUri
 
 private data class EventIdUriPair(

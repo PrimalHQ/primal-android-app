@@ -1,6 +1,17 @@
 package net.primal.domain
 
 import io.kotest.matchers.shouldBe
+import net.primal.domain.feeds.isAudioSpec
+import net.primal.domain.feeds.isImageSpec
+import net.primal.domain.feeds.isNotesBookmarkFeedSpec
+import net.primal.domain.feeds.isNotesFeedSpec
+import net.primal.domain.feeds.isProfileAuthoredNoteRepliesFeedSpec
+import net.primal.domain.feeds.isProfileAuthoredNotesFeedSpec
+import net.primal.domain.feeds.isProfileNotesFeedSpec
+import net.primal.domain.feeds.isReadsFeedSpec
+import net.primal.domain.feeds.isUserNotesFeedSpec
+import net.primal.domain.feeds.isUserNotesLwrFeedSpec
+import net.primal.domain.feeds.isVideoSpec
 import org.junit.Test
 
 class FeedExtensionsKtTest {

@@ -1,8 +1,8 @@
 package net.primal.data.repository.mappers.local
 
 import net.primal.data.local.dao.messages.MessageConversation
-import net.primal.domain.model.DMConversation
-import net.primal.domain.model.ProfileData
+import net.primal.domain.messages.DMConversation
+import net.primal.domain.profile.ProfileData
 
 fun MessageConversation.asDMConversation(): DMConversation {
     return DMConversation(

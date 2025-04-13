@@ -2,8 +2,8 @@ package net.primal.android.events.ui
 
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
-import net.primal.domain.CdnImage
-import net.primal.domain.EventZap
+import net.primal.domain.events.EventZap
+import net.primal.domain.links.CdnImage
 
 data class EventZapUiModel(
     val id: String,

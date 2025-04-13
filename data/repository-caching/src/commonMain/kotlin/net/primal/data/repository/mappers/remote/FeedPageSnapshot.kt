@@ -1,7 +1,7 @@
 package net.primal.data.repository.mappers.remote
 
 import net.primal.data.remote.api.feed.model.FeedResponse
-import net.primal.domain.model.FeedPageSnapshot
+import net.primal.domain.posts.FeedPageSnapshot
 
 internal fun FeedResponse.asFeedPageSnapshot(): FeedPageSnapshot {
     return FeedPageSnapshot(

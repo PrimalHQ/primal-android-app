@@ -2,11 +2,11 @@ package net.primal.data.repository.mappers.local
 
 import kotlinx.datetime.Instant
 import net.primal.data.local.dao.notifications.Notification as NotificationPO
-import net.primal.domain.model.FeedPost
-import net.primal.domain.model.FeedPostAuthor
-import net.primal.domain.model.FeedPostStats
-import net.primal.domain.model.Notification as NotificationDO
 import net.primal.domain.nostr.utils.asEllipsizedNpub
+import net.primal.domain.notifications.Notification as NotificationDO
+import net.primal.domain.posts.FeedPost
+import net.primal.domain.posts.FeedPostAuthor
+import net.primal.domain.posts.FeedPostStats
 
 fun NotificationPO.asNotificationDO(): NotificationDO {
     return NotificationDO(

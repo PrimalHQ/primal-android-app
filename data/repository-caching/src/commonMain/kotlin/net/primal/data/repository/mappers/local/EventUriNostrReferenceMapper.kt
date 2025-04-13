@@ -1,7 +1,7 @@
 package net.primal.data.repository.mappers.local
 
 import net.primal.data.local.dao.events.EventUriNostr
-import net.primal.domain.EventUriNostrReference
+import net.primal.domain.links.EventUriNostrReference
 
 internal fun EventUriNostr.asReferencedNostrUriDO(forcePosition: Int? = null): EventUriNostrReference {
     return EventUriNostrReference(

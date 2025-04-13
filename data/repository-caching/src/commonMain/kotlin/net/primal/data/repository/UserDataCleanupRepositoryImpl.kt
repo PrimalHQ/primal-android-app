@@ -2,7 +2,7 @@ package net.primal.data.repository
 
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.local.db.withTransaction
-import net.primal.domain.repository.UserDataCleanupRepository
+import net.primal.domain.user.UserDataCleanupRepository
 
 class UserDataCleanupRepositoryImpl(
     private val database: PrimalDatabase,

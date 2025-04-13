@@ -8,7 +8,7 @@ import kotlinx.coroutines.test.runTest
 import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
-import net.primal.domain.repository.NotificationRepository
+import net.primal.domain.notifications.NotificationRepository
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

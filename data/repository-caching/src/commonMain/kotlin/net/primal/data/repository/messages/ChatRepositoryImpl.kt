@@ -21,14 +21,14 @@ import net.primal.data.repository.mappers.local.asDMConversation
 import net.primal.data.repository.mappers.local.asDirectMessageDO
 import net.primal.data.repository.messages.paging.MessagesRemoteMediator
 import net.primal.data.repository.messages.processors.MessagesProcessor
-import net.primal.domain.ConversationRelation
+import net.primal.domain.messages.ChatRepository
+import net.primal.domain.messages.ConversationRelation
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asPubkeyTag
 import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.publisher.PrimalPublisher
-import net.primal.domain.repository.ChatRepository
 
 @OptIn(ExperimentalPagingApi::class)
 internal class ChatRepositoryImpl(

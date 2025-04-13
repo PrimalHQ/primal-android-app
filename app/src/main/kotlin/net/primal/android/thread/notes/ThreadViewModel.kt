@@ -24,11 +24,11 @@ import net.primal.android.thread.notes.ThreadContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.events.EventRepository
 import net.primal.domain.nostr.Nip19TLV
 import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
-import net.primal.domain.repository.ArticleRepository
-import net.primal.domain.repository.EventRepository
-import net.primal.domain.repository.FeedRepository
+import net.primal.domain.posts.FeedRepository
+import net.primal.domain.reads.ArticleRepository
 import timber.log.Timber
 
 @HiltViewModel

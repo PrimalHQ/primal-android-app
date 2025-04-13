@@ -3,7 +3,7 @@ package net.primal.data.local.dao.feeds
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import net.primal.domain.FeedSpecKind
+import net.primal.domain.feeds.FeedSpecKind
 
 @Entity(indices = [Index(value = ["ownerId", "spec"], unique = true)])
 data class Feed(

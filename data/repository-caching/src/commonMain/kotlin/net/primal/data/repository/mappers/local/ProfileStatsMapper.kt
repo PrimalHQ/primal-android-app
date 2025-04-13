@@ -1,7 +1,7 @@
 package net.primal.data.repository.mappers.local
 
 import net.primal.data.local.dao.profiles.ProfileStats as ProfileStatsPO
-import net.primal.domain.model.ProfileStats as ProfileStatsDO
+import net.primal.domain.profile.ProfileStats as ProfileStatsDO
 
 fun ProfileStatsPO.asProfileStatsDO(): ProfileStatsDO {
     return ProfileStatsDO(

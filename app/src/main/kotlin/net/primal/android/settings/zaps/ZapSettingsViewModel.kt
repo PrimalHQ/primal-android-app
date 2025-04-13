@@ -19,9 +19,9 @@ import net.primal.android.settings.zaps.ZapSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.domain.ContentZapConfigItem
-import net.primal.domain.ContentZapDefault
 import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.notifications.ContentZapConfigItem
+import net.primal.domain.notifications.ContentZapDefault
 import timber.log.Timber
 
 @HiltViewModel

@@ -1,7 +1,7 @@
 package net.primal.android.premium.manage.media.api.model
 
-import net.primal.domain.ContentPrimalPaging
-import net.primal.domain.PrimalEvent
+import net.primal.domain.common.ContentPrimalPaging
+import net.primal.domain.common.PrimalEvent
 
 data class MediaUploadsResponse(
     val paging: ContentPrimalPaging?,

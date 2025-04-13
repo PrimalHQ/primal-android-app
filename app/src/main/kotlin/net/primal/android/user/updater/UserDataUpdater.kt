@@ -11,7 +11,7 @@ import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.repository.WalletRepository
-import net.primal.domain.repository.PublicBookmarksRepository
+import net.primal.domain.bookmarks.PublicBookmarksRepository
 
 class UserDataUpdater @AssistedInject constructor(
     @Assisted val userId: String,

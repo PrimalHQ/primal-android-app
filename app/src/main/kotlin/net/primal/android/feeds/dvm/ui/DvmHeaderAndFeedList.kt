@@ -9,8 +9,8 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.notes.feed.list.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
-import net.primal.domain.FeedSpecKind
-import net.primal.domain.buildSpec
+import net.primal.domain.feeds.FeedSpecKind
+import net.primal.domain.feeds.buildSpec
 
 @Composable
 fun DvmHeaderAndFeedList(
