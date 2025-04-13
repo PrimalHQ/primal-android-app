@@ -1,12 +1,17 @@
 package net.primal.android.settings.notifications
 
 import net.primal.android.core.errors.SignatureUiError
-import net.primal.domain.notifications.NotificationType
+import net.primal.android.settings.notifications.ui.NotificationSwitchUi
+import net.primal.domain.notifications.NotificationSettingsType
+import net.primal.domain.notifications.NotificationSettingsType.Preferences
+import net.primal.domain.notifications.NotificationSettingsType.PushNotifications
+import net.primal.domain.notifications.NotificationSettingsType.TabNotifications
 
 interface NotificationsSettingsContract {
     data class UiState(
-        val enabledPushNotifications: Boolean = false,
-        val notificationSwitches: List<NotificationSwitchUi> = emptyList(),
+        val pushNotificationsSettings: List<NotificationSwitchUi<PushNotifications>> = emptyList(),
+        val tabNotificationsSettings: List<NotificationSwitchUi<TabNotifications>> = emptyList(),
+        val preferencesSettings: List<NotificationSwitchUi<Preferences>> = emptyList(),
         val error: ApiError? = null,
         val signatureError: SignatureUiError? = null,
     ) {
@@ -17,11 +22,7 @@ interface NotificationsSettingsContract {
     }
 
     sealed class UiEvent {
-        data class NotificationSettingChanged(
-            val type: NotificationType,
-            val value: Boolean,
-        ) : UiEvent()
-
         data object DismissErrors : UiEvent()
+        data class NotificationSettingsChanged(val type: NotificationSettingsType, val value: Boolean) : UiEvent()
     }
 }

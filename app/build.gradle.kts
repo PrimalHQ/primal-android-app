@@ -53,8 +53,8 @@ fun extractSigningConfigProperties(storeName: String): SigningConfigProperties? 
     )
 }
 
-val appVersionCode = 223
-val appVersionName = "2.2.2 (2)"
+val appVersionCode = 224
+val appVersionName = "2.2.3 (2)"
 
 tasks.register("generateReleaseProperties") {
     doLast {
@@ -256,6 +256,8 @@ dependencies {
 
     implementation(libs.compose.constraintlayout)
     implementation(libs.constraintlayout)
+
+    implementation(libs.permissions.accompanist)
 
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.emoji2)
