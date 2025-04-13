@@ -15,12 +15,15 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import net.primal.android.core.errors.asSignatureUiError
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiEvent.DismissErrors
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiEvent.NotificationSettingsChanged
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiState
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiState.ApiError.FetchAppSettingsError
+import net.primal.android.settings.notifications.NotificationsSettingsContract.UiState.ApiError.UpdateAppSettingsError
 import net.primal.android.settings.notifications.ui.NotificationSwitchUi
 import net.primal.android.settings.notifications.ui.mapAsNotificationsPreferences
 import net.primal.android.settings.notifications.ui.mapAsPushNotificationSwitchUi
@@ -31,6 +34,9 @@ import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.notifications.NotificationSettingsType
+import net.primal.domain.notifications.NotificationSettingsType.Preferences
+import net.primal.domain.notifications.NotificationSettingsType.PushNotifications
+import net.primal.domain.notifications.NotificationSettingsType.TabNotifications
 import timber.log.Timber
 
 @HiltViewModel
@@ -67,15 +73,15 @@ class NotificationsSettingsViewModel @Inject constructor(
                     DismissErrors -> setState { copy(error = null) }
                     is NotificationSettingsChanged -> {
                         when (event.type) {
-                            is NotificationSettingsType.Preferences -> setState {
+                            is Preferences -> setState {
                                 copy(preferencesSettings = this.preferencesSettings.update(event))
                             }
 
-                            is NotificationSettingsType.PushNotifications -> setState {
+                            is PushNotifications -> setState {
                                 copy(pushNotificationsSettings = this.pushNotificationsSettings.update(event))
                             }
 
-                            is NotificationSettingsType.TabNotifications -> setState {
+                            is TabNotifications -> setState {
                                 copy(tabNotificationsSettings = this.tabNotificationsSettings.update(event))
                             }
                         }
@@ -100,11 +106,11 @@ class NotificationsSettingsViewModel @Inject constructor(
             events.filterIsInstance<NotificationSettingsChanged>()
                 .debounce(1.seconds)
                 .collect {
-                    // TODO Reimplement updating settings remotely
-                    // Trigger updates
-//                    updateNotificationsSettings(
-//                        notifications = state.value.notificationSwitches,
-//                    )
+                    updateNotificationsSettings(
+                        tabNotificationsSettings = state.value.tabNotificationsSettings,
+                        pushNotificationsSettings = state.value.pushNotificationsSettings,
+                        preferencesSettings = state.value.preferencesSettings,
+                    )
                 }
         }
 
@@ -144,31 +150,51 @@ class NotificationsSettingsViewModel @Inject constructor(
             }
         }
 
-//    private fun updateNotificationsSettings(
-//        notifications: List<NotificationSwitchUi>,
-//    ) =
-//        viewModelScope.launch {
-//            val notificationsJsonObject = JsonObject(
-//                content = notifications.associate {
-//                    it.notificationType.id to JsonPrimitive(value = it.enabled)
-//                },
-//            )
-//
-//            try {
-//                val userId = activeAccountStore.activeUserId()
-//                val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
-//                    userId = userId,
-//                    description = "Sync app settings",
-//                )
-//                settingsRepository.fetchAndUpdateAndPublishAppSettings(authorizationEvent) {
-//                    val newAppSettings = this.copy(notifications = notificationsJsonObject)
-//                    nostrNotary.signAppSettingsNostrEvent(
-//                        userId = userId,
-//                        appSettings = newAppSettings,
-//                    )
-//                }
-//            } catch (error: WssException) {
-//                setState { copy(error = UpdateAppSettingsError(cause = error)) }
-//            }
-//        }
+    private fun updateNotificationsSettings(
+        tabNotificationsSettings: List<NotificationSwitchUi<TabNotifications>>,
+        pushNotificationsSettings: List<NotificationSwitchUi<PushNotifications>>,
+        preferencesSettings: List<NotificationSwitchUi<Preferences>>,
+    ) = viewModelScope.launch {
+        val tabNotificationsJsonObject = tabNotificationsSettings.mapToRemoteTabNotificationsJsonObject()
+        val pushNotificationsJsonObject = pushNotificationsSettings.mapToRemoteJsonObject()
+        val preferencesJsonObject = preferencesSettings.mapToRemoteJsonObject()
+
+        try {
+            val userId = activeAccountStore.activeUserId()
+            val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
+                userId = userId,
+                description = "Sync app settings",
+            )
+            settingsRepository.fetchAndUpdateAndPublishAppSettings(authorizationEvent) {
+                val newAppSettings = this.copy(
+                    notifications = tabNotificationsJsonObject,
+                    pushNotifications = pushNotificationsJsonObject,
+                    notificationsAdditional = preferencesJsonObject,
+
+                )
+                nostrNotary.signAppSettingsNostrEvent(
+                    userId = userId,
+                    appSettings = newAppSettings,
+                )
+            }
+        } catch (error: WssException) {
+            setState { copy(error = UpdateAppSettingsError(cause = error)) }
+        }
+    }
+
+    private fun List<NotificationSwitchUi<TabNotifications>>.mapToRemoteTabNotificationsJsonObject(): JsonObject {
+        return JsonObject(
+            content = this.flatMap { switchUi ->
+                switchUi.settingsType.types.map { it.id to JsonPrimitive(switchUi.enabled) }
+            }.toMap(),
+        )
+    }
+
+    private fun <T : NotificationSettingsType> List<NotificationSwitchUi<T>>.mapToRemoteJsonObject(): JsonObject {
+        return JsonObject(
+            content = this.associate {
+                it.settingsType.id to JsonPrimitive(value = it.enabled)
+            },
+        )
+    }
 }

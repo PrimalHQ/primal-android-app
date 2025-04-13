@@ -18,9 +18,9 @@ import net.primal.domain.notifications.NotificationType.YOUR_POST_WAS_REPOSTED
 import net.primal.domain.notifications.NotificationType.YOUR_POST_WAS_ZAPPED
 import net.primal.domain.notifications.NotificationType.YOU_WERE_MENTIONED_IN_POST
 
-sealed class NotificationSettingsType {
+sealed class NotificationSettingsType(val id: String) {
 
-    sealed class PushNotifications(val id: String) : NotificationSettingsType() {
+    sealed class PushNotifications(id: String) : NotificationSettingsType(id = id) {
         data object NewFollows : PushNotifications(id = NEW_FOLLOWS)
         data object Zaps : PushNotifications(id = ZAPS)
         data object Reactions : PushNotifications(id = REACTIONS)
@@ -56,10 +56,10 @@ sealed class NotificationSettingsType {
         }
     }
 
-    sealed class Preferences(val id: String) : NotificationSettingsType() {
-        data object HellThread : Preferences(id = "")
-        data object DMsFromFollows : Preferences(id = "")
-        data object ReactionsFromFollows : Preferences(id = "")
+    sealed class Preferences(id: String) : NotificationSettingsType(id = id) {
+        data object HellThread : Preferences(id = HELL_THREAD)
+        data object DMsFromFollows : Preferences(id = DMS_FROM_FOLLOWS)
+        data object ReactionsFromFollows : Preferences(id = REACTIONS_FROM_FOLLOWS)
 
         companion object {
             private const val HELL_THREAD = "ignore_events_with_too_many_mentions"
@@ -78,9 +78,9 @@ sealed class NotificationSettingsType {
     }
 
     sealed class TabNotifications(
-        val id: String,
+        id: String,
         val types: List<NotificationType>,
-    ) : NotificationSettingsType() {
+    ) : NotificationSettingsType(id = id) {
 
         data object NewFollows : TabNotifications(
             id = "NEW_FOLLOWS",
