@@ -41,6 +41,7 @@ import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.networking.upload.PrimalUploadService
+import net.primal.android.networking.upload.UploadJob
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
@@ -49,7 +50,6 @@ import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.blossom.UnsuccessfulBlossomUpload
-import net.primal.core.networking.blossom.UploadJob
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.nostr.MAX_RELAY_HINTS
 import net.primal.domain.nostr.Naddr
@@ -365,11 +365,10 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             newAttachments
                 .map {
-                    val uploadId = PrimalUploadService.generateRandomUploadId()
                     val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
                         uploadAttachment(attachment = it)
                     }
-                    val uploadJob = UploadJob(job = job, id = uploadId)
+                    val uploadJob = UploadJob(job = job)
                     attachmentUploads[it.id] = uploadJob
                     uploadJob
                 }.forEach {
@@ -445,29 +444,16 @@ class NoteEditorViewModel @AssistedInject constructor(
             }
         }
 
-    private fun UploadJob?.cancel() {
-        if (this == null) return
-
-        viewModelScope.launch {
-            this@cancel.job.cancel()
-            runCatching {
-                primalUploadService.cancelOrDelete(
-                    userId = activeAccountStore.activeUserId(),
-                    uploadId = this@cancel.id,
-                )
-            }
-        }
-    }
+    private fun UploadJob?.cancel() = this?.job?.cancel()
 
     private fun retryAttachmentUpload(attachmentId: UUID) =
         viewModelScope.launch {
             val noteAttachment = _state.value.attachments.firstOrNull { it.id == attachmentId }
             if (noteAttachment != null) {
-                val uploadId = PrimalUploadService.generateRandomUploadId()
                 val job = viewModelScope.launch {
                     uploadAttachment(attachment = noteAttachment)
                 }
-                attachmentUploads[attachmentId] = UploadJob(job = job, id = uploadId)
+                attachmentUploads[attachmentId] = UploadJob(job = job)
                 job.join()
                 checkUploadQueueAndDisableFlagIfCompleted()
             }

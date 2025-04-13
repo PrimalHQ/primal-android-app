@@ -4,18 +4,14 @@ import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.net.Uri
 import java.io.IOException
-import java.util.*
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
-import net.primal.android.BuildConfig
-import net.primal.android.networking.UserAgentProvider
 import net.primal.android.nostr.notary.signOrThrow
 import net.primal.core.networking.blossom.BlossomApiFactory
 import net.primal.core.networking.blossom.FileMetadata
 import net.primal.core.networking.blossom.UnsuccessfulBlossomUpload
-import net.primal.core.networking.blossom.UploadResult
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.NostrEvent
@@ -40,12 +36,6 @@ class PrimalUploadService @Inject constructor(
     private val contentResolver: ContentResolver,
     private val signatureHandler: NostrEventSignatureHandler,
 ) {
-    companion object {
-        fun generateRandomUploadId(): String {
-            val uploadFriendlyVersionName = BuildConfig.VERSION_NAME.replace(".", "_")
-            return "${UUID.randomUUID()}-${UserAgentProvider.APP_NAME}-$uploadFriendlyVersionName"
-        }
-    }
 
     private val blossomApi = BlossomApiFactory.create(baseBlossomUrl = "https://blossom.primal.net")
 
@@ -123,8 +113,6 @@ class PrimalUploadService @Inject constructor(
         }
 
     private fun expirationTimestamp() = Clock.System.now().plus(1.hours).toEpochMilliseconds()
-
-    suspend fun cancelOrDelete(userId: String, uploadId: String) = Unit
 
     private fun BufferedSource.getMetadata(): FileMetadata {
         val hashingSource = HashingSource.sha256(this)

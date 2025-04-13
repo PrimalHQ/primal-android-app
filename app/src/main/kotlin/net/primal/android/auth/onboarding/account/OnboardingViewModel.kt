@@ -20,9 +20,9 @@ import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroupMember
 import net.primal.android.auth.repository.CreateAccountHandler
 import net.primal.android.networking.upload.PrimalUploadService
+import net.primal.android.networking.upload.UploadJob
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.core.networking.blossom.UnsuccessfulBlossomUpload
-import net.primal.core.networking.blossom.UploadJob
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
@@ -171,7 +171,6 @@ class OnboardingViewModel @Inject constructor(
         avatarUploadJob.cancel()
         avatarUploadJob = null
         if (avatarUri != null) {
-            val uploadId = PrimalUploadService.generateRandomUploadId()
             val job = viewModelScope.launch {
                 try {
                     val uploadResult = withContext(dispatcherProvider.io()) {
@@ -189,7 +188,7 @@ class OnboardingViewModel @Inject constructor(
                     Timber.w(error)
                 }
             }
-            avatarUploadJob = UploadJob(job = job, id = uploadId)
+            avatarUploadJob = UploadJob(job = job)
         }
     }
 
@@ -198,7 +197,6 @@ class OnboardingViewModel @Inject constructor(
         bannerUploadJob.cancel()
         bannerUploadJob = null
         if (bannerUri != null) {
-            val uploadId = PrimalUploadService.generateRandomUploadId()
             val job = viewModelScope.launch {
                 try {
                     val uploadResult = withContext(dispatcherProvider.io()) {
@@ -216,7 +214,7 @@ class OnboardingViewModel @Inject constructor(
                     Timber.w(error)
                 }
             }
-            bannerUploadJob = UploadJob(job = job, id = uploadId)
+            bannerUploadJob = UploadJob(job = job)
         }
     }
 
@@ -235,17 +233,7 @@ class OnboardingViewModel @Inject constructor(
             remoteBannerUrl = this.bannerRemoteUrl ?: DEFAULT_BANNER_URL,
         )
 
-    private fun UploadJob?.cancel() {
-        if (this == null) return
-
-        viewModelScope.launch {
-            this@cancel.job.cancel()
-            runCatching {
-                // TODO: implement or consider how to cancel upload
-//                fileUploader.cancelUpload(keyPair = keyPair, uploadId = this@cancel.id)
-            }
-        }
-    }
+    private fun UploadJob?.cancel() = this?.job?.cancel()
 
     private fun toggleFollowMemberFollowing(event: UiEvent.ToggleFollowEvent) {
         setState {
