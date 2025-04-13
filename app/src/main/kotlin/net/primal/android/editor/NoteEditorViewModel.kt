@@ -40,7 +40,7 @@ import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.networking.upload.BlossomUploadService
+import net.primal.android.networking.upload.PrimalUploadService
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
@@ -49,6 +49,7 @@ import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.blossom.UnsuccessfulBlossomUpload
+import net.primal.core.networking.blossom.UploadJob
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.nostr.MAX_RELAY_HINTS
 import net.primal.domain.nostr.Naddr
@@ -65,7 +66,6 @@ import net.primal.domain.repository.EventRelayHintsRepository
 import net.primal.domain.repository.ExploreRepository
 import net.primal.domain.repository.FeedRepository
 import net.primal.domain.repository.HighlightRepository
-import net.primal.domain.upload.UploadJob
 import timber.log.Timber
 
 class NoteEditorViewModel @AssistedInject constructor(
@@ -74,7 +74,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
     private val notePublishHandler: NotePublishHandler,
-    private val blossomUploadService: BlossomUploadService,
+    private val primalUploadService: PrimalUploadService,
     private val highlightRepository: HighlightRepository,
     private val exploreRepository: ExploreRepository,
     private val userRepository: UserRepository,
@@ -365,7 +365,7 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             newAttachments
                 .map {
-                    val uploadId = BlossomUploadService.generateRandomUploadId()
+                    val uploadId = PrimalUploadService.generateRandomUploadId()
                     val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
                         uploadAttachment(attachment = it)
                     }
@@ -387,7 +387,7 @@ class NoteEditorViewModel @AssistedInject constructor(
             updatedAttachment = updatedAttachment.copy(uploadError = null)
             updateNoteAttachmentState(attachment = updatedAttachment)
 
-            val uploadResult = blossomUploadService.upload(
+            val uploadResult = primalUploadService.upload(
                 uri = attachment.localUri,
                 userId = activeAccountStore.activeUserId(),
                 onProgress = { uploadedBytes, totalBytes ->
@@ -451,7 +451,7 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             this@cancel.job.cancel()
             runCatching {
-                blossomUploadService.cancelOrDelete(
+                primalUploadService.cancelOrDelete(
                     userId = activeAccountStore.activeUserId(),
                     uploadId = this@cancel.id,
                 )
@@ -463,7 +463,7 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             val noteAttachment = _state.value.attachments.firstOrNull { it.id == attachmentId }
             if (noteAttachment != null) {
-                val uploadId = BlossomUploadService.generateRandomUploadId()
+                val uploadId = PrimalUploadService.generateRandomUploadId()
                 val job = viewModelScope.launch {
                     uploadAttachment(attachment = noteAttachment)
                 }

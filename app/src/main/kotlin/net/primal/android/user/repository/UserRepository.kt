@@ -11,7 +11,7 @@ import kotlinx.serialization.json.JsonArray
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.networking.upload.BlossomUploadService
+import net.primal.android.networking.upload.PrimalUploadService
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.premium.repository.asProfileDataDO
 import net.primal.android.profile.domain.ProfileMetadata
@@ -51,7 +51,7 @@ class UserRepository @Inject constructor(
     private val accountsStore: UserAccountsStore,
     private val credentialsStore: CredentialsStore,
     private val activeAccountStore: ActiveAccountStore,
-    private val fileUploader: BlossomUploadService,
+    private val primalUploadService: PrimalUploadService,
     private val usersApi: UsersApi,
     private val nostrPublisher: NostrPublisher,
     private val profileRepository: ProfileRepository,
@@ -160,7 +160,7 @@ class UserRepository @Inject constructor(
     suspend fun setProfileMetadata(userId: String, profileMetadata: ProfileMetadata) {
         val pictureUrl = profileMetadata.remotePictureUrl
             ?: if (profileMetadata.localPictureUri != null) {
-                fileUploader.upload(
+                primalUploadService.upload(
                     uri = profileMetadata.localPictureUri,
                     userId = userId,
                 ).remoteUrl
@@ -170,7 +170,7 @@ class UserRepository @Inject constructor(
 
         val bannerUrl = profileMetadata.remoteBannerUrl
             ?: if (profileMetadata.localBannerUri != null) {
-                fileUploader.upload(
+                primalUploadService.upload(
                     uri = profileMetadata.localBannerUri,
                     userId = userId,
                 ).remoteUrl

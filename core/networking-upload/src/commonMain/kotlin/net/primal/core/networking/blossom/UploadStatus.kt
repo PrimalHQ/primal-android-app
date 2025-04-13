@@ -1,4 +1,4 @@
-package net.primal.domain.upload
+package net.primal.core.networking.blossom
 
 sealed class UploadStatus {
     data object Uploading : UploadStatus()

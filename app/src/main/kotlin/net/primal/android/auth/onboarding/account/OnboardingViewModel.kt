@@ -19,16 +19,16 @@ import net.primal.android.auth.onboarding.account.api.OnboardingApi
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroupMember
 import net.primal.android.auth.repository.CreateAccountHandler
-import net.primal.android.networking.upload.BlossomUploadService
+import net.primal.android.networking.upload.PrimalUploadService
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.core.networking.blossom.UnsuccessfulBlossomUpload
+import net.primal.core.networking.blossom.UploadJob
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.utils.CryptoUtils
-import net.primal.domain.upload.UploadJob
 import timber.log.Timber
 
 @HiltViewModel
@@ -36,7 +36,7 @@ class OnboardingViewModel @Inject constructor(
     private val dispatcherProvider: DispatcherProvider,
     private val onboardingApi: OnboardingApi,
     private val createAccountHandler: CreateAccountHandler,
-    private val fileUploader: BlossomUploadService,
+    private val primalUploadService: PrimalUploadService,
 ) : ViewModel() {
 
     private val keyPair = CryptoUtils.generateHexEncodedKeypair()
@@ -171,11 +171,11 @@ class OnboardingViewModel @Inject constructor(
         avatarUploadJob.cancel()
         avatarUploadJob = null
         if (avatarUri != null) {
-            val uploadId = BlossomUploadService.generateRandomUploadId()
+            val uploadId = PrimalUploadService.generateRandomUploadId()
             val job = viewModelScope.launch {
                 try {
                     val uploadResult = withContext(dispatcherProvider.io()) {
-                        fileUploader.upload(
+                        primalUploadService.upload(
                             uri = avatarUri,
                             userId = keyPair.pubKey,
                         )
@@ -198,13 +198,13 @@ class OnboardingViewModel @Inject constructor(
         bannerUploadJob.cancel()
         bannerUploadJob = null
         if (bannerUri != null) {
-            val uploadId = BlossomUploadService.generateRandomUploadId()
+            val uploadId = PrimalUploadService.generateRandomUploadId()
             val job = viewModelScope.launch {
                 try {
                     val uploadResult = withContext(dispatcherProvider.io()) {
-                        fileUploader.upload(
+                        primalUploadService.upload(
                             uri = bannerUri,
-                            userId = keyPair.pubKey,
+                            keyPair = keyPair,
                         )
                     }
                     setState { copy(bannerRemoteUrl = uploadResult.remoteUrl) }
