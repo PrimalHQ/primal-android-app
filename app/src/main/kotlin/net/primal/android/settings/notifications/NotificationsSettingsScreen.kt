@@ -385,6 +385,7 @@ private fun NotificationSettingsSection.toTitle(): String =
         NotificationSettingsSection.PREFERENCES -> stringResource(R.string.settings_notifications_section_preferences)
     }
 
+@Suppress("CyclomaticComplexMethod")
 @Composable
 private fun NotificationSettingsType.toTitle(): String =
     when (this) {
@@ -452,6 +453,7 @@ private fun NotificationSettingsType.toTitle(): String =
         NotificationSettingsType.TabNotifications.Zaps -> stringResource(R.string.settings_notifications_group_zaps)
     }
 
+@Suppress("CyclomaticComplexMethod")
 @Composable
 private fun NotificationSettingsType.toImagePainter(): Painter? =
     when (this) {
