@@ -20,6 +20,7 @@ fun UserAccount.copyProfileIfNotNull(profile: UserAccount?): UserAccount {
             internetIdentifier = profile.internetIdentifier,
             lightningAddress = profile.lightningAddress,
             primalLegendProfile = profile.primalLegendProfile,
+            blossomServers = profile.blossomServers,
         )
     } else {
         this

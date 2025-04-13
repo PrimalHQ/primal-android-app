@@ -103,6 +103,7 @@ class UserRepository @Inject constructor(
                 notesCount = userStats?.notesCount,
                 repliesCount = userStats?.repliesCount,
                 primalLegendProfile = userData.primalPremiumInfo?.legendProfile,
+                blossomServers = userData.blossoms,
             )
         }
 

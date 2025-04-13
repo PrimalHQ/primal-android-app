@@ -41,6 +41,7 @@ data class UserAccount(
     val lastBuyPremiumTimestampInMillis: Long? = null,
     val primalLegendProfile: PrimalLegendProfile? = null,
     val lastAccessedAt: Long = Instant.now().epochSecond,
+    val blossomServers: List<String> = emptyList(),
 ) {
     companion object {
         val EMPTY = UserAccount(
