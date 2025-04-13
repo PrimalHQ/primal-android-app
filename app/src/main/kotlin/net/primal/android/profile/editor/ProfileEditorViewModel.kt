@@ -15,7 +15,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.utils.isPrimalIdentifier
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.networking.upload.UnsuccessfulFileUpload
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.profile.editor.ProfileEditorContract.SideEffect
@@ -26,6 +25,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.nwc.InvalidLud16Exception
 import net.primal.android.wallet.nwc.LightningAddressChecker
+import net.primal.core.networking.blossom.UnsuccessfulBlossomUpload
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.nostr.cryptography.SignatureException
@@ -171,7 +171,7 @@ class ProfileEditorViewModel @Inject constructor(
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setErrorState(error = EditProfileError.MissingRelaysConfiguration(error))
-            } catch (error: UnsuccessfulFileUpload) {
+            } catch (error: UnsuccessfulBlossomUpload) {
                 Timber.w(error)
                 setErrorState(error = EditProfileError.FailedToUploadImage(error))
             } catch (error: InvalidLud16Exception) {

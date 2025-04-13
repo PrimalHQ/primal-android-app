@@ -15,8 +15,8 @@ import net.primal.core.networking.factory.HttpClientFactory
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
-import net.primal.domain.nostr.asBlobUploadTag
 import net.primal.domain.nostr.asExpirationTag
+import net.primal.domain.nostr.asHashtagTag
 import net.primal.domain.nostr.asSha256Tag
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import okio.Buffer
@@ -130,7 +130,7 @@ internal class BlossomUploaderImpl(
                 pubKey = pubkey,
                 content = "Upload File",
                 tags = listOf(
-                    "upload".asBlobUploadTag(),
+                    "upload".asHashtagTag(),
                     hash.asSha256Tag(),
                     expirationTimestamp().asExpirationTag(),
                 ),
@@ -143,5 +143,5 @@ internal class BlossomUploaderImpl(
         return "Nostr $base64Encoded"
     }
 
-    private fun expirationTimestamp(): String = Clock.System.now().plus(1.hours).toEpochMilliseconds().toString()
+    private fun expirationTimestamp() = Clock.System.now().plus(1.hours).toEpochMilliseconds()
 }

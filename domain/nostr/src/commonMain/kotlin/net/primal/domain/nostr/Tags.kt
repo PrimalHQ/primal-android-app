@@ -162,10 +162,10 @@ fun String.asReplaceableEventTag(relayHint: String? = null, marker: String? = nu
         add(marker ?: "")
     }.removeTrailingEmptyStrings()
 
-fun String.asBlobUploadTag(): JsonArray =
+fun String.asHashtagTag(): JsonArray =
     buildJsonArray {
         add("t")
-        add(this@asBlobUploadTag)
+        add(this@asHashtagTag)
     }
 
 fun String.asSha256Tag(): JsonArray =
@@ -174,10 +174,10 @@ fun String.asSha256Tag(): JsonArray =
         add(this@asSha256Tag)
     }
 
-fun String.asExpirationTag(): JsonArray =
+fun Long.asExpirationTag(): JsonArray =
     buildJsonArray {
         add("expiration")
-        add(this@asExpirationTag)
+        add(this@asExpirationTag.toString())
     }
 
 fun Naddr.asReplaceableEventTag(marker: String? = null): JsonArray =
