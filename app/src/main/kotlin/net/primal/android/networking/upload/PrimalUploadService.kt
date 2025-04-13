@@ -122,7 +122,7 @@ class PrimalUploadService @Inject constructor(
 
         var totalBytes = 0L
         while (!bufferedHashingSource.exhausted()) {
-            val bytesRead = bufferedHashingSource.read(tempBuffer, 8192)
+            val bytesRead = bufferedHashingSource.read(tempBuffer, DEFAULT_BUFFER_SIZE)
             if (bytesRead == -1L) break
             totalBytes += bytesRead
             blackhole.write(tempBuffer, bytesRead)
@@ -130,12 +130,16 @@ class PrimalUploadService @Inject constructor(
 
         val sha256Bytes = hashingSource.hash.toByteArray()
         val hex = sha256Bytes.joinToString("") {
-            it.toInt().and(0xff).toString(16).padStart(2, '0')
+            it.toInt().and(other = 0xff).toString(radix = 16).padStart(length = 2, padChar = '0')
         }
 
         return FileMetadata(
             sizeInBytes = totalBytes,
             sha256 = hex,
         )
+    }
+
+    private companion object {
+        private const val DEFAULT_BUFFER_SIZE = 8 * 1024L
     }
 }
