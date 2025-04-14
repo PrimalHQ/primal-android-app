@@ -4,7 +4,7 @@ import net.primal.android.core.errors.UiError
 
 interface MediaUploadsSettingsContract {
     data class UiState(
-        val isLoadingBlossomServerUrls: Boolean = false,
+        val isLoadingBlossomServerUrls: Boolean = true,
         val blossomServerUrl: String = "",
         val blossomServerMirrorUrl: String = "",
         val newBlossomServerUrl: String = "",

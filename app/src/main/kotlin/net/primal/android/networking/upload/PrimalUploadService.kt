@@ -103,7 +103,7 @@ class PrimalUploadService @Inject constructor(
             val base64Encoded = jsonPayload.encodeUtf8().base64()
             val authorizationHeader = "Nostr $base64Encoded"
 
-            val userBlossomServers = blossomRepository.getBlossomServers(userId).mapNotNull {
+            val userBlossomServers = blossomRepository.ensureBlossomServerList(userId).mapNotNull {
                 runCatching { BlossomApiFactory.create(baseBlossomUrl = it) }.getOrNull()
             }.ifEmpty {
                 throw UnsuccessfulBlossomUpload(cause = IllegalStateException("Invalid blossom server list."))
