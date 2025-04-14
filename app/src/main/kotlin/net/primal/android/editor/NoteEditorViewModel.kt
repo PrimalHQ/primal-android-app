@@ -49,7 +49,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
-import net.primal.core.networking.blossom.UnsuccessfulBlossomUpload
+import net.primal.core.networking.blossom.BlossomException
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.events.EventRelayHintsRepository
 import net.primal.domain.explore.ExploreRepository
@@ -413,7 +413,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                 )
                 updateNoteAttachmentState(updatedAttachment)
             }
-        } catch (error: UnsuccessfulBlossomUpload) {
+        } catch (error: BlossomException) {
             Timber.w(error)
             updateNoteAttachmentState(attachment = updatedAttachment.copy(uploadError = error))
         } catch (error: SignatureException) {
