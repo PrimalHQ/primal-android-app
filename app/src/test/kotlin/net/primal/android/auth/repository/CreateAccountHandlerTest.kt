@@ -20,6 +20,7 @@ import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.Credential
+import net.primal.android.user.repository.BlossomRepository
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
@@ -39,6 +40,7 @@ class CreateAccountHandlerTest {
         authRepository: AuthRepository = mockk(relaxed = true),
         relayRepository: RelayRepository = mockk(relaxed = true),
         userRepository: UserRepository = mockk(relaxed = true),
+        blossomRepository: BlossomRepository = mockk(relaxed = true),
         settingsRepository: SettingsRepository = mockk(relaxed = true),
         credentialsStore: CredentialsStore = mockk(relaxed = true),
         nostrNotary: NostrNotary = mockk(relaxed = true),
@@ -51,6 +53,7 @@ class CreateAccountHandlerTest {
             credentialsStore = credentialsStore,
             dispatchers = coroutinesTestRule.dispatcherProvider,
             nostrNotary = nostrNotary,
+            blossomRepository = blossomRepository,
         )
     }
 
