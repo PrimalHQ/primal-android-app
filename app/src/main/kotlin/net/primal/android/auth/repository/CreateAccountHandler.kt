@@ -39,7 +39,7 @@ class CreateAccountHandler @Inject constructor(
             )
 
             relayRepository.bootstrapUserRelays(userId)
-            blossomRepository.bootstrapBlossomServerList(userId)
+            blossomRepository.ensureBlossomServerList(userId)
             userRepository.setProfileMetadata(userId = userId, profileMetadata = profileMetadata)
             val contacts = setOf(userId) + interests.mapToContacts()
             userRepository.setFollowList(userId = userId, contacts = contacts)
