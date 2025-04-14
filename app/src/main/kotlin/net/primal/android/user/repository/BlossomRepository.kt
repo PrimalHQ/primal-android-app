@@ -13,7 +13,6 @@ class BlossomRepository @Inject constructor(
     private val dispatcherProvider: DispatcherProvider,
     private val userAccountsStore: UserAccountsStore,
     private val primalPublisher: PrimalPublisher,
-    private val userRepository: UserRepository,
 ) {
 
     private companion object {
@@ -44,7 +43,13 @@ class BlossomRepository @Inject constructor(
                     content = "",
                 ),
             )
-            userRepository.updateBlossomServers(userId = userId, blossomServers = servers)
+            persistBlossomServersLocally(userId = userId, blossomServers = servers)
+        }
+    }
+
+    private suspend fun persistBlossomServersLocally(userId: String, blossomServers: List<String>) {
+        userAccountsStore.getAndUpdateAccount(userId) {
+            copy(blossomServers = blossomServers)
         }
     }
 
