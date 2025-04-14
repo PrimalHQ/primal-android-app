@@ -43,9 +43,13 @@ class BlossomRepository @Inject constructor(
                     content = "",
                 ),
             )
-            userAccountsStore.getAndUpdateAccount(userId = userId) {
-                copy(blossomServers = servers)
-            }
+            persistBlossomServersLocally(userId = userId, blossomServers = servers)
+        }
+    }
+
+    private suspend fun persistBlossomServersLocally(userId: String, blossomServers: List<String>) {
+        userAccountsStore.getAndUpdateAccount(userId) {
+            copy(blossomServers = blossomServers)
         }
     }
 
