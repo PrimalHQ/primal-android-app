@@ -1,7 +1,6 @@
-package net.primal.android.signer.poc
+package net.primal.domain.nostr.cryptography
 
 import net.primal.domain.nostr.NostrEvent
-import net.primal.domain.nostr.cryptography.SignatureException
 
 sealed class SignResult {
     data class Signed(val event: NostrEvent) : SignResult()

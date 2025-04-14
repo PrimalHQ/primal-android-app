@@ -27,9 +27,9 @@ import kotlinx.coroutines.launch
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.navigation.PrimalAppNavigation
 import net.primal.android.navigation.splash.SplashViewModel
+import net.primal.android.nostr.notary.NostrNotary
+import net.primal.android.nostr.notary.NotarySideEffect
 import net.primal.android.signer.launchSignEvent
-import net.primal.android.signer.poc.NewNostrNotary
-import net.primal.android.signer.poc.NotarySideEffect
 import net.primal.android.signer.rememberAmberSignerLauncher
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
@@ -49,7 +49,7 @@ class MainActivity : FragmentActivity() {
     lateinit var activeAccountStore: ActiveAccountStore
 
     @Inject
-    lateinit var newNostrNotary: NewNostrNotary
+    lateinit var nostrNotary: NostrNotary
 
     private lateinit var primalTheme: PrimalTheme
 
@@ -66,11 +66,11 @@ class MainActivity : FragmentActivity() {
 
         setContent {
             val signLauncher = rememberAmberSignerLauncher(
-                onFailure = { newNostrNotary.onFailure() },
-                onSuccess = newNostrNotary::onSuccess,
+                onFailure = { nostrNotary.onFailure() },
+                onSuccess = nostrNotary::onSuccess,
             )
-            LaunchedEffect(newNostrNotary, newNostrNotary.effects) {
-                newNostrNotary.effects.collect {
+            LaunchedEffect(nostrNotary, nostrNotary.effects) {
+                nostrNotary.effects.collect {
                     when (it) {
                         is NotarySideEffect.RequestSignature ->
                             signLauncher.launchSignEvent(it.unsignedEvent)
