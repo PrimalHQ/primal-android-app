@@ -128,6 +128,7 @@ class PrimalUploadService @Inject constructor(
                 buildAuthorizationUnsignedNostrEvent(
                     userId = userId,
                     fileHash = descriptor.sha256,
+                    humanMessage = "Mirror File",
                 ),
             ).buildAuthorizationHeader()
 
@@ -159,11 +160,15 @@ class PrimalUploadService @Inject constructor(
         }
     }
 
-    private fun buildAuthorizationUnsignedNostrEvent(userId: String, fileHash: String): NostrUnsignedEvent =
+    private fun buildAuthorizationUnsignedNostrEvent(
+        userId: String,
+        fileHash: String,
+        humanMessage: String? = null,
+    ): NostrUnsignedEvent =
         NostrUnsignedEvent(
             kind = NostrEventKind.BlossomUploadBlob.value,
             pubKey = userId,
-            content = "Upload File",
+            content = humanMessage ?: "Upload File",
             tags = listOf(
                 "upload".asHashtagTag(),
                 fileHash.asSha256Tag(),
