@@ -109,7 +109,7 @@ class PrimalUploadService @Inject constructor(
             val blossomApis = blossomRepository.getBlossomServers(userId).mapNotNull {
                 runCatching { BlossomApiFactory.create(baseBlossomUrl = it) }.getOrNull()
             }.ifEmpty {
-                listOf(blossomApi)
+                throw UnsuccessfulBlossomUpload(cause = IllegalStateException("Invalid blossom server list."))
             }
 
             val primaryApi = blossomApis.first()
