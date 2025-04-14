@@ -151,8 +151,8 @@ class PrimalUploadService @Inject constructor(
             )
         }
 
-    private fun resolveBlossomApisOrThrow(userId: String): List<BlossomApi> {
-        return blossomRepository.getBlossomServers(userId).mapNotNull {
+    private suspend fun resolveBlossomApisOrThrow(userId: String): List<BlossomApi> {
+        return blossomRepository.ensureBlossomServerList(userId).mapNotNull {
             runCatching { BlossomApiFactory.create(baseBlossomUrl = it) }.getOrNull()
         }.ifEmpty {
             throw BlossomUploadException(cause = IllegalStateException("Invalid blossom server list."))

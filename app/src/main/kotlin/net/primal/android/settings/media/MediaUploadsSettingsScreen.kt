@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -97,21 +98,26 @@ private fun MediaUploadsSettingsScreen(
             )
         },
         content = { paddingValues ->
-            MediaUploadsLazyColumn(
-                modifier = Modifier
-                    .background(color = AppTheme.colorScheme.surfaceVariant)
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-                    .padding(paddingValues)
-                    .imePadding(),
-                state = state,
-                focusManager = focusManager,
-                eventPublisher = eventPublisher,
-            )
+            if (state.isLoadingBlossomServerUrls) {
+                PrimalLoadingSpinner()
+            } else {
+                MediaUploadsLazyColumn(
+                    modifier = Modifier
+                        .background(color = AppTheme.colorScheme.surfaceVariant)
+                        .fillMaxWidth()
+                        .fillMaxHeight()
+                        .padding(paddingValues)
+                        .imePadding(),
+                    state = state,
+                    focusManager = focusManager,
+                    eventPublisher = eventPublisher,
+                )
+            }
         },
     )
 }
 
+@Suppress("ComplexMethod")
 @Composable
 private fun MediaUploadsLazyColumn(
     modifier: Modifier,
@@ -169,7 +175,7 @@ private fun MediaUploadsLazyColumn(
         }
 
         if (state.blossomMirrorEnabled) {
-            if (isViewMode) {
+            if (isViewMode && state.blossomServerMirrorUrl.isNotEmpty()) {
                 item {
                     BlossomServerDestination(
                         modifier = Modifier.padding(vertical = 8.dp),
@@ -447,8 +453,10 @@ private fun BlossomServerDestination(
             )
         },
         headlineContent = {
-            Text(text = destinationUrl)
+            Text(text = destinationUrl.removeHttpPrefix())
         },
         colors = colors,
     )
 }
+
+private fun String.removeHttpPrefix() = this.removePrefix("https://").removePrefix("http://")

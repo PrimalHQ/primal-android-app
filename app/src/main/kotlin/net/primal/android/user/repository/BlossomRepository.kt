@@ -21,18 +21,24 @@ class BlossomRepository @Inject constructor(
         private val DEFAULT_BLOSSOM_LIST = listOf("https://blossom.primal.net")
     }
 
-    suspend fun ensureBlossomServerList(userId: String) {
+    suspend fun ensureBlossomServerList(userId: String): List<String> {
         val userAccount = userAccountsStore.findByIdOrNull(userId)
-        if (userAccount?.blossomServers?.isEmpty() == true) {
-            bootstrapBlossomServerList(userId = userId)
+        val currentList = userAccount?.blossomServers.orEmpty()
+
+        return if (currentList.isEmpty()) {
+            bootstrapBlossomServerList(userId)
+        } else {
+            currentList
         }
     }
 
-    suspend fun bootstrapBlossomServerList(userId: String) {
+    suspend fun bootstrapBlossomServerList(userId: String): List<String> {
+        val defaultList = DEFAULT_BLOSSOM_LIST
         publishBlossomServerList(
             userId = userId,
-            servers = DEFAULT_BLOSSOM_LIST,
+            servers = defaultList,
         )
+        return defaultList
     }
 
     suspend fun publishBlossomServerList(userId: String, servers: List<String>) {
@@ -59,8 +65,4 @@ class BlossomRepository @Inject constructor(
         withContext(dispatcherProvider.io()) {
             usersApi.getRecommendedBlossomServers()
         }
-
-    fun getBlossomServers(userId: String): List<String> {
-        return userAccountsStore.findByIdOrNull(userId)?.blossomServers ?: DEFAULT_BLOSSOM_LIST
-    }
 }

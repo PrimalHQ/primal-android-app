@@ -24,4 +24,7 @@ sealed class UiError {
     data class FailedToRemoveFeed(val cause: Throwable) : UiError()
 
     data class GenericError(val message: String? = null) : UiError()
+
+    data class FailedToRestoreDefaultBlossomServer(val cause: Throwable?) : UiError()
+    data class FailedToUpdateBlossomServer(val cause: Throwable?) : UiError()
 }
