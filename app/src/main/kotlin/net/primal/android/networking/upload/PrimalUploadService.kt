@@ -3,13 +3,19 @@ package net.primal.android.networking.upload
 import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.net.Uri
+import io.github.aakira.napier.Napier
 import java.io.IOException
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.hours
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import net.primal.android.nostr.notary.signOrThrow
 import net.primal.android.user.repository.BlossomRepository
+import net.primal.core.networking.blossom.BlobDescriptor
+import net.primal.core.networking.blossom.BlossomApi
 import net.primal.core.networking.blossom.BlossomApiFactory
 import net.primal.core.networking.blossom.FileMetadata
 import net.primal.core.networking.blossom.UnsuccessfulBlossomUpload
@@ -39,10 +45,8 @@ class PrimalUploadService @Inject constructor(
     private val signatureHandler: NostrEventSignatureHandler,
 ) {
 
-    @Deprecated("Remove when switching to `userBlossomServers`")
     private val blossomApi = BlossomApiFactory.create(baseBlossomUrl = "https://blossom.primal.net")
 
-    @SuppressLint("Recycle")
     private fun Uri.openBufferedSource(): BufferedSource {
         return contentResolver.openInputStream(this)?.source()?.buffer()
             ?: throw IOException("Unable to open input stream.")
@@ -75,54 +79,84 @@ class PrimalUploadService @Inject constructor(
             onProgress = onProgress,
         )
 
+    @Throws(UnsuccessfulBlossomUpload::class, CancellationException::class)
     private suspend fun upload(
         uri: Uri,
         userId: String,
         onSignRequested: (NostrUnsignedEvent) -> NostrEvent,
         onProgress: ((uploadedBytes: Int, totalBytes: Int) -> Unit)? = null,
-    ): UploadResult =
-        withContext(dispatchers.io()) {
-            val fileMetadata = uri.openBufferedSource().use { it.getMetadata() }
+    ): UploadResult = withContext(dispatchers.io()) {
+        val fileMetadata = uri.openBufferedSource().use { it.getMetadata() }
 
-            val signed = onSignRequested(
-                NostrUnsignedEvent(
-                    kind = NostrEventKind.BlossomUploadBlob.value,
-                    pubKey = userId,
-                    content = "Upload File",
-                    tags = listOf(
-                        "upload".asHashtagTag(),
-                        fileMetadata.sha256.asSha256Tag(),
-                        expirationTimestamp().asExpirationTag(),
-                    ),
+        val signed = onSignRequested(
+            NostrUnsignedEvent(
+                kind = NostrEventKind.BlossomUploadBlob.value,
+                pubKey = userId,
+                content = "Upload File",
+                tags = listOf(
+                    "upload".asHashtagTag(),
+                    fileMetadata.sha256.asSha256Tag(),
+                    expirationTimestamp().asExpirationTag(),
                 ),
-            )
+            ),
+        )
 
-            val jsonPayload = signed.encodeToJsonString()
-            val base64Encoded = jsonPayload.encodeUtf8().base64()
-            val authorizationHeader = "Nostr $base64Encoded"
+        val jsonPayload = signed.encodeToJsonString()
+        val base64Encoded = jsonPayload.encodeUtf8().base64()
+        val authorizationHeader = "Nostr $base64Encoded"
 
-            val userBlossomServers = blossomRepository.getBlossomServers(userId).mapNotNull {
-                runCatching { BlossomApiFactory.create(baseBlossomUrl = it) }.getOrNull()
-            }.ifEmpty {
-                throw UnsuccessfulBlossomUpload(cause = IllegalStateException("Invalid blossom server list."))
-            }
+        val blossomApis = blossomRepository.getBlossomServers(userId).mapNotNull {
+            runCatching { BlossomApiFactory.create(baseBlossomUrl = it) }.getOrNull()
+        }.ifEmpty {
+            listOf(blossomApi)
+        }
 
-            // Use this list of blossom apis instead of blossomApi field
-            userBlossomServers.toString()
+        val primaryApi = blossomApis.first()
+        val mirrorApis = blossomApis.drop(1)
 
-            val descriptor = blossomApi.putUpload(
+        val descriptor: BlobDescriptor = try {
+            primaryApi.headMedia(authorization = authorizationHeader, fileMetadata = fileMetadata)
+            primaryApi.putMedia(
                 authorization = authorizationHeader,
                 fileMetadata = fileMetadata,
                 openBufferedSource = { uri.openBufferedSource() },
                 onProgress = onProgress,
             )
-
-            UploadResult(
-                remoteUrl = descriptor.url,
-                originalFileSize = descriptor.sizeInBytes,
-                originalHash = descriptor.sha256,
-            )
+        } catch (mediaError: UnsuccessfulBlossomUpload) {
+            try {
+                primaryApi.headUpload(authorization = authorizationHeader, fileMetadata = fileMetadata)
+                primaryApi.putUpload(
+                    authorization = authorizationHeader,
+                    fileMetadata = fileMetadata,
+                    openBufferedSource = { uri.openBufferedSource() },
+                    onProgress = onProgress,
+                )
+            } catch (uploadError: UnsuccessfulBlossomUpload) {
+                Napier.w(uploadError) { "Blossom upload failed after media fallback. SHA-256: ${fileMetadata.sha256}" }
+                throw uploadError
+            }
         }
+
+        mirrorApis.forEach { api ->
+            launchMirror(api, authorizationHeader, descriptor.url)
+        }
+
+        UploadResult(
+            remoteUrl = descriptor.url,
+            originalFileSize = descriptor.sizeInBytes,
+            originalHash = descriptor.sha256,
+        )
+    }
+
+    private fun CoroutineScope.launchMirror(api: BlossomApi, authorization: String, fileUrl: String) {
+        launch {
+            runCatching {
+                api.putMirror(authorization = authorization, fileUrl = fileUrl)
+            }.onFailure { error ->
+                Napier.w(error) { "Blossom mirror failed for file: $fileUrl — ${error.message}" }
+            }
+        }
+    }
 
     private fun expirationTimestamp() = Clock.System.now().plus(1.hours).toEpochMilliseconds()
 
