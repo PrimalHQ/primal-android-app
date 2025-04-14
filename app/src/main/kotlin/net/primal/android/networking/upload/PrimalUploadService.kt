@@ -44,6 +44,7 @@ class PrimalUploadService @Inject constructor(
     private val signatureHandler: NostrEventSignatureHandler,
 ) {
 
+    @Deprecated("Remove when switching to `userBlossomServers`")
     private val blossomApi = BlossomApiFactory.create(baseBlossomUrl = "https://blossom.primal.net")
 
     private fun Uri.openBufferedSource(): BufferedSource {
