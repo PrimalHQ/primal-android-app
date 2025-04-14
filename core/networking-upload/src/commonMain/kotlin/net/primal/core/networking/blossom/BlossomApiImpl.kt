@@ -28,7 +28,21 @@ internal class BlossomApiImpl(
     }
 
     override suspend fun headUpload(authorization: String, fileMetadata: FileMetadata) {
-        throw NotImplementedError()
+        val response = withContext(dispatcherProvider.io()) {
+            httpClient.head("$baseBlossomUrl/upload") {
+                headers {
+                    append("Authorization", authorization)
+                    append("X-SHA-256", fileMetadata.sha256)
+                    append("X-Content-Length", fileMetadata.sizeInBytes.toString())
+                    append("X-Content-Type", fileMetadata.mimeType ?: "application/octet-stream")
+                }
+            }
+        }
+
+        if (!response.status.isSuccess()) {
+            val reason = response.headers["X-Reason"] ?: "Unknown"
+            throw UnsuccessfulBlossomUpload(Exception("Head Upload failed: ${response.status.value} - $reason"))
+        }
     }
 
     override suspend fun putUpload(
@@ -93,7 +107,7 @@ internal class BlossomApiImpl(
                     append("Authorization", authorization)
                     append("X-SHA-256", fileMetadata.sha256)
                     append("X-Content-Length", fileMetadata.sizeInBytes.toString())
-                    append("X-Content-Type", fileMetadata.mimeType.toString())
+                    append("X-Content-Type", fileMetadata.mimeType ?: "application/octet-stream")
                 }
             }
         }
