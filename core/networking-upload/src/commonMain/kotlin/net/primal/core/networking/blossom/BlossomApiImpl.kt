@@ -1,6 +1,7 @@
 package net.primal.core.networking.blossom
 
 import io.ktor.client.call.body
+import io.ktor.client.request.head
 import io.ktor.client.request.headers
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -86,7 +87,21 @@ internal class BlossomApiImpl(
     }
 
     override suspend fun headMedia(authorization: String, fileMetadata: FileMetadata) {
-        throw NotImplementedError()
+        val response = withContext(dispatcherProvider.io()) {
+            httpClient.head("$baseBlossomUrl/media") {
+                headers {
+                    append("Authorization", authorization)
+                    append("X-SHA-256", fileMetadata.sha256)
+                    append("X-Content-Length", fileMetadata.sizeInBytes.toString())
+                    append("X-Content-Type", fileMetadata.mimeType.toString())
+                }
+            }
+        }
+
+        if (!response.status.isSuccess()) {
+            val reason = response.headers["X-Reason"] ?: "Unknown"
+            throw UnsuccessfulBlossomUpload(Exception("Head Media failed: ${response.status.value} - $reason"))
+        }
     }
 
     override suspend fun putMedia(
