@@ -3,14 +3,12 @@ package net.primal.android.user.repository
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import net.primal.android.user.accounts.UserAccountsStore
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asServerTag
 import net.primal.domain.publisher.PrimalPublisher
-import timber.log.Timber
 
 class BlossomRepository @Inject constructor(
     private val dispatcherProvider: DispatcherProvider,
@@ -59,12 +57,7 @@ class BlossomRepository @Inject constructor(
 
     suspend fun fetchSuggestedBlossomList(): List<String> =
         withContext(dispatcherProvider.io()) {
-            try {
-                usersApi.getRecommendedBlossomServers()
-            } catch (error: WssException) {
-                Timber.w(error)
-                DEFAULT_BLOSSOM_LIST
-            }
+            usersApi.getRecommendedBlossomServers()
         }
 
     fun getBlossomServers(userId: String): List<String> {
