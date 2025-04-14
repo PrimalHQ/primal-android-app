@@ -201,7 +201,6 @@ internal class UsersApiImpl(
         )
     }
 
-
     override suspend fun getRecommendedBlossomServers(): List<String> {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(primalVerb = net.primal.data.remote.PrimalVerb.RECOMMENDED_BLOSSOM_SERVERS.id),

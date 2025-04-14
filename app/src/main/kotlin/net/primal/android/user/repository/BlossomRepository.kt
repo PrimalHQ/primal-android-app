@@ -57,14 +57,15 @@ class BlossomRepository @Inject constructor(
         }
     }
 
-    suspend fun fetchSuggestedBlossomList(): List<String> = withContext(dispatcherProvider.io()) {
-        try {
-            usersApi.getRecommendedBlossomServers()
-        } catch (error: WssException) {
-            Timber.w(error)
-            DEFAULT_BLOSSOM_LIST
+    suspend fun fetchSuggestedBlossomList(): List<String> =
+        withContext(dispatcherProvider.io()) {
+            try {
+                usersApi.getRecommendedBlossomServers()
+            } catch (error: WssException) {
+                Timber.w(error)
+                DEFAULT_BLOSSOM_LIST
+            }
         }
-    }
 
     fun getBlossomServers(userId: String): List<String> {
         return userAccountsStore.findByIdOrNull(userId)?.blossomServers ?: DEFAULT_BLOSSOM_LIST
