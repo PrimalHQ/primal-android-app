@@ -88,7 +88,7 @@ internal class BlossomApiImpl(
 
         if (!response.status.isSuccess()) {
             val reason = response.headers["X-Reason"] ?: "Unknown"
-            throw UnsuccessfulBlossomUpload(Exception("Put Mirror failed: ${response.status.value} - $reason"))
+            throw BlossomMirrorException(message = reason)
         }
 
         return response.body<BlobDescriptor>()
@@ -113,7 +113,7 @@ internal class BlossomApiImpl(
 
         if (!response.status.isSuccess()) {
             val reason = response.headers["X-Reason"] ?: "Unknown"
-            throw UnsuccessfulBlossomUpload(Exception("$errorPrefix failed: ${response.status.value} - $reason"))
+            throw UploadRequirementException(message = "$reason ($errorPrefix)")
         }
     }
 
@@ -161,14 +161,12 @@ internal class BlossomApiImpl(
 
         if (!response.status.isSuccess()) {
             val reason = response.headers["X-Reason"] ?: "Unknown"
-            throw UnsuccessfulBlossomUpload(Exception("$errorPrefix failed: ${response.status.value} - $reason"))
+            throw BlossomUploadException(message = "$reason ($errorPrefix)")
         }
 
         val descriptor = response.body<BlobDescriptor>()
         if (checkFileSize && fileMetadata.sizeInBytes != descriptor.sizeInBytes) {
-            throw UnsuccessfulBlossomUpload(
-                cause = RuntimeException("Different file size on the server."),
-            )
+            throw BlossomUploadException(message = "Different file size on the server.")
         }
 
         return descriptor

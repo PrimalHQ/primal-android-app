@@ -16,8 +16,9 @@ import net.primal.android.user.repository.BlossomRepository
 import net.primal.core.networking.blossom.BlobDescriptor
 import net.primal.core.networking.blossom.BlossomApi
 import net.primal.core.networking.blossom.BlossomApiFactory
+import net.primal.core.networking.blossom.BlossomException
+import net.primal.core.networking.blossom.BlossomUploadException
 import net.primal.core.networking.blossom.FileMetadata
-import net.primal.core.networking.blossom.UnsuccessfulBlossomUpload
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.NostrEvent
@@ -49,7 +50,7 @@ class PrimalUploadService @Inject constructor(
             ?: throw IOException("Unable to open input stream.")
     }
 
-    @Throws(UnsuccessfulBlossomUpload::class)
+    @Throws(BlossomException::class, CancellationException::class)
     suspend fun upload(
         uri: Uri,
         userId: String,
@@ -76,7 +77,7 @@ class PrimalUploadService @Inject constructor(
             onProgress = onProgress,
         )
 
-    @Throws(UnsuccessfulBlossomUpload::class, CancellationException::class)
+    @Throws(BlossomException::class, CancellationException::class)
     private suspend fun upload(
         uri: Uri,
         userId: String,
@@ -106,34 +107,40 @@ class PrimalUploadService @Inject constructor(
             val blossomApis = blossomRepository.getBlossomServers(userId).mapNotNull {
                 runCatching { BlossomApiFactory.create(baseBlossomUrl = it) }.getOrNull()
             }.ifEmpty {
-                throw UnsuccessfulBlossomUpload(cause = IllegalStateException("Invalid blossom server list."))
+                throw BlossomUploadException(cause = IllegalStateException("Invalid blossom server list."))
             }
 
             val primaryApi = blossomApis.first()
             val mirrorApis = blossomApis.drop(1)
 
             val descriptor: BlobDescriptor = try {
-                primaryApi.headMedia(authorization = authorizationHeader, fileMetadata = fileMetadata)
+                primaryApi.headMedia(
+                    authorization = authorizationHeader,
+                    fileMetadata = fileMetadata,
+                )
                 primaryApi.putMedia(
                     authorization = authorizationHeader,
                     fileMetadata = fileMetadata,
                     openBufferedSource = { uri.openBufferedSource() },
                     onProgress = onProgress,
                 )
-            } catch (mediaError: UnsuccessfulBlossomUpload) {
+            } catch (mediaError: BlossomException) {
                 Napier.w(mediaError) {
                     "Media upload failed. Falling back to file upload. SHA-256: ${fileMetadata.sha256}"
                 }
 
                 try {
-                    primaryApi.headUpload(authorization = authorizationHeader, fileMetadata = fileMetadata)
+                    primaryApi.headUpload(
+                        authorization = authorizationHeader,
+                        fileMetadata = fileMetadata,
+                    )
                     primaryApi.putUpload(
                         authorization = authorizationHeader,
                         fileMetadata = fileMetadata,
                         openBufferedSource = { uri.openBufferedSource() },
                         onProgress = onProgress,
                     )
-                } catch (uploadError: UnsuccessfulBlossomUpload) {
+                } catch (uploadError: BlossomException) {
                     Napier.w(
                         uploadError,
                     ) { "Blossom upload failed after media fallback. SHA-256: ${fileMetadata.sha256}" }
