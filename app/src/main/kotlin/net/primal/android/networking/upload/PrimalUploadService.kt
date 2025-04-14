@@ -1,6 +1,5 @@
 package net.primal.android.networking.upload
 
-import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.net.Uri
 import io.github.aakira.napier.Napier
@@ -85,70 +84,85 @@ class PrimalUploadService @Inject constructor(
         userId: String,
         onSignRequested: (NostrUnsignedEvent) -> NostrEvent,
         onProgress: ((uploadedBytes: Int, totalBytes: Int) -> Unit)? = null,
-    ): UploadResult = withContext(dispatchers.io()) {
-        val fileMetadata = uri.openBufferedSource().use { it.getMetadata() }
+    ): UploadResult =
+        withContext(dispatchers.io()) {
+            val fileMetadata = uri.openBufferedSource().use { it.getMetadata() }
 
-        val signed = onSignRequested(
-            NostrUnsignedEvent(
-                kind = NostrEventKind.BlossomUploadBlob.value,
-                pubKey = userId,
-                content = "Upload File",
-                tags = listOf(
-                    "upload".asHashtagTag(),
-                    fileMetadata.sha256.asSha256Tag(),
-                    expirationTimestamp().asExpirationTag(),
+            val signed = onSignRequested(
+                NostrUnsignedEvent(
+                    kind = NostrEventKind.BlossomUploadBlob.value,
+                    pubKey = userId,
+                    content = "Upload File",
+                    tags = listOf(
+                        "upload".asHashtagTag(),
+                        fileMetadata.sha256.asSha256Tag(),
+                        expirationTimestamp().asExpirationTag(),
+                    ),
                 ),
-            ),
-        )
-
-        val jsonPayload = signed.encodeToJsonString()
-        val base64Encoded = jsonPayload.encodeUtf8().base64()
-        val authorizationHeader = "Nostr $base64Encoded"
-
-        val blossomApis = blossomRepository.getBlossomServers(userId).mapNotNull {
-            runCatching { BlossomApiFactory.create(baseBlossomUrl = it) }.getOrNull()
-        }.ifEmpty {
-            listOf(blossomApi)
-        }
-
-        val primaryApi = blossomApis.first()
-        val mirrorApis = blossomApis.drop(1)
-
-        val descriptor: BlobDescriptor = try {
-            primaryApi.headMedia(authorization = authorizationHeader, fileMetadata = fileMetadata)
-            primaryApi.putMedia(
-                authorization = authorizationHeader,
-                fileMetadata = fileMetadata,
-                openBufferedSource = { uri.openBufferedSource() },
-                onProgress = onProgress,
             )
-        } catch (mediaError: UnsuccessfulBlossomUpload) {
-            try {
-                primaryApi.headUpload(authorization = authorizationHeader, fileMetadata = fileMetadata)
-                primaryApi.putUpload(
+
+            val jsonPayload = signed.encodeToJsonString()
+            val base64Encoded = jsonPayload.encodeUtf8().base64()
+            val authorizationHeader = "Nostr $base64Encoded"
+
+            val blossomApis = blossomRepository.getBlossomServers(userId).mapNotNull {
+                runCatching { BlossomApiFactory.create(baseBlossomUrl = it) }.getOrNull()
+            }.ifEmpty {
+                listOf(blossomApi)
+            }
+
+            val primaryApi = blossomApis.first()
+            val mirrorApis = blossomApis.drop(1)
+
+            val descriptor: BlobDescriptor = try {
+                primaryApi.headMedia(authorization = authorizationHeader, fileMetadata = fileMetadata)
+                primaryApi.putMedia(
                     authorization = authorizationHeader,
                     fileMetadata = fileMetadata,
                     openBufferedSource = { uri.openBufferedSource() },
                     onProgress = onProgress,
                 )
-            } catch (uploadError: UnsuccessfulBlossomUpload) {
-                Napier.w(uploadError) { "Blossom upload failed after media fallback. SHA-256: ${fileMetadata.sha256}" }
-                throw uploadError
+            } catch (mediaError: UnsuccessfulBlossomUpload) {
+                Napier.w(mediaError) {
+                    "Media upload failed. Falling back to file upload. SHA-256: ${fileMetadata.sha256}"
+                }
+
+                try {
+                    primaryApi.headUpload(authorization = authorizationHeader, fileMetadata = fileMetadata)
+                    primaryApi.putUpload(
+                        authorization = authorizationHeader,
+                        fileMetadata = fileMetadata,
+                        openBufferedSource = { uri.openBufferedSource() },
+                        onProgress = onProgress,
+                    )
+                } catch (uploadError: UnsuccessfulBlossomUpload) {
+                    Napier.w(
+                        uploadError,
+                    ) { "Blossom upload failed after media fallback. SHA-256: ${fileMetadata.sha256}" }
+                    throw uploadError
+                }
             }
+
+            mirrorApis.forEach { api ->
+                launchMirror(
+                    api,
+                    authorizationHeader,
+                    descriptor.url,
+                )
+            }
+
+            UploadResult(
+                remoteUrl = descriptor.url,
+                originalFileSize = descriptor.sizeInBytes,
+                originalHash = descriptor.sha256,
+            )
         }
 
-        mirrorApis.forEach { api ->
-            launchMirror(api, authorizationHeader, descriptor.url)
-        }
-
-        UploadResult(
-            remoteUrl = descriptor.url,
-            originalFileSize = descriptor.sizeInBytes,
-            originalHash = descriptor.sha256,
-        )
-    }
-
-    private fun CoroutineScope.launchMirror(api: BlossomApi, authorization: String, fileUrl: String) {
+    private fun CoroutineScope.launchMirror(
+        api: BlossomApi,
+        authorization: String,
+        fileUrl: String,
+    ) {
         launch {
             runCatching {
                 api.putMirror(authorization = authorization, fileUrl = fileUrl)
@@ -167,11 +181,13 @@ class PrimalUploadService @Inject constructor(
         val tempBuffer = Buffer()
 
         var totalBytes = 0L
-        while (!bufferedHashingSource.exhausted()) {
-            val bytesRead = bufferedHashingSource.read(tempBuffer, DEFAULT_BUFFER_SIZE)
-            if (bytesRead == -1L) break
-            totalBytes += bytesRead
-            blackhole.write(tempBuffer, bytesRead)
+        bufferedHashingSource.use {
+            while (!it.exhausted()) {
+                val bytesRead = it.read(tempBuffer, DEFAULT_BUFFER_SIZE)
+                if (bytesRead == -1L) break
+                totalBytes += bytesRead
+                blackhole.write(tempBuffer, bytesRead)
+            }
         }
 
         val sha256Bytes = hashingSource.hash.toByteArray()
