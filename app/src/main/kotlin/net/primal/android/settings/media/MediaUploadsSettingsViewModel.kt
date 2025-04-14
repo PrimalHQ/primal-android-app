@@ -4,8 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,6 +32,7 @@ class MediaUploadsSettingsViewModel @Inject constructor(
     init {
         observeEvents()
         ensureBlossomServerList()
+        fetchSuggestedBlossomServers()
     }
 
     private fun ensureBlossomServerList() = viewModelScope.launch {
@@ -112,6 +111,16 @@ class MediaUploadsSettingsViewModel @Inject constructor(
             )
         }
     }
+
+    private fun fetchSuggestedBlossomServers() =
+        viewModelScope.launch {
+            try {
+                val suggestedBlossoms = blossomRepository.fetchSuggestedBlossomList()
+                setState { copy(suggestedBlossomServers = suggestedBlossoms) }
+            } catch (error: WssException) {
+                Timber.w(error)
+            }
+        }
 
     private fun confirmBlossomServerUrl(url: String) =
         setState {
