@@ -1,4 +1,7 @@
 ## Features
+- Implement Amber support;
+- Implement blossom uploads;
+- Implement push notifications;
 - Implement npub login (#366);
 - Implement image gallery in article details (#356);
 - Implement new gallery rendering for media attachments in notes (#354);
