@@ -11,9 +11,14 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.settings.media.MediaUploadsSettingsContract.UiEvent
 import net.primal.android.settings.media.MediaUploadsSettingsContract.UiState
+import net.primal.android.user.repository.BlossomRepository
+import net.primal.core.networking.sockets.errors.WssException
+import timber.log.Timber
 
 @HiltViewModel
-class MediaUploadsSettingsViewModel @Inject constructor() : ViewModel() {
+class MediaUploadsSettingsViewModel @Inject constructor(
+    private val blossomRepository: BlossomRepository,
+) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -24,6 +29,7 @@ class MediaUploadsSettingsViewModel @Inject constructor() : ViewModel() {
 
     init {
         observeEvents()
+        fetchSuggestedBlossomServers()
     }
 
     private fun observeEvents() =
@@ -48,6 +54,16 @@ class MediaUploadsSettingsViewModel @Inject constructor() : ViewModel() {
                 newBlossomServerMirrorUrl = "",
                 mode = MediaUploadsMode.View,
             )
+        }
+
+    private fun fetchSuggestedBlossomServers() =
+        viewModelScope.launch {
+            try {
+                val suggestedBlossoms = blossomRepository.fetchSuggestedBlossomList()
+                setState { copy(suggestedBlossomServers = suggestedBlossoms) }
+            } catch (error: WssException) {
+                Timber.w(error)
+            }
         }
 
     private fun restoreDefaultBlossomServer() =

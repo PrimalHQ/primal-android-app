@@ -206,7 +206,7 @@ internal class UsersApiImpl(
             message = PrimalCacheFilter(primalVerb = net.primal.data.remote.PrimalVerb.RECOMMENDED_BLOSSOM_SERVERS.id),
         )
 
-        val list = queryResult.findPrimalEvent(NostrEventKind.BlossomServerList)
+        val list = queryResult.findPrimalEvent(NostrEventKind.PrimalRecommendedBlossomServer)
         val content = list?.content
         if (content.isNullOrEmpty()) throw WssException("Invalid content.")
 
