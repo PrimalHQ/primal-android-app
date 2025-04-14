@@ -121,10 +121,58 @@ internal class BlossomApiImpl(
     override suspend fun putMedia(
         authorization: String,
         fileMetadata: FileMetadata,
-        inputStream: () -> BufferedSource,
+        openBufferedSource: () -> BufferedSource,
         onProgress: ((Int, Int) -> Unit)?,
     ): BlobDescriptor {
-        throw NotImplementedError()
+        var uploadedBytes = 0L
+        val totalBytes = fileMetadata.sizeInBytes
+        val mimeType = fileMetadata.mimeType ?: "application/octet-stream"
+
+        val response = withContext(dispatcherProvider.io()) {
+            openBufferedSource().use { source ->
+                httpClient.put("$baseBlossomUrl/media") {
+                    headers {
+                        append("Authorization", authorization)
+                        append("Content-Length", totalBytes.toString())
+                        append("Content-Type", mimeType)
+                    }
+
+                    setBody(
+                        object : OutgoingContent.WriteChannelContent() {
+                            override val contentType: ContentType
+                                get() = ContentType.parse(mimeType)
+
+                            override suspend fun writeTo(channel: ByteWriteChannel) {
+                                val byteArray = ByteArray(DEFAULT_BUFFER_SIZE)
+                                while (!source.exhausted()) {
+                                    val read = source.read(byteArray)
+                                    if (read == -1) break
+
+                                    channel.writeFully(byteArray, 0, read)
+                                    uploadedBytes += read
+                                    onProgress?.invoke(uploadedBytes.toInt(), totalBytes.toInt())
+                                }
+                                channel.flush()
+                            }
+                        }
+                    )
+                }
+            }
+        }
+
+        if (!response.status.isSuccess()) {
+            val reason = response.headers["X-Reason"] ?: "Unknown"
+            throw UnsuccessfulBlossomUpload(Exception("Upload Media failed: ${response.status.value} - $reason"))
+        }
+
+        val descriptor = response.body<BlobDescriptor>()
+        if (fileMetadata.sizeInBytes != descriptor.sizeInBytes) {
+            throw UnsuccessfulBlossomUpload(
+                cause = RuntimeException("Different file size on the server."),
+            )
+        }
+
+        return descriptor
     }
 
     override suspend fun putMirror(authorization: String, fileUrl: String): BlobDescriptor {
