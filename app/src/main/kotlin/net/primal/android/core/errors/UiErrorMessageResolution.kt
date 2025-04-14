@@ -55,5 +55,9 @@ fun UiError.resolveUiErrorMessage(context: Context): String {
         is UiError.FailedToRestoreDefaultBlossomServer -> context.getString(
             R.string.app_error_restore_default_blossom_server,
         )
+
+        is UiError.FailedToUpdateBlossomServer -> context.getString(
+            R.string.app_error_unable_to_update_blossom_server_list,
+        )
     }
 }

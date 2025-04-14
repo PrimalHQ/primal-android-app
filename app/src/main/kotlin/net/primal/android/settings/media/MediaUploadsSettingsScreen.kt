@@ -117,7 +117,7 @@ private fun MediaUploadsSettingsScreen(
     )
 }
 
-@Suppress
+@Suppress("ComplexMethod")
 @Composable
 private fun MediaUploadsLazyColumn(
     modifier: Modifier,

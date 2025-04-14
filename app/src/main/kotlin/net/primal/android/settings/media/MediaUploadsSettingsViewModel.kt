@@ -44,7 +44,6 @@ class MediaUploadsSettingsViewModel @Inject constructor(
 
             try {
                 val userId = activeAccountStore.activeUserId()
-                blossomRepository.ensureBlossomServerList(userId = userId)
                 val blossoms = blossomRepository.ensureBlossomServerList(userId = userId)
 
                 if (blossoms.isNotEmpty()) {
@@ -75,14 +74,62 @@ class MediaUploadsSettingsViewModel @Inject constructor(
                     is UiEvent.ConfirmBlossomServerUrl -> confirmBlossomServerUrl(it.url)
                     is UiEvent.UpdateNewBlossomMirrorServerUrl -> setState { copy(newBlossomServerMirrorUrl = it.url) }
                     is UiEvent.ConfirmBlossomMirrorServerUrl -> confirmBlossomMirrorServerUrl(it.url)
-                    is UiEvent.UpdateBlossomMirrorEnabled -> setState { copy(blossomMirrorEnabled = it.enabled) }
+                    is UiEvent.UpdateBlossomMirrorEnabled -> updateBlossomMirrorEnabled(it.enabled)
                     UiEvent.RestoreDefaultBlossomServer -> restoreDefaultBlossomServer()
                 }
             }
         }
 
+    private fun confirmBlossomServerUrl(url: String) {
+        val mirrorUrl = state.value.blossomServerMirrorUrl
+
+        val serverList = buildList {
+            add(url)
+            if (mirrorUrl.isNotBlank() && mirrorUrl != url) {
+                add(mirrorUrl)
+            }
+        }
+
+        updateBlossomServers(serverList) {
+            copy(
+                blossomServerUrl = url,
+                newBlossomServerUrl = "",
+                mode = MediaUploadsMode.View,
+            )
+        }
+    }
+
+    private fun updateBlossomMirrorEnabled(blossomMirrorEnabled: Boolean) {
+        if (blossomMirrorEnabled) {
+            setState {
+                copy(
+                    blossomMirrorEnabled = true,
+                    blossomServerMirrorUrl = "",
+                    newBlossomServerMirrorUrl = "",
+                )
+            }
+            return
+        }
+
+        val primaryUrl = state.value.blossomServerUrl
+        val serverList = listOf(primaryUrl)
+
+        updateBlossomServers(serverList) {
+            copy(blossomMirrorEnabled = false)
+        }
+    }
+
     private fun confirmBlossomMirrorServerUrl(url: String) {
-        setState {
+        val primaryUrl = state.value.blossomServerUrl
+
+        val serverList = buildList {
+            add(primaryUrl)
+            if (url.isNotBlank() && url != primaryUrl) {
+                add(url)
+            }
+        }
+
+        updateBlossomServers(serverList) {
             copy(
                 blossomServerMirrorUrl = url,
                 newBlossomServerMirrorUrl = "",
@@ -91,42 +138,43 @@ class MediaUploadsSettingsViewModel @Inject constructor(
         }
     }
 
-    private fun restoreDefaultBlossomServer() =
+    private fun restoreDefaultBlossomServer() {
+        val mirrorUrl = state.value.blossomServerMirrorUrl
+
+        val serverList = buildList {
+            add(DEFAULT_BLOSSOM_URL)
+            if (mirrorUrl.isNotBlank() && mirrorUrl != DEFAULT_BLOSSOM_URL) {
+                add(mirrorUrl)
+            }
+        }
+
+        updateBlossomServers(serverList) {
+            copy(
+                blossomServerUrl = DEFAULT_BLOSSOM_URL,
+                newBlossomServerUrl = "",
+                mode = MediaUploadsMode.View,
+            )
+        }
+    }
+
+    private fun updateBlossomServers(servers: List<String>, onSuccess: UiState.() -> UiState) =
         viewModelScope.launch {
             try {
                 val userId = activeAccountStore.activeUserId()
-                val mirrorUrl = state.value.blossomServerMirrorUrl
-
-                val serverList = buildList {
-                    add(DEFAULT_BLOSSOM_URL)
-                    if (mirrorUrl.isNotBlank() && mirrorUrl != DEFAULT_BLOSSOM_URL) {
-                        add(mirrorUrl)
-                    }
-                }
-
-                blossomRepository.publishBlossomServerList(
-                    userId = userId,
-                    servers = serverList,
-                )
-
-                setState {
-                    copy(
-                        blossomServerUrl = DEFAULT_BLOSSOM_URL,
-                        newBlossomServerUrl = "",
-                        mode = MediaUploadsMode.View,
-                    )
-                }
+                blossomRepository.publishBlossomServerList(userId = userId, servers = servers)
+                setState(onSuccess)
             } catch (error: WssException) {
                 Timber.w(error)
-                setState { copy(error = UiError.FailedToRestoreDefaultBlossomServer(error)) }
+                setState { copy(error = UiError.FailedToUpdateBlossomServer(error)) }
             } catch (error: SignatureException) {
                 Timber.w(error)
-                setState { copy(error = UiError.FailedToRestoreDefaultBlossomServer(error)) }
+                setState { copy(error = UiError.FailedToUpdateBlossomServer(error)) }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
-                setState { copy(error = UiError.FailedToRestoreDefaultBlossomServer(error)) }
+                setState { copy(error = UiError.FailedToUpdateBlossomServer(error)) }
             }
         }
+
     private fun fetchSuggestedBlossomServers() =
         viewModelScope.launch {
             try {
@@ -135,15 +183,6 @@ class MediaUploadsSettingsViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.w(error)
             }
-        }
-
-    private fun confirmBlossomServerUrl(url: String) =
-        setState {
-            copy(
-                blossomServerUrl = url,
-                newBlossomServerUrl = "",
-                mode = MediaUploadsMode.View,
-            )
         }
 
     companion object {
