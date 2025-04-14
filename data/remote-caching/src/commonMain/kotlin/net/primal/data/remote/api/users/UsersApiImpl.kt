@@ -200,4 +200,18 @@ internal class UsersApiImpl(
             bookmarksListEvent = queryResult.findNostrEvent(NostrEventKind.BookmarksList),
         )
     }
+
+
+    override suspend fun getRecommendedBlossomServers(): List<String> {
+//        val queryResult = primalApiClient.query(
+//            message = PrimalCacheFilter(primalVerb = net.primal.data.remote.PrimalVerb.RECOMMENDED_BLOSSOM_SERVERS.id),
+//        )
+//
+////        val list = queryResult.findPrimalEvent(NostrEventKind.PrimalDefaultRelaysList)
+////        val content = list?.content
+////        if (content.isNullOrEmpty()) throw WssException("Invalid content.")
+//
+//        return list.content.decodeFromJsonStringOrNull<List<String>>() ?: emptyList()
+        return emptyList()
+    }
 }
