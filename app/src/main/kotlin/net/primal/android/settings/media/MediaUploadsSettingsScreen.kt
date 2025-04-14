@@ -169,7 +169,7 @@ private fun MediaUploadsLazyColumn(
         }
 
         if (state.blossomMirrorEnabled) {
-            if (isViewMode) {
+            if (isViewMode && state.blossomServerMirrorUrl.isNotEmpty()) {
                 item {
                     BlossomServerDestination(
                         modifier = Modifier.padding(vertical = 8.dp),
@@ -447,8 +447,10 @@ private fun BlossomServerDestination(
             )
         },
         headlineContent = {
-            Text(text = destinationUrl)
+            Text(text = destinationUrl.removeHttpPrefix())
         },
         colors = colors,
     )
 }
+
+private fun String.removeHttpPrefix() = this.removePrefix("https://").removePrefix("http://")
