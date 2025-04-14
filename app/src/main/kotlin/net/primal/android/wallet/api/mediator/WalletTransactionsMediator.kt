@@ -96,7 +96,11 @@ class WalletTransactionsMediator(
         }
 
         val mentionedUserIds = transactions.mapNotNull { it.otherUserId }
-        profileRepository.fetchProfiles(profileIds = mentionedUserIds)
+        if (mentionedUserIds.isNotEmpty()) {
+            runCatching {
+                profileRepository.fetchProfiles(profileIds = mentionedUserIds)
+            }
+        }
 
         return MediatorResult.Success(endOfPaginationReached = false)
     }
