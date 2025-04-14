@@ -16,7 +16,7 @@ import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asIdentifierTag
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
-import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.cryptography.utils.getOrNull
 import timber.log.Timber
 
 class FcmPushNotificationsTokenUpdater @Inject constructor(
@@ -47,18 +47,15 @@ class FcmPushNotificationsTokenUpdater @Inject constructor(
         }
     }
 
-    private fun signAuthorizationEventOrNull(userId: String, token: String): NostrEvent? {
-        return try {
-            signatureHandler.signNostrEvent(
-                NostrUnsignedEvent(
-                    pubKey = userId,
-                    kind = NostrEventKind.ApplicationSpecificData.value,
-                    tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
-                    content = UpdateTokenContent(token = token).encodeToJsonString(),
-                ),
-            )
-        } catch (_: SignatureException) {
-            null
-        }
+    private suspend fun signAuthorizationEventOrNull(userId: String, token: String): NostrEvent? {
+        val signResult = signatureHandler.signNostrEvent(
+            NostrUnsignedEvent(
+                pubKey = userId,
+                kind = NostrEventKind.ApplicationSpecificData.value,
+                tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
+                content = UpdateTokenContent(token = token).encodeToJsonString(),
+            ),
+        )
+        return signResult.getOrNull()
     }
 }
