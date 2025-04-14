@@ -176,6 +176,20 @@ internal class BlossomApiImpl(
     }
 
     override suspend fun putMirror(authorization: String, fileUrl: String): BlobDescriptor {
-        throw NotImplementedError()
+        val response = withContext(dispatcherProvider.io()) {
+            httpClient.put("$baseBlossomUrl/mirror") {
+                headers {
+                    append("Authorization", authorization)
+                }
+                setBody(MirrorRequest(fileUrl))
+            }
+        }
+
+        if (!response.status.isSuccess()) {
+            val reason = response.headers["X-Reason"] ?: "Unknown"
+            throw UnsuccessfulBlossomUpload(Exception("Put Mirror failed: ${response.status.value} - $reason"))
+        }
+
+        return response.body<BlobDescriptor>()
     }
 }
