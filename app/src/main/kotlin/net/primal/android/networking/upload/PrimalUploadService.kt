@@ -88,8 +88,6 @@ class PrimalUploadService @Inject constructor(
         onProgress: ((uploadedBytes: Int, totalBytes: Int) -> Unit)? = null,
     ): UploadResult =
         withContext(dispatchers.io()) {
-            blossomRepository.ensureBlossomServerList(userId = userId)
-
             val blossomApis = resolveBlossomApisOrThrow(userId = userId)
             val primaryApi = blossomApis.first()
             val mirrorApis = blossomApis.drop(1)
