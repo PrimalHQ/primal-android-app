@@ -20,6 +20,7 @@ import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.cryptography.SignResult
 import net.primal.domain.profile.MutedUserRepository
 import org.junit.Rule
 import org.junit.Test
@@ -121,7 +122,7 @@ class LoginHandlerTest {
                 nostrNotary = mockk(relaxed = true) {
                     coEvery {
                         signAuthorizationNostrEvent(expectedUserId, any(), any())
-                    } returns expectedNostrEvent
+                    } returns SignResult.Signed(expectedNostrEvent)
                 },
             )
 

@@ -11,6 +11,7 @@ import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import net.primal.domain.publisher.NostrEventImporter
 import net.primal.domain.publisher.PrimalPublishResult
 import net.primal.domain.publisher.PrimalPublisher
@@ -49,13 +50,11 @@ class NostrPublisher @Inject constructor(
     }
 
     @Throws(NostrPublishException::class, SignatureException::class)
-    @Deprecated("Please use signPublishImportNostrEvent(NoNostrUnsignedEvent, List<String>).")
-    suspend fun signPublishImportNostrEvent(
-        userId: String,
+    override suspend fun signPublishImportNostrEvent(
         unsignedNostrEvent: NostrUnsignedEvent,
-        outboxRelays: List<String> = emptyList(),
+        outboxRelays: List<String>,
     ): PrimalPublishResult {
-        val signedNostrEvent = nostrNotary.signNostrEvent(userId = userId, event = unsignedNostrEvent)
+        val signedNostrEvent = nostrNotary.signNostrEvent(unsignedNostrEvent = unsignedNostrEvent).unwrapOrThrow()
         val imported = publishAndImportEvent(signedNostrEvent = signedNostrEvent, outboxRelays = outboxRelays)
         return PrimalPublishResult(
             nostrEvent = signedNostrEvent,
@@ -64,20 +63,11 @@ class NostrPublisher @Inject constructor(
     }
 
     @Throws(NostrPublishException::class, SignatureException::class)
-    override suspend fun signPublishImportNostrEvent(
-        unsignedNostrEvent: NostrUnsignedEvent,
-        outboxRelays: List<String>,
-    ): PrimalPublishResult {
-        return signPublishImportNostrEvent(
-            userId = unsignedNostrEvent.pubKey,
-            unsignedNostrEvent = unsignedNostrEvent,
-            outboxRelays = outboxRelays,
-        )
-    }
-
-    @Throws(NostrPublishException::class, SignatureException::class)
     suspend fun publishUserProfile(userId: String, contentMetadata: ContentMetadata): NostrEvent {
-        val signedNostrEvent = nostrNotary.signMetadataNostrEvent(userId = userId, metadata = contentMetadata)
+        val signedNostrEvent = nostrNotary
+            .signMetadataNostrEvent(userId = userId, metadata = contentMetadata)
+            .unwrapOrThrow()
+
         relaysSocketManager.publishEvent(nostrEvent = signedNostrEvent)
         importEvent(signedNostrEvent)
         return signedNostrEvent
@@ -93,14 +83,15 @@ class NostrPublisher @Inject constructor(
             userId = userId,
             contacts = contacts,
             content = content,
-        )
+        ).unwrapOrThrow()
+
         publishAndImportEvent(signedNostrEvent)
         return signedNostrEvent
     }
 
     @Throws(NostrPublishException::class, SignatureException::class)
     suspend fun publishRelayList(userId: String, relays: List<Relay>): NostrEvent {
-        val signedNostrEvent = nostrNotary.signRelayListMetadata(userId = userId, relays = relays)
+        val signedNostrEvent = nostrNotary.signRelayListMetadata(userId = userId, relays = relays).unwrapOrThrow()
         relaysSocketManager.publishEvent(nostrEvent = signedNostrEvent, relays = relays)
         importEvent(signedNostrEvent)
         return signedNostrEvent
@@ -111,7 +102,7 @@ class NostrPublisher @Inject constructor(
         val walletPayNostrEvent = nostrNotary.signWalletInvoiceRequestNostrEvent(
             request = invoice.toWalletPayRequest(),
             nwc = nwcData,
-        )
+        ).unwrapOrThrow()
         relaysSocketManager.publishNwcEvent(nostrEvent = walletPayNostrEvent)
     }
 }

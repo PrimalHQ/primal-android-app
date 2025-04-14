@@ -13,6 +13,7 @@ import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.nostr.cryptography.utils.assureValidNsec
+import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import timber.log.Timber
 
 class CreateAccountHandler @Inject constructor(
@@ -36,7 +37,7 @@ class CreateAccountHandler @Inject constructor(
             val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
                 userId = userId,
                 description = "Sync app settings",
-            )
+            ).unwrapOrThrow()
 
             relayRepository.bootstrapUserRelays(userId)
             blossomRepository.bootstrapBlossomServerList(userId)

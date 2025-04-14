@@ -30,8 +30,6 @@ import net.primal.android.settings.notifications.ui.mapAsNotificationsPreference
 import net.primal.android.settings.notifications.ui.mapAsPushNotificationSwitchUi
 import net.primal.android.settings.notifications.ui.mapAsTabNotificationSwitchUi
 import net.primal.android.settings.repository.SettingsRepository
-import net.primal.android.signer.poc.Notary
-import net.primal.android.signer.poc.SignResult
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
@@ -40,7 +38,8 @@ import net.primal.data.remote.api.settings.model.AppSettingsDescription
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asIdentifierTag
-import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.cryptography.SignResult
+import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import net.primal.domain.notifications.NotificationSettingsType
 import net.primal.domain.notifications.NotificationSettingsType.Preferences
 import net.primal.domain.notifications.NotificationSettingsType.PushNotifications
@@ -53,7 +52,6 @@ class NotificationsSettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val nostrNotary: NostrNotary,
-    private val newNostrNotary: Notary,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -142,8 +140,8 @@ class NotificationsSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val userId = activeAccountStore.activeUserId()
-                val signResult = newNostrNotary.signEvent(
-                    unsignedEvent = NostrUnsignedEvent(
+                val signResult = nostrNotary.signNostrEvent(
+                    unsignedNostrEvent = NostrUnsignedEvent(
                         pubKey = userId,
                         kind = NostrEventKind.ApplicationSpecificData.value,
                         tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
@@ -166,9 +164,6 @@ class NotificationsSettingsViewModel @Inject constructor(
             } catch (error: WssException) {
                 Timber.w(error)
                 setState { copy(error = FetchAppSettingsError(cause = error)) }
-            } catch (error: SignatureException) {
-                Timber.w(error)
-                setState { copy(signatureError = error.asSignatureUiError()) }
             }
         }
 
@@ -183,21 +178,32 @@ class NotificationsSettingsViewModel @Inject constructor(
 
         try {
             val userId = activeAccountStore.activeUserId()
-            val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
+            val signResult = nostrNotary.signAuthorizationNostrEvent(
                 userId = userId,
                 description = "Sync app settings",
             )
-            settingsRepository.fetchAndUpdateAndPublishAppSettings(authorizationEvent) {
-                val newAppSettings = this.copy(
-                    notifications = tabNotificationsJsonObject,
-                    pushNotifications = pushNotificationsJsonObject,
-                    notificationsAdditional = preferencesJsonObject,
 
-                )
-                nostrNotary.signAppSettingsNostrEvent(
-                    userId = userId,
-                    appSettings = newAppSettings,
-                )
+            when (signResult) {
+                is SignResult.Rejected -> {
+                    setState { copy(error = UpdateAppSettingsError(cause = signResult.error)) }
+                }
+
+                is SignResult.Signed -> {
+                    settingsRepository.fetchAndUpdateAndPublishAppSettings(signResult.event) {
+                        val newAppSettings = this.copy(
+                            notifications = tabNotificationsJsonObject,
+                            pushNotifications = pushNotificationsJsonObject,
+                            notificationsAdditional = preferencesJsonObject,
+                        )
+
+                        nostrNotary.signAppSettingsNostrEvent(
+                            userId = userId,
+                            appSettings = newAppSettings,
+                        ).unwrapOrThrow { error ->
+                            setState { copy(signatureError = error.asSignatureUiError()) }
+                        }
+                    }
+                }
             }
         } catch (error: WssException) {
             setState { copy(error = UpdateAppSettingsError(cause = error)) }

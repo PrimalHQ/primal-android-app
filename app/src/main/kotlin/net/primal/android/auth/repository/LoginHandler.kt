@@ -11,6 +11,7 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.cryptography.utils.assureValidNsec
+import net.primal.domain.nostr.cryptography.utils.getOrNull
 import net.primal.domain.profile.MutedUserRepository
 
 class LoginHandler @Inject constructor(
@@ -35,12 +36,10 @@ class LoginHandler @Inject constructor(
 
                 LoginType.PrivateKey -> credentialsStore.saveNsec(nostrKey = nostrKey)
             }
-            val authorizationEvent = authorizationEvent ?: runCatching {
-                nostrNotary.signAuthorizationNostrEvent(
-                    userId = userId,
-                    description = "Sync app settings",
-                )
-            }.getOrNull()
+            val authorizationEvent = authorizationEvent ?: nostrNotary.signAuthorizationNostrEvent(
+                userId = userId,
+                description = "Sync app settings",
+            ).getOrNull()
 
             userRepository.fetchAndUpdateUserAccount(userId = userId)
             bookmarksRepository.fetchAndPersistBookmarks(userId = userId)

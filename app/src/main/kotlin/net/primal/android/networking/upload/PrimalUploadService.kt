@@ -31,6 +31,7 @@ import net.primal.domain.nostr.asSha256Tag
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.cryptography.NostrKeyPair
 import net.primal.domain.nostr.cryptography.utils.hexToNsecHrp
+import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import okio.Buffer
 import okio.BufferedSource
 import okio.ByteString.Companion.encodeUtf8
@@ -62,7 +63,7 @@ class PrimalUploadService @Inject constructor(
         upload(
             uri = uri,
             userId = userId,
-            onSignRequested = { signatureHandler.signNostrEvent(it) },
+            onSignRequested = { signatureHandler.signNostrEvent(it).unwrapOrThrow() },
             onProgress = onProgress,
         )
 
@@ -84,7 +85,7 @@ class PrimalUploadService @Inject constructor(
     private suspend fun upload(
         uri: Uri,
         userId: String,
-        onSignRequested: (NostrUnsignedEvent) -> NostrEvent,
+        onSignRequested: suspend (NostrUnsignedEvent) -> NostrEvent,
         onProgress: ((uploadedBytes: Int, totalBytes: Int) -> Unit)? = null,
     ): UploadResult =
         withContext(dispatchers.io()) {

@@ -28,7 +28,7 @@ import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.navigation.PrimalAppNavigation
 import net.primal.android.navigation.splash.SplashViewModel
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.nostr.notary.NotarySideEffect
+import net.primal.android.nostr.notary.NostrNotary.NotarySideEffect
 import net.primal.android.signer.launchSignEvent
 import net.primal.android.signer.rememberAmberSignerLauncher
 import net.primal.android.theme.AppTheme

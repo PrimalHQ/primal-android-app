@@ -14,6 +14,7 @@ import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.model.AppSpecificDataRequest
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 
 class MediaManagementApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
@@ -28,7 +29,7 @@ class MediaManagementApiImpl @Inject constructor(
                     eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
                         userId = userId,
                         content = "",
-                    ),
+                    ).unwrapOrThrow(),
                 ).encodeToJsonString(),
             ),
         )
@@ -43,7 +44,8 @@ class MediaManagementApiImpl @Inject constructor(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.MEDIA_MANAGEMENT_UPLOADS.id,
                 optionsJson = MediaUploadsRequestBody(
-                    eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(userId = userId, content = ""),
+                    eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(userId = userId, content = "")
+                        .unwrapOrThrow(),
                     since = 0,
                     limit = 1_000,
                 ).encodeToJsonString(),
@@ -67,7 +69,7 @@ class MediaManagementApiImpl @Inject constructor(
                     eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
                         userId = userId,
                         content = "{\"url\":\"$mediaUrl\"}",
-                    ),
+                    ).unwrapOrThrow(),
                 ).encodeToJsonString(),
             ),
         )
