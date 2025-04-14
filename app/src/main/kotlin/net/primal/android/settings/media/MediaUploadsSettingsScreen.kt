@@ -117,6 +117,7 @@ private fun MediaUploadsSettingsScreen(
     )
 }
 
+@Suppress
 @Composable
 private fun MediaUploadsLazyColumn(
     modifier: Modifier,

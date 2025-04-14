@@ -51,5 +51,9 @@ fun UiError.resolveUiErrorMessage(context: Context): String {
         is UiError.FailedToRemoveFeed -> context.getString(R.string.app_error_removing_feed)
 
         UiError.NostrSignUnauthorized -> context.getString(R.string.app_error_sign_unauthorized)
+
+        is UiError.FailedToRestoreDefaultBlossomServer -> context.getString(
+            R.string.app_error_restore_default_blossom_server,
+        )
     }
 }

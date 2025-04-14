@@ -9,11 +9,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.core.errors.UiError
+import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.settings.media.MediaUploadsSettingsContract.UiEvent
 import net.primal.android.settings.media.MediaUploadsSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.BlossomRepository
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
 @HiltViewModel
@@ -88,44 +91,42 @@ class MediaUploadsSettingsViewModel @Inject constructor(
         }
     }
 
-    private fun restoreDefaultBlossomServer() = viewModelScope.launch {
-        try {
-            val userId = activeAccountStore.activeUserId()
-            val mirrorUrl = state.value.blossomServerMirrorUrl
+    private fun restoreDefaultBlossomServer() =
+        viewModelScope.launch {
+            try {
+                val userId = activeAccountStore.activeUserId()
+                val mirrorUrl = state.value.blossomServerMirrorUrl
 
-            val serverList = buildList {
-                add(DEFAULT_BLOSSOM_URL)
-                if (mirrorUrl.isNotBlank() && mirrorUrl != DEFAULT_BLOSSOM_URL) {
-                    add(mirrorUrl)
+                val serverList = buildList {
+                    add(DEFAULT_BLOSSOM_URL)
+                    if (mirrorUrl.isNotBlank() && mirrorUrl != DEFAULT_BLOSSOM_URL) {
+                        add(mirrorUrl)
+                    }
                 }
-            }
 
-            blossomRepository.publishBlossomServerList(
-                userId = userId,
-                servers = serverList,
-            )
-
-            setState {
-                copy(
-                    blossomServerUrl = DEFAULT_BLOSSOM_URL,
-                    newBlossomServerUrl = "",
-                    mode = MediaUploadsMode.View,
+                blossomRepository.publishBlossomServerList(
+                    userId = userId,
+                    servers = serverList,
                 )
-            }
-        } catch (e : Exception) {
 
+                setState {
+                    copy(
+                        blossomServerUrl = DEFAULT_BLOSSOM_URL,
+                        newBlossomServerUrl = "",
+                        mode = MediaUploadsMode.View,
+                    )
+                }
+            } catch (error: WssException) {
+                Timber.w(error)
+                setState { copy(error = UiError.FailedToRestoreDefaultBlossomServer(error)) }
+            } catch (error: SignatureException) {
+                Timber.w(error)
+                setState { copy(error = UiError.FailedToRestoreDefaultBlossomServer(error)) }
+            } catch (error: NostrPublishException) {
+                Timber.w(error)
+                setState { copy(error = UiError.FailedToRestoreDefaultBlossomServer(error)) }
+            }
         }
-//        } catch (error: SignatureException) {
-//            Timber.w(error)
-//            setState { copy(error = UiState) }
-//        } catch (error: NostrPublishException) {
-//            Timber.w(error)
-//            setState { copy(error = UiState.NetworkSettingsError.FailedToAddRelay(error)) }
-//        } catch (error: WssException) {
-//            Timber.w(error)
-//            setState { copy(error = UiState.NetworkSettingsError.FailedToAddRelay(error)) }
-//        }
-    }
     private fun fetchSuggestedBlossomServers() =
         viewModelScope.launch {
             try {
