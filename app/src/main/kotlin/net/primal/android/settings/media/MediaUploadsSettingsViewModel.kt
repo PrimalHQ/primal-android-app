@@ -31,8 +31,8 @@ class MediaUploadsSettingsViewModel @Inject constructor(
 
     init {
         observeEvents()
-        ensureBlossomServerList()
         fetchSuggestedBlossomServers()
+        ensureBlossomServerList()
     }
 
     private fun ensureBlossomServerList() = viewModelScope.launch {
