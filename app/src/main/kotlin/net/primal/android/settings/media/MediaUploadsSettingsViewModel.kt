@@ -35,32 +35,33 @@ class MediaUploadsSettingsViewModel @Inject constructor(
         ensureBlossomServerList()
     }
 
-    private fun ensureBlossomServerList() = viewModelScope.launch {
-        setState { copy(isLoadingBlossomServerUrls = true) }
+    private fun ensureBlossomServerList() =
+        viewModelScope.launch {
+            setState { copy(isLoadingBlossomServerUrls = true) }
 
-        try {
-            val userId = activeAccountStore.activeUserId()
-            blossomRepository.ensureBlossomServerList(userId = userId)
-            val blossoms = blossomRepository.getBlossomServers(userId = userId)
+            try {
+                val userId = activeAccountStore.activeUserId()
+                blossomRepository.ensureBlossomServerList(userId = userId)
+                val blossoms = blossomRepository.getBlossomServers(userId = userId)
 
-            if (blossoms.isNotEmpty()) {
-                val primaryServer = blossoms.first()
-                val mirrorServer = blossoms.getOrNull(1)
+                if (blossoms.isNotEmpty()) {
+                    val primaryServer = blossoms.first()
+                    val mirrorServer = blossoms.getOrNull(1)
 
-                setState {
-                    copy(
-                        blossomServerUrl = primaryServer,
-                        blossomServerMirrorUrl = mirrorServer ?: blossomServerMirrorUrl,
-                        blossomMirrorEnabled = mirrorServer != null
-                    )
+                    setState {
+                        copy(
+                            blossomServerUrl = primaryServer,
+                            blossomServerMirrorUrl = mirrorServer ?: blossomServerMirrorUrl,
+                            blossomMirrorEnabled = mirrorServer != null,
+                        )
+                    }
                 }
+            } catch (error: WssException) {
+                Timber.w(error)
+            } finally {
+                setState { copy(isLoadingBlossomServerUrls = false) }
             }
-        } catch (error: WssException) {
-            Timber.w(error)
-        } finally {
-            setState { copy(isLoadingBlossomServerUrls = false) }
         }
-    }
 
     private fun observeEvents() =
         viewModelScope.launch {
@@ -100,7 +101,7 @@ class MediaUploadsSettingsViewModel @Inject constructor(
 
         blossomRepository.publishBlossomServerList(
             userId = userId,
-            servers = serverList
+            servers = serverList,
         )
 
         setState {

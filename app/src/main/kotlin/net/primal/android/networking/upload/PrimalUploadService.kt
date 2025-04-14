@@ -82,6 +82,8 @@ class PrimalUploadService @Inject constructor(
         onProgress: ((uploadedBytes: Int, totalBytes: Int) -> Unit)? = null,
     ): UploadResult =
         withContext(dispatchers.io()) {
+            blossomRepository.ensureBlossomServerList(userId = userId)
+
             val fileMetadata = uri.openBufferedSource().use { it.getMetadata() }
 
             val signed = onSignRequested(
