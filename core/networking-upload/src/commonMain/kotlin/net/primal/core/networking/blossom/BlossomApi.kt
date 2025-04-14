@@ -6,13 +6,13 @@ import okio.BufferedSource
 interface BlossomApi {
 
     @Throws(
-        UnsuccessfulBlossomUpload::class,
+        UploadRequirementException::class,
         CancellationException::class,
     )
     suspend fun headUpload(authorization: String, fileMetadata: FileMetadata)
 
     @Throws(
-        UnsuccessfulBlossomUpload::class,
+        BlossomUploadException::class,
         CancellationException::class,
     )
     suspend fun putUpload(
@@ -23,13 +23,13 @@ interface BlossomApi {
     ): BlobDescriptor
 
     @Throws(
-        UnsuccessfulBlossomUpload::class,
+        UploadRequirementException::class,
         CancellationException::class,
     )
     suspend fun headMedia(authorization: String, fileMetadata: FileMetadata)
 
     @Throws(
-        UnsuccessfulBlossomUpload::class,
+        BlossomUploadException::class,
         CancellationException::class,
     )
     suspend fun putMedia(
@@ -40,7 +40,7 @@ interface BlossomApi {
     ): BlobDescriptor
 
     @Throws(
-        UnsuccessfulBlossomUpload::class,
+        BlossomMirrorException::class,
         CancellationException::class,
     )
     suspend fun putMirror(authorization: String, fileUrl: String): BlobDescriptor

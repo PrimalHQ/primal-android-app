@@ -25,7 +25,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.nwc.InvalidLud16Exception
 import net.primal.android.wallet.nwc.LightningAddressChecker
-import net.primal.core.networking.blossom.UnsuccessfulBlossomUpload
+import net.primal.core.networking.blossom.BlossomException
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.nostr.cryptography.SignatureException
@@ -171,7 +171,7 @@ class ProfileEditorViewModel @Inject constructor(
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setErrorState(error = EditProfileError.MissingRelaysConfiguration(error))
-            } catch (error: UnsuccessfulBlossomUpload) {
+            } catch (error: BlossomException) {
                 Timber.w(error)
                 setErrorState(error = EditProfileError.FailedToUploadImage(error))
             } catch (error: InvalidLud16Exception) {
