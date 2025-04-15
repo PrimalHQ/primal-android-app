@@ -18,9 +18,9 @@ import net.primal.android.user.domain.LoginType
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.bookmarks.PublicBookmarksRepository
+import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.domain.profile.MutedUserRepository
 import org.junit.Rule
 import org.junit.Test
 
@@ -38,7 +38,7 @@ class LoginHandlerTest {
         settingsRepository: SettingsRepository = mockk(relaxed = true),
         authRepository: AuthRepository = mockk(relaxed = true),
         userRepository: UserRepository = mockk(relaxed = true),
-        mutedUserRepository: MutedUserRepository = mockk(relaxed = true),
+        mutedItemRepository: MutedItemRepository = mockk(relaxed = true),
         bookmarksRepository: PublicBookmarksRepository = mockk(relaxed = true),
         credentialsStore: CredentialsStore = mockk(relaxed = true),
         nostrNotary: NostrNotary = mockk(relaxed = true),
@@ -47,7 +47,7 @@ class LoginHandlerTest {
             settingsRepository = settingsRepository,
             authRepository = authRepository,
             userRepository = userRepository,
-            mutedUserRepository = mutedUserRepository,
+            mutedItemRepository = mutedItemRepository,
             bookmarksRepository = bookmarksRepository,
             dispatchers = coroutinesTestRule.dispatcherProvider,
             credentialsStore = credentialsStore,
@@ -145,9 +145,9 @@ class LoginHandlerTest {
             val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
                 coEvery { saveNsec(any()) } returns expectedUserId
             }
-            val mutedUserRepository = mockk<MutedUserRepository>(relaxed = true)
+            val mutedItemRepository = mockk<MutedItemRepository>(relaxed = true)
             val loginHandler = createLoginHandler(
-                mutedUserRepository = mutedUserRepository,
+                mutedItemRepository = mutedItemRepository,
                 credentialsStore = credentialsStore,
             )
             loginHandler.login(
@@ -157,7 +157,7 @@ class LoginHandlerTest {
             )
 
             coVerify {
-                mutedUserRepository.fetchAndPersistMuteList(expectedUserId)
+                mutedItemRepository.fetchAndPersistMuteList(expectedUserId)
             }
         }
 

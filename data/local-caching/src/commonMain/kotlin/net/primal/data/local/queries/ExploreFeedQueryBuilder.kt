@@ -25,14 +25,14 @@ class ExploreFeedQueryBuilder(
                 EventUserStats.reposted AS userReposted,
                 EventUserStats.zapped AS userZapped,
                 NULL AS feedCreatedAt,
-                CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted,
+                CASE WHEN MutedItemData.item IS NOT NULL THEN 1 ELSE 0 END AS isMuted,
                 PostData.replyToPostId,
                 PostData.replyToAuthorId
             FROM PostData
             INNER JOIN FeedPostDataCrossRef ON FeedPostDataCrossRef.eventId = PostData.postId
             INNER JOIN EventStats ON PostData.postId = EventStats.eventId
             LEFT JOIN EventUserStats ON EventUserStats.eventId = PostData.postId AND EventUserStats.userId = ?
-            LEFT JOIN MutedUserData ON MutedUserData.userId = PostData.authorId
+            LEFT JOIN MutedItemData ON MutedItemData.item = PostData.authorId
             WHERE FeedPostDataCrossRef.feedSpec = ? AND FeedPostDataCrossRef.ownerId = ? AND isMuted = 0
         """
     }

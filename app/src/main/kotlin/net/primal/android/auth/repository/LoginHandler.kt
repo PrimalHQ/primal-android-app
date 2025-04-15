@@ -9,15 +9,15 @@ import net.primal.android.user.domain.LoginType
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.bookmarks.PublicBookmarksRepository
+import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.cryptography.utils.assureValidNsec
-import net.primal.domain.profile.MutedUserRepository
 
 class LoginHandler @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
-    private val mutedUserRepository: MutedUserRepository,
+    private val mutedItemRepository: MutedItemRepository,
     private val bookmarksRepository: PublicBookmarksRepository,
     private val dispatchers: DispatcherProvider,
     private val credentialsStore: CredentialsStore,
@@ -47,7 +47,7 @@ class LoginHandler @Inject constructor(
             authorizationEvent?.let {
                 settingsRepository.fetchAndPersistAppSettings(authorizationEvent)
             }
-            mutedUserRepository.fetchAndPersistMuteList(userId = userId)
+            mutedItemRepository.fetchAndPersistMuteList(userId = userId)
         }.onFailure { exception ->
             when (loginType) {
                 LoginType.PublicKey, LoginType.ExternalSigner ->

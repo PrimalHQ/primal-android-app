@@ -12,7 +12,7 @@ class UserDataCleanupRepositoryImpl(
             database.messages().deleteAllByOwnerId(ownerId = userId)
             database.messageConversations().deleteAllByOwnerId(ownerId = userId)
             database.feeds().deleteAllByOwnerId(ownerId = userId)
-            database.mutedUsers().deleteAllByOwnerId(ownerId = userId)
+            database.mutedItems().deleteAllByOwnerId(ownerId = userId)
             database.notifications().deleteAllByOwnerId(ownerId = userId)
             database.articleFeedsConnections().deleteConnections(ownerId = userId)
             database.feedsConnections().deleteConnections(ownerId = userId)

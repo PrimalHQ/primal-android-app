@@ -38,14 +38,14 @@ interface ThreadConversationDao {
                 EventUserStats.reposted AS userReposted,
                 EventUserStats.zapped AS userZapped,
                 NULL AS feedCreatedAt,
-                CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted,
+                CASE WHEN MutedItemData.item IS NOT NULL THEN 1 ELSE 0 END AS isMuted,
                 NULL AS replyToPostId,
                 NULL AS replyToAuthorId
             FROM PostData AS FPD1
             INNER JOIN NoteConversationCrossRef ON FPD1.postId = NoteConversationCrossRef.noteId
             INNER JOIN PostData AS FPD2 ON NoteConversationCrossRef.replyNoteId = FPD2.postId
             LEFT JOIN EventUserStats ON EventUserStats.eventId = FPD2.postId AND EventUserStats.userId = :userId
-            LEFT JOIN MutedUserData ON MutedUserData.userId = FPD2.authorId
+            LEFT JOIN MutedItemData ON MutedItemData.item = FPD2.authorId
             WHERE FPD1.postId = :postId AND isMuted = 0
             ORDER BY FPD2.createdAt ASC
         """,
@@ -72,13 +72,13 @@ interface ThreadConversationDao {
                 EventUserStats.reposted AS userReposted,
                 EventUserStats.zapped AS userZapped,
                 NULL AS feedCreatedAt,
-                CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted,
+                CASE WHEN MutedItemData.item IS NOT NULL THEN 1 ELSE 0 END AS isMuted,
                 NULL AS replyToPostId,
                 NULL AS replyToAuthorId
             FROM PostData
             INNER JOIN ArticleCommentCrossRef ON PostData.postId = ArticleCommentCrossRef.commentNoteId
             LEFT JOIN EventUserStats ON EventUserStats.eventId = PostData.postId AND EventUserStats.userId = :userId
-            LEFT JOIN MutedUserData ON MutedUserData.userId = PostData.authorId
+            LEFT JOIN MutedItemData ON MutedItemData.item = PostData.authorId
             WHERE ArticleCommentCrossRef.articleId = :articleId
                 AND ArticleCommentCrossRef.articleAuthorId = :articleAuthorId
                 AND isMuted = 0

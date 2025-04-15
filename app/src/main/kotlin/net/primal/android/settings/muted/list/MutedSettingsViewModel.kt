@@ -17,15 +17,15 @@ import net.primal.android.settings.muted.list.MutedSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.cryptography.SignatureException
-import net.primal.domain.profile.MutedUserRepository
 import timber.log.Timber
 
 @HiltViewModel
 class MutedSettingsViewModel @Inject constructor(
     private val dispatcherProvider: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
-    private val mutedUserRepository: MutedUserRepository,
+    private val mutedItemRepository: MutedItemRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -43,7 +43,7 @@ class MutedSettingsViewModel @Inject constructor(
 
     private fun observeMutedUsers() =
         viewModelScope.launch {
-            mutedUserRepository.observeMutedUsersByOwnerId(ownerId = activeAccountStore.activeUserId()).collect {
+            mutedItemRepository.observeMutedUsersByOwnerId(ownerId = activeAccountStore.activeUserId()).collect {
                 setState {
                     copy(mutedUsers = it.map { it.asProfileDetailsUi() })
                 }
@@ -63,7 +63,7 @@ class MutedSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 withContext(dispatcherProvider.io()) {
-                    mutedUserRepository.fetchAndPersistMuteList(
+                    mutedItemRepository.fetchAndPersistMuteList(
                         userId = activeAccountStore.activeUserId(),
                     )
                 }
@@ -76,7 +76,7 @@ class MutedSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 withContext(dispatcherProvider.io()) {
-                    mutedUserRepository.unmuteUserAndPersistMuteList(
+                    mutedItemRepository.unmuteUserAndPersistMuteList(
                         userId = activeAccountStore.activeUserId(),
                         unmutedUserId = event.pubkey,
                     )

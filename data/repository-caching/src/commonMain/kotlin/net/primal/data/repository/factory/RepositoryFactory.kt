@@ -10,12 +10,12 @@ import net.primal.domain.feeds.FeedsRepository
 import net.primal.domain.global.CachingImportRepository
 import net.primal.domain.links.EventUriRepository
 import net.primal.domain.messages.ChatRepository
+import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.zaps.NostrZapperFactory
 import net.primal.domain.notifications.NotificationRepository
 import net.primal.domain.posts.FeedRepository
-import net.primal.domain.profile.MutedUserRepository
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.reads.ArticleRepository
@@ -60,10 +60,10 @@ internal interface RepositoryFactory {
 
     fun createExploreRepository(cachingPrimalApiClient: PrimalApiClient): ExploreRepository
 
-    fun createMutedUserRepository(
+    fun createMutedItemRepository(
         cachingPrimalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,
-    ): MutedUserRepository
+    ): MutedItemRepository
 
     fun createNotificationRepository(cachingPrimalApiClient: PrimalApiClient): NotificationRepository
 
