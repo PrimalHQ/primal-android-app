@@ -46,7 +46,7 @@ internal class BlossomApiImpl(
     override suspend fun putUpload(
         authorization: String,
         fileMetadata: FileMetadata,
-        openBufferedSource: () -> BufferedSource,
+        bufferedSource: BufferedSource,
         onProgress: ((Int, Int) -> Unit)?,
     ): BlobDescriptor =
         performPutUpload(
@@ -54,7 +54,7 @@ internal class BlossomApiImpl(
             authorization = authorization,
             contentType = "application/octet-stream",
             fileMetadata = fileMetadata,
-            openBufferedSource = openBufferedSource,
+            bufferedSource = bufferedSource,
             onProgress = onProgress,
             errorPrefix = "Upload",
             checkFileSize = true,
@@ -63,7 +63,7 @@ internal class BlossomApiImpl(
     override suspend fun putMedia(
         authorization: String,
         fileMetadata: FileMetadata,
-        openBufferedSource: () -> BufferedSource,
+        bufferedSource: BufferedSource,
         onProgress: ((Int, Int) -> Unit)?,
     ): BlobDescriptor =
         performPutUpload(
@@ -71,7 +71,7 @@ internal class BlossomApiImpl(
             authorization = authorization,
             contentType = fileMetadata.mimeType ?: "application/octet-stream",
             fileMetadata = fileMetadata,
-            openBufferedSource = openBufferedSource,
+            bufferedSource = bufferedSource,
             onProgress = onProgress,
             errorPrefix = "Upload Media",
         )
@@ -122,7 +122,7 @@ internal class BlossomApiImpl(
         authorization: String,
         contentType: String,
         fileMetadata: FileMetadata,
-        openBufferedSource: () -> BufferedSource,
+        bufferedSource: BufferedSource,
         errorPrefix: String,
         onProgress: ((Int, Int) -> Unit)? = null,
         checkFileSize: Boolean = false,
@@ -131,7 +131,7 @@ internal class BlossomApiImpl(
         val totalBytes = fileMetadata.sizeInBytes
 
         val response = withContext(dispatcherProvider.io()) {
-            openBufferedSource().use { source ->
+            bufferedSource.use { source ->
                 httpClient.put("$baseBlossomUrl/$endpoint") {
                     headers {
                         append("Authorization", authorization)
