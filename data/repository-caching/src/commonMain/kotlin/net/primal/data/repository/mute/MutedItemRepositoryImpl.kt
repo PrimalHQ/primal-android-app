@@ -3,9 +3,9 @@ package net.primal.data.repository.mute
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.jsonPrimitive
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.data.local.dao.profiles.MutedUserData
+import net.primal.data.local.dao.mutes.MutedItemData
+import net.primal.data.local.dao.mutes.MutedItemType
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.settings.SettingsApi
@@ -16,26 +16,32 @@ import net.primal.data.repository.mappers.remote.asProfileDataPO
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
+import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.nostr.asEventIdTag
+import net.primal.domain.nostr.asHashtagTag
 import net.primal.domain.nostr.asPubkeyTag
-import net.primal.domain.profile.MutedUserRepository
+import net.primal.domain.nostr.asWordTag
+import net.primal.domain.nostr.getTagValueOrNull
+import net.primal.domain.nostr.isEventIdTag
+import net.primal.domain.nostr.isHashtagTag
+import net.primal.domain.nostr.isPubKeyTag
+import net.primal.domain.nostr.isWordTag
 import net.primal.domain.publisher.PrimalPublisher
 
-class MutedUserRepositoryImpl(
+class MutedItemRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val database: PrimalDatabase,
     private val settingsApi: SettingsApi,
     private val primalPublisher: PrimalPublisher,
-) : MutedUserRepository {
-
+) : MutedItemRepository {
     override fun observeMutedUsersByOwnerId(ownerId: String) =
-        database.mutedUsers()
-            .observeMutedUsersByOwnerId(ownerId = ownerId)
+        database.mutedItems().observeMutedUsersByOwnerId(ownerId = ownerId)
             .map { it.mapNotNull { it.profileData?.asProfileDataDO() } }
 
     override fun observeIsUserMutedByOwnerId(pubkey: String, ownerId: String) =
-        database.mutedUsers().observeIsUserMutedByOwnerId(
+        database.mutedItems().observeIsUserMutedByOwnerId(
             pubkey = pubkey,
             ownerId = ownerId,
         )
@@ -46,50 +52,37 @@ class MutedUserRepositoryImpl(
     }
 
     override suspend fun muteUserAndPersistMuteList(userId: String, mutedUserId: String) =
-        withContext(dispatcherProvider.io()) {
-            val userMetadataEventId = database.profiles().findMetadataEventId(mutedUserId)
-            updateAndPersistMuteList(userId = userId) {
-                toMutableSet().apply {
-                    add(
-                        MutedUserData(
-                            userId = mutedUserId,
-                            userMetadataEventId = userMetadataEventId,
-                            ownerId = userId,
-                        ),
-                    )
-                }
-            }
+        updateAndPersistMuteList(userId = userId) {
+            plus(MutedItemData(item = mutedUserId, ownerId = userId, type = MutedItemType.User))
         }
 
-    override suspend fun unmuteUserAndPersistMuteList(userId: String, unmutedUserId: String) {
+    override suspend fun unmuteUserAndPersistMuteList(userId: String, unmutedUserId: String) =
         updateAndPersistMuteList(userId = userId) {
-            filterNot { it.userId == unmutedUserId && it.ownerId == userId }.toSet()
+            minus(MutedItemData(item = unmutedUserId, ownerId = userId, type = MutedItemType.User))
         }
-    }
 
     private suspend fun updateAndPersistMuteList(
         userId: String,
-        reducer: Set<MutedUserData>.() -> Set<MutedUserData>,
+        reducer: Set<MutedItemData>.() -> Set<MutedItemData>,
     ) = withContext(dispatcherProvider.io()) {
         val remoteMuteList = fetchMuteListAndPersistProfiles(userId = userId)
         val newMuteList = remoteMuteList.reducer()
+
         primalPublisher.signPublishImportNostrEvent(
             NostrUnsignedEvent(
                 content = "",
                 pubKey = userId,
                 kind = NostrEventKind.MuteList.value,
-                tags = newMuteList
-                    .map { it.userId }
-                    .toSet()
-                    .map { it.asPubkeyTag() },
+                tags = newMuteList.map { it.toTag() },
             ),
         )
         persistMuteList(ownerId = userId, muteList = newMuteList)
     }
 
-    private suspend fun fetchMuteListAndPersistProfiles(userId: String): Set<MutedUserData> {
+    private suspend fun fetchMuteListAndPersistProfiles(userId: String): Set<MutedItemData> {
         val response = settingsApi.getMuteList(userId = userId)
-        val muteList = response.muteList?.tags?.mapToPubkeySet() ?: emptySet()
+        val muteList = response.muteList
+            ?.tags?.mapNotNull { it.toMutedItemData(ownerId = userId) }?.toSet() ?: emptySet()
         val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
         val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
         val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
@@ -106,29 +99,44 @@ class MutedUserRepositoryImpl(
         }
 
         database.profiles().insertOrUpdateAll(data = profileData)
+
         return muteList
-            .map { mutedUserId ->
-                mutedUserId.asMutedAccountPO(
-                    metadataEventId = profileData.find { mutedUserId == it.ownerId }?.eventId,
-                    ownerId = userId,
-                )
-            }
-            .toSet()
     }
 
-    private suspend fun persistMuteList(ownerId: String, muteList: Set<MutedUserData>) {
+    private suspend fun persistMuteList(ownerId: String, muteList: Set<MutedItemData>) =
         withContext(dispatcherProvider.io()) {
             database.withTransaction {
-                database.mutedUsers().deleteAllByOwnerId(ownerId = ownerId)
-                database.mutedUsers().upsertAll(data = muteList)
+                database.mutedItems().deleteAllByOwnerId(ownerId = ownerId)
+                database.mutedItems().upsertAll(data = muteList)
             }
         }
-    }
 
-    private fun String.asMutedAccountPO(metadataEventId: String? = null, ownerId: String): MutedUserData =
-        MutedUserData(userId = this, userMetadataEventId = metadataEventId, ownerId = ownerId)
+    private fun JsonArray.toMutedItemData(ownerId: String) =
+        getTagValueOrNull()?.let { value ->
+            findMutedType()?.let { type ->
+                MutedItemData(
+                    item = value,
+                    ownerId = ownerId,
+                    type = type,
+                )
+            }
+        }
 
-    private fun List<JsonArray>?.mapToPubkeySet(): Set<String>? {
-        return this?.filter { it.size == 2 }?.map { it[1].jsonPrimitive.content }?.toSet()
-    }
+    private fun MutedItemData.toTag() =
+        when (this.type) {
+            MutedItemType.User -> this.item.asPubkeyTag()
+            MutedItemType.Hashtag -> this.item.asHashtagTag()
+            MutedItemType.Word -> this.item.asWordTag()
+            MutedItemType.Thread -> this.item.asEventIdTag()
+        }
+
+    private fun JsonArray.findMutedType() =
+        when {
+            isPubKeyTag() -> MutedItemType.User
+            isEventIdTag() -> MutedItemType.Thread
+            isHashtagTag() -> MutedItemType.Hashtag
+            isWordTag() -> MutedItemType.Word
+
+            else -> null
+        }
 }

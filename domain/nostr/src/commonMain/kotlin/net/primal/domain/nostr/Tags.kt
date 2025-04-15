@@ -56,6 +56,8 @@ fun JsonArray.isDescriptionTag() = getOrNull(0)?.jsonPrimitive?.content == "desc
 
 fun JsonArray.isAmountTag() = getOrNull(0)?.jsonPrimitive?.content == "amount"
 
+fun JsonArray.isWordTag() = getOrNull(0)?.jsonPrimitive?.content == "word"
+
 fun JsonArray.isEventIdTag() = getOrNull(0)?.jsonPrimitive?.content == "e"
 
 fun JsonArray.isPubKeyTag() = getOrNull(0)?.jsonPrimitive?.content == "p"
@@ -94,6 +96,12 @@ fun String.asContextTag() =
     buildJsonArray {
         add("context")
         add(this@asContextTag)
+    }
+
+fun String.asWordTag() =
+    buildJsonArray {
+        add("word")
+        add(this@asWordTag)
     }
 
 fun String.asAltTag() =

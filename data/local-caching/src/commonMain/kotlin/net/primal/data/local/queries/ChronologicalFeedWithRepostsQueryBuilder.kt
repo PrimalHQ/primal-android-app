@@ -25,14 +25,14 @@ class ChronologicalFeedWithRepostsQueryBuilder(
                 EventUserStats.reposted AS userReposted,
                 EventUserStats.zapped AS userZapped,
                 PostData.createdAt AS feedCreatedAt,
-                CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted,
+                CASE WHEN MutedItemData.item IS NOT NULL THEN 1 ELSE 0 END AS isMuted,
                 FeedPostDataCrossRef.position AS position,
                 PostData.replyToPostId,
                 PostData.replyToAuthorId
             FROM PostData
             JOIN FeedPostDataCrossRef ON FeedPostDataCrossRef.eventId = PostData.postId
             LEFT JOIN EventUserStats ON EventUserStats.eventId = PostData.postId AND EventUserStats.userId = ?
-            LEFT JOIN MutedUserData ON MutedUserData.userId = PostData.authorId
+            LEFT JOIN MutedItemData ON MutedItemData.item = PostData.authorId
             WHERE FeedPostDataCrossRef.feedSpec = ? AND FeedPostDataCrossRef.ownerId = ? AND isMuted = 0
 
             UNION ALL
@@ -53,7 +53,7 @@ class ChronologicalFeedWithRepostsQueryBuilder(
                 EventUserStats.reposted AS userReposted,
                 EventUserStats.zapped AS userZapped,
                 RepostData.createdAt AS feedCreatedAt,
-                CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted,
+                CASE WHEN MutedItemData.item IS NOT NULL THEN 1 ELSE 0 END AS isMuted,
                 FeedPostDataCrossRef.position AS position,
                 PostData.replyToPostId,
                 PostData.replyToAuthorId
@@ -61,7 +61,7 @@ class ChronologicalFeedWithRepostsQueryBuilder(
             JOIN PostData ON RepostData.postId = PostData.postId
             JOIN FeedPostDataCrossRef ON FeedPostDataCrossRef.eventId = RepostData.repostId
             LEFT JOIN EventUserStats ON EventUserStats.eventId = PostData.postId AND EventUserStats.userId = ?
-            LEFT JOIN MutedUserData ON MutedUserData.userId = PostData.authorId
+            LEFT JOIN MutedItemData ON MutedItemData.item = PostData.authorId
             WHERE FeedPostDataCrossRef.feedSpec = ? AND FeedPostDataCrossRef.ownerId = ? AND isMuted = 0
         """
     }

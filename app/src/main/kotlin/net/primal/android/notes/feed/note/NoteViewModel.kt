@@ -23,6 +23,7 @@ import net.primal.domain.bookmarks.BookmarkType
 import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.events.EventInteractionRepository
 import net.primal.domain.events.EventRelayHintsRepository
+import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.PublicBookmarksNotFoundException
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
@@ -31,7 +32,6 @@ import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.nostr.zaps.ZapFailureException
 import net.primal.domain.nostr.zaps.ZapRequestException
 import net.primal.domain.nostr.zaps.ZapTarget
-import net.primal.domain.profile.MutedUserRepository
 import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
 
@@ -42,7 +42,7 @@ class NoteViewModel @AssistedInject constructor(
     private val zapHandler: ZapHandler,
     private val eventInteractionRepository: EventInteractionRepository,
     private val profileRepository: ProfileRepository,
-    private val mutedUserRepository: MutedUserRepository,
+    private val mutedItemRepository: MutedItemRepository,
     private val bookmarksRepository: PublicBookmarksRepository,
     private val relayHintsRepository: EventRelayHintsRepository,
 ) : ViewModel() {
@@ -191,7 +191,7 @@ class NoteViewModel @AssistedInject constructor(
     private fun mute(action: UiEvent.MuteAction) =
         viewModelScope.launch {
             try {
-                mutedUserRepository.muteUserAndPersistMuteList(
+                mutedItemRepository.muteUserAndPersistMuteList(
                     userId = activeAccountStore.activeUserId(),
                     mutedUserId = action.userId,
                 )
