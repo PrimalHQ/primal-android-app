@@ -31,4 +31,20 @@ interface MutedItemRepository {
         CancellationException::class,
     )
     suspend fun unmuteUserAndPersistMuteList(userId: String, unmutedUserId: String)
+
+    @Throws(
+        MissingRelaysException::class,
+        NostrPublishException::class,
+        SignatureException::class,
+        CancellationException::class,
+    )
+    suspend fun muteThreadAndPersistMuteList(userId: String, postId: String)
+
+    @Throws(
+        MissingRelaysException::class,
+        NostrPublishException::class,
+        SignatureException::class,
+        CancellationException::class,
+    )
+    suspend fun unmuteThreadAndPersistMuteList(userId: String, postId: String)
 }

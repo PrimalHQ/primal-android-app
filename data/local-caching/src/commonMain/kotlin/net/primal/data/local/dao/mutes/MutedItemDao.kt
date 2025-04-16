@@ -7,7 +7,6 @@ import androidx.room.Query
 import androidx.room.RewriteQueriesToDropUnusedColumns
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
-import net.primal.data.local.dao.mutes.MutedUser
 
 @Dao
 interface MutedItemDao {

@@ -4,5 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class MutedItemType {
-    User, Hashtag, Word, Thread
+    User,
+    Hashtag,
+    Word,
+    Thread,
 }

@@ -34,6 +34,7 @@ data class FeedPostUi(
     val hashtags: List<String> = emptyList(),
     val replyToAuthorHandle: String? = null,
     val isBookmarked: Boolean = false,
+    val isThreadMuted: Boolean = false,
     val eventZaps: List<EventZapUiModel> = emptyList(),
     val authorLegendaryCustomization: LegendaryCustomization? = null,
     val authorBlossoms: List<String> = emptyList(),
@@ -72,6 +73,7 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
         rawNostrEventJson = this.rawNostrEvent,
         replyToAuthorHandle = this.replyToAuthor?.handle ?: this.replyToAuthor?.authorId?.asEllipsizedNpub(),
         isBookmarked = this.bookmark != null,
+        isThreadMuted = this.isThreadMuted,
         eventZaps = this.eventZaps
             .map { it.asEventZapUiModel() }
             .sortedWith(EventZapUiModel.DefaultComparator),
