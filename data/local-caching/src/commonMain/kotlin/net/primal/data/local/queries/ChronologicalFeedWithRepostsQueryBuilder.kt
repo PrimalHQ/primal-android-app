@@ -5,6 +5,7 @@ import androidx.room.RoomRawQuery
 class ChronologicalFeedWithRepostsQueryBuilder(
     private val feedSpec: String,
     private val userPubkey: String,
+    private val allowMutedThreads: Boolean,
 ) : FeedQueryBuilder {
 
     companion object {
@@ -36,7 +37,7 @@ class ChronologicalFeedWithRepostsQueryBuilder(
             LEFT JOIN MutedItemData AS MutedUser ON MutedUser.item = PostData.authorId AND MutedUser.ownerId = ?
             LEFT JOIN MutedItemData AS MutedThread ON MutedThread.item = PostData.postId AND MutedThread.ownerId = ?
             WHERE FeedPostDataCrossRef.feedSpec = ? AND FeedPostDataCrossRef.ownerId = ? 
-                AND isAuthorMuted = 0 AND isThreadMuted = 0
+                AND isAuthorMuted = 0 AND (isThreadMuted = 0 OR ?)
 
             UNION ALL
 
@@ -68,7 +69,7 @@ class ChronologicalFeedWithRepostsQueryBuilder(
             LEFT JOIN MutedItemData AS MutedUser ON MutedUser.item = PostData.authorId AND MutedUser.ownerId = ?
             LEFT JOIN MutedItemData AS MutedThread ON MutedThread.item = PostData.postId AND MutedThread.ownerId = ?
             WHERE FeedPostDataCrossRef.feedSpec = ? AND FeedPostDataCrossRef.ownerId = ? 
-                AND isAuthorMuted = 0 AND isThreadMuted = 0
+                AND isAuthorMuted = 0 AND (isThreadMuted = 0 OR ?)
         """
     }
 
@@ -85,11 +86,13 @@ class ChronologicalFeedWithRepostsQueryBuilder(
                 query.bindText(index = 3, value = userPubkey)
                 query.bindText(index = 4, value = feedSpec)
                 query.bindText(index = 5, value = userPubkey)
-                query.bindText(index = 6, value = userPubkey)
+                query.bindBoolean(index = 6, value = allowMutedThreads)
                 query.bindText(index = 7, value = userPubkey)
                 query.bindText(index = 8, value = userPubkey)
-                query.bindText(index = 9, value = feedSpec)
-                query.bindText(index = 10, value = userPubkey)
+                query.bindText(index = 9, value = userPubkey)
+                query.bindText(index = 10, value = feedSpec)
+                query.bindText(index = 11, value = userPubkey)
+                query.bindBoolean(index = 12, value = allowMutedThreads)
             },
         )
     }
@@ -103,12 +106,14 @@ class ChronologicalFeedWithRepostsQueryBuilder(
                 query.bindText(index = 3, value = userPubkey)
                 query.bindText(index = 4, value = feedSpec)
                 query.bindText(index = 5, value = userPubkey)
-                query.bindText(index = 6, value = userPubkey)
+                query.bindBoolean(index = 6, value = allowMutedThreads)
                 query.bindText(index = 7, value = userPubkey)
                 query.bindText(index = 8, value = userPubkey)
-                query.bindText(index = 9, value = feedSpec)
-                query.bindText(index = 10, value = userPubkey)
-                query.bindInt(index = 11, value = limit)
+                query.bindText(index = 9, value = userPubkey)
+                query.bindText(index = 10, value = feedSpec)
+                query.bindText(index = 11, value = userPubkey)
+                query.bindBoolean(index = 12, value = allowMutedThreads)
+                query.bindInt(index = 13, value = limit)
             },
         )
     }
@@ -122,12 +127,14 @@ class ChronologicalFeedWithRepostsQueryBuilder(
                 query.bindText(index = 3, value = userPubkey)
                 query.bindText(index = 4, value = feedSpec)
                 query.bindText(index = 5, value = userPubkey)
-                query.bindText(index = 6, value = userPubkey)
+                query.bindBoolean(index = 6, value = allowMutedThreads)
                 query.bindText(index = 7, value = userPubkey)
                 query.bindText(index = 8, value = userPubkey)
-                query.bindText(index = 9, value = feedSpec)
-                query.bindText(index = 10, value = userPubkey)
-                query.bindInt(index = 11, value = limit)
+                query.bindText(index = 9, value = userPubkey)
+                query.bindText(index = 10, value = feedSpec)
+                query.bindText(index = 11, value = userPubkey)
+                query.bindBoolean(index = 12, value = allowMutedThreads)
+                query.bindInt(index = 13, value = limit)
             },
         )
     }

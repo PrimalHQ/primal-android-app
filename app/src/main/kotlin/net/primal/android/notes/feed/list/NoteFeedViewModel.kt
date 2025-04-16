@@ -47,17 +47,22 @@ import timber.log.Timber
 @HiltViewModel(assistedFactory = NoteFeedViewModel.Factory::class)
 class NoteFeedViewModel @AssistedInject constructor(
     @Assisted private val feedSpec: String,
+    @Assisted private val allowMutedThreads: Boolean,
     private val feedRepository: FeedRepository,
     private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
 
     @AssistedFactory
     interface Factory {
-        fun create(feedSpec: String): NoteFeedViewModel
+        fun create(feedSpec: String, allowMutedThreads: Boolean): NoteFeedViewModel
     }
 
     private fun buildFeedByDirective(feedSpec: String) =
-        feedRepository.feedBySpec(userId = activeAccountStore.activeUserId(), feedSpec = feedSpec)
+        feedRepository.feedBySpec(
+            userId = activeAccountStore.activeUserId(),
+            feedSpec = feedSpec,
+            allowMutedThreads = allowMutedThreads,
+        )
             .map { it.map { feedNote -> feedNote.asFeedPostUi() } }
             .cachedIn(viewModelScope)
 
