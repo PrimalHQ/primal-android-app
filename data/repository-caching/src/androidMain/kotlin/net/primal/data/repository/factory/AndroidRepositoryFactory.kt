@@ -21,7 +21,7 @@ import net.primal.data.repository.feeds.FeedsRepositoryImpl
 import net.primal.data.repository.importer.CachingImportRepositoryImpl
 import net.primal.data.repository.messages.ChatRepositoryImpl
 import net.primal.data.repository.messages.processors.MessagesProcessor
-import net.primal.data.repository.mute.MutedUserRepositoryImpl
+import net.primal.data.repository.mute.MutedItemRepositoryImpl
 import net.primal.data.repository.notifications.NotificationRepositoryImpl
 import net.primal.data.repository.profile.ProfileRepositoryImpl
 import net.primal.domain.bookmarks.PublicBookmarksRepository
@@ -33,12 +33,12 @@ import net.primal.domain.feeds.FeedsRepository
 import net.primal.domain.global.CachingImportRepository
 import net.primal.domain.links.EventUriRepository
 import net.primal.domain.messages.ChatRepository
+import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.zaps.NostrZapperFactory
 import net.primal.domain.notifications.NotificationRepository
 import net.primal.domain.posts.FeedRepository
-import net.primal.domain.profile.MutedUserRepository
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.reads.ArticleRepository
@@ -170,11 +170,11 @@ object AndroidRepositoryFactory : RepositoryFactory {
         )
     }
 
-    override fun createMutedUserRepository(
+    override fun createMutedItemRepository(
         cachingPrimalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,
-    ): MutedUserRepository {
-        return MutedUserRepositoryImpl(
+    ): MutedItemRepository {
+        return MutedItemRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             database = cachingDatabase,
             settingsApi = PrimalApiServiceFactory.createSettingsApi(cachingPrimalApiClient),

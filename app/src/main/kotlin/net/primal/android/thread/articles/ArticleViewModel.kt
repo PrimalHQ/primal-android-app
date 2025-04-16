@@ -17,11 +17,11 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.bookmarks.BookmarkType
 import net.primal.domain.bookmarks.PublicBookmarksRepository
+import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.PublicBookmarksNotFoundException
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.publisher.MissingRelaysException
-import net.primal.domain.profile.MutedUserRepository
 import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
 
@@ -29,7 +29,7 @@ import timber.log.Timber
 class ArticleViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val profileRepository: ProfileRepository,
-    private val mutedUserRepository: MutedUserRepository,
+    private val mutedItemRepository: MutedItemRepository,
     private val bookmarksRepository: PublicBookmarksRepository,
 ) : ViewModel() {
 
@@ -60,7 +60,7 @@ class ArticleViewModel @Inject constructor(
     private fun mute(uiEvent: UiEvent.MuteAction) =
         viewModelScope.launch {
             try {
-                mutedUserRepository.muteUserAndPersistMuteList(
+                mutedItemRepository.muteUserAndPersistMuteList(
                     userId = activeAccountStore.activeUserId(),
                     mutedUserId = uiEvent.userId,
                 )

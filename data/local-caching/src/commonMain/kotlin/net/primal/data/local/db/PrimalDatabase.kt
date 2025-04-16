@@ -28,6 +28,8 @@ import net.primal.data.local.dao.messages.DirectMessageDao
 import net.primal.data.local.dao.messages.DirectMessageData
 import net.primal.data.local.dao.messages.MessageConversationDao
 import net.primal.data.local.dao.messages.MessageConversationData
+import net.primal.data.local.dao.mutes.MutedItemDao
+import net.primal.data.local.dao.mutes.MutedItemData
 import net.primal.data.local.dao.notes.FeedPostDao
 import net.primal.data.local.dao.notes.FeedPostDataCrossRef
 import net.primal.data.local.dao.notes.FeedPostDataCrossRefDao
@@ -39,8 +41,6 @@ import net.primal.data.local.dao.notes.RepostDao
 import net.primal.data.local.dao.notes.RepostData
 import net.primal.data.local.dao.notifications.NotificationDao
 import net.primal.data.local.dao.notifications.NotificationData
-import net.primal.data.local.dao.profiles.MutedUserDao
-import net.primal.data.local.dao.profiles.MutedUserData
 import net.primal.data.local.dao.profiles.ProfileData
 import net.primal.data.local.dao.profiles.ProfileDataDao
 import net.primal.data.local.dao.profiles.ProfileStats
@@ -78,7 +78,7 @@ import net.primal.data.local.serialization.ProfileTypeConverters
         NoteConversationCrossRef::class,
         TrendingTopic::class,
         NotificationData::class,
-        MutedUserData::class,
+        MutedItemData::class,
         DirectMessageData::class,
         MessageConversationData::class,
         PublicBookmark::class,
@@ -87,7 +87,7 @@ import net.primal.data.local.serialization.ProfileTypeConverters
         ArticleFeedCrossRef::class,
         HighlightData::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -132,7 +132,7 @@ abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun notifications(): NotificationDao
 
-    abstract fun mutedUsers(): MutedUserDao
+    abstract fun mutedItems(): MutedItemDao
 
     abstract fun messages(): DirectMessageDao
 

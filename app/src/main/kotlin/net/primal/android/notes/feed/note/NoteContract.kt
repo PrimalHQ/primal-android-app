@@ -32,8 +32,16 @@ interface NoteContract {
             val zapDescription: String? = null,
         ) : UiEvent()
 
-        data class MuteAction(
+        data class MuteUserAction(
             val userId: String,
+        ) : UiEvent()
+
+        data class MuteThreadAction(
+            val postId: String,
+        ) : UiEvent()
+
+        data class UnmuteThreadAction(
+            val postId: String,
         ) : UiEvent()
 
         data class ReportAbuse(
