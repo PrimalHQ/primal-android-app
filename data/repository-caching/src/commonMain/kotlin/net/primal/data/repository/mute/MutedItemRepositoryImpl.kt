@@ -61,6 +61,18 @@ class MutedItemRepositoryImpl(
             minus(MutedItemData(item = unmutedUserId, ownerId = userId, type = MutedItemType.User))
         }
 
+    override suspend fun muteThreadAndPersistMuteList(userId: String, postId: String) {
+        updateAndPersistMuteList(userId = userId) {
+            plus(MutedItemData(item = postId, ownerId = userId, type = MutedItemType.Thread))
+        }
+    }
+
+    override suspend fun unmuteThreadAndPersistMuteList(userId: String, postId: String) {
+        updateAndPersistMuteList(userId = userId) {
+            minus(MutedItemData(item = postId, ownerId = userId, type = MutedItemType.Thread))
+        }
+    }
+
     private suspend fun updateAndPersistMuteList(
         userId: String,
         reducer: Set<MutedItemData>.() -> Set<MutedItemData>,

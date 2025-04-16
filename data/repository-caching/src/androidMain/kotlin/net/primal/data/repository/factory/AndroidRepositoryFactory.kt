@@ -170,7 +170,6 @@ object AndroidRepositoryFactory : RepositoryFactory {
         )
     }
 
-
     override fun createMutedItemRepository(
         cachingPrimalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,

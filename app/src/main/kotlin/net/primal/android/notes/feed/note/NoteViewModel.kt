@@ -100,7 +100,9 @@ class NoteViewModel @AssistedInject constructor(
                     is UiEvent.ReportAbuse -> reportAbuse(it)
                     is UiEvent.RepostAction -> repostPost(it)
                     is UiEvent.ZapAction -> zapPost(it)
-                    is UiEvent.MuteAction -> mute(it)
+                    is UiEvent.MuteUserAction -> muteUser(it)
+                    is UiEvent.MuteThreadAction -> toggleMuteThread(postId = it.postId, isThreadMuted = false)
+                    is UiEvent.UnmuteThreadAction -> toggleMuteThread(postId = it.postId, isThreadMuted = true)
                     is UiEvent.BookmarkAction -> handleBookmark(it)
                     is UiEvent.DismissBookmarkConfirmation -> dismissBookmarkConfirmation()
                     UiEvent.DismissError -> setState { copy(error = null) }
@@ -188,7 +190,7 @@ class NoteViewModel @AssistedInject constructor(
             }
         }
 
-    private fun mute(action: UiEvent.MuteAction) =
+    private fun muteUser(action: UiEvent.MuteUserAction) =
         viewModelScope.launch {
             try {
                 mutedItemRepository.muteUserAndPersistMuteList(
@@ -207,6 +209,46 @@ class NoteViewModel @AssistedInject constructor(
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToMuteUser(error)) }
+            } catch (error: MissingRelaysException) {
+                Timber.w(error)
+                setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
+            }
+        }
+
+    private fun toggleMuteThread(postId: String, isThreadMuted: Boolean) =
+        viewModelScope.launch {
+            try {
+                if (isThreadMuted) {
+                    mutedItemRepository.unmuteThreadAndPersistMuteList(
+                        postId = postId,
+                        userId = activeAccountStore.activeUserId(),
+                    )
+                } else {
+                    mutedItemRepository.muteThreadAndPersistMuteList(
+                        postId = postId,
+                        userId = activeAccountStore.activeUserId(),
+                    )
+                }
+            } catch (error: WssException) {
+                Timber.w(error)
+                if (isThreadMuted) {
+                    setState { copy(error = UiError.FailedToUnmuteThread(error)) }
+                } else {
+                    setState { copy(error = UiError.FailedToMuteThread(error)) }
+                }
+            } catch (error: SigningKeyNotFoundException) {
+                Timber.w(error)
+                setState { copy(error = UiError.MissingPrivateKey) }
+            } catch (error: SigningRejectedException) {
+                Timber.w(error)
+                setState { copy(error = UiError.NostrSignUnauthorized) }
+            } catch (error: NostrPublishException) {
+                Timber.w(error)
+                if (isThreadMuted) {
+                    setState { copy(error = UiError.FailedToUnmuteThread(error)) }
+                } else {
+                    setState { copy(error = UiError.FailedToMuteThread(error)) }
+                }
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }

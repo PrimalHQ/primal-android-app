@@ -288,6 +288,7 @@ private fun FeedNoteCard(
                 noteRawData = data.rawNostrEventJson,
                 authorId = data.authorId,
                 isBookmarked = data.isBookmarked,
+                isThreadMuted = data.isThreadMuted,
                 relayHints = state.relayHints,
                 enabled = noteOptionsMenuEnabled,
                 noteGraphicsLayer = graphicsLayer,
@@ -295,7 +296,13 @@ private fun FeedNoteCard(
                     eventPublisher(UiEvent.BookmarkAction(noteId = data.postId))
                 },
                 onMuteUserClick = {
-                    eventPublisher(UiEvent.MuteAction(userId = data.authorId))
+                    eventPublisher(UiEvent.MuteUserAction(userId = data.authorId))
+                },
+                onMuteThreadClick = {
+                    eventPublisher(UiEvent.MuteThreadAction(postId = data.postId))
+                },
+                onUnmuteThreadClick = {
+                    eventPublisher(UiEvent.UnmuteThreadAction(postId = data.postId))
                 },
                 onReportContentClick = {
                     reportDialogVisible = true
