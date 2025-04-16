@@ -106,6 +106,8 @@ fun MutedSettingsScreen(
                         MuteHashtags(
                             modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
                             paddingValues = paddingValues,
+                            state = state,
+                            eventPublisher = eventPublisher,
                         )
                     }
 
