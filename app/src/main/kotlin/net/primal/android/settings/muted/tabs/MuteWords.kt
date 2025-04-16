@@ -28,6 +28,7 @@ import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.settings.muted.MutedSettingsContract
+import net.primal.android.settings.muted.ui.MutedListItem
 import net.primal.android.settings.muted.ui.MutedSettingsBottomSection
 import net.primal.android.theme.AppTheme
 
@@ -56,7 +57,7 @@ fun MuteWords(
                 key = { it },
                 contentType = { "MutedWord" },
             ) { mutedWord ->
-                MutedWordListItem(
+                MutedListItem(
                     item = mutedWord,
                     onUnmuteClick = {
                         eventPublisher(
@@ -101,41 +102,4 @@ fun MuteWords(
             ),
         )
     }
-}
-
-@Composable
-fun MutedWordListItem(item: String, onUnmuteClick: (String) -> Unit) {
-    ListItem(
-        colors = ListItemDefaults.colors(
-            containerColor = AppTheme.colorScheme.surfaceVariant,
-        ),
-        headlineContent = {
-            Text(
-                text = item,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = AppTheme.typography.headlineLarge,
-                fontSize = 14.sp,
-            )
-        },
-        trailingContent = {
-            PrimalFilledButton(
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .height(36.dp),
-                containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                contentColor = AppTheme.colorScheme.onSurface,
-                textStyle = AppTheme.typography.titleMedium.copy(
-                    lineHeight = 18.sp,
-                ),
-                onClick = { onUnmuteClick(item) },
-            ) {
-                Text(
-                    text = stringResource(
-                        id = R.string.settings_muted_accounts_unmute_button,
-                    ).lowercase(),
-                )
-            }
-        },
-    )
 }
