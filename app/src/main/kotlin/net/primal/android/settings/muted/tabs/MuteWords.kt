@@ -30,7 +30,7 @@ fun MuteWords(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(all = 0.dp),
 ) {
-    var newMuteWord by remember { mutableStateOf("") }
+    var newMutedWord by remember { mutableStateOf("") }
 
     Column(
         modifier = modifier
@@ -75,19 +75,19 @@ fun MuteWords(
         }
 
         MutedSettingsBottomSection(
-            value = newMuteWord,
-            onValueChange = { newMuteWord = it },
+            value = newMutedWord,
+            onValueChange = { newMutedWord = it },
             sending = false,
             onMute = {
                 eventPublisher(
-                    MutedSettingsContract.UiEvent.MuteWord(newMuteWord),
+                    MutedSettingsContract.UiEvent.MuteWord(newMutedWord),
                 )
-                newMuteWord = ""
+                newMutedWord = ""
             },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 12.dp),
-            sendEnabled = newMuteWord.isNotBlank(),
+            sendEnabled = newMutedWord.isNotBlank(),
             textFieldPlaceholder = stringResource(
                 id = R.string.settings_muted_words_mute_new_word,
             ),
