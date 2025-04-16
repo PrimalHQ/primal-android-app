@@ -1,4 +1,4 @@
-package net.primal.android.settings.muted.list
+package net.primal.android.settings.muted
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,8 +12,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.settings.muted.list.MutedSettingsContract.UiEvent
-import net.primal.android.settings.muted.list.MutedSettingsContract.UiState
+import net.primal.android.settings.muted.MutedSettingsContract.UiEvent
+import net.primal.android.settings.muted.MutedSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
@@ -54,16 +54,63 @@ class MutedSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.UnmuteEvent -> unmuteEventHandler(it)
-                    is UiEvent.MuteHashtags -> {}
-                    is UiEvent.MuteThreads -> {}
-                    is UiEvent.MuteWord -> {}
-                    is UiEvent.UnmuteHashtags -> {}
-                    is UiEvent.UnmuteThreads -> {}
-                    is UiEvent.UnmuteUser -> {}
-                    is UiEvent.UnmuteWord -> {}
+                    is UiEvent.MuteHashtag -> muteHashtag(it.hashtag)
+                    is UiEvent.MuteThread -> muteThread(it.threadId)
+                    is UiEvent.MuteWord -> muteWord(it.word)
+                    is UiEvent.UnmuteHashtag -> unmuteHashtag(it.hashtag)
+                    is UiEvent.UnmuteThread -> unmuteThread(it.threadId)
+                    is UiEvent.UnmuteUser -> unmuteUser(it)
+                    is UiEvent.UnmuteWord -> unmuteWord(it.word)
                 }
             }
+        }
+
+    private fun muteHashtag(hashtag: String) =
+        setState {
+            if (mutedHashtags.contains(hashtag)) {
+                this
+            } else {
+                copy(mutedHashtags = mutedHashtags + hashtag)
+            }
+        }
+
+    private fun unmuteHashtag(hashtag: String) =
+        setState {
+            copy(
+                mutedHashtags = mutedHashtags.filterNot { it == hashtag },
+            )
+        }
+
+    private fun muteThread(thread: String) =
+        setState {
+            if (mutedThreads.contains(thread)) {
+                this
+            } else {
+                copy(mutedThreads = mutedThreads + thread)
+            }
+        }
+
+    private fun unmuteThread(thread: String) =
+        setState {
+            copy(
+                mutedThreads = mutedThreads.filterNot { it == thread },
+            )
+        }
+
+    private fun muteWord(word: String) =
+        setState {
+            if (mutedWords.contains(word)) {
+                this
+            } else {
+                copy(mutedWords = mutedWords + word)
+            }
+        }
+
+    private fun unmuteWord(word: String) =
+        setState {
+            copy(
+                mutedWords = mutedWords.filterNot { it == word },
+            )
         }
 
     private fun fetchLatestMuteList() =
@@ -79,7 +126,7 @@ class MutedSettingsViewModel @Inject constructor(
             }
         }
 
-    private fun unmuteEventHandler(event: UiEvent.UnmuteEvent) =
+    private fun unmuteUser(event: UiEvent.UnmuteUser) =
         viewModelScope.launch {
             try {
                 withContext(dispatcherProvider.io()) {

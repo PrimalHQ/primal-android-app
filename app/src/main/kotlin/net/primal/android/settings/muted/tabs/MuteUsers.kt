@@ -1,4 +1,4 @@
-package net.primal.android.settings.muted.list
+package net.primal.android.settings.muted.tabs
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,6 +24,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.settings.muted.MutedSettingsContract
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -49,7 +50,7 @@ fun MuteUsers(
                 item = mutedUser,
                 onUnmuteClick = {
                     eventPublisher(
-                        MutedSettingsContract.UiEvent.UnmuteEvent(mutedUser.pubkey),
+                        MutedSettingsContract.UiEvent.UnmuteUser(mutedUser.pubkey),
                     )
                 },
                 onProfileClick = onProfileClick,

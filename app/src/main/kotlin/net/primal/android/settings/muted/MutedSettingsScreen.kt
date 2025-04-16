@@ -1,4 +1,4 @@
-package net.primal.android.settings.muted.list
+package net.primal.android.settings.muted
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.pager.HorizontalPager
@@ -18,6 +18,16 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.settings.muted.tabs.HASHTAGS_INDEX
+import net.primal.android.settings.muted.tabs.MUTE_SETTINGS_TAB_COUNT
+import net.primal.android.settings.muted.tabs.MuteHashtags
+import net.primal.android.settings.muted.tabs.MuteThreads
+import net.primal.android.settings.muted.tabs.MuteUsers
+import net.primal.android.settings.muted.tabs.MuteWords
+import net.primal.android.settings.muted.tabs.MutedSettingsTabs
+import net.primal.android.settings.muted.tabs.THREADS_INDEX
+import net.primal.android.settings.muted.tabs.USERS_INDEX
+import net.primal.android.settings.muted.tabs.WORDS_INDEX
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.domain.links.CdnImage
@@ -87,6 +97,8 @@ fun MutedSettingsScreen(
                         MuteWords(
                             modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
                             paddingValues = paddingValues,
+                            state = state,
+                            eventPublisher = eventPublisher,
                         )
                     }
 

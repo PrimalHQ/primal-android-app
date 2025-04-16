@@ -1,4 +1,4 @@
-package net.primal.android.settings.muted.list
+package net.primal.android.settings.muted.tabs
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
