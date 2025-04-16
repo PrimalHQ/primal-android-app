@@ -39,10 +39,18 @@ internal class FeedRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
 ) : FeedRepository {
 
-    override fun feedBySpec(userId: String, feedSpec: String): Flow<PagingData<FeedPostDO>> {
+    override fun feedBySpec(
+        userId: String,
+        feedSpec: String,
+        allowMutedThreads: Boolean,
+    ): Flow<PagingData<FeedPostDO>> {
         return createPager(userId = userId, feedSpec = feedSpec) {
             database.feedPosts().feedQuery(
-                query = feedQueryBuilder(userId = userId, feedSpec = feedSpec).feedQuery(),
+                query = feedQueryBuilder(
+                    userId = userId,
+                    feedSpec = feedSpec,
+                    allowMutedThreads = allowMutedThreads,
+                ).feedQuery(),
             )
         }.flow.map { it.map { feedPostPO -> feedPostPO.mapAsFeedPostDO() } }
     }
@@ -50,12 +58,14 @@ internal class FeedRepositoryImpl(
     override suspend fun findNewestPosts(
         userId: String,
         feedDirective: String,
+        allowMutedThreads: Boolean,
         limit: Int,
     ) = withContext(dispatcherProvider.io()) {
         database.feedPosts().newestFeedPosts(
             query = feedQueryBuilder(
                 userId = userId,
                 feedSpec = feedDirective,
+                allowMutedThreads = allowMutedThreads,
             ).newestFeedPostsQuery(limit = limit),
         ).map { it.mapAsFeedPostDO() }
     }
@@ -167,16 +177,22 @@ internal class FeedRepositoryImpl(
         pagingSourceFactory = pagingSourceFactory,
     )
 
-    private fun feedQueryBuilder(userId: String, feedSpec: String): FeedQueryBuilder =
+    private fun feedQueryBuilder(
+        userId: String,
+        feedSpec: String,
+        allowMutedThreads: Boolean,
+    ): FeedQueryBuilder =
         when {
             feedSpec.supportsNoteReposts() -> ChronologicalFeedWithRepostsQueryBuilder(
                 feedSpec = feedSpec,
                 userPubkey = userId,
+                allowMutedThreads = allowMutedThreads,
             )
 
             else -> ExploreFeedQueryBuilder(
                 feedSpec = feedSpec,
                 userPubkey = userId,
+                allowMutedThreads = allowMutedThreads,
             )
         }
 }

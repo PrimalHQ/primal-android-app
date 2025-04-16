@@ -5,6 +5,7 @@ import androidx.room.RoomRawQuery
 class ExploreFeedQueryBuilder(
     private val feedSpec: String,
     private val userPubkey: String,
+    private val allowMutedThreads: Boolean,
 ) : FeedQueryBuilder {
 
     companion object {
@@ -36,7 +37,7 @@ class ExploreFeedQueryBuilder(
             LEFT JOIN MutedItemData AS MutedUser ON MutedUser.item = PostData.authorId AND MutedUser.ownerId = ?
             LEFT JOIN MutedItemData AS MutedThread ON MutedThread.item = PostData.postId AND MutedThread.ownerId = ?
             WHERE FeedPostDataCrossRef.feedSpec = ? AND FeedPostDataCrossRef.ownerId = ? 
-                AND isAuthorMuted = 0 AND isThreadMuted = 0
+                AND isAuthorMuted = 0 AND (isThreadMuted = 0 OR ?)
         """
     }
 
@@ -57,6 +58,7 @@ class ExploreFeedQueryBuilder(
                 query.bindText(index = 3, userPubkey)
                 query.bindText(index = 4, feedSpec)
                 query.bindText(index = 5, userPubkey)
+                query.bindBoolean(index = 6, value = allowMutedThreads)
             },
         )
     }
@@ -74,7 +76,8 @@ class ExploreFeedQueryBuilder(
                 query.bindText(index = 3, userPubkey)
                 query.bindText(index = 4, feedSpec)
                 query.bindText(index = 5, userPubkey)
-                query.bindInt(index = 6, limit)
+                query.bindBoolean(index = 6, value = allowMutedThreads)
+                query.bindInt(index = 7, limit)
             },
         )
     }
@@ -92,7 +95,8 @@ class ExploreFeedQueryBuilder(
                 query.bindText(index = 3, userPubkey)
                 query.bindText(index = 4, feedSpec)
                 query.bindText(index = 5, userPubkey)
-                query.bindInt(index = 6, limit)
+                query.bindBoolean(index = 6, value = allowMutedThreads)
+                query.bindInt(index = 7, limit)
             },
         )
     }
