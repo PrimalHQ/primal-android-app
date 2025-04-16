@@ -12,10 +12,10 @@ import kotlinx.coroutines.flow.Flow
 interface MutedItemDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun upsertAll(data: Set<MutedItemData>)
+    suspend fun upsertAll(data: Set<MutedItemData>)
 
     @Query("DELETE FROM MutedItemData WHERE ownerId = :ownerId")
-    fun deleteAllByOwnerId(ownerId: String)
+    suspend fun deleteAllByOwnerId(ownerId: String)
 
     @Transaction
     @RewriteQueriesToDropUnusedColumns
