@@ -336,8 +336,10 @@ private fun NavGraphBuilder.mutedAccounts(route: String, navController: NavContr
         LockToOrientationPortrait()
         MutedSettingsScreen(
             viewModel = viewModel,
+            noteCallbacks = noteCallbacksHandler(navController),
             onClose = { navController.navigateUp() },
             onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+            onGoToWallet = { navController.navigateToWallet() },
         )
     }
 

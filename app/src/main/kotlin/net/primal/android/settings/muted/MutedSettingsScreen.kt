@@ -18,6 +18,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.settings.muted.tabs.HASHTAGS_INDEX
 import net.primal.android.settings.muted.tabs.MUTE_SETTINGS_TAB_COUNT
 import net.primal.android.settings.muted.tabs.MuteHashtags
@@ -35,8 +36,10 @@ import net.primal.domain.links.CdnImage
 @Composable
 fun MutedSettingsScreen(
     viewModel: MutedSettingsViewModel,
+    noteCallbacks: NoteCallbacks,
     onProfileClick: (String) -> Unit,
     onClose: () -> Unit,
+    onGoToWallet: () -> Unit,
 ) {
     val state = viewModel.state.collectAsState()
     MutedSettingsScreen(
@@ -44,6 +47,8 @@ fun MutedSettingsScreen(
         eventPublisher = viewModel::setEvent,
         onProfileClick = onProfileClick,
         onClose = onClose,
+        noteCallbacks = noteCallbacks,
+        onGoToWallet = onGoToWallet,
     )
 }
 
@@ -51,6 +56,8 @@ fun MutedSettingsScreen(
 @Composable
 fun MutedSettingsScreen(
     state: MutedSettingsContract.UiState,
+    noteCallbacks: NoteCallbacks,
+    onGoToWallet: () -> Unit,
     eventPublisher: (MutedSettingsContract.UiEvent) -> Unit,
     onProfileClick: (String) -> Unit,
     onClose: () -> Unit,
@@ -115,6 +122,10 @@ fun MutedSettingsScreen(
                         MuteThreads(
                             modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
                             paddingValues = paddingValues,
+                            state = state,
+                            eventPublisher = eventPublisher,
+                            noteCallbacks = noteCallbacks,
+                            onGoToWallet = onGoToWallet,
                         )
                     }
                 }
@@ -170,6 +181,8 @@ fun PreviewMutedScreen() {
             eventPublisher = {},
             onProfileClick = {},
             onClose = {},
+            onGoToWallet = {},
+            noteCallbacks = NoteCallbacks(),
         )
     }
 }

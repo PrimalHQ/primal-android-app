@@ -65,6 +65,7 @@ import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
+import timber.log.Timber
 
 @Composable
 fun NoteFeedList(
@@ -85,6 +86,7 @@ fun NoteFeedList(
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
+    Timber.tag("feedSpec").i(feedSpec)
     val viewModelKey by remember { mutableStateOf(if (!previewMode) feedSpec else UUID.randomUUID().toString()) }
     val viewModel = hiltViewModel<NoteFeedViewModel, NoteFeedViewModel.Factory>(key = viewModelKey) { factory ->
         factory.create(feedSpec = feedSpec)

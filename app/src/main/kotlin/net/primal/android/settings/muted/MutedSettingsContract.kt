@@ -8,6 +8,7 @@ interface MutedSettingsContract {
         val mutedWords: List<String> = listOf<String>("sample1", "sample2", "sample3"),
         val mutedHashtags: List<String> = listOf<String>("#example1", "#example2", "#example3"),
         val mutedThreads: List<String> = emptyList(),
+        val defaultMuteThreadsFeedSpec: String = "{\"id\":\"latest\",\"kind\":\"notes\"}",
         val error: MutedSettingsError? = null,
     ) {
         sealed class MutedSettingsError {
