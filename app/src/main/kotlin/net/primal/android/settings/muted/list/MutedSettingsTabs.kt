@@ -14,6 +14,8 @@ import net.primal.android.R
 import net.primal.android.core.compose.PrimalSingleTab
 import net.primal.android.theme.AppTheme
 
+internal const val MUTE_SETTINGS_TAB_COUNT = 4
+
 internal const val USERS_INDEX = 0
 internal const val WORDS_INDEX = 1
 internal const val HASHTAGS_INDEX = 2

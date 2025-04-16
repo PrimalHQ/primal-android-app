@@ -14,5 +14,16 @@ interface MutedSettingsContract {
 
     sealed class UiEvent {
         data class UnmuteEvent(val pubkey: String) : UiEvent()
+
+        data class UnmuteUser(val pubkey: String) : UiEvent()
+
+        data class UnmuteWord(val pubkey: String) : UiEvent()
+        data class MuteWord(val pubkey: String) : UiEvent()
+
+        data class UnmuteHashtags(val pubkey: String) : UiEvent()
+        data class MuteHashtags(val pubkey: String) : UiEvent()
+
+        data class UnmuteThreads(val pubkey: String) : UiEvent()
+        data class MuteThreads(val pubkey: String) : UiEvent()
     }
 }

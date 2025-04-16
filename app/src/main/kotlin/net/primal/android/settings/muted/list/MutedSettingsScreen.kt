@@ -1,32 +1,19 @@
 package net.primal.android.settings.muted.list
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.background
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import net.primal.android.R
-import net.primal.android.core.compose.ListNoContent
-import net.primal.android.core.compose.NostrUserText
-import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
-import net.primal.android.core.compose.UniversalAvatarThumbnail
-import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
@@ -58,6 +45,9 @@ fun MutedSettingsScreen(
     onProfileClick: (String) -> Unit,
     onClose: () -> Unit,
 ) {
+    val pagerState = rememberPagerState { MUTE_SETTINGS_TAB_COUNT }
+    val scope = rememberCoroutineScope()
+
     Scaffold(
         modifier = Modifier,
         topBar = {
@@ -66,102 +56,54 @@ fun MutedSettingsScreen(
                 navigationIcon = PrimalIcons.ArrowBack,
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 onNavigationIconClick = onClose,
+                footer = {
+                    MutedSettingsTabs(
+                        modifier = Modifier,
+                        selectedTabIndex = pagerState.currentPage,
+                        onUsersTabClick = { scope.launch { pagerState.animateScrollToPage(USERS_INDEX) } },
+                        onWordsTabClick = { scope.launch { pagerState.animateScrollToPage(WORDS_INDEX) } },
+                        onHashtagsTabClick = { scope.launch { pagerState.animateScrollToPage(HASHTAGS_INDEX) } },
+                        onThreadsTabClick = { scope.launch { pagerState.animateScrollToPage(THREADS_INDEX) } },
+                    )
+                },
             )
         },
         content = { paddingValues ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .imePadding(),
-            ) {
-                items(
-                    items = state.mutedUsers,
-                    key = { it.pubkey },
-                    contentType = { "MutedUser" },
-                ) { mutedUser ->
-                    MutedUserListItem(
-                        item = mutedUser,
-                        onUnmuteClick = {
-                            eventPublisher(
-                                MutedSettingsContract.UiEvent.UnmuteEvent(mutedUser.pubkey),
-                            )
-                        },
-                        onProfileClick = onProfileClick,
-                    )
-                    PrimalDivider()
-                }
+            HorizontalPager(
+                state = pagerState,
+            ) { pageIndex ->
+                when (pageIndex) {
+                    USERS_INDEX -> {
+                        MuteUsers(
+                            modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
+                            paddingValues = paddingValues,
+                            state = state,
+                            eventPublisher = eventPublisher,
+                            onProfileClick = onProfileClick,
+                        )
+                    }
 
-                if (state.mutedUsers.isEmpty()) {
-                    item(contentType = "NoContent") {
-                        ListNoContent(
-                            modifier = Modifier.fillParentMaxSize(),
-                            noContentText = stringResource(
-                                id = R.string.settings_muted_accounts_no_content,
-                            ),
-                            refreshButtonVisible = false,
+                    WORDS_INDEX -> {
+                        MuteWords(
+                            modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
+                            paddingValues = paddingValues,
+                        )
+                    }
+
+                    HASHTAGS_INDEX -> {
+                        MuteHashtags(
+                            modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
+                            paddingValues = paddingValues,
+                        )
+                    }
+
+                    THREADS_INDEX -> {
+                        MuteThreads(
+                            modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
+                            paddingValues = paddingValues,
                         )
                     }
                 }
-            }
-        },
-    )
-}
-
-@Composable
-fun MutedUserListItem(
-    item: ProfileDetailsUi,
-    onUnmuteClick: (String) -> Unit,
-    onProfileClick: (String) -> Unit,
-) {
-    ListItem(
-        colors = ListItemDefaults.colors(
-            containerColor = AppTheme.colorScheme.surfaceVariant,
-        ),
-        leadingContent = {
-            UniversalAvatarThumbnail(
-                avatarCdnImage = item.avatarCdnImage,
-                onClick = { onProfileClick(item.pubkey) },
-                legendaryCustomization = item.premiumDetails?.legendaryCustomization,
-            )
-        },
-        headlineContent = {
-            NostrUserText(
-                displayName = item.authorDisplayName,
-                fontSize = 14.sp,
-                internetIdentifier = item.internetIdentifier,
-                legendaryCustomization = item.premiumDetails?.legendaryCustomization,
-            )
-        },
-        supportingContent = {
-            if (!item.internetIdentifier.isNullOrEmpty()) {
-                Text(
-                    text = item.internetIdentifier,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = AppTheme.typography.bodyMedium,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                    fontSize = 14.sp,
-                )
-            }
-        },
-        trailingContent = {
-            PrimalFilledButton(
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .height(36.dp),
-                containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                contentColor = AppTheme.colorScheme.onSurface,
-                textStyle = AppTheme.typography.titleMedium.copy(
-                    lineHeight = 18.sp,
-                ),
-                onClick = { onUnmuteClick(item.pubkey) },
-            ) {
-                Text(
-                    text = stringResource(
-                        id = R.string.settings_muted_accounts_unmute_button,
-                    ).lowercase(),
-                )
             }
         },
     )

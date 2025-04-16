@@ -55,6 +55,13 @@ class MutedSettingsViewModel @Inject constructor(
             events.collect {
                 when (it) {
                     is UiEvent.UnmuteEvent -> unmuteEventHandler(it)
+                    is UiEvent.MuteHashtags -> {}
+                    is UiEvent.MuteThreads -> {}
+                    is UiEvent.MuteWord -> {}
+                    is UiEvent.UnmuteHashtags -> {}
+                    is UiEvent.UnmuteThreads -> {}
+                    is UiEvent.UnmuteUser -> {}
+                    is UiEvent.UnmuteWord -> {}
                 }
             }
         }

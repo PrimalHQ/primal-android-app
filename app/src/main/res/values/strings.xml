@@ -862,9 +862,12 @@
     <string name="settings_zaps_editor_value">Value</string>
     <string name="settings_zaps_editor_save">Save</string>
 
-    <string name="settings_muted_accounts_title">Muted Accounts</string>
+    <string name="settings_muted_accounts_title">Muted</string>
     <string name="settings_muted_accounts_unmute_button">Unmute</string>
     <string name="settings_muted_accounts_no_content">Your muted accounts will appear here.</string>
+    <string name="settings_muted_words_no_content">Your muted words will appear here.</string>
+    <string name="settings_muted_hashtags_no_content">Your muted hashtags will appear here.</string>
+    <string name="settings_muted_threads_no_content">Your muted threads will appear here.</string>
     <string name="settings_muted_users_tab">Users</string>
     <string name="settings_muted_words_tab">Words</string>
     <string name="settings_muted_hashtags_tab">Hashtags</string>
