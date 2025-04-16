@@ -865,6 +865,10 @@
     <string name="settings_muted_accounts_title">Muted Accounts</string>
     <string name="settings_muted_accounts_unmute_button">Unmute</string>
     <string name="settings_muted_accounts_no_content">Your muted accounts will appear here.</string>
+    <string name="settings_muted_users_tab">Users</string>
+    <string name="settings_muted_words_tab">Words</string>
+    <string name="settings_muted_hashtags_tab">Hashtags</string>
+    <string name="settings_muted_threads_tab">Threads</string>
 
     <string name="settings_media_uploads_title">Media Uploads</string>
     <string name="settings_media_uploads_blossom_server_section_title">Blossom Server</string>
