@@ -30,7 +30,9 @@ class FcmPushNotificationsTokenUpdater @Inject constructor(
             runCatching {
                 FirebaseMessaging.getInstance().token.await()
             }.getOrNull()?.let { token ->
-                val userIds = userAccountsStore.userAccounts.value.map { it.pubkey }
+                val userIds = userAccountsStore.userAccounts.value
+                    .filter { it.pushNotificationsEnabled }.map { it.pubkey }
+
                 val authorizationEvents = userIds.mapNotNull { userId ->
                     signAuthorizationEventOrNull(userId = userId, token = token)
                 }
