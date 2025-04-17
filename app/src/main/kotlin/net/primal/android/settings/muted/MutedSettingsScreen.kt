@@ -120,10 +120,8 @@ fun MutedSettingsScreen(
 
                     THREADS_INDEX -> {
                         MuteThreads(
-                            modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
                             paddingValues = paddingValues,
                             state = state,
-                            eventPublisher = eventPublisher,
                             noteCallbacks = noteCallbacks,
                             onGoToWallet = onGoToWallet,
                         )
