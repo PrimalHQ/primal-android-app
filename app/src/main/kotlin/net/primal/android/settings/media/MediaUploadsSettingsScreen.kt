@@ -3,19 +3,23 @@ package net.primal.android.settings.media
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
@@ -41,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.DeleteListItemImage
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalSwitch
@@ -176,10 +181,10 @@ private fun MediaUploadsLazyColumn(
 
         if (state.blossomMirrorEnabled) {
             if (isViewMode && state.mirrorBlossomServerUrls.isNotEmpty()) {
-                items(state.mirrorBlossomServerUrls) { server ->
-                    BlossomServerDestination(
-                        modifier = Modifier.padding(vertical = 8.dp),
-                        destinationUrl = server,
+                item {
+                    MirrorBlossomServerSection(
+                        mirrorBlossomServerUrls = state.mirrorBlossomServerUrls,
+                        onDisconnectMirrorBlossomServer = {},
                     )
                 }
             }
@@ -457,6 +462,75 @@ private fun BlossomServerDestination(
         },
         colors = colors,
     )
+}
+
+@Composable
+private fun MirrorBlossomServerDestination(
+    modifier: Modifier = Modifier,
+    destinationUrl: String,
+    onDisconnectMirrorBlossomServer: () -> Unit,
+    connected: Boolean = true,
+    colors: ListItemColors = ListItemDefaults.colors(
+        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+    ),
+) {
+    val success = AppTheme.extraColorScheme.successBright
+    val failed = AppTheme.colorScheme.error
+
+    ListItem(
+        modifier = modifier
+            .padding(horizontal = 16.dp)
+            .clip(AppTheme.shapes.medium),
+        leadingContent = {
+            Box(
+                modifier = Modifier
+                    .padding(start = 2.dp, top = 2.dp)
+                    .size(10.dp)
+                    .drawWithCache {
+                        this.onDrawWithContent {
+                            drawCircle(color = if (connected) success else failed)
+                        }
+                    },
+            )
+        },
+        headlineContent = {
+            Text(text = destinationUrl.removeHttpPrefix())
+        },
+        trailingContent = {
+            Row(
+                horizontalArrangement = Arrangement.End,
+            ) {
+                IconButton(
+                    modifier = Modifier.offset(x = 7.dp),
+                    onClick = onDisconnectMirrorBlossomServer,
+                ) {
+                    DeleteListItemImage()
+                }
+            }
+        },
+        colors = colors,
+    )
+}
+
+@Composable
+private fun MirrorBlossomServerSection(
+    mirrorBlossomServerUrls: List<String>,
+    onDisconnectMirrorBlossomServer: (String) -> Unit,
+    connected: Boolean = true,
+    modifier: Modifier = Modifier,
+    colors: ListItemColors = ListItemDefaults.colors(
+        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+    ),
+) {
+    mirrorBlossomServerUrls.forEach { server ->
+        MirrorBlossomServerDestination(
+            modifier = Modifier.padding(vertical = 8.dp),
+            destinationUrl = server,
+            onDisconnectMirrorBlossomServer = {
+                onDisconnectMirrorBlossomServer(server)
+            }
+        )
+    }
 }
 
 private fun String.removeHttpPrefix() = this.removePrefix("https://").removePrefix("http://")
