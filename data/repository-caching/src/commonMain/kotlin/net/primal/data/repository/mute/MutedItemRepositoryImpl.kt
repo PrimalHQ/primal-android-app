@@ -46,6 +46,16 @@ class MutedItemRepositoryImpl(
             ownerId = ownerId,
         )
 
+    override fun observeMutedHashtagsByOwnerId(ownerId: String) =
+        database.mutedItems()
+            .observeMutedItemsByType(ownerId = ownerId, type = MutedItemType.Hashtag)
+            .map { it.map { item -> item.item } }
+
+    override fun observeMutedWordsByOwnerId(ownerId: String) =
+        database.mutedItems()
+            .observeMutedItemsByType(ownerId = ownerId, type = MutedItemType.Word)
+            .map { it.map { item -> item.item } }
+
     override suspend fun fetchAndPersistMuteList(userId: String) {
         val muteList = fetchMuteListAndPersistProfiles(userId = userId)
         persistMuteList(ownerId = userId, muteList = muteList)
@@ -72,6 +82,26 @@ class MutedItemRepositoryImpl(
             minus(MutedItemData(item = postId, ownerId = userId, type = MutedItemType.Thread))
         }
     }
+
+    override suspend fun muteHashtagAndPersistMuteList(userId: String, hashtag: String) =
+        updateAndPersistMuteList(userId = userId) {
+            plus(MutedItemData(item = hashtag, ownerId = userId, type = MutedItemType.Hashtag))
+        }
+
+    override suspend fun unmuteHashtagAndPersistMuteList(userId: String, hashtag: String) =
+        updateAndPersistMuteList(userId = userId) {
+            minus(MutedItemData(item = hashtag, ownerId = userId, type = MutedItemType.Hashtag))
+        }
+
+    override suspend fun muteWordAndPersistMuteList(userId: String, word: String) =
+        updateAndPersistMuteList(userId = userId) {
+            plus(MutedItemData(item = word, ownerId = userId, type = MutedItemType.Word))
+        }
+
+    override suspend fun unmuteWordAndPersistMuteList(userId: String, word: String) =
+        updateAndPersistMuteList(userId = userId) {
+            minus(MutedItemData(item = word, ownerId = userId, type = MutedItemType.Word))
+        }
 
     private suspend fun updateAndPersistMuteList(
         userId: String,
