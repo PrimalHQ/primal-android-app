@@ -23,6 +23,7 @@ import net.primal.domain.bookmarks.BookmarkType
 import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.events.EventInteractionRepository
 import net.primal.domain.events.EventRelayHintsRepository
+import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.PublicBookmarksNotFoundException
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
@@ -31,7 +32,6 @@ import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.nostr.zaps.ZapFailureException
 import net.primal.domain.nostr.zaps.ZapRequestException
 import net.primal.domain.nostr.zaps.ZapTarget
-import net.primal.domain.profile.MutedUserRepository
 import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
 
@@ -42,7 +42,7 @@ class NoteViewModel @AssistedInject constructor(
     private val zapHandler: ZapHandler,
     private val eventInteractionRepository: EventInteractionRepository,
     private val profileRepository: ProfileRepository,
-    private val mutedUserRepository: MutedUserRepository,
+    private val mutedItemRepository: MutedItemRepository,
     private val bookmarksRepository: PublicBookmarksRepository,
     private val relayHintsRepository: EventRelayHintsRepository,
 ) : ViewModel() {
@@ -100,7 +100,9 @@ class NoteViewModel @AssistedInject constructor(
                     is UiEvent.ReportAbuse -> reportAbuse(it)
                     is UiEvent.RepostAction -> repostPost(it)
                     is UiEvent.ZapAction -> zapPost(it)
-                    is UiEvent.MuteAction -> mute(it)
+                    is UiEvent.MuteUserAction -> muteUser(it)
+                    is UiEvent.MuteThreadAction -> toggleMuteThread(postId = it.postId, isThreadMuted = false)
+                    is UiEvent.UnmuteThreadAction -> toggleMuteThread(postId = it.postId, isThreadMuted = true)
                     is UiEvent.BookmarkAction -> handleBookmark(it)
                     is UiEvent.DismissBookmarkConfirmation -> dismissBookmarkConfirmation()
                     UiEvent.DismissError -> setState { copy(error = null) }
@@ -188,10 +190,10 @@ class NoteViewModel @AssistedInject constructor(
             }
         }
 
-    private fun mute(action: UiEvent.MuteAction) =
+    private fun muteUser(action: UiEvent.MuteUserAction) =
         viewModelScope.launch {
             try {
-                mutedUserRepository.muteUserAndPersistMuteList(
+                mutedItemRepository.muteUserAndPersistMuteList(
                     userId = activeAccountStore.activeUserId(),
                     mutedUserId = action.userId,
                 )
@@ -207,6 +209,46 @@ class NoteViewModel @AssistedInject constructor(
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToMuteUser(error)) }
+            } catch (error: MissingRelaysException) {
+                Timber.w(error)
+                setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
+            }
+        }
+
+    private fun toggleMuteThread(postId: String, isThreadMuted: Boolean) =
+        viewModelScope.launch {
+            try {
+                if (isThreadMuted) {
+                    mutedItemRepository.unmuteThreadAndPersistMuteList(
+                        postId = postId,
+                        userId = activeAccountStore.activeUserId(),
+                    )
+                } else {
+                    mutedItemRepository.muteThreadAndPersistMuteList(
+                        postId = postId,
+                        userId = activeAccountStore.activeUserId(),
+                    )
+                }
+            } catch (error: WssException) {
+                Timber.w(error)
+                if (isThreadMuted) {
+                    setState { copy(error = UiError.FailedToUnmuteThread(error)) }
+                } else {
+                    setState { copy(error = UiError.FailedToMuteThread(error)) }
+                }
+            } catch (error: SigningKeyNotFoundException) {
+                Timber.w(error)
+                setState { copy(error = UiError.MissingPrivateKey) }
+            } catch (error: SigningRejectedException) {
+                Timber.w(error)
+                setState { copy(error = UiError.NostrSignUnauthorized) }
+            } catch (error: NostrPublishException) {
+                Timber.w(error)
+                if (isThreadMuted) {
+                    setState { copy(error = UiError.FailedToUnmuteThread(error)) }
+                } else {
+                    setState { copy(error = UiError.FailedToMuteThread(error)) }
+                }
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }

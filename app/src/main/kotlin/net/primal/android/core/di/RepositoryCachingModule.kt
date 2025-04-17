@@ -17,11 +17,11 @@ import net.primal.domain.feeds.FeedsRepository
 import net.primal.domain.global.CachingImportRepository
 import net.primal.domain.links.EventUriRepository
 import net.primal.domain.messages.ChatRepository
+import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.nostr.zaps.NostrZapperFactory
 import net.primal.domain.notifications.NotificationRepository
 import net.primal.domain.posts.FeedRepository
-import net.primal.domain.profile.MutedUserRepository
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.reads.ArticleRepository
@@ -112,11 +112,11 @@ object RepositoryCachingModule {
         PrimalRepositoryFactory.createProfileRepository(cachingPrimalApiClient = primalApiClient, primalPublisher)
 
     @Provides
-    fun provideMutedUserRepository(
+    fun provideMutedItemRepository(
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,
-    ): MutedUserRepository =
-        PrimalRepositoryFactory.createMutedUserRepository(cachingPrimalApiClient = primalApiClient, primalPublisher)
+    ): MutedItemRepository =
+        PrimalRepositoryFactory.createMutedItemRepository(cachingPrimalApiClient = primalApiClient, primalPublisher)
 
     @Provides
     fun provideNotificationRepository(@PrimalCacheApiClient primalApiClient: PrimalApiClient): NotificationRepository =

@@ -73,6 +73,7 @@ fun NoteFeedList(
     onGoToWallet: () -> Unit,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     newNotesNoticeAlpha: Float = 1.00f,
+    allowMutedThreads: Boolean = false,
     showTopZaps: Boolean = false,
     previewMode: Boolean = false,
     pullToRefreshEnabled: Boolean = true,
@@ -87,7 +88,7 @@ fun NoteFeedList(
 ) {
     val viewModelKey by remember { mutableStateOf(if (!previewMode) feedSpec else UUID.randomUUID().toString()) }
     val viewModel = hiltViewModel<NoteFeedViewModel, NoteFeedViewModel.Factory>(key = viewModelKey) { factory ->
-        factory.create(feedSpec = feedSpec)
+        factory.create(feedSpec = feedSpec, allowMutedThreads = allowMutedThreads)
     }
     val uiState = viewModel.state.collectAsState()
 

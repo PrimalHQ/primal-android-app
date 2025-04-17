@@ -18,7 +18,7 @@ interface BlossomApi {
     suspend fun putUpload(
         authorization: String,
         fileMetadata: FileMetadata,
-        openBufferedSource: () -> BufferedSource,
+        bufferedSource: BufferedSource,
         onProgress: ((uploadedBytes: Int, totalBytes: Int) -> Unit)? = null,
     ): BlobDescriptor
 
@@ -35,7 +35,7 @@ interface BlossomApi {
     suspend fun putMedia(
         authorization: String,
         fileMetadata: FileMetadata,
-        openBufferedSource: () -> BufferedSource,
+        bufferedSource: BufferedSource,
         onProgress: ((uploadedBytes: Int, totalBytes: Int) -> Unit)? = null,
     ): BlobDescriptor
 
