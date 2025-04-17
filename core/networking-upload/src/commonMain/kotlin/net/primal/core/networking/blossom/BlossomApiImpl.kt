@@ -87,7 +87,7 @@ internal class BlossomApiImpl(
                 }
             }
         } catch (e: Throwable) {
-            throw BlossomMirrorException("Mirror upload failed: ${e.message}")
+            throw BlossomMirrorException(cause = e)
         }
 
         if (!response.status.isSuccess()) {
@@ -116,7 +116,7 @@ internal class BlossomApiImpl(
                 }
             }
         } catch (e: Throwable) {
-            throw UploadRequirementException("$errorPrefix failed: ${e.message}")
+            throw UploadRequirementException(cause = e)
         }
 
         if (!response.status.isSuccess()) {
@@ -170,7 +170,7 @@ internal class BlossomApiImpl(
                 }
             }
         } catch (e: Throwable) {
-            throw BlossomUploadException("$errorPrefix failed: ${e.message}", e)
+            throw BlossomUploadException(cause = e)
         }
 
         if (!response.status.isSuccess()) {
