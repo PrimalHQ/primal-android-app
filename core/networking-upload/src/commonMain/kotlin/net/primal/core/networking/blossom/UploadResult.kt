@@ -1,4 +1,4 @@
-package net.primal.android.networking.upload
+package net.primal.core.networking.blossom
 
 data class UploadResult(
     val remoteUrl: String,

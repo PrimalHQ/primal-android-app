@@ -23,22 +23,19 @@ class BlossomRepository @Inject constructor(
 
     suspend fun ensureBlossomServerList(userId: String): List<String> {
         val userAccount = userAccountsStore.findByIdOrNull(userId)
-        val currentList = userAccount?.blossomServers.orEmpty()
+        val existingList = userAccount?.blossomServers.orEmpty()
 
-        return if (currentList.isEmpty()) {
-            bootstrapBlossomServerList(userId)
+        return if (existingList.isEmpty()) {
+            runCatching {
+                publishBlossomServerList(
+                    userId = userId,
+                    servers = DEFAULT_BLOSSOM_LIST,
+                )
+            }
+            DEFAULT_BLOSSOM_LIST
         } else {
-            currentList
+            existingList
         }
-    }
-
-    suspend fun bootstrapBlossomServerList(userId: String): List<String> {
-        val defaultList = DEFAULT_BLOSSOM_LIST
-        publishBlossomServerList(
-            userId = userId,
-            servers = defaultList,
-        )
-        return defaultList
     }
 
     suspend fun publishBlossomServerList(userId: String, servers: List<String>) {

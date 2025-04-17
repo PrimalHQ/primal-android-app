@@ -7,11 +7,16 @@ import net.primal.domain.common.exception.NetworkException
 
 interface FeedRepository {
 
-    fun feedBySpec(userId: String, feedSpec: String): Flow<PagingData<FeedPost>>
+    fun feedBySpec(
+        userId: String,
+        feedSpec: String,
+        allowMutedThreads: Boolean = false,
+    ): Flow<PagingData<FeedPost>>
 
     suspend fun findNewestPosts(
         userId: String,
         feedDirective: String,
+        allowMutedThreads: Boolean = false,
         limit: Int,
     ): List<FeedPost>
 

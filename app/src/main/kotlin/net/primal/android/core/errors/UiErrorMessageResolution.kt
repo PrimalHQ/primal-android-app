@@ -59,5 +59,9 @@ fun UiError.resolveUiErrorMessage(context: Context): String {
         is UiError.FailedToUpdateBlossomServer -> context.getString(
             R.string.app_error_unable_to_update_blossom_server_list,
         )
+
+        is UiError.FailedToMuteThread -> context.getString(R.string.app_error_unmuting_thread)
+
+        is UiError.FailedToUnmuteThread -> context.getString(R.string.app_error_unmuting_thread)
     }
 }

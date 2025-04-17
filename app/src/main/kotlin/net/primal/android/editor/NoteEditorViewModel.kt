@@ -40,8 +40,6 @@ import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.networking.upload.PrimalUploadService
-import net.primal.android.networking.upload.UploadJob
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
@@ -49,7 +47,9 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
+import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.BlossomException
+import net.primal.core.networking.blossom.UploadJob
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.events.EventRelayHintsRepository
 import net.primal.domain.explore.ExploreRepository
@@ -74,7 +74,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
     private val notePublishHandler: NotePublishHandler,
-    private val primalUploadService: PrimalUploadService,
+    private val primalUploadService: AndroidPrimalBlossomUploadService,
     private val highlightRepository: HighlightRepository,
     private val exploreRepository: ExploreRepository,
     private val userRepository: UserRepository,
