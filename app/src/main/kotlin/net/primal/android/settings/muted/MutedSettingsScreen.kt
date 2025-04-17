@@ -94,7 +94,7 @@ fun MutedSettingsScreen(
                         MuteUsers(
                             modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
                             paddingValues = paddingValues,
-                            state = state,
+                            mutedUsers = state.mutedUsers,
                             eventPublisher = eventPublisher,
                             onProfileClick = onProfileClick,
                         )
@@ -104,7 +104,7 @@ fun MutedSettingsScreen(
                         MuteWords(
                             modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
                             paddingValues = paddingValues,
-                            state = state,
+                            mutedWords = state.mutedWords,
                             eventPublisher = eventPublisher,
                         )
                     }
@@ -113,15 +113,15 @@ fun MutedSettingsScreen(
                         MuteHashtags(
                             modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
                             paddingValues = paddingValues,
-                            state = state,
+                            mutedHashtags = state.mutedHashtags,
                             eventPublisher = eventPublisher,
                         )
                     }
 
                     THREADS_INDEX -> {
                         MuteThreads(
+                            defaultMuteThreadsFeedSpec = state.defaultMuteThreadsFeedSpec,
                             paddingValues = paddingValues,
-                            state = state,
                             noteCallbacks = noteCallbacks,
                             onGoToWallet = onGoToWallet,
                         )

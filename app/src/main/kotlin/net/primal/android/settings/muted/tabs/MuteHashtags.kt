@@ -25,7 +25,7 @@ import net.primal.android.settings.muted.ui.MutedSettingsBottomSection
 
 @Composable
 fun MuteHashtags(
-    state: MutedSettingsContract.UiState,
+    mutedHashtags: List<String>,
     eventPublisher: (MutedSettingsContract.UiEvent) -> Unit,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(all = 0.dp),
@@ -44,12 +44,12 @@ fun MuteHashtags(
                 .fillMaxWidth(),
         ) {
             items(
-                items = state.mutedHashtags,
+                items = mutedHashtags,
                 key = { it },
                 contentType = { "MutedHashtag" },
             ) { mutedWord ->
                 MutedListItem(
-                    item = mutedWord,
+                    item = "#$mutedWord",
                     onUnmuteClick = {
                         eventPublisher(
                             MutedSettingsContract.UiEvent.UnmuteHashtag(mutedWord),
@@ -59,7 +59,7 @@ fun MuteHashtags(
                 PrimalDivider()
             }
 
-            if (state.mutedHashtags.isEmpty()) {
+            if (mutedHashtags.isEmpty()) {
                 item(contentType = "NoContent") {
                     ListNoContent(
                         modifier = Modifier
@@ -87,10 +87,11 @@ fun MuteHashtags(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 12.dp),
-            sendEnabled = newMutedHashtag.startsWith("#") && newMutedHashtag.length > 1,
+            sendEnabled = newMutedHashtag.isNotBlank(),
             textFieldPlaceholder = stringResource(
                 id = R.string.settings_muted_hashtags_mute_new_hashtag,
             ),
+            showLeadingHashtag = true,
         )
     }
 }

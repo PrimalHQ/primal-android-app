@@ -25,7 +25,7 @@ import net.primal.android.settings.muted.ui.MutedSettingsBottomSection
 
 @Composable
 fun MuteWords(
-    state: MutedSettingsContract.UiState,
+    mutedWords: List<String>,
     eventPublisher: (MutedSettingsContract.UiEvent) -> Unit,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(all = 0.dp),
@@ -44,7 +44,7 @@ fun MuteWords(
                 .fillMaxWidth(),
         ) {
             items(
-                items = state.mutedWords,
+                items = mutedWords,
                 key = { it },
                 contentType = { "MutedWord" },
             ) { mutedWord ->
@@ -59,7 +59,7 @@ fun MuteWords(
                 PrimalDivider()
             }
 
-            if (state.mutedWords.isEmpty()) {
+            if (mutedWords.isEmpty()) {
                 item(contentType = "NoContent") {
                     ListNoContent(
                         modifier = Modifier

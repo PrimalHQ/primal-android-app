@@ -31,6 +31,7 @@ fun MutedSettingsBottomSection(
     onMute: () -> Unit,
     textFieldPlaceholder: String,
     modifier: Modifier = Modifier,
+    showLeadingHashtag: Boolean = false,
     sendEnabled: Boolean = true,
 ) {
     val fieldHeight = 49.dp
@@ -63,6 +64,17 @@ fun MutedSettingsBottomSection(
             keyboardOptions = KeyboardOptions.Default.copy(
                 capitalization = KeyboardCapitalization.Sentences,
             ),
+            leadingIcon = if (showLeadingHashtag) {
+                {
+                    Text(
+                        text = "#",
+                        style = AppTheme.typography.bodyLarge,
+                        color = AppTheme.colorScheme.primary,
+                    )
+                }
+            } else {
+                null
+            },
         )
 
         PrimalLoadingButton(

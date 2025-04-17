@@ -29,7 +29,7 @@ import net.primal.android.theme.AppTheme
 
 @Composable
 fun MuteUsers(
-    state: MutedSettingsContract.UiState,
+    mutedUsers: List<ProfileDetailsUi>,
     eventPublisher: (MutedSettingsContract.UiEvent) -> Unit,
     modifier: Modifier = Modifier,
     onProfileClick: (String) -> Unit,
@@ -42,7 +42,7 @@ fun MuteUsers(
             .imePadding(),
     ) {
         items(
-            items = state.mutedUsers,
+            items = mutedUsers,
             key = { it.pubkey },
             contentType = { "MutedUser" },
         ) { mutedUser ->
@@ -58,7 +58,7 @@ fun MuteUsers(
             PrimalDivider()
         }
 
-        if (state.mutedUsers.isEmpty()) {
+        if (mutedUsers.isEmpty()) {
             item(contentType = "NoContent") {
                 ListNoContent(
                     modifier = Modifier.fillParentMaxSize(),

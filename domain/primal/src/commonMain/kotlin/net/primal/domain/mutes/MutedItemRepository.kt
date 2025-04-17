@@ -25,6 +25,7 @@ interface MutedItemRepository {
         NostrPublishException::class,
         SignatureException::class,
         CancellationException::class,
+        NetworkException::class,
     )
     suspend fun muteUserAndPersistMuteList(userId: String, mutedUserId: String)
 
@@ -33,6 +34,7 @@ interface MutedItemRepository {
         NostrPublishException::class,
         SignatureException::class,
         CancellationException::class,
+        NetworkException::class,
     )
     suspend fun unmuteUserAndPersistMuteList(userId: String, unmutedUserId: String)
 
@@ -41,6 +43,7 @@ interface MutedItemRepository {
         NostrPublishException::class,
         SignatureException::class,
         CancellationException::class,
+        NetworkException::class,
     )
     suspend fun muteThreadAndPersistMuteList(userId: String, postId: String)
 
@@ -49,6 +52,7 @@ interface MutedItemRepository {
         NostrPublishException::class,
         SignatureException::class,
         CancellationException::class,
+        NetworkException::class,
     )
     suspend fun unmuteThreadAndPersistMuteList(userId: String, postId: String)
 
@@ -57,6 +61,7 @@ interface MutedItemRepository {
         NostrPublishException::class,
         SignatureException::class,
         CancellationException::class,
+        NetworkException::class,
     )
     suspend fun muteHashtagAndPersistMuteList(userId: String, hashtag: String)
 
@@ -65,6 +70,7 @@ interface MutedItemRepository {
         NostrPublishException::class,
         SignatureException::class,
         CancellationException::class,
+        NetworkException::class,
     )
     suspend fun unmuteHashtagAndPersistMuteList(userId: String, hashtag: String)
 
@@ -73,6 +79,7 @@ interface MutedItemRepository {
         NostrPublishException::class,
         SignatureException::class,
         CancellationException::class,
+        NetworkException::class,
     )
     suspend fun muteWordAndPersistMuteList(userId: String, word: String)
 
@@ -81,6 +88,7 @@ interface MutedItemRepository {
         NostrPublishException::class,
         SignatureException::class,
         CancellationException::class,
+        NetworkException::class,
     )
     suspend fun unmuteWordAndPersistMuteList(userId: String, word: String)
 }
