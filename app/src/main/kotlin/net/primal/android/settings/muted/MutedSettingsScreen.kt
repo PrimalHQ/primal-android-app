@@ -107,9 +107,7 @@ fun MutedSettingsScreen(
             )
         },
         content = { paddingValues ->
-            HorizontalPager(
-                state = pagerState,
-            ) { pageIndex ->
+            HorizontalPager(state = pagerState) { pageIndex ->
                 when (pageIndex) {
                     USERS_INDEX -> {
                         MuteUsers(
@@ -150,11 +148,7 @@ fun MutedSettingsScreen(
                 }
             }
         },
-        snackbarHost = {
-            SnackbarHost(
-                hostState = snackbarHostState,
-            )
-        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     )
 }
 
