@@ -71,5 +71,14 @@ fun UiError.resolveUiErrorMessage(context: Context): String {
         is UiError.FailedToUnmuteHashtag -> context.getString(R.string.app_error_unmuting_hashtag)
 
         is UiError.FailedToUnmuteWord -> context.getString(R.string.app_error_unmuting_word)
+
+        is UiError.NetworkError -> context.getString(R.string.app_error_network)
+
+        is UiError.SignatureError -> when (this.error) {
+            SignatureUiError.SigningKeyNotFound -> context.getString(R.string.app_npub_login_error)
+            SignatureUiError.SigningRejected -> context.getString(R.string.app_error_sign_unauthorized)
+        }
+
+        is UiError.FailedToFetchMuteList -> context.getString(R.string.app_error_fetching_mute_list)
     }
 }

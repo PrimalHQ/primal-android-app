@@ -36,4 +36,8 @@ sealed class UiError {
 
     data class FailedToMuteWord(val cause: Throwable) : UiError()
     data class FailedToUnmuteWord(val cause: Throwable) : UiError()
+    data class FailedToFetchMuteList(val cause: Throwable) : UiError()
+
+    data class SignatureError(val error: SignatureUiError) : UiError()
+    data class NetworkError(val cause: Throwable) : UiError()
 }

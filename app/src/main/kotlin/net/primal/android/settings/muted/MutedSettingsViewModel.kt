@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.errors.UiError
+import net.primal.android.core.errors.asSignatureUiError
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.settings.muted.MutedSettingsContract.UiEvent
 import net.primal.android.settings.muted.MutedSettingsContract.UiState
@@ -92,11 +93,17 @@ class MutedSettingsViewModel @Inject constructor(
                     )
                 }
             } catch (error: MissingRelaysException) {
+                Timber.w(error)
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
             } catch (error: SignatureException) {
                 Timber.w(error)
+                setState { copy(error = UiError.SignatureError(error.asSignatureUiError())) }
             } catch (error: NostrPublishException) {
+                Timber.w(error)
                 setState { copy(error = UiError.FailedToMuteHashtag(error)) }
+            } catch (error: WssException) {
+                Timber.w(error)
+                setState { copy(error = UiError.NetworkError(error)) }
             }
         }
 
@@ -110,11 +117,17 @@ class MutedSettingsViewModel @Inject constructor(
                     )
                 }
             } catch (error: MissingRelaysException) {
+                Timber.w(error)
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
             } catch (error: SignatureException) {
                 Timber.w(error)
+                setState { copy(error = UiError.SignatureError(error.asSignatureUiError())) }
             } catch (error: NostrPublishException) {
+                Timber.w(error)
                 setState { copy(error = UiError.FailedToUnmuteHashtag(error)) }
+            } catch (error: WssException) {
+                Timber.w(error)
+                setState { copy(error = UiError.NetworkError(error)) }
             }
         }
 
@@ -128,11 +141,17 @@ class MutedSettingsViewModel @Inject constructor(
                     )
                 }
             } catch (error: MissingRelaysException) {
+                Timber.w(error)
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
             } catch (error: SignatureException) {
                 Timber.w(error)
+                setState { copy(error = UiError.SignatureError(error.asSignatureUiError())) }
             } catch (error: NostrPublishException) {
+                Timber.w(error)
                 setState { copy(error = UiError.FailedToMuteWord(error)) }
+            } catch (error: WssException) {
+                Timber.w(error)
+                setState { copy(error = UiError.NetworkError(error)) }
             }
         }
 
@@ -146,24 +165,17 @@ class MutedSettingsViewModel @Inject constructor(
                     )
                 }
             } catch (error: MissingRelaysException) {
+                Timber.w(error)
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
             } catch (error: SignatureException) {
                 Timber.w(error)
+                setState { copy(error = UiError.SignatureError(error.asSignatureUiError())) }
             } catch (error: NostrPublishException) {
+                Timber.w(error)
                 setState { copy(error = UiError.FailedToUnmuteWord(error)) }
-            }
-        }
-
-    private fun fetchLatestMuteList() =
-        viewModelScope.launch {
-            try {
-                withContext(dispatcherProvider.io()) {
-                    mutedItemRepository.fetchAndPersistMuteList(
-                        userId = activeAccountStore.activeUserId(),
-                    )
-                }
             } catch (error: WssException) {
                 Timber.w(error)
+                setState { copy(error = UiError.NetworkError(error)) }
             }
         }
 
@@ -177,17 +189,31 @@ class MutedSettingsViewModel @Inject constructor(
                     )
                 }
             } catch (error: MissingRelaysException) {
-                setState {
-                    copy(error = UiError.MissingRelaysConfiguration(error))
-                }
+                Timber.w(error)
+                setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
             } catch (error: SignatureException) {
-                setState {
-                    copy(error = UiError.NostrSignUnauthorized)
-                }
+                Timber.w(error)
+                setState { copy(error = UiError.SignatureError(error.asSignatureUiError())) }
             } catch (error: NostrPublishException) {
-                setState {
-                    copy(error = UiError.FailedToUnmuteUser(error))
+                Timber.w(error)
+                setState { copy(error = UiError.FailedToUnmuteUser(error)) }
+            } catch (error: WssException) {
+                Timber.w(error)
+                setState { copy(error = UiError.NetworkError(error)) }
+            }
+        }
+
+    private fun fetchLatestMuteList() =
+        viewModelScope.launch {
+            try {
+                withContext(dispatcherProvider.io()) {
+                    mutedItemRepository.fetchAndPersistMuteList(
+                        userId = activeAccountStore.activeUserId(),
+                    )
                 }
+            } catch (error: WssException) {
+                Timber.w(error)
+                setState { copy(error = UiError.FailedToFetchMuteList(error)) }
             }
         }
 }
