@@ -31,4 +31,7 @@ interface MutedItemDao {
 
     @Query("SELECT EXISTS(SELECT * FROM MutedItemData WHERE item = :pubkey AND ownerId = :ownerId)")
     fun observeIsUserMutedByOwnerId(pubkey: String, ownerId: String): Flow<Boolean>
+
+    @Query("SELECT * FROM MutedItemData WHERE ownerId = :ownerId AND type = :type")
+    fun observeMutedItemsByType(ownerId: String, type: MutedItemType): Flow<List<MutedItemData>>
 }

@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
+import net.primal.android.core.errors.UiError
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.settings.muted.MutedSettingsContract.UiEvent
 import net.primal.android.settings.muted.MutedSettingsContract.UiState
@@ -19,6 +20,7 @@ import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.publisher.MissingRelaysException
 import timber.log.Timber
 
 @HiltViewModel
@@ -38,16 +40,33 @@ class MutedSettingsViewModel @Inject constructor(
     init {
         fetchLatestMuteList()
         observeMutedUsers()
+        observeMutedHashtags()
+        observeMutedWords()
         observeEvents()
     }
 
     private fun observeMutedUsers() =
         viewModelScope.launch {
-            mutedItemRepository.observeMutedUsersByOwnerId(ownerId = activeAccountStore.activeUserId()).collect {
-                setState {
-                    copy(mutedUsers = it.map { it.asProfileDetailsUi() })
+            mutedItemRepository.observeMutedUsersByOwnerId(ownerId = activeAccountStore.activeUserId())
+                .collect {
+                    setState { copy(mutedUsers = it.map { it.asProfileDetailsUi() }) }
                 }
-            }
+        }
+
+    private fun observeMutedHashtags() =
+        viewModelScope.launch {
+            mutedItemRepository.observeMutedHashtagsByOwnerId(ownerId = activeAccountStore.activeUserId())
+                .collect {
+                    setState { copy(mutedHashtags = it) }
+                }
+        }
+
+    private fun observeMutedWords() =
+        viewModelScope.launch {
+            mutedItemRepository.observeMutedWordsByOwnerId(ownerId = activeAccountStore.activeUserId())
+                .collect {
+                    setState { copy(mutedWords = it) }
+                }
         }
 
     private fun observeEvents() =
@@ -55,10 +74,8 @@ class MutedSettingsViewModel @Inject constructor(
             events.collect {
                 when (it) {
                     is UiEvent.MuteHashtag -> muteHashtag(it.hashtag)
-                    is UiEvent.MuteThread -> muteThread(it.threadId)
                     is UiEvent.MuteWord -> muteWord(it.word)
                     is UiEvent.UnmuteHashtag -> unmuteHashtag(it.hashtag)
-                    is UiEvent.UnmuteThread -> unmuteThread(it.threadId)
                     is UiEvent.UnmuteUser -> unmuteUser(it)
                     is UiEvent.UnmuteWord -> unmuteWord(it.word)
                 }
@@ -66,51 +83,75 @@ class MutedSettingsViewModel @Inject constructor(
         }
 
     private fun muteHashtag(hashtag: String) =
-        setState {
-            if (mutedHashtags.contains(hashtag)) {
-                this
-            } else {
-                copy(mutedHashtags = mutedHashtags + hashtag)
+        viewModelScope.launch {
+            try {
+                withContext(dispatcherProvider.io()) {
+                    mutedItemRepository.muteHashtagAndPersistMuteList(
+                        userId = activeAccountStore.activeUserId(),
+                        hashtag = hashtag,
+                    )
+                }
+            } catch (error: MissingRelaysException) {
+                setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
+            } catch (error: SignatureException) {
+                Timber.w(error)
+            } catch (error: NostrPublishException) {
+                setState { copy(error = UiError.FailedToMuteHashtag(error)) }
             }
         }
 
     private fun unmuteHashtag(hashtag: String) =
-        setState {
-            copy(
-                mutedHashtags = mutedHashtags.filterNot { it == hashtag },
-            )
-        }
-
-    private fun muteThread(thread: String) =
-        setState {
-            if (mutedThreads.contains(thread)) {
-                this
-            } else {
-                copy(mutedThreads = mutedThreads + thread)
+        viewModelScope.launch {
+            try {
+                withContext(dispatcherProvider.io()) {
+                    mutedItemRepository.unmuteHashtagAndPersistMuteList(
+                        userId = activeAccountStore.activeUserId(),
+                        hashtag = hashtag,
+                    )
+                }
+            } catch (error: MissingRelaysException) {
+                setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
+            } catch (error: SignatureException) {
+                Timber.w(error)
+            } catch (error: NostrPublishException) {
+                setState { copy(error = UiError.FailedToUnmuteHashtag(error)) }
             }
         }
 
-    private fun unmuteThread(thread: String) =
-        setState {
-            copy(
-                mutedThreads = mutedThreads.filterNot { it == thread },
-            )
-        }
-
     private fun muteWord(word: String) =
-        setState {
-            if (mutedWords.contains(word)) {
-                this
-            } else {
-                copy(mutedWords = mutedWords + word)
+        viewModelScope.launch {
+            try {
+                withContext(dispatcherProvider.io()) {
+                    mutedItemRepository.muteWordAndPersistMuteList(
+                        userId = activeAccountStore.activeUserId(),
+                        word = word,
+                    )
+                }
+            } catch (error: MissingRelaysException) {
+                setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
+            } catch (error: SignatureException) {
+                Timber.w(error)
+            } catch (error: NostrPublishException) {
+                setState { copy(error = UiError.FailedToMuteWord(error)) }
             }
         }
 
     private fun unmuteWord(word: String) =
-        setState {
-            copy(
-                mutedWords = mutedWords.filterNot { it == word },
-            )
+        viewModelScope.launch {
+            try {
+                withContext(dispatcherProvider.io()) {
+                    mutedItemRepository.unmuteWordAndPersistMuteList(
+                        userId = activeAccountStore.activeUserId(),
+                        word = word,
+                    )
+                }
+            } catch (error: MissingRelaysException) {
+                setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
+            } catch (error: SignatureException) {
+                Timber.w(error)
+            } catch (error: NostrPublishException) {
+                setState { copy(error = UiError.FailedToUnmuteWord(error)) }
+            }
         }
 
     private fun fetchLatestMuteList() =
@@ -135,15 +176,17 @@ class MutedSettingsViewModel @Inject constructor(
                         unmutedUserId = event.pubkey,
                     )
                 }
-            } catch (error: WssException) {
+            } catch (error: MissingRelaysException) {
                 setState {
-                    copy(error = UiState.MutedSettingsError.FailedToUnmuteUserError(error))
+                    copy(error = UiError.MissingRelaysConfiguration(error))
                 }
             } catch (error: SignatureException) {
-                Timber.w(error)
+                setState {
+                    copy(error = UiError.NostrSignUnauthorized)
+                }
             } catch (error: NostrPublishException) {
                 setState {
-                    copy(error = UiState.MutedSettingsError.FailedToUnmuteUserError(error))
+                    copy(error = UiError.FailedToUnmuteUser(error))
                 }
             }
         }

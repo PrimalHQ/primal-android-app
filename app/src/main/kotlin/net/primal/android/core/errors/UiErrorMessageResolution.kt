@@ -63,5 +63,13 @@ fun UiError.resolveUiErrorMessage(context: Context): String {
         is UiError.FailedToMuteThread -> context.getString(R.string.app_error_unmuting_thread)
 
         is UiError.FailedToUnmuteThread -> context.getString(R.string.app_error_unmuting_thread)
+
+        is UiError.FailedToMuteHashtag -> context.getString(R.string.app_error_muting_hashtag)
+
+        is UiError.FailedToMuteWord -> context.getString(R.string.app_error_muting_word)
+
+        is UiError.FailedToUnmuteHashtag -> context.getString(R.string.app_error_unmuting_hashtag)
+
+        is UiError.FailedToUnmuteWord -> context.getString(R.string.app_error_unmuting_word)
     }
 }

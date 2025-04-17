@@ -13,6 +13,10 @@ interface MutedItemRepository {
 
     fun observeIsUserMutedByOwnerId(pubkey: String, ownerId: String): Flow<Boolean>
 
+    fun observeMutedHashtagsByOwnerId(ownerId: String): Flow<List<String>>
+
+    fun observeMutedWordsByOwnerId(ownerId: String): Flow<List<String>>
+
     @Throws(NetworkException::class, CancellationException::class)
     suspend fun fetchAndPersistMuteList(userId: String)
 
@@ -47,4 +51,36 @@ interface MutedItemRepository {
         CancellationException::class,
     )
     suspend fun unmuteThreadAndPersistMuteList(userId: String, postId: String)
+
+    @Throws(
+        MissingRelaysException::class,
+        NostrPublishException::class,
+        SignatureException::class,
+        CancellationException::class,
+    )
+    suspend fun muteHashtagAndPersistMuteList(userId: String, hashtag: String)
+
+    @Throws(
+        MissingRelaysException::class,
+        NostrPublishException::class,
+        SignatureException::class,
+        CancellationException::class,
+    )
+    suspend fun unmuteHashtagAndPersistMuteList(userId: String, hashtag: String)
+
+    @Throws(
+        MissingRelaysException::class,
+        NostrPublishException::class,
+        SignatureException::class,
+        CancellationException::class,
+    )
+    suspend fun muteWordAndPersistMuteList(userId: String, word: String)
+
+    @Throws(
+        MissingRelaysException::class,
+        NostrPublishException::class,
+        SignatureException::class,
+        CancellationException::class,
+    )
+    suspend fun unmuteWordAndPersistMuteList(userId: String, word: String)
 }
