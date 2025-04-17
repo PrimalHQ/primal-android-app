@@ -80,6 +80,7 @@ class MutedSettingsViewModel @Inject constructor(
                     is UiEvent.UnmuteHashtag -> unmuteHashtag(it.hashtag)
                     is UiEvent.UnmuteUser -> unmuteUser(it)
                     is UiEvent.UnmuteWord -> unmuteWord(it.word)
+                    is UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
         }

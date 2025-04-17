@@ -21,5 +21,7 @@ interface MutedSettingsContract {
 
         data class MuteHashtag(val hashtag: String) : UiEvent()
         data class UnmuteHashtag(val hashtag: String) : UiEvent()
+
+        class DismissError : UiEvent()
     }
 }
