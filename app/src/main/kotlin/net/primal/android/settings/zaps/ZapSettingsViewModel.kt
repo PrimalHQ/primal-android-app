@@ -19,7 +19,8 @@ import net.primal.android.settings.zaps.ZapSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.cryptography.SignResult
+import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import net.primal.domain.notifications.ContentZapConfigItem
 import net.primal.domain.notifications.ContentZapDefault
 import timber.log.Timber
@@ -89,17 +90,22 @@ class ZapSettingsViewModel @Inject constructor(
             try {
                 withContext(dispatcherProvider.io()) {
                     val userId = activeAccountStore.activeUserId()
-                    val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
+                    nostrNotary.signAuthorizationNostrEvent(
                         userId = userId,
                         description = "Sync app settings",
-                    )
-                    settingsRepository.fetchAndPersistAppSettings(authorizationEvent)
+                    ).let { signResult ->
+                        when (signResult) {
+                            is SignResult.Rejected -> {
+                                Timber.w(signResult.error)
+                                setState { copy(signatureError = signResult.error.asSignatureUiError()) }
+                            }
+
+                            is SignResult.Signed -> settingsRepository.fetchAndPersistAppSettings(signResult.event)
+                        }
+                    }
                 }
             } catch (error: WssException) {
                 Timber.w(error)
-            } catch (error: SignatureException) {
-                Timber.w(error)
-                setState { copy(signatureError = error.asSignatureUiError()) }
             }
         }
 
@@ -108,17 +114,30 @@ class ZapSettingsViewModel @Inject constructor(
             setState { copy(saving = true) }
             try {
                 val userId = activeAccountStore.activeUserId()
-                val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
+                val signResult = nostrNotary.signAuthorizationNostrEvent(
                     userId = userId,
                     description = "Sync app settings",
                 )
-                settingsRepository.fetchAndUpdateAndPublishAppSettings(authorizationEvent) {
-                    val newAppSettings = copy(zapDefault = newZapDefault)
-                    nostrNotary.signAppSettingsNostrEvent(
-                        userId = userId,
-                        appSettings = newAppSettings,
-                    )
+
+                when (signResult) {
+                    is SignResult.Rejected -> {
+                        setState { copy(signatureError = signResult.error.asSignatureUiError()) }
+                    }
+
+                    is SignResult.Signed -> {
+                        settingsRepository.fetchAndUpdateAndPublishAppSettings(signResult.event) {
+                            val newAppSettings = copy(zapDefault = newZapDefault)
+
+                            nostrNotary.signAppSettingsNostrEvent(
+                                userId = userId,
+                                appSettings = newAppSettings,
+                            ).unwrapOrThrow { error ->
+                                setState { copy(signatureError = error.asSignatureUiError()) }
+                            }
+                        }
+                    }
                 }
+
                 setState { copy(editPresetIndex = null) }
             } catch (error: WssException) {
                 Timber.w(error)
@@ -132,22 +151,33 @@ class ZapSettingsViewModel @Inject constructor(
             setState { copy(saving = true) }
             try {
                 val userId = activeAccountStore.activeUserId()
-                val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
+                val signResult = nostrNotary.signAuthorizationNostrEvent(
                     userId = userId,
                     description = "Sync app settings",
                 )
 
-                settingsRepository.fetchAndUpdateAndPublishAppSettings(authorizationEvent) {
-                    val newAppSettings = this.copy(
-                        zapsConfig = this.zapsConfig.toMutableList().apply {
-                            this[presetIndex] = zapPreset
-                        },
-                    )
-                    nostrNotary.signAppSettingsNostrEvent(
-                        userId = userId,
-                        appSettings = newAppSettings,
-                    )
+                when (signResult) {
+                    is SignResult.Rejected -> {
+                        setState { copy(signatureError = signResult.error.asSignatureUiError()) }
+                    }
+
+                    is SignResult.Signed -> {
+                        settingsRepository.fetchAndUpdateAndPublishAppSettings(signResult.event) {
+                            val newAppSettings = this.copy(
+                                zapsConfig = this.zapsConfig.toMutableList().apply {
+                                    this[presetIndex] = zapPreset
+                                },
+                            )
+                            nostrNotary.signAppSettingsNostrEvent(
+                                userId = userId,
+                                appSettings = newAppSettings,
+                            ).unwrapOrThrow { error ->
+                                setState { copy(signatureError = error.asSignatureUiError()) }
+                            }
+                        }
+                    }
                 }
+
                 setState { copy(editPresetIndex = null) }
             } catch (error: WssException) {
                 Timber.w(error)

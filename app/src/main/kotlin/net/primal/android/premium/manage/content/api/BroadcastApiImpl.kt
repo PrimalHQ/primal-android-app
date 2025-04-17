@@ -14,6 +14,7 @@ import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.model.AppSpecificDataRequest
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 
 class BroadcastApiImpl @Inject constructor(
     @PrimalCacheApiClient private val primalCacheApiClient: PrimalApiClient,
@@ -29,7 +30,7 @@ class BroadcastApiImpl @Inject constructor(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
                             userId = userId,
                             content = "{}",
-                        ),
+                        ).unwrapOrThrow(),
                     ),
                 ),
             ),
@@ -48,7 +49,7 @@ class BroadcastApiImpl @Inject constructor(
                     eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
                         userId = userId,
                         content = "{}",
-                    ),
+                    ).unwrapOrThrow(),
                     kinds = kinds,
                 ).encodeToJsonString(),
             ),
@@ -64,7 +65,7 @@ class BroadcastApiImpl @Inject constructor(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
                             userId = userId,
                             content = "{}",
-                        ),
+                        ).unwrapOrThrow(),
                     ),
                 ),
             ),
@@ -80,7 +81,7 @@ class BroadcastApiImpl @Inject constructor(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
                             userId = userId,
                             content = "{}",
-                        ),
+                        ).unwrapOrThrow(),
                     ),
                 ),
             ),

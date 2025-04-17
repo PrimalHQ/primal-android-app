@@ -17,6 +17,7 @@ import net.primal.domain.nostr.asExpirationTag
 import net.primal.domain.nostr.asHashtagTag
 import net.primal.domain.nostr.asSha256Tag
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
+import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import okio.Buffer
 import okio.BufferedSource
 import okio.ByteString.Companion.encodeUtf8
@@ -37,7 +38,7 @@ internal class PrimalUploadService(
     suspend fun upload(
         userId: String,
         openBufferedSource: () -> BufferedSource,
-        onSignRequested: ((NostrUnsignedEvent) -> NostrEvent)? = null,
+        onSignRequested: (suspend (NostrUnsignedEvent) -> NostrEvent)? = null,
         onProgress: ((uploadedBytes: Int, totalBytes: Int) -> Unit)? = null,
     ): UploadResult =
         withContext(dispatchers.io()) {
@@ -112,11 +113,11 @@ internal class PrimalUploadService(
         }
     }
 
-    private fun signAuthorizationOrThrow(
+    private suspend fun signAuthorizationOrThrow(
         userId: String,
         fileHash: String,
         humanMessage: String? = null,
-        onSignRequested: ((NostrUnsignedEvent) -> NostrEvent)? = null,
+        onSignRequested: (suspend (NostrUnsignedEvent) -> NostrEvent)? = null,
     ): String {
         val unsignedAuthorizationEvent = NostrUnsignedEvent(
             kind = NostrEventKind.BlossomUploadBlob.value,
@@ -130,7 +131,7 @@ internal class PrimalUploadService(
         )
 
         val signedAuthorizationEvent = onSignRequested?.invoke(unsignedAuthorizationEvent)
-            ?: signatureHandler?.signNostrEvent(unsignedAuthorizationEvent)
+            ?: signatureHandler?.signNostrEvent(unsignedAuthorizationEvent)?.unwrapOrThrow()
             ?: error("Missing signature handler.")
         return signedAuthorizationEvent.buildAuthorizationHeader()
     }

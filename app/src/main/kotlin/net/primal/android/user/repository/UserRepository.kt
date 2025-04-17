@@ -369,7 +369,6 @@ class UserRepository @Inject constructor(
         content: String,
     ) = withContext(dispatchers.io()) {
         val publishResult = nostrPublisher.signPublishImportNostrEvent(
-            userId = userId,
             unsignedNostrEvent = NostrUnsignedEvent(
                 pubKey = userId,
                 kind = NostrEventKind.FollowList.value,

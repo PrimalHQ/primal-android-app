@@ -11,6 +11,7 @@ import androidx.core.net.toUri
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 
 internal const val AMBER_PACKAGE_NAME = "com.greenart7c3.nostrsigner"
@@ -101,6 +102,14 @@ fun AmberLauncher.launchGetPublicKey() {
         ),
         Permission(
             type = SignerMethod.NIP04_DECRYPT,
+        ),
+        Permission(
+            type = SignerMethod.SIGN_EVENT,
+            kind = NostrEventKind.PrimalWalletOperation.value,
+        ),
+        Permission(
+            type = SignerMethod.SIGN_EVENT,
+            kind = NostrEventKind.ApplicationSpecificData.value,
         ),
     )
 

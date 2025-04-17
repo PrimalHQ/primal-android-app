@@ -11,8 +11,9 @@ import net.primal.android.wallet.api.model.WalletOperationRequestBody
 import net.primal.android.wallet.api.model.WalletOperationVerb
 import net.primal.android.wallet.api.model.WalletRequestBody
 import net.primal.core.utils.serialization.CommonJson
+import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 
-fun buildWalletOptionsJson(
+suspend fun buildWalletOptionsJson(
     userId: String,
     walletVerb: WalletOperationVerb,
     requestBody: WalletOperationRequestBody,
@@ -32,6 +33,6 @@ fun buildWalletOptionsJson(
                         },
                     )
                 }.toString(),
-            ),
+            ).unwrapOrThrow(),
         ),
     )

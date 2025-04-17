@@ -18,6 +18,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import net.primal.android.core.errors.asSignatureUiError
 import net.primal.android.core.push.PushNotificationsTokenUpdater
+import net.primal.android.networking.UserAgentProvider
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiEvent.DismissErrors
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiEvent.NotificationSettingsChanged
@@ -33,7 +34,13 @@ import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.data.remote.api.settings.model.AppSettingsDescription
+import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.nostr.asIdentifierTag
+import net.primal.domain.nostr.cryptography.SignResult
+import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import net.primal.domain.notifications.NotificationSettingsType
 import net.primal.domain.notifications.NotificationSettingsType.Preferences
 import net.primal.domain.notifications.NotificationSettingsType.PushNotifications
@@ -153,20 +160,30 @@ class NotificationsSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val userId = activeAccountStore.activeUserId()
-                val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
-                    userId = userId,
-                    description = "Sync app settings",
+                val signResult = nostrNotary.signNostrEvent(
+                    unsignedNostrEvent = NostrUnsignedEvent(
+                        pubKey = userId,
+                        kind = NostrEventKind.ApplicationSpecificData.value,
+                        tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
+                        content = AppSettingsDescription(description = "Sync app settings").encodeToJsonString(),
+                    ),
                 )
 
-                withContext(dispatcherProvider.io()) {
-                    settingsRepository.fetchAndPersistAppSettings(authorizationEvent)
+                when (signResult) {
+                    is SignResult.Rejected -> {
+                        Timber.w(signResult.error)
+                        setState { copy(signatureError = signResult.error.asSignatureUiError()) }
+                    }
+
+                    is SignResult.Signed -> {
+                        withContext(dispatcherProvider.io()) {
+                            settingsRepository.fetchAndPersistAppSettings(signResult.event)
+                        }
+                    }
                 }
             } catch (error: WssException) {
                 Timber.w(error)
                 setState { copy(error = FetchAppSettingsError(cause = error)) }
-            } catch (error: SignatureException) {
-                Timber.w(error)
-                setState { copy(signatureError = error.asSignatureUiError()) }
             }
         }
 
@@ -181,21 +198,32 @@ class NotificationsSettingsViewModel @Inject constructor(
 
         try {
             val userId = activeAccountStore.activeUserId()
-            val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
+            val signResult = nostrNotary.signAuthorizationNostrEvent(
                 userId = userId,
                 description = "Sync app settings",
             )
-            settingsRepository.fetchAndUpdateAndPublishAppSettings(authorizationEvent) {
-                val newAppSettings = this.copy(
-                    notifications = tabNotificationsJsonObject,
-                    pushNotifications = pushNotificationsJsonObject,
-                    notificationsAdditional = preferencesJsonObject,
 
-                )
-                nostrNotary.signAppSettingsNostrEvent(
-                    userId = userId,
-                    appSettings = newAppSettings,
-                )
+            when (signResult) {
+                is SignResult.Rejected -> {
+                    setState { copy(error = UpdateAppSettingsError(cause = signResult.error)) }
+                }
+
+                is SignResult.Signed -> {
+                    settingsRepository.fetchAndUpdateAndPublishAppSettings(signResult.event) {
+                        val newAppSettings = this.copy(
+                            notifications = tabNotificationsJsonObject,
+                            pushNotifications = pushNotificationsJsonObject,
+                            notificationsAdditional = preferencesJsonObject,
+                        )
+
+                        nostrNotary.signAppSettingsNostrEvent(
+                            userId = userId,
+                            appSettings = newAppSettings,
+                        ).unwrapOrThrow { error ->
+                            setState { copy(signatureError = error.asSignatureUiError()) }
+                        }
+                    }
+                }
             }
         } catch (error: WssException) {
             setState { copy(error = UpdateAppSettingsError(cause = error)) }

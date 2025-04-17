@@ -39,6 +39,7 @@ import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.notifications.model.PubkeyRequestBody
 import net.primal.domain.common.PrimalEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 
 @Singleton
 class SubscriptionsManager @Inject constructor(
@@ -117,7 +118,7 @@ class SubscriptionsManager @Inject constructor(
 
     private suspend fun pauseSubscriptions() = unsubscribeAll()
 
-    private fun subscribeAll(userId: String) {
+    private suspend fun subscribeAll(userId: String) {
         subscriptionsActive = true
         notificationsSummarySubscription = launchNotificationsSummarySubscription(userId = userId)
         messagesUnreadCountSubscription = launchMessagesUnreadCountSubscription(userId = userId)
@@ -161,7 +162,7 @@ class SubscriptionsManager @Inject constructor(
             }
         }
 
-    private fun launchWalletMonitorSubscription(userId: String) =
+    private suspend fun launchWalletMonitorSubscription(userId: String) =
         runCatching {
             PrimalSocketSubscription.launch(
                 scope = scope,
@@ -173,7 +174,7 @@ class SubscriptionsManager @Inject constructor(
                             event = nostrNotary.signPrimalWalletOperationNostrEvent(
                                 userId = userId,
                                 content = BalanceRequestBody(subWallet = SubWallet.Open).encodeToJsonString(),
-                            ),
+                            ).unwrapOrThrow(),
                         ),
                     ),
                 ),

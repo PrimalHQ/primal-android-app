@@ -43,6 +43,7 @@ import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asIdentifierTag
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
+import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import net.primal.domain.nostr.findFirstIdentifier
 import net.primal.domain.nostr.utils.parseAsLNUrlOrNull
 
@@ -92,7 +93,8 @@ class FeedsRepositoryImpl(
                     tags = listOf("${AppBuildHelper.getAppName()} App".asIdentifierTag()),
                     content = ContentAppSubSettings<String>(key = specKind.settingsKey).encodeToJsonString(),
                 ),
-            )
+            ).unwrapOrThrow()
+
             val response = feedsApi.getUserFeeds(authorization = authorization, specKind = specKind)
             val content = response.articleFeeds.content.decodeFromJsonStringOrNull<List<ContentPrimalFeedData>>()
             val feeds = content?.map { it.asFeedPO(ownerId = userId, specKind = specKind) }
@@ -163,7 +165,7 @@ class FeedsRepositoryImpl(
                         settings = feeds.map { it.asContentPrimalFeedData() },
                     ).encodeToJsonString(),
                 ),
-            )
+            ).unwrapOrThrow()
 
             feedsApi.setUserFeeds(userFeedsNostrEvent = signedEvent)
         }
@@ -188,7 +190,7 @@ class FeedsRepositoryImpl(
                     settings = feeds.map { it.asContentPrimalFeedData() },
                 ).encodeToJsonString(),
             ),
-        )
+        ).unwrapOrThrow()
 
         feedsApi.setUserFeeds(userFeedsNostrEvent = signedEvent)
     }

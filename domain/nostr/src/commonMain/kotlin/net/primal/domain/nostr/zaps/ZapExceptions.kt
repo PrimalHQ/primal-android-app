@@ -11,5 +11,6 @@ class ZapRequestException(
 ) : ZapException(message = message, cause = cause)
 
 class ZapFailureException(
-    override val cause: Throwable,
-) : ZapException(cause = cause)
+    override val message: String? = null,
+    override val cause: Throwable? = null,
+) : ZapException(message = message, cause = cause)

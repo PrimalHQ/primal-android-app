@@ -5,7 +5,6 @@ import io.kotest.matchers.collections.shouldContainOnly
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -26,6 +25,7 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.cryptography.SignResult
 import net.primal.domain.nostr.cryptography.utils.CryptoUtils
 import org.junit.Rule
 import org.junit.Test
@@ -244,9 +244,9 @@ class CreateAccountHandlerTest {
                 settingsRepository = settingsRepository,
                 credentialsStore = credentialsStore,
                 nostrNotary = mockk(relaxed = true) {
-                    every {
+                    coEvery {
                         signAuthorizationNostrEvent(keyPair.pubKey, any(), any())
-                    } returns expectedNostrEvent
+                    } returns SignResult.Signed(expectedNostrEvent)
                 },
             )
 

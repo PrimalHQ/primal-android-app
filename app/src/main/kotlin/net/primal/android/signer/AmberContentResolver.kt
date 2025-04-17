@@ -87,21 +87,19 @@ fun ContentResolver.encryptNip04WithAmber(
     }
 
 /**
- * Requests Amber to sign the given [NostrUnsignedEvent] via its `sign_event` method.
+ * Requests Amber to sign the specified [NostrUnsignedEvent] by invoking its `sign_event` method.
  *
- * If the user has already granted permission for this event kind, a signed [NostrEvent] is returned.
- * Otherwise, the method returns `null`. An optional [onResult] callback may also be supplied to handle
- * the signing outcome—this callback will receive either the signed event or `null` if signing was not authorized.
+ * The signing request can result in one of the following outcomes:
+ *  - [AmberSignResult.Signed]: The event was successfully signed and a valid [NostrEvent] is returned.
+ *  - [AmberSignResult.Undecided]: The user has not yet made a decision regarding signing this event.
+ *  - [AmberSignResult.Rejected]: The user has explicitly declined to sign the event.
  *
- * @param event The unsigned Nostr event to be signed.
- * @param onResult An optional callback invoked with the signed [NostrEvent],
- *                 or `null` if signing was declined or failed.
- * @return The signed [NostrEvent], or `null` if the user has not approved signing for this event kind.
+ * The outcome is encapsulated in an [AmberSignResult] that represents the exact state of the signing operation.
+ *
+ * @param event The unsigned Nostr event that is to be signed.
+ * @return An [AmberSignResult] indicating whether the event was signed, left undecided, or rejected.
  */
-fun ContentResolver.signEventWithAmber(
-    event: NostrUnsignedEvent,
-    onResult: ((nostrEvent: NostrEvent?) -> Unit)? = null,
-): NostrEvent? =
+fun ContentResolver.signEventWithAmber(event: NostrUnsignedEvent): AmberSignResult =
     query(
         (AMBER_PREFIX + SignerMethod.SIGN_EVENT.method.uppercase()).toUri(),
         arrayOf(event.encodeToJsonString(), "", event.pubKey.hexToNpubHrp()),
@@ -110,13 +108,20 @@ fun ContentResolver.signEventWithAmber(
         null,
     )?.use {
         if (it.moveToFirst()) {
-            val index = it.getColumnIndex("event")
-            if (index < 0) return null
-            val nostrEvent = it.getString(index).decodeFromJsonStringOrNull<NostrEvent>()
+            val rejectedIndex = it.getColumnIndex("rejected")
+            val eventIndex = it.getColumnIndex("event")
 
-            onResult?.invoke(nostrEvent)
-            return nostrEvent
+            if (eventIndex < 0 || rejectedIndex >= 0) return AmberSignResult.Rejected
+            val nostrEvent = it.getString(eventIndex).decodeFromJsonStringOrNull<NostrEvent>()
+
+            nostrEvent?.let { AmberSignResult.Signed(it) }
         } else {
-            return null
+            AmberSignResult.Undecided
         }
-    }
+    } ?: AmberSignResult.Undecided
+
+sealed class AmberSignResult {
+    data class Signed(val nostrEvent: NostrEvent) : AmberSignResult()
+    data object Undecided : AmberSignResult()
+    data object Rejected : AmberSignResult()
+}
