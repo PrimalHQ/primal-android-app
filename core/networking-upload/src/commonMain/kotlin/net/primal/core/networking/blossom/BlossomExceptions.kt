@@ -4,6 +4,6 @@ open class BlossomException(message: String? = null, cause: Throwable? = null) :
 
 class BlossomUploadException(message: String? = null, cause: Throwable? = null) : BlossomException(message, cause)
 
-class UploadRequirementException(message: String) : BlossomException(message)
+class UploadRequirementException(message: String? = null, cause: Throwable? = null) : BlossomException(message, cause)
 
-class BlossomMirrorException(message: String) : BlossomException(message)
+class BlossomMirrorException(message: String? = null, cause: Throwable? = null) : BlossomException(message, cause)
