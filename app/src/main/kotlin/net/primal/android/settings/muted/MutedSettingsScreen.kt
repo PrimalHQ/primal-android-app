@@ -69,7 +69,7 @@ fun MutedSettingsScreen(
         modifier = Modifier,
         topBar = {
             PrimalTopAppBar(
-                title = stringResource(id = R.string.settings_muted_accounts_title),
+                title = stringResource(id = R.string.settings_muted_title),
                 navigationIcon = PrimalIcons.ArrowBack,
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 onNavigationIconClick = onClose,

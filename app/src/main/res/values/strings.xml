@@ -871,7 +871,8 @@
     <string name="settings_zaps_editor_value">Value</string>
     <string name="settings_zaps_editor_save">Save</string>
 
-    <string name="settings_muted_accounts_title">Muted</string>
+    <string name="settings_muted_content_title">Muted Content</string>
+    <string name="settings_muted_title">Muted</string>
     <string name="settings_muted_accounts_unmute_button">Unmute</string>
     <string name="settings_muted_accounts_mute_button">Mute</string>
     <string name="settings_muted_accounts_no_content">Your muted accounts will appear here.</string>
