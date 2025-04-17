@@ -75,10 +75,26 @@ class MediaUploadsSettingsViewModel @Inject constructor(
                     is UiEvent.UpdateNewBlossomMirrorServerUrl -> setState { copy(newBlossomServerMirrorUrl = it.url) }
                     is UiEvent.ConfirmBlossomMirrorServerUrl -> confirmBlossomMirrorServerUrl(it.url)
                     is UiEvent.UpdateBlossomMirrorEnabled -> updateBlossomMirrorEnabled(it.enabled)
+                    is UiEvent.RemoveBlossomMirrorServerUrl -> removeBlossomMirrorServerUrl(it.url)
                     UiEvent.RestoreDefaultBlossomServer -> restoreDefaultBlossomServer()
                 }
             }
         }
+
+    private fun removeBlossomMirrorServerUrl(url: String) {
+        val mirrorUrls = state.value.mirrorBlossomServerUrls.filterNot { it == url }
+
+        val serverList = buildList {
+            add(state.value.blossomServerUrl)
+            addAll(mirrorUrls)
+        }
+
+        updateBlossomServers(serverList) {
+            copy(
+                mirrorBlossomServerUrls = mirrorUrls,
+            )
+        }
+    }
 
     private fun confirmBlossomServerUrl(url: String) {
         val mirrorUrls = state.value.mirrorBlossomServerUrls

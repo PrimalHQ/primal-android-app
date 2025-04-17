@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -184,7 +185,9 @@ private fun MediaUploadsLazyColumn(
                 item {
                     MirrorBlossomServerSection(
                         mirrorBlossomServerUrls = state.mirrorBlossomServerUrls,
-                        onDisconnectMirrorBlossomServer = {},
+                        onDisconnectMirrorBlossomServer = {
+                            eventPublisher(MediaUploadsSettingsContract.UiEvent.RemoveBlossomMirrorServerUrl(it))
+                        },
                     )
                 }
             }
@@ -361,7 +364,7 @@ private fun LazyListScope.blossomMirrorServerInputItem(
                 )
             },
             buttonEnabled = state.newBlossomServerMirrorUrl != state.blossomServerUrl &&
-               !state.mirrorBlossomServerUrls.contains(state.newBlossomServerMirrorUrl) &&
+                !state.mirrorBlossomServerUrls.contains(state.newBlossomServerMirrorUrl) &&
                 state.newBlossomServerMirrorUrl.isNotEmpty(),
             onActionClick = {
                 keyboardController?.hide()
@@ -419,7 +422,7 @@ private fun LazyListScope.blossomMirrorServerSectionItem(
                 ),
             )
             Text(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = 17.dp).padding(top = 10.dp, bottom = 15.dp),
                 text = stringResource(id = R.string.settings_media_uploads_blossom_mirror_server_enabled_notice),
                 style = AppTheme.typography.bodySmall,
                 lineHeight = 20.sp,
@@ -465,22 +468,57 @@ private fun BlossomServerDestination(
 }
 
 @Composable
-private fun MirrorBlossomServerDestination(
+private fun MirrorBlossomServerSection(
     modifier: Modifier = Modifier,
-    destinationUrl: String,
-    onDisconnectMirrorBlossomServer: () -> Unit,
-    connected: Boolean = true,
+    mirrorBlossomServerUrls: List<String>,
+    onDisconnectMirrorBlossomServer: (String) -> Unit,
     colors: ListItemColors = ListItemDefaults.colors(
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
     ),
 ) {
-    val success = AppTheme.extraColorScheme.successBright
-    val failed = AppTheme.colorScheme.error
+    Column(modifier = modifier.padding(horizontal = 16.dp)) {
+        mirrorBlossomServerUrls.forEachIndexed { index, server ->
+            val isFirst = index == 0
+            val isLast = index == mirrorBlossomServerUrls.lastIndex
+
+            val shape = when {
+                isFirst && isLast -> AppTheme.shapes.medium
+                isFirst -> RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                isLast -> RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
+                else -> RoundedCornerShape(0.dp)
+            }
+
+            MirrorBlossomServerDestination(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(shape),
+                destinationUrl = server,
+                onDisconnectMirrorBlossomServer = {
+                    onDisconnectMirrorBlossomServer(server)
+                },
+                colors = colors,
+            )
+
+            if (!isLast) {
+                PrimalDivider()
+            }
+        }
+    }
+}
+
+@Composable
+private fun MirrorBlossomServerDestination(
+    modifier: Modifier = Modifier,
+    destinationUrl: String,
+    onDisconnectMirrorBlossomServer: () -> Unit,
+    colors: ListItemColors = ListItemDefaults.colors(
+        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+    ),
+) {
+    val gray = AppTheme.colorScheme.outline
 
     ListItem(
-        modifier = modifier
-            .padding(horizontal = 16.dp)
-            .clip(AppTheme.shapes.medium),
+        modifier = modifier,
         leadingContent = {
             Box(
                 modifier = Modifier
@@ -488,7 +526,7 @@ private fun MirrorBlossomServerDestination(
                     .size(10.dp)
                     .drawWithCache {
                         this.onDrawWithContent {
-                            drawCircle(color = if (connected) success else failed)
+                            drawCircle(color = gray)
                         }
                     },
             )
@@ -510,27 +548,6 @@ private fun MirrorBlossomServerDestination(
         },
         colors = colors,
     )
-}
-
-@Composable
-private fun MirrorBlossomServerSection(
-    mirrorBlossomServerUrls: List<String>,
-    onDisconnectMirrorBlossomServer: (String) -> Unit,
-    connected: Boolean = true,
-    modifier: Modifier = Modifier,
-    colors: ListItemColors = ListItemDefaults.colors(
-        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-    ),
-) {
-    mirrorBlossomServerUrls.forEach { server ->
-        MirrorBlossomServerDestination(
-            modifier = Modifier.padding(vertical = 8.dp),
-            destinationUrl = server,
-            onDisconnectMirrorBlossomServer = {
-                onDisconnectMirrorBlossomServer(server)
-            }
-        )
-    }
 }
 
 private fun String.removeHttpPrefix() = this.removePrefix("https://").removePrefix("http://")

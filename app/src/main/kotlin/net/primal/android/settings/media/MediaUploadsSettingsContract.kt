@@ -22,6 +22,7 @@ interface MediaUploadsSettingsContract {
         data class ConfirmBlossomMirrorServerUrl(val url: String) : UiEvent()
         data class UpdateMediaUploadsMode(val mode: MediaUploadsMode) : UiEvent()
         data class UpdateBlossomMirrorEnabled(val enabled: Boolean) : UiEvent()
+        data class RemoveBlossomMirrorServerUrl(val url: String) : UiEvent()
         data object RestoreDefaultBlossomServer : UiEvent()
     }
 }
