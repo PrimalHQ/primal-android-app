@@ -30,4 +30,14 @@ sealed class UiError {
 
     data class FailedToRestoreDefaultBlossomServer(val cause: Throwable?) : UiError()
     data class FailedToUpdateBlossomServer(val cause: Throwable?) : UiError()
+
+    data class FailedToMuteHashtag(val cause: Throwable) : UiError()
+    data class FailedToUnmuteHashtag(val cause: Throwable) : UiError()
+
+    data class FailedToMuteWord(val cause: Throwable) : UiError()
+    data class FailedToUnmuteWord(val cause: Throwable) : UiError()
+    data class FailedToFetchMuteList(val cause: Throwable) : UiError()
+
+    data class SignatureError(val error: SignatureUiError) : UiError()
+    data class NetworkError(val cause: Throwable) : UiError()
 }

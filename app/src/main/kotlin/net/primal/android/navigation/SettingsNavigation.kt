@@ -21,8 +21,8 @@ import net.primal.android.settings.keys.KeysSettingsScreen
 import net.primal.android.settings.keys.KeysSettingsViewModel
 import net.primal.android.settings.media.MediaUploadsSettingsScreen
 import net.primal.android.settings.media.MediaUploadsSettingsViewModel
-import net.primal.android.settings.muted.list.MutedSettingsScreen
-import net.primal.android.settings.muted.list.MutedSettingsViewModel
+import net.primal.android.settings.muted.MutedSettingsScreen
+import net.primal.android.settings.muted.MutedSettingsViewModel
 import net.primal.android.settings.network.NetworkSettingsScreen
 import net.primal.android.settings.network.NetworkSettingsViewModel
 import net.primal.android.settings.notifications.NotificationsSettingsScreen
@@ -336,8 +336,10 @@ private fun NavGraphBuilder.mutedAccounts(route: String, navController: NavContr
         LockToOrientationPortrait()
         MutedSettingsScreen(
             viewModel = viewModel,
+            noteCallbacks = noteCallbacksHandler(navController),
             onClose = { navController.navigateUp() },
             onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+            onGoToWallet = { navController.navigateToWallet() },
         )
     }
 
