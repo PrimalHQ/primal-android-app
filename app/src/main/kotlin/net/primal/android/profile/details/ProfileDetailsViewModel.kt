@@ -36,6 +36,7 @@ import net.primal.domain.feeds.FEED_KIND_USER
 import net.primal.domain.feeds.FeedSpecKind
 import net.primal.domain.feeds.FeedsRepository
 import net.primal.domain.feeds.buildLatestNotesUserFeedSpec
+import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.Nip19TLV
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
@@ -46,7 +47,6 @@ import net.primal.domain.nostr.utils.isValidHex
 import net.primal.domain.nostr.zaps.ZapFailureException
 import net.primal.domain.nostr.zaps.ZapRequestException
 import net.primal.domain.nostr.zaps.ZapTarget
-import net.primal.domain.profile.MutedUserRepository
 import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
 
@@ -58,7 +58,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private val feedsRepository: FeedsRepository,
     private val profileRepository: ProfileRepository,
     private val userRepository: UserRepository,
-    private val mutedUserRepository: MutedUserRepository,
+    private val mutedItemRepository: MutedItemRepository,
     private val zapHandler: ZapHandler,
 ) : ViewModel() {
 
@@ -259,7 +259,7 @@ class ProfileDetailsViewModel @Inject constructor(
 
     private fun observeMutedAccount(profileId: String) =
         viewModelScope.launch {
-            mutedUserRepository.observeIsUserMutedByOwnerId(
+            mutedItemRepository.observeIsUserMutedByOwnerId(
                 pubkey = profileId,
                 ownerId = activeAccountStore.activeUserId(),
             ).collect {
@@ -338,7 +338,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private suspend fun fetchLatestMuteList() =
         try {
             withContext(dispatcherProvider.io()) {
-                mutedUserRepository.fetchAndPersistMuteList(
+                mutedItemRepository.fetchAndPersistMuteList(
                     userId = activeAccountStore.activeUserId(),
                 )
             }
@@ -495,7 +495,7 @@ class ProfileDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 withContext(dispatcherProvider.io()) {
-                    mutedUserRepository.muteUserAndPersistMuteList(
+                    mutedItemRepository.muteUserAndPersistMuteList(
                         userId = activeAccountStore.activeUserId(),
                         mutedUserId = action.profileId,
                     )
@@ -523,7 +523,7 @@ class ProfileDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 withContext(dispatcherProvider.io()) {
-                    mutedUserRepository.unmuteUserAndPersistMuteList(
+                    mutedItemRepository.unmuteUserAndPersistMuteList(
                         userId = activeAccountStore.activeUserId(),
                         unmutedUserId = action.profileId,
                     )

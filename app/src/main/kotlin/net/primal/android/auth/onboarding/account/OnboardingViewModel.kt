@@ -19,16 +19,18 @@ import net.primal.android.auth.onboarding.account.api.OnboardingApi
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroupMember
 import net.primal.android.auth.repository.CreateAccountHandler
-import net.primal.android.networking.upload.PrimalUploadService
-import net.primal.android.networking.upload.UploadJob
+import net.primal.android.nostr.notary.signOrThrow
 import net.primal.android.profile.domain.ProfileMetadata
+import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.BlossomException
+import net.primal.core.networking.blossom.UploadJob
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.utils.CryptoUtils
+import net.primal.domain.nostr.cryptography.utils.hexToNsecHrp
 import timber.log.Timber
 
 @HiltViewModel
@@ -36,7 +38,7 @@ class OnboardingViewModel @Inject constructor(
     private val dispatcherProvider: DispatcherProvider,
     private val onboardingApi: OnboardingApi,
     private val createAccountHandler: CreateAccountHandler,
-    private val primalUploadService: PrimalUploadService,
+    private val primalUploadService: AndroidPrimalBlossomUploadService,
 ) : ViewModel() {
 
     private val keyPair = CryptoUtils.generateHexEncodedKeypair()
@@ -202,7 +204,10 @@ class OnboardingViewModel @Inject constructor(
                     val uploadResult = withContext(dispatcherProvider.io()) {
                         primalUploadService.upload(
                             uri = bannerUri,
-                            keyPair = keyPair,
+                            userId = keyPair.pubKey,
+                            onSignRequested = {
+                                it.signOrThrow(keyPair.privateKey.hexToNsecHrp())
+                            },
                         )
                     }
                     setState { copy(bannerRemoteUrl = uploadResult.remoteUrl) }

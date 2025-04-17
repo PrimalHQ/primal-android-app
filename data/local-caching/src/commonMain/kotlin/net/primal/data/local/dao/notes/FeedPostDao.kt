@@ -7,21 +7,21 @@ import androidx.room.RawQuery
 import androidx.room.RoomRawQuery
 import androidx.room.Transaction
 import net.primal.data.local.dao.events.EventUserStats
-import net.primal.data.local.dao.profiles.MutedUserData
+import net.primal.data.local.dao.mutes.MutedItemData
 
 @Dao
 interface FeedPostDao {
 
     @Transaction
-    @RawQuery(observedEntities = [FeedPost::class, MutedUserData::class, EventUserStats::class])
+    @RawQuery(observedEntities = [FeedPost::class, MutedItemData::class, EventUserStats::class])
     fun feedQuery(query: RoomRawQuery): PagingSource<Int, FeedPost>
 
     @Transaction
-    @RawQuery(observedEntities = [FeedPost::class, MutedUserData::class, EventUserStats::class])
+    @RawQuery(observedEntities = [FeedPost::class, MutedItemData::class, EventUserStats::class])
     suspend fun newestFeedPosts(query: RoomRawQuery): List<FeedPost>
 
     @Transaction
-    @RawQuery(observedEntities = [FeedPost::class, MutedUserData::class, EventUserStats::class])
+    @RawQuery(observedEntities = [FeedPost::class, MutedItemData::class, EventUserStats::class])
     suspend fun oldestFeedPosts(query: RoomRawQuery): List<FeedPost>
 
     @Transaction
@@ -39,7 +39,7 @@ interface FeedPostDao {
             NULL AS repostId,
             NULL AS repostAuthorId,
             NULL AS feedCreatedAt,
-            NULL AS isMuted,
+            NULL AS isAuthorMuted,
             PostData.replyToPostId,
             PostData.replyToAuthorId
         FROM PostData WHERE postId IN (:postIds)

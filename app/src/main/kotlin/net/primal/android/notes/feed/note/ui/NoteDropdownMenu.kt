@@ -31,6 +31,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteLink
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteText
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyPublicKey
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyRawData
+import net.primal.android.core.compose.icons.primaliconpack.ContextMuteConversation
 import net.primal.android.core.compose.icons.primaliconpack.ContextMuteUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextRemoveBookmark
 import net.primal.android.core.compose.icons.primaliconpack.ContextReportUser
@@ -55,11 +56,14 @@ fun NoteDropdownMenuIcon(
     noteRawData: String,
     authorId: String,
     isBookmarked: Boolean,
+    isThreadMuted: Boolean,
     relayHints: List<String> = emptyList(),
     noteGraphicsLayer: GraphicsLayer,
     enabled: Boolean = true,
     onBookmarkClick: (() -> Unit)? = null,
     onMuteUserClick: (() -> Unit)? = null,
+    onMuteThreadClick: (() -> Unit)? = null,
+    onUnmuteThreadClick: (() -> Unit)? = null,
     onReportContentClick: (() -> Unit)? = null,
 ) {
     var menuVisible by remember { mutableStateOf(false) }
@@ -88,6 +92,17 @@ fun NoteDropdownMenuIcon(
             expanded = menuVisible,
             onDismissRequest = { menuVisible = false },
         ) {
+            if (isThreadMuted) {
+                DropdownPrimalMenuItem(
+                    trailingIconVector = PrimalIcons.ContextMuteConversation,
+                    tint = AppTheme.colorScheme.error,
+                    text = stringResource(id = R.string.feed_context_unmute_thread),
+                    onClick = {
+                        onUnmuteThreadClick?.invoke()
+                        menuVisible = false
+                    },
+                )
+            }
             DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.ContextShare,
                 text = stringResource(id = R.string.feed_context_share_note),
@@ -220,6 +235,17 @@ fun NoteDropdownMenuIcon(
                     menuVisible = false
                 },
             )
+            if (!isThreadMuted) {
+                DropdownPrimalMenuItem(
+                    trailingIconVector = PrimalIcons.ContextMuteConversation,
+                    tint = AppTheme.colorScheme.error,
+                    text = stringResource(id = R.string.feed_context_mute_thread),
+                    onClick = {
+                        onMuteThreadClick?.invoke()
+                        menuVisible = false
+                    },
+                )
+            }
             DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.ContextReportUser,
                 tint = AppTheme.colorScheme.error,
