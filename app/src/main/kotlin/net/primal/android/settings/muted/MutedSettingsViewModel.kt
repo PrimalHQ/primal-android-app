@@ -19,6 +19,7 @@ import net.primal.android.settings.muted.MutedSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.publisher.MissingRelaysException
@@ -101,7 +102,7 @@ class MutedSettingsViewModel @Inject constructor(
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToMuteHashtag(error)) }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setState { copy(error = UiError.NetworkError(error)) }
             }
@@ -125,7 +126,7 @@ class MutedSettingsViewModel @Inject constructor(
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToUnmuteHashtag(error)) }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setState { copy(error = UiError.NetworkError(error)) }
             }
@@ -149,7 +150,7 @@ class MutedSettingsViewModel @Inject constructor(
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToMuteWord(error)) }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setState { copy(error = UiError.NetworkError(error)) }
             }
@@ -173,7 +174,7 @@ class MutedSettingsViewModel @Inject constructor(
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToUnmuteWord(error)) }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setState { copy(error = UiError.NetworkError(error)) }
             }
@@ -197,7 +198,7 @@ class MutedSettingsViewModel @Inject constructor(
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToUnmuteUser(error)) }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setState { copy(error = UiError.NetworkError(error)) }
             }
