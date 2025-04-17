@@ -20,5 +20,6 @@ fun MuteThreads(
         onGoToWallet = onGoToWallet,
         contentPadding = paddingValues,
         pollingEnabled = false,
+        allowMutedThreads = true,
     )
 }
