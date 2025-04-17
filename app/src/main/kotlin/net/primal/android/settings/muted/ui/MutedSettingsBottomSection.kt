@@ -34,8 +34,6 @@ fun MutedSettingsBottomSection(
     showLeadingHashtag: Boolean = false,
     sendEnabled: Boolean = true,
 ) {
-    val fieldHeight = 49.dp
-
     PrimalDivider()
 
     Row(
@@ -43,9 +41,7 @@ fun MutedSettingsBottomSection(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         OutlinedTextField(
-            modifier = Modifier
-                .weight(1.0f)
-                .height(fieldHeight),
+            modifier = Modifier.weight(1.0f),
             value = value,
             onValueChange = onValueChange,
             maxLines = 1,
@@ -64,7 +60,7 @@ fun MutedSettingsBottomSection(
             keyboardOptions = KeyboardOptions.Default.copy(
                 capitalization = KeyboardCapitalization.Sentences,
             ),
-            leadingIcon = if (showLeadingHashtag) {
+            prefix = if (showLeadingHashtag) {
                 {
                     Text(
                         text = "#",
@@ -80,8 +76,8 @@ fun MutedSettingsBottomSection(
         PrimalLoadingButton(
             modifier = Modifier
                 .padding(start = 8.dp)
-                .height(fieldHeight)
-                .wrapContentWidth(),
+                .wrapContentWidth()
+                .height(46.dp),
             text = stringResource(
                 id = R.string.settings_muted_accounts_mute_button,
             ).lowercase(),

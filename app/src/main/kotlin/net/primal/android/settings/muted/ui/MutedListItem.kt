@@ -1,6 +1,7 @@
 package net.primal.android.settings.muted.ui
 
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -18,6 +19,7 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun MutedListItem(item: String, onUnmuteClick: (String) -> Unit) {
     ListItem(
+        modifier = Modifier.heightIn(min = 60.dp),
         colors = ListItemDefaults.colors(
             containerColor = AppTheme.colorScheme.surfaceVariant,
         ),
@@ -26,8 +28,8 @@ fun MutedListItem(item: String, onUnmuteClick: (String) -> Unit) {
                 text = item,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                style = AppTheme.typography.headlineLarge,
-                fontSize = 14.sp,
+                style = AppTheme.typography.bodyLarge,
+                fontSize = 16.sp,
             )
         },
         trailingContent = {
