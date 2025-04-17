@@ -77,6 +77,7 @@ class MediaUploadsSettingsViewModel @Inject constructor(
                     is UiEvent.UpdateBlossomMirrorEnabled -> updateBlossomMirrorEnabled(it.enabled)
                     is UiEvent.RemoveBlossomMirrorServerUrl -> removeBlossomMirrorServerUrl(it.url)
                     UiEvent.RestoreDefaultBlossomServer -> restoreDefaultBlossomServer()
+                    is UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
         }

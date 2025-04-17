@@ -25,18 +25,24 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
@@ -44,6 +50,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.DeleteListItemImage
@@ -55,6 +62,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.ConnectRelay
 import net.primal.android.core.compose.settings.DecoratedSettingsOutlinedTextField
+import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.settings.network.ConfirmActionAlertDialog
 import net.primal.android.settings.network.TextSection
 import net.primal.android.theme.AppTheme
@@ -77,6 +85,9 @@ private fun MediaUploadsSettingsScreen(
     onClose: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     val backSequence = {
         if (state.mode == MediaUploadsMode.View) {
@@ -86,6 +97,18 @@ private fun MediaUploadsSettingsScreen(
             eventPublisher(
                 MediaUploadsSettingsContract.UiEvent.UpdateMediaUploadsMode(mode = MediaUploadsMode.View),
             )
+        }
+    }
+
+    LaunchedEffect(state.error) {
+        state.error?.let {
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = it.resolveUiErrorMessage(context),
+                    duration = SnackbarDuration.Short,
+                )
+            }
+            eventPublisher(MediaUploadsSettingsContract.UiEvent.DismissError())
         }
     }
 
@@ -120,6 +143,7 @@ private fun MediaUploadsSettingsScreen(
                 )
             }
         },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     )
 }
 
