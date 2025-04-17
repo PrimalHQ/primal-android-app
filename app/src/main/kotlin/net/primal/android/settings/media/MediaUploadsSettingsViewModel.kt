@@ -48,13 +48,13 @@ class MediaUploadsSettingsViewModel @Inject constructor(
 
                 if (blossoms.isNotEmpty()) {
                     val primaryServer = blossoms.first()
-                    val mirrorServer = blossoms.getOrNull(1)
+                    val mirrorServers = blossoms.drop(1)
 
                     setState {
                         copy(
                             blossomServerUrl = primaryServer,
-                            blossomServerMirrorUrl = mirrorServer ?: blossomServerMirrorUrl,
-                            blossomMirrorEnabled = mirrorServer != null,
+                            mirrorBlossomServerUrls = mirrorServers,
+                            blossomMirrorEnabled = mirrorServers.isNotEmpty(),
                         )
                     }
                 }
@@ -81,13 +81,11 @@ class MediaUploadsSettingsViewModel @Inject constructor(
         }
 
     private fun confirmBlossomServerUrl(url: String) {
-        val mirrorUrl = state.value.blossomServerMirrorUrl
+        val mirrorUrls = state.value.mirrorBlossomServerUrls
 
         val serverList = buildList {
             add(url)
-            if (mirrorUrl.isNotBlank() && mirrorUrl != url) {
-                add(mirrorUrl)
-            }
+            addAll(mirrorUrls.filterNot { it == url })
         }
 
         updateBlossomServers(serverList) {
@@ -104,7 +102,7 @@ class MediaUploadsSettingsViewModel @Inject constructor(
             setState {
                 copy(
                     blossomMirrorEnabled = true,
-                    blossomServerMirrorUrl = "",
+                    mirrorBlossomServerUrls = emptyList(),
                     newBlossomServerMirrorUrl = "",
                 )
             }
@@ -121,17 +119,19 @@ class MediaUploadsSettingsViewModel @Inject constructor(
 
     private fun confirmBlossomMirrorServerUrl(url: String) {
         val primaryUrl = state.value.blossomServerUrl
+        val mirrors = state.value.mirrorBlossomServerUrls
 
         val serverList = buildList {
             add(primaryUrl)
-            if (url.isNotBlank() && url != primaryUrl) {
+            addAll(mirrors.filterNot { it == primaryUrl })
+            if (url.isNotBlank() && url != primaryUrl && url !in mirrors) {
                 add(url)
             }
         }
 
         updateBlossomServers(serverList) {
             copy(
-                blossomServerMirrorUrl = url,
+                mirrorBlossomServerUrls = serverList.drop(1),
                 newBlossomServerMirrorUrl = "",
                 mode = MediaUploadsMode.View,
             )
@@ -139,16 +139,12 @@ class MediaUploadsSettingsViewModel @Inject constructor(
     }
 
     private fun restoreDefaultBlossomServer() {
-        val mirrorUrl = state.value.blossomServerMirrorUrl
-
-        val serverList = buildList {
+        val serverUrls = buildList {
             add(DEFAULT_BLOSSOM_URL)
-            if (mirrorUrl.isNotBlank() && mirrorUrl != DEFAULT_BLOSSOM_URL) {
-                add(mirrorUrl)
-            }
+            addAll(state.value.mirrorBlossomServerUrls.filterNot { it == DEFAULT_BLOSSOM_URL })
         }
 
-        updateBlossomServers(serverList) {
+        updateBlossomServers(serverUrls) {
             copy(
                 blossomServerUrl = DEFAULT_BLOSSOM_URL,
                 newBlossomServerUrl = "",

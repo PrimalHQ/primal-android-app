@@ -6,7 +6,7 @@ interface MediaUploadsSettingsContract {
     data class UiState(
         val isLoadingBlossomServerUrls: Boolean = true,
         val blossomServerUrl: String = "",
-        val blossomServerMirrorUrl: String = "",
+        val mirrorBlossomServerUrls: List<String> = emptyList(),
         val newBlossomServerUrl: String = "",
         val newBlossomServerMirrorUrl: String = "",
         val suggestedBlossomServers: List<String> = emptyList(),

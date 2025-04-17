@@ -175,11 +175,11 @@ private fun MediaUploadsLazyColumn(
         }
 
         if (state.blossomMirrorEnabled) {
-            if (isViewMode && state.blossomServerMirrorUrl.isNotEmpty()) {
-                item {
+            if (isViewMode && state.mirrorBlossomServerUrls.isNotEmpty()) {
+                items(state.mirrorBlossomServerUrls) { server ->
                     BlossomServerDestination(
                         modifier = Modifier.padding(vertical = 8.dp),
-                        destinationUrl = state.blossomServerMirrorUrl,
+                        destinationUrl = server,
                     )
                 }
             }
@@ -316,7 +316,7 @@ private fun LazyListScope.blossomMainServerInputItem(
             },
             showSupportContent = state.mode == MediaUploadsMode.View,
             buttonEnabled = state.newBlossomServerUrl != state.blossomServerUrl &&
-                state.newBlossomServerUrl != state.blossomServerMirrorUrl &&
+                !state.mirrorBlossomServerUrls.contains(state.newBlossomServerUrl) &&
                 state.newBlossomServerUrl.isNotEmpty(),
             onActionClick = {
                 keyboardController?.hide()
@@ -356,7 +356,7 @@ private fun LazyListScope.blossomMirrorServerInputItem(
                 )
             },
             buttonEnabled = state.newBlossomServerMirrorUrl != state.blossomServerUrl &&
-                state.newBlossomServerMirrorUrl != state.blossomServerMirrorUrl &&
+               !state.mirrorBlossomServerUrls.contains(state.newBlossomServerMirrorUrl) &&
                 state.newBlossomServerMirrorUrl.isNotEmpty(),
             onActionClick = {
                 keyboardController?.hide()
