@@ -50,6 +50,7 @@ fun DvmHeaderAndFeedList(
                 NoteFeedList(
                     feedSpec = dvmFeed.data.buildSpec(specKind = feedSpecKind),
                     noteCallbacks = NoteCallbacks(),
+                    previewMode = true,
                     pullToRefreshEnabled = false,
                     pollingEnabled = false,
                     showTopZaps = true,

@@ -74,6 +74,7 @@ fun NoteFeedList(
     contentPadding: PaddingValues = PaddingValues(0.dp),
     newNotesNoticeAlpha: Float = 1.00f,
     showTopZaps: Boolean = false,
+    previewMode: Boolean = false,
     pullToRefreshEnabled: Boolean = true,
     pollingEnabled: Boolean = true,
     noContentText: String = stringResource(id = R.string.feed_no_content),
@@ -84,8 +85,12 @@ fun NoteFeedList(
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
-    val viewModelKey = remember(feedSpec) {
-        "NoteFeedViewModel_$feedSpec"
+    val viewModelKey = remember(previewMode, feedSpec.toString()) {
+        if (!previewMode) {
+            "NoteFeedViewModel_$feedSpec"
+        } else {
+            UUID.randomUUID().toString()
+        }
     }
 
     val viewModel = hiltViewModel<NoteFeedViewModel, NoteFeedViewModel.Factory>(key = viewModelKey) { factory ->

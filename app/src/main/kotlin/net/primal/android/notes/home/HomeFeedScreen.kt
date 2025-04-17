@@ -119,7 +119,7 @@ fun HomeFeedScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     var shouldAnimateScrollToTop by remember { mutableStateOf(false) }
-    var activeFeed by rememberSaveable { mutableStateOf<FeedUi?>(null) }
+    var activeFeed by remember { mutableStateOf<FeedUi?>(null) }
     val pagerState = rememberPagerState(pageCount = { state.feeds.size })
 
     val topAppBarState = remember {
