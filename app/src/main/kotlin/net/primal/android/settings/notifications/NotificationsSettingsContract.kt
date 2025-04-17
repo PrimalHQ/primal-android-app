@@ -9,6 +9,7 @@ import net.primal.domain.notifications.NotificationSettingsType.TabNotifications
 
 interface NotificationsSettingsContract {
     data class UiState(
+        val pushNotificationsEnabled: Boolean = false,
         val pushNotificationsSettings: List<NotificationSwitchUi<PushNotifications>> = emptyList(),
         val tabNotificationsSettings: List<NotificationSwitchUi<TabNotifications>> = emptyList(),
         val preferencesSettings: List<NotificationSwitchUi<Preferences>> = emptyList(),
@@ -24,5 +25,6 @@ interface NotificationsSettingsContract {
     sealed class UiEvent {
         data object DismissErrors : UiEvent()
         data class NotificationSettingsChanged(val type: NotificationSettingsType, val value: Boolean) : UiEvent()
+        data class PushNotificationsToggled(val value: Boolean) : UiEvent()
     }
 }

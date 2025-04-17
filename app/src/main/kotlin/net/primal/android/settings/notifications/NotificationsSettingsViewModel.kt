@@ -12,12 +12,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import net.primal.android.core.errors.asSignatureUiError
+import net.primal.android.core.push.PushNotificationsTokenUpdater
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiEvent.DismissErrors
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiEvent.NotificationSettingsChanged
@@ -29,6 +29,7 @@ import net.primal.android.settings.notifications.ui.mapAsNotificationsPreference
 import net.primal.android.settings.notifications.ui.mapAsPushNotificationSwitchUi
 import net.primal.android.settings.notifications.ui.mapAsTabNotificationSwitchUi
 import net.primal.android.settings.repository.SettingsRepository
+import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
@@ -44,6 +45,8 @@ class NotificationsSettingsViewModel @Inject constructor(
     private val dispatcherProvider: DispatcherProvider,
     private val settingsRepository: SettingsRepository,
     private val activeAccountStore: ActiveAccountStore,
+    private val pushNotificationsTokenUpdater: PushNotificationsTokenUpdater,
+    private val accountsStore: UserAccountsStore,
     private val nostrNotary: NostrNotary,
 ) : ViewModel() {
 
@@ -86,7 +89,21 @@ class NotificationsSettingsViewModel @Inject constructor(
                             }
                         }
                     }
+
+                    is NotificationsSettingsContract.UiEvent.PushNotificationsToggled ->
+                        updatePushNotificationsEnabled(event.value)
                 }
+            }
+        }
+
+    private fun updatePushNotificationsEnabled(value: Boolean) =
+        viewModelScope.launch {
+            withContext(dispatcherProvider.io()) {
+                accountsStore.getAndUpdateAccount(activeAccountStore.activeUserId()) {
+                    copy(pushNotificationsEnabled = value)
+                }
+
+                pushNotificationsTokenUpdater.updateTokenForAllUsers()
             }
         }
 
@@ -117,13 +134,16 @@ class NotificationsSettingsViewModel @Inject constructor(
     private fun observeActiveAccount() =
         viewModelScope.launch {
             activeAccountStore.activeUserAccount
-                .mapNotNull { it.appSettings }
-                .collect { appSettings ->
+                .collect { activeAccount ->
                     setState {
                         copy(
-                            pushNotificationsSettings = appSettings.mapAsPushNotificationSwitchUi(),
-                            tabNotificationsSettings = appSettings.mapAsTabNotificationSwitchUi(),
-                            preferencesSettings = appSettings.mapAsNotificationsPreferences(),
+                            pushNotificationsEnabled = activeAccount.pushNotificationsEnabled,
+                            pushNotificationsSettings = activeAccount.appSettings?.mapAsPushNotificationSwitchUi()
+                                ?: emptyList(),
+                            tabNotificationsSettings = activeAccount.appSettings?.mapAsTabNotificationSwitchUi()
+                                ?: emptyList(),
+                            preferencesSettings = activeAccount.appSettings?.mapAsNotificationsPreferences()
+                                ?: emptyList(),
                         )
                     }
                 }
