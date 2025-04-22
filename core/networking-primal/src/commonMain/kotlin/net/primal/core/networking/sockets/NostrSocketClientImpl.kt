@@ -22,6 +22,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonObject
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.common.exception.NetworkException
 import okio.Buffer
 import okio.GzipSink
 import okio.Inflater
@@ -48,7 +49,7 @@ internal class NostrSocketClientImpl(
 
     override val socketUrl = wssUrl.cleanWebSocketUrl()
 
-    override suspend fun ensureSocketConnection() =
+    override suspend fun ensureSocketConnectionOrThrow() =
         webSocketMutex.withLock {
             if (webSocket == null) {
                 openWebSocketConnection(url = socketUrl)
@@ -73,7 +74,7 @@ internal class NostrSocketClientImpl(
                 Napier.w("NostrSocketClient::openWebSocketConnection($socketUrl) failed.", error)
                 this@NostrSocketClientImpl.webSocket = null
                 onSocketConnectionClosed?.invoke(socketUrl, error)
-                connectionAcquired.completeExceptionally(error)
+                connectionAcquired.completeExceptionally(NetworkException(cause = error))
             }
         }
         connectionAcquired.await()

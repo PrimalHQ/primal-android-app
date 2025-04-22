@@ -27,7 +27,7 @@ internal class BasePrimalApiClient(
     suspend fun query(message: PrimalCacheFilter): PrimalQueryResult {
         return try {
             coroutineScope {
-                socketClient.ensureSocketConnection()
+                socketClient.ensureSocketConnectionOrThrow()
                 val subscriptionId = Uuid.random().toPrimalSubscriptionId()
                 val deferredQueryResult = async { collectQueryResult(subscriptionId) }
                 sendMessageOrThrow(subscriptionId = subscriptionId, data = message.toPrimalJsonObject())
@@ -56,10 +56,10 @@ internal class BasePrimalApiClient(
     }
 
     suspend fun subscribe(subscriptionId: String, message: PrimalCacheFilter): Flow<NostrIncomingMessage> {
-        socketClient.ensureSocketConnection()
         try {
+            socketClient.ensureSocketConnectionOrThrow()
             sendMessageOrThrow(subscriptionId = subscriptionId, data = message.toPrimalJsonObject())
-        } catch (error: SocketSendMessageException) {
+        } catch (error: Exception) {
             Napier.w(error) { "Unable to subscribe." }
             throw WssException(message = "Api unreachable at the moment.", cause = error)
         }
@@ -67,8 +67,8 @@ internal class BasePrimalApiClient(
     }
 
     suspend fun closeSubscription(subscriptionId: String): Boolean {
-        socketClient.ensureSocketConnection()
         return try {
+            socketClient.ensureSocketConnectionOrThrow()
             socketClient.sendCLOSE(subscriptionId = subscriptionId)
             true
         } catch (_: Exception) {

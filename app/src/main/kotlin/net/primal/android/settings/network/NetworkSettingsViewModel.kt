@@ -104,13 +104,13 @@ class NetworkSettingsViewModel @Inject constructor(
                 Timber.w(error)
             }
             delay(1.seconds)
-            relaysSocketManager.ensureUserRelayPoolConnected()
+            relaysSocketManager.tryConnectingToAllUserRelays()
         }
 
     private fun ensureRelayConnected(url: String) =
         viewModelScope.launch {
             delay(1.seconds)
-            relaysSocketManager.ensureUserRelayConnected(url)
+            relaysSocketManager.tryConnectingToUserRelay(url)
         }
 
     private fun observeCachingServiceConnection() =

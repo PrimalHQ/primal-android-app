@@ -98,12 +98,18 @@ class RelayPool(
 
     fun hasRelays() = relays.isNotEmpty()
 
-    suspend fun ensureAllRelaysConnected() {
-        socketClients.forEach { it.ensureSocketConnection() }
+    suspend fun tryConnectingToAllRelays() {
+        socketClients.forEach {
+            runCatching {
+                it.ensureSocketConnectionOrThrow()
+            }
+        }
     }
 
-    suspend fun ensureRelayConnected(url: String) {
-        socketClients.find { it.socketUrl == url }?.ensureSocketConnection()
+    suspend fun tryConnectingToRelay(url: String) {
+        runCatching {
+            socketClients.find { it.socketUrl == url }?.ensureSocketConnectionOrThrow()
+        }
     }
 
     private fun List<Relay>.mapAsNostrSocketClient() =
@@ -167,7 +173,7 @@ class RelayPool(
             scope.launch {
                 with(nostrSocketClient) {
                     val sendEventResult = runCatching {
-                        ensureSocketConnection()
+                        ensureSocketConnectionOrThrow()
                         sendEVENT(nostrEvent.toNostrJsonObject())
                         collectPublishResponse(eventId = nostrEvent.id)
                     }

@@ -12,4 +12,4 @@ package net.primal.domain.common.exception
  * @param message Optional detail message describing the failure.
  * @param cause The underlying cause of the exception, if any.
  */
-class NetworkException(message: String?, cause: Throwable?) : RuntimeException(message, cause)
+class NetworkException(message: String? = null, cause: Throwable? = null) : RuntimeException(message, cause)
