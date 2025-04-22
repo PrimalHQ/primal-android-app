@@ -1,7 +1,9 @@
 package net.primal.android.settings.muted
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -107,49 +109,61 @@ fun MutedSettingsScreen(
             )
         },
         content = { paddingValues ->
-            HorizontalPager(state = pagerState) { pageIndex ->
-                when (pageIndex) {
-                    USERS_INDEX -> {
-                        MuteUsers(
-                            modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
-                            paddingValues = paddingValues,
-                            mutedUsers = state.mutedUsers,
-                            eventPublisher = eventPublisher,
-                            onProfileClick = onProfileClick,
-                        )
-                    }
-
-                    WORDS_INDEX -> {
-                        MuteWords(
-                            modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
-                            paddingValues = paddingValues,
-                            mutedWords = state.mutedWords,
-                            eventPublisher = eventPublisher,
-                        )
-                    }
-
-                    HASHTAGS_INDEX -> {
-                        MuteHashtags(
-                            modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
-                            paddingValues = paddingValues,
-                            mutedHashtags = state.mutedHashtags,
-                            eventPublisher = eventPublisher,
-                        )
-                    }
-
-                    THREADS_INDEX -> {
-                        MuteThreads(
-                            defaultMuteThreadsFeedSpec = state.defaultMuteThreadsFeedSpec,
-                            paddingValues = paddingValues,
-                            noteCallbacks = noteCallbacks,
-                            onGoToWallet = onGoToWallet,
-                        )
-                    }
-                }
-            }
+            MutedSettingsPager(
+                pagerState = pagerState,
+                state = state,
+                paddingValues = paddingValues,
+                noteCallbacks = noteCallbacks,
+                onGoToWallet = onGoToWallet,
+                eventPublisher = eventPublisher,
+                onProfileClick = onProfileClick,
+            )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     )
+}
+
+@Composable
+private fun MutedSettingsPager(
+    pagerState: PagerState,
+    state: MutedSettingsContract.UiState,
+    paddingValues: PaddingValues,
+    noteCallbacks: NoteCallbacks,
+    onGoToWallet: () -> Unit,
+    eventPublisher: (MutedSettingsContract.UiEvent) -> Unit,
+    onProfileClick: (String) -> Unit,
+) {
+    HorizontalPager(state = pagerState) { pageIndex ->
+        when (pageIndex) {
+            USERS_INDEX -> MuteUsers(
+                modifier = Modifier.background(AppTheme.colorScheme.surfaceVariant),
+                paddingValues = paddingValues,
+                mutedUsers = state.mutedUsers,
+                eventPublisher = eventPublisher,
+                onProfileClick = onProfileClick,
+            )
+            WORDS_INDEX -> MuteWords(
+                modifier = Modifier.background(AppTheme.colorScheme.surfaceVariant),
+                paddingValues = paddingValues,
+                mutedWords = state.mutedWords,
+                newMutedWord = state.newMutedWord,
+                eventPublisher = eventPublisher,
+            )
+            HASHTAGS_INDEX -> MuteHashtags(
+                modifier = Modifier.background(AppTheme.colorScheme.surfaceVariant),
+                paddingValues = paddingValues,
+                mutedHashtags = state.mutedHashtags,
+                newMutedHashtag = state.newMutedHashtag,
+                eventPublisher = eventPublisher,
+            )
+            THREADS_INDEX -> MuteThreads(
+                defaultMuteThreadsFeedSpec = state.defaultMuteThreadsFeedSpec,
+                paddingValues = paddingValues,
+                noteCallbacks = noteCallbacks,
+                onGoToWallet = onGoToWallet,
+            )
+        }
+    }
 }
 
 @Preview
