@@ -1,4 +1,4 @@
-package net.primal.android.networking.upload
+package net.primal.core.networking.blossom
 
 import kotlinx.coroutines.Job
 

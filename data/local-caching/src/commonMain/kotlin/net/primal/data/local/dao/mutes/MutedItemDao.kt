@@ -1,4 +1,4 @@
-package net.primal.data.local.dao.profiles
+package net.primal.data.local.dao.mutes
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -9,26 +9,29 @@ import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface MutedUserDao {
+interface MutedItemDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsertAll(data: Set<MutedUserData>)
+    suspend fun upsertAll(data: Set<MutedItemData>)
 
-    @Query("DELETE FROM MutedUserData WHERE ownerId = :ownerId")
+    @Query("DELETE FROM MutedItemData WHERE ownerId = :ownerId")
     suspend fun deleteAllByOwnerId(ownerId: String)
 
     @Transaction
     @RewriteQueriesToDropUnusedColumns
     @Query(
         """
-        SELECT * FROM MutedUserData 
-        INNER JOIN ProfileData ON MutedUserData.userId = ProfileData.ownerId
-        WHERE MutedUserData.ownerId = :ownerId
+        SELECT * FROM MutedItemData m
+        INNER JOIN ProfileData ON m.item = ProfileData.ownerId
+        WHERE m.ownerId = :ownerId AND m.type = 'User'
         ORDER BY ProfileData.displayName ASC
         """,
     )
     fun observeMutedUsersByOwnerId(ownerId: String): Flow<List<MutedUser>>
 
-    @Query("SELECT EXISTS(SELECT * FROM MutedUserData WHERE userId = :pubkey AND ownerId = :ownerId)")
+    @Query("SELECT EXISTS(SELECT * FROM MutedItemData WHERE item = :pubkey AND ownerId = :ownerId)")
     fun observeIsUserMutedByOwnerId(pubkey: String, ownerId: String): Flow<Boolean>
+
+    @Query("SELECT * FROM MutedItemData WHERE ownerId = :ownerId AND type = :type")
+    fun observeMutedItemsByType(ownerId: String, type: MutedItemType): Flow<List<MutedItemData>>
 }

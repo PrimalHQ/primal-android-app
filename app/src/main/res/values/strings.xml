@@ -16,7 +16,14 @@
     <string name="app_added_to_user_feeds">Added to your home feeds</string>
     <string name="app_removed_from_user_feeds">Removed from your home feeds</string>
     <string name="app_error_muting_user">Unable to mute user. Please try again.</string>
+    <string name="app_error_muting_word">Unable to mute word. Please try again.</string>
+    <string name="app_error_muting_hashtag">Unable to mute hashtag. Please try again.</string>
     <string name="app_error_unmuting_user">Unable to unmute user. Please try again.</string>
+    <string name="app_error_muting_thread">Unable to mute thread. Please try again.</string>
+    <string name="app_error_unmuting_thread">Unable to unmute thread. Please try again.</string>
+    <string name="app_error_unmuting_hashtag">Unable to unmute hashtag. Please try again.</string>
+    <string name="app_error_unmuting_word">Unable to unmute word. Please try again.</string>
+    <string name="app_error_network">Unable to complete the action. Please check your connection and try again.</string>
     <string name="app_invalid_lud16_address">Invalid lightning (lud16) address.</string>
     <string name="app_invalid_lud16_address_user_not_found">Invalid lightning address. User \'%1$s\' doesn\'t exist on %2$s.</string>
     <string name="app_invalid_nip05_address">Invalid nostr verification address.</string>
@@ -30,7 +37,7 @@
     <string name="app_npub_login_error">Primal is in read only mode because you are signed in via your public key. To enable all options, please sign in with your private key.</string>
     <string name="app_error_restore_default_blossom_server">Unable to restore default blossom server. Please try again.</string>
     <string name="app_error_unable_to_update_blossom_server_list">Unable to update blossom server list. Please try again.</string>
-
+    <string name="app_error_fetching_mute_list">Failed to load your mute list. Please check your connection and try again.</string>
 
     <string name="welcome_sign_in_button_title">Sign In</string>
     <string name="welcome_create_account_button_title">Create Account</string>
@@ -485,6 +492,7 @@
         <item quantity="other">%1$s new notes</item>
     </plurals>
 
+    <string name="feed_context_unmute_thread">Unmute Thread</string>
     <string name="feed_context_share_note">Share note</string>
     <string name="feed_context_share_note_as_image">Share note as image</string>
     <string name="feed_context_copy_note_link">Copy note link</string>
@@ -498,6 +506,7 @@
     <string name="feed_context_copy_user_id">Copy user id</string>
     <string name="feed_context_report_user">Report user</string>
     <string name="feed_context_mute_user">Mute user</string>
+    <string name="feed_context_mute_thread">Mute Thread</string>
     <string name="feed_context_copied_toast">Copied!</string>
 
     <string name="feed_lightning_invoice_title">Lightning Invoice</string>
@@ -862,9 +871,20 @@
     <string name="settings_zaps_editor_value">Value</string>
     <string name="settings_zaps_editor_save">Save</string>
 
-    <string name="settings_muted_accounts_title">Muted Accounts</string>
+    <string name="settings_muted_content_title">Muted Content</string>
+    <string name="settings_muted_title">Muted</string>
     <string name="settings_muted_accounts_unmute_button">Unmute</string>
+    <string name="settings_muted_accounts_mute_button">Mute</string>
     <string name="settings_muted_accounts_no_content">Your muted accounts will appear here.</string>
+    <string name="settings_muted_words_no_content">Your muted words will appear here.</string>
+    <string name="settings_muted_hashtags_no_content">Your muted hashtags will appear here.</string>
+    <string name="settings_muted_threads_no_content">Your muted threads will appear here.</string>
+    <string name="settings_muted_users_tab">Users</string>
+    <string name="settings_muted_words_tab">Words</string>
+    <string name="settings_muted_hashtags_tab">Hashtags</string>
+    <string name="settings_muted_threads_tab">Threads</string>
+    <string name="settings_muted_words_mute_new_word">Mute new word…</string>
+    <string name="settings_muted_hashtags_mute_new_hashtag">Mute new hashtag…</string>
 
     <string name="settings_media_uploads_title">Media Uploads</string>
     <string name="settings_media_uploads_blossom_server_section_title">Blossom Server</string>

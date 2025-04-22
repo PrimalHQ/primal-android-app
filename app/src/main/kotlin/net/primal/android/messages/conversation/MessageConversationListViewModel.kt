@@ -29,7 +29,7 @@ import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.messages.ChatRepository
 import net.primal.domain.messages.ConversationRelation
 import net.primal.domain.messages.DMConversation
-import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.cryptography.SignResult
 import timber.log.Timber
 
 @HiltViewModel
@@ -122,13 +122,16 @@ class MessageConversationListViewModel @Inject constructor(
     private fun markAllConversationAsRead() =
         viewModelScope.launch {
             try {
-                val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
+                val signResult = nostrNotary.signAuthorizationNostrEvent(
                     userId = activeAccountStore.activeUserId(),
                     description = "Mark all messages as read.",
                 )
-                chatRepository.markAllMessagesAsRead(authorization = authorizationEvent)
-            } catch (error: SignatureException) {
-                Timber.w(error)
+
+                when (signResult) {
+                    is SignResult.Rejected -> Timber.w(signResult.error)
+                    is SignResult.Signed ->
+                        chatRepository.markAllMessagesAsRead(authorization = signResult.event)
+                }
             } catch (error: WssException) {
                 Timber.w(error)
             }

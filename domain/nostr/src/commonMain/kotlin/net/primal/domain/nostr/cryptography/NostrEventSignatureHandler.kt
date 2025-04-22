@@ -5,8 +5,7 @@ import net.primal.domain.nostr.NostrUnsignedEvent
 
 interface NostrEventSignatureHandler {
 
-    @Throws(SigningKeyNotFoundException::class, SigningRejectedException::class)
-    fun signNostrEvent(unsignedNostrEvent: NostrUnsignedEvent): NostrEvent
+    suspend fun signNostrEvent(unsignedNostrEvent: NostrUnsignedEvent): SignResult
 
     fun verifySignature(nostrEvent: NostrEvent): Boolean
 }

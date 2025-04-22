@@ -3,12 +3,20 @@ package net.primal.android.nostr.notary
 import android.content.ContentResolver
 import fr.acinq.secp256k1.Hex
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.core.serialization.json.NostrNotaryJson
 import net.primal.android.networking.UserAgentProvider
+import net.primal.android.signer.AmberSignResult
 import net.primal.android.signer.signEventWithAmber
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.NostrWalletConnect
@@ -16,6 +24,7 @@ import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.toZapTag
 import net.primal.android.wallet.nwc.model.NwcWalletRequest
 import net.primal.android.wallet.nwc.model.PayInvoiceRequest
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.settings.model.AppSettingsDescription
 import net.primal.domain.global.ContentAppSettings
@@ -26,6 +35,8 @@ import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asIdentifierTag
 import net.primal.domain.nostr.asPubkeyTag
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
+import net.primal.domain.nostr.cryptography.SignResult
+import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.cryptography.utils.CryptoUtils
@@ -34,20 +45,50 @@ import net.primal.domain.nostr.cryptography.utils.toNpub
 import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.nostr.zaps.toTags
 
+@Singleton
 class NostrNotary @Inject constructor(
+    dispatchers: DispatcherProvider,
     private val contentResolver: ContentResolver,
     private val credentialsStore: CredentialsStore,
 ) : NostrEventSignatureHandler {
 
-    override fun signNostrEvent(unsignedNostrEvent: NostrUnsignedEvent): NostrEvent {
-        return signNostrEvent(
-            userId = unsignedNostrEvent.pubKey,
-            event = unsignedNostrEvent,
-        )
+    private val scope = CoroutineScope(dispatchers.main())
+    private val _effects = Channel<NotarySideEffect>()
+    val effects = _effects.receiveAsFlow()
+    private fun setEffect(effect: NotarySideEffect) = scope.launch { _effects.send(effect) }
+
+    private val signMutex = Mutex()
+
+    private val _responses = Channel<SignResult>()
+    private fun setResponse(response: SignResult) = scope.launch { _responses.send(response) }
+
+    override suspend fun signNostrEvent(unsignedNostrEvent: NostrUnsignedEvent): SignResult {
+        val result = try {
+            signNostrEvent(userId = unsignedNostrEvent.pubKey, event = unsignedNostrEvent)
+        } catch (error: SignatureException) {
+            return SignResult.Rejected(error)
+        }
+
+        return if (result != null) {
+            SignResult.Signed(result)
+        } else {
+            signMutex.withLock {
+                setEffect(NotarySideEffect.RequestSignature(unsignedNostrEvent))
+                _responses.receive()
+            }
+        }
     }
 
     override fun verifySignature(nostrEvent: NostrEvent): Boolean {
         throw NotImplementedError()
+    }
+
+    fun onSuccess(nostrEvent: NostrEvent) {
+        setResponse(SignResult.Signed(nostrEvent))
+    }
+
+    fun onFailure() {
+        setResponse(SignResult.Rejected(SigningRejectedException()))
     }
 
     private fun findNsecOrThrow(pubkey: String): String =
@@ -56,26 +97,30 @@ class NostrNotary @Inject constructor(
             credentialsStore.findOrThrow(npub = npub).nsec
         }.getOrNull() ?: throw SigningKeyNotFoundException()
 
-    fun signNostrEvent(userId: String, event: NostrUnsignedEvent): NostrEvent {
+    private fun signNostrEvent(userId: String, event: NostrUnsignedEvent): NostrEvent? {
         val isExternalSignerLogin = runCatching {
             credentialsStore.isExternalSignerLogin(npub = userId.hexToNpubHrp())
         }.getOrDefault(false)
 
         if (isExternalSignerLogin) {
-            return contentResolver.signEventWithAmber(event = event) ?: throw SigningRejectedException()
+            val result = contentResolver.signEventWithAmber(event = event)
+            return when (result) {
+                AmberSignResult.Rejected -> throw SigningRejectedException()
+                is AmberSignResult.Signed -> result.nostrEvent
+                AmberSignResult.Undecided -> null
+            }
         }
 
         return event.signOrThrow(nsec = findNsecOrThrow(userId))
     }
 
-    fun signMetadataNostrEvent(
+    suspend fun signMetadataNostrEvent(
         userId: String,
         tags: List<JsonArray> = emptyList(),
         metadata: ContentMetadata,
-    ): NostrEvent {
+    ): SignResult {
         return signNostrEvent(
-            userId = userId,
-            event = NostrUnsignedEvent(
+            unsignedNostrEvent = NostrUnsignedEvent(
                 pubKey = userId,
                 kind = NostrEventKind.Metadata.value,
                 tags = tags,
@@ -84,14 +129,13 @@ class NostrNotary @Inject constructor(
         )
     }
 
-    fun signAuthorizationNostrEvent(
+    suspend fun signAuthorizationNostrEvent(
         userId: String,
         description: String,
         tags: List<JsonArray> = emptyList(),
-    ): NostrEvent {
+    ): SignResult {
         return signNostrEvent(
-            userId = userId,
-            event = NostrUnsignedEvent(
+            unsignedNostrEvent = NostrUnsignedEvent(
                 pubKey = userId,
                 kind = NostrEventKind.ApplicationSpecificData.value,
                 tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()) + tags,
@@ -100,10 +144,9 @@ class NostrNotary @Inject constructor(
         )
     }
 
-    fun signAppSettingsNostrEvent(userId: String, appSettings: ContentAppSettings): NostrEvent {
+    suspend fun signAppSettingsNostrEvent(userId: String, appSettings: ContentAppSettings): SignResult {
         return signNostrEvent(
-            userId = userId,
-            event = NostrUnsignedEvent(
+            unsignedNostrEvent = NostrUnsignedEvent(
                 pubKey = userId,
                 kind = NostrEventKind.ApplicationSpecificData.value,
                 tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
@@ -112,10 +155,9 @@ class NostrNotary @Inject constructor(
         )
     }
 
-    fun signAppSpecificDataNostrEvent(userId: String, content: String): NostrEvent {
+    suspend fun signAppSpecificDataNostrEvent(userId: String, content: String): SignResult {
         return signNostrEvent(
-            userId = userId,
-            event = NostrUnsignedEvent(
+            unsignedNostrEvent = NostrUnsignedEvent(
                 pubKey = userId,
                 kind = NostrEventKind.ApplicationSpecificData.value,
                 tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
@@ -124,15 +166,14 @@ class NostrNotary @Inject constructor(
         )
     }
 
-    fun signFollowListNostrEvent(
+    suspend fun signFollowListNostrEvent(
         userId: String,
         contacts: Set<String>,
         content: String,
-    ): NostrEvent {
+    ): SignResult {
         val tags = contacts.map { it.asPubkeyTag() }
         return signNostrEvent(
-            userId = userId,
-            event = NostrUnsignedEvent(
+            unsignedNostrEvent = NostrUnsignedEvent(
                 pubKey = userId,
                 kind = NostrEventKind.FollowList.value,
                 content = content,
@@ -141,15 +182,14 @@ class NostrNotary @Inject constructor(
         )
     }
 
-    fun signZapRequestNostrEvent(
+    suspend fun signZapRequestNostrEvent(
         userId: String,
         comment: String,
         target: ZapTarget,
         relays: List<Relay>,
-    ): NostrEvent {
+    ): SignResult {
         return signNostrEvent(
-            userId = userId,
-            event = NostrUnsignedEvent(
+            unsignedNostrEvent = NostrUnsignedEvent(
                 pubKey = userId,
                 kind = NostrEventKind.ZapRequest.value,
                 content = comment,
@@ -159,10 +199,10 @@ class NostrNotary @Inject constructor(
     }
 
     @OptIn(ExperimentalEncodingApi::class)
-    fun signWalletInvoiceRequestNostrEvent(
+    suspend fun signWalletInvoiceRequestNostrEvent(
         request: NwcWalletRequest<PayInvoiceRequest>,
         nwc: NostrWalletConnect,
-    ): NostrEvent {
+    ): SignResult {
         val tags = listOf(nwc.pubkey.asPubkeyTag())
         val content = NostrNotaryJson.encodeToString(request)
         val encryptedMessage = CryptoUtils.encrypt(
@@ -172,8 +212,7 @@ class NostrNotary @Inject constructor(
         )
 
         return signNostrEvent(
-            userId = nwc.keypair.pubkey,
-            event = NostrUnsignedEvent(
+            unsignedNostrEvent = NostrUnsignedEvent(
                 pubKey = nwc.keypair.pubkey,
                 kind = NostrEventKind.WalletRequest.value,
                 content = encryptedMessage,
@@ -182,10 +221,9 @@ class NostrNotary @Inject constructor(
         )
     }
 
-    fun signPrimalWalletOperationNostrEvent(userId: String, content: String): NostrEvent {
+    suspend fun signPrimalWalletOperationNostrEvent(userId: String, content: String): SignResult {
         return signNostrEvent(
-            userId = userId,
-            event = NostrUnsignedEvent(
+            unsignedNostrEvent = NostrUnsignedEvent(
                 pubKey = userId,
                 content = content,
                 kind = NostrEventKind.PrimalWalletOperation.value,
@@ -194,10 +232,9 @@ class NostrNotary @Inject constructor(
         )
     }
 
-    fun signRelayListMetadata(userId: String, relays: List<Relay>): NostrEvent {
+    suspend fun signRelayListMetadata(userId: String, relays: List<Relay>): SignResult {
         return signNostrEvent(
-            userId = userId,
-            event = NostrUnsignedEvent(
+            unsignedNostrEvent = NostrUnsignedEvent(
                 pubKey = userId,
                 content = "",
                 kind = NostrEventKind.RelayListMetadata.value,
@@ -214,5 +251,9 @@ class NostrNotary @Inject constructor(
                 },
             ),
         )
+    }
+
+    sealed class NotarySideEffect {
+        data class RequestSignature(val unsignedEvent: NostrUnsignedEvent) : NotarySideEffect()
     }
 }

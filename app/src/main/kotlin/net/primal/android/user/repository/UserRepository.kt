@@ -11,7 +11,6 @@ import kotlinx.serialization.json.JsonArray
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.networking.upload.PrimalUploadService
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.premium.repository.asProfileDataDO
 import net.primal.android.profile.domain.ProfileMetadata
@@ -30,6 +29,7 @@ import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.domain.asUserAccountFromFollowListEvent
 import net.primal.android.wallet.domain.WalletSettings
+import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.BlossomException
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
@@ -51,7 +51,7 @@ class UserRepository @Inject constructor(
     private val accountsStore: UserAccountsStore,
     private val credentialsStore: CredentialsStore,
     private val activeAccountStore: ActiveAccountStore,
-    private val primalUploadService: PrimalUploadService,
+    private val primalUploadService: AndroidPrimalBlossomUploadService,
     private val usersApi: UsersApi,
     private val nostrPublisher: NostrPublisher,
     private val profileRepository: ProfileRepository,
@@ -369,7 +369,6 @@ class UserRepository @Inject constructor(
         content: String,
     ) = withContext(dispatchers.io()) {
         val publishResult = nostrPublisher.signPublishImportNostrEvent(
-            userId = userId,
             unsignedNostrEvent = NostrUnsignedEvent(
                 pubKey = userId,
                 kind = NostrEventKind.FollowList.value,

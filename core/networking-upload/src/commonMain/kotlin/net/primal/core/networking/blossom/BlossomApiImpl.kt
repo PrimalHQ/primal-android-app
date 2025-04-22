@@ -46,7 +46,7 @@ internal class BlossomApiImpl(
     override suspend fun putUpload(
         authorization: String,
         fileMetadata: FileMetadata,
-        openBufferedSource: () -> BufferedSource,
+        bufferedSource: BufferedSource,
         onProgress: ((Int, Int) -> Unit)?,
     ): BlobDescriptor =
         performPutUpload(
@@ -54,7 +54,7 @@ internal class BlossomApiImpl(
             authorization = authorization,
             contentType = "application/octet-stream",
             fileMetadata = fileMetadata,
-            openBufferedSource = openBufferedSource,
+            bufferedSource = bufferedSource,
             onProgress = onProgress,
             errorPrefix = "Upload",
             checkFileSize = true,
@@ -63,7 +63,7 @@ internal class BlossomApiImpl(
     override suspend fun putMedia(
         authorization: String,
         fileMetadata: FileMetadata,
-        openBufferedSource: () -> BufferedSource,
+        bufferedSource: BufferedSource,
         onProgress: ((Int, Int) -> Unit)?,
     ): BlobDescriptor =
         performPutUpload(
@@ -71,19 +71,23 @@ internal class BlossomApiImpl(
             authorization = authorization,
             contentType = fileMetadata.mimeType ?: "application/octet-stream",
             fileMetadata = fileMetadata,
-            openBufferedSource = openBufferedSource,
+            bufferedSource = bufferedSource,
             onProgress = onProgress,
             errorPrefix = "Upload Media",
         )
 
     override suspend fun putMirror(authorization: String, fileUrl: String): BlobDescriptor {
-        val response = withContext(dispatcherProvider.io()) {
-            httpClient.put("$baseBlossomUrl/mirror") {
-                headers {
-                    append("Authorization", authorization)
+        val response = try {
+            withContext(dispatcherProvider.io()) {
+                httpClient.put("$baseBlossomUrl/mirror") {
+                    headers {
+                        append("Authorization", authorization)
+                    }
+                    setBody(MirrorRequest(fileUrl))
                 }
-                setBody(MirrorRequest(fileUrl))
             }
+        } catch (e: Throwable) {
+            throw BlossomMirrorException(cause = e)
         }
 
         if (!response.status.isSuccess()) {
@@ -100,15 +104,19 @@ internal class BlossomApiImpl(
         fileMetadata: FileMetadata,
         errorPrefix: String,
     ) {
-        val response = withContext(dispatcherProvider.io()) {
-            httpClient.head("$baseBlossomUrl/$endpoint") {
-                headers {
-                    append("Authorization", authorization)
-                    append("X-SHA-256", fileMetadata.sha256)
-                    append("X-Content-Length", fileMetadata.sizeInBytes.toString())
-                    append("X-Content-Type", fileMetadata.mimeType ?: "application/octet-stream")
+        val response = try {
+            withContext(dispatcherProvider.io()) {
+                httpClient.head("$baseBlossomUrl/$endpoint") {
+                    headers {
+                        append("Authorization", authorization)
+                        append("X-SHA-256", fileMetadata.sha256)
+                        append("X-Content-Length", fileMetadata.sizeInBytes.toString())
+                        append("X-Content-Type", fileMetadata.mimeType ?: "application/octet-stream")
+                    }
                 }
             }
+        } catch (e: Throwable) {
+            throw UploadRequirementException(cause = e)
         }
 
         if (!response.status.isSuccess()) {
@@ -122,7 +130,7 @@ internal class BlossomApiImpl(
         authorization: String,
         contentType: String,
         fileMetadata: FileMetadata,
-        openBufferedSource: () -> BufferedSource,
+        bufferedSource: BufferedSource,
         errorPrefix: String,
         onProgress: ((Int, Int) -> Unit)? = null,
         checkFileSize: Boolean = false,
@@ -130,33 +138,39 @@ internal class BlossomApiImpl(
         var uploadedBytes = 0L
         val totalBytes = fileMetadata.sizeInBytes
 
-        val response = withContext(dispatcherProvider.io()) {
-            openBufferedSource().use { source ->
-                httpClient.put("$baseBlossomUrl/$endpoint") {
-                    headers {
-                        append("Authorization", authorization)
-                        append("Content-Length", totalBytes.toString())
-                        append("Content-Type", contentType)
-                    }
-
-                    setBody(object : OutgoingContent.WriteChannelContent() {
-                        override val contentType: ContentType
-                            get() = ContentType.parse(contentType)
-
-                        override suspend fun writeTo(channel: ByteWriteChannel) {
-                            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-                            while (!source.exhausted()) {
-                                val read = source.read(buffer)
-                                if (read == -1) break
-                                channel.writeFully(buffer, 0, read)
-                                uploadedBytes += read
-                                onProgress?.invoke(uploadedBytes.toInt(), totalBytes.toInt())
-                            }
-                            channel.flush()
+        val response = try {
+            withContext(dispatcherProvider.io()) {
+                bufferedSource.use { source ->
+                    httpClient.put("$baseBlossomUrl/$endpoint") {
+                        headers {
+                            append("Authorization", authorization)
+                            append("Content-Length", totalBytes.toString())
+                            append("Content-Type", contentType)
                         }
-                    })
+
+                        setBody(
+                            object : OutgoingContent.WriteChannelContent() {
+                                override val contentType: ContentType
+                                    get() = ContentType.parse(contentType)
+
+                                override suspend fun writeTo(channel: ByteWriteChannel) {
+                                    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                                    while (!source.exhausted()) {
+                                        val read = source.read(buffer)
+                                        if (read == -1) break
+                                        channel.writeFully(buffer, 0, read)
+                                        uploadedBytes += read
+                                        onProgress?.invoke(uploadedBytes.toInt(), totalBytes.toInt())
+                                    }
+                                    channel.flush()
+                                }
+                            },
+                        )
+                    }
                 }
             }
+        } catch (e: Throwable) {
+            throw BlossomUploadException(cause = e)
         }
 
         if (!response.status.isSuccess()) {

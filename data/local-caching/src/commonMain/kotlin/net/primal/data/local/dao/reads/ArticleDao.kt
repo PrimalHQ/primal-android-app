@@ -19,13 +19,13 @@ interface ArticleDao {
         """
             SELECT 
                 ArticleData.*, 
-                CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted
+                CASE WHEN MutedItemData.item IS NOT NULL THEN 1 ELSE 0 END AS isMuted
             FROM ArticleData
             INNER JOIN ArticleFeedCrossRef 
                 ON ArticleFeedCrossRef.articleATag = ArticleData.aTag 
                 AND ArticleFeedCrossRef.articleAuthorId = ArticleData.authorId
             LEFT JOIN EventUserStats ON EventUserStats.eventId = ArticleData.eventId AND EventUserStats.userId = :userId
-            LEFT JOIN MutedUserData ON MutedUserData.userId = ArticleData.authorId
+            LEFT JOIN MutedItemData ON MutedItemData.item = ArticleData.authorId
             WHERE ArticleFeedCrossRef.spec = :spec AND ArticleFeedCrossRef.ownerId = :userId AND isMuted = 0
             ORDER BY ArticleFeedCrossRef.position ASC
         """,

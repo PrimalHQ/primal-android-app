@@ -36,6 +36,7 @@ import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.messages.ChatRepository
 import net.primal.domain.messages.DirectMessage
 import net.primal.domain.nostr.cryptography.MessageEncryptException
+import net.primal.domain.nostr.cryptography.SignResult
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.profile.ProfileRepository
@@ -125,17 +126,24 @@ class ChatViewModel @Inject constructor(
     private fun markConversationAsRead() =
         viewModelScope.launch {
             try {
-                val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
+                val signResult = nostrNotary.signAuthorizationNostrEvent(
                     userId = userId,
                     description = "Mark conversation with $participantId as read.",
                 )
-                chatRepository.markConversationAsRead(
-                    authorization = authorizationEvent,
-                    conversationUserId = participantId,
-                )
-            } catch (error: SignatureException) {
-                Timber.w(error)
-                setErrorState(error = UiState.ChatError.PublishError(error))
+
+                when (signResult) {
+                    is SignResult.Rejected -> {
+                        Timber.w(signResult.error)
+                        setErrorState(error = UiState.ChatError.PublishError(signResult.error))
+                    }
+
+                    is SignResult.Signed -> {
+                        chatRepository.markConversationAsRead(
+                            authorization = signResult.event,
+                            conversationUserId = participantId,
+                        )
+                    }
+                }
             } catch (error: WssException) {
                 Timber.w(error)
             }
