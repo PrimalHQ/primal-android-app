@@ -9,10 +9,10 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.runBlocking
-import net.primal.android.crypto.bech32ToHexOrThrow
-import net.primal.android.crypto.extractKeyPairFromPrivateKeyOrThrow
 import net.primal.android.user.domain.Credential
 import net.primal.android.user.domain.LoginType
+import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
+import net.primal.domain.nostr.cryptography.utils.extractKeyPairFromPrivateKeyOrThrow
 
 @Singleton
 class CredentialsStore @Inject constructor(

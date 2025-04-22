@@ -28,13 +28,13 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.events.domain.findNearestOrNull
+import net.primal.android.events.ui.findNearestOrNull
 import net.primal.android.notes.feed.note.ui.attachment.findImageSize
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.thread.articles.details.ui.rendering.MarkdownRenderer
 import net.primal.android.thread.articles.details.ui.rendering.rememberPrimalMarkwon
-import net.primal.domain.CdnImage
+import net.primal.domain.links.CdnImage
 
 @Composable
 fun ArticleDetailsHeader(
@@ -76,7 +76,7 @@ fun ArticleDetailsHeader(
                     .fillMaxWidth()
                     .clip(shape = AppTheme.shapes.small),
             ) {
-                val maxWidthPx = with(LocalDensity.current) { maxWidth.roundToPx() }
+                val maxWidthPx = with(LocalDensity.current) { this@BoxWithConstraints.maxWidth.roundToPx() }
                 val variant = cover.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
                 val maxWidth = maxWidth.value.toInt()
 

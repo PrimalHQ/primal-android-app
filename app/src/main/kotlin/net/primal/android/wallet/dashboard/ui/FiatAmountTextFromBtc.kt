@@ -15,11 +15,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.math.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import java.text.NumberFormat
 import net.primal.android.R
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toUsd
+import net.primal.core.utils.CurrencyConversionUtils.toUsd
 
 @Composable
 fun FiatAmountTextFromBtc(

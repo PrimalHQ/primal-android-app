@@ -27,9 +27,10 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import net.primal.android.articles.ArticleRepository
 import net.primal.android.articles.feed.ui.generateNaddr
 import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
+import net.primal.android.articles.highlights.asHighlightUi
+import net.primal.android.articles.highlights.generateNevent
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.core.files.FileAnalyser
 import net.primal.android.editor.NoteEditorContract.SideEffect
@@ -38,26 +39,20 @@ import net.primal.android.editor.NoteEditorContract.UiState
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteTaggedUser
-import net.primal.android.explore.repository.ExploreRepository
-import net.primal.android.highlights.model.asHighlightUi
-import net.primal.android.highlights.model.generateNevent
-import net.primal.android.highlights.repository.HighlightRepository
-import net.primal.android.networking.primal.upload.PrimalFileUploader
-import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
-import net.primal.android.networking.primal.upload.repository.FileUploadRepository
-import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.notary.exceptions.SignException
-import net.primal.android.nostr.repository.RelayHintsRepository
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asFeedPostUi
-import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
+import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
+import net.primal.core.networking.blossom.BlossomException
+import net.primal.core.networking.blossom.UploadJob
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.events.EventRelayHintsRepository
+import net.primal.domain.explore.ExploreRepository
 import net.primal.domain.nostr.MAX_RELAY_HINTS
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
@@ -65,7 +60,11 @@ import net.primal.domain.nostr.Nip19TLV
 import net.primal.domain.nostr.Nip19TLV.toNprofileString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.Nprofile
-import net.primal.domain.upload.UploadJob
+import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.posts.FeedRepository
+import net.primal.domain.reads.ArticleRepository
+import net.primal.domain.reads.HighlightRepository
 import timber.log.Timber
 
 class NoteEditorViewModel @AssistedInject constructor(
@@ -74,13 +73,13 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val feedRepository: FeedRepository,
     private val notePublishHandler: NotePublishHandler,
-    private val fileUploadRepository: FileUploadRepository,
+    private val primalUploadService: AndroidPrimalBlossomUploadService,
     private val highlightRepository: HighlightRepository,
     private val exploreRepository: ExploreRepository,
     private val userRepository: UserRepository,
     private val articleRepository: ArticleRepository,
     private val relayRepository: RelayRepository,
-    private val relayHintsRepository: RelayHintsRepository,
+    private val relayHintsRepository: EventRelayHintsRepository,
 ) : ViewModel() {
 
     private val referencedArticleNaddr = args.referencedArticleNaddr?.let(Nip19TLV::parseUriAsNaddrOrNull)
@@ -296,7 +295,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                 resetState()
 
                 sendEffect(SideEffect.PostPublished)
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
                 setErrorState(error = UiState.NoteEditorError.PublishError(cause = error.cause))
             } catch (error: NostrPublishException) {
@@ -365,11 +364,10 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             newAttachments
                 .map {
-                    val uploadId = PrimalFileUploader.generateRandomUploadId()
                     val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
-                        uploadAttachment(attachment = it, uploadId = uploadId)
+                        uploadAttachment(attachment = it)
                     }
-                    val uploadJob = UploadJob(job = job, id = uploadId)
+                    val uploadJob = UploadJob(job = job)
                     attachmentUploads[it.id] = uploadJob
                     uploadJob
                 }.forEach {
@@ -380,17 +378,16 @@ class NoteEditorViewModel @AssistedInject constructor(
         }
     }
 
-    private suspend fun uploadAttachment(attachment: NoteAttachment, uploadId: String) {
+    private suspend fun uploadAttachment(attachment: NoteAttachment) {
         var updatedAttachment = attachment
         try {
             setState { copy(uploadingAttachments = true) }
             updatedAttachment = updatedAttachment.copy(uploadError = null)
             updateNoteAttachmentState(attachment = updatedAttachment)
 
-            val uploadResult = fileUploadRepository.uploadNoteAttachment(
+            val uploadResult = primalUploadService.upload(
+                uri = attachment.localUri,
                 userId = activeAccountStore.activeUserId(),
-                attachment = attachment,
-                uploadId = uploadId,
                 onProgress = { uploadedBytes, totalBytes ->
                     updatedAttachment = updatedAttachment.copy(
                         originalUploadedInBytes = uploadedBytes,
@@ -403,7 +400,7 @@ class NoteEditorViewModel @AssistedInject constructor(
             updatedAttachment = updatedAttachment.copy(
                 remoteUrl = uploadResult.remoteUrl,
                 originalHash = uploadResult.originalHash,
-                originalSizeInBytes = uploadResult.originalFileSize,
+                originalSizeInBytes = uploadResult.originalFileSize.toInt(),
             )
             updateNoteAttachmentState(attachment = updatedAttachment)
 
@@ -415,10 +412,10 @@ class NoteEditorViewModel @AssistedInject constructor(
                 )
                 updateNoteAttachmentState(updatedAttachment)
             }
-        } catch (error: UnsuccessfulFileUpload) {
+        } catch (error: BlossomException) {
             Timber.w(error)
             updateNoteAttachmentState(attachment = updatedAttachment.copy(uploadError = error))
-        } catch (error: SignException) {
+        } catch (error: SignatureException) {
             Timber.w(error)
             updateNoteAttachmentState(attachment = updatedAttachment.copy(uploadError = error))
         }
@@ -446,29 +443,16 @@ class NoteEditorViewModel @AssistedInject constructor(
             }
         }
 
-    private fun UploadJob?.cancel() {
-        if (this == null) return
-
-        viewModelScope.launch {
-            this@cancel.job.cancel()
-            runCatching {
-                fileUploadRepository.cancelNoteAttachmentUpload(
-                    userId = activeAccountStore.activeUserId(),
-                    uploadId = this@cancel.id,
-                )
-            }
-        }
-    }
+    private fun UploadJob?.cancel() = this?.job?.cancel()
 
     private fun retryAttachmentUpload(attachmentId: UUID) =
         viewModelScope.launch {
             val noteAttachment = _state.value.attachments.firstOrNull { it.id == attachmentId }
             if (noteAttachment != null) {
-                val uploadId = PrimalFileUploader.generateRandomUploadId()
                 val job = viewModelScope.launch {
-                    uploadAttachment(attachment = noteAttachment, uploadId = uploadId)
+                    uploadAttachment(attachment = noteAttachment)
                 }
-                attachmentUploads[attachmentId] = UploadJob(job = job, id = uploadId)
+                attachmentUploads[attachmentId] = UploadJob(job = job)
                 job.join()
                 checkUploadQueueAndDisableFlagIfCompleted()
             }
@@ -504,7 +488,7 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private fun observeRecentUsers() {
         viewModelScope.launch {
-            exploreRepository.observeRecentUsers(ownerId = activeAccountStore.activeUserId())
+            userRepository.observeRecentUsers(ownerId = activeAccountStore.activeUserId())
                 .distinctUntilChanged()
                 .collect {
                     setState { copy(recentUsers = it.map { it.mapAsUserProfileUi() }) }

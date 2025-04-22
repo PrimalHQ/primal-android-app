@@ -1,7 +1,7 @@
 package net.primal.android.premium.legend.become
 
 import java.math.BigDecimal
-import net.primal.domain.CdnImage
+import net.primal.domain.links.CdnImage
 
 class PremiumBecomeLegendContract {
 

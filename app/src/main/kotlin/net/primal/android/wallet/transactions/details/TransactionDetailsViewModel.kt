@@ -3,6 +3,7 @@ package net.primal.android.wallet.transactions.details
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import javax.inject.Inject
@@ -13,27 +14,27 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.articles.ArticleRepository
 import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.navigation.transactionIdOrThrow
 import net.primal.android.notes.feed.model.asFeedPostUi
-import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.wallet.db.WalletTransaction
 import net.primal.android.wallet.repository.ExchangeRateHandler
+import net.primal.android.wallet.repository.TransactionProfileData
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.details.TransactionDetailsContract.UiState
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.posts.FeedRepository
+import net.primal.domain.reads.ArticleRepository
 import timber.log.Timber
 
 @HiltViewModel
 class TransactionDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val walletRepository: WalletRepository,
     private val feedRepository: FeedRepository,
@@ -55,15 +56,13 @@ class TransactionDetailsViewModel @Inject constructor(
 
     private fun loadTransaction() =
         viewModelScope.launch {
-            val tx = withContext(dispatcherProvider.io()) {
-                walletRepository.findTransactionById(txId = transactionId)
-            }
+            val tx = walletRepository.findTransactionByIdOrNull(txId = transactionId)
             setState { copy(loading = false, txData = tx?.mapAsTransactionDataUi()) }
-            tx?.data?.zapNoteId?.let {
+            tx?.transaction?.zapNoteId?.let {
                 observeZappedNote(it)
                 fetchZappedNote(it)
-                observeZappedArticle(articleId = it, articleAuthorId = tx.data.zapNoteAuthorId)
-                fetchZappedArticle(articleId = it, articleAuthorId = tx.data.zapNoteAuthorId)
+                observeZappedArticle(articleId = it, articleAuthorId = tx.transaction.zapNoteAuthorId)
+                fetchZappedArticle(articleId = it, articleAuthorId = tx.transaction.zapNoteAuthorId)
             }
         }
 
@@ -99,7 +98,7 @@ class TransactionDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             feedRepository.observeConversation(userId = activeAccountStore.activeUserId(), noteId = noteId)
                 .filter { it.isNotEmpty() }
-                .mapNotNull { conversation -> conversation.first { it.data.postId == noteId } }
+                .mapNotNull { conversation -> conversation.first { it.eventId == noteId } }
                 .collect {
                     setState { copy(feedPost = it.asFeedPostUi()) }
                 }
@@ -135,28 +134,28 @@ class TransactionDetailsViewModel @Inject constructor(
             )
         }
 
-    private fun WalletTransaction.mapAsTransactionDataUi() =
+    private fun TransactionProfileData.mapAsTransactionDataUi() =
         TransactionDetailDataUi(
-            txId = this.data.id,
-            txType = this.data.type,
-            txState = this.data.state,
-            txAmountInSats = this.data.amountInBtc.toBigDecimal().abs().toSats(),
-            txAmountInUsd = this.data.amountInUsd,
-            txInstant = Instant.ofEpochSecond(this.data.completedAt ?: this.data.createdAt),
-            txNote = this.data.note,
-            invoice = this.data.invoice,
-            totalFeeInSats = this.data.totalFeeInBtc?.toBigDecimal()?.abs()?.toSats(),
-            exchangeRate = this.data.exchangeRate,
-            onChainAddress = this.data.onChainAddress,
-            onChainTxId = this.data.onChainTxId,
-            otherUserId = this.data.otherUserId,
+            txId = this.transaction.id,
+            txType = this.transaction.type,
+            txState = this.transaction.state,
+            txAmountInSats = this.transaction.amountInBtc.toBigDecimal().abs().toSats(),
+            txAmountInUsd = this.transaction.amountInUsd,
+            txInstant = Instant.ofEpochSecond(this.transaction.completedAt ?: this.transaction.createdAt),
+            txNote = this.transaction.note,
+            invoice = this.transaction.invoice,
+            totalFeeInSats = this.transaction.totalFeeInBtc?.toBigDecimal()?.abs()?.toSats(),
+            exchangeRate = this.transaction.exchangeRate,
+            onChainAddress = this.transaction.onChainAddress,
+            onChainTxId = this.transaction.onChainTxId,
+            otherUserId = this.transaction.otherUserId,
             otherUserAvatarCdnImage = this.otherProfileData?.avatarCdnImage,
             otherUserDisplayName = this.otherProfileData?.authorNameUiFriendly(),
             otherUserInternetIdentifier = this.otherProfileData?.internetIdentifier,
-            otherUserLightningAddress = this.data.otherLightningAddress,
             otherUserLegendaryCustomization = this.otherProfileData?.primalPremiumInfo
                 ?.legendProfile?.asLegendaryCustomization(),
-            isZap = this.data.isZap,
-            isStorePurchase = this.data.isStorePurchase,
+            otherUserLightningAddress = this.transaction.otherLightningAddress,
+            isZap = this.transaction.isZap,
+            isStorePurchase = this.transaction.isStorePurchase,
         )
 }

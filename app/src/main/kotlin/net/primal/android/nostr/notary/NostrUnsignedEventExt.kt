@@ -3,12 +3,12 @@ package net.primal.android.nostr.notary
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.addJsonArray
 import kotlinx.serialization.json.buildJsonArray
-import net.primal.android.crypto.Bech32
-import net.primal.android.crypto.CryptoUtils
-import net.primal.android.crypto.toHex
-import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.nostr.cryptography.utils.Bech32
+import net.primal.domain.nostr.cryptography.utils.CryptoUtils
+import net.primal.domain.nostr.cryptography.utils.toHex
 
 fun NostrUnsignedEvent.signOrThrow(nsec: String): NostrEvent {
     val hexPrivateKey = Bech32.decodeBytes(nsec).second
@@ -40,6 +40,6 @@ fun NostrUnsignedEvent.calculateEventId(): ByteArray {
         addJsonArray { tags.forEach { add(it) } }
         add(content)
     }
-    val rawEventJson = CommonJson.encodeToString(json)
+    val rawEventJson = json.encodeToJsonString()
     return CryptoUtils.sha256(rawEventJson.toByteArray())
 }

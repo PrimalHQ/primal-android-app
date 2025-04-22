@@ -27,7 +27,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.InAppProduct
 import net.primal.android.wallet.store.domain.SatsPurchase
@@ -35,11 +34,12 @@ import net.primal.android.wallet.store.domain.SatsPurchaseQuote
 import net.primal.android.wallet.store.domain.SubscriptionBillingPeriod
 import net.primal.android.wallet.store.domain.SubscriptionProduct
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
+import net.primal.core.utils.coroutines.DispatcherProvider
 import timber.log.Timber
 
 class PlayBillingClient @Inject constructor(
     @ApplicationContext appContext: Context,
-    dispatchers: CoroutineDispatcherProvider,
+    dispatchers: DispatcherProvider,
 ) : PrimalBillingClient, PurchasesUpdatedListener {
 
     private val scope = CoroutineScope(dispatchers.io())

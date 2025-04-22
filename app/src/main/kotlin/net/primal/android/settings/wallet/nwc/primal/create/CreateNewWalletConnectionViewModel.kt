@@ -10,13 +10,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiEvent
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.repository.NwcWalletRepository
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
 @HiltViewModel
@@ -86,7 +86,7 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
                         creatingSecret = false,
                     )
                 }
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 setState { copy(creatingSecret = false) }
                 Timber.w(error)
             } catch (error: WssException) {

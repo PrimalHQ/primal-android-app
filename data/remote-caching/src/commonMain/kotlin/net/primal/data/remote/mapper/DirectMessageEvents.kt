@@ -5,7 +5,7 @@ import kotlinx.serialization.json.jsonObject
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.data.remote.model.ConversationSummary
 import net.primal.data.remote.model.ConversationsSummary
-import net.primal.domain.PrimalEvent
+import net.primal.domain.common.PrimalEvent
 
 fun PrimalEvent.asMessageConversationsSummary(): ConversationsSummary {
     val jsonObject = CommonJson.parseToJsonElement(this.content).jsonObject

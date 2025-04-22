@@ -1,13 +1,9 @@
 package net.primal.android.events.ui
 
-import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.core.utils.formatNip05Identifier
-import net.primal.android.core.utils.usernameUiFriendly
-import net.primal.android.events.db.EventZap
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toSats
-import net.primal.domain.CdnImage
+import net.primal.domain.events.EventZap
+import net.primal.domain.links.CdnImage
 
 data class EventZapUiModel(
     val id: String,
@@ -28,14 +24,14 @@ data class EventZapUiModel(
 
 fun EventZap.asEventZapUiModel() =
     EventZapUiModel(
-        id = "${this.zapSenderId};${this.eventId};${this.zapRequestAt}",
-        zapperAvatarCdnImage = this.zapSenderAvatarCdnImage,
-        zapperId = this.zapSenderId,
-        zapperName = this.authorNameUiFriendly(),
-        zapperHandle = this.usernameUiFriendly(),
-        zapperInternetIdentifier = this.zapSenderInternetIdentifier?.formatNip05Identifier(),
-        zappedAt = this.zapRequestAt,
+        id = this.id,
+        zapperAvatarCdnImage = this.zapperAvatarCdnImage,
+        zapperId = this.zapperId,
+        zapperName = this.zapperName,
+        zapperHandle = this.zapperHandle,
+        zapperInternetIdentifier = this.zapperInternetIdentifier,
+        zappedAt = this.zappedAt,
         message = this.message,
-        amountInSats = this.amountInBtc.toBigDecimal().toSats(),
-        zapperLegendaryCustomization = this.zapSenderPrimalLegendProfile?.asLegendaryCustomization(),
+        amountInSats = this.amountInSats,
+        zapperLegendaryCustomization = this.zapperLegendProfile?.asLegendaryCustomization(),
     )

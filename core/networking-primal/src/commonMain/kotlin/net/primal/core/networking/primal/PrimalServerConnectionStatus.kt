@@ -1,6 +1,6 @@
 package net.primal.core.networking.primal
 
-import net.primal.domain.PrimalServerType
+import net.primal.domain.global.PrimalServerType
 
 data class PrimalServerConnectionStatus(
     val serverType: PrimalServerType,

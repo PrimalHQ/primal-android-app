@@ -2,18 +2,42 @@ package net.primal.data.repository.mappers.local
 
 import kotlinx.datetime.Instant
 import net.primal.data.local.dao.events.EventStats
-import net.primal.data.local.dao.events.EventUserStats
 import net.primal.data.local.dao.notes.FeedPost as FeedPostPO
 import net.primal.data.local.dao.notes.FeedPostUserStats
+import net.primal.data.local.dao.notes.PostData
 import net.primal.data.repository.mappers.authorNameUiFriendly
 import net.primal.data.repository.mappers.usernameUiFriendly
-import net.primal.domain.EventZap
-import net.primal.domain.model.FeedPost as FeedPostDO
-import net.primal.domain.model.FeedPostAuthor
-import net.primal.domain.model.FeedPostRepostInfo
-import net.primal.domain.model.FeedPostStats
+import net.primal.domain.events.EventZap
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.nostr.utils.formatNip05Identifier
+import net.primal.domain.posts.FeedPost
+import net.primal.domain.posts.FeedPost as FeedPostDO
+import net.primal.domain.posts.FeedPostAuthor
+import net.primal.domain.posts.FeedPostRepostInfo
+import net.primal.domain.posts.FeedPostStats
+
+internal fun PostData.mapAsFeedPostDO(): FeedPost {
+    return FeedPost(
+        eventId = this.postId,
+        author = FeedPostAuthor(
+            authorId = this.authorId,
+            handle = this.authorId.asEllipsizedNpub(),
+            displayName = this.authorId.asEllipsizedNpub(),
+        ),
+        content = this.content,
+        tags = this.tags,
+        timestamp = Instant.fromEpochSeconds(this.createdAt),
+        rawNostrEvent = this.raw,
+        hashtags = this.hashtags,
+        replyToAuthor = this.replyToAuthorId?.let { replyToAuthorId ->
+            FeedPostAuthor(
+                authorId = replyToAuthorId,
+                handle = replyToAuthorId.asEllipsizedNpub(),
+                displayName = replyToAuthorId.asEllipsizedNpub(),
+            )
+        },
+    )
+}
 
 internal fun FeedPostPO.mapAsFeedPostDO(): FeedPostDO {
     return FeedPostDO(
@@ -29,6 +53,7 @@ internal fun FeedPostPO.mapAsFeedPostDO(): FeedPostDO {
             blossomServers = this.author?.blossoms ?: emptyList(),
         ),
         content = this.data.content,
+        tags = this.data.tags,
         timestamp = Instant.fromEpochSeconds(this.data.createdAt),
         rawNostrEvent = this.data.raw,
         hashtags = this.data.hashtags,
@@ -69,31 +94,20 @@ internal fun FeedPostPO.mapAsFeedPostDO(): FeedPostDO {
             eventUriNostr.asReferencedNostrUriDO(forcePosition = index)
         },
         eventZaps = this.eventZaps.map { it.asEventZapDO() }.sortedWith(EventZap.DefaultComparator),
+        bookmark = this.bookmark?.asPublicBookmark(),
+        isThreadMuted = this.data.isThreadMuted == true,
     )
 }
 
 private fun buildFeedPostStats(eventStats: EventStats?, feedPostUserStats: FeedPostUserStats?) =
     FeedPostStats(
         repliesCount = eventStats?.replies ?: 0,
-        userReplied = feedPostUserStats?.userReplied ?: false,
+        userReplied = feedPostUserStats?.userReplied == true,
         zapsCount = eventStats?.zaps ?: 0,
         satsZapped = eventStats?.satsZapped ?: 0,
-        userZapped = feedPostUserStats?.userZapped ?: false,
+        userZapped = feedPostUserStats?.userZapped == true,
         likesCount = eventStats?.likes ?: 0,
-        userLiked = feedPostUserStats?.userLiked ?: false,
+        userLiked = feedPostUserStats?.userLiked == true,
         repostsCount = eventStats?.reposts ?: 0,
-        userReposted = feedPostUserStats?.userReposted ?: false,
-    )
-
-private fun buildFeedPostStats(eventStats: EventStats?, userStats: EventUserStats?) =
-    FeedPostStats(
-        repliesCount = eventStats?.replies ?: 0,
-        userReplied = userStats?.replied ?: false,
-        zapsCount = eventStats?.zaps ?: 0,
-        satsZapped = eventStats?.satsZapped ?: 0,
-        userZapped = userStats?.zapped ?: false,
-        likesCount = eventStats?.likes ?: 0,
-        userLiked = userStats?.liked ?: false,
-        repostsCount = eventStats?.reposts ?: 0,
-        userReposted = userStats?.reposted ?: false,
+        userReposted = feedPostUserStats?.userReposted == true,
     )

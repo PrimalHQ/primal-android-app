@@ -1,9 +1,11 @@
 package net.primal.android.premium.api.model
 
-import net.primal.domain.PrimalEvent
+import net.primal.domain.common.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 
 data class LegendLeaderboardResponse(
+    val nostrEvents: List<NostrEvent>,
+    val primalEvents: List<PrimalEvent>,
     val orderedLegendLeaderboardEvent: PrimalEvent?,
     val primalPremiumInfoEvents: List<PrimalEvent>,
     val primalLegendProfiles: List<PrimalEvent>,

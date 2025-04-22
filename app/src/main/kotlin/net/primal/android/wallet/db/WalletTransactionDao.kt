@@ -13,7 +13,6 @@ interface WalletTransactionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun upsertAll(data: List<WalletTransactionData>)
 
-    @Transaction
     @Query(
         """
             SELECT * FROM WalletTransactionData 
@@ -21,7 +20,7 @@ interface WalletTransactionDao {
             ORDER BY updatedAt DESC
         """,
     )
-    fun latestTransactionsPagedByUserId(userId: String): PagingSource<Int, WalletTransaction>
+    fun latestTransactionsPagedByUserId(userId: String): PagingSource<Int, WalletTransactionData>
 
     @Query("SELECT * FROM WalletTransactionData WHERE userId IS :userId ORDER BY updatedAt DESC LIMIT 1")
     fun firstByUserId(userId: String): WalletTransactionData?
@@ -31,7 +30,7 @@ interface WalletTransactionDao {
 
     @Transaction
     @Query("SELECT * FROM WalletTransactionData WHERE id IS :txId")
-    fun findTransactionById(txId: String): WalletTransaction?
+    fun findTransactionById(txId: String): WalletTransactionData?
 
     @Query("DELETE FROM WalletTransactionData WHERE userId IS :userId")
     fun deleteAllTransactionsByUserId(userId: String)

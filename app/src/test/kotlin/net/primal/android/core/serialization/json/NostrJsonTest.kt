@@ -12,8 +12,7 @@ import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.long
-import net.primal.core.utils.serialization.CommonJson
-import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.serialization.toNostrJsonObject
 import org.junit.Test
@@ -33,8 +32,7 @@ class NostrJsonTest {
 
     @Test
     fun `decodeFromStringOrNull returns decoded object`() {
-        val actual = CommonJson.decodeFromStringOrNull<NostrEvent>(
-            """
+        val actual = """
                 {
                 	"id": "1c6a86ab9e68e3a32e6f1c8503890dd8fd62a124d081c75114faf3edcbe50384",
                 	"pubkey": "d61f3bc5b3eb4400efdae6169a5c17cabf3246b514361de939ce4a1a0da6ef4a",
@@ -43,21 +41,20 @@ class NostrJsonTest {
                 	"content": "Any Android users out there? \n\nWould you like to try the new Primal Android build? ",
                 	"sig": "d42332eb0e3d6ca268ab89cecc6f61cb545916749c492d35d48baf2b5959cfd930fd6c04645591aeb2c75b08d8a684d6f99ee6d738a1f2e10867ded1c4bd2f62"
                 }
-            """.trimIndent(),
-        )
+        """.trimIndent().decodeFromJsonStringOrNull<NostrEvent>()
         actual.shouldNotBeNull()
         actual.shouldBeTypeOf<NostrEvent>()
     }
 
     @Test
     fun `decodeFromStringOrNull returns null for null input`() {
-        val actual = CommonJson.decodeFromStringOrNull<NostrEvent>(null)
+        val actual = null.decodeFromJsonStringOrNull<NostrEvent>()
         actual.shouldBeNull()
     }
 
     @Test
     fun `decodeFromStringOrNull returns null for invalid input`() {
-        val actual = CommonJson.decodeFromStringOrNull<NostrEvent>("invalid")
+        val actual = "invalid".decodeFromJsonStringOrNull<NostrEvent>()
         actual.shouldBeNull()
     }
 

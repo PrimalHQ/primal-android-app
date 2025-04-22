@@ -4,16 +4,14 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.time.Instant
 import kotlin.time.Duration
-import net.primal.android.bookmarks.BookmarksRepository
+import net.primal.android.core.push.PushNotificationsTokenUpdater
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.repository.WalletRepository
-import net.primal.core.networking.sockets.errors.WssException
-import timber.log.Timber
+import net.primal.domain.bookmarks.PublicBookmarksRepository
 
 class UserDataUpdater @AssistedInject constructor(
     @Assisted val userId: String,
@@ -21,9 +19,10 @@ class UserDataUpdater @AssistedInject constructor(
     private val userRepository: UserRepository,
     private val walletRepository: WalletRepository,
     private val relayRepository: RelayRepository,
-    private val bookmarksRepository: BookmarksRepository,
+    private val bookmarksRepository: PublicBookmarksRepository,
     private val premiumRepository: PremiumRepository,
     private val nostrNotary: NostrNotary,
+    private val pushNotificationsTokenUpdater: PushNotificationsTokenUpdater,
 ) {
 
     private var lastTimeFetched: Instant = Instant.EPOCH
@@ -34,33 +33,30 @@ class UserDataUpdater @AssistedInject constructor(
 
     suspend fun updateUserDataWithDebounce(duration: Duration) {
         if (isUserDataSyncedInLast(duration)) {
-            try {
-                updateData()
-                lastTimeFetched = Instant.now()
-            } catch (error: WssException) {
-                Timber.w(error)
-            } catch (error: SignException) {
-                Timber.w(error)
-            }
+            updateData()
+            lastTimeFetched = Instant.now()
         }
     }
 
     private suspend fun updateData() {
-        val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
-            userId = userId,
-            description = "Sync app settings",
-        )
-        settingsRepository.fetchAndPersistAppSettings(authorizationEvent)
-        settingsRepository.ensureZapConfig(authorizationEvent) { appSettings ->
-            nostrNotary.signAppSettingsNostrEvent(
+        runCatching {
+            val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
                 userId = userId,
-                appSettings = appSettings,
+                description = "Sync app settings",
             )
+            settingsRepository.fetchAndPersistAppSettings(authorizationEvent)
+            settingsRepository.ensureZapConfig(authorizationEvent) { appSettings ->
+                nostrNotary.signAppSettingsNostrEvent(
+                    userId = userId,
+                    appSettings = appSettings,
+                )
+            }
         }
-        premiumRepository.fetchMembershipStatus(userId = userId)
-        relayRepository.fetchAndUpdateUserRelays(userId = userId)
-        userRepository.fetchAndUpdateUserAccount(userId = userId)
-        bookmarksRepository.fetchAndPersistPublicBookmarks(userId = userId)
-        walletRepository.fetchUserWalletInfoAndUpdateUserAccount(userId = userId)
+        runCatching { premiumRepository.fetchMembershipStatus(userId = userId) }
+        runCatching { relayRepository.fetchAndUpdateUserRelays(userId = userId) }
+        runCatching { userRepository.fetchAndUpdateUserAccount(userId = userId) }
+        runCatching { bookmarksRepository.fetchAndPersistBookmarks(userId = userId) }
+        runCatching { walletRepository.fetchUserWalletInfoAndUpdateUserAccount(userId = userId) }
+        runCatching { pushNotificationsTokenUpdater.updateTokenForAllUsers() }
     }
 }

@@ -3,7 +3,7 @@ package net.primal.core.config
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.test.runTest
 import net.primal.core.coroutines.CoroutinesTestRule
-import net.primal.domain.PrimalServerType
+import net.primal.domain.global.PrimalServerType
 import org.junit.Rule
 import org.junit.Test
 

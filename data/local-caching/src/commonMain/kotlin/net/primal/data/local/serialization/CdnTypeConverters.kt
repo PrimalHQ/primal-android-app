@@ -1,36 +1,36 @@
 package net.primal.data.local.serialization
 
 import androidx.room.TypeConverter
-import net.primal.core.utils.serialization.CommonJson
-import net.primal.core.utils.serialization.decodeFromStringOrNull
-import net.primal.domain.CdnImage
-import net.primal.domain.CdnResourceVariant
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.domain.links.CdnImage
+import net.primal.domain.links.CdnResourceVariant
 
 class CdnTypeConverters {
 
     @TypeConverter
     fun stringToCdnImage(value: String?): CdnImage? {
-        return CommonJson.decodeFromStringOrNull<CdnImage>(value)
+        return value.decodeFromJsonStringOrNull<CdnImage>()
     }
 
     @TypeConverter
     fun cdnImageToString(data: CdnImage?): String? {
         return when (data) {
             null -> null
-            else -> CommonJson.encodeToString(data)
+            else -> data.encodeToJsonString()
         }
     }
 
     @TypeConverter
     fun stringToListOfCdnResourceVariant(value: String?): List<CdnResourceVariant>? {
-        return CommonJson.decodeFromStringOrNull<List<CdnResourceVariant>>(value)
+        return value.decodeFromJsonStringOrNull<List<CdnResourceVariant>>()
     }
 
     @TypeConverter
     fun listOfCdnResourceVariantToString(list: List<CdnResourceVariant>?): String? {
         return when (list) {
             null -> null
-            else -> CommonJson.encodeToString(list)
+            else -> list.encodeToJsonString()
         }
     }
 }

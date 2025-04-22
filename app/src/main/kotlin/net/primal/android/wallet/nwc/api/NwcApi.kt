@@ -1,19 +1,20 @@
 package net.primal.android.wallet.nwc.api
 
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import java.io.IOException
-import java.math.BigDecimal
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.wallet.nwc.model.LightningPayRequest
 import net.primal.android.wallet.nwc.model.LightningPayResponse
-import net.primal.android.wallet.utils.LnInvoiceUtils
-import net.primal.core.utils.serialization.CommonJson
-import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.core.utils.toLong
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.serialization.toNostrJsonObject
+import net.primal.domain.nostr.utils.LnInvoiceUtils
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -21,7 +22,7 @@ import timber.log.Timber
 
 @Singleton
 class NwcApi @Inject constructor(
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val okHttpClient: OkHttpClient,
 ) {
     suspend fun fetchZapPayRequest(lnUrl: String): LightningPayRequest {
@@ -38,7 +39,8 @@ class NwcApi @Inject constructor(
         val responseBody = response.body
         return if (responseBody != null) {
             val responseString = withContext(dispatcherProvider.io()) { responseBody.string() }
-            CommonJson.decodeFromStringOrNull(string = responseString)
+            responseString.decodeFromJsonStringOrNull()
+
                 ?: throw IOException("Invalid body content.")
         } else {
             throw IOException("Empty response body.")
@@ -70,10 +72,10 @@ class NwcApi @Inject constructor(
 
         val response = withContext(dispatcherProvider.io()) { okHttpClient.newCall(getRequest).execute() }
         val responseString = withContext(dispatcherProvider.io()) { response.body?.string() }
-        val decoded = CommonJson.decodeFromStringOrNull<LightningPayResponse>(responseString)
+        val decoded = responseString.decodeFromJsonStringOrNull<LightningPayResponse>()
 
         val responseInvoiceAmountInMillis = decoded?.pr?.extractInvoiceAmountInMilliSats()
-        val requestAmountInMillis = BigDecimal(satoshiAmountInMilliSats.toLong()).toLong()
+        val requestAmountInMillis = satoshiAmountInMilliSats.toLong().toBigDecimal().toLong()
 
         if (decoded == null || requestAmountInMillis != responseInvoiceAmountInMillis) {
             throw IOException("Invalid invoice response.")
@@ -82,7 +84,7 @@ class NwcApi @Inject constructor(
         return decoded
     }
 
-    private val thousandAsBigDecimal = BigDecimal(1000)
+    private val thousandAsBigDecimal = BigDecimal.fromInt(1_000)
 
     private fun String.extractInvoiceAmountInMilliSats(): Long? {
         return try {

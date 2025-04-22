@@ -16,7 +16,14 @@
     <string name="app_added_to_user_feeds">Added to your home feeds</string>
     <string name="app_removed_from_user_feeds">Removed from your home feeds</string>
     <string name="app_error_muting_user">Unable to mute user. Please try again.</string>
+    <string name="app_error_muting_word">Unable to mute word. Please try again.</string>
+    <string name="app_error_muting_hashtag">Unable to mute hashtag. Please try again.</string>
     <string name="app_error_unmuting_user">Unable to unmute user. Please try again.</string>
+    <string name="app_error_muting_thread">Unable to mute thread. Please try again.</string>
+    <string name="app_error_unmuting_thread">Unable to unmute thread. Please try again.</string>
+    <string name="app_error_unmuting_hashtag">Unable to unmute hashtag. Please try again.</string>
+    <string name="app_error_unmuting_word">Unable to unmute word. Please try again.</string>
+    <string name="app_error_network">Unable to complete the action. Please check your connection and try again.</string>
     <string name="app_invalid_lud16_address">Invalid lightning (lud16) address.</string>
     <string name="app_invalid_lud16_address_user_not_found">Invalid lightning address. User \'%1$s\' doesn\'t exist on %2$s.</string>
     <string name="app_invalid_nip05_address">Invalid nostr verification address.</string>
@@ -27,6 +34,10 @@
     <string name="app_error_unable_to_unfollow_profile">Unable to unfollow profile. Please try again.</string>
     <string name="app_error_unable_to_set_nostr_address">Unable to set nostr address. Please try again.</string>
     <string name="app_error_unable_to_set_lightning_address">Unable to set lightning address. Please try again.</string>
+    <string name="app_npub_login_error">Primal is in read only mode because you are signed in via your public key. To enable all options, please sign in with your private key.</string>
+    <string name="app_error_restore_default_blossom_server">Unable to restore default blossom server. Please try again.</string>
+    <string name="app_error_unable_to_update_blossom_server_list">Unable to update blossom server list. Please try again.</string>
+    <string name="app_error_fetching_mute_list">Failed to load your mute list. Please check your connection and try again.</string>
 
     <string name="welcome_sign_in_button_title">Sign In</string>
     <string name="welcome_create_account_button_title">Create Account</string>
@@ -481,6 +492,7 @@
         <item quantity="other">%1$s new notes</item>
     </plurals>
 
+    <string name="feed_context_unmute_thread">Unmute Thread</string>
     <string name="feed_context_share_note">Share note</string>
     <string name="feed_context_share_note_as_image">Share note as image</string>
     <string name="feed_context_copy_note_link">Copy note link</string>
@@ -494,6 +506,7 @@
     <string name="feed_context_copy_user_id">Copy user id</string>
     <string name="feed_context_report_user">Report user</string>
     <string name="feed_context_mute_user">Mute user</string>
+    <string name="feed_context_mute_thread">Mute Thread</string>
     <string name="feed_context_copied_toast">Copied!</string>
 
     <string name="feed_lightning_invoice_title">Lightning Invoice</string>
@@ -692,6 +705,8 @@
     <string name="notification_list_item_post_where_you_post_was_mentioned_was_liked">liked a note your note was mentioned in</string>
     <string name="notification_list_item_post_where_you_post_was_mentioned_was_reposted">reposted a note your note was mentioned in</string>
     <string name="notification_list_item_post_where_you_post_was_mentioned_was_replied_to">replied to a note your note was mentioned in</string>
+    <string name="notification_list_item_bookmarked_your_post">bookmarked your note</string>
+    <string name="notification_list_item_highlighted_your_article">highlighted your article</string>
     <string name="notification_list_button_jump_to_start">New notifications</string>
 
     <string name="messages_title">Messages</string>
@@ -797,24 +812,23 @@
     <string name="settings_notifications_title">Notifications</string>
     <string name="settings_notifications_error_update_settings">Unable to update notification settings.</string>
     <string name="settings_notifications_error_fetch_settings">Unable to retrieve latest notification settings.</string>
-    <string name="settings_notifications_section_core">Core notifications</string>
-    <string name="settings_notifications_section_note_you_were_mentioned_in">A note you were mentioned in was</string>
-    <string name="settings_notifications_section_note_your_note_was_mentioned_in">A note your note was mentioned in was</string>
-    <string name="settings_notifications_new_user_followed_you_text">new user followed you</string>
-    <string name="settings_notifications_your_post_was_zapped_text">your post was zapped</string>
-    <string name="settings_notifications_your_post_was_liked_text">your post was liked</string>
-    <string name="settings_notifications_your_post_was_reposted_text">your post was reposted</string>
-    <string name="settings_notifications_your_post_was_replied_to_text">your post was replied to</string>
-    <string name="settings_notifications_you_were_mentioned_text">you were mentioned</string>
-    <string name="settings_notifications_your_post_was_mentioned_text">your post was mentioned</string>
-    <string name="settings_notifications_post_you_were_mentioned_in_was_zapped_text">zapped</string>
-    <string name="settings_notifications_post_you_were_mentioned_in_was_liked_text">liked</string>
-    <string name="settings_notifications_post_you_were_mentioned_in_was_reposted_text">reposted</string>
-    <string name="settings_notifications_post_you_were_mentioned_in_was_replied_to_text">replied to</string>
-    <string name="settings_notifications_post_your_post_was_mentioned_in_was_zapped_text">zapped</string>
-    <string name="settings_notifications_post_your_post_was_mentioned_in_was_liked_text">liked</string>
-    <string name="settings_notifications_post_your_post_was_mentioned_in_was_reposted_text">reposted</string>
-    <string name="settings_notifications_post_your_post_was_mentioned_in_was_replied_to_text">replied to</string>
+    <string name="settings_notifications_section_push">Enable push notifications for:</string>
+    <string name="settings_notifications_section_tab">Show in notifications tab:</string>
+    <string name="settings_notifications_section_preferences">Notification Preferences</string>
+    <string name="settings_notifications_group_new_followers">New Followers</string>
+    <string name="settings_notifications_group_zaps">Zaps</string>
+    <string name="settings_notifications_group_reactions">Reactions</string>
+    <string name="settings_notifications_group_replies">Replies</string>
+    <string name="settings_notifications_group_reposts">Reposts</string>
+    <string name="settings_notifications_group_mentions">Mentions</string>
+    <string name="settings_notifications_group_direct_messages">Direct Messages</string>
+    <string name="settings_notifications_group_wallet_txs">Wallet Transactions</string>
+    <string name="settings_notifications_group_preferences_hell_thread">Ignore notes with more than 10 user mentions</string>
+    <string name="settings_notifications_group_preferences_DMS_from_follows">Only show DM notifications from users I follow</string>
+    <string name="settings_notifications_group_preferences_reactions_from_follows">Only show reactions from users I follow</string>
+    <string name="settings_notifications_enable_push_notifications">Enable Push Notifications</string>
+    <string name="settings_notifications_enable_push_notifications_description">Get system notifications from Primal. You can also configure this in your system settings.</string>
+    <string name="settings_notifications_channel_name_all_app_events">Primal app notifications</string>
 
     <string name="settings_appearance_title">Appearance</string>
     <string name="settings_appearance_theme_section_title">Theme</string>
@@ -859,10 +873,33 @@
     <string name="settings_zaps_editor_value">Value</string>
     <string name="settings_zaps_editor_save">Save</string>
 
-    <string name="settings_muted_accounts_title">Muted Accounts</string>
+    <string name="settings_muted_content_title">Muted Content</string>
+    <string name="settings_muted_title">Muted</string>
     <string name="settings_muted_accounts_unmute_button">Unmute</string>
+    <string name="settings_muted_accounts_mute_button">Mute</string>
     <string name="settings_muted_accounts_no_content">Your muted accounts will appear here.</string>
+    <string name="settings_muted_words_no_content">Your muted words will appear here.</string>
+    <string name="settings_muted_hashtags_no_content">Your muted hashtags will appear here.</string>
+    <string name="settings_muted_threads_no_content">Your muted threads will appear here.</string>
+    <string name="settings_muted_users_tab">Users</string>
+    <string name="settings_muted_words_tab">Words</string>
+    <string name="settings_muted_hashtags_tab">Hashtags</string>
+    <string name="settings_muted_threads_tab">Threads</string>
+    <string name="settings_muted_words_mute_new_word">Mute new word…</string>
+    <string name="settings_muted_hashtags_mute_new_hashtag">Mute new hashtag…</string>
 
+    <string name="settings_media_uploads_title">Media Uploads</string>
+    <string name="settings_media_uploads_blossom_server_section_title">Blossom Server</string>
+    <string name="settings_media_uploads_switch_blossom_server">Switch Blossom Server</string>
+    <string name="settings_media_uploads_restore_default_blossom_server">Restore Default Blossom Server</string>
+    <string name="settings_media_uploads_switch_blossom_server_placeholder">enter blossom server url</string>
+    <string name="settings_media_uploads_blossom_mirror_server_section_title">Mirror</string>
+    <string name="settings_media_uploads_blossom_mirror_server_switcher_title">Enable blossom mirror</string>
+    <string name="settings_media_uploads_blossom_mirror_server_enabled_notice">When enabled, your uploads to the primary blossom server will be automatically copied to the mirror.</string>
+    <string name="settings_media_uploads_switch_blossom_mirror_server">Switch Blossom Mirror Server</string>
+    <string name="settings_media_uploads_suggested_blossoms_title">Suggested blossom servers</string>
+    <string name="settings_media_uploads_restore_default_blossom_server_title">Restore Default</string>
+    <string name="settings_media_uploads_restore_default_blossom_server_description">Are you sure you want to restore default blossom server?</string>
     <string name="settings_version_title">Version</string>
 
     <string name="biometric_prompt_title">Authenticate</string>
@@ -963,7 +1000,6 @@
     <string name="wallet_dashboard_enable_wallet_notice_hint">External wallet is currently enabled via Nostr Wallet Connect</string>
     <string name="wallet_dashboard_enable_wallet_button">Enable Primal Wallet</string>
     <string name="wallet_dashboard_no_transactions_hint">You need sats to zap people on Nostr</string>
-    <string name="wallet_dashboard_npub_login">Primal is in read only mode because you are signed in via your public key. To enable all options, please sign in with your private key.</string>
     <string name="wallet_dashboard_low_sats_hint">You are running low on sats</string>
     <string name="wallet_dashboard_buy_sats_button">Buy Sats Now</string>
 

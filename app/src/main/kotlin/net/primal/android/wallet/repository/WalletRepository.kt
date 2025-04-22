@@ -3,12 +3,15 @@ package net.primal.android.wallet.repository
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import androidx.paging.PagingSource
+import androidx.paging.map
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.db.PrimalDatabase
 import net.primal.android.user.accounts.UserAccountsStore
+import net.primal.android.user.db.UsersDatabase
 import net.primal.android.user.domain.PrimalWallet
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.api.WalletApi
@@ -22,28 +25,52 @@ import net.primal.android.wallet.api.model.OnChainAddressResponse
 import net.primal.android.wallet.api.model.ParsedLnInvoiceResponse
 import net.primal.android.wallet.api.model.ParsedLnUrlResponse
 import net.primal.android.wallet.api.model.WithdrawRequestBody
-import net.primal.android.wallet.db.WalletTransaction
+import net.primal.android.wallet.db.WalletTransactionData
 import net.primal.android.wallet.domain.Network
 import net.primal.android.wallet.domain.SubWallet
 import net.primal.android.wallet.domain.WalletKycLevel
-import net.primal.data.remote.api.users.UsersApi
+import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.profile.ProfileRepository
 
 @OptIn(ExperimentalPagingApi::class)
 class WalletRepository @Inject constructor(
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val accountsStore: UserAccountsStore,
     private val walletApi: WalletApi,
-    private val usersApi: UsersApi,
-    private val database: PrimalDatabase,
+    private val usersDatabase: UsersDatabase,
     private val userRepository: UserRepository,
+    private val profileRepository: ProfileRepository,
 ) {
 
-    fun latestTransactions(userId: String) =
+    private fun latestTransactions(userId: String) =
         createTransactionsPager(userId) {
-            database.walletTransactions().latestTransactionsPagedByUserId(userId = userId)
+            usersDatabase.walletTransactions().latestTransactionsPagedByUserId(userId = userId)
         }.flow
 
-    fun findTransactionById(txId: String) = database.walletTransactions().findTransactionById(txId = txId)
+    fun getLatestTransactions(userId: String): Flow<PagingData<TransactionProfileData>> =
+        latestTransactions(userId = userId).map {
+            it.map {
+                val otherProfile = it.otherUserId?.let { profileRepository.findProfileDataOrNull(it) }
+                TransactionProfileData(
+                    transaction = it,
+                    otherProfileData = otherProfile,
+                )
+            }
+        }
+
+    suspend fun findTransactionByIdOrNull(txId: String): TransactionProfileData? =
+        withContext(dispatcherProvider.io()) {
+            val transaction = usersDatabase.walletTransactions().findTransactionById(txId = txId)
+                ?: return@withContext null
+
+            val profile = transaction.otherUserId
+                ?.let { profileRepository.findProfileDataOrNull(profileId = transaction.otherUserId) }
+
+            TransactionProfileData(
+                transaction = transaction,
+                otherProfileData = profile,
+            )
+        }
 
     suspend fun fetchUserWalletInfoAndUpdateUserAccount(userId: String) {
         val response = walletApi.getWalletUserInfo(userId)
@@ -140,7 +167,7 @@ class WalletRepository @Inject constructor(
     }
 
     fun deleteAllTransactions(userId: String) =
-        database.walletTransactions().deleteAllTransactionsByUserId(userId = userId)
+        usersDatabase.walletTransactions().deleteAllTransactionsByUserId(userId = userId)
 
     suspend fun fetchMiningFees(
         userId: String,
@@ -183,7 +210,7 @@ class WalletRepository @Inject constructor(
 
     private fun createTransactionsPager(
         userId: String,
-        pagingSourceFactory: () -> PagingSource<Int, WalletTransaction>,
+        pagingSourceFactory: () -> PagingSource<Int, WalletTransactionData>,
     ) = Pager(
         config = PagingConfig(
             pageSize = 50,
@@ -192,12 +219,12 @@ class WalletRepository @Inject constructor(
             enablePlaceholders = true,
         ),
         remoteMediator = WalletTransactionsMediator(
-            dispatchers = dispatcherProvider,
-            accountsStore = accountsStore,
             userId = userId,
-            database = database,
+            dispatcherProvider = dispatcherProvider,
+            accountsStore = accountsStore,
+            usersDatabase = usersDatabase,
             walletApi = walletApi,
-            usersApi = usersApi,
+            profileRepository = profileRepository,
         ),
         pagingSourceFactory = pagingSourceFactory,
     )

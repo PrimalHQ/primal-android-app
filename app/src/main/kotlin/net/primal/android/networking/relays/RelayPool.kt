@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.networking.relays.broadcast.BroadcastEventResponse
 import net.primal.android.networking.relays.broadcast.BroadcastRequestBody
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -29,15 +28,17 @@ import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.sockets.filterByEventId
 import net.primal.core.networking.sockets.parseIncomingMessage
-import net.primal.core.utils.serialization.CommonJson
-import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.data.remote.PrimalVerb
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.serialization.toNostrJsonObject
 import timber.log.Timber
 
 class RelayPool(
-    dispatchers: CoroutineDispatcherProvider,
+    dispatchers: DispatcherProvider,
     private val nostrSocketClientFactory: NostrSocketClientFactory,
     private val primalApiClient: PrimalApiClient,
 ) {
@@ -127,17 +128,15 @@ class RelayPool(
         val result = try {
             val queryResult = primalApiClient.query(
                 message = PrimalCacheFilter(
-                    primalVerb = net.primal.data.remote.PrimalVerb.BROADCAST_EVENTS.id,
-                    optionsJson = CommonJson.encodeToString(
-                        BroadcastRequestBody(
-                            events = listOf(nostrEvent),
-                            relays = relayUrls,
-                        ),
-                    ),
+                    primalVerb = PrimalVerb.BROADCAST_EVENTS.id,
+                    optionsJson = BroadcastRequestBody(
+                        events = listOf(nostrEvent),
+                        relays = relayUrls,
+                    ).encodeToJsonString(),
                 ),
             )
             val broadcastEvents = queryResult.findPrimalEvent(NostrEventKind.PrimalBroadcastResult)
-            CommonJson.decodeFromStringOrNull<List<BroadcastEventResponse>>(broadcastEvents?.content)
+            broadcastEvents?.content.decodeFromJsonStringOrNull<List<BroadcastEventResponse>>()
         } catch (error: WssException) {
             Timber.w(error)
             null

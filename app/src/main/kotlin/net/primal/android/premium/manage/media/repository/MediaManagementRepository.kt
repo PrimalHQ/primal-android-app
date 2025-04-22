@@ -2,16 +2,16 @@ package net.primal.android.premium.manage.media.repository
 
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.ext.asMapByKey
 import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
 import net.primal.android.nostr.ext.takeContentOrNull
 import net.primal.android.premium.manage.media.api.MediaManagementApi
 import net.primal.android.premium.manage.media.api.model.MediaUploadInfo
 import net.primal.android.premium.manage.media.domain.MediaUpload
+import net.primal.core.utils.coroutines.DispatcherProvider
 
 class MediaManagementRepository @Inject constructor(
-    private val dispatchers: CoroutineDispatcherProvider,
+    private val dispatchers: DispatcherProvider,
     private val mediaManagementApi: MediaManagementApi,
 ) {
 

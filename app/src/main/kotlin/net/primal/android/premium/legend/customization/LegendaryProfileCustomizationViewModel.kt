@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
 import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationContract.UiEvent
 import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationContract.UiState
@@ -19,6 +18,7 @@ import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
 @HiltViewModel
@@ -66,7 +66,7 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
                         editedShoutout = event.editedShoutout,
                     ),
                 )
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.e(error)
             } catch (error: WssException) {
                 Timber.e(error)

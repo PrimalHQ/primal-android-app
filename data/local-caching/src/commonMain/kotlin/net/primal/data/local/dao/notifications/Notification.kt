@@ -20,7 +20,7 @@ data class Notification(
     val actionPost: PostData? = null,
 
     @Relation(entityColumn = "eventId", parentColumn = "actionPostId")
-    val actionEventStats: EventStats? = null,
+    val actionPostStats: EventStats? = null,
 
     @Relation(entityColumn = "eventId", parentColumn = "actionPostId")
     val actionPostUserStats: EventUserStats? = null,

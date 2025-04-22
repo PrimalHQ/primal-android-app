@@ -21,7 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil.compose.SubcomposeAsyncImage
+import coil3.compose.SubcomposeAsyncImage
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -30,7 +30,7 @@ import net.primal.android.core.images.AvatarCoilImageLoader
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.theme.AppTheme
-import net.primal.domain.CdnImage
+import net.primal.domain.links.CdnImage
 
 @Composable
 fun UniversalAvatarThumbnail(

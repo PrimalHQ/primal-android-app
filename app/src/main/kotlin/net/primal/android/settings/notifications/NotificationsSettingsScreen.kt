@@ -1,10 +1,16 @@
 package net.primal.android.settings.notifications
 
+import android.content.Intent
+import android.os.Build
+import android.provider.Settings
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,6 +31,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -32,6 +39,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.NotificationManagerCompat
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
@@ -39,15 +51,18 @@ import net.primal.android.R
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.SignatureErrorColumn
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.core.compose.notifications.toImagePainter
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.notifications.domain.NotificationSection
-import net.primal.android.notifications.domain.NotificationType
+import net.primal.android.core.compose.res.painterResource
+import net.primal.android.settings.notifications.NotificationsSettingsContract.UiEvent.NotificationSettingsChanged
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiState.ApiError
+import net.primal.android.settings.notifications.ui.NotificationSwitchUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.domain.notifications.NotificationSettingsSection
+import net.primal.domain.notifications.NotificationSettingsType
 
 @Composable
 fun NotificationsSettingsScreen(viewModel: NotificationsSettingsViewModel, onClose: () -> Unit) {
@@ -70,6 +85,7 @@ fun NotificationsSettingsScreen(
     eventPublisher: (NotificationsSettingsContract.UiEvent) -> Unit,
 ) {
     Scaffold(
+        containerColor = AppTheme.colorScheme.surfaceVariant,
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.settings_notifications_title),
@@ -79,39 +95,82 @@ fun NotificationsSettingsScreen(
             )
         },
         content = { paddingValues ->
-            LazyColumn(
-                modifier = Modifier
-                    .background(color = AppTheme.colorScheme.surfaceVariant)
-                    .padding(paddingValues)
-                    .padding(top = 6.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
+            SignatureErrorColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = paddingValues,
+                signatureUiError = state.signatureError,
             ) {
-                state.notificationSwitches
-                    .groupBy { it.notificationType.section }
-                    .forEach { (section, notifications) ->
-                        item {
-                            NotificationsSettingsBlock(
-                                section = section,
-                                notifications = notifications,
-                                eventPublisher = eventPublisher,
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-                    }
-
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
+                NotificationsColumn(
+                    modifier = Modifier.padding(paddingValues),
+                    state = state,
+                    eventPublisher = eventPublisher,
+                )
             }
         },
     )
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun NotificationsSettingsBlock(
-    section: NotificationSection,
-    notifications: List<NotificationSwitchUi>,
+private fun NotificationsColumn(
+    modifier: Modifier = Modifier,
+    state: NotificationsSettingsContract.UiState,
+    eventPublisher: (NotificationsSettingsContract.UiEvent) -> Unit,
+) {
+    LazyColumn(
+        modifier = modifier
+            .fillMaxSize()
+            .background(color = AppTheme.colorScheme.surfaceVariant),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        item {
+            PushNotificationSection(
+                modifier = Modifier.padding(vertical = 12.dp),
+                pushNotificationsEnabled = state.pushNotificationsEnabled,
+                onChange = { eventPublisher(NotificationsSettingsContract.UiEvent.PushNotificationsToggled(it)) },
+            )
+        }
+
+        if (state.pushNotificationsEnabled) {
+            item {
+                NotificationsSettingsBlock(
+                    section = NotificationSettingsSection.PUSH_NOTIFICATIONS,
+                    notifications = state.pushNotificationsSettings,
+                    eventPublisher = eventPublisher,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+
+        item {
+            NotificationsSettingsBlock(
+                section = NotificationSettingsSection.NOTIFICATIONS_IN_TAB,
+                notifications = state.tabNotificationsSettings,
+                eventPublisher = eventPublisher,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        item {
+            NotificationsSettingsBlock(
+                section = NotificationSettingsSection.PREFERENCES,
+                notifications = state.preferencesSettings,
+                eventPublisher = eventPublisher,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+@Composable
+fun <T : NotificationSettingsType> NotificationsSettingsBlock(
+    section: NotificationSettingsSection,
+    notifications: List<NotificationSwitchUi<T>>,
     eventPublisher: (NotificationsSettingsContract.UiEvent) -> Unit,
 ) {
     Column(
@@ -139,50 +198,20 @@ fun NotificationsSettingsBlock(
             horizontalAlignment = Alignment.Start,
         ) {
             notifications.forEachIndexed { index, notificationSwitchUi ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            eventPublisher(
-                                NotificationsSettingsContract.UiEvent.NotificationSettingChanged(
-                                    type = notificationSwitchUi.notificationType,
-                                    value = !notificationSwitchUi.enabled,
-                                ),
-                            )
-                        }
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Image(
-                        modifier = Modifier.size(32.dp),
-                        painter = notificationSwitchUi.notificationType.toImagePainter(),
-                        contentDescription = null,
-                    )
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth(fraction = 0.75f)
-                            .padding(bottom = 5.dp),
-                        text = notificationSwitchUi.notificationType.toTitle(),
-                        fontWeight = FontWeight.W400,
-                        fontSize = 16.sp,
-                        lineHeight = 20.sp,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    PrimalSwitch(
-                        checked = notificationSwitchUi.enabled,
-                        onCheckedChange = {
-                            eventPublisher(
-                                NotificationsSettingsContract.UiEvent.NotificationSettingChanged(
-                                    type = notificationSwitchUi.notificationType,
-                                    value = it,
-                                ),
-                            )
-                        },
-                    )
-                }
+                NotificationSettingsRow(
+                    title = notificationSwitchUi.settingsType.toTitle(),
+                    longTitleText = notificationSwitchUi.settingsType is NotificationSettingsType.Preferences,
+                    enabled = notificationSwitchUi.enabled,
+                    painter = notificationSwitchUi.settingsType.toImagePainter(),
+                    onCheckedChange = {
+                        eventPublisher(
+                            NotificationSettingsChanged(
+                                type = notificationSwitchUi.settingsType,
+                                value = it,
+                            ),
+                        )
+                    },
+                )
 
                 if (index < notifications.size - 1) {
                     PrimalDivider()
@@ -193,84 +222,125 @@ fun NotificationsSettingsBlock(
 }
 
 @Composable
-private fun NotificationSection.toTitle(): String =
-    when (this) {
-        NotificationSection.CORE_NOTIFICATIONS ->
-            stringResource(id = R.string.settings_notifications_section_core)
-
-        NotificationSection.NOTE_YOU_WERE_MENTIONED_IN ->
-            stringResource(id = R.string.settings_notifications_section_note_you_were_mentioned_in)
-
-        NotificationSection.NOTE_YOUR_NOTE_WAS_MENTIONED_IN ->
-            stringResource(
-                id = R.string.settings_notifications_section_note_your_note_was_mentioned_in,
+private fun NotificationSettingsRow(
+    title: String,
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+    longTitleText: Boolean = false,
+    painter: Painter? = null,
+    onCheckedChange: ((Boolean) -> Unit)? = null,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(enabled = onCheckedChange != null, onClick = { onCheckedChange?.invoke(!enabled) })
+            .padding(horizontal = 16.dp)
+            .padding(vertical = if (longTitleText) 8.dp else 0.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (painter != null) {
+            Image(
+                modifier = Modifier.size(32.dp),
+                painter = painter,
+                contentDescription = null,
             )
-    }
+        }
 
+        Text(
+            modifier = Modifier
+                .fillMaxWidth(fraction = 0.75f)
+                .padding(top = 2.dp)
+                .padding(end = if (longTitleText) 6.dp else 0.dp),
+            text = title,
+            fontWeight = FontWeight.W400,
+            fontSize = 16.sp,
+            lineHeight = 20.sp,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+
+        PrimalSwitch(
+            checked = enabled,
+            onCheckedChange = onCheckedChange,
+        )
+    }
+}
+
+@ExperimentalPermissionsApi
 @Composable
-private fun NotificationType.toTitle(): String =
-    when (this) {
-        NotificationType.NEW_USER_FOLLOWED_YOU ->
-            stringResource(id = R.string.settings_notifications_new_user_followed_you_text)
-
-        NotificationType.YOUR_POST_WAS_ZAPPED ->
-            stringResource(id = R.string.settings_notifications_your_post_was_zapped_text)
-
-        NotificationType.YOUR_POST_WAS_LIKED ->
-            stringResource(id = R.string.settings_notifications_your_post_was_liked_text)
-
-        NotificationType.YOUR_POST_WAS_REPOSTED ->
-            stringResource(id = R.string.settings_notifications_your_post_was_reposted_text)
-
-        NotificationType.YOUR_POST_WAS_REPLIED_TO ->
-            stringResource(id = R.string.settings_notifications_your_post_was_replied_to_text)
-
-        NotificationType.YOU_WERE_MENTIONED_IN_POST ->
-            stringResource(id = R.string.settings_notifications_you_were_mentioned_text)
-
-        NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST ->
-            stringResource(id = R.string.settings_notifications_your_post_was_mentioned_text)
-
-        NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED ->
-            stringResource(
-                id = R.string.settings_notifications_post_you_were_mentioned_in_was_zapped_text,
-            )
-
-        NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED ->
-            stringResource(
-                id = R.string.settings_notifications_post_you_were_mentioned_in_was_liked_text,
-            )
-
-        NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED ->
-            stringResource(
-                id = R.string.settings_notifications_post_you_were_mentioned_in_was_reposted_text,
-            )
-
-        NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO ->
-            stringResource(
-                id = R.string.settings_notifications_post_you_were_mentioned_in_was_replied_to_text,
-            )
-
-        NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED ->
-            stringResource(
-                id = R.string.settings_notifications_post_your_post_was_mentioned_in_was_zapped_text,
-            )
-
-        NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED ->
-            stringResource(
-                id = R.string.settings_notifications_post_your_post_was_mentioned_in_was_liked_text,
-            )
-
-        NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED ->
-            stringResource(
-                id = R.string.settings_notifications_post_your_post_was_mentioned_in_was_reposted_text,
-            )
-
-        NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO ->
-            stringResource(
-                id = R.string.settings_notifications_post_your_post_was_mentioned_in_was_replied_to_text,
-            )
+private fun PushNotificationSection(
+    modifier: Modifier,
+    pushNotificationsEnabled: Boolean,
+    onChange: (Boolean) -> Unit,
+) {
+    val context = LocalContext.current
+    val notificationsPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        rememberPermissionState(permission = android.Manifest.permission.POST_NOTIFICATIONS) { result ->
+            onChange(result)
+        }
+    } else {
+        null
     }
+
+    val systemSettingsLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+    ) { result ->
+        val enabled = NotificationManagerCompat.from(context).areNotificationsEnabled()
+        onChange(enabled)
+    }
+
+    fun buildNotificationsSettingsIntent() =
+        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+        }
+
+    Column(modifier = modifier) {
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 12.dp)
+                .background(
+                    color = AppTheme.extraColorScheme.surfaceVariantAlt3,
+                    shape = RoundedCornerShape(12.dp),
+                )
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(size = 12.dp)),
+            contentAlignment = Alignment.Center,
+        ) {
+            NotificationSettingsRow(
+                modifier = Modifier.height(48.dp),
+                title = stringResource(R.string.settings_notifications_enable_push_notifications),
+                enabled = pushNotificationsEnabled,
+                onCheckedChange = { newEnabled ->
+                    if (newEnabled) {
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                            notificationsPermission?.status?.isGranted == true
+                        ) {
+                            onChange(true)
+                        } else {
+                            if (notificationsPermission?.status?.shouldShowRationale == true) {
+                                notificationsPermission.launchPermissionRequest()
+                            } else {
+                                systemSettingsLauncher.launch(buildNotificationsSettingsIntent())
+                            }
+                        }
+                    } else {
+                        onChange(false)
+                    }
+                },
+            )
+        }
+
+        Text(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 8.dp),
+            text = stringResource(R.string.settings_notifications_enable_push_notifications_description),
+            style = AppTheme.typography.bodySmall,
+        )
+    }
+}
 
 @Composable
 @Deprecated("Replace with SnackbarErrorHandler")
@@ -296,6 +366,172 @@ fun LaunchedErrorHandler(viewModel: NotificationsSettingsViewModel) {
             }
     }
 }
+
+@Composable
+private fun NotificationSettingsSection.toTitle(): String =
+    when (this) {
+        NotificationSettingsSection.PUSH_NOTIFICATIONS -> stringResource(R.string.settings_notifications_section_push)
+        NotificationSettingsSection.NOTIFICATIONS_IN_TAB -> stringResource(R.string.settings_notifications_section_tab)
+        NotificationSettingsSection.PREFERENCES -> stringResource(R.string.settings_notifications_section_preferences)
+    }
+
+@Suppress("CyclomaticComplexMethod")
+@Composable
+private fun NotificationSettingsType.toTitle(): String =
+    when (this) {
+        NotificationSettingsType.Preferences.DMsFromFollows -> stringResource(
+            R.string.settings_notifications_group_preferences_DMS_from_follows,
+        )
+
+        NotificationSettingsType.Preferences.HellThread -> stringResource(
+            R.string.settings_notifications_group_preferences_hell_thread,
+        )
+
+        NotificationSettingsType.Preferences.ReactionsFromFollows -> stringResource(
+            R.string.settings_notifications_group_preferences_reactions_from_follows,
+        )
+
+        NotificationSettingsType.PushNotifications.DirectMessages -> stringResource(
+            R.string.settings_notifications_group_direct_messages,
+        )
+
+        NotificationSettingsType.PushNotifications.Mentions -> stringResource(
+            R.string.settings_notifications_group_mentions,
+        )
+
+        NotificationSettingsType.PushNotifications.NewFollows -> stringResource(
+            R.string.settings_notifications_group_new_followers,
+        )
+
+        NotificationSettingsType.PushNotifications.Reactions -> stringResource(
+            R.string.settings_notifications_group_reactions,
+        )
+
+        NotificationSettingsType.PushNotifications.Replies -> stringResource(
+            R.string.settings_notifications_group_replies,
+        )
+
+        NotificationSettingsType.PushNotifications.Reposts -> stringResource(
+            R.string.settings_notifications_group_reposts,
+        )
+
+        NotificationSettingsType.PushNotifications.WalletTransactions -> stringResource(
+            R.string.settings_notifications_group_wallet_txs,
+        )
+
+        NotificationSettingsType.PushNotifications.Zaps -> stringResource(R.string.settings_notifications_group_zaps)
+        NotificationSettingsType.TabNotifications.Mentions -> stringResource(
+            R.string.settings_notifications_group_mentions,
+        )
+
+        NotificationSettingsType.TabNotifications.NewFollows -> stringResource(
+            R.string.settings_notifications_group_new_followers,
+        )
+
+        NotificationSettingsType.TabNotifications.Reactions -> stringResource(
+            R.string.settings_notifications_group_reactions,
+        )
+
+        NotificationSettingsType.TabNotifications.Replies -> stringResource(
+            R.string.settings_notifications_group_replies,
+        )
+
+        NotificationSettingsType.TabNotifications.Reposts -> stringResource(
+            R.string.settings_notifications_group_reposts,
+        )
+
+        NotificationSettingsType.TabNotifications.Zaps -> stringResource(R.string.settings_notifications_group_zaps)
+    }
+
+@Suppress("CyclomaticComplexMethod")
+@Composable
+private fun NotificationSettingsType.toImagePainter(): Painter? =
+    when (this) {
+        is NotificationSettingsType.Preferences -> null
+        NotificationSettingsType.PushNotifications.DirectMessages ->
+            painterResource(
+                darkResId = R.drawable.notification_push_type_dms_dark,
+                lightResId = R.drawable.notification_push_type_dms_dark,
+            )
+
+        NotificationSettingsType.PushNotifications.Mentions ->
+            painterResource(
+                darkResId = R.drawable.notification_type_you_were_mentioned_in_a_post_dark,
+                lightResId = R.drawable.notification_type_you_were_mentioned_in_a_post_light,
+            )
+
+        NotificationSettingsType.PushNotifications.NewFollows ->
+            painterResource(
+                darkResId = R.drawable.notification_type_followed_dark,
+                lightResId = R.drawable.notification_type_followed_light,
+            )
+
+        NotificationSettingsType.PushNotifications.Reactions ->
+            painterResource(
+                darkResId = R.drawable.notification_type_your_post_was_liked_dark,
+                lightResId = R.drawable.notification_type_your_post_was_liked_light,
+            )
+
+        NotificationSettingsType.PushNotifications.Replies ->
+            painterResource(
+                darkResId = R.drawable.notification_type_your_post_was_replied_to_dark,
+                lightResId = R.drawable.notification_type_your_post_was_replied_to_light,
+            )
+
+        NotificationSettingsType.PushNotifications.Reposts ->
+            painterResource(
+                darkResId = R.drawable.notification_type_your_post_was_reposted_dark,
+                lightResId = R.drawable.notification_type_your_post_was_reposted_light,
+            )
+
+        NotificationSettingsType.PushNotifications.WalletTransactions ->
+            painterResource(
+                darkResId = R.drawable.notification_push_type_wallet_tx_dark,
+                lightResId = R.drawable.notification_push_type_wallet_tx_dark,
+            )
+
+        NotificationSettingsType.PushNotifications.Zaps ->
+            painterResource(
+                darkResId = R.drawable.notification_type_your_post_was_zapped_dark,
+                lightResId = R.drawable.notification_type_your_post_was_zapped_light,
+            )
+
+        NotificationSettingsType.TabNotifications.Mentions ->
+            painterResource(
+                darkResId = R.drawable.notification_type_you_were_mentioned_in_a_post_dark,
+                lightResId = R.drawable.notification_type_you_were_mentioned_in_a_post_light,
+            )
+
+        NotificationSettingsType.TabNotifications.NewFollows ->
+            painterResource(
+                darkResId = R.drawable.notification_type_followed_dark,
+                lightResId = R.drawable.notification_type_followed_light,
+            )
+
+        NotificationSettingsType.TabNotifications.Reactions ->
+            painterResource(
+                darkResId = R.drawable.notification_type_your_post_was_liked_dark,
+                lightResId = R.drawable.notification_type_your_post_was_liked_light,
+            )
+
+        NotificationSettingsType.TabNotifications.Replies ->
+            painterResource(
+                darkResId = R.drawable.notification_type_your_post_was_replied_to_dark,
+                lightResId = R.drawable.notification_type_your_post_was_replied_to_light,
+            )
+
+        NotificationSettingsType.TabNotifications.Reposts ->
+            painterResource(
+                darkResId = R.drawable.notification_type_your_post_was_reposted_dark,
+                lightResId = R.drawable.notification_type_your_post_was_reposted_light,
+            )
+
+        NotificationSettingsType.TabNotifications.Zaps ->
+            painterResource(
+                darkResId = R.drawable.notification_type_your_post_was_zapped_dark,
+                lightResId = R.drawable.notification_type_your_post_was_zapped_light,
+            )
+    }
 
 @Preview
 @Composable

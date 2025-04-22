@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.play.publishing)
+    alias(libs.plugins.google.services)
 }
 
 val configProperties by lazy {
@@ -52,8 +53,8 @@ fun extractSigningConfigProperties(storeName: String): SigningConfigProperties? 
     )
 }
 
-val appVersionCode = 221
-val appVersionName = "2.2.0"
+val appVersionCode = 224
+val appVersionName = "2.2.3 (2)"
 
 tasks.register("generateReleaseProperties") {
     doLast {
@@ -228,6 +229,7 @@ dependencies {
     implementation(project(":core:utils"))
     implementation(project(":core:app-config"))
     implementation(project(":core:networking-primal"))
+    implementation(project(":core:networking-upload"))
     implementation(project(":domain:nostr"))
     implementation(project(":domain:primal"))
     implementation(project(":domain:primal-wallet"))
@@ -235,6 +237,7 @@ dependencies {
     implementation(project(":data:remote-caching"))
     implementation(project(":data:repository-caching"))
 
+    implementation(libs.bignum)
     implementation(libs.core.ktx)
     implementation(libs.core.splashscreen)
     implementation(libs.lifecycle.runtime.ktx)
@@ -254,6 +257,8 @@ dependencies {
 
     implementation(libs.compose.constraintlayout)
     implementation(libs.constraintlayout)
+
+    implementation(libs.permissions.accompanist)
 
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.emoji2)
@@ -292,6 +297,7 @@ dependencies {
 
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging.interceptor)
+    implementation(libs.okio)
 
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.scalars)
@@ -305,6 +311,7 @@ dependencies {
     implementation(libs.coil.svg)
     implementation(libs.coil.gif)
     implementation(libs.coil.video)
+    implementation(libs.coil.network)
     implementation(libs.telephoto.zoomable.image)
     implementation(libs.telephoto.zoomable.image.coil)
     implementation(libs.media3.exoplayer.core)
@@ -322,7 +329,6 @@ dependencies {
     implementation(libs.secp256k1.kmp.jvm)
     implementation(libs.secp256k1.kmp.jni.android)
     testImplementation(libs.secp256k1.kmp.jni.jvm)
-    implementation(libs.spongycastle.core)
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.biometric)
 
@@ -330,6 +336,9 @@ dependencies {
 
     "googleImplementation"(libs.play.billing)
     "googleImplementation"(libs.play.billing.ktx)
+    "googleImplementation"(platform(libs.firebase.bom))
+    "googleImplementation"(libs.firebase.messaging)
+    "googleImplementation"(libs.kotlinx.coroutines.play.services)
 
     implementation(libs.qrcode.generator)
 

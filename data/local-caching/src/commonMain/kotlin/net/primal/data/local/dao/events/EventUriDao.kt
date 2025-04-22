@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import net.primal.domain.EventUriType
+import net.primal.domain.links.EventUriType
 
 @Dao
 interface EventUriDao {

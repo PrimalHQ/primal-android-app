@@ -6,7 +6,7 @@ import com.linkedin.urls.detection.UrlDetectorOptions
 import java.net.MalformedURLException
 import java.net.URL
 import java.util.regex.Pattern
-import net.primal.android.nostr.ext.parseNostrUris
+import net.primal.domain.nostr.utils.parseNostrUris
 import timber.log.Timber
 
 private val urlRegexPattern: Pattern = Pattern.compile(

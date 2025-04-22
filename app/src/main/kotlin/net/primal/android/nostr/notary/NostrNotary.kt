@@ -3,50 +3,58 @@ package net.primal.android.nostr.notary
 import android.content.ContentResolver
 import fr.acinq.secp256k1.Hex
 import javax.inject.Inject
+import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.core.serialization.json.NostrNotaryJson
-import net.primal.android.crypto.CryptoUtils
-import net.primal.android.crypto.hexToNpubHrp
-import net.primal.android.crypto.toNpub
 import net.primal.android.networking.UserAgentProvider
-import net.primal.android.nostr.ext.asIdentifierTag
-import net.primal.android.nostr.ext.asPubkeyTag
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
-import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
 import net.primal.android.signer.signEventWithAmber
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.toZapTag
-import net.primal.android.wallet.domain.ZapTarget
-import net.primal.android.wallet.domain.toTags
 import net.primal.android.wallet.nwc.model.NwcWalletRequest
 import net.primal.android.wallet.nwc.model.PayInvoiceRequest
-import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.settings.model.AppSettingsDescription
-import net.primal.domain.ContentAppSettings
+import net.primal.domain.global.ContentAppSettings
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
-import timber.log.Timber
+import net.primal.domain.nostr.asIdentifierTag
+import net.primal.domain.nostr.asPubkeyTag
+import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
+import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
+import net.primal.domain.nostr.cryptography.SigningRejectedException
+import net.primal.domain.nostr.cryptography.utils.CryptoUtils
+import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
+import net.primal.domain.nostr.cryptography.utils.toNpub
+import net.primal.domain.nostr.zaps.ZapTarget
+import net.primal.domain.nostr.zaps.toTags
 
 class NostrNotary @Inject constructor(
     private val contentResolver: ContentResolver,
     private val credentialsStore: CredentialsStore,
-) {
+) : NostrEventSignatureHandler {
 
-    private fun findNsecOrThrow(pubkey: String): String {
-        return try {
-            val npub = Hex.decode(pubkey).toNpub()
-            credentialsStore.findOrThrow(npub = npub).nsec ?: throw MissingPrivateKey()
-        } catch (error: IllegalArgumentException) {
-            Timber.w(error)
-            throw NostrSignUnauthorized()
-        }
+    override fun signNostrEvent(unsignedNostrEvent: NostrUnsignedEvent): NostrEvent {
+        return signNostrEvent(
+            userId = unsignedNostrEvent.pubKey,
+            event = unsignedNostrEvent,
+        )
     }
+
+    override fun verifySignature(nostrEvent: NostrEvent): Boolean {
+        throw NotImplementedError()
+    }
+
+    private fun findNsecOrThrow(pubkey: String): String =
+        runCatching {
+            val npub = Hex.decode(pubkey).toNpub()
+            credentialsStore.findOrThrow(npub = npub).nsec
+        }.getOrNull() ?: throw SigningKeyNotFoundException()
 
     fun signNostrEvent(userId: String, event: NostrUnsignedEvent): NostrEvent {
         val isExternalSignerLogin = runCatching {
@@ -54,7 +62,7 @@ class NostrNotary @Inject constructor(
         }.getOrDefault(false)
 
         if (isExternalSignerLogin) {
-            return contentResolver.signEventWithAmber(event = event) ?: throw NostrSignUnauthorized()
+            return contentResolver.signEventWithAmber(event = event) ?: throw SigningRejectedException()
         }
 
         return event.signOrThrow(nsec = findNsecOrThrow(userId))
@@ -87,9 +95,7 @@ class NostrNotary @Inject constructor(
                 pubKey = userId,
                 kind = NostrEventKind.ApplicationSpecificData.value,
                 tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()) + tags,
-                content = CommonJson.encodeToString(
-                    AppSettingsDescription(description = description),
-                ),
+                content = AppSettingsDescription(description = description).encodeToJsonString(),
             ),
         )
     }
@@ -101,7 +107,7 @@ class NostrNotary @Inject constructor(
                 pubKey = userId,
                 kind = NostrEventKind.ApplicationSpecificData.value,
                 tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
-                content = CommonJson.encodeToString(appSettings),
+                content = appSettings.encodeToJsonString(),
             ),
         )
     }
@@ -152,6 +158,7 @@ class NostrNotary @Inject constructor(
         )
     }
 
+    @OptIn(ExperimentalEncodingApi::class)
     fun signWalletInvoiceRequestNostrEvent(
         request: NwcWalletRequest<PayInvoiceRequest>,
         nwc: NostrWalletConnect,

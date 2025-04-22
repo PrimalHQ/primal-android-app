@@ -11,27 +11,28 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.bookmarks.BookmarksRepository
 import net.primal.android.core.errors.UiError
-import net.primal.android.events.repository.EventRepository
-import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
-import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
-import net.primal.android.nostr.repository.RelayHintsRepository
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.NoteContract.UiState
-import net.primal.android.profile.repository.ProfileRepository
-import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.wallet.domain.ZapTarget
-import net.primal.android.wallet.zaps.InvalidZapRequestException
-import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.domain.BookmarkType
+import net.primal.domain.bookmarks.BookmarkType
+import net.primal.domain.bookmarks.PublicBookmarksRepository
+import net.primal.domain.events.EventInteractionRepository
+import net.primal.domain.events.EventRelayHintsRepository
+import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.PublicBookmarksNotFoundException
+import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
+import net.primal.domain.nostr.cryptography.SigningRejectedException
+import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.nostr.zaps.ZapFailureException
+import net.primal.domain.nostr.zaps.ZapRequestException
+import net.primal.domain.nostr.zaps.ZapTarget
+import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = NoteViewModel.Factory::class)
@@ -39,11 +40,11 @@ class NoteViewModel @AssistedInject constructor(
     @Assisted private val noteId: String?,
     private val activeAccountStore: ActiveAccountStore,
     private val zapHandler: ZapHandler,
-    private val eventRepository: EventRepository,
+    private val eventInteractionRepository: EventInteractionRepository,
     private val profileRepository: ProfileRepository,
-    private val mutedUserRepository: MutedUserRepository,
-    private val bookmarksRepository: BookmarksRepository,
-    private val relayHintsRepository: RelayHintsRepository,
+    private val mutedItemRepository: MutedItemRepository,
+    private val bookmarksRepository: PublicBookmarksRepository,
+    private val relayHintsRepository: EventRelayHintsRepository,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -99,7 +100,9 @@ class NoteViewModel @AssistedInject constructor(
                     is UiEvent.ReportAbuse -> reportAbuse(it)
                     is UiEvent.RepostAction -> repostPost(it)
                     is UiEvent.ZapAction -> zapPost(it)
-                    is UiEvent.MuteAction -> mute(it)
+                    is UiEvent.MuteUserAction -> muteUser(it)
+                    is UiEvent.MuteThreadAction -> toggleMuteThread(postId = it.postId, isThreadMuted = false)
+                    is UiEvent.UnmuteThreadAction -> toggleMuteThread(postId = it.postId, isThreadMuted = true)
                     is UiEvent.BookmarkAction -> handleBookmark(it)
                     is UiEvent.DismissBookmarkConfirmation -> dismissBookmarkConfirmation()
                     UiEvent.DismissError -> setState { copy(error = null) }
@@ -110,7 +113,7 @@ class NoteViewModel @AssistedInject constructor(
     private fun likePost(postLikeAction: UiEvent.PostLikeAction) =
         viewModelScope.launch {
             try {
-                eventRepository.likeEvent(
+                eventInteractionRepository.likeEvent(
                     userId = activeAccountStore.activeUserId(),
                     eventId = postLikeAction.postId,
                     eventAuthorId = postLikeAction.postAuthorId,
@@ -121,10 +124,10 @@ class NoteViewModel @AssistedInject constructor(
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 setState { copy(error = UiError.MissingPrivateKey) }
                 Timber.w(error)
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 setState { copy(error = UiError.NostrSignUnauthorized) }
                 Timber.w(error)
             }
@@ -133,11 +136,11 @@ class NoteViewModel @AssistedInject constructor(
     private fun repostPost(repostAction: UiEvent.RepostAction) =
         viewModelScope.launch {
             try {
-                eventRepository.repostEvent(
+                eventInteractionRepository.repostEvent(
                     userId = activeAccountStore.activeUserId(),
                     eventId = repostAction.postId,
                     eventAuthorId = repostAction.postAuthorId,
-                    eventKind = NostrEventKind.ShortTextNote,
+                    eventKind = NostrEventKind.ShortTextNote.value,
                     eventRawNostrEvent = repostAction.postNostrEvent,
                 )
             } catch (error: NostrPublishException) {
@@ -146,10 +149,10 @@ class NoteViewModel @AssistedInject constructor(
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 setState { copy(error = UiError.MissingPrivateKey) }
                 Timber.w(error)
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 setState { copy(error = UiError.NostrSignUnauthorized) }
                 Timber.w(error)
             }
@@ -158,7 +161,8 @@ class NoteViewModel @AssistedInject constructor(
     private fun zapPost(zapAction: UiEvent.ZapAction) =
         viewModelScope.launch {
             val postAuthorProfileData = profileRepository.findProfileDataOrNull(profileId = zapAction.postAuthorId)
-            if (postAuthorProfileData?.lnUrlDecoded == null) {
+            val lnUrlDecoded = postAuthorProfileData?.lnUrlDecoded
+            if (lnUrlDecoded == null) {
                 setState { copy(error = UiError.MissingLightningAddress(IllegalStateException("Missing ln url"))) }
                 return@launch
             }
@@ -169,9 +173,9 @@ class NoteViewModel @AssistedInject constructor(
                     comment = zapAction.zapDescription,
                     amountInSats = zapAction.zapAmount,
                     target = ZapTarget.Event(
-                        zapAction.postId,
-                        zapAction.postAuthorId,
-                        postAuthorProfileData.lnUrlDecoded,
+                        eventId = zapAction.postId,
+                        eventAuthorId = zapAction.postAuthorId,
+                        eventAuthorLnUrlDecoded = lnUrlDecoded,
                     ),
                 )
             } catch (error: ZapFailureException) {
@@ -180,31 +184,71 @@ class NoteViewModel @AssistedInject constructor(
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
-            } catch (error: InvalidZapRequestException) {
+            } catch (error: ZapRequestException) {
                 Timber.w(error)
                 setState { copy(error = UiError.InvalidZapRequest(error)) }
             }
         }
 
-    private fun mute(action: UiEvent.MuteAction) =
+    private fun muteUser(action: UiEvent.MuteUserAction) =
         viewModelScope.launch {
             try {
-                mutedUserRepository.muteUserAndPersistMuteList(
+                mutedItemRepository.muteUserAndPersistMuteList(
                     userId = activeAccountStore.activeUserId(),
                     mutedUserId = action.userId,
                 )
             } catch (error: WssException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToMuteUser(error)) }
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 Timber.w(error)
                 setState { copy(error = UiError.MissingPrivateKey) }
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 Timber.w(error)
                 setState { copy(error = UiError.NostrSignUnauthorized) }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToMuteUser(error)) }
+            } catch (error: MissingRelaysException) {
+                Timber.w(error)
+                setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
+            }
+        }
+
+    private fun toggleMuteThread(postId: String, isThreadMuted: Boolean) =
+        viewModelScope.launch {
+            try {
+                if (isThreadMuted) {
+                    mutedItemRepository.unmuteThreadAndPersistMuteList(
+                        postId = postId,
+                        userId = activeAccountStore.activeUserId(),
+                    )
+                } else {
+                    mutedItemRepository.muteThreadAndPersistMuteList(
+                        postId = postId,
+                        userId = activeAccountStore.activeUserId(),
+                    )
+                }
+            } catch (error: WssException) {
+                Timber.w(error)
+                if (isThreadMuted) {
+                    setState { copy(error = UiError.FailedToUnmuteThread(error)) }
+                } else {
+                    setState { copy(error = UiError.FailedToMuteThread(error)) }
+                }
+            } catch (error: SigningKeyNotFoundException) {
+                Timber.w(error)
+                setState { copy(error = UiError.MissingPrivateKey) }
+            } catch (error: SigningRejectedException) {
+                Timber.w(error)
+                setState { copy(error = UiError.NostrSignUnauthorized) }
+            } catch (error: NostrPublishException) {
+                Timber.w(error)
+                if (isThreadMuted) {
+                    setState { copy(error = UiError.FailedToUnmuteThread(error)) }
+                } else {
+                    setState { copy(error = UiError.FailedToMuteThread(error)) }
+                }
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
@@ -220,10 +264,10 @@ class NoteViewModel @AssistedInject constructor(
                     profileId = event.profileId,
                     eventId = event.noteId,
                 )
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 Timber.w(error)
                 setState { copy(error = UiError.MissingPrivateKey) }
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 Timber.w(error)
                 setState { copy(error = UiError.NostrSignUnauthorized) }
             } catch (error: NostrPublishException) {
@@ -254,13 +298,13 @@ class NoteViewModel @AssistedInject constructor(
                 }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
-            } catch (error: BookmarksRepository.BookmarksListNotFound) {
+            } catch (error: PublicBookmarksNotFoundException) {
                 Timber.w(error)
                 setState { copy(shouldApproveBookmark = true) }
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 setState { copy(error = UiError.MissingPrivateKey) }
                 Timber.w(error)
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 setState { copy(error = UiError.NostrSignUnauthorized) }
                 Timber.w(error)
             }

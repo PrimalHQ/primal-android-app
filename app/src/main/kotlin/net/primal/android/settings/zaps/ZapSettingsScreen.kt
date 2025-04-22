@@ -60,16 +60,17 @@ import net.primal.android.R
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.SignatureErrorColumn
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
-import net.primal.domain.ContentZapConfigItem
-import net.primal.domain.ContentZapDefault
-import net.primal.domain.DEFAULT_ZAP_CONFIG
-import net.primal.domain.DEFAULT_ZAP_DEFAULT
+import net.primal.domain.notifications.ContentZapConfigItem
+import net.primal.domain.notifications.ContentZapDefault
+import net.primal.domain.notifications.DEFAULT_ZAP_CONFIG
+import net.primal.domain.notifications.DEFAULT_ZAP_DEFAULT
 
 @Composable
 fun ZapSettingsScreen(viewModel: ZapSettingsViewModel, onClose: () -> Unit) {
@@ -111,74 +112,93 @@ fun ZapSettingsScreen(
             )
         },
         content = { paddingValues ->
-            AnimatedContent(
-                modifier = Modifier
-                    .background(color = AppTheme.colorScheme.surfaceVariant)
-                    .fillMaxSize(),
-                targetState = uiState.editPresetIndex,
-                transitionSpec = {
-                    when (targetState) {
-                        null -> {
-                            slideInHorizontally(initialOffsetX = { -it })
-                                .togetherWith(
-                                    slideOutHorizontally(targetOffsetX = { it }),
-                                )
-                        }
-
-                        else -> {
-                            slideInHorizontally(initialOffsetX = { it })
-                                .togetherWith(slideOutHorizontally(targetOffsetX = { -it }))
-                        }
-                    }
-                },
-                label = "ZapSettings",
+            SignatureErrorColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = paddingValues,
+                signatureUiError = uiState.signatureError,
             ) {
-                when (it) {
-                    null -> {
-                        ZapPresetsList(
-                            paddingValues = paddingValues,
-                            zapDefault = uiState.zapDefault,
-                            zapsConfig = uiState.zapConfig,
-                            onZapDefaultClick = {
-                                eventPublisher(ZapSettingsContract.UiEvent.EditZapDefault)
-                            },
-                            onPresetClick = { presetItem ->
-                                eventPublisher(ZapSettingsContract.UiEvent.EditZapPreset(presetItem))
-                            },
-                        )
-                    }
-
-                    -1 -> {
-                        ZapDefaultEditor(
-                            paddingValues = paddingValues,
-                            zapDefault = uiState.zapDefault!!,
-                            onUpdate = {
-                                eventPublisher(ZapSettingsContract.UiEvent.UpdateZapDefault(it))
-                            },
-                            updating = uiState.saving,
-                        )
-                    }
-
-                    in (0..PRESETS_COUNT) -> {
-                        ZapPresetEditor(
-                            paddingValues = paddingValues,
-                            index = it,
-                            zapsConfig = uiState.zapConfig,
-                            updating = uiState.saving,
-                            onUpdate = { zapPreset ->
-                                eventPublisher(
-                                    ZapSettingsContract.UiEvent.UpdateZapPreset(
-                                        index = it,
-                                        zapPreset = zapPreset,
-                                    ),
-                                )
-                            },
-                        )
-                    }
-                }
+                ZapSettingsAnimatedContent(
+                    uiState = uiState,
+                    contentPadding = paddingValues,
+                    eventPublisher = eventPublisher,
+                )
             }
         },
     )
+}
+
+@Composable
+private fun ZapSettingsAnimatedContent(
+    uiState: ZapSettingsContract.UiState,
+    contentPadding: PaddingValues,
+    eventPublisher: (ZapSettingsContract.UiEvent) -> Unit,
+) {
+    AnimatedContent(
+        modifier = Modifier
+            .background(color = AppTheme.colorScheme.surfaceVariant)
+            .fillMaxSize(),
+        targetState = uiState.editPresetIndex,
+        transitionSpec = {
+            when (targetState) {
+                null -> {
+                    slideInHorizontally(initialOffsetX = { -it })
+                        .togetherWith(
+                            slideOutHorizontally(targetOffsetX = { it }),
+                        )
+                }
+
+                else -> {
+                    slideInHorizontally(initialOffsetX = { it })
+                        .togetherWith(slideOutHorizontally(targetOffsetX = { -it }))
+                }
+            }
+        },
+        label = "ZapSettings",
+    ) {
+        when (it) {
+            null -> {
+                ZapPresetsList(
+                    paddingValues = contentPadding,
+                    zapDefault = uiState.zapDefault,
+                    zapsConfig = uiState.zapConfig,
+                    onZapDefaultClick = {
+                        eventPublisher(ZapSettingsContract.UiEvent.EditZapDefault)
+                    },
+                    onPresetClick = { presetItem ->
+                        eventPublisher(ZapSettingsContract.UiEvent.EditZapPreset(presetItem))
+                    },
+                )
+            }
+
+            -1 -> {
+                ZapDefaultEditor(
+                    paddingValues = contentPadding,
+                    zapDefault = uiState.zapDefault!!,
+                    onUpdate = {
+                        eventPublisher(ZapSettingsContract.UiEvent.UpdateZapDefault(it))
+                    },
+                    updating = uiState.saving,
+                )
+            }
+
+            in (0..PRESETS_COUNT) -> {
+                ZapPresetEditor(
+                    paddingValues = contentPadding,
+                    index = it,
+                    zapsConfig = uiState.zapConfig,
+                    updating = uiState.saving,
+                    onUpdate = { zapPreset ->
+                        eventPublisher(
+                            ZapSettingsContract.UiEvent.UpdateZapPreset(
+                                index = it,
+                                zapPreset = zapPreset,
+                            ),
+                        )
+                    },
+                )
+            }
+        }
+    }
 }
 
 @Composable

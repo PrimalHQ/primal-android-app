@@ -19,18 +19,14 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notes.FeedPost
 import net.primal.data.local.dao.notes.FeedPostRemoteKey
 import net.primal.data.local.db.PrimalDatabase
-import net.primal.data.local.queries.ChronologicalFeedWithRepostsQueryBuilder
-import net.primal.data.local.queries.ExploreFeedQueryBuilder
-import net.primal.data.local.queries.FeedQueryBuilder
 import net.primal.data.remote.api.feed.FeedApi
 import net.primal.data.remote.api.feed.model.FeedBySpecRequestBody
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.repository.feed.processors.FeedProcessor
-import net.primal.domain.isNotesBookmarkFeedSpec
-import net.primal.domain.isProfileAuthoredNoteRepliesFeedSpec
-import net.primal.domain.isProfileAuthoredNotesFeedSpec
-import net.primal.domain.supportsNoteReposts
-import net.primal.domain.supportsUpwardsNotesPagination
+import net.primal.domain.feeds.isNotesBookmarkFeedSpec
+import net.primal.domain.feeds.isProfileAuthoredNoteRepliesFeedSpec
+import net.primal.domain.feeds.isProfileAuthoredNotesFeedSpec
+import net.primal.domain.feeds.supportsUpwardsNotesPagination
 
 @ExperimentalPagingApi
 internal class NoteFeedRemoteMediator(
@@ -40,18 +36,6 @@ internal class NoteFeedRemoteMediator(
     private val feedApi: FeedApi,
     private val database: PrimalDatabase,
 ) : RemoteMediator<Int, FeedPost>() {
-
-    private val feedQueryBuilder: FeedQueryBuilder = when {
-        feedSpec.supportsNoteReposts() -> ChronologicalFeedWithRepostsQueryBuilder(
-            feedSpec = feedSpec,
-            userPubkey = userId,
-        )
-
-        else -> ExploreFeedQueryBuilder(
-            feedSpec = feedSpec,
-            userPubkey = userId,
-        )
-    }
 
     private val lastRequests: MutableMap<LoadType, Pair<FeedBySpecRequestBody, Long>> = mutableMapOf()
 
@@ -259,19 +243,21 @@ internal class NoteFeedRemoteMediator(
 //    }
 
     private suspend fun findLastFeedPostRemoteKey(state: PagingState<Int, FeedPost>): FeedPostRemoteKey? {
-        val lastItem = state.lastItemOrNull()
-            ?: oldestFeedPostInDatabaseOrNull()
-            ?: throw NoSuchFeedPostException()
+        val (lastItemId, lastItemRepostId) =
+            state.lastItemOrNull()?.let {
+                (state.lastItemOrNull()?.data?.postId to state.lastItemOrNull()?.data?.repostId)
+            } ?: oldestFeedPostInDatabaseOrNull()
+                ?: throw NoSuchFeedPostException()
 
         return withContext(dispatcherProvider.io()) {
             Napier.i(
-                "feed_spec $feedSpec looking for lastItem postId=${lastItem.data.postId}" +
-                    " and repostId=${lastItem.data.repostId}",
+                "feed_spec $feedSpec looking for lastItem postId=$lastItemId" +
+                    " and repostId=$lastItemRepostId",
             )
             database.feedPostsRemoteKeys().find(
                 ownerId = userId,
-                postId = lastItem.data.postId,
-                repostId = lastItem.data.repostId,
+                postId = lastItemId,
+                repostId = lastItemRepostId,
                 directive = feedSpec,
             )
         }
@@ -279,9 +265,7 @@ internal class NoteFeedRemoteMediator(
 
     private suspend fun oldestFeedPostInDatabaseOrNull() =
         withContext(dispatcherProvider.io()) {
-            database.feedPosts()
-                .oldestFeedPosts(query = feedQueryBuilder.oldestFeedPostsQuery(limit = 1))
-                .firstOrNull()
+            database.feedsConnections().findLastBySpec(ownerId = userId, spec = feedSpec)?.let { it.eventId to null }
         }
 
     private inner class NoSuchFeedPostException : RuntimeException()

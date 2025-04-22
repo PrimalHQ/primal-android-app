@@ -16,7 +16,7 @@ import net.primal.core.config.observeApiUrlByType
 import net.primal.core.networking.sockets.NostrIncomingMessage
 import net.primal.core.networking.sockets.NostrSocketClientImpl
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.domain.PrimalServerType
+import net.primal.domain.global.PrimalServerType
 
 internal class ProxyPrimalApiClient(
     private val dispatcherProvider: DispatcherProvider,
@@ -57,7 +57,6 @@ internal class ProxyPrimalApiClient(
                     }
 
                     socketClient = buildAndInitializeSocketClient(apiUrl).apply {
-                        ensureSocketConnection()
                         primalClient = BasePrimalApiClient(socketClient = this)
                         clientInitialized = true
                     }
@@ -82,7 +81,7 @@ internal class ProxyPrimalApiClient(
     }
 
     private fun PrimalServerType.isIncomingCompressionSupported(): Boolean {
-        return this == PrimalServerType.Caching || this == PrimalServerType.Wallet
+        return this == PrimalServerType.Caching
     }
 
     override suspend fun query(message: PrimalCacheFilter): PrimalQueryResult {

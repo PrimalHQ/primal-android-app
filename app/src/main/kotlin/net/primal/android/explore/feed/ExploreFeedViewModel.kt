@@ -14,27 +14,27 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent
 import net.primal.android.explore.feed.ExploreFeedContract.UiState
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
-import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.navigation.advancedSearchFeedSpec
 import net.primal.android.navigation.exploreFeedSpec
 import net.primal.android.navigation.renderType
-import net.primal.android.nostr.notary.exceptions.SignException
-import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.domain.FEED_KIND_SEARCH
-import net.primal.domain.buildAdvancedSearchFeedSpec
-import net.primal.domain.resolveFeedSpecKind
+import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.feeds.FEED_KIND_SEARCH
+import net.primal.domain.feeds.FeedsRepository
+import net.primal.domain.feeds.buildAdvancedSearchFeedSpec
+import net.primal.domain.feeds.resolveFeedSpecKind
+import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.posts.FeedRepository
 import timber.log.Timber
 
 @HiltViewModel
 class ExploreFeedViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val feedRepository: FeedRepository,
     private val feedsRepository: FeedsRepository,
     private val activeAccountStore: ActiveAccountStore,
@@ -97,19 +97,20 @@ class ExploreFeedViewModel @Inject constructor(
 
     private suspend fun addToMyFeeds(event: UiEvent.AddToUserFeeds) {
         try {
+            val userId = activeAccountStore.activeUserId()
             val feedSpecKind = feedSpec.resolveFeedSpecKind()
             if (feedSpecKind != null) {
                 feedsRepository.addFeedLocally(
-                    userId = activeAccountStore.activeUserId(),
+                    userId = userId,
                     feedSpec = feedSpec,
                     title = event.title,
                     description = event.description,
                     feedSpecKind = feedSpecKind,
                     feedKind = FEED_KIND_SEARCH,
                 )
-                feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
+                feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
             }
-        } catch (error: SignException) {
+        } catch (error: SignatureException) {
             Timber.w(error)
             setErrorState(error = ExploreFeedError.FailedToAddToFeed(error))
         } catch (error: WssException) {
@@ -120,9 +121,10 @@ class ExploreFeedViewModel @Inject constructor(
 
     private suspend fun removeFromMyFeeds() {
         try {
-            feedsRepository.removeFeedLocally(userId = activeAccountStore.activeUserId(), feedSpec = feedSpec)
-            feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
-        } catch (error: SignException) {
+            val userId = activeAccountStore.activeUserId()
+            feedsRepository.removeFeedLocally(userId = userId, feedSpec = feedSpec)
+            feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
+        } catch (error: SignatureException) {
             Timber.w(error)
             setErrorState(error = ExploreFeedError.FailedToRemoveFeed(error))
         } catch (error: WssException) {

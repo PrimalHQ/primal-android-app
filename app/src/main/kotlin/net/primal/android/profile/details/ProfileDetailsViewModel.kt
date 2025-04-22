@@ -19,46 +19,46 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.profile.approvals.ProfileApproval
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileStatsUi
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.errors.UiError
-import net.primal.android.core.utils.isValidHex
-import net.primal.android.crypto.bech32ToHexOrThrow
-import net.primal.android.feeds.repository.FeedsRepository
 import net.primal.android.navigation.primalName
 import net.primal.android.navigation.profileId
-import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.ext.extractProfileId
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
-import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
-import net.primal.android.profile.repository.ProfileRepository
-import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
-import net.primal.android.wallet.domain.ZapTarget
-import net.primal.android.wallet.zaps.InvalidZapRequestException
-import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.domain.FEED_KIND_USER
-import net.primal.domain.FeedSpecKind
-import net.primal.domain.buildLatestNotesUserFeedSpec
+import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.feeds.FEED_KIND_USER
+import net.primal.domain.feeds.FeedSpecKind
+import net.primal.domain.feeds.FeedsRepository
+import net.primal.domain.feeds.buildLatestNotesUserFeedSpec
+import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.Nip19TLV
+import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
+import net.primal.domain.nostr.cryptography.SigningRejectedException
+import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
+import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.nostr.utils.extractProfileId
+import net.primal.domain.nostr.utils.isValidHex
+import net.primal.domain.nostr.zaps.ZapFailureException
+import net.primal.domain.nostr.zaps.ZapRequestException
+import net.primal.domain.nostr.zaps.ZapTarget
+import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel
 class ProfileDetailsViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val feedsRepository: FeedsRepository,
     private val profileRepository: ProfileRepository,
     private val userRepository: UserRepository,
-    private val mutedUserRepository: MutedUserRepository,
+    private val mutedItemRepository: MutedItemRepository,
     private val zapHandler: ZapHandler,
 ) : ViewModel() {
 
@@ -180,7 +180,7 @@ class ProfileDetailsViewModel @Inject constructor(
         } catch (error: MissingRelaysException) {
             setState { copy(zapError = UiError.MissingRelaysConfiguration(error)) }
             Timber.w(error)
-        } catch (error: InvalidZapRequestException) {
+        } catch (error: ZapRequestException) {
             setState { copy(zapError = UiError.InvalidZapRequest(error)) }
             Timber.w(error)
         }
@@ -259,7 +259,7 @@ class ProfileDetailsViewModel @Inject constructor(
 
     private fun observeMutedAccount(profileId: String) =
         viewModelScope.launch {
-            mutedUserRepository.observeIsUserMutedByOwnerId(
+            mutedItemRepository.observeIsUserMutedByOwnerId(
                 pubkey = profileId,
                 ownerId = activeAccountStore.activeUserId(),
             ).collect {
@@ -278,11 +278,11 @@ class ProfileDetailsViewModel @Inject constructor(
 
     private fun observeReferencedProfilesData(profileId: String) =
         viewModelScope.launch {
-            profileRepository.observeProfile(profileId)
+            profileRepository.observeProfileData(profileId)
                 .mapNotNull { profile ->
-                    profile.metadata?.aboutUris
-                        ?.mapNotNull { it.extractProfileId() }
-                        ?.filter { it != profileId }
+                    profile.aboutUris
+                        .mapNotNull { it.extractProfileId() }
+                        .filter { it != profileId }
                 }
                 .distinctUntilChanged()
                 .collect { profileIds ->
@@ -294,7 +294,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private suspend fun requestProfileUpdates(profileIds: List<String>) {
         profileIds.forEach { profileId ->
             try {
-                profileRepository.requestProfileUpdate(profileId = profileId)
+                profileRepository.fetchProfile(profileId = profileId)
             } catch (error: WssException) {
                 Timber.w(error)
             }
@@ -304,7 +304,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private fun launchReferencedProfilesObserver(profileIds: List<String>) {
         referencedProfilesObserver?.cancel()
         referencedProfilesObserver = viewModelScope.launch {
-            profileRepository.observeProfilesData(profileIds = profileIds).collect { profilesData ->
+            profileRepository.observeProfileData(profileIds = profileIds).collect { profilesData ->
                 setState { copy(referencedProfilesData = profilesData.map { it.asProfileDetailsUi() }.toSet()) }
             }
         }
@@ -314,7 +314,7 @@ class ProfileDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             profileRepository.observeProfileStats(profileId = profileId).collect {
                 setState {
-                    copy(profileStats = it.asProfileStatsUi())
+                    copy(profileStats = it?.asProfileStatsUi())
                 }
             }
         }
@@ -338,7 +338,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private suspend fun fetchLatestMuteList() =
         try {
             withContext(dispatcherProvider.io()) {
-                mutedUserRepository.fetchAndPersistMuteList(
+                mutedItemRepository.fetchAndPersistMuteList(
                     userId = activeAccountStore.activeUserId(),
                 )
             }
@@ -348,9 +348,7 @@ class ProfileDetailsViewModel @Inject constructor(
 
     private suspend fun fetchLatestProfile(profileId: String) =
         try {
-            withContext(dispatcherProvider.io()) {
-                profileRepository.requestProfileUpdate(profileId = profileId)
-            }
+            profileRepository.fetchProfile(profileId = profileId)
         } catch (error: WssException) {
             Timber.w(error)
         }
@@ -378,11 +376,11 @@ class ProfileDetailsViewModel @Inject constructor(
                 Timber.w(error)
                 updateStateProfileAsUnfollowedAndClearApprovalFlag()
                 setErrorState(error = UiError.FailedToFollowUser(error))
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 Timber.w(error)
                 updateStateProfileAsUnfollowedAndClearApprovalFlag()
                 setErrorState(error = UiError.MissingPrivateKey)
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 Timber.w(error)
                 updateStateProfileAsUnfollowedAndClearApprovalFlag()
                 setErrorState(error = UiError.NostrSignUnauthorized)
@@ -416,11 +414,11 @@ class ProfileDetailsViewModel @Inject constructor(
                 Timber.w(error)
                 updateStateProfileAsFollowedAndClearApprovalFlag()
                 setErrorState(error = UiError.FailedToUnfollowUser(error))
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 Timber.w(error)
                 updateStateProfileAsFollowedAndClearApprovalFlag()
                 setErrorState(error = UiError.MissingPrivateKey)
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 Timber.w(error)
                 updateStateProfileAsFollowedAndClearApprovalFlag()
                 setErrorState(error = UiError.NostrSignUnauthorized)
@@ -446,20 +444,21 @@ class ProfileDetailsViewModel @Inject constructor(
     private fun addProfileFeed(action: UiEvent.AddProfileFeedAction) {
         viewModelScope.launch {
             try {
+                val userId = activeAccountStore.activeUserId()
                 feedsRepository.addFeedLocally(
-                    userId = activeAccountStore.activeUserId(),
+                    userId = userId,
                     feedSpec = buildLatestNotesUserFeedSpec(userId = action.profileId),
                     title = action.feedTitle,
                     description = action.feedDescription,
                     feedSpecKind = FeedSpecKind.Notes,
                     feedKind = FEED_KIND_USER,
                 )
-                feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
+                feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
                 setEffect(ProfileDetailsContract.SideEffect.ProfileFeedAdded)
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 Timber.w(error)
                 setErrorState(error = UiError.MissingPrivateKey)
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 Timber.w(error)
                 setErrorState(error = UiError.NostrSignUnauthorized)
             } catch (error: WssException) {
@@ -472,16 +471,17 @@ class ProfileDetailsViewModel @Inject constructor(
     private fun removeProfileFeed(action: UiEvent.RemoveProfileFeedAction) {
         viewModelScope.launch {
             try {
+                val userId = activeAccountStore.activeUserId()
                 feedsRepository.removeFeedLocally(
-                    userId = activeAccountStore.activeUserId(),
+                    userId = userId,
                     feedSpec = buildLatestNotesUserFeedSpec(userId = action.profileId),
                 )
-                feedsRepository.persistRemotelyAllLocalUserFeeds(userId = activeAccountStore.activeUserId())
+                feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
                 setEffect(ProfileDetailsContract.SideEffect.ProfileFeedRemoved)
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 Timber.w(error)
                 setErrorState(error = UiError.MissingPrivateKey)
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 Timber.w(error)
                 setErrorState(error = UiError.NostrSignUnauthorized)
             } catch (error: WssException) {
@@ -495,16 +495,16 @@ class ProfileDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 withContext(dispatcherProvider.io()) {
-                    mutedUserRepository.muteUserAndPersistMuteList(
+                    mutedItemRepository.muteUserAndPersistMuteList(
                         userId = activeAccountStore.activeUserId(),
                         mutedUserId = action.profileId,
                     )
                 }
                 setState { copy(isProfileMuted = true) }
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 Timber.w(error)
                 setErrorState(error = UiError.MissingPrivateKey)
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 Timber.w(error)
                 setErrorState(error = UiError.NostrSignUnauthorized)
             } catch (error: NostrPublishException) {
@@ -523,16 +523,16 @@ class ProfileDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 withContext(dispatcherProvider.io()) {
-                    mutedUserRepository.unmuteUserAndPersistMuteList(
+                    mutedItemRepository.unmuteUserAndPersistMuteList(
                         userId = activeAccountStore.activeUserId(),
                         unmutedUserId = action.profileId,
                     )
                 }
                 setState { copy(isProfileMuted = false) }
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 Timber.w(error)
                 setErrorState(error = UiError.MissingPrivateKey)
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 Timber.w(error)
                 setErrorState(error = UiError.NostrSignUnauthorized)
             } catch (error: NostrPublishException) {
@@ -550,18 +550,16 @@ class ProfileDetailsViewModel @Inject constructor(
     private fun reportAbuse(event: UiEvent.ReportAbuse) =
         viewModelScope.launch {
             try {
-                withContext(dispatcherProvider.io()) {
-                    profileRepository.reportAbuse(
-                        userId = activeAccountStore.activeUserId(),
-                        reportType = event.type,
-                        profileId = event.profileId,
-                        eventId = event.noteId,
-                    )
-                }
-            } catch (error: MissingPrivateKey) {
+                profileRepository.reportAbuse(
+                    userId = activeAccountStore.activeUserId(),
+                    reportType = event.type,
+                    profileId = event.profileId,
+                    eventId = event.noteId,
+                )
+            } catch (error: SigningKeyNotFoundException) {
                 Timber.w(error)
                 setErrorState(error = UiError.MissingPrivateKey)
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 Timber.w(error)
                 setErrorState(error = UiError.NostrSignUnauthorized)
             } catch (error: NostrPublishException) {

@@ -49,7 +49,6 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.core.ext.openUriSafely
-import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.domain.LegendaryCustomization
@@ -62,6 +61,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.utils.isLightningAddress
+import net.primal.domain.nostr.utils.asEllipsizedNpub
 
 @Composable
 fun ProfileHeaderDetails(

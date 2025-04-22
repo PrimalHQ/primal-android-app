@@ -3,7 +3,7 @@ package net.primal.core.config.store
 import androidx.datastore.core.okio.OkioSerializer
 import kotlinx.serialization.json.Json
 import net.primal.core.config.DEFAULT_APP_CONFIG
-import net.primal.domain.AppConfig
+import net.primal.domain.global.AppConfig
 import okio.BufferedSink
 import okio.BufferedSource
 import okio.use

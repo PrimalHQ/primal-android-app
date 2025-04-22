@@ -36,9 +36,6 @@ import net.primal.android.core.compose.zaps.ReferencedNoteZap
 import net.primal.android.core.compose.zaps.ReferencedZap
 import net.primal.android.core.utils.TextMatch
 import net.primal.android.core.utils.TextMatcher
-import net.primal.android.nostr.ext.cleanNostrUris
-import net.primal.android.notes.db.ReferencedNote
-import net.primal.android.notes.db.ReferencedUser
 import net.primal.android.notes.feed.model.NoteContentUi
 import net.primal.android.notes.feed.model.NoteNostrUriUi
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
@@ -48,7 +45,10 @@ import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.domain.EventUriNostrType
+import net.primal.domain.links.EventUriNostrType
+import net.primal.domain.links.ReferencedNote
+import net.primal.domain.links.ReferencedUser
+import net.primal.domain.nostr.utils.clearAtSignFromNostrUris
 
 private const val PROFILE_ID_ANNOTATION_TAG = "profileId"
 private const val URL_ANNOTATION_TAG = "url"
@@ -302,13 +302,15 @@ fun NoteContent(
         referencedZaps
             .mapNotNull { it.referencedZap }
             .forEach { zap ->
-                if (zap.zappedEventId != null && zap.zappedEventContent?.isNotEmpty() == true) {
+                val zappedEventId = zap.zappedEventId
+                val zappedEventContent = zap.zappedEventContent
+                if (zappedEventId != null && zappedEventContent?.isNotEmpty() == true) {
                     ReferencedNoteZap(
                         senderId = zap.senderId,
                         receiverId = zap.receiverId,
                         noteContentUi = NoteContentUi(
-                            noteId = zap.zappedEventId,
-                            content = zap.zappedEventContent,
+                            noteId = zappedEventId,
+                            content = zappedEventContent,
                             nostrUris = zap.zappedEventNostrUris.map { it.asNoteNostrUriUi() },
                             hashtags = zap.zappedEventHashtags,
                         ),
@@ -407,7 +409,7 @@ fun renderContentAsAnnotatedString(
     val unhandledNostrAddressUris = data.nostrUris.filterUnhandledNostrAddressUris()
 
     val refinedContent = data.content
-        .cleanNostrUris()
+        .clearAtSignFromNostrUris()
         .replaceNostrProfileUrisWithHandles(resources = mentionedUsers)
         .remove(texts = mediaAttachments.map { it.url })
         .remove(texts = if (!shouldKeepNostrNoteUris) data.nostrUris.map { it.uri } else emptyList())

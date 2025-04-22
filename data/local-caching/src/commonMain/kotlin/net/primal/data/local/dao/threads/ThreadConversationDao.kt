@@ -27,6 +27,7 @@ interface ThreadConversationDao {
                 FPD2.authorId,
                 FPD2.createdAt,
                 FPD2.content,
+                FPD2.tags,
                 FPD2.raw,
                 FPD2.authorMetadataId,
                 FPD2.hashtags,
@@ -37,15 +38,17 @@ interface ThreadConversationDao {
                 EventUserStats.reposted AS userReposted,
                 EventUserStats.zapped AS userZapped,
                 NULL AS feedCreatedAt,
-                CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted,
+                CASE WHEN MutedUser.item IS NOT NULL THEN 1 ELSE 0 END AS isAuthorMuted,
+                CASE WHEN MutedThread.item IS NOT NULL THEN 1 ELSE 0 END AS isThreadMuted,
                 NULL AS replyToPostId,
                 NULL AS replyToAuthorId
             FROM PostData AS FPD1
             INNER JOIN NoteConversationCrossRef ON FPD1.postId = NoteConversationCrossRef.noteId
             INNER JOIN PostData AS FPD2 ON NoteConversationCrossRef.replyNoteId = FPD2.postId
             LEFT JOIN EventUserStats ON EventUserStats.eventId = FPD2.postId AND EventUserStats.userId = :userId
-            LEFT JOIN MutedUserData ON MutedUserData.userId = FPD2.authorId
-            WHERE FPD1.postId = :postId AND isMuted = 0
+            LEFT JOIN MutedItemData AS MutedUser ON MutedUser.item = FPD2.authorId AND MutedUser.ownerId = :userId
+            LEFT JOIN MutedItemData AS MutedThread ON MutedThread.item = FPD2.postId AND MutedThread.ownerId = :userId 
+            WHERE FPD1.postId = :postId AND isAuthorMuted = 0 AND isThreadMuted = 0
             ORDER BY FPD2.createdAt ASC
         """,
     )
@@ -60,6 +63,7 @@ interface ThreadConversationDao {
                 PostData.authorId,
                 PostData.createdAt,
                 PostData.content,
+                PostData.tags,
                 PostData.raw,
                 PostData.authorMetadataId,
                 PostData.hashtags,
@@ -70,16 +74,18 @@ interface ThreadConversationDao {
                 EventUserStats.reposted AS userReposted,
                 EventUserStats.zapped AS userZapped,
                 NULL AS feedCreatedAt,
-                CASE WHEN MutedUserData.userId IS NOT NULL THEN 1 ELSE 0 END AS isMuted,
+                CASE WHEN MutedUser.item IS NOT NULL THEN 1 ELSE 0 END AS isAuthorMuted,
+                CASE WHEN MutedThread.item IS NOT NULL THEN 1 ELSE 0 END AS isThreadMuted,
                 NULL AS replyToPostId,
                 NULL AS replyToAuthorId
             FROM PostData
             INNER JOIN ArticleCommentCrossRef ON PostData.postId = ArticleCommentCrossRef.commentNoteId
             LEFT JOIN EventUserStats ON EventUserStats.eventId = PostData.postId AND EventUserStats.userId = :userId
-            LEFT JOIN MutedUserData ON MutedUserData.userId = PostData.authorId
+            LEFT JOIN MutedItemData AS MutedUser ON MutedUser.item = PostData.authorId AND MutedUser.ownerId = :userId
+            LEFT JOIN MutedItemData AS MutedThread ON MutedThread.item = PostData.postId AND MutedThread.ownerId = :userId
             WHERE ArticleCommentCrossRef.articleId = :articleId
                 AND ArticleCommentCrossRef.articleAuthorId = :articleAuthorId
-                AND isMuted = 0
+                AND isAuthorMuted = 0 AND isThreadMuted = 0
             ORDER BY PostData.createdAt DESC
         """,
     )

@@ -1,8 +1,8 @@
 package net.primal.android.core.compose.attachment.model
 
-import net.primal.android.events.db.EventUri
-import net.primal.domain.CdnResourceVariant
-import net.primal.domain.EventUriType
+import net.primal.domain.links.CdnResourceVariant
+import net.primal.domain.links.EventLink
+import net.primal.domain.links.EventUriType
 
 data class EventUriUi(
     val eventId: String,
@@ -17,7 +17,9 @@ data class EventUriUi(
     val position: Int,
 )
 
-fun EventUri.asEventUriUiModel() =
+fun EventUriUi.isMediaUri() = type == EventUriType.Image || type == EventUriType.Video
+
+fun EventLink.asEventUriUiModel() =
     EventUriUi(
         eventId = this.eventId,
         url = this.url,
@@ -30,5 +32,3 @@ fun EventUri.asEventUriUiModel() =
         authorAvatarUrl = this.authorAvatarUrl,
         position = this.position,
     )
-
-fun EventUriUi.isMediaUri() = type == EventUriType.Image || type == EventUriType.Video

@@ -22,10 +22,10 @@ import net.primal.android.core.compose.attachment.model.isMediaUri
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.MediaGalleryFilled
 import net.primal.android.core.compose.icons.primaliconpack.MediaVideoFilled
-import net.primal.android.events.domain.findNearestOrNull
+import net.primal.android.events.ui.findNearestOrNull
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.theme.AppTheme
-import net.primal.domain.EventUriType
+import net.primal.domain.links.EventUriType
 
 @Composable
 fun MediaGridItem(

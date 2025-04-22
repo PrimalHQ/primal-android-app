@@ -1,8 +1,8 @@
 package net.primal.android.wallet.transactions.receive.model
 
-import net.primal.android.crypto.urlToLnUrlHrp
 import net.primal.android.wallet.api.parseAsLNUrlOrNull
 import net.primal.android.wallet.domain.Network
+import net.primal.domain.nostr.cryptography.utils.urlToLnUrlHrp
 
 data class NetworkDetails(
     val network: Network,

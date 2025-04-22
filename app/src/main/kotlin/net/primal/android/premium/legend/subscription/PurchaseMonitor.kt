@@ -12,7 +12,7 @@ import net.primal.android.premium.api.model.MembershipPurchaseMonitorResponse
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.primal.PrimalSocketSubscription
-import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.NostrEventKind
 
 class PurchaseMonitor @Inject constructor(
@@ -53,9 +53,7 @@ class PurchaseMonitor @Inject constructor(
         primalApiClient = walletApiClient,
         cacheFilter = PrimalCacheFilter(
             primalVerb = net.primal.data.remote.PrimalVerb.WALLET_MEMBERSHIP_PURCHASE_MONITOR.id,
-            optionsJson = CommonJson.encodeToString(
-                MembershipPurchaseMonitorRequestBody(membershipQuoteId = quoteId),
-            ),
+            optionsJson = MembershipPurchaseMonitorRequestBody(membershipQuoteId = quoteId).encodeToJsonString(),
         ),
         transformer = {
             if (primalEvent?.kind == NostrEventKind.PrimalMembershipPurchaseMonitor.value) {

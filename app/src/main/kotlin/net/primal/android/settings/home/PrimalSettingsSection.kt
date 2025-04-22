@@ -7,6 +7,7 @@ enum class PrimalSettingsSection {
     Appearance,
     ContentDisplay,
     MutedAccounts,
+    MediaUploads,
     Notifications,
     Zaps,
 }

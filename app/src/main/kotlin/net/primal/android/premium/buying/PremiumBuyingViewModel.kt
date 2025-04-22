@@ -19,7 +19,6 @@ import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.navigation.FROM_ORIGIN_PREMIUM_BADGE
 import net.primal.android.navigation.buyingPremiumFromOrigin
 import net.primal.android.navigation.extendExistingPremiumName
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.buying.PremiumBuyingContract.PremiumStage
 import net.primal.android.premium.buying.PremiumBuyingContract.SideEffect
 import net.primal.android.premium.buying.PremiumBuyingContract.UiEvent
@@ -27,13 +26,14 @@ import net.primal.android.premium.buying.PremiumBuyingContract.UiState
 import net.primal.android.premium.domain.MembershipError
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.premium.utils.hasPremiumMembership
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.InAppPurchaseException
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -145,11 +145,11 @@ class PremiumBuyingViewModel @Inject constructor(
 
     private fun observeActiveProfile() =
         viewModelScope.launch {
-            profileRepository.observeProfile(profileId = activeAccountStore.activeUserId()).collect {
+            profileRepository.observeProfileData(profileId = activeAccountStore.activeUserId()).collect {
                 setState {
                     copy(
-                        profile = it.metadata?.asProfileDetailsUi(),
-                        primalName = this.primalName ?: it.metadata?.handle,
+                        profile = it.asProfileDetailsUi(),
+                        primalName = this.primalName ?: it.handle,
                     )
                 }
             }
@@ -167,7 +167,7 @@ class PremiumBuyingViewModel @Inject constructor(
                             purchase = purchase,
                         )
                         setState { copy(stage = PremiumStage.Success) }
-                    } catch (error: SignException) {
+                    } catch (error: SignatureException) {
                         Timber.w(error)
                     } catch (error: WssException) {
                         Timber.e(error)
@@ -219,7 +219,7 @@ class PremiumBuyingViewModel @Inject constructor(
                     )
                     setState { copy(stage = PremiumStage.Success) }
                     premiumRepository.fetchMembershipStatus(userId = userId)
-                } catch (error: SignException) {
+                } catch (error: SignatureException) {
                     Timber.e(error)
                 } catch (error: WssException) {
                     Timber.e(error)

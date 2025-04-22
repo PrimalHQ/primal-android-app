@@ -77,11 +77,6 @@ import net.primal.android.core.compose.zaps.ArticleTopZapsSection
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
-import net.primal.android.nostr.ext.isNEvent
-import net.primal.android.nostr.ext.isNEventUri
-import net.primal.android.nostr.ext.isNostrUri
-import net.primal.android.nostr.ext.isNote
-import net.primal.android.nostr.ext.takeAsNoteHexIdOrNull
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
@@ -95,7 +90,6 @@ import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
-import net.primal.android.profile.report.ReportType
 import net.primal.android.theme.AppTheme
 import net.primal.android.thread.articles.ArticleContract
 import net.primal.android.thread.articles.ArticleViewModel
@@ -114,9 +108,15 @@ import net.primal.android.thread.articles.details.ui.rendering.replaceProfileNos
 import net.primal.android.thread.articles.details.ui.rendering.splitMarkdownByInlineImages
 import net.primal.android.thread.articles.details.ui.rendering.splitMarkdownByNostrUris
 import net.primal.android.wallet.zaps.canZap
-import net.primal.domain.EventUriType
+import net.primal.domain.links.EventUriType
 import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.Nip19TLV.toNeventString
+import net.primal.domain.nostr.ReportType
+import net.primal.domain.nostr.utils.isNEvent
+import net.primal.domain.nostr.utils.isNEventUri
+import net.primal.domain.nostr.utils.isNostrUri
+import net.primal.domain.nostr.utils.isNote
+import net.primal.domain.nostr.utils.takeAsNoteHexIdOrNull
 
 @Composable
 fun ArticleDetailsScreen(

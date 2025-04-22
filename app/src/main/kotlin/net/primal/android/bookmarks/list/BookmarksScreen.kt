@@ -37,7 +37,7 @@ import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.notes.feed.list.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
-import net.primal.domain.FeedSpecKind
+import net.primal.domain.feeds.FeedSpecKind
 
 @Composable
 fun BookmarksScreen(

@@ -16,35 +16,34 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
-import net.primal.android.core.utils.asEllipsizedNpub
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent
 import net.primal.android.messages.conversation.MessageConversationListContract.UiState
 import net.primal.android.messages.conversation.model.MessageConversationUi
-import net.primal.android.messages.db.MessageConversation
-import net.primal.android.messages.repository.MessageRepository
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.domain.ConversationRelation
+import net.primal.domain.messages.ChatRepository
+import net.primal.domain.messages.ConversationRelation
+import net.primal.domain.messages.DMConversation
+import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
 @HiltViewModel
 class MessageConversationListViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val subscriptionsManager: SubscriptionsManager,
-    private val messageRepository: MessageRepository,
+    private val chatRepository: ChatRepository,
     private val nostrNotary: NostrNotary,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
         value = UiState(
             activeRelation = ConversationRelation.Follows,
-            conversations = messageRepository
+            conversations = chatRepository
                 .newestConversations(
                     userId = activeAccountStore.activeUserId(),
                     relation = ConversationRelation.Follows,
@@ -93,13 +92,13 @@ class MessageConversationListViewModel @Inject constructor(
                 val userId = activeAccountStore.activeUserId()
                 when (state.value.activeRelation) {
                     ConversationRelation.Follows -> {
-                        messageRepository.fetchFollowConversations(userId = userId)
-                        messageRepository.fetchNonFollowsConversations(userId = userId)
+                        chatRepository.fetchFollowConversations(userId = userId)
+                        chatRepository.fetchNonFollowsConversations(userId = userId)
                     }
 
                     ConversationRelation.Other -> {
-                        messageRepository.fetchNonFollowsConversations(userId = userId)
-                        messageRepository.fetchFollowConversations(userId = userId)
+                        chatRepository.fetchNonFollowsConversations(userId = userId)
+                        chatRepository.fetchFollowConversations(userId = userId)
                     }
                 }
             } catch (error: WssException) {
@@ -113,7 +112,7 @@ class MessageConversationListViewModel @Inject constructor(
         setState {
             copy(
                 activeRelation = relation,
-                conversations = messageRepository
+                conversations = chatRepository
                     .newestConversations(userId = activeAccountStore.activeUserId(), relation = relation)
                     .mapAsPagingDataOfMessageConversationUi(),
             )
@@ -127,32 +126,31 @@ class MessageConversationListViewModel @Inject constructor(
                     userId = activeAccountStore.activeUserId(),
                     description = "Mark all messages as read.",
                 )
-                messageRepository.markAllMessagesAsRead(authorization = authorizationEvent)
-            } catch (error: SignException) {
+                chatRepository.markAllMessagesAsRead(authorization = authorizationEvent)
+            } catch (error: SignatureException) {
                 Timber.w(error)
             } catch (error: WssException) {
                 Timber.w(error)
             }
         }
 
-    private fun Flow<PagingData<MessageConversation>>.mapAsPagingDataOfMessageConversationUi() =
+    private fun Flow<PagingData<DMConversation>>.mapAsPagingDataOfMessageConversationUi() =
         map { pagingData -> pagingData.map { it.mapAsMessageConversationUi() } }
 
-    private fun MessageConversation.mapAsMessageConversationUi() =
+    private fun DMConversation.mapAsMessageConversationUi() =
         MessageConversationUi(
-            participantId = this.data.participantId,
-            participantUsername = this.participant?.usernameUiFriendly()
-                ?: this.data.participantId.asEllipsizedNpub(),
+            participantId = this.participant.profileId,
+            participantUsername = this.participant.usernameUiFriendly(),
             lastMessageId = this.lastMessage?.messageId,
             lastMessageSnippet = this.lastMessage?.content,
-            lastMessageAttachments = this.lastMessageUris.map { it.asEventUriUiModel() },
-            lastMessageNostrUris = this.lastMessageNostrUris.map { it.asNoteNostrUriUi() },
+            lastMessageAttachments = this.lastMessage?.links?.map { it.asEventUriUiModel() } ?: emptyList(),
+            lastMessageNostrUris = this.lastMessage?.nostrUris?.map { it.asNoteNostrUriUi() } ?: emptyList(),
             lastMessageAt = this.lastMessage?.createdAt?.let { Instant.ofEpochSecond(it) },
             isLastMessageFromUser = this.lastMessage?.senderId == activeAccountStore.activeUserId(),
-            participantInternetIdentifier = this.participant?.internetIdentifier,
-            participantAvatarCdnImage = this.participant?.avatarCdnImage,
-            participantLegendaryCustomization = this.participant?.primalPremiumInfo
+            participantInternetIdentifier = this.participant.internetIdentifier,
+            participantAvatarCdnImage = this.participant.avatarCdnImage,
+            participantLegendaryCustomization = this.participant.primalPremiumInfo
                 ?.legendProfile?.asLegendaryCustomization(),
-            unreadMessagesCount = this.data.unreadMessagesCount,
+            unreadMessagesCount = this.unreadMessagesCount,
         )
 }

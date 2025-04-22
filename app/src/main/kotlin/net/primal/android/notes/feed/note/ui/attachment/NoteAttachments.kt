@@ -17,7 +17,7 @@ import net.primal.android.notes.feed.note.ui.NoteLinkPreview
 import net.primal.android.notes.feed.note.ui.NoteVideoLinkPreview
 import net.primal.android.notes.feed.note.ui.NoteYouTubeLinkPreview
 import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
-import net.primal.domain.EventUriType
+import net.primal.domain.links.EventUriType
 
 @ExperimentalFoundationApi
 @Composable

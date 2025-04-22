@@ -9,18 +9,7 @@ private val urlRegexPattern = Regex(
     RegexOption.IGNORE_CASE,
 )
 
-fun String.parseUris(includeNostrUris: Boolean = true): List<String> {
-    val detectedUrls = this.detectUrls()
-
-    return if (includeNostrUris) {
-        // TODO: handle nostrUris
-        detectedUrls + emptyList()
-    } else {
-        detectedUrls
-    }
-}
-
-private fun String.detectUrls(): List<String> {
+fun String.detectUrls(): List<String> {
     return urlRegexPattern.findAll(this).map { matchResult ->
         val url = matchResult.value
         val startIndex = matchResult.range.first

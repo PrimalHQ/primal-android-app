@@ -2,16 +2,11 @@
 
 package net.primal.android.core.utils
 
-import net.primal.android.events.db.EventZap
-import net.primal.android.profile.db.ProfileData as ProfileDataPO
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.user.domain.UserAccount
-import net.primal.domain.model.ProfileData as ProfileDataDO
 import net.primal.domain.nostr.ContentMetadata
-
-fun ProfileDataPO.usernameUiFriendly(): String = usernameUiFriendly(this.displayName, this.handle, this.ownerId)
-
-fun ProfileDataPO.authorNameUiFriendly(): String = authorNameUiFriendly(this.displayName, this.handle, this.ownerId)
+import net.primal.domain.nostr.utils.asEllipsizedNpub
+import net.primal.domain.profile.ProfileData as ProfileDataDO
 
 fun ProfileDataDO.usernameUiFriendly(): String = usernameUiFriendly(this.displayName, this.handle, this.profileId)
 
@@ -19,12 +14,6 @@ fun ProfileDataDO.authorNameUiFriendly(): String = authorNameUiFriendly(this.dis
 
 fun UserAccount.authorNameUiFriendly(): String =
     authorNameUiFriendly(this.authorDisplayName, this.userDisplayName, this.pubkey)
-
-fun EventZap.usernameUiFriendly(): String =
-    usernameUiFriendly(this.zapSenderDisplayName, this.zapSenderHandle, this.zapSenderId)
-
-fun EventZap.authorNameUiFriendly(): String =
-    authorNameUiFriendly(this.zapSenderDisplayName, this.zapSenderHandle, this.zapSenderId)
 
 fun ContentMetadata.usernameUiFriendly(pubkey: String) =
     usernameUiFriendly(

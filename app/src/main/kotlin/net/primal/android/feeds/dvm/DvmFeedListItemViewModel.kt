@@ -10,28 +10,28 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.core.errors.UiError
-import net.primal.android.events.repository.EventRepository
 import net.primal.android.feeds.dvm.DvmFeedListItemContract.UiEvent
 import net.primal.android.feeds.dvm.DvmFeedListItemContract.UiState
-import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.ext.asReplaceableEventTag
-import net.primal.android.nostr.notary.exceptions.MissingPrivateKey
-import net.primal.android.nostr.notary.exceptions.NostrSignUnauthorized
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.wallet.domain.ZapTarget
-import net.primal.android.wallet.zaps.InvalidZapRequestException
-import net.primal.android.wallet.zaps.ZapFailureException
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
-import net.primal.domain.DvmFeed
+import net.primal.domain.events.EventInteractionRepository
+import net.primal.domain.feeds.DvmFeed
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.asReplaceableEventTag
+import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
+import net.primal.domain.nostr.cryptography.SigningRejectedException
+import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.nostr.zaps.ZapFailureException
+import net.primal.domain.nostr.zaps.ZapRequestException
+import net.primal.domain.nostr.zaps.ZapTarget
 import timber.log.Timber
 
 @HiltViewModel
 class DvmFeedListItemViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
-    private val eventRepository: EventRepository,
+    private val eventInteractionRepository: EventInteractionRepository,
     private val zapHandler: ZapHandler,
 ) : ViewModel() {
 
@@ -79,7 +79,7 @@ class DvmFeedListItemViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val aTagValue = "${NostrEventKind.AppHandler.value}:${dvmFeed.dvmPubkey}:${dvmFeed.dvmId}"
-                eventRepository.likeEvent(
+                eventInteractionRepository.likeEvent(
                     userId = activeAccountStore.activeUserId(),
                     eventId = dvmFeed.eventId,
                     eventAuthorId = dvmFeed.dvmPubkey,
@@ -91,10 +91,10 @@ class DvmFeedListItemViewModel @Inject constructor(
             } catch (error: MissingRelaysException) {
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
                 Timber.w(error)
-            } catch (error: MissingPrivateKey) {
+            } catch (error: SigningKeyNotFoundException) {
                 setState { copy(error = UiError.MissingPrivateKey) }
                 Timber.w(error)
-            } catch (error: NostrSignUnauthorized) {
+            } catch (error: SigningRejectedException) {
                 setState { copy(error = UiError.NostrSignUnauthorized) }
                 Timber.w(error)
             }
@@ -127,7 +127,7 @@ class DvmFeedListItemViewModel @Inject constructor(
             } catch (error: MissingRelaysException) {
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
                 Timber.w(error)
-            } catch (error: InvalidZapRequestException) {
+            } catch (error: ZapRequestException) {
                 setState { copy(error = UiError.InvalidZapRequest(error)) }
                 Timber.w(error)
             }

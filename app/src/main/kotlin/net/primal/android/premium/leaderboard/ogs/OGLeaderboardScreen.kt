@@ -34,12 +34,12 @@ import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWor
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.isEmpty
-import net.primal.android.premium.leaderboard.domain.OGLeaderboardEntry
 import net.primal.android.premium.leaderboard.legend.ui.LATEST_INDEX
 import net.primal.android.premium.leaderboard.ogs.ui.OGLeaderboardItem
 import net.primal.android.premium.leaderboard.ogs.ui.OGLeaderboardTabs
 import net.primal.android.premium.leaderboard.ogs.ui.PAGE_COUNT
 import net.primal.android.theme.AppTheme
+import net.primal.domain.premium.OGLeaderboardEntry
 import timber.log.Timber
 
 @Composable

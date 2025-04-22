@@ -4,13 +4,11 @@ import androidx.room.withTransaction
 import javax.inject.Inject
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.relays.FALLBACK_RELAYS
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.user.accounts.parseNip65Relays
+import net.primal.android.user.db.UsersDatabase
 import net.primal.android.user.domain.Relay as RelayDO
 import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.UserRelays
@@ -18,22 +16,24 @@ import net.primal.android.user.domain.cleanWebSocketUrl
 import net.primal.android.user.domain.mapToRelayPO
 import net.primal.android.user.domain.toRelay
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.remote.api.users.UsersApi
+import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
 class RelayRepository @Inject constructor(
-    private val primalDatabase: PrimalDatabase,
+    private val dispatchers: DispatcherProvider,
+    private val usersDatabase: UsersDatabase,
     private val usersApi: UsersApi,
     private val nostrPublisher: NostrPublisher,
-    private val dispatchers: CoroutineDispatcherProvider,
 ) {
     fun observeUserRelays(userId: String) =
-        primalDatabase.relays().observeRelays(userId)
+        usersDatabase.relays().observeRelays(userId)
             .map { relays -> relays.filter { it.kind == RelayKind.UserRelay } }
 
-    fun findRelays(userId: String, kind: RelayKind) = primalDatabase.relays().findRelays(userId, kind)
+    fun findRelays(userId: String, kind: RelayKind) = usersDatabase.relays().findRelays(userId, kind)
 
-    @Throws(NostrPublishException::class, SignException::class)
+    @Throws(NostrPublishException::class, SignatureException::class)
     suspend fun bootstrapUserRelays(userId: String) =
         withContext(dispatchers.io()) {
             val relays = try {
@@ -72,9 +72,9 @@ class RelayRepository @Inject constructor(
 
     private suspend fun replaceUserRelays(userId: String, relays: List<RelayDO>) =
         withContext(dispatchers.io()) {
-            primalDatabase.withTransaction {
-                primalDatabase.relays().deleteAll(userId = userId, kind = RelayKind.UserRelay)
-                primalDatabase.relays().upsertAll(
+            usersDatabase.withTransaction {
+                usersDatabase.relays().deleteAll(userId = userId, kind = RelayKind.UserRelay)
+                usersDatabase.relays().upsertAll(
                     relays = relays.map {
                         it.mapToRelayPO(userId = userId, kind = RelayKind.UserRelay)
                     },

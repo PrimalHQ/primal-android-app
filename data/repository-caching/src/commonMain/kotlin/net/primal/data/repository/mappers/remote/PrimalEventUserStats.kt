@@ -3,7 +3,7 @@ package net.primal.data.repository.mappers.remote
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.local.dao.events.EventUserStats
 import net.primal.data.remote.model.ContentPrimalEventUserStats
-import net.primal.domain.PrimalEvent
+import net.primal.domain.common.PrimalEvent
 
 fun ContentPrimalEventUserStats.asEventUserStatsPO(userId: String) =
     EventUserStats(

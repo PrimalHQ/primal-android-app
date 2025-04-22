@@ -5,8 +5,8 @@ import kotlinx.serialization.json.float
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
-import net.primal.core.utils.serialization.CommonJson
-import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.explore.model.ExploreRequestBody
 import net.primal.data.remote.api.explore.model.SearchUsersRequestBody
 import net.primal.data.remote.api.explore.model.TopicScore
@@ -23,13 +23,13 @@ internal class ExploreApiImpl(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.EXPLORE_PEOPLE.id,
-                optionsJson = CommonJson.encodeToString(body),
+                optionsJson = body.encodeToJsonString(),
             ),
         )
 
         return TrendingPeopleResponse(
             paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging).let {
-                CommonJson.decodeFromStringOrNull(it?.content)
+                it?.content.decodeFromJsonStringOrNull()
             },
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
@@ -47,13 +47,13 @@ internal class ExploreApiImpl(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.EXPLORE_ZAPS.id,
-                optionsJson = CommonJson.encodeToString(body),
+                optionsJson = body.encodeToJsonString(),
             ),
         )
 
         return TrendingZapsResponse(
             paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging).let {
-                CommonJson.decodeFromStringOrNull(it?.content)
+                it?.content.decodeFromJsonStringOrNull()
             },
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
@@ -74,7 +74,7 @@ internal class ExploreApiImpl(
         )
 
         val trendingTopicsEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalTrendingTopics)
-        val topics = CommonJson.decodeFromStringOrNull<JsonObject>(trendingTopicsEvent?.content)
+        val topics = trendingTopicsEvent?.content.decodeFromJsonStringOrNull<JsonObject>()
 
         val result = mutableListOf<TopicScore>()
         topics?.forEach { (topic, score) ->
@@ -105,7 +105,7 @@ internal class ExploreApiImpl(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.USER_SEARCH.id,
-                optionsJson = CommonJson.encodeToString(body),
+                optionsJson = body.encodeToJsonString(),
             ),
         )
 

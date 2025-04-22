@@ -2,7 +2,7 @@ package net.primal.data.remote.api.messages.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import net.primal.domain.ConversationRelation
+import net.primal.domain.messages.ConversationRelation
 
 @Serializable
 data class ConversationRequestBody(

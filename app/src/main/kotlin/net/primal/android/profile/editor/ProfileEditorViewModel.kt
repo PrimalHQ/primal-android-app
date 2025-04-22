@@ -13,30 +13,30 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.isPrimalIdentifier
-import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
-import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.profile.editor.ProfileEditorContract.SideEffect
 import net.primal.android.profile.editor.ProfileEditorContract.UiEvent
 import net.primal.android.profile.editor.ProfileEditorContract.UiState
 import net.primal.android.profile.editor.ProfileEditorContract.UiState.EditProfileError
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.nwc.InvalidLud16Exception
 import net.primal.android.wallet.nwc.LightningAddressChecker
+import net.primal.core.networking.blossom.BlossomException
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel
 class ProfileEditorViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val profileRepository: ProfileRepository,
     private val userRepository: UserRepository,
     private val lightningAddressChecker: LightningAddressChecker,
@@ -110,17 +110,17 @@ class ProfileEditorViewModel @Inject constructor(
 
     private fun observeActiveProfile() =
         viewModelScope.launch {
-            profileRepository.observeProfile(profileId = profileId).collect {
+            profileRepository.observeProfileData(profileId = profileId).collect {
                 setState {
                     copy(
-                        displayName = it.metadata?.displayName.orEmpty(),
-                        username = it.metadata?.handle.orEmpty(),
-                        aboutMe = it.metadata?.about.orEmpty(),
-                        website = it.metadata?.website.orEmpty(),
-                        lightningAddress = it.metadata?.lightningAddress.orEmpty(),
-                        nip05Identifier = it.metadata?.internetIdentifier.orEmpty(),
-                        remoteBannerUrl = it.metadata?.bannerCdnImage?.sourceUrl,
-                        remoteAvatarUrl = it.metadata?.avatarCdnImage?.sourceUrl,
+                        displayName = it.displayName.orEmpty(),
+                        username = it.handle.orEmpty(),
+                        aboutMe = it.about.orEmpty(),
+                        website = it.website.orEmpty(),
+                        lightningAddress = it.lightningAddress.orEmpty(),
+                        nip05Identifier = it.internetIdentifier.orEmpty(),
+                        remoteBannerUrl = it.bannerCdnImage?.sourceUrl,
+                        remoteAvatarUrl = it.avatarCdnImage?.sourceUrl,
                     )
                 }
             }
@@ -129,7 +129,7 @@ class ProfileEditorViewModel @Inject constructor(
     private fun fetchLatestProfile() =
         viewModelScope.launch {
             try {
-                profileRepository.requestProfileUpdate(profileId = profileId)
+                profileRepository.fetchProfile(profileId = profileId)
             } catch (error: WssException) {
                 Timber.w(error)
             }
@@ -162,7 +162,7 @@ class ProfileEditorViewModel @Inject constructor(
                     }
                     setEffect(effect = SideEffect.AccountSuccessfulyEdited)
                 }
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
                 setErrorState(error = EditProfileError.FailedToPublishMetadata(error))
             } catch (error: NostrPublishException) {
@@ -171,7 +171,7 @@ class ProfileEditorViewModel @Inject constructor(
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setErrorState(error = EditProfileError.MissingRelaysConfiguration(error))
-            } catch (error: UnsuccessfulFileUpload) {
+            } catch (error: BlossomException) {
                 Timber.w(error)
                 setErrorState(error = EditProfileError.FailedToUploadImage(error))
             } catch (error: InvalidLud16Exception) {

@@ -18,15 +18,20 @@ import net.primal.data.local.queries.ChronologicalFeedWithRepostsQueryBuilder
 import net.primal.data.local.queries.ExploreFeedQueryBuilder
 import net.primal.data.local.queries.FeedQueryBuilder
 import net.primal.data.remote.api.feed.FeedApi
+import net.primal.data.remote.api.feed.model.FeedBySpecRequestBody
 import net.primal.data.remote.api.feed.model.ThreadRequestBody
 import net.primal.data.repository.feed.paging.NoteFeedRemoteMediator
+import net.primal.data.repository.feed.processors.FeedProcessor
 import net.primal.data.repository.feed.processors.persistNoteRepliesAndArticleCommentsToDatabase
 import net.primal.data.repository.feed.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.local.mapAsFeedPostDO
-import net.primal.domain.error.NetworkException
-import net.primal.domain.model.FeedPost as FeedPostDO
-import net.primal.domain.repository.FeedRepository
-import net.primal.domain.supportsNoteReposts
+import net.primal.data.repository.mappers.remote.asFeedPageSnapshot
+import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.feeds.supportsNoteReposts
+import net.primal.domain.posts.FeedPageSnapshot
+import net.primal.domain.posts.FeedPost as FeedPostDO
+import net.primal.domain.posts.FeedRepository
+import net.primal.domain.posts.FeedRepository.Companion.DEFAULT_PAGE_SIZE
 
 internal class FeedRepositoryImpl(
     private val feedApi: FeedApi,
@@ -34,17 +39,45 @@ internal class FeedRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
 ) : FeedRepository {
 
-    override fun feedBySpec(userId: String, feedSpec: String): Flow<PagingData<FeedPostDO>> {
+    override fun feedBySpec(
+        userId: String,
+        feedSpec: String,
+        allowMutedThreads: Boolean,
+    ): Flow<PagingData<FeedPostDO>> {
         return createPager(userId = userId, feedSpec = feedSpec) {
             database.feedPosts().feedQuery(
-                query = feedQueryBuilder(userId = userId, feedSpec = feedSpec).feedQuery(),
+                query = feedQueryBuilder(
+                    userId = userId,
+                    feedSpec = feedSpec,
+                    allowMutedThreads = allowMutedThreads,
+                ).feedQuery(),
             )
         }.flow.map { it.map { feedPostPO -> feedPostPO.mapAsFeedPostDO() } }
+    }
+
+    override suspend fun findNewestPosts(
+        userId: String,
+        feedDirective: String,
+        allowMutedThreads: Boolean,
+        limit: Int,
+    ) = withContext(dispatcherProvider.io()) {
+        database.feedPosts().newestFeedPosts(
+            query = feedQueryBuilder(
+                userId = userId,
+                feedSpec = feedDirective,
+                allowMutedThreads = allowMutedThreads,
+            ).newestFeedPostsQuery(limit = limit),
+        ).map { it.mapAsFeedPostDO() }
     }
 
     override suspend fun findAllPostsByIds(postIds: List<String>): List<FeedPostDO> =
         withContext(dispatcherProvider.io()) {
             database.feedPosts().findAllPostsByIds(postIds).map { it.mapAsFeedPostDO() }
+        }
+
+    override suspend fun findPostsById(postId: String): FeedPostDO? =
+        withContext(dispatcherProvider.io()) {
+            database.feedPosts().findAllPostsByIds(listOf(postId)).firstOrNull()?.mapAsFeedPostDO()
         }
 
     override suspend fun fetchConversation(userId: String, noteId: String) {
@@ -58,6 +91,58 @@ internal class FeedRepositoryImpl(
             response.persistToDatabaseAsTransaction(userId = userId, database = database)
         }
     }
+
+    override suspend fun fetchReplies(userId: String, noteId: String) =
+        withContext(dispatcherProvider.io()) {
+            val response = feedApi.getThread(ThreadRequestBody(postId = noteId, userPubKey = userId, limit = 100))
+            response.persistNoteRepliesAndArticleCommentsToDatabase(noteId = noteId, database = database)
+            response.persistToDatabaseAsTransaction(userId = userId, database = database)
+        }
+
+    override suspend fun removeFeedSpec(userId: String, feedSpec: String) =
+        withContext(dispatcherProvider.io()) {
+            database.feedPostsRemoteKeys().deleteByDirective(ownerId = userId, directive = feedSpec)
+            database.feedsConnections().deleteConnectionsByDirective(ownerId = userId, feedSpec = feedSpec)
+            database.articleFeedsConnections().deleteConnectionsBySpec(ownerId = userId, spec = feedSpec)
+        }
+
+    override suspend fun replaceFeed(
+        userId: String,
+        feedSpec: String,
+        snapshot: FeedPageSnapshot,
+    ) = withContext(dispatcherProvider.io()) {
+        FeedProcessor(
+            feedSpec = feedSpec,
+            database = database,
+        ).processAndPersistToDatabase(
+            userId = userId,
+            snapshot = snapshot,
+            clearFeed = true,
+        )
+    }
+
+    override suspend fun fetchFeedPageSnapshot(
+        userId: String,
+        feedSpec: String,
+        notes: String?,
+        until: Long?,
+        since: Long?,
+        order: String?,
+        limit: Int,
+    ): FeedPageSnapshot =
+        withContext(dispatcherProvider.io()) {
+            feedApi.getFeedBySpec(
+                body = FeedBySpecRequestBody(
+                    spec = feedSpec,
+                    userPubKey = userId,
+                    notes = notes,
+                    until = until,
+                    since = since,
+                    order = order,
+                    limit = limit,
+                ),
+            ).asFeedPageSnapshot()
+        }
 
     override suspend fun findConversation(userId: String, noteId: String): List<FeedPostDO> {
         return observeConversation(userId = userId, noteId = noteId).firstOrNull() ?: emptyList()
@@ -77,9 +162,9 @@ internal class FeedRepositoryImpl(
         pagingSourceFactory: () -> PagingSource<Int, FeedPostPO>,
     ) = Pager(
         config = PagingConfig(
-            pageSize = PAGE_SIZE,
-            prefetchDistance = PAGE_SIZE,
-            initialLoadSize = PAGE_SIZE * 3,
+            pageSize = DEFAULT_PAGE_SIZE,
+            prefetchDistance = DEFAULT_PAGE_SIZE,
+            initialLoadSize = DEFAULT_PAGE_SIZE * 3,
             enablePlaceholders = true,
         ),
         remoteMediator = NoteFeedRemoteMediator(
@@ -92,20 +177,22 @@ internal class FeedRepositoryImpl(
         pagingSourceFactory = pagingSourceFactory,
     )
 
-    private fun feedQueryBuilder(userId: String, feedSpec: String): FeedQueryBuilder =
+    private fun feedQueryBuilder(
+        userId: String,
+        feedSpec: String,
+        allowMutedThreads: Boolean,
+    ): FeedQueryBuilder =
         when {
             feedSpec.supportsNoteReposts() -> ChronologicalFeedWithRepostsQueryBuilder(
                 feedSpec = feedSpec,
                 userPubkey = userId,
+                allowMutedThreads = allowMutedThreads,
             )
 
             else -> ExploreFeedQueryBuilder(
                 feedSpec = feedSpec,
                 userPubkey = userId,
+                allowMutedThreads = allowMutedThreads,
             )
         }
-
-    companion object {
-        private const val PAGE_SIZE = 25
-    }
 }

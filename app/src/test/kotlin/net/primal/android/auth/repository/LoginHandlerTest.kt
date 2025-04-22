@@ -7,11 +7,9 @@ import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import net.primal.android.bookmarks.BookmarksRepository
 import net.primal.android.core.FakeDataStore
 import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.settings.muted.repository.MutedUserRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
@@ -19,6 +17,8 @@ import net.primal.android.user.domain.Credential
 import net.primal.android.user.domain.LoginType
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.bookmarks.PublicBookmarksRepository
+import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import org.junit.Rule
@@ -38,8 +38,8 @@ class LoginHandlerTest {
         settingsRepository: SettingsRepository = mockk(relaxed = true),
         authRepository: AuthRepository = mockk(relaxed = true),
         userRepository: UserRepository = mockk(relaxed = true),
-        mutedUserRepository: MutedUserRepository = mockk(relaxed = true),
-        bookmarksRepository: BookmarksRepository = mockk(relaxed = true),
+        mutedItemRepository: MutedItemRepository = mockk(relaxed = true),
+        bookmarksRepository: PublicBookmarksRepository = mockk(relaxed = true),
         credentialsStore: CredentialsStore = mockk(relaxed = true),
         nostrNotary: NostrNotary = mockk(relaxed = true),
     ): LoginHandler =
@@ -47,7 +47,7 @@ class LoginHandlerTest {
             settingsRepository = settingsRepository,
             authRepository = authRepository,
             userRepository = userRepository,
-            mutedUserRepository = mutedUserRepository,
+            mutedItemRepository = mutedItemRepository,
             bookmarksRepository = bookmarksRepository,
             dispatchers = coroutinesTestRule.dispatcherProvider,
             credentialsStore = credentialsStore,
@@ -145,9 +145,9 @@ class LoginHandlerTest {
             val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
                 coEvery { saveNsec(any()) } returns expectedUserId
             }
-            val mutedUserRepository = mockk<MutedUserRepository>(relaxed = true)
+            val mutedItemRepository = mockk<MutedItemRepository>(relaxed = true)
             val loginHandler = createLoginHandler(
-                mutedUserRepository = mutedUserRepository,
+                mutedItemRepository = mutedItemRepository,
                 credentialsStore = credentialsStore,
             )
             loginHandler.login(
@@ -157,7 +157,7 @@ class LoginHandlerTest {
             )
 
             coVerify {
-                mutedUserRepository.fetchAndPersistMuteList(expectedUserId)
+                mutedItemRepository.fetchAndPersistMuteList(expectedUserId)
             }
         }
 

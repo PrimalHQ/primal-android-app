@@ -1,12 +1,13 @@
 package net.primal.data.repository.mappers.remote
 
 import kotlinx.serialization.json.jsonPrimitive
-import net.primal.core.utils.parseUris
+import net.primal.core.utils.detectUrls
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.local.dao.notes.PostData
 import net.primal.data.local.dao.reads.ArticleData
 import net.primal.data.local.dao.reads.HighlightData
-import net.primal.domain.PrimalEvent
+import net.primal.domain.common.PrimalEvent
+import net.primal.domain.common.util.takeContentOrNull
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.getPubkeyFromReplyOrRootTag
@@ -18,7 +19,7 @@ import net.primal.domain.nostr.isEventIdTag
 import net.primal.domain.nostr.isIMetaTag
 import net.primal.domain.nostr.serialization.toNostrJsonObject
 import net.primal.domain.nostr.utils.parseHashtags
-import net.primal.domain.serialization.takeContentOrNull
+import net.primal.domain.nostr.utils.parseNostrUris
 
 fun List<NostrEvent>.mapAsPostDataPO(
     referencedPosts: List<PostData>,
@@ -85,7 +86,7 @@ private fun NostrEvent.shortTextNoteAsPost(
         createdAt = this.createdAt,
         tags = this.tags,
         content = this.content,
-        uris = this.content.parseUris(),
+        uris = this.content.detectUrls() + this.content.parseNostrUris(),
         hashtags = this.parseHashtags(),
         sig = this.sig,
         raw = this.toNostrJsonObject().encodeToJsonString(),
@@ -104,7 +105,7 @@ private fun NostrEvent.pictureNoteAsPost(): PostData {
         createdAt = this.createdAt,
         tags = this.tags,
         content = content,
-        uris = content.parseUris(),
+        uris = content.detectUrls() + content.parseNostrUris(),
         hashtags = emptyList(),
         sig = this.sig,
         raw = this.toNostrJsonObject().encodeToJsonString(),

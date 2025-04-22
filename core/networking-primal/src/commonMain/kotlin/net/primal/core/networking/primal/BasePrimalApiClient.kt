@@ -34,7 +34,7 @@ internal class BasePrimalApiClient(
                 deferredQueryResult.await()
             }
         } catch (error: Exception) {
-            throw error.takeAsWssException()
+            throw error.takeAsWssException(verb = message.primalVerb)
         }
     }
 
@@ -46,12 +46,12 @@ internal class BasePrimalApiClient(
         }
     }
 
-    private fun Throwable?.takeAsWssException(): WssException {
+    private fun Throwable?.takeAsWssException(verb: String?): WssException {
         return when (this) {
             is WssException -> this
-            is NostrNoticeException -> WssException(message = this.reason)
-            is SocketSendMessageException -> WssException(message = "Api unreachable at the moment.")
-            else -> WssException(message = this?.message, cause = this)
+            is NostrNoticeException -> WssException(message = "${this.reason} [$verb]")
+            is SocketSendMessageException -> WssException(message = "Api unreachable at the moment. [$verb]")
+            else -> WssException(message = "${this?.message} [$verb]", cause = this)
         }
     }
 

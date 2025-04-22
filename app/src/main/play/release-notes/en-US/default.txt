@@ -1,3 +1,4 @@
+- Push notifications preview.
 - Public key login.
 - Image gallery in articles and new gallery in notes.
 - Stability and improvements.

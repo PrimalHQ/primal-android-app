@@ -8,26 +8,26 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.db.PrimalDatabase
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.db.UsersDatabase
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.mapToRelayDO
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.sockets.NostrSocketClientFactory
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.nostr.NostrEvent
 import timber.log.Timber
 
 @Singleton
 class RelaysSocketManager @Inject constructor(
-    private val dispatchers: CoroutineDispatcherProvider,
+    private val dispatchers: DispatcherProvider,
     private val nostrSocketClientFactory: NostrSocketClientFactory,
     @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
     private val activeAccountStore: ActiveAccountStore,
-    private val primalDatabase: PrimalDatabase,
+    private val usersDatabase: UsersDatabase,
 ) {
     private val scope = CoroutineScope(dispatchers.io())
     private val relayPoolsMutex = Mutex()
@@ -76,7 +76,7 @@ class RelaysSocketManager @Inject constructor(
     private fun observeRelays(userId: String): Job =
         scope.launch {
             try {
-                primalDatabase.relays().observeRelays(userId = userId).collect { relays ->
+                usersDatabase.relays().observeRelays(userId = userId).collect { relays ->
                     val userRelays = relays.filter { it.kind == RelayKind.UserRelay }.map { it.mapToRelayDO() }
                     val nwcRelays = relays.filter { it.kind == RelayKind.NwcRelay }.map { it.mapToRelayDO() }
                     updateRelayPools(regularRelays = userRelays, walletRelays = nwcRelays)

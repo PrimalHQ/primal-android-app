@@ -2,6 +2,7 @@ package net.primal.data.local.dao.notifications
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import net.primal.domain.notifications.NotificationType
 
 @Entity
 data class NotificationData(

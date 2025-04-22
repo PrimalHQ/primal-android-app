@@ -77,7 +77,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.math.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import java.text.NumberFormat
 import java.time.Instant
 import java.time.format.FormatStyle
@@ -115,11 +115,11 @@ import net.primal.android.wallet.domain.TxType
 import net.primal.android.wallet.repository.isValidExchangeRate
 import net.primal.android.wallet.transactions.details.TransactionDetailsContract.UiState
 import net.primal.android.wallet.transactions.list.TransactionIcon
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toBtc
-import net.primal.android.wallet.utils.CurrencyConversionUtils.toUsd
 import net.primal.android.wallet.walletDepositColor
 import net.primal.android.wallet.walletTransactionIconBackgroundColor
 import net.primal.android.wallet.walletWithdrawColor
+import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.core.utils.CurrencyConversionUtils.toUsd
 import timber.log.Timber
 
 private const val URL_ANNOTATION_TAG = "url"
@@ -616,7 +616,8 @@ private fun ColumnScope.TransactionUsdValues(
         amountInSats.toBtc() / rate.toDouble()
     }
 
-    val currentUsdAmount = BigDecimal.valueOf(amountInSats.toBtc())
+    val currentUsdAmount = amountInSats.toBtc()
+        .toBigDecimal()
         .toUsd(currentExchangeRate)
 
     numberFormat.formatSafely(usdAmount)?.let { formattedUsdAmount ->

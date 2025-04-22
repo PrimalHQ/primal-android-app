@@ -13,26 +13,26 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.profile.approvals.ProfileApproval
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.navigation.followsType
 import net.primal.android.navigation.profileIdOrThrow
-import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.profile.follows.ProfileFollowsContract.UiEvent
 import net.primal.android.profile.follows.ProfileFollowsContract.UiState
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
 
 @HiltViewModel
 class ProfileFollowsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val profileRepository: ProfileRepository,
     private val userRepository: UserRepository,
@@ -153,7 +153,7 @@ class ProfileFollowsViewModel @Inject constructor(
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.FailedToFollowUser(error))
                 updateStateProfileUnfollowAndClearApprovalFlag(profileId)
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.FailedToFollowUser(error))
                 updateStateProfileUnfollowAndClearApprovalFlag(profileId)
@@ -185,7 +185,7 @@ class ProfileFollowsViewModel @Inject constructor(
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.FailedToUnfollowUser(error))
                 updateStateProfileFollowAndClearApprovalFlag(profileId)
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.FailedToUnfollowUser(error))
                 updateStateProfileFollowAndClearApprovalFlag(profileId)

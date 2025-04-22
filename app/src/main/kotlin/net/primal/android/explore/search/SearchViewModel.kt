@@ -15,12 +15,12 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
-import net.primal.android.explore.repository.ExploreRepository
 import net.primal.android.explore.search.SearchContract.UiEvent
 import net.primal.android.explore.search.SearchContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.explore.ExploreRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -80,7 +80,7 @@ class SearchViewModel @Inject constructor(
 
     private fun observeRecentUsers() {
         viewModelScope.launch {
-            exploreRepository.observeRecentUsers(ownerId = activeAccountStore.activeUserId())
+            userRepository.observeRecentUsers(ownerId = activeAccountStore.activeUserId())
                 .distinctUntilChanged()
                 .collect {
                     setState { copy(recentUsers = it.map { it.mapAsUserProfileUi() }) }

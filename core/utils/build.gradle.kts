@@ -71,6 +71,13 @@ kotlin {
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.kotlinx.serialization.json)
                 implementation(libs.ktor.http)
+
+                implementation(libs.napier)
+                implementation(libs.bignum)
+
+                // Cryptography
+                implementation(libs.bitcoin.kmp)
+                implementation(libs.secp256k1.kmp)
             }
         }
 

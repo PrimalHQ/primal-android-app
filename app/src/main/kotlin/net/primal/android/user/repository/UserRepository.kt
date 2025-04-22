@@ -3,29 +3,25 @@ package net.primal.android.user.repository
 import androidx.room.withTransaction
 import java.time.Instant
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.JsonArray
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
-import net.primal.android.crypto.hexToNpubHrp
-import net.primal.android.db.PrimalDatabase
-import net.primal.android.networking.primal.upload.PrimalFileUploader
-import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.ext.asProfileDataPO
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.nostr.publish.NostrPublisher
-import net.primal.android.profile.db.ProfileInteraction
+import net.primal.android.premium.repository.asProfileDataDO
 import net.primal.android.profile.domain.ProfileMetadata
-import net.primal.android.user.accounts.UserAccountFetcher
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.copyFollowListIfNotNull
 import net.primal.android.user.accounts.copyIfNotNull
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.db.Relay
+import net.primal.android.user.db.UserProfileInteraction
+import net.primal.android.user.db.UsersDatabase
 import net.primal.android.user.domain.ContentDisplaySettings
 import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.RelayKind
@@ -33,24 +29,34 @@ import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.domain.asUserAccountFromFollowListEvent
 import net.primal.android.wallet.domain.WalletSettings
+import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
+import net.primal.core.networking.blossom.BlossomException
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.core.utils.serialization.CommonJson
-import net.primal.core.utils.serialization.decodeFromStringOrNull
+import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.remote.api.users.UsersApi
+import net.primal.domain.common.UserProfileSearchItem
+import net.primal.domain.global.CachingImportRepository
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
+import net.primal.domain.profile.ProfileRepository
+import net.primal.domain.user.UserDataCleanupRepository
 
 class UserRepository @Inject constructor(
-    private val database: PrimalDatabase,
-    private val dispatchers: CoroutineDispatcherProvider,
-    private val userAccountFetcher: UserAccountFetcher,
+    private val usersDatabase: UsersDatabase,
+    private val dispatchers: DispatcherProvider,
     private val accountsStore: UserAccountsStore,
     private val credentialsStore: CredentialsStore,
     private val activeAccountStore: ActiveAccountStore,
-    private val fileUploader: PrimalFileUploader,
+    private val primalUploadService: AndroidPrimalBlossomUploadService,
     private val usersApi: UsersApi,
     private val nostrPublisher: NostrPublisher,
+    private val profileRepository: ProfileRepository,
+    private val userDataCleanupRepository: UserDataCleanupRepository,
+    private val cachingImportRepository: CachingImportRepository,
 ) {
     suspend fun setActiveAccount(userId: String) =
         withContext(dispatchers.io()) {
@@ -62,11 +68,11 @@ class UserRepository @Inject constructor(
         runCatching { credentialsStore.isNpubLogin(npub = userId.hexToNpubHrp()) }.getOrDefault(false)
 
     suspend fun fetchAndUpdateUserAccount(userId: String): UserAccount {
-        val userProfile = userAccountFetcher.fetchUserProfileOrNull(userId = userId)
+        val userProfile = fetchUserProfileOrNull(userId = userId)
         val userStats = userProfile?.takeIf {
             it.followersCount != null && it.followingCount != null && it.notesCount != null
         }
-        val followList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
+        val followList = fetchUserFollowListOrNull(userId = userId)
 
         return accountsStore.getAndUpdateAccount(userId = userId) {
             copyIfNotNull(
@@ -77,21 +83,44 @@ class UserRepository @Inject constructor(
         }
     }
 
+    private suspend fun fetchUserProfileOrNull(userId: String): UserAccount? =
+        withContext(dispatchers.io()) {
+            val userData = profileRepository.fetchProfile(profileId = userId)
+                ?: return@withContext null
+
+            val userStats = profileRepository.findProfileStats(profileIds = listOf(userId))
+                .firstOrNull { it.profileId == userId }
+
+            UserAccount(
+                pubkey = userId,
+                authorDisplayName = userData.authorNameUiFriendly(),
+                userDisplayName = userData.usernameUiFriendly(),
+                avatarCdnImage = userData.avatarCdnImage,
+                internetIdentifier = userData.internetIdentifier,
+                lightningAddress = userData.lightningAddress,
+                followersCount = userStats?.followers,
+                followingCount = userStats?.following,
+                notesCount = userStats?.notesCount,
+                repliesCount = userStats?.repliesCount,
+                primalLegendProfile = userData.primalPremiumInfo?.legendProfile,
+                blossomServers = userData.blossoms,
+            )
+        }
+
+    private suspend fun fetchUserFollowListOrNull(userId: String): UserAccount? =
+        withContext(dispatchers.io()) {
+            val contactsResponse = usersApi.getUserFollowList(userId = userId)
+
+            contactsResponse.followListEvent?.asUserAccountFromFollowListEvent()
+        }
+
     suspend fun clearAllUserRelatedData(userId: String) =
         withContext(dispatchers.io()) {
-            database.withTransaction {
-                database.messages().deleteAllByOwnerId(ownerId = userId)
-                database.messageConversations().deleteAllByOwnerId(ownerId = userId)
-                database.feeds().deleteAllByOwnerId(ownerId = userId)
-                database.mutedUsers().deleteAllByOwnerId(ownerId = userId)
-                database.profileInteractions().deleteAllByOwnerId(ownerId = userId)
-                database.walletTransactions().deleteAllTransactionsByUserId(userId = userId)
-                database.notifications().deleteAllByOwnerId(ownerId = userId)
-                database.articleFeedsConnections().deleteConnections(ownerId = userId)
-                database.feedsConnections().deleteConnections(ownerId = userId)
-                database.feedPostsRemoteKeys().deleteAllByOwnerId(ownerId = userId)
-                database.publicBookmarks().deleteAllBookmarks(userId = userId)
-                database.relays().deleteAll(userId = userId)
+            userDataCleanupRepository.clearUserData(userId)
+            usersDatabase.withTransaction {
+                usersDatabase.userProfileInteractions().deleteAllByOwnerId(ownerId = userId)
+                usersDatabase.walletTransactions().deleteAllTransactionsByUserId(userId = userId)
+                usersDatabase.relays().deleteAll(userId = userId)
             }
         }
 
@@ -104,7 +133,7 @@ class UserRepository @Inject constructor(
 
     suspend fun connectNostrWallet(userId: String, nostrWalletConnect: NostrWalletConnect) {
         withContext(dispatchers.io()) {
-            database.relays().upsertAll(
+            usersDatabase.relays().upsertAll(
                 relays = nostrWalletConnect.relays.map {
                     Relay(userId = userId, kind = RelayKind.NwcRelay, url = it, read = false, write = true)
                 },
@@ -117,7 +146,7 @@ class UserRepository @Inject constructor(
 
     suspend fun disconnectNostrWallet(userId: String) {
         withContext(dispatchers.io()) {
-            database.relays().deleteAll(userId = userId, kind = RelayKind.NwcRelay)
+            usersDatabase.relays().deleteAll(userId = userId, kind = RelayKind.NwcRelay)
             accountsStore.getAndUpdateAccount(userId = userId) {
                 copy(nostrWallet = null)
             }
@@ -128,18 +157,24 @@ class UserRepository @Inject constructor(
         accountsStore.deleteAccount(pubkey = pubkey)
     }
 
-    @Throws(UnsuccessfulFileUpload::class, NostrPublishException::class, SignException::class)
+    @Throws(BlossomException::class, NostrPublishException::class, SignatureException::class)
     suspend fun setProfileMetadata(userId: String, profileMetadata: ProfileMetadata) {
         val pictureUrl = profileMetadata.remotePictureUrl
             ?: if (profileMetadata.localPictureUri != null) {
-                fileUploader.uploadFile(userId = userId, uri = profileMetadata.localPictureUri).remoteUrl
+                primalUploadService.upload(
+                    uri = profileMetadata.localPictureUri,
+                    userId = userId,
+                ).remoteUrl
             } else {
                 null
             }
 
         val bannerUrl = profileMetadata.remoteBannerUrl
             ?: if (profileMetadata.localBannerUri != null) {
-                fileUploader.uploadFile(userId = userId, uri = profileMetadata.localBannerUri).remoteUrl
+                primalUploadService.upload(
+                    uri = profileMetadata.localBannerUri,
+                    userId = userId,
+                ).remoteUrl
             } else {
                 null
             }
@@ -159,11 +194,11 @@ class UserRepository @Inject constructor(
         )
     }
 
-    @Throws(NostrPublishException::class, WssException::class, SignException::class)
+    @Throws(NostrPublishException::class, WssException::class, SignatureException::class)
     suspend fun setNostrAddress(userId: String, nostrAddress: String) =
         withContext(dispatchers.io()) {
             val userProfileResponse = usersApi.getUserProfile(userId = userId)
-            val metadata = CommonJson.decodeFromStringOrNull<ContentMetadata>(userProfileResponse.metadata?.content)
+            val metadata = userProfileResponse.metadata?.content.decodeFromJsonStringOrNull<ContentMetadata>()
                 ?: throw WssException("Profile Content Metadata not found.")
 
             setUserProfileAndUpdateLocally(
@@ -172,11 +207,11 @@ class UserRepository @Inject constructor(
             )
         }
 
-    @Throws(NostrPublishException::class, WssException::class, SignException::class)
+    @Throws(NostrPublishException::class, WssException::class, SignatureException::class)
     suspend fun setLightningAddress(userId: String, lightningAddress: String) =
         withContext(dispatchers.io()) {
             val userProfileResponse = usersApi.getUserProfile(userId = userId)
-            val metadata = CommonJson.decodeFromStringOrNull<ContentMetadata>(userProfileResponse.metadata?.content)
+            val metadata = userProfileResponse.metadata?.content.decodeFromJsonStringOrNull<ContentMetadata>()
                 ?: throw WssException("Profile Content Metadata not found.")
 
             setUserProfileAndUpdateLocally(
@@ -190,15 +225,15 @@ class UserRepository @Inject constructor(
             userId = userId,
             contentMetadata = contentMetadata,
         )
-        val profileData = profileMetadataNostrEvent.asProfileDataPO(
+        val profileData = profileMetadataNostrEvent.asProfileDataDO(
             cdnResources = emptyMap(),
             primalUserNames = emptyMap(),
             primalPremiumInfo = emptyMap(),
             primalLegendProfiles = emptyMap(),
             blossomServers = emptyMap(),
         )
-        database.profiles().insertOrUpdateAll(data = listOf(profileData))
 
+        cachingImportRepository.cacheNostrEvents(profileMetadataNostrEvent)
         accountsStore.getAndUpdateAccount(userId = userId) {
             this.copy(
                 authorDisplayName = profileData.authorNameUiFriendly(),
@@ -264,7 +299,7 @@ class UserRepository @Inject constructor(
         }
     }
 
-    @Throws(FollowListNotFound::class, NostrPublishException::class, SignException::class)
+    @Throws(FollowListNotFound::class, NostrPublishException::class, SignatureException::class)
     suspend fun follow(
         userId: String,
         followedUserId: String,
@@ -275,7 +310,7 @@ class UserRepository @Inject constructor(
         }
     }
 
-    @Throws(FollowListNotFound::class, NostrPublishException::class, SignException::class)
+    @Throws(FollowListNotFound::class, NostrPublishException::class, SignatureException::class)
     suspend fun unfollow(
         userId: String,
         unfollowedUserId: String,
@@ -286,13 +321,13 @@ class UserRepository @Inject constructor(
         }
     }
 
-    @Throws(FollowListNotFound::class, NostrPublishException::class, SignException::class)
+    @Throws(FollowListNotFound::class, NostrPublishException::class, SignatureException::class)
     private suspend fun updateFollowList(
         userId: String,
         forceUpdate: Boolean,
         reducer: Set<String>.() -> Set<String>,
     ) = withContext(dispatchers.io()) {
-        val userFollowList = userAccountFetcher.fetchUserFollowListOrNull(userId = userId)
+        val userFollowList = fetchUserFollowListOrNull(userId = userId)
         val isEmptyFollowList = userFollowList == null || userFollowList.following.isEmpty()
         if (isEmptyFollowList && !forceUpdate) {
             throw FollowListNotFound()
@@ -310,7 +345,7 @@ class UserRepository @Inject constructor(
         )
     }
 
-    @Throws(NostrPublishException::class, SignException::class)
+    @Throws(NostrPublishException::class, SignatureException::class)
     suspend fun setFollowList(
         userId: String,
         contacts: Set<String>,
@@ -327,7 +362,7 @@ class UserRepository @Inject constructor(
         )
     }
 
-    @Throws(NostrPublishException::class, SignException::class)
+    @Throws(NostrPublishException::class, SignatureException::class)
     suspend fun recoverFollowList(
         userId: String,
         tags: List<JsonArray>,
@@ -351,14 +386,31 @@ class UserRepository @Inject constructor(
 
     suspend fun markAsInteracted(profileId: String, ownerId: String) =
         withContext(dispatchers.io()) {
-            database.profileInteractions().upsert(
-                ProfileInteraction(
+            usersDatabase.userProfileInteractions().upsert(
+                UserProfileInteraction(
                     profileId = profileId,
                     lastInteractionAt = Instant.now().epochSecond,
                     ownerId = ownerId,
                 ),
             )
         }
+
+    fun observeRecentUsers(ownerId: String): Flow<List<UserProfileSearchItem>> =
+        usersDatabase.userProfileInteractions()
+            .observeRecentProfilesByOwnerId(ownerId)
+            .map { recentProfiles ->
+                val profileIds = recentProfiles.map { it.profileId }
+
+                val profiles = profileRepository.findProfileData(profileIds).associateBy { it.profileId }
+                val statsMap = profileRepository.findProfileStats(profileIds).associateBy { it.profileId }
+
+                profileIds.mapNotNull { profileId ->
+                    profiles[profileId]?.let { profile ->
+                        val stats = statsMap[profileId]
+                        UserProfileSearchItem(metadata = profile, followersCount = stats?.followers)
+                    }
+                }
+            }
 
     class FollowListNotFound : Exception()
 }

@@ -4,17 +4,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import net.primal.android.R
 import net.primal.android.core.utils.ellipsizeMiddle
-import net.primal.android.crypto.hexToNpubHrp
-import net.primal.domain.extractAdvancedSearchQuery
-import net.primal.domain.extractPubkeyFromFeedSpec
-import net.primal.domain.extractSimpleSearchQuery
-import net.primal.domain.extractTopicFromFeedSpec
-import net.primal.domain.isAdvancedSearchFeedSpec
-import net.primal.domain.isNotesFeedSpec
-import net.primal.domain.isPubkeyFeedSpec
-import net.primal.domain.isReadsFeedSpec
-import net.primal.domain.isSearchFeedSpec
-import net.primal.domain.isSimpleSearchFeedSpec
+import net.primal.domain.feeds.extractAdvancedSearchQuery
+import net.primal.domain.feeds.extractPubkeyFromFeedSpec
+import net.primal.domain.feeds.extractSimpleSearchQuery
+import net.primal.domain.feeds.extractTopicFromFeedSpec
+import net.primal.domain.feeds.isAdvancedSearchFeedSpec
+import net.primal.domain.feeds.isNotesFeedSpec
+import net.primal.domain.feeds.isPubkeyFeedSpec
+import net.primal.domain.feeds.isReadsFeedSpec
+import net.primal.domain.feeds.isSearchFeedSpec
+import net.primal.domain.feeds.isSimpleSearchFeedSpec
+import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 
 @Composable
 fun String.resolveDefaultTitle(profileName: String? = null): String =

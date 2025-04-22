@@ -8,7 +8,7 @@ import io.kotest.matchers.shouldBe
 import kotlin.uuid.Uuid
 import net.primal.core.networking.primal.PrimalQueryResult
 import net.primal.core.networking.sockets.NostrIncomingMessage
-import net.primal.domain.PrimalEvent
+import net.primal.domain.common.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.isNotPrimalEventKind

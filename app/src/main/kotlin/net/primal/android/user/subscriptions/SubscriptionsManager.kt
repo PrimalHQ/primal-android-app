@@ -3,6 +3,7 @@ package net.primal.android.user.subscriptions
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.flowWithLifecycle
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
@@ -10,12 +11,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
 import net.primal.android.messages.domain.MessagesUnreadCount
 import net.primal.android.networking.di.PrimalCacheApiClient
@@ -33,26 +31,26 @@ import net.primal.android.wallet.api.model.BalanceResponse
 import net.primal.android.wallet.api.model.LastUpdatedAtResponse
 import net.primal.android.wallet.api.model.WalletRequestBody
 import net.primal.android.wallet.domain.SubWallet
-import net.primal.core.config.AppConfigProvider
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.primal.PrimalSocketSubscription
-import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.notifications.model.PubkeyRequestBody
-import net.primal.domain.PrimalEvent
+import net.primal.domain.common.PrimalEvent
 import net.primal.domain.nostr.NostrEventKind
 
 @Singleton
 class SubscriptionsManager @Inject constructor(
-    dispatcherProvider: CoroutineDispatcherProvider,
+    dispatcherProvider: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val userRepository: UserRepository,
     private val nostrNotary: NostrNotary,
-    private val appConfigProvider: AppConfigProvider,
     @PrimalCacheApiClient private val cacheApiClient: PrimalApiClient,
     @PrimalWalletApiClient private val walletApiClient: PrimalApiClient,
 ) {
 
+    private val lifecycle: Lifecycle = ProcessLifecycleOwner.get().lifecycle
     private val scope = CoroutineScope(dispatcherProvider.io())
     private var subscriptionsActive = false
 
@@ -80,30 +78,27 @@ class SubscriptionsManager @Inject constructor(
 
     private fun observeActiveAccount() =
         scope.launch {
-            appConfigProvider.waitForCacheAndWalletConfigsUrls()
-            activeAccountStore.activeUserId.collect { newActiveUserId ->
-                emitBadgesUpdate { Badges() }
-                unsubscribeAll()
-                when {
-                    newActiveUserId.isEmpty() -> {
-                        withContext(Dispatchers.Main) {
-                            ProcessLifecycleOwner.get().lifecycle.removeObserver(lifecycleEventObserver)
+            activeAccountStore.activeUserId
+                .flowWithLifecycle(lifecycle = lifecycle, minActiveState = Lifecycle.State.STARTED)
+                .collect { newActiveUserId ->
+                    emitBadgesUpdate { Badges() }
+                    unsubscribeAll()
+                    when {
+                        newActiveUserId.isEmpty() -> {
+                            withContext(Dispatchers.Main) {
+                                lifecycle.removeObserver(lifecycleEventObserver)
+                            }
                         }
-                    }
 
-                    else -> {
-                        subscribeAll(userId = newActiveUserId)
-                        withContext(Dispatchers.Main) {
-                            ProcessLifecycleOwner.get().lifecycle.addObserver(lifecycleEventObserver)
+                        else -> {
+                            subscribeAll(userId = newActiveUserId)
+                            withContext(Dispatchers.Main) {
+                                lifecycle.addObserver(lifecycleEventObserver)
+                            }
                         }
                     }
                 }
-            }
         }
-
-    private suspend fun AppConfigProvider.waitForCacheAndWalletConfigsUrls() {
-        combine(cacheUrl(), walletUrl()) { array -> array.toList() }.first()
-    }
 
     private val lifecycleEventObserver = LifecycleEventObserver { _, event ->
         when (event) {
@@ -142,7 +137,7 @@ class SubscriptionsManager @Inject constructor(
             primalApiClient = cacheApiClient,
             cacheFilter = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.NEW_NOTIFICATIONS_COUNT.id,
-                optionsJson = CommonJson.encodeToString(PubkeyRequestBody(pubkey = userId)),
+                optionsJson = PubkeyRequestBody(pubkey = userId).encodeToJsonString(),
             ),
             transformer = { primalEvent?.asNotificationSummary() },
         ) {
@@ -157,7 +152,7 @@ class SubscriptionsManager @Inject constructor(
             primalApiClient = cacheApiClient,
             cacheFilter = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.NEW_DMS_COUNT.id,
-                optionsJson = CommonJson.encodeToString(PubkeyRequestBody(pubkey = userId)),
+                optionsJson = PubkeyRequestBody(pubkey = userId).encodeToJsonString(),
             ),
             transformer = { primalEvent?.asMessagesTotalCount() },
         ) {
@@ -177,9 +172,7 @@ class SubscriptionsManager @Inject constructor(
                         WalletRequestBody(
                             event = nostrNotary.signPrimalWalletOperationNostrEvent(
                                 userId = userId,
-                                content = CommonJson.encodeToString(
-                                    BalanceRequestBody(subWallet = SubWallet.Open),
-                                ),
+                                content = BalanceRequestBody(subWallet = SubWallet.Open).encodeToJsonString(),
                             ),
                         ),
                     ),

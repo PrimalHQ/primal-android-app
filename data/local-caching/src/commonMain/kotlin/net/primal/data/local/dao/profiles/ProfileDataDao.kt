@@ -2,10 +2,12 @@ package net.primal.data.local.dao.profiles
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.MapColumn
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
+import net.primal.domain.premium.PrimalPremiumInfo
 
 @Dao
 interface ProfileDataDao {
@@ -22,6 +24,16 @@ interface ProfileDataDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrReplaceAll(data: List<ProfileData>)
+
+    @Query("SELECT ownerId, primalPremiumInfo FROM ProfileData WHERE ownerId IN (:profileIds)")
+    suspend fun findLegendProfileData(
+        profileIds: List<String>,
+    ): Map<
+        @MapColumn("ownerId")
+        String,
+        @MapColumn("primalPremiumInfo")
+        PrimalPremiumInfo?,
+        >
 
     @Transaction
     @Query("SELECT * FROM ProfileData WHERE ownerId = :profileId")

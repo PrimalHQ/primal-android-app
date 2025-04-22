@@ -20,46 +20,49 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import net.primal.android.core.ext.asMapByKey
-import net.primal.android.nostr.ext.findFirstEventId
-import net.primal.android.nostr.ext.flatMapNotNullAsCdnResource
-import net.primal.android.nostr.ext.mapAsMapPubkeyToListOfBlossomServers
-import net.primal.android.nostr.ext.mapAsProfileDataPO
-import net.primal.android.nostr.ext.parseAndMapPrimalLegendProfiles
-import net.primal.android.nostr.ext.parseAndMapPrimalPremiumInfo
-import net.primal.android.nostr.ext.parseAndMapPrimalUserNames
-import net.primal.android.notes.db.FeedPost
 import net.primal.android.notes.feed.list.NoteFeedContract.UiEvent
 import net.primal.android.notes.feed.list.NoteFeedContract.UiState
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
 import net.primal.android.notes.feed.model.asFeedPostUi
-import net.primal.android.notes.repository.FeedRepository
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
+import net.primal.android.premium.repository.mapAsProfileDataDO
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.core.utils.serialization.CommonJson
-import net.primal.core.utils.serialization.decodeFromStringOrNull
-import net.primal.data.remote.api.feed.model.FeedResponse
-import net.primal.domain.isPremiumFeedSpec
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
+import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
+import net.primal.domain.feeds.isPremiumFeedSpec
+import net.primal.domain.feeds.supportsUpwardsNotesPagination
 import net.primal.domain.nostr.NostrEvent
-import net.primal.domain.supportsUpwardsNotesPagination
+import net.primal.domain.nostr.findFirstEventId
+import net.primal.domain.posts.FeedPageSnapshot
+import net.primal.domain.posts.FeedPost
+import net.primal.domain.posts.FeedRepository
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = NoteFeedViewModel.Factory::class)
 class NoteFeedViewModel @AssistedInject constructor(
     @Assisted private val feedSpec: String,
+    @Assisted private val allowMutedThreads: Boolean,
     private val feedRepository: FeedRepository,
     private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
 
     @AssistedFactory
     interface Factory {
-        fun create(feedSpec: String): NoteFeedViewModel
+        fun create(feedSpec: String, allowMutedThreads: Boolean): NoteFeedViewModel
     }
 
     private fun buildFeedByDirective(feedSpec: String) =
-        feedRepository.feedBySpec(userId = activeAccountStore.activeUserId(), feedSpec = feedSpec)
+        feedRepository.feedBySpec(
+            userId = activeAccountStore.activeUserId(),
+            feedSpec = feedSpec,
+            allowMutedThreads = allowMutedThreads,
+        )
             .map { it.map { feedNote -> feedNote.asFeedPostUi() } }
             .cachedIn(viewModelScope)
 
@@ -70,7 +73,7 @@ class NoteFeedViewModel @AssistedInject constructor(
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
-    private var latestFeedResponse: FeedResponse? = null
+    private var latestFeedResponse: FeedPageSnapshot? = null
     private var topVisibleNote: Pair<String, String?>? = null
 
     private var pollingJob: Job? = null
@@ -139,22 +142,26 @@ class NoteFeedViewModel @AssistedInject constructor(
     }
 
     private suspend fun fetchLatestNotes() {
-        val feedResponse = feedRepository.fetchLatestNotes(
+        val latestFeedPageResponse = feedRepository.fetchFeedPageSnapshot(
             userId = activeAccountStore.activeUserId(),
             feedSpec = feedSpec,
         )
 
-        latestFeedResponse = feedResponse
-        feedResponse.processSyncCount(
+        latestFeedResponse = latestFeedPageResponse
+        latestFeedPageResponse.processSyncCount(
             newestLocalNote = feedRepository
-                .findNewestPosts(userId = activeAccountStore.activeUserId(), feedDirective = feedSpec, limit = 1)
+                .findNewestPosts(
+                    userId = activeAccountStore.activeUserId(),
+                    feedDirective = feedSpec,
+                    limit = 1,
+                )
                 .firstOrNull(),
         )
     }
 
-    private fun FeedResponse.processSyncCount(newestLocalNote: FeedPost? = null) {
+    private fun FeedPageSnapshot.processSyncCount(newestLocalNote: FeedPost? = null) {
         val allReferencedNotes = this.referencedEvents.mapNotNull {
-            CommonJson.decodeFromStringOrNull<NostrEvent>(it.content)
+            it.content.decodeFromJsonStringOrNull<NostrEvent>()
         }
 
         val repostedNotes = this.reposts
@@ -170,26 +177,27 @@ class NoteFeedViewModel @AssistedInject constructor(
         val allNotes = (repostedNotes + notes)
             .asSequence()
             .sortedByDescending { it.first }
-            .filter { it.first >= (newestLocalNote?.data?.feedCreatedAt ?: 0) }
+            .filter { it.first >= (newestLocalNote?.timestamp?.epochSeconds ?: 0) }
             .distinctBy { it.second.id }
-            .filter { it.second.id != newestLocalNote?.data?.postId }
+            .filter { it.second.id != newestLocalNote?.eventId }
             .map { it.second }
             .toMutableSet()
 
-        val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+        val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource()
         val primalUserNames = this.primalUserNames.parseAndMapPrimalUserNames()
         val primalPremiumInfo = this.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
         val primalLegendProfiles = this.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
         val blossomServers = this.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
-        val profiles = this.metadata.mapAsProfileDataPO(
+        val profiles = this.metadata.mapAsProfileDataDO(
             cdnResources = cdnResources,
             primalUserNames = primalUserNames,
             primalPremiumInfo = primalPremiumInfo,
             primalLegendProfiles = primalLegendProfiles,
             blossomServers = blossomServers,
         )
+
         val avatarCdnImagesAndLegendaryCustomizations = allNotes
-            .mapNotNull { note -> profiles.find { it.ownerId == note.pubKey } }
+            .mapNotNull { note -> profiles.find { it.profileId == note.pubKey } }
             .map { profileData ->
                 Pair(
                     profileData.avatarCdnImage,
@@ -217,10 +225,10 @@ class NoteFeedViewModel @AssistedInject constructor(
     private fun showLatestNotes() =
         viewModelScope.launch {
             latestFeedResponse?.let { latestFeed ->
-                feedRepository.replaceFeedSpec(
+                feedRepository.replaceFeed(
                     userId = activeAccountStore.activeUserId(),
                     feedSpec = feedSpec,
-                    response = latestFeed,
+                    snapshot = latestFeed,
                 )
 
                 delay(130.milliseconds)

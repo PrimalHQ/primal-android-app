@@ -2,7 +2,7 @@ package net.primal.core.config.store
 
 import androidx.datastore.core.DataStore
 import kotlinx.cinterop.ExperimentalForeignApi
-import net.primal.domain.AppConfig
+import net.primal.domain.global.AppConfig
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL

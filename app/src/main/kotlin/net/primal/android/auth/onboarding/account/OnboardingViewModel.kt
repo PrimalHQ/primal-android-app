@@ -19,24 +19,26 @@ import net.primal.android.auth.onboarding.account.api.OnboardingApi
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroupMember
 import net.primal.android.auth.repository.CreateAccountHandler
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.crypto.CryptoUtils
-import net.primal.android.networking.primal.upload.PrimalFileUploader
-import net.primal.android.networking.primal.upload.UnsuccessfulFileUpload
-import net.primal.android.nostr.notary.exceptions.SignException
+import net.primal.android.nostr.notary.signOrThrow
 import net.primal.android.profile.domain.ProfileMetadata
+import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
+import net.primal.core.networking.blossom.BlossomException
+import net.primal.core.networking.blossom.UploadJob
 import net.primal.core.networking.sockets.errors.WssException
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.nostr.ContentMetadata
-import net.primal.domain.upload.UploadJob
+import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.cryptography.utils.CryptoUtils
+import net.primal.domain.nostr.cryptography.utils.hexToNsecHrp
 import timber.log.Timber
 
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val onboardingApi: OnboardingApi,
     private val createAccountHandler: CreateAccountHandler,
-    private val fileUploader: PrimalFileUploader,
+    private val primalUploadService: AndroidPrimalBlossomUploadService,
 ) : ViewModel() {
 
     private val keyPair = CryptoUtils.generateHexEncodedKeypair()
@@ -155,7 +157,7 @@ class OnboardingViewModel @Inject constructor(
                     interests = uiState.selectedSuggestions,
                 )
                 setState { copy(accountCreated = true, accountCreationStep = AccountCreationStep.AccountCreated) }
-            } catch (error: UnsuccessfulFileUpload) {
+            } catch (error: BlossomException) {
                 Timber.w(error)
                 setState { copy(error = UiState.OnboardingError.ImageUploadFailed(error)) }
             } catch (error: CreateAccountHandler.AccountCreationException) {
@@ -171,22 +173,24 @@ class OnboardingViewModel @Inject constructor(
         avatarUploadJob.cancel()
         avatarUploadJob = null
         if (avatarUri != null) {
-            val uploadId = PrimalFileUploader.generateRandomUploadId()
             val job = viewModelScope.launch {
                 try {
                     val uploadResult = withContext(dispatcherProvider.io()) {
-                        fileUploader.uploadFile(keyPair = keyPair, uri = avatarUri)
+                        primalUploadService.upload(
+                            uri = avatarUri,
+                            userId = keyPair.pubKey,
+                        )
                     }
                     setState { copy(avatarRemoteUrl = uploadResult.remoteUrl) }
-                } catch (error: UnsuccessfulFileUpload) {
+                } catch (error: BlossomException) {
                     Timber.w(error)
                 } catch (error: WssException) {
                     Timber.w(error)
-                } catch (error: SignException) {
+                } catch (error: SignatureException) {
                     Timber.w(error)
                 }
             }
-            avatarUploadJob = UploadJob(job = job, id = uploadId)
+            avatarUploadJob = UploadJob(job = job)
         }
     }
 
@@ -195,22 +199,27 @@ class OnboardingViewModel @Inject constructor(
         bannerUploadJob.cancel()
         bannerUploadJob = null
         if (bannerUri != null) {
-            val uploadId = PrimalFileUploader.generateRandomUploadId()
             val job = viewModelScope.launch {
                 try {
                     val uploadResult = withContext(dispatcherProvider.io()) {
-                        fileUploader.uploadFile(keyPair = keyPair, uri = bannerUri)
+                        primalUploadService.upload(
+                            uri = bannerUri,
+                            userId = keyPair.pubKey,
+                            onSignRequested = {
+                                it.signOrThrow(keyPair.privateKey.hexToNsecHrp())
+                            },
+                        )
                     }
                     setState { copy(bannerRemoteUrl = uploadResult.remoteUrl) }
-                } catch (error: UnsuccessfulFileUpload) {
+                } catch (error: BlossomException) {
                     Timber.w(error)
                 } catch (error: WssException) {
                     Timber.w(error)
-                } catch (error: SignException) {
+                } catch (error: SignatureException) {
                     Timber.w(error)
                 }
             }
-            bannerUploadJob = UploadJob(job = job, id = uploadId)
+            bannerUploadJob = UploadJob(job = job)
         }
     }
 
@@ -229,16 +238,7 @@ class OnboardingViewModel @Inject constructor(
             remoteBannerUrl = this.bannerRemoteUrl ?: DEFAULT_BANNER_URL,
         )
 
-    private fun UploadJob?.cancel() {
-        if (this == null) return
-
-        viewModelScope.launch {
-            this@cancel.job.cancel()
-            runCatching {
-                fileUploader.cancelUpload(keyPair = keyPair, uploadId = this@cancel.id)
-            }
-        }
-    }
+    private fun UploadJob?.cancel() = this?.job?.cancel()
 
     private fun toggleFollowMemberFollowing(event: UiEvent.ToggleFollowEvent) {
         setState {

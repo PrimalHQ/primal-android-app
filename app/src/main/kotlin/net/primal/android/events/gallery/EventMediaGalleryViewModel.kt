@@ -15,23 +15,23 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
 import net.primal.android.core.files.MediaDownloader
 import net.primal.android.core.files.error.UnableToSaveContent
 import net.primal.android.core.files.error.UnsuccessfulFileDownload
 import net.primal.android.events.gallery.EventMediaGalleryContract.UiEvent
 import net.primal.android.events.gallery.EventMediaGalleryContract.UiState
-import net.primal.android.events.repository.EventUriRepository
 import net.primal.android.navigation.mediaPositionMs
 import net.primal.android.navigation.mediaUrl
 import net.primal.android.navigation.noteIdOrThrow
-import net.primal.domain.EventUriType
+import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.links.EventUriRepository
+import net.primal.domain.links.EventUriType
 import timber.log.Timber
 
 @HiltViewModel
 class EventMediaGalleryViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val dispatcherProvider: CoroutineDispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val mediaDownloader: MediaDownloader,
     private val eventUriRepository: EventUriRepository,
 ) : ViewModel() {
@@ -70,7 +70,7 @@ class EventMediaGalleryViewModel @Inject constructor(
     private fun loadAttachments() =
         viewModelScope.launch {
             val attachments = withContext(dispatcherProvider.io()) {
-                eventUriRepository.loadEventUris(
+                eventUriRepository.loadEventLinks(
                     noteId = noteId,
                     types = listOf(EventUriType.Image, EventUriType.Video),
                 )

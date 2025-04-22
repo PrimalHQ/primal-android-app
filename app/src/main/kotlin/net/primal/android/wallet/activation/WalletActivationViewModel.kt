@@ -14,10 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.core.coroutines.CoroutineDispatcherProvider
-import net.primal.android.networking.relays.errors.MissingRelaysException
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.nostr.notary.exceptions.SignException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.repository.UserRepository
@@ -34,12 +31,15 @@ import net.primal.android.wallet.api.model.GetActivationCodeRequestBody
 import net.primal.android.wallet.api.model.WalletActivationDetails
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.core.networking.sockets.errors.WssException
-import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.publisher.MissingRelaysException
 import timber.log.Timber
 
 @HiltViewModel
 class WalletActivationViewModel @Inject constructor(
-    private val coroutineDispatcher: CoroutineDispatcherProvider,
+    private val coroutineDispatcher: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val walletRepository: WalletRepository,
     private val userRepository: UserRepository,
@@ -84,8 +84,11 @@ class WalletActivationViewModel @Inject constructor(
 
     private fun loadAllCountries() =
         viewModelScope.launch {
-            val allCountries = CommonJson.decodeFromString<Regions>(WalletRegionJson).mapToListOfCountries()
-            setState { copy(allCountries = allCountries) }
+            val allCountries = WalletRegionJson
+                .decodeFromJsonStringOrNull<Regions>()
+                ?.mapToListOfCountries()
+
+            setState { copy(allCountries = allCountries ?: emptyList()) }
         }
 
     private fun Regions.mapToListOfCountries(): List<Country> {
@@ -139,7 +142,7 @@ class WalletActivationViewModel @Inject constructor(
                     ),
                 )
                 setState { copy(status = WalletActivationStatus.PendingOtpVerification) }
-            } catch (error: SignException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
                 setState { copy(error = error) }
             } catch (error: WssException) {
@@ -173,7 +176,7 @@ class WalletActivationViewModel @Inject constructor(
                 activeUser.primalWallet?.lightningAddress?.let {
                     try {
                         userRepository.setLightningAddress(userId = userId, lightningAddress = it)
-                    } catch (error: SignException) {
+                    } catch (error: SignatureException) {
                         Timber.w(error)
                     } catch (error: NostrPublishException) {
                         Timber.w(error)

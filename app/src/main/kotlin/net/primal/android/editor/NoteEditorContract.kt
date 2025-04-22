@@ -4,13 +4,13 @@ import android.net.Uri
 import androidx.compose.ui.text.input.TextFieldValue
 import java.util.*
 import net.primal.android.articles.feed.ui.FeedArticleUi
+import net.primal.android.articles.highlights.HighlightUi
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteTaggedUser
-import net.primal.android.highlights.model.HighlightUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.premium.legend.domain.LegendaryCustomization
-import net.primal.domain.CdnImage
+import net.primal.domain.links.CdnImage
 
 interface NoteEditorContract {
 

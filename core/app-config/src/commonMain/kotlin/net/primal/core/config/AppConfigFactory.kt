@@ -8,7 +8,7 @@ import net.primal.core.config.store.AppConfigDataStore
 import net.primal.core.config.store.createAppConfigDataStorePersistence
 import net.primal.core.networking.factory.HttpClientFactory
 import net.primal.core.utils.coroutines.DispatcherProviderFactory
-import net.primal.domain.AppConfig
+import net.primal.domain.global.AppConfig
 
 private const val CONFIG_CACHE_API = "wss://cache1.primal.net/v1"
 private const val CONFIG_UPLOAD_API = "wss://uploads.primal.net/v1"

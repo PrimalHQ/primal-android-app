@@ -12,8 +12,8 @@ import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.navigation.profileIdOrThrow
 import net.primal.android.premium.utils.isPrimalLegendTier
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.domain.profile.ProfileRepository
 
 @HiltViewModel
 class PremiumCardViewModel @Inject constructor(
@@ -30,7 +30,7 @@ class PremiumCardViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            runCatching { profileRepository.requestProfileUpdate(profileId = profileId) }
+            runCatching { profileRepository.fetchProfile(profileId = profileId) }
         }
         observeActiveAccount()
         observeProfileById(profileId)

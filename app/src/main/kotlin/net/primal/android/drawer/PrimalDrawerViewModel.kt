@@ -15,12 +15,12 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
-import net.primal.android.profile.repository.ProfileRepository
 import net.primal.android.theme.active.ActiveThemeStore
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.subscriptions.SubscriptionsManager
+import net.primal.domain.profile.ProfileRepository
 
 @HiltViewModel
 class PrimalDrawerViewModel @Inject constructor(
@@ -80,11 +80,12 @@ class PrimalDrawerViewModel @Inject constructor(
 
     private fun observeProfile() {
         viewModelScope.launch {
-            profileRepository.observeProfile(profileId = activeAccountStore.activeUserId()).collect {
+            profileRepository.observeProfileData(profileId = activeAccountStore.activeUserId()).collect {
                 setState {
                     copy(
-                        legendaryCustomization = it.metadata?.primalPremiumInfo
-                            ?.legendProfile?.asLegendaryCustomization(),
+                        legendaryCustomization = it.primalPremiumInfo
+                            ?.legendProfile
+                            ?.asLegendaryCustomization(),
                     )
                 }
             }

@@ -5,9 +5,22 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.jsonPrimitive
+import net.primal.domain.nostr.Nip19TLV.parseUriAsNeventOrNull
+import net.primal.domain.nostr.utils.isNAddr
+import net.primal.domain.nostr.utils.isNAddrUri
+import net.primal.domain.nostr.utils.isNEvent
+import net.primal.domain.nostr.utils.isNEventUri
+import net.primal.domain.nostr.utils.isNProfile
+import net.primal.domain.nostr.utils.isNProfileUri
+import net.primal.domain.nostr.utils.isNPub
+import net.primal.domain.nostr.utils.isNPubUri
+import net.primal.domain.nostr.utils.isNote
+import net.primal.domain.nostr.utils.isNoteUri
+import net.primal.domain.nostr.utils.nostrUriToNoteId
+import net.primal.domain.nostr.utils.nostrUriToPubkey
+import net.primal.domain.nostr.utils.nostrUriToPubkeyAndRelay
 import net.primal.domain.nostr.utils.parseHashtags
-
-// TODO Port missing helper functions
+import net.primal.domain.nostr.utils.parseNostrUris
 
 fun List<JsonArray>.findFirstEventId() = firstOrNull { it.isEventIdTag() }?.getTagValueOrNull()
 
@@ -42,6 +55,8 @@ fun JsonArray.isBolt11Tag() = getOrNull(0)?.jsonPrimitive?.content == "bolt11"
 fun JsonArray.isDescriptionTag() = getOrNull(0)?.jsonPrimitive?.content == "description"
 
 fun JsonArray.isAmountTag() = getOrNull(0)?.jsonPrimitive?.content == "amount"
+
+fun JsonArray.isWordTag() = getOrNull(0)?.jsonPrimitive?.content == "word"
 
 fun JsonArray.isEventIdTag() = getOrNull(0)?.jsonPrimitive?.content == "e"
 
@@ -81,6 +96,12 @@ fun String.asContextTag() =
     buildJsonArray {
         add("context")
         add(this@asContextTag)
+    }
+
+fun String.asWordTag() =
+    buildJsonArray {
+        add("word")
+        add(this@asWordTag)
     }
 
 fun String.asAltTag() =
@@ -149,64 +170,75 @@ fun String.asReplaceableEventTag(relayHint: String? = null, marker: String? = nu
         add(marker ?: "")
     }.removeTrailingEmptyStrings()
 
+fun String.asHashtagTag(): JsonArray =
+    buildJsonArray {
+        add("t")
+        add(this@asHashtagTag)
+    }
+
+fun String.asSha256Tag(): JsonArray =
+    buildJsonArray {
+        add("x")
+        add(this@asSha256Tag)
+    }
+
+fun Long.asExpirationTag(): JsonArray =
+    buildJsonArray {
+        add("expiration")
+        add(this@asExpirationTag.toString())
+    }
+
+fun String.asServerTag(): JsonArray =
+    buildJsonArray {
+        add("server")
+        add(this@asServerTag)
+    }
+
 fun Naddr.asReplaceableEventTag(marker: String? = null): JsonArray =
     this.asATagValue().asReplaceableEventTag(
         relayHint = this.relays.firstOrNull(),
         marker = marker,
     )
 
-// fun NoteAttachment.asIMetaTag(): JsonArray {
-//    require(this.remoteUrl != null)
-//    return buildJsonArray {
-//        add("imeta")
-//        add("url ${this@asIMetaTag.remoteUrl}")
-//        this@asIMetaTag.mimeType?.let { add("m $it") }
-//        this@asIMetaTag.uploadedHash?.let { add("x $it") }
-//        this@asIMetaTag.originalHash?.let { add("ox $it") }
-//        this@asIMetaTag.uploadedSizeInBytes?.let { add("size $it") }
-//        this@asIMetaTag.dimensionInPixels?.let { add("dim $it") }
-//    }
-// }
+fun String.parseEventTags(marker: String? = null): Set<JsonArray> =
+    this.parseNostrUris().mapNotNull { uri ->
+        when {
+            uri.isNEventUri() || uri.isNEvent() ->
+                parseUriAsNeventOrNull(uri)?.asEventTag(marker = marker)
 
-// fun String.parseEventTags(marker: String? = null): Set<JsonArray> =
-//    this.parseNostrUris().mapNotNull { uri ->
-//        when {
-//            uri.isNEventUri() || uri.isNEvent() ->
-//                parseUriAsNeventOrNull(uri)?.asEventTag(marker = marker)
-//
-//            uri.isNoteUri() || uri.isNote() ->
-//                uri.nostrUriToNoteId()?.asEventIdTag(marker = marker)
-//
-//            else -> null
-//        }
-//    }.toSet()
+            uri.isNoteUri() || uri.isNote() ->
+                uri.nostrUriToNoteId()?.asEventIdTag(marker = marker)
 
-// fun String.parsePubkeyTags(marker: String? = null): Set<JsonArray> =
-//    parseNostrUris().mapNotNull {
-//        when {
-//            it.isNProfileUri() || it.isNProfile() -> {
-//                val result = it.nostrUriToPubkeyAndRelay()
-//                val pubkey = result.first
-//                val relayUrl = result.second
-//                pubkey?.asPubkeyTag(relayHint = relayUrl, optional = marker)
-//            }
-//
-//            it.isNPubUri() || it.isNPub() ->
-//                it.nostrUriToPubkey()?.asPubkeyTag(optional = marker)
-//
-//            else -> null
-//        }
-//    }.toSet()
+            else -> null
+        }
+    }.toSet()
 
-// fun String.parseReplaceableEventTags(marker: String? = null): Set<JsonArray> =
-//    this.parseNostrUris().mapNotNull { uri ->
-//        when {
-//            uri.isNAddrUri() || uri.isNAddr() ->
-//                Nip19TLV.parseUriAsNaddrOrNull(uri)?.asReplaceableEventTag(marker = marker)
-//
-//            else -> null
-//        }
-//    }.toSet()
+fun String.parsePubkeyTags(marker: String? = null): Set<JsonArray> =
+    parseNostrUris().mapNotNull {
+        when {
+            it.isNProfileUri() || it.isNProfile() -> {
+                val result = it.nostrUriToPubkeyAndRelay()
+                val pubkey = result.first
+                val relayUrl = result.second
+                pubkey?.asPubkeyTag(relayHint = relayUrl, optional = marker)
+            }
+
+            it.isNPubUri() || it.isNPub() ->
+                it.nostrUriToPubkey()?.asPubkeyTag(optional = marker)
+
+            else -> null
+        }
+    }.toSet()
+
+fun String.parseReplaceableEventTags(marker: String? = null): Set<JsonArray> =
+    this.parseNostrUris().mapNotNull { uri ->
+        when {
+            uri.isNAddrUri() || uri.isNAddr() ->
+                Nip19TLV.parseUriAsNaddrOrNull(uri)?.asReplaceableEventTag(marker = marker)
+
+            else -> null
+        }
+    }.toSet()
 
 fun String.parseHashtagTags(): List<JsonArray> =
     parseHashtags().map {
