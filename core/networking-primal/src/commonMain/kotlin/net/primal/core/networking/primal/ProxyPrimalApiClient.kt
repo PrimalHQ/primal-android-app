@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.yield
 import net.primal.core.config.AppConfigHandler
 import net.primal.core.config.AppConfigProvider
 import net.primal.core.config.observeApiUrlByType
@@ -85,14 +86,17 @@ internal class ProxyPrimalApiClient(
     }
 
     override suspend fun query(message: PrimalCacheFilter): PrimalQueryResult {
+        while (!clientInitialized) yield()
         return primalClient.query(message = message)
     }
 
     override suspend fun subscribe(subscriptionId: String, message: PrimalCacheFilter): Flow<NostrIncomingMessage> {
+        while (!clientInitialized) yield()
         return primalClient.subscribe(subscriptionId = subscriptionId, message = message)
     }
 
     override suspend fun closeSubscription(subscriptionId: String): Boolean {
+        while (!clientInitialized) yield()
         return primalClient.closeSubscription(subscriptionId = subscriptionId)
     }
 }
