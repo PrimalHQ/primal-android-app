@@ -25,12 +25,10 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,7 +48,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.DeleteListItemImage
@@ -345,9 +342,11 @@ private fun LazyListScope.blossomMainServerInputItem(
                 onRestoreDefaultBlossomServer()
             },
             showSupportContent = state.mode == MediaUploadsMode.View,
-            buttonEnabled = state.newBlossomServerUrl != state.blossomServerUrl &&
-                !state.mirrorBlossomServerUrls.contains(state.newBlossomServerUrl) &&
-                state.newBlossomServerUrl.isNotEmpty(),
+            buttonEnabled = isBlossomServerConfirmEnabled(
+                state.blossomServerUrl,
+                state.newBlossomServerUrl,
+                state.mirrorBlossomServerUrls,
+            ),
             onActionClick = {
                 keyboardController?.hide()
                 eventPublisher(
@@ -385,9 +384,11 @@ private fun LazyListScope.blossomMirrorServerInputItem(
                     ),
                 )
             },
-            buttonEnabled = state.newBlossomServerMirrorUrl != state.blossomServerUrl &&
-                !state.mirrorBlossomServerUrls.contains(state.newBlossomServerMirrorUrl) &&
-                state.newBlossomServerMirrorUrl.isNotEmpty(),
+            buttonEnabled = isBlossomServerConfirmEnabled(
+                state.blossomServerUrl,
+                state.newBlossomServerMirrorUrl,
+                state.mirrorBlossomServerUrls,
+            ),
             onActionClick = {
                 keyboardController?.hide()
                 eventPublisher(
@@ -573,3 +574,12 @@ private fun MirrorBlossomServerDestination(
 }
 
 private fun String.removeHttpPrefix() = this.removePrefix("https://").removePrefix("http://")
+
+private fun isBlossomServerConfirmEnabled(
+    currentUrl: String,
+    newUrl: String,
+    mirrorUrls: List<String>,
+): Boolean =
+    newUrl.isNotEmpty() &&
+        newUrl != currentUrl &&
+        newUrl !in mirrorUrls
