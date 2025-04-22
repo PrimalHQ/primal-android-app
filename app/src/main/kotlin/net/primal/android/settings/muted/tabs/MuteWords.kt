@@ -10,8 +10,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -25,13 +23,12 @@ import net.primal.android.settings.muted.ui.MutedSettingsBottomSection
 
 @Composable
 fun MuteWords(
+    newMutedWord: String,
     mutedWords: List<String>,
     eventPublisher: (MutedSettingsContract.UiEvent) -> Unit,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(all = 0.dp),
 ) {
-    var newMutedWord by remember { mutableStateOf("") }
-
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -76,13 +73,16 @@ fun MuteWords(
 
         MutedSettingsBottomSection(
             value = newMutedWord,
-            onValueChange = { newMutedWord = it },
+            onValueChange = {
+                eventPublisher(
+                    MutedSettingsContract.UiEvent.UpdateNewMutedWord(it),
+                )
+            },
             sending = false,
             onMute = {
                 eventPublisher(
                     MutedSettingsContract.UiEvent.MuteWord(newMutedWord),
                 )
-                newMutedWord = ""
             },
             modifier = Modifier
                 .fillMaxWidth()
