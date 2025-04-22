@@ -83,7 +83,6 @@ private fun MediaUploadsSettingsScreen(
     onClose: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
