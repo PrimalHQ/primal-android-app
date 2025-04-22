@@ -86,7 +86,14 @@ fun NoteFeedList(
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
-    val viewModelKey by remember { mutableStateOf(if (!previewMode) feedSpec else UUID.randomUUID().toString()) }
+    val viewModelKey = remember(previewMode, feedSpec) {
+        if (!previewMode) {
+            "NoteFeedViewModel_$feedSpec"
+        } else {
+            UUID.randomUUID().toString()
+        }
+    }
+
     val viewModel = hiltViewModel<NoteFeedViewModel, NoteFeedViewModel.Factory>(key = viewModelKey) { factory ->
         factory.create(feedSpec = feedSpec, allowMutedThreads = allowMutedThreads)
     }
