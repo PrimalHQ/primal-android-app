@@ -96,6 +96,7 @@ internal fun FeedPostPO.mapAsFeedPostDO(): FeedPostDO {
         eventZaps = this.eventZaps.map { it.asEventZapDO() }.sortedWith(EventZap.DefaultComparator),
         bookmark = this.bookmark?.asPublicBookmark(),
         isThreadMuted = this.data.isThreadMuted == true,
+        eventRelayHints = this.eventRelayHints?.asEventRelayHintsDO(),
     )
 }
 

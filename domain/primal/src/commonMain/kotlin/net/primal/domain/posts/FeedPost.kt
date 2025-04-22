@@ -3,6 +3,7 @@ package net.primal.domain.posts
 import kotlinx.datetime.Instant
 import kotlinx.serialization.json.JsonArray
 import net.primal.domain.bookmarks.PublicBookmark
+import net.primal.domain.events.EventRelayHints
 import net.primal.domain.events.EventZap
 import net.primal.domain.links.EventLink
 import net.primal.domain.links.EventUriNostrReference
@@ -23,4 +24,5 @@ data class FeedPost(
     val eventZaps: List<EventZap> = emptyList(),
     val bookmark: PublicBookmark? = null,
     val isThreadMuted: Boolean = false,
+    val eventRelayHints: EventRelayHints? = null,
 )

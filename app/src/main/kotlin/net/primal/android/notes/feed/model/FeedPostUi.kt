@@ -84,7 +84,7 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
             .sortedWith(EventZapUiModel.DefaultComparator),
         authorLegendaryCustomization = this.author.legendProfile?.asLegendaryCustomization(),
         authorBlossoms = this.author.blossomServers,
-//        eventRelayHints = this.eventRelayHints?.relays ?: emptyList(),
+        eventRelayHints = this.eventRelayHints?.relays ?: emptyList(),
     )
 }
 
