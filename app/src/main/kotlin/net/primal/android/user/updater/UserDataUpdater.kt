@@ -12,6 +12,7 @@ import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.domain.bookmarks.PublicBookmarksRepository
+import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 
 class UserDataUpdater @AssistedInject constructor(
     @Assisted val userId: String,
@@ -43,13 +44,13 @@ class UserDataUpdater @AssistedInject constructor(
             val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
                 userId = userId,
                 description = "Sync app settings",
-            )
+            ).unwrapOrThrow()
             settingsRepository.fetchAndPersistAppSettings(authorizationEvent)
             settingsRepository.ensureZapConfig(authorizationEvent) { appSettings ->
                 nostrNotary.signAppSettingsNostrEvent(
                     userId = userId,
                     appSettings = appSettings,
-                )
+                ).unwrapOrThrow()
             }
         }
         runCatching { premiumRepository.fetchMembershipStatus(userId = userId) }

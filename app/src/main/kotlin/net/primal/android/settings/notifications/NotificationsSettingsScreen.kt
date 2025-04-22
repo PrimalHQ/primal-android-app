@@ -1,11 +1,11 @@
 package net.primal.android.settings.notifications
 
-import android.app.NotificationManager
-import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,12 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,11 +39,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.Lifecycle
+import androidx.core.app.NotificationManagerCompat
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
@@ -61,7 +56,6 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.res.painterResource
-import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiEvent.NotificationSettingsChanged
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiState.ApiError
 import net.primal.android.settings.notifications.ui.NotificationSwitchUi
@@ -123,7 +117,6 @@ private fun NotificationsColumn(
     state: NotificationsSettingsContract.UiState,
     eventPublisher: (NotificationsSettingsContract.UiEvent) -> Unit,
 ) {
-    var pushNotificationsEnabled by remember { mutableStateOf(false) }
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -134,11 +127,12 @@ private fun NotificationsColumn(
         item {
             PushNotificationSection(
                 modifier = Modifier.padding(vertical = 12.dp),
-                onChange = { enabled -> pushNotificationsEnabled = enabled },
+                pushNotificationsEnabled = state.pushNotificationsEnabled,
+                onChange = { eventPublisher(NotificationsSettingsContract.UiEvent.PushNotificationsToggled(it)) },
             )
         }
 
-        if (pushNotificationsEnabled) {
+        if (state.pushNotificationsEnabled) {
             item {
                 NotificationsSettingsBlock(
                     section = NotificationSettingsSection.PUSH_NOTIFICATIONS,
@@ -276,39 +270,31 @@ private fun NotificationSettingsRow(
 
 @ExperimentalPermissionsApi
 @Composable
-private fun PushNotificationSection(modifier: Modifier, onChange: (Boolean) -> Unit) {
+private fun PushNotificationSection(
+    modifier: Modifier,
+    pushNotificationsEnabled: Boolean,
+    onChange: (Boolean) -> Unit,
+) {
     val context = LocalContext.current
-    var returningFromOtherScreenTimestamp by remember { mutableLongStateOf(0) }
-    var deviceEnabledPushNotifications by remember { mutableStateOf(false) }
-    val notificationPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        rememberPermissionState(permission = android.Manifest.permission.POST_NOTIFICATIONS)
+    val notificationsPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        rememberPermissionState(permission = android.Manifest.permission.POST_NOTIFICATIONS) { result ->
+            onChange(result)
+        }
     } else {
         null
     }
 
-    DisposableLifecycleObserverEffect(Unit) {
-        if (it == Lifecycle.Event.ON_RESUME) {
-            returningFromOtherScreenTimestamp = System.currentTimeMillis()
-        }
+    val systemSettingsLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+    ) { result ->
+        val enabled = NotificationManagerCompat.from(context).areNotificationsEnabled()
+        onChange(enabled)
     }
 
-    LaunchedEffect(context, notificationPermission?.status, returningFromOtherScreenTimestamp) {
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val locallyEnabled = notificationManager.areNotificationsEnabled()
-        deviceEnabledPushNotifications = if (notificationPermission == null) {
-            locallyEnabled
-        } else {
-            locallyEnabled && notificationPermission.status.isGranted == true
-        }
-        onChange(deviceEnabledPushNotifications)
-    }
-
-    fun openSystemSettings() {
-        val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+    fun buildNotificationsSettingsIntent() =
+        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
             putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
         }
-        context.startActivity(intent)
-    }
 
     Column(modifier = modifier) {
         Box(
@@ -325,24 +311,22 @@ private fun PushNotificationSection(modifier: Modifier, onChange: (Boolean) -> U
             NotificationSettingsRow(
                 modifier = Modifier.height(48.dp),
                 title = stringResource(R.string.settings_notifications_enable_push_notifications),
-                enabled = deviceEnabledPushNotifications,
+                enabled = pushNotificationsEnabled,
                 onCheckedChange = { newEnabled ->
                     if (newEnabled) {
                         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-                            notificationPermission?.status == PermissionStatus.Granted
+                            notificationsPermission?.status?.isGranted == true
                         ) {
-                            if (!deviceEnabledPushNotifications) {
-                                openSystemSettings()
-                            }
+                            onChange(true)
                         } else {
-                            if ((notificationPermission?.status as PermissionStatus.Denied).shouldShowRationale) {
-                                notificationPermission.launchPermissionRequest()
+                            if (notificationsPermission?.status?.shouldShowRationale == true) {
+                                notificationsPermission.launchPermissionRequest()
                             } else {
-                                openSystemSettings()
+                                systemSettingsLauncher.launch(buildNotificationsSettingsIntent())
                             }
                         }
                     } else {
-                        openSystemSettings()
+                        onChange(false)
                     }
                 },
             )

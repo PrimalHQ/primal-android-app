@@ -30,6 +30,7 @@ import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.model.AppSpecificDataRequest
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import timber.log.Timber
 
 @HiltViewModel
@@ -109,17 +110,19 @@ class PremiumContentBackupViewModel @Inject constructor(
         }
     }
 
-    private fun subscribeToBroadcastMonitor(userId: String) =
-        PrimalSocketSubscription.launch(
+    private suspend fun subscribeToBroadcastMonitor(userId: String): PrimalSocketSubscription<BroadcastingStatus>? {
+        val nostrEvent = nostrNotary.signAppSpecificDataNostrEvent(
+            userId = userId,
+            content = "",
+        ).unwrapOrThrow()
+
+        return PrimalSocketSubscription.launch(
             scope = viewModelScope,
             primalApiClient = primalCachingApiClient,
             cacheFilter = PrimalCacheFilter(
                 primalVerb = net.primal.data.remote.PrimalVerb.MEMBERSHIP_MONITOR_CONTENT_BROADCAST_STATUS.id,
                 optionsJson = AppSpecificDataRequest(
-                    eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
-                        userId = userId,
-                        content = "",
-                    ),
+                    eventFromUser = nostrEvent,
                 ).encodeToJsonString(),
             ),
             transformer = {
@@ -130,6 +133,7 @@ class PremiumContentBackupViewModel @Inject constructor(
                 }
             },
         ) { status -> handleBroadcastStatus(status) }
+    }
 
     private fun handleBroadcastStatus(status: BroadcastingStatus) {
         setState {

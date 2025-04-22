@@ -33,6 +33,7 @@ import net.primal.data.remote.model.AppSpecificDataRequest
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.asPubkeyTag
+import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 
 class PremiumApiImpl @Inject constructor(
     @PrimalWalletApiClient private val primalWalletApiClient: PrimalApiClient,
@@ -62,7 +63,7 @@ class PremiumApiImpl @Inject constructor(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
                             userId = userId,
                             content = ChangeNameRequest(name = name).encodeToJsonString(),
-                        ),
+                        ).unwrapOrThrow(),
                     ),
                 ),
             ),
@@ -82,7 +83,7 @@ class PremiumApiImpl @Inject constructor(
                         userId = userId,
                         description = "Check Primal Premium membership status",
                         tags = listOf(userId.asPubkeyTag()),
-                    ),
+                    ).unwrapOrThrow(),
                 ).encodeToJsonString(),
             ),
         )
@@ -98,7 +99,7 @@ class PremiumApiImpl @Inject constructor(
                     eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
                         userId = userId,
                         content = body.encodeToJsonString(),
-                    ),
+                    ).unwrapOrThrow(),
                 ).encodeToJsonString(),
             ),
         )
@@ -124,7 +125,7 @@ class PremiumApiImpl @Inject constructor(
                             onChain = onChain,
                             amountUsd = amountUsd,
                         ).encodeToJsonString(),
-                    ),
+                    ).unwrapOrThrow(),
                 ).encodeToJsonString(),
             ),
         )
@@ -141,28 +142,6 @@ class PremiumApiImpl @Inject constructor(
                 optionsJson = MembershipProductsRequest(origin = "android").encodeToJsonString(),
             ),
         )
-
-//        "kind": 10000604,
-//        [
-//            {
-//                "product_id": "1-month-premium",
-//                "tier": "premium",
-//                "months": 1,
-//                "max_storage": 107374182400,
-//                "label": "Primal Premium 1M Subscription",
-//                "android_product_id": "monthly_premium",
-//                "short_product_id": "1M"
-//            },
-//            {
-//                "product_id": "12-months-premium",
-//                "tier": "premium",
-//                "months": 12,
-//                "max_storage": 107374182400,
-//                "label": "Primal Premium 12M Subscription",
-//                "android_product_id": "yearly_premium",
-//                "short_product_id": "12M"
-//            }
-//        ]
     }
 
     override suspend fun cancelMembership(userId: String, body: CancelMembershipRequest) {
@@ -173,7 +152,7 @@ class PremiumApiImpl @Inject constructor(
                     eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
                         userId = userId,
                         content = body.encodeToJsonString(),
-                    ),
+                    ).unwrapOrThrow(),
                 ).encodeToJsonString(),
             ),
         )
@@ -197,7 +176,7 @@ class PremiumApiImpl @Inject constructor(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
                             userId = userId,
                             content = "{\"since\": 0, \"limit\": 100}",
-                        ),
+                        ).unwrapOrThrow(),
                     ),
                 ),
             ),
@@ -217,7 +196,7 @@ class PremiumApiImpl @Inject constructor(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
                             userId = userId,
                             content = CommonJsonImplicitNulls.encodeToString(updateProfileRequest),
-                        ),
+                        ).unwrapOrThrow(),
                     ),
                 ),
             ),
@@ -296,7 +275,7 @@ class PremiumApiImpl @Inject constructor(
                         eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
                             userId = userId,
                             content = "",
-                        ),
+                        ).unwrapOrThrow(),
                     ),
                 ),
             ),
