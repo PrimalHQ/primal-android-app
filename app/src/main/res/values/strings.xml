@@ -889,17 +889,17 @@
     <string name="settings_muted_hashtags_mute_new_hashtag">Mute new hashtag…</string>
 
     <string name="settings_media_uploads_title">Media Uploads</string>
-    <string name="settings_media_uploads_blossom_server_section_title">Blossom Server</string>
-    <string name="settings_media_uploads_switch_blossom_server">Switch Blossom Server</string>
-    <string name="settings_media_uploads_restore_default_blossom_server">Restore Default Blossom Server</string>
-    <string name="settings_media_uploads_switch_blossom_server_placeholder">enter blossom server url</string>
-    <string name="settings_media_uploads_blossom_mirror_server_section_title">Mirror</string>
-    <string name="settings_media_uploads_blossom_mirror_server_switcher_title">Enable blossom mirror</string>
-    <string name="settings_media_uploads_blossom_mirror_server_enabled_notice">When enabled, your uploads to the primary blossom server will be automatically copied to the mirror.</string>
-    <string name="settings_media_uploads_switch_blossom_mirror_server">Switch Blossom Mirror Server</string>
-    <string name="settings_media_uploads_suggested_blossoms_title">Suggested blossom servers</string>
+    <string name="settings_media_uploads_blossom_server_section_title">Media Server</string>
+    <string name="settings_media_uploads_switch_blossom_server">Switch Media Server</string>
+    <string name="settings_media_uploads_restore_default_blossom_server">Restore Default Media Server</string>
+    <string name="settings_media_uploads_switch_blossom_server_placeholder">enter media server url</string>
+    <string name="settings_media_uploads_blossom_mirror_server_section_title">Media Mirrors</string>
+    <string name="settings_media_uploads_blossom_mirror_server_switcher_title">Enable media mirrors</string>
+    <string name="settings_media_uploads_blossom_mirror_server_enabled_notice">You can enable one or more media mirror servers. When enabled, your uploads to the primary media server will be automatically copied to the mirror(s).</string>
+    <string name="settings_media_uploads_switch_blossom_mirror_server">Add a media mirror server</string>
+    <string name="settings_media_uploads_suggested_blossoms_title">Suggested media mirror servers</string>
     <string name="settings_media_uploads_restore_default_blossom_server_title">Restore Default</string>
-    <string name="settings_media_uploads_restore_default_blossom_server_description">Are you sure you want to restore default blossom server?</string>
+    <string name="settings_media_uploads_restore_default_blossom_server_description">Are you sure you want to restore default mirror server?</string>
     <string name="settings_version_title">Version</string>
 
     <string name="biometric_prompt_title">Authenticate</string>

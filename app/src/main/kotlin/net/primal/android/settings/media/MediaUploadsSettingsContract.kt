@@ -6,7 +6,7 @@ interface MediaUploadsSettingsContract {
     data class UiState(
         val isLoadingBlossomServerUrls: Boolean = true,
         val blossomServerUrl: String = "",
-        val blossomServerMirrorUrl: String = "",
+        val mirrorBlossomServerUrls: List<String> = emptyList(),
         val newBlossomServerUrl: String = "",
         val newBlossomServerMirrorUrl: String = "",
         val suggestedBlossomServers: List<String> = emptyList(),
@@ -22,7 +22,9 @@ interface MediaUploadsSettingsContract {
         data class ConfirmBlossomMirrorServerUrl(val url: String) : UiEvent()
         data class UpdateMediaUploadsMode(val mode: MediaUploadsMode) : UiEvent()
         data class UpdateBlossomMirrorEnabled(val enabled: Boolean) : UiEvent()
+        data class RemoveBlossomMirrorServerUrl(val url: String) : UiEvent()
         data object RestoreDefaultBlossomServer : UiEvent()
+        class DismissError : UiEvent()
     }
 }
 
