@@ -86,7 +86,7 @@ fun NoteFeedList(
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
-    val viewModelKey = remember(previewMode, feedSpec.toString()) {
+    val viewModelKey = remember(previewMode, feedSpec) {
         if (!previewMode) {
             "NoteFeedViewModel_$feedSpec"
         } else {
