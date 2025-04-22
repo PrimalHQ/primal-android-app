@@ -97,7 +97,6 @@ class NotePublishHandler @Inject constructor(
             } ?: emptyList()
 
             nostrPublisher.signPublishImportNostrEvent(
-                userId = userId,
                 unsignedNostrEvent = NostrUnsignedEvent(
                     pubKey = userId,
                     kind = NostrEventKind.ShortTextNote.value,

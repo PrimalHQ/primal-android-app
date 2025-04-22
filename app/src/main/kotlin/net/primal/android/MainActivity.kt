@@ -11,6 +11,7 @@ import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.RippleDefaults
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.produceState
@@ -26,6 +27,10 @@ import kotlinx.coroutines.launch
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.navigation.PrimalAppNavigation
 import net.primal.android.navigation.splash.SplashViewModel
+import net.primal.android.nostr.notary.NostrNotary
+import net.primal.android.nostr.notary.NostrNotary.NotarySideEffect
+import net.primal.android.signer.launchSignEvent
+import net.primal.android.signer.rememberAmberSignerLauncher
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.active.ActiveThemeStore
@@ -43,6 +48,9 @@ class MainActivity : FragmentActivity() {
     @Inject
     lateinit var activeAccountStore: ActiveAccountStore
 
+    @Inject
+    lateinit var nostrNotary: NostrNotary
+
     private lateinit var primalTheme: PrimalTheme
 
     private val splashViewModel: SplashViewModel by viewModels()
@@ -57,6 +65,19 @@ class MainActivity : FragmentActivity() {
         primalTheme = savedInstanceState.restoreOrDefaultPrimalTheme()
 
         setContent {
+            val signLauncher = rememberAmberSignerLauncher(
+                onFailure = { nostrNotary.onFailure() },
+                onSuccess = nostrNotary::onSuccess,
+            )
+            LaunchedEffect(nostrNotary, nostrNotary.effects) {
+                nostrNotary.effects.collect {
+                    when (it) {
+                        is NotarySideEffect.RequestSignature ->
+                            signLauncher.launchSignEvent(it.unsignedEvent)
+                    }
+                }
+            }
+
             val userTheme = themeStore.userThemeState.collectAsState()
             primalTheme = userTheme.value ?: defaultPrimalTheme(currentTheme = primalTheme)
 
