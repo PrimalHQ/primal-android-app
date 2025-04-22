@@ -49,7 +49,9 @@ internal class NostrSocketClientImpl(
 
     override val socketUrl = wssUrl.cleanWebSocketUrl()
 
-    override suspend fun ensureSocketConnectionOrThrow() =
+    override suspend fun ensureSocketConnectionOrThrow() {
+        if (webSocket != null) return
+
         webSocketMutex.withLock {
             if (webSocket == null) {
                 openWebSocketConnection(url = socketUrl)
@@ -59,6 +61,7 @@ internal class NostrSocketClientImpl(
                 }
             }
         }
+    }
 
     private suspend fun openWebSocketConnection(url: String) {
         val connectionAcquired = CompletableDeferred<Boolean>()
