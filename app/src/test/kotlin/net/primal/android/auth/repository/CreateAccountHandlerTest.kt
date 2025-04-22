@@ -12,7 +12,7 @@ import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroupMember
 import net.primal.android.core.FakeDataStore
 import net.primal.android.core.coroutines.CoroutinesTestRule
-import net.primal.android.nostr.notary.NostrNotary
+import net.primal.android.nostr.notary.FakeNostrNotary
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.UserAccountsStore
@@ -25,7 +25,7 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.domain.nostr.cryptography.SignResult
+import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.cryptography.utils.CryptoUtils
 import org.junit.Rule
 import org.junit.Test
@@ -43,7 +43,9 @@ class CreateAccountHandlerTest {
         blossomRepository: BlossomRepository = mockk(relaxed = true),
         settingsRepository: SettingsRepository = mockk(relaxed = true),
         credentialsStore: CredentialsStore = mockk(relaxed = true),
-        nostrNotary: NostrNotary = mockk(relaxed = true),
+        eventsSignatureHandler: NostrEventSignatureHandler = FakeNostrNotary(
+            expectedSignedNostrEvent = mockk(relaxed = true),
+        ),
     ): CreateAccountHandler {
         return CreateAccountHandler(
             authRepository = authRepository,
@@ -52,7 +54,7 @@ class CreateAccountHandlerTest {
             settingsRepository = settingsRepository,
             credentialsStore = credentialsStore,
             dispatchers = coroutinesTestRule.dispatcherProvider,
-            nostrNotary = nostrNotary,
+            eventsSignatureHandler = eventsSignatureHandler,
             blossomRepository = blossomRepository,
         )
     }
@@ -243,11 +245,7 @@ class CreateAccountHandlerTest {
             val handler = createAccountHandler(
                 settingsRepository = settingsRepository,
                 credentialsStore = credentialsStore,
-                nostrNotary = mockk(relaxed = true) {
-                    coEvery {
-                        signAuthorizationNostrEvent(keyPair.pubKey, any(), any())
-                    } returns SignResult.Signed(expectedNostrEvent)
-                },
+                eventsSignatureHandler = FakeNostrNotary(expectedSignedNostrEvent = expectedNostrEvent),
             )
 
             handler.createNostrAccount(
