@@ -12,7 +12,6 @@ import net.primal.data.local.dao.messages.DirectMessage
 import net.primal.data.local.dao.messages.MessageConversation
 import net.primal.data.local.dao.messages.MessageConversationData
 import net.primal.data.local.db.PrimalDatabase
-import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.messages.MessagesApi
 import net.primal.data.remote.api.messages.model.ConversationRequestBody
 import net.primal.data.remote.api.messages.model.MarkMessagesReadRequestBody
@@ -83,19 +82,17 @@ internal class ChatRepositoryImpl(
             }
 
         withContext(dispatcherProvider.io()) {
-            database.withTransaction {
-                messagesProcessor.processMessageEventsAndSave(
-                    userId = userId,
-                    messages = response.messages,
-                    profileMetadata = response.profileMetadata,
-                    mediaResources = response.cdnResources,
-                    primalUserNames = response.primalUserNames,
-                    primalPremiumInfo = response.primalPremiumInfo,
-                    primalLegendProfiles = response.primalLegendProfiles,
-                    blossomServerEvents = response.blossomServers,
-                )
-                database.messageConversations().upsertAll(data = messageConversation)
-            }
+            messagesProcessor.processMessageEventsAndSave(
+                userId = userId,
+                messages = response.messages,
+                profileMetadata = response.profileMetadata,
+                mediaResources = response.cdnResources,
+                primalUserNames = response.primalUserNames,
+                primalPremiumInfo = response.primalPremiumInfo,
+                primalLegendProfiles = response.primalLegendProfiles,
+                blossomServerEvents = response.blossomServers,
+            )
+            database.messageConversations().upsertAll(data = messageConversation)
         }
     }
 
