@@ -9,6 +9,8 @@ interface MutedSettingsContract {
         val mutedWords: List<String> = emptyList(),
         val mutedHashtags: List<String> = emptyList(),
         val mutedThreads: List<String> = emptyList(),
+        val newMutedHashtag: String = "",
+        val newMutedWord: String = "",
         val defaultMuteThreadsFeedSpec: String = "{\"id\":\"latest\",\"kind\":\"notes\"}",
         val error: UiError? = null,
     )
@@ -21,6 +23,9 @@ interface MutedSettingsContract {
 
         data class MuteHashtag(val hashtag: String) : UiEvent()
         data class UnmuteHashtag(val hashtag: String) : UiEvent()
+
+        data class UpdateNewMutedHashtag(val hashtag: String) : UiEvent()
+        data class UpdateNewMutedWord(val word: String) : UiEvent()
 
         class DismissError : UiEvent()
     }

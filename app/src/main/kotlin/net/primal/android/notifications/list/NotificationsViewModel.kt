@@ -31,7 +31,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.cryptography.SignResult
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.notifications.Notification
 import net.primal.domain.notifications.NotificationRepository
@@ -136,16 +136,16 @@ class NotificationsViewModel @Inject constructor(
         // Launching in a new scope to survive view model destruction
         CoroutineScope(dispatcherProvider.io()).launch {
             try {
-                val authorization = nostrNotary.signAuthorizationNostrEvent(
+                val signResult = nostrNotary.signAuthorizationNostrEvent(
                     userId = activeAccountStore.activeUserId(),
                     description = "Update notifications last seen timestamp.",
                 )
-                notificationRepository.markAllNotificationsAsSeen(authorization)
+
+                when (signResult) {
+                    is SignResult.Rejected -> Timber.w(signResult.error)
+                    is SignResult.Signed -> notificationRepository.markAllNotificationsAsSeen(signResult.event)
+                }
             } catch (error: WssException) {
-                Timber.w(error)
-            } catch (error: SignatureException) {
-                // If user logs out on notifications screen local account gets cleared
-                // and when this is called there is no authenticated user and signing fails
                 Timber.w(error)
             }
         }

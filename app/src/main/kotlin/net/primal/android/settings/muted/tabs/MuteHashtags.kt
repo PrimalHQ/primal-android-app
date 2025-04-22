@@ -10,8 +10,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -25,13 +23,12 @@ import net.primal.android.settings.muted.ui.MutedSettingsBottomSection
 
 @Composable
 fun MuteHashtags(
+    newMutedHashtag: String,
     mutedHashtags: List<String>,
     eventPublisher: (MutedSettingsContract.UiEvent) -> Unit,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(all = 0.dp),
 ) {
-    var newMutedHashtag by remember { mutableStateOf("") }
-
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -76,13 +73,16 @@ fun MuteHashtags(
 
         MutedSettingsBottomSection(
             value = newMutedHashtag,
-            onValueChange = { newMutedHashtag = it },
+            onValueChange = {
+                eventPublisher(
+                    MutedSettingsContract.UiEvent.UpdateNewMutedHashtag(newMutedHashtag),
+                )
+            },
             sending = false,
             onMute = {
                 eventPublisher(
                     MutedSettingsContract.UiEvent.MuteHashtag(newMutedHashtag),
                 )
-                newMutedHashtag = ""
             },
             modifier = Modifier
                 .fillMaxWidth()

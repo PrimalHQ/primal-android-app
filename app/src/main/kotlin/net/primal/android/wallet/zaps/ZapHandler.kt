@@ -10,6 +10,7 @@ import net.primal.android.user.domain.mapToRelayDO
 import net.primal.android.user.repository.RelayRepository
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.events.EventInteractionRepository
+import net.primal.domain.nostr.cryptography.utils.getOrThrow
 import net.primal.domain.nostr.zaps.ZapFailureException
 import net.primal.domain.nostr.zaps.ZapRequestException
 import net.primal.domain.nostr.zaps.ZapTarget
@@ -46,7 +47,7 @@ class ZapHandler @Inject constructor(
             comment = zapComment,
             target = target,
             relays = userRelays,
-        )
+        ).getOrThrow(ZapFailureException(message = "Signing zap event failed."))
 
         eventInteractionRepository.zapEvent(
             userId = userId,

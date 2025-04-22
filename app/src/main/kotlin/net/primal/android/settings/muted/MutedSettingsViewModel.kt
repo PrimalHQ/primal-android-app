@@ -81,6 +81,8 @@ class MutedSettingsViewModel @Inject constructor(
                     is UiEvent.UnmuteUser -> unmuteUser(it)
                     is UiEvent.UnmuteWord -> unmuteWord(it.word)
                     is UiEvent.DismissError -> setState { copy(error = null) }
+                    is UiEvent.UpdateNewMutedHashtag -> setState { copy(newMutedHashtag = it.hashtag) }
+                    is UiEvent.UpdateNewMutedWord -> setState { copy(newMutedWord = it.word) }
                 }
             }
         }
@@ -94,6 +96,7 @@ class MutedSettingsViewModel @Inject constructor(
                         hashtag = hashtag,
                     )
                 }
+                setState { copy(newMutedHashtag = "") }
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
@@ -142,6 +145,7 @@ class MutedSettingsViewModel @Inject constructor(
                         word = word,
                     )
                 }
+                setState { copy(newMutedWord = "") }
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
