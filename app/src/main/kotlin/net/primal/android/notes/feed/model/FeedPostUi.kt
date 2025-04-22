@@ -10,7 +10,11 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.links.CdnImage
+import net.primal.domain.nostr.MAX_RELAY_HINTS
+import net.primal.domain.nostr.Nevent
+import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.posts.FeedPost
 
@@ -38,6 +42,7 @@ data class FeedPostUi(
     val eventZaps: List<EventZapUiModel> = emptyList(),
     val authorLegendaryCustomization: LegendaryCustomization? = null,
     val authorBlossoms: List<String> = emptyList(),
+    val eventRelayHints: List<String> = emptyList(),
 )
 
 fun FeedPost.asFeedPostUi(): FeedPostUi {
@@ -79,5 +84,15 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
             .sortedWith(EventZapUiModel.DefaultComparator),
         authorLegendaryCustomization = this.author.legendProfile?.asLegendaryCustomization(),
         authorBlossoms = this.author.blossomServers,
+        eventRelayHints = this.eventRelayHints?.relays ?: emptyList(),
     )
+}
+
+fun FeedPostUi.asNeventString(): String {
+    return Nevent(
+        eventId = this.postId,
+        kind = NostrEventKind.ShortTextNote.value,
+        userId = this.authorId,
+        relays = this.eventRelayHints.take(MAX_RELAY_HINTS),
+    ).toNeventString()
 }

@@ -61,6 +61,7 @@ import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.model.asNeventString
 import net.primal.android.notes.feed.note.NoteContract
 import net.primal.android.notes.feed.note.NoteViewModel
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
@@ -221,7 +222,9 @@ fun NotificationsScreen(
                     )
                 },
                 onPostQuoteClick = {
-                    noteCallbacks.onNoteQuoteClick?.invoke(it.postId)
+                    noteCallbacks.onNoteQuoteClick?.invoke(
+                        it.asNeventString(),
+                    )
                 },
                 onBookmarkClick = {
                     noteEventPublisher(NoteContract.UiEvent.BookmarkAction(noteId = it.postId))

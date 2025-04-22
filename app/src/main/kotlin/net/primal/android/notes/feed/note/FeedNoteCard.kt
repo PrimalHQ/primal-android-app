@@ -62,6 +62,7 @@ import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.model.asNeventString
 import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.ui.FeedNoteActionsRow
@@ -225,7 +226,11 @@ private fun FeedNoteCard(
                     ),
                 )
             },
-            onPostQuoteClick = { noteCallbacks.onNoteQuoteClick?.invoke(data.postId) },
+            onPostQuoteClick = {
+                noteCallbacks.onNoteQuoteClick?.invoke(
+                    data.asNeventString(),
+                )
+            },
         )
     }
 
@@ -361,7 +366,9 @@ private fun FeedNoteCard(
                         onPostAction = { postAction ->
                             when (postAction) {
                                 FeedPostAction.Reply -> {
-                                    noteCallbacks.onNoteReplyClick?.invoke(data.postId)
+                                    noteCallbacks.onNoteReplyClick?.invoke(
+                                        data.asNeventString(),
+                                    )
                                 }
 
                                 FeedPostAction.Zap -> {
