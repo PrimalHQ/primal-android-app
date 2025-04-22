@@ -175,12 +175,10 @@ class OnboardingViewModel @Inject constructor(
         if (avatarUri != null) {
             val job = viewModelScope.launch {
                 try {
-                    val uploadResult = withContext(dispatcherProvider.io()) {
-                        primalUploadService.upload(
-                            uri = avatarUri,
-                            userId = keyPair.pubKey,
-                        )
-                    }
+                    val uploadResult = primalUploadService.upload(
+                        uri = avatarUri,
+                        userId = keyPair.pubKey,
+                    )
                     setState { copy(avatarRemoteUrl = uploadResult.remoteUrl) }
                 } catch (error: BlossomException) {
                     Timber.w(error)
@@ -201,15 +199,13 @@ class OnboardingViewModel @Inject constructor(
         if (bannerUri != null) {
             val job = viewModelScope.launch {
                 try {
-                    val uploadResult = withContext(dispatcherProvider.io()) {
-                        primalUploadService.upload(
-                            uri = bannerUri,
-                            userId = keyPair.pubKey,
-                            onSignRequested = {
-                                it.signOrThrow(keyPair.privateKey.hexToNsecHrp())
-                            },
-                        )
-                    }
+                    val uploadResult = primalUploadService.upload(
+                        uri = bannerUri,
+                        userId = keyPair.pubKey,
+                        onSignRequested = {
+                            it.signOrThrow(keyPair.privateKey.hexToNsecHrp())
+                        },
+                    )
                     setState { copy(bannerRemoteUrl = uploadResult.remoteUrl) }
                 } catch (error: BlossomException) {
                     Timber.w(error)
