@@ -58,6 +58,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.ConnectRelay
@@ -100,17 +101,14 @@ private fun MediaUploadsSettingsScreen(
         }
     }
 
-    LaunchedEffect(state.error) {
-        state.error?.let {
-            scope.launch {
-                snackbarHostState.showSnackbar(
-                    message = it.resolveUiErrorMessage(context),
-                    duration = SnackbarDuration.Short,
-                )
-            }
+    SnackbarErrorHandler(
+        error = state.error,
+        snackbarHostState = snackbarHostState,
+        errorMessageResolver = { it.resolveUiErrorMessage(context) },
+        onErrorDismiss = {
             eventPublisher(MediaUploadsSettingsContract.UiEvent.DismissError())
-        }
-    }
+        },
+    )
 
     BackHandler {
         backSequence()
