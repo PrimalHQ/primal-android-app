@@ -24,7 +24,7 @@ fun String.detectUrls(): List<String> {
 }
 
 fun String.ensureHttpOrHttps(): String =
-    if (startsWith(prefix = "http")) {
+    if (startsWith(prefix = "http://") || startsWith(prefix = "https://")) {
         this
     } else {
         "https://$this"
