@@ -177,7 +177,7 @@ class NoteFeedViewModel @AssistedInject constructor(
 
         val notes = this.notes.map { it.createdAt to it }
         val latestTimestamp = (
-            (newestLocalNote?.reposts?.mapNotNull { it.repostTimestamp } ?: emptyList<Long>()) +
+            (newestLocalNote?.reposts?.mapNotNull { it.repostCreatedAt } ?: emptyList<Long>()) +
                 listOfNotNull(newestLocalNote?.timestamp?.epochSeconds)
             ).maxOrNull()
 
