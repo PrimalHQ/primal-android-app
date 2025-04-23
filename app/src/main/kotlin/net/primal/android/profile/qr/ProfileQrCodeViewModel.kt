@@ -22,7 +22,7 @@ import net.primal.android.scanner.analysis.WalletTextParser
 import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
 import net.primal.domain.nostr.utils.extractNoteId
@@ -111,7 +111,7 @@ class ProfileQrCodeViewModel @Inject constructor(
             }
         } catch (error: SignatureException) {
             Timber.w(error)
-        } catch (error: WssException) {
+        } catch (error: NetworkException) {
             Timber.w(error)
         }
     }

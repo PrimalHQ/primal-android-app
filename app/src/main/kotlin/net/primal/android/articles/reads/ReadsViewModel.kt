@@ -15,8 +15,8 @@ import net.primal.android.feeds.list.ui.model.asFeedUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.utils.retryNetworkCall
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.FeedSpecKind
 import net.primal.domain.feeds.FeedsRepository
 import net.primal.domain.nostr.cryptography.SignatureException
@@ -82,7 +82,7 @@ class ReadsViewModel @Inject constructor(
                 )
             } catch (error: SignatureException) {
                 Timber.w(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             } finally {
                 setState { copy(loading = false) }
@@ -102,7 +102,7 @@ class ReadsViewModel @Inject constructor(
             } catch (error: SigningKeyNotFoundException) {
                 restoreDefaultReadsFeeds()
                 Timber.w(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             } finally {
                 setState { copy(loading = false) }

@@ -15,9 +15,9 @@ import kotlinx.serialization.json.JsonObject
 import net.primal.core.networking.sockets.NostrIncomingMessage
 import net.primal.core.networking.sockets.NostrSocketClientImpl
 import net.primal.core.networking.sockets.errors.NostrNoticeException
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.sockets.filterBySubscriptionId
 import net.primal.core.networking.sockets.toPrimalSubscriptionId
+import net.primal.domain.common.exception.NetworkException
 
 internal class BasePrimalApiClient(
     private val socketClient: NostrSocketClientImpl,
@@ -34,7 +34,7 @@ internal class BasePrimalApiClient(
                 deferredQueryResult.await()
             }
         } catch (error: Exception) {
-            throw error.takeAsWssException(verb = message.primalVerb)
+            throw error.takeAsNetworkException(verb = message.primalVerb)
         }
     }
 
@@ -46,12 +46,12 @@ internal class BasePrimalApiClient(
         }
     }
 
-    private fun Throwable?.takeAsWssException(verb: String?): WssException {
+    private fun Throwable?.takeAsNetworkException(verb: String?): NetworkException {
         return when (this) {
-            is WssException -> this
-            is NostrNoticeException -> WssException(message = "${this.reason} [$verb]")
-            is SocketSendMessageException -> WssException(message = "Api unreachable at the moment. [$verb]")
-            else -> WssException(message = "${this?.message} [$verb]", cause = this)
+            is NetworkException -> this
+            is NostrNoticeException -> NetworkException(message = "${this.reason} [$verb]")
+            is SocketSendMessageException -> NetworkException(message = "Api unreachable at the moment. [$verb]")
+            else -> NetworkException(message = "${this?.message} [$verb]", cause = this)
         }
     }
 
@@ -61,7 +61,7 @@ internal class BasePrimalApiClient(
             sendMessageOrThrow(subscriptionId = subscriptionId, data = message.toPrimalJsonObject())
         } catch (error: Exception) {
             Napier.w(error) { "Unable to subscribe." }
-            throw WssException(message = "Api unreachable at the moment.", cause = error)
+            throw NetworkException(message = "Api unreachable at the moment.", cause = error)
         }
         return socketClient.incomingMessages.filterBySubscriptionId(id = subscriptionId)
     }
@@ -106,7 +106,7 @@ internal class BasePrimalApiClient(
 
     private fun NostrIncomingMessage?.verifyOrThrow(subscriptionId: String) {
         if (this == null) {
-            throw WssException("No messages received.")
+            throw NetworkException("No messages received.")
         }
 
         if (this is NostrIncomingMessage.NoticeMessage) {

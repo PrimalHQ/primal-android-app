@@ -17,7 +17,7 @@ import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
@@ -52,7 +52,7 @@ class PremiumOrderHistoryViewModel @Inject constructor(
                 setState { copy(orders = orders) }
             } catch (error: SignatureException) {
                 Timber.e(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.e(error)
             } finally {
                 setState { copy(fetchingHistory = false) }
@@ -104,7 +104,7 @@ class PremiumOrderHistoryViewModel @Inject constructor(
                     premiumRepository.fetchMembershipStatus(activeAccountStore.activeUserId())
                 } catch (error: SignatureException) {
                     Timber.w(error)
-                } catch (error: WssException) {
+                } catch (error: NetworkException) {
                     setState { copy(error = MembershipError.FailedToCancelSubscription(cause = error)) }
                 } finally {
                     setState { copy(cancellingSubscription = false) }

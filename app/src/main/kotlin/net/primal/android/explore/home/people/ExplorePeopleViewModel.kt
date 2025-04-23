@@ -16,7 +16,7 @@ import net.primal.android.explore.home.people.ExplorePeopleContract.UiState
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.explore.ExploreRepository
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
@@ -58,7 +58,7 @@ class ExplorePeopleViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 profileRepository.fetchFollowing(profileId = activeAccountStore.activeUserId())
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
         }
@@ -71,7 +71,7 @@ class ExplorePeopleViewModel @Inject constructor(
                     userId = activeAccountStore.activeUserId(),
                 )
                 setState { copy(people = explorePeople) }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             } finally {
                 setState { copy(loading = false) }
@@ -113,7 +113,7 @@ class ExplorePeopleViewModel @Inject constructor(
 
                         is SigningRejectedException -> setState { copy(error = UiError.NostrSignUnauthorized) }
 
-                        is WssException, is NostrPublishException ->
+                        is NetworkException, is NostrPublishException ->
                             setState { copy(error = UiError.FailedToFollowUser(error)) }
 
                         is UserRepository.FollowListNotFound -> setState {
@@ -146,7 +146,7 @@ class ExplorePeopleViewModel @Inject constructor(
                 unfollowResult.exceptionOrNull()?.let { error ->
                     Timber.w(error)
                     when (error) {
-                        is WssException, is NostrPublishException, is SignatureException ->
+                        is NetworkException, is NostrPublishException, is SignatureException ->
                             setState { copy(error = UiError.FailedToUnfollowUser(error)) }
 
                         is UserRepository.FollowListNotFound -> setState {

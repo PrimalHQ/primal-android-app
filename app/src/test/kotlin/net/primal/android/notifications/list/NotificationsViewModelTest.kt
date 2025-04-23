@@ -6,7 +6,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import net.primal.android.core.coroutines.CoroutinesTestRule
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.notifications.NotificationRepository
 import org.junit.Rule
@@ -33,11 +33,11 @@ class NotificationsViewModelTest {
     }
 
     @Test
-    fun handleNotificationsSeen_handlesWssException() =
+    fun handleNotificationsSeen_handlesNetworkException() =
         runTest {
             val viewModel = createViewModel(
                 notificationsRepository = mockk(relaxed = true) {
-                    coEvery { markAllNotificationsAsSeen(any()) } throws WssException()
+                    coEvery { markAllNotificationsAsSeen(any()) } throws NetworkException()
                 },
             )
             viewModel.setEvent(NotificationsContract.UiEvent.NotificationsSeen)

@@ -30,9 +30,9 @@ import net.primal.android.wallet.activation.regions.WalletRegionJson
 import net.primal.android.wallet.api.model.GetActivationCodeRequestBody
 import net.primal.android.wallet.api.model.WalletActivationDetails
 import net.primal.android.wallet.repository.WalletRepository
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import timber.log.Timber
@@ -145,7 +145,7 @@ class WalletActivationViewModel @Inject constructor(
             } catch (error: SignatureException) {
                 Timber.w(error)
                 setState { copy(error = error) }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setState { copy(error = error) }
             } finally {
@@ -180,7 +180,7 @@ class WalletActivationViewModel @Inject constructor(
                         Timber.w(error)
                     } catch (error: NostrPublishException) {
                         Timber.w(error)
-                    } catch (error: WssException) {
+                    } catch (error: NetworkException) {
                         Timber.w(error)
                     } catch (error: MissingRelaysException) {
                         Timber.w(error)
@@ -193,7 +193,7 @@ class WalletActivationViewModel @Inject constructor(
                         status = WalletActivationStatus.ActivationSuccess,
                     )
                 }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setState { copy(error = error) }
             } finally {

@@ -25,13 +25,13 @@ import net.primal.core.networking.sockets.NostrSocketClientFactory
 import net.primal.core.networking.sockets.SocketConnectionClosedCallback
 import net.primal.core.networking.sockets.SocketConnectionOpenedCallback
 import net.primal.core.networking.sockets.errors.NostrNoticeException
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.sockets.filterByEventId
 import net.primal.core.networking.sockets.parseIncomingMessage
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.PrimalVerb
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.serialization.toNostrJsonObject
@@ -143,11 +143,11 @@ class RelayPool(
             )
             val broadcastEvents = queryResult.findPrimalEvent(NostrEventKind.PrimalBroadcastResult)
             broadcastEvents?.content.decodeFromJsonStringOrNull<List<BroadcastEventResponse>>()
-        } catch (error: WssException) {
+        } catch (error: NetworkException) {
             Timber.w(error)
             null
         } ?: throw NostrPublishException(
-            cause = WssException(message = "Primal NostrEvent 10_000_149 not found or invalid."),
+            cause = NetworkException(message = "Primal NostrEvent 10_000_149 not found or invalid."),
         )
 
         result.find { response -> response.eventId == nostrEvent.id }?.responses
@@ -162,7 +162,7 @@ class RelayPool(
             }
             ?.find { (_, relayMessage) -> relayMessage is NostrIncomingMessage.OkMessage && relayMessage.success }
             ?: throw NostrPublishException(
-                cause = WssException("Event broadcast failed. Could not find success response from relays."),
+                cause = NetworkException("Event broadcast failed. Could not find success response from relays."),
             )
     }
 

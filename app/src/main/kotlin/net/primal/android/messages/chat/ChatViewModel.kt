@@ -32,7 +32,7 @@ import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.messages.ChatRepository
 import net.primal.domain.messages.DirectMessage
 import net.primal.domain.nostr.cryptography.MessageEncryptException
@@ -117,7 +117,7 @@ class ChatViewModel @Inject constructor(
                 .collect {
                     try {
                         chatRepository.fetchNewConversationMessages(userId, participantId)
-                    } catch (error: WssException) {
+                    } catch (error: NetworkException) {
                         Timber.w(error)
                     }
                 }
@@ -144,7 +144,7 @@ class ChatViewModel @Inject constructor(
                         )
                     }
                 }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
         }

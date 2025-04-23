@@ -22,7 +22,7 @@ import net.primal.android.feeds.list.ui.model.FeedUi
 import net.primal.android.feeds.list.ui.model.asFeedUi
 import net.primal.android.feeds.list.ui.model.asPrimalFeed
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.DvmFeed
 import net.primal.domain.feeds.FeedSpecKind
 import net.primal.domain.feeds.FeedsRepository
@@ -160,7 +160,7 @@ class FeedListViewModel @AssistedInject constructor(
                 updateFeedsState()
             } catch (error: SignatureException) {
                 Timber.w(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
         }
@@ -204,7 +204,7 @@ class FeedListViewModel @AssistedInject constructor(
             val userId = activeAccountStore.activeUserId()
             try {
                 defaultFeeds = feedsRepository.fetchDefaultFeeds(userId = userId, specKind = specKind) ?: emptyList()
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
 
@@ -216,7 +216,7 @@ class FeedListViewModel @AssistedInject constructor(
                 )
             } catch (error: SignatureException) {
                 Timber.w(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
         }
@@ -236,7 +236,7 @@ class FeedListViewModel @AssistedInject constructor(
                     }
                     setState { copy(dvmFeeds = dvmFeeds, selectedDvmFeed = updatedSelectedDvmFeed) }
                 }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             } finally {
                 setState { copy(fetchingDvmFeeds = false) }
@@ -297,7 +297,7 @@ class FeedListViewModel @AssistedInject constructor(
                 )
             } catch (error: SignatureException) {
                 Timber.w(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
         }

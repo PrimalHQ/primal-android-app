@@ -10,7 +10,6 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notes.FeedPostRemoteKey
@@ -25,6 +24,7 @@ import net.primal.data.repository.articles.processors.persistToDatabaseAsTransac
 import net.primal.data.repository.mappers.remote.mapNotNullAsArticleDataPO
 import net.primal.data.repository.mappers.remote.orderByPagingIfNotNull
 import net.primal.domain.common.ContentPrimalPaging
+import net.primal.domain.common.exception.NetworkException
 
 @ExperimentalPagingApi
 internal class ArticleFeedMediator(
@@ -78,7 +78,7 @@ internal class ArticleFeedMediator(
             processAndPersistToDatabase(response = response, clearFeed = loadType == LoadType.REFRESH)
 
             MediatorResult.Success(endOfPaginationReached = false)
-        } catch (error: WssException) {
+        } catch (error: NetworkException) {
             MediatorResult.Error(error)
         } catch (_: RepeatingRequestBodyException) {
             Napier.d("RepeatingRequestBody exit.")

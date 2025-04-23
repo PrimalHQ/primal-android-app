@@ -24,9 +24,9 @@ import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.repository.TransactionProfileData
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.details.TransactionDetailsContract.UiState
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.posts.FeedRepository
 import net.primal.domain.reads.ArticleRepository
 import timber.log.Timber
@@ -87,7 +87,7 @@ class TransactionDetailsViewModel @Inject constructor(
                         articleAuthorId = articleAuthorId,
                     )
                 }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             } finally {
                 setState { copy(loading = false) }
@@ -111,7 +111,7 @@ class TransactionDetailsViewModel @Inject constructor(
                 withContext(dispatcherProvider.io()) {
                     feedRepository.fetchReplies(userId = activeAccountStore.activeUserId(), noteId = noteId)
                 }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             } finally {
                 setState { copy(loading = false) }

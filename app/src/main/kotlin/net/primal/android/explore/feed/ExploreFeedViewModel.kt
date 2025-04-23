@@ -21,8 +21,8 @@ import net.primal.android.navigation.advancedSearchFeedSpec
 import net.primal.android.navigation.exploreFeedSpec
 import net.primal.android.navigation.renderType
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.FEED_KIND_SEARCH
 import net.primal.domain.feeds.FeedsRepository
 import net.primal.domain.feeds.buildAdvancedSearchFeedSpec
@@ -113,7 +113,7 @@ class ExploreFeedViewModel @Inject constructor(
         } catch (error: SignatureException) {
             Timber.w(error)
             setErrorState(error = ExploreFeedError.FailedToAddToFeed(error))
-        } catch (error: WssException) {
+        } catch (error: NetworkException) {
             Timber.w(error)
             setErrorState(error = ExploreFeedError.FailedToAddToFeed(error))
         }
@@ -127,7 +127,7 @@ class ExploreFeedViewModel @Inject constructor(
         } catch (error: SignatureException) {
             Timber.w(error)
             setErrorState(error = ExploreFeedError.FailedToRemoveFeed(error))
-        } catch (error: WssException) {
+        } catch (error: NetworkException) {
             Timber.w(error)
             setErrorState(error = ExploreFeedError.FailedToRemoveFeed(error))
         }

@@ -22,7 +22,7 @@ import net.primal.android.user.domain.Credential
 import net.primal.android.user.repository.BlossomRepository
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
@@ -280,7 +280,7 @@ class CreateAccountHandlerTest {
                 activeAccountStore = activeAccountStore,
             )
             val userRepository = mockk<UserRepository>(relaxed = true) {
-                coEvery { setFollowList(any(), any()) } throws WssException()
+                coEvery { setFollowList(any(), any()) } throws NetworkException()
             }
             val handler = createAccountHandler(
                 authRepository = authRepository,

@@ -5,7 +5,7 @@ import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
@@ -24,7 +24,7 @@ class ExchangeRateHandler @Inject constructor(
             setState { btcRate }
         } catch (error: SignatureException) {
             Timber.e(error)
-        } catch (error: WssException) {
+        } catch (error: NetworkException) {
             Timber.e(error)
         }
     }

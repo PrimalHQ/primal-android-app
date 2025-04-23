@@ -31,7 +31,7 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.InAppPurchaseException
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
@@ -96,7 +96,7 @@ class PremiumBuyingViewModel @Inject constructor(
                             setEffect(SideEffect.NavigateToPremiumHome)
                         }
                     }
-                } catch (error: WssException) {
+                } catch (error: NetworkException) {
                     Timber.w(error)
                 }
             }
@@ -114,7 +114,7 @@ class PremiumBuyingViewModel @Inject constructor(
                 }
 
                 fetchActiveSubscription()
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
         }
@@ -169,7 +169,7 @@ class PremiumBuyingViewModel @Inject constructor(
                         setState { copy(stage = PremiumStage.Success) }
                     } catch (error: SignatureException) {
                         Timber.w(error)
-                    } catch (error: WssException) {
+                    } catch (error: NetworkException) {
                         Timber.e(error)
                         this@PremiumBuyingViewModel.purchase = purchase
                         setState {
@@ -221,7 +221,7 @@ class PremiumBuyingViewModel @Inject constructor(
                     premiumRepository.fetchMembershipStatus(userId = userId)
                 } catch (error: SignatureException) {
                     Timber.e(error)
-                } catch (error: WssException) {
+                } catch (error: NetworkException) {
                     Timber.e(error)
                 }
             }

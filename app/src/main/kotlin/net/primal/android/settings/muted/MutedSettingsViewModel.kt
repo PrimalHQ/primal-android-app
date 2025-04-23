@@ -17,7 +17,6 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.settings.muted.MutedSettingsContract.UiEvent
 import net.primal.android.settings.muted.MutedSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.mutes.MutedItemRepository
@@ -217,7 +216,7 @@ class MutedSettingsViewModel @Inject constructor(
                         userId = activeAccountStore.activeUserId(),
                     )
                 }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToFetchMuteList(error)) }
             }

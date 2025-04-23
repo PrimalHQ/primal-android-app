@@ -13,7 +13,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.io.IOException
 import net.primal.core.networking.sockets.errors.NostrNoticeException
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notes.FeedPost
@@ -23,6 +22,7 @@ import net.primal.data.remote.api.feed.FeedApi
 import net.primal.data.remote.api.feed.model.FeedBySpecRequestBody
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.repository.feed.processors.FeedProcessor
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.isNotesBookmarkFeedSpec
 import net.primal.domain.feeds.isProfileAuthoredNoteRepliesFeedSpec
 import net.primal.domain.feeds.isProfileAuthoredNotesFeedSpec
@@ -113,7 +113,7 @@ internal class NoteFeedRemoteMediator(
         } catch (error: RemoteKeyNotFoundException) {
             Napier.w("feed_spec $feedSpec load exit 3", error)
             MediatorResult.Error(error)
-        } catch (error: WssException) {
+        } catch (error: NetworkException) {
             Napier.w("feed_spec $feedSpec load exit 5", error)
             MediatorResult.Error(error)
         } catch (error: RepeatingRequestBodyException) {
@@ -159,7 +159,7 @@ internal class NoteFeedRemoteMediator(
             onBeforeDelay = { error -> Napier.w("Attempting FeedRemoteMediator.retry().", error) },
         ) {
             val response = withContext(dispatcherProvider.io()) { feedApi.getFeedBySpec(body = requestBody) }
-            response.paging ?: throw WssException("PagingEvent not found.")
+            response.paging ?: throw NetworkException("PagingEvent not found.")
             response
         }
         return requestBody to response
@@ -187,7 +187,7 @@ internal class NoteFeedRemoteMediator(
             onBeforeDelay = { error -> Napier.w("Attempting FeedRemoteMediator.retry().", error) },
         ) {
             val response = withContext(dispatcherProvider.io()) { feedApi.getFeedBySpec(body = requestBody) }
-            if (response.paging == null) throw WssException("PagingEvent not found.")
+            if (response.paging == null) throw NetworkException("PagingEvent not found.")
             response
         }
 
@@ -215,7 +215,7 @@ internal class NoteFeedRemoteMediator(
             onBeforeDelay = { error -> Napier.w("Attempting FeedRemoteMediator.retry().", error) },
         ) {
             val response = withContext(dispatcherProvider.io()) { feedApi.getFeedBySpec(body = requestBody) }
-            if (response.paging == null) throw WssException("PagingEvent not found.")
+            if (response.paging == null) throw NetworkException("PagingEvent not found.")
             response
         }
 

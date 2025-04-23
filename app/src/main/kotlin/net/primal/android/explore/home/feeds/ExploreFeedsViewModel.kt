@@ -14,7 +14,7 @@ import net.primal.android.explore.home.feeds.ExploreFeedsContract.UiState
 import net.primal.android.feeds.DvmFeedListHandler
 import net.primal.android.feeds.dvm.ui.DvmFeedUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.DvmFeed
 import net.primal.domain.feeds.FeedsRepository
 import net.primal.domain.feeds.buildSpec
@@ -89,7 +89,7 @@ class ExploreFeedsViewModel @Inject constructor(
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
             } catch (error: SignatureException) {
                 Timber.w(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
         }
@@ -107,7 +107,7 @@ class ExploreFeedsViewModel @Inject constructor(
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
             } catch (error: SignatureException) {
                 Timber.w(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
         }
@@ -123,7 +123,7 @@ class ExploreFeedsViewModel @Inject constructor(
                 ) { dvmFeeds ->
                     setState { copy(feeds = dvmFeeds) }
                 }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             } finally {
                 setState { copy(loading = false) }

@@ -145,14 +145,14 @@ class UserAccountFetcherTest {
 //    fun fetchUserProfile_failsIfApiCallFails() =
 //        runTest {
 //            val usersApiMock = mockk<UsersApi> {
-//                coEvery { getUserProfile(any()) } throws WssException()
+//                coEvery { getUserProfile(any()) } throws NetworkException()
 //            }
 //            val fetcher = UserAccountFetcher(
 //                dispatcherProvider = coroutinesTestRule.dispatcherProvider,
 //                usersApi = usersApiMock,
 //                primalDatabase = primalDatabase,
 //            )
-//            shouldThrow<WssException> { fetcher.fetchUserProfileOrNull(userId = "any") }
+//            shouldThrow<NetworkException> { fetcher.fetchUserProfileOrNull(userId = "any") }
 //        }
 
 //    @Test
@@ -214,13 +214,13 @@ class UserAccountFetcherTest {
 //    fun fetchUserFollowList_failsIfApiCallFails() =
 //        runTest {
 //            val usersApiMock = mockk<UsersApi> {
-//                coEvery { getUserFollowList(any()) } throws WssException()
+//                coEvery { getUserFollowList(any()) } throws NetworkException()
 //            }
 //            val fetcher = UserAccountFetcher(
 //                dispatcherProvider = coroutinesTestRule.dispatcherProvider,
 //                usersApi = usersApiMock,
 //                primalDatabase = primalDatabase,
 //            )
-//            shouldThrow<WssException> { fetcher.fetchUserFollowListOrNull(userId = "any") }
+//            shouldThrow<NetworkException> { fetcher.fetchUserFollowListOrNull(userId = "any") }
 //        }
 }

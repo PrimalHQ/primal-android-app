@@ -16,7 +16,7 @@ import net.primal.android.premium.leaderboard.legend.ui.model.toUiModel
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import timber.log.Timber
 
 @HiltViewModel
@@ -71,7 +71,7 @@ class LegendLeaderboardViewModel @Inject constructor(
                     .fetchLegendLeaderboard(orderBy = orderBy, limit = 300)
                     .map { it.toUiModel() }
                 setState { copy(leaderboardEntries = leaderboardEntries + (orderBy to entries)) }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setState { copy(error = error) }
             } finally {

@@ -15,7 +15,7 @@ import net.primal.android.settings.media.MediaUploadsSettingsContract.UiEvent
 import net.primal.android.settings.media.MediaUploadsSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.BlossomRepository
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
@@ -58,7 +58,7 @@ class MediaUploadsSettingsViewModel @Inject constructor(
                         )
                     }
                 }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             } finally {
                 setState { copy(isLoadingBlossomServerUrls = false) }
@@ -176,7 +176,7 @@ class MediaUploadsSettingsViewModel @Inject constructor(
                 val userId = activeAccountStore.activeUserId()
                 blossomRepository.publishBlossomServerList(userId = userId, servers = servers)
                 setState(onSuccess)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToUpdateBlossomServer(error)) }
             } catch (error: SignatureException) {
@@ -193,7 +193,7 @@ class MediaUploadsSettingsViewModel @Inject constructor(
             try {
                 val suggestedBlossoms = blossomRepository.fetchSuggestedBlossomList()
                 setState { copy(suggestedBlossomServers = suggestedBlossoms) }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
         }

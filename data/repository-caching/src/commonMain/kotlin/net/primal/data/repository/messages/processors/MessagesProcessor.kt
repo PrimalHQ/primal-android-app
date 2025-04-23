@@ -1,7 +1,6 @@
 package net.primal.data.repository.messages.processors
 
 import io.github.aakira.napier.Napier
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.data.local.dao.messages.DirectMessageData
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.local.db.withTransaction
@@ -21,6 +20,7 @@ import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.domain.common.PrimalEvent
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.nostr.utils.extractNoteId
@@ -95,7 +95,7 @@ internal class MessagesProcessor(
                     referencedArticles = emptyList(),
                     referencedHighlights = emptyList(),
                 )
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Napier.w(error) { "Failed to get notes for DMs." }
                 emptyList()
             }
@@ -128,7 +128,7 @@ internal class MessagesProcessor(
                 )
                 database.profiles().insertOrUpdateAll(data = profiles)
                 profiles
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Napier.w(error) { "Failed to get user profiles for DM messages." }
                 emptyList()
             }

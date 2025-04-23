@@ -37,10 +37,10 @@ import net.primal.android.wallet.api.model.WithdrawRequestBody
 import net.primal.android.wallet.domain.SubWallet
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.common.PrimalEvent
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEventKind
 import timber.log.Timber
 
@@ -63,7 +63,7 @@ class WalletApiImpl @Inject constructor(
         )
 
         val isUserEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalWalletIsUser)
-        return isUserEvent?.content?.toIntOrNull() ?: throw WssException("Missing or invalid content in response.")
+        return isUserEvent?.content?.toIntOrNull() ?: throw NetworkException("Missing or invalid content in response.")
     }
 
     override suspend fun getWalletUserInfo(userId: String): WalletUserInfoResponse {
@@ -131,7 +131,7 @@ class WalletApiImpl @Inject constructor(
 
         return queryResult.findPrimalEvent(NostrEventKind.PrimalWalletBalance)
             ?.takeContentOrNull<BalanceResponse>()
-            ?: throw WssException("Missing or invalid content in response.")
+            ?: throw NetworkException("Missing or invalid content in response.")
     }
 
     override suspend fun withdraw(userId: String, body: WithdrawRequestBody) {
@@ -163,7 +163,7 @@ class WalletApiImpl @Inject constructor(
 
         return response.findPrimalEvent(NostrEventKind.PrimalWalletDepositInvoice)
             ?.takeContentOrNull<LightningInvoiceResponse>()
-            ?: throw WssException("Missing or invalid content in response.")
+            ?: throw NetworkException("Missing or invalid content in response.")
     }
 
     override suspend fun createOnChainAddress(userId: String, body: DepositRequestBody): OnChainAddressResponse {
@@ -181,7 +181,7 @@ class WalletApiImpl @Inject constructor(
 
         return response.findPrimalEvent(NostrEventKind.PrimalWalletOnChainAddress)
             ?.takeContentOrNull<OnChainAddressResponse>()
-            ?: throw WssException("Missing or invalid content in response.")
+            ?: throw NetworkException("Missing or invalid content in response.")
     }
 
     override suspend fun getTransactions(userId: String, body: TransactionsRequestBody): TransactionsResponse {
@@ -198,10 +198,10 @@ class WalletApiImpl @Inject constructor(
         )
 
         val transactionsEvent = result.findPrimalEvent(kind = NostrEventKind.PrimalWalletTransactions)
-            ?: throw WssException("Missing or invalid content in response.")
+            ?: throw NetworkException("Missing or invalid content in response.")
 
         val txJsonArray = transactionsEvent.content.decodeFromJsonStringOrNull<JsonArray>()
-            ?: throw WssException("Invalid content in 10_000_304 event.")
+            ?: throw NetworkException("Invalid content in 10_000_304 event.")
 
         val transactions = txJsonArray.mapNotNull {
             try {
@@ -245,7 +245,7 @@ class WalletApiImpl @Inject constructor(
 
         val quoteEvent = result.findPrimalEvent(NostrEventKind.PrimalWalletInAppPurchaseQuote)
         return quoteEvent?.takeContentOrNull<InAppPurchaseQuoteResponse>()
-            ?: throw WssException("Missing or invalid content in response.")
+            ?: throw NetworkException("Missing or invalid content in response.")
     }
 
     override suspend fun confirmInAppPurchase(
@@ -281,7 +281,7 @@ class WalletApiImpl @Inject constructor(
 
         return result.findPrimalEvent(kind = NostrEventKind.PrimalWalletParsedLnUrl)
             ?.takeContentOrNull<ParsedLnUrlResponse>()
-            ?: throw WssException("Missing or invalid content in response.")
+            ?: throw NetworkException("Missing or invalid content in response.")
     }
 
     override suspend fun parseLnInvoice(userId: String, lnbc: String): ParsedLnInvoiceResponse {
@@ -299,7 +299,7 @@ class WalletApiImpl @Inject constructor(
 
         return result.findPrimalEvent(kind = NostrEventKind.PrimalWalletParsedLnInvoice)
             ?.takeContentOrNull<ParsedLnInvoiceResponse>()
-            ?: throw WssException("Missing or invalid content in response.")
+            ?: throw NetworkException("Missing or invalid content in response.")
     }
 
     override suspend fun getMiningFees(
@@ -321,12 +321,12 @@ class WalletApiImpl @Inject constructor(
 
         return result.findPrimalEvent(kind = NostrEventKind.PrimalWalletMiningFees)
             ?.takeContentOrNull<List<MiningFeeTier>>()
-            ?: throw WssException("Missing or invalid content in response.")
+            ?: throw NetworkException("Missing or invalid content in response.")
     }
 
     private fun PrimalEvent?.toUserWalletInfoResponseOrThrow(): WalletUserInfoResponse {
         val content = takeContentOrNull<WalletUserInfoContent>()
-            ?: throw WssException("Missing or invalid content in response.")
+            ?: throw NetworkException("Missing or invalid content in response.")
         return WalletUserInfoResponse(
             kycLevel = content.kycLevel,
             lightningAddress = content.lud16,
@@ -335,7 +335,7 @@ class WalletApiImpl @Inject constructor(
 
     private fun PrimalEvent?.toWalletLightningAddressOrThrow(): String {
         val content = takeContentOrNull<WalletActivationContent>()
-            ?: throw WssException("Missing or invalid content in response.")
+            ?: throw NetworkException("Missing or invalid content in response.")
         return content.lud16
     }
 
@@ -354,6 +354,6 @@ class WalletApiImpl @Inject constructor(
 
         return result.findPrimalEvent(NostrEventKind.PrimalWalletExchangeRate)
             ?.takeContentOrNull<ContentWalletExchangeRate>()?.rate
-            ?: throw WssException("Missing or invalid content in response.")
+            ?: throw NetworkException("Missing or invalid content in response.")
     }
 }

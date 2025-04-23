@@ -17,7 +17,7 @@ import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
@@ -92,7 +92,7 @@ class PremiumHomeViewModel @Inject constructor(
 
             try {
                 userRepository.setNostrAddress(userId = activeAccountStore.activeUserId(), nostrAddress = nip05)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setState { copy(error = MembershipError.ProfileMetadataNotFound) }
             } catch (error: SignatureException) {
@@ -111,7 +111,7 @@ class PremiumHomeViewModel @Inject constructor(
 
             try {
                 userRepository.setLightningAddress(userId = activeAccountStore.activeUserId(), lightningAddress = lud16)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setState { copy(error = MembershipError.ProfileMetadataNotFound) }
             } catch (error: SignatureException) {
@@ -127,7 +127,7 @@ class PremiumHomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 premiumRepository.fetchMembershipStatus(activeAccountStore.activeUserId())
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
         }
@@ -141,7 +141,7 @@ class PremiumHomeViewModel @Inject constructor(
                         showSupportUsNotice = clientConfigShowSupport,
                     )
                 }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.e(error)
             }
         }

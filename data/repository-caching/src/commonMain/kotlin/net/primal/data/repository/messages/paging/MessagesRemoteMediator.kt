@@ -7,13 +7,13 @@ import androidx.paging.RemoteMediator
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.messages.DirectMessage
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.remote.api.messages.MessagesApi
 import net.primal.data.remote.api.messages.model.MessagesRequestBody
 import net.primal.data.repository.messages.processors.MessagesProcessor
+import net.primal.domain.common.exception.NetworkException
 
 @ExperimentalPagingApi
 internal class MessagesRemoteMediator(
@@ -75,7 +75,7 @@ internal class MessagesRemoteMediator(
             withContext(dispatcherProvider.io()) {
                 messagesApi.getMessages(body = requestBody)
             }
-        } catch (error: WssException) {
+        } catch (error: NetworkException) {
             Napier.w(error) { "Failed to get remote messages." }
             return MediatorResult.Error(error)
         }

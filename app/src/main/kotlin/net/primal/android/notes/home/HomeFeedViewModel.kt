@@ -20,9 +20,9 @@ import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.user.updater.UserDataUpdater
 import net.primal.android.user.updater.UserDataUpdaterFactory
 import net.primal.core.config.AppConfigHandler
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.FeedSpecKind
 import net.primal.domain.feeds.FeedsRepository
 import net.primal.domain.nostr.cryptography.SignatureException
@@ -81,7 +81,7 @@ class HomeFeedViewModel @Inject constructor(
                 )
             } catch (error: SignatureException) {
                 Timber.w(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             } finally {
                 setState { copy(loading = false) }
@@ -101,7 +101,7 @@ class HomeFeedViewModel @Inject constructor(
             } catch (error: SigningKeyNotFoundException) {
                 restoreDefaultNoteFeeds()
                 Timber.w(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             } finally {
                 setState { copy(loading = false) }

@@ -20,7 +20,7 @@ import net.primal.android.premium.manage.media.ui.MediaType
 import net.primal.android.premium.manage.media.ui.MediaUiItem
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
@@ -98,7 +98,7 @@ class PremiumMediaManagementViewModel @Inject constructor(
                 setState { copy(mediaItems = uploads) }
             } catch (error: SignatureException) {
                 Timber.e(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.e(error)
             }
         }
@@ -118,7 +118,7 @@ class PremiumMediaManagementViewModel @Inject constructor(
                 }
             } catch (error: SignatureException) {
                 Timber.e(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.e(error)
             } finally {
                 setState { copy(calculating = false) }
@@ -144,7 +144,7 @@ class PremiumMediaManagementViewModel @Inject constructor(
                 premiumRepository.fetchMembershipStatus(userId = userId)
             } catch (error: SignatureException) {
                 Timber.e(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.e(error)
             }
         }

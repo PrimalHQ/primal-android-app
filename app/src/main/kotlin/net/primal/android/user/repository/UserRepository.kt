@@ -32,11 +32,11 @@ import net.primal.android.wallet.domain.WalletSettings
 import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.BlossomException
 import net.primal.core.networking.blossom.UploadResult
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.domain.common.UserProfileSearchItem
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.global.CachingImportRepository
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEventKind
@@ -205,12 +205,12 @@ class UserRepository @Inject constructor(
         )
     }
 
-    @Throws(NostrPublishException::class, WssException::class, SignatureException::class)
+    @Throws(NostrPublishException::class, NetworkException::class, SignatureException::class)
     suspend fun setNostrAddress(userId: String, nostrAddress: String) =
         withContext(dispatchers.io()) {
             val userProfileResponse = usersApi.getUserProfile(userId = userId)
             val metadata = userProfileResponse.metadata?.content.decodeFromJsonStringOrNull<ContentMetadata>()
-                ?: throw WssException("Profile Content Metadata not found.")
+                ?: throw NetworkException("Profile Content Metadata not found.")
 
             setUserProfileAndUpdateLocally(
                 userId = userId,
@@ -218,12 +218,12 @@ class UserRepository @Inject constructor(
             )
         }
 
-    @Throws(NostrPublishException::class, WssException::class, SignatureException::class)
+    @Throws(NostrPublishException::class, NetworkException::class, SignatureException::class)
     suspend fun setLightningAddress(userId: String, lightningAddress: String) =
         withContext(dispatchers.io()) {
             val userProfileResponse = usersApi.getUserProfile(userId = userId)
             val metadata = userProfileResponse.metadata?.content.decodeFromJsonStringOrNull<ContentMetadata>()
-                ?: throw WssException("Profile Content Metadata not found.")
+                ?: throw NetworkException("Profile Content Metadata not found.")
 
             setUserProfileAndUpdateLocally(
                 userId = userId,

@@ -18,9 +18,9 @@ import net.primal.android.notes.feed.note.NoteContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.bookmarks.BookmarkType
 import net.primal.domain.bookmarks.PublicBookmarksRepository
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventInteractionRepository
 import net.primal.domain.events.EventRelayHintsRepository
 import net.primal.domain.mutes.MutedItemRepository
@@ -197,7 +197,7 @@ class NoteViewModel @AssistedInject constructor(
                     userId = activeAccountStore.activeUserId(),
                     mutedUserId = action.userId,
                 )
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToMuteUser(error)) }
             } catch (error: SigningKeyNotFoundException) {
@@ -229,7 +229,7 @@ class NoteViewModel @AssistedInject constructor(
                         userId = activeAccountStore.activeUserId(),
                     )
                 }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 if (isThreadMuted) {
                     setState { copy(error = UiError.FailedToUnmuteThread(error)) }

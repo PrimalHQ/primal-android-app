@@ -20,7 +20,7 @@ import net.primal.android.wallet.store.domain.SatsPurchaseQuote
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyContract.SideEffect
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyContract.UiEvent
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyContract.UiState
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
@@ -88,7 +88,7 @@ class InAppPurchaseBuyViewModel @Inject constructor(
                     if (_state.value.quote == null) {
                         setState { copy(error = error) }
                     }
-                } catch (error: WssException) {
+                } catch (error: NetworkException) {
                     Timber.w(error)
                     if (_state.value.quote == null) {
                         setState { copy(error = error) }

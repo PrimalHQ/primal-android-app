@@ -24,10 +24,10 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.primal.PrimalSocketSubscription
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.model.AppSpecificDataRequest
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
@@ -64,7 +64,7 @@ class PremiumContentBackupViewModel @Inject constructor(
                     broadcastRepository.fetchBroadcastStatus(userId = activeAccountStore.activeUserId())
                 }
                 handleBroadcastStatus(status)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.e(error)
             } catch (error: SignatureException) {
                 Timber.e(error)
@@ -89,7 +89,7 @@ class PremiumContentBackupViewModel @Inject constructor(
                         },
                     )
                 }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.e(error)
             } catch (error: SignatureException) {
                 Timber.e(error)
@@ -191,7 +191,7 @@ class PremiumContentBackupViewModel @Inject constructor(
                         },
                     )
                 }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.e(error)
             } catch (error: SignatureException) {
                 Timber.e(error)
@@ -203,7 +203,7 @@ class PremiumContentBackupViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 broadcastRepository.cancelBroadcast(userId = activeAccountStore.activeUserId())
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.e(error)
             } catch (error: SignatureException) {
                 Timber.e(error)

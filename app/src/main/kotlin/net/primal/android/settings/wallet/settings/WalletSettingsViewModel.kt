@@ -23,7 +23,7 @@ import net.primal.android.wallet.api.model.PrimalNwcConnectionInfo
 import net.primal.android.wallet.domain.WalletKycLevel
 import net.primal.android.wallet.repository.NwcWalletRepository
 import net.primal.android.wallet.repository.WalletRepository
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
@@ -80,7 +80,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                 }
             } catch (error: SignatureException) {
                 Timber.w(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setState { copy(connectionsState = WalletSettingsContract.ConnectionsState.Error) }
             }
@@ -117,7 +117,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                 nwcWalletRepository.revokeConnection(activeAccountStore.activeUserId(), nwcPubkey)
             } catch (error: SignatureException) {
                 Timber.w(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setState { copy(nwcConnectionsInfo = nwcConnections) }
             }

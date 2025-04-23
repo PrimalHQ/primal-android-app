@@ -8,8 +8,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import net.primal.core.networking.sockets.NostrIncomingMessage
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.networking.sockets.toPrimalSubscriptionId
+import net.primal.domain.common.exception.NetworkException
 
 class PrimalSocketSubscription<T> private constructor(
     private val scope: CoroutineScope,
@@ -40,7 +40,7 @@ class PrimalSocketSubscription<T> private constructor(
                 this.job = this.scope.launch {
                     try {
                         subscribe()
-                    } catch (error: WssException) {
+                    } catch (error: NetworkException) {
                         Napier.w(error) { "Subscription failed." }
                     }
                 }

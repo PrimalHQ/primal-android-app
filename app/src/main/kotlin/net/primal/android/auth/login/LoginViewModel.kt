@@ -20,8 +20,8 @@ import net.primal.android.auth.login.LoginContract.UiState
 import net.primal.android.auth.repository.LoginHandler
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.user.domain.LoginType
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
 import net.primal.domain.nostr.cryptography.utils.extractKeyPairFromPrivateKeyOrThrow
@@ -77,7 +77,7 @@ class LoginViewModel @Inject constructor(
                     )
                     setEffect(SideEffect.LoginSuccess)
                 }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setErrorState(error = UiState.LoginError.GenericError(error))
                 if (state.value.loginType == LoginType.ExternalSigner) {
@@ -137,7 +137,7 @@ class LoginViewModel @Inject constructor(
                 try {
                     profileRepository.fetchProfile(profileId = userId)
                     profileRepository.findProfileDataOrNull(profileId = userId)
-                } catch (error: WssException) {
+                } catch (error: NetworkException) {
                     Timber.w(error)
                     null
                 }

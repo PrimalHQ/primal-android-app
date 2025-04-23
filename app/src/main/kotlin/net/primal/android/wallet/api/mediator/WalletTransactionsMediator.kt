@@ -13,10 +13,10 @@ import net.primal.android.wallet.api.WalletApi
 import net.primal.android.wallet.api.model.TransactionsRequestBody
 import net.primal.android.wallet.db.WalletTransactionData
 import net.primal.android.wallet.domain.SubWallet
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
 
@@ -81,7 +81,7 @@ class WalletTransactionsMediator(
             withContext(dispatcherProvider.io()) {
                 walletApi.getTransactions(userId = userId, body = requestBody)
             }
-        } catch (error: WssException) {
+        } catch (error: NetworkException) {
             Timber.w(error)
             return MediatorResult.Error(error)
         }

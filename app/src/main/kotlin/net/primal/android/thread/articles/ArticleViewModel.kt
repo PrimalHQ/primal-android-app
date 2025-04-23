@@ -14,9 +14,9 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.thread.articles.ArticleContract.UiEvent
 import net.primal.android.thread.articles.ArticleContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.bookmarks.BookmarkType
 import net.primal.domain.bookmarks.PublicBookmarksRepository
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.PublicBookmarksNotFoundException
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
@@ -64,7 +64,7 @@ class ArticleViewModel @Inject constructor(
                     userId = activeAccountStore.activeUserId(),
                     mutedUserId = uiEvent.userId,
                 )
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToMuteUser(error)) }
             } catch (error: SigningKeyNotFoundException) {

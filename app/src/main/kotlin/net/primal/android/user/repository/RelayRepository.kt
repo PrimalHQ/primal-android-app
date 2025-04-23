@@ -15,9 +15,9 @@ import net.primal.android.user.domain.UserRelays
 import net.primal.android.user.domain.cleanWebSocketUrl
 import net.primal.android.user.domain.mapToRelayPO
 import net.primal.android.user.domain.toRelay
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.remote.api.users.UsersApi
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
@@ -38,7 +38,7 @@ class RelayRepository @Inject constructor(
         withContext(dispatchers.io()) {
             val relays = try {
                 usersApi.getDefaultRelays().map { it.toRelay() }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 FALLBACK_RELAYS
             }

@@ -27,9 +27,9 @@ import net.primal.android.wallet.utils.parseBitcoinPaymentInstructions
 import net.primal.android.wallet.utils.parseLightningPaymentInstructions
 import net.primal.android.wallet.utils.parseSatsToUsd
 import net.primal.android.wallet.utils.parseUsdToSats
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.core.utils.getMaximumUsdAmount
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
@@ -181,7 +181,7 @@ class LegendContributeViewModel @Inject constructor(
                 startPurchaseMonitor()
             } catch (error: SignatureException) {
                 Timber.e(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.e(error)
             } finally {
                 setState { copy(isFetchingPaymentInstructions = false) }
@@ -204,7 +204,7 @@ class LegendContributeViewModel @Inject constructor(
                         primalWalletPaymentInProgress = false,
                     )
                 }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 setState {
                     copy(
                         error = UiState.ContributionUiError.WithdrawViaPrimalWalletFailed(error),

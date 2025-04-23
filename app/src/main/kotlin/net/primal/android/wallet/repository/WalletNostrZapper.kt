@@ -3,9 +3,9 @@ package net.primal.android.wallet.repository
 import javax.inject.Inject
 import net.primal.android.wallet.api.model.WithdrawRequestBody
 import net.primal.android.wallet.domain.SubWallet
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.utils.urlToLnUrlHrp
 import net.primal.domain.nostr.zaps.NostrZapper
@@ -32,7 +32,7 @@ class WalletNostrZapper @Inject constructor(
             )
         } catch (error: SignatureException) {
             throw ZapFailureException(cause = error)
-        } catch (error: WssException) {
+        } catch (error: NetworkException) {
             throw ZapFailureException(cause = error)
         }
     }
