@@ -22,7 +22,7 @@ import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.utils.parseBitcoinPaymentInstructions
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
@@ -147,7 +147,7 @@ class PremiumBecomeLegendViewModel @Inject constructor(
                 }
             } catch (error: SignatureException) {
                 Timber.e(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.e(error)
             }
         }
@@ -177,7 +177,7 @@ class PremiumBecomeLegendViewModel @Inject constructor(
                 startPurchaseMonitor()
             } catch (error: SignatureException) {
                 Timber.e(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.e(error)
             } finally {
                 setState { copy(isFetchingPaymentInstructions = false) }
@@ -204,7 +204,7 @@ class PremiumBecomeLegendViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 premiumRepository.fetchMembershipStatus(activeAccountStore.activeUserId())
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
         }

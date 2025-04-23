@@ -25,11 +25,11 @@ import net.primal.android.premium.api.model.UpdatePrimalLegendProfileRequest
 import net.primal.android.premium.domain.PremiumPurchaseOrder
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.serialization.CommonJsonImplicitNulls
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.model.AppSpecificDataRequest
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.asPubkeyTag
@@ -51,7 +51,7 @@ class PremiumApiImpl @Inject constructor(
 
         val event = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalMembershipNameAvailable)
         return event?.content.decodeFromJsonStringOrNull<NameAvailableResponse>()
-            ?: throw WssException("Invalid content")
+            ?: throw NetworkException("Invalid content")
     }
 
     override suspend fun changePrimalName(userId: String, name: String): NameAvailableResponse {
@@ -71,7 +71,7 @@ class PremiumApiImpl @Inject constructor(
 
         val event = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalMembershipNameAvailable)
         return event?.content.decodeFromJsonStringOrNull<NameAvailableResponse>()
-            ?: throw WssException("Invalid content")
+            ?: throw NetworkException("Invalid content")
     }
 
     override suspend fun getPremiumMembershipStatus(userId: String): MembershipStatusResponse? {
@@ -132,7 +132,7 @@ class PremiumApiImpl @Inject constructor(
 
         val event = result.findPrimalEvent(NostrEventKind.PrimalMembershipLegendPaymentInstructions)
         return event?.takeContentOrNull<LegendPaymentInstructionsResponse>()
-            ?: throw WssException("Missing event or invalid content.")
+            ?: throw NetworkException("Missing event or invalid content.")
     }
 
     override suspend fun getMembershipProducts() {
@@ -184,7 +184,7 @@ class PremiumApiImpl @Inject constructor(
 
         val historyEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalMembershipHistory)
         return historyEvent.takeContentOrNull<List<PremiumPurchaseOrder>>()
-            ?: throw WssException("Missing event or invalid content.")
+            ?: throw NetworkException("Missing event or invalid content.")
     }
 
     override suspend fun updateLegendProfile(userId: String, updateProfileRequest: UpdatePrimalLegendProfileRequest) {

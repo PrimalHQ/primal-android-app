@@ -116,7 +116,7 @@ class PrimalApiClientTest {
 //
 //            try {
 //                primalClient.query(message = PrimalCacheFilter(primalVerb = PrimalVerb.IMPORT_EVENTS))
-//            } catch (_: WssException) {}
+//            } catch (_: NetworkException) {}
 //
 //            verify(exactly = 1 + PrimalApiClient.MAX_RETRIES) {
 //                mockNostrSocketClient.sendREQ(any(), any())

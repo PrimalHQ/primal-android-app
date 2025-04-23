@@ -26,8 +26,8 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.nwc.InvalidLud16Exception
 import net.primal.android.wallet.nwc.LightningAddressChecker
 import net.primal.core.networking.blossom.BlossomException
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.profile.ProfileRepository
@@ -130,7 +130,7 @@ class ProfileEditorViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 profileRepository.fetchProfile(profileId = profileId)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
         }

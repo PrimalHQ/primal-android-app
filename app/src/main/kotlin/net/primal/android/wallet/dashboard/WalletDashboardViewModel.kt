@@ -30,8 +30,8 @@ import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SatsPurchase
 import net.primal.android.wallet.transactions.list.TransactionListItemDataUi
 import net.primal.core.networking.sockets.errors.NostrNoticeException
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
@@ -119,7 +119,7 @@ class WalletDashboardViewModel @Inject constructor(
                 walletRepository.fetchWalletBalance(userId = activeUserId)
             } catch (error: SignatureException) {
                 Timber.w(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
         }
@@ -158,7 +158,7 @@ class WalletDashboardViewModel @Inject constructor(
                 )
             } catch (error: SignatureException) {
                 Timber.w(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 val dashboardError = if (error.cause is NostrNoticeException) {
                     UiState.DashboardError.InAppPurchaseNoticeError(message = error.message)

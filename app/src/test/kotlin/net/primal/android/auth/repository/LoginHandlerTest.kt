@@ -16,8 +16,8 @@ import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.Credential
 import net.primal.android.user.domain.LoginType
 import net.primal.android.user.repository.UserRepository
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.bookmarks.PublicBookmarksRepository
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
@@ -184,7 +184,7 @@ class LoginHandlerTest {
             )
 
             val userRepository = mockk<UserRepository>(relaxed = true) {
-                coEvery { fetchAndUpdateUserAccount(any()) } throws WssException()
+                coEvery { fetchAndUpdateUserAccount(any()) } throws NetworkException()
             }
             val loginHandler = createLoginHandler(
                 authRepository = authRepository,
@@ -197,7 +197,7 @@ class LoginHandlerTest {
                     loginType = LoginType.PrivateKey,
                     authorizationEvent = null,
                 )
-            } catch (_: WssException) {
+            } catch (_: NetworkException) {
             }
 
             credentialsPersistence.latestData shouldBe emptyList()

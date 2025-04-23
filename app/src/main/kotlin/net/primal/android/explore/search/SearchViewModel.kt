@@ -19,7 +19,7 @@ import net.primal.android.explore.search.SearchContract.UiEvent
 import net.primal.android.explore.search.SearchContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.explore.ExploreRepository
 import timber.log.Timber
 
@@ -71,7 +71,7 @@ class SearchViewModel @Inject constructor(
             try {
                 val result = exploreRepository.searchUsers(query = query)
                 setState { copy(searchResults = result.map { it.mapAsUserProfileUi() }) }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             } finally {
                 setState { copy(searching = false) }
@@ -93,7 +93,7 @@ class SearchViewModel @Inject constructor(
             try {
                 val popularUsers = exploreRepository.fetchPopularUsers()
                 setState { copy(popularUsers = popularUsers.map { it.mapAsUserProfileUi() }) }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
         }

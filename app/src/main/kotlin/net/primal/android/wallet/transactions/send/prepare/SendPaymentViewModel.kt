@@ -23,8 +23,8 @@ import net.primal.android.wallet.transactions.send.prepare.SendPaymentContract.U
 import net.primal.android.wallet.transactions.send.prepare.SendPaymentContract.UiState
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
 import net.primal.android.wallet.utils.isLightningAddress
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
@@ -79,7 +79,7 @@ class SendPaymentViewModel @Inject constructor(
                 }
             } catch (error: SignatureException) {
                 Timber.w(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setState { copy(error = UiState.SendPaymentError.ParseException(error)) }
             } finally {

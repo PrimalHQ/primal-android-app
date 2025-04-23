@@ -28,13 +28,13 @@ import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.repository.mapAsProfileDataDO
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.isPremiumFeedSpec
 import net.primal.domain.feeds.supportsUpwardsNotesPagination
 import net.primal.domain.nostr.NostrEvent
@@ -117,7 +117,7 @@ class NoteFeedViewModel @AssistedInject constructor(
                         val pollInterval = POLL_INTERVAL + Random.nextInt(from = -5, until = 5)
                         delay(pollInterval.seconds)
                     }
-                } catch (error: WssException) {
+                } catch (error: NetworkException) {
                     Timber.e(error)
                 }
             }

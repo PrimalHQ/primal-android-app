@@ -8,9 +8,9 @@ import net.primal.android.core.push.api.PrimalPushMessagesApi
 import net.primal.android.core.push.api.model.UpdateTokenContent
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.user.accounts.UserAccountsStore
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
@@ -42,7 +42,7 @@ class FcmPushNotificationsTokenUpdater @Inject constructor(
                         authorizationEvents = authorizationEvents,
                         token = token,
                     )
-                } catch (error: WssException) {
+                } catch (error: NetworkException) {
                     Timber.e(error)
                 }
             }

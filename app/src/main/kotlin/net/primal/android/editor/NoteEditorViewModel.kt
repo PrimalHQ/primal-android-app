@@ -50,7 +50,7 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.UploadJob
 import net.primal.core.networking.blossom.UploadResult
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventRelayHintsRepository
 import net.primal.domain.explore.ExploreRepository
 import net.primal.domain.nostr.MAX_RELAY_HINTS
@@ -237,7 +237,7 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             try {
                 feedRepository.fetchReplies(userId = activeAccountStore.activeUserId(), noteId = replyToNoteId)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
         }
@@ -250,7 +250,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                     articleId = replyToArticleNaddr.identifier,
                     articleAuthorId = replyToArticleNaddr.userId,
                 )
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
         }
@@ -327,7 +327,7 @@ class NoteEditorViewModel @AssistedInject constructor(
             relayRepository
                 .fetchAndUpdateUserRelays(userIds = users.map { it.userId })
                 .associateBy { it.pubkey }
-        } catch (error: WssException) {
+        } catch (error: NetworkException) {
             Timber.w(error)
             emptyMap()
         }
@@ -507,7 +507,7 @@ class NoteEditorViewModel @AssistedInject constructor(
             try {
                 val popularUsers = exploreRepository.fetchPopularUsers()
                 setState { copy(popularUsers = popularUsers.map { it.mapAsUserProfileUi() }) }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
         }
@@ -518,7 +518,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                 try {
                     val result = exploreRepository.searchUsers(query = query, limit = 10)
                     setState { copy(users = result.map { it.mapAsUserProfileUi() }) }
-                } catch (error: WssException) {
+                } catch (error: NetworkException) {
                     Timber.w(error)
                 }
             } else {

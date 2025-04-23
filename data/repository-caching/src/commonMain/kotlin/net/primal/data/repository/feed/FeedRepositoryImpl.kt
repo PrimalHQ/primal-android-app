@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notes.FeedPost as FeedPostPO
 import net.primal.data.local.db.PrimalDatabase
@@ -84,7 +83,7 @@ internal class FeedRepositoryImpl(
         withContext(dispatcherProvider.io()) {
             val response = try {
                 feedApi.getThread(ThreadRequestBody(postId = noteId, userPubKey = userId, limit = 100))
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 throw NetworkException(message = error.message, cause = error)
             }
             response.persistNoteRepliesAndArticleCommentsToDatabase(noteId = noteId, database = database)

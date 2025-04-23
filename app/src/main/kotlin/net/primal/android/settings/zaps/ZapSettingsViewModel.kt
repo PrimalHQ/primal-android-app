@@ -17,8 +17,8 @@ import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.settings.zaps.ZapSettingsContract.UiEvent
 import net.primal.android.settings.zaps.ZapSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignResult
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import net.primal.domain.notifications.ContentZapConfigItem
@@ -104,7 +104,7 @@ class ZapSettingsViewModel @Inject constructor(
                         }
                     }
                 }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
         }
@@ -139,7 +139,7 @@ class ZapSettingsViewModel @Inject constructor(
                 }
 
                 setState { copy(editPresetIndex = null) }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             } finally {
                 setState { copy(saving = false) }
@@ -179,7 +179,7 @@ class ZapSettingsViewModel @Inject constructor(
                 }
 
                 setState { copy(editPresetIndex = null) }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             } finally {
                 setState { copy(saving = false) }

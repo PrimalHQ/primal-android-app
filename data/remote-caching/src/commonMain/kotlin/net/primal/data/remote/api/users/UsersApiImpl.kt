@@ -2,7 +2,6 @@ package net.primal.data.remote.api.users
 
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.explore.model.UsersResponse
@@ -17,6 +16,7 @@ import net.primal.data.remote.api.users.model.UserProfilesResponse
 import net.primal.data.remote.api.users.model.UserRequestBody
 import net.primal.data.remote.api.users.model.UsersRelaysResponse
 import net.primal.data.remote.api.users.model.UsersRequestBody
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEventKind
 
 internal class UsersApiImpl(
@@ -167,7 +167,7 @@ internal class UsersApiImpl(
 
         val list = queryResult.findPrimalEvent(NostrEventKind.PrimalDefaultRelaysList)
         val content = list?.content
-        if (content.isNullOrEmpty()) throw WssException("Invalid content.")
+        if (content.isNullOrEmpty()) throw NetworkException("Invalid content.")
 
         return list.content.decodeFromJsonStringOrNull<List<String>>() ?: emptyList()
     }
@@ -184,9 +184,9 @@ internal class UsersApiImpl(
         )
 
         val primalEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalIsUserFollowing)
-            ?: throw WssException("No response")
+            ?: throw NetworkException("No response")
         return primalEvent.content.toBooleanStrictOrNull()
-            ?: throw WssException("Invalid response.")
+            ?: throw NetworkException("Invalid response.")
     }
 
     override suspend fun getUserBookmarksList(userId: String): BookmarksResponse {
@@ -208,7 +208,7 @@ internal class UsersApiImpl(
 
         val list = queryResult.findPrimalEvent(NostrEventKind.PrimalRecommendedBlossomServer)
         val content = list?.content
-        if (content.isNullOrEmpty()) throw WssException("Invalid content.")
+        if (content.isNullOrEmpty()) throw NetworkException("Invalid content.")
 
         return list.content.decodeFromJsonStringOrNull<List<String>>() ?: emptyList()
     }

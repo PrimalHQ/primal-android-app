@@ -24,9 +24,9 @@ import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.BlossomException
 import net.primal.core.networking.blossom.UploadJob
 import net.primal.core.networking.blossom.UploadResult
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.signOrThrow
@@ -184,7 +184,7 @@ class OnboardingViewModel @Inject constructor(
                     if (uploadResult is UploadResult.Success) {
                         setState { copy(avatarRemoteUrl = uploadResult.remoteUrl) }
                     }
-                } catch (error: WssException) {
+                } catch (error: NetworkException) {
                     Timber.w(error)
                 } catch (error: SignatureException) {
                     Timber.w(error)
@@ -211,7 +211,7 @@ class OnboardingViewModel @Inject constructor(
                     if (uploadResult is UploadResult.Success) {
                         setState { copy(bannerRemoteUrl = uploadResult.remoteUrl) }
                     }
-                } catch (error: WssException) {
+                } catch (error: NetworkException) {
                     Timber.w(error)
                 } catch (error: SignatureException) {
                     Timber.w(error)

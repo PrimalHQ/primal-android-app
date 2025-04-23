@@ -17,7 +17,7 @@ import net.primal.android.explore.home.zaps.ui.ExploreZapNoteUi
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.explore.ExploreRepository
 import net.primal.domain.explore.ExploreZapNoteData
 import timber.log.Timber
@@ -48,7 +48,7 @@ class ExploreZapsViewModel @Inject constructor(
                     userId = activeAccountStore.activeUserId(),
                 )
                 setState { copy(zaps = zaps.mapAsUiModel()) }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             } finally {
                 setState { copy(loading = false) }

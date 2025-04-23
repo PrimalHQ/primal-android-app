@@ -23,8 +23,8 @@ import net.primal.android.settings.wallet.nwc.primal.link.LinkPrimalWalletContra
 import net.primal.android.settings.wallet.nwc.primal.link.LinkPrimalWalletContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.repository.NwcWalletRepository
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.domain.common.exception.NetworkException
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = LinkPrimalWalletViewModel.Factory::class)
@@ -105,7 +105,7 @@ class LinkPrimalWalletViewModel @AssistedInject constructor(
                         callbackUri = "${_state.value.callback}?value=${response.nwcConnectionUri.urlEncode()}",
                     ),
                 )
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 setState { copy(creatingSecret = false) }
                 Timber.w(error)
             }

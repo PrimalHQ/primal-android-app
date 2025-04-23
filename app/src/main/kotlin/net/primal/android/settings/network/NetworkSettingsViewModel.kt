@@ -21,7 +21,7 @@ import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.config.AppConfigHandler
 import net.primal.core.networking.primal.PrimalApiClient
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
@@ -100,7 +100,7 @@ class NetworkSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 relayRepository.fetchAndUpdateUserRelays(userId = activeAccountStore.activeUserId())
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
             delay(1.seconds)
@@ -171,7 +171,7 @@ class NetworkSettingsViewModel @Inject constructor(
             setState { copy(updatingRelays = true) }
             val userId = activeAccountStore.activeUserId()
             block(userId)
-        } catch (error: WssException) {
+        } catch (error: NetworkException) {
             Timber.w(error)
             setState { copy(error = UiState.NetworkSettingsError.FailedToAddRelay(error)) }
         } catch (error: SignatureException) {

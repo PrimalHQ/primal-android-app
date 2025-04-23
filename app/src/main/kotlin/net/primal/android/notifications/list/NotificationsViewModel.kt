@@ -29,8 +29,8 @@ import net.primal.android.notifications.list.ui.NotificationUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignResult
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.notifications.Notification
@@ -145,7 +145,7 @@ class NotificationsViewModel @Inject constructor(
                     is SignResult.Rejected -> Timber.w(signResult.error)
                     is SignResult.Signed -> notificationRepository.markAllNotificationsAsSeen(signResult.event)
                 }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
         }

@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.explore.home.topics.ExploreTopicsContract.UiEvent
 import net.primal.android.explore.home.topics.ExploreTopicsContract.UiState
 import net.primal.android.explore.home.topics.ui.TopicUi
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.explore.ExploreRepository
 import net.primal.domain.explore.ExploreTrendingTopic
 import timber.log.Timber
@@ -49,7 +49,7 @@ class ExploreTopicsViewModel @Inject constructor(
             setState { copy(loading = true) }
             try {
                 exploreRepository.fetchTrendingTopics()
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             } finally {
                 setState { copy(loading = false) }

@@ -9,10 +9,10 @@ import net.primal.android.premium.manage.media.api.model.MediaUploadsRequestBody
 import net.primal.android.premium.manage.media.api.model.MediaUploadsResponse
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.model.AppSpecificDataRequest
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 
@@ -36,7 +36,7 @@ class MediaManagementApiImpl @Inject constructor(
 
         return queryResult.findPrimalEvent(NostrEventKind.PrimalUserMediaStorageStats)
             .takeContentOrNull<MediaStorageStats>()
-            ?: throw WssException("Missing event or invalid content.")
+            ?: throw NetworkException("Missing event or invalid content.")
     }
 
     override suspend fun getMediaUploads(userId: String): MediaUploadsResponse {

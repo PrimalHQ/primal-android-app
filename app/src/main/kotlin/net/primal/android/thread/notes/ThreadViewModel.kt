@@ -22,8 +22,8 @@ import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.thread.notes.ThreadContract.UiEvent
 import net.primal.android.thread.notes.ThreadContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventRepository
 import net.primal.domain.nostr.Nip19TLV
 import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
@@ -120,7 +120,7 @@ class ThreadViewModel @Inject constructor(
                 withContext(dispatcherProvider.io()) {
                     feedRepository.fetchReplies(userId = activeAccountStore.activeUserId(), noteId = highlightPostId)
                 }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             } finally {
                 setState { copy(fetching = false) }
@@ -137,7 +137,7 @@ class ThreadViewModel @Inject constructor(
                         limit = 15,
                     )
                 }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
         }

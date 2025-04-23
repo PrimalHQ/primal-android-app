@@ -17,7 +17,7 @@ import net.primal.android.events.reactions.ReactionsContract.UiState
 import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.navigation.noteIdOrThrow
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventRepository
 import net.primal.domain.events.NostrEventAction
 import net.primal.domain.nostr.NostrEventKind
@@ -59,7 +59,7 @@ class ReactionsViewModel @Inject constructor(
                     kind = NostrEventKind.Reaction.value,
                 )
                 setState { copy(likes = likes.map { it.mapAsEventActionUi() }) }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.e(error)
             } finally {
                 setState { copy(loading = false) }
@@ -75,7 +75,7 @@ class ReactionsViewModel @Inject constructor(
                     kind = NostrEventKind.ShortTextNoteRepost.value,
                 )
                 setState { copy(reposts = reposts.map { it.mapAsEventActionUi() }) }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.e(error)
             } finally {
                 setState { copy(loading = false) }

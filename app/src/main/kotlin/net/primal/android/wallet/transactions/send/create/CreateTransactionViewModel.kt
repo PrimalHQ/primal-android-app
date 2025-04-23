@@ -28,7 +28,6 @@ import net.primal.android.wallet.transactions.send.create.CreateTransactionContr
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract.UiState
 import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
 import net.primal.android.wallet.utils.isLightningAddress
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.core.utils.CurrencyConversionUtils.fromUsdToSats
@@ -36,6 +35,7 @@ import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.getMaximumUsdAmount
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.profile.ProfileData
 import net.primal.domain.profile.ProfileRepository
@@ -173,7 +173,7 @@ class CreateTransactionViewModel @Inject constructor(
                     withContext(dispatchers.io()) {
                         profileRepository.fetchProfile(profileId = targetUserId)
                     }
-                } catch (error: WssException) {
+                } catch (error: NetworkException) {
                     Timber.w(error)
                 }
             }
@@ -213,7 +213,7 @@ class CreateTransactionViewModel @Inject constructor(
                 }
             } catch (error: SignatureException) {
                 Timber.w(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             } finally {
                 setState { copy(fetchingMiningFees = false) }
@@ -243,7 +243,7 @@ class CreateTransactionViewModel @Inject constructor(
             }
         } catch (error: SignatureException) {
             Timber.w(error)
-        } catch (error: WssException) {
+        } catch (error: NetworkException) {
             Timber.w(error)
             setState { copy(error = error) }
         } finally {
@@ -315,7 +315,7 @@ class CreateTransactionViewModel @Inject constructor(
                         transaction = transaction.copy(status = DraftTxStatus.Failed),
                     )
                 }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setState {
                     copy(

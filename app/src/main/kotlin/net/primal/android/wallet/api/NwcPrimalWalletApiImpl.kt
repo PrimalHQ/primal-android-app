@@ -11,8 +11,8 @@ import net.primal.android.wallet.api.model.PrimalNwcConnectionInfo
 import net.primal.android.wallet.api.model.WalletOperationVerb
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEventKind
 
 class NwcPrimalWalletApiImpl @Inject constructor(
@@ -33,10 +33,10 @@ class NwcPrimalWalletApiImpl @Inject constructor(
             ),
         )
         val info = queryResult.findPrimalEvent(NostrEventKind.PrimalWalletNwcConnectionList)
-            ?: throw WssException("Event with kind 10000321 not found.")
+            ?: throw NetworkException("Event with kind 10000321 not found.")
 
         return info.content.decodeFromJsonStringOrNull<List<PrimalNwcConnectionInfo>>()
-            ?: throw WssException("Invalid event with kind 10000321.")
+            ?: throw NetworkException("Invalid event with kind 10000321.")
     }
 
     override suspend fun revokeConnection(userId: String, nwcPubkey: String) {
@@ -71,9 +71,9 @@ class NwcPrimalWalletApiImpl @Inject constructor(
         )
 
         val info = queryResult.findPrimalEvent(NostrEventKind.PrimalWalletNwcConnectionCreated)
-            ?: throw WssException("Event with kind 10000319 not found.")
+            ?: throw NetworkException("Event with kind 10000319 not found.")
 
         return info.content.decodeFromJsonStringOrNull<NwcConnectionCreatedResponse>()
-            ?: throw WssException("Invalid event with kind 10000319.")
+            ?: throw NetworkException("Invalid event with kind 10000319.")
     }
 }

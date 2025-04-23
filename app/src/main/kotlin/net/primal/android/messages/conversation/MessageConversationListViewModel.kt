@@ -25,7 +25,7 @@ import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.messages.ChatRepository
 import net.primal.domain.messages.ConversationRelation
 import net.primal.domain.messages.DMConversation
@@ -101,7 +101,7 @@ class MessageConversationListViewModel @Inject constructor(
                         chatRepository.fetchFollowConversations(userId = userId)
                     }
                 }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             } finally {
                 setState { copy(loading = false) }
@@ -132,7 +132,7 @@ class MessageConversationListViewModel @Inject constructor(
                     is SignResult.Signed ->
                         chatRepository.markAllMessagesAsRead(authorization = signResult.event)
                 }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
         }

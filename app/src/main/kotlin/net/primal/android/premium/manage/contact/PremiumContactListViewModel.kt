@@ -18,7 +18,7 @@ import net.primal.android.premium.manage.contact.model.FollowListBackup
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
@@ -61,7 +61,7 @@ class PremiumContactListViewModel @Inject constructor(
                 setState { copy(backups = backups) }
             } catch (error: SignatureException) {
                 Timber.e(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.e(error)
             } finally {
                 setState { copy(fetching = false) }

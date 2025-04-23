@@ -8,7 +8,6 @@ import io.github.aakira.napier.Napier
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notifications.Notification
 import net.primal.data.local.dao.notifications.NotificationData
@@ -20,6 +19,7 @@ import net.primal.data.remote.api.notifications.model.NotificationsRequestBody
 import net.primal.data.repository.feed.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.remote.mapNotNullAsNotificationPO
 import net.primal.data.repository.mappers.remote.mapNotNullAsProfileStatsPO
+import net.primal.domain.common.exception.NetworkException
 
 @ExperimentalPagingApi
 class NotificationsRemoteMediator(
@@ -104,7 +104,7 @@ class NotificationsRemoteMediator(
                 ensureLastSeenTimestamp()
                 notificationsApi.getNotifications(body = requestBody)
             }
-        } catch (error: WssException) {
+        } catch (error: NetworkException) {
             Napier.w(error) { "Failed to get notifications." }
             return MediatorResult.Error(error)
         }

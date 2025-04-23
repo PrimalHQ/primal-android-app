@@ -30,8 +30,8 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.FEED_KIND_USER
 import net.primal.domain.feeds.FeedSpecKind
 import net.primal.domain.feeds.FeedsRepository
@@ -211,7 +211,7 @@ class ProfileDetailsViewModel @Inject constructor(
                         }.sortedByDescending { it.premiumDetails?.tier?.isPrimalLegendTier() == true },
                     )
                 }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.e(error)
             }
         }
@@ -295,7 +295,7 @@ class ProfileDetailsViewModel @Inject constructor(
         profileIds.forEach { profileId ->
             try {
                 profileRepository.fetchProfile(profileId = profileId)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
         }
@@ -328,7 +328,7 @@ class ProfileDetailsViewModel @Inject constructor(
                         profileRepository.isUserFollowing(userId = activeUserId, targetUserId = profileId)
                     }
                     setState { copy(isProfileFollowingMe = isFollowing) }
-                } catch (error: WssException) {
+                } catch (error: NetworkException) {
                     Timber.w(error)
                 }
             }
@@ -342,14 +342,14 @@ class ProfileDetailsViewModel @Inject constructor(
                     userId = activeAccountStore.activeUserId(),
                 )
             }
-        } catch (error: WssException) {
+        } catch (error: NetworkException) {
             Timber.w(error)
         }
 
     private suspend fun fetchLatestProfile(profileId: String) =
         try {
             profileRepository.fetchProfile(profileId = profileId)
-        } catch (error: WssException) {
+        } catch (error: NetworkException) {
             Timber.w(error)
         }
 
@@ -372,7 +372,7 @@ class ProfileDetailsViewModel @Inject constructor(
                     followedUserId = followAction.profileId,
                     forceUpdate = followAction.forceUpdate,
                 )
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 updateStateProfileAsUnfollowedAndClearApprovalFlag()
                 setErrorState(error = UiError.FailedToFollowUser(error))
@@ -410,7 +410,7 @@ class ProfileDetailsViewModel @Inject constructor(
                     unfollowedUserId = unfollowAction.profileId,
                     forceUpdate = unfollowAction.forceUpdate,
                 )
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 updateStateProfileAsFollowedAndClearApprovalFlag()
                 setErrorState(error = UiError.FailedToUnfollowUser(error))
@@ -461,7 +461,7 @@ class ProfileDetailsViewModel @Inject constructor(
             } catch (error: SigningRejectedException) {
                 Timber.w(error)
                 setErrorState(error = UiError.NostrSignUnauthorized)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setErrorState(error = UiError.FailedToAddToFeed(error))
             }
@@ -484,7 +484,7 @@ class ProfileDetailsViewModel @Inject constructor(
             } catch (error: SigningRejectedException) {
                 Timber.w(error)
                 setErrorState(error = UiError.NostrSignUnauthorized)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setErrorState(error = UiError.FailedToRemoveFeed(error))
             }
@@ -513,7 +513,7 @@ class ProfileDetailsViewModel @Inject constructor(
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setErrorState(error = UiError.MissingRelaysConfiguration(error))
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setErrorState(error = UiError.FailedToMuteUser(error))
             }
@@ -541,7 +541,7 @@ class ProfileDetailsViewModel @Inject constructor(
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setErrorState(error = UiError.MissingRelaysConfiguration(error))
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setErrorState(error = UiError.FailedToUnmuteUser(error))
             }

@@ -2,7 +2,6 @@ package net.primal.data.remote.api.feeds
 
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.PrimalVerb
 import net.primal.data.remote.api.feeds.model.DvmFeedsRequestBody
@@ -10,6 +9,7 @@ import net.primal.data.remote.api.feeds.model.DvmFeedsResponse
 import net.primal.data.remote.api.feeds.model.FeedsResponse
 import net.primal.data.remote.api.feeds.model.SubSettingsAuthorization
 import net.primal.data.remote.model.ContentAppSubSettings
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.FeedSpecKind
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
@@ -57,7 +57,7 @@ internal class FeedsApiImpl(
         )
 
         val articleFeeds = queryResult.findPrimalEvent(NostrEventKind.PrimalSubSettings)
-            ?: throw WssException("Invalid default feeds response for key '$key'.")
+            ?: throw NetworkException("Invalid default feeds response for key '$key'.")
 
         return FeedsResponse(articleFeeds = articleFeeds)
     }
@@ -81,7 +81,7 @@ internal class FeedsApiImpl(
         )
 
         val articleFeeds = queryResult.findPrimalEvent(NostrEventKind.PrimalSubSettings)
-            ?: throw WssException("Invalid feeds response for key '$key'.")
+            ?: throw NetworkException("Invalid feeds response for key '$key'.")
 
         return FeedsResponse(articleFeeds = articleFeeds)
     }

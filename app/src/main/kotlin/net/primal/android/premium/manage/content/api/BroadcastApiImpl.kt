@@ -10,9 +10,9 @@ import net.primal.android.premium.manage.content.api.model.ContentEventKindCount
 import net.primal.android.premium.manage.content.api.model.StartContentBroadcastRequest
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.model.AppSpecificDataRequest
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 
@@ -38,7 +38,7 @@ class BroadcastApiImpl @Inject constructor(
 
         val event = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalContentBroadcastStats)
         val counts = event.takeContentOrNull<List<ContentEventKindCount>>()
-        return counts?.associate { it.kind to it.count } ?: throw WssException("Missing or invalid content")
+        return counts?.associate { it.kind to it.count } ?: throw NetworkException("Missing or invalid content")
     }
 
     override suspend fun startContentRebroadcast(userId: String, kinds: List<Int>?) {
@@ -89,6 +89,6 @@ class BroadcastApiImpl @Inject constructor(
 
         return queryResult.findPrimalEvent(NostrEventKind.PrimalContentBroadcastStatus)
             ?.takeContentOrNull<BroadcastingStatus>()
-            ?: throw WssException("Missing or invalid content")
+            ?: throw NetworkException("Missing or invalid content")
     }
 }

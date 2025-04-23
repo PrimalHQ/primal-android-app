@@ -33,7 +33,7 @@ import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventInteractionRepository
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
@@ -154,7 +154,7 @@ class ArticleDetailsViewModel @Inject constructor(
                         articleAuthorId = naddr.userId,
                         articleId = naddr.identifier,
                     )
-                } catch (error: WssException) {
+                } catch (error: NetworkException) {
                     Timber.w(error)
                 }
             }
@@ -362,7 +362,7 @@ class ArticleDetailsViewModel @Inject constructor(
             if (followUnfollowResult.isFailure) {
                 followUnfollowResult.exceptionOrNull()?.let { error ->
                     when (error) {
-                        is WssException, is UserRepository.FollowListNotFound,
+                        is NetworkException, is UserRepository.FollowListNotFound,
                         is NostrPublishException,
                         -> {
                             Timber.e(error)

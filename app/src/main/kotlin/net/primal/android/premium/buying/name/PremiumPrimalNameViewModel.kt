@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.premium.buying.name.PremiumPrimalNameContract.UiEvent
 import net.primal.android.premium.buying.name.PremiumPrimalNameContract.UiState
 import net.primal.android.premium.repository.PremiumRepository
-import net.primal.core.networking.sockets.errors.WssException
+import net.primal.domain.common.exception.NetworkException
 import timber.log.Timber
 
 @HiltViewModel
@@ -45,7 +45,7 @@ class PremiumPrimalNameViewModel @Inject constructor(
             try {
                 val isNameAvailable = premiumRepository.isPrimalNameAvailable(name = name)
                 setState { copy(isNameAvailable = isNameAvailable) }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             }
         }

@@ -22,8 +22,8 @@ import net.primal.android.profile.follows.ProfileFollowsContract.UiEvent
 import net.primal.android.profile.follows.ProfileFollowsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.profile.ProfileRepository
@@ -115,7 +115,7 @@ class ProfileFollowsViewModel @Inject constructor(
                     }
                 }
                 setState { copy(users = users.map { it.mapAsUserProfileUi() }) }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             } finally {
                 setState { copy(loading = false) }
@@ -149,7 +149,7 @@ class ProfileFollowsViewModel @Inject constructor(
                     followedUserId = profileId,
                     forceUpdate = forceUpdate,
                 )
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.FailedToFollowUser(error))
                 updateStateProfileUnfollowAndClearApprovalFlag(profileId)
@@ -181,7 +181,7 @@ class ProfileFollowsViewModel @Inject constructor(
                     unfollowedUserId = profileId,
                     forceUpdate = forceUpdate,
                 )
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setErrorState(error = UiState.FollowsError.FailedToUnfollowUser(error))
                 updateStateProfileFollowAndClearApprovalFlag(profileId)

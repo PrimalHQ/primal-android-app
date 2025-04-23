@@ -18,8 +18,8 @@ import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiE
 import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiState
 import net.primal.android.wallet.transactions.receive.model.PaymentDetails
 import net.primal.android.wallet.transactions.receive.tabs.ReceivePaymentTab
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.getMaximumUsdAmount
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
@@ -113,7 +113,7 @@ class ReceivePaymentViewModel @Inject constructor(
                 }
             } catch (error: SignatureException) {
                 Timber.w(error)
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
             } finally {
                 setState { copy(loading = false) }
@@ -154,7 +154,7 @@ class ReceivePaymentViewModel @Inject constructor(
         } catch (error: SignatureException) {
             Timber.w(error)
             setState { copy(error = UiState.ReceivePaymentError.FailedToCreateLightningInvoice(cause = error)) }
-        } catch (error: WssException) {
+        } catch (error: NetworkException) {
             Timber.w(error)
             setState { copy(error = UiState.ReceivePaymentError.FailedToCreateLightningInvoice(cause = error)) }
         } finally {

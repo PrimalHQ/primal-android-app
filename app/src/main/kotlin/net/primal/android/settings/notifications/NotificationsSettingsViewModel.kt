@@ -32,10 +32,10 @@ import net.primal.android.settings.notifications.ui.mapAsTabNotificationSwitchUi
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.settings.model.AppSettingsDescription
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asIdentifierTag
@@ -181,7 +181,7 @@ class NotificationsSettingsViewModel @Inject constructor(
                         }
                     }
                 }
-            } catch (error: WssException) {
+            } catch (error: NetworkException) {
                 Timber.w(error)
                 setState { copy(error = FetchAppSettingsError(cause = error)) }
             }
@@ -225,7 +225,7 @@ class NotificationsSettingsViewModel @Inject constructor(
                     }
                 }
             }
-        } catch (error: WssException) {
+        } catch (error: NetworkException) {
             setState { copy(error = UpdateAppSettingsError(cause = error)) }
         }
     }
