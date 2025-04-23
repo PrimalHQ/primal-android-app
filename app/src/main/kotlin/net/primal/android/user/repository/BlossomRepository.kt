@@ -4,6 +4,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.ensureHttpOrHttps
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
@@ -44,11 +45,11 @@ class BlossomRepository @Inject constructor(
                 unsignedNostrEvent = NostrUnsignedEvent(
                     pubKey = userId,
                     kind = NostrEventKind.BlossomServerList.value,
-                    tags = servers.map { it.asServerTag() },
+                    tags = servers.map { it.ensureHttpOrHttps().asServerTag() },
                     content = "",
                 ),
             )
-            persistBlossomServersLocally(userId = userId, blossomServers = servers)
+            persistBlossomServersLocally(userId = userId, blossomServers = servers.map { it.ensureHttpOrHttps() })
         }
     }
 
