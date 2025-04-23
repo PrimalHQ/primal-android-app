@@ -135,12 +135,14 @@ class NoteFeedViewModel @AssistedInject constructor(
             }
         }
 
-    private fun FeedPostsSyncStats.isTopVisibleNoteTheLatestNote(): Boolean {
-        val (noteId, repostId) = topVisibleNote ?: return false
-        val newestNoteId = latestNoteIds.firstOrNull() ?: return false
+    private fun FeedPostsSyncStats.isTopVisibleNoteTheLatestNote(): Boolean =
+        topVisibleNote?.let { topVisibleNote ->
+            latestNoteIds.firstOrNull()?.let { newestNoteId ->
+                val (noteId, repostId) = topVisibleNote
 
-        return newestNoteId == noteId || newestNoteId == repostId
-    }
+                newestNoteId == noteId || newestNoteId == repostId
+            }
+        } == true
 
     private suspend fun fetchLatestNotes() {
         val latestFeedPageResponse = feedRepository.fetchFeedPageSnapshot(
