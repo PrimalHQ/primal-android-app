@@ -136,9 +136,10 @@ class NoteFeedViewModel @AssistedInject constructor(
         }
 
     private fun FeedPostsSyncStats.isTopVisibleNoteTheLatestNote(): Boolean {
-        val topNoteId = topVisibleNote?.first
-        val newestNoteId = this.latestNoteIds.firstOrNull()
-        return newestNoteId == topNoteId
+        val (noteId, repostId) = topVisibleNote ?: return false
+        val newestNoteId = latestNoteIds.firstOrNull() ?: return false
+
+        return newestNoteId == noteId || newestNoteId == repostId
     }
 
     private suspend fun fetchLatestNotes() {
@@ -179,7 +180,6 @@ class NoteFeedViewModel @AssistedInject constructor(
             .sortedByDescending { it.first }
             .filter { it.first >= (newestLocalNote?.timestamp?.epochSeconds ?: 0) }
             .distinctBy { it.second.id }
-            .filter { it.second.id != newestLocalNote?.eventId }
             .map { it.second }
             .toMutableSet()
 
