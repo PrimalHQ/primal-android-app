@@ -23,6 +23,13 @@ fun String.detectUrls(): List<String> {
     }.toList()
 }
 
+fun String.ensureHttpOrHttps(): String =
+    if (startsWith(prefix = "http")) {
+        this
+    } else {
+        "https://$this"
+    }
+
 private val extensionToMimeType = mapOf(
     "jpeg" to "image/jpeg",
     "jpg" to "image/jpeg",
