@@ -174,12 +174,17 @@ class NoteFeedViewModel @AssistedInject constructor(
             }
 
         val notes = this.notes.map { it.createdAt to it }
+        val latestTimestamp = (
+            (newestLocalNote?.reposts?.mapNotNull { it.repostTimestamp } ?: emptyList<Long>()) +
+                listOfNotNull(newestLocalNote?.timestamp?.epochSeconds)
+            ).maxOrNull()
 
         val allNotes = (repostedNotes + notes)
             .asSequence()
             .sortedByDescending { it.first }
-            .filter { it.first >= (newestLocalNote?.timestamp?.epochSeconds ?: 0) }
+            .filter { it.first >= (latestTimestamp ?: 0) }
             .distinctBy { it.second.id }
+            .filter { it.second.id != newestLocalNote?.eventId }
             .map { it.second }
             .toMutableSet()
 
