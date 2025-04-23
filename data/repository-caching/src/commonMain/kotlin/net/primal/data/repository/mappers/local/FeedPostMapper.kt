@@ -76,6 +76,7 @@ internal fun FeedPostPO.mapAsFeedPostDO(): FeedPostDO {
                     repostAuthorId = this.data.repostAuthorId,
                     repostAuthorDisplayName = this.repostAuthor?.authorNameUiFriendly()
                         ?: this.data.repostAuthorId?.asEllipsizedNpub(),
+                    repostCreatedAt = this.data.repostCreatedAt,
                 ),
             )
         } ?: emptyList(),
