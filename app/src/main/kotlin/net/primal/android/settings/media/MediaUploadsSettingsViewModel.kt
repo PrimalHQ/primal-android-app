@@ -199,6 +199,6 @@ class MediaUploadsSettingsViewModel @Inject constructor(
         }
 
     companion object {
-        private const val DEFAULT_BLOSSOM_URL = "blossom.primal.net"
+        private const val DEFAULT_BLOSSOM_URL = "https://blossom.primal.net"
     }
 }
