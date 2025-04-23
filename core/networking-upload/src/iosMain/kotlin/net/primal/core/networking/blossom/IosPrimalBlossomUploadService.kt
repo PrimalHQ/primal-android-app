@@ -1,6 +1,5 @@
 package net.primal.core.networking.blossom
 
-import kotlin.coroutines.cancellation.CancellationException
 import net.primal.core.utils.coroutines.DispatcherProviderFactory
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
@@ -23,10 +22,6 @@ class IosPrimalBlossomUploadService(
         )
     }
 
-    @Throws(
-        BlossomUploadException::class,
-        CancellationException::class,
-    )
     suspend fun upload(
         path: String,
         userId: String,
@@ -39,10 +34,6 @@ class IosPrimalBlossomUploadService(
         )
     }
 
-    @Throws(
-        BlossomUploadException::class,
-        CancellationException::class,
-    )
     suspend fun upload(
         path: String,
         userId: String,

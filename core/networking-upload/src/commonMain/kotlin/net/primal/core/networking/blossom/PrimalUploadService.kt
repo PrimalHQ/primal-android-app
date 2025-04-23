@@ -1,7 +1,6 @@
 package net.primal.core.networking.blossom
 
 import io.github.aakira.napier.Napier
-import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -34,76 +33,89 @@ internal class PrimalUploadService(
 
     private val mirroringScope = CoroutineScope(SupervisorJob() + dispatchers.io())
 
-    @Throws(BlossomException::class, CancellationException::class)
     suspend fun upload(
         userId: String,
         openBufferedSource: () -> BufferedSource,
         onSignRequested: (suspend (NostrUnsignedEvent) -> NostrEvent)? = null,
         onProgress: ((uploadedBytes: Int, totalBytes: Int) -> Unit)? = null,
-    ): UploadResult =
-        withContext(dispatchers.io()) {
-            val blossomApis = resolveBlossomApisOrThrow(userId = userId)
-            val primaryApi = blossomApis.first()
-            val mirrorApis = blossomApis.drop(1)
+    ): UploadResult {
+        val result = withContext(dispatchers.io()) {
+            runCatching {
+                val blossomApis = resolveBlossomApisOrThrow(userId = userId)
+                val primaryApi = blossomApis.first()
+                val mirrorApis = blossomApis.drop(1)
 
-            val fileMetadata = openBufferedSource().use { it.getMetadata() }
+                val fileMetadata = openBufferedSource().use { it.getMetadata() }
 
-            val uploadAuthorizationHeader = signAuthorizationOrThrow(
-                userId = userId,
-                fileHash = fileMetadata.sha256,
-                onSignRequested = onSignRequested,
-            )
-
-            val descriptor: BlobDescriptor = try {
-                primaryApi.headMedia(
-                    authorization = uploadAuthorizationHeader,
-                    fileMetadata = fileMetadata,
+                val uploadAuthorizationHeader = signAuthorizationOrThrow(
+                    userId = userId,
+                    fileHash = fileMetadata.sha256,
+                    onSignRequested = onSignRequested,
                 )
-                primaryApi.putMedia(
-                    authorization = uploadAuthorizationHeader,
-                    fileMetadata = fileMetadata,
-                    bufferedSource = openBufferedSource(),
-                    onProgress = onProgress,
-                )
-            } catch (_: BlossomException) {
-                primaryApi.headUpload(
-                    authorization = uploadAuthorizationHeader,
-                    fileMetadata = fileMetadata,
-                )
-                primaryApi.putUpload(
-                    authorization = uploadAuthorizationHeader,
-                    fileMetadata = fileMetadata,
-                    bufferedSource = openBufferedSource(),
-                    onProgress = onProgress,
-                )
-            }
 
-            val mirrorAuthorizationHeader = signAuthorizationOrThrow(
-                userId = userId,
-                fileHash = descriptor.sha256,
-                humanMessage = "Mirror File",
-                onSignRequested = onSignRequested,
-            )
+                val descriptor: BlobDescriptor = try {
+                    primaryApi.headMedia(
+                        authorization = uploadAuthorizationHeader,
+                        fileMetadata = fileMetadata,
+                    )
+                    primaryApi.putMedia(
+                        authorization = uploadAuthorizationHeader,
+                        fileMetadata = fileMetadata,
+                        bufferedSource = openBufferedSource(),
+                        onProgress = onProgress,
+                    )
+                } catch (_: BlossomException) {
+                    primaryApi.headUpload(
+                        authorization = uploadAuthorizationHeader,
+                        fileMetadata = fileMetadata,
+                    )
+                    primaryApi.putUpload(
+                        authorization = uploadAuthorizationHeader,
+                        fileMetadata = fileMetadata,
+                        bufferedSource = openBufferedSource(),
+                        onProgress = onProgress,
+                    )
+                }
 
-            mirrorApis.forEach { blossomApi ->
-                mirroringScope.launch {
-                    runCatching {
-                        blossomApi.putMirror(
-                            authorization = mirrorAuthorizationHeader,
-                            fileUrl = descriptor.url,
-                        )
-                    }.onFailure { error ->
-                        Napier.w(error) { "Blossom mirror failed for ${descriptor.url}" }
+                val mirrorAuthorizationHeader = signAuthorizationOrThrow(
+                    userId = userId,
+                    fileHash = descriptor.sha256,
+                    humanMessage = "Mirror File",
+                    onSignRequested = onSignRequested,
+                )
+
+                mirrorApis.forEach { blossomApi ->
+                    mirroringScope.launch {
+                        runCatching {
+                            blossomApi.putMirror(
+                                authorization = mirrorAuthorizationHeader,
+                                fileUrl = descriptor.url,
+                            )
+                        }.onFailure { error ->
+                            Napier.w(error) { "Blossom mirror failed for ${descriptor.url}" }
+                        }
                     }
                 }
-            }
 
-            UploadResult(
+                return@runCatching descriptor
+            }
+        }
+
+        return try {
+            val descriptor = result.getOrThrow()
+            UploadResult.Success(
                 remoteUrl = descriptor.url,
                 originalFileSize = descriptor.sizeInBytes,
                 originalHash = descriptor.sha256,
             )
+        } catch (error: Exception) {
+            val uploadError = when {
+                error is BlossomException -> error
+                else -> BlossomException(cause = error)
+            }
+            UploadResult.Failed(error = uploadError)
         }
+    }
 
     private suspend fun resolveBlossomApisOrThrow(userId: String): List<BlossomApi> {
         return blossomResolver.provideBlossomServerList(userId).mapNotNull {

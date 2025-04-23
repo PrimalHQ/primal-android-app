@@ -31,6 +31,7 @@ import net.primal.android.user.domain.asUserAccountFromFollowListEvent
 import net.primal.android.wallet.domain.WalletSettings
 import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.BlossomException
+import net.primal.core.networking.blossom.UploadResult
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
@@ -161,20 +162,30 @@ class UserRepository @Inject constructor(
     suspend fun setProfileMetadata(userId: String, profileMetadata: ProfileMetadata) {
         val pictureUrl = profileMetadata.remotePictureUrl
             ?: if (profileMetadata.localPictureUri != null) {
-                primalUploadService.upload(
+                val uploadResult = primalUploadService.upload(
                     uri = profileMetadata.localPictureUri,
                     userId = userId,
-                ).remoteUrl
+                )
+                if (uploadResult is UploadResult.Success) {
+                    uploadResult.remoteUrl
+                } else {
+                    null
+                }
             } else {
                 null
             }
 
         val bannerUrl = profileMetadata.remoteBannerUrl
             ?: if (profileMetadata.localBannerUri != null) {
-                primalUploadService.upload(
+                val uploadResult = primalUploadService.upload(
                     uri = profileMetadata.localBannerUri,
                     userId = userId,
-                ).remoteUrl
+                )
+                if (uploadResult is UploadResult.Success) {
+                    uploadResult.remoteUrl
+                } else {
+                    null
+                }
             } else {
                 null
             }

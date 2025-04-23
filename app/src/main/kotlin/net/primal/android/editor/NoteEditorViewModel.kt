@@ -48,8 +48,8 @@ import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
-import net.primal.core.networking.blossom.BlossomException
 import net.primal.core.networking.blossom.UploadJob
+import net.primal.core.networking.blossom.UploadResult
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.domain.events.EventRelayHintsRepository
 import net.primal.domain.explore.ExploreRepository
@@ -397,24 +397,30 @@ class NoteEditorViewModel @AssistedInject constructor(
                 },
             )
 
-            updatedAttachment = updatedAttachment.copy(
-                remoteUrl = uploadResult.remoteUrl,
-                originalHash = uploadResult.originalHash,
-                originalSizeInBytes = uploadResult.originalFileSize.toInt(),
-            )
-            updateNoteAttachmentState(attachment = updatedAttachment)
+            when (uploadResult) {
+                is UploadResult.Success -> {
+                    updatedAttachment = updatedAttachment.copy(
+                        remoteUrl = uploadResult.remoteUrl,
+                        originalHash = uploadResult.originalHash,
+                        originalSizeInBytes = uploadResult.originalFileSize.toInt(),
+                    )
+                    updateNoteAttachmentState(attachment = updatedAttachment)
 
-            val (mimeType, dimensions) = fileAnalyser.extractImageTypeAndDimensions(attachment.localUri)
-            if (mimeType != null || dimensions != null) {
-                updatedAttachment = updatedAttachment.copy(
-                    mimeType = mimeType,
-                    dimensionInPixels = dimensions,
-                )
-                updateNoteAttachmentState(updatedAttachment)
+                    val (mimeType, dimensions) = fileAnalyser.extractImageTypeAndDimensions(attachment.localUri)
+                    if (mimeType != null || dimensions != null) {
+                        updatedAttachment = updatedAttachment.copy(
+                            mimeType = mimeType,
+                            dimensionInPixels = dimensions,
+                        )
+                        updateNoteAttachmentState(updatedAttachment)
+                    }
+                }
+
+                is UploadResult.Failed -> {
+                    Timber.w(uploadResult.error)
+                    updateNoteAttachmentState(attachment = updatedAttachment.copy(uploadError = uploadResult.error))
+                }
             }
-        } catch (error: BlossomException) {
-            Timber.w(error)
-            updateNoteAttachmentState(attachment = updatedAttachment.copy(uploadError = error))
         } catch (error: SignatureException) {
             Timber.w(error)
             updateNoteAttachmentState(attachment = updatedAttachment.copy(uploadError = error))

@@ -23,6 +23,7 @@ import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.BlossomException
 import net.primal.core.networking.blossom.UploadJob
+import net.primal.core.networking.blossom.UploadResult
 import net.primal.core.networking.sockets.errors.WssException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
@@ -180,9 +181,9 @@ class OnboardingViewModel @Inject constructor(
                         userId = keyPair.pubKey,
                         onSignRequested = { it.signOrThrow(nsec = keyPair.privateKey.hexToNsecHrp()) },
                     )
-                    setState { copy(avatarRemoteUrl = uploadResult.remoteUrl) }
-                } catch (error: BlossomException) {
-                    Timber.w(error)
+                    if (uploadResult is UploadResult.Success) {
+                        setState { copy(avatarRemoteUrl = uploadResult.remoteUrl) }
+                    }
                 } catch (error: WssException) {
                     Timber.w(error)
                 } catch (error: SignatureException) {
@@ -207,9 +208,9 @@ class OnboardingViewModel @Inject constructor(
                             it.signOrThrow(keyPair.privateKey.hexToNsecHrp())
                         },
                     )
-                    setState { copy(bannerRemoteUrl = uploadResult.remoteUrl) }
-                } catch (error: BlossomException) {
-                    Timber.w(error)
+                    if (uploadResult is UploadResult.Success) {
+                        setState { copy(bannerRemoteUrl = uploadResult.remoteUrl) }
+                    }
                 } catch (error: WssException) {
                     Timber.w(error)
                 } catch (error: SignatureException) {
