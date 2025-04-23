@@ -2,7 +2,9 @@ package net.primal.core.networking.primal
 
 import io.ktor.client.HttpClient
 import kotlin.time.Duration.Companion.minutes
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,7 +12,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.yield
 import net.primal.core.config.AppConfigHandler
 import net.primal.core.config.AppConfigProvider
 import net.primal.core.config.observeApiUrlByType
@@ -31,7 +32,7 @@ internal class ProxyPrimalApiClient(
 
     private lateinit var primalClient: BasePrimalApiClient
     private lateinit var socketClient: NostrSocketClientImpl
-    private var clientInitialized: Boolean = false
+    private val clientInitialized = CompletableDeferred<Boolean>()
     private val clientMutex = Mutex()
 
     private val _connectionStatus = MutableStateFlow(PrimalServerConnectionStatus(serverType = serverType))
@@ -52,18 +53,20 @@ internal class ProxyPrimalApiClient(
                 clientMutex.withLock {
                     updateStatus { copy(url = apiUrl) }
 
-                    if (clientInitialized) {
+                    if (clientInitialized.isSuccessfullyCompleted()) {
                         updateStatus { copy(connected = false) }
                         socketClient.close()
                     }
 
                     socketClient = buildAndInitializeSocketClient(apiUrl).apply {
                         primalClient = BasePrimalApiClient(socketClient = this)
-                        clientInitialized = true
+                        clientInitialized.complete(true)
                     }
                 }
             }
         }
+
+    private fun Job.isSuccessfullyCompleted() = this.isCompleted && !this.isCancelled
 
     private fun buildAndInitializeSocketClient(apiUrl: String): NostrSocketClientImpl {
         return NostrSocketClientImpl(
@@ -86,17 +89,17 @@ internal class ProxyPrimalApiClient(
     }
 
     override suspend fun query(message: PrimalCacheFilter): PrimalQueryResult {
-        while (!clientInitialized) yield()
+        clientInitialized.await()
         return primalClient.query(message = message)
     }
 
     override suspend fun subscribe(subscriptionId: String, message: PrimalCacheFilter): Flow<NostrIncomingMessage> {
-        while (!clientInitialized) yield()
+        clientInitialized.await()
         return primalClient.subscribe(subscriptionId = subscriptionId, message = message)
     }
 
     override suspend fun closeSubscription(subscriptionId: String): Boolean {
-        while (!clientInitialized) yield()
+        clientInitialized.await()
         return primalClient.closeSubscription(subscriptionId = subscriptionId)
     }
 }
