@@ -71,6 +71,8 @@ class ThreadViewModel @Inject constructor(
                 .filter { it.isNotEmpty() }
                 .map { posts -> posts.map { it.asFeedPostUi() } }
                 .collect { conversation ->
+                    setState { copy(highlightNote = conversation.find { it.postId == highlightPostId }) }
+
                     val highlightPostIndex = conversation.indexOfFirst { it.postId == highlightPostId }
                     if (_state.value.conversation.isEmpty() && highlightPostIndex != -1) {
                         setState {
