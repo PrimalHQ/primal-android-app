@@ -178,6 +178,7 @@ class OnboardingViewModel @Inject constructor(
                     val uploadResult = primalUploadService.upload(
                         uri = avatarUri,
                         userId = keyPair.pubKey,
+                        onSignRequested = { it.signOrThrow(nsec = keyPair.privateKey.hexToNsecHrp()) },
                     )
                     setState { copy(avatarRemoteUrl = uploadResult.remoteUrl) }
                 } catch (error: BlossomException) {
