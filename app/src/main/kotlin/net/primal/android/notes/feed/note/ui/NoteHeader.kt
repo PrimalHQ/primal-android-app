@@ -48,6 +48,7 @@ fun FeedNoteHeader(
     authorAvatarCdnImage: CdnImage? = null,
     authorInternetIdentifier: String? = null,
     authorLegendaryCustomization: LegendaryCustomization? = null,
+    authorBlossoms: List<String> = emptyList(),
     replyToAuthor: String? = null,
     label: String? = authorInternetIdentifier,
     labelStyle: TextStyle? = null,
@@ -69,6 +70,7 @@ fun FeedNoteHeader(
                 avatarSize = authorAvatarSize,
                 onClick = onAuthorAvatarClick,
                 legendaryCustomization = authorLegendaryCustomization,
+                avatarBlossoms = authorBlossoms,
             )
         }
 

@@ -53,6 +53,7 @@ fun UserProfileListItem(
             UniversalAvatarThumbnail(
                 avatarCdnImage = data.avatarCdnImage,
                 avatarSize = avatarSize,
+                avatarBlossoms = data.avatarBlossoms,
                 onClick = { onClick(data) },
                 legendaryCustomization = data.legendaryCustomization,
             )

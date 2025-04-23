@@ -164,6 +164,7 @@ fun CommentRow(modifier: Modifier = Modifier, comment: HighlightCommentUi) {
             ) {
                 UniversalAvatarThumbnail(
                     avatarCdnImage = comment.authorCdnImage,
+                    avatarBlossoms = comment.authorBlossoms,
                     legendaryCustomization = comment.authorLegendaryCustomization,
                     avatarSize = 28.dp,
                 )

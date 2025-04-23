@@ -437,6 +437,7 @@ private fun ProfileDetailsColumn(
                 avatarCdnImage = profileDetails.avatarCdnImage,
                 avatarSize = 100.dp,
                 hasBorder = profileDetails.avatarCdnImage != null,
+                avatarBlossoms = profileDetails.profileBlossoms,
                 fallbackBorderColor = Color.White,
                 legendaryCustomization = profileDetails.premiumDetails?.legendaryCustomization,
                 backgroundColor = defaultOnboardingAvatarBackground,

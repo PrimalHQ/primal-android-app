@@ -14,6 +14,7 @@ data class HighlightCommentUi(
     val authorInternetIdentifier: String?,
     val authorLegendaryCustomization: LegendaryCustomization?,
     val authorCdnImage: CdnImage?,
+    val authorBlossoms: List<String> = emptyList(),
     val content: String,
     val createdAt: Instant,
 )
@@ -26,6 +27,7 @@ fun FeedPost.toHighlightCommentUi() =
         authorInternetIdentifier = this.author.internetIdentifier,
         authorLegendaryCustomization = this.author.legendProfile?.asLegendaryCustomization(),
         authorCdnImage = this.author.avatarCdnImage,
+        authorBlossoms = this.author.blossomServers,
         content = this.content,
         createdAt = this.timestamp.toJavaInstant(),
     )

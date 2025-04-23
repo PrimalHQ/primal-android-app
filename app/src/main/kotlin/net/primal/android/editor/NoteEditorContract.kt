@@ -24,6 +24,7 @@ interface NoteEditorContract {
         val error: NoteEditorError? = null,
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val activeAccountLegendaryCustomization: LegendaryCustomization? = null,
+        val activeAccountBlossoms: List<String> = emptyList(),
         val uploadingAttachments: Boolean = false,
         val attachments: List<NoteAttachment> = emptyList(),
         val taggedUsers: List<NoteTaggedUser> = emptyList(),

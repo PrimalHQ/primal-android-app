@@ -36,6 +36,7 @@ class ExploreHomeViewModel @Inject constructor(
                         activeAccountPubkey = it.pubkey,
                         activeAccountAvatarCdnImage = it.avatarCdnImage,
                         activeAccountLegendaryCustomization = it.primalLegendProfile?.asLegendaryCustomization(),
+                        activeAccountBlossoms = it.blossomServers,
                     )
                 }
             }

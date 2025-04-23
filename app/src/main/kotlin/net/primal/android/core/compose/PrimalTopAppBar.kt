@@ -37,6 +37,7 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.domain.links.CdnImage
 
+@Suppress("LongMethod")
 @OptIn(ExperimentalFoundationApi::class)
 @ExperimentalMaterial3Api
 @Composable
@@ -53,6 +54,7 @@ fun PrimalTopAppBar(
     onNavigationIconClick: (() -> Unit)? = null,
     autoCloseKeyboardOnNavigationIconClick: Boolean = true,
     avatarCdnImage: CdnImage? = null,
+    avatarBlossoms: List<String> = emptyList(),
     legendaryCustomization: LegendaryCustomization? = null,
     actions: (@Composable RowScope.() -> Unit)? = null,
     showDivider: Boolean = true,
@@ -80,6 +82,7 @@ fun PrimalTopAppBar(
                         UniversalAvatarThumbnail(
                             avatarCdnImage = avatarCdnImage,
                             avatarSize = 32.dp,
+                            avatarBlossoms = avatarBlossoms,
                             onClick = onNavigationIconClick,
                             legendaryCustomization = legendaryCustomization,
                         )

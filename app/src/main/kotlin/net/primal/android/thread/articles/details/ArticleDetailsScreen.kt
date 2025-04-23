@@ -522,6 +522,7 @@ private fun ArticleContentWithComments(
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     authorFollowed = state.isAuthorFollowed,
                     authorCdnImage = state.article.authorAvatarCdnImage,
+                    authorBlossoms = state.article.authorBlossoms,
                     authorDisplayName = state.article.authorDisplayName,
                     authorInternetIdentifier = state.article.authorInternetIdentifier,
                     authorLegendaryCustomization = state.article.authorLegendaryCustomization,

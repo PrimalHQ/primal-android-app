@@ -116,6 +116,7 @@ class ReadsViewModel @Inject constructor(
                     copy(
                         activeAccountAvatarCdnImage = it.avatarCdnImage,
                         activeAccountLegendaryCustomization = it.primalLegendProfile?.asLegendaryCustomization(),
+                        activeAccountBlossoms = it.blossomServers,
                     )
                 }
             }

@@ -24,6 +24,7 @@ data class ProfileDetailsUi(
     val primalName: String? = null,
     val lnUrlDecoded: String? = null,
     val premiumDetails: PremiumProfileDataUi? = null,
+    val profileBlossoms: List<String> = emptyList(),
 )
 
 fun ProfileDataDO.asProfileDetailsUi() =
@@ -42,6 +43,7 @@ fun ProfileDataDO.asProfileDetailsUi() =
         primalName = this.primalPremiumInfo?.primalName,
         lnUrlDecoded = this.lnUrlDecoded,
         premiumDetails = this.primalPremiumInfo?.asPremiumProfileDataUi(),
+        profileBlossoms = this.blossoms,
     )
 
 fun PrimalPremiumInfo.asPremiumProfileDataUi() =

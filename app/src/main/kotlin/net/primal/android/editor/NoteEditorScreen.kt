@@ -434,6 +434,7 @@ private fun NoteEditor(
                     .padding(top = 8.dp),
                 avatarSize = avatarSizeDp,
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
+                avatarBlossoms = state.activeAccountBlossoms,
                 legendaryCustomization = state.activeAccountLegendaryCustomization,
             )
 

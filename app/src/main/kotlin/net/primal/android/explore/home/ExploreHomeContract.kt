@@ -8,6 +8,7 @@ interface ExploreHomeContract {
     data class UiState(
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val activeAccountLegendaryCustomization: LegendaryCustomization? = null,
+        val activeAccountBlossoms: List<String> = emptyList(),
         val activeAccountPubkey: String? = null,
         val badges: Badges = Badges(),
     )

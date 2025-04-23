@@ -163,6 +163,7 @@ private fun ListItemHeader(
             UniversalAvatarThumbnail(
                 avatarSize = 24.dp,
                 avatarCdnImage = data.authorAvatarCdnImage,
+                avatarBlossoms = data.authorBlossoms,
                 legendaryCustomization = data.authorLegendaryCustomization,
             )
 

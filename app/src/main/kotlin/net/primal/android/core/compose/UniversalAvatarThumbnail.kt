@@ -11,6 +11,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,6 +34,7 @@ import net.primal.android.core.images.AvatarCoilImageLoader
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.theme.AppTheme
+import net.primal.core.networking.blossom.resolveBlossomUrls
 import net.primal.domain.links.CdnImage
 
 @Composable
@@ -44,6 +49,7 @@ fun UniversalAvatarThumbnail(
     backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onClick: (() -> Unit)? = null,
     hasInnerBorderOverride: Boolean = true,
+    avatarBlossoms: List<String> = emptyList(),
     defaultAvatar: @Composable () -> Unit = { DefaultAvatarThumbnailPlaceholderListItemImage() },
 ) {
     val hasLegendBorder = legendaryCustomization?.avatarGlow == true &&
@@ -65,6 +71,7 @@ fun UniversalAvatarThumbnail(
         avatarSize = avatarSize,
         cdnVariantUrl = variant?.mediaUrl,
         sourceUrl = avatarCdnImage?.sourceUrl,
+        blossoms = avatarBlossoms,
         hasOuterBorder = hasBorder && avatarSize > 0.dp,
         hasInnerBorder = hasLegendBorder && avatarSize > 0.dp && hasInnerBorderOverride,
         borderBrush = borderBrush ?: Brush.linearGradient(
@@ -94,10 +101,11 @@ private fun transparentBorderBrush() =
 
 @Composable
 private fun AvatarThumbnailListItemImage(
-    cdnVariantUrl: Any?,
-    sourceUrl: Any?,
+    cdnVariantUrl: String?,
+    sourceUrl: String?,
     modifier: Modifier = Modifier,
     avatarSize: Dp = 48.dp,
+    blossoms: List<String> = emptyList(),
     totalBorderSize: Dp = 2.dp,
     hasOuterBorder: Boolean = false,
     hasInnerBorder: Boolean = false,
@@ -114,40 +122,48 @@ private fun AvatarThumbnailListItemImage(
         AvatarCoilImageLoader.provideNoGifsImageLoader(context = context)
     }
 
-    SubcomposeAsyncImage(
-        model = cdnVariantUrl ?: sourceUrl,
-        imageLoader = imageLoader,
-        modifier = modifier
-            .adjustAvatarBackground(
-                avatarSize = avatarSize,
-                totalBorderSize = totalBorderSize,
-                borderBrush = borderBrush,
-                hasOuterBorder = hasOuterBorder,
-                hasInnerBorder = hasInnerBorder,
-            )
-            .then(
-                if (onClick != null) {
-                    Modifier.clickable(onClick = onClick)
-                } else {
-                    Modifier
-                },
-            ),
-        contentDescription = stringResource(id = R.string.accessibility_profile_image),
-        contentScale = ContentScale.Crop,
-        loading = { AvatarLoadingBox(backgroundColor) },
-        error = {
-            SubcomposeAsyncImage(
-                model = sourceUrl,
-                imageLoader = imageLoader,
-                contentDescription = stringResource(id = R.string.accessibility_profile_image),
-                contentScale = ContentScale.Crop,
-                loading = { AvatarLoadingBox(backgroundColor) },
-                error = {
-                    defaultAvatar()
-                },
-            )
-        },
-    )
+    val sharedModifier = modifier
+        .adjustAvatarBackground(
+            avatarSize = avatarSize,
+            totalBorderSize = totalBorderSize,
+            borderBrush = borderBrush,
+            hasOuterBorder = hasOuterBorder,
+            hasInnerBorder = hasInnerBorder,
+        )
+        .then(
+            if (onClick != null) {
+                Modifier.clickable(onClick = onClick)
+            } else {
+                Modifier
+            },
+        )
+
+    val blossomUrls = resolveBlossomUrls(originalUrl = sourceUrl, blossoms = blossoms)
+    val imageUrls = ((listOfNotNull(cdnVariantUrl, sourceUrl) + blossomUrls)).distinct()
+    var currentUrlIndex by remember { mutableIntStateOf(0) }
+    val currentUrl = imageUrls.getOrNull(currentUrlIndex)
+
+    if (currentUrl != null) {
+        SubcomposeAsyncImage(
+            model = currentUrl,
+            imageLoader = imageLoader,
+            modifier = sharedModifier,
+            contentDescription = stringResource(id = R.string.accessibility_profile_image),
+            contentScale = ContentScale.Crop,
+            loading = { AvatarLoadingBox(backgroundColor) },
+            error = { currentUrlIndex += 1 },
+        )
+    } else {
+        SubcomposeAsyncImage(
+            modifier = sharedModifier,
+            model = sourceUrl,
+            imageLoader = imageLoader,
+            contentDescription = stringResource(id = R.string.accessibility_profile_image),
+            contentScale = ContentScale.Crop,
+            loading = { AvatarLoadingBox(backgroundColor) },
+            error = { defaultAvatar() },
+        )
+    }
 }
 
 @Composable

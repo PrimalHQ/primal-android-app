@@ -190,6 +190,7 @@ private fun ExplorePersonListItem(
                     modifier = Modifier.padding(bottom = 24.dp),
                     avatarSize = 64.dp,
                     avatarCdnImage = person.profile.avatarCdnImage,
+                    avatarBlossoms = person.profile.blossoms,
                     onClick = onItemClick,
                     legendaryCustomization = person.profile.primalPremiumInfo?.legendProfile
                         ?.asLegendaryCustomization(),

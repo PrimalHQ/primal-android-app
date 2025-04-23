@@ -16,6 +16,7 @@ interface WalletDashboardContract {
         val isNpubLogin: Boolean = false,
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val activeAccountLegendaryCustomization: LegendaryCustomization? = null,
+        val activeAccountBlossoms: List<String> = emptyList(),
         val badges: Badges = Badges(),
         val primalWallet: PrimalWallet? = null,
         val walletPreference: WalletPreference = WalletPreference.Undefined,

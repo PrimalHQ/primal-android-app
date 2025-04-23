@@ -14,6 +14,7 @@ interface NotificationsContract {
         val unseenNotifications: List<List<NotificationUi>> = emptyList(),
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val activeAccountLegendaryCustomization: LegendaryCustomization? = null,
+        val activeAccountBlossoms: List<String> = emptyList(),
         val badges: Badges = Badges(),
     )
 

@@ -151,6 +151,7 @@ private fun ExploreHomeScreen(
                 actionIcon = PrimalIcons.AdvancedSearch,
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
                 avatarLegendaryCustomization = state.activeAccountLegendaryCustomization,
+                avatarBlossoms = state.activeAccountBlossoms,
                 navigationIcon = PrimalIcons.AvatarDefault,
                 onNavigationIconClick = {
                     uiScope.launch { drawerState.open() }
@@ -235,7 +236,7 @@ private fun ExploreHomeScreen(
 
 @ExperimentalMaterial3Api
 @Composable
-fun ExploreTopAppBar(
+private fun ExploreTopAppBar(
     modifier: Modifier = Modifier,
     pagerState: PagerState,
     avatarCdnImage: CdnImage?,
@@ -245,6 +246,7 @@ fun ExploreTopAppBar(
     onActionIconClick: () -> Unit,
     onSearchClick: () -> Unit,
     avatarLegendaryCustomization: LegendaryCustomization? = null,
+    avatarBlossoms: List<String> = emptyList(),
     navigationIconTintColor: Color = LocalContentColor.current,
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
@@ -271,6 +273,7 @@ fun ExploreTopAppBar(
                         UniversalAvatarThumbnail(
                             avatarCdnImage = avatarCdnImage,
                             avatarSize = 32.dp,
+                            avatarBlossoms = avatarBlossoms,
                             onClick = onNavigationIconClick,
                             legendaryCustomization = avatarLegendaryCustomization,
                         )

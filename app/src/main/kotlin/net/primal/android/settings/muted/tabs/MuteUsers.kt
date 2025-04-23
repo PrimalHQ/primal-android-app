@@ -85,6 +85,7 @@ fun MutedUserListItem(
         leadingContent = {
             UniversalAvatarThumbnail(
                 avatarCdnImage = item.avatarCdnImage,
+                avatarBlossoms = item.profileBlossoms,
                 onClick = { onProfileClick(item.pubkey) },
                 legendaryCustomization = item.premiumDetails?.legendaryCustomization,
             )

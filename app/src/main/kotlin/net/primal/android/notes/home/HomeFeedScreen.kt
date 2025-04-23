@@ -162,6 +162,7 @@ fun HomeFeedScreen(
                 activeFeed = activeFeed,
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
                 avatarLegendaryCustomization = state.activeAccountLegendaryCustomization,
+                avatarBlossoms = state.activeAccountBlossoms,
                 onAvatarClick = { uiScope.launch { drawerState.open() } },
                 onSearchClick = onSearchClick,
                 onFeedChanged = { feed ->
@@ -236,6 +237,7 @@ private fun NoteFeedTopAppBar(
     activeFeed: FeedUi?,
     onFeedChanged: (FeedUi) -> Unit,
     avatarLegendaryCustomization: LegendaryCustomization? = null,
+    avatarBlossoms: List<String> = emptyList(),
     scrollBehavior: TopAppBarScrollBehavior? = null,
     onGoToWallet: (() -> Unit)? = null,
 ) {
@@ -264,6 +266,7 @@ private fun NoteFeedTopAppBar(
             }
         },
         avatarCdnImage = avatarCdnImage,
+        avatarBlossoms = avatarBlossoms,
         legendaryCustomization = avatarLegendaryCustomization,
         navigationIcon = PrimalIcons.AvatarDefault,
         onNavigationIconClick = onAvatarClick,

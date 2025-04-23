@@ -24,6 +24,7 @@ import io.github.fornewid.placeholder.material3.placeholder
 import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.events.ui.findNearestOrNull
 import net.primal.android.theme.AppTheme
+import net.primal.core.networking.blossom.resolveBlossomUrls
 import net.primal.domain.links.EventUriType
 
 @Composable
@@ -44,7 +45,6 @@ fun NoteAttachmentImagePreview(
 
     val blossomUrls = resolveBlossomUrls(originalUrl = attachment.url, blossoms = blossoms)
     val imageUrls = ((listOfNotNull(cdnImageSource, attachment.url) + blossomUrls)).distinct()
-
     var currentUrlIndex by remember { mutableIntStateOf(0) }
     val currentUrl = imageUrls.getOrNull(currentUrlIndex)
 
@@ -62,26 +62,6 @@ fun NoteAttachmentImagePreview(
             modifier = modifier,
         )
     }
-}
-
-private fun resolveBlossomUrls(originalUrl: String, blossoms: List<String>): List<String> {
-    val fileName = originalUrl.extractFileHashNameFromUrl()
-    return blossoms.map { blossomUrl ->
-        "${blossomUrl.ensureEndsWithSlash()}$fileName"
-    }
-}
-
-private fun String.extractFileHashNameFromUrl(): String? {
-    val hashStartIndex = this.lastIndexOf('/') + 1
-    return if (hashStartIndex != -1 && hashStartIndex < this.length) {
-        this.substring(hashStartIndex)
-    } else {
-        null
-    }
-}
-
-private fun String.ensureEndsWithSlash(): String {
-    return if (this.endsWith("/")) this else "$this/"
 }
 
 @Composable

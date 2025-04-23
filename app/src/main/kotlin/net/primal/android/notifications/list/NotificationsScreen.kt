@@ -169,6 +169,7 @@ fun NotificationsScreen(
                 title = stringResource(id = R.string.notifications_title),
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
                 legendaryCustomization = state.activeAccountLegendaryCustomization,
+                avatarBlossoms = state.activeAccountBlossoms,
                 navigationIcon = PrimalIcons.AvatarDefault,
                 onNavigationIconClick = {
                     uiScope.launch { drawerState.open() }

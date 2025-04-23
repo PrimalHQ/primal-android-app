@@ -135,6 +135,7 @@ private fun ReadsScreen(
                 activeFeed = activeFeed,
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
                 avatarLegendaryCustomization = state.activeAccountLegendaryCustomization,
+                avatarBlossoms = state.activeAccountBlossoms,
                 onAvatarClick = { uiScope.launch { drawerState.open() } },
                 onSearchClick = onSearchClick,
                 onFeedChanged = { feed ->
@@ -201,6 +202,7 @@ private fun ArticleFeedTopAppBar(
     activeFeed: FeedUi?,
     onFeedChanged: (FeedUi) -> Unit,
     avatarLegendaryCustomization: LegendaryCustomization? = null,
+    avatarBlossoms: List<String> = emptyList(),
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
     var feedPickerVisible by rememberSaveable { mutableStateOf(false) }
@@ -227,6 +229,7 @@ private fun ArticleFeedTopAppBar(
             }
         },
         avatarCdnImage = avatarCdnImage,
+        avatarBlossoms = avatarBlossoms,
         legendaryCustomization = avatarLegendaryCustomization,
         navigationIcon = PrimalIcons.AvatarDefault,
         onNavigationIconClick = onAvatarClick,

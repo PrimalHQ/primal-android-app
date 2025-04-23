@@ -233,6 +233,7 @@ private fun ProfileTopCoverBar(
                 avatarSize = avatarValues.avatarSize,
                 onClick = { state.profileDetails?.avatarCdnImage?.sourceUrl?.let { onMediaItemClick(it) } },
                 avatarCdnImage = state.profileDetails?.avatarCdnImage,
+                avatarBlossoms = state.profileDetails?.profileBlossoms ?: emptyList(),
                 fallbackBorderColor = if (isDarkTheme) Color.Black else Color.White,
                 borderSizeOverride = if (legendaryCustomization == null) 5.dp else null,
                 legendaryCustomization = legendaryCustomization,

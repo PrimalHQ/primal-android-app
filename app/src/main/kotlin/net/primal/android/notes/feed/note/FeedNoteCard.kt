@@ -502,6 +502,7 @@ private fun FeedNote(
                 avatarSize = avatarSizeDp,
                 avatarCdnImage = data.authorAvatarCdnImage,
                 legendaryCustomization = data.authorLegendaryCustomization,
+                avatarBlossoms = data.authorBlossoms,
                 onClick = if (noteCallbacks.onProfileClick != null) {
                     { noteCallbacks.onProfileClick.invoke(data.authorId) }
                 } else {
@@ -526,6 +527,7 @@ private fun FeedNote(
                 authorAvatarCdnImage = data.authorAvatarCdnImage,
                 authorInternetIdentifier = data.authorInternetIdentifier,
                 authorLegendaryCustomization = data.authorLegendaryCustomization,
+                authorBlossoms = data.authorBlossoms,
                 replyToAuthor = if (showReplyTo) data.replyToAuthorHandle else null,
                 onAuthorAvatarClick = if (noteCallbacks.onProfileClick != null) {
                     { noteCallbacks.onProfileClick.invoke(data.authorId) }

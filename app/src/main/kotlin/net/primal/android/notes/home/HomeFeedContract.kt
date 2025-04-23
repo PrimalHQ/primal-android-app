@@ -11,6 +11,7 @@ interface HomeFeedContract {
         val feeds: List<FeedUi> = emptyList(),
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val activeAccountLegendaryCustomization: LegendaryCustomization? = null,
+        val activeAccountBlossoms: List<String> = emptyList(),
         val badges: Badges = Badges(),
         val loading: Boolean = true,
     )

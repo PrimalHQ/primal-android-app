@@ -100,6 +100,7 @@ fun ProfileQrCodeViewer(
         UniversalAvatarThumbnail(
             avatarSize = 108.dp,
             avatarCdnImage = profileDetails?.avatarCdnImage,
+            avatarBlossoms = profileDetails?.profileBlossoms ?: emptyList(),
             hasBorder = true,
             fallbackBorderColor = Color.White,
             legendaryCustomization = profileDetails?.premiumDetails?.legendaryCustomization,

@@ -182,6 +182,7 @@ private fun DrawerHeader(
             UniversalAvatarThumbnail(
                 avatarSize = 52.dp,
                 avatarCdnImage = userAccount?.avatarCdnImage,
+                avatarBlossoms = userAccount?.blossomServers ?: emptyList(),
                 legendaryCustomization = legendaryCustomization,
             )
 

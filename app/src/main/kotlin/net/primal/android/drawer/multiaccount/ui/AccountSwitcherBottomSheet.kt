@@ -221,6 +221,7 @@ private fun AccountListItem(
                 UniversalAvatarThumbnail(
                     avatarSize = 40.dp,
                     avatarCdnImage = account.avatarCdnImage,
+                    avatarBlossoms = account.avatarBlossoms,
                     legendaryCustomization = account.legendaryCustomization,
                 )
             }

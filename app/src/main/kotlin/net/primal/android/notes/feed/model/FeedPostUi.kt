@@ -57,6 +57,7 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
         authorHandle = this.author.handle,
         authorInternetIdentifier = this.author.internetIdentifier?.formatNip05Identifier(),
         authorAvatarCdnImage = this.author.avatarCdnImage,
+        authorBlossoms = this.author.blossomServers,
         timestamp = Instant.ofEpochSecond(this.timestamp.epochSeconds),
         content = this.content,
         uris = this.links.map { it.asEventUriUiModel() }.sortedBy { it.position },
@@ -83,7 +84,6 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
             .map { it.asEventZapUiModel() }
             .sortedWith(EventZapUiModel.DefaultComparator),
         authorLegendaryCustomization = this.author.legendProfile?.asLegendaryCustomization(),
-        authorBlossoms = this.author.blossomServers,
         eventRelayHints = this.eventRelayHints?.relays ?: emptyList(),
     )
 }

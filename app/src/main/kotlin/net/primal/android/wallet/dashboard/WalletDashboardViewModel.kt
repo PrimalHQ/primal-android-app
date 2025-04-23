@@ -87,6 +87,7 @@ class WalletDashboardViewModel @Inject constructor(
                     copy(
                         activeAccountAvatarCdnImage = it.avatarCdnImage,
                         activeAccountLegendaryCustomization = it.primalLegendProfile?.asLegendaryCustomization(),
+                        activeAccountBlossoms = it.blossomServers,
                         primalWallet = it.primalWallet,
                         walletPreference = it.walletPreference,
                         walletBalance = it.primalWalletState.balanceInBtc?.toBigDecimal(),

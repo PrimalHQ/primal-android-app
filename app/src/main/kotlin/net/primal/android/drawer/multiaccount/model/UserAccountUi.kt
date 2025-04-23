@@ -11,6 +11,7 @@ data class UserAccountUi(
     val displayName: String,
     val internetIdentifier: String? = null,
     val avatarCdnImage: CdnImage? = null,
+    val avatarBlossoms: List<String> = emptyList(),
     val legendaryCustomization: LegendaryCustomization? = null,
     val lastAccessedAt: Long,
 )
@@ -21,6 +22,7 @@ fun UserAccount.asUserAccountUi() =
         displayName = authorNameUiFriendly(),
         internetIdentifier = internetIdentifier,
         avatarCdnImage = avatarCdnImage,
+        avatarBlossoms = blossomServers,
         legendaryCustomization = primalLegendProfile?.asLegendaryCustomization(),
         lastAccessedAt = lastAccessedAt,
     )

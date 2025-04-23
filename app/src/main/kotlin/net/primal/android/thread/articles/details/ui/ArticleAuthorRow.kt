@@ -45,6 +45,7 @@ fun ArticleAuthorRow(
     authorCdnImage: CdnImage? = null,
     authorInternetIdentifier: String? = null,
     authorLegendaryCustomization: LegendaryCustomization? = null,
+    authorBlossoms: List<String> = emptyList(),
     onAuthorAvatarClick: (() -> Unit)? = null,
     onFollowUnfollowClick: (() -> Unit)? = null,
 ) {
@@ -55,6 +56,7 @@ fun ArticleAuthorRow(
         UniversalAvatarThumbnail(
             avatarSize = 42.dp,
             avatarCdnImage = authorCdnImage,
+            avatarBlossoms = authorBlossoms,
             onClick = onAuthorAvatarClick,
             legendaryCustomization = authorLegendaryCustomization,
         )

@@ -267,6 +267,7 @@ private fun SelectedUsersIndicator(
                     UniversalAvatarThumbnail(
                         avatarSize = 42.dp,
                         avatarCdnImage = user.avatarCdnImage,
+                        avatarBlossoms = user.avatarBlossoms,
                         onClick = { onUserClick(user) },
                         legendaryCustomization = user.legendaryCustomization,
                     )
