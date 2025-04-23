@@ -32,7 +32,7 @@ internal class ProxyPrimalApiClient(
 
     private lateinit var primalClient: BasePrimalApiClient
     private lateinit var socketClient: NostrSocketClientImpl
-    private val clientInitialized = CompletableDeferred<Boolean>()
+    private var clientInitialized = CompletableDeferred<Boolean>()
     private val clientMutex = Mutex()
 
     private val _connectionStatus = MutableStateFlow(PrimalServerConnectionStatus(serverType = serverType))
@@ -54,6 +54,7 @@ internal class ProxyPrimalApiClient(
                     updateStatus { copy(url = apiUrl) }
 
                     if (clientInitialized.isSuccessfullyCompleted()) {
+                        clientInitialized = CompletableDeferred<Boolean>()
                         updateStatus { copy(connected = false) }
                         socketClient.close()
                     }
