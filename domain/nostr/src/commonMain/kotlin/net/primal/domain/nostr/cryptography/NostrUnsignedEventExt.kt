@@ -1,5 +1,6 @@
-package net.primal.android.nostr.notary
+package net.primal.domain.nostr.cryptography
 
+import io.ktor.utils.io.core.toByteArray
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.addJsonArray
 import kotlinx.serialization.json.buildJsonArray

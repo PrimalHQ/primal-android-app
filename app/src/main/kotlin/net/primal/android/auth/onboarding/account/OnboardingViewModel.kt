@@ -19,7 +19,6 @@ import net.primal.android.auth.onboarding.account.api.OnboardingApi
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroupMember
 import net.primal.android.auth.repository.CreateAccountHandler
-import net.primal.android.nostr.notary.signOrThrow
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.BlossomException
@@ -29,6 +28,7 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.cryptography.signOrThrow
 import net.primal.domain.nostr.cryptography.utils.CryptoUtils
 import net.primal.domain.nostr.cryptography.utils.hexToNsecHrp
 import timber.log.Timber
