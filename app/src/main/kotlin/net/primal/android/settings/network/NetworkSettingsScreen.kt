@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemColors
@@ -22,7 +21,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
+import net.primal.android.core.compose.ConfirmActionAlertDialog
 import net.primal.android.core.compose.DeleteListItemImage
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalSwitch
@@ -119,6 +118,8 @@ private fun NetworkLazyColumn(
     var confirmingRestoreCachingServiceDialog by remember { mutableStateOf(false) }
     if (confirmingRestoreCachingServiceDialog) {
         ConfirmActionAlertDialog(
+            confirmText = stringResource(id = R.string.settings_network_dialog_confirm),
+            dismissText = stringResource(id = R.string.settings_network_dialog_dismiss),
             dialogTitle = stringResource(id = R.string.settings_network_restore_default_caching_service_title),
             dialogText = stringResource(id = R.string.settings_network_restore_default_caching_service_description),
             onDismissRequest = {
@@ -134,11 +135,11 @@ private fun NetworkLazyColumn(
     var confirmingRestoreDefaultRelaysDialog by remember { mutableStateOf(false) }
     if (confirmingRestoreDefaultRelaysDialog) {
         ConfirmActionAlertDialog(
+            confirmText = stringResource(id = R.string.settings_network_dialog_confirm),
+            dismissText = stringResource(id = R.string.settings_network_dialog_dismiss),
             dialogTitle = stringResource(id = R.string.settings_network_restore_default_relays_title),
             dialogText = stringResource(id = R.string.settings_network_restore_default_relays_description),
-            onDismissRequest = {
-                confirmingRestoreDefaultRelaysDialog = false
-            },
+            onDismissRequest = { confirmingRestoreDefaultRelaysDialog = false },
             onConfirmation = {
                 confirmingRestoreDefaultRelaysDialog = false
                 eventsPublisher(NetworkSettingsContract.UiEvent.RestoreDefaultRelays)
@@ -149,14 +150,14 @@ private fun NetworkLazyColumn(
     var confirmingRelayDeletionDialog by remember { mutableStateOf<String?>(null) }
     confirmingRelayDeletionDialog?.let { relayUrl ->
         ConfirmActionAlertDialog(
+            confirmText = stringResource(id = R.string.settings_network_dialog_confirm),
+            dismissText = stringResource(id = R.string.settings_network_dialog_dismiss),
             dialogTitle = stringResource(id = R.string.settings_network_delete_relay_title),
             dialogText = stringResource(
                 id = R.string.settings_network_delete_relay_description,
                 relayUrl,
             ),
-            onDismissRequest = {
-                confirmingRelayDeletionDialog = null
-            },
+            onDismissRequest = { confirmingRelayDeletionDialog = null },
             onConfirmation = {
                 confirmingRelayDeletionDialog = null
                 eventsPublisher(NetworkSettingsContract.UiEvent.DeleteRelay(url = relayUrl))
@@ -375,45 +376,6 @@ fun NetworkDestinationListItem(
             }
         },
         colors = colors,
-    )
-}
-
-@Composable
-fun ConfirmActionAlertDialog(
-    dialogTitle: String,
-    dialogText: String,
-    onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit,
-) {
-    AlertDialog(
-        containerColor = AppTheme.colorScheme.surfaceVariant,
-        title = { Text(text = dialogTitle) },
-        text = { Text(text = dialogText) },
-        onDismissRequest = {
-            onDismissRequest()
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onConfirmation()
-                },
-            ) {
-                Text(
-                    text = stringResource(id = R.string.settings_network_dialog_confirm),
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    onDismissRequest()
-                },
-            ) {
-                Text(
-                    text = stringResource(id = R.string.settings_network_dialog_dismiss),
-                )
-            }
-        },
     )
 }
 

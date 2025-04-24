@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -34,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import java.util.*
 import net.primal.android.R
+import net.primal.android.core.compose.ConfirmActionAlertDialog
 import net.primal.android.core.compose.DeleteListItemImage
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.settings.wallet.domain.NwcConnectionInfo
@@ -100,7 +100,9 @@ fun ConnectedAppsSettings(
     )
 
     if (revokeDialogVisible) {
-        ConfirmRevokeAlertDialog(
+        ConfirmActionAlertDialog(
+            confirmText = stringResource(id = R.string.feed_list_dialog_confirm),
+            dismissText = stringResource(id = R.string.feed_list_dialog_dismiss),
             onDismissRequest = {
                 revokeDialogVisible = false
                 revokeNwcPubkey = ""
@@ -325,43 +327,4 @@ private fun ConnectedAppsHint(isPrimalWalletActivated: Boolean, createNewWalletC
             }
         }
     }
-}
-
-@Composable
-private fun ConfirmRevokeAlertDialog(
-    onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit,
-    dialogTitle: String? = null,
-    dialogText: String? = null,
-) {
-    AlertDialog(
-        containerColor = AppTheme.colorScheme.surfaceVariant,
-        title = {
-            if (dialogTitle != null) {
-                Text(text = dialogTitle)
-            }
-        },
-        text = {
-            if (dialogText != null) {
-                Text(text = dialogText)
-            }
-        },
-        onDismissRequest = {
-            onDismissRequest()
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onConfirmation() },
-            ) {
-                Text(text = stringResource(id = R.string.feed_list_dialog_confirm))
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = { onDismissRequest() },
-            ) {
-                Text(text = stringResource(id = R.string.feed_list_dialog_dismiss))
-            }
-        },
-    )
 }
