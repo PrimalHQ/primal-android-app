@@ -3,6 +3,7 @@ package net.primal.android.core.compose.dropdown
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -14,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import net.primal.android.theme.AppTheme
 
@@ -25,6 +27,7 @@ fun DropdownPrimalMenuItem(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     tint: Color = LocalContentColor.current,
+    iconSize: Dp? = null,
     colors: MenuItemColors = MenuDefaults.itemColors(),
     contentPadding: PaddingValues = PaddingValues(
         horizontal = 16.dp,
@@ -36,6 +39,7 @@ fun DropdownPrimalMenuItem(
         modifier = modifier,
         trailingIcon = {
             Icon(
+                modifier = Modifier.size(iconSize ?: Dp.Unspecified),
                 imageVector = trailingIconVector,
                 tint = tint,
                 contentDescription = null,
