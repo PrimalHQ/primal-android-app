@@ -10,7 +10,9 @@ import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asEventIdTag
+import net.primal.domain.nostr.asKindTag
 import net.primal.domain.nostr.asPubkeyTag
+import net.primal.domain.nostr.asReplaceableEventTag
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.publisher.NostrPublishException
 import net.primal.domain.nostr.zaps.NostrZapperFactory
@@ -101,6 +103,30 @@ class EventInteractionRepositoryImpl(
             statsUpdater.revertStats()
             throw error
         }
+    }
+
+    override suspend fun deleteEvent(
+        userId: String,
+        eventIdentifier: String,
+        eventKind: NostrEventKind,
+        content: String,
+        relayHint: String?,
+    ) = withContext(dispatcherProvider.io()) {
+        primalPublisher.signPublishImportNostrEvent(
+            unsignedNostrEvent = NostrUnsignedEvent(
+                pubKey = userId,
+                kind = NostrEventKind.EventDeletion.value,
+                tags = listOf(
+                    if (eventKind == NostrEventKind.LongFormContent) {
+                        eventIdentifier.asReplaceableEventTag(relayHint = relayHint)
+                    } else {
+                        eventIdentifier.asEventIdTag(authorPubkey = userId, relayHint = relayHint)
+                    },
+                    eventKind.asKindTag(),
+                ),
+                content = content,
+            ),
+        )
     }
 
     override suspend fun zapEvent(
