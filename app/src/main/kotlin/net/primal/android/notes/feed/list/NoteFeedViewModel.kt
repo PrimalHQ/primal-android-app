@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.primal.android.notes.feed.list.NoteFeedContract.UiEvent
 import net.primal.android.notes.feed.list.NoteFeedContract.UiState
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
@@ -29,6 +30,7 @@ import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.repository.mapAsProfileDataDO
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
@@ -50,6 +52,7 @@ import timber.log.Timber
 class NoteFeedViewModel @AssistedInject constructor(
     @Assisted private val feedSpec: String,
     @Assisted private val allowMutedThreads: Boolean,
+    private val dispatcherProvider: DispatcherProvider,
     private val feedRepository: FeedRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val mutedItemRepository: MutedItemRepository,
@@ -82,16 +85,30 @@ class NoteFeedViewModel @AssistedInject constructor(
     private var pollingJob: Job? = null
 
     init {
+        fetchLatestMuteList()
         subscribeToEvents()
         observeActiveAccount()
         observeMutedUsers()
     }
 
+    private fun fetchLatestMuteList() =
+        viewModelScope.launch {
+            try {
+                withContext(dispatcherProvider.io()) {
+                    mutedItemRepository.fetchAndPersistMuteList(
+                        userId = activeAccountStore.activeUserId(),
+                    )
+                }
+            } catch (error: NetworkException) {
+                Timber.e(error)
+            }
+        }
+
     private fun observeMutedUsers() =
         viewModelScope.launch {
-            mutedItemRepository.observeMutedUsersByOwnerId(ownerId = activeAccountStore.activeUserId())
+            mutedItemRepository.observeMutedProfileIdsByOwnerId(ownerId = activeAccountStore.activeUserId())
                 .collect {
-                    setState { copy(mutedProfileIds = it.map { profileData -> profileData.profileId }) }
+                    setState { copy(mutedProfileIds = it) }
                 }
         }
 
@@ -215,12 +232,9 @@ class NoteFeedViewModel @AssistedInject constructor(
             blossomServers = blossomServers,
         )
 
-        val filteredMutedProfiles = allNotes.filter { note ->
-            val profileId = profiles.find { it.profileId == note.pubKey }?.profileId
-            profileId == null || profileId !in state.value.mutedProfileIds
-        }
+        val allNotesFromNotMutedProfiles = allNotes.filter { note -> note.pubKey !in state.value.mutedProfileIds }
 
-        val avatarCdnImagesAndLegendaryCustomizations = filteredMutedProfiles
+        val avatarCdnImagesAndLegendaryCustomizations = allNotesFromNotMutedProfiles
             .mapNotNull { note -> profiles.find { it.profileId == note.pubKey } }
             .map { profileData ->
                 Pair(
@@ -233,7 +247,7 @@ class NoteFeedViewModel @AssistedInject constructor(
         val limit = avatarCdnImagesAndLegendaryCustomizations.count().coerceAtMost(MAX_AVATARS)
 
         val newSyncStats = FeedPostsSyncStats(
-            latestNoteIds = filteredMutedProfiles.map { it.id },
+            latestNoteIds = allNotesFromNotMutedProfiles.map { it.id },
             latestAvatarCdnImages = avatarCdnImagesAndLegendaryCustomizations
                 .map { it.first }
                 .take(limit),
