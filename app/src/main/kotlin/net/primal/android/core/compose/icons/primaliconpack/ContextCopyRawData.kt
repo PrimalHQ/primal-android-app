@@ -1,102 +1,74 @@
-@file:Suppress("MagicNumber")
-
 package net.primal.android.core.compose.icons.primaliconpack
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathFillType.Companion.NonZero
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.StrokeCap.Companion.Butt
-import androidx.compose.ui.graphics.StrokeJoin.Companion.Miter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.icons.PrimalIcons
 
-public val PrimalIcons.ContextCopyRawData: ImageVector
+val PrimalIcons.ContextCopyRawData: ImageVector
     get() {
-        if (_contextCopyRawData != null) {
-            return _contextCopyRawData!!
+        if (_ContextCopyRawData != null) {
+            return _ContextCopyRawData!!
         }
-        _contextCopyRawData = Builder(name = "ContextCopyRawData", defaultWidth = 20.0.dp,
-                defaultHeight = 20.0.dp, viewportWidth = 20.0f, viewportHeight = 20.0f).apply {
-            path(fill = SolidColor(Color(0xFFffffff)), stroke = null, strokeLineWidth = 0.0f,
-                    strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
-                    pathFillType = NonZero) {
-                moveTo(2.0f, 1.5f)
-                horizontalLineTo(13.0f)
-                curveTo(13.2761f, 1.5f, 13.5f, 1.7239f, 13.5f, 2.0f)
-                verticalLineTo(2.25f)
-                curveTo(13.5f, 2.6642f, 13.8358f, 3.0f, 14.25f, 3.0f)
-                curveTo(14.6642f, 3.0f, 15.0f, 2.6642f, 15.0f, 2.25f)
-                verticalLineTo(2.0f)
-                curveTo(15.0f, 0.8954f, 14.1046f, 0.0f, 13.0f, 0.0f)
-                horizontalLineTo(2.0f)
-                curveTo(0.8954f, 0.0f, 0.0f, 0.8954f, 0.0f, 2.0f)
-                verticalLineTo(13.0f)
-                curveTo(0.0f, 14.1046f, 0.8954f, 15.0f, 2.0f, 15.0f)
-                horizontalLineTo(3.25f)
-                curveTo(3.6642f, 15.0f, 4.0f, 14.6642f, 4.0f, 14.25f)
-                curveTo(4.0f, 13.8358f, 3.6642f, 13.5f, 3.25f, 13.5f)
-                horizontalLineTo(2.0f)
-                curveTo(1.7239f, 13.5f, 1.5f, 13.2761f, 1.5f, 13.0f)
-                verticalLineTo(2.0f)
-                curveTo(1.5f, 1.7239f, 1.7239f, 1.5f, 2.0f, 1.5f)
+        _ContextCopyRawData = ImageVector.Builder(
+            name = "ContextCopyRawData",
+            defaultWidth = 20.dp,
+            defaultHeight = 20.dp,
+            viewportWidth = 20f,
+            viewportHeight = 20f
+        ).apply {
+            path(fill = SolidColor(Color(0xFFFFFFFF))) {
+                moveTo(1f, 8.964f)
+                horizontalLineTo(2.917f)
+                verticalLineTo(4.857f)
+                curveTo(2.917f, 2.873f, 4.587f, 1.25f, 6.667f, 1.25f)
+                horizontalLineTo(7f)
+                curveTo(7.423f, 1.25f, 7.75f, 1.578f, 7.75f, 1.964f)
+                curveTo(7.75f, 2.35f, 7.423f, 2.679f, 7f, 2.679f)
+                horizontalLineTo(6.667f)
+                curveTo(5.433f, 2.679f, 4.417f, 3.645f, 4.417f, 4.857f)
+                verticalLineTo(15.143f)
+                curveTo(4.417f, 16.354f, 5.433f, 17.321f, 6.667f, 17.321f)
+                horizontalLineTo(7f)
+                curveTo(7.423f, 17.321f, 7.75f, 17.65f, 7.75f, 18.036f)
+                curveTo(7.75f, 18.422f, 7.423f, 18.75f, 7f, 18.75f)
+                horizontalLineTo(6.667f)
+                curveTo(4.587f, 18.75f, 2.917f, 17.126f, 2.917f, 15.143f)
+                verticalLineTo(10.393f)
+                horizontalLineTo(1f)
+                curveTo(0.577f, 10.393f, 0.25f, 10.065f, 0.25f, 9.679f)
+                curveTo(0.25f, 9.293f, 0.577f, 8.964f, 1f, 8.964f)
                 close()
             }
-            path(fill = SolidColor(Color(0xFFffffff)), stroke = null, strokeLineWidth = 0.0f,
-                    strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
-                    pathFillType = NonZero) {
-                moveTo(10.0f, 5.0f)
-                curveTo(8.3432f, 5.0f, 7.0f, 6.3432f, 7.0f, 8.0f)
-                verticalLineTo(11.0f)
-                horizontalLineTo(5.75f)
-                curveTo(5.3358f, 11.0f, 5.0f, 11.3358f, 5.0f, 11.75f)
-                curveTo(5.0f, 12.1642f, 5.3358f, 12.5f, 5.75f, 12.5f)
-                horizontalLineTo(7.0f)
-                verticalLineTo(16.0f)
-                curveTo(7.0f, 17.6569f, 8.3432f, 19.0f, 10.0f, 19.0f)
-                horizontalLineTo(10.25f)
-                curveTo(10.6642f, 19.0f, 11.0f, 18.6642f, 11.0f, 18.25f)
-                curveTo(11.0f, 17.8358f, 10.6642f, 17.5f, 10.25f, 17.5f)
-                horizontalLineTo(10.0f)
-                curveTo(9.1716f, 17.5f, 8.5f, 16.8284f, 8.5f, 16.0f)
-                verticalLineTo(8.0f)
-                curveTo(8.5f, 7.1716f, 9.1716f, 6.5f, 10.0f, 6.5f)
-                horizontalLineTo(10.25f)
-                curveTo(10.6642f, 6.5f, 11.0f, 6.1642f, 11.0f, 5.75f)
-                curveTo(11.0f, 5.3358f, 10.6642f, 5.0f, 10.25f, 5.0f)
-                horizontalLineTo(10.0f)
+            path(fill = SolidColor(Color(0xFFFFFFFF))) {
+                moveTo(17.083f, 4.857f)
+                verticalLineTo(8.964f)
+                horizontalLineTo(19f)
+                curveTo(19.423f, 8.964f, 19.75f, 9.293f, 19.75f, 9.679f)
+                curveTo(19.75f, 10.065f, 19.423f, 10.393f, 19f, 10.393f)
+                horizontalLineTo(17.083f)
+                verticalLineTo(15.143f)
+                curveTo(17.083f, 17.126f, 15.413f, 18.75f, 13.333f, 18.75f)
+                horizontalLineTo(13f)
+                curveTo(12.577f, 18.75f, 12.25f, 18.422f, 12.25f, 18.036f)
+                curveTo(12.25f, 17.65f, 12.577f, 17.321f, 13f, 17.321f)
+                horizontalLineTo(13.333f)
+                curveTo(14.567f, 17.321f, 15.583f, 16.354f, 15.583f, 15.143f)
+                verticalLineTo(4.857f)
+                curveTo(15.583f, 3.645f, 14.567f, 2.679f, 13.333f, 2.679f)
+                horizontalLineTo(13f)
+                curveTo(12.577f, 2.679f, 12.25f, 2.35f, 12.25f, 1.964f)
+                curveTo(12.25f, 1.578f, 12.577f, 1.25f, 13f, 1.25f)
+                horizontalLineTo(13.333f)
+                curveTo(15.413f, 1.25f, 17.083f, 2.873f, 17.083f, 4.857f)
                 close()
             }
-            path(fill = SolidColor(Color(0xFFffffff)), stroke = null, strokeLineWidth = 0.0f,
-                    strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
-                    pathFillType = NonZero) {
-                moveTo(15.0f, 5.0f)
-                curveTo(16.6569f, 5.0f, 18.0f, 6.3432f, 18.0f, 8.0f)
-                verticalLineTo(11.0f)
-                horizontalLineTo(19.25f)
-                curveTo(19.6642f, 11.0f, 20.0f, 11.3358f, 20.0f, 11.75f)
-                curveTo(20.0f, 12.1642f, 19.6642f, 12.5f, 19.25f, 12.5f)
-                horizontalLineTo(18.0f)
-                verticalLineTo(16.0f)
-                curveTo(18.0f, 17.6569f, 16.6569f, 19.0f, 15.0f, 19.0f)
-                horizontalLineTo(14.75f)
-                curveTo(14.3358f, 19.0f, 14.0f, 18.6642f, 14.0f, 18.25f)
-                curveTo(14.0f, 17.8358f, 14.3358f, 17.5f, 14.75f, 17.5f)
-                horizontalLineTo(15.0f)
-                curveTo(15.8284f, 17.5f, 16.5f, 16.8284f, 16.5f, 16.0f)
-                verticalLineTo(8.0f)
-                curveTo(16.5f, 7.1716f, 15.8284f, 6.5f, 15.0f, 6.5f)
-                horizontalLineTo(14.75f)
-                curveTo(14.3358f, 6.5f, 14.0f, 6.1642f, 14.0f, 5.75f)
-                curveTo(14.0f, 5.3358f, 14.3358f, 5.0f, 14.75f, 5.0f)
-                horizontalLineTo(15.0f)
-                close()
-            }
-        }
-        .build()
-        return _contextCopyRawData!!
+        }.build()
+
+        return _ContextCopyRawData!!
     }
 
-private var _contextCopyRawData: ImageVector? = null
+@Suppress("ObjectPropertyName")
+private var _ContextCopyRawData: ImageVector? = null

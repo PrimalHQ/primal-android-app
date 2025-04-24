@@ -26,6 +26,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextMuteUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextRemoveBookmark
 import net.primal.android.core.compose.icons.primaliconpack.ContextReportUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextShare
+import net.primal.android.core.compose.icons.primaliconpack.ContextShareImage
 import net.primal.android.core.compose.icons.primaliconpack.ContextShowHighlightsOutlined
 import net.primal.android.core.compose.icons.primaliconpack.Copy
 import net.primal.android.core.compose.icons.primaliconpack.CopyAlt
@@ -226,6 +227,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             ContextRemoveBookmark,
             ContextMuteUser,
             ContextShare,
+            ContextShareImage,
             ImportPhotoFromCamera,
             ImportPhotoFromGallery,
             NavWalletFilled,

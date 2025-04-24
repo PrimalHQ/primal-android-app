@@ -36,6 +36,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextMuteUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextRemoveBookmark
 import net.primal.android.core.compose.icons.primaliconpack.ContextReportUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextShare
+import net.primal.android.core.compose.icons.primaliconpack.ContextShareImage
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.resolvePrimalNoteLink
@@ -115,7 +116,7 @@ fun NoteDropdownMenuIcon(
                 },
             )
             DropdownPrimalMenuItem(
-                trailingIconVector = PrimalIcons.ContextShare,
+                trailingIconVector = PrimalIcons.ContextShareImage,
                 text = stringResource(id = R.string.feed_context_share_note_as_image),
                 onClick = {
                     uiScope.launch {
