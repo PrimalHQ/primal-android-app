@@ -16,4 +16,7 @@ interface PostDao {
 
     @Query("SELECT * FROM PostData WHERE postId IN (:postIds)")
     suspend fun findPosts(postIds: List<String>): List<PostData>
+
+    @Query("DELETE FROM PostData WHERE postId = :postId")
+    suspend fun deletePostById(postId: String)
 }

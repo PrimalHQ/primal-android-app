@@ -70,6 +70,11 @@ internal class FeedRepositoryImpl(
         ).map { it.mapAsFeedPostDO() }
     }
 
+    override suspend fun deletePostById(postId: String) =
+        withContext(dispatcherProvider.io()) {
+            database.posts().deletePostById(postId = postId)
+        }
+
     override suspend fun findAllPostsByIds(postIds: List<String>): List<FeedPostDO> =
         withContext(dispatcherProvider.io()) {
             database.feedPosts().findAllPostsByIds(postIds).map { it.mapAsFeedPostDO() }
