@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import net.primal.android.notes.feed.list.NoteFeedContract.UiEvent
 import net.primal.android.notes.feed.list.NoteFeedContract.UiState
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
@@ -30,7 +29,6 @@ import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.repository.mapAsProfileDataDO
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
@@ -52,7 +50,6 @@ import timber.log.Timber
 class NoteFeedViewModel @AssistedInject constructor(
     @Assisted private val feedSpec: String,
     @Assisted private val allowMutedThreads: Boolean,
-    private val dispatcherProvider: DispatcherProvider,
     private val feedRepository: FeedRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val mutedItemRepository: MutedItemRepository,
@@ -85,24 +82,10 @@ class NoteFeedViewModel @AssistedInject constructor(
     private var pollingJob: Job? = null
 
     init {
-        fetchLatestMuteList()
         subscribeToEvents()
         observeActiveAccount()
         observeMutedUsers()
     }
-
-    private fun fetchLatestMuteList() =
-        viewModelScope.launch {
-            try {
-                withContext(dispatcherProvider.io()) {
-                    mutedItemRepository.fetchAndPersistMuteList(
-                        userId = activeAccountStore.activeUserId(),
-                    )
-                }
-            } catch (error: NetworkException) {
-                Timber.e(error)
-            }
-        }
 
     private fun observeMutedUsers() =
         viewModelScope.launch {

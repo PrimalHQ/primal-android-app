@@ -12,6 +12,7 @@ import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.domain.bookmarks.PublicBookmarksRepository
+import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 
 class UserDataUpdater @AssistedInject constructor(
@@ -22,6 +23,7 @@ class UserDataUpdater @AssistedInject constructor(
     private val relayRepository: RelayRepository,
     private val bookmarksRepository: PublicBookmarksRepository,
     private val premiumRepository: PremiumRepository,
+    private val mutedItemRepository: MutedItemRepository,
     private val nostrNotary: NostrNotary,
     private val pushNotificationsTokenUpdater: PushNotificationsTokenUpdater,
 ) {
@@ -59,5 +61,6 @@ class UserDataUpdater @AssistedInject constructor(
         runCatching { bookmarksRepository.fetchAndPersistBookmarks(userId = userId) }
         runCatching { walletRepository.fetchUserWalletInfoAndUpdateUserAccount(userId = userId) }
         runCatching { pushNotificationsTokenUpdater.updateTokenForAllUsers() }
+        runCatching { mutedItemRepository.fetchAndPersistMuteList(userId = userId) }
     }
 }
