@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Menu
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -42,6 +41,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
+import net.primal.android.core.compose.ConfirmActionAlertDialog
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.feeds.list.ui.model.FeedUi
@@ -85,6 +85,8 @@ fun FeedList(
 
     if (deleteFeedDialogVisible != null) {
         ConfirmActionAlertDialog(
+            confirmText = stringResource(id = R.string.feed_list_dialog_confirm),
+            dismissText = stringResource(id = R.string.feed_list_dialog_dismiss),
             dialogTitle = stringResource(R.string.feed_list_remove_feed_title),
             dialogText = stringResource(R.string.feed_list_remove_feed_text, deleteFeedDialogVisible?.title ?: ""),
             onConfirmation = {
@@ -102,6 +104,8 @@ fun FeedList(
     var restoreDefaultDialogVisible by remember { mutableStateOf(false) }
     if (restoreDefaultDialogVisible) {
         ConfirmActionAlertDialog(
+            confirmText = stringResource(id = R.string.feed_list_dialog_confirm),
+            dismissText = stringResource(id = R.string.feed_list_dialog_dismiss),
             dialogTitle = stringResource(id = R.string.feed_list_restore_default_feeds),
             dialogText = stringResource(id = R.string.feed_list_restore_default_feeds_prompt_text),
             onConfirmation = {
@@ -317,43 +321,4 @@ private enum class ReorderHapticFeedbackType {
 
 private interface ReorderHapticFeedback {
     fun performHapticFeedback(type: ReorderHapticFeedbackType)
-}
-
-@Composable
-private fun ConfirmActionAlertDialog(
-    onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit,
-    dialogTitle: String? = null,
-    dialogText: String? = null,
-) {
-    AlertDialog(
-        containerColor = AppTheme.colorScheme.surfaceVariant,
-        title = {
-            if (dialogTitle != null) {
-                Text(text = dialogTitle)
-            }
-        },
-        text = {
-            if (dialogText != null) {
-                Text(text = dialogText)
-            }
-        },
-        onDismissRequest = {
-            onDismissRequest()
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onConfirmation() },
-            ) {
-                Text(text = stringResource(id = R.string.feed_list_dialog_confirm))
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = { onDismissRequest() },
-            ) {
-                Text(text = stringResource(id = R.string.feed_list_dialog_dismiss))
-            }
-        },
-    )
 }

@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.ConfirmActionAlertDialog
 import net.primal.android.core.compose.DeleteListItemImage
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
@@ -60,7 +61,6 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.ConnectRelay
 import net.primal.android.core.compose.settings.DecoratedSettingsOutlinedTextField
 import net.primal.android.core.errors.resolveUiErrorMessage
-import net.primal.android.settings.network.ConfirmActionAlertDialog
 import net.primal.android.settings.network.TextSection
 import net.primal.android.theme.AppTheme
 
@@ -151,13 +151,13 @@ private fun MediaUploadsLazyColumn(
     var confirmingRestoreDefaultBlossomServerDialog by remember { mutableStateOf(false) }
     if (confirmingRestoreDefaultBlossomServerDialog) {
         ConfirmActionAlertDialog(
+            confirmText = stringResource(id = R.string.settings_network_dialog_confirm),
+            dismissText = stringResource(id = R.string.settings_network_dialog_dismiss),
             dialogTitle = stringResource(id = R.string.settings_media_uploads_restore_default_blossom_server_title),
             dialogText = stringResource(
                 id = R.string.settings_media_uploads_restore_default_blossom_server_description,
             ),
-            onDismissRequest = {
-                confirmingRestoreDefaultBlossomServerDialog = false
-            },
+            onDismissRequest = { confirmingRestoreDefaultBlossomServerDialog = false },
             onConfirmation = {
                 confirmingRestoreDefaultBlossomServerDialog = false
                 eventPublisher(MediaUploadsSettingsContract.UiEvent.RestoreDefaultBlossomServer)
