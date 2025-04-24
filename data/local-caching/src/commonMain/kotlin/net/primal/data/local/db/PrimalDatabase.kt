@@ -5,8 +5,6 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
-import androidx.sqlite.SQLiteDriver
-import kotlin.coroutines.CoroutineContext
 import net.primal.data.local.dao.bookmarks.PublicBookmark
 import net.primal.data.local.dao.bookmarks.PublicBookmarkDao
 import net.primal.data.local.dao.events.EventRelayHints
@@ -87,7 +85,7 @@ import net.primal.data.local.serialization.ProfileTypeConverters
         ArticleFeedCrossRef::class,
         HighlightData::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -153,15 +151,9 @@ internal expect object AppDatabaseConstructor : RoomDatabaseConstructor<PrimalDa
     override fun initialize(): PrimalDatabase
 }
 
-internal fun buildPrimalDatabase(
-    driver: SQLiteDriver,
-    queryCoroutineContext: CoroutineContext,
-    builder: RoomDatabase.Builder<PrimalDatabase>,
-): PrimalDatabase {
-    return builder
+internal fun buildPrimalDatabase(createDatabaseBuilder: () -> RoomDatabase.Builder<PrimalDatabase>): PrimalDatabase {
+    return createDatabaseBuilder()
         .fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)
         .fallbackToDestructiveMigration(true)
-        .setDriver(driver)
-        .setQueryCoroutineContext(queryCoroutineContext)
         .build()
 }

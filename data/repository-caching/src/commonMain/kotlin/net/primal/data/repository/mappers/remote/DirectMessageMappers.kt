@@ -2,6 +2,7 @@ package net.primal.data.repository.mappers.remote
 
 import net.primal.core.utils.detectUrls
 import net.primal.data.local.dao.messages.DirectMessageData
+import net.primal.data.local.encryption.EncryptableString
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.findFirstProfileId
 import net.primal.domain.nostr.utils.parseHashtags
@@ -29,7 +30,7 @@ fun NostrEvent.mapAsMessageDataPO(
         receiverId = receiverId,
         participantId = participantId,
         createdAt = this.createdAt,
-        content = decryptedMessage,
+        content = EncryptableString(decrypted = decryptedMessage),
         uris = decryptedMessage.detectUrls() + decryptedMessage.parseNostrUris(),
         hashtags = decryptedMessage.parseHashtags(),
     )

@@ -1,7 +1,6 @@
 package net.primal.data.local.db
 
 import androidx.room.Room
-import androidx.room.RoomDatabase
 import androidx.sqlite.driver.NativeSQLiteDriver
 import kotlinx.cinterop.ExperimentalForeignApi
 import net.primal.core.utils.coroutines.IOSDispatcherProvider
@@ -17,18 +16,12 @@ actual object PrimalDatabaseFactory {
     fun getDefaultDatabase() = defaultDatabase
 
     fun createDatabase(): PrimalDatabase {
-        return buildPrimalDatabase(
-            driver = NativeSQLiteDriver(),
-            queryCoroutineContext = IOSDispatcherProvider().io(),
-            builder = getDatabaseBuilder(),
-        )
-    }
-
-    private fun getDatabaseBuilder(): RoomDatabase.Builder<PrimalDatabase> {
         val dbFilePath = documentDirectory() + "/$DATABASE_NAME"
-        return Room.databaseBuilder<PrimalDatabase>(
-            name = dbFilePath,
-        )
+        return buildPrimalDatabase {
+            Room.databaseBuilder<PrimalDatabase>(name = dbFilePath)
+                .setQueryCoroutineContext(IOSDispatcherProvider().io())
+                .setDriver(NativeSQLiteDriver())
+        }
     }
 
     @OptIn(ExperimentalForeignApi::class)

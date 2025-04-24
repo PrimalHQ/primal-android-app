@@ -48,6 +48,9 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.datetime)
 
+                // Cryptography
+                implementation(libs.whyoleg.cryptography.core)
+
                 // Room
                 api(libs.room.runtime)
                 implementation(libs.room.paging)
@@ -69,6 +72,11 @@ kotlin {
             dependencies {
                 // Coroutines
                 implementation(libs.kotlinx.coroutines.android)
+                implementation(libs.core.ktx)
+
+                // Cryptography
+                implementation(libs.whyoleg.cryptography.provider.jdk)
+                implementation(libs.androidx.security.crypto)
 
                 // Room
                 api(libs.room.runtime.android)
@@ -78,6 +86,8 @@ kotlin {
 
         iosMain {
             dependencies {
+                // Cryptography
+                implementation(libs.whyoleg.cryptography.provider.apple)
             }
         }
 

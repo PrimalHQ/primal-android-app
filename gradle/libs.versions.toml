@@ -35,7 +35,7 @@ jetpack-test-ext = "1.2.1"
 jetpack-datastore = "1.1.4"
 jetpack-lifecycle = "2.8.7"
 jetpack-paging = "3.3.6"
-jetpack-room = "2.7.0"
+jetpack-room = "2.7.1"
 jetpack-sqlite = "2.5.0"
 jetpack-webkit = "1.13.0"
 junit = "4.13.2"
@@ -69,13 +69,14 @@ reorderable = "2.4.0"
 retrofit = "2.11.0"
 roboelectric = "4.13"
 security-app-authenticator = "1.0.0-beta01"
-security-crypto = "1.1.0-alpha06"
+security-crypto = "1.1.0-alpha07"
 security-identity-credential = "1.0.0-alpha03"
 skie = "0.10.1"
-sqlcipher-android = "4.6.1"
+sqlcipher-android = "4.7.2"
 telephoto = "0.14.0"
 timber = "5.0.1"
 url-detector = "0.1.23"
+whyoleg-cryptography-kotlin = "0.4.0"
 
 [libraries]
 # Core libs
@@ -265,6 +266,9 @@ androidx-security-crypto = { module = "androidx.security:security-crypto", versi
 androidx-security-app-authenticator = { module = "androidx.security:security-app-authenticator", version.ref = "security-app-authenticator" }
 androidx-security-identity-credential = { module = "androidx.security:security-identity-credential", version.ref = "security-identity-credential" }
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
+whyoleg-cryptography-core = { module = "dev.whyoleg.cryptography:cryptography-core", version.ref = "whyoleg-cryptography-kotlin" }
+whyoleg-cryptography-provider-jdk = { module = "dev.whyoleg.cryptography:cryptography-provider-jdk", version.ref = "whyoleg-cryptography-kotlin" }
+whyoleg-cryptography-provider-apple = { module = "dev.whyoleg.cryptography:cryptography-provider-apple", version.ref = "whyoleg-cryptography-kotlin" }
 
 #Interop
 skie-configuration-annotations = { module = "co.touchlab.skie:configuration-annotations", version.ref = "skie" }

@@ -6,6 +6,7 @@ import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.utils.coroutines.DispatcherProviderFactory
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.local.db.PrimalDatabaseFactory
+import net.primal.data.local.encryption.PlatformKeyStore
 import net.primal.data.remote.factory.PrimalApiServiceFactory
 import net.primal.data.repository.UserDataCleanupRepositoryImpl
 import net.primal.data.repository.articles.ArticleRepositoryImpl
@@ -57,7 +58,8 @@ object AndroidRepositoryFactory : RepositoryFactory {
     }
 
     fun init(context: Context) {
-        appContext = context.applicationContext
+        this.appContext = context.applicationContext
+        PlatformKeyStore.init(context)
         AppConfigInitializer.init(context)
     }
 
