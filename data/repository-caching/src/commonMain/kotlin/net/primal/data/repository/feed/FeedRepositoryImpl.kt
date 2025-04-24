@@ -25,7 +25,7 @@ import net.primal.data.repository.feed.processors.persistNoteRepliesAndArticleCo
 import net.primal.data.repository.feed.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.local.mapAsFeedPostDO
 import net.primal.data.repository.mappers.remote.asFeedPageSnapshot
-import net.primal.data.repository.utils.performTopologicalSort
+import net.primal.data.repository.utils.performTopologicalSortOrThis
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.supportsNoteReposts
 import net.primal.domain.posts.FeedPageSnapshot
@@ -152,8 +152,9 @@ internal class FeedRepositoryImpl(
         return database.threadConversations().observeNoteConversation(
             postId = noteId,
             userId = userId,
-        ).map { list -> list.map { it.mapAsFeedPostDO() } }
-            .map { posts -> posts.performTopologicalSort() }
+        ).map { list ->
+            list.map { it.mapAsFeedPostDO() }.performTopologicalSortOrThis()
+        }
     }
 
     @OptIn(ExperimentalPagingApi::class)

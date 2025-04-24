@@ -6,10 +6,17 @@ import net.primal.domain.nostr.hasRootMarker
 import net.primal.domain.posts.FeedPost
 
 /**
+ * Tries to perform topological sort calling [performTopologicalSort].  In case the sort fails,
+ * returns the original list.
+ */
+fun List<FeedPost>.performTopologicalSortOrThis() = runCatching { performTopologicalSort() }.getOrDefault(this)
+
+/**
  * Performs a topological sort based on depth-first search as described
  * [here](https://en.wikipedia.org/wiki/Topological_sorting#Depth-first_search).
  *
  * Used to deal with some clients generating bad timestamps on thread chains.
+ * @throws IllegalStateException thrown in case a cycle is detected making sort impossible to complete.
  */
 fun List<FeedPost>.performTopologicalSort(): List<FeedPost> {
     val postsMap = this.associateBy { it.eventId }
