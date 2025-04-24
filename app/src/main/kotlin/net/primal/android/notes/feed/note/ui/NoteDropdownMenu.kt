@@ -116,6 +116,22 @@ fun NoteDropdownMenuIcon(
                 },
             )
             DropdownPrimalMenuItem(
+                trailingIconVector = if (isBookmarked) {
+                    PrimalIcons.ContextRemoveBookmark
+                } else {
+                    PrimalIcons.ContextAddBookmark
+                },
+                text = if (isBookmarked) {
+                    stringResource(id = R.string.feed_context_remove_from_bookmark)
+                } else {
+                    stringResource(id = R.string.feed_context_add_to_bookmark)
+                },
+                onClick = {
+                    onBookmarkClick?.invoke()
+                    menuVisible = false
+                },
+            )
+            DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.ContextShareImage,
                 text = stringResource(id = R.string.feed_context_share_note_as_image),
                 onClick = {
@@ -143,22 +159,6 @@ fun NoteDropdownMenuIcon(
                             Toast.LENGTH_SHORT,
                         ).show()
                     }
-                },
-            )
-            DropdownPrimalMenuItem(
-                trailingIconVector = if (isBookmarked) {
-                    PrimalIcons.ContextRemoveBookmark
-                } else {
-                    PrimalIcons.ContextAddBookmark
-                },
-                text = if (isBookmarked) {
-                    stringResource(id = R.string.feed_context_remove_from_bookmark)
-                } else {
-                    stringResource(id = R.string.feed_context_add_to_bookmark)
-                },
-                onClick = {
-                    onBookmarkClick?.invoke()
-                    menuVisible = false
                 },
             )
             DropdownPrimalMenuItem(
