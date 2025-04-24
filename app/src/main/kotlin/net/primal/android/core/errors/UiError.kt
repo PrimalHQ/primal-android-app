@@ -12,6 +12,7 @@ sealed class UiError {
     data class FailedToPublishZapEvent(val cause: Throwable) : UiError()
     data class FailedToPublishRepostEvent(val cause: Throwable) : UiError()
     data class FailedToPublishLikeEvent(val cause: Throwable) : UiError()
+    data class FailedToPublishDeleteEvent(val cause: Throwable) : UiError()
 
     data class FailedToFollowUser(val cause: Throwable) : UiError()
     data class FailedToUnfollowUser(val cause: Throwable) : UiError()

@@ -36,6 +36,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextRemoveBookmar
 import net.primal.android.core.compose.icons.primaliconpack.ContextReportContent
 import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.ContextShareImage
+import net.primal.android.core.compose.icons.primaliconpack.Delete
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.resolvePrimalNoteLink
@@ -55,6 +56,7 @@ fun NoteDropdownMenuIcon(
     authorId: String,
     isBookmarked: Boolean,
     isThreadMuted: Boolean,
+    shouldShowDelete: Boolean,
     relayHints: List<String> = emptyList(),
     noteGraphicsLayer: GraphicsLayer,
     enabled: Boolean = true,
@@ -63,6 +65,7 @@ fun NoteDropdownMenuIcon(
     onMuteThreadClick: (() -> Unit)? = null,
     onUnmuteThreadClick: (() -> Unit)? = null,
     onReportContentClick: (() -> Unit)? = null,
+    onRequestDeleteClick: (() -> Unit)? = null,
 ) {
     var menuVisible by remember { mutableStateOf(false) }
 
@@ -238,6 +241,18 @@ fun NoteDropdownMenuIcon(
                     menuVisible = false
                 },
             )
+            if (shouldShowDelete) {
+                DropdownPrimalMenuItem(
+                    iconSize = 20.dp,
+                    trailingIconVector = PrimalIcons.Delete,
+                    tint = AppTheme.colorScheme.error,
+                    text = stringResource(id = R.string.feed_context_request_delete),
+                    onClick = {
+                        onRequestDeleteClick?.invoke()
+                        menuVisible = false
+                    },
+                )
+            }
         }
     }
 }

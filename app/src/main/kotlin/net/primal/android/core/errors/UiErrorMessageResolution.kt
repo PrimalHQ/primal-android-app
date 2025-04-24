@@ -28,6 +28,8 @@ fun UiError.resolveUiErrorMessage(context: Context): String {
             R.string.post_action_like_failed,
         )
 
+        is UiError.FailedToPublishDeleteEvent -> context.getString(R.string.post_action_delete_failed)
+
         is UiError.FailedToPublishRepostEvent -> context.getString(
             R.string.post_action_repost_failed,
         )

@@ -32,6 +32,7 @@ import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.nostr.zaps.ZapFailureException
 import net.primal.domain.nostr.zaps.ZapRequestException
 import net.primal.domain.nostr.zaps.ZapTarget
+import net.primal.domain.posts.FeedRepository
 import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
 
@@ -42,6 +43,7 @@ class NoteViewModel @AssistedInject constructor(
     private val zapHandler: ZapHandler,
     private val eventInteractionRepository: EventInteractionRepository,
     private val profileRepository: ProfileRepository,
+    private val feedRepository: FeedRepository,
     private val mutedItemRepository: MutedItemRepository,
     private val bookmarksRepository: PublicBookmarksRepository,
     private val relayHintsRepository: EventRelayHintsRepository,
@@ -52,7 +54,7 @@ class NoteViewModel @AssistedInject constructor(
         fun create(noteId: String? = null): NoteViewModel
     }
 
-    private val _state = MutableStateFlow(UiState())
+    private val _state = MutableStateFlow(UiState(activeAccountUserId = activeAccountStore.activeUserId()))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -106,6 +108,7 @@ class NoteViewModel @AssistedInject constructor(
                     is UiEvent.BookmarkAction -> handleBookmark(it)
                     is UiEvent.DismissBookmarkConfirmation -> dismissBookmarkConfirmation()
                     UiEvent.DismissError -> setState { copy(error = null) }
+                    is UiEvent.RequestDeleteAction -> requestDelete(noteId = it.noteId, userId = it.userId)
                 }
             }
         }
@@ -271,6 +274,34 @@ class NoteViewModel @AssistedInject constructor(
                 Timber.w(error)
                 setState { copy(error = UiError.NostrSignUnauthorized) }
             } catch (error: NostrPublishException) {
+                Timber.w(error)
+            }
+        }
+
+    private fun requestDelete(noteId: String, userId: String) =
+        viewModelScope.launch {
+            if (userId != activeAccountStore.activeUserId()) return@launch
+
+            try {
+                eventInteractionRepository.deleteEvent(
+                    userId = userId,
+                    eventIdentifier = noteId,
+                    eventKind = NostrEventKind.ShortTextNote,
+                    relayHint = state.value.relayHints.firstOrNull(),
+                )
+
+                feedRepository.deletePostById(postId = noteId)
+            } catch (error: NostrPublishException) {
+                Timber.w(error)
+                setState { copy(error = UiError.FailedToPublishDeleteEvent(error)) }
+            } catch (error: MissingRelaysException) {
+                Timber.w(error)
+                setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
+            } catch (error: SigningKeyNotFoundException) {
+                setState { copy(error = UiError.MissingPrivateKey) }
+                Timber.w(error)
+            } catch (error: SigningRejectedException) {
+                setState { copy(error = UiError.NostrSignUnauthorized) }
                 Timber.w(error)
             }
         }
