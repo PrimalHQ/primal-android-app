@@ -134,7 +134,7 @@ private fun GenericLinkThumbnailIcon() {
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            modifier = Modifier.size(size = 44.dp),
+            modifier = Modifier.size(size = 34.dp),
             imageVector = PrimalIcons.GenericLinkIcon,
             contentDescription = null,
             tint = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
