@@ -220,12 +220,12 @@ object Nip19TLV {
     }
 
     private fun String.constructNaddrIdentifierBytes(): List<Byte> {
-        val identifierBytes = this.toByteArray(charset = Charsets.ISO_8859_1)
+        val identifierBytes = this.toByteArray(charset = Charsets.UTF_8)
         return identifierBytes.toTLVBytes(type = Type.SPECIAL)
     }
 
     private fun List<String>.constructRelayBytes(): List<Byte> {
-        return flatMap { it.toByteArray(charset = Charsets.ISO_8859_1).toTLVBytes(type = Type.RELAY) }
+        return flatMap { it.toByteArray(charset = Charsets.UTF_8).toTLVBytes(type = Type.RELAY) }
     }
 
     private fun ByteArray.toTLVBytes(type: Type) =
