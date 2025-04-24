@@ -212,7 +212,7 @@ fun NoteDropdownMenuIcon(
             DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.ContextMuteUser,
                 tint = AppTheme.colorScheme.error,
-                text = stringResource(id = R.string.context_menu_mute_user),
+                text = stringResource(id = R.string.feed_context_mute_user),
                 onClick = {
                     onMuteUserClick?.invoke()
                     menuVisible = false
