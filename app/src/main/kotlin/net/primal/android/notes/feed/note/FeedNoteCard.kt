@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -52,6 +53,8 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.launch
 import net.primal.android.LocalContentDisplaySettings
+import net.primal.android.R
+import net.primal.android.core.compose.ConfirmActionAlertDialog
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.preview.PrimalPreview
@@ -196,6 +199,20 @@ private fun FeedNoteCard(
         )
     }
 
+    var deleteDialogVisible by remember { mutableStateOf(false) }
+    if (deleteDialogVisible) {
+        ConfirmActionAlertDialog(
+            confirmText = stringResource(id = R.string.context_confirm_delete_positive),
+            dismissText = stringResource(id = R.string.context_confirm_delete_negative),
+            dialogTitle = stringResource(id = R.string.context_confirm_delete_title),
+            dialogText = stringResource(id = R.string.context_confirm_delete_text),
+            onConfirmation = {
+                eventPublisher(UiEvent.RequestDeleteAction(noteId = data.postId, userId = data.authorId))
+            },
+            onDismissRequest = { deleteDialogVisible = false },
+        )
+    }
+
     var reportDialogVisible by remember { mutableStateOf(false) }
     if (reportDialogVisible) {
         ReportUserDialog(
@@ -294,6 +311,7 @@ private fun FeedNoteCard(
                 authorId = data.authorId,
                 isBookmarked = data.isBookmarked,
                 isThreadMuted = data.isThreadMuted,
+                shouldShowDelete = data.authorId == state.activeAccountUserId,
                 relayHints = state.relayHints,
                 enabled = noteOptionsMenuEnabled,
                 noteGraphicsLayer = graphicsLayer,
@@ -308,6 +326,9 @@ private fun FeedNoteCard(
                 },
                 onUnmuteThreadClick = {
                     eventPublisher(UiEvent.UnmuteThreadAction(postId = data.postId))
+                },
+                onRequestDeleteClick = {
+                    deleteDialogVisible = true
                 },
                 onReportContentClick = {
                     reportDialogVisible = true
@@ -684,7 +705,7 @@ fun PreviewFeedNoteListItemLightMultiLineHeader(
     PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
         FeedNoteCard(
             data = feedPostUi,
-            state = NoteContract.UiState(),
+            state = NoteContract.UiState(activeAccountUserId = ""),
             eventPublisher = {},
             headerSingleLine = false,
             fullWidthContent = false,
@@ -702,7 +723,7 @@ fun PreviewFeedNoteListItemLightMultiLineHeaderFullWidth(
     PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
         FeedNoteCard(
             data = feedPostUi,
-            state = NoteContract.UiState(),
+            state = NoteContract.UiState(activeAccountUserId = ""),
             eventPublisher = {},
             headerSingleLine = false,
             fullWidthContent = true,
@@ -720,7 +741,7 @@ fun PreviewFeedNoteListItemDarkSingleLineHeader(
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         FeedNoteCard(
             data = feedPostUi,
-            state = NoteContract.UiState(),
+            state = NoteContract.UiState(activeAccountUserId = ""),
             eventPublisher = {},
             headerSingleLine = true,
             fullWidthContent = false,
@@ -738,7 +759,7 @@ fun PreviewFeedNoteListItemDarkSingleLineHeaderFullWidth(
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         FeedNoteCard(
             data = feedPostUi,
-            state = NoteContract.UiState(),
+            state = NoteContract.UiState(activeAccountUserId = ""),
             eventPublisher = {},
             headerSingleLine = true,
             fullWidthContent = true,
@@ -756,7 +777,7 @@ fun PreviewFeedNoteListItemLightForcedContentIndentFullWidthSingleLineHeader(
     PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
         FeedNoteCard(
             data = feedPostUi,
-            state = NoteContract.UiState(),
+            state = NoteContract.UiState(activeAccountUserId = ""),
             eventPublisher = {},
             headerSingleLine = true,
             fullWidthContent = true,
@@ -776,7 +797,7 @@ fun PreviewFeedNoteListItemDarkForcedContentIndentSingleLineHeader(
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         FeedNoteCard(
             data = feedPostUi,
-            state = NoteContract.UiState(),
+            state = NoteContract.UiState(activeAccountUserId = ""),
             eventPublisher = {},
             headerSingleLine = true,
             fullWidthContent = false,

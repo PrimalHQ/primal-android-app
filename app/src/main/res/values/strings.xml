@@ -506,6 +506,7 @@
     <string name="feed_context_report_user">Report user</string>
     <string name="feed_context_mute_user">Mute User</string>
     <string name="feed_context_mute_thread">Mute Thread</string>
+    <string name="feed_context_request_delete">Request Delete</string>
     <string name="feed_context_copied_toast">Copied!</string>
 
     <string name="feed_lightning_invoice_title">Lightning Invoice</string>
@@ -539,6 +540,7 @@
     <string name="post_action_like_failed">Unable to like. Please try again.</string>
     <string name="post_action_repost_failed">Unable to repost. Please try again.</string>
     <string name="post_action_reply_failed">Unable to reply. Please try again.</string>
+    <string name="post_action_delete_failed">Unable to delete. Please try again.</string>
 
     <string name="thread_title">Thread</string>
     <string name="thread_reply_to">Reply to %1$s</string>
@@ -969,6 +971,11 @@
     <string name="context_confirm_bookmark_text">You are about to save your first public bookmark. These bookmarks can be seen by other nostr users. Do you wish to continue?</string>
     <string name="context_confirm_bookmark_positive">Save Bookmark</string>
     <string name="context_confirm_bookmark_negative">No</string>
+
+    <string name="context_confirm_delete_title">Delete note?</string>
+    <string name="context_confirm_delete_text">This will issue a "request delete" command to the relays where the note was published. Do you want to continue?</string>
+    <string name="context_confirm_delete_positive">Confirm</string>
+    <string name="context_confirm_delete_negative">Dismiss</string>
 
     <string name="context_confirm_follow_title">Saving first follow</string>
     <string name="context_confirm_follow_text">This will result in following a total of one account. Do you wish to continue?</string>

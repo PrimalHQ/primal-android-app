@@ -7,6 +7,7 @@ import net.primal.domain.nostr.ReportType
 interface NoteContract {
 
     data class UiState(
+        val activeAccountUserId: String,
         val zappingState: ZappingState = ZappingState(),
         val shouldApproveBookmark: Boolean = false,
         val relayHints: List<String> = emptyList(),
@@ -57,6 +58,11 @@ interface NoteContract {
 
         data class DismissBookmarkConfirmation(
             val noteId: String,
+        ) : UiEvent()
+
+        data class RequestDeleteAction(
+            val noteId: String,
+            val userId: String,
         ) : UiEvent()
 
         data object DismissError : UiEvent()
