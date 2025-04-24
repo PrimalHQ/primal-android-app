@@ -14,7 +14,7 @@ import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenuItem
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ContextMuteUser
-import net.primal.android.core.compose.icons.primaliconpack.ContextReportUser
+import net.primal.android.core.compose.icons.primaliconpack.ContextReportContent
 import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
@@ -97,7 +97,7 @@ fun ProfileDropdownMenu(
             )
 
             DropdownPrimalMenuItem(
-                trailingIconVector = PrimalIcons.ContextReportUser,
+                trailingIconVector = PrimalIcons.ContextReportContent,
                 tint = AppTheme.colorScheme.error,
                 text = stringResource(id = R.string.context_menu_report_user),
                 onClick = {

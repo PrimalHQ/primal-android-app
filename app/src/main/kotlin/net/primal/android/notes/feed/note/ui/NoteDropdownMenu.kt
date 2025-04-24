@@ -29,13 +29,13 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextAddBookmark
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteId
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteLink
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteText
-import net.primal.android.core.compose.icons.primaliconpack.ContextCopyPublicKey
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyRawData
 import net.primal.android.core.compose.icons.primaliconpack.ContextMuteConversation
 import net.primal.android.core.compose.icons.primaliconpack.ContextMuteUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextRemoveBookmark
-import net.primal.android.core.compose.icons.primaliconpack.ContextReportUser
+import net.primal.android.core.compose.icons.primaliconpack.ContextReportContent
 import net.primal.android.core.compose.icons.primaliconpack.ContextShare
+import net.primal.android.core.compose.icons.primaliconpack.ContextShareImage
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.resolvePrimalNoteLink
@@ -44,9 +44,7 @@ import net.primal.android.core.utils.systemShareText
 import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV.toNeventString
-import net.primal.domain.nostr.Nip19TLV.toNprofileString
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.domain.nostr.Nprofile
 
 @Composable
 fun NoteDropdownMenuIcon(
@@ -115,7 +113,23 @@ fun NoteDropdownMenuIcon(
                 },
             )
             DropdownPrimalMenuItem(
-                trailingIconVector = PrimalIcons.ContextShare,
+                trailingIconVector = if (isBookmarked) {
+                    PrimalIcons.ContextRemoveBookmark
+                } else {
+                    PrimalIcons.ContextAddBookmark
+                },
+                text = if (isBookmarked) {
+                    stringResource(id = R.string.feed_context_remove_from_bookmark)
+                } else {
+                    stringResource(id = R.string.feed_context_add_to_bookmark)
+                },
+                onClick = {
+                    onBookmarkClick?.invoke()
+                    menuVisible = false
+                },
+            )
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.ContextShareImage,
                 text = stringResource(id = R.string.feed_context_share_note_as_image),
                 onClick = {
                     uiScope.launch {
@@ -142,22 +156,6 @@ fun NoteDropdownMenuIcon(
                             Toast.LENGTH_SHORT,
                         ).show()
                     }
-                },
-            )
-            DropdownPrimalMenuItem(
-                trailingIconVector = if (isBookmarked) {
-                    PrimalIcons.ContextRemoveBookmark
-                } else {
-                    PrimalIcons.ContextAddBookmark
-                },
-                text = if (isBookmarked) {
-                    stringResource(id = R.string.feed_context_remove_from_bookmark)
-                } else {
-                    stringResource(id = R.string.feed_context_add_to_bookmark)
-                },
-                onClick = {
-                    onBookmarkClick?.invoke()
-                    menuVisible = false
                 },
             )
             DropdownPrimalMenuItem(
@@ -212,24 +210,9 @@ fun NoteDropdownMenuIcon(
                 },
             )
             DropdownPrimalMenuItem(
-                trailingIconVector = PrimalIcons.ContextCopyPublicKey,
-                text = stringResource(id = R.string.feed_context_copy_user_id),
-                onClick = {
-                    copyText(context = context, text = Nprofile(pubkey = authorId).toNprofileString())
-                    menuVisible = false
-                    uiScope.launch {
-                        Toast.makeText(
-                            context,
-                            copyConfirmationText,
-                            Toast.LENGTH_SHORT,
-                        ).show()
-                    }
-                },
-            )
-            DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.ContextMuteUser,
                 tint = AppTheme.colorScheme.error,
-                text = stringResource(id = R.string.context_menu_mute_user),
+                text = stringResource(id = R.string.feed_context_mute_user),
                 onClick = {
                     onMuteUserClick?.invoke()
                     menuVisible = false
@@ -247,7 +230,7 @@ fun NoteDropdownMenuIcon(
                 )
             }
             DropdownPrimalMenuItem(
-                trailingIconVector = PrimalIcons.ContextReportUser,
+                trailingIconVector = PrimalIcons.ContextReportContent,
                 tint = AppTheme.colorScheme.error,
                 text = stringResource(id = R.string.context_menu_report_content),
                 onClick = {

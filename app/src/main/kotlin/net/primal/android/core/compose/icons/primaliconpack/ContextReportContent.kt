@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.icons.PrimalIcons
 
-public val PrimalIcons.ContextReportUser: ImageVector
+public val PrimalIcons.ContextReportContent: ImageVector
     get() {
         if (_contextReportUser != null) {
             return _contextReportUser!!

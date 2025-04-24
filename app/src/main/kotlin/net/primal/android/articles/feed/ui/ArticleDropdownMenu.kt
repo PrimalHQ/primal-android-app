@@ -28,7 +28,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextCopyRawData
 import net.primal.android.core.compose.icons.primaliconpack.ContextHideHighlightsOutlined
 import net.primal.android.core.compose.icons.primaliconpack.ContextMuteUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextRemoveBookmark
-import net.primal.android.core.compose.icons.primaliconpack.ContextReportUser
+import net.primal.android.core.compose.icons.primaliconpack.ContextReportContent
 import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.ContextShowHighlightsOutlined
 import net.primal.android.core.utils.copyText
@@ -235,7 +235,7 @@ fun ArticleDropdownMenuIcon(
             )
 
             DropdownPrimalMenuItem(
-                trailingIconVector = PrimalIcons.ContextReportUser,
+                trailingIconVector = PrimalIcons.ContextReportContent,
                 tint = AppTheme.colorScheme.error,
                 text = stringResource(id = R.string.context_menu_report_content),
                 onClick = {
