@@ -1,4 +1,5 @@
-- Push notifications preview.
-- Public key login.
+- Login with Amber & Public key.
+- Push notifications.
+- New Media Uploads & Muted Content settings.
 - Image gallery in articles and new gallery in notes.
-- Stability and improvements.
+- Various minor improvements and stability fixes.
