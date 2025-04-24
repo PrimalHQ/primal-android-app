@@ -29,7 +29,6 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextAddBookmark
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteId
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteLink
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteText
-import net.primal.android.core.compose.icons.primaliconpack.ContextCopyPublicKey
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyRawData
 import net.primal.android.core.compose.icons.primaliconpack.ContextMuteConversation
 import net.primal.android.core.compose.icons.primaliconpack.ContextMuteUser
@@ -45,9 +44,7 @@ import net.primal.android.core.utils.systemShareText
 import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV.toNeventString
-import net.primal.domain.nostr.Nip19TLV.toNprofileString
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.domain.nostr.Nprofile
 
 @Composable
 fun NoteDropdownMenuIcon(
@@ -202,21 +199,6 @@ fun NoteDropdownMenuIcon(
                 text = stringResource(id = R.string.feed_context_copy_raw_data),
                 onClick = {
                     copyText(context = context, text = noteRawData)
-                    menuVisible = false
-                    uiScope.launch {
-                        Toast.makeText(
-                            context,
-                            copyConfirmationText,
-                            Toast.LENGTH_SHORT,
-                        ).show()
-                    }
-                },
-            )
-            DropdownPrimalMenuItem(
-                trailingIconVector = PrimalIcons.ContextCopyPublicKey,
-                text = stringResource(id = R.string.feed_context_copy_user_id),
-                onClick = {
-                    copyText(context = context, text = Nprofile(pubkey = authorId).toNprofileString())
                     menuVisible = false
                     uiScope.launch {
                         Toast.makeText(
