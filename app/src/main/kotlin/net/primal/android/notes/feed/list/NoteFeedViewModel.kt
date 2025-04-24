@@ -8,6 +8,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlin.collections.map
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -37,6 +38,7 @@ import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.isPremiumFeedSpec
 import net.primal.domain.feeds.supportsUpwardsNotesPagination
+import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.findFirstEventId
 import net.primal.domain.posts.FeedPageSnapshot
@@ -50,6 +52,7 @@ class NoteFeedViewModel @AssistedInject constructor(
     @Assisted private val allowMutedThreads: Boolean,
     private val feedRepository: FeedRepository,
     private val activeAccountStore: ActiveAccountStore,
+    private val mutedItemRepository: MutedItemRepository,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -81,7 +84,16 @@ class NoteFeedViewModel @AssistedInject constructor(
     init {
         subscribeToEvents()
         observeActiveAccount()
+        observeMutedUsers()
     }
+
+    private fun observeMutedUsers() =
+        viewModelScope.launch {
+            mutedItemRepository.observeMutedProfileIdsByOwnerId(ownerId = activeAccountStore.activeUserId())
+                .collect {
+                    setState { copy(mutedProfileIds = it) }
+                }
+        }
 
     private fun observeActiveAccount() {
         viewModelScope.launch {
@@ -203,7 +215,9 @@ class NoteFeedViewModel @AssistedInject constructor(
             blossomServers = blossomServers,
         )
 
-        val avatarCdnImagesAndLegendaryCustomizations = allNotes
+        val allNotesFromNotMutedProfiles = allNotes.filter { note -> note.pubKey !in state.value.mutedProfileIds }
+
+        val avatarCdnImagesAndLegendaryCustomizations = allNotesFromNotMutedProfiles
             .mapNotNull { note -> profiles.find { it.profileId == note.pubKey } }
             .map { profileData ->
                 Pair(
@@ -216,7 +230,7 @@ class NoteFeedViewModel @AssistedInject constructor(
         val limit = avatarCdnImagesAndLegendaryCustomizations.count().coerceAtMost(MAX_AVATARS)
 
         val newSyncStats = FeedPostsSyncStats(
-            latestNoteIds = allNotes.map { it.id },
+            latestNoteIds = allNotesFromNotMutedProfiles.map { it.id },
             latestAvatarCdnImages = avatarCdnImagesAndLegendaryCustomizations
                 .map { it.first }
                 .take(limit),

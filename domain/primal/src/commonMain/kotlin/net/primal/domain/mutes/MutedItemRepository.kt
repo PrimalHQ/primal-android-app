@@ -17,6 +17,8 @@ interface MutedItemRepository {
 
     fun observeMutedWordsByOwnerId(ownerId: String): Flow<List<String>>
 
+    fun observeMutedProfileIdsByOwnerId(ownerId: String): Flow<List<String>>
+
     @Throws(NetworkException::class, CancellationException::class)
     suspend fun fetchAndPersistMuteList(userId: String)
 

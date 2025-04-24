@@ -8,6 +8,7 @@ import net.primal.android.notes.feed.model.FeedPostsSyncStats
 interface NoteFeedContract {
 
     data class UiState(
+        val mutedProfileIds: List<String> = emptyList(),
         val notes: Flow<PagingData<FeedPostUi>>,
         val paywall: Boolean = false,
         val feedPostsCount: Int = 0,

@@ -51,6 +51,9 @@ class MutedItemRepositoryImpl(
             .observeMutedItemsByType(ownerId = ownerId, type = MutedItemType.Hashtag)
             .map { it.map { item -> item.item } }
 
+    override fun observeMutedProfileIdsByOwnerId(ownerId: String) =
+        database.mutedItems().observeMutedProfileIdsByOwnerId(ownerId = ownerId)
+
     override fun observeMutedWordsByOwnerId(ownerId: String) =
         database.mutedItems()
             .observeMutedItemsByType(ownerId = ownerId, type = MutedItemType.Word)

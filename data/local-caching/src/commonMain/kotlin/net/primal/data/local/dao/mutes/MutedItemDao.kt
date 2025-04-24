@@ -34,4 +34,7 @@ interface MutedItemDao {
 
     @Query("SELECT * FROM MutedItemData WHERE ownerId = :ownerId AND type = :type")
     fun observeMutedItemsByType(ownerId: String, type: MutedItemType): Flow<List<MutedItemData>>
+
+    @Query("SELECT item FROM MutedItemData WHERE ownerId = :ownerId AND type = 'User'")
+    fun observeMutedProfileIdsByOwnerId(ownerId: String): Flow<List<String>>
 }
