@@ -114,7 +114,10 @@ internal class PrimalUploadService(
                 error is BlossomException -> error
                 else -> BlossomException(cause = error)
             }
-            UploadResult.Failed(error = uploadError)
+            UploadResult.Failed(
+                error = uploadError,
+                message = uploadError.message,
+            )
         }
     }
 

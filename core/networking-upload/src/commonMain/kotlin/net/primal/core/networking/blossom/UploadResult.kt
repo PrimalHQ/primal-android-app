@@ -9,5 +9,6 @@ sealed class UploadResult {
 
     data class Failed(
         val error: BlossomException,
+        val message: String? = null,
     ) : UploadResult()
 }
