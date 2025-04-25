@@ -39,6 +39,7 @@ interface NoteEditorContract {
         sealed class NoteEditorError {
             data class PublishError(val cause: Throwable?) : NoteEditorError()
             data class MissingRelaysConfiguration(val cause: Throwable) : NoteEditorError()
+            data class AttachmentUploadFailed(val cause: Throwable) : NoteEditorError()
         }
     }
 

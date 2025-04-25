@@ -643,6 +643,10 @@ private fun NoteEditorErrorHandler(
                 R.string.post_action_reply_failed,
             )
 
+            is NoteEditorContract.UiState.NoteEditorError.AttachmentUploadFailed ->
+                error.cause.message
+                    ?: context.getString(R.string.app_error_upload_failed)
+
             null -> return@LaunchedEffect
         }
 

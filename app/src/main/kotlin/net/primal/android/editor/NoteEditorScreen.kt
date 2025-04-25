@@ -638,15 +638,17 @@ private fun NewPostPublishErrorHandler(error: NoteEditorError?, snackbarHostStat
                 R.string.note_editor_nostr_publish_error,
             )
 
-            else -> null
+            is NoteEditorError.AttachmentUploadFailed ->
+                error.cause.message
+                    ?: context.getString(R.string.app_error_upload_failed)
+
+            null -> return@LaunchedEffect
         }
 
-        if (errorMessage != null) {
-            snackbarHostState.showSnackbar(
-                message = errorMessage,
-                duration = SnackbarDuration.Short,
-            )
-        }
+        snackbarHostState.showSnackbar(
+            message = errorMessage,
+            duration = SnackbarDuration.Long,
+        )
     }
 }
 

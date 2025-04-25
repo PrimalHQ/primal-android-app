@@ -420,6 +420,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                 is UploadResult.Failed -> {
                     Timber.w(uploadResult.error)
                     updateNoteAttachmentState(attachment = updatedAttachment.copy(uploadError = uploadResult.error))
+                    setErrorState(error = UiState.NoteEditorError.AttachmentUploadFailed(cause = uploadResult.error))
                 }
             }
         } catch (error: SignatureException) {
