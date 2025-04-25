@@ -1,7 +1,6 @@
 package net.primal.core.networking.blossom
 
 import io.ktor.client.call.body
-import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.head
 import io.ktor.client.request.headers
 import io.ktor.client.request.put
@@ -12,7 +11,6 @@ import io.ktor.http.isSuccess
 import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.writeFully
 import kotlinx.coroutines.withContext
-import net.primal.core.networking.factory.HttpClientFactory
 import net.primal.core.utils.coroutines.DispatcherProvider
 import okio.BufferedSource
 import okio.use
@@ -24,15 +22,7 @@ internal class BlossomApiImpl(
     private val dispatcherProvider: DispatcherProvider,
 ) : BlossomApi {
 
-    private val httpClient by lazy {
-        HttpClientFactory.createHttpClientWithDefaultConfig {
-            install(HttpTimeout) {
-                requestTimeoutMillis = Long.MAX_VALUE
-                connectTimeoutMillis = 15_000
-                socketTimeoutMillis = 15_000
-            }
-        }
-    }
+    private val httpClient by lazy { createBlossomHttpClient() }
 
     override suspend fun headMedia(authorization: String, fileMetadata: FileMetadata) =
         performHeadRequest(
@@ -59,11 +49,11 @@ internal class BlossomApiImpl(
         performPutUpload(
             "upload",
             authorization = authorization,
-            contentType = "application/octet-stream",
+            contentType = fileMetadata.mimeType ?: "application/octet-stream",
             fileMetadata = fileMetadata,
             bufferedSource = bufferedSource,
             onProgress = onProgress,
-            errorPrefix = "Upload",
+            errorPrefix = "Put Upload",
             checkFileSize = true,
         )
 
@@ -80,7 +70,7 @@ internal class BlossomApiImpl(
             fileMetadata = fileMetadata,
             bufferedSource = bufferedSource,
             onProgress = onProgress,
-            errorPrefix = "Upload Media",
+            errorPrefix = "Put Media",
         )
 
     override suspend fun putMirror(authorization: String, fileUrl: String): BlobDescriptor {
