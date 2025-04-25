@@ -104,7 +104,6 @@ fun FeedArticleListItem(
                 onBookmarkClick = onBookmarkClick,
                 onMuteUserClick = onMuteUserClick,
                 onReportContentClick = onReportContentClick,
-
             )
 
             ListItemContent(data = data)

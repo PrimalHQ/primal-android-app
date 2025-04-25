@@ -225,17 +225,17 @@ fun ArticleDropdownMenuIcon(
                 },
             )
 
-            DropdownPrimalMenuItem(
-                trailingIconVector = PrimalIcons.ContextMuteUser,
-                tint = AppTheme.colorScheme.error,
-                text = stringResource(id = R.string.context_menu_mute_user),
-                onClick = {
-                    onMuteUserClick?.invoke()
-                    menuVisible = false
-                },
-            )
-
             if (!isArticleAuthor) {
+                DropdownPrimalMenuItem(
+                    trailingIconVector = PrimalIcons.ContextMuteUser,
+                    tint = AppTheme.colorScheme.error,
+                    text = stringResource(id = R.string.context_menu_mute_user),
+                    onClick = {
+                        onMuteUserClick?.invoke()
+                        menuVisible = false
+                    },
+                )
+
                 DropdownPrimalMenuItem(
                     trailingIconVector = PrimalIcons.ContextReportContent,
                     tint = AppTheme.colorScheme.error,

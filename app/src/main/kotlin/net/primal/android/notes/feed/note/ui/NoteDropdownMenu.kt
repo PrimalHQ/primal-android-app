@@ -212,16 +212,18 @@ fun NoteDropdownMenuIcon(
                     }
                 },
             )
-            DropdownPrimalMenuItem(
-                trailingIconVector = PrimalIcons.ContextMuteUser,
-                tint = AppTheme.colorScheme.error,
-                text = stringResource(id = R.string.feed_context_mute_user),
-                onClick = {
-                    onMuteUserClick?.invoke()
-                    menuVisible = false
-                },
-            )
-            if (!isThreadMuted) {
+            if (!isNoteAuthor) {
+                DropdownPrimalMenuItem(
+                    trailingIconVector = PrimalIcons.ContextMuteUser,
+                    tint = AppTheme.colorScheme.error,
+                    text = stringResource(id = R.string.feed_context_mute_user),
+                    onClick = {
+                        onMuteUserClick?.invoke()
+                        menuVisible = false
+                    },
+                )
+            }
+            if (!isThreadMuted && !isNoteAuthor) {
                 DropdownPrimalMenuItem(
                     trailingIconVector = PrimalIcons.ContextMuteConversation,
                     tint = AppTheme.colorScheme.error,
