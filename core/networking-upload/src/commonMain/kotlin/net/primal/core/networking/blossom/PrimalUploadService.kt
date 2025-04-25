@@ -1,6 +1,7 @@
 package net.primal.core.networking.blossom
 
 import io.github.aakira.napier.Napier
+import io.github.anvell.filetype.FileType
 import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -163,6 +164,7 @@ internal class PrimalUploadService(
         val blackhole = blackholeSink().buffer()
         val tempBuffer = Buffer()
 
+        val mimeType = this.mimeType()
         var totalBytes = 0L
         bufferedHashingSource.use {
             while (!it.exhausted()) {
@@ -181,7 +183,17 @@ internal class PrimalUploadService(
         return FileMetadata(
             sizeInBytes = totalBytes,
             sha256 = hex,
+            mimeType = mimeType,
         )
+    }
+
+    /**
+     * Returns the RFC-6838 media-type (e.g. "image/png") or `null`
+     * without consuming the source.
+     */
+    fun BufferedSource.mimeType(): String? {
+        val head = peek().readByteArray(512)
+        return FileType.detect(head)?.toString()
     }
 
     private companion object {
