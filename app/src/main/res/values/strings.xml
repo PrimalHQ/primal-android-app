@@ -899,7 +899,8 @@
     <string name="settings_media_uploads_blossom_mirror_server_switcher_title">Enable media mirrors</string>
     <string name="settings_media_uploads_blossom_mirror_server_enabled_notice">You can enable one or more media mirror servers. When enabled, your uploads to the primary media server will be automatically copied to the mirror(s).</string>
     <string name="settings_media_uploads_switch_blossom_mirror_server">Add a media mirror server</string>
-    <string name="settings_media_uploads_suggested_blossoms_title">Suggested media mirror servers</string>
+    <string name="settings_media_uploads_suggested_blossoms_title">Suggested media servers</string>
+    <string name="settings_media_uploads_suggested_mirror_blossoms_title">Suggested media mirror servers</string>
     <string name="settings_media_uploads_restore_default_blossom_server_title">Restore Default</string>
     <string name="settings_media_uploads_restore_default_blossom_server_description">Are you sure you want to restore default mirror server?</string>
     <string name="settings_version_title">Version</string>
