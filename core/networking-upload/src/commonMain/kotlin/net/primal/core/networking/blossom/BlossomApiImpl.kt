@@ -1,6 +1,7 @@
 package net.primal.core.networking.blossom
 
 import io.ktor.client.call.body
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.head
 import io.ktor.client.request.headers
 import io.ktor.client.request.put
@@ -24,7 +25,13 @@ internal class BlossomApiImpl(
 ) : BlossomApi {
 
     private val httpClient by lazy {
-        HttpClientFactory.createHttpClientWithDefaultConfig()
+        HttpClientFactory.createHttpClientWithDefaultConfig {
+            install(HttpTimeout) {
+                requestTimeoutMillis = Long.MAX_VALUE
+                connectTimeoutMillis = 15_000
+                socketTimeoutMillis = 15_000
+            }
+        }
     }
 
     override suspend fun headMedia(authorization: String, fileMetadata: FileMetadata) =
