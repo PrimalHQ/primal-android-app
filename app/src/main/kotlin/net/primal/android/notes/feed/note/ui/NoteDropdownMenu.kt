@@ -56,7 +56,7 @@ fun NoteDropdownMenuIcon(
     authorId: String,
     isBookmarked: Boolean,
     isThreadMuted: Boolean,
-    shouldShowDelete: Boolean,
+    isNoteAuthor: Boolean,
     relayHints: List<String> = emptyList(),
     noteGraphicsLayer: GraphicsLayer,
     enabled: Boolean = true,
@@ -232,16 +232,18 @@ fun NoteDropdownMenuIcon(
                     },
                 )
             }
-            DropdownPrimalMenuItem(
-                trailingIconVector = PrimalIcons.ContextReportContent,
-                tint = AppTheme.colorScheme.error,
-                text = stringResource(id = R.string.context_menu_report_content),
-                onClick = {
-                    onReportContentClick?.invoke()
-                    menuVisible = false
-                },
-            )
-            if (shouldShowDelete) {
+            if (!isNoteAuthor) {
+                DropdownPrimalMenuItem(
+                    trailingIconVector = PrimalIcons.ContextReportContent,
+                    tint = AppTheme.colorScheme.error,
+                    text = stringResource(id = R.string.context_menu_report_content),
+                    onClick = {
+                        onReportContentClick?.invoke()
+                        menuVisible = false
+                    },
+                )
+            }
+            if (isNoteAuthor) {
                 DropdownPrimalMenuItem(
                     iconSize = 20.dp,
                     trailingIconVector = PrimalIcons.Delete,
