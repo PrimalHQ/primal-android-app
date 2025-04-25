@@ -52,6 +52,7 @@ fun ArticleDropdownMenuIcon(
     authorId: String,
     isBookmarked: Boolean,
     enabled: Boolean = true,
+    isArticleAuthor: Boolean,
     showHighlights: Boolean? = null,
     onToggleHighlightsClick: (() -> Unit)? = null,
     onBookmarkClick: (() -> Unit)? = null,
@@ -234,15 +235,17 @@ fun ArticleDropdownMenuIcon(
                 },
             )
 
-            DropdownPrimalMenuItem(
-                trailingIconVector = PrimalIcons.ContextReportContent,
-                tint = AppTheme.colorScheme.error,
-                text = stringResource(id = R.string.context_menu_report_content),
-                onClick = {
-                    menuVisible = false
-                    reportDialogVisible = true
-                },
-            )
+            if (!isArticleAuthor) {
+                DropdownPrimalMenuItem(
+                    trailingIconVector = PrimalIcons.ContextReportContent,
+                    tint = AppTheme.colorScheme.error,
+                    text = stringResource(id = R.string.context_menu_report_content),
+                    onClick = {
+                        menuVisible = false
+                        reportDialogVisible = true
+                    },
+                )
+            }
         }
     }
 }
