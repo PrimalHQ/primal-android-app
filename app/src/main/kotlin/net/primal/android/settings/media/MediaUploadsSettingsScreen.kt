@@ -230,6 +230,7 @@ private fun MediaUploadsLazyColumn(
                     focusManager.clearFocus()
                     eventPublisher(event)
                 },
+                isMainServerSelection = isEditMainBlossom,
             )
         }
     }
@@ -238,13 +239,18 @@ private fun MediaUploadsLazyColumn(
 private fun LazyListScope.suggestedBlossomServersSectionItems(
     suggestedBlossomServerUrls: List<String>,
     confirmBlossomServerUrl: (String) -> Unit,
+    isMainServerSelection: Boolean = true,
 ) {
     item {
         Column {
             Spacer(modifier = Modifier.height(24.dp))
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                text = stringResource(id = R.string.settings_media_uploads_suggested_blossoms_title),
+                text = if (isMainServerSelection) {
+                    stringResource(id = R.string.settings_media_uploads_suggested_blossoms_title)
+                } else {
+                    stringResource(id = R.string.settings_media_uploads_suggested_mirror_blossoms_title)
+                },
                 style = AppTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
             )
             Spacer(modifier = Modifier.height(8.dp))
