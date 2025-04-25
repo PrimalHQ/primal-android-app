@@ -142,14 +142,14 @@ private fun FourImageGallery(
         mediaEventUri.chunked(2).forEachIndexed { rowIndex, rowAttachments ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(1.dp),
             ) {
                 rowAttachments.forEachIndexed { index, mediaEventUri ->
                     NoteMediaAttachment(
                         modifier = Modifier
                             .weight(1f)
                             .aspectRatio(1f)
-                            .then(if (rowIndex == 0) Modifier.padding(0.dp) else Modifier.padding(vertical = 4.dp))
+                            .then(if (rowIndex == 0) Modifier.padding(0.dp) else Modifier.padding(vertical = 1.dp))
                             .clip(shapeMatrix[rowIndex * 2 + index]),
                         mediaEventUri = mediaEventUri,
                         blossoms = blossoms,
@@ -186,7 +186,7 @@ private fun ThreeImageGallery(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(2f / 1f)
-                .padding(vertical = 4.dp)
+                .padding(vertical = 1.dp)
                 .clip(
                     RoundedCornerShape(
                         topStart = AppTheme.shapes.large.topStart,
@@ -212,7 +212,7 @@ private fun ThreeImageGallery(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(1.dp),
         ) {
             mediaEventUris.drop(1).take(2).forEachIndexed { index, attachment ->
                 NoteMediaAttachment(
@@ -264,14 +264,14 @@ private fun TwoImageGallery(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(1.dp),
     ) {
         mediaEventUris.take(2).forEachIndexed { index, attachment ->
             NoteMediaAttachment(
                 modifier = Modifier
                     .weight(1f)
                     .aspectRatio(1f)
-                    .padding(vertical = 4.dp)
+                    .padding(vertical = 1.dp)
                     .clip(
                         if (index == 0) {
                             RoundedCornerShape(
