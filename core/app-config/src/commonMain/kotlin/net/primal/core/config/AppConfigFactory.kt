@@ -35,7 +35,7 @@ object AppConfigFactory {
     }
 
     private val persistence: DataStore<AppConfig> by lazy {
-        createAppConfigDataStorePersistence("app_config.json")
+        createAppConfigDataStorePersistence("primal_app_config.json")
     }
 
     private val appConfigDataStore: AppConfigDataStore by lazy {
