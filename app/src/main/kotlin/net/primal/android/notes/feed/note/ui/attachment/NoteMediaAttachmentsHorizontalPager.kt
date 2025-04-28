@@ -34,6 +34,7 @@ const val SINGLE_IMAGE = 1
 const val TWO_IMAGES = 2
 const val THREE_IMAGES = 3
 const val FOUR_IMAGES = 4
+private val GalleryGapSpace = 1.dp
 
 @ExperimentalFoundationApi
 @Composable
@@ -142,14 +143,14 @@ private fun FourImageGallery(
         mediaEventUri.chunked(2).forEachIndexed { rowIndex, rowAttachments ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(1.dp),
+                horizontalArrangement = Arrangement.spacedBy(GalleryGapSpace),
             ) {
                 rowAttachments.forEachIndexed { index, mediaEventUri ->
                     NoteMediaAttachment(
                         modifier = Modifier
                             .weight(1f)
                             .aspectRatio(1f)
-                            .then(if (rowIndex == 0) Modifier.padding(0.dp) else Modifier.padding(vertical = 1.dp))
+                            .then(if (rowIndex == 0) Modifier.padding(0.dp) else Modifier.padding(vertical = GalleryGapSpace))
                             .clip(shapeMatrix[rowIndex * 2 + index]),
                         mediaEventUri = mediaEventUri,
                         blossoms = blossoms,
@@ -186,7 +187,7 @@ private fun ThreeImageGallery(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(2f / 1f)
-                .padding(vertical = 1.dp)
+                .padding(vertical = GalleryGapSpace)
                 .clip(
                     RoundedCornerShape(
                         topStart = AppTheme.shapes.large.topStart,
@@ -212,7 +213,7 @@ private fun ThreeImageGallery(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(1.dp),
+            horizontalArrangement = Arrangement.spacedBy(GalleryGapSpace),
         ) {
             mediaEventUris.drop(1).take(2).forEachIndexed { index, attachment ->
                 NoteMediaAttachment(
@@ -264,14 +265,14 @@ private fun TwoImageGallery(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(1.dp),
+        horizontalArrangement = Arrangement.spacedBy(GalleryGapSpace),
     ) {
         mediaEventUris.take(2).forEachIndexed { index, attachment ->
             NoteMediaAttachment(
                 modifier = Modifier
                     .weight(1f)
                     .aspectRatio(1f)
-                    .padding(vertical = 1.dp)
+                    .padding(vertical = GalleryGapSpace)
                     .clip(
                         if (index == 0) {
                             RoundedCornerShape(
