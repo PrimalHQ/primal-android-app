@@ -13,15 +13,15 @@ import net.primal.data.local.dao.mutes.MutedItemData
 interface FeedPostDao {
 
     @Transaction
-    @RawQuery(observedEntities = [FeedPost::class, MutedItemData::class, EventUserStats::class])
+    @RawQuery(observedEntities = [PostData::class, MutedItemData::class, EventUserStats::class])
     fun feedQuery(query: RoomRawQuery): PagingSource<Int, FeedPost>
 
     @Transaction
-    @RawQuery(observedEntities = [FeedPost::class, MutedItemData::class, EventUserStats::class])
+    @RawQuery(observedEntities = [PostData::class, MutedItemData::class, EventUserStats::class])
     suspend fun newestFeedPosts(query: RoomRawQuery): List<FeedPost>
 
     @Transaction
-    @RawQuery(observedEntities = [FeedPost::class, MutedItemData::class, EventUserStats::class])
+    @RawQuery(observedEntities = [PostData::class, MutedItemData::class, EventUserStats::class])
     suspend fun oldestFeedPosts(query: RoomRawQuery): List<FeedPost>
 
     @Transaction
