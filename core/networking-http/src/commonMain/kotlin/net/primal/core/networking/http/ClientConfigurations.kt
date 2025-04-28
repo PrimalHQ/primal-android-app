@@ -12,11 +12,11 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
-import net.primal.core.networking.resolveUserAgent
+import net.primal.core.networking.UserAgentProvider
 
 internal fun HttpClientConfig<*>.installDefaultHttpClientConfiguration(
     json: Json,
-    userAgent: String? = resolveUserAgent(),
+    userAgent: String? = UserAgentProvider.resolveUserAgent(),
     loggingTag: String? = "HttpClient",
 ) {
     install(ContentNegotiation) {

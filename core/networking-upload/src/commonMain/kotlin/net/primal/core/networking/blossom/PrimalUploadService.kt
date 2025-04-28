@@ -55,10 +55,10 @@ internal class PrimalUploadService(
                 )
 
                 val descriptor: BlobDescriptor = try {
-                    primaryApi.headMedia(
-                        authorization = uploadAuthorizationHeader,
-                        fileMetadata = fileMetadata,
-                    )
+//                    primaryApi.headMedia(
+//                        authorization = uploadAuthorizationHeader,
+//                        fileMetadata = fileMetadata,
+//                    )
                     primaryApi.putMedia(
                         authorization = uploadAuthorizationHeader,
                         fileMetadata = fileMetadata,
@@ -66,10 +66,10 @@ internal class PrimalUploadService(
                         onProgress = onProgress,
                     )
                 } catch (_: BlossomException) {
-                    primaryApi.headUpload(
-                        authorization = uploadAuthorizationHeader,
-                        fileMetadata = fileMetadata,
-                    )
+//                    primaryApi.headUpload(
+//                        authorization = uploadAuthorizationHeader,
+//                        fileMetadata = fileMetadata,
+//                    )
                     primaryApi.putUpload(
                         authorization = uploadAuthorizationHeader,
                         fileMetadata = fileMetadata,
