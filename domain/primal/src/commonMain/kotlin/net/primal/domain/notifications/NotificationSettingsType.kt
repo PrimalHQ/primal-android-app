@@ -18,17 +18,17 @@ import net.primal.domain.notifications.NotificationType.YOUR_POST_WAS_REPOSTED
 import net.primal.domain.notifications.NotificationType.YOUR_POST_WAS_ZAPPED
 import net.primal.domain.notifications.NotificationType.YOU_WERE_MENTIONED_IN_POST
 
-sealed class NotificationSettingsType(val id: String) {
+sealed class NotificationSettingsType(val id: String, val order: Int) {
 
-    sealed class PushNotifications(id: String) : NotificationSettingsType(id = id) {
-        data object NewFollows : PushNotifications(id = NEW_FOLLOWS)
-        data object Zaps : PushNotifications(id = ZAPS)
-        data object Reactions : PushNotifications(id = REACTIONS)
-        data object Replies : PushNotifications(id = REPLIES)
-        data object Reposts : PushNotifications(id = REPOSTS)
-        data object Mentions : PushNotifications(id = MENTIONS)
-        data object DirectMessages : PushNotifications(id = DIRECT_MESSAGES)
-        data object WalletTransactions : PushNotifications(id = WALLET_TRANSACTIONS)
+    sealed class PushNotifications(id: String, order: Int) : NotificationSettingsType(id = id, order = order) {
+        data object NewFollows : PushNotifications(id = NEW_FOLLOWS, order = 1)
+        data object Zaps : PushNotifications(id = ZAPS, order = 2)
+        data object Reactions : PushNotifications(id = REACTIONS, order = 3)
+        data object Replies : PushNotifications(id = REPLIES, order = 4)
+        data object Reposts : PushNotifications(id = REPOSTS, order = 5)
+        data object Mentions : PushNotifications(id = MENTIONS, order = 6)
+        data object DirectMessages : PushNotifications(id = DIRECT_MESSAGES, order = 7)
+        data object WalletTransactions : PushNotifications(id = WALLET_TRANSACTIONS, order = 8)
 
         companion object {
             private const val NEW_FOLLOWS = "NEW_FOLLOWS"
@@ -56,10 +56,10 @@ sealed class NotificationSettingsType(val id: String) {
         }
     }
 
-    sealed class Preferences(id: String) : NotificationSettingsType(id = id) {
-        data object HellThread : Preferences(id = HELL_THREAD)
-        data object DMsFromFollows : Preferences(id = DMS_FROM_FOLLOWS)
-        data object ReactionsFromFollows : Preferences(id = REACTIONS_FROM_FOLLOWS)
+    sealed class Preferences(id: String, order: Int) : NotificationSettingsType(id = id, order = order) {
+        data object HellThread : Preferences(id = HELL_THREAD, order = 1)
+        data object DMsFromFollows : Preferences(id = DMS_FROM_FOLLOWS, order = 2)
+        data object ReactionsFromFollows : Preferences(id = REACTIONS_FROM_FOLLOWS, order = 3)
 
         companion object {
             private const val HELL_THREAD = "ignore_events_with_too_many_mentions"
@@ -79,14 +79,16 @@ sealed class NotificationSettingsType(val id: String) {
 
     sealed class TabNotifications(
         id: String,
+        order: Int,
         val types: List<NotificationType>,
-    ) : NotificationSettingsType(id = id) {
+    ) : NotificationSettingsType(id = id, order = order) {
 
         data object NewFollows : TabNotifications(
             id = "NEW_FOLLOWS",
             types = listOf(
                 NEW_USER_FOLLOWED_YOU,
             ),
+            order = 1,
         )
 
         data object Zaps : TabNotifications(
@@ -96,6 +98,7 @@ sealed class NotificationSettingsType(val id: String) {
                 POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED,
                 POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED,
             ),
+            order = 2,
         )
 
         data object Reactions : TabNotifications(
@@ -107,6 +110,7 @@ sealed class NotificationSettingsType(val id: String) {
                 POST_YOU_WERE_MENTIONED_IN_WAS_LIKED,
                 POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED,
             ),
+            order = 3,
         )
 
         data object Replies : TabNotifications(
@@ -116,6 +120,7 @@ sealed class NotificationSettingsType(val id: String) {
                 POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO,
                 POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO,
             ),
+            order = 4,
         )
 
         data object Reposts : TabNotifications(
@@ -125,6 +130,7 @@ sealed class NotificationSettingsType(val id: String) {
                 POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED,
                 POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED,
             ),
+            order = 5,
         )
 
         data object Mentions : TabNotifications(
@@ -133,6 +139,7 @@ sealed class NotificationSettingsType(val id: String) {
                 YOU_WERE_MENTIONED_IN_POST,
                 YOUR_POST_WAS_MENTIONED_IN_POST,
             ),
+            order = 6,
         )
     }
 }
