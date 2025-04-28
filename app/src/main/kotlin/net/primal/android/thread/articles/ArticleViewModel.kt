@@ -33,7 +33,7 @@ class ArticleViewModel @Inject constructor(
     private val bookmarksRepository: PublicBookmarksRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(UiState())
+    private val _state = MutableStateFlow(UiState(activeAccountUserId = activeAccountStore.activeUserId()))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -42,7 +42,15 @@ class ArticleViewModel @Inject constructor(
 
     init {
         observeEvents()
+        observeActiveAccount()
     }
+
+    private fun observeActiveAccount() =
+        viewModelScope.launch {
+            activeAccountStore.activeUserAccount.collect {
+                setState { copy(activeAccountUserId = activeAccountStore.activeUserId()) }
+            }
+        }
 
     private fun observeEvents() =
         viewModelScope.launch {

@@ -453,6 +453,7 @@ private fun ArticleDetailsTopAppBar(
                     articleRawData = state.article.eventRawNostrEvent,
                     authorId = state.article.authorId,
                     isBookmarked = state.article.isBookmarked,
+                    isArticleAuthor = state.article.authorId == state.activeAccountUserId,
                     showHighlights = state.showHighlights,
                     onToggleHighlightsClick = onToggleHighlightsClick,
                     onBookmarkClick = onBookmarkClick,

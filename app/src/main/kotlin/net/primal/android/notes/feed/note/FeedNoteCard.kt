@@ -311,7 +311,7 @@ private fun FeedNoteCard(
                 authorId = data.authorId,
                 isBookmarked = data.isBookmarked,
                 isThreadMuted = data.isThreadMuted,
-                shouldShowDelete = data.authorId == state.activeAccountUserId,
+                isNoteAuthor = data.authorId == state.activeAccountUserId,
                 relayHints = state.relayHints,
                 enabled = noteOptionsMenuEnabled,
                 noteGraphicsLayer = graphicsLayer,

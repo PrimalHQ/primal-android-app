@@ -346,6 +346,7 @@ private fun ThreadLazyColumn(
                         data = state.replyToArticle,
                         modifier = Modifier.padding(all = 16.dp),
                         onClick = noteCallbacks.onArticleClick,
+                        isArticleAuthor = state.replyToArticle.authorId == state.activeAccountUserId,
                     )
                     PrimalDivider()
                 }
@@ -663,6 +664,7 @@ fun ThreadScreenPreview() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         ThreadScreen(
             state = ThreadContract.UiState(
+                activeAccountUserId = "",
                 highlightPostId = "",
                 conversation = listOf(
                     FeedPostUi(

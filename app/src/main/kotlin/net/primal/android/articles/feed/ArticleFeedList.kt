@@ -274,6 +274,7 @@ private fun ArticleFeedLazyColumn(
                                 ),
                             )
                         },
+                        isArticleAuthor = item.authorId == articleState.activeAccountUserId,
                     )
                     PrimalDivider()
                 }
