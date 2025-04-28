@@ -26,6 +26,7 @@ data class ContentAppSettings(
         put("ignore_events_with_too_many_mentions", JsonPrimitive(true))
         put("only_show_dm_notifications_from_users_i_follow", JsonPrimitive(true))
         put("only_show_reactions_from_users_i_follow", JsonPrimitive(false))
+        put("show_wallet_push_notifications_above_sats", JsonPrimitive(1))
     },
     @Deprecated("Replaced with zapDefault.") val defaultZapAmount: ULong? = null,
     @Deprecated("Replaced with zapsConfig.") val zapOptions: List<ULong> = emptyList(),

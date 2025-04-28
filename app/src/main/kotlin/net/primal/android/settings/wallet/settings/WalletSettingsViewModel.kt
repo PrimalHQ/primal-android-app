@@ -104,6 +104,10 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     }
 
                     UiEvent.RequestFetchWalletConnections -> fetchWalletConnections()
+
+                    is UiEvent.UpdateMinNotificationAmount -> {
+                        updateMinNotificationThresholdAmount(amountInSats = it.amountInSats)
+                    }
                 }
             }
         }
@@ -184,6 +188,11 @@ class WalletSettingsViewModel @AssistedInject constructor(
                 this.copy(spamThresholdAmountInSats = amountInSats)
             }
             walletRepository.deleteAllTransactions(userId = activeAccountStore.activeUserId())
+        }
+
+    private fun updateMinNotificationThresholdAmount(amountInSats: Long) =
+        viewModelScope.launch {
+
         }
 
     private fun PrimalNwcConnectionInfo.mapAsConnectedAppUi(): NwcConnectionInfo {

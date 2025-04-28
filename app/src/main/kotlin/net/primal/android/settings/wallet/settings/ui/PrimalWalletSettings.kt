@@ -57,6 +57,29 @@ fun PrimalWalletSettings(state: WalletSettingsContract.UiState, eventPublisher: 
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        var notificationThresholdAmountEditorDialog by remember { mutableStateOf(false) }
+        val notificationThresholdAmountInSats = state.notificationThresholdAmountInSats?.let {
+            numberFormat.format(it)
+        } ?: "1"
+        SettingsItem(
+            headlineText = stringResource(
+                id = R.string.settings_wallet_show_notifications_above,
+            ),
+            supportText = "$notificationThresholdAmountInSats sats",
+            onClick = { notificationThresholdAmountEditorDialog = true },
+        )
+
+        if (notificationThresholdAmountEditorDialog) {
+            SpamThresholdAmountEditorDialog(
+                onDialogDismiss = { notificationThresholdAmountEditorDialog = false },
+                onEditAmount = {
+                    eventPublisher(UiEvent.UpdateMinNotificationAmount(amountInSats = it))
+                },
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
         var spamThresholdAmountEditorDialog by remember { mutableStateOf(false) }
         val spamThresholdAmountInSats = state.spamThresholdAmountInSats?.let {
             numberFormat.format(it)

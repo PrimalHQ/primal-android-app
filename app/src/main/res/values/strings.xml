@@ -773,6 +773,7 @@
     <string name="settings_wallet_max_wallet_balance">Max wallet balance</string>
     <string name="settings_wallet_max_wallet_balance_hint">Primal Wallet is a transactional wallet, designed for handling small amounts. We recommend self custody for larger amounts.</string>
     <string name="settings_wallet_hide_transactions_below">Hide transactions below</string>
+    <string name="settings_wallet_show_notifications_above">Show notifications above</string>
     <string name="settings_wallet_nwc_connections_header_app">App</string>
     <string name="settings_wallet_nwc_connections_header_daily_budget">Daily Budget</string>
     <string name="settings_wallet_nwc_connections_header_revoke">Revoke</string>

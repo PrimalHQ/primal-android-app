@@ -11,6 +11,7 @@ interface WalletSettingsContract {
         val userLightningAddress: String? = null,
         val maxWalletBalanceInBtc: String? = null,
         val spamThresholdAmountInSats: Long? = null,
+        val notificationThresholdAmountInSats: Long? = null,
         val nwcConnectionsInfo: List<NwcConnectionInfo> = emptyList(),
         val connectionsState: ConnectionsState = ConnectionsState.Loading,
         val isPrimalWalletActivated: Boolean = false,
@@ -22,6 +23,7 @@ interface WalletSettingsContract {
         data class RevokeConnection(val nwcPubkey: String) : UiEvent()
         data class UpdateWalletPreference(val walletPreference: WalletPreference) : UiEvent()
         data class UpdateMinTransactionAmount(val amountInSats: Long) : UiEvent()
+        data class UpdateMinNotificationAmount(val amountInSats: Long) : UiEvent()
     }
 
     enum class ConnectionsState {
