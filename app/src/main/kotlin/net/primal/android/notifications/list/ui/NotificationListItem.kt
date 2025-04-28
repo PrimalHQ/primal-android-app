@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import java.time.Instant
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarOverlap
@@ -39,6 +40,7 @@ import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.notifications.toImagePainter
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.ext.openUriSafely
+import net.primal.android.core.utils.isOnlyEmoji
 import net.primal.android.core.utils.shortened
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
@@ -232,13 +234,22 @@ private fun NotificationIconAndExtraStats(icon: Painter, notifications: List<Not
         modifier = Modifier.padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Image(
-            modifier = Modifier
-                .padding(top = 12.dp)
-                .size(32.dp),
-            painter = icon,
-            contentDescription = null,
-        )
+        if (firstNotification.reaction != null && firstNotification.reaction.isOnlyEmoji()) {
+            Text(
+                modifier = Modifier
+                    .padding(top = 16.dp),
+                text = firstNotification.reaction,
+                fontSize = 20.sp,
+            )
+        } else {
+            Image(
+                modifier = Modifier
+                    .padding(top = 12.dp)
+                    .size(32.dp),
+                painter = icon,
+                contentDescription = null,
+            )
+        }
 
         val extraStat = notifications.extractExtraStat()
         if (extraStat != null && extraStat > 0) {
