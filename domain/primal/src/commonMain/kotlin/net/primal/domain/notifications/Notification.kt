@@ -14,4 +14,5 @@ data class Notification(
     val satsZapped: Long? = null,
     val actionByUser: ProfileData?,
     val actionOnPost: FeedPost?,
+    val reaction: String? = null,
 )

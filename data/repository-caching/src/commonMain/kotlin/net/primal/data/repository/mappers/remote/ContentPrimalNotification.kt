@@ -25,4 +25,5 @@ data class ContentPrimalNotification(
     @SerialName("post_your_post_was_mentioned_in") val postYourPostWasMentionedIn: String? = null,
     @SerialName("who_highlighted_it") val whoHighlightedIt: String? = null,
     @SerialName("who_bookmarked_it") val whoBookmarkedIt: String? = null,
+    val reaction: String? = null,
 )

@@ -85,7 +85,7 @@ import net.primal.data.local.serialization.ProfileTypeConverters
         ArticleFeedCrossRef::class,
         HighlightData::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
