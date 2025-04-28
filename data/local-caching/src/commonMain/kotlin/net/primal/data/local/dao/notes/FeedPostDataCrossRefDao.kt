@@ -25,4 +25,7 @@ interface FeedPostDataCrossRefDao {
 
     @Query("DELETE FROM FeedPostDataCrossRef WHERE ownerId = :ownerId")
     suspend fun deleteConnections(ownerId: String)
+
+    @Query("DELETE FROM FeedPostDataCrossRef WHERE eventId = :eventId")
+    suspend fun deletePostConnections(eventId: String)
 }

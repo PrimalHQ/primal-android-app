@@ -13,6 +13,7 @@ import kotlinx.coroutines.withContext
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notes.FeedPost as FeedPostPO
 import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.withTransaction
 import net.primal.data.local.queries.ChronologicalFeedWithRepostsQueryBuilder
 import net.primal.data.local.queries.ExploreFeedQueryBuilder
 import net.primal.data.local.queries.FeedQueryBuilder
@@ -70,9 +71,27 @@ internal class FeedRepositoryImpl(
         ).map { it.mapAsFeedPostDO() }
     }
 
-    override suspend fun deletePostById(postId: String) =
+    override suspend fun deletePostById(postId: String, userId: String) =
         withContext(dispatcherProvider.io()) {
-            database.posts().deletePostById(postId = postId)
+            database.withTransaction {
+                val post = database.posts().findAndDeletePostById(postId = postId)
+                database.feedsConnections().deletePostConnections(eventId = postId)
+
+                post?.replyToPostId?.let { replyToPostId ->
+                    database.eventStats()
+                        .reduceEventStats(eventId = replyToPostId) {
+                            copy(replies = replies - 1)
+                        }
+                    database.eventUserStats()
+                        .reduceEventUserStats(eventId = replyToPostId, userId = userId) {
+                            copy(replied = false)
+                        }
+                }
+
+                database.eventStats().deleteByEventId(eventId = postId)
+                database.eventUserStats().deleteByEventId(eventId = postId)
+                database.feedPostsRemoteKeys().deleteAllByEventId(eventId = postId)
+            }
         }
 
     override suspend fun findAllPostsByIds(postIds: List<String>): List<FeedPostDO> =
