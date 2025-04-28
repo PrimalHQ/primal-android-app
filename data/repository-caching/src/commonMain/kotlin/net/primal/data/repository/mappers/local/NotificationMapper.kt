@@ -18,6 +18,7 @@ fun NotificationPO.asNotificationDO(): NotificationDO {
         actionUserId = this.data.actionUserId,
         actionPostId = this.data.actionPostId,
         satsZapped = this.data.satsZapped,
+        reaction = this.data.reaction,
         actionByUser = this.actionByUser?.asProfileDataDO(),
         actionOnPost = this.actionPost?.let { post ->
             FeedPost(
