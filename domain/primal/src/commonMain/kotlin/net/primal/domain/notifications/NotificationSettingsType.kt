@@ -60,17 +60,20 @@ sealed class NotificationSettingsType(val id: String) {
         data object HellThread : Preferences(id = HELL_THREAD)
         data object DMsFromFollows : Preferences(id = DMS_FROM_FOLLOWS)
         data object ReactionsFromFollows : Preferences(id = REACTIONS_FROM_FOLLOWS)
+        data object NotificationAmountThreshold : Preferences(id = NOTIFICATION_AMOUNT_THRESHOLD)
 
         companion object {
             private const val HELL_THREAD = "ignore_events_with_too_many_mentions"
             private const val DMS_FROM_FOLLOWS = "only_show_dm_notifications_from_users_i_follow"
             private const val REACTIONS_FROM_FOLLOWS = "only_show_reactions_from_users_i_follow"
+            private const val NOTIFICATION_AMOUNT_THRESHOLD = "show_wallet_push_notifications_above_sats"
 
             fun valueOf(id: String): Preferences? {
                 return when (id) {
                     HELL_THREAD -> HellThread
                     DMS_FROM_FOLLOWS -> DMsFromFollows
                     REACTIONS_FROM_FOLLOWS -> ReactionsFromFollows
+                    NOTIFICATION_AMOUNT_THRESHOLD -> NotificationAmountThreshold
                     else -> null
                 }
             }

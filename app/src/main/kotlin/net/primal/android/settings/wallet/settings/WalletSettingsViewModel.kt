@@ -11,6 +11,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.longOrNull
+import net.primal.android.nostr.notary.NostrNotary
+import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.settings.wallet.domain.NwcConnectionInfo
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEvent
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiState
@@ -24,7 +30,10 @@ import net.primal.android.wallet.domain.WalletKycLevel
 import net.primal.android.wallet.repository.NwcWalletRepository
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.nostr.cryptography.SignResult
 import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
+import net.primal.domain.notifications.NotificationSettingsType
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = WalletSettingsViewModel.Factory::class)
@@ -34,6 +43,8 @@ class WalletSettingsViewModel @AssistedInject constructor(
     private val userRepository: UserRepository,
     private val walletRepository: WalletRepository,
     private val nwcWalletRepository: NwcWalletRepository,
+    private val nostrNotary: NostrNotary,
+    private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -137,6 +148,11 @@ class WalletSettingsViewModel @AssistedInject constructor(
                         userLightningAddress = it.lightningAddress,
                         maxWalletBalanceInBtc = it.primalWalletSettings.maxBalanceInBtc,
                         spamThresholdAmountInSats = it.primalWalletSettings.spamThresholdAmountInSats,
+                        notificationThresholdAmountInSats = it.appSettings?.notificationsAdditional[
+                            NotificationSettingsType.Preferences.NotificationAmountThreshold.id,
+                        ]
+                            ?.jsonPrimitive
+                            ?.longOrNull,
                     )
                 }
             }
@@ -192,7 +208,37 @@ class WalletSettingsViewModel @AssistedInject constructor(
 
     private fun updateMinNotificationThresholdAmount(amountInSats: Long) =
         viewModelScope.launch {
+            val userId = activeAccountStore.activeUserId()
 
+            val signResult = nostrNotary.signAuthorizationNostrEvent(
+                userId = userId,
+                description = "Sync app settings",
+            )
+
+            when (signResult) {
+                is SignResult.Rejected -> {
+                    Timber.w(signResult.error)
+                }
+
+                is SignResult.Signed -> {
+                    settingsRepository.fetchAndUpdateAndPublishAppSettings(signResult.event) {
+                        val updatedNotificationsAdditional = notificationsAdditional.updateNotificationAmountThreshold(
+                            amountInSats,
+                        )
+
+                        val newAppSettings = this.copy(
+                            notificationsAdditional = updatedNotificationsAdditional,
+                        )
+
+                        nostrNotary.signAppSettingsNostrEvent(
+                            userId = userId,
+                            appSettings = newAppSettings,
+                        ).unwrapOrThrow { error ->
+                            Timber.w(error)
+                        }
+                    }
+                }
+            }
         }
 
     private fun PrimalNwcConnectionInfo.mapAsConnectedAppUi(): NwcConnectionInfo {
@@ -200,6 +246,18 @@ class WalletSettingsViewModel @AssistedInject constructor(
             nwcPubkey = nwcPubkey,
             appName = appName,
             dailyBudget = dailyBudget,
+        )
+    }
+
+    private fun JsonObject.updateNotificationAmountThreshold(amountInSats: Long): JsonObject {
+        return JsonObject(
+            content = this.map { (key, value) ->
+                if (key == NotificationSettingsType.Preferences.NotificationAmountThreshold.id) {
+                    key to JsonPrimitive(amountInSats)
+                } else {
+                    key to value
+                }
+            }.toMap(),
         )
     }
 }

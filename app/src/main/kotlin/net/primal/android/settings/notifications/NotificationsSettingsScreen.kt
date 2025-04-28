@@ -391,6 +391,10 @@ private fun NotificationSettingsType.toTitle(): String =
             R.string.settings_notifications_group_preferences_reactions_from_follows,
         )
 
+        NotificationSettingsType.Preferences.NotificationAmountThreshold -> stringResource(
+            R.string.settings_notifications_group_preferences_show_notifications_above,
+        )
+
         NotificationSettingsType.PushNotifications.DirectMessages -> stringResource(
             R.string.settings_notifications_group_direct_messages,
         )
