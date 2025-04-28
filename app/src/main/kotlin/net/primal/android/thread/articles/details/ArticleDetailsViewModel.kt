@@ -73,7 +73,7 @@ class ArticleDetailsViewModel @Inject constructor(
     private val zapHandler: ZapHandler,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(UiState(activeAccountUserId = activeAccountStore.activeUserId()))
+    private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -237,6 +237,7 @@ class ArticleDetailsViewModel @Inject constructor(
                                 zapsConfig = it.data.appSettings?.zapsConfig ?: this.zappingState.zapsConfig,
                                 walletBalanceInBtc = it.data.primalWalletState.balanceInBtc,
                             ),
+                            activeAccountUserId = activeAccountStore.activeUserId(),
                         )
                     }
                 }

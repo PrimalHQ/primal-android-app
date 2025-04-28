@@ -11,7 +11,7 @@ import net.primal.domain.nostr.Nevent
 
 interface ArticleDetailsContract {
     data class UiState(
-        val activeAccountUserId: String,
+        val activeAccountUserId: String = "",
         val naddr: Naddr? = null,
         val isResolvingNaddr: Boolean = true,
         val showHighlights: Boolean = true,
