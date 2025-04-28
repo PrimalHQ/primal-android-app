@@ -150,7 +150,15 @@ private fun FourImageGallery(
                         modifier = Modifier
                             .weight(1f)
                             .aspectRatio(1f)
-                            .then(if (rowIndex == 0) Modifier.padding(0.dp) else Modifier.padding(vertical = GalleryGapSpace))
+                            .then(
+                                if (rowIndex == 0) {
+                                    Modifier.padding(
+                                        0.dp,
+                                    )
+                                } else {
+                                    Modifier.padding(vertical = GalleryGapSpace)
+                                },
+                            )
                             .clip(shapeMatrix[rowIndex * 2 + index]),
                         mediaEventUri = mediaEventUri,
                         blossoms = blossoms,
