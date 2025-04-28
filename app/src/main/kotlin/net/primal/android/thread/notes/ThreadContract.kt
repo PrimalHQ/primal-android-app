@@ -6,7 +6,7 @@ import net.primal.android.notes.feed.model.FeedPostUi
 interface ThreadContract {
 
     data class UiState(
-        val activeAccountUserId: String = "",
+        val activeAccountUserId: String,
         val highlightPostId: String,
         val highlightNote: FeedPostUi? = null,
         val highlightPostIndex: Int = 0,
