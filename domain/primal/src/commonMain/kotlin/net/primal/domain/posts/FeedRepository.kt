@@ -20,7 +20,7 @@ interface FeedRepository {
         limit: Int,
     ): List<FeedPost>
 
-    suspend fun deletePostById(postId: String)
+    suspend fun deletePostById(postId: String, userId: String)
 
     suspend fun findAllPostsByIds(postIds: List<String>): List<FeedPost>
 

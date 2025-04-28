@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 
 @Dao
 interface PostDao {
@@ -19,4 +20,8 @@ interface PostDao {
 
     @Query("DELETE FROM PostData WHERE postId = :postId")
     suspend fun deletePostById(postId: String)
+
+    @Transaction
+    suspend fun findAndDeletePostById(postId: String): PostData? =
+        findByPostId(postId = postId)?.also { deletePostById(postId = postId) }
 }
