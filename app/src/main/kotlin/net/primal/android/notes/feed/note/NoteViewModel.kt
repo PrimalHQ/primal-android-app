@@ -82,6 +82,7 @@ class NoteViewModel @AssistedInject constructor(
             activeAccountStore.activeUserAccount.collect {
                 setState {
                     copy(
+                        activeAccountUserId = activeAccountStore.activeUserId(),
                         zappingState = this.zappingState.copy(
                             walletConnected = it.hasWallet(),
                             walletPreference = it.walletPreference,
@@ -290,7 +291,7 @@ class NoteViewModel @AssistedInject constructor(
                     relayHint = state.value.relayHints.firstOrNull(),
                 )
 
-                feedRepository.deletePostById(postId = noteId)
+                feedRepository.deletePostById(postId = noteId, userId = activeAccountStore.activeUserId())
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToPublishDeleteEvent(error)) }

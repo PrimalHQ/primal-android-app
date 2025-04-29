@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.toJavaInstant
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
 import net.primal.android.core.utils.authorNameUiFriendly
+import net.primal.android.core.utils.isOnlyEmoji
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.notes.feed.model.EventStatsUi
@@ -35,6 +36,7 @@ import net.primal.domain.nostr.cryptography.SignResult
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.notifications.Notification
 import net.primal.domain.notifications.NotificationRepository
+import net.primal.domain.notifications.NotificationType
 import timber.log.Timber
 
 @HiltViewModel
@@ -112,7 +114,22 @@ class NotificationsViewModel @Inject constructor(
                                         val groupByPostId = notificationsByType.groupBy { it.actionPostId }
                                         groupByPostId.keys.forEach { postId ->
                                             groupByPostId[postId]?.let {
-                                                unseenNotifications.add(it)
+                                                if (notificationType.isLike()) {
+                                                    it.map {
+                                                        it.copy(
+                                                            reaction = if (it.reaction?.isOnlyEmoji() == true) {
+                                                                it.reaction
+                                                            } else {
+                                                                "+"
+                                                            },
+                                                        )
+                                                    }.groupBy { it.reaction }
+                                                        .onEach { (_, notifications) ->
+                                                            unseenNotifications.add(notifications)
+                                                        }
+                                                } else {
+                                                    unseenNotifications.add(it)
+                                                }
                                             }
                                         }
                                     }
@@ -152,6 +169,11 @@ class NotificationsViewModel @Inject constructor(
         }
     }
 
+    private fun NotificationType.isLike() =
+        this == NotificationType.YOUR_POST_WAS_LIKED ||
+            this == NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED ||
+            this == NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED
+
     private fun Notification.asNotificationUi(): NotificationUi {
         return NotificationUi(
             notificationId = this.notificationId,
@@ -159,6 +181,7 @@ class NotificationsViewModel @Inject constructor(
             notificationType = this.type,
             createdAt = Instant.ofEpochSecond(this.createdAt),
             actionUserId = this.actionUserId,
+            reaction = this.reaction,
             actionUserDisplayName = this.actionByUser?.authorNameUiFriendly()
                 ?: this.actionUserId?.asEllipsizedNpub(),
             actionUserInternetIdentifier = this.actionByUser?.internetIdentifier,

@@ -50,4 +50,7 @@ interface FeedPostRemoteKeyDao {
 
     @Query("DELETE FROM FeedPostRemoteKey WHERE ownerId = :ownerId")
     suspend fun deleteAllByOwnerId(ownerId: String)
+
+    @Query("DELETE FROM FeedPostRemoteKey WHERE eventId = :eventId")
+    suspend fun deleteAllByEventId(eventId: String)
 }

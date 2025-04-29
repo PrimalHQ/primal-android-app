@@ -19,6 +19,7 @@ fun ContentAppSettings.mapAsPushNotificationSwitchUi() =
                 null
             }
         }
+        .sortedBy { it.settingsType.order }
 
 private fun TabNotifications.resolveIfEnabled(
     remoteMap: Map<NotificationType, Boolean>,

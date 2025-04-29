@@ -15,4 +15,5 @@ data class NotificationData(
     val actionUserId: String? = null,
     val actionPostId: String? = null,
     val satsZapped: Long? = null,
+    val reaction: String? = null,
 )

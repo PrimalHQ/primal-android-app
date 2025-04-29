@@ -119,7 +119,6 @@ class RelaysSocketManager @Inject constructor(
     suspend fun publishEvent(nostrEvent: NostrEvent, relays: List<Relay>) {
         val customPool = buildRelayPool()
         customPool.changeRelays(relays = relays)
-        customPool.tryConnectingToAllRelays()
         customPool.publishEvent(nostrEvent = nostrEvent, cachingProxyEnabled = isCachingProxyEnabled())
         customPool.closePool()
     }
@@ -133,7 +132,13 @@ class RelaysSocketManager @Inject constructor(
         nwcRelaysPool.publishEvent(nostrEvent = nostrEvent, cachingProxyEnabled = isCachingProxyEnabled())
     }
 
-    suspend fun tryConnectingToAllUserRelays() = userRelaysPool.tryConnectingToAllRelays()
+    fun tryConnectingToAllUserRelays() {
+        userRelaysPool.relays.forEach {
+            scope.launch {
+                userRelaysPool.tryConnectingToRelay(it.url)
+            }
+        }
+    }
 
     suspend fun tryConnectingToUserRelay(url: String) = userRelaysPool.tryConnectingToRelay(url)
 }

@@ -52,6 +52,7 @@ fun ArticleDropdownMenuIcon(
     authorId: String,
     isBookmarked: Boolean,
     enabled: Boolean = true,
+    isArticleAuthor: Boolean,
     showHighlights: Boolean? = null,
     onToggleHighlightsClick: (() -> Unit)? = null,
     onBookmarkClick: (() -> Unit)? = null,
@@ -224,25 +225,27 @@ fun ArticleDropdownMenuIcon(
                 },
             )
 
-            DropdownPrimalMenuItem(
-                trailingIconVector = PrimalIcons.ContextMuteUser,
-                tint = AppTheme.colorScheme.error,
-                text = stringResource(id = R.string.context_menu_mute_user),
-                onClick = {
-                    onMuteUserClick?.invoke()
-                    menuVisible = false
-                },
-            )
+            if (!isArticleAuthor) {
+                DropdownPrimalMenuItem(
+                    trailingIconVector = PrimalIcons.ContextMuteUser,
+                    tint = AppTheme.colorScheme.error,
+                    text = stringResource(id = R.string.context_menu_mute_user),
+                    onClick = {
+                        onMuteUserClick?.invoke()
+                        menuVisible = false
+                    },
+                )
 
-            DropdownPrimalMenuItem(
-                trailingIconVector = PrimalIcons.ContextReportContent,
-                tint = AppTheme.colorScheme.error,
-                text = stringResource(id = R.string.context_menu_report_content),
-                onClick = {
-                    menuVisible = false
-                    reportDialogVisible = true
-                },
-            )
+                DropdownPrimalMenuItem(
+                    trailingIconVector = PrimalIcons.ContextReportContent,
+                    tint = AppTheme.colorScheme.error,
+                    text = stringResource(id = R.string.context_menu_report_content),
+                    onClick = {
+                        menuVisible = false
+                        reportDialogVisible = true
+                    },
+                )
+            }
         }
     }
 }

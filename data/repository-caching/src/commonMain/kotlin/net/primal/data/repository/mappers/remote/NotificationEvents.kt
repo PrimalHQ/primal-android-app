@@ -62,6 +62,7 @@ fun ContentPrimalNotification.asNotificationPOOrNull(): NotificationData? {
         actionUserId = actionUserId,
         actionPostId = actionOnPostId,
         satsZapped = this.satsZapped,
+        reaction = this.reaction,
     )
 }
 

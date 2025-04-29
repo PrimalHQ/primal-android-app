@@ -13,6 +13,7 @@ data class NotificationUi(
     val createdAt: Instant,
     val actionUserId: String?,
     val actionUserDisplayName: String?,
+    val reaction: String? = null,
     val actionUserInternetIdentifier: String? = null,
     val actionUserAvatarCdnImage: CdnImage? = null,
     val actionUserLegendaryCustomization: LegendaryCustomization? = null,

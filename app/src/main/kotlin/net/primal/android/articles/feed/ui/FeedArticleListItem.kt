@@ -69,6 +69,7 @@ fun FeedArticleListItem(
     modifier: Modifier = Modifier,
     enabledDropdownMenu: Boolean = true,
     showCommentsCount: Boolean = true,
+    isArticleAuthor: Boolean = false,
     color: Color = AppTheme.colorScheme.surfaceVariant,
     onClick: ((naddr: String) -> Unit)? = null,
     onBookmarkClick: (() -> Unit)? = null,
@@ -98,6 +99,7 @@ fun FeedArticleListItem(
             ListItemHeader(
                 data = data,
                 textStyle = infoTextStyle,
+                isArticleAuthor = isArticleAuthor,
                 enabledDropdownMenu = enabledDropdownMenu,
                 onBookmarkClick = onBookmarkClick,
                 onMuteUserClick = onMuteUserClick,
@@ -119,6 +121,7 @@ fun FeedArticleListItem(
 @Composable
 private fun ListItemHeader(
     data: FeedArticleUi,
+    isArticleAuthor: Boolean,
     textStyle: TextStyle,
     enabledDropdownMenu: Boolean = true,
     onBookmarkClick: (() -> Unit)? = null,
@@ -142,6 +145,7 @@ private fun ListItemHeader(
                 onBookmarkClick = onBookmarkClick,
                 onMuteUserClick = onMuteUserClick,
                 onReportContentClick = onReportContentClick,
+                isArticleAuthor = isArticleAuthor,
                 icon = {
                     Icon(
                         modifier = Modifier

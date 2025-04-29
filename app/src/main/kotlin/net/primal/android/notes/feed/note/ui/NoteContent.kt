@@ -410,10 +410,10 @@ fun renderContentAsAnnotatedString(
 
     val refinedContent = data.content
         .clearAtSignFromNostrUris()
-        .replaceNostrProfileUrisWithHandles(resources = mentionedUsers)
         .remove(texts = mediaAttachments.map { it.url })
-        .remove(texts = if (!shouldKeepNostrNoteUris) data.nostrUris.map { it.uri } else emptyList())
         .remove(texts = linkAttachments.filter { it.title?.isNotEmpty() == true }.map { it.url })
+        .replaceNostrProfileUrisWithHandles(resources = mentionedUsers)
+        .remove(texts = if (!shouldKeepNostrNoteUris) data.nostrUris.map { it.uri } else emptyList())
         .remove(texts = data.invoices)
         .clearParsedPrimalLinks()
         .limitLineBreaks(maxBreaks = 2)
