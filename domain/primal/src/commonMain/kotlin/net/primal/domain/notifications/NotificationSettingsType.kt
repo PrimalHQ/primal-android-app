@@ -60,7 +60,7 @@ sealed class NotificationSettingsType(val id: String, val order: Int) {
         data object HellThread : Preferences(id = HELL_THREAD, order = 1)
         data object DMsFromFollows : Preferences(id = DMS_FROM_FOLLOWS, order = 2)
         data object ReactionsFromFollows : Preferences(id = REACTIONS_FROM_FOLLOWS, order = 3)
-        data object NotificationAmountThreshold : Preferences(id = NOTIFICATION_AMOUNT_THRESHOLD)
+        data object NotificationAmountThreshold : Preferences(id = NOTIFICATION_AMOUNT_THRESHOLD, order = 4)
 
         companion object {
             private const val HELL_THREAD = "ignore_events_with_too_many_mentions"
