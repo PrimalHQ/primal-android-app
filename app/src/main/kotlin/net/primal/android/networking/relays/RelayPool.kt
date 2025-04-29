@@ -98,14 +98,6 @@ class RelayPool(
 
     fun hasRelays() = relays.isNotEmpty()
 
-    suspend fun tryConnectingToAllRelays() {
-        socketClients.forEach {
-            runCatching {
-                it.ensureSocketConnectionOrThrow()
-            }
-        }
-    }
-
     suspend fun tryConnectingToRelay(url: String) {
         runCatching {
             socketClients.find { it.socketUrl == url }?.ensureSocketConnectionOrThrow()
