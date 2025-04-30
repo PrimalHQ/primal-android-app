@@ -49,7 +49,6 @@ import net.primal.domain.links.EventUriNostrType
 import net.primal.domain.links.ReferencedNote
 import net.primal.domain.links.ReferencedUser
 import net.primal.domain.nostr.utils.clearAtSignFromNostrUris
-import timber.log.Timber
 
 private const val PROFILE_ID_ANNOTATION_TAG = "profileId"
 private const val URL_ANNOTATION_TAG = "url"
@@ -408,9 +407,6 @@ fun renderContentAsAnnotatedString(
     val linkAttachments = data.uris.filterNot { it.isMediaUri() }
     val mentionedUsers = data.nostrUris.filter(type = EventUriNostrType.Profile)
     val unhandledNostrAddressUris = data.nostrUris.filterUnhandledNostrAddressUris()
-
-    Timber.tag("ShodanMedia").i(mediaAttachments.toString())
-    Timber.tag("ShodanLink").i(linkAttachments.toString())
 
     val refinedContent = data.content
         .clearAtSignFromNostrUris()
