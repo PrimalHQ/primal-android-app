@@ -120,6 +120,7 @@ import net.primal.android.wallet.walletWithdrawColor
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.CurrencyConversionUtils.toUsd
 import net.primal.core.utils.detectUrls
+import net.primal.domain.nostr.utils.parseNostrUris
 import timber.log.Timber
 
 private const val URL_ANNOTATION_TAG = "url"
@@ -480,7 +481,7 @@ private fun TransactionNoteText(note: String) {
 
 @Composable
 private fun refineContentAsAnnotatedString(content: String): AnnotatedString {
-    val uriLinks = content.detectUrls()
+    val uriLinks = content.detectUrls() + content.parseNostrUris()
     val refinedContent = content.trim()
 
     return buildAnnotatedString {
