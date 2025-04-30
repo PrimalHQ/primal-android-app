@@ -182,6 +182,7 @@ fun ThreadScreen(
                     noteCallbacks = noteCallbacks,
                     onGoToWallet = onGoToWallet,
                     eventPublisher = eventPublisher,
+                    onRootPostDeleted = onClose,
                     onUiError = { uiError ->
                         uiScope.launch {
                             snackbarHostState.showSnackbar(
@@ -273,6 +274,7 @@ private fun ThreadConversationLazyColumn(
     state: ThreadContract.UiState,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
+    onRootPostDeleted: () -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
     onUiError: ((UiError) -> Unit)? = null,
 ) {
@@ -308,6 +310,7 @@ private fun ThreadConversationLazyColumn(
             state = state,
             onGoToWallet = onGoToWallet,
             noteCallbacks = noteCallbacks,
+            onRootPostDeleted = onRootPostDeleted,
             onUiError = onUiError,
         )
     }
@@ -319,6 +322,7 @@ private fun ThreadLazyColumn(
     modifier: Modifier,
     state: ThreadContract.UiState,
     noteCallbacks: NoteCallbacks,
+    onRootPostDeleted: () -> Unit,
     onGoToWallet: (() -> Unit),
     paddingValues: PaddingValues = PaddingValues(all = 0.dp),
     onUiError: ((UiError) -> Unit)? = null,
@@ -389,6 +393,11 @@ private fun ThreadLazyColumn(
                             }
                         },
                     ),
+                    onNoteDeleted = {
+                        if (!isReply) {
+                            onRootPostDeleted()
+                        }
+                    },
                     onGoToWallet = onGoToWallet,
                     contentFooter = {
                         Column(
