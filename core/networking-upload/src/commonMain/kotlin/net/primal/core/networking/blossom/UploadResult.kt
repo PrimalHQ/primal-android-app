@@ -5,6 +5,7 @@ sealed class UploadResult {
         val remoteUrl: String,
         val originalFileSize: Long,
         val originalHash: String,
+        val nip94: Nip94Metadata? = null,
     ) : UploadResult()
 
     data class Failed(

@@ -108,6 +108,7 @@ internal class PrimalUploadService(
                 remoteUrl = descriptor.url,
                 originalFileSize = descriptor.sizeInBytes,
                 originalHash = descriptor.sha256,
+                nip94 = descriptor.nip94?.toNip94Metadata(),
             )
         } catch (error: Exception) {
             val uploadError = when {
