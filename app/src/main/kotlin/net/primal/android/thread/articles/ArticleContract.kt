@@ -11,6 +11,10 @@ interface ArticleContract {
         val error: UiError? = null,
     )
 
+    sealed class SideEffect {
+        data object ArticleDeleted : SideEffect()
+    }
+
     sealed class UiEvent {
         data class MuteAction(
             val userId: String,
@@ -26,6 +30,12 @@ interface ArticleContract {
         data class BookmarkAction(
             val articleATag: String,
             val forceUpdate: Boolean = false,
+        ) : UiEvent()
+
+        data class RequestDeleteAction(
+            val eventId: String,
+            val articleATag: String,
+            val authorId: String,
         ) : UiEvent()
 
         data object DismissBookmarkConfirmation : UiEvent()

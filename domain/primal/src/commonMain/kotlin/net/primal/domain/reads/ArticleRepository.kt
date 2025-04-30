@@ -34,5 +34,7 @@ interface ArticleRepository {
         articleAuthorId: String,
     ): Flow<List<FeedPost>>
 
+    suspend fun deleteArticleByATag(articleATag: String)
+
     suspend fun observeArticleByCommentId(commentNoteId: String): Flow<Article?>
 }

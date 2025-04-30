@@ -204,8 +204,8 @@ private fun FeedNoteCard(
         ConfirmActionAlertDialog(
             confirmText = stringResource(id = R.string.context_confirm_delete_positive),
             dismissText = stringResource(id = R.string.context_confirm_delete_negative),
-            dialogTitle = stringResource(id = R.string.context_confirm_delete_title),
-            dialogText = stringResource(id = R.string.context_confirm_delete_text),
+            dialogTitle = stringResource(id = R.string.context_confirm_delete_note_title),
+            dialogText = stringResource(id = R.string.context_confirm_delete_note_text),
             onConfirmation = {
                 eventPublisher(UiEvent.RequestDeleteAction(noteId = data.postId, userId = data.authorId))
             },

@@ -19,4 +19,7 @@ interface ArticleFeedCrossRefDao {
 
     @Query("DELETE FROM ArticleFeedCrossRef WHERE ownerId = :ownerId")
     suspend fun deleteConnections(ownerId: String)
+
+    @Query("DELETE FROM ArticleFeedCrossRef WHERE articleATag = :articleATag")
+    suspend fun deleteConnectionsByATag(articleATag: String)
 }

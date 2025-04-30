@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
 import net.primal.android.R
+import net.primal.android.core.compose.ConfirmActionAlertDialog
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenuItem
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -31,6 +32,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextRemoveBookmar
 import net.primal.android.core.compose.icons.primaliconpack.ContextReportContent
 import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.ContextShowHighlightsOutlined
+import net.primal.android.core.compose.icons.primaliconpack.Delete
 import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.resolvePrimalArticleLink
 import net.primal.android.core.utils.systemShareText
@@ -47,6 +49,8 @@ import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 fun ArticleDropdownMenuIcon(
     modifier: Modifier,
     articleId: String,
+    eventId: String,
+    articleATag: String,
     articleContent: String?,
     articleRawData: String?,
     authorId: String,
@@ -57,6 +61,7 @@ fun ArticleDropdownMenuIcon(
     onToggleHighlightsClick: (() -> Unit)? = null,
     onBookmarkClick: (() -> Unit)? = null,
     onMuteUserClick: (() -> Unit)? = null,
+    onRequestDeleteClick: ((eventId: String, articleATag: String, authorId: String) -> Unit)? = null,
     onReportContentClick: ((reportType: ReportType) -> Unit)? = null,
     icon: @Composable () -> Unit,
 ) {
@@ -80,6 +85,21 @@ fun ArticleDropdownMenuIcon(
                 reportDialogVisible = false
                 onReportContentClick?.invoke(type)
             },
+        )
+    }
+
+    var deleteDialogVisible by remember { mutableStateOf(false) }
+    if (deleteDialogVisible && onRequestDeleteClick != null) {
+        ConfirmActionAlertDialog(
+            confirmText = stringResource(id = R.string.context_confirm_delete_positive),
+            dismissText = stringResource(id = R.string.context_confirm_delete_negative),
+            dialogTitle = stringResource(id = R.string.context_confirm_delete_article_title),
+            dialogText = stringResource(id = R.string.context_confirm_delete_article_text),
+            onConfirmation = {
+                deleteDialogVisible = false
+                onRequestDeleteClick(eventId, articleATag, authorId)
+            },
+            onDismissRequest = { deleteDialogVisible = false },
         )
     }
 
@@ -243,6 +263,18 @@ fun ArticleDropdownMenuIcon(
                     onClick = {
                         menuVisible = false
                         reportDialogVisible = true
+                    },
+                )
+            }
+
+            if (isArticleAuthor) {
+                DropdownPrimalMenuItem(
+                    trailingIconVector = PrimalIcons.Delete,
+                    tint = AppTheme.colorScheme.error,
+                    text = stringResource(id = R.string.article_feed_context_request_delete),
+                    onClick = {
+                        menuVisible = false
+                        deleteDialogVisible = true
                     },
                 )
             }

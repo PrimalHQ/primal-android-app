@@ -264,6 +264,15 @@ private fun ArticleFeedLazyColumn(
                         onMuteUserClick = {
                             articleEventPublisher(ArticleContract.UiEvent.MuteAction(userId = item.authorId))
                         },
+                        onRequestDeleteClick = { eventId, aTag, authorId ->
+                            articleEventPublisher(
+                                ArticleContract.UiEvent.RequestDeleteAction(
+                                    eventId = eventId,
+                                    articleATag = aTag,
+                                    authorId = authorId,
+                                ),
+                            )
+                        },
                         onReportContentClick = { reportType ->
                             articleEventPublisher(
                                 ArticleContract.UiEvent.ReportAbuse(

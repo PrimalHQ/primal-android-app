@@ -15,6 +15,7 @@ import kotlinx.coroutines.withContext
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.reads.Article as ArticlePO
 import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.articles.ArticlesApi
 import net.primal.data.remote.api.articles.model.ArticleDetailsRequestBody
 import net.primal.data.remote.api.articles.model.ArticleHighlightsRequestBody
@@ -109,6 +110,23 @@ class ArticleRepositoryImpl(
                 articleAuthorId = articleAuthorId,
                 userId = userId,
             ).map { it.map { it.mapAsFeedPostDO() } }
+        }
+
+    override suspend fun deleteArticleByATag(articleATag: String) =
+        withContext(dispatcherProvider.io()) {
+            database.withTransaction {
+                val article = database.articles().findAndDeleteArticleByATag(articleATag = articleATag)
+                article?.data?.let {
+                    database.feedPostsRemoteKeys().deleteAllByEventId(it.eventId)
+                    database.threadConversations()
+                        .deleteArticleCrossRefs(articleId = it.articleId, articleAuthorId = it.authorId)
+
+                    database.eventStats().deleteByEventId(eventId = it.eventId)
+                    database.eventUserStats().deleteByEventId(eventId = it.eventId)
+                }
+
+                database.articleFeedsConnections().deleteConnectionsByATag(articleATag = articleATag)
+            }
         }
 
     override suspend fun observeArticleByCommentId(commentNoteId: String): Flow<ArticleDO?> =

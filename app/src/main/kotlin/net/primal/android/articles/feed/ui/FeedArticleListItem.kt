@@ -23,6 +23,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -75,6 +77,7 @@ fun FeedArticleListItem(
     onBookmarkClick: (() -> Unit)? = null,
     onMuteUserClick: (() -> Unit)? = null,
     onReportContentClick: ((reportType: ReportType) -> Unit)? = null,
+    onRequestDeleteClick: ((eventId: String, articleATag: String, authorId: String) -> Unit)? = null,
 ) {
     Surface(
         modifier = Modifier.clickable(
@@ -104,6 +107,7 @@ fun FeedArticleListItem(
                 onBookmarkClick = onBookmarkClick,
                 onMuteUserClick = onMuteUserClick,
                 onReportContentClick = onReportContentClick,
+                onRequestDeleteClick = onRequestDeleteClick,
             )
 
             ListItemContent(data = data)
@@ -127,6 +131,7 @@ private fun ListItemHeader(
     onBookmarkClick: (() -> Unit)? = null,
     onMuteUserClick: (() -> Unit)? = null,
     onReportContentClick: ((reportType: ReportType) -> Unit)? = null,
+    onRequestDeleteClick: ((eventId: String, articleATag: String, authorId: String) -> Unit)? = null,
 ) {
     val overflowIconSizeDp = 40.dp
     Box(contentAlignment = Alignment.TopEnd) {
@@ -138,12 +143,15 @@ private fun ListItemHeader(
                     .offset(x = 4.dp)
                     .clip(CircleShape),
                 articleId = data.articleId,
+                eventId = data.eventId,
+                articleATag = data.aTag,
                 articleContent = data.content,
                 articleRawData = data.rawNostrEventJson,
                 authorId = data.authorId,
                 isBookmarked = data.isBookmarked,
                 onBookmarkClick = onBookmarkClick,
                 onMuteUserClick = onMuteUserClick,
+                onRequestDeleteClick = onRequestDeleteClick,
                 onReportContentClick = onReportContentClick,
                 isArticleAuthor = isArticleAuthor,
                 icon = {
