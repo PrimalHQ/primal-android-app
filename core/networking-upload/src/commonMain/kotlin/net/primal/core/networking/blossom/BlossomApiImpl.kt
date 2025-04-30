@@ -6,6 +6,7 @@ import io.ktor.client.request.headers
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.content.OutgoingContent
 import io.ktor.http.isSuccess
 import io.ktor.utils.io.ByteWriteChannel
@@ -77,7 +78,7 @@ internal class BlossomApiImpl(
         val response = withContext(dispatcherProvider.io()) {
             httpClient.put("$baseBlossomUrl/mirror") {
                 headers {
-                    append("Authorization", authorization)
+                    append(HttpHeaders.Authorization, authorization)
                 }
                 setBody(MirrorRequest(fileUrl))
             }
@@ -100,7 +101,7 @@ internal class BlossomApiImpl(
         val response = withContext(dispatcherProvider.io()) {
             httpClient.head("$baseBlossomUrl/$endpoint") {
                 headers {
-                    append("Authorization", authorization)
+                    append(HttpHeaders.Authorization, authorization)
                     append("X-SHA-256", fileMetadata.sha256)
                     append("X-Content-Length", fileMetadata.sizeInBytes.toString())
                     append("X-Content-Type", fileMetadata.mimeType ?: "application/octet-stream")
@@ -131,9 +132,9 @@ internal class BlossomApiImpl(
             bufferedSource.use { source ->
                 httpClient.put("$baseBlossomUrl/$endpoint") {
                     headers {
-                        append("Authorization", authorization)
-                        append("Content-Length", totalBytes.toString())
-                        append("Content-Type", contentType)
+                        append(HttpHeaders.Authorization, authorization)
+                        append(HttpHeaders.ContentLength, totalBytes.toString())
+                        append(HttpHeaders.ContentType, contentType)
                     }
 
                     setBody(
