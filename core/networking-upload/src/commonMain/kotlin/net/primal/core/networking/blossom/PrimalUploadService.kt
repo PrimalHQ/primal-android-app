@@ -123,7 +123,7 @@ internal class PrimalUploadService(
 
     private suspend fun resolveBlossomApisOrThrow(userId: String): List<BlossomApi> {
         return blossomResolver.provideBlossomServerList(userId).mapNotNull {
-            runCatching { BlossomApiFactory.create(baseBlossomUrl = it) }.getOrNull()
+            runCatching { BlossomApiFactory.create(baseBlossomUrl = it.trimTrailingSlashes()) }.getOrNull()
         }.ifEmpty {
             throw BlossomUploadException(cause = IllegalStateException("Invalid blossom server list."))
         }
@@ -202,4 +202,6 @@ internal class PrimalUploadService(
     private companion object {
         private const val DEFAULT_BUFFER_SIZE = 8 * 1024L
     }
+
+    private fun String.trimTrailingSlashes(): String = this.trimEnd('/')
 }
