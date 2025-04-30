@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.HorizontalPagerIndicator
 import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
-import net.primal.android.theme.AppTheme
 import net.primal.domain.links.EventUriType
 
 const val SINGLE_IMAGE = 1
@@ -35,6 +34,7 @@ const val TWO_IMAGES = 2
 const val THREE_IMAGES = 3
 const val FOUR_IMAGES = 4
 private val GalleryGapSpace = 1.dp
+private val RadiusSize = 8.dp
 
 @ExperimentalFoundationApi
 @Composable
@@ -86,7 +86,7 @@ fun NoteMediaAttachmentsHorizontalPager(
                 HorizontalPager(state = pagerState, pageSpacing = 12.dp) {
                     val mediaUri = mediaEventUris[it]
                     NoteMediaAttachment(
-                        modifier = Modifier.padding(vertical = 4.dp).clip(AppTheme.shapes.large),
+                        modifier = Modifier.padding(vertical = 4.dp).clip(RoundedCornerShape(CornerSize(RadiusSize))),
                         mediaEventUri = mediaUri,
                         blossoms = blossoms,
                         imageSizeDp = imageSizeDp,
@@ -110,7 +110,7 @@ fun NoteMediaAttachmentsHorizontalPager(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 8.dp)
-                    .background(color = Color.Black.copy(alpha = 0.21f), shape = AppTheme.shapes.large)
+                    .background(color = Color.Black.copy(alpha = 0.21f), shape = RoundedCornerShape(RadiusSize))
                     .padding(horizontal = 8.dp),
             ) {
                 HorizontalPagerIndicator(
@@ -133,10 +133,10 @@ private fun FourImageGallery(
     onMediaClick: (MediaClickEvent) -> Unit,
 ) {
     val shapeMatrix = listOf(
-        RoundedCornerShape(AppTheme.shapes.large.topStart, CornerSize(0.dp), CornerSize(0.dp), CornerSize(0.dp)),
-        RoundedCornerShape(CornerSize(0.dp), AppTheme.shapes.large.topEnd, CornerSize(0.dp), CornerSize(0.dp)),
-        RoundedCornerShape(CornerSize(0.dp), CornerSize(0.dp), CornerSize(0.dp), AppTheme.shapes.large.bottomEnd),
-        RoundedCornerShape(CornerSize(0.dp), CornerSize(0.dp), AppTheme.shapes.large.bottomStart, CornerSize(0.dp)),
+        RoundedCornerShape(CornerSize(RadiusSize), CornerSize(0.dp), CornerSize(0.dp), CornerSize(0.dp)),
+        RoundedCornerShape(CornerSize(0.dp), CornerSize(RadiusSize), CornerSize(0.dp), CornerSize(0.dp)),
+        RoundedCornerShape(CornerSize(0.dp), CornerSize(0.dp), CornerSize(0.dp), CornerSize(RadiusSize)),
+        RoundedCornerShape(CornerSize(0.dp), CornerSize(0.dp), CornerSize(RadiusSize), CornerSize(0.dp)),
     )
 
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -198,8 +198,8 @@ private fun ThreeImageGallery(
                 .padding(vertical = GalleryGapSpace)
                 .clip(
                     RoundedCornerShape(
-                        topStart = AppTheme.shapes.large.topStart,
-                        topEnd = AppTheme.shapes.large.topEnd,
+                        topStart = CornerSize(RadiusSize),
+                        topEnd = CornerSize(RadiusSize),
                         bottomStart = CornerSize(0.dp),
                         bottomEnd = CornerSize(0.dp),
                     ),
@@ -233,7 +233,7 @@ private fun ThreeImageGallery(
                                 RoundedCornerShape(
                                     topStart = CornerSize(0.dp),
                                     topEnd = CornerSize(0.dp),
-                                    bottomStart = AppTheme.shapes.large.bottomStart,
+                                    bottomStart = CornerSize(RadiusSize),
                                     bottomEnd = CornerSize(0.dp),
                                 )
                             } else {
@@ -241,7 +241,7 @@ private fun ThreeImageGallery(
                                     topStart = CornerSize(0.dp),
                                     topEnd = CornerSize(0.dp),
                                     bottomStart = CornerSize(0.dp),
-                                    bottomEnd = AppTheme.shapes.large.bottomEnd,
+                                    bottomEnd = CornerSize(RadiusSize),
                                 )
                             },
                         ),
@@ -284,17 +284,17 @@ private fun TwoImageGallery(
                     .clip(
                         if (index == 0) {
                             RoundedCornerShape(
-                                topStart = AppTheme.shapes.large.topStart,
+                                topStart = CornerSize(RadiusSize),
                                 topEnd = CornerSize(0.dp),
-                                bottomStart = AppTheme.shapes.large.bottomStart,
+                                bottomStart = CornerSize(RadiusSize),
                                 bottomEnd = CornerSize(0.dp),
                             )
                         } else {
                             RoundedCornerShape(
                                 topStart = CornerSize(0.dp),
-                                topEnd = AppTheme.shapes.large.topEnd,
+                                topEnd = CornerSize(RadiusSize),
                                 bottomStart = CornerSize(0.dp),
-                                bottomEnd = AppTheme.shapes.large.bottomEnd,
+                                bottomEnd = CornerSize(RadiusSize),
                             )
                         },
                     ),
@@ -327,7 +327,7 @@ private fun SingleImageGallery(
     NoteMediaAttachment(
         modifier = Modifier
             .padding(vertical = 4.dp)
-            .clip(AppTheme.shapes.large),
+            .clip(RoundedCornerShape(RadiusSize)),
         mediaEventUri = mediaEventUri,
         blossoms = blossoms,
         imageSizeDp = imageSizeDp,
