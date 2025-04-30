@@ -97,4 +97,7 @@ interface ThreadConversationDao {
 
     @Query("SELECT * FROM ArticleCommentCrossRef WHERE commentNoteId = :commentNoteId")
     suspend fun findCrossRefByCommentId(commentNoteId: String): ArticleCommentCrossRef?
+
+    @Query("DELETE FROM ArticleCommentCrossRef WHERE articleId = :articleId AND articleAuthorId = :articleAuthorId")
+    suspend fun deleteArticleCrossRefs(articleId: String, articleAuthorId: String)
 }

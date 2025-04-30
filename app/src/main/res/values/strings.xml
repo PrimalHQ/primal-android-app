@@ -974,8 +974,10 @@
     <string name="context_confirm_bookmark_positive">Save Bookmark</string>
     <string name="context_confirm_bookmark_negative">No</string>
 
-    <string name="context_confirm_delete_title">Delete note?</string>
-    <string name="context_confirm_delete_text">This will issue a "request delete" command to the relays where the note was published. Do you want to continue?</string>
+    <string name="context_confirm_delete_note_title">Delete note?</string>
+    <string name="context_confirm_delete_article_title">Delete article?</string>
+    <string name="context_confirm_delete_note_text">This will issue a "request delete" command to the relays where the note was published. Do you want to continue?</string>
+    <string name="context_confirm_delete_article_text">This will issue a "request delete" command to the relays where the article was published. Do you want to continue?</string>
     <string name="context_confirm_delete_positive">Confirm</string>
     <string name="context_confirm_delete_negative">Dismiss</string>
 
@@ -1210,6 +1212,7 @@
     <string name="article_feed_context_copy_user_id">Copy user id</string>
     <string name="article_feed_context_report_user">Report user</string>
     <string name="article_feed_context_mute_user">Mute user</string>
+    <string name="article_feed_context_request_delete">Request Delete</string>
     <string name="article_feed_context_copied_toast">Copied!</string>
 
     <string name="article_details_zap">Zap</string>

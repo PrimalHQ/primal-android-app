@@ -51,4 +51,14 @@ interface ArticleDao {
         """,
     )
     fun observeArticleByEventId(eventId: String, authorId: String): Flow<Article?>
+
+    @Query("SELECT * FROM ArticleData WHERE aTag = :articleATag")
+    fun findArticleByATag(articleATag: String): Article?
+
+    @Query("DELETE FROM ArticleData WHERE aTag = :articleATag")
+    fun deleteByATag(articleATag: String)
+
+    @Transaction
+    fun findAndDeleteArticleByATag(articleATag: String): Article? =
+        findArticleByATag(articleATag = articleATag)?.also { deleteByATag(articleATag = articleATag) }
 }

@@ -134,6 +134,17 @@ fun ArticleDetailsScreen(
         }
     }
 
+    val articleViewModel = hiltViewModel<ArticleViewModel>()
+    val articleState by articleViewModel.state.collectAsState()
+
+    LaunchedEffect(articleViewModel, articleViewModel.effects) {
+        articleViewModel.effects.collect {
+            when (it) {
+                ArticleContract.SideEffect.ArticleDeleted -> onClose()
+            }
+        }
+    }
+
     LaunchedEffect(viewModel) {
         viewModel.effect.collect { effect ->
             when (effect) {
@@ -153,9 +164,6 @@ fun ArticleDetailsScreen(
             }
         }
     }
-
-    val articleViewModel = hiltViewModel<ArticleViewModel>()
-    val articleState by articleViewModel.state.collectAsState()
 
     ArticleDetailsScreen(
         detailsState = detailsState,
@@ -312,6 +320,17 @@ private fun ArticleDetailsScreen(
                         )
                     }
                 },
+                onRequestDeleteClick = { eventId, aTag, authorId ->
+                    if (detailsState.article != null) {
+                        articleEventPublisher(
+                            ArticleContract.UiEvent.RequestDeleteAction(
+                                eventId = eventId,
+                                articleATag = aTag,
+                                authorId = authorId,
+                            ),
+                        )
+                    }
+                },
                 onReportContentClick = { reportType ->
                     if (detailsState.article != null) {
                         articleEventPublisher(
@@ -429,6 +448,7 @@ private fun ArticleDetailsTopAppBar(
     onBookmarkClick: (() -> Unit)? = null,
     onMuteUserClick: (() -> Unit)? = null,
     onReportContentClick: ((reportType: ReportType) -> Unit)? = null,
+    onRequestDeleteClick: ((eventId: String, articleATag: String, authorId: String) -> Unit)? = null,
 ) {
     PrimalTopAppBar(
         navigationIcon = PrimalIcons.ArrowBack,
@@ -448,6 +468,8 @@ private fun ArticleDetailsTopAppBar(
                     modifier = Modifier
                         .size(42.dp)
                         .clip(CircleShape),
+                    eventId = state.article.eventId,
+                    articleATag = state.article.aTag,
                     articleId = state.article.articleId,
                     articleContent = state.article.content,
                     articleRawData = state.article.eventRawNostrEvent,
@@ -458,6 +480,7 @@ private fun ArticleDetailsTopAppBar(
                     onToggleHighlightsClick = onToggleHighlightsClick,
                     onBookmarkClick = onBookmarkClick,
                     onMuteUserClick = onMuteUserClick,
+                    onRequestDeleteClick = onRequestDeleteClick,
                     onReportContentClick = onReportContentClick,
                     icon = {
                         Icon(
