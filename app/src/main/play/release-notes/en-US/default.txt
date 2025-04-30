@@ -1,5 +1,8 @@
 - Login with Amber & Public key.
-- Push notifications.
-- New Media Uploads & Muted Content settings.
-- Image gallery in articles and new gallery in notes.
+- Push notifications & notifications overhaul.
+- Blossom Media Uploads & Settings.
+- Muted words, hashtags, & threads.
+- Image gallery in articles.
+- New gallery in note previews.
+- Request delete for notes and articles.
 - Various minor improvements and stability fixes.
