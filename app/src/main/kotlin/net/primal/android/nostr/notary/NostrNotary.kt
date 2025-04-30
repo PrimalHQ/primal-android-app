@@ -200,7 +200,7 @@ class NostrNotary @Inject constructor(
     }
 
     @OptIn(ExperimentalEncodingApi::class)
-    suspend fun signWalletInvoiceRequestNostrEvent(
+    fun signWalletInvoiceRequestNostrEvent(
         request: NwcWalletRequest<PayInvoiceRequest>,
         nwc: NostrWalletConnect,
     ): SignResult {
@@ -212,14 +212,16 @@ class NostrNotary @Inject constructor(
             pubKey = Hex.decode(nwc.pubkey),
         )
 
-        return signNostrEvent(
-            unsignedNostrEvent = NostrUnsignedEvent(
-                pubKey = nwc.keypair.pubkey,
-                kind = NostrEventKind.WalletRequest.value,
-                content = encryptedMessage,
-                tags = tags,
-            ),
-        )
+        return runCatching {
+            SignResult.Signed(
+                NostrUnsignedEvent(
+                    pubKey = nwc.keypair.pubkey,
+                    kind = NostrEventKind.WalletRequest.value,
+                    content = encryptedMessage,
+                    tags = tags,
+                ).signOrThrow(hexPrivateKey = Hex.decode(nwc.keypair.privateKey)),
+            )
+        }.getOrElse { SignResult.Rejected(SignatureException(cause = it)) }
     }
 
     suspend fun signPrimalWalletOperationNostrEvent(userId: String, content: String): SignResult {
