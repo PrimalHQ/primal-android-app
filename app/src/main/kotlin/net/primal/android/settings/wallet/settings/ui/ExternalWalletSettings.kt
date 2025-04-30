@@ -37,6 +37,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.ext.openUriSafely
 import net.primal.android.settings.wallet.settings.WalletSettingsContract
 import net.primal.android.settings.wallet.settings.WalletUiStateProvider
 import net.primal.android.theme.AppTheme
@@ -96,7 +97,7 @@ private fun ExternalWalletSection(
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
             onAlbyConnectClick = {
-                uriHandler.openUri(
+                uriHandler.openUriSafely(
                     "https://nwc.getalby.com/apps/new?c=Primal-Android",
                 )
             },
