@@ -20,9 +20,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
-import net.primal.android.core.utils.extractTLD
 import net.primal.android.notes.feed.note.ui.attachment.NoteImageLoadingPlaceholder
 import net.primal.android.theme.AppTheme
+import net.primal.core.utils.extractTLD
 
 @Composable
 fun NoteLinkLargePreview(

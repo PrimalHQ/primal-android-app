@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package net.primal.android.core.utils
 
 import com.linkedin.urls.Url
