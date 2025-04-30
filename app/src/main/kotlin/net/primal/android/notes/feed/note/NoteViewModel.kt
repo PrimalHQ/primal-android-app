@@ -6,13 +6,16 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.errors.UiError
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.notes.feed.note.NoteContract.SideEffect
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.NoteContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -60,6 +63,10 @@ class NoteViewModel @AssistedInject constructor(
 
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
+
+    private val _effects = Channel<SideEffect>()
+    val effects = _effects.receiveAsFlow()
+    private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effects.send(effect) }
 
     init {
         observeEvents()
@@ -292,6 +299,7 @@ class NoteViewModel @AssistedInject constructor(
                 )
 
                 feedRepository.deletePostById(postId = noteId, userId = activeAccountStore.activeUserId())
+                setEffect(SideEffect.NoteDeleted)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToPublishDeleteEvent(error)) }

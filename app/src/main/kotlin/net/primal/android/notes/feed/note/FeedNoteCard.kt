@@ -103,6 +103,7 @@ fun FeedNoteCard(
     noteOptionsMenuEnabled: Boolean = true,
     showNoteStatCounts: Boolean = true,
     noteCallbacks: NoteCallbacks = NoteCallbacks(),
+    onNoteDeleted: (() -> Unit)? = null,
     onGoToWallet: (() -> Unit)? = null,
     onUiError: ((UiError) -> Unit)? = null,
     contentFooter: @Composable () -> Unit = {},
@@ -113,6 +114,14 @@ fun FeedNoteCard(
     LaunchedEffect(viewModel, uiState.error, onUiError) {
         uiState.error?.let { onUiError?.invoke(it) }
         viewModel.setEvent(UiEvent.DismissError)
+    }
+
+    LaunchedEffect(viewModel, onNoteDeleted) {
+        viewModel.effects.collect {
+            when (it) {
+                NoteContract.SideEffect.NoteDeleted -> onNoteDeleted?.invoke()
+            }
+        }
     }
 
     FeedNoteCard(
@@ -207,6 +216,7 @@ private fun FeedNoteCard(
             dialogTitle = stringResource(id = R.string.context_confirm_delete_note_title),
             dialogText = stringResource(id = R.string.context_confirm_delete_note_text),
             onConfirmation = {
+                deleteDialogVisible = false
                 eventPublisher(UiEvent.RequestDeleteAction(noteId = data.postId, userId = data.authorId))
             },
             onDismissRequest = { deleteDialogVisible = false },

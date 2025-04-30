@@ -14,6 +14,10 @@ interface NoteContract {
         val error: UiError? = null,
     )
 
+    sealed class SideEffect {
+        data object NoteDeleted : SideEffect()
+    }
+
     sealed class UiEvent {
         data class PostLikeAction(
             val postId: String,
