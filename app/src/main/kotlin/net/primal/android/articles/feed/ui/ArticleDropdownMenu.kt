@@ -128,6 +128,22 @@ fun ArticleDropdownMenuIcon(
                     menuVisible = false
                 },
             )
+            DropdownPrimalMenuItem(
+                trailingIconVector = if (isBookmarked) {
+                    PrimalIcons.ContextRemoveBookmark
+                } else {
+                    PrimalIcons.ContextAddBookmark
+                },
+                text = if (isBookmarked) {
+                    stringResource(id = R.string.article_feed_context_remove_from_bookmark)
+                } else {
+                    stringResource(id = R.string.article_feed_context_add_to_bookmark)
+                },
+                onClick = {
+                    onBookmarkClick?.invoke()
+                    menuVisible = false
+                },
+            )
             if (showHighlights != null) {
                 DropdownPrimalMenuItem(
                     trailingIconVector = if (showHighlights) {
@@ -159,22 +175,6 @@ fun ArticleDropdownMenuIcon(
                             Toast.LENGTH_SHORT,
                         ).show()
                     }
-                },
-            )
-            DropdownPrimalMenuItem(
-                trailingIconVector = if (isBookmarked) {
-                    PrimalIcons.ContextRemoveBookmark
-                } else {
-                    PrimalIcons.ContextAddBookmark
-                },
-                text = if (isBookmarked) {
-                    stringResource(id = R.string.article_feed_context_remove_from_bookmark)
-                } else {
-                    stringResource(id = R.string.article_feed_context_add_to_bookmark)
-                },
-                onClick = {
-                    onBookmarkClick?.invoke()
-                    menuVisible = false
                 },
             )
             if (!articleContent.isNullOrEmpty()) {
