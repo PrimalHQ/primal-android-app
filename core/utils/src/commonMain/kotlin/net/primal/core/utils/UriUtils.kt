@@ -1,11 +1,9 @@
-@file:Suppress("unused")
-
 package net.primal.core.utils
 
 import io.ktor.http.Url
 
 private val urlRegexPattern = Regex(
-    "(https?://)?(www\\\\.)?[-a-zA-Z0-9@:%.+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()_@:%+.~#?&//=]*)",
+    """(https?://)?(www\.)?[-a-zA-Z0-9@:%+.~#=]{1,256}\.[a-zA-Z0-9()]{2,63}\b([-a-zA-Z0-9()_@:%+.~#?&/=]*)""",
     RegexOption.IGNORE_CASE,
 )
 
