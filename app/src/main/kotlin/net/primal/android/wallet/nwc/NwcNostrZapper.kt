@@ -10,6 +10,7 @@ import net.primal.android.wallet.nwc.api.NwcApi
 import net.primal.android.wallet.nwc.model.LightningPayRequest
 import net.primal.android.wallet.nwc.model.LightningPayResponse
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.zaps.NostrZapper
 import net.primal.domain.nostr.zaps.ZapFailureException
 import net.primal.domain.nostr.zaps.ZapRequestData
@@ -34,6 +35,8 @@ class NwcNostrZapper @AssistedInject constructor(
             nostrPublisher.publishWalletRequest(invoice = invoice, nwcData = nwcData)
         } catch (error: NostrPublishException) {
             throw ZapFailureException(cause = error)
+        } catch (error: SignatureException) {
+            throw ZapFailureException(cause = error)
         }
     }
 
@@ -53,15 +56,16 @@ class NwcNostrZapper @AssistedInject constructor(
         satoshiAmountInMilliSats: ULong,
         comment: String = "",
     ): LightningPayResponse {
-        return try {
+        val fetchInvoiceResult = runCatching {
             this.fetchInvoice(
                 request = zapPayRequest,
                 zapEvent = zapEvent,
                 satoshiAmountInMilliSats = satoshiAmountInMilliSats,
                 comment = comment,
             )
-        } catch (error: IOException) {
-            throw ZapFailureException(cause = error)
         }
+
+        return fetchInvoiceResult.getOrNull()
+            ?: throw ZapFailureException(cause = fetchInvoiceResult.exceptionOrNull())
     }
 }
