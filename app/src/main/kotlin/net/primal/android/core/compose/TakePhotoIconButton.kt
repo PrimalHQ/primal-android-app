@@ -39,31 +39,36 @@ fun TakePhotoIconButton(
 ) {
     val context = LocalContext.current
     val file = context.createImageFile()
-    val uri = FileProvider.getUriForFile(
-        Objects.requireNonNull(context),
-        BuildConfig.APPLICATION_ID + ".provider",
-        file,
-    )
+    val uri = runCatching {
+        FileProvider.getUriForFile(
+            Objects.requireNonNull(context),
+            BuildConfig.APPLICATION_ID + ".provider",
+            file,
+        )
+    }.getOrNull()
 
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { caputred ->
-        if (caputred) {
+        if (caputred && uri != null) {
             onPhotoTaken(uri)
         }
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) {
+        if (granted && uri != null) {
             cameraLauncher.launch(uri)
         }
     }
 
     IconButton(
+        enabled = uri != null,
         onClick = {
-            val cameraPermissionResult = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
-            if (cameraPermissionResult == PackageManager.PERMISSION_GRANTED) {
-                cameraLauncher.launch(uri)
-            } else {
-                permissionLauncher.launch(Manifest.permission.CAMERA)
+            if (uri != null) {
+                val cameraPermissionResult = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+                if (cameraPermissionResult == PackageManager.PERMISSION_GRANTED) {
+                    cameraLauncher.launch(uri)
+                } else {
+                    permissionLauncher.launch(Manifest.permission.CAMERA)
+                }
             }
         },
     ) {
