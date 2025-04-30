@@ -201,6 +201,7 @@ class NostrNotary @Inject constructor(
 
     @OptIn(ExperimentalEncodingApi::class)
     suspend fun signWalletInvoiceRequestNostrEvent(
+        userId: String,
         request: NwcWalletRequest<PayInvoiceRequest>,
         nwc: NostrWalletConnect,
     ): SignResult {
@@ -214,7 +215,7 @@ class NostrNotary @Inject constructor(
 
         return signNostrEvent(
             unsignedNostrEvent = NostrUnsignedEvent(
-                pubKey = nwc.keypair.pubkey,
+                pubKey = userId,
                 kind = NostrEventKind.WalletRequest.value,
                 content = encryptedMessage,
                 tags = tags,

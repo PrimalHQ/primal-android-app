@@ -98,8 +98,13 @@ class NostrPublisher @Inject constructor(
     }
 
     @Throws(NostrPublishException::class, SignatureException::class)
-    suspend fun publishWalletRequest(invoice: LightningPayResponse, nwcData: NostrWalletConnect) {
+    suspend fun publishWalletRequest(
+        userId: String,
+        invoice: LightningPayResponse,
+        nwcData: NostrWalletConnect,
+    ) {
         val walletPayNostrEvent = nostrNotary.signWalletInvoiceRequestNostrEvent(
+            userId = userId,
             request = invoice.toWalletPayRequest(),
             nwc = nwcData,
         ).unwrapOrThrow()

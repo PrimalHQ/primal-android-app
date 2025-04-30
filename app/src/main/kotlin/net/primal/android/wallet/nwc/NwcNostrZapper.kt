@@ -32,7 +32,7 @@ class NwcNostrZapper @AssistedInject constructor(
         )
 
         try {
-            nostrPublisher.publishWalletRequest(invoice = invoice, nwcData = nwcData)
+            nostrPublisher.publishWalletRequest(userId = data.zapperUserId, invoice = invoice, nwcData = nwcData)
         } catch (error: NostrPublishException) {
             throw ZapFailureException(cause = error)
         } catch (error: SignatureException) {
