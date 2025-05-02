@@ -17,7 +17,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import net.primal.android.core.files.error.UnableToSaveContent
 import net.primal.android.core.files.error.UnsuccessfulFileDownload
-import net.primal.android.core.utils.extractExtensionFromUrl
+import net.primal.core.utils.extractExtensionFromUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response

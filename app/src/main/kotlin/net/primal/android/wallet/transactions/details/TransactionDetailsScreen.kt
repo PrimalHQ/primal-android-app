@@ -101,7 +101,6 @@ import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.core.utils.formatToDefaultDateTimeFormat
-import net.primal.android.core.utils.parseUris
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.notes.feed.note.ui.FeedNoteHeader
@@ -120,6 +119,8 @@ import net.primal.android.wallet.walletTransactionIconBackgroundColor
 import net.primal.android.wallet.walletWithdrawColor
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.CurrencyConversionUtils.toUsd
+import net.primal.core.utils.detectUrls
+import net.primal.domain.nostr.utils.parseNostrUris
 import timber.log.Timber
 
 private const val URL_ANNOTATION_TAG = "url"
@@ -480,7 +481,7 @@ private fun TransactionNoteText(note: String) {
 
 @Composable
 private fun refineContentAsAnnotatedString(content: String): AnnotatedString {
-    val uriLinks = content.parseUris()
+    val uriLinks = content.detectUrls() + content.parseNostrUris()
     val refinedContent = content.trim()
 
     return buildAnnotatedString {

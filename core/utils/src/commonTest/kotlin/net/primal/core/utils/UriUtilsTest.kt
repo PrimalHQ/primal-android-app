@@ -10,7 +10,22 @@ import kotlin.test.Test
 class UriUtilsTest {
 
     @Test
-    fun `parseUrls should recognize https and http`() {
+    fun `detectUrls should recognize complex url`() {
+        val content = """
+            Some random links about bitcoin:
+            https://media.infosec.exchange/infosec.exchange/media_attachments/files/114/426/571/043/336/971/original/e5c23bb1b071328e.jpg
+        """.trimIndent()
+
+        val expectedUrls = content.detectUrls()
+
+        expectedUrls.shouldNotBeNull()
+        expectedUrls shouldBe listOf(
+            "https://media.infosec.exchange/infosec.exchange/media_attachments/files/114/426/571/043/336/971/original/e5c23bb1b071328e.jpg",
+        )
+    }
+
+    @Test
+    fun `detectUrls should recognize https and http`() {
         val content = """
             Some random links about bitcoin:
             http://bitcoinops.org/en/newsletters/2023/06/07/
@@ -26,7 +41,7 @@ class UriUtilsTest {
     }
 
     @Test
-    fun `parseUrls should recognize urls with brackets`() {
+    fun `detectUrls should recognize urls with brackets`() {
         val content = """
             Some random links about bitcoin:
             https://en.m.wikipedia.org/wiki/Bit_(money)
@@ -39,7 +54,7 @@ class UriUtilsTest {
     }
 
     @Test
-    fun `parseUrls should recognize various url formats`() {
+    fun `detectUrls should recognize various url formats`() {
         val content = """
         Some random links about bitcoin:
         https://en.m.wikipedia.org/wiki/Bit_(money)
@@ -65,7 +80,7 @@ class UriUtilsTest {
     }
 
     @Test
-    fun `parseUrls should recognize urls with port numbers`() {
+    fun `detectUrls should recognize urls with port numbers`() {
         val content = """
         A link with a port number:
         https://www.example.com:443/resource
@@ -80,7 +95,7 @@ class UriUtilsTest {
     }
 
     @Test
-    fun `parseUrls should return empty for invalid urls`() {
+    fun `detectUrls should return empty for invalid urls`() {
         val content = """
         Some random links:
         thisisnotalink
@@ -96,7 +111,7 @@ class UriUtilsTest {
     }
 
     @Test
-    fun `parseUrls should not return urls with brackets`() {
+    fun `detectUrls should not return urls with brackets`() {
         val hugeContent = MARKDOWN_WITH_LINKS
         hugeContent.shouldNotBeNull()
 

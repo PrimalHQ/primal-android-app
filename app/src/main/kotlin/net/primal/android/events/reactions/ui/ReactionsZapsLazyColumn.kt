@@ -30,11 +30,11 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.ext.openUriSafely
-import net.primal.android.core.utils.parseUris
 import net.primal.android.core.utils.shortened
 import net.primal.android.events.reactions.ReactionsContract
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.theme.AppTheme
+import net.primal.core.utils.detectUrls
 
 @Composable
 fun ReactionsZapsLazyColumn(
@@ -82,7 +82,7 @@ private fun NoteZapListItem(data: EventZapUiModel, onProfileClick: (profileId: S
     Column {
         ListItem(
             modifier = Modifier.clickable {
-                val messageUris = data.message?.parseUris(includeNostrUris = false)
+                val messageUris = data.message?.detectUrls()
 
                 if (messageUris?.isNotEmpty() == true) {
                     localUriHandler.openUriSafely(messageUris.first())
