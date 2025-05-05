@@ -2,6 +2,7 @@ package net.primal.core.networking.blossom
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import net.primal.domain.nostr.Nip94Metadata
 
 @Serializable
 data class BlobDescriptor(

@@ -1,4 +1,4 @@
-package net.primal.core.networking.blossom
+package net.primal.domain.nostr
 
 data class Nip94Metadata(
     val url: String? = null,

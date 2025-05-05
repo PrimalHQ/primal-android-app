@@ -1,5 +1,7 @@
 package net.primal.core.networking.blossom
 
+import net.primal.domain.nostr.Nip94Metadata
+
 sealed class UploadResult {
     data class Success(
         val remoteUrl: String,
