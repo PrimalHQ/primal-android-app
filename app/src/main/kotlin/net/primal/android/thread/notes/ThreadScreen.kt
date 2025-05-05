@@ -70,6 +70,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.FeedArticleListItem
 import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.ImportPhotosIconButton
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
@@ -313,14 +314,21 @@ private fun ThreadConversationLazyColumn(
             )
         },
     ) {
-        ThreadLazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            state = state,
-            onGoToWallet = onGoToWallet,
-            noteCallbacks = noteCallbacks,
-            onRootPostDeleted = onRootPostDeleted,
-            onUiError = onUiError,
-        )
+        if (state.fetching) {
+            HeightAdjustableLoadingLazyListPlaceholder(
+                repeat = 1,
+                height = 250.dp,
+            )
+        } else {
+            ThreadLazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = state,
+                onGoToWallet = onGoToWallet,
+                noteCallbacks = noteCallbacks,
+                onRootPostDeleted = onRootPostDeleted,
+                onUiError = onUiError,
+            )
+        }
     }
 }
 
