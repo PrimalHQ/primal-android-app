@@ -82,5 +82,9 @@ fun UiError.resolveUiErrorMessage(context: Context): String {
         }
 
         is UiError.FailedToFetchMuteList -> context.getString(R.string.app_error_fetching_mute_list)
+
+        is UiError.FailedToFetchNote -> context.getString(R.string.app_error_fetching_note)
+
+        is UiError.FailedToFetchTopNoteZaps -> context.getString(R.string.app_error_fetching_top_note_zaps)
     }
 }

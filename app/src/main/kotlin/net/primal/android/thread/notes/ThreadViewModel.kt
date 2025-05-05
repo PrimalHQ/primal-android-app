@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
+import net.primal.android.core.errors.UiError
 import net.primal.android.navigation.noteIdOrThrow
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.thread.notes.ThreadContract.UiEvent
@@ -73,6 +74,7 @@ class ThreadViewModel @Inject constructor(
             events.collect {
                 when (it) {
                     UiEvent.UpdateConversation -> fetchData()
+                    UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
         }
@@ -137,6 +139,7 @@ class ThreadViewModel @Inject constructor(
                 }
             } catch (error: NetworkException) {
                 Timber.w(error)
+                setState { copy(error = UiError.FailedToFetchNote(error)) }
             } finally {
                 setState { copy(fetching = false) }
             }
@@ -154,6 +157,7 @@ class ThreadViewModel @Inject constructor(
                 }
             } catch (error: NetworkException) {
                 Timber.w(error)
+                setState { copy(error = UiError.FailedToFetchTopNoteZaps(error)) }
             }
         }
 

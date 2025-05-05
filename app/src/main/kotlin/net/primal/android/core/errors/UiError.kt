@@ -41,4 +41,7 @@ sealed class UiError {
 
     data class SignatureError(val error: SignatureUiError) : UiError()
     data class NetworkError(val cause: Throwable) : UiError()
+
+    data class FailedToFetchNote(val cause: Throwable) : UiError()
+    data class FailedToFetchTopNoteZaps(val cause: Throwable) : UiError()
 }

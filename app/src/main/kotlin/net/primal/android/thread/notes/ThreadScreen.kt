@@ -75,6 +75,7 @@ import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.ReplyingToText
+import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.TakePhotoIconButton
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
@@ -158,6 +159,13 @@ fun ThreadScreen(
     NoteEditorErrorHandler(
         error = replyState.error,
         snackbarHostState = snackbarHostState,
+    )
+
+    SnackbarErrorHandler(
+        error = state.error,
+        snackbarHostState = snackbarHostState,
+        errorMessageResolver = { it.resolveUiErrorMessage(context) },
+        onErrorDismiss = { eventPublisher(ThreadContract.UiEvent.DismissError) },
     )
 
     Scaffold(
