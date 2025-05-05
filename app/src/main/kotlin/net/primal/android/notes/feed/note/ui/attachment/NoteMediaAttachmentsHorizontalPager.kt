@@ -9,14 +9,14 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,9 +24,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import net.primal.android.core.compose.HorizontalPagerIndicator
+import androidx.compose.ui.unit.sp
 import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
+import net.primal.android.theme.AppTheme
 import net.primal.domain.links.EventUriType
 
 const val SINGLE_IMAGE = 1
@@ -47,7 +48,6 @@ fun NoteMediaAttachmentsHorizontalPager(
     BoxWithConstraints(modifier = modifier) {
         val imageSizeDp = findImageSize(eventUri = mediaEventUris.first())
         val imagesCount = mediaEventUris.size
-        val pagerState = rememberPagerState { imagesCount }
 
         when (imagesCount) {
             SINGLE_IMAGE -> {
@@ -74,51 +74,12 @@ fun NoteMediaAttachmentsHorizontalPager(
                     onMediaClick = onMediaClick,
                 )
             }
-            FOUR_IMAGES -> {
-                FourImageGallery(
+            else -> {
+                MultipleImageGallery(
                     mediaEventUri = mediaEventUris,
                     blossoms = blossoms,
                     imageSizeDp = imageSizeDp,
                     onMediaClick = onMediaClick,
-                )
-            }
-            else -> {
-                HorizontalPager(state = pagerState, pageSpacing = 12.dp) {
-                    val mediaUri = mediaEventUris[it]
-                    NoteMediaAttachment(
-                        modifier = Modifier.padding(vertical = 4.dp).clip(RoundedCornerShape(CornerSize(RadiusSize))),
-                        mediaEventUri = mediaUri,
-                        blossoms = blossoms,
-                        imageSizeDp = imageSizeDp,
-                        onClick = { positionMs ->
-                            onMediaClick(
-                                MediaClickEvent(
-                                    noteId = mediaUri.eventId,
-                                    eventUriType = mediaUri.type,
-                                    mediaUrl = mediaUri.url,
-                                    positionMs = positionMs,
-                                ),
-                            )
-                        },
-                    )
-                }
-            }
-        }
-
-        if (imagesCount > FOUR_IMAGES) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 8.dp)
-                    .background(color = Color.Black.copy(alpha = 0.21f), shape = RoundedCornerShape(RadiusSize))
-                    .padding(horizontal = 8.dp),
-            ) {
-                HorizontalPagerIndicator(
-                    modifier = Modifier.padding(vertical = 4.dp),
-                    pagesCount = imagesCount,
-                    currentPage = pagerState.currentPage,
-                    predecessorsColor = Color.White,
-                    successorsColor = Color.White,
                 )
             }
         }
@@ -126,12 +87,13 @@ fun NoteMediaAttachmentsHorizontalPager(
 }
 
 @Composable
-private fun FourImageGallery(
+private fun MultipleImageGallery(
     mediaEventUri: List<EventUriUi>,
     blossoms: List<String>,
     imageSizeDp: DpSize,
     onMediaClick: (MediaClickEvent) -> Unit,
 ) {
+    val maxDisplayImages = FOUR_IMAGES
     val shapeMatrix = listOf(
         RoundedCornerShape(CornerSize(RadiusSize), CornerSize(0.dp), CornerSize(0.dp), CornerSize(0.dp)),
         RoundedCornerShape(CornerSize(0.dp), CornerSize(RadiusSize), CornerSize(0.dp), CornerSize(0.dp)),
@@ -139,41 +101,63 @@ private fun FourImageGallery(
         RoundedCornerShape(CornerSize(0.dp), CornerSize(0.dp), CornerSize(RadiusSize), CornerSize(0.dp)),
     )
 
+    val displayedMedia = mediaEventUri.take(maxDisplayImages)
+    val hasExtra = mediaEventUri.size > maxDisplayImages
+    val extraCount = mediaEventUri.size - maxDisplayImages
+
     Column(modifier = Modifier.fillMaxWidth()) {
-        mediaEventUri.chunked(2).forEachIndexed { rowIndex, rowAttachments ->
+        displayedMedia.chunked(2).forEachIndexed { rowIndex, rowAttachments ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(GalleryGapSpace),
             ) {
-                rowAttachments.forEachIndexed { index, mediaEventUri ->
-                    NoteMediaAttachment(
+                rowAttachments.forEachIndexed { index, media ->
+                    val position = rowIndex * 2 + index
+                    val shape = shapeMatrix.getOrNull(position) ?: RoundedCornerShape(0.dp)
+                    val isLastVisible = hasExtra && position == maxDisplayImages - 1
+
+                    Box(
                         modifier = Modifier
                             .weight(1f)
                             .aspectRatio(1f)
-                            .then(
-                                if (rowIndex == 0) {
-                                    Modifier.padding(
-                                        0.dp,
-                                    )
-                                } else {
-                                    Modifier.padding(vertical = GalleryGapSpace)
-                                },
-                            )
-                            .clip(shapeMatrix[rowIndex * 2 + index]),
-                        mediaEventUri = mediaEventUri,
-                        blossoms = blossoms,
-                        imageSizeDp = imageSizeDp,
-                        onClick = { positionMs ->
-                            onMediaClick(
-                                MediaClickEvent(
-                                    noteId = mediaEventUri.eventId,
-                                    eventUriType = mediaEventUri.type,
-                                    mediaUrl = mediaEventUri.url,
-                                    positionMs = positionMs,
-                                ),
-                            )
-                        },
-                    )
+                            .then(if (rowIndex == 0) Modifier else Modifier.padding(vertical = GalleryGapSpace))
+                            .clip(shape),
+                    ) {
+                        NoteMediaAttachment(
+                            modifier = Modifier.fillMaxSize(),
+                            mediaEventUri = media,
+                            blossoms = blossoms,
+                            imageSizeDp = imageSizeDp,
+                            onClick = { positionMs ->
+                                onMediaClick(
+                                    MediaClickEvent(
+                                        noteId = media.eventId,
+                                        eventUriType = media.type,
+                                        mediaUrl = media.url,
+                                        positionMs = positionMs,
+                                    ),
+                                )
+                            },
+                        )
+
+                        if (isLastVisible) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Black.copy(alpha = 0.5f))
+                                    .align(Alignment.Center),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    text = "+$extraCount",
+                                    style = AppTheme.typography.bodyLarge.copy(
+                                        fontSize = 48.sp,
+                                    ),
+                                    color = Color.White,
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
