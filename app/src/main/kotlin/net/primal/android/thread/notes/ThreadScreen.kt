@@ -157,9 +157,15 @@ fun ThreadScreen(
     val replyState by noteEditorViewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    NoteEditorErrorHandler(
+    SnackbarErrorHandler(
         error = replyState.error,
         snackbarHostState = snackbarHostState,
+        errorMessageResolver = { it.resolveUiErrorMessage(context) },
+        onErrorDismiss = {
+            noteEditorViewModel.setEvent(
+                NoteEditorContract.UiEvent.DismissError,
+            )
+        },
     )
 
     SnackbarErrorHandler(
@@ -648,37 +654,6 @@ private fun ReplyToOptions(
                 onPublishReplyClick()
                 keyboardController?.hide()
             },
-        )
-    }
-}
-
-@Composable
-@Deprecated("Replace with SnackbarErrorHandler")
-private fun NoteEditorErrorHandler(
-    error: NoteEditorContract.UiState.NoteEditorError?,
-    snackbarHostState: SnackbarHostState,
-) {
-    val context = LocalContext.current
-    LaunchedEffect(error) {
-        val errorMessage = when (error) {
-            is NoteEditorContract.UiState.NoteEditorError.MissingRelaysConfiguration -> context.getString(
-                R.string.app_missing_relays_config,
-            )
-
-            is NoteEditorContract.UiState.NoteEditorError.PublishError -> context.getString(
-                R.string.post_action_reply_failed,
-            )
-
-            is NoteEditorContract.UiState.NoteEditorError.AttachmentUploadFailed ->
-                error.cause.message
-                    ?: context.getString(R.string.app_error_upload_failed)
-
-            null -> return@LaunchedEffect
-        }
-
-        snackbarHostState.showSnackbar(
-            message = errorMessage,
-            duration = SnackbarDuration.Short,
         )
     }
 }

@@ -32,7 +32,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -70,6 +69,7 @@ import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.ReplyingToText
+import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.TakePhotoIconButton
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalLoadingButton
@@ -77,8 +77,8 @@ import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
+import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.editor.NoteEditorContract.UiEvent
-import net.primal.android.editor.NoteEditorContract.UiState.NoteEditorError
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.ui.NoteAttachmentPreview
 import net.primal.android.editor.ui.NoteOutlinedTextField
@@ -121,10 +121,13 @@ fun NoteEditorScreen(
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
-    NewPostPublishErrorHandler(
+    SnackbarErrorHandler(
         error = state.error,
         snackbarHostState = snackbarHostState,
+        errorMessageResolver = { it.resolveUiErrorMessage(context) },
+        onErrorDismiss = { eventPublisher(UiEvent.DismissError) },
     )
 
     Scaffold(
@@ -621,34 +624,6 @@ private fun NoteActionRow(onPhotosImported: (List<Uri>) -> Unit, onUserTag: () -
                 tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             )
         }
-    }
-}
-
-@Composable
-@Deprecated("Replace with SnackbarErrorHandler")
-private fun NewPostPublishErrorHandler(error: NoteEditorError?, snackbarHostState: SnackbarHostState) {
-    val context = LocalContext.current
-    LaunchedEffect(error ?: true) {
-        val errorMessage = when (error) {
-            is NoteEditorError.MissingRelaysConfiguration -> context.getString(
-                R.string.app_missing_relays_config,
-            )
-
-            is NoteEditorError.PublishError -> context.getString(
-                R.string.note_editor_nostr_publish_error,
-            )
-
-            is NoteEditorError.AttachmentUploadFailed ->
-                error.cause.message
-                    ?: context.getString(R.string.app_error_upload_failed)
-
-            null -> return@LaunchedEffect
-        }
-
-        snackbarHostState.showSnackbar(
-            message = errorMessage,
-            duration = SnackbarDuration.Long,
-        )
     }
 }
 

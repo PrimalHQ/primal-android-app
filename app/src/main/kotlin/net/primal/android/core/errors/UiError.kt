@@ -22,7 +22,7 @@ sealed class UiError {
     data class FailedToMuteThread(val cause: Throwable) : UiError()
     data class FailedToUnmuteThread(val cause: Throwable) : UiError()
 
-    data class MissingRelaysConfiguration(val cause: Throwable) : UiError()
+    data class MissingRelaysConfiguration(val cause: Throwable?) : UiError()
 
     data class FailedToAddToFeed(val cause: Throwable) : UiError()
     data class FailedToRemoveFeed(val cause: Throwable) : UiError()
@@ -44,4 +44,7 @@ sealed class UiError {
 
     data class FailedToFetchNote(val cause: Throwable) : UiError()
     data class FailedToFetchTopNoteZaps(val cause: Throwable) : UiError()
+
+    data class FailedToUploadAttachment(val cause: Throwable) : UiError()
+    data class PublishError(val cause: Throwable?) : UiError()
 }
