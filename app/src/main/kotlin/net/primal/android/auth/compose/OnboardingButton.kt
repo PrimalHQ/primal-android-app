@@ -21,7 +21,7 @@ fun OnboardingButton(
         modifier = modifier
             .widthIn(240.dp, MAX_COMPONENT_WIDTH.dp)
             .fillMaxWidth(),
-        containerColor = Color.Black,
+        containerColor = Color.Black.copy(alpha = 0.8f),
         disabledContainerColor = Color.Black.copy(alpha = 0.20f),
         contentColor = Color.White,
         enabled = enabled,
