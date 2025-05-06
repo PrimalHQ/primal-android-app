@@ -1,5 +1,6 @@
 package net.primal.core.utils
 
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -8,6 +9,48 @@ import io.kotest.matchers.string.shouldNotEndWith
 import kotlin.test.Test
 
 class UriUtilsTest {
+
+    @Test
+    fun `detectUrls should not match triple-dot false positives`() {
+        "Medicare...he".detectUrls().shouldBeEmpty()
+    }
+
+    @Test
+    fun `detectUrls should not match domains without a proper TLD`() {
+        "justadomain".detectUrls().shouldBeEmpty()
+        "example.".detectUrls().shouldBeEmpty()
+    }
+
+    @Test
+    fun `detectUrls should not match single-letter or too-short TLD`() {
+        "http://example.c".detectUrls().shouldBeEmpty()
+    }
+
+    @Test
+    fun `detectUrls should not match adjacent-dot domains`() {
+        "Visit a..b for info".detectUrls().shouldBeEmpty()
+    }
+
+    @Test
+    fun `detectUrls should trim trailing dot after parenthesis-wrapped url`() {
+        val content = "Check this: (blossom.primal.net)."
+        val urls = content.detectUrls()
+        urls shouldBe listOf("blossom.primal.net")
+    }
+
+    @Test
+    fun `detectUrls should trim trailing comma after bracket-wrapped url`() {
+        val content = "[www.example.org],"
+        val urls = content.detectUrls()
+        urls shouldBe listOf("www.example.org")
+    }
+
+    @Test
+    fun `detectUrls should trim trailing exclamation and question marks`() {
+        val content = "Check this out: example.com?!"
+        val urls = content.detectUrls()
+        urls shouldBe listOf("example.com")
+    }
 
     @Test
     fun `detectUrls should recognize complex url`() {
