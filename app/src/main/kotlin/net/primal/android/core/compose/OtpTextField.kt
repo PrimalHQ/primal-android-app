@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -34,6 +35,8 @@ fun OtpTextField(
     onCodeConfirmed: ((String) -> Unit)? = null,
     charSpacing: Dp = 8.dp,
     charWidth: Dp? = 44.dp,
+    alpha: Float = 1f,
+    backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     keyboardType: KeyboardType = KeyboardType.NumberPassword,
 ) {
     BasicTextField(
@@ -65,7 +68,13 @@ fun OtpTextField(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 repeat(otpCount) {
-                    CharText(index = it, text = otpText, width = charWidth)
+                    CharText(
+                        index = it,
+                        text = otpText,
+                        width = charWidth,
+                        alpha = alpha,
+                        backgroundColor = backgroundColor,
+                    )
                 }
             }
         },
@@ -77,6 +86,8 @@ private fun RowScope.CharText(
     index: Int,
     text: String,
     width: Dp?,
+    alpha: Float,
+    backgroundColor: Color,
 ) {
     val char = when {
         index == text.length -> ""
@@ -94,7 +105,7 @@ private fun RowScope.CharText(
             }
             .fillMaxHeight()
             .background(
-                color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                color = backgroundColor.copy(alpha = alpha),
                 shape = AppTheme.shapes.large,
             )
             .padding(horizontal = 2.dp)
