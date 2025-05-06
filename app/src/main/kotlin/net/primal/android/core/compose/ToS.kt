@@ -7,6 +7,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
@@ -36,14 +37,14 @@ fun ToSAndPrivacyPolicyText(
         append("\n")
 
         pushStringAnnotation(TOS_ANNOTATION_TAG, "tos")
-        withStyle(style = linkSpanStyle) {
+        withStyle(style = linkSpanStyle.copy(fontWeight = FontWeight.Bold)) {
             append(stringResource(id = R.string.legal_tos_hint_highlighted_word))
         }
         pop()
 
         append(" and ")
         pushStringAnnotation(PRIVACY_ANNOTATION_TAG, "privacy")
-        withStyle(style = linkSpanStyle) {
+        withStyle(style = linkSpanStyle.copy(fontWeight = FontWeight.Bold)) {
             append(stringResource(id = R.string.legal_privacy_policy_hint_highlighted_word))
         }
         pop()
