@@ -2,22 +2,42 @@ package net.primal.core.utils
 
 import io.ktor.http.Url
 
+/**
+ * A URL-matching regex that supports:
+ * - Optional `http://` or `https://`
+ * - Optional `www.`
+ * - Domain names (1–256 characters), forbidding consecutive dots
+ * - A mandatory dot + TLD (2–63 letters only)
+ * - A word boundary to avoid trailing punctuation
+ * - Optional path, query, or fragment
+ *
+ * Pattern components:
+ * ```
+ * (https?://)?                   // Optional “http://” or “https://”
+ * (www\.)?                       // Optional “www.”
+ * [-a-zA-Z0-9@:%+.~#=]{1,256}    // Domain name characters (1–256 chars)
+ * (?<!\.)\.                      // Literal dot, not preceded by another dot
+ * [a-zA-Z]{2,63}                 // TLD: 2–63 letters only
+ * \b                             // Word boundary
+ * ([-a-zA-Z0-9()_@:%+.~#?&/=]*)  // Optional path/query/fragment
+ * ```
+ */
 private val urlRegexPattern = Regex(
-    """(https?://)?(www\.)?[-a-zA-Z0-9@:%+.~#=]{1,256}\.[a-zA-Z0-9()]{2,63}\b([-a-zA-Z0-9()_@:%+.~#?&/=]*)""",
+    """(https?://)?(www\.)?[-a-zA-Z0-9@:%+.~#=]{1,256}(?<!\.)\.[a-zA-Z]{2,63}\b([-a-zA-Z0-9()_@:%+.~#?&/=]*)""",
     RegexOption.IGNORE_CASE,
 )
 
 fun String.detectUrls(): List<String> {
     return urlRegexPattern.findAll(this).map { matchResult ->
-        val url = matchResult.value
-        val startIndex = matchResult.range.first
-        val charBefore = this.getOrNull(startIndex - 1)
+        var url = matchResult.value
+        url = url.trimEnd('.', ',', '!', '?')
 
-        when (charBefore) {
-            '(' -> url.trimEnd(')')
-            '[' -> url.trimEnd(']')
-            else -> url
+        when (this.getOrNull(matchResult.range.first - 1)) {
+            '(' -> url = url.trimEnd(')')
+            '[' -> url = url.trimEnd(']')
         }
+
+        url
     }.toList()
 }
 
