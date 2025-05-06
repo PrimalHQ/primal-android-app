@@ -157,7 +157,6 @@ class ThreadViewModel @Inject constructor(
                 }
             } catch (error: NetworkException) {
                 Timber.w(error)
-                setState { copy(error = UiError.FailedToFetchTopNoteZaps(error)) }
             }
         }
 

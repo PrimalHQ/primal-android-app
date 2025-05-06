@@ -85,8 +85,6 @@ fun UiError.resolveUiErrorMessage(context: Context): String {
 
         is UiError.FailedToFetchNote -> context.getString(R.string.app_error_fetching_note)
 
-        is UiError.FailedToFetchTopNoteZaps -> context.getString(R.string.app_error_fetching_top_note_zaps)
-
         is UiError.FailedToUploadAttachment -> context.getString(R.string.app_error_upload_failed)
 
         is UiError.PublishError -> context.getString(R.string.post_action_reply_failed)
