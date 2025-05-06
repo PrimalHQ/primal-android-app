@@ -156,23 +156,22 @@ fun ThreadScreen(
 
     val replyState by noteEditorViewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val errorToShow = replyState.error ?: state.error
 
     SnackbarErrorHandler(
-        error = replyState.error,
+        error = errorToShow,
         snackbarHostState = snackbarHostState,
         errorMessageResolver = { it.resolveUiErrorMessage(context) },
         onErrorDismiss = {
-            noteEditorViewModel.setEvent(
-                NoteEditorContract.UiEvent.DismissError,
-            )
+            if (replyState.error != null) {
+                noteEditorViewModel.setEvent(
+                    NoteEditorContract.UiEvent.DismissError,
+                )
+            }
+            if (state.error != null) {
+                eventPublisher(ThreadContract.UiEvent.DismissError)
+            }
         },
-    )
-
-    SnackbarErrorHandler(
-        error = state.error,
-        snackbarHostState = snackbarHostState,
-        errorMessageResolver = { it.resolveUiErrorMessage(context) },
-        onErrorDismiss = { eventPublisher(ThreadContract.UiEvent.DismissError) },
     )
 
     Scaffold(
