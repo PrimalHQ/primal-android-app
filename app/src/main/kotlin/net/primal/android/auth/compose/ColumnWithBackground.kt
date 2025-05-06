@@ -18,9 +18,7 @@ fun ColumnWithBackground(
     backgroundPainter: Painter,
     content: @Composable (DpSize) -> Unit,
 ) {
-    BoxWithConstraints(
-        modifier = modifier,
-    ) {
+    BoxWithConstraints {
         val maxSize = DpSize(width = this.maxWidth, height = this.maxHeight)
 
         Image(
@@ -32,7 +30,7 @@ fun ColumnWithBackground(
         )
 
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .systemBarsPadding(),
         ) {
