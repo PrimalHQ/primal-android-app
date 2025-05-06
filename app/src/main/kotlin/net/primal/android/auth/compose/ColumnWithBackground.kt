@@ -1,6 +1,7 @@
 package net.primal.android.auth.compose
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +17,8 @@ import androidx.compose.ui.unit.DpSize
 fun ColumnWithBackground(
     modifier: Modifier = Modifier,
     backgroundPainter: Painter,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start,
     content: @Composable (DpSize) -> Unit,
 ) {
     BoxWithConstraints {
@@ -33,6 +36,8 @@ fun ColumnWithBackground(
             modifier = modifier
                 .fillMaxSize()
                 .systemBarsPadding(),
+            verticalArrangement = verticalArrangement,
+            horizontalAlignment = horizontalAlignment,
         ) {
             content(maxSize)
         }
