@@ -72,6 +72,7 @@ import net.primal.android.articles.feed.ui.FeedArticleListItem
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.ImportPhotosIconButton
+import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -323,6 +324,12 @@ private fun ThreadConversationLazyColumn(
             HeightAdjustableLoadingLazyListPlaceholder(
                 repeat = 1,
                 height = 250.dp,
+            )
+        } else if (state.conversation.isEmpty()) {
+            ListNoContent(
+                modifier = Modifier.fillMaxSize(),
+                noContentText = stringResource(id = R.string.thread_invalid_thread_id),
+                onRefresh = { eventPublisher(ThreadContract.UiEvent.UpdateConversation) },
             )
         } else {
             ThreadLazyColumn(
