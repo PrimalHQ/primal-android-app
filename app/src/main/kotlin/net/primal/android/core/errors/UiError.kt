@@ -19,6 +19,8 @@ sealed class UiError {
     data class FailedToMuteUser(val cause: Throwable) : UiError()
     data class FailedToUnmuteUser(val cause: Throwable) : UiError()
 
+    data class FailedToBookmarkNote(val cause: Throwable) : UiError()
+
     data class FailedToMuteThread(val cause: Throwable) : UiError()
     data class FailedToUnmuteThread(val cause: Throwable) : UiError()
 
