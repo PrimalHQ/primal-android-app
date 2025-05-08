@@ -176,9 +176,10 @@ class WalletRepository @Inject constructor(
         return walletApi.parseLnInvoice(userId = userId, lnbc = lnbc)
     }
 
-    suspend fun deleteAllTransactions(userId: String) = withContext(dispatcherProvider.io()) {
-        usersDatabase.walletTransactions().deleteAllTransactionsByUserId(userId = userId)
-    }
+    suspend fun deleteAllTransactions(userId: String) =
+        withContext(dispatcherProvider.io()) {
+            usersDatabase.walletTransactions().deleteAllTransactionsByUserId(userId = userId)
+        }
 
     suspend fun fetchMiningFees(
         userId: String,
