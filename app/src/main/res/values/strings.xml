@@ -134,6 +134,7 @@
     <string name="drawer_destination_premium">Premium</string>
     <string name="drawer_destination_messages">Messages</string>
     <string name="drawer_destination_bookmarks">Bookmarks</string>
+    <string name="drawer_destination_redeem_code">Redeem Code</string>
     <string name="drawer_destination_settings">Settings</string>
     <string name="drawer_destination_sign_out">Sign Out</string>
     <string name="drawer_followers_suffix">Followers</string>
