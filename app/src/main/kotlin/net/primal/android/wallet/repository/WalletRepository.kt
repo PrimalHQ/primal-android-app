@@ -58,6 +58,16 @@ class WalletRepository @Inject constructor(
             }
         }
 
+    suspend fun getPromoCodeDetails(code: String) =
+        withContext(dispatcherProvider.io()) {
+            walletApi.getPromoCodeDetails(code = code)
+        }
+
+    suspend fun redeemPromoCode(userId: String, code: String) =
+        withContext(dispatcherProvider.io()) {
+            walletApi.redeemPromoCode(userId = userId, code = code)
+        }
+
     suspend fun findTransactionByIdOrNull(txId: String): TransactionProfileData? =
         withContext(dispatcherProvider.io()) {
             val transaction = usersDatabase.walletTransactions().findTransactionById(txId = txId)

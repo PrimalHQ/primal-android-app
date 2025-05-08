@@ -28,6 +28,8 @@ import net.primal.android.wallet.api.model.ParseLnInvoiceRequestBody
 import net.primal.android.wallet.api.model.ParseLnUrlRequestBody
 import net.primal.android.wallet.api.model.ParsedLnInvoiceResponse
 import net.primal.android.wallet.api.model.ParsedLnUrlResponse
+import net.primal.android.wallet.api.model.PromoCodeDetailsResponse
+import net.primal.android.wallet.api.model.PromoCodeRequestBody
 import net.primal.android.wallet.api.model.TransactionsRequestBody
 import net.primal.android.wallet.api.model.TransactionsResponse
 import net.primal.android.wallet.api.model.UserWalletInfoRequestBody
@@ -39,9 +41,13 @@ import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.data.remote.PrimalVerb
+import net.primal.data.remote.model.AppSpecificDataRequest
 import net.primal.domain.common.PrimalEvent
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import timber.log.Timber
 
 class WalletApiImpl @Inject constructor(
@@ -217,6 +223,37 @@ class WalletApiImpl @Inject constructor(
             paging = result.findPrimalEvent(kind = NostrEventKind.PrimalPaging)?.let {
                 it.content.decodeFromJsonStringOrNull()
             },
+        )
+    }
+
+    override suspend fun getPromoCodeDetails(code: String): PromoCodeDetailsResponse {
+        val result = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.PROMO_CODE_GET_DETAILS.id,
+                optionsJson = PromoCodeRequestBody(
+                    promoCode = code,
+                ).encodeToJsonString(),
+            ),
+        )
+
+        return result.findPrimalEvent(kind = NostrEventKind.PrimalPromoCodeDetails)
+            .takeContentOrNull<PromoCodeDetailsResponse>()
+            ?: throw NetworkException("Missing or invalid content in response.")
+    }
+
+    override suspend fun redeemPromoCode(userId: String, code: String) {
+        primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.PROMO_CODES_REDEEM.id,
+                optionsJson = AppSpecificDataRequest(
+                    eventFromUser = nostrNotary.signAppSpecificDataNostrEvent(
+                        userId = userId,
+                        content = PromoCodeRequestBody(
+                            promoCode = code,
+                        ).encodeToJsonString(),
+                    ).unwrapOrThrow(),
+                ).encodeToJsonString(),
+            ),
         )
     }
 
