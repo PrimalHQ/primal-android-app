@@ -22,18 +22,22 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -47,10 +51,13 @@ import net.primal.android.auth.compose.ColumnWithBackground
 import net.primal.android.auth.compose.OnboardingBottomBar
 import net.primal.android.auth.compose.onboardingTextHintTypography
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.WalletSuccess
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.errors.UiError
+import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.activation.WalletActivationContract
@@ -80,6 +87,20 @@ fun OnboardingWalletActivation(
     eventPublisher: (WalletActivationContract.UiEvent) -> Unit,
     onDoneOrDismiss: () -> Unit,
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    SnackbarErrorHandler(
+        error = state.uiError,
+        snackbarHostState = snackbarHostState,
+        errorMessageResolver = {
+            when (it) {
+                is UiError.InvalidPromoCode -> stringResource(id = R.string.app_error_invalid_promo_code_try_later)
+                else -> it.resolveUiErrorMessage(context)
+            }
+        },
+        onErrorDismiss = { eventPublisher(WalletActivationContract.UiEvent.DismissSnackbarError) },
+    )
+
     val isKeyboardVisible by keyboardVisibilityAsState()
     BackHandler {}
     ColumnWithBackground(
@@ -124,9 +145,7 @@ fun OnboardingWalletActivation(
                             errorContent = { OtpErrorText(error = state.error) },
                         )
                     },
-                    success = {
-                        WalletSuccessContent(modifier = Modifier.padding(paddingValues))
-                    },
+                    success = { WalletSuccessContent(modifier = Modifier.padding(paddingValues)) },
                 )
             },
             bottomBar = {
@@ -142,6 +161,7 @@ fun OnboardingWalletActivation(
                     onDoneOrDismiss = onDoneOrDismiss,
                 )
             },
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         )
     }
 }
