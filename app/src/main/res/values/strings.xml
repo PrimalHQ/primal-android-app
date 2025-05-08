@@ -44,6 +44,7 @@
 
     <string name="welcome_sign_in_button_title">Sign In</string>
     <string name="welcome_create_account_button_title">Create Account</string>
+    <string name="welcome_redeem_code_button_title">Redeem Code</string>
     <string name="welcome_tos_prefix">By proceeding you accept our</string>
 
     <string name="legal_tos_hint_highlighted_word">Terms of Service</string>
