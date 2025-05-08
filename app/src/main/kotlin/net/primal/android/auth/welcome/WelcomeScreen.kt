@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,12 +29,15 @@ import net.primal.android.core.compose.TWO_FIFTHS
 import net.primal.android.core.compose.ToSAndPrivacyPolicyText
 import net.primal.android.core.compose.UiDensityMode
 import net.primal.android.core.compose.detectUiDensityModeFromMaxHeight
-import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
-fun WelcomeScreen(onSignInClick: () -> Unit, onCreateAccountClick: () -> Unit) {
+fun WelcomeScreen(
+    onSignInClick: () -> Unit,
+    onCreateAccountClick: () -> Unit,
+    onRedeemCodeClick: () -> Unit,
+) {
     ColumnWithBackground(
         backgroundPainter = painterResource(id = R.drawable.onboarding_spot1),
     ) { size ->
@@ -63,18 +65,8 @@ fun WelcomeScreen(onSignInClick: () -> Unit, onCreateAccountClick: () -> Unit) {
 
             Image(
                 modifier = Modifier.width(200.dp),
-                painter = painterResource(id = R.drawable.primal_logo),
+                painter = painterResource(id = R.drawable.primal_welcome_logo),
                 contentDescription = null,
-            )
-
-            Text(
-                modifier = Modifier.padding(vertical = 8.dp),
-                text = "Discover the Best of Nostr",
-                style = AppTheme.typography.bodyMedium.copy(
-                    color = Color.White,
-                    fontSize = 17.sp,
-                    lineHeight = 24.sp,
-                ),
             )
 
             Spacer(
@@ -97,6 +89,13 @@ fun WelcomeScreen(onSignInClick: () -> Unit, onCreateAccountClick: () -> Unit) {
             OnboardingButton(
                 text = stringResource(id = R.string.welcome_create_account_button_title),
                 onClick = onCreateAccountClick,
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OnboardingButton(
+                text = stringResource(id = R.string.welcome_redeem_code_button_title),
+                onClick = onRedeemCodeClick,
             )
 
             ToSAndPrivacyPolicyText(
@@ -122,6 +121,7 @@ fun PreviewWelcomeScreen() {
         WelcomeScreen(
             onSignInClick = {},
             onCreateAccountClick = {},
+            onRedeemCodeClick = {},
         )
     }
 }
