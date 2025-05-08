@@ -6,12 +6,11 @@ import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.domain.WalletKycLevel
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 
-fun UserAccount.hasWallet(): Boolean {
-    return when (walletPreference) {
-        WalletPreference.NostrWalletConnect -> nostrWallet != null
-        else -> primalWallet != null && primalWallet.kycLevel != WalletKycLevel.None
-    }
-}
+fun UserAccount.hasWallet() = hasNwcWallet() || hasPrimalWallet()
+
+fun UserAccount.hasPrimalWallet(): Boolean = primalWallet != null && primalWallet.kycLevel != WalletKycLevel.None
+
+fun UserAccount.hasNwcWallet() = walletPreference == WalletPreference.NostrWalletConnect && nostrWallet != null
 
 fun ZappingState.canZap(zapAmount: Long = this.zapDefault.amount): Boolean {
     return walletConnected && when (walletPreference) {
