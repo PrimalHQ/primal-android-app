@@ -1,0 +1,131 @@
+package net.primal.android.redeem
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
+import net.primal.android.core.errors.UiError
+import net.primal.android.redeem.RedeemCodeContract.SideEffect
+import net.primal.android.redeem.RedeemCodeContract.UiEvent
+import net.primal.android.redeem.RedeemCodeContract.UiState
+import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.domain.UserAccount
+import net.primal.android.wallet.api.model.PromoCodeDetailsResponse
+import net.primal.android.wallet.repository.WalletRepository
+import net.primal.android.wallet.zaps.hasPrimalWallet
+import net.primal.core.networking.sockets.errors.NostrNoticeException
+import net.primal.core.utils.CurrencyConversionUtils.toSats
+import net.primal.domain.common.exception.NetworkException
+import timber.log.Timber
+
+@HiltViewModel
+class RedeemCodeViewModel @Inject constructor(
+    private val walletRepository: WalletRepository,
+    private val activeAccountStore: ActiveAccountStore,
+) : ViewModel() {
+    private val _state = MutableStateFlow(UiState())
+    val state = _state.asStateFlow()
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
+
+    private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
+    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
+
+    private val _effects = Channel<SideEffect>()
+    val effects = _effects.receiveAsFlow()
+    private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effects.send(effect) }
+
+    init {
+        observeEvents()
+        observeActiveAccount()
+    }
+
+    private fun observeEvents() =
+        viewModelScope.launch {
+            events.collect {
+                when (it) {
+                    is UiEvent.GetCodeDetails -> getCodeDetails(it.code)
+
+                    UiEvent.GoToEnterCodeStage ->
+                        setState { copy(stage = RedeemCodeContract.RedeemCodeStage.EnterCode) }
+
+                    is UiEvent.ApplyCode -> applyCode(it.code)
+                    UiEvent.DismissError -> setState { copy(error = null) }
+                }
+            }
+        }
+
+    private fun observeActiveAccount() =
+        viewModelScope.launch {
+            activeAccountStore.activeUserAccount.collect {
+                val userState = when {
+                    it == UserAccount.EMPTY -> RedeemCodeContract.UserState.NoUser
+
+                    it.hasPrimalWallet() -> RedeemCodeContract.UserState.UserWithPrimalWallet
+
+                    else -> RedeemCodeContract.UserState.UserWithoutPrimalWallet
+                }
+
+                setState { copy(userState = userState) }
+            }
+        }
+
+    private fun applyCode(promoCode: String) =
+        viewModelScope.launch {
+            setState { copy(loading = true, error = null) }
+            try {
+                walletRepository.redeemPromoCode(userId = activeAccountStore.activeUserId(), code = promoCode)
+                setEffect(SideEffect.PromoCodeApplied)
+            } catch (error: NetworkException) {
+                Timber.w(error)
+
+                val uiError = if (error.cause is NostrNoticeException) {
+                    UiError.InvalidPromoCode(error)
+                } else {
+                    UiError.NetworkError(error)
+                }
+
+                setState { copy(error = uiError) }
+            } finally {
+                setState { copy(loading = false) }
+            }
+        }
+
+    private fun getCodeDetails(code: String) =
+        viewModelScope.launch {
+            setState { copy(loading = true, error = null, showErrorBadge = false, promoCode = null) }
+            try {
+                val response = walletRepository.getPromoCodeDetails(code = code)
+
+                setState {
+                    copy(
+                        promoCode = code,
+                        welcomeMessage = response.welcomeMessage,
+                        promoCodeBenefits = response.toBenefitsList(),
+                        requiresPrimalWallet = response.preloadedBtc != null,
+                        stage = RedeemCodeContract.RedeemCodeStage.Success,
+                    )
+                }
+            } catch (error: NetworkException) {
+                Timber.w(error)
+                if (error.cause is NostrNoticeException) {
+                    setState { copy(showErrorBadge = true) }
+                } else {
+                    setState { copy(error = UiError.NetworkError(error)) }
+                }
+            } finally {
+                setState { copy(loading = false) }
+            }
+        }
+
+    private fun PromoCodeDetailsResponse.toBenefitsList() =
+        listOfNotNull(
+            this.preloadedBtc?.toSats()?.let { RedeemCodeContract.PromoCodeBenefit.WalletBalance(sats = it) },
+        )
+}
