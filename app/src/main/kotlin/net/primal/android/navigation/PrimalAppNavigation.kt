@@ -126,6 +126,8 @@ import net.primal.android.profile.follows.ProfileFollowsScreen
 import net.primal.android.profile.follows.ProfileFollowsViewModel
 import net.primal.android.profile.qr.ProfileQrCodeViewModel
 import net.primal.android.profile.qr.ui.ProfileQrCodeViewerScreen
+import net.primal.android.redeem.RedeemCodeScreen
+import net.primal.android.redeem.RedeemCodeViewModel
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -148,9 +150,11 @@ private fun NavController.navigateToWelcome() =
 
 private fun NavController.navigateToLogin() = navigate(route = "login")
 
-private fun NavController.navigateToOnboarding() = navigate(route = "onboarding")
+private fun NavController.navigateToOnboarding(promoCode: String? = null) =
+    navigate(route = "onboarding?$PROMO_CODE=$promoCode")
 
-private fun NavController.navigateToWalletOnboarding() = navigate(route = "onboardingWallet")
+private fun NavController.navigateToWalletOnboarding(promoCode: String?) =
+    navigate(route = "onboardingWallet?$PROMO_CODE=$promoCode")
 
 private fun NavController.navigateToLogout(profileId: String) = navigate(route = "logout?$PROFILE_ID=$profileId")
 
@@ -214,6 +218,8 @@ fun NavController.navigateToExplore() =
         route = "explore",
         navOptions = topLevelNavOptions,
     )
+
+fun NavController.navigateToRedeemCode() = navigate(route = "redeemCode")
 
 private fun NavController.navigateToMessages() = navigate(route = "messages")
 
@@ -403,6 +409,7 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
 
             DrawerScreenDestination.Messages -> navController.navigateToMessages()
             is DrawerScreenDestination.Bookmarks -> navController.navigateToBookmarks()
+            DrawerScreenDestination.RedeemCode -> navController.navigateToRedeemCode()
             DrawerScreenDestination.Settings -> navController.navigateToSettings()
             is DrawerScreenDestination.SignOut -> navController.navigateToLogout(profileId = it.userId)
         }
@@ -417,9 +424,29 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
 
         login(route = "login", navController = navController)
 
-        onboarding(route = "onboarding", navController = navController)
+        onboarding(
+            route = "onboarding?$PROMO_CODE={$PROMO_CODE}",
+            arguments = listOf(
+                navArgument(PROMO_CODE) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+            ),
+            navController = navController,
+        )
 
-        onboardingWalletActivation(route = "onboardingWallet", navController)
+        onboardingWalletActivation(
+            route = "onboardingWallet?$PROMO_CODE={$PROMO_CODE}",
+            arguments = listOf(
+                navArgument(PROMO_CODE) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+            ),
+            navController = navController,
+        )
+
+        redeemCode(route = "redeemCode", navController = navController)
 
         logout(
             route = "logout?$PROFILE_ID={$PROFILE_ID}",
@@ -874,14 +901,25 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
     composable(
         route = route,
         enterTransition = {
-            when (initialState.destination.route) {
-                "login", "onboarding" -> slideInHorizontally(initialOffsetX = { -it })
+            val initialRoute = initialState.destination.route
+
+            when {
+                initialRoute == "login" ||
+                    initialRoute?.startsWith("onboarding") == true ||
+                    initialRoute == "redeemCode"
+                -> slideInHorizontally(initialOffsetX = { -it })
+
                 else -> null
             }
         },
         exitTransition = {
-            when (targetState.destination.route) {
-                "login", "onboarding" -> slideOutHorizontally(targetOffsetX = { -it })
+            val targetRoute = targetState.destination.route
+            when {
+                targetRoute == "login" ||
+                    targetRoute?.startsWith("onboarding") == true ||
+                    targetRoute == "redeemCode"
+                -> slideOutHorizontally(targetOffsetX = { -it })
+
                 else -> null
             }
         },
@@ -892,6 +930,7 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
             WelcomeScreen(
                 onSignInClick = { navController.navigateToLogin() },
                 onCreateAccountClick = { navController.navigateToOnboarding() },
+                onRedeemCodeClick = { navController.navigateToRedeemCode() },
             )
         }
     }
@@ -924,43 +963,92 @@ private fun NavGraphBuilder.login(route: String, navController: NavController) =
         }
     }
 
-private fun NavGraphBuilder.onboarding(route: String, navController: NavController) =
+private fun NavGraphBuilder.onboarding(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = {
+        when (initialState.destination.route) {
+            "welcome", "redeemCode" -> slideInHorizontally(initialOffsetX = { it })
+            else -> null
+        }
+    },
+    exitTransition = {
+        when (targetState.destination.route) {
+            "welcome", "redeemCode" -> slideOutHorizontally(targetOffsetX = { it })
+            else -> null
+        }
+    },
+) {
+    val viewModel: OnboardingViewModel = hiltViewModel(it)
+    val promoCode = it.arguments?.getString(PROMO_CODE)
+
+    LockToOrientationPortrait()
+    PrimalTheme(PrimalTheme.Sunset) {
+        ApplyEdgeToEdge(isDarkTheme = true)
+        OnboardingScreen(
+            viewModel = viewModel,
+            onClose = { navController.popBackStack() },
+            onOnboarded = { navController.navigateToHome() },
+            onActivateWallet = { navController.navigateToWalletOnboarding(promoCode = promoCode) },
+        )
+    }
+}
+
+private fun NavGraphBuilder.onboardingWalletActivation(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = composable(route = route, arguments = arguments) {
+    val viewModel = hiltViewModel<WalletActivationViewModel>()
+    PrimalTheme(PrimalTheme.Sunset) {
+        ApplyEdgeToEdge(isDarkTheme = true)
+        OnboardingWalletActivation(
+            viewModel = viewModel,
+            onDoneOrDismiss = { navController.navigateToHome() },
+        )
+    }
+}
+
+private fun NavGraphBuilder.redeemCode(route: String, navController: NavController) =
     composable(
         route = route,
         enterTransition = {
-            when (initialState.destination.route) {
-                "welcome" -> slideInHorizontally(initialOffsetX = { it })
+            val initialRoute = initialState.destination.route
+            when {
+                initialRoute == "welcome" || initialRoute.isMainScreenRoute() ->
+                    slideInHorizontally(initialOffsetX = { it })
+
+                initialRoute?.startsWith("onboarding") == true ->
+                    slideInHorizontally(initialOffsetX = { -it })
+
                 else -> null
             }
         },
         exitTransition = {
-            when (targetState.destination.route) {
-                "welcome" -> slideOutHorizontally(targetOffsetX = { it })
+            val targetRoute = targetState.destination.route
+            when {
+                targetRoute == "welcome" || targetRoute.isMainScreenRoute() ->
+                    slideOutHorizontally(targetOffsetX = { it })
+
+                targetRoute?.startsWith("onboarding") == true ->
+                    slideOutHorizontally(targetOffsetX = { -it })
+
                 else -> null
             }
         },
     ) {
-        val viewModel: OnboardingViewModel = hiltViewModel(it)
-        LockToOrientationPortrait()
+        val viewModel = hiltViewModel<RedeemCodeViewModel>()
         PrimalTheme(PrimalTheme.Sunset) {
             ApplyEdgeToEdge(isDarkTheme = true)
-            OnboardingScreen(
+            RedeemCodeScreen(
                 viewModel = viewModel,
-                onClose = { navController.popBackStack() },
-                onOnboarded = { navController.navigateToHome() },
-                onActivateWallet = { navController.navigateToWalletOnboarding() },
-            )
-        }
-    }
-
-private fun NavGraphBuilder.onboardingWalletActivation(route: String, navController: NavController) =
-    composable(route = route) {
-        val viewModel = hiltViewModel<WalletActivationViewModel>()
-        PrimalTheme(PrimalTheme.Sunset) {
-            ApplyEdgeToEdge(isDarkTheme = true)
-            OnboardingWalletActivation(
-                viewModel = viewModel,
-                onDoneOrDismiss = { navController.navigateToHome() },
+                onClose = navController::navigateUp,
+                navigateToOnboarding = { navController.navigateToOnboarding(it) },
+                navigateToWalletOnboarding = { navController.navigateToWalletOnboarding(it) },
             )
         }
     }
