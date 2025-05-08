@@ -82,5 +82,6 @@ fun UiError.resolveUiErrorMessage(context: Context): String {
         }
 
         is UiError.FailedToFetchMuteList -> context.getString(R.string.app_error_fetching_mute_list)
+        is UiError.InvalidPromoCode -> context.getString(R.string.app_error_invalid_promo_code)
     }
 }
