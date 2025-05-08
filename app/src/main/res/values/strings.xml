@@ -40,6 +40,7 @@
     <string name="app_error_unable_to_update_blossom_server_list">Unable to update blossom server list. Please try again.</string>
     <string name="app_error_fetching_mute_list">Failed to load your mute list. Please check your connection and try again.</string>
     <string name="app_error_invalid_promo_code">Sorry, we couldn’t find a match for that promo code. Please check the spelling and try again.</string>
+    <string name="app_error_invalid_promo_code_try_later">Sorry, we couldn’t find a match for that promo code. Don\'t worry, you can proceed and try to redeem your code again.</string>
 
     <string name="welcome_sign_in_button_title">Sign In</string>
     <string name="welcome_create_account_button_title">Create Account</string>
