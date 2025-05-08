@@ -63,7 +63,8 @@ class UriUtilsTest {
 
         expectedUrls.shouldNotBeNull()
         expectedUrls shouldBe listOf(
-            "https://media.infosec.exchange/infosec.exchange/media_attachments/files/114/426/571/043/336/971/original/e5c23bb1b071328e.jpg",
+            "https://media.infosec.exchange/infosec.exchange/media_attachments" +
+                "/files/114/426/571/043/336/971/original/e5c23bb1b071328e.jpg",
         )
     }
 
