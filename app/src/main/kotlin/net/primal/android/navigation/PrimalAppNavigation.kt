@@ -258,10 +258,10 @@ fun NavController.navigateToMediaGallery(
         "&$MEDIA_POSITION_MS=$mediaPositionMs",
 )
 
-fun NavController.navigateToMediaItem(mediaUrl: String) =
-    navigate(
-        route = "mediaItem/${mediaUrl.asUrlEncoded()}",
-    )
+fun NavController.navigateToMediaItem(mediaUrl: String) {
+    val encodedUrl = mediaUrl.asUrlEncoded()
+    navigate(route = "mediaItem?$MEDIA_URL=$encodedUrl")
+}
 
 fun NavController.navigateToExploreFeed(
     feedSpec: String,
@@ -802,10 +802,11 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
         )
 
         mediaItem(
-            route = "mediaItem/{$MEDIA_URL}",
+            route = "mediaItem?$MEDIA_URL={$MEDIA_URL}",
             arguments = listOf(
                 navArgument(MEDIA_URL) {
                     type = NavType.StringType
+                    nullable = false
                 },
             ),
             navController = navController,
