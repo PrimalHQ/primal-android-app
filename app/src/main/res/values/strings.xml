@@ -23,6 +23,7 @@
     <string name="app_error_unmuting_thread">Unable to unmute thread. Please try again.</string>
     <string name="app_error_unmuting_hashtag">Unable to unmute hashtag. Please try again.</string>
     <string name="app_error_unmuting_word">Unable to unmute word. Please try again.</string>
+    <string name="app_error_bookmark_note">Unable to bookmark note. Please try again.</string>
     <string name="app_error_network">Unable to complete the action. Please check your connection and try again.</string>
     <string name="app_error_upload_failed">Unable to upload file. Please check your connection and try again.</string>
     <string name="app_invalid_lud16_address">Invalid lightning (lud16) address.</string>

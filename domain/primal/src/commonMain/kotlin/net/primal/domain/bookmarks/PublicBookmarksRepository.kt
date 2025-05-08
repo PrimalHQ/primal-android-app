@@ -17,6 +17,7 @@ interface PublicBookmarksRepository {
         PublicBookmarksNotFoundException::class,
         NostrPublishException::class,
         SignatureException::class,
+        NetworkException::class,
         CancellationException::class,
     )
     suspend fun addToBookmarks(
@@ -30,6 +31,7 @@ interface PublicBookmarksRepository {
         PublicBookmarksNotFoundException::class,
         NostrPublishException::class,
         SignatureException::class,
+        NetworkException::class,
         CancellationException::class,
     )
     suspend fun removeFromBookmarks(
