@@ -1,4 +1,4 @@
-package net.primal.android.profile.qr.ui
+package net.primal.android.scanner
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -31,13 +31,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import net.primal.android.core.compose.foundation.KeepScreenOn
-import net.primal.android.scanner.CameraQrCodeDetector2
-import net.primal.android.scanner.MissingCameraPermissionContent
+import net.primal.android.profile.qr.ui.profileQrCodeButtonBackgroundColor
 import net.primal.android.scanner.domain.QrCodeResult
-import net.primal.android.scanner.missingCameraPermissionColors
 
 @Composable
-fun ProfileQrCodeScanner(
+fun QrCodeScanner(
     paddingValues: PaddingValues,
     cameraVisible: Boolean,
     onQrCodeDetected: (QrCodeResult) -> Unit,
