@@ -1,6 +1,7 @@
 package net.primal.android.redeem
 
 import net.primal.android.core.errors.UiError
+import net.primal.android.scanner.domain.QrCodeResult
 
 interface RedeemCodeContract {
     data class UiState(
@@ -11,13 +12,19 @@ interface RedeemCodeContract {
         val loading: Boolean = false,
         val showErrorBadge: Boolean = false,
         val error: UiError? = null,
-        val stage: RedeemCodeStage = RedeemCodeStage.EnterCode,
+        val stageStack: List<RedeemCodeStage> = listOf(
+            RedeemCodeStage.ScanCode,
+        ),
         val promoCodeBenefits: List<PromoCodeBenefit> = emptyList(),
-    )
+    ) {
+        fun getStage() = stageStack.last()
+    }
 
     sealed class UiEvent {
         data object DismissError : UiEvent()
+        data object PreviousStage : UiEvent()
         data object GoToEnterCodeStage : UiEvent()
+        data class QrCodeDetected(val result: QrCodeResult) : UiEvent()
         data class GetCodeDetails(val code: String) : UiEvent()
         data class ApplyCode(val code: String) : UiEvent()
     }
@@ -27,6 +34,7 @@ interface RedeemCodeContract {
     }
 
     enum class RedeemCodeStage {
+        ScanCode,
         EnterCode,
         Success,
     }
