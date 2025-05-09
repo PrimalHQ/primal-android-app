@@ -30,6 +30,7 @@ import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.redeem.RedeemCodeContract.UiEvent
 import net.primal.android.redeem.ui.RedeemCodeSuccessStage
 import net.primal.android.redeem.ui.RedeemEnterCodeStage
+import net.primal.android.redeem.ui.RedeemScanCodeStage
 
 @Composable
 fun RedeemCodeScreen(
@@ -117,6 +118,7 @@ fun RedeemCodeScreen(
                     RedeemCodeContract.RedeemCodeStage.EnterCode -> {
                         RedeemEnterCodeStage(
                             modifier = Modifier.padding(top = 96.dp, bottom = 64.dp),
+                            promoCode = state.promoCode,
                             isError = state.showErrorBadge,
                             isLoading = state.loading,
                             onApplyCodeClick = { eventPublisher(UiEvent.GetCodeDetails(it)) },
