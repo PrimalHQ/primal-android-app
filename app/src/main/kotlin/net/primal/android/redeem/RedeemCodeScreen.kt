@@ -2,10 +2,6 @@ package net.primal.android.redeem
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -107,7 +103,6 @@ fun RedeemCodeScreen(
                     .padding(top = 32.dp)
                     .padding(horizontal = 24.dp),
                 targetState = state.stage,
-                transitionSpec = { transitionSpecBetweenStages() },
             ) { stage ->
                 when (stage) {
                     RedeemCodeContract.RedeemCodeStage.EnterCode -> {
@@ -175,17 +170,4 @@ private fun RedeemCodeContract.RedeemCodeStage.toTitle() =
     when (this) {
         RedeemCodeContract.RedeemCodeStage.EnterCode -> stringResource(id = R.string.redeem_code_title)
         RedeemCodeContract.RedeemCodeStage.Success -> stringResource(id = R.string.redeem_code_success_title)
-    }
-
-private fun AnimatedContentTransitionScope<RedeemCodeContract.RedeemCodeStage>.transitionSpecBetweenStages() =
-    when (initialState) {
-        RedeemCodeContract.RedeemCodeStage.EnterCode -> {
-            slideInHorizontally(initialOffsetX = { it })
-                .togetherWith(slideOutHorizontally(targetOffsetX = { -it }))
-        }
-
-        RedeemCodeContract.RedeemCodeStage.Success -> {
-            slideInHorizontally(initialOffsetX = { -it })
-                .togetherWith(slideOutHorizontally(targetOffsetX = { it }))
-        }
     }
