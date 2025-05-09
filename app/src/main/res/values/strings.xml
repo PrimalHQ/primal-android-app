@@ -107,6 +107,7 @@
     <string name="redeem_code_apply_code_button">Apply code</string>
     <string name="redeem_code_onboard_to_primal_button">Onboard to Primal</string>
     <string name="redeem_code_active_wallet_button">Activate Wallet</string>
+    <string name="redeem_code_enter_code_button">Enter Code Instead</string>
     <string name="redeem_code_enter_code_description">If you have an Invite Code, or a\nPrimal Gift Card, you can redeem it here.</string>
     <string name="redeem_code_incorrect_code_message">Incorrect code. Please try again.</string>
     <string name="redeem_code_this_code_is_loaded">This code is loaded with:</string>
@@ -119,6 +120,7 @@
     </plurals>
     <string name="redeem_code_to_redeem_code_notice">To redeem your code, onboard to Primal by\ncreating your Nostr account and activating\nyour Primal Wallet.</string>
     <string name="redeem_code_no_wallet_notice">To redeem your code,\nactivate your Primal Wallet.</string>
+    <string name="redeem_code_scan_hint">Scan your Invite Code,\nor a Primal Gift Card.</string>
 
     <string name="logout_title">Sign out</string>
     <string name="logout_description">If you didn\'t save your private key, it will be irretrievably lost. Do you really want to sign out?</string>
