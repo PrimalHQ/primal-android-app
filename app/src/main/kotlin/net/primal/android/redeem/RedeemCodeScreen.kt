@@ -27,6 +27,7 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.errors.resolveUiErrorMessage
+import net.primal.android.redeem.RedeemCodeContract.UiEvent
 import net.primal.android.redeem.ui.RedeemCodeSuccessStage
 import net.primal.android.redeem.ui.RedeemEnterCodeStage
 
@@ -72,7 +73,7 @@ fun RedeemCodeScreen(
         error = state.error,
         snackbarHostState = snackbarHostState,
         errorMessageResolver = { it.resolveUiErrorMessage(context) },
-        onErrorDismiss = { eventPublisher(RedeemCodeContract.UiEvent.DismissError) },
+        onErrorDismiss = { eventPublisher(UiEvent.DismissError) },
     )
     BackHandler(enabled = state.stageStack.size > 1) {
         eventPublisher(UiEvent.PreviousStage)
@@ -118,7 +119,7 @@ fun RedeemCodeScreen(
                             modifier = Modifier.padding(top = 96.dp, bottom = 64.dp),
                             isError = state.showErrorBadge,
                             isLoading = state.loading,
-                            onApplyCodeClick = { eventPublisher(RedeemCodeContract.UiEvent.GetCodeDetails(it)) },
+                            onApplyCodeClick = { eventPublisher(UiEvent.GetCodeDetails(it)) },
                         )
                     }
 
@@ -134,7 +135,7 @@ fun RedeemCodeScreen(
                                 isLoading = state.loading,
                                 benefits = state.promoCodeBenefits,
                                 onApplyCodeClick = {
-                                    state.promoCode?.let { eventPublisher(RedeemCodeContract.UiEvent.ApplyCode(it)) }
+                                    state.promoCode?.let { eventPublisher(UiEvent.ApplyCode(it)) }
                                 },
                                 onOnboardToPrimalClick = { state.promoCode?.let { navigateToOnboarding(it) } },
                                 onActivateWalletClick = { state.promoCode?.let { navigateToWalletOnboarding(it) } },
