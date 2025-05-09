@@ -38,10 +38,11 @@ internal fun RedeemEnterCodeStage(
     modifier: Modifier = Modifier,
     isError: Boolean,
     isLoading: Boolean,
+    promoCode: String?,
     onApplyCodeClick: (code: String) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    var promoCode by remember { mutableStateOf("") }
+    var promoCode by remember { mutableStateOf(promoCode ?: "") }
     var isDirty by remember { mutableStateOf(false) }
 
     Column(
