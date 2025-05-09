@@ -23,6 +23,7 @@
     <string name="app_error_unmuting_thread">Unable to unmute thread. Please try again.</string>
     <string name="app_error_unmuting_hashtag">Unable to unmute hashtag. Please try again.</string>
     <string name="app_error_unmuting_word">Unable to unmute word. Please try again.</string>
+    <string name="app_error_bookmark_note">Unable to bookmark note. Please try again.</string>
     <string name="app_error_network">Unable to complete the action. Please check your connection and try again.</string>
     <string name="app_error_upload_failed">Unable to upload file. Please check your connection and try again.</string>
     <string name="app_invalid_lud16_address">Invalid lightning (lud16) address.</string>
@@ -40,9 +41,12 @@
     <string name="app_error_unable_to_update_blossom_server_list">Unable to update blossom server list. Please try again.</string>
     <string name="app_error_fetching_mute_list">Failed to load your mute list. Please check your connection and try again.</string>
     <string name="app_error_fetching_note">Failed to load note. Please check your connection and try again.</string>
+    <string name="app_error_invalid_promo_code">Sorry, we couldn’t find a match for that promo code. Please check the spelling and try again.</string>
+    <string name="app_error_invalid_promo_code_try_later">Sorry, we couldn’t find a match for that promo code. Don\'t worry, you can proceed and try to redeem your code again.</string>
 
     <string name="welcome_sign_in_button_title">Sign In</string>
     <string name="welcome_create_account_button_title">Create Account</string>
+    <string name="welcome_redeem_code_button_title">Redeem Code</string>
     <string name="welcome_tos_prefix">By proceeding you accept our</string>
 
     <string name="legal_tos_hint_highlighted_word">Terms of Service</string>
@@ -99,6 +103,24 @@
     <string name="login_enter_nsec_key">Enter your Nostr key to sign in:</string>
     <string name="login_invalid_nsec_key">Please enter a valid Nostr key,\nstarting with “nsec”:</string>
 
+    <string name="redeem_code_title">Enter Your Code</string>
+    <string name="redeem_code_success_title">Success!</string>
+    <string name="redeem_code_apply_code_button">Apply code</string>
+    <string name="redeem_code_onboard_to_primal_button">Onboard to Primal</string>
+    <string name="redeem_code_active_wallet_button">Activate Wallet</string>
+    <string name="redeem_code_enter_code_description">If you have an Invite Code, or a\nPrimal Gift Card, you can redeem it here.</string>
+    <string name="redeem_code_incorrect_code_message">Incorrect code. Please try again.</string>
+    <string name="redeem_code_this_code_is_loaded">This code is loaded with:</string>
+    <string name="redeem_code_get_zapping">Get Zapping!</string>
+    <string name="redeem_code_sats">sats</string>
+    <string name="redeem_code_primal_premium">Primal Premium</string>
+    <plurals name="redeem_code_premium_months">
+        <item quantity="one">%1$s month</item>
+        <item quantity="other">%1$s months</item>
+    </plurals>
+    <string name="redeem_code_to_redeem_code_notice">To redeem your code, onboard to Primal by\ncreating your Nostr account and activating\nyour Primal Wallet.</string>
+    <string name="redeem_code_no_wallet_notice">To redeem your code,\nactivate your Primal Wallet.</string>
+
     <string name="logout_title">Sign out</string>
     <string name="logout_description">If you didn\'t save your private key, it will be irretrievably lost. Do you really want to sign out?</string>
     <string name="logout_cancel_button">Cancel</string>
@@ -114,6 +136,7 @@
     <string name="drawer_destination_premium">Premium</string>
     <string name="drawer_destination_messages">Messages</string>
     <string name="drawer_destination_bookmarks">Bookmarks</string>
+    <string name="drawer_destination_redeem_code">Redeem Code</string>
     <string name="drawer_destination_settings">Settings</string>
     <string name="drawer_destination_sign_out">Sign Out</string>
     <string name="drawer_followers_suffix">Followers</string>

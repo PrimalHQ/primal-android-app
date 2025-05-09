@@ -88,5 +88,9 @@ fun UiError.resolveUiErrorMessage(context: Context): String {
         is UiError.FailedToUploadAttachment -> context.getString(R.string.app_error_upload_failed)
 
         is UiError.PublishError -> context.getString(R.string.post_action_reply_failed)
+
+        is UiError.InvalidPromoCode -> context.getString(R.string.app_error_invalid_promo_code)
+
+        is UiError.FailedToBookmarkNote -> context.getString(R.string.app_error_bookmark_note)
     }
 }

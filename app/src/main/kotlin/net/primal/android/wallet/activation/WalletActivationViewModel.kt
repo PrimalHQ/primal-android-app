@@ -1,6 +1,7 @@
 package net.primal.android.wallet.activation
 
 import android.util.Patterns
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,6 +15,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.primal.android.core.errors.UiError
+import net.primal.android.navigation.promoCode
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.WalletPreference
@@ -39,11 +42,14 @@ import timber.log.Timber
 
 @HiltViewModel
 class WalletActivationViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val coroutineDispatcher: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val walletRepository: WalletRepository,
     private val userRepository: UserRepository,
 ) : ViewModel() {
+
+    private val promoCode = savedStateHandle.promoCode
 
     private val _uiState = MutableStateFlow(value = UiState())
     val uiState = _uiState.asStateFlow()
@@ -78,6 +84,7 @@ class WalletActivationViewModel @Inject constructor(
                     is UiEvent.ActivationRequest -> onActivationRequest()
                     UiEvent.ClearErrorMessage -> setState { copy(error = null) }
                     UiEvent.RequestBackToDataInput -> setState { copy(status = WalletActivationStatus.PendingData) }
+                    UiEvent.DismissSnackbarError -> setState { copy(uiError = null) }
                 }
             }
         }
@@ -185,6 +192,18 @@ class WalletActivationViewModel @Inject constructor(
                     } catch (error: MissingRelaysException) {
                         Timber.w(error)
                     }
+                }
+
+                try {
+                    promoCode?.let {
+                        walletRepository.redeemPromoCode(
+                            userId = activeAccountStore.activeUserId(),
+                            code = promoCode,
+                        )
+                    }
+                } catch (error: NetworkException) {
+                    Timber.w(error)
+                    setState { copy(uiError = UiError.InvalidPromoCode(error)) }
                 }
 
                 setState {

@@ -1,5 +1,6 @@
 package net.primal.android.wallet.activation
 
+import net.primal.android.core.errors.UiError
 import net.primal.android.wallet.activation.domain.WalletActivationData
 import net.primal.android.wallet.activation.domain.WalletActivationStatus
 import net.primal.android.wallet.activation.regions.Country
@@ -15,6 +16,7 @@ interface WalletActivationContract {
         val otpCode: String = "",
         val working: Boolean = false,
         val error: Throwable? = null,
+        val uiError: UiError? = null,
         val activatedLightningAddress: String? = null,
     )
 
@@ -24,6 +26,7 @@ interface WalletActivationContract {
         data object ActivationRequest : UiEvent()
         data object Activate : UiEvent()
         data object ClearErrorMessage : UiEvent()
+        data object DismissSnackbarError : UiEvent()
         data object RequestBackToDataInput : UiEvent()
     }
 }

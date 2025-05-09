@@ -9,6 +9,7 @@ import net.primal.android.wallet.api.model.MiningFeeTier
 import net.primal.android.wallet.api.model.OnChainAddressResponse
 import net.primal.android.wallet.api.model.ParsedLnInvoiceResponse
 import net.primal.android.wallet.api.model.ParsedLnUrlResponse
+import net.primal.android.wallet.api.model.PromoCodeDetailsResponse
 import net.primal.android.wallet.api.model.TransactionsRequestBody
 import net.primal.android.wallet.api.model.TransactionsResponse
 import net.primal.android.wallet.api.model.WalletUserInfoResponse
@@ -33,6 +34,10 @@ interface WalletApi {
     suspend fun createOnChainAddress(userId: String, body: DepositRequestBody): OnChainAddressResponse
 
     suspend fun getTransactions(userId: String, body: TransactionsRequestBody): TransactionsResponse
+
+    suspend fun getPromoCodeDetails(code: String): PromoCodeDetailsResponse
+
+    suspend fun redeemPromoCode(userId: String, code: String)
 
     suspend fun getInAppPurchaseQuote(
         userId: String,

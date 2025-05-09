@@ -347,6 +347,9 @@ class NoteViewModel @AssistedInject constructor(
             } catch (error: SigningRejectedException) {
                 setState { copy(error = UiError.NostrSignUnauthorized) }
                 Timber.w(error)
+            } catch (error: NetworkException) {
+                setState { copy(error = UiError.FailedToBookmarkNote(error)) }
+                Timber.w(error)
             }
         }
 
