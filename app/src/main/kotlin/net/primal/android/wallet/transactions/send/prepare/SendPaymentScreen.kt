@@ -46,6 +46,7 @@ fun SendPaymentScreen(
     viewModel: SendPaymentViewModel,
     onClose: () -> Unit,
     onCreateTransaction: (DraftTx) -> Unit,
+    onPromoCodeScan: (promoCode: String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -55,6 +56,8 @@ fun SendPaymentScreen(
                 is SendPaymentContract.SideEffect.DraftTransactionReady -> {
                     onCreateTransaction(it.draft)
                 }
+
+                is SendPaymentContract.SideEffect.PromoCodeDetected -> onPromoCodeScan(it.promoCode)
             }
         }
     }
@@ -136,9 +139,7 @@ fun SendPaymentScreen(
                     SendPaymentTab.Scan -> {
                         SendPaymentTabScan(
                             isClosing = closingScreen,
-                            onQrCodeDetected = {
-                                eventPublisher(SendPaymentContract.UiEvent.ProcessTextData(text = it.value))
-                            },
+                            onQrCodeDetected = { eventPublisher(SendPaymentContract.UiEvent.QrCodeDetected(it)) },
                         )
                     }
 
