@@ -219,7 +219,8 @@ fun NavController.navigateToExplore() =
         navOptions = topLevelNavOptions,
     )
 
-fun NavController.navigateToRedeemCode() = navigate(route = "redeemCode")
+fun NavController.navigateToRedeemCode(promoCode: String? = null) =
+    navigate(route = "redeemCode?$PROMO_CODE=$promoCode")
 
 private fun NavController.navigateToMessages() = navigate(route = "messages")
 
@@ -446,7 +447,21 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
             navController = navController,
         )
 
-        redeemCode(route = "redeemCode", navController = navController)
+        redeemCode(
+            route = "redeemCode?$PROMO_CODE={$PROMO_CODE}",
+            arguments = listOf(
+                navArgument(PROMO_CODE) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+            ),
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "https://primal.net/rc/{$PROMO_CODE}"
+                },
+            ),
+            navController = navController,
+        )
 
         logout(
             route = "logout?$PROFILE_ID={$PROFILE_ID}",
@@ -907,7 +922,7 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
             when {
                 initialRoute == "login" ||
                     initialRoute?.startsWith("onboarding") == true ||
-                    initialRoute == "redeemCode"
+                    initialRoute?.startsWith("redeemCode") == true
                 -> slideInHorizontally(initialOffsetX = { -it })
 
                 else -> null
@@ -918,7 +933,7 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
             when {
                 targetRoute == "login" ||
                     targetRoute?.startsWith("onboarding") == true ||
-                    targetRoute == "redeemCode"
+                    targetRoute?.startsWith("redeemCode") == true
                 -> slideOutHorizontally(targetOffsetX = { -it })
 
                 else -> null
@@ -972,14 +987,24 @@ private fun NavGraphBuilder.onboarding(
     route = route,
     arguments = arguments,
     enterTransition = {
-        when (initialState.destination.route) {
-            "welcome", "redeemCode" -> slideInHorizontally(initialOffsetX = { it })
+        val initialRoute = initialState.destination.route
+
+        when {
+            initialRoute == "welcome" ||
+                initialRoute?.startsWith("redeemCode") == true ->
+                slideInHorizontally(initialOffsetX = { it })
+
             else -> null
         }
     },
     exitTransition = {
-        when (targetState.destination.route) {
-            "welcome", "redeemCode" -> slideOutHorizontally(targetOffsetX = { it })
+        val targetRoute = targetState.destination.route
+
+        when {
+            targetRoute == "welcome" ||
+                targetRoute?.startsWith("redeemCode") == true ->
+                slideOutHorizontally(targetOffsetX = { it })
+
             else -> null
         }
     },
@@ -1014,45 +1039,51 @@ private fun NavGraphBuilder.onboardingWalletActivation(
     }
 }
 
-private fun NavGraphBuilder.redeemCode(route: String, navController: NavController) =
-    composable(
-        route = route,
-        enterTransition = {
-            val initialRoute = initialState.destination.route
-            when {
-                initialRoute == "welcome" || initialRoute.isMainScreenRoute() ->
-                    slideInHorizontally(initialOffsetX = { it })
+private fun NavGraphBuilder.redeemCode(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    deepLinks: List<NavDeepLink>,
+    navController: NavController,
+) = composable(
+    route = route,
+    arguments = arguments,
+    deepLinks = deepLinks,
+    enterTransition = {
+        val initialRoute = initialState.destination.route
+        when {
+            initialRoute == "welcome" || initialRoute.isMainScreenRoute() ->
+                slideInHorizontally(initialOffsetX = { it })
 
-                initialRoute?.startsWith("onboarding") == true ->
-                    slideInHorizontally(initialOffsetX = { -it })
+            initialRoute?.startsWith("onboarding") == true ->
+                slideInHorizontally(initialOffsetX = { -it })
 
-                else -> null
-            }
-        },
-        exitTransition = {
-            val targetRoute = targetState.destination.route
-            when {
-                targetRoute == "welcome" || targetRoute.isMainScreenRoute() ->
-                    slideOutHorizontally(targetOffsetX = { it })
-
-                targetRoute?.startsWith("onboarding") == true ->
-                    slideOutHorizontally(targetOffsetX = { -it })
-
-                else -> null
-            }
-        },
-    ) {
-        val viewModel = hiltViewModel<RedeemCodeViewModel>()
-        PrimalTheme(PrimalTheme.Sunset) {
-            ApplyEdgeToEdge(isDarkTheme = true)
-            RedeemCodeScreen(
-                viewModel = viewModel,
-                onClose = navController::navigateUp,
-                navigateToOnboarding = { navController.navigateToOnboarding(it) },
-                navigateToWalletOnboarding = { navController.navigateToWalletOnboarding(it) },
-            )
+            else -> null
         }
+    },
+    exitTransition = {
+        val targetRoute = targetState.destination.route
+        when {
+            targetRoute == "welcome" || targetRoute.isMainScreenRoute() ->
+                slideOutHorizontally(targetOffsetX = { it })
+
+            targetRoute?.startsWith("onboarding") == true ->
+                slideOutHorizontally(targetOffsetX = { -it })
+
+            else -> null
+        }
+    },
+) {
+    val viewModel = hiltViewModel<RedeemCodeViewModel>()
+    PrimalTheme(PrimalTheme.Sunset) {
+        ApplyEdgeToEdge(isDarkTheme = true)
+        RedeemCodeScreen(
+            viewModel = viewModel,
+            onClose = navController::navigateUp,
+            navigateToOnboarding = { navController.navigateToOnboarding(it) },
+            navigateToWalletOnboarding = { navController.navigateToWalletOnboarding(it) },
+        )
     }
+}
 
 private fun NavGraphBuilder.home(
     route: String,
