@@ -49,6 +49,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -159,6 +160,10 @@ private fun NoteFeedList(
 
     LaunchedEffect(shouldAnimateScrollToTop, state.shouldAnimateScrollToTop) {
         if (shouldAnimateScrollToTop || state.shouldAnimateScrollToTop == true) {
+            snapshotFlow { pagingItems.itemCount }
+                .filter { it > 0 }
+                .first()
+
             listState.animateScrollToItem(index = 0)
         }
     }
