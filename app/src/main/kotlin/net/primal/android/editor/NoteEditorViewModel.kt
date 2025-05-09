@@ -32,6 +32,7 @@ import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
 import net.primal.android.articles.highlights.asHighlightUi
 import net.primal.android.articles.highlights.generateNevent
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
+import net.primal.android.core.errors.UiError
 import net.primal.android.core.files.FileAnalyser
 import net.primal.android.editor.NoteEditorContract.SideEffect
 import net.primal.android.editor.NoteEditorContract.UiEvent
@@ -175,6 +176,8 @@ class NoteEditorViewModel @AssistedInject constructor(
                     UiEvent.AppendUserTagAtSign -> setState {
                         copy(content = this.content.appendUserTagAtSignAtCursorPosition())
                     }
+
+                    UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
         }
@@ -298,13 +301,13 @@ class NoteEditorViewModel @AssistedInject constructor(
                 sendEffect(SideEffect.PostPublished)
             } catch (error: SignatureException) {
                 Timber.w(error)
-                setErrorState(error = UiState.NoteEditorError.PublishError(cause = error.cause))
+                setErrorState(error = UiError.PublishError(cause = error.cause))
             } catch (error: NostrPublishException) {
                 Timber.w(error)
-                setErrorState(error = UiState.NoteEditorError.PublishError(cause = error.cause))
+                setErrorState(error = UiError.PublishError(cause = error.cause))
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
-                setErrorState(error = UiState.NoteEditorError.MissingRelaysConfiguration(cause = error))
+                setErrorState(error = UiError.MissingRelaysConfiguration(cause = error.cause))
             } finally {
                 setState { copy(publishing = false) }
             }
@@ -420,7 +423,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                 is UploadResult.Failed -> {
                     Timber.w(uploadResult.error)
                     updateNoteAttachmentState(attachment = updatedAttachment.copy(uploadError = uploadResult.error))
-                    setErrorState(error = UiState.NoteEditorError.AttachmentUploadFailed(cause = uploadResult.error))
+                    setErrorState(error = UiError.FailedToUploadAttachment(cause = uploadResult.error))
                 }
             }
         } catch (error: SignatureException) {
@@ -474,7 +477,7 @@ class NoteEditorViewModel @AssistedInject constructor(
         setState { copy(uploadingAttachments = attachmentsInUpload > 0) }
     }
 
-    private fun setErrorState(error: UiState.NoteEditorError) {
+    private fun setErrorState(error: UiError) {
         setState { copy(error = error) }
         viewModelScope.launch {
             delay(2.seconds)
