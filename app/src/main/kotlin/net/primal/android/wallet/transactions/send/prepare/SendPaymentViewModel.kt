@@ -15,7 +15,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.navigation.sendPaymentTab
+import net.primal.android.redeem.utils.getPromoCodeFromUrl
 import net.primal.android.scanner.analysis.WalletTextParser
+import net.primal.android.scanner.domain.QrCodeDataType
+import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.transactions.send.prepare.SendPaymentContract.SideEffect
@@ -62,7 +65,18 @@ class SendPaymentViewModel @Inject constructor(
                     is UiEvent.ProcessTextData -> processTextData(text = it.text)
                     is UiEvent.ProcessProfileData -> processProfileData(profileId = it.profileId)
                     UiEvent.DismissError -> setState { copy(error = null) }
+                    is UiEvent.QrCodeDetected -> handleQrCodeDetected(it.result)
                 }
+            }
+        }
+
+    private fun handleQrCodeDetected(result: QrCodeResult) =
+        viewModelScope.launch {
+            when (result.type) {
+                QrCodeDataType.PROMO_CODE ->
+                    setEffect(SideEffect.PromoCodeDetected(result.value.getPromoCodeFromUrl()))
+
+                else -> processTextData(text = result.value)
             }
         }
 
