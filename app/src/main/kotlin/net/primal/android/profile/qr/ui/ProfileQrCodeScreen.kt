@@ -51,6 +51,7 @@ fun ProfileQrCodeViewerScreen(
     onProfileScan: (profileId: String) -> Unit,
     onNoteScan: (noteId: String) -> Unit,
     onDraftTxScan: (draftTx: DraftTx) -> Unit,
+    onPromoCodeScan: (promoCode: String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -60,6 +61,7 @@ fun ProfileQrCodeViewerScreen(
                 is ProfileQrCodeContract.SideEffect.NostrProfileDetected -> onProfileScan(it.profileId)
                 is ProfileQrCodeContract.SideEffect.NostrNoteDetected -> onNoteScan(it.noteId)
                 is ProfileQrCodeContract.SideEffect.WalletTxDetected -> onDraftTxScan(it.draftTx)
+                is ProfileQrCodeContract.SideEffect.PromoCodeDetected -> onPromoCodeScan(it.promoCode)
             }
         }
     }
