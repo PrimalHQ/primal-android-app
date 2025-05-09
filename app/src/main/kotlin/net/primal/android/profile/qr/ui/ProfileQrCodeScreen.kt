@@ -3,7 +3,10 @@ package net.primal.android.profile.qr.ui
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -117,12 +120,15 @@ private fun ProfileQrCodeViewerScreen(
 
                         QrCodeMode.Scanner -> {
                             QrCodeScanner(
-                                paddingValues = paddingValues,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(paddingValues),
                                 cameraVisible = !isClosing,
                                 onQrCodeDetected = {
                                     eventPublisher(ProfileQrCodeContract.UiEvent.ProcessQrCodeResult(it))
                                 },
                                 hint = {
+                                    Spacer(modifier = Modifier.height(32.dp))
                                     ScanningHint(modifier = Modifier.padding(horizontal = 64.dp))
                                 },
                             )

@@ -10,11 +10,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -36,15 +32,13 @@ import net.primal.android.scanner.domain.QrCodeResult
 
 @Composable
 fun QrCodeScanner(
-    paddingValues: PaddingValues,
     cameraVisible: Boolean,
     onQrCodeDetected: (QrCodeResult) -> Unit,
+    modifier: Modifier = Modifier,
     hint: @Composable () -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues),
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -58,7 +52,6 @@ fun QrCodeScanner(
         if (hasCameraPermission) {
             if (cameraVisible) {
                 ProfileQrCodeCameraBox(onQrCodeDetected)
-                Spacer(modifier = Modifier.height(32.dp))
                 hint()
             }
         } else {

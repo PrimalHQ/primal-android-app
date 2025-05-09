@@ -2,7 +2,10 @@ package net.primal.android.settings.wallet.nwc.scan
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -79,10 +82,13 @@ private fun NwcQrCodeScannerScreen(onClose: () -> Unit, eventPublisher: (UiEvent
             },
             content = { paddingValues ->
                 QrCodeScanner(
-                    paddingValues = paddingValues,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
                     cameraVisible = !isClosing,
                     onQrCodeDetected = { eventPublisher(UiEvent.ProcessQrCodeResult(it)) },
                     hint = {
+                        Spacer(modifier = Modifier.height(32.dp))
                         Text(
                             modifier = Modifier.padding(horizontal = 64.dp),
                             text = stringResource(id = R.string.settings_wallet_nwc_qr_code_scan_hint),
