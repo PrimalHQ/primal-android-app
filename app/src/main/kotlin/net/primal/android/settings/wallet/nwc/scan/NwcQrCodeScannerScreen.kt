@@ -30,7 +30,7 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.profile.qr.ui.ProfileQrCodeScanner
+import net.primal.android.scanner.QrCodeScanner
 import net.primal.android.settings.wallet.nwc.scan.NwcQrCodeScannerContract.UiEvent
 import net.primal.android.theme.AppTheme
 
@@ -78,7 +78,7 @@ private fun NwcQrCodeScannerScreen(onClose: () -> Unit, eventPublisher: (UiEvent
                 )
             },
             content = { paddingValues ->
-                ProfileQrCodeScanner(
+                QrCodeScanner(
                     paddingValues = paddingValues,
                     cameraVisible = !isClosing,
                     onQrCodeDetected = { eventPublisher(UiEvent.ProcessQrCodeResult(it)) },

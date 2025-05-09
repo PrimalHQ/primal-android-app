@@ -37,6 +37,7 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.profile.qr.ProfileQrCodeContract
 import net.primal.android.profile.qr.ProfileQrCodeViewModel
+import net.primal.android.scanner.QrCodeScanner
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.domain.DraftTx
 
@@ -115,7 +116,7 @@ private fun ProfileQrCodeViewerScreen(
                         }
 
                         QrCodeMode.Scanner -> {
-                            ProfileQrCodeScanner(
+                            QrCodeScanner(
                                 paddingValues = paddingValues,
                                 cameraVisible = !isClosing,
                                 onQrCodeDetected = {
