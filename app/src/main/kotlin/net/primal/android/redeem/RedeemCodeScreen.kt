@@ -74,8 +74,8 @@ fun RedeemCodeScreen(
         errorMessageResolver = { it.resolveUiErrorMessage(context) },
         onErrorDismiss = { eventPublisher(RedeemCodeContract.UiEvent.DismissError) },
     )
-    BackHandler(enabled = state.stage == RedeemCodeContract.RedeemCodeStage.Success) {
-        eventPublisher(RedeemCodeContract.UiEvent.GoToEnterCodeStage)
+    BackHandler(enabled = state.stageStack.size > 1) {
+        eventPublisher(UiEvent.PreviousStage)
     }
 
     ColumnWithBackground(
@@ -85,10 +85,10 @@ fun RedeemCodeScreen(
             containerColor = Color.Transparent,
             topBar = {
                 RedeemCodeTopAppBar(
-                    stage = state.stage,
+                    stage = state.getStage(),
                     onClose = {
-                        if (state.stage == RedeemCodeContract.RedeemCodeStage.Success) {
-                            eventPublisher(RedeemCodeContract.UiEvent.GoToEnterCodeStage)
+                        if (state.stageStack.size > 1) {
+                            eventPublisher(UiEvent.PreviousStage)
                         } else {
                             onClose()
                         }
@@ -102,9 +102,17 @@ fun RedeemCodeScreen(
                     .padding(paddingValues)
                     .padding(top = 32.dp)
                     .padding(horizontal = 24.dp),
-                targetState = state.stage,
+                targetState = state.getStage(),
             ) { stage ->
                 when (stage) {
+                    RedeemCodeContract.RedeemCodeStage.ScanCode -> {
+                        RedeemScanCodeStage(
+                            modifier = Modifier.padding(bottom = 64.dp),
+                            onQrCodeDetected = { eventPublisher(UiEvent.QrCodeDetected(it)) },
+                            onEnterCodeClick = { eventPublisher(UiEvent.GoToEnterCodeStage) },
+                        )
+                    }
+
                     RedeemCodeContract.RedeemCodeStage.EnterCode -> {
                         RedeemEnterCodeStage(
                             modifier = Modifier.padding(top = 96.dp, bottom = 64.dp),
@@ -168,6 +176,7 @@ fun RedeemCodeTopAppBar(
 @Composable
 private fun RedeemCodeContract.RedeemCodeStage.toTitle() =
     when (this) {
-        RedeemCodeContract.RedeemCodeStage.EnterCode -> stringResource(id = R.string.redeem_code_title)
+        RedeemCodeContract.RedeemCodeStage.ScanCode -> stringResource(id = R.string.redeem_code_title)
+        RedeemCodeContract.RedeemCodeStage.EnterCode -> stringResource(id = R.string.redeem_code_manual_entry_title)
         RedeemCodeContract.RedeemCodeStage.Success -> stringResource(id = R.string.redeem_code_success_title)
     }

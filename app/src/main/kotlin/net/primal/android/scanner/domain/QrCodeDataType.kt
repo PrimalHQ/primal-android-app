@@ -1,6 +1,6 @@
 package net.primal.android.scanner.domain
 
-import net.primal.android.scanner.domain.QrCodeDataType.entries
+import net.primal.android.redeem.utils.isPromoCodeUrl
 import net.primal.android.user.domain.isNwcUrl
 import net.primal.android.wallet.utils.isBitcoinAddress
 import net.primal.android.wallet.utils.isBitcoinUri
@@ -27,6 +27,7 @@ enum class QrCodeDataType(val validator: (String) -> Boolean) {
     BITCOIN_URI(validator = { it.isBitcoinUri() }),
     BITCOIN_ADDRESS(validator = { it.isBitcoinAddress() }),
     NWC_URL(validator = { it.isNwcUrl() }),
+    PROMO_CODE(validator = { it.isPromoCodeUrl() }),
     ;
 
     companion object {
