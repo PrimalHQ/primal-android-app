@@ -50,7 +50,7 @@ internal fun createBlossomHttpClient() =
                     Napier.v(message = message, tag = "BlossomHttpClient")
                 }
             }
-            level = LogLevel.ALL
+            level = LogLevel.HEADERS
         }
     }.apply {
         // Required workaround to remove `ContentLength: 0`
