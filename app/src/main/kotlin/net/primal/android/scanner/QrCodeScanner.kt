@@ -1,4 +1,4 @@
-package net.primal.android.profile.qr.ui
+package net.primal.android.scanner
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -10,11 +10,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -31,22 +27,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import net.primal.android.core.compose.foundation.KeepScreenOn
-import net.primal.android.scanner.CameraQrCodeDetector2
-import net.primal.android.scanner.MissingCameraPermissionContent
+import net.primal.android.profile.qr.ui.profileQrCodeButtonBackgroundColor
 import net.primal.android.scanner.domain.QrCodeResult
-import net.primal.android.scanner.missingCameraPermissionColors
 
 @Composable
-fun ProfileQrCodeScanner(
-    paddingValues: PaddingValues,
+fun QrCodeScanner(
     cameraVisible: Boolean,
     onQrCodeDetected: (QrCodeResult) -> Unit,
+    modifier: Modifier = Modifier,
     hint: @Composable () -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues),
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -60,7 +52,6 @@ fun ProfileQrCodeScanner(
         if (hasCameraPermission) {
             if (cameraVisible) {
                 ProfileQrCodeCameraBox(onQrCodeDetected)
-                Spacer(modifier = Modifier.height(32.dp))
                 hint()
             }
         } else {

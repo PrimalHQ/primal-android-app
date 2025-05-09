@@ -1,5 +1,6 @@
 package net.primal.android.redeem
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,9 +13,14 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.errors.UiError
+import net.primal.android.core.utils.getPromoCodeFromUrl
+import net.primal.android.navigation.promoCode
+import net.primal.android.redeem.RedeemCodeContract.RedeemCodeStage
 import net.primal.android.redeem.RedeemCodeContract.SideEffect
 import net.primal.android.redeem.RedeemCodeContract.UiEvent
 import net.primal.android.redeem.RedeemCodeContract.UiState
+import net.primal.android.scanner.domain.QrCodeDataType
+import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.wallet.api.model.PromoCodeDetailsResponse
@@ -27,9 +33,13 @@ import timber.log.Timber
 
 @HiltViewModel
 class RedeemCodeViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val walletRepository: WalletRepository,
     private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
+
+    private val preFilledPromoCode = savedStateHandle.promoCode
+
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
@@ -42,6 +52,16 @@ class RedeemCodeViewModel @Inject constructor(
     private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effects.send(effect) }
 
     init {
+        if (preFilledPromoCode != null) {
+            setState {
+                copy(
+                    promoCode = preFilledPromoCode,
+                    stageStack = stageStack.pushStage(RedeemCodeStage.EnterCode),
+                )
+            }
+
+            getCodeDetails(code = preFilledPromoCode)
+        }
         observeEvents()
         observeActiveAccount()
     }
@@ -53,10 +73,13 @@ class RedeemCodeViewModel @Inject constructor(
                     is UiEvent.GetCodeDetails -> getCodeDetails(it.code)
 
                     UiEvent.GoToEnterCodeStage ->
-                        setState { copy(stage = RedeemCodeContract.RedeemCodeStage.EnterCode) }
+                        setState { copy(stageStack = stageStack.pushStage(RedeemCodeStage.EnterCode)) }
 
                     is UiEvent.ApplyCode -> applyCode(it.code)
                     UiEvent.DismissError -> setState { copy(error = null) }
+                    UiEvent.PreviousStage -> setState { copy(stageStack = stageStack.popStage()) }
+
+                    is UiEvent.QrCodeDetected -> qrCodeDetected(it.result)
                 }
             }
         }
@@ -73,6 +96,24 @@ class RedeemCodeViewModel @Inject constructor(
                 }
 
                 setState { copy(userState = userState) }
+            }
+        }
+
+    private fun qrCodeDetected(result: QrCodeResult) =
+        viewModelScope.launch {
+            when (result.type) {
+                QrCodeDataType.PROMO_CODE -> {
+                    setState {
+                        copy(
+                            promoCode = result.value.getPromoCodeFromUrl(),
+                            stageStack = stageStack.pushStage(RedeemCodeStage.EnterCode),
+                        )
+                    }
+
+                    getCodeDetails(code = result.value.getPromoCodeFromUrl())
+                }
+
+                else -> Unit
             }
         }
 
@@ -99,7 +140,7 @@ class RedeemCodeViewModel @Inject constructor(
 
     private fun getCodeDetails(code: String) =
         viewModelScope.launch {
-            setState { copy(loading = true, error = null, showErrorBadge = false, promoCode = null) }
+            setState { copy(loading = true, error = null, showErrorBadge = false) }
             try {
                 val response = walletRepository.getPromoCodeDetails(code = code)
 
@@ -109,7 +150,7 @@ class RedeemCodeViewModel @Inject constructor(
                         welcomeMessage = response.welcomeMessage,
                         promoCodeBenefits = response.toBenefitsList(),
                         requiresPrimalWallet = response.preloadedBtc != null,
-                        stage = RedeemCodeContract.RedeemCodeStage.Success,
+                        stageStack = stageStack.pushStage(RedeemCodeStage.Success),
                     )
                 }
             } catch (error: NetworkException) {
@@ -128,4 +169,13 @@ class RedeemCodeViewModel @Inject constructor(
         listOfNotNull(
             this.preloadedBtc?.toSats()?.let { RedeemCodeContract.PromoCodeBenefit.WalletBalance(sats = it) },
         )
+
+    private fun List<RedeemCodeStage>.popStage() =
+        if (this.size > 1) {
+            this.dropLast(1)
+        } else {
+            this
+        }
+
+    private fun List<RedeemCodeStage>.pushStage(stage: RedeemCodeStage) = this + listOf(stage)
 }

@@ -193,6 +193,10 @@ private fun NavGraphBuilder.send(
     SendPaymentScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
+        onPromoCodeScan = {
+            navController.popBackStack()
+            navController.navigateToRedeemCode(it)
+        },
         onCreateTransaction = { draft ->
             navController.navigateToWalletCreateTransaction(draftTransaction = draft)
         },

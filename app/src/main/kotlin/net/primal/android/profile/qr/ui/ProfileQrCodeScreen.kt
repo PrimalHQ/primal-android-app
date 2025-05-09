@@ -3,7 +3,10 @@ package net.primal.android.profile.qr.ui
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,6 +40,7 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.profile.qr.ProfileQrCodeContract
 import net.primal.android.profile.qr.ProfileQrCodeViewModel
+import net.primal.android.scanner.QrCodeScanner
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.domain.DraftTx
 
@@ -47,6 +51,7 @@ fun ProfileQrCodeViewerScreen(
     onProfileScan: (profileId: String) -> Unit,
     onNoteScan: (noteId: String) -> Unit,
     onDraftTxScan: (draftTx: DraftTx) -> Unit,
+    onPromoCodeScan: (promoCode: String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -56,6 +61,7 @@ fun ProfileQrCodeViewerScreen(
                 is ProfileQrCodeContract.SideEffect.NostrProfileDetected -> onProfileScan(it.profileId)
                 is ProfileQrCodeContract.SideEffect.NostrNoteDetected -> onNoteScan(it.noteId)
                 is ProfileQrCodeContract.SideEffect.WalletTxDetected -> onDraftTxScan(it.draftTx)
+                is ProfileQrCodeContract.SideEffect.PromoCodeDetected -> onPromoCodeScan(it.promoCode)
             }
         }
     }
@@ -115,13 +121,16 @@ private fun ProfileQrCodeViewerScreen(
                         }
 
                         QrCodeMode.Scanner -> {
-                            ProfileQrCodeScanner(
-                                paddingValues = paddingValues,
+                            QrCodeScanner(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(paddingValues),
                                 cameraVisible = !isClosing,
                                 onQrCodeDetected = {
                                     eventPublisher(ProfileQrCodeContract.UiEvent.ProcessQrCodeResult(it))
                                 },
                                 hint = {
+                                    Spacer(modifier = Modifier.height(32.dp))
                                     ScanningHint(modifier = Modifier.padding(horizontal = 64.dp))
                                 },
                             )
