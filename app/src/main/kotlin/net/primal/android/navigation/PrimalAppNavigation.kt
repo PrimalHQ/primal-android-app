@@ -2124,6 +2124,10 @@ private fun NavGraphBuilder.profileQrCodeViewer(
                 navController.popBackStack()
                 navController.navigateToWalletCreateTransaction(draftTx)
             },
+            onPromoCodeScan = {
+                navController.popBackStack()
+                navController.navigateToRedeemCode(it)
+            },
         )
     }
 }

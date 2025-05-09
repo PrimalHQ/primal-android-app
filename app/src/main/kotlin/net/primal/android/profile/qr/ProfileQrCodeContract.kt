@@ -18,5 +18,6 @@ interface ProfileQrCodeContract {
         data class NostrProfileDetected(val profileId: String) : SideEffect()
         data class NostrNoteDetected(val noteId: String) : SideEffect()
         data class WalletTxDetected(val draftTx: DraftTx) : SideEffect()
+        data class PromoCodeDetected(val promoCode: String) : SideEffect()
     }
 }

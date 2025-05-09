@@ -18,6 +18,7 @@ import net.primal.android.navigation.profileId
 import net.primal.android.profile.qr.ProfileQrCodeContract.SideEffect
 import net.primal.android.profile.qr.ProfileQrCodeContract.UiEvent
 import net.primal.android.profile.qr.ProfileQrCodeContract.UiState
+import net.primal.android.redeem.utils.getPromoCodeFromUrl
 import net.primal.android.scanner.analysis.WalletTextParser
 import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.scanner.domain.QrCodeResult
@@ -93,6 +94,9 @@ class ProfileQrCodeViewModel @Inject constructor(
                 QrCodeDataType.BITCOIN_URI,
                 QrCodeDataType.BITCOIN_ADDRESS,
                 -> processWalletText(text = result.value)
+
+                QrCodeDataType.PROMO_CODE ->
+                    setEffect(SideEffect.PromoCodeDetected(result.value.getPromoCodeFromUrl()))
 
                 else -> Unit
             }
