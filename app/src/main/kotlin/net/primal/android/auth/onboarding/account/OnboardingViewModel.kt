@@ -221,9 +221,13 @@ class OnboardingViewModel @Inject constructor(
         }
     }
 
-    private fun OnboardingStep.nextStep() = OnboardingStep.fromIndex(this.index + 1)
+    private fun OnboardingStep.nextStep(): OnboardingStep {
+        return OnboardingStep.entries.find { it.index == this.index + 1 } ?: this
+    }
 
-    private fun OnboardingStep.previousStep() = OnboardingStep.fromIndex(this.index - 1)
+    private fun OnboardingStep.previousStep(): OnboardingStep {
+        return OnboardingStep.entries.find { it.index == this.index - 1 } ?: this
+    }
 
     private fun UiState.asProfileMetadata(): ProfileMetadata =
         ProfileMetadata(
