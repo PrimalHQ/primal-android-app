@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,6 +72,7 @@ fun ZapBottomSheet(
     val zapConfig: List<ContentZapConfigItem> = zappingState.ensureZapConfig()
 
     var customZapAmount by remember { mutableStateOf("") }
+    var selectedZapIndex by remember { mutableIntStateOf(0) }
     var selectedZapComment by remember { mutableStateOf(zapConfig.first().message) }
     var selectedZapAmount by remember { mutableLongStateOf(zapConfig.first().amount) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -98,13 +100,12 @@ fun ZapBottomSheet(
             )
             ZapOptions(
                 zapConfig = zapConfig,
-                selectedZapAmount = selectedZapAmount,
-                onSelectedZapAmountChange = { amount ->
+                selectedZapIndex = selectedZapIndex,
+                onSelectedZapAmountChange = { amount, comment, index ->
                     keyboardController?.hide()
                     selectedZapAmount = amount
-                    selectedZapComment = zapConfig.find {
-                        it.amount == amount
-                    }?.message ?: selectedZapComment
+                    selectedZapIndex = index
+                    selectedZapComment = comment
                 },
             )
             ZapCustomAmountOutlinedTextField(
@@ -204,21 +205,19 @@ private const val ZAP_OPTIONS_COLUMNS_COUNT = 3
 @Composable
 private fun ZapOptions(
     zapConfig: List<ContentZapConfigItem>,
-    selectedZapAmount: Long,
-    onSelectedZapAmountChange: (Long) -> Unit,
+    selectedZapIndex: Int,
+    onSelectedZapAmountChange: (Long, String, Int) -> Unit,
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(ZAP_OPTIONS_COLUMNS_COUNT),
         contentPadding = PaddingValues(12.dp),
     ) {
-        items(zapConfig) {
+        itemsIndexed(zapConfig) { index, config ->
             ZapOption(
-                defaultAmount = it.amount,
-                defaultEmoji = it.emoji,
-                selected = selectedZapAmount == it.amount,
-                onClick = {
-                    onSelectedZapAmountChange(it.amount)
-                },
+                defaultAmount = config.amount,
+                defaultEmoji = config.emoji,
+                selected = index == selectedZapIndex,
+                onClick = { onSelectedZapAmountChange(config.amount, config.message, index) },
             )
         }
     }
