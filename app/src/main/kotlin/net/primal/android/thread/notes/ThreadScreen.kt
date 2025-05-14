@@ -70,11 +70,14 @@ import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.FeedArticleListItem
 import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.ImportPhotosIconButton
+import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.ReplyingToText
+import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.TakePhotoIconButton
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
@@ -154,10 +157,22 @@ fun ThreadScreen(
 
     val replyState by noteEditorViewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val errorToShow = replyState.error ?: state.error
 
-    NoteEditorErrorHandler(
-        error = replyState.error,
+    SnackbarErrorHandler(
+        error = errorToShow,
         snackbarHostState = snackbarHostState,
+        errorMessageResolver = { it.resolveUiErrorMessage(context) },
+        onErrorDismiss = {
+            if (replyState.error != null) {
+                noteEditorViewModel.setEvent(
+                    NoteEditorContract.UiEvent.DismissError,
+                )
+            }
+            if (state.error != null) {
+                eventPublisher(ThreadContract.UiEvent.DismissError)
+            }
+        },
     )
 
     Scaffold(
@@ -305,14 +320,29 @@ private fun ThreadConversationLazyColumn(
             )
         },
     ) {
-        ThreadLazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            state = state,
-            onGoToWallet = onGoToWallet,
-            noteCallbacks = noteCallbacks,
-            onRootPostDeleted = onRootPostDeleted,
-            onUiError = onUiError,
-        )
+        if (state.conversation.isEmpty()) {
+            if (state.fetching) {
+                HeightAdjustableLoadingLazyListPlaceholder(
+                    firstItemHeight = 250.dp,
+                    height = 100.dp,
+                )
+            } else {
+                ListNoContent(
+                    modifier = Modifier.fillMaxSize(),
+                    noContentText = stringResource(id = R.string.thread_invalid_thread_id),
+                    onRefresh = { eventPublisher(ThreadContract.UiEvent.UpdateConversation) },
+                )
+            }
+        } else {
+            ThreadLazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = state,
+                onGoToWallet = onGoToWallet,
+                noteCallbacks = noteCallbacks,
+                onRootPostDeleted = onRootPostDeleted,
+                onUiError = onUiError,
+            )
+        }
     }
 }
 
@@ -632,37 +662,6 @@ private fun ReplyToOptions(
                 onPublishReplyClick()
                 keyboardController?.hide()
             },
-        )
-    }
-}
-
-@Composable
-@Deprecated("Replace with SnackbarErrorHandler")
-private fun NoteEditorErrorHandler(
-    error: NoteEditorContract.UiState.NoteEditorError?,
-    snackbarHostState: SnackbarHostState,
-) {
-    val context = LocalContext.current
-    LaunchedEffect(error) {
-        val errorMessage = when (error) {
-            is NoteEditorContract.UiState.NoteEditorError.MissingRelaysConfiguration -> context.getString(
-                R.string.app_missing_relays_config,
-            )
-
-            is NoteEditorContract.UiState.NoteEditorError.PublishError -> context.getString(
-                R.string.post_action_reply_failed,
-            )
-
-            is NoteEditorContract.UiState.NoteEditorError.AttachmentUploadFailed ->
-                error.cause.message
-                    ?: context.getString(R.string.app_error_upload_failed)
-
-            null -> return@LaunchedEffect
-        }
-
-        snackbarHostState.showSnackbar(
-            message = errorMessage,
-            duration = SnackbarDuration.Short,
         )
     }
 }

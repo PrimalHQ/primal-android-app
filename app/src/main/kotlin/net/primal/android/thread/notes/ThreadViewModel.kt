@@ -73,6 +73,7 @@ class ThreadViewModel @Inject constructor(
             events.collect {
                 when (it) {
                     UiEvent.UpdateConversation -> fetchData()
+                    UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
         }

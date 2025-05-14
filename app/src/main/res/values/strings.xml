@@ -556,14 +556,13 @@
     <string name="note_editor_quoting_publishing_button">Quoting…</string>
     <string name="note_editor_uploading_attachments">Uploading…</string>
     <string name="note_editor_content_placeholder">Type your note here…</string>
-    <string name="note_editor_nostr_publish_error">Unable to publish your note to Nostr. Please try again soon.</string>
+    <string name="note_editor_nostr_publish_error">Unable to publish your note. Please check your connection and try again.</string>
 
     <string name="post_action_missing_lightning_address">Unable to zap this user since they don\'t have a lightning address set up.</string>
     <string name="post_action_invalid_zap_request">Unable to zap. Check your wallet connection and try again.</string>
     <string name="post_action_zap_failed">Unable to zap. Please try again.</string>
     <string name="post_action_like_failed">Unable to like. Please try again.</string>
     <string name="post_action_repost_failed">Unable to repost. Please try again.</string>
-    <string name="post_action_reply_failed">Unable to reply. Please try again.</string>
     <string name="post_action_delete_failed">Unable to delete. Please try again.</string>
 
     <string name="thread_title">Thread</string>
@@ -576,6 +575,7 @@
     <string name="thread_stats_zaps">Zaps</string>
     <string name="thread_stats_likes">Likes</string>
     <string name="thread_stats_reposts">Reposts</string>
+    <string name="thread_invalid_thread_id">Unable to load the thread. Please check your connection and try again.</string>
 
     <string name="reactions_title">Reactions</string>
     <string name="reactions_zaps_tab">Zaps</string>
@@ -952,7 +952,7 @@
     <string name="profile_followed_by">Followed by</string>
     <string name="profile_save_user_feed_title">%1$s\'s Latest</string>
     <string name="profile_save_user_feed_description">Latest notes by %1$s\'s follows</string>
-    <string name="profile_invalid_profile_id">We couldn’t locate this profile. Please confirm the details and try again.</string>
+    <string name="profile_invalid_profile_id">Unable to load the profile. Please check your connection and try again.</string>
 
     <string name="profile_follow">Follow</string>
     <string name="profile_unfollow">Unfollow</string>

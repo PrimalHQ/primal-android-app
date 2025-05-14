@@ -6,6 +6,7 @@ import java.util.*
 import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.articles.highlights.HighlightUi
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
+import net.primal.android.core.errors.UiError
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.notes.feed.model.FeedPostUi
@@ -21,7 +22,7 @@ interface NoteEditorContract {
         val referencedHighlight: HighlightUi? = null,
         val isQuoting: Boolean = false,
         val publishing: Boolean = false,
-        val error: NoteEditorError? = null,
+        val error: UiError? = null,
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val activeAccountLegendaryCustomization: LegendaryCustomization? = null,
         val activeAccountBlossoms: List<String> = emptyList(),
@@ -36,11 +37,6 @@ interface NoteEditorContract {
         val isReply: Boolean get() = conversation.isNotEmpty()
         val replyToNote: FeedPostUi? = conversation.lastOrNull()
         val recommendedUsers: List<UserProfileItemUi> get() = recentUsers + popularUsers
-        sealed class NoteEditorError {
-            data class PublishError(val cause: Throwable?) : NoteEditorError()
-            data class MissingRelaysConfiguration(val cause: Throwable) : NoteEditorError()
-            data class AttachmentUploadFailed(val cause: Throwable) : NoteEditorError()
-        }
     }
 
     sealed class UiEvent {
@@ -53,6 +49,7 @@ interface NoteEditorContract {
         data class SearchUsers(val query: String) : UiEvent()
         data class ToggleSearchUsers(val enabled: Boolean) : UiEvent()
         data class TagUser(val taggedUser: NoteTaggedUser) : UiEvent()
+        data object DismissError : UiEvent()
     }
 
     sealed class SideEffect {
