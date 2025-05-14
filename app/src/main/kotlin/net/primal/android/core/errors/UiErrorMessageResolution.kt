@@ -83,11 +83,9 @@ fun UiError.resolveUiErrorMessage(context: Context): String {
 
         is UiError.FailedToFetchMuteList -> context.getString(R.string.app_error_fetching_mute_list)
 
-        is UiError.FailedToFetchNote -> context.getString(R.string.app_error_fetching_note)
-
         is UiError.FailedToUploadAttachment -> context.getString(R.string.app_error_upload_failed)
 
-        is UiError.PublishError -> context.getString(R.string.post_action_reply_failed)
+        is UiError.PublishError -> context.getString(R.string.note_editor_nostr_publish_error)
 
         is UiError.InvalidPromoCode -> context.getString(R.string.app_error_invalid_promo_code)
 

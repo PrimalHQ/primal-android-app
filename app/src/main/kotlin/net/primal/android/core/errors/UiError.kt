@@ -46,8 +46,6 @@ sealed class UiError {
     data class SignatureError(val error: SignatureUiError) : UiError()
     data class NetworkError(val cause: Throwable) : UiError()
 
-    data class FailedToFetchNote(val cause: Throwable) : UiError()
-
     data class FailedToUploadAttachment(val cause: Throwable) : UiError()
     data class PublishError(val cause: Throwable?) : UiError()
 }
