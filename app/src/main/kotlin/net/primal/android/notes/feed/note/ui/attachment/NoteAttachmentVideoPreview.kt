@@ -203,6 +203,6 @@ fun NoteVideoThumbnailErrorImage() {
     Spacer(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = AppTheme.colorScheme.surface),
+            .background(color = AppTheme.extraColorScheme.surfaceVariantAlt3),
     )
 }
