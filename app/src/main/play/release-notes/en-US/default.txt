@@ -1,2 +1,1 @@
-- Redeem code.
 - Various minor improvements and stability fixes.
