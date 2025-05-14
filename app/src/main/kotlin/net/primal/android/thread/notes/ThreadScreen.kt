@@ -320,17 +320,19 @@ private fun ThreadConversationLazyColumn(
             )
         },
     ) {
-        if (state.fetching) {
-            HeightAdjustableLoadingLazyListPlaceholder(
-                firstItemHeight = 250.dp,
-                height = 100.dp,
-            )
-        } else if (state.conversation.isEmpty()) {
-            ListNoContent(
-                modifier = Modifier.fillMaxSize(),
-                noContentText = stringResource(id = R.string.thread_invalid_thread_id),
-                onRefresh = { eventPublisher(ThreadContract.UiEvent.UpdateConversation) },
-            )
+        if (state.conversation.isEmpty()) {
+            if (state.fetching) {
+                HeightAdjustableLoadingLazyListPlaceholder(
+                    firstItemHeight = 250.dp,
+                    height = 100.dp,
+                )
+            } else {
+                ListNoContent(
+                    modifier = Modifier.fillMaxSize(),
+                    noContentText = stringResource(id = R.string.thread_invalid_thread_id),
+                    onRefresh = { eventPublisher(ThreadContract.UiEvent.UpdateConversation) },
+                )
+            }
         } else {
             ThreadLazyColumn(
                 modifier = Modifier.fillMaxSize(),
