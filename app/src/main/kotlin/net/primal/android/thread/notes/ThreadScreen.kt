@@ -322,8 +322,8 @@ private fun ThreadConversationLazyColumn(
     ) {
         if (state.fetching) {
             HeightAdjustableLoadingLazyListPlaceholder(
-                repeat = 1,
-                height = 250.dp,
+                firstItemHeight = 250.dp,
+                height = 100.dp,
             )
         } else if (state.conversation.isEmpty()) {
             ListNoContent(

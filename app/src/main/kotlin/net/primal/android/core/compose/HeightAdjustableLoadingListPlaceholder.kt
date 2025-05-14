@@ -30,6 +30,7 @@ fun HeightAdjustableLoadingLazyListPlaceholder(
     clipShape: Shape = AppTheme.shapes.small,
     repeat: Int = 10,
     height: Dp = 100.dp,
+    firstItemHeight: Dp = height,
 ) {
     val animationRawResId = when (LocalPrimalTheme.current.isDarkTheme) {
         true -> R.raw.primal_loader_generic_square_dark
@@ -44,13 +45,13 @@ fun HeightAdjustableLoadingLazyListPlaceholder(
             .padding(contentPaddingValues),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        repeat(times = repeat) {
+        repeat(times = repeat) { index ->
             Box(
                 modifier = Modifier
                     .clipToBounds()
                     .clip(clipShape)
                     .fillMaxWidth()
-                    .height(height),
+                    .height(if (index == 0) firstItemHeight else height),
             ) {
                 InfiniteLottieAnimation(
                     modifier = Modifier
