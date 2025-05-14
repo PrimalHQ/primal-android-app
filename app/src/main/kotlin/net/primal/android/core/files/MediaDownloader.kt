@@ -36,7 +36,7 @@ class MediaDownloader @Inject constructor(
 
     @Throws(UnsuccessfulFileDownload::class)
     fun downloadToMediaGallery(url: String) {
-        try {
+        runCatching {
             val response = requestMediaDownload(url)
             val fileName = generateFileName()
             val fileExtension = url.extractExtensionFromUrl()
@@ -57,12 +57,13 @@ class MediaDownloader @Inject constructor(
                     context = context,
                 )
             }
-        } catch (error: IOException) {
+        }.getOrElse { error ->
+            Timber.w(error, "Malformed URL: $url")
             throw UnsuccessfulFileDownload("Unable to download media.", cause = error)
         }
     }
 
-    @Throws(IOException::class)
+    @Throws(IOException::class, IllegalArgumentException::class)
     private fun requestMediaDownload(url: String): Response {
         val request = Request.Builder().url(url).build()
         val client = OkHttpClient.Builder().followRedirects(true).build()
