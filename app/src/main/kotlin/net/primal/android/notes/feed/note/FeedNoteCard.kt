@@ -108,7 +108,10 @@ fun FeedNoteCard(
     onUiError: ((UiError) -> Unit)? = null,
     contentFooter: @Composable () -> Unit = {},
 ) {
-    val viewModel = hiltViewModel<NoteViewModel, NoteViewModel.Factory> { it.create(noteId = data.postId) }
+    val viewModel = hiltViewModel<NoteViewModel, NoteViewModel.Factory>(
+        key = "noteViewModel$${data.postId}",
+        creationCallback = { it.create(noteId = data.postId) },
+    )
     val uiState by viewModel.state.collectAsState()
 
     LaunchedEffect(viewModel, uiState.error, onUiError) {
