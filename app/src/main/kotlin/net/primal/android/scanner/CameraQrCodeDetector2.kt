@@ -19,6 +19,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import java.util.concurrent.Executors
 import kotlin.time.Duration.Companion.seconds
+import net.primal.android.LocalQrCodeDecoder
 import net.primal.android.core.utils.isOlderThan
 import net.primal.android.scanner.analysis.QrCodeAnalyzer
 import net.primal.android.scanner.domain.QrCodeResult
@@ -36,8 +37,9 @@ fun CameraQrCodeDetector2(torchEnabled: Boolean = false, onQrCodeDetected: (QrCo
 
     var lastScannedQrCodeData by remember { mutableStateOf<QrCodeResult?>(null) }
 
+    val decoder = LocalQrCodeDecoder.current
     val cameraController = remember {
-        val qrCodeAnalyzer = QrCodeAnalyzer { result ->
+        val qrCodeAnalyzer = QrCodeAnalyzer(decoder = decoder) { result ->
             val isRepeatingResult = result.equalValues(lastScannedQrCodeData)
             val lastSuccessfulScanResultExpired = lastScannedQrCodeData?.timestamp.isOlderThan(2.seconds)
             if (!isRepeatingResult || lastSuccessfulScanResultExpired) {

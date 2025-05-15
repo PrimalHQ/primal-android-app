@@ -29,6 +29,7 @@ import net.primal.android.navigation.PrimalAppNavigation
 import net.primal.android.navigation.splash.SplashViewModel
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.nostr.notary.NostrNotary.NotarySideEffect
+import net.primal.android.scanner.analysis.QrCodeResultDecoder
 import net.primal.android.signer.launchSignEvent
 import net.primal.android.signer.rememberAmberSignerLauncher
 import net.primal.android.theme.AppTheme
@@ -50,6 +51,9 @@ class MainActivity : FragmentActivity() {
 
     @Inject
     lateinit var nostrNotary: NostrNotary
+
+    @Inject
+    lateinit var qrCodeResultDecoder: QrCodeResultDecoder
 
     private lateinit var primalTheme: PrimalTheme
 
@@ -99,6 +103,7 @@ class MainActivity : FragmentActivity() {
                     LocalPrimalTheme provides primalTheme,
                     LocalRippleConfiguration provides primalRippleConfiguration,
                     LocalContentDisplaySettings provides contentDisplaySettings.value,
+                    LocalQrCodeDecoder provides qrCodeResultDecoder,
                 ) {
                     ApplyEdgeToEdge()
 
@@ -143,5 +148,8 @@ class MainActivity : FragmentActivity() {
 
 val LocalPrimalTheme = compositionLocalOf<PrimalTheme> { error("No PrimalTheme provided.") }
 
-val LocalContentDisplaySettings =
-    compositionLocalOf<ContentDisplaySettings> { error("No ContentDisplay settins provided.") }
+val LocalContentDisplaySettings = compositionLocalOf<ContentDisplaySettings> {
+    error("No ContentDisplay settins provided.")
+}
+
+val LocalQrCodeDecoder = compositionLocalOf<QrCodeResultDecoder> { error("No QrCodeResultDecoder provided.") }

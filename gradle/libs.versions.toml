@@ -7,6 +7,7 @@ acinq-bitcoin-kmp = "0.22.1"
 acinq-secp256k1-kmp = "0.17.1"
 agp = "8.10.0"
 appcompat = "1.7.0"
+barcode-scanning = "17.3.0"
 bignum = "0.3.10"
 bitcoinj-core = "0.16.3"
 biometric = "1.4.0-alpha03"
@@ -98,6 +99,7 @@ play-billing-ktx = { module = "com.android.billingclient:billing-ktx", version.r
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref="firebase" }
 firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref="kotlinx-coroutines" }
+mlkit-barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "barcode-scanning" }
 
 # UI libs
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }

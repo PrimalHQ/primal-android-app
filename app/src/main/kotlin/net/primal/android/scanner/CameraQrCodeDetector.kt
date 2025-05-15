@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import java.util.concurrent.Executors
+import net.primal.android.LocalQrCodeDecoder
 import net.primal.android.scanner.analysis.QrCodeAnalyzer
 import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.theme.AppTheme
@@ -53,10 +54,9 @@ fun CameraQrCodeDetector(
             .build()
     }
 
+    val decoder = LocalQrCodeDecoder.current
     val cameraController = remember {
-        val qrCodeAnalyzer = QrCodeAnalyzer {
-            onQrCodeDetected(it)
-        }
+        val qrCodeAnalyzer = QrCodeAnalyzer(decoder = decoder) { onQrCodeDetected(it) }
 
         LifecycleCameraController(context).apply {
             this.cameraSelector = cameraSelector

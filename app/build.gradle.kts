@@ -339,6 +339,7 @@ dependencies {
     "googleImplementation"(platform(libs.firebase.bom))
     "googleImplementation"(libs.firebase.messaging)
     "googleImplementation"(libs.kotlinx.coroutines.play.services)
+    "googleImplementation"(libs.mlkit.barcode.scanning)
 
     implementation(libs.qrcode.generator)
 
