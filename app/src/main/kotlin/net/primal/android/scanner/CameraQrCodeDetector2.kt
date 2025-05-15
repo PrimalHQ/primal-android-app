@@ -2,7 +2,8 @@ package net.primal.android.scanner
 
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
-import androidx.camera.view.CameraController
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.fillMaxSize
@@ -48,7 +49,16 @@ fun CameraQrCodeDetector2(torchEnabled: Boolean = false, onQrCodeDetected: (QrCo
         LifecycleCameraController(context).apply {
             this.cameraSelector = cameraSelector
             imageAnalysisBackpressureStrategy = ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST
-            imageAnalysisTargetSize = CameraController.OutputSize(QrCodeAnalyzer.AnalysisTargetSize)
+            setImageAnalysisResolutionSelector(
+                ResolutionSelector.Builder()
+                    .setResolutionStrategy(
+                        ResolutionStrategy(
+                            QrCodeAnalyzer.AnalysisTargetSize,
+                            ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER,
+                        ),
+                    )
+                    .build(),
+            )
             setImageAnalysisAnalyzer(Executors.newSingleThreadExecutor(), qrCodeAnalyzer)
         }
     }
