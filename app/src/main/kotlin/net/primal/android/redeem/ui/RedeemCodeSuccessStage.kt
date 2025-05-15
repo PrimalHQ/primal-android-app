@@ -116,7 +116,7 @@ fun NoUserContent(isLoading: Boolean, onOnboardToPrimalClick: () -> Unit) {
 fun UserWithWalletContent(isLoading: Boolean, onApplyCodeClick: () -> Unit) {
     OnboardingButton(
         loading = isLoading,
-        text = stringResource(id = R.string.redeem_code_apply_code_button),
+        text = stringResource(id = R.string.redeem_code_redeem_code_button),
         onClick = onApplyCodeClick,
     )
 }

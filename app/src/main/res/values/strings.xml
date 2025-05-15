@@ -106,6 +106,7 @@
     <string name="redeem_code_manual_entry_title">Enter Your Code</string>
     <string name="redeem_code_success_title">Success!</string>
     <string name="redeem_code_apply_code_button">Apply code</string>
+    <string name="redeem_code_redeem_code_button">Redeem code</string>
     <string name="redeem_code_onboard_to_primal_button">Onboard to Primal</string>
     <string name="redeem_code_active_wallet_button">Activate Wallet</string>
     <string name="redeem_code_enter_code_button">Enter Code Instead</string>
