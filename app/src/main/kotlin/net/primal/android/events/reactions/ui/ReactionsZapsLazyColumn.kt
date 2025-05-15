@@ -13,10 +13,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
@@ -109,10 +114,16 @@ private fun NoteZapListItem(data: EventZapUiModel, onProfileClick: (profileId: S
                 )
             },
             supportingContent = {
-                if (!data.message.isNullOrEmpty()) {
+                data.message?.takeIf { it.isNotEmpty() }?.let { message ->
+                    val annotatedMessage = buildAnnotatedString {
+                        appendTextWithLinkHighlights(message, AppTheme.colorScheme.secondary)
+                    }
+
                     Text(
-                        text = data.message,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        text = annotatedMessage,
+                        style = AppTheme.typography.bodyMedium.copy(
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        ),
                     )
                 }
             },
@@ -141,5 +152,25 @@ private fun NoteZapListItem(data: EventZapUiModel, onProfileClick: (profileId: S
             },
         )
         PrimalDivider()
+    }
+}
+
+private fun AnnotatedString.Builder.appendTextWithLinkHighlights(text: String, linkColor: Color) {
+    var lastIndex = 0
+    val urls = text.detectUrls()
+
+    for (url in urls) {
+        val start = text.indexOf(url, lastIndex).takeIf { it >= 0 } ?: continue
+        append(text.substring(lastIndex, start))
+
+        withStyle(SpanStyle(color = linkColor)) {
+            append(url)
+        }
+
+        lastIndex = start + url.length
+    }
+
+    if (lastIndex < text.length) {
+        append(text.substring(lastIndex))
     }
 }
