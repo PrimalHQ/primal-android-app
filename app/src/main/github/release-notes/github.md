@@ -11,5 +11,6 @@
 - Fixed crash when downloading media from malformed URLs in MediaDownloader (#465);
 - Fixed rare crash when tapping new notes pill in note feeds (#466);
 - Fixed repeating error messages on note action when error occurs;
+- Fixed selection in CustomZap dialog if multiple presets have the same sats (#472);
 - Removed danger icon when image or video preview could not be loaded;
 - Added support for BUD-08 in blossom upload responses (#456);
