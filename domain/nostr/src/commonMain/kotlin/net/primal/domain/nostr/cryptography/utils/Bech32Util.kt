@@ -64,14 +64,14 @@ object Bech32 {
         values.forEach { v ->
             val b = chk shr 25
             chk = ((chk and 0x1ffffff) shl 5) xor v.toInt()
-            for (i in 0..5) {
+            for (i in gen.indices) {
                 if (((b shr i) and 1) != 0) chk = chk xor gen[i]
             }
         }
         values1.forEach { v ->
             val b = chk shr 25
             chk = ((chk and 0x1ffffff) shl 5) xor v.toInt()
-            for (i in 0..5) {
+            for (i in gen.indices) {
                 if (((b shr i) and 1) != 0) chk = chk xor gen[i]
             }
         }
