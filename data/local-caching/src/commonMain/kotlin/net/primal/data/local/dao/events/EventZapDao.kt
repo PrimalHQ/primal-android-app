@@ -10,7 +10,7 @@ import androidx.room.Transaction
 @Dao
 interface EventZapDao {
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(data: EventZap)
 
     @Query(
