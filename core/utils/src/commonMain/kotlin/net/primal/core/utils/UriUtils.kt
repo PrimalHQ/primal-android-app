@@ -41,6 +41,33 @@ fun String.detectUrls(): List<String> {
     }.toList()
 }
 
+fun String.detectUrlsWithRanges(): List<Pair<String, IntRange>> {
+    return urlRegexPattern.findAll(this).map { mr ->
+        var url = mr.value
+        var start = mr.range.first
+        var end = mr.range.last + 1
+
+        val trimmed = url.trimEnd('.', ',', '!', '?')
+        if (trimmed.length != url.length) {
+            end -= (url.length - trimmed.length)
+            url = trimmed
+        }
+
+        when (this.getOrNull(start - 1)) {
+            '(' -> if (url.lastOrNull() == ')') {
+                url = url.dropLast(1)
+                end--
+            }
+            '[' -> if (url.lastOrNull() == ']') {
+                url = url.dropLast(1)
+                end--
+            }
+        }
+
+        url to (start until end)
+    }.toList()
+}
+
 fun String.ensureHttpOrHttps(): String =
     if (startsWith(prefix = "http://") || startsWith(prefix = "https://")) {
         this

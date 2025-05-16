@@ -134,4 +134,44 @@ class NostrUriUtilsTest {
         parsed shouldContain "npub17nd4yu9anyd3004pumgrtazaacujjxwzj36thtqsxskjy0r5urgqf6950x"
         parsed.size shouldBe 2
     }
+
+    @Test
+    fun parseNostrUris_skipsUrisEmbeddedInUrls() {
+        val url = "https://example.com/npub1235jkvq3mr0pm7gpqkj07n4lw2yacr009h0ncqgegrt00s3hugdsmpzphw"
+        val nostr = "nostr:npub1235jkvq3mr0pm7gpqkj07n4lw2yacr009h0ncqgegrt00s3hugdsmpzphw"
+        val parsed = "Check $url and $nostr".parseNostrUris()
+
+        parsed shouldContain nostr
+        parsed.size shouldBe 1
+    }
+
+    @Test
+    fun parseNostrUris_returnsSingleValidNpubUriInChat() {
+        val npub = "npub1235jkvq3mr0pm7gpqkj07n4lw2yacr009h0ncqgegrt00s3hugdsmpzphw"
+        val parsed = "User wallet: $npub".parseNostrUris()
+        parsed shouldContain npub
+        parsed.size shouldBe 1
+    }
+
+    @Test
+    fun parseNostrUris_returnsMultipleValidNpubUrisInChat() {
+        val npub1 = "npub1235jkvq3mr0pm7gpqkj07n4lw2yacr009h0ncqgegrt00s3hugdsmpzphw"
+        val npub2 = "npub19au6acy8d09lvuelfdaupytjy4avwz062yze46p6nkjyesk67nuq8t0nnd"
+        val message = "Hey, share your keys: $npub1 and $npub2 in chat"
+        val parsed = message.parseNostrUris()
+        parsed shouldContain npub1
+        parsed shouldContain npub2
+        parsed.size shouldBe 2
+    }
+
+    @Test
+    fun parseNostrUris_handlesMixedNoteAndNpubInChat() {
+        val note = "nevent1qqsrcnmym6eky5glqq0vrkm48ftwwmsxkhu5c0a8cpy58csjm67u8ns26af33"
+        val npub = "npub19au6acy8d09lvuelfdaupytjy4avwz062yze46p6nkjyesk67nuq8t0nnd"
+        val text = "Chat contains $note then some text then $npub end"
+        val parsed = text.parseNostrUris()
+        parsed shouldContain note
+        parsed shouldContain npub
+        parsed.size shouldBe 2
+    }
 }

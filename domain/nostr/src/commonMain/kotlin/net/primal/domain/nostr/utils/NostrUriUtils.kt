@@ -9,6 +9,7 @@ import net.primal.core.utils.NPROFILE
 import net.primal.core.utils.NPUB
 import net.primal.core.utils.NRELAY
 import net.primal.core.utils.NSEC
+import net.primal.core.utils.detectUrlsWithRanges
 import net.primal.domain.nostr.Nip19TLV
 import net.primal.domain.nostr.Nip19TLV.readAsString
 import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
@@ -20,13 +21,23 @@ private val nostrUriRegexPattern = Regex(
     RegexOption.IGNORE_CASE,
 )
 
-fun String.parseNostrUris(): List<String> =
-    nostrUriRegexPattern.findAll(this)
-        .map { matchResult ->
-            matchResult.groupValues[1] + matchResult.groupValues[2] + matchResult.groupValues[3]
+fun String.parseNostrUris(): List<String> {
+    val urlMatches = this.detectUrlsWithRanges()
+
+    return nostrUriRegexPattern.findAll(this)
+        .map { mr ->
+            val uri = mr.groupValues[1] + mr.groupValues[2] + mr.groupValues[3]
+            uri to mr.range
         }
-        .filter { it.nostrUriToBytes() != null }
+        .filter { (uri, _) -> uri.nostrUriToBytes() != null }
+        .filter { (_, uriRange) ->
+            urlMatches.none { (_, urlRange) ->
+                uriRange.first >= urlRange.first && uriRange.last <= urlRange.last
+            }
+        }
+        .map { (uri, _) -> uri }
         .toList()
+}
 
 fun String.nostrUriToBytes(): ByteArray? {
     val matchResult = nostrUriRegexPattern.find(this) ?: return null
