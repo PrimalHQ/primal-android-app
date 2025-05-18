@@ -2,8 +2,7 @@ package net.primal.android.editor.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Refresh
@@ -24,19 +23,20 @@ import net.primal.android.theme.AppTheme
 
 @Composable
 fun NoteAttachmentPreview(
+    modifier: Modifier,
     attachment: NoteAttachment,
     onDiscard: (UUID) -> Unit,
     onRetryUpload: (UUID) -> Unit,
 ) {
     val shape = AppTheme.shapes.medium
     Box(
+        modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
         SubcomposeAsyncImage(
             model = attachment.localUri,
             modifier = Modifier
-                .fillMaxHeight()
-                .wrapContentWidth()
+                .fillMaxWidth()
                 .clip(shape),
             contentDescription = null,
             contentScale = ContentScale.Crop,

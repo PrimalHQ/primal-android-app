@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -527,17 +526,19 @@ private fun NoteAttachmentsLazyRow(
 ) {
     LazyRow(
         modifier = modifier,
+        contentPadding = PaddingValues(
+            start = avatarsColumnWidthDp - 8.dp,
+        ),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        item {
-            Spacer(modifier = Modifier.width(avatarsColumnWidthDp - 8.dp))
-        }
-
         items(
             items = attachments,
             key = { it.id },
         ) { attachment ->
             NoteAttachmentPreview(
+                modifier = Modifier
+                    .fillParentMaxWidth(ATTACHMENT_FILL_FRACTION)
+                    .wrapContentHeight(),
                 attachment = attachment,
                 onDiscard = onDiscard,
                 onRetryUpload = onRetryUpload,
@@ -631,3 +632,5 @@ private val avatarSizeDp = 42.dp
 private val connectionLineOffsetXDp = 40.dp
 private val attachmentsHeightDp = 160.dp
 private val avatarsColumnWidthDp = avatarSizeDp + 24.dp
+
+private const val ATTACHMENT_FILL_FRACTION = 0.92f
