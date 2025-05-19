@@ -88,6 +88,7 @@ import net.primal.android.notes.feed.note.ui.ThreadNoteStatsRow
 import net.primal.android.notes.feed.note.ui.attachment.PlayButton
 import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
+import net.primal.android.notes.feed.note.ui.events.ReactionTab
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
 import net.primal.android.theme.AppTheme
@@ -599,7 +600,12 @@ private fun ArticleContentWithComments(
                         .padding(horizontal = 16.dp),
                     topZaps = state.topZaps,
                     onTopZapsClick = {
-                        state.article?.eventId?.let { noteCallbacks.onEventReactionsClick?.invoke(it) }
+                        state.article?.eventId?.let {
+                            noteCallbacks.onEventReactionsClick?.invoke(
+                                it,
+                                ReactionTab.ZAPS,
+                            )
+                        }
                     },
                     onZapClick = onZapOptionsClick,
                 )
@@ -750,7 +756,12 @@ private fun ArticleContentWithComments(
                         Row(
                             modifier = Modifier.clickable(
                                 enabled = noteCallbacks.onEventReactionsClick != null,
-                                onClick = { noteCallbacks.onEventReactionsClick?.invoke(state.article.eventId) },
+                                onClick = {
+                                    noteCallbacks.onEventReactionsClick?.invoke(
+                                        state.article.eventId,
+                                        ReactionTab.ZAPS,
+                                    )
+                                },
                             ),
                             verticalAlignment = Alignment.Bottom,
                         ) {
@@ -777,12 +788,11 @@ private fun ArticleContentWithComments(
                     if (state.article.eventStatsUi.hasAnyCount()) {
                         ThreadNoteStatsRow(
                             modifier = Modifier
-                                .padding(top = 16.dp, bottom = 8.dp)
-                                .clickable(
-                                    enabled = noteCallbacks.onEventReactionsClick != null,
-                                    onClick = { noteCallbacks.onEventReactionsClick?.invoke(state.article.eventId) },
-                                ),
+                                .padding(top = 16.dp, bottom = 8.dp),
                             eventStats = state.article.eventStatsUi,
+                            onStatClick = { tab ->
+                                noteCallbacks.onEventReactionsClick?.invoke(state.article.eventId, tab)
+                            },
                         )
                     }
 

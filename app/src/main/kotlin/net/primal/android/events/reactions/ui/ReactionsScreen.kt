@@ -58,8 +58,10 @@ private fun ReactionsScreen(
     onProfileClick: (profileId: String) -> Unit,
 ) {
     val uiScope = rememberCoroutineScope()
-    val pagerState = rememberPagerState { REACTION_TABS_COUNT }
-
+    val pagerState = rememberPagerState(
+        initialPage = state.initialTab.ordinal,
+        pageCount = { REACTION_TABS_COUNT },
+    )
     Scaffold(
         topBar = {
             PrimalTopAppBar(

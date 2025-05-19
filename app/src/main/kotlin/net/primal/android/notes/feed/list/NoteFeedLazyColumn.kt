@@ -35,6 +35,7 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
+import net.primal.android.notes.feed.note.ui.events.ReactionTab
 import timber.log.Timber
 
 @ExperimentalMaterial3Api
@@ -120,7 +121,7 @@ fun NoteFeedLazyColumn(
                                         .padding(top = 4.dp, end = 2.dp),
                                     zaps = item.eventZaps,
                                     onClick = if (noteCallbacks.onEventReactionsClick != null) {
-                                        { noteCallbacks.onEventReactionsClick.invoke(item.postId) }
+                                        { noteCallbacks.onEventReactionsClick.invoke(item.postId, ReactionTab.ZAPS) }
                                     } else {
                                         null
                                     },

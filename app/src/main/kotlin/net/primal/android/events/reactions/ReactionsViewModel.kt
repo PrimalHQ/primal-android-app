@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.events.reactions.ReactionsContract.UiState
 import net.primal.android.events.ui.asEventZapUiModel
+import net.primal.android.navigation.initialTabOrThrow
 import net.primal.android.navigation.noteIdOrThrow
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.domain.common.exception.NetworkException
@@ -31,6 +32,7 @@ class ReactionsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val noteId = savedStateHandle.noteIdOrThrow
+    private val initialTab = savedStateHandle.initialTabOrThrow
 
     private val _state = MutableStateFlow(
         UiState(
@@ -40,6 +42,7 @@ class ReactionsViewModel @Inject constructor(
             )
                 .map { it.map { noteZap -> noteZap.asEventZapUiModel() } }
                 .cachedIn(viewModelScope),
+            initialTab = initialTab,
         ),
     )
     val state = _state.asStateFlow()

@@ -5,7 +5,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -104,6 +103,7 @@ import net.primal.android.notes.feed.model.asNeventString
 import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.notes.feed.note.ui.ThreadNoteStatsRow
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
+import net.primal.android.notes.feed.note.ui.events.ReactionTab
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -439,7 +439,7 @@ private fun ThreadLazyColumn(
                                 ThreadNoteTopZapsSection(
                                     zaps = item.eventZaps,
                                     onClick = if (noteCallbacks.onEventReactionsClick != null) {
-                                        { noteCallbacks.onEventReactionsClick.invoke(item.postId) }
+                                        { noteCallbacks.onEventReactionsClick.invoke(item.postId, ReactionTab.ZAPS) }
                                     } else {
                                         null
                                     },
@@ -458,13 +458,11 @@ private fun ThreadLazyColumn(
 
                                 if (item.stats.hasAnyCount()) {
                                     ThreadNoteStatsRow(
-                                        modifier = Modifier
-                                            .padding(top = 10.dp)
-                                            .clickable(
-                                                enabled = noteCallbacks.onEventReactionsClick != null,
-                                                onClick = { noteCallbacks.onEventReactionsClick?.invoke(item.postId) },
-                                            ),
+                                        modifier = Modifier.padding(top = 10.dp),
                                         eventStats = item.stats,
+                                        onStatClick = { tab ->
+                                            noteCallbacks.onEventReactionsClick?.invoke(item.postId, tab)
+                                        },
                                     )
                                 }
 

@@ -73,6 +73,7 @@ import net.primal.android.messages.conversation.MessageConversationListViewModel
 import net.primal.android.messages.conversation.MessageListScreen
 import net.primal.android.messages.conversation.create.NewConversationScreen
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
+import net.primal.android.notes.feed.note.ui.events.ReactionTab
 import net.primal.android.notes.home.HomeFeedScreen
 import net.primal.android.notes.home.HomeFeedViewModel
 import net.primal.android.notifications.list.NotificationsScreen
@@ -247,7 +248,10 @@ fun NavController.navigateToThread(noteId: String) = navigate(route = "thread/$n
 
 fun NavController.navigateToArticleDetails(naddr: String) = navigate(route = "article?$NADDR=$naddr")
 
-fun NavController.navigateToReactions(eventId: String) = navigate(route = "reactions/$eventId")
+fun NavController.navigateToReactions(eventId: String, initialTab: ReactionTab = ReactionTab.ZAPS) =
+    navigate(
+        "reactions/$eventId?$INITIAL_TAB=${initialTab.name}",
+    )
 
 fun NavController.navigateToMediaGallery(
     noteId: String,
@@ -377,8 +381,8 @@ fun noteCallbacksHandler(navController: NavController) =
         onPayInvoiceClick = {
             navController.navigateToWalletCreateTransaction(lnbc = it.lnbc)
         },
-        onEventReactionsClick = { noteId ->
-            navController.navigateToReactions(eventId = noteId)
+        onEventReactionsClick = { noteId, initialTab ->
+            navController.navigateToReactions(eventId = noteId, initialTab = initialTab)
         },
         onGetPrimalPremiumClick = { navController.navigateToPremiumBuying() },
         onPrimalLegendsLeaderboardClick = { navController.navigateToPremiumLegendLeaderboard() },
@@ -785,10 +789,12 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
         )
 
         reactions(
-            route = "reactions/{$NOTE_ID}",
+            route = "reactions/{$NOTE_ID}?$INITIAL_TAB={$INITIAL_TAB}",
             arguments = listOf(
-                navArgument(NOTE_ID) {
+                navArgument(NOTE_ID) { type = NavType.StringType },
+                navArgument(INITIAL_TAB) {
                     type = NavType.StringType
+                    defaultValue = ReactionTab.ZAPS.name
                 },
             ),
             navController = navController,

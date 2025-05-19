@@ -1,5 +1,6 @@
 package net.primal.android.notes.feed.note.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -12,15 +13,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.notes.feed.model.EventStatsUi
+import net.primal.android.notes.feed.note.ui.events.ReactionTab
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun ThreadNoteStatsRow(eventStats: EventStatsUi, modifier: Modifier = Modifier) {
+fun ThreadNoteStatsRow(
+    eventStats: EventStatsUi,
+    onStatClick: (ReactionTab) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Row(modifier = modifier) {
         if (eventStats.repliesCount > 0) {
             SingleNoteStat(
                 count = eventStats.repliesCount,
                 text = stringResource(R.string.thread_stats_replies),
+                onClick = { onStatClick(ReactionTab.REPLIES) },
             )
         }
 
@@ -31,6 +38,7 @@ fun ThreadNoteStatsRow(eventStats: EventStatsUi, modifier: Modifier = Modifier) 
                 modifier = Modifier.padding(start = startPadding),
                 count = eventStats.zapsCount,
                 text = stringResource(R.string.thread_stats_zaps),
+                onClick = { onStatClick(ReactionTab.ZAPS) },
             )
         }
 
@@ -41,6 +49,7 @@ fun ThreadNoteStatsRow(eventStats: EventStatsUi, modifier: Modifier = Modifier) 
                 modifier = Modifier.padding(start = startPadding),
                 count = eventStats.likesCount,
                 text = stringResource(R.string.thread_stats_likes),
+                onClick = { onStatClick(ReactionTab.LIKES) },
             )
         }
 
@@ -51,6 +60,7 @@ fun ThreadNoteStatsRow(eventStats: EventStatsUi, modifier: Modifier = Modifier) 
                 modifier = Modifier.padding(start = startPadding),
                 count = eventStats.repostsCount,
                 text = stringResource(R.string.thread_stats_reposts),
+                onClick = { onStatClick(ReactionTab.REPLIES) },
             )
         }
     }
@@ -60,9 +70,12 @@ fun ThreadNoteStatsRow(eventStats: EventStatsUi, modifier: Modifier = Modifier) 
 private fun SingleNoteStat(
     count: Long,
     text: String,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(modifier = modifier) {
+    Row(
+        modifier = modifier.clickable(onClick = onClick),
+    ) {
         Text(
             text = "$count",
             style = AppTheme.typography.bodyMedium,
