@@ -160,8 +160,10 @@ private fun NoteFeedList(
 
     LaunchedEffect(shouldAnimateScrollToTop, state.shouldAnimateScrollToTop) {
         if (shouldAnimateScrollToTop || state.shouldAnimateScrollToTop == true) {
-            snapshotFlow { pagingItems.itemCount }
-                .filter { it > 0 }
+            snapshotFlow {
+                pagingItems.itemCount > 0 && listState.layoutInfo.totalItemsCount > 0
+            }
+                .filter { it }
                 .first()
 
             listState.animateScrollToItem(index = 0)
