@@ -1,5 +1,7 @@
 package net.primal.android.thread.articles.details
 
+import android.graphics.BitmapFactory
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -42,7 +44,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
@@ -54,6 +58,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import coil.compose.SubcomposeAsyncImage
 import java.text.NumberFormat
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.ArticleDropdownMenuIcon
@@ -102,6 +108,7 @@ import net.primal.android.thread.articles.details.ui.FloatingArticlePill
 import net.primal.android.thread.articles.details.ui.HighlightActivityBottomSheet
 import net.primal.android.thread.articles.details.ui.rendering.MarkdownRenderer
 import net.primal.android.thread.articles.details.ui.rendering.handleArticleLinkClick
+import net.primal.android.thread.articles.details.ui.rendering.isBase64ImageUrl
 import net.primal.android.thread.articles.details.ui.rendering.isValidHttpOrHttpsUrl
 import net.primal.android.thread.articles.details.ui.rendering.rememberPrimalMarkwon
 import net.primal.android.thread.articles.details.ui.rendering.replaceProfileNostrUrisWithMarkdownLinks
@@ -117,6 +124,7 @@ import net.primal.domain.nostr.utils.isNEventUri
 import net.primal.domain.nostr.utils.isNostrUri
 import net.primal.domain.nostr.utils.isNote
 import net.primal.domain.nostr.utils.takeAsNoteHexIdOrNull
+import timber.log.Timber
 
 @Composable
 fun ArticleDetailsScreen(
@@ -697,29 +705,48 @@ private fun ArticleContentWithComments(
                 }
 
                 is ArticlePartRender.ImageRender -> {
-                    SubcomposeAsyncImage(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .clip(AppTheme.shapes.medium)
-                            .clickable {
-                                state.article?.eventId?.let {
-                                    MediaClickEvent(
-                                        noteId = it,
-                                        eventUriType = EventUriType.Image,
-                                        mediaUrl = part.imageUrl,
-                                        positionMs = 0L,
-                                    )
-                                }?.let {
-                                    noteCallbacks.onMediaClick?.invoke(
-                                        it,
-                                    )
-                                }
-                            },
-                        model = part.imageUrl,
-                        contentScale = ContentScale.FillWidth,
-                        contentDescription = null,
-                    )
+                    val isBase64 = part.imageUrl.startsWith("data:image")
+
+                    val imageBitmap = remember(part.imageUrl.take(IMAGE_KEY_LENGTH)) {
+                        if (isBase64) {
+                            decodeBase64ToImageBitmap(part.imageUrl)
+                        } else {
+                            null
+                        }
+                    }
+
+                    val modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .clip(AppTheme.shapes.medium)
+                        .clickable {
+                            state.article?.eventId?.let {
+                                MediaClickEvent(
+                                    noteId = it,
+                                    eventUriType = EventUriType.Image,
+                                    mediaUrl = part.imageUrl,
+                                    positionMs = 0L,
+                                )
+                            }?.let {
+                                noteCallbacks.onMediaClick?.invoke(it)
+                            }
+                        }
+
+                    if (imageBitmap != null) {
+                        Image(
+                            bitmap = imageBitmap,
+                            contentDescription = null,
+                            contentScale = ContentScale.FillWidth,
+                            modifier = modifier,
+                        )
+                    } else {
+                        SubcomposeAsyncImage(
+                            model = part.imageUrl,
+                            contentDescription = null,
+                            contentScale = ContentScale.FillWidth,
+                            modifier = modifier,
+                        )
+                    }
                 }
             }
         }
@@ -899,6 +926,10 @@ private fun List<String>.buildArticleRenderParts(referencedNotes: List<FeedPostU
                     ?: ArticlePartRender.MarkdownRender(markdown = part)
             }
 
+            part.isBase64ImageUrl() -> {
+                ArticlePartRender.ImageRender(imageUrl = part)
+            }
+
             part.isValidHttpOrHttpsUrl() -> {
                 if (part.isVideoUrl()) {
                     ArticlePartRender.VideoRender(videoUrl = part)
@@ -924,3 +955,18 @@ fun String?.isVideoUrl(): Boolean {
             endsWith(".flv", ignoreCase = true)
     } == true
 }
+
+@OptIn(ExperimentalEncodingApi::class)
+fun decodeBase64ToImageBitmap(dataUrl: String): ImageBitmap? {
+    return try {
+        val base64Data = dataUrl.substringAfter("base64,", "")
+        val decodedBytes = Base64.decode(base64Data)
+        val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+        bitmap?.asImageBitmap()
+    } catch (error: IllegalArgumentException) {
+        Timber.e(error)
+        null
+    }
+}
+
+private const val IMAGE_KEY_LENGTH = 100

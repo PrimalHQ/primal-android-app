@@ -68,3 +68,5 @@ fun String.isValidHttpOrHttpsUrl(): Boolean {
         url.protocol == "http" || url.protocol == "https"
     }.getOrNull() == true
 }
+
+fun String.isBase64ImageUrl(): Boolean = startsWith("data:image/")
