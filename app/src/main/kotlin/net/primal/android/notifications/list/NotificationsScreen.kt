@@ -1,12 +1,6 @@
 package net.primal.android.notifications.list
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -15,7 +9,6 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,9 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -69,7 +60,6 @@ import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
 import net.primal.android.notifications.list.ui.NotificationListItem
 import net.primal.android.notifications.list.ui.NotificationUi
-import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.zaps.canZap
 
 @Composable
@@ -145,6 +135,21 @@ fun NotificationsScreen(
     LaunchedEffect(seenNotificationsPagingItems, state.badges) {
         if (state.badges.unreadNotificationsCount > 0) {
             seenNotificationsPagingItems.refresh()
+        }
+    }
+
+    var previousUnseenNotificationIds by remember {
+        mutableStateOf<List<String>>(emptyList())
+    }
+
+    LaunchedEffect(canScrollUp, state.unseenNotifications) {
+        val currentIds = state.unseenNotifications.flatten().map { it.notificationId }
+
+        if (canScrollUp && currentIds != previousUnseenNotificationIds) {
+            previousUnseenNotificationIds = currentIds
+            uiScope.launch {
+                notificationsListState.animateScrollToItem(0)
+            }
         }
     }
 
@@ -232,17 +237,6 @@ fun NotificationsScreen(
                 },
                 noteCallbacks = noteCallbacks,
             )
-        },
-        floatingNewDataHost = {
-            if (canScrollUp && state.badges.unreadNotificationsCount > 0) {
-                NewNotificationsButton(
-                    onClick = {
-                        uiScope.launch {
-                            notificationsListState.animateScrollToItem(0)
-                        }
-                    },
-                )
-            }
         },
         floatingActionButton = {
             NewPostFloatingActionButton(onNewPostClick = onNewPostClick)
@@ -434,28 +428,5 @@ private fun NotificationsList(
 
             else -> Unit
         }
-    }
-}
-
-@Composable
-private fun NewNotificationsButton(onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .height(40.dp)
-            .background(
-                color = AppTheme.colorScheme.primary,
-                shape = AppTheme.shapes.extraLarge,
-            )
-            .clickable { onClick() },
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            modifier = Modifier
-                .padding(start = 12.dp, end = 16.dp)
-                .wrapContentHeight(),
-            text = stringResource(id = R.string.notification_list_button_jump_to_start),
-            style = AppTheme.typography.bodySmall,
-            color = Color.White,
-        )
     }
 }
