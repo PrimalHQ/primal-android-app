@@ -405,15 +405,26 @@ fun renderContentAsAnnotatedString(
 ): AnnotatedString {
     val mediaAttachments = data.uris.filter { it.isMediaUri() }
     val linkAttachments = data.uris.filterNot { it.isMediaUri() }
-    val mentionedUsers = data.nostrUris.filter(type = EventUriNostrType.Profile)
-    val unhandledNostrAddressUris = data.nostrUris.filterUnhandledNostrAddressUris()
+
+    val effectiveNostrUris = data.nostrUris.filterNot { nostrUri ->
+        data.uris.any { uri ->
+            uri.url.contains(nostrUri.uri) &&
+                data.content.indexOf(uri.url).takeIf { it >= 0 }?.let { uriIndex ->
+                    val nostrIndex = data.content.indexOf(nostrUri.uri, startIndex = uriIndex)
+                    nostrIndex in uriIndex until (uriIndex + uri.url.length)
+                } == true
+        }
+    }
+
+    val mentionedUsers = effectiveNostrUris.filter(type = EventUriNostrType.Profile)
+    val unhandledNostrAddressUris = effectiveNostrUris.filterUnhandledNostrAddressUris()
 
     val refinedContent = data.content
         .clearAtSignFromNostrUris()
         .remove(texts = mediaAttachments.map { it.url })
         .remove(texts = linkAttachments.filter { it.title?.isNotEmpty() == true }.map { it.url })
         .replaceNostrProfileUrisWithHandles(resources = mentionedUsers)
-        .remove(texts = if (!shouldKeepNostrNoteUris) data.nostrUris.map { it.uri } else emptyList())
+        .remove(texts = if (!shouldKeepNostrNoteUris) effectiveNostrUris.map { it.uri } else emptyList())
         .remove(texts = data.invoices)
         .clearParsedPrimalLinks()
         .limitLineBreaks(maxBreaks = 2)
