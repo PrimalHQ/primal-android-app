@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "3414ba4b84370d6ab48be8d7f9b8b7f7",
+    "identityHash": "e78188f8f6090c3231e2d2c2a8923781",
     "entities": [
       {
         "tableName": "PostData",
@@ -480,20 +480,7 @@
           "columnNames": [
             "id"
           ]
-        },
-        "indices": [
-          {
-            "name": "index_EventZap_zapSenderId_eventId_zapRequestAt",
-            "unique": false,
-            "columnNames": [
-              "zapSenderId",
-              "eventId",
-              "zapRequestAt"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_EventZap_zapSenderId_eventId_zapRequestAt` ON `${TABLE_NAME}` (`zapSenderId`, `eventId`, `zapRequestAt`)"
-          }
-        ]
+        }
       },
       {
         "tableName": "EventUserStats",
@@ -1479,7 +1466,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3414ba4b84370d6ab48be8d7f9b8b7f7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e78188f8f6090c3231e2d2c2a8923781')"
     ]
   }
 }

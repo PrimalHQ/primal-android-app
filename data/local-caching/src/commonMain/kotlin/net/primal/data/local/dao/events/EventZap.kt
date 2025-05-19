@@ -1,16 +1,11 @@
 package net.primal.data.local.dao.events
 
 import androidx.room.Entity
-import androidx.room.Index
 import androidx.room.PrimaryKey
 import net.primal.domain.links.CdnImage
 import net.primal.domain.premium.PrimalLegendProfile
 
-@Entity(
-    indices = [
-        Index(value = ["zapSenderId", "eventId", "zapRequestAt"]),
-    ],
-)
+@Entity
 data class EventZap(
     @PrimaryKey(autoGenerate = true) val id: Long = 0L,
     val eventId: String,
