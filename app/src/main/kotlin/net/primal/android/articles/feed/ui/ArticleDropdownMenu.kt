@@ -43,6 +43,7 @@ import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.ReportType
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
+import net.primal.domain.nostr.utils.withNostrPrefix
 
 @ExperimentalMaterial3Api
 @Composable
@@ -199,7 +200,7 @@ fun ArticleDropdownMenuIcon(
                 trailingIconVector = PrimalIcons.ContextCopyNoteId,
                 text = stringResource(id = R.string.article_feed_context_copy_article_id),
                 onClick = {
-                    copyText(context = context, text = naddr)
+                    copyText(context = context, text = naddr.withNostrPrefix())
                     menuVisible = false
                     uiScope.launch {
                         Toast.makeText(
@@ -233,7 +234,7 @@ fun ArticleDropdownMenuIcon(
                 trailingIconVector = PrimalIcons.ContextCopyPublicKey,
                 text = stringResource(id = R.string.article_feed_context_copy_user_id),
                 onClick = {
-                    copyText(context = context, text = authorId.hexToNpubHrp())
+                    copyText(context = context, text = authorId.hexToNpubHrp().withNostrPrefix())
                     menuVisible = false
                     uiScope.launch {
                         Toast.makeText(

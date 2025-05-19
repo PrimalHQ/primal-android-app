@@ -46,6 +46,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.utils.withNostrPrefix
 
 @Composable
 fun NoteDropdownMenuIcon(
@@ -186,7 +187,7 @@ fun NoteDropdownMenuIcon(
                         userId = authorId,
                         relays = relayHints,
                     ).toNeventString()
-                    copyText(context = context, text = nevent)
+                    copyText(context = context, text = nevent.withNostrPrefix())
                     menuVisible = false
                     uiScope.launch {
                         Toast.makeText(
