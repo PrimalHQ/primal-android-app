@@ -180,3 +180,7 @@ fun String.takeAsProfileHexIdOrNull(): String? {
         null
     }
 }
+
+fun String.withNostrPrefix(): String {
+    return if (this.startsWith(NOSTR)) this else "$NOSTR$this"
+}
