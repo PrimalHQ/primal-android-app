@@ -169,7 +169,7 @@ fun SharedTransitionScope.MediaItemContent(
     animatedVisibilityScope: AnimatedVisibilityScope,
     onMediaLoaded: ((Bitmap) -> Unit),
 ) {
-    val zoomSpec = ZoomSpec(maxZoomFactor = 15f)
+    val zoomSpec = ZoomSpec(maxZoomFactor = 2f)
     var loadedBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     var error by remember { mutableStateOf<ErrorResult?>(null) }
