@@ -71,7 +71,7 @@ fun ZapBottomSheet(
 ) {
     val zapConfig: List<ContentZapConfigItem> = zappingState.ensureZapConfig()
 
-    var customZapAmount by remember { mutableStateOf("") }
+    var customZapAmount by remember { mutableStateOf(zapConfig.first().amount.toString()) }
     var selectedZapIndex by remember { mutableIntStateOf(0) }
     var selectedZapComment by remember { mutableStateOf(zapConfig.first().message) }
     var selectedZapAmount by remember { mutableLongStateOf(zapConfig.first().amount) }
@@ -104,6 +104,7 @@ fun ZapBottomSheet(
                 onSelectedZapAmountChange = { amount, comment, index ->
                     keyboardController?.hide()
                     selectedZapAmount = amount
+                    customZapAmount = amount.toString()
                     selectedZapIndex = index
                     selectedZapComment = comment
                 },
