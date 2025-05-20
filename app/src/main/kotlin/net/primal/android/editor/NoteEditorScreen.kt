@@ -527,7 +527,8 @@ private fun NoteAttachmentsLazyRow(
     LazyRow(
         modifier = modifier,
         contentPadding = PaddingValues(
-            start = avatarsColumnWidthDp - 8.dp,
+            start = 68.dp,
+            end = 16.dp,
         ),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -537,7 +538,7 @@ private fun NoteAttachmentsLazyRow(
         ) { attachment ->
             NoteAttachmentPreview(
                 modifier = Modifier
-                    .fillParentMaxWidth(ATTACHMENT_FILL_FRACTION)
+                    .fillParentMaxWidth()
                     .wrapContentHeight(),
                 attachment = attachment,
                 onDiscard = onDiscard,
@@ -632,5 +633,3 @@ private val avatarSizeDp = 42.dp
 private val connectionLineOffsetXDp = 40.dp
 private val attachmentsHeightDp = 160.dp
 private val avatarsColumnWidthDp = avatarSizeDp + 24.dp
-
-private const val ATTACHMENT_FILL_FRACTION = 0.92f
