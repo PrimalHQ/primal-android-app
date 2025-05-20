@@ -173,7 +173,7 @@ fun NoteContent(
     val isDarkTheme = LocalPrimalTheme.current.isDarkTheme
     val displaySettings = LocalContentDisplaySettings.current
     val seeMoreText = stringResource(id = R.string.feed_see_more)
-    val contentText = remember {
+    val contentText = remember(data, expanded, seeMoreText, highlightColor) {
         renderContentAsAnnotatedString(
             data = data,
             expanded = expanded,

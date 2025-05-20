@@ -327,19 +327,22 @@ private fun ConversationListItem(
             }
         },
         supportingContent = {
-            val annotatedContent = renderContentAsAnnotatedString(
-                data = NoteContentUi(
-                    noteId = conversation.lastMessageId ?: "",
-                    content = conversation.lastMessageSnippet ?: conversation.participantInternetIdentifier ?: "",
-                    hashtags = conversation.lastMessageSnippet?.parseHashtags() ?: emptyList(),
-                    uris = conversation.lastMessageAttachments,
-                    nostrUris = conversation.lastMessageNostrUris,
-                ),
-                expanded = false,
-                seeMoreText = "",
-                shouldKeepNostrNoteUris = true,
-                highlightColor = AppTheme.colorScheme.primary,
-            )
+            val highlightColor = AppTheme.colorScheme.primary
+            val annotatedContent = remember(conversation) {
+                renderContentAsAnnotatedString(
+                    data = NoteContentUi(
+                        noteId = conversation.lastMessageId ?: "",
+                        content = conversation.lastMessageSnippet ?: conversation.participantInternetIdentifier ?: "",
+                        hashtags = conversation.lastMessageSnippet?.parseHashtags() ?: emptyList(),
+                        uris = conversation.lastMessageAttachments,
+                        nostrUris = conversation.lastMessageNostrUris,
+                    ),
+                    expanded = false,
+                    seeMoreText = "",
+                    shouldKeepNostrNoteUris = true,
+                    highlightColor = highlightColor,
+                )
+            }
 
             Text(
                 modifier = Modifier.padding(top = 4.dp),
