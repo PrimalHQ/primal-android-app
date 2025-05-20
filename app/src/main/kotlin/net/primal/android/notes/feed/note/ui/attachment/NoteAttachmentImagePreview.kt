@@ -17,6 +17,8 @@ import coil.compose.SubcomposeAsyncImage
 import io.github.fornewid.placeholder.foundation.PlaceholderHighlight
 import io.github.fornewid.placeholder.foundation.fade
 import io.github.fornewid.placeholder.material3.placeholder
+import me.saket.telephoto.zoomable.rememberZoomablePeekOverlayState
+import me.saket.telephoto.zoomable.zoomablePeekOverlay
 import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.events.ui.findNearestOrNull
 import net.primal.android.theme.AppTheme
@@ -47,7 +49,7 @@ fun NoteAttachmentImagePreview(
     if (currentUrl != null) {
         SubcomposeAsyncImage(
             model = currentUrl,
-            modifier = modifier,
+            modifier = modifier.zoomablePeekOverlay(state = rememberZoomablePeekOverlayState()),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             loading = { NoteImageLoadingPlaceholder() },
