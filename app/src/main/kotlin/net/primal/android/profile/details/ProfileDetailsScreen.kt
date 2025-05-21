@@ -52,6 +52,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ArticleFeedList
@@ -309,6 +310,14 @@ private fun ProfileDetailsContent(
         )
     }
 
+    var isZapCooldownActive by remember { mutableStateOf(false) }
+    LaunchedEffect(isZapCooldownActive) {
+        if (isZapCooldownActive) {
+            delay(ZAP_ACTION_DELAY)
+            isZapCooldownActive = false
+        }
+    }
+
     var showZapOptions by remember { mutableStateOf(false) }
     if (showZapOptions) {
         ZapBottomSheet(
@@ -317,17 +326,20 @@ private fun ProfileDetailsContent(
                 ?: stringResource(id = R.string.profile_zap_bottom_sheet_fallback_title),
             zappingState = state.zappingState,
             onZap = { zapAmount, zapDescription ->
-                if (state.zappingState.canZap(zapAmount) && state.profileId != null) {
-                    eventPublisher(
-                        ProfileDetailsContract.UiEvent.ZapProfile(
-                            profileId = state.profileId,
-                            profileLnUrlDecoded = state.profileDetails?.lnUrlDecoded,
-                            zapAmount = zapAmount.toULong(),
-                            zapDescription = zapDescription,
-                        ),
-                    )
-                } else {
-                    showCantZapWarning = true
+                if (!isZapCooldownActive) {
+                    isZapCooldownActive = true
+                    if (state.zappingState.canZap(zapAmount) && state.profileId != null) {
+                        eventPublisher(
+                            ProfileDetailsContract.UiEvent.ZapProfile(
+                                profileId = state.profileId,
+                                profileLnUrlDecoded = state.profileDetails?.lnUrlDecoded,
+                                zapAmount = zapAmount.toULong(),
+                                zapDescription = zapDescription,
+                            ),
+                        )
+                    } else {
+                        showCantZapWarning = true
+                    }
                 }
             },
         )
@@ -384,6 +396,8 @@ private fun ProfileDetailsContent(
         }
     }
 }
+
+private const val ZAP_ACTION_DELAY = 1100L
 
 @Composable
 private fun ProfileDetailsFeeds(
