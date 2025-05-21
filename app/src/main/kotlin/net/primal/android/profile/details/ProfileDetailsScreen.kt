@@ -68,6 +68,7 @@ import net.primal.android.core.compose.profile.approvals.ApproveFollowUnfollowPr
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.core.compose.zaps.ZAP_ACTION_DELAY
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.notes.feed.grid.MediaFeedGrid
@@ -396,8 +397,6 @@ private fun ProfileDetailsContent(
         }
     }
 }
-
-private const val ZAP_ACTION_DELAY = 1100L
 
 @Composable
 private fun ProfileDetailsFeeds(

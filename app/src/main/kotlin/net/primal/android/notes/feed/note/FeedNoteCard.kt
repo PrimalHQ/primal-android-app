@@ -60,6 +60,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
+import net.primal.android.core.compose.zaps.ZAP_ACTION_DELAY
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
@@ -472,8 +473,6 @@ private fun FeedNoteCard(
         }
     }
 }
-
-private const val ZAP_ACTION_DELAY = 1100L
 
 @Composable
 private fun Modifier.shareableGraphics(

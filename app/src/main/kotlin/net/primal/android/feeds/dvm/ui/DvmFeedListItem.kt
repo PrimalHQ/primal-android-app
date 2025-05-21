@@ -50,6 +50,7 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedLikes
 import net.primal.android.core.compose.icons.primaliconpack.FeedLikesFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
+import net.primal.android.core.compose.zaps.ZAP_ACTION_DELAY
 import net.primal.android.core.errors.UiError
 import net.primal.android.feeds.dvm.DvmFeedListItemContract
 import net.primal.android.feeds.dvm.DvmFeedListItemViewModel
@@ -277,7 +278,6 @@ private fun DvmFeedListItem(
 
 private const val AvatarVisiblePercentage = 0.75f
 private const val MaxAvatarsToShow = 5
-private const val ZAP_ACTION_DELAY = 1100L
 
 @Composable
 fun DvmFeedThumbnail(

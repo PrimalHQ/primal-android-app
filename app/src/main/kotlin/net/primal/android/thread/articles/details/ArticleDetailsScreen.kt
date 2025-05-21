@@ -75,6 +75,7 @@ import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.compose.zaps.ArticleTopZapsSection
+import net.primal.android.core.compose.zaps.ZAP_ACTION_DELAY
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
@@ -452,8 +453,6 @@ private fun ArticleDetailsScreen(
         },
     )
 }
-
-private const val ZAP_ACTION_DELAY = 1100L
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)

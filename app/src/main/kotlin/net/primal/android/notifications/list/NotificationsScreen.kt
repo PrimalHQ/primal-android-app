@@ -48,6 +48,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.core.compose.zaps.ZAP_ACTION_DELAY
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
@@ -443,5 +444,3 @@ private fun NotificationsList(
         }
     }
 }
-
-private const val ZAP_ACTION_DELAY = 1100L
