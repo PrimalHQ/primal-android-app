@@ -263,7 +263,7 @@ private fun NoteEditorBox(
                     ReferencedEventsAndConversationAsQuote(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 68.dp, end = 16.dp, bottom = 8.dp)
+                            .padding(start = avatarsColumnWidthDp, end = 16.dp, bottom = 8.dp)
                             .onSizeChanged { quotedEventHeightPx = it.height },
                         referencedNote = state.conversation.lastOrNull(),
                         referencedArticle = state.referencedArticle,
@@ -527,7 +527,7 @@ private fun NoteAttachmentsLazyRow(
     LazyRow(
         modifier = modifier,
         contentPadding = PaddingValues(
-            start = 68.dp,
+            start = avatarsColumnWidthDp,
             end = 16.dp,
         ),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
