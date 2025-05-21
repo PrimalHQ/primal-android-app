@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
@@ -27,6 +28,7 @@ import net.primal.android.theme.AppTheme
 fun RepostedNotice(
     modifier: Modifier,
     repostedByAuthor: String,
+    othersRepostedCount: Int,
     onRepostAuthorClick: (() -> Unit)? = null,
 ) {
     Box(
@@ -40,14 +42,31 @@ fun RepostedNotice(
                 .align(Alignment.TopStart),
             text = buildAnnotatedString {
                 appendInlineContent("icon", "[icon]")
-                append(
-                    AnnotatedString(
-                        text = "  $repostedByAuthor ${stringResource(
-                            id = R.string.feed_reposted_suffix,
-                        )} ",
-                        spanStyle = SpanStyle(color = contentColor),
-                    ),
-                )
+                if (othersRepostedCount == 0) {
+                    append(
+                        AnnotatedString(
+                            text = "  $repostedByAuthor ${
+                                stringResource(
+                                    id = R.string.feed_reposted_suffix,
+                                )
+                            } ",
+                            spanStyle = SpanStyle(color = contentColor),
+                        ),
+                    )
+                } else {
+                    append(
+                        AnnotatedString(
+                            text = "  $repostedByAuthor ${
+                                pluralStringResource(
+                                    id = R.plurals.feed_reposted_suffix,
+                                    othersRepostedCount,
+                                    othersRepostedCount,
+                                )
+                            } ",
+                            spanStyle = SpanStyle(color = contentColor),
+                        ),
+                    )
+                }
             },
             style = AppTheme.typography.bodyMedium,
             onClick = { _, _ ->

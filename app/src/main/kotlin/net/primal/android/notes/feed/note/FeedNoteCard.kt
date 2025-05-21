@@ -356,6 +356,7 @@ private fun FeedNoteCard(
                             .padding(horizontal = avatarPaddingDp)
                             .padding(top = notePaddingDp * 2),
                         repostedByAuthor = data.repostAuthorName,
+                        othersRepostedCount = data.othersRepostedCount,
                         onRepostAuthorClick = if (data.repostAuthorId != null && noteCallbacks.onProfileClick != null) {
                             { noteCallbacks.onProfileClick.invoke(data.repostAuthorId) }
                         } else {
