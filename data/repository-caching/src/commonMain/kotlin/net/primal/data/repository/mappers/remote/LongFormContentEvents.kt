@@ -11,6 +11,7 @@ import net.primal.domain.links.CdnImage
 import net.primal.domain.links.CdnResource
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.findFirstClient
 import net.primal.domain.nostr.findFirstIdentifier
 import net.primal.domain.nostr.findFirstImage
 import net.primal.domain.nostr.findFirstPublishedAt
@@ -54,6 +55,7 @@ private fun NostrEvent.asArticleData(wordsCount: Int?, cdnResources: Map<String,
     val identifier = tags.findFirstIdentifier()
     val title = tags.findFirstTitle()
     val raw = this.toNostrJsonObject().encodeToJsonString()
+    val client = tags.findFirstClient()
 
     if (identifier == null || title == null) {
         Napier.w("Unable to parse long form content: $raw")
@@ -80,5 +82,6 @@ private fun NostrEvent.asArticleData(wordsCount: Int?, cdnResources: Map<String,
         },
         summary = tags.findFirstSummary(),
         wordsCount = wordsCount,
+        client = client,
     )
 }
