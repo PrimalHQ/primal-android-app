@@ -96,6 +96,8 @@ import net.primal.android.core.compose.icons.primaliconpack.NavWalletBolt
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletFilled
 import net.primal.android.core.compose.icons.primaliconpack.NewDM
+import net.primal.android.core.compose.icons.primaliconpack.NoConnectionBlack
+import net.primal.android.core.compose.icons.primaliconpack.NoConnectionWhite
 import net.primal.android.core.compose.icons.primaliconpack.NostrichFilled
 import net.primal.android.core.compose.icons.primaliconpack.Notifications
 import net.primal.android.core.compose.icons.primaliconpack.NotificationsFilled
@@ -234,6 +236,8 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             NavWallet,
             NavWalletBolt,
             NavWalletBoltFilled,
+            NoConnectionBlack,
+            NoConnectionWhite,
             Send,
             NewDM,
             Unmute,
