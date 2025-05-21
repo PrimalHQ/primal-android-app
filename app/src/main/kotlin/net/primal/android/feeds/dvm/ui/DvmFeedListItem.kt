@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import java.text.NumberFormat
+import kotlinx.coroutines.delay
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarOverlap
 import net.primal.android.core.compose.AvatarThumbnailsRow
@@ -120,6 +121,14 @@ private fun DvmFeedListItem(
         )
     }
 
+    var isZapCooldownActive by remember { mutableStateOf(false) }
+    LaunchedEffect(isZapCooldownActive) {
+        if (isZapCooldownActive) {
+            delay(ZAP_ACTION_DELAY)
+            isZapCooldownActive = false
+        }
+    }
+
     var showZapOptions by remember { mutableStateOf(false) }
     if (showZapOptions) {
         ZapBottomSheet(
@@ -127,16 +136,19 @@ private fun DvmFeedListItem(
             receiverName = dvmFeed.data.title,
             zappingState = state.zappingState,
             onZap = { zapAmount, zapDescription ->
-                if (state.zappingState.canZap(zapAmount)) {
-                    eventPublisher(
-                        DvmFeedListItemContract.UiEvent.OnZapClick(
-                            dvmFeed = dvmFeed,
-                            zapDescription = zapDescription,
-                            zapAmount = zapAmount.toULong(),
-                        ),
-                    )
-                } else {
-                    showCantZapWarning = true
+                if (!isZapCooldownActive) {
+                    isZapCooldownActive = true
+                    if (state.zappingState.canZap(zapAmount)) {
+                        eventPublisher(
+                            DvmFeedListItemContract.UiEvent.OnZapClick(
+                                dvmFeed = dvmFeed,
+                                zapDescription = zapDescription,
+                                zapAmount = zapAmount.toULong(),
+                            ),
+                        )
+                    } else {
+                        showCantZapWarning = true
+                    }
                 }
             },
         )
@@ -265,6 +277,7 @@ private fun DvmFeedListItem(
 
 private const val AvatarVisiblePercentage = 0.75f
 private const val MaxAvatarsToShow = 5
+private const val ZAP_ACTION_DELAY = 1100L
 
 @Composable
 fun DvmFeedThumbnail(
