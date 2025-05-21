@@ -54,6 +54,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import coil.compose.SubcomposeAsyncImage
 import java.text.NumberFormat
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.ArticleDropdownMenuIcon
@@ -215,6 +216,14 @@ private fun ArticleDetailsScreen(
         )
     }
 
+    var isZapCooldownActive by remember { mutableStateOf(false) }
+    LaunchedEffect(isZapCooldownActive) {
+        if (isZapCooldownActive) {
+            delay(ZAP_ACTION_DELAY)
+            isZapCooldownActive = false
+        }
+    }
+
     var showZapOptions by remember { mutableStateOf(false) }
     if (showZapOptions && detailsState.article != null) {
         ZapBottomSheet(
@@ -222,15 +231,18 @@ private fun ArticleDetailsScreen(
             receiverName = detailsState.article.authorDisplayName,
             zappingState = detailsState.zappingState,
             onZap = { zapAmount, zapDescription ->
-                if (detailsState.zappingState.canZap(zapAmount)) {
-                    detailsEventPublisher(
-                        UiEvent.ZapArticle(
-                            zapAmount = zapAmount.toULong(),
-                            zapDescription = zapDescription,
-                        ),
-                    )
-                } else {
-                    showCantZapWarning = true
+                if (!isZapCooldownActive) {
+                    isZapCooldownActive = true
+                    if (detailsState.zappingState.canZap(zapAmount)) {
+                        detailsEventPublisher(
+                            UiEvent.ZapArticle(
+                                zapAmount = zapAmount.toULong(),
+                                zapDescription = zapDescription,
+                            ),
+                        )
+                    } else {
+                        showCantZapWarning = true
+                    }
                 }
             },
         )
@@ -381,10 +393,13 @@ private fun ArticleDetailsScreen(
                             }
 
                             FeedPostAction.Zap -> {
-                                if (detailsState.zappingState.canZap()) {
-                                    detailsEventPublisher(UiEvent.ZapArticle())
-                                } else {
-                                    showCantZapWarning = true
+                                if (!isZapCooldownActive) {
+                                    isZapCooldownActive = true
+                                    if (detailsState.zappingState.canZap()) {
+                                        detailsEventPublisher(UiEvent.ZapArticle())
+                                    } else {
+                                        showCantZapWarning = true
+                                    }
                                 }
                             }
 
@@ -437,6 +452,8 @@ private fun ArticleDetailsScreen(
         },
     )
 }
+
+private const val ZAP_ACTION_DELAY = 1100L
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
