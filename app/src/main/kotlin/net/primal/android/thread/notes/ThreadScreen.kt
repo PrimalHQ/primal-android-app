@@ -103,9 +103,9 @@ import net.primal.android.notes.feed.model.asNeventString
 import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.notes.feed.note.ui.ThreadNoteStatsRow
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
-import net.primal.android.notes.feed.note.ui.events.ReactionTab
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.domain.nostr.ReactionType
 
 @Composable
 fun ThreadScreen(
@@ -439,7 +439,7 @@ private fun ThreadLazyColumn(
                                 ThreadNoteTopZapsSection(
                                     zaps = item.eventZaps,
                                     onClick = if (noteCallbacks.onEventReactionsClick != null) {
-                                        { noteCallbacks.onEventReactionsClick.invoke(item.postId, ReactionTab.ZAPS) }
+                                        { noteCallbacks.onEventReactionsClick.invoke(item.postId, ReactionType.ZAPS) }
                                     } else {
                                         null
                                     },
@@ -460,7 +460,7 @@ private fun ThreadLazyColumn(
                                     ThreadNoteStatsRow(
                                         modifier = Modifier.padding(top = 10.dp),
                                         eventStats = item.stats,
-                                        onStatClick = { tab ->
+                                        onReactionTypeClick = { tab ->
                                             noteCallbacks.onEventReactionsClick?.invoke(item.postId, tab)
                                         },
                                     )

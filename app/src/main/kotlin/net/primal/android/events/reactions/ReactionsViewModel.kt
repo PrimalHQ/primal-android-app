@@ -15,8 +15,8 @@ import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.events.reactions.ReactionsContract.UiState
 import net.primal.android.events.ui.asEventZapUiModel
-import net.primal.android.navigation.initialTabOrThrow
 import net.primal.android.navigation.noteIdOrThrow
+import net.primal.android.navigation.reactionTypeOrThrow
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventRepository
@@ -32,7 +32,7 @@ class ReactionsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val noteId = savedStateHandle.noteIdOrThrow
-    private val initialTab = savedStateHandle.initialTabOrThrow
+    private val initialTab = savedStateHandle.reactionTypeOrThrow
 
     private val _state = MutableStateFlow(
         UiState(

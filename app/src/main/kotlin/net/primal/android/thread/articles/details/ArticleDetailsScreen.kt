@@ -88,7 +88,6 @@ import net.primal.android.notes.feed.note.ui.ThreadNoteStatsRow
 import net.primal.android.notes.feed.note.ui.attachment.PlayButton
 import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
-import net.primal.android.notes.feed.note.ui.events.ReactionTab
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
 import net.primal.android.theme.AppTheme
@@ -112,6 +111,7 @@ import net.primal.android.wallet.zaps.canZap
 import net.primal.domain.links.EventUriType
 import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.Nip19TLV.toNeventString
+import net.primal.domain.nostr.ReactionType
 import net.primal.domain.nostr.ReportType
 import net.primal.domain.nostr.utils.isNEvent
 import net.primal.domain.nostr.utils.isNEventUri
@@ -603,7 +603,7 @@ private fun ArticleContentWithComments(
                         state.article?.eventId?.let {
                             noteCallbacks.onEventReactionsClick?.invoke(
                                 it,
-                                ReactionTab.ZAPS,
+                                ReactionType.ZAPS,
                             )
                         }
                     },
@@ -759,7 +759,7 @@ private fun ArticleContentWithComments(
                                 onClick = {
                                     noteCallbacks.onEventReactionsClick?.invoke(
                                         state.article.eventId,
-                                        ReactionTab.ZAPS,
+                                        ReactionType.ZAPS,
                                     )
                                 },
                             ),
@@ -790,7 +790,7 @@ private fun ArticleContentWithComments(
                             modifier = Modifier
                                 .padding(top = 16.dp, bottom = 8.dp),
                             eventStats = state.article.eventStatsUi,
-                            onStatClick = { tab ->
+                            onReactionTypeClick = { tab ->
                                 noteCallbacks.onEventReactionsClick?.invoke(state.article.eventId, tab)
                             },
                         )

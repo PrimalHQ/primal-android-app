@@ -73,7 +73,6 @@ import net.primal.android.messages.conversation.MessageConversationListViewModel
 import net.primal.android.messages.conversation.MessageListScreen
 import net.primal.android.messages.conversation.create.NewConversationScreen
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
-import net.primal.android.notes.feed.note.ui.events.ReactionTab
 import net.primal.android.notes.home.HomeFeedScreen
 import net.primal.android.notes.home.HomeFeedViewModel
 import net.primal.android.notifications.list.NotificationsScreen
@@ -142,6 +141,7 @@ import net.primal.domain.feeds.buildAdvancedSearchNotesFeedSpec
 import net.primal.domain.feeds.buildAdvancedSearchNotificationsFeedSpec
 import net.primal.domain.feeds.buildAdvancedSearchReadsFeedSpec
 import net.primal.domain.feeds.buildReadsTopicFeedSpec
+import net.primal.domain.nostr.ReactionType
 
 private fun NavController.navigateToWelcome() =
     navigate(
@@ -248,9 +248,9 @@ fun NavController.navigateToThread(noteId: String) = navigate(route = "thread/$n
 
 fun NavController.navigateToArticleDetails(naddr: String) = navigate(route = "article?$NADDR=$naddr")
 
-fun NavController.navigateToReactions(eventId: String, initialTab: ReactionTab = ReactionTab.ZAPS) =
+fun NavController.navigateToReactions(eventId: String, initialTab: ReactionType = ReactionType.ZAPS) =
     navigate(
-        "reactions/$eventId?$INITIAL_TAB=${initialTab.name}",
+        "reactions/$eventId?$INITIAL_REACTION_TYPE=${initialTab.name}",
     )
 
 fun NavController.navigateToMediaGallery(
@@ -789,12 +789,12 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
         )
 
         reactions(
-            route = "reactions/{$NOTE_ID}?$INITIAL_TAB={$INITIAL_TAB}",
+            route = "reactions/{$NOTE_ID}?$INITIAL_REACTION_TYPE={$INITIAL_REACTION_TYPE}",
             arguments = listOf(
                 navArgument(NOTE_ID) { type = NavType.StringType },
-                navArgument(INITIAL_TAB) {
+                navArgument(INITIAL_REACTION_TYPE) {
                     type = NavType.StringType
-                    defaultValue = ReactionTab.ZAPS.name
+                    defaultValue = ReactionType.ZAPS.name
                 },
             ),
             navController = navController,

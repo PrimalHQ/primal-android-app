@@ -4,10 +4,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavBackStackEntry
 import net.primal.android.explore.asearch.AdvancedSearchContract
 import net.primal.android.explore.search.ui.SearchScope
-import net.primal.android.notes.feed.note.ui.events.ReactionTab
 import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.domain.nostr.ReactionType
 
 const val NOTE_ID = "noteId"
 inline val SavedStateHandle.noteIdOrThrow: String
@@ -110,8 +110,8 @@ const val TRANSACTION_ID = "transactionId"
 inline val SavedStateHandle.transactionIdOrThrow: String
     get() = get(TRANSACTION_ID) ?: throw IllegalArgumentException("Missing required transactionId argument.")
 
-const val INITIAL_TAB = "initialTab"
-inline val SavedStateHandle.initialTabOrThrow: ReactionTab
-    get() = get<String>(INITIAL_TAB)
-        ?.let { ReactionTab.valueOf(it) }
-        ?: throw IllegalArgumentException("Missing required $INITIAL_TAB argument.")
+const val INITIAL_REACTION_TYPE = "initialReactionType"
+inline val SavedStateHandle.reactionTypeOrThrow: ReactionType
+    get() = get<String>(INITIAL_REACTION_TYPE)
+        ?.let { ReactionType.valueOf(it) }
+        ?: throw IllegalArgumentException("Missing required $INITIAL_REACTION_TYPE argument.")

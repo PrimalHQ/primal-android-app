@@ -13,13 +13,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.notes.feed.model.EventStatsUi
-import net.primal.android.notes.feed.note.ui.events.ReactionTab
 import net.primal.android.theme.AppTheme
+import net.primal.domain.nostr.ReactionType
 
 @Composable
 fun ThreadNoteStatsRow(
     eventStats: EventStatsUi,
-    onStatClick: (ReactionTab) -> Unit,
+    onReactionTypeClick: (ReactionType) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(modifier = modifier) {
@@ -27,7 +27,7 @@ fun ThreadNoteStatsRow(
             SingleNoteStat(
                 count = eventStats.repliesCount,
                 text = stringResource(R.string.thread_stats_replies),
-                onClick = { onStatClick(ReactionTab.REPLIES) },
+                onClick = { onReactionTypeClick(ReactionType.REPLIES) },
             )
         }
 
@@ -38,7 +38,7 @@ fun ThreadNoteStatsRow(
                 modifier = Modifier.padding(start = startPadding),
                 count = eventStats.zapsCount,
                 text = stringResource(R.string.thread_stats_zaps),
-                onClick = { onStatClick(ReactionTab.ZAPS) },
+                onClick = { onReactionTypeClick(ReactionType.ZAPS) },
             )
         }
 
@@ -49,7 +49,7 @@ fun ThreadNoteStatsRow(
                 modifier = Modifier.padding(start = startPadding),
                 count = eventStats.likesCount,
                 text = stringResource(R.string.thread_stats_likes),
-                onClick = { onStatClick(ReactionTab.LIKES) },
+                onClick = { onReactionTypeClick(ReactionType.LIKES) },
             )
         }
 
@@ -60,7 +60,7 @@ fun ThreadNoteStatsRow(
                 modifier = Modifier.padding(start = startPadding),
                 count = eventStats.repostsCount,
                 text = stringResource(R.string.thread_stats_reposts),
-                onClick = { onStatClick(ReactionTab.REPLIES) },
+                onClick = { onReactionTypeClick(ReactionType.REPLIES) },
             )
         }
     }
