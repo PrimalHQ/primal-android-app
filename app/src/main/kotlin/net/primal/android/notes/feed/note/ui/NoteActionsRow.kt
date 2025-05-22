@@ -6,7 +6,11 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -16,6 +20,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
+import kotlinx.coroutines.delay
 import net.primal.android.R
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -29,6 +34,7 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedNewReposts
 import net.primal.android.core.compose.icons.primaliconpack.FeedNewRepostsFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedNewZap
 import net.primal.android.core.compose.icons.primaliconpack.FeedNewZapFilled
+import net.primal.android.core.compose.zaps.ZAP_ACTION_DELAY
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.theme.AppTheme
@@ -46,6 +52,15 @@ fun FeedNoteActionsRow(
 ) {
     val iconSize = if (highlightedNote) 26.sp else 17.sp
     val numberFormat = remember { NumberFormat.getNumberInstance() }
+
+    var isZapCooldownActive by remember { mutableStateOf(false) }
+    LaunchedEffect(isZapCooldownActive) {
+        if (isZapCooldownActive) {
+            delay(ZAP_ACTION_DELAY)
+            isZapCooldownActive = false
+        }
+    }
+
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -74,8 +89,15 @@ fun FeedNoteActionsRow(
             iconSize = if (!highlightedNote) iconSize.times(other = 1.2f) else iconSize,
             iconVectorHighlight = PrimalIcons.FeedNewZapFilled,
             colorHighlight = AppTheme.extraColorScheme.zapped,
-            onClick = onPostAction?.let {
-                { onPostAction(FeedPostAction.Zap) }
+            onClick = if (onPostAction != null) {
+                {
+                    if (!isZapCooldownActive) {
+                        isZapCooldownActive = true
+                        onPostAction(FeedPostAction.Zap)
+                    }
+                }
+            } else {
+                {}
             },
             onLongClick = onPostLongPressAction?.let {
                 { onPostLongPressAction(FeedPostAction.Zap) }
