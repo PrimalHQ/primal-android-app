@@ -49,7 +49,7 @@ fun UniversalAvatarThumbnail(
     backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onClick: (() -> Unit)? = null,
     hasInnerBorderOverride: Boolean = true,
-    supportAnimation: Boolean = false,
+    forceAnimationIfAvailable: Boolean = false,
     avatarBlossoms: List<String> = emptyList(),
     defaultAvatar: @Composable () -> Unit = { DefaultAvatarThumbnailPlaceholderListItemImage() },
 ) {
@@ -85,7 +85,7 @@ fun UniversalAvatarThumbnail(
         backgroundColor = backgroundColor,
         onClick = onClick,
         defaultAvatar = defaultAvatar,
-        supportAnimation = supportAnimation,
+        forceAnimationIfAvailable = forceAnimationIfAvailable,
     )
 }
 
@@ -115,7 +115,7 @@ private fun AvatarThumbnailListItemImage(
     backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onClick: (() -> Unit)? = null,
     defaultAvatar: @Composable () -> Unit,
-    supportAnimation: Boolean = false,
+    forceAnimationIfAvailable: Boolean = false,
 ) {
     val context = LocalContext.current
 
@@ -141,7 +141,7 @@ private fun AvatarThumbnailListItemImage(
     val currentUrl = imageUrls.getOrNull(currentUrlIndex)
 
     val animatedContent = LocalContentDisplaySettings.current.showAnimatedAvatars
-    val imageLoader = if (animatedContent || supportAnimation) {
+    val imageLoader = if (animatedContent || forceAnimationIfAvailable) {
         AvatarCoilImageLoader.provideImageLoader(context = context)
     } else {
         AvatarCoilImageLoader.provideNoGifsImageLoader(context = context)
