@@ -141,6 +141,7 @@ import net.primal.domain.feeds.buildAdvancedSearchNotesFeedSpec
 import net.primal.domain.feeds.buildAdvancedSearchNotificationsFeedSpec
 import net.primal.domain.feeds.buildAdvancedSearchReadsFeedSpec
 import net.primal.domain.feeds.buildReadsTopicFeedSpec
+import net.primal.domain.nostr.ReactionType
 
 private fun NavController.navigateToWelcome() =
     navigate(
@@ -247,7 +248,8 @@ fun NavController.navigateToThread(noteId: String) = navigate(route = "thread/$n
 
 fun NavController.navigateToArticleDetails(naddr: String) = navigate(route = "article?$NADDR=$naddr")
 
-fun NavController.navigateToReactions(eventId: String) = navigate(route = "reactions/$eventId")
+fun NavController.navigateToReactions(eventId: String, initialTab: ReactionType = ReactionType.ZAPS) =
+    navigate("reactions/$eventId?$INITIAL_REACTION_TYPE=${initialTab.name}")
 
 fun NavController.navigateToMediaGallery(
     noteId: String,
@@ -377,8 +379,8 @@ fun noteCallbacksHandler(navController: NavController) =
         onPayInvoiceClick = {
             navController.navigateToWalletCreateTransaction(lnbc = it.lnbc)
         },
-        onEventReactionsClick = { noteId ->
-            navController.navigateToReactions(eventId = noteId)
+        onEventReactionsClick = { noteId, initialTab ->
+            navController.navigateToReactions(eventId = noteId, initialTab = initialTab)
         },
         onGetPrimalPremiumClick = { navController.navigateToPremiumBuying() },
         onPrimalLegendsLeaderboardClick = { navController.navigateToPremiumLegendLeaderboard() },
@@ -785,10 +787,12 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
         )
 
         reactions(
-            route = "reactions/{$NOTE_ID}",
+            route = "reactions/{$NOTE_ID}?$INITIAL_REACTION_TYPE={$INITIAL_REACTION_TYPE}",
             arguments = listOf(
-                navArgument(NOTE_ID) {
+                navArgument(NOTE_ID) { type = NavType.StringType },
+                navArgument(INITIAL_REACTION_TYPE) {
                     type = NavType.StringType
+                    defaultValue = ReactionType.ZAPS.name
                 },
             ),
             navController = navController,
@@ -923,7 +927,7 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
                 initialRoute == "login" ||
                     initialRoute?.startsWith("onboarding") == true ||
                     initialRoute?.startsWith("redeemCode") == true
-                -> slideInHorizontally(initialOffsetX = { -it })
+                    -> slideInHorizontally(initialOffsetX = { -it })
 
                 else -> null
             }
@@ -934,7 +938,7 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
                 targetRoute == "login" ||
                     targetRoute?.startsWith("onboarding") == true ||
                     targetRoute?.startsWith("redeemCode") == true
-                -> slideOutHorizontally(targetOffsetX = { -it })
+                    -> slideOutHorizontally(targetOffsetX = { -it })
 
                 else -> null
             }

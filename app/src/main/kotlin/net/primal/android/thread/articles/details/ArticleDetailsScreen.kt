@@ -111,6 +111,7 @@ import net.primal.android.wallet.zaps.canZap
 import net.primal.domain.links.EventUriType
 import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.Nip19TLV.toNeventString
+import net.primal.domain.nostr.ReactionType
 import net.primal.domain.nostr.ReportType
 import net.primal.domain.nostr.utils.isNEvent
 import net.primal.domain.nostr.utils.isNEventUri
@@ -600,7 +601,9 @@ private fun ArticleContentWithComments(
                         .padding(horizontal = 16.dp),
                     topZaps = state.topZaps,
                     onTopZapsClick = {
-                        state.article?.eventId?.let { noteCallbacks.onEventReactionsClick?.invoke(it) }
+                        state.article?.eventId?.let { eventId ->
+                            noteCallbacks.onEventReactionsClick?.invoke(eventId, ReactionType.ZAPS)
+                        }
                     },
                     onZapClick = onZapOptionsClick,
                 )
@@ -751,7 +754,12 @@ private fun ArticleContentWithComments(
                         Row(
                             modifier = Modifier.clickable(
                                 enabled = noteCallbacks.onEventReactionsClick != null,
-                                onClick = { noteCallbacks.onEventReactionsClick?.invoke(state.article.eventId) },
+                                onClick = {
+                                    noteCallbacks.onEventReactionsClick?.invoke(
+                                        state.article.eventId,
+                                        ReactionType.ZAPS,
+                                    )
+                                },
                             ),
                             verticalAlignment = Alignment.Bottom,
                         ) {
@@ -778,12 +786,11 @@ private fun ArticleContentWithComments(
                     if (state.article.eventStatsUi.hasAnyCount()) {
                         ThreadNoteStatsRow(
                             modifier = Modifier
-                                .padding(top = 16.dp, bottom = 8.dp)
-                                .clickable(
-                                    enabled = noteCallbacks.onEventReactionsClick != null,
-                                    onClick = { noteCallbacks.onEventReactionsClick?.invoke(state.article.eventId) },
-                                ),
+                                .padding(top = 16.dp, bottom = 8.dp),
                             eventStats = state.article.eventStatsUi,
+                            onReactionTypeClick = { tab ->
+                                noteCallbacks.onEventReactionsClick?.invoke(state.article.eventId, tab)
+                            },
                         )
                     }
 
