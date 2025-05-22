@@ -26,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
+import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
@@ -48,6 +49,7 @@ fun UniversalAvatarThumbnail(
     backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onClick: (() -> Unit)? = null,
     hasInnerBorderOverride: Boolean = true,
+    isAvatarAnimated: Boolean = false,
     avatarBlossoms: List<String> = emptyList(),
     defaultAvatar: @Composable () -> Unit = { DefaultAvatarThumbnailPlaceholderListItemImage() },
 ) {
@@ -83,6 +85,7 @@ fun UniversalAvatarThumbnail(
         backgroundColor = backgroundColor,
         onClick = onClick,
         defaultAvatar = defaultAvatar,
+        isAvatarAnimated = isAvatarAnimated,
     )
 }
 
@@ -112,6 +115,7 @@ private fun AvatarThumbnailListItemImage(
     backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onClick: (() -> Unit)? = null,
     defaultAvatar: @Composable () -> Unit,
+    isAvatarAnimated: Boolean = false,
 ) {
     val context = LocalContext.current
 
@@ -136,10 +140,17 @@ private fun AvatarThumbnailListItemImage(
     var currentUrlIndex by remember { mutableIntStateOf(0) }
     val currentUrl = imageUrls.getOrNull(currentUrlIndex)
 
+    val animatedContent = LocalContentDisplaySettings.current.showAnimatedAvatars
+    val imageLoader = if (animatedContent || isAvatarAnimated) {
+        AvatarCoilImageLoader.provideImageLoader(context = context)
+    } else {
+        AvatarCoilImageLoader.provideNoGifsImageLoader(context = context)
+    }
+
     if (currentUrl != null) {
         SubcomposeAsyncImage(
             model = currentUrl,
-            imageLoader = AvatarCoilImageLoader.provideImageLoader(context = context),
+            imageLoader = imageLoader,
             modifier = sharedModifier,
             contentDescription = stringResource(id = R.string.accessibility_profile_image),
             contentScale = ContentScale.Crop,
@@ -150,7 +161,7 @@ private fun AvatarThumbnailListItemImage(
         SubcomposeAsyncImage(
             modifier = sharedModifier,
             model = sourceUrl,
-            imageLoader = AvatarCoilImageLoader.provideImageLoader(context = context),
+            imageLoader = imageLoader,
             contentDescription = stringResource(id = R.string.accessibility_profile_image),
             contentScale = ContentScale.Crop,
             loading = { AvatarLoadingBox(backgroundColor) },
