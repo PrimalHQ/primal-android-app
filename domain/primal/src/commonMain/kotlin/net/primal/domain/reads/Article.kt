@@ -29,4 +29,5 @@ data class Article(
     val eventZaps: List<EventZap> = emptyList(),
     val bookmark: PublicBookmark? = null,
     val highlights: List<Highlight> = emptyList(),
+    val client: String? = null,
 )

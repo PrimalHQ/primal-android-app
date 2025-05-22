@@ -583,6 +583,7 @@ private fun ArticleContentWithComments(
                 title = state.article?.title ?: "",
                 date = state.article?.publishedAt,
                 cover = state.article?.coverImageCdnImage,
+                client = state.article?.client,
                 summary = state.article?.summary,
             )
         }

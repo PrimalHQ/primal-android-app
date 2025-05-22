@@ -32,6 +32,7 @@ data class ArticleDetailsUi(
     val eventStatsUi: EventStatsUi = EventStatsUi(),
     val authorLegendaryCustomization: LegendaryCustomization? = null,
     val highlights: List<HighlightUi> = emptyList(),
+    val client: String? = null,
 )
 
 fun Article.mapAsArticleDetailsUi(): ArticleDetailsUi {
@@ -56,5 +57,6 @@ fun Article.mapAsArticleDetailsUi(): ArticleDetailsUi {
         eventStatsUi = EventStatsUi.from(eventStats = this.eventStats, userStats = this.userEventStats),
         authorLegendaryCustomization = this.author?.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
         highlights = this.highlights.map { it.asHighlightUi() },
+        client = this.client,
     )
 }
