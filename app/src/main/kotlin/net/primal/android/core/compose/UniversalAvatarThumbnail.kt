@@ -49,6 +49,7 @@ fun UniversalAvatarThumbnail(
     backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onClick: (() -> Unit)? = null,
     hasInnerBorderOverride: Boolean = true,
+    forceAnimationIfAvailable: Boolean = false,
     avatarBlossoms: List<String> = emptyList(),
     defaultAvatar: @Composable () -> Unit = { DefaultAvatarThumbnailPlaceholderListItemImage() },
 ) {
@@ -84,6 +85,7 @@ fun UniversalAvatarThumbnail(
         backgroundColor = backgroundColor,
         onClick = onClick,
         defaultAvatar = defaultAvatar,
+        forceAnimationIfAvailable = forceAnimationIfAvailable,
     )
 }
 
@@ -113,14 +115,9 @@ private fun AvatarThumbnailListItemImage(
     backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onClick: (() -> Unit)? = null,
     defaultAvatar: @Composable () -> Unit,
+    forceAnimationIfAvailable: Boolean = false,
 ) {
-    val animatedAvatars = LocalContentDisplaySettings.current.showAnimatedAvatars
     val context = LocalContext.current
-    val imageLoader = if (animatedAvatars) {
-        AvatarCoilImageLoader.provideImageLoader(context = context)
-    } else {
-        AvatarCoilImageLoader.provideNoGifsImageLoader(context = context)
-    }
 
     val sharedModifier = modifier
         .adjustAvatarBackground(
@@ -142,6 +139,13 @@ private fun AvatarThumbnailListItemImage(
     val imageUrls = ((listOfNotNull(cdnVariantUrl, sourceUrl) + blossomUrls)).distinct()
     var currentUrlIndex by remember { mutableIntStateOf(0) }
     val currentUrl = imageUrls.getOrNull(currentUrlIndex)
+
+    val animatedContent = LocalContentDisplaySettings.current.showAnimatedAvatars
+    val imageLoader = if (animatedContent || forceAnimationIfAvailable) {
+        AvatarCoilImageLoader.provideImageLoader(context = context)
+    } else {
+        AvatarCoilImageLoader.provideNoGifsImageLoader(context = context)
+    }
 
     if (currentUrl != null) {
         SubcomposeAsyncImage(

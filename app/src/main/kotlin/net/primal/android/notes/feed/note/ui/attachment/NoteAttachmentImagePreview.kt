@@ -11,15 +11,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
-import coil.compose.SubcomposeAsyncImage
+import coil3.compose.SubcomposeAsyncImage
 import io.github.fornewid.placeholder.foundation.PlaceholderHighlight
 import io.github.fornewid.placeholder.foundation.fade
 import io.github.fornewid.placeholder.material3.placeholder
 import me.saket.telephoto.zoomable.rememberZoomablePeekOverlayState
 import me.saket.telephoto.zoomable.zoomablePeekOverlay
 import net.primal.android.core.compose.attachment.model.EventUriUi
+import net.primal.android.core.images.AvatarCoilImageLoader
 import net.primal.android.events.ui.findNearestOrNull
 import net.primal.android.theme.AppTheme
 import net.primal.core.networking.blossom.resolveBlossomUrls
@@ -46,9 +48,12 @@ fun NoteAttachmentImagePreview(
     var currentUrlIndex by remember { mutableIntStateOf(0) }
     val currentUrl = imageUrls.getOrNull(currentUrlIndex)
 
+    val context = LocalContext.current
+
     if (currentUrl != null) {
         SubcomposeAsyncImage(
             model = currentUrl,
+            imageLoader = AvatarCoilImageLoader.provideImageLoader(context = context),
             modifier = modifier.zoomablePeekOverlay(state = rememberZoomablePeekOverlayState()),
             contentDescription = null,
             contentScale = ContentScale.Crop,
