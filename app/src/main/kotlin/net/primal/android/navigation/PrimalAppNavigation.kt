@@ -249,9 +249,7 @@ fun NavController.navigateToThread(noteId: String) = navigate(route = "thread/$n
 fun NavController.navigateToArticleDetails(naddr: String) = navigate(route = "article?$NADDR=$naddr")
 
 fun NavController.navigateToReactions(eventId: String, initialTab: ReactionType = ReactionType.ZAPS) =
-    navigate(
-        "reactions/$eventId?$INITIAL_REACTION_TYPE=${initialTab.name}",
-    )
+    navigate("reactions/$eventId?$INITIAL_REACTION_TYPE=${initialTab.name}")
 
 fun NavController.navigateToMediaGallery(
     noteId: String,
@@ -929,7 +927,7 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
                 initialRoute == "login" ||
                     initialRoute?.startsWith("onboarding") == true ||
                     initialRoute?.startsWith("redeemCode") == true
-                -> slideInHorizontally(initialOffsetX = { -it })
+                    -> slideInHorizontally(initialOffsetX = { -it })
 
                 else -> null
             }
@@ -940,7 +938,7 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
                 targetRoute == "login" ||
                     targetRoute?.startsWith("onboarding") == true ||
                     targetRoute?.startsWith("redeemCode") == true
-                -> slideOutHorizontally(targetOffsetX = { -it })
+                    -> slideOutHorizontally(targetOffsetX = { -it })
 
                 else -> null
             }

@@ -600,11 +600,8 @@ private fun ArticleContentWithComments(
                         .padding(horizontal = 16.dp),
                     topZaps = state.topZaps,
                     onTopZapsClick = {
-                        state.article?.eventId?.let {
-                            noteCallbacks.onEventReactionsClick?.invoke(
-                                it,
-                                ReactionType.ZAPS,
-                            )
+                        state.article?.eventId?.let { eventId ->
+                            noteCallbacks.onEventReactionsClick?.invoke(eventId, ReactionType.ZAPS)
                         }
                     },
                     onZapClick = onZapOptionsClick,

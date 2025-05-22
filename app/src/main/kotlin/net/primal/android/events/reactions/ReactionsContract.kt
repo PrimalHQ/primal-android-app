@@ -11,6 +11,6 @@ interface ReactionsContract {
         val loading: Boolean = true,
         val likes: List<EventActionUi> = emptyList(),
         val reposts: List<EventActionUi> = emptyList(),
-        val initialTab: ReactionType = ReactionType.ZAPS,
+        val initialReactionType: ReactionType = ReactionType.ZAPS,
     )
 }

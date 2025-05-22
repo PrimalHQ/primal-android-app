@@ -460,8 +460,8 @@ private fun ThreadLazyColumn(
                                     ThreadNoteStatsRow(
                                         modifier = Modifier.padding(top = 10.dp),
                                         eventStats = item.stats,
-                                        onReactionTypeClick = { tab ->
-                                            noteCallbacks.onEventReactionsClick?.invoke(item.postId, tab)
+                                        onReactionTypeClick = { reactionType ->
+                                            noteCallbacks.onEventReactionsClick?.invoke(item.postId, reactionType)
                                         },
                                     )
                                 }

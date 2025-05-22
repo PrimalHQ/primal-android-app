@@ -60,7 +60,7 @@ fun ThreadNoteStatsRow(
                 modifier = Modifier.padding(start = startPadding),
                 count = eventStats.repostsCount,
                 text = stringResource(R.string.thread_stats_reposts),
-                onClick = { onReactionTypeClick(ReactionType.REPLIES) },
+                onClick = { onReactionTypeClick(ReactionType.REPOSTS) },
             )
         }
     }

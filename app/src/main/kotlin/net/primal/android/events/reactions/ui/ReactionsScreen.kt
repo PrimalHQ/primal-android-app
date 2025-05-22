@@ -29,6 +29,7 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedReposts
 import net.primal.android.events.reactions.ReactionsContract
 import net.primal.android.events.reactions.ReactionsViewModel
 import net.primal.android.theme.AppTheme
+import net.primal.domain.nostr.ReactionType
 
 private const val REACTION_TABS_COUNT = 3
 private const val ZAPS_TAB_INDEX = 0
@@ -59,7 +60,12 @@ private fun ReactionsScreen(
 ) {
     val uiScope = rememberCoroutineScope()
     val pagerState = rememberPagerState(
-        initialPage = state.initialTab.ordinal,
+        initialPage = when (state.initialReactionType) {
+            ReactionType.ZAPS -> ZAPS_TAB_INDEX
+            ReactionType.LIKES -> LIKES_TAB_INDEX
+            ReactionType.REPOSTS -> REPOSTS_TAB_INDEX
+            ReactionType.REPLIES -> ZAPS_TAB_INDEX
+        },
         pageCount = { REACTION_TABS_COUNT },
     )
     Scaffold(

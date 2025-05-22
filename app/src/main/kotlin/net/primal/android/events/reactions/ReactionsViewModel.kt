@@ -32,7 +32,6 @@ class ReactionsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val noteId = savedStateHandle.noteIdOrThrow
-    private val initialTab = savedStateHandle.reactionTypeOrThrow
 
     private val _state = MutableStateFlow(
         UiState(
@@ -42,7 +41,7 @@ class ReactionsViewModel @Inject constructor(
             )
                 .map { it.map { noteZap -> noteZap.asEventZapUiModel() } }
                 .cachedIn(viewModelScope),
-            initialTab = initialTab,
+            initialReactionType = savedStateHandle.reactionTypeOrThrow,
         ),
     )
     val state = _state.asStateFlow()
