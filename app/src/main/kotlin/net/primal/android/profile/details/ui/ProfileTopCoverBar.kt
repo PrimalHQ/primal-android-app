@@ -237,7 +237,7 @@ private fun ProfileTopCoverBar(
                 fallbackBorderColor = if (isDarkTheme) Color.Black else Color.White,
                 borderSizeOverride = if (legendaryCustomization == null) 5.dp else null,
                 legendaryCustomization = legendaryCustomization,
-                isAvatarAnimated = true,
+                supportAnimation = true,
             )
         }
     }
