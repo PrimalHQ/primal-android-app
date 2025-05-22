@@ -26,7 +26,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
-import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
@@ -114,13 +113,7 @@ private fun AvatarThumbnailListItemImage(
     onClick: (() -> Unit)? = null,
     defaultAvatar: @Composable () -> Unit,
 ) {
-    val animatedAvatars = LocalContentDisplaySettings.current.showAnimatedAvatars
     val context = LocalContext.current
-    val imageLoader = if (animatedAvatars) {
-        AvatarCoilImageLoader.provideImageLoader(context = context)
-    } else {
-        AvatarCoilImageLoader.provideNoGifsImageLoader(context = context)
-    }
 
     val sharedModifier = modifier
         .adjustAvatarBackground(
@@ -146,7 +139,7 @@ private fun AvatarThumbnailListItemImage(
     if (currentUrl != null) {
         SubcomposeAsyncImage(
             model = currentUrl,
-            imageLoader = imageLoader,
+            imageLoader = AvatarCoilImageLoader.provideImageLoader(context = context),
             modifier = sharedModifier,
             contentDescription = stringResource(id = R.string.accessibility_profile_image),
             contentScale = ContentScale.Crop,
@@ -157,7 +150,7 @@ private fun AvatarThumbnailListItemImage(
         SubcomposeAsyncImage(
             modifier = sharedModifier,
             model = sourceUrl,
-            imageLoader = imageLoader,
+            imageLoader = AvatarCoilImageLoader.provideImageLoader(context = context),
             contentDescription = stringResource(id = R.string.accessibility_profile_image),
             contentScale = ContentScale.Crop,
             loading = { AvatarLoadingBox(backgroundColor) },
