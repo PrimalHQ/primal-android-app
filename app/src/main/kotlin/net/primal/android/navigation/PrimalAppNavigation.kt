@@ -927,7 +927,7 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
                 initialRoute == "login" ||
                     initialRoute?.startsWith("onboarding") == true ||
                     initialRoute?.startsWith("redeemCode") == true
-                    -> slideInHorizontally(initialOffsetX = { -it })
+                -> slideInHorizontally(initialOffsetX = { -it })
 
                 else -> null
             }
@@ -938,7 +938,7 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
                 targetRoute == "login" ||
                     targetRoute?.startsWith("onboarding") == true ||
                     targetRoute?.startsWith("redeemCode") == true
-                    -> slideOutHorizontally(targetOffsetX = { -it })
+                -> slideOutHorizontally(targetOffsetX = { -it })
 
                 else -> null
             }
