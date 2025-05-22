@@ -26,5 +26,6 @@ fun ArticlePO.asArticleDO(): ArticleDO {
         eventZaps = this.eventZaps.map { it.asEventZapDO() },
         bookmark = this.bookmark?.asPublicBookmark(),
         highlights = this.highlights.map { it.asHighlightDO() },
+        client = this.data.client,
     )
 }

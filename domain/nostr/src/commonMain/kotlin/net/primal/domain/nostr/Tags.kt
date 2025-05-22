@@ -48,6 +48,8 @@ fun List<JsonArray>.findFirstReplaceableEventId() = firstOrNull { it.isATag() }?
 
 fun List<JsonArray>.findFirstContextTag() = firstOrNull { it.isContextTag() }?.getTagValueOrNull()
 
+fun List<JsonArray>.findFirstClient() = firstOrNull { it.isClientTag() }?.getTagValueOrNull()
+
 fun JsonArray.isContextTag() = getOrNull(0)?.jsonPrimitive?.content == "context"
 
 fun JsonArray.isBolt11Tag() = getOrNull(0)?.jsonPrimitive?.content == "bolt11"
@@ -81,6 +83,8 @@ fun JsonArray.isAltTag() = getOrNull(0)?.jsonPrimitive?.content == "alt"
 fun JsonArray.isPublishedAtTag() = getOrNull(0)?.jsonPrimitive?.content == "published_at"
 
 fun JsonArray.isServerTag() = getOrNull(0)?.jsonPrimitive?.content == "server"
+
+fun JsonArray.isClientTag() = getOrNull(0)?.jsonPrimitive?.content == "client"
 
 fun JsonArray.getTagValueOrNull() = getOrNull(1)?.jsonPrimitive?.content
 

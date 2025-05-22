@@ -16,6 +16,7 @@ import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.events.reactions.ReactionsContract.UiState
 import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.navigation.noteIdOrThrow
+import net.primal.android.navigation.reactionTypeOrThrow
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventRepository
@@ -40,6 +41,7 @@ class ReactionsViewModel @Inject constructor(
             )
                 .map { it.map { noteZap -> noteZap.asEventZapUiModel() } }
                 .cachedIn(viewModelScope),
+            initialReactionType = savedStateHandle.reactionTypeOrThrow,
         ),
     )
     val state = _state.asStateFlow()

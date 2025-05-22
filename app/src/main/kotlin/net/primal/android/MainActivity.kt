@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.ApplyEdgeToEdge
+import net.primal.android.core.compose.connectionindicator.ConnectionIndicatorOverlay
 import net.primal.android.navigation.PrimalAppNavigation
 import net.primal.android.navigation.splash.SplashViewModel
 import net.primal.android.nostr.notary.NostrNotary
@@ -109,7 +110,9 @@ class MainActivity : FragmentActivity() {
 
                     val isLoggedIn = splashViewModel.isLoggedIn.collectAsState()
                     SharedTransitionLayout {
-                        PrimalAppNavigation(startDestination = if (isLoggedIn.value) "home" else "welcome")
+                        ConnectionIndicatorOverlay {
+                            PrimalAppNavigation(startDestination = if (isLoggedIn.value) "home" else "welcome")
+                        }
                     }
                 }
             }

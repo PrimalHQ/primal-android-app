@@ -22,4 +22,5 @@ data class ArticleData(
     val wordsCount: Int? = null,
     val uris: List<String> = emptyList(),
     val hashtags: List<String> = emptyList(),
+    val client: String? = null,
 )

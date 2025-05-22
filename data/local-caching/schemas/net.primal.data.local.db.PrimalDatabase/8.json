@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 8,
-    "identityHash": "2b098a7f92aca8b3fc5af4ff947e7364",
+    "identityHash": "e04c55f7280651bf8b4f9462bc092005",
     "entities": [
       {
         "tableName": "PostData",
@@ -400,8 +400,14 @@
       },
       {
         "tableName": "EventZap",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eventId` TEXT NOT NULL, `zapSenderId` TEXT NOT NULL, `zapReceiverId` TEXT NOT NULL, `zapRequestAt` INTEGER NOT NULL, `zapReceiptAt` INTEGER NOT NULL, `amountInBtc` REAL NOT NULL, `message` TEXT, `zapSenderDisplayName` TEXT, `zapSenderHandle` TEXT, `zapSenderInternetIdentifier` TEXT, `zapSenderAvatarCdnImage` TEXT, `zapSenderPrimalLegendProfile` TEXT, PRIMARY KEY(`zapSenderId`, `eventId`, `zapRequestAt`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `eventId` TEXT NOT NULL, `zapSenderId` TEXT NOT NULL, `zapReceiverId` TEXT NOT NULL, `zapRequestAt` INTEGER NOT NULL, `zapReceiptAt` INTEGER NOT NULL, `amountInBtc` REAL NOT NULL, `message` TEXT, `zapSenderDisplayName` TEXT, `zapSenderHandle` TEXT, `zapSenderInternetIdentifier` TEXT, `zapSenderAvatarCdnImage` TEXT, `zapSenderPrimalLegendProfile` TEXT)",
         "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
           {
             "fieldPath": "eventId",
             "columnName": "eventId",
@@ -470,11 +476,9 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
-            "zapSenderId",
-            "eventId",
-            "zapRequestAt"
+            "id"
           ]
         }
       },
@@ -1219,7 +1223,7 @@
       },
       {
         "tableName": "ArticleData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aTag` TEXT NOT NULL, `eventId` TEXT NOT NULL, `articleId` TEXT NOT NULL, `authorId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `content` TEXT NOT NULL, `title` TEXT NOT NULL, `publishedAt` INTEGER NOT NULL, `raw` TEXT NOT NULL, `imageCdnImage` TEXT, `summary` TEXT, `authorMetadataId` TEXT, `wordsCount` INTEGER, `uris` TEXT NOT NULL, `hashtags` TEXT NOT NULL, PRIMARY KEY(`aTag`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aTag` TEXT NOT NULL, `eventId` TEXT NOT NULL, `articleId` TEXT NOT NULL, `authorId` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `content` TEXT NOT NULL, `title` TEXT NOT NULL, `publishedAt` INTEGER NOT NULL, `raw` TEXT NOT NULL, `imageCdnImage` TEXT, `summary` TEXT, `authorMetadataId` TEXT, `wordsCount` INTEGER, `uris` TEXT NOT NULL, `hashtags` TEXT NOT NULL, `client` TEXT, PRIMARY KEY(`aTag`))",
         "fields": [
           {
             "fieldPath": "aTag",
@@ -1306,6 +1310,11 @@
             "columnName": "hashtags",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "client",
+            "columnName": "client",
+            "affinity": "TEXT"
           }
         ],
         "primaryKey": {
@@ -1462,7 +1471,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2b098a7f92aca8b3fc5af4ff947e7364')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e04c55f7280651bf8b4f9462bc092005')"
     ]
   }
 }

@@ -42,6 +42,7 @@
     <string name="app_error_fetching_mute_list">Failed to load your mute list. Please check your connection and try again.</string>
     <string name="app_error_invalid_promo_code">Sorry, we couldn’t find a match for that promo code. Please check the spelling and try again.</string>
     <string name="app_error_invalid_promo_code_try_later">Sorry, we couldn’t find a match for that promo code. Don\'t worry, you can proceed and try to redeem your code again.</string>
+    <string name="app_no_connection_notice">Unable to connect</string>
 
     <string name="welcome_sign_in_button_title">Sign In</string>
     <string name="welcome_create_account_button_title">Create Account</string>
@@ -418,6 +419,10 @@
     <string name="premium_leaderboard_error_loading">Unable to load leaderboard.\nPlease try again.</string>
 
     <string name="feed_reposted_suffix">reposted</string>
+    <plurals name="feed_reposted_suffix">
+        <item quantity="one">and %d other reposted</item>
+        <item quantity="other">and %d others reposted</item>
+    </plurals>
     <string name="feed_see_more">See more…</string>
 
     <string name="timestamp_since_just_now">now</string>
