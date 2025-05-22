@@ -51,7 +51,6 @@ import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
@@ -60,7 +59,6 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
-import net.primal.android.core.compose.zaps.ZAP_ACTION_DELAY
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
@@ -181,14 +179,6 @@ private fun FeedNoteCard(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
 
-    var isZapCooldownActive by remember { mutableStateOf(false) }
-    LaunchedEffect(isZapCooldownActive) {
-        if (isZapCooldownActive) {
-            delay(ZAP_ACTION_DELAY)
-            isZapCooldownActive = false
-        }
-    }
-
     var showCantZapWarning by remember { mutableStateOf(false) }
     if (showCantZapWarning) {
         UnableToZapBottomSheet(
@@ -205,21 +195,17 @@ private fun FeedNoteCard(
             receiverName = data.authorName,
             zappingState = state.zappingState,
             onZap = { zapAmount, zapDescription ->
-                if (!isZapCooldownActive) {
-                    if (state.zappingState.canZap(zapAmount)) {
-                        isZapCooldownActive = true
-
-                        eventPublisher(
-                            UiEvent.ZapAction(
-                                postId = data.postId,
-                                postAuthorId = data.authorId,
-                                zapAmount = zapAmount.toULong(),
-                                zapDescription = zapDescription,
-                            ),
-                        )
-                    } else {
-                        showCantZapWarning = true
-                    }
+                if (state.zappingState.canZap(zapAmount)) {
+                    eventPublisher(
+                        UiEvent.ZapAction(
+                            postId = data.postId,
+                            postAuthorId = data.authorId,
+                            zapAmount = zapAmount.toULong(),
+                            zapDescription = zapDescription,
+                        ),
+                    )
+                } else {
+                    showCantZapWarning = true
                 }
             },
         )
@@ -421,18 +407,15 @@ private fun FeedNoteCard(
                                 }
 
                                 FeedPostAction.Zap -> {
-                                    if (!isZapCooldownActive) {
-                                        if (state.zappingState.canZap()) {
-                                            isZapCooldownActive = true
-                                            eventPublisher(
-                                                UiEvent.ZapAction(
-                                                    postId = data.postId,
-                                                    postAuthorId = data.authorId,
-                                                ),
-                                            )
-                                        } else {
-                                            showCantZapWarning = true
-                                        }
+                                    if (state.zappingState.canZap()) {
+                                        eventPublisher(
+                                            UiEvent.ZapAction(
+                                                postId = data.postId,
+                                                postAuthorId = data.authorId,
+                                            ),
+                                        )
+                                    } else {
+                                        showCantZapWarning = true
                                     }
                                 }
 

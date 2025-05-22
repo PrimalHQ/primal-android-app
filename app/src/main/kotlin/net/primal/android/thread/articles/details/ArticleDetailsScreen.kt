@@ -54,7 +54,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import coil.compose.SubcomposeAsyncImage
 import java.text.NumberFormat
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.ArticleDropdownMenuIcon
@@ -75,7 +74,6 @@ import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.compose.zaps.ArticleTopZapsSection
-import net.primal.android.core.compose.zaps.ZAP_ACTION_DELAY
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
@@ -218,14 +216,6 @@ private fun ArticleDetailsScreen(
         )
     }
 
-    var isZapCooldownActive by remember { mutableStateOf(false) }
-    LaunchedEffect(isZapCooldownActive) {
-        if (isZapCooldownActive) {
-            delay(ZAP_ACTION_DELAY)
-            isZapCooldownActive = false
-        }
-    }
-
     var showZapOptions by remember { mutableStateOf(false) }
     if (showZapOptions && detailsState.article != null) {
         ZapBottomSheet(
@@ -233,18 +223,15 @@ private fun ArticleDetailsScreen(
             receiverName = detailsState.article.authorDisplayName,
             zappingState = detailsState.zappingState,
             onZap = { zapAmount, zapDescription ->
-                if (!isZapCooldownActive) {
-                    isZapCooldownActive = true
-                    if (detailsState.zappingState.canZap(zapAmount)) {
-                        detailsEventPublisher(
-                            UiEvent.ZapArticle(
-                                zapAmount = zapAmount.toULong(),
-                                zapDescription = zapDescription,
-                            ),
-                        )
-                    } else {
-                        showCantZapWarning = true
-                    }
+                if (detailsState.zappingState.canZap(zapAmount)) {
+                    detailsEventPublisher(
+                        UiEvent.ZapArticle(
+                            zapAmount = zapAmount.toULong(),
+                            zapDescription = zapDescription,
+                        ),
+                    )
+                } else {
+                    showCantZapWarning = true
                 }
             },
         )
@@ -395,13 +382,10 @@ private fun ArticleDetailsScreen(
                             }
 
                             FeedPostAction.Zap -> {
-                                if (!isZapCooldownActive) {
-                                    isZapCooldownActive = true
-                                    if (detailsState.zappingState.canZap()) {
-                                        detailsEventPublisher(UiEvent.ZapArticle())
-                                    } else {
-                                        showCantZapWarning = true
-                                    }
+                                if (detailsState.zappingState.canZap()) {
+                                    detailsEventPublisher(UiEvent.ZapArticle())
+                                } else {
+                                    showCantZapWarning = true
                                 }
                             }
 

@@ -29,7 +29,6 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
@@ -48,7 +47,6 @@ import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
-import net.primal.android.core.compose.zaps.ZAP_ACTION_DELAY
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
@@ -155,14 +153,6 @@ fun NotificationsScreen(
         }
     }
 
-    var isZapCooldownActive by remember { mutableStateOf(false) }
-    LaunchedEffect(isZapCooldownActive) {
-        if (isZapCooldownActive) {
-            delay(ZAP_ACTION_DELAY)
-            isZapCooldownActive = false
-        }
-    }
-
     PrimalDrawerScaffold(
         drawerState = drawerState,
         activeDestination = PrimalTopLevelDestination.Notifications,
@@ -228,18 +218,14 @@ fun NotificationsScreen(
                     )
                 },
                 onZapClick = { postData, amount, description ->
-                    if (!isZapCooldownActive) {
-                        isZapCooldownActive = true
-
-                        noteEventPublisher(
-                            NoteContract.UiEvent.ZapAction(
-                                postId = postData.postId,
-                                postAuthorId = postData.authorId,
-                                zapAmount = amount,
-                                zapDescription = description,
-                            ),
-                        )
-                    }
+                    noteEventPublisher(
+                        NoteContract.UiEvent.ZapAction(
+                            postId = postData.postId,
+                            postAuthorId = postData.authorId,
+                            zapAmount = amount,
+                            zapDescription = description,
+                        ),
+                    )
                 },
                 onPostQuoteClick = {
                     noteCallbacks.onNoteQuoteClick?.invoke(

@@ -26,6 +26,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -50,10 +51,12 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.text.isDigitsOnly
+import kotlinx.coroutines.delay
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
+import net.primal.android.core.compose.zaps.ZAP_ACTION_DELAY
 import net.primal.android.core.utils.shortened
 import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.settings.zaps.PRESETS_COUNT
@@ -80,6 +83,14 @@ fun ZapBottomSheet(
     val keyboardController = LocalSoftwareKeyboardController.current
     val keyboardVisible by keyboardVisibilityAsState()
 
+    var isZapCooldownActive by remember { mutableStateOf(false) }
+    LaunchedEffect(isZapCooldownActive) {
+        if (isZapCooldownActive) {
+            delay(ZAP_ACTION_DELAY)
+            isZapCooldownActive = false
+        }
+    }
+
     ModalBottomSheet(
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
         tonalElevation = 0.dp,
@@ -89,9 +100,7 @@ fun ZapBottomSheet(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
         ) {
             ZapTitle(
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -134,8 +143,11 @@ fun ZapBottomSheet(
                     text = stringResource(id = R.string.zap_bottom_sheet_zap_button),
                     leadingIcon = ImageVector.vectorResource(id = R.drawable.zap),
                     onClick = {
-                        onDismissRequest()
-                        onZap(selectedZapAmount, selectedZapComment)
+                        if (!isZapCooldownActive) {
+                            isZapCooldownActive = true
+                            onDismissRequest()
+                            onZap(selectedZapAmount, selectedZapComment)
+                        }
                     },
                 )
             }
