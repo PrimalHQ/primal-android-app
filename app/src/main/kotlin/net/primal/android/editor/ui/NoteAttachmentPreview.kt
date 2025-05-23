@@ -2,8 +2,9 @@ package net.primal.android.editor.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Refresh
@@ -15,7 +16,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import java.util.*
 import net.primal.android.R
@@ -27,19 +31,27 @@ fun NoteAttachmentPreview(
     attachment: NoteAttachment,
     onDiscard: (UUID) -> Unit,
     onRetryUpload: (UUID) -> Unit,
+    rowStartPaddingDp: Dp,
+    rowEndPaddingDp: Dp,
 ) {
     val shape = AppTheme.shapes.medium
-    Box(
+
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val maxPreviewWidth = (screenWidth - rowStartPaddingDp - rowEndPaddingDp)
+        .coerceAtLeast(0.dp)
+
+    BoxWithConstraints(
+        modifier = Modifier.widthIn(max = maxPreviewWidth),
         contentAlignment = Alignment.Center,
     ) {
         SubcomposeAsyncImage(
             model = attachment.localUri,
             modifier = Modifier
                 .fillMaxHeight()
-                .wrapContentWidth()
+                .widthIn(max = this.maxWidth)
                 .clip(shape),
             contentDescription = null,
-            contentScale = ContentScale.Crop,
+            contentScale = ContentScale.FillHeight,
         )
 
         if (attachment.remoteUrl == null) {
