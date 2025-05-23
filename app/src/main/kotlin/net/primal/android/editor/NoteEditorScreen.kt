@@ -263,7 +263,7 @@ private fun NoteEditorBox(
                     ReferencedEventsAndConversationAsQuote(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = avatarsColumnWidthDp, end = 16.dp, bottom = 8.dp)
+                            .padding(start = avatarsColumnWidthDp, end = contentEndPadding, bottom = 8.dp)
                             .onSizeChanged { quotedEventHeightPx = it.height },
                         referencedNote = state.conversation.lastOrNull(),
                         referencedArticle = state.referencedArticle,
@@ -528,7 +528,7 @@ private fun NoteAttachmentsLazyRow(
         modifier = modifier,
         contentPadding = PaddingValues(
             start = avatarsColumnWidthDp,
-            end = 16.dp,
+            end = contentEndPadding,
         ),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -537,12 +537,11 @@ private fun NoteAttachmentsLazyRow(
             key = { it.id },
         ) { attachment ->
             NoteAttachmentPreview(
-                modifier = Modifier
-                    .fillParentMaxWidth()
-                    .wrapContentHeight(),
                 attachment = attachment,
                 onDiscard = onDiscard,
                 onRetryUpload = onRetryUpload,
+                rowStartPaddingDp = avatarsColumnWidthDp,
+                rowEndPaddingDp = contentEndPadding,
             )
         }
     }
@@ -633,3 +632,4 @@ private val avatarSizeDp = 42.dp
 private val connectionLineOffsetXDp = 40.dp
 private val attachmentsHeightDp = 160.dp
 private val avatarsColumnWidthDp = avatarSizeDp + 24.dp
+private val contentEndPadding = 16.dp
