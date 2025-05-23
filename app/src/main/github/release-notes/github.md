@@ -1,16 +1,14 @@
 ## Improvements
-- Implemented Redeem Code functionality (#467)
-- Implemented notes image gallery per latest design (#458)
-- Implemented loading and error states in ThreadScreen (#459);
-- Fixed url parsing with long TLDs & improved edge cases  (#452 #460)
-- Fixed crash during bookmark operations when offline (#461)
-- Fixed crash when navigating to MediaItem screen with invalid url (#463)
-- Fixed wallet accessing db on main thread crash (#462)
-- Fixed blossom uploader crash when uploading for large files;
-- Fixed crash on onboarding next step beyond last enum value (#464);
-- Fixed crash when downloading media from malformed URLs in MediaDownloader (#465);
-- Fixed rare crash when tapping new notes pill in note feeds (#466);
-- Fixed repeating error messages on note action when error occurs;
-- Fixed selection in CustomZap dialog if multiple presets have the same sats (#472);
-- Removed danger icon when image or video preview could not be loaded;
-- Added support for BUD-08 in blossom upload responses (#456);
+- Implemented "Unabled to connect" indicator
+- Implemented grouping reposts
+- Implemented scrolling to top on new notifications in notifications tab (#480)
+- Added GIFs support for feed images (#489)
+- Fixed crash when zapping too fast (#484 #474)
+- Fixed preselecting reactions tabs (#478)
+- Added "via [nostr-app]" on article details (#488)
+- Added zoom support to images in feeds
+- Display the amount for presets instead of leaving empty field (#476)
+- Defer scroll until LazyList layout info is available (#481)
+- Fixed rendering urls which have nostr ids (#471)
+- Added prefix when copying note and article ids (#483)
+- Fixed rendering urls from zap comments as links (#475)
