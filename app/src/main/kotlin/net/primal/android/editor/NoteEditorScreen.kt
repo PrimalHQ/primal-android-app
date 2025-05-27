@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -524,25 +525,28 @@ private fun NoteAttachmentsLazyRow(
     onDiscard: (UUID) -> Unit,
     onRetryUpload: (UUID) -> Unit,
 ) {
-    LazyRow(
+    BoxWithConstraints(
         modifier = modifier,
-        contentPadding = PaddingValues(
-            start = avatarsColumnWidthDp,
-            end = contentEndPadding,
-        ),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(
-            items = attachments,
-            key = { it.id },
-        ) { attachment ->
-            NoteAttachmentPreview(
-                attachment = attachment,
-                onDiscard = onDiscard,
-                onRetryUpload = onRetryUpload,
-                rowStartPaddingDp = avatarsColumnWidthDp,
-                rowEndPaddingDp = contentEndPadding,
-            )
+        LazyRow(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                start = avatarsColumnWidthDp,
+                end = contentEndPadding,
+            ),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            items(
+                items = attachments,
+                key = { it.id },
+            ) { attachment ->
+                NoteAttachmentPreview(
+                    attachment = attachment,
+                    maxWidth = this@BoxWithConstraints.maxWidth - (avatarsColumnWidthDp + contentEndPadding),
+                    onDiscard = onDiscard,
+                    onRetryUpload = onRetryUpload,
+                )
+            }
         }
     }
 }
