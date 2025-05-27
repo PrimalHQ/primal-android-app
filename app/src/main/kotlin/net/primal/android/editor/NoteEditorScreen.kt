@@ -52,6 +52,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -67,6 +68,7 @@ import net.primal.android.articles.highlights.HighlightUi
 import net.primal.android.core.compose.ImportPhotosIconButton
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.ReplyingToText
 import net.primal.android.core.compose.SnackbarErrorHandler
@@ -88,6 +90,7 @@ import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.notes.feed.note.ui.FeedNoteHeader
 import net.primal.android.notes.feed.note.ui.NoteContent
+import net.primal.android.notes.feed.note.ui.NoteUnknownEvent
 import net.primal.android.notes.feed.note.ui.ReferencedArticleCard
 import net.primal.android.notes.feed.note.ui.ReferencedHighlight
 import net.primal.android.notes.feed.note.ui.ReferencedNoteCard
@@ -167,6 +170,7 @@ fun NoteEditorScreen(
                 state = state,
                 eventPublisher = eventPublisher,
                 contentPadding = paddingValues,
+                noteCallbacks = NoteCallbacks(),
             )
         },
     )
@@ -201,6 +205,7 @@ private fun NoteEditorBox(
     eventPublisher: (UiEvent) -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues,
+    noteCallbacks: NoteCallbacks,
 ) {
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) {
@@ -259,6 +264,12 @@ private fun NoteEditorBox(
                     onReplyNoteHeightChanged = { replyNoteHeightPx = it },
                 )
             }
+
+            nostrUris(
+                nostrUris = state.nostrUris,
+                noteCallbacks = noteCallbacks,
+                onRetryUriClick = { eventPublisher(UiEvent.RefreshUri(it.uri)) },
+            )
 
             if (state.isQuoting) {
                 item {
@@ -365,6 +376,55 @@ private fun LazyListScope.referencedEventsAndConversationAsReplyTo(
     }
 }
 
+internal const val ELLIPSIZE_URI_CHAR_COUNT = 16
+
+@OptIn(ExperimentalMaterial3Api::class)
+fun LazyListScope.nostrUris(
+    onRetryUriClick: (NoteEditorContract.ReferencedUri<*>) -> Unit,
+    nostrUris: List<NoteEditorContract.ReferencedUri<*>>,
+    noteCallbacks: NoteCallbacks,
+) {
+    items(items = nostrUris) { uri ->
+        Box(
+            modifier = Modifier
+                .padding(start = 68.dp, end = 16.dp, bottom = 8.dp),
+        ) {
+            if (uri.loading) {
+                Box(modifier = Modifier.height(100.dp)) {
+                    PrimalLoadingSpinner(size = 48.dp)
+                }
+            } else if (uri.data != null) {
+                when (uri) {
+                    is NoteEditorContract.ReferencedUri.Article -> {
+                        uri.data?.let { article ->
+                            ReferencedArticleCard(
+                                data = article,
+                            )
+                        }
+                    }
+
+                    is NoteEditorContract.ReferencedUri.Note -> {
+                        uri.data?.let { note ->
+                            ReferencedNoteCard(
+                                data = note,
+                                noteCallbacks = noteCallbacks,
+                            )
+                        }
+                    }
+                }
+            } else {
+                NoteUnknownEvent(
+                    altDescription = stringResource(
+                        id = R.string.note_editor_unable_to_locate_event,
+                        "${uri.uri.take(ELLIPSIZE_URI_CHAR_COUNT)}...${uri.uri.takeLast(ELLIPSIZE_URI_CHAR_COUNT)}",
+                    ),
+                    onClick = { onRetryUriClick(uri) },
+                )
+            }
+        }
+    }
+}
+
 @ExperimentalMaterial3Api
 @Composable
 private fun ReferencedEventsAndConversationAsQuote(
@@ -412,6 +472,7 @@ private fun NoteEditor(
     onReplyToNoticeHeightChanged: (Int) -> Unit,
     eventPublisher: (UiEvent) -> Unit,
 ) {
+    val clipboardManager = LocalClipboardManager.current
     Column {
         if (state.isReply && state.replyToNote != null && !state.isQuoting) {
             ReplyingToText(
@@ -461,26 +522,27 @@ private fun NoteEditor(
                     .focusRequester(focusRequester)
                     .onSizeChanged { onReplyNoteHeightChanged(it.height) },
                 value = state.content,
-                onValueChange = { eventPublisher(UiEvent.UpdateContent(content = it)) },
+                onValueChange = {
+                    val clipboardText = clipboardManager.getText()
+                    if (clipboardText != null && it.text.contains(clipboardText.text)) {
+                        eventPublisher(UiEvent.PasteContent(content = it))
+                    } else {
+                        eventPublisher(UiEvent.UpdateContent(content = it))
+                    }
+                },
                 taggedUsers = state.taggedUsers,
                 enabled = !state.publishing,
                 placeholder = {
                     Text(
-                        text = stringResource(
-                            id = R.string.note_editor_content_placeholder,
-                        ),
+                        text = stringResource(id = R.string.note_editor_content_placeholder),
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                         style = AppTheme.typography.bodyMedium,
                     )
                 },
                 textStyle = AppTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
                 colors = PrimalDefaults.transparentOutlinedTextFieldColors(),
-                onUserTaggingModeChanged = {
-                    eventPublisher(UiEvent.ToggleSearchUsers(enabled = it))
-                },
-                onUserTagSearch = {
-                    eventPublisher(UiEvent.SearchUsers(query = it))
-                },
+                onUserTaggingModeChanged = { eventPublisher(UiEvent.ToggleSearchUsers(enabled = it)) },
+                onUserTagSearch = { eventPublisher(UiEvent.SearchUsers(query = it)) },
             )
         }
     }

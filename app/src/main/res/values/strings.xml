@@ -566,6 +566,7 @@
     <string name="note_editor_uploading_attachments">Uploading…</string>
     <string name="note_editor_content_placeholder">Type your note here…</string>
     <string name="note_editor_nostr_publish_error">Unable to publish your note. Please check your connection and try again.</string>
+    <string name="note_editor_unable_to_locate_event">Unable to preview %1$s event. Tap to retry.</string>
 
     <string name="post_action_missing_lightning_address">Unable to zap this user since they don\'t have a lightning address set up.</string>
     <string name="post_action_invalid_zap_request">Unable to zap. Check your wallet connection and try again.</string>
