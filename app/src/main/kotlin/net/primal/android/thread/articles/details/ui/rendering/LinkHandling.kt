@@ -1,7 +1,7 @@
 package net.primal.android.thread.articles.details.ui.rendering
 
 import android.net.Uri
-import net.primal.domain.nostr.utils.takeAsNaddrOrNull
+import net.primal.domain.nostr.utils.takeAsNaddrStringOrNull
 import net.primal.domain.nostr.utils.takeAsNoteHexIdOrNull
 import net.primal.domain.nostr.utils.takeAsProfileHexIdOrNull
 
@@ -16,7 +16,7 @@ fun String.handleArticleLinkClick(
             "nostr" -> {
                 val url = this.split(":").lastOrNull().orEmpty()
                 val profileId = url.takeAsProfileHexIdOrNull()
-                val naddr = url.takeAsNaddrOrNull()
+                val naddr = url.takeAsNaddrStringOrNull()
                 val noteId = url.takeAsNoteHexIdOrNull()
 
                 when {

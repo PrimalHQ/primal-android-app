@@ -146,7 +146,7 @@ fun String.extractEventId(): String? {
     }
 }
 
-fun String.takeAsNaddrOrNull(): String? {
+fun String.takeAsNaddrStringOrNull(): String? {
     return if (isNAddr() || isNAddrUri()) {
         val result = runCatching {
             Nip19TLV.parseUriAsNaddrOrNull(this)
