@@ -183,7 +183,7 @@ private fun ExternalWalletDisconnected(modifier: Modifier = Modifier, onOtherCon
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        ConnectOtherWalletButton(
+        ScanNwcQrCodeButton(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -209,7 +209,7 @@ fun PasteNwcStringButton(modifier: Modifier = Modifier, onClick: (() -> Unit)?) 
 }
 
 @Composable
-fun ConnectOtherWalletButton(modifier: Modifier = Modifier, onClick: (() -> Unit)?) {
+fun ScanNwcQrCodeButton(modifier: Modifier = Modifier, onClick: (() -> Unit)?) {
     PrimalFilledButton(
         modifier = modifier,
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
