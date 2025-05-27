@@ -18,26 +18,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.core.ext.openUriSafely
 import net.primal.android.settings.wallet.settings.WalletSettingsContract
 import net.primal.android.settings.wallet.settings.WalletUiStateProvider
 import net.primal.android.theme.AppTheme
@@ -101,16 +95,10 @@ private fun ExternalWalletSection(
             disconnectWallet = onExternalWalletDisconnect,
         )
     } else {
-        val uriHandler = LocalUriHandler.current
         ExternalWalletDisconnected(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
-            onAlbyConnectClick = {
-                uriHandler.openUriSafely(
-                    "https://nwc.getalby.com/apps/new?c=Primal-Android",
-                )
-            },
             onOtherConnectClick = onOtherConnectClick,
         )
     }
@@ -180,21 +168,17 @@ private fun ExternalWalletConnected(
 }
 
 @Composable
-private fun ExternalWalletDisconnected(
-    modifier: Modifier = Modifier,
-    onAlbyConnectClick: () -> Unit,
-    onOtherConnectClick: () -> Unit,
-) {
+private fun ExternalWalletDisconnected(modifier: Modifier = Modifier, onOtherConnectClick: () -> Unit) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        ConnectAlbyWalletButton(
+        PasteNwcStringButton(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
-            onClick = onAlbyConnectClick,
+            onClick = onOtherConnectClick,
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -208,23 +192,18 @@ private fun ExternalWalletDisconnected(
     }
 }
 
-private val albyColor = Color(0xFFFFDF6F)
-
 @Composable
-fun ConnectAlbyWalletButton(modifier: Modifier = Modifier, onClick: (() -> Unit)?) {
+fun PasteNwcStringButton(modifier: Modifier = Modifier, onClick: (() -> Unit)?) {
     PrimalFilledButton(
         modifier = modifier,
-        containerColor = albyColor,
+        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
         onClick = onClick,
     ) {
         IconText(
-            text = stringResource(id = R.string.settings_wallet_nwc_connect_alby_wallet),
-            leadingIcon = ImageVector.vectorResource(id = R.drawable.alby_logo),
-            iconSize = 42.sp,
+            text = stringResource(id = R.string.settings_wallet_nwc_paste_string),
             style = AppTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium,
-            color = Color.Black,
-            leadingIconTintColor = null,
+            color = AppTheme.colorScheme.onSurface,
         )
     }
 }

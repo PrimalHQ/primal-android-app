@@ -797,7 +797,7 @@
     <string name="settings_wallet_nwc_primal_wallet">Primal Wallet</string>
     <string name="settings_wallet_nwc_external_app">External App</string>
     <string name="settings_wallet_nwc_header_connected">Wallet Connected</string>
-    <string name="settings_wallet_nwc_connect_alby_wallet">Connect Alby Wallet</string>
+    <string name="settings_wallet_nwc_paste_string">Paste NWC String</string>
     <string name="settings_wallet_nwc_scan_qr_code">Scan NWC QR Code</string>
     <string name="settings_wallet_nwc_disconnect_wallet_button">Disconnect Wallet</string>
     <string name="settings_wallet_nwc_profile_lightning_address">Your Nostr Lightning Address:</string>
