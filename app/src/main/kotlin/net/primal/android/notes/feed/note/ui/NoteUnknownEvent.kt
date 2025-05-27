@@ -2,12 +2,15 @@ package net.primal.android.notes.feed.note.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,6 +29,7 @@ fun NoteUnknownEvent(
     altDescription: String,
     icon: ImageVector = Icons.Outlined.Description,
     onClick: (() -> Unit)? = null,
+    onRetryClick: (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier
@@ -36,19 +40,34 @@ fun NoteUnknownEvent(
             .padding(all = 16.dp)
             .clickable(enabled = onClick != null, onClick = { onClick?.invoke() }),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-        )
+        Row(
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+            )
 
-        Text(
-            modifier = Modifier.padding(start = 12.dp, top = 2.dp),
-            text = altDescription,
-            style = AppTheme.typography.bodyMedium,
-            maxLines = 7,
-            overflow = TextOverflow.Ellipsis,
-        )
+            Text(
+                modifier = Modifier.padding(start = 12.dp, top = 2.dp),
+                text = altDescription,
+                style = AppTheme.typography.bodyMedium,
+                maxLines = 7,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+
+        onRetryClick?.let {
+            IconButton(onClick = it) {
+                Icon(
+                    imageVector = Icons.Filled.Refresh,
+                    contentDescription = null,
+                )
+            }
+        }
     }
 }
 
@@ -72,6 +91,33 @@ private fun PreviewDarkNoteInvoice() {
             NoteUnknownEvent(
                 altDescription = "This is unknown event with some very long alt description " +
                     "which is going to break into multiple lines for sure.",
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewLightNoteInvoiceWithRefresh() {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunrise) {
+        Surface(modifier = Modifier.fillMaxWidth()) {
+            NoteUnknownEvent(
+                altDescription = "This is unknown event.",
+                onRetryClick = {},
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewDarkNoteInvoiceWithRefresh() {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+        Surface(modifier = Modifier.fillMaxWidth()) {
+            NoteUnknownEvent(
+                altDescription = "This is unknown event with some very long alt description " +
+                    "which is going to break into multiple lines for sure.",
+                onRetryClick = {},
             )
         }
     }
