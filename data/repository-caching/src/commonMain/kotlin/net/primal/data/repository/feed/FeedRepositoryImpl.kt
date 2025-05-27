@@ -120,10 +120,14 @@ internal class FeedRepositoryImpl(
             database.feedPosts().findAllPostsByIds(listOf(postId)).firstOrNull()?.mapAsFeedPostDO()
         }
 
-    override suspend fun fetchConversation(userId: String, noteId: String) {
+    override suspend fun fetchConversation(
+        userId: String,
+        noteId: String,
+        limit: Int,
+    ) {
         withContext(dispatcherProvider.io()) {
             val response = try {
-                feedApi.getThread(ThreadRequestBody(postId = noteId, userPubKey = userId, limit = 100))
+                feedApi.getThread(ThreadRequestBody(postId = noteId, userPubKey = userId, limit = limit))
             } catch (error: NetworkException) {
                 throw NetworkException(message = error.message, cause = error)
             }

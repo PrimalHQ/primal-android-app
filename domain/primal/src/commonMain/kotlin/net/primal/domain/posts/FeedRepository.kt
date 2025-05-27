@@ -51,7 +51,11 @@ interface FeedRepository {
     ): FeedPageSnapshot
 
     @Throws(NetworkException::class, CancellationException::class)
-    suspend fun fetchConversation(userId: String, noteId: String)
+    suspend fun fetchConversation(
+        userId: String,
+        noteId: String,
+        limit: Int = 100,
+    )
 
     suspend fun findConversation(userId: String, noteId: String): List<FeedPost>
 
