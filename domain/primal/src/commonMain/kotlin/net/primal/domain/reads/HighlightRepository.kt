@@ -17,6 +17,8 @@ interface HighlightRepository {
 
     fun observeHighlightById(highlightId: String): Flow<Highlight>
 
+    suspend fun getHighlightById(highlightId: String): Highlight?
+
     @Throws(
         NostrPublishException::class,
         SignatureException::class,

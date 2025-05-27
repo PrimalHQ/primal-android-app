@@ -18,6 +18,7 @@ import net.primal.domain.nostr.asKindTag
 import net.primal.domain.nostr.asPubkeyTag
 import net.primal.domain.nostr.asReplaceableEventTag
 import net.primal.domain.publisher.PrimalPublisher
+import net.primal.domain.reads.Highlight
 import net.primal.domain.reads.HighlightRepository
 
 class HighlightRepositoryImpl(
@@ -31,6 +32,11 @@ class HighlightRepositoryImpl(
             .distinctUntilChanged()
             .filterNotNull()
             .map { it.asHighlightDO() }
+
+    override suspend fun getHighlightById(highlightId: String): Highlight? =
+        withContext(dispatcherProvider.io()) {
+            database.highlights().findById(highlightId = highlightId)?.asHighlightDO()
+        }
 
     override suspend fun publishAndSaveHighlight(
         userId: String,
