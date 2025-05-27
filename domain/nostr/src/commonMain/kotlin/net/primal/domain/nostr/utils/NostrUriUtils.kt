@@ -9,6 +9,8 @@ import net.primal.core.utils.NPROFILE
 import net.primal.core.utils.NPUB
 import net.primal.core.utils.NRELAY
 import net.primal.core.utils.NSEC
+import net.primal.domain.nostr.Naddr
+import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV
 import net.primal.domain.nostr.Nip19TLV.readAsString
 import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
@@ -143,6 +145,26 @@ fun String.extractEventId(): String? {
 
             else -> (bechPrefix + key).bechToBytesOrThrow().toHex()
         }
+    }
+}
+
+fun String.takeAsNeventOrNull(): Nevent? {
+    return if (isNEvent() || isNEventUri()) {
+        runCatching {
+            Nip19TLV.parseUriAsNeventOrNull(this)
+        }.getOrNull()
+    } else {
+        null
+    }
+}
+
+fun String.takeAsNaddrOrNull(): Naddr? {
+    return if (isNAddr() || isNAddrUri()) {
+        runCatching {
+            Nip19TLV.parseUriAsNaddrOrNull(this)
+        }.getOrNull()
+    } else {
+        null
     }
 }
 
