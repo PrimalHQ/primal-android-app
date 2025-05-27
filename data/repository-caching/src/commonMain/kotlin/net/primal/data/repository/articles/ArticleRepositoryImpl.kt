@@ -91,6 +91,11 @@ class ArticleRepositoryImpl(
                 .map { it.asArticleDO() }
         }
 
+    override suspend fun getArticleByATag(aTag: String): ArticleDO? =
+        withContext(dispatcherProvider.io()) {
+            database.articles().findArticleByATag(articleATag = aTag)?.asArticleDO()
+        }
+
     override suspend fun observeArticleByEventId(eventId: String, articleAuthorId: String): Flow<ArticleDO> =
         withContext(dispatcherProvider.io()) {
             database.articles().observeArticleByEventId(eventId = eventId, authorId = articleAuthorId)

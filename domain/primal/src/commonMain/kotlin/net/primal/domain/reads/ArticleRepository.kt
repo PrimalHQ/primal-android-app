@@ -24,6 +24,8 @@ interface ArticleRepository {
         articleAuthorId: String,
     )
 
+    suspend fun getArticleByATag(aTag: String): Article?
+
     suspend fun observeArticle(articleId: String, articleAuthorId: String): Flow<Article>
 
     suspend fun observeArticleByEventId(eventId: String, articleAuthorId: String): Flow<Article>
