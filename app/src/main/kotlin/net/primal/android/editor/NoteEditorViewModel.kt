@@ -49,6 +49,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
+import net.primal.android.wallet.utils.isLnInvoice
 import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.UploadJob
 import net.primal.core.networking.blossom.UploadResult
@@ -201,10 +202,17 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private fun handlePasteContent(content: TextFieldValue) =
         viewModelScope.launch {
-            val uris = content.text.parseNostrUris()
+            val uris = content.text.parseNostrUris() + content.text.split(" ").filter { it.isLnInvoice() }
             var contentText = content.text
 
             uris.mapNotNull { uri ->
+                if (uri.isLnInvoice()) {
+                    return@mapNotNull ReferencedUri.LightningInvoice(
+                        data = uri,
+                        uri = uri,
+                        loading = false,
+                    )
+                }
                 uri.takeAsNaddrOrNull()?.let { naddr ->
                     ReferencedUri.Article(
                         data = null,
@@ -240,6 +248,8 @@ class NoteEditorViewModel @AssistedInject constructor(
 
                     is ReferencedUri.Note ->
                         fetchAndUpdateNoteUriDetails(it.uri, it.nevent)
+
+                    is ReferencedUri.LightningInvoice -> Unit
                 }
             }
         }

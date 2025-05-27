@@ -80,5 +80,11 @@ interface NoteEditorContract {
             override val uri: String,
             val naddr: Naddr,
         ) : ReferencedUri<FeedArticleUi>
+
+        data class LightningInvoice(
+            override val loading: Boolean,
+            override val uri: String,
+            override val data: String,
+        ) : ReferencedUri<String>
     }
 }
