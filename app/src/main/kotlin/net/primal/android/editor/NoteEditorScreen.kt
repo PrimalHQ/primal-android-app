@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,8 +25,10 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AlternateEmail
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -45,6 +48,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -269,6 +273,7 @@ private fun NoteEditorBox(
                 nostrUris = state.nostrUris,
                 noteCallbacks = noteCallbacks,
                 onRetryUriClick = { eventPublisher(UiEvent.RefreshUri(it.uri)) },
+                onRemoveUriClick = { eventPublisher(UiEvent.RemoveUri(it)) },
             )
 
             if (state.isQuoting) {
@@ -381,10 +386,15 @@ internal const val ELLIPSIZE_URI_CHAR_COUNT = 16
 @OptIn(ExperimentalMaterial3Api::class)
 fun LazyListScope.nostrUris(
     onRetryUriClick: (NoteEditorContract.ReferencedUri<*>) -> Unit,
+    onRemoveUriClick: (Int) -> Unit,
     nostrUris: List<NoteEditorContract.ReferencedUri<*>>,
     noteCallbacks: NoteCallbacks,
 ) {
-    items(items = nostrUris) { uri ->
+    items(
+        count = nostrUris.size,
+        contentType = { "ReferencedUri" },
+    ) { uriIndex ->
+        val uri = nostrUris[uriIndex]
         Box(
             modifier = Modifier
                 .padding(start = 68.dp, end = 16.dp, bottom = 8.dp),
@@ -420,6 +430,26 @@ fun LazyListScope.nostrUris(
                     ),
                     onClick = { onRetryUriClick(uri) },
                 )
+            }
+
+            Box(
+                modifier = Modifier
+                    .padding(top = 8.dp, end = 8.dp)
+                    .align(Alignment.TopEnd)
+                    .clip(CircleShape)
+                    .background(Color.Black.copy(alpha = 0.6f))
+                    .padding(4.dp),
+            ) {
+                IconButton(
+                    modifier = Modifier.size(24.dp),
+                    onClick = { onRemoveUriClick(uriIndex) },
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = null,
+                        tint = Color.White,
+                    )
+                }
             }
         }
     }
