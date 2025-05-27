@@ -47,6 +47,7 @@ interface NoteEditorContract {
         data class PasteContent(val content: TextFieldValue) : UiEvent()
         data class RefreshUri(val uri: String) : UiEvent()
         data class RemoveUri(val uriIndex: Int) : UiEvent()
+        data class RemoveHighlightByArticle(val articleATag: String) : UiEvent()
         data object AppendUserTagAtSign : UiEvent()
         data object PublishNote : UiEvent()
         data class ImportLocalFiles(val uris: List<Uri>) : UiEvent()
@@ -80,6 +81,13 @@ interface NoteEditorContract {
             override val uri: String,
             val naddr: Naddr,
         ) : ReferencedUri<FeedArticleUi>
+
+        data class Highlight(
+            override val data: HighlightUi?,
+            override val loading: Boolean,
+            override val uri: String,
+            val nevent: Nevent,
+        ) : ReferencedUri<HighlightUi>
 
         data class LightningInvoice(
             override val loading: Boolean,

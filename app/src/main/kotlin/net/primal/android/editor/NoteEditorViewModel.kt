@@ -196,6 +196,15 @@ class NoteEditorViewModel @AssistedInject constructor(
                             nostrUris = nostrUris.filterIndexed { index, _ -> index != event.uriIndex },
                         )
                     }
+
+                    is UiEvent.RemoveHighlightByArticle ->
+                        setState {
+                            copy(
+                                nostrUris = nostrUris.filter {
+                                    it !is ReferencedUri.Highlight || it.data?.referencedEventATag != event.articleATag
+                                },
+                            )
+                        }
                 }
             }
         }
@@ -221,14 +230,30 @@ class NoteEditorViewModel @AssistedInject constructor(
                         naddr = naddr,
                     )
                 } ?: uri.takeAsNeventOrNull()
-                    .takeIf { it?.kind == NostrEventKind.ShortTextNote.value }
+                    .takeIf {
+                        it?.kind == NostrEventKind.ShortTextNote.value ||
+                            it?.kind == NostrEventKind.Highlight.value
+                    }
                     ?.let { nevent ->
-                        ReferencedUri.Note(
-                            data = null,
-                            loading = true,
-                            uri = uri,
-                            nevent = nevent,
-                        )
+                        when (nevent.kind) {
+                            NostrEventKind.ShortTextNote.value ->
+                                ReferencedUri.Note(
+                                    data = null,
+                                    loading = true,
+                                    uri = uri,
+                                    nevent = nevent,
+                                )
+
+                            NostrEventKind.Highlight.value ->
+                                ReferencedUri.Highlight(
+                                    data = null,
+                                    loading = true,
+                                    uri = uri,
+                                    nevent = nevent,
+                                )
+
+                            else -> null
+                        }
                     }
             }.onEach { contentText = contentText.replace(it.uri, "") }
                 .also {
@@ -248,6 +273,9 @@ class NoteEditorViewModel @AssistedInject constructor(
 
                     is ReferencedUri.Note ->
                         fetchAndUpdateNoteUriDetails(it.uri, it.nevent)
+
+                    is ReferencedUri.Highlight ->
+                        getAndUpdateHighlightUriDetails(it.uri, it.nevent)
 
                     is ReferencedUri.LightningInvoice -> Unit
                 }
@@ -347,6 +375,23 @@ class NoteEditorViewModel @AssistedInject constructor(
                         },
                     )
                 }
+            }
+        }
+
+    private fun getAndUpdateHighlightUriDetails(uri: String, nevent: Nevent) =
+        viewModelScope.launch {
+            setState {
+                copy(nostrUris = nostrUris.updateByUri<ReferencedUri.Highlight>(uri = uri) { copy(loading = true) })
+            }
+
+            val highlight = highlightRepository.getHighlightById(highlightId = nevent.eventId)
+
+            setState {
+                copy(
+                    nostrUris = nostrUris.updateByUri<ReferencedUri.Highlight>(uri = uri) {
+                        copy(data = highlight?.asHighlightUi(), loading = false)
+                    },
+                )
             }
         }
 
