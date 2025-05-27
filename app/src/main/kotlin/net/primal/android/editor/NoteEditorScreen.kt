@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -101,6 +102,7 @@ import net.primal.android.notes.feed.note.ui.ReferencedHighlight
 import net.primal.android.notes.feed.note.ui.ReferencedNoteCard
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
+import net.primal.domain.nostr.asATagValue
 
 @Composable
 fun NoteEditorScreen(viewModel: NoteEditorViewModel, onClose: () -> Unit) {
@@ -275,6 +277,7 @@ private fun NoteEditorBox(
                 noteCallbacks = noteCallbacks,
                 onRetryUriClick = { eventPublisher(UiEvent.RefreshUri(it.uri)) },
                 onRemoveUriClick = { eventPublisher(UiEvent.RemoveUri(it)) },
+                onRemoveHighlight = { eventPublisher(UiEvent.RemoveHighlightByArticle(it)) },
             )
 
             if (state.isQuoting) {
@@ -388,6 +391,7 @@ internal const val ELLIPSIZE_URI_CHAR_COUNT = 16
 fun LazyListScope.nostrUris(
     onRetryUriClick: (NoteEditorContract.ReferencedUri<*>) -> Unit,
     onRemoveUriClick: (Int) -> Unit,
+    onRemoveHighlight: (String) -> Unit,
     nostrUris: List<NoteEditorContract.ReferencedUri<*>>,
     noteCallbacks: NoteCallbacks,
 ) {
@@ -426,6 +430,20 @@ fun LazyListScope.nostrUris(
                     is NoteEditorContract.ReferencedUri.LightningInvoice -> {
                         NoteLightningInvoice(invoice = uri.data)
                     }
+
+                    is NoteEditorContract.ReferencedUri.Highlight -> {
+                        uri.data?.let {
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                ReferencedHighlight(
+                                    highlight = uri.data.toReferencedHighlight(),
+                                    isDarkTheme = isAppInDarkPrimalTheme(),
+                                    onClick = {},
+                                )
+                            }
+                        }
+                    }
                 }
             } else {
                 NoteUnknownEvent(
@@ -437,25 +455,48 @@ fun LazyListScope.nostrUris(
                 )
             }
 
-            Box(
-                modifier = Modifier
-                    .padding(top = 8.dp, end = 8.dp)
-                    .align(Alignment.TopEnd)
-                    .clip(CircleShape)
-                    .background(Color.Black.copy(alpha = 0.6f))
-                    .padding(4.dp),
-            ) {
-                IconButton(
-                    modifier = Modifier.size(24.dp),
-                    onClick = { onRemoveUriClick(uriIndex) },
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Close,
-                        contentDescription = null,
-                        tint = Color.White,
-                    )
-                }
+            if (uri !is NoteEditorContract.ReferencedUri.Highlight) {
+                DismissUriFloatingButton(
+                    onRemoveUriClick = onRemoveUriClick,
+                    uriIndex = uriIndex,
+                    uri = uri,
+                    onRemoveHighlight = onRemoveHighlight,
+                )
             }
+        }
+    }
+}
+
+@Composable
+private fun BoxScope.DismissUriFloatingButton(
+    onRemoveUriClick: (Int) -> Unit,
+    uriIndex: Int,
+    uri: NoteEditorContract.ReferencedUri<*>,
+    onRemoveHighlight: (String) -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .padding(top = 8.dp, end = 8.dp)
+            .align(Alignment.TopEnd)
+            .clip(CircleShape)
+            .background(Color.Black.copy(alpha = 0.6f))
+            .padding(4.dp),
+    ) {
+        IconButton(
+            modifier = Modifier.size(24.dp),
+            onClick = {
+                onRemoveUriClick(uriIndex)
+
+                if (uri is NoteEditorContract.ReferencedUri.Article) {
+                    onRemoveHighlight(uri.naddr.asATagValue())
+                }
+            },
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Close,
+                contentDescription = null,
+                tint = Color.White,
+            )
         }
     }
 }
