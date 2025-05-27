@@ -94,6 +94,7 @@ import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.notes.feed.note.ui.FeedNoteHeader
 import net.primal.android.notes.feed.note.ui.NoteContent
+import net.primal.android.notes.feed.note.ui.NoteLightningInvoice
 import net.primal.android.notes.feed.note.ui.NoteUnknownEvent
 import net.primal.android.notes.feed.note.ui.ReferencedArticleCard
 import net.primal.android.notes.feed.note.ui.ReferencedHighlight
@@ -420,6 +421,10 @@ fun LazyListScope.nostrUris(
                                 noteCallbacks = noteCallbacks,
                             )
                         }
+                    }
+
+                    is NoteEditorContract.ReferencedUri.LightningInvoice -> {
+                        NoteLightningInvoice(invoice = uri.data)
                     }
                 }
             } else {
