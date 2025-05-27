@@ -40,6 +40,7 @@ fun String.splitMarkdownByNostrUris(): List<String> {
 
     return chunks.filter { it.isNotBlank() }
 }
+
 /**
 * Uses a regular expression to detect image patterns:
 * - `!\[([^\]]*)\]`        → captures alt text inside square brackets (Group 1)
