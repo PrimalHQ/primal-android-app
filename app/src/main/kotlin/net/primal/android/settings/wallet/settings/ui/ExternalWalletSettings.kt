@@ -237,7 +237,7 @@ fun ConnectOtherWalletButton(modifier: Modifier = Modifier, onClick: (() -> Unit
         onClick = onClick,
     ) {
         IconText(
-            text = stringResource(id = R.string.settings_wallet_nwc_connect_other_wallet),
+            text = stringResource(id = R.string.settings_wallet_nwc_scan_qr_code),
             style = AppTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium,
             color = AppTheme.colorScheme.onSurface,
