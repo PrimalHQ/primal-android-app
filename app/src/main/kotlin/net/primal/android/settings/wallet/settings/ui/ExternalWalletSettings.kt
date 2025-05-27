@@ -81,6 +81,16 @@ private fun ExternalWalletSection(
 
     Spacer(modifier = Modifier.height(16.dp))
 
+    Text(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        text = stringResource(id = R.string.settings_wallet_nwc_header_not_connected_hint),
+        style = AppTheme.typography.bodySmall,
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
     if (nwcWallet != null) {
         ExternalWalletConnected(
             modifier = Modifier
