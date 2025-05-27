@@ -190,6 +190,11 @@ class NoteEditorViewModel @AssistedInject constructor(
 
                     UiEvent.DismissError -> setState { copy(error = null) }
                     is UiEvent.RefreshUri -> fetchNostrUris(uris = state.value.nostrUris.filter { it.uri == event.uri })
+                    is UiEvent.RemoveUri -> setState {
+                        copy(
+                            nostrUris = nostrUris.filterIndexed { index, _ -> index != event.uriIndex },
+                        )
+                    }
                 }
             }
         }

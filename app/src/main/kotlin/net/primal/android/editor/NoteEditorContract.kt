@@ -46,6 +46,7 @@ interface NoteEditorContract {
         data class UpdateContent(val content: TextFieldValue) : UiEvent()
         data class PasteContent(val content: TextFieldValue) : UiEvent()
         data class RefreshUri(val uri: String) : UiEvent()
+        data class RemoveUri(val uriIndex: Int) : UiEvent()
         data object AppendUserTagAtSign : UiEvent()
         data object PublishNote : UiEvent()
         data class ImportLocalFiles(val uris: List<Uri>) : UiEvent()
