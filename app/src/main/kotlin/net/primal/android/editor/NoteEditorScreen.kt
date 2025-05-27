@@ -213,6 +213,7 @@ private fun NoteEditorBox(
     var quotedEventHeightPx by remember { mutableIntStateOf(0) }
     val replyingToPaddingTop = 8.dp
     var replyingToNoticeHeightPx by remember { mutableIntStateOf(0) }
+    var footerHeight by remember { mutableIntStateOf(0) }
 
     val density = LocalDensity.current
     var extraSpacing by remember { mutableStateOf(0.dp) }
@@ -291,12 +292,23 @@ private fun NoteEditorBox(
             item(key = "extraSpacing") {
                 Spacer(modifier = Modifier.height(extraSpacing))
             }
+
+            if (state.attachments.isNotEmpty()) {
+                item(key = "attachmentSpacing") {
+                    Spacer(
+                        modifier = Modifier.height(
+                            with(density) { footerHeight.toDp() + 8.dp },
+                        ),
+                    )
+                }
+            }
         }
 
         NoteEditorFooter(
             Modifier
                 .background(color = AppTheme.colorScheme.surface)
-                .navigationBarsPadding(),
+                .navigationBarsPadding()
+                .onSizeChanged { footerHeight = it.height },
             state = state,
             eventPublisher = eventPublisher,
         )
