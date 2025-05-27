@@ -34,6 +34,7 @@ import net.primal.android.articles.highlights.generateNevent
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.files.FileAnalyser
+import net.primal.android.editor.NoteEditorContract.ReferencedUri
 import net.primal.android.editor.NoteEditorContract.SideEffect
 import net.primal.android.editor.NoteEditorContract.UiEvent
 import net.primal.android.editor.NoteEditorContract.UiState
@@ -51,6 +52,7 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.UploadJob
 import net.primal.core.networking.blossom.UploadResult
+import net.primal.core.utils.fetchAndGet
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventRelayHintsRepository
 import net.primal.domain.explore.ExploreRepository
@@ -61,9 +63,16 @@ import net.primal.domain.nostr.Nip19TLV
 import net.primal.domain.nostr.Nip19TLV.toNprofileString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.Nprofile
+import net.primal.domain.nostr.asATagValue
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.nostr.utils.parseNostrUris
+import net.primal.domain.nostr.utils.takeAsNaddrOrNull
+import net.primal.domain.nostr.utils.takeAsNeventOrNull
+import net.primal.domain.nostr.utils.withNostrPrefix
+import net.primal.domain.posts.FeedPost
 import net.primal.domain.posts.FeedRepository
+import net.primal.domain.reads.Article
 import net.primal.domain.reads.ArticleRepository
 import net.primal.domain.reads.HighlightRepository
 import timber.log.Timber
@@ -147,11 +156,13 @@ class NoteEditorViewModel @AssistedInject constructor(
         }
     }
 
+    @Suppress("CyclomaticComplexMethod")
     private fun subscribeToEvents() =
         viewModelScope.launch {
             events.collect { event ->
                 when (event) {
                     is UiEvent.UpdateContent -> setState { copy(content = event.content) }
+                    is UiEvent.PasteContent -> handlePasteContent(content = event.content)
                     is UiEvent.PublishNote -> publishPost()
                     is UiEvent.ImportLocalFiles -> importPhotos(event.uris)
                     is UiEvent.DiscardNoteAttachment -> discardAttachment(event.attachmentId)
@@ -178,6 +189,52 @@ class NoteEditorViewModel @AssistedInject constructor(
                     }
 
                     UiEvent.DismissError -> setState { copy(error = null) }
+                    is UiEvent.RefreshUri -> fetchNostrUris(uris = state.value.nostrUris.filter { it.uri == event.uri })
+                }
+            }
+        }
+
+    private fun handlePasteContent(content: TextFieldValue) =
+        viewModelScope.launch {
+            val uris = content.text.parseNostrUris()
+            var contentText = content.text
+
+            uris.mapNotNull { uri ->
+                uri.takeAsNaddrOrNull()?.let { naddr ->
+                    ReferencedUri.Article(
+                        data = null,
+                        loading = true,
+                        uri = uri,
+                        naddr = naddr,
+                    )
+                } ?: uri.takeAsNeventOrNull()
+                    .takeIf { it?.kind == NostrEventKind.ShortTextNote.value }
+                    ?.let { nevent ->
+                        ReferencedUri.Note(
+                            data = null,
+                            loading = true,
+                            uri = uri,
+                            nevent = nevent,
+                        )
+                    }
+            }.onEach { contentText = contentText.replace(it.uri, "") }
+                .also {
+                    fetchNostrUris(it)
+                    setState { copy(nostrUris = it + nostrUris) }
+                }
+
+            setState { copy(content = content.copy(text = contentText)) }
+        }
+
+    private fun fetchNostrUris(uris: List<ReferencedUri<*>>) =
+        viewModelScope.launch {
+            uris.onEach {
+                when (it) {
+                    is ReferencedUri.Article ->
+                        fetchAndUpdateArticleUriDetails(it.uri, it.naddr)
+
+                    is ReferencedUri.Note ->
+                        fetchAndUpdateNoteUriDetails(it.uri, it.nevent)
                 }
             }
         }
@@ -246,6 +303,73 @@ class NoteEditorViewModel @AssistedInject constructor(
             }
         }
 
+    private fun fetchAndUpdateNoteUriDetails(uri: String, nevent: Nevent) =
+        viewModelScope.launch {
+            setState {
+                copy(nostrUris = nostrUris.updateByUri<ReferencedUri.Note>(uri = uri) { copy(loading = true) })
+            }
+            fetchAndGet<FeedPost, NetworkException>(
+                fetch = {
+                    feedRepository.fetchConversation(
+                        userId = activeAccountStore.activeUserId(),
+                        noteId = nevent.eventId,
+                        limit = 1,
+                    )
+                },
+                get = { feedRepository.findAllPostsByIds(postIds = listOf(nevent.eventId)).firstOrNull() },
+                onFinally = {
+                    setState {
+                        copy(
+                            nostrUris = nostrUris.updateByUri<ReferencedUri.Note>(uri = uri) { copy(loading = false) },
+                        )
+                    }
+                },
+            ) { post ->
+                setState {
+                    copy(
+                        nostrUris = nostrUris.updateByUri<ReferencedUri.Note>(uri = uri) {
+                            copy(data = post.asFeedPostUi())
+                        },
+                    )
+                }
+            }
+        }
+
+    private fun fetchAndUpdateArticleUriDetails(uri: String, naddr: Naddr) =
+        viewModelScope.launch {
+            setState {
+                copy(nostrUris = nostrUris.updateByUri<ReferencedUri.Article>(uri = uri) { copy(loading = true) })
+            }
+
+            fetchAndGet<Article, NetworkException>(
+                fetch = {
+                    articleRepository.fetchArticleAndComments(
+                        userId = activeAccountStore.activeUserId(),
+                        articleId = naddr.identifier,
+                        articleAuthorId = naddr.userId,
+                    )
+                },
+                get = { articleRepository.getArticleByATag(aTag = naddr.asATagValue()) },
+                onFinally = {
+                    setState {
+                        copy(
+                            nostrUris = nostrUris.updateByUri<ReferencedUri.Article>(uri = uri) {
+                                copy(loading = false)
+                            },
+                        )
+                    }
+                },
+            ) { article ->
+                setState {
+                    copy(
+                        nostrUris = nostrUris.updateByUri<ReferencedUri.Article>(uri = uri) {
+                            copy(data = article.mapAsFeedArticleUi())
+                        },
+                    )
+                }
+            }
+        }
+
     private fun fetchArticleDetailsFromNetwork(replyToArticleNaddr: Naddr) =
         viewModelScope.launch {
             try {
@@ -269,7 +393,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                 val publishResult = if (args.isQuoting) {
                     notePublishHandler.publishShortTextNote(
                         userId = activeAccountStore.activeUserId(),
-                        content = noteContent.concatenateReferencedEvents(),
+                        content = noteContent.concatenateUris().concatenateReferencedEvents(),
                         attachments = _state.value.attachments,
                     )
                 } else {
@@ -277,7 +401,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                     val replyToPost = _state.value.conversation.lastOrNull()
                     notePublishHandler.publishShortTextNote(
                         userId = activeAccountStore.activeUserId(),
-                        content = noteContent,
+                        content = noteContent.concatenateUris(),
                         attachments = _state.value.attachments,
                         rootNoteNevent = rootPost?.asNevent(),
                         replyToNoteNevent = replyToPost?.asNevent(),
@@ -554,6 +678,18 @@ class NoteEditorViewModel @AssistedInject constructor(
         }
     }
 
+    private inline fun <reified T : ReferencedUri<*>> List<ReferencedUri<*>>.updateByUri(
+        uri: String,
+        reducer: T.() -> T,
+    ): List<ReferencedUri<*>> =
+        map {
+            if (it.uri == uri && it is T) {
+                it.reducer()
+            } else {
+                it
+            }
+        }
+
     private suspend fun FeedPostUi.asNevent(): Nevent {
         val relayHints = runCatching { relayHintsRepository.findRelaysByIds(listOf(this.postId)) }.getOrNull()
 
@@ -564,6 +700,11 @@ class NoteEditorViewModel @AssistedInject constructor(
             relays = relayHints?.firstOrNull { it.eventId == this.postId }?.relays?.take(MAX_RELAY_HINTS)
                 ?: emptyList(),
         )
+    }
+
+    private fun String.concatenateUris(): String {
+        return this + state.value.nostrUris.map { it.uri }
+            .joinToString(separator = " \n\n", prefix = " \n\n") { it.withNostrPrefix() }
     }
 
     private fun String.concatenateReferencedEvents(): String {
