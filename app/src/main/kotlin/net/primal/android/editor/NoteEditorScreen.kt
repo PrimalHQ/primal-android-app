@@ -280,20 +280,6 @@ private fun NoteEditorBox(
                 onRemoveHighlight = { eventPublisher(UiEvent.RemoveHighlightByArticle(it)) },
             )
 
-            if (state.isQuoting) {
-                item {
-                    ReferencedEventsAndConversationAsQuote(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = avatarsColumnWidthDp, end = contentEndPadding, bottom = 8.dp)
-                            .onSizeChanged { quotedEventHeightPx = it.height },
-                        referencedNote = state.conversation.lastOrNull(),
-                        referencedArticle = state.referencedArticle,
-                        referencedHighlight = state.referencedHighlight,
-                    )
-                }
-            }
-
             item(key = "attachments") {
                 NoteAttachmentsLazyRow(
                     modifier = Modifier
@@ -497,43 +483,6 @@ private fun BoxScope.DismissUriFloatingButton(
                 contentDescription = null,
                 tint = Color.White,
             )
-        }
-    }
-}
-
-@ExperimentalMaterial3Api
-@Composable
-private fun ReferencedEventsAndConversationAsQuote(
-    modifier: Modifier = Modifier,
-    referencedNote: FeedPostUi?,
-    referencedArticle: FeedArticleUi?,
-    referencedHighlight: HighlightUi?,
-) {
-    Column {
-        if (referencedNote != null) {
-            ReferencedNoteCard(
-                modifier = modifier,
-                data = referencedNote,
-                noteCallbacks = NoteCallbacks(),
-            )
-        }
-
-        if (referencedArticle != null || referencedHighlight != null) {
-            Column(
-                modifier = modifier.padding(top = if (referencedNote != null) 8.dp else 0.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                if (referencedHighlight != null) {
-                    ReferencedHighlight(
-                        highlight = referencedHighlight.toReferencedHighlight(),
-                        isDarkTheme = isAppInDarkPrimalTheme(),
-                        onClick = {},
-                    )
-                }
-                if (referencedArticle != null) {
-                    ReferencedArticleCard(data = referencedArticle)
-                }
-            }
         }
     }
 }

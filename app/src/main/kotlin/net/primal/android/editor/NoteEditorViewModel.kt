@@ -61,6 +61,8 @@ import net.primal.domain.nostr.MAX_RELAY_HINTS
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV
+import net.primal.domain.nostr.Nip19TLV.toNaddrString
+import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.Nip19TLV.toNprofileString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.Nprofile
@@ -123,22 +125,63 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             setStateFromArgs()
 
-            if (referencedNoteNevent != null) {
-                fetchNoteThreadFromNetwork(referencedNoteNevent.eventId)
-                observeThreadConversation(referencedNoteNevent.eventId)
-                observeArticleByCommentId(replyToNoteId = referencedNoteNevent.eventId)
-            } else if (referencedArticleNaddr != null) {
-                fetchArticleDetailsFromNetwork(referencedArticleNaddr)
-                observeArticleByNaddr(naddr = referencedArticleNaddr)
-            }
-
-            if (referencedHighlightNevent != null) {
-                observeHighlight(highlightNevent = referencedHighlightNevent)
+            if (args.isQuoting) {
+                processQuotedEntities()
+            } else {
+                fetchReplyToEntities()
             }
 
             if (args.mediaUris.isNotEmpty()) {
                 importPhotos(args.mediaUris.map { it.toUri() })
             }
+        }
+    }
+
+    private fun processQuotedEntities() =
+        viewModelScope.launch {
+            val referencedUris = listOfNotNull(
+                referencedNoteNevent?.let {
+                    ReferencedUri.Note(
+                        data = null,
+                        loading = true,
+                        uri = it.toNeventString(),
+                        nevent = it,
+                    )
+                },
+                referencedHighlightNevent?.let {
+                    ReferencedUri.Highlight(
+                        data = null,
+                        loading = true,
+                        uri = it.toNeventString(),
+                        nevent = it,
+                    )
+                },
+                referencedArticleNaddr?.let {
+                    ReferencedUri.Article(
+                        data = null,
+                        loading = true,
+                        uri = it.toNaddrString(),
+                        naddr = it,
+                    )
+                },
+            )
+
+            setState { copy(nostrUris = nostrUris + referencedUris) }
+            fetchNostrUris(uris = referencedUris)
+        }
+
+    private fun fetchReplyToEntities() {
+        if (referencedNoteNevent != null) {
+            fetchNoteThreadFromNetwork(replyToNoteId = referencedNoteNevent.eventId)
+            observeThreadConversation(replyToNoteId = referencedNoteNevent.eventId)
+            observeArticleByCommentId(replyToNoteId = referencedNoteNevent.eventId)
+        } else if (referencedArticleNaddr != null) {
+            fetchArticleDetailsFromNetwork(replyToArticleNaddr = referencedArticleNaddr)
+            observeArticleByNaddr(naddr = referencedArticleNaddr)
+        }
+
+        if (referencedHighlightNevent != null) {
+            observeHighlight(highlightNevent = referencedHighlightNevent)
         }
     }
 
@@ -453,7 +496,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                 val publishResult = if (args.isQuoting) {
                     notePublishHandler.publishShortTextNote(
                         userId = activeAccountStore.activeUserId(),
-                        content = noteContent.concatenateUris().concatenateReferencedEvents(),
+                        content = noteContent.concatenateUris(),
                         attachments = _state.value.attachments,
                     )
                 } else {
@@ -765,13 +808,5 @@ class NoteEditorViewModel @AssistedInject constructor(
     private fun String.concatenateUris(): String {
         return this + state.value.nostrUris.map { it.uri }
             .joinToString(separator = " \n\n", prefix = " \n\n") { it.withNostrPrefix() }
-    }
-
-    private fun String.concatenateReferencedEvents(): String {
-        return this + listOfNotNull(
-            args.referencedNoteNevent,
-            args.referencedHighlightNevent,
-            args.referencedArticleNaddr,
-        ).joinToString(separator = " \n\n", prefix = " \n\n") { it.withNostrPrefix() }
     }
 }
