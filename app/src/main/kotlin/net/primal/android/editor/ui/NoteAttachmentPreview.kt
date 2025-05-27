@@ -3,7 +3,7 @@ package net.primal.android.editor.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Refresh
@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import coil.compose.SubcomposeAsyncImage
 import java.util.*
 import net.primal.android.R
@@ -25,21 +26,21 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun NoteAttachmentPreview(
     attachment: NoteAttachment,
+    maxWidth: Dp,
     onDiscard: (UUID) -> Unit,
     onRetryUpload: (UUID) -> Unit,
 ) {
     val shape = AppTheme.shapes.medium
-    Box(
-        contentAlignment = Alignment.Center,
-    ) {
+
+    Box(contentAlignment = Alignment.Center) {
         SubcomposeAsyncImage(
             model = attachment.localUri,
             modifier = Modifier
                 .fillMaxHeight()
-                .wrapContentWidth()
+                .widthIn(max = maxWidth)
                 .clip(shape),
             contentDescription = null,
-            contentScale = ContentScale.Crop,
+            contentScale = ContentScale.FillHeight,
         )
 
         if (attachment.remoteUrl == null) {

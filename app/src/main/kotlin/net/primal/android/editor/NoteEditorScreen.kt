@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,7 +17,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -264,7 +264,7 @@ private fun NoteEditorBox(
                     ReferencedEventsAndConversationAsQuote(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 68.dp, end = 16.dp, bottom = 8.dp)
+                            .padding(start = avatarsColumnWidthDp, end = contentEndPadding, bottom = 8.dp)
                             .onSizeChanged { quotedEventHeightPx = it.height },
                         referencedNote = state.conversation.lastOrNull(),
                         referencedArticle = state.referencedArticle,
@@ -525,23 +525,28 @@ private fun NoteAttachmentsLazyRow(
     onDiscard: (UUID) -> Unit,
     onRetryUpload: (UUID) -> Unit,
 ) {
-    LazyRow(
+    BoxWithConstraints(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        item {
-            Spacer(modifier = Modifier.width(avatarsColumnWidthDp - 8.dp))
-        }
-
-        items(
-            items = attachments,
-            key = { it.id },
-        ) { attachment ->
-            NoteAttachmentPreview(
-                attachment = attachment,
-                onDiscard = onDiscard,
-                onRetryUpload = onRetryUpload,
-            )
+        LazyRow(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                start = avatarsColumnWidthDp,
+                end = contentEndPadding,
+            ),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            items(
+                items = attachments,
+                key = { it.id },
+            ) { attachment ->
+                NoteAttachmentPreview(
+                    attachment = attachment,
+                    maxWidth = this@BoxWithConstraints.maxWidth - (avatarsColumnWidthDp + contentEndPadding),
+                    onDiscard = onDiscard,
+                    onRetryUpload = onRetryUpload,
+                )
+            }
         }
     }
 }
@@ -631,3 +636,4 @@ private val avatarSizeDp = 42.dp
 private val connectionLineOffsetXDp = 40.dp
 private val attachmentsHeightDp = 160.dp
 private val avatarsColumnWidthDp = avatarSizeDp + 24.dp
+private val contentEndPadding = 16.dp
