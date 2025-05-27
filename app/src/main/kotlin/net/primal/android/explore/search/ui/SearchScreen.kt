@@ -44,7 +44,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.explore.search.SearchContract
 import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.theme.AppTheme
-import net.primal.domain.nostr.utils.takeAsNaddrOrNull
+import net.primal.domain.nostr.utils.takeAsNaddrStringOrNull
 import net.primal.domain.nostr.utils.takeAsNoteHexIdOrNull
 import net.primal.domain.nostr.utils.takeAsProfileHexIdOrNull
 
@@ -140,7 +140,7 @@ fun SearchScreen(
                                 val query = state.searchQuery
                                 val noteId = query.takeAsNoteHexIdOrNull()
                                 val profileId = query.takeAsProfileHexIdOrNull()
-                                val naddr = query.takeAsNaddrOrNull()
+                                val naddr = query.takeAsNaddrStringOrNull()
                                 when {
                                     noteId != null -> {
                                         delay(KEYBOARD_HIDE_DELAY)
