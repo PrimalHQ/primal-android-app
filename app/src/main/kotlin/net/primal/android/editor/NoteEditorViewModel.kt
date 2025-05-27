@@ -571,6 +571,6 @@ class NoteEditorViewModel @AssistedInject constructor(
             args.referencedNoteNevent,
             args.referencedHighlightNevent,
             args.referencedArticleNaddr,
-        ).joinToString(separator = " \n\n", prefix = " \n\n") { "nostr:$it" }
+        ).joinToString(separator = " \n\n", prefix = " \n\n") { it.withNostrPrefix() }
     }
 }
