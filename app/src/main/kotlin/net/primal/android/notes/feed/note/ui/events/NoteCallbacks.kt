@@ -15,7 +15,7 @@ data class NoteCallbacks(
     val onHashtagClick: ((hashtag: String) -> Unit)? = null,
     val onMediaClick: ((event: MediaClickEvent) -> Unit)? = null,
     val onPayInvoiceClick: ((event: InvoicePayClickEvent) -> Unit)? = null,
-    val onEventReactionsClick: ((eventId: String, initialTab: ReactionType) -> Unit)? = null,
+    val onEventReactionsClick: ((eventId: String, initialTab: ReactionType, articleATag: String?) -> Unit)? = null,
     val onGetPrimalPremiumClick: (() -> Unit)? = null,
     val onPrimalLegendsLeaderboardClick: (() -> Unit)? = null,
 )

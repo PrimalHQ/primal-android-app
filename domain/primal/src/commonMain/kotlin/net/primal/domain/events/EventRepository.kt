@@ -6,7 +6,11 @@ import kotlinx.coroutines.flow.Flow
 import net.primal.domain.common.exception.NetworkException
 
 interface EventRepository {
-    fun pagedEventZaps(userId: String, eventId: String): Flow<PagingData<EventZap>>
+    fun pagedEventZaps(
+        userId: String,
+        eventId: String,
+        articleATag: String?,
+    ): Flow<PagingData<EventZap>>
     fun observeEventStats(eventIds: List<String>): Flow<List<NostrEventStats>>
     fun observeUserEventStatus(eventIds: List<String>, userId: String): Flow<List<NostrEventUserStats>>
 

@@ -24,6 +24,14 @@ inline val SavedStateHandle.profileId: String? get() = get(PROFILE_ID)
 inline val SavedStateHandle.profileIdOrThrow: String
     get() = get(PROFILE_ID) ?: throw IllegalArgumentException("Missing required profileId argument")
 
+const val EVENT_ID = "eventId"
+inline val SavedStateHandle.eventId: String? get() = get(EVENT_ID)
+inline val SavedStateHandle.eventIdOrThrow: String
+    get() = eventId ?: throw IllegalArgumentException("Missing required eventId argument")
+
+const val ARTICLE_A_TAG = "articleATag"
+inline val SavedStateHandle.articleATag: String? get() = get(ARTICLE_A_TAG)
+
 const val ARTICLE_ID = "articleId"
 inline val SavedStateHandle.articleId: String? get() = get(ARTICLE_ID)
 

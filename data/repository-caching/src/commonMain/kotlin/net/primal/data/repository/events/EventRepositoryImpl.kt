@@ -101,9 +101,13 @@ class EventRepositoryImpl(
         response.persistToDatabaseAsTransaction(database = database)
     }
 
-    override fun pagedEventZaps(userId: String, eventId: String): Flow<PagingData<EventZapDO>> {
+    override fun pagedEventZaps(
+        userId: String,
+        eventId: String,
+        articleATag: String?,
+    ): Flow<PagingData<EventZapDO>> {
         return createPager(userId = userId, eventId = eventId) {
-            database.eventZaps().pagedEventZaps(eventId = eventId)
+            database.eventZaps().pagedEventZaps(eventId = articleATag ?: eventId)
         }.flow.map { it.map { it.asEventZapDO() } }
     }
 
