@@ -30,6 +30,8 @@ fun ReferencedNoteCard(
     data: FeedPostUi,
     noteCallbacks: NoteCallbacks,
     modifier: Modifier = Modifier,
+    nestingLevel: Int = 0,
+    nestingCutOffLimit: Int = Int.MAX_VALUE,
     hasBorder: Boolean = false,
     colors: CardColors = referencedNoteCardColors(),
 ) {
@@ -69,6 +71,8 @@ fun ReferencedNoteCard(
             data = data.toNoteContentUi(),
             expanded = false,
             referencedEventsHaveBorder = true,
+            nestingLevel = nestingLevel + 1,
+            nestingCutOffLimit = nestingCutOffLimit,
             onClick = { noteCallbacks.onNoteClick?.invoke(data.postId) },
             onUrlClick = { _ -> noteCallbacks.onNoteClick?.invoke(data.postId) },
             noteCallbacks = noteCallbacks,

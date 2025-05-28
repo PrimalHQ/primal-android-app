@@ -38,6 +38,8 @@ import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.domain.nostr.ReactionType
 import timber.log.Timber
 
+internal const val FEED_NESTED_NOTES_CUT_OFF_LIMIT = 2
+
 @ExperimentalMaterial3Api
 @ExperimentalFoundationApi
 @Composable
@@ -108,6 +110,7 @@ fun NoteFeedLazyColumn(
                         cardPadding = PaddingValues(all = 0.dp),
                         fullWidthContent = true,
                         enableTweetsMode = true,
+                        nestingCutOffLimit = FEED_NESTED_NOTES_CUT_OFF_LIMIT,
                         showReplyTo = showReplyTo,
                         noteCallbacks = noteCallbacks,
                         onGoToWallet = onGoToWallet,

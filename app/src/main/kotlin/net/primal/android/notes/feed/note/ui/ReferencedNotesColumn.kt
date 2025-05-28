@@ -18,6 +18,8 @@ fun ReferencedNotesColumn(
     expanded: Boolean,
     containerColor: Color,
     noteCallbacks: NoteCallbacks,
+    nestingLevel: Int,
+    nestingCutOffLimit: Int,
     modifier: Modifier = Modifier,
     hasBorder: Boolean = false,
 ) {
@@ -37,6 +39,8 @@ fun ReferencedNotesColumn(
                     .padding(vertical = 4.dp),
                 data = data.asFeedPostUi(),
                 hasBorder = hasBorder,
+                nestingLevel = nestingLevel,
+                nestingCutOffLimit = nestingCutOffLimit,
                 colors = CardDefaults.cardColors(containerColor = containerColor),
                 noteCallbacks = noteCallbacks,
             )
