@@ -439,7 +439,10 @@ private fun ThreadLazyColumn(
                                 ThreadNoteTopZapsSection(
                                     zaps = item.eventZaps,
                                     onClick = if (noteCallbacks.onEventReactionsClick != null) {
-                                        { noteCallbacks.onEventReactionsClick.invoke(item.postId, ReactionType.ZAPS) }
+                                        {
+                                            noteCallbacks.onEventReactionsClick
+                                                .invoke(item.postId, ReactionType.ZAPS, null)
+                                        }
                                     } else {
                                         null
                                     },
@@ -461,7 +464,8 @@ private fun ThreadLazyColumn(
                                         modifier = Modifier.padding(top = 10.dp),
                                         eventStats = item.stats,
                                         onReactionTypeClick = { reactionType ->
-                                            noteCallbacks.onEventReactionsClick?.invoke(item.postId, reactionType)
+                                            noteCallbacks.onEventReactionsClick
+                                                ?.invoke(item.postId, reactionType, null)
                                         },
                                     )
                                 }

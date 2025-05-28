@@ -601,8 +601,9 @@ private fun ArticleContentWithComments(
                         .padding(horizontal = 16.dp),
                     topZaps = state.topZaps,
                     onTopZapsClick = {
-                        state.article?.eventId?.let { eventId ->
-                            noteCallbacks.onEventReactionsClick?.invoke(eventId, ReactionType.ZAPS)
+                        state.article?.let { article ->
+                            noteCallbacks.onEventReactionsClick
+                                ?.invoke(article.eventId, ReactionType.ZAPS, article.aTag)
                         }
                     },
                     onZapClick = onZapOptionsClick,
@@ -755,10 +756,8 @@ private fun ArticleContentWithComments(
                             modifier = Modifier.clickable(
                                 enabled = noteCallbacks.onEventReactionsClick != null,
                                 onClick = {
-                                    noteCallbacks.onEventReactionsClick?.invoke(
-                                        state.article.eventId,
-                                        ReactionType.ZAPS,
-                                    )
+                                    noteCallbacks.onEventReactionsClick
+                                        ?.invoke(state.article.eventId, ReactionType.ZAPS, state.article.aTag)
                                 },
                             ),
                             verticalAlignment = Alignment.Bottom,
@@ -789,7 +788,8 @@ private fun ArticleContentWithComments(
                                 .padding(top = 16.dp, bottom = 8.dp),
                             eventStats = state.article.eventStatsUi,
                             onReactionTypeClick = { tab ->
-                                noteCallbacks.onEventReactionsClick?.invoke(state.article.eventId, tab)
+                                noteCallbacks.onEventReactionsClick
+                                    ?.invoke(state.article.eventId, tab, state.article.aTag)
                             },
                         )
                     }

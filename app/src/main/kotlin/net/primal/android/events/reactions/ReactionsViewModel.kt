@@ -15,7 +15,8 @@ import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.events.reactions.ReactionsContract.UiState
 import net.primal.android.events.ui.asEventZapUiModel
-import net.primal.android.navigation.noteIdOrThrow
+import net.primal.android.navigation.articleATag
+import net.primal.android.navigation.eventIdOrThrow
 import net.primal.android.navigation.reactionTypeOrThrow
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.domain.common.exception.NetworkException
@@ -31,13 +32,15 @@ class ReactionsViewModel @Inject constructor(
     private val eventRepository: EventRepository,
 ) : ViewModel() {
 
-    private val noteId = savedStateHandle.noteIdOrThrow
+    private val eventId = savedStateHandle.eventIdOrThrow
+    private val articleATag = savedStateHandle.articleATag
 
     private val _state = MutableStateFlow(
         UiState(
             zaps = eventRepository.pagedEventZaps(
                 userId = activeAccountStore.activeUserId(),
-                eventId = noteId,
+                eventId = eventId,
+                articleATag = articleATag,
             )
                 .map { it.map { noteZap -> noteZap.asEventZapUiModel() } }
                 .cachedIn(viewModelScope),
@@ -57,7 +60,7 @@ class ReactionsViewModel @Inject constructor(
             try {
                 setState { copy(loading = true) }
                 val likes = eventRepository.fetchEventActions(
-                    eventId = noteId,
+                    eventId = eventId,
                     kind = NostrEventKind.Reaction.value,
                 )
                 setState { copy(likes = likes.map { it.mapAsEventActionUi() }) }
@@ -73,7 +76,7 @@ class ReactionsViewModel @Inject constructor(
             try {
                 setState { copy(loading = true) }
                 val reposts = eventRepository.fetchEventActions(
-                    eventId = noteId,
+                    eventId = eventId,
                     kind = NostrEventKind.ShortTextNoteRepost.value,
                 )
                 setState { copy(reposts = reposts.map { it.mapAsEventActionUi() }) }

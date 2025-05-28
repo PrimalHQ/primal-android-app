@@ -248,8 +248,11 @@ fun NavController.navigateToThread(noteId: String) = navigate(route = "thread/$n
 
 fun NavController.navigateToArticleDetails(naddr: String) = navigate(route = "article?$NADDR=$naddr")
 
-fun NavController.navigateToReactions(eventId: String, initialTab: ReactionType = ReactionType.ZAPS) =
-    navigate("reactions/$eventId?$INITIAL_REACTION_TYPE=${initialTab.name}")
+fun NavController.navigateToReactions(
+    eventId: String,
+    initialTab: ReactionType = ReactionType.ZAPS,
+    articleATag: String?,
+) = navigate("reactions/$eventId?$INITIAL_REACTION_TYPE=${initialTab.name}&$ARTICLE_A_TAG=$articleATag")
 
 fun NavController.navigateToMediaGallery(
     noteId: String,
@@ -379,8 +382,8 @@ fun noteCallbacksHandler(navController: NavController) =
         onPayInvoiceClick = {
             navController.navigateToWalletCreateTransaction(lnbc = it.lnbc)
         },
-        onEventReactionsClick = { noteId, initialTab ->
-            navController.navigateToReactions(eventId = noteId, initialTab = initialTab)
+        onEventReactionsClick = { eventId, initialTab, articleATag ->
+            navController.navigateToReactions(eventId = eventId, initialTab = initialTab, articleATag = articleATag)
         },
         onGetPrimalPremiumClick = { navController.navigateToPremiumBuying() },
         onPrimalLegendsLeaderboardClick = { navController.navigateToPremiumLegendLeaderboard() },
@@ -787,12 +790,17 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
         )
 
         reactions(
-            route = "reactions/{$NOTE_ID}?$INITIAL_REACTION_TYPE={$INITIAL_REACTION_TYPE}",
+            route = "reactions/{$EVENT_ID}" +
+                "?$INITIAL_REACTION_TYPE={$INITIAL_REACTION_TYPE}&$ARTICLE_A_TAG={$ARTICLE_A_TAG}",
             arguments = listOf(
-                navArgument(NOTE_ID) { type = NavType.StringType },
+                navArgument(EVENT_ID) { type = NavType.StringType },
                 navArgument(INITIAL_REACTION_TYPE) {
                     type = NavType.StringType
                     defaultValue = ReactionType.ZAPS.name
+                },
+                navArgument(ARTICLE_A_TAG) {
+                    type = NavType.StringType
+                    nullable = true
                 },
             ),
             navController = navController,

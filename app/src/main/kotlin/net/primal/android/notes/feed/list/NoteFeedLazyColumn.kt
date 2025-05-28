@@ -121,7 +121,10 @@ fun NoteFeedLazyColumn(
                                         .padding(top = 4.dp, end = 2.dp),
                                     zaps = item.eventZaps,
                                     onClick = if (noteCallbacks.onEventReactionsClick != null) {
-                                        { noteCallbacks.onEventReactionsClick.invoke(item.postId, ReactionType.ZAPS) }
+                                        {
+                                            noteCallbacks.onEventReactionsClick
+                                                .invoke(item.postId, ReactionType.ZAPS, null)
+                                        }
                                     } else {
                                         null
                                     },
