@@ -261,48 +261,8 @@ class NoteEditorViewModel @AssistedInject constructor(
             val uris = content.text.parseNostrUris() + content.text.split(" ").filter { it.isLnInvoice() }
             var contentText = content.text
 
-            uris.mapNotNull { uri ->
-                if (uri.isLnInvoice()) {
-                    return@mapNotNull ReferencedUri.LightningInvoice(
-                        data = uri,
-                        uri = uri,
-                        loading = false,
-                    )
-                }
-                uri.takeAsNaddrOrNull()?.let { naddr ->
-                    ReferencedUri.Article(
-                        data = null,
-                        loading = true,
-                        uri = uri,
-                        naddr = naddr,
-                    )
-                } ?: uri.takeAsNeventOrNull()
-                    .takeIf {
-                        it?.kind == NostrEventKind.ShortTextNote.value ||
-                            it?.kind == NostrEventKind.Highlight.value
-                    }
-                    ?.let { nevent ->
-                        when (nevent.kind) {
-                            NostrEventKind.ShortTextNote.value ->
-                                ReferencedUri.Note(
-                                    data = null,
-                                    loading = true,
-                                    uri = uri,
-                                    nevent = nevent,
-                                )
-
-                            NostrEventKind.Highlight.value ->
-                                ReferencedUri.Highlight(
-                                    data = null,
-                                    loading = true,
-                                    uri = uri,
-                                    nevent = nevent,
-                                )
-
-                            else -> null
-                        }
-                    }
-            }.onEach { contentText = contentText.replace(it.uri, "") }
+            uris.mapNotNull(::mapUriToReferencedUri)
+                .onEach { contentText = contentText.replace(it.uri, "") }
                 .also {
                     fetchNostrUris(it)
                     setState { copy(referencedNostrUris = it + referencedNostrUris) }
@@ -810,6 +770,50 @@ class NoteEditorViewModel @AssistedInject constructor(
                 it
             }
         }
+
+    private fun mapUriToReferencedUri(uri: String): ReferencedUri<*>? {
+        if (uri.isLnInvoice()) {
+            return ReferencedUri.LightningInvoice(
+                data = uri,
+                uri = uri,
+                loading = false,
+            )
+        }
+
+        return uri.takeAsNaddrOrNull()?.let { naddr ->
+            ReferencedUri.Article(
+                data = null,
+                loading = true,
+                uri = uri,
+                naddr = naddr,
+            )
+        } ?: uri.takeAsNeventOrNull()
+            .takeIf {
+                it?.kind == NostrEventKind.ShortTextNote.value ||
+                    it?.kind == NostrEventKind.Highlight.value
+            }
+            ?.let { nevent ->
+                when (nevent.kind) {
+                    NostrEventKind.ShortTextNote.value ->
+                        ReferencedUri.Note(
+                            data = null,
+                            loading = true,
+                            uri = uri,
+                            nevent = nevent,
+                        )
+
+                    NostrEventKind.Highlight.value ->
+                        ReferencedUri.Highlight(
+                            data = null,
+                            loading = true,
+                            uri = uri,
+                            nevent = nevent,
+                        )
+
+                    else -> null
+                }
+            }
+    }
 
     private suspend fun FeedPostUi.asNevent(): Nevent {
         val relayHints = runCatching { relayHintsRepository.findRelaysByIds(listOf(this.postId)) }.getOrNull()
