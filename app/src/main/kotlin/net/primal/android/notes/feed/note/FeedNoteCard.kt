@@ -91,6 +91,7 @@ fun FeedNoteCard(
     shape: Shape = CardDefaults.shape,
     colors: CardColors = noteCardColors(),
     cardPadding: PaddingValues = PaddingValues(all = 0.dp),
+    nestingCutOffLimit: Int = Int.MAX_VALUE,
     enableTweetsMode: Boolean = false,
     headerSingleLine: Boolean = true,
     fullWidthContent: Boolean = false,
@@ -136,6 +137,7 @@ fun FeedNoteCard(
         colors = colors,
         cardPadding = cardPadding,
         enableTweetsMode = enableTweetsMode,
+        nestingCutOffLimit = nestingCutOffLimit,
         headerSingleLine = headerSingleLine,
         fullWidthContent = fullWidthContent,
         forceContentIndent = forceContentIndent,
@@ -162,6 +164,7 @@ private fun FeedNoteCard(
     shape: Shape = CardDefaults.shape,
     colors: CardColors = noteCardColors(),
     cardPadding: PaddingValues = PaddingValues(all = 0.dp),
+    nestingCutOffLimit: Int = Int.MAX_VALUE,
     enableTweetsMode: Boolean = false,
     headerSingleLine: Boolean = true,
     fullWidthContent: Boolean = false,
@@ -390,6 +393,7 @@ private fun FeedNoteCard(
                             top = avatarPaddingDp,
                             end = overflowIconSizeDp - 8.dp,
                         ),
+                        nestingCutOffLimit = nestingCutOffLimit,
                         enableTweetsMode = enableTweetsMode,
                         headerSingleLine = headerSingleLine,
                         showReplyTo = showReplyTo,
@@ -522,6 +526,7 @@ private fun FeedNote(
     textSelectable: Boolean,
     showNoteStatCounts: Boolean,
     noteCallbacks: NoteCallbacks,
+    nestingCutOffLimit: Int = Int.MAX_VALUE,
     onPostAction: ((FeedPostAction) -> Unit)? = null,
     onPostLongClickAction: ((FeedPostAction) -> Unit)? = null,
     contentFooter: @Composable () -> Unit = {},
@@ -589,6 +594,7 @@ private fun FeedNote(
                 expanded = expanded,
                 enableTweetsMode = enableTweetsMode,
                 textSelectable = textSelectable,
+                nestingCutOffLimit = nestingCutOffLimit,
                 onClick = if (noteCallbacks.onNoteClick != null) {
                     {
                         launchRippleEffect(it)

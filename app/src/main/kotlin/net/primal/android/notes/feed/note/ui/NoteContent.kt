@@ -151,6 +151,7 @@ private fun String.ellipsize(expanded: Boolean, ellipsizeText: String): String {
 
 const val TWEET_MODE_THRESHOLD = 21
 const val MAX_LINE_BREAKS_IN_TWEET = 3
+internal const val NOT_FOUND_NOTICE_CUT_OFF_LEVEL = 2
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -159,6 +160,8 @@ fun NoteContent(
     data: NoteContentUi,
     expanded: Boolean,
     noteCallbacks: NoteCallbacks,
+    nestingLevel: Int = 0,
+    nestingCutOffLimit: Int = Int.MAX_VALUE,
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip,
     enableTweetsMode: Boolean = false,
@@ -275,9 +278,11 @@ fun NoteContent(
         }
 
         val referencedPostResources = data.nostrUris.filter(type = EventUriNostrType.Note)
-        if (referencedPostResources.isNotEmpty()) {
+        if (referencedPostResources.isNotEmpty() && (nestingLevel < nestingCutOffLimit || expanded)) {
             ReferencedNotesColumn(
                 modifier = Modifier.padding(top = 4.dp),
+                nestingLevel = nestingLevel,
+                nestingCutOffLimit = nestingCutOffLimit,
                 postResources = referencedPostResources,
                 expanded = expanded,
                 containerColor = referencedEventsContainerColor,
@@ -341,7 +346,7 @@ fun NoteContent(
             }
 
         val genericEvents = data.nostrUris.filter(type = EventUriNostrType.Unsupported)
-        if (genericEvents.isNotEmpty()) {
+        if (genericEvents.isNotEmpty() && (nestingLevel < NOT_FOUND_NOTICE_CUT_OFF_LEVEL)) {
             genericEvents.forEachIndexed { index, nostrUriUi ->
                 NoteUnknownEvent(
                     modifier = Modifier.fillMaxWidth(),
