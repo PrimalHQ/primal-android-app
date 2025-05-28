@@ -86,11 +86,10 @@ class ArticleDetailsViewModel @Inject constructor(
 
     init {
         observeEvents()
-        observeActiveAccount()
-        resolveNaddr()
+        resolveNaddrAndInit()
     }
 
-    private fun resolveNaddr() =
+    private fun resolveNaddrAndInit() =
         viewModelScope.launch {
             setState { copy(isResolvingNaddr = true, error = null) }
             val naddr = parseAndResolveNaddr()
@@ -102,6 +101,7 @@ class ArticleDetailsViewModel @Inject constructor(
 
                 observeArticle(naddr)
                 observeArticleComments(naddr = naddr)
+                observeActiveAccount()
             }
 
             setState { copy(isResolvingNaddr = false) }
@@ -135,7 +135,7 @@ class ArticleDetailsViewModel @Inject constructor(
                         )
                     }
 
-                    UiEvent.RequestResolveNaddr -> resolveNaddr()
+                    UiEvent.RequestResolveNaddr -> resolveNaddrAndInit()
                 }
             }
         }
