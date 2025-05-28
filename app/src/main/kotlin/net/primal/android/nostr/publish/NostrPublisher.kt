@@ -7,6 +7,7 @@ import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.Relay
 import net.primal.android.wallet.nwc.model.LightningPayResponse
+import net.primal.android.wallet.nwc.model.NwcWalletRequest
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
@@ -104,5 +105,17 @@ class NostrPublisher @Inject constructor(
             nwc = nwcData,
         ).unwrapOrThrow()
         relaysSocketManager.publishNwcEvent(nostrEvent = walletPayNostrEvent)
+    }
+
+    @Throws(NostrPublishException::class, SignatureException::class)
+    suspend fun publishGetBalanceRequest(nwcData: NostrWalletConnect) {
+        val request = NwcWalletRequest(method = "get_balance", params = Unit)
+        val balanceReqEvent = nostrNotary
+            .signWalletBalanceRequestNostrEvent(
+                request = request,
+                nwc = nwcData,
+            )
+            .unwrapOrThrow()
+        relaysSocketManager.publishNwcEvent(nostrEvent = balanceReqEvent)
     }
 }

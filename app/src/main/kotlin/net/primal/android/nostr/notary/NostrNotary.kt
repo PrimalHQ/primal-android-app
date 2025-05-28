@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
@@ -220,6 +221,35 @@ class NostrNotary @Inject constructor(
                     content = encryptedMessage,
                     tags = tags,
                 ).signOrThrow(hexPrivateKey = Hex.decode(nwc.keypair.privateKey)),
+            )
+        }.getOrElse { SignResult.Rejected(SignatureException(cause = it)) }
+    }
+
+    @OptIn(ExperimentalEncodingApi::class)
+    fun signWalletBalanceRequestNostrEvent(request: NwcWalletRequest<Unit>, nwc: NostrWalletConnect): SignResult {
+        val tags = listOf(nwc.pubkey.asPubkeyTag())
+
+        val plaintext = NostrNotaryJson.encodeToString(
+            NwcWalletRequest.serializer(Unit.serializer()),
+            request,
+        )
+
+        val encrypted = CryptoUtils.encrypt(
+            msg = plaintext,
+            privateKey = Hex.decode(nwc.keypair.privateKey),
+            pubKey = Hex.decode(nwc.pubkey),
+        )
+
+        val unsigned = NostrUnsignedEvent(
+            pubKey = nwc.keypair.pubkey,
+            kind = NostrEventKind.WalletRequest.value,
+            content = encrypted,
+            tags = tags,
+        )
+
+        return runCatching {
+            SignResult.Signed(
+                unsigned.signOrThrow(hexPrivateKey = Hex.decode(nwc.keypair.privateKey)),
             )
         }.getOrElse { SignResult.Rejected(SignatureException(cause = it)) }
     }

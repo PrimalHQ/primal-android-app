@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.utils.authorNameUiFriendly
+import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.WalletPreference
@@ -43,6 +44,7 @@ class WalletDashboardViewModel @Inject constructor(
     private val primalBillingClient: PrimalBillingClient,
     private val subscriptionsManager: SubscriptionsManager,
     private val exchangeRateHandler: ExchangeRateHandler,
+    private val nostrPublisher: NostrPublisher,
 ) : ViewModel() {
 
     private val activeUserId = activeAccountStore.activeUserId()
@@ -117,7 +119,13 @@ class WalletDashboardViewModel @Inject constructor(
     private fun fetchWalletBalance() =
         viewModelScope.launch {
             try {
-                walletRepository.fetchWalletBalance(userId = activeUserId)
+                // This is just for concept
+                activeAccountStore.activeUserAccount.collect {
+                    it.nostrWallet?.let { nwc ->
+                        nostrPublisher.publishGetBalanceRequest(nwcData = nwc)
+                    }
+                }
+//                walletRepository.fetchWalletBalance(userId = activeUserId)
             } catch (error: SignatureException) {
                 Timber.w(error)
             } catch (error: NetworkException) {
