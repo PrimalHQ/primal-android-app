@@ -191,7 +191,7 @@ private fun NavGraphBuilder.wallet(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onEditProfileClick = { navController.navigateToProfileEditor() },
-        onOtherConnectClick = { navController.navigateToWalletScanNwcUrl() },
+        onScanNwcClick = { navController.navigateToWalletScanNwcUrl() },
         onCreateNewWalletConnection = { navController.navigateToCreateNewWalletConnection() },
     )
 }

@@ -42,7 +42,8 @@ import net.primal.android.user.domain.NostrWalletConnect
 fun ExternalWalletSettings(
     nwcWallet: NostrWalletConnect?,
     onExternalWalletDisconnect: () -> Unit,
-    onOtherConnectClick: () -> Unit,
+    onPasteNwcClick: () -> Unit,
+    onScanNwcClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier.animateContentSize(),
@@ -52,7 +53,8 @@ fun ExternalWalletSettings(
         ExternalWalletSection(
             nwcWallet = nwcWallet,
             onExternalWalletDisconnect = onExternalWalletDisconnect,
-            onOtherConnectClick = onOtherConnectClick,
+            onPasteNwcClick = onPasteNwcClick,
+            onScanNwcClick = onScanNwcClick,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -63,7 +65,8 @@ fun ExternalWalletSettings(
 private fun ExternalWalletSection(
     nwcWallet: NostrWalletConnect?,
     onExternalWalletDisconnect: () -> Unit,
-    onOtherConnectClick: () -> Unit,
+    onPasteNwcClick: () -> Unit,
+    onScanNwcClick: () -> Unit,
 ) {
     SectionTitle(
         title = if (nwcWallet != null) {
@@ -99,7 +102,8 @@ private fun ExternalWalletSection(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
-            onOtherConnectClick = onOtherConnectClick,
+            onPasteNwcClick = onPasteNwcClick,
+            onScanNwcClick = onScanNwcClick,
         )
     }
 }
@@ -168,7 +172,11 @@ private fun ExternalWalletConnected(
 }
 
 @Composable
-private fun ExternalWalletDisconnected(modifier: Modifier = Modifier, onOtherConnectClick: () -> Unit) {
+private fun ExternalWalletDisconnected(
+    modifier: Modifier = Modifier,
+    onPasteNwcClick: () -> Unit,
+    onScanNwcClick: () -> Unit,
+) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Top,
@@ -178,7 +186,7 @@ private fun ExternalWalletDisconnected(modifier: Modifier = Modifier, onOtherCon
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
-            onClick = onOtherConnectClick,
+            onClick = onPasteNwcClick,
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -187,7 +195,7 @@ private fun ExternalWalletDisconnected(modifier: Modifier = Modifier, onOtherCon
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
-            onClick = onOtherConnectClick,
+            onClick = onScanNwcClick,
         )
     }
 }
@@ -236,7 +244,8 @@ private fun PreviewExternalWalletSettings(
                 ExternalWalletSettings(
                     nwcWallet = state.wallet,
                     onExternalWalletDisconnect = {},
-                    onOtherConnectClick = {},
+                    onPasteNwcClick = {},
+                    onScanNwcClick = {},
                 )
             }
         }

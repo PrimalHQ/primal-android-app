@@ -8,7 +8,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -16,12 +15,10 @@ import net.primal.android.user.domain.NWCParseException
 import net.primal.android.user.domain.isNwcUrl
 import net.primal.android.user.domain.parseNWCUrl
 import net.primal.android.user.repository.UserRepository
-import net.primal.core.utils.coroutines.DispatcherProvider
 import timber.log.Timber
 
 @HiltViewModel
 class NwcQrCodeScannerViewModel @Inject constructor(
-    private val dispatcherProvider: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val userRepository: UserRepository,
 ) : ViewModel() {
@@ -68,12 +65,10 @@ class NwcQrCodeScannerViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val nostrWalletConnect = nwcUrl.parseNWCUrl()
-                withContext(dispatcherProvider.io()) {
-                    userRepository.connectNostrWallet(
-                        userId = activeAccountStore.activeUserId(),
-                        nostrWalletConnect = nostrWalletConnect,
-                    )
-                }
+                userRepository.connectNostrWallet(
+                    userId = activeAccountStore.activeUserId(),
+                    nostrWalletConnect = nostrWalletConnect,
+                )
                 setEffect(NwcQrCodeScannerContract.SideEffect.NwcConnected)
             } catch (error: NWCParseException) {
                 Timber.w(error)

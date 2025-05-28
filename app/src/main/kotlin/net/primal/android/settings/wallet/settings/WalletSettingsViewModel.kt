@@ -17,6 +17,7 @@ import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiStat
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.NWCParseException
 import net.primal.android.user.domain.WalletPreference
+import net.primal.android.user.domain.isNwcUrl
 import net.primal.android.user.domain.parseNWCUrl
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.api.model.PrimalNwcConnectionInfo
@@ -104,6 +105,10 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     }
 
                     UiEvent.RequestFetchWalletConnections -> fetchWalletConnections()
+
+                    is UiEvent.ConnectExternalWallet -> if (it.connectionLink.isNwcUrl()) {
+                        connectWallet(nwcUrl = it.connectionLink)
+                    }
                 }
             }
         }
