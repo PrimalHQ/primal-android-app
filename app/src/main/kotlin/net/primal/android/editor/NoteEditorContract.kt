@@ -19,9 +19,9 @@ interface NoteEditorContract {
 
     data class UiState(
         val content: TextFieldValue = TextFieldValue(),
-        val conversation: List<FeedPostUi> = emptyList(),
-        val referencedArticle: FeedArticleUi? = null,
-        val referencedHighlight: HighlightUi? = null,
+        val replyToConversation: List<FeedPostUi> = emptyList(),
+        val replyToArticle: FeedArticleUi? = null,
+        val replyToHighlight: HighlightUi? = null,
         val isQuoting: Boolean = false,
         val publishing: Boolean = false,
         val error: UiError? = null,
@@ -35,10 +35,10 @@ interface NoteEditorContract {
         val users: List<UserProfileItemUi> = emptyList(),
         val recentUsers: List<UserProfileItemUi> = emptyList(),
         val popularUsers: List<UserProfileItemUi> = emptyList(),
-        val nostrUris: List<ReferencedUri<*>> = emptyList(),
+        val referencedNostrUris: List<ReferencedUri<*>> = emptyList(),
     ) {
-        val isReply: Boolean get() = conversation.isNotEmpty()
-        val replyToNote: FeedPostUi? = conversation.lastOrNull()
+        val isReply: Boolean get() = replyToConversation.isNotEmpty()
+        val replyToNote: FeedPostUi? = replyToConversation.lastOrNull()
         val recommendedUsers: List<UserProfileItemUi> get() = recentUsers + popularUsers
     }
 

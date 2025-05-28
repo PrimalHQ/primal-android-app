@@ -254,9 +254,9 @@ private fun NoteEditorBox(
             if (!state.isQuoting) {
                 referencedEventsAndConversationAsReplyTo(
                     modifier = Modifier.padding(all = 16.dp),
-                    referencedHighlight = state.referencedHighlight,
-                    referencedArticle = state.referencedArticle,
-                    conversation = state.conversation,
+                    referencedHighlight = state.replyToHighlight,
+                    referencedArticle = state.replyToArticle,
+                    conversation = state.replyToConversation,
                 )
             }
 
@@ -273,7 +273,7 @@ private fun NoteEditorBox(
             }
 
             nostrUris(
-                nostrUris = state.nostrUris,
+                nostrUris = state.referencedNostrUris,
                 noteCallbacks = noteCallbacks,
                 onRetryUriClick = { eventPublisher(UiEvent.RefreshUri(it.uri)) },
                 onRemoveUriClick = { eventPublisher(UiEvent.RemoveUri(it)) },
