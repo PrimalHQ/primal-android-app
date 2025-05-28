@@ -166,7 +166,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                 },
             )
 
-            setState { copy(nostrUris = nostrUris + referencedUris) }
+            setState { copy(referencedNostrUris = referencedNostrUris + referencedUris) }
             fetchNostrUris(uris = referencedUris)
         }
 
@@ -233,17 +233,21 @@ class NoteEditorViewModel @AssistedInject constructor(
                     }
 
                     UiEvent.DismissError -> setState { copy(error = null) }
-                    is UiEvent.RefreshUri -> fetchNostrUris(uris = state.value.nostrUris.filter { it.uri == event.uri })
+                    is UiEvent.RefreshUri -> fetchNostrUris(
+                        uris = state.value.referencedNostrUris.filter { it.uri == event.uri },
+                    )
+
                     is UiEvent.RemoveUri -> setState {
                         copy(
-                            nostrUris = nostrUris.filterIndexed { index, _ -> index != event.uriIndex },
+                            referencedNostrUris = referencedNostrUris
+                                .filterIndexed { index, _ -> index != event.uriIndex },
                         )
                     }
 
                     is UiEvent.RemoveHighlightByArticle ->
                         setState {
                             copy(
-                                nostrUris = nostrUris.filter {
+                                referencedNostrUris = referencedNostrUris.filter {
                                     it !is ReferencedUri.Highlight || it.data?.referencedEventATag != event.articleATag
                                 },
                             )
@@ -301,7 +305,7 @@ class NoteEditorViewModel @AssistedInject constructor(
             }.onEach { contentText = contentText.replace(it.uri, "") }
                 .also {
                     fetchNostrUris(it)
-                    setState { copy(nostrUris = it + nostrUris) }
+                    setState { copy(referencedNostrUris = it + referencedNostrUris) }
                 }
 
             setState { copy(content = content.copy(text = contentText)) }
@@ -329,7 +333,7 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             highlightRepository.observeHighlightById(highlightId = highlightNevent.eventId)
                 .collect {
-                    setState { copy(referencedHighlight = it.asHighlightUi()) }
+                    setState { copy(replyToHighlight = it.asHighlightUi()) }
                 }
         }
 
@@ -357,7 +361,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                 .collect { conversation ->
                     val replyToNoteIndex = conversation.indexOfFirst { it.postId == replyToNoteId }
                     val thread = conversation.subList(0, replyToNoteIndex + 1)
-                    setState { copy(conversation = thread) }
+                    setState { copy(replyToConversation = thread) }
                 }
         }
     }
@@ -367,7 +371,7 @@ class NoteEditorViewModel @AssistedInject constructor(
             articleRepository.observeArticleByCommentId(commentNoteId = replyToNoteId)
                 .filterNotNull()
                 .collect { article ->
-                    setState { copy(referencedArticle = article.mapAsFeedArticleUi()) }
+                    setState { copy(replyToArticle = article.mapAsFeedArticleUi()) }
                 }
         }
 
@@ -376,7 +380,7 @@ class NoteEditorViewModel @AssistedInject constructor(
             articleRepository.observeArticle(articleId = naddr.identifier, articleAuthorId = naddr.userId)
                 .filterNotNull()
                 .collect { article ->
-                    setState { copy(referencedArticle = article.mapAsFeedArticleUi()) }
+                    setState { copy(replyToArticle = article.mapAsFeedArticleUi()) }
                 }
         }
 
@@ -392,7 +396,11 @@ class NoteEditorViewModel @AssistedInject constructor(
     private fun fetchAndUpdateNoteUriDetails(uri: String, nevent: Nevent) =
         viewModelScope.launch {
             setState {
-                copy(nostrUris = nostrUris.updateByUri<ReferencedUri.Note>(uri = uri) { copy(loading = true) })
+                copy(
+                    referencedNostrUris = referencedNostrUris.updateByUri<ReferencedUri.Note>(
+                        uri = uri,
+                    ) { copy(loading = true) },
+                )
             }
             fetchAndGet<FeedPost, NetworkException>(
                 fetch = {
@@ -406,14 +414,16 @@ class NoteEditorViewModel @AssistedInject constructor(
                 onFinally = {
                     setState {
                         copy(
-                            nostrUris = nostrUris.updateByUri<ReferencedUri.Note>(uri = uri) { copy(loading = false) },
+                            referencedNostrUris = referencedNostrUris.updateByUri<ReferencedUri.Note>(
+                                uri = uri,
+                            ) { copy(loading = false) },
                         )
                     }
                 },
             ) { post ->
                 setState {
                     copy(
-                        nostrUris = nostrUris.updateByUri<ReferencedUri.Note>(uri = uri) {
+                        referencedNostrUris = referencedNostrUris.updateByUri<ReferencedUri.Note>(uri = uri) {
                             copy(data = post.asFeedPostUi())
                         },
                     )
@@ -424,14 +434,18 @@ class NoteEditorViewModel @AssistedInject constructor(
     private fun getAndUpdateHighlightUriDetails(uri: String, nevent: Nevent) =
         viewModelScope.launch {
             setState {
-                copy(nostrUris = nostrUris.updateByUri<ReferencedUri.Highlight>(uri = uri) { copy(loading = true) })
+                copy(
+                    referencedNostrUris = referencedNostrUris.updateByUri<ReferencedUri.Highlight>(
+                        uri = uri,
+                    ) { copy(loading = true) },
+                )
             }
 
             val highlight = highlightRepository.getHighlightById(highlightId = nevent.eventId)
 
             setState {
                 copy(
-                    nostrUris = nostrUris.updateByUri<ReferencedUri.Highlight>(uri = uri) {
+                    referencedNostrUris = referencedNostrUris.updateByUri<ReferencedUri.Highlight>(uri = uri) {
                         copy(data = highlight?.asHighlightUi(), loading = false)
                     },
                 )
@@ -441,7 +455,11 @@ class NoteEditorViewModel @AssistedInject constructor(
     private fun fetchAndUpdateArticleUriDetails(uri: String, naddr: Naddr) =
         viewModelScope.launch {
             setState {
-                copy(nostrUris = nostrUris.updateByUri<ReferencedUri.Article>(uri = uri) { copy(loading = true) })
+                copy(
+                    referencedNostrUris = referencedNostrUris.updateByUri<ReferencedUri.Article>(
+                        uri = uri,
+                    ) { copy(loading = true) },
+                )
             }
 
             fetchAndGet<Article, NetworkException>(
@@ -456,7 +474,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                 onFinally = {
                     setState {
                         copy(
-                            nostrUris = nostrUris.updateByUri<ReferencedUri.Article>(uri = uri) {
+                            referencedNostrUris = referencedNostrUris.updateByUri<ReferencedUri.Article>(uri = uri) {
                                 copy(loading = false)
                             },
                         )
@@ -465,7 +483,7 @@ class NoteEditorViewModel @AssistedInject constructor(
             ) { article ->
                 setState {
                     copy(
-                        nostrUris = nostrUris.updateByUri<ReferencedUri.Article>(uri = uri) {
+                        referencedNostrUris = referencedNostrUris.updateByUri<ReferencedUri.Article>(uri = uri) {
                             copy(data = article.mapAsFeedArticleUi())
                         },
                     )
@@ -500,8 +518,8 @@ class NoteEditorViewModel @AssistedInject constructor(
                         attachments = _state.value.attachments,
                     )
                 } else {
-                    val rootPost = _state.value.conversation.firstOrNull()
-                    val replyToPost = _state.value.conversation.lastOrNull()
+                    val rootPost = _state.value.replyToConversation.firstOrNull()
+                    val replyToPost = _state.value.replyToConversation.lastOrNull()
                     notePublishHandler.publishShortTextNote(
                         userId = activeAccountStore.activeUserId(),
                         content = noteContent.concatenateUris(),
@@ -509,9 +527,9 @@ class NoteEditorViewModel @AssistedInject constructor(
                         rootNoteNevent = rootPost?.asNevent(),
                         replyToNoteNevent = replyToPost?.asNevent(),
                         rootArticleNaddr = referencedArticleNaddr
-                            ?: _state.value.referencedArticle?.generateNaddr(),
+                            ?: _state.value.replyToArticle?.generateNaddr(),
                         rootHighlightNevent = referencedHighlightNevent
-                            ?: _state.value.referencedHighlight?.generateNevent(),
+                            ?: _state.value.replyToHighlight?.generateNevent(),
                     )
                 }
 
@@ -806,7 +824,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     }
 
     private fun String.concatenateUris(): String {
-        return this + state.value.nostrUris.map { it.uri }
+        return this + state.value.referencedNostrUris.map { it.uri }
             .joinToString(separator = " \n\n", prefix = " \n\n") { it.withNostrPrefix() }
     }
 }
