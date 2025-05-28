@@ -337,6 +337,7 @@ class NoteViewModel @AssistedInject constructor(
                     )
                 }
             } catch (error: NostrPublishException) {
+                setState { copy(error = UiError.FailedToBookmarkNote(error)) }
                 Timber.w(error)
             } catch (error: PublicBookmarksNotFoundException) {
                 Timber.w(error)
