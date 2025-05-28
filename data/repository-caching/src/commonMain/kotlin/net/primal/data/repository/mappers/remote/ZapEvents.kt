@@ -6,6 +6,7 @@ import net.primal.core.utils.toDouble
 import net.primal.data.local.dao.events.EventZap
 import net.primal.data.local.dao.profiles.ProfileData
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.findFirstATag
 import net.primal.domain.nostr.findFirstBolt11
 import net.primal.domain.nostr.findFirstEventId
 import net.primal.domain.nostr.findFirstProfileId
@@ -23,7 +24,9 @@ fun List<NostrEvent>.mapAsEventZapDO(profilesMap: Map<String, ProfileData>) =
         val senderId = zapRequest?.pubKey
             ?: return@mapNotNull null
 
-        val noteId = zapReceipt.tags.findFirstEventId()
+        val noteId = zapReceipt.tags.findFirstATag()
+            ?: zapRequest.tags.findFirstATag()
+            ?: zapReceipt.tags.findFirstEventId()
             ?: zapRequest.tags.findFirstEventId()
             ?: return@mapNotNull null
 

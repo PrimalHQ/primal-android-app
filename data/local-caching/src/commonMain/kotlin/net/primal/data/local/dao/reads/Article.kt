@@ -21,7 +21,7 @@ data class Article(
     @Relation(entityColumn = "eventId", parentColumn = "eventId")
     val userEventStats: EventUserStats? = null,
 
-    @Relation(entityColumn = "eventId", parentColumn = "eventId")
+    @Relation(entityColumn = "eventId", parentColumn = "aTag")
     val eventZaps: List<EventZap> = emptyList(),
 
     @Relation(entityColumn = "tagValue", parentColumn = "aTag")
