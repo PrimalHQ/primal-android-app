@@ -794,11 +794,12 @@
     <string name="settings_wallet_use_primal_wallet">Use Primal wallet</string>
     <string name="settings_wallet_use_primal_wallet_hint">Alternatively you can connect to an external lightning wallet via Nostr Wallet Connect</string>
     <string name="settings_wallet_nwc_header_not_connected">Connect a Wallet</string>
+    <string name="settings_wallet_nwc_header_not_connected_hint">Connect an external wallet by scanning or pasting its Nostr Wallet Connect (NWC) connection string:</string>
     <string name="settings_wallet_nwc_primal_wallet">Primal Wallet</string>
     <string name="settings_wallet_nwc_external_app">External App</string>
     <string name="settings_wallet_nwc_header_connected">Wallet Connected</string>
-    <string name="settings_wallet_nwc_connect_alby_wallet">Connect Alby Wallet</string>
-    <string name="settings_wallet_nwc_connect_other_wallet">Connect Other Wallet</string>
+    <string name="settings_wallet_nwc_paste_string">Paste NWC String</string>
+    <string name="settings_wallet_nwc_scan_qr_code">Scan NWC QR Code</string>
     <string name="settings_wallet_nwc_disconnect_wallet_button">Disconnect Wallet</string>
     <string name="settings_wallet_nwc_profile_lightning_address">Your Nostr Lightning Address:</string>
     <string name="settings_wallet_nwc_profile_lightning_address_hint">You can change your Nostr Lightning Address (for receiving zaps) in your</string>

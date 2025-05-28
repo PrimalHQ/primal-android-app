@@ -26,6 +26,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -58,7 +59,7 @@ fun WalletSettingsScreen(
     viewModel: WalletSettingsViewModel,
     onClose: () -> Unit,
     onEditProfileClick: () -> Unit,
-    onOtherConnectClick: () -> Unit,
+    onScanNwcClick: () -> Unit,
     onCreateNewWalletConnection: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -73,7 +74,7 @@ fun WalletSettingsScreen(
         state = uiState.value,
         onClose = onClose,
         onEditProfileClick = onEditProfileClick,
-        onOtherConnectClick = onOtherConnectClick,
+        onScanNwcClick = onScanNwcClick,
         onCreateNewWalletConnection = onCreateNewWalletConnection,
         eventPublisher = { viewModel.setEvent(it) },
     )
@@ -85,7 +86,7 @@ fun WalletSettingsScreen(
     state: WalletSettingsContract.UiState,
     onClose: () -> Unit,
     onEditProfileClick: () -> Unit,
-    onOtherConnectClick: () -> Unit,
+    onScanNwcClick: () -> Unit,
     onCreateNewWalletConnection: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
 ) {
@@ -139,12 +140,15 @@ fun WalletSettingsScreen(
                         }
 
                         false -> {
+                            val clipboardManager = LocalClipboardManager.current
                             ExternalWalletSettings(
                                 nwcWallet = state.wallet,
-                                onExternalWalletDisconnect = {
-                                    eventPublisher(UiEvent.DisconnectWallet)
+                                onExternalWalletDisconnect = { eventPublisher(UiEvent.DisconnectWallet) },
+                                onPasteNwcClick = {
+                                    val clipboardText = clipboardManager.getText()?.text.orEmpty().trim()
+                                    eventPublisher(UiEvent.ConnectExternalWallet(connectionLink = clipboardText))
                                 },
-                                onOtherConnectClick = onOtherConnectClick,
+                                onScanNwcClick = onScanNwcClick,
                             )
                         }
                     }
@@ -293,7 +297,7 @@ private fun PreviewSettingsWalletScreen(
             state = state,
             onClose = {},
             onEditProfileClick = {},
-            onOtherConnectClick = {},
+            onScanNwcClick = {},
             onCreateNewWalletConnection = {},
             eventPublisher = {},
         )

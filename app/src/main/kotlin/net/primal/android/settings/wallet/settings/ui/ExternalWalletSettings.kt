@@ -18,26 +18,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.core.ext.openUriSafely
 import net.primal.android.settings.wallet.settings.WalletSettingsContract
 import net.primal.android.settings.wallet.settings.WalletUiStateProvider
 import net.primal.android.theme.AppTheme
@@ -48,7 +42,8 @@ import net.primal.android.user.domain.NostrWalletConnect
 fun ExternalWalletSettings(
     nwcWallet: NostrWalletConnect?,
     onExternalWalletDisconnect: () -> Unit,
-    onOtherConnectClick: () -> Unit,
+    onPasteNwcClick: () -> Unit,
+    onScanNwcClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier.animateContentSize(),
@@ -58,7 +53,8 @@ fun ExternalWalletSettings(
         ExternalWalletSection(
             nwcWallet = nwcWallet,
             onExternalWalletDisconnect = onExternalWalletDisconnect,
-            onOtherConnectClick = onOtherConnectClick,
+            onPasteNwcClick = onPasteNwcClick,
+            onScanNwcClick = onScanNwcClick,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -69,7 +65,8 @@ fun ExternalWalletSettings(
 private fun ExternalWalletSection(
     nwcWallet: NostrWalletConnect?,
     onExternalWalletDisconnect: () -> Unit,
-    onOtherConnectClick: () -> Unit,
+    onPasteNwcClick: () -> Unit,
+    onScanNwcClick: () -> Unit,
 ) {
     SectionTitle(
         title = if (nwcWallet != null) {
@@ -77,6 +74,16 @@ private fun ExternalWalletSection(
         } else {
             stringResource(id = R.string.settings_wallet_nwc_header_not_connected)
         },
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    Text(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        text = stringResource(id = R.string.settings_wallet_nwc_header_not_connected_hint),
+        style = AppTheme.typography.bodySmall,
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -91,17 +98,12 @@ private fun ExternalWalletSection(
             disconnectWallet = onExternalWalletDisconnect,
         )
     } else {
-        val uriHandler = LocalUriHandler.current
         ExternalWalletDisconnected(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
-            onAlbyConnectClick = {
-                uriHandler.openUriSafely(
-                    "https://nwc.getalby.com/apps/new?c=Primal-Android",
-                )
-            },
-            onOtherConnectClick = onOtherConnectClick,
+            onPasteNwcClick = onPasteNwcClick,
+            onScanNwcClick = onScanNwcClick,
         )
     }
 }
@@ -172,62 +174,57 @@ private fun ExternalWalletConnected(
 @Composable
 private fun ExternalWalletDisconnected(
     modifier: Modifier = Modifier,
-    onAlbyConnectClick: () -> Unit,
-    onOtherConnectClick: () -> Unit,
+    onPasteNwcClick: () -> Unit,
+    onScanNwcClick: () -> Unit,
 ) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        ConnectAlbyWalletButton(
+        PasteNwcStringButton(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
-            onClick = onAlbyConnectClick,
+            onClick = onPasteNwcClick,
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        ConnectOtherWalletButton(
+        ScanNwcQrCodeButton(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
-            onClick = onOtherConnectClick,
-        )
-    }
-}
-
-private val albyColor = Color(0xFFFFDF6F)
-
-@Composable
-fun ConnectAlbyWalletButton(modifier: Modifier = Modifier, onClick: (() -> Unit)?) {
-    PrimalFilledButton(
-        modifier = modifier,
-        containerColor = albyColor,
-        onClick = onClick,
-    ) {
-        IconText(
-            text = stringResource(id = R.string.settings_wallet_nwc_connect_alby_wallet),
-            leadingIcon = ImageVector.vectorResource(id = R.drawable.alby_logo),
-            iconSize = 42.sp,
-            style = AppTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium,
-            color = Color.Black,
-            leadingIconTintColor = null,
+            onClick = onScanNwcClick,
         )
     }
 }
 
 @Composable
-fun ConnectOtherWalletButton(modifier: Modifier = Modifier, onClick: (() -> Unit)?) {
+fun PasteNwcStringButton(modifier: Modifier = Modifier, onClick: (() -> Unit)?) {
     PrimalFilledButton(
         modifier = modifier,
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
         onClick = onClick,
     ) {
         IconText(
-            text = stringResource(id = R.string.settings_wallet_nwc_connect_other_wallet),
+            text = stringResource(id = R.string.settings_wallet_nwc_paste_string),
+            style = AppTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium,
+            color = AppTheme.colorScheme.onSurface,
+        )
+    }
+}
+
+@Composable
+fun ScanNwcQrCodeButton(modifier: Modifier = Modifier, onClick: (() -> Unit)?) {
+    PrimalFilledButton(
+        modifier = modifier,
+        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+        onClick = onClick,
+    ) {
+        IconText(
+            text = stringResource(id = R.string.settings_wallet_nwc_scan_qr_code),
             style = AppTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium,
             color = AppTheme.colorScheme.onSurface,
@@ -247,7 +244,8 @@ private fun PreviewExternalWalletSettings(
                 ExternalWalletSettings(
                     nwcWallet = state.wallet,
                     onExternalWalletDisconnect = {},
-                    onOtherConnectClick = {},
+                    onPasteNwcClick = {},
+                    onScanNwcClick = {},
                 )
             }
         }

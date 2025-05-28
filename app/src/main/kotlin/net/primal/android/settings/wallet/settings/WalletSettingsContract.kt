@@ -22,6 +22,7 @@ interface WalletSettingsContract {
         data class RevokeConnection(val nwcPubkey: String) : UiEvent()
         data class UpdateWalletPreference(val walletPreference: WalletPreference) : UiEvent()
         data class UpdateMinTransactionAmount(val amountInSats: Long) : UiEvent()
+        data class ConnectExternalWallet(val connectionLink: String) : UiEvent()
     }
 
     enum class ConnectionsState {
