@@ -6,10 +6,16 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
 import android.widget.Toast
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -80,6 +86,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteLink
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyRawData
 import net.primal.android.core.compose.icons.primaliconpack.More
+import net.primal.android.core.compose.immersive.rememberImmersiveModeState
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.utils.copyBitmapToClipboard
 import net.primal.android.core.utils.copyText
@@ -125,6 +132,8 @@ private fun EventMediaGalleryScreen(
     val imageAttachments = state.attachments
     val pagerState = rememberPagerState { imageAttachments.size }
     var mediaItemBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    val window = LocalActivity.current?.window
+    val immersiveMode = window?.let { rememberImmersiveModeState(window = window) }
 
     fun currentImage() = imageAttachments.getOrNull(pagerState.currentPage)
 
@@ -145,47 +154,27 @@ private fun EventMediaGalleryScreen(
     )
 
     val containerColor = AppTheme.colorScheme.surface.copy(alpha = 0.21f)
-    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         contentColor = AppTheme.colorScheme.background,
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {},
-                navigationIcon = {
-                    AppBarIcon(
-                        icon = PrimalIcons.ArrowBack,
-                        onClick = onClose,
-                        appBarIconContentDescription = stringResource(id = R.string.accessibility_back_button),
-                    )
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            AnimatedVisibility(
+                visible = immersiveMode?.isImmersive != true,
+                enter = slideInVertically(
+                    initialOffsetY = { -it },
+                ) + fadeIn(),
+                exit = slideOutVertically(
+                    targetOffsetY = { -it },
+                ) + fadeOut(),
+            ) {
+                MediaGalleryTopAppBar(
+                    onClose = onClose,
                     containerColor = containerColor,
-                    scrolledContainerColor = containerColor,
-                ),
-                actions = {
-                    GalleryDropdownMenu(
-                        onSaveClick = {
-                            currentImage()?.let { eventPublisher(EventMediaGalleryContract.UiEvent.SaveMedia(it)) }
-                        },
-                        onMediaUrlCopyClick = {
-                            currentImage()?.url?.let { copyText(context = context, text = it) }
-                        },
-                        onMediaCopyClick = {
-                            mediaItemBitmap?.let {
-                                coroutineScope.launch {
-                                    copyBitmapToClipboard(
-                                        context = context,
-                                        bitmap = it,
-                                        errorMessage = context.getString(R.string.media_gallery_error_photo_not_copied),
-                                    )
-                                }
-                            }
-                        },
-                        showCopyMediaMenuItem = currentImage()?.type == EventUriType.Image,
-                    )
-                },
-            )
+                    eventPublisher = eventPublisher,
+                    mediaItemBitmap = mediaItemBitmap,
+                    getCurrentImage = ::currentImage,
+                )
+            }
         },
         content = {
             MediaGalleryContent(
@@ -195,10 +184,60 @@ private fun EventMediaGalleryScreen(
                 imageAttachments = imageAttachments,
                 pagerIndicatorContainerColor = containerColor,
                 onCurrentlyVisibleBitmap = { mediaItemBitmap = it },
+                toggleImmersiveMode = { immersiveMode?.toggle() },
             )
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
+        },
+    )
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun MediaGalleryTopAppBar(
+    onClose: () -> Unit,
+    containerColor: Color,
+    eventPublisher: (EventMediaGalleryContract.UiEvent) -> Unit,
+    mediaItemBitmap: Bitmap?,
+    getCurrentImage: () -> EventUriUi?,
+) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    CenterAlignedTopAppBar(
+        title = {},
+        navigationIcon = {
+            AppBarIcon(
+                icon = PrimalIcons.ArrowBack,
+                onClick = onClose,
+                appBarIconContentDescription = stringResource(id = R.string.accessibility_back_button),
+            )
+        },
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            containerColor = containerColor,
+            scrolledContainerColor = containerColor,
+        ),
+        actions = {
+            GalleryDropdownMenu(
+                onSaveClick = {
+                    getCurrentImage()?.let { eventPublisher(EventMediaGalleryContract.UiEvent.SaveMedia(it)) }
+                },
+                onMediaUrlCopyClick = {
+                    getCurrentImage()?.url?.let { copyText(context = context, text = it) }
+                },
+                onMediaCopyClick = {
+                    mediaItemBitmap?.let {
+                        coroutineScope.launch {
+                            copyBitmapToClipboard(
+                                context = context,
+                                bitmap = it,
+                                errorMessage = context.getString(R.string.media_gallery_error_photo_not_copied),
+                            )
+                        }
+                    }
+                },
+                showCopyMediaMenuItem = getCurrentImage()?.type == EventUriType.Image,
+            )
         },
     )
 }
@@ -211,6 +250,7 @@ private fun MediaGalleryContent(
     initialPositionMs: Long,
     imageAttachments: List<EventUriUi>,
     pagerIndicatorContainerColor: Color,
+    toggleImmersiveMode: () -> Unit,
     onCurrentlyVisibleBitmap: ((Bitmap?) -> Unit)? = null,
 ) {
     Box(
@@ -225,6 +265,7 @@ private fun MediaGalleryContent(
                 initialIndex = initialAttachmentIndex,
                 initialPositionMs = initialPositionMs,
                 onCurrentlyVisibleBitmap = onCurrentlyVisibleBitmap,
+                toggleImmersiveMode = toggleImmersiveMode,
             )
         }
 
@@ -364,6 +405,7 @@ private fun MediaCopyMenuItem(onMediaCopyClick: () -> Unit) {
 private fun AttachmentsHorizontalPager(
     pagerState: PagerState,
     imageAttachments: List<EventUriUi>,
+    toggleImmersiveMode: () -> Unit,
     modifier: Modifier = Modifier,
     initialIndex: Int = 0,
     initialPositionMs: Long = 0,
@@ -387,6 +429,7 @@ private fun AttachmentsHorizontalPager(
                         attachment = attachment,
                         currentImage = imageAttachments.getOrNull(pagerState.currentPage),
                         onImageBitmapLoaded = { onCurrentlyVisibleBitmap?.invoke(it) },
+                        toggleImmersiveMode = toggleImmersiveMode,
                     )
                 }
 
@@ -416,6 +459,7 @@ private fun ImageScreen(
     attachment: EventUriUi,
     currentImage: EventUriUi?,
     onImageBitmapLoaded: (Bitmap) -> Unit,
+    toggleImmersiveMode: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var loadedBitmap by remember { mutableStateOf<Bitmap?>(null) }
@@ -456,6 +500,7 @@ private fun ImageScreen(
     CoilZoomAsyncImage(
         imageLoader = imageLoader,
         modifier = modifier,
+        onTap = { toggleImmersiveMode() },
         model = ImageRequest.Builder(LocalContext.current)
             .data(attachment.url)
             .placeholderMemoryCacheKey(placeholderKey)
