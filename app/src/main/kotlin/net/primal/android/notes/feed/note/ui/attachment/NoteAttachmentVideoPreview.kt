@@ -29,7 +29,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
-import coil.compose.SubcomposeAsyncImage
+import coil3.compose.SubcomposeAsyncImage
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.attachment.model.EventUriUi
