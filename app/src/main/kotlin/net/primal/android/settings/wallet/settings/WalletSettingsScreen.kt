@@ -51,8 +51,8 @@ import net.primal.android.settings.wallet.settings.ui.PrimalWalletSettings
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.domain.WalletPreference
-import net.primal.core.networking.nwc.NostrWalletConnect
-import net.primal.core.networking.nwc.NostrWalletKeypair
+import net.primal.core.networking.nwc.model.NostrWalletConnect
+import net.primal.core.networking.nwc.model.NostrWalletKeypair
 
 @Composable
 fun WalletSettingsScreen(

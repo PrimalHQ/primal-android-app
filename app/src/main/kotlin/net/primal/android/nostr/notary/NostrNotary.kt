@@ -22,7 +22,7 @@ import net.primal.android.signer.signEventWithAmber
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.toZapTag
-import net.primal.core.networking.nwc.NostrWalletConnect
+import net.primal.core.networking.nwc.model.NostrWalletConnect
 import net.primal.core.networking.nwc.model.NwcWalletRequest
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.encodeToJsonString

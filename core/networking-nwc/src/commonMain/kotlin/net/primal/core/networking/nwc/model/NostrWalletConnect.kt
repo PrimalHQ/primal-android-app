@@ -1,4 +1,4 @@
-package net.primal.core.networking.nwc
+package net.primal.core.networking.nwc.model
 
 import kotlinx.serialization.Serializable
 

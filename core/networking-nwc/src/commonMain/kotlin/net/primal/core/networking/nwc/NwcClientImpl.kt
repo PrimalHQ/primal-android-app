@@ -3,8 +3,11 @@ package net.primal.core.networking.nwc
 import fr.acinq.secp256k1.Hex
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlinx.io.IOException
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.JsonObject
 import net.primal.core.networking.nwc.model.LightningPayRequest
 import net.primal.core.networking.nwc.model.LightningPayResponse
+import net.primal.core.networking.nwc.model.NostrWalletConnect
 import net.primal.core.networking.nwc.model.NwcWalletRequest
 import net.primal.core.networking.nwc.model.PayInvoiceRequest
 import net.primal.core.utils.serialization.CommonJson
@@ -17,15 +20,17 @@ import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.signOrThrow
 import net.primal.domain.nostr.cryptography.utils.CryptoUtils
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
+import net.primal.domain.nostr.publisher.NostrEventPublisher
 import net.primal.domain.nostr.publisher.NostrPublishException
 import net.primal.domain.nostr.zaps.NostrZapper
 import net.primal.domain.nostr.zaps.ZapFailureException
 import net.primal.domain.nostr.zaps.ZapRequestData
 
-class NwcNostrZapper(
+internal class NwcClientImpl(
     private val nwcData: NostrWalletConnect,
     private val nwcZapHelper: NwcZapHelper,
-) : NostrZapper {
+) : NostrZapper, NwcApi, NostrEventPublisher {
+
 
     override suspend fun zap(data: ZapRequestData) {
         val zapPayRequest = nwcZapHelper.fetchZapPayRequestOrThrow(data.lnUrlDecoded)
@@ -38,7 +43,12 @@ class NwcNostrZapper(
         )
 
         try {
-            publishWalletRequest(invoice = invoice, nwcData = nwcData)
+            publishNostrEvent(
+                nostrEvent = signWalletInvoiceRequestNostrEvent(
+                    request = invoice.toWalletPayRequest(),
+                    nwc = nwcData,
+                ).unwrapOrThrow(),
+            )
         } catch (error: NostrPublishException) {
             throw ZapFailureException(cause = error)
         } catch (error: SignatureException) {
@@ -75,17 +85,6 @@ class NwcNostrZapper(
             ?: throw ZapFailureException(cause = fetchInvoiceResult.exceptionOrNull())
     }
 
-    @Throws(NostrPublishException::class, SignatureException::class)
-    suspend fun publishWalletRequest(invoice: LightningPayResponse, nwcData: NostrWalletConnect) {
-        val walletPayNostrEvent = signWalletInvoiceRequestNostrEvent(
-            request = invoice.toWalletPayRequest(),
-            nwc = nwcData,
-        ).unwrapOrThrow()
-
-        // TODO Bring back publishing
-//        relaysSocketManager.publishNwcEvent(nostrEvent = walletPayNostrEvent)
-    }
-
     @OptIn(ExperimentalEncodingApi::class)
     private fun signWalletInvoiceRequestNostrEvent(
         request: NwcWalletRequest<PayInvoiceRequest>,
@@ -107,6 +106,47 @@ class NwcNostrZapper(
                     content = encryptedMessage,
                     tags = tags,
                 ).signOrThrow(hexPrivateKey = Hex.decode(nwc.keypair.privateKey)),
+            )
+        }.getOrElse { SignResult.Rejected(SignatureException(cause = it)) }
+    }
+
+    override suspend fun getBalance(): Long {
+        return 0L
+    }
+
+    override suspend fun getTransactions(): List<JsonObject> {
+        return emptyList()
+    }
+
+    override suspend fun publishNostrEvent(nostrEvent: NostrEvent, outboxRelays: List<String>) {
+
+    }
+
+    @OptIn(ExperimentalEncodingApi::class)
+    fun signWalletBalanceRequestNostrEvent(request: NwcWalletRequest<Unit>, nwc: NostrWalletConnect): SignResult {
+        val tags = listOf(nwc.pubkey.asPubkeyTag())
+
+        val plaintext = CommonJson.encodeToString(
+            NwcWalletRequest.serializer(Unit.serializer()),
+            request,
+        )
+
+        val encrypted = CryptoUtils.encrypt(
+            msg = plaintext,
+            privateKey = Hex.decode(nwc.keypair.privateKey),
+            pubKey = Hex.decode(nwc.pubkey),
+        )
+
+        val unsigned = NostrUnsignedEvent(
+            pubKey = nwc.keypair.pubkey,
+            kind = NostrEventKind.WalletRequest.value,
+            content = encrypted,
+            tags = tags,
+        )
+
+        return runCatching {
+            SignResult.Signed(
+                unsigned.signOrThrow(hexPrivateKey = Hex.decode(nwc.keypair.privateKey)),
             )
         }.getOrElse { SignResult.Rejected(SignatureException(cause = it)) }
     }

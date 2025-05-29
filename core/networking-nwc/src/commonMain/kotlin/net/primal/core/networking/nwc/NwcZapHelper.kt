@@ -21,7 +21,7 @@ import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.serialization.toNostrJsonObject
 import net.primal.domain.nostr.utils.LnInvoiceUtils
 
-class NwcZapHelper(
+internal class NwcZapHelper(
     private val dispatcherProvider: DispatcherProvider,
     private val httpClient: HttpClient,
 ) {

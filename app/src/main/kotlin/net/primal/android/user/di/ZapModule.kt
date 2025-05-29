@@ -6,16 +6,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import net.primal.android.user.zaps.NostrZapperFactoryImpl
 import net.primal.core.networking.nwc.LightningAddressChecker
-import net.primal.core.networking.nwc.NwcNostrZapperFactory
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.nostr.zaps.NostrZapperFactory
 
 @Module
 @InstallIn(SingletonComponent::class)
 class ZapModule {
-
-    @Provides
-    fun provideNwcNostrZapperFactory(): NwcNostrZapperFactory = NwcNostrZapperFactory
 
     @Provides
     fun provideLightningAddressChecker(dispatcherProvider: DispatcherProvider): LightningAddressChecker {

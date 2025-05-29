@@ -2,8 +2,8 @@ package net.primal.android.user.domain
 
 import android.net.Uri
 import fr.acinq.secp256k1.Hex
-import net.primal.core.networking.nwc.NostrWalletConnect
-import net.primal.core.networking.nwc.NostrWalletKeypair
+import net.primal.core.networking.nwc.model.NostrWalletConnect
+import net.primal.core.networking.nwc.model.NostrWalletKeypair
 import net.primal.domain.nostr.cryptography.utils.CryptoUtils
 import net.primal.domain.nostr.cryptography.utils.toHex
 

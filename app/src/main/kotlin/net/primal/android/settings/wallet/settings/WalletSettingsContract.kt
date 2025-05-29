@@ -2,7 +2,7 @@ package net.primal.android.settings.wallet.settings
 
 import net.primal.android.settings.wallet.domain.NwcConnectionInfo
 import net.primal.android.user.domain.WalletPreference
-import net.primal.core.networking.nwc.NostrWalletConnect
+import net.primal.core.networking.nwc.model.NostrWalletConnect
 
 interface WalletSettingsContract {
     data class UiState(

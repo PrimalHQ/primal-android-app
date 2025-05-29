@@ -6,15 +6,13 @@ import net.primal.android.user.domain.PrimalWallet
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.domain.WalletKycLevel
 import net.primal.android.wallet.repository.WalletNostrZapper
-import net.primal.core.networking.nwc.NostrWalletConnect
-import net.primal.core.networking.nwc.NwcNostrZapper
-import net.primal.core.networking.nwc.NwcNostrZapperFactory
+import net.primal.core.networking.nwc.NwcClientFactory
+import net.primal.core.networking.nwc.model.NostrWalletConnect
 import net.primal.domain.nostr.zaps.NostrZapper
 import net.primal.domain.nostr.zaps.NostrZapperFactory
 
 class NostrZapperFactoryImpl @Inject constructor(
     private val accountsStore: UserAccountsStore,
-    private val nwcNostrZapperFactory: NwcNostrZapperFactory,
     private val primalWalletZapper: WalletNostrZapper,
 ) : NostrZapperFactory {
 
@@ -35,7 +33,7 @@ class NostrZapperFactoryImpl @Inject constructor(
         }
     }
 
-    private fun NostrWalletConnect.createNwcZapper(): NwcNostrZapper? {
-        return nwcNostrZapperFactory.create(nwcData = this)
+    private fun NostrWalletConnect.createNwcZapper(): NostrZapper? {
+        return NwcClientFactory.createNwcNostrZapper(nwcData = this)
     }
 }

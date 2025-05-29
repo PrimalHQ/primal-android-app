@@ -31,7 +31,7 @@ import net.primal.android.wallet.domain.WalletSettings
 import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.BlossomException
 import net.primal.core.networking.blossom.UploadResult
-import net.primal.core.networking.nwc.NostrWalletConnect
+import net.primal.core.networking.nwc.model.NostrWalletConnect
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.remote.api.users.UsersApi

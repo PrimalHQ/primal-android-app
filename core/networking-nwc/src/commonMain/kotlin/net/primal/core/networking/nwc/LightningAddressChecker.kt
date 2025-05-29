@@ -9,7 +9,7 @@ import net.primal.domain.nostr.utils.parseAsLNUrlOrNull
 
 class LightningAddressChecker(
     private val dispatcherProvider: DispatcherProvider,
-    private val httpClient: HttpClient,
+    private val httpClient: HttpClient = NwcClientFactory.nwcHttpClient,
 ) {
 
     private fun String.parseAsLnUrlOrThrow(): String {
