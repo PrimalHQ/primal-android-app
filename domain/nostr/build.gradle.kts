@@ -51,7 +51,7 @@ kotlin {
                 implementation(libs.ktor.io)
 
                 implementation(libs.napier)
-                implementation(libs.bignum)
+                api(libs.bignum)
             }
         }
 
