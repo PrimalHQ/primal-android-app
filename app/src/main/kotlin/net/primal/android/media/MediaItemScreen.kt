@@ -2,9 +2,15 @@ package net.primal.android.media
 
 import android.graphics.Bitmap
 import android.widget.Toast
+import androidx.activity.compose.LocalActivity
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -24,6 +30,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import coil3.imageLoader
@@ -39,6 +46,7 @@ import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.immersive.rememberImmersiveModeState
 import net.primal.android.core.utils.copyBitmapToClipboard
 import net.primal.android.core.utils.copyText
 import net.primal.android.events.gallery.GalleryDropdownMenu
@@ -87,8 +95,8 @@ private fun MediaItemScreen(
     animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
+    val window = LocalActivity.current?.window
+    val immersiveMode = window?.let { rememberImmersiveModeState(window = window) }
 
     var mediaItemBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
@@ -110,39 +118,23 @@ private fun MediaItemScreen(
     Scaffold(
         contentColor = AppTheme.colorScheme.background,
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {},
-                navigationIcon = {
-                    AppBarIcon(
-                        icon = PrimalIcons.ArrowBack,
-                        onClick = onClose,
-                        appBarIconContentDescription = stringResource(id = R.string.accessibility_back_button),
-                    )
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            AnimatedVisibility(
+                visible = immersiveMode?.isImmersive != true,
+                enter = slideInVertically(
+                    initialOffsetY = { -it },
+                ) + fadeIn(),
+                exit = slideOutVertically(
+                    targetOffsetY = { -it },
+                ) + fadeOut(),
+            ) {
+                MediaItemTopAppBar(
+                    onClose = onClose,
                     containerColor = containerColor,
-                    scrolledContainerColor = containerColor,
-                ),
-                actions = {
-                    GalleryDropdownMenu(
-                        onSaveClick = { eventPublisher(MediaItemContract.UiEvent.SaveMedia) },
-                        onMediaUrlCopyClick = {
-                            copyText(context = context, text = state.mediaUrl)
-                        },
-                        onMediaCopyClick = {
-                            mediaItemBitmap?.let {
-                                coroutineScope.launch {
-                                    copyBitmapToClipboard(
-                                        context = context,
-                                        bitmap = it,
-                                        errorMessage = context.getString(R.string.media_gallery_error_photo_not_copied),
-                                    )
-                                }
-                            }
-                        },
-                    )
-                },
-            )
+                    eventPublisher = eventPublisher,
+                    state = state,
+                    mediaItemBitmap = mediaItemBitmap,
+                )
+            }
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
@@ -154,9 +146,57 @@ private fun MediaItemScreen(
                 mediaUrl = state.mediaUrl,
                 animatedVisibilityScope = animatedVisibilityScope,
                 onMediaLoaded = { mediaItemBitmap = it },
+                onToggleImmersiveMode = { immersiveMode?.toggle() },
             )
         }
     }
+}
+
+@ExperimentalMaterial3Api
+@Composable
+private fun MediaItemTopAppBar(
+    onClose: () -> Unit,
+    containerColor: Color,
+    eventPublisher: (MediaItemContract.UiEvent) -> Unit,
+    state: MediaItemContract.UiState,
+    mediaItemBitmap: Bitmap?,
+) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    CenterAlignedTopAppBar(
+        title = {},
+        navigationIcon = {
+            AppBarIcon(
+                icon = PrimalIcons.ArrowBack,
+                onClick = onClose,
+                appBarIconContentDescription = stringResource(id = R.string.accessibility_back_button),
+            )
+        },
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            containerColor = containerColor,
+            scrolledContainerColor = containerColor,
+        ),
+        actions = {
+            GalleryDropdownMenu(
+                onSaveClick = { eventPublisher(MediaItemContract.UiEvent.SaveMedia) },
+                onMediaUrlCopyClick = {
+                    copyText(context = context, text = state.mediaUrl)
+                },
+                onMediaCopyClick = {
+                    mediaItemBitmap?.let {
+                        coroutineScope.launch {
+                            copyBitmapToClipboard(
+                                context = context,
+                                bitmap = it,
+                                errorMessage = context.getString(R.string.media_gallery_error_photo_not_copied),
+                            )
+                        }
+                    }
+                },
+            )
+        },
+    )
 }
 
 @ExperimentalSharedTransitionApi
@@ -165,6 +205,7 @@ fun SharedTransitionScope.MediaItemContent(
     modifier: Modifier = Modifier,
     mediaUrl: String,
     animatedVisibilityScope: AnimatedVisibilityScope,
+    onToggleImmersiveMode: () -> Unit,
     onMediaLoaded: ((Bitmap) -> Unit),
 ) {
     var loadedBitmap by remember { mutableStateOf<Bitmap?>(null) }
@@ -193,6 +234,7 @@ fun SharedTransitionScope.MediaItemContent(
         contentAlignment = Alignment.Center,
     ) {
         CoilZoomAsyncImage(
+            onTap = { onToggleImmersiveMode() },
             modifier = Modifier
                 .sharedElement(
                     sharedContentState = rememberSharedContentState(key = "mediaItem"),
