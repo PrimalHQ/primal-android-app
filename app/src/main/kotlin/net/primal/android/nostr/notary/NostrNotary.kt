@@ -4,14 +4,12 @@ import android.content.ContentResolver
 import fr.acinq.secp256k1.Hex
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
@@ -22,8 +20,6 @@ import net.primal.android.signer.signEventWithAmber
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.toZapTag
-import net.primal.core.networking.nwc.model.NostrWalletConnect
-import net.primal.core.networking.nwc.model.NwcWalletRequest
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.settings.model.AppSettingsDescription
@@ -40,7 +36,6 @@ import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.cryptography.signOrThrow
-import net.primal.domain.nostr.cryptography.utils.CryptoUtils
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import net.primal.domain.nostr.cryptography.utils.toNpub
 import net.primal.domain.nostr.zaps.ZapTarget
@@ -197,35 +192,6 @@ class NostrNotary @Inject constructor(
                 tags = target.toTags() + listOf(relays.toZapTag()),
             ),
         )
-    }
-
-    @OptIn(ExperimentalEncodingApi::class)
-    fun signWalletBalanceRequestNostrEvent(request: NwcWalletRequest<Unit>, nwc: NostrWalletConnect): SignResult {
-        val tags = listOf(nwc.pubkey.asPubkeyTag())
-
-        val plaintext = NostrNotaryJson.encodeToString(
-            NwcWalletRequest.serializer(Unit.serializer()),
-            request,
-        )
-
-        val encrypted = CryptoUtils.encrypt(
-            msg = plaintext,
-            privateKey = Hex.decode(nwc.keypair.privateKey),
-            pubKey = Hex.decode(nwc.pubkey),
-        )
-
-        val unsigned = NostrUnsignedEvent(
-            pubKey = nwc.keypair.pubkey,
-            kind = NostrEventKind.WalletRequest.value,
-            content = encrypted,
-            tags = tags,
-        )
-
-        return runCatching {
-            SignResult.Signed(
-                unsigned.signOrThrow(hexPrivateKey = Hex.decode(nwc.keypair.privateKey)),
-            )
-        }.getOrElse { SignResult.Rejected(SignatureException(cause = it)) }
     }
 
     suspend fun signPrimalWalletOperationNostrEvent(userId: String, content: String): SignResult {

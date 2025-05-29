@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.utils.authorNameUiFriendly
-import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.WalletPreference
@@ -30,6 +29,7 @@ import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SatsPurchase
 import net.primal.android.wallet.transactions.list.TransactionListItemDataUi
+import net.primal.core.networking.nwc.NwcClientFactory
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.domain.common.exception.NetworkException
@@ -44,7 +44,6 @@ class WalletDashboardViewModel @Inject constructor(
     private val primalBillingClient: PrimalBillingClient,
     private val subscriptionsManager: SubscriptionsManager,
     private val exchangeRateHandler: ExchangeRateHandler,
-    private val nostrPublisher: NostrPublisher,
 ) : ViewModel() {
 
     private val activeUserId = activeAccountStore.activeUserId()
@@ -122,7 +121,8 @@ class WalletDashboardViewModel @Inject constructor(
                 // This is just for concept
                 activeAccountStore.activeUserAccount.collect {
                     it.nostrWallet?.let { nwc ->
-                        nostrPublisher.publishGetBalanceRequest(nwcData = nwc)
+                        val nwcClient = NwcClientFactory.createNwcApiClient(nwcData = nwc)
+                        nwcClient.getBalance()
                     }
                 }
 //                walletRepository.fetchWalletBalance(userId = activeUserId)

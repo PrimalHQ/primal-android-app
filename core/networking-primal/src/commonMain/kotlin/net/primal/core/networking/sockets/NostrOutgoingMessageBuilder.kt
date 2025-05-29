@@ -1,10 +1,8 @@
 package net.primal.core.networking.sockets
 
-import kotlin.uuid.Uuid
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
-import net.primal.core.utils.AppBuildHelper
 
 internal fun JsonObject.buildNostrREQMessage(subscriptionId: String): String {
     return buildJsonArray {
@@ -42,5 +40,3 @@ internal fun String.buildNostrCLOSEMessage(): String {
         add(this@buildNostrCLOSEMessage)
     }.toString()
 }
-
-internal fun Uuid.toPrimalSubscriptionId(): String = "${AppBuildHelper.getPlatformName()}-$this".lowercase()

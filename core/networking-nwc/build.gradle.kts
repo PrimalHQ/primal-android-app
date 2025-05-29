@@ -36,6 +36,7 @@ kotlin {
             dependencies {
                 implementation(project(":core:utils"))
                 implementation(project(":core:networking-http"))
+                implementation(project(":core:networking-primal"))
                 implementation(project(":domain:nostr"))
 
                 implementation(libs.kotlinx.coroutines.core)
