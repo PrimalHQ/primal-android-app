@@ -1,19 +1,16 @@
 package net.primal.android.media
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.widget.Toast
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -28,7 +25,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -55,12 +51,7 @@ import net.primal.android.theme.AppTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @ExperimentalSharedTransitionApi
 @Composable
-fun MediaItemScreen(
-    viewModel: MediaItemViewModel,
-    onClose: () -> Unit,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedVisibilityScope,
-) {
+fun MediaItemScreen(viewModel: MediaItemViewModel, onClose: () -> Unit) {
     val uiState = viewModel.state.collectAsState()
 
     val uiScope = rememberCoroutineScope()
@@ -79,11 +70,10 @@ fun MediaItemScreen(
         state = uiState.value,
         onClose = onClose,
         eventPublisher = viewModel::setEvent,
-        sharedTransitionScope = sharedTransitionScope,
-        animatedVisibilityScope = animatedVisibilityScope,
     )
 }
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @ExperimentalMaterial3Api
 @ExperimentalSharedTransitionApi
 @Composable
@@ -91,8 +81,6 @@ private fun MediaItemScreen(
     state: MediaItemContract.UiState,
     eventPublisher: (MediaItemContract.UiEvent) -> Unit,
     onClose: () -> Unit,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val window = LocalActivity.current?.window
@@ -140,15 +128,11 @@ private fun MediaItemScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
     ) {
-        with(sharedTransitionScope) {
-            MediaItemContent(
-                modifier = Modifier.padding(it),
-                mediaUrl = state.mediaUrl,
-                animatedVisibilityScope = animatedVisibilityScope,
-                onMediaLoaded = { mediaItemBitmap = it },
-                onToggleImmersiveMode = { immersiveMode?.toggle() },
-            )
-        }
+        MediaItemContent(
+            mediaUrl = state.mediaUrl,
+            onMediaLoaded = { mediaItemBitmap = it },
+            onToggleImmersiveMode = { immersiveMode?.toggle() },
+        )
     }
 }
 
@@ -201,10 +185,9 @@ private fun MediaItemTopAppBar(
 
 @ExperimentalSharedTransitionApi
 @Composable
-fun SharedTransitionScope.MediaItemContent(
+fun MediaItemContent(
     modifier: Modifier = Modifier,
     mediaUrl: String,
-    animatedVisibilityScope: AnimatedVisibilityScope,
     onToggleImmersiveMode: () -> Unit,
     onMediaLoaded: ((Bitmap) -> Unit),
 ) {
@@ -229,25 +212,15 @@ fun SharedTransitionScope.MediaItemContent(
         loadedBitmap?.let { onMediaLoaded(it) }
     }
 
-    Box(
+    CoilZoomAsyncImage(
+        onTap = { onToggleImmersiveMode() },
         modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        CoilZoomAsyncImage(
-            onTap = { onToggleImmersiveMode() },
-            modifier = Modifier
-                .sharedElement(
-                    sharedContentState = rememberSharedContentState(key = "mediaItem"),
-                    animatedVisibilityScope = animatedVisibilityScope,
-                )
-                .fillMaxSize(),
-            imageLoader = imageLoader,
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(mediaUrl)
-                .listener(loadingImageListener)
-                .crossfade(durationMillis = 300)
-                .build(),
-            contentDescription = null,
-        )
-    }
+        imageLoader = imageLoader,
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(mediaUrl)
+            .listener(loadingImageListener)
+            .crossfade(durationMillis = 300)
+            .build(),
+        contentDescription = null,
+    )
 }

@@ -837,7 +837,6 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
                 },
             ),
             navController = navController,
-            sharedTransitionScope = this@PrimalAppNavigation,
         )
 
         profile(
@@ -2001,7 +2000,6 @@ private fun NavGraphBuilder.mediaItem(
     route: String,
     arguments: List<NamedNavArgument>,
     navController: NavController,
-    sharedTransitionScope: SharedTransitionScope,
 ) = composable(
     route = route,
     arguments = arguments,
@@ -2013,8 +2011,6 @@ private fun NavGraphBuilder.mediaItem(
         MediaItemScreen(
             onClose = { navController.navigateUp() },
             viewModel = viewModel,
-            sharedTransitionScope = sharedTransitionScope,
-            animatedVisibilityScope = this@composable,
         )
     }
 }
