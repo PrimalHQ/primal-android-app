@@ -1,7 +1,6 @@
 package net.primal.android.media
 
 import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -27,15 +26,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import coil.imageLoader
-import coil.request.ErrorResult
-import coil.request.ImageRequest
-import coil.request.SuccessResult
+import coil3.imageLoader
+import coil3.request.ErrorResult
+import coil3.request.ImageRequest
+import coil3.request.SuccessResult
+import coil3.request.crossfade
+import coil3.toBitmap
+import com.github.panpf.zoomimage.CoilZoomAsyncImage
 import kotlinx.coroutines.launch
-import me.saket.telephoto.zoomable.ZoomSpec
-import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
-import me.saket.telephoto.zoomable.rememberZoomableImageState
-import me.saket.telephoto.zoomable.rememberZoomableState
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.SnackbarErrorHandler
@@ -169,7 +167,6 @@ fun SharedTransitionScope.MediaItemContent(
     animatedVisibilityScope: AnimatedVisibilityScope,
     onMediaLoaded: ((Bitmap) -> Unit),
 ) {
-    val zoomSpec = ZoomSpec(maxZoomFactor = 2f)
     var loadedBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     var error by remember { mutableStateOf<ErrorResult?>(null) }
@@ -177,7 +174,7 @@ fun SharedTransitionScope.MediaItemContent(
         object : ImageRequest.Listener {
             override fun onSuccess(request: ImageRequest, result: SuccessResult) {
                 error = null
-                loadedBitmap = (result.drawable as? BitmapDrawable)?.bitmap
+                loadedBitmap = result.image.toBitmap()
             }
 
             override fun onError(request: ImageRequest, result: ErrorResult) {
@@ -195,14 +192,13 @@ fun SharedTransitionScope.MediaItemContent(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        ZoomableAsyncImage(
+        CoilZoomAsyncImage(
             modifier = Modifier
                 .sharedElement(
                     sharedContentState = rememberSharedContentState(key = "mediaItem"),
                     animatedVisibilityScope = animatedVisibilityScope,
                 )
                 .fillMaxSize(),
-            state = rememberZoomableImageState(rememberZoomableState(zoomSpec = zoomSpec)),
             imageLoader = imageLoader,
             model = ImageRequest.Builder(LocalContext.current)
                 .data(mediaUrl)
