@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -58,17 +57,16 @@ import androidx.media3.common.Player.Listener
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
-import coil.imageLoader
-import coil.memory.MemoryCache
-import coil.request.ErrorResult
-import coil.request.ImageRequest
-import coil.request.SuccessResult
+import coil3.imageLoader
+import coil3.memory.MemoryCache
+import coil3.request.ErrorResult
+import coil3.request.ImageRequest
+import coil3.request.SuccessResult
+import coil3.request.crossfade
+import coil3.toBitmap
+import com.github.panpf.zoomimage.CoilZoomAsyncImage
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.launch
-import me.saket.telephoto.zoomable.ZoomSpec
-import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
-import me.saket.telephoto.zoomable.rememberZoomableImageState
-import me.saket.telephoto.zoomable.rememberZoomableState
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.HorizontalPagerIndicator
@@ -420,21 +418,31 @@ private fun ImageScreen(
     onImageBitmapLoaded: (Bitmap) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val zoomSpec = ZoomSpec(maxZoomFactor = 2.5f)
     var loadedBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     var error by remember { mutableStateOf<ErrorResult?>(null) }
     val imageLoader = LocalContext.current.imageLoader
 
+    val memoryCache = imageLoader.memoryCache
+
+    val keys = attachment.variants.orEmpty()
+        .sortedBy { it.width }
+        .map { MemoryCache.Key(it.mediaUrl) }
+        .filter { memoryCache?.get(it) != null }
+
+    val highestResMirrorImage = keys.firstOrNull()?.let { memoryCache?.get(it) }?.image
+    val placeholderKey = keys.lastOrNull()
+
     val loadingImageListener = remember {
         object : ImageRequest.Listener {
             override fun onSuccess(request: ImageRequest, result: SuccessResult) {
                 error = null
-                loadedBitmap = (result.drawable as? BitmapDrawable)?.bitmap
+                loadedBitmap = result.image.toBitmap()
             }
 
             override fun onError(request: ImageRequest, result: ErrorResult) {
                 error = result
+                loadedBitmap = highestResMirrorImage?.toBitmap()
             }
         }
     }
@@ -445,27 +453,21 @@ private fun ImageScreen(
         }
     }
 
-    val keys = attachment.variants.orEmpty()
-        .sortedBy { it.width }
-        .mapNotNull {
-            val cacheKey = MemoryCache.Key(it.mediaUrl)
-            if (imageLoader.memoryCache?.keys?.contains(cacheKey) == true) cacheKey else null
-        }
-
-    ZoomableAsyncImage(
-        modifier = modifier,
-        state = rememberZoomableImageState(rememberZoomableState(zoomSpec = zoomSpec)),
+    CoilZoomAsyncImage(
         imageLoader = imageLoader,
+        modifier = modifier,
         model = ImageRequest.Builder(LocalContext.current)
             .data(attachment.url)
-            .placeholderMemoryCacheKey(keys.lastOrNull())
+            .placeholderMemoryCacheKey(placeholderKey)
+            .error(highestResMirrorImage)
+            .fallback(highestResMirrorImage)
             .listener(loadingImageListener)
             .crossfade(durationMillis = 300)
             .build(),
         contentDescription = null,
     )
 
-    if (error != null) {
+    if (error != null && highestResMirrorImage == null) {
         AttachmentLoadingError()
     }
 }
@@ -480,6 +482,7 @@ private fun AttachmentLoadingError() {
             imageVector = Icons.Filled.Warning,
             contentDescription = stringResource(id = R.string.accessibility_warning),
             modifier = Modifier.size(48.dp),
+            tint = Color.White,
         )
     }
 }
