@@ -20,11 +20,10 @@ import net.primal.android.networking.UserAgentProvider
 import net.primal.android.signer.AmberSignResult
 import net.primal.android.signer.signEventWithAmber
 import net.primal.android.user.credentials.CredentialsStore
-import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.toZapTag
-import net.primal.android.wallet.nwc.model.NwcWalletRequest
-import net.primal.android.wallet.nwc.model.PayInvoiceRequest
+import net.primal.core.networking.nwc.NostrWalletConnect
+import net.primal.core.networking.nwc.model.NwcWalletRequest
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.settings.model.AppSettingsDescription
@@ -198,31 +197,6 @@ class NostrNotary @Inject constructor(
                 tags = target.toTags() + listOf(relays.toZapTag()),
             ),
         )
-    }
-
-    @OptIn(ExperimentalEncodingApi::class)
-    fun signWalletInvoiceRequestNostrEvent(
-        request: NwcWalletRequest<PayInvoiceRequest>,
-        nwc: NostrWalletConnect,
-    ): SignResult {
-        val tags = listOf(nwc.pubkey.asPubkeyTag())
-        val content = NostrNotaryJson.encodeToString(request)
-        val encryptedMessage = CryptoUtils.encrypt(
-            msg = content,
-            privateKey = Hex.decode(nwc.keypair.privateKey),
-            pubKey = Hex.decode(nwc.pubkey),
-        )
-
-        return runCatching {
-            SignResult.Signed(
-                NostrUnsignedEvent(
-                    pubKey = nwc.keypair.pubkey,
-                    kind = NostrEventKind.WalletRequest.value,
-                    content = encryptedMessage,
-                    tags = tags,
-                ).signOrThrow(hexPrivateKey = Hex.decode(nwc.keypair.privateKey)),
-            )
-        }.getOrElse { SignResult.Rejected(SignatureException(cause = it)) }
     }
 
     @OptIn(ExperimentalEncodingApi::class)

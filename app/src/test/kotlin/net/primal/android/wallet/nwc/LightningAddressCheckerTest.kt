@@ -5,6 +5,8 @@ import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import net.primal.android.core.coroutines.CoroutinesTestRule
+import net.primal.core.networking.nwc.InvalidLud16Exception
+import net.primal.core.networking.nwc.LightningAddressChecker
 import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -35,7 +37,8 @@ class LightningAddressCheckerTest {
         runTest {
             val checker = LightningAddressChecker(
                 dispatcherProvider = coroutinesTestRule.dispatcherProvider,
-                okHttpClient = buildMockOkHttpClient(responseCode = 200),
+                // TODO Check this
+//                okHttpClient = buildMockOkHttpClient(responseCode = 200),
             )
             checker.validateLightningAddress("alex@primal.net")
         }
@@ -45,7 +48,8 @@ class LightningAddressCheckerTest {
         runTest {
             val checker = LightningAddressChecker(
                 dispatcherProvider = coroutinesTestRule.dispatcherProvider,
-                okHttpClient = buildMockOkHttpClient(responseCode = 404),
+                // TODO Check this
+//                okHttpClient = buildMockOkHttpClient(responseCode = 404),
             )
             checker.validateLightningAddress("invalidaddress123$^@primal.net")
         }

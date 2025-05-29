@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 import net.primal.android.premium.domain.PremiumMembership
 import net.primal.android.wallet.domain.WalletSettings
 import net.primal.android.wallet.domain.WalletState
+import net.primal.core.networking.nwc.NostrWalletConnect
 import net.primal.domain.global.ContentAppSettings
 import net.primal.domain.links.CdnImage
 import net.primal.domain.nostr.utils.asEllipsizedNpub

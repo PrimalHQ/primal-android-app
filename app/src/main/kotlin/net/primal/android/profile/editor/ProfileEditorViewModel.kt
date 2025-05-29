@@ -23,9 +23,9 @@ import net.primal.android.profile.editor.ProfileEditorContract.UiState
 import net.primal.android.profile.editor.ProfileEditorContract.UiState.EditProfileError
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
-import net.primal.android.wallet.nwc.InvalidLud16Exception
-import net.primal.android.wallet.nwc.LightningAddressChecker
 import net.primal.core.networking.blossom.BlossomException
+import net.primal.core.networking.nwc.InvalidLud16Exception
+import net.primal.core.networking.nwc.LightningAddressChecker
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException

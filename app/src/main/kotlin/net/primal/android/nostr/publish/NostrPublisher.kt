@@ -4,10 +4,9 @@ import javax.inject.Inject
 import net.primal.android.networking.relays.RelaysSocketManager
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.Relay
-import net.primal.android.wallet.nwc.model.LightningPayResponse
-import net.primal.android.wallet.nwc.model.NwcWalletRequest
+import net.primal.core.networking.nwc.NostrWalletConnect
+import net.primal.core.networking.nwc.model.NwcWalletRequest
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
@@ -96,15 +95,6 @@ class NostrPublisher @Inject constructor(
         relaysSocketManager.publishEvent(nostrEvent = signedNostrEvent, relays = relays)
         importEvent(signedNostrEvent)
         return signedNostrEvent
-    }
-
-    @Throws(NostrPublishException::class, SignatureException::class)
-    suspend fun publishWalletRequest(invoice: LightningPayResponse, nwcData: NostrWalletConnect) {
-        val walletPayNostrEvent = nostrNotary.signWalletInvoiceRequestNostrEvent(
-            request = invoice.toWalletPayRequest(),
-            nwc = nwcData,
-        ).unwrapOrThrow()
-        relaysSocketManager.publishNwcEvent(nostrEvent = walletPayNostrEvent)
     }
 
     @Throws(NostrPublishException::class, SignatureException::class)
