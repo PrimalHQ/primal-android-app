@@ -11,7 +11,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
 import net.primal.core.networking.nwc.model.NostrWalletConnect
 import net.primal.core.networking.nwc.model.NwcWalletRequest
 import net.primal.core.networking.sockets.NostrIncomingMessage
@@ -73,9 +72,7 @@ internal class NwcClientImpl(
                 nwc = nwcData,
                 request = NwcWalletRequest<JsonObject>(
                     method = "get_balance",
-                    params = buildJsonObject {
-                        put("test", true)
-                    },
+                    params = buildJsonObject {},
                 ),
             ).unwrapOrThrow()
 
@@ -126,6 +123,26 @@ internal class NwcClientImpl(
 
     override suspend fun getTransactions(): NwcResult<List<JsonObject>> {
         return NwcResult.Success(result = emptyList())
+    }
+
+    override suspend fun makeInvoice() {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun lookupInvoice() {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getInfo() {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun payInvoice() {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun payKeysend() {
+        TODO("Not yet implemented")
     }
 
     override suspend fun publishNostrEvent(nostrEvent: NostrEvent, outboxRelays: List<String>) {
