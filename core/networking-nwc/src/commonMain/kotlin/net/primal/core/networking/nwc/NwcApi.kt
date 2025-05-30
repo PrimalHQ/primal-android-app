@@ -4,7 +4,7 @@ import kotlinx.serialization.json.JsonObject
 
 interface NwcApi {
 
-    suspend fun getBalance(): Long
+    suspend fun getBalance(): NwcResult<Long>
 
-    suspend fun getTransactions(): List<JsonObject>
+    suspend fun getTransactions(): NwcResult<List<JsonObject>>
 }

@@ -20,6 +20,7 @@ import net.primal.core.utils.toLong
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.serialization.toNostrJsonObject
 import net.primal.domain.nostr.utils.LnInvoiceUtils
+import net.primal.domain.nostr.zaps.ZapFailureException
 
 internal class NwcZapHelper(
     private val dispatcherProvider: DispatcherProvider,
@@ -38,6 +39,13 @@ internal class NwcZapHelper(
 
         return bodyString.decodeFromJsonStringOrNull<LightningPayRequest>()
             ?: throw IOException("Invalid body content.")
+    }
+
+    suspend fun fetchZapPayRequestOrThrow(lnUrl: String): LightningPayRequest {
+        val result = runCatching {
+            fetchZapPayRequest(lnUrl)
+        }
+        return result.getOrNull() ?: throw ZapFailureException(cause = result.exceptionOrNull())
     }
 
     suspend fun fetchInvoice(
@@ -75,13 +83,29 @@ internal class NwcZapHelper(
         return decoded
     }
 
+    suspend fun fetchInvoiceOrThrow(
+        zapPayRequest: LightningPayRequest,
+        zapEvent: NostrEvent,
+        satoshiAmountInMilliSats: ULong,
+        comment: String = "",
+    ): LightningPayResponse {
+        val result = runCatching {
+            this.fetchInvoice(
+                request = zapPayRequest,
+                zapEvent = zapEvent,
+                satoshiAmountInMilliSats = satoshiAmountInMilliSats,
+                comment = comment,
+            )
+        }
+
+        return result.getOrNull() ?: throw ZapFailureException(cause = result.exceptionOrNull())
+    }
+
     private val thousandAsBigDecimal = BigDecimal.fromInt(1_000)
 
     private fun String.extractInvoiceAmountInMilliSats(): Long? {
         return try {
-            LnInvoiceUtils.getAmountInSats(this)
-                .multiply(thousandAsBigDecimal)
-                .toLong()
+            LnInvoiceUtils.getAmountInSats(this).multiply(thousandAsBigDecimal).toLong()
         } catch (error: LnInvoiceUtils.AddressFormatException) {
             Napier.w(error) { "Cannot parse amount from LN invoice: \"$this\" — ${error.message}" }
             null
