@@ -92,7 +92,7 @@ class PublicBookmarksRepositoryImpl(
             data = listOf(
                 PublicBookmarkPO(
                     ownerId = userId,
-                    bookmarkType = BookmarkType.Article,
+                    bookmarkType = bookmarkType,
                     tagType = tagType,
                     tagValue = tagValue,
                 ),
