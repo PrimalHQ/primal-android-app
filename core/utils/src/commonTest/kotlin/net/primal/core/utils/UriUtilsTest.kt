@@ -11,6 +11,45 @@ import kotlin.test.Test
 class UriUtilsTest {
 
     @Test
+    fun `detectUrls should trim closing parenthesis after TLD`() {
+        val text = "Check this: primal.net)"
+        text.detectUrls() shouldBe listOf("primal.net")
+    }
+
+    @Test
+    fun `detectUrls should trim closing square bracket after TLD`() {
+        val text = "Visit [primal.net]"
+        text.detectUrls() shouldBe listOf("primal.net")
+    }
+
+    @Test
+    fun `detectUrls should trim closing curly brace after TLD`() {
+        val text = "Here's a link: {primal.net}"
+        text.detectUrls() shouldBe listOf("primal.net")
+    }
+
+    @Test
+    fun `detectUrls should trim closing quote after TLD`() {
+        val text = "Try visiting \"primal.net\" for more info."
+        text.detectUrls() shouldBe listOf("primal.net")
+    }
+
+    @Test
+    fun `detectUrls should trim punctuation and bracket combo`() {
+        val text = "Check out [primal.net)."
+        text.detectUrls() shouldBe listOf("primal.net")
+    }
+
+    @Test
+    fun `detectUrls should extract multiple urls inside parentheses and trim trailing parenthesis`() {
+        val content = "This links should work (such as primal.net and example.com)."
+
+        val urls = content.detectUrls()
+
+        urls shouldBe listOf("primal.net", "example.com")
+    }
+
+    @Test
     fun `detectUrls should not match triple-dot false positives`() {
         "Medicare...he".detectUrls().shouldBeEmpty()
     }
