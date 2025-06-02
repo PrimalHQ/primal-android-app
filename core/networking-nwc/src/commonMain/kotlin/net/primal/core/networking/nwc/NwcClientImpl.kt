@@ -33,6 +33,7 @@ import net.primal.core.networking.sockets.NostrSocketClientFactory
 import net.primal.core.networking.sockets.filterBySubscriptionId
 import net.primal.core.networking.sockets.toPrimalSubscriptionId
 import net.primal.core.utils.serialization.CommonJson
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.cryptography.SignatureException
@@ -114,13 +115,13 @@ internal class NwcClientImpl(
                 val parsed = CommonJson.decodeFromString<NwcResponseContent<R>>(decrypted)
                 parsed.result?.let {
                     NwcResult.Success(it)
-                } ?: NwcResult.Failure(Exception("NWC Error: ${parsed.error?.message}"))
+                } ?: NwcResult.Failure(NetworkException("NWC Error: ${parsed.error?.message}"))
             } else {
-                NwcResult.Failure(Exception("No response event received."))
+                NwcResult.Failure(NetworkException("No response event received."))
             }
         } catch (e: Exception) {
             Napier.e(e) { "NWC request failed: $method" }
-            NwcResult.Failure(e)
+            NwcResult.Failure(NetworkException("Failed to execute NWC request: $method", e))
         }
     }
 

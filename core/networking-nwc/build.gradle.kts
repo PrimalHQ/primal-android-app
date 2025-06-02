@@ -35,6 +35,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(project(":core:utils"))
+                implementation(project(":domain:primal"))
                 implementation(project(":core:networking-http"))
                 implementation(project(":core:networking-primal"))
                 implementation(project(":domain:nostr"))
