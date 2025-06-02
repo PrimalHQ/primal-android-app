@@ -166,11 +166,11 @@ private fun ExploreHomeScreen(
                 state = pagerState,
             ) { pageIndex ->
                 when (pageIndex) {
-                    FEEDS_INDEX -> {
-                        ExploreFeeds(
+                    PEOPLE_INDEX -> {
+                        ExplorePeople(
                             modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
                             paddingValues = paddingValues,
-                            onGoToWallet = onGoToWallet,
+                            onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
                             onUiError = { uiError: UiError ->
                                 uiScope.launch {
                                     snackbarHostState.showSnackbar(
@@ -182,11 +182,11 @@ private fun ExploreHomeScreen(
                         )
                     }
 
-                    PEOPLE_INDEX -> {
-                        ExplorePeople(
+                    FEEDS_INDEX -> {
+                        ExploreFeeds(
                             modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
                             paddingValues = paddingValues,
-                            onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
+                            onGoToWallet = onGoToWallet,
                             onUiError = { uiError: UiError ->
                                 uiScope.launch {
                                     snackbarHostState.showSnackbar(
@@ -307,8 +307,8 @@ private fun ExploreTopAppBar(
         )
         ExploreHomeTabs(
             selectedTabIndex = pagerState.currentPage,
-            onFeedsTabClick = { scope.launch { pagerState.animateScrollToPage(FEEDS_INDEX) } },
             onPeopleTabClick = { scope.launch { pagerState.animateScrollToPage(PEOPLE_INDEX) } },
+            onFeedsTabClick = { scope.launch { pagerState.animateScrollToPage(FEEDS_INDEX) } },
             onZapsTabClick = { scope.launch { pagerState.animateScrollToPage(ZAPS_INDEX) } },
             onMediaTabClick = { scope.launch { pagerState.animateScrollToPage(MEDIA_INDEX) } },
             onTopicsTabClick = { scope.launch { pagerState.animateScrollToPage(TOPICS_INDEX) } },

@@ -16,8 +16,8 @@ import net.primal.android.theme.AppTheme
 
 internal const val EXPLORE_HOME_TAB_COUNT = 5
 
-internal const val FEEDS_INDEX = 0
-internal const val PEOPLE_INDEX = 1
+internal const val PEOPLE_INDEX = 0
+internal const val FEEDS_INDEX = 1
 internal const val ZAPS_INDEX = 2
 internal const val MEDIA_INDEX = 3
 internal const val TOPICS_INDEX = 4
@@ -51,14 +51,14 @@ fun ExploreHomeTabs(
         },
     ) {
         PrimalSingleTab(
-            selected = selectedTabIndex == FEEDS_INDEX,
-            onClick = onFeedsTabClick,
-            text = stringResource(id = R.string.explore_feeds_tab).uppercase(),
-        )
-        PrimalSingleTab(
             selected = selectedTabIndex == PEOPLE_INDEX,
             onClick = onPeopleTabClick,
             text = stringResource(id = R.string.explore_people_tab).uppercase(),
+        )
+        PrimalSingleTab(
+            selected = selectedTabIndex == FEEDS_INDEX,
+            onClick = onFeedsTabClick,
+            text = stringResource(id = R.string.explore_feeds_tab).uppercase(),
         )
         PrimalSingleTab(
             selected = selectedTabIndex == ZAPS_INDEX,
