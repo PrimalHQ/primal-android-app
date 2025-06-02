@@ -30,7 +30,7 @@ internal inline fun <reified T> signNwcRequestNostrEvent(
 
     val unsigned = NostrUnsignedEvent(
         pubKey = nwc.keypair.pubkey,
-        kind = NostrEventKind.WalletRequest.value,
+        kind = NostrEventKind.NwcRequest.value,
         content = encrypted,
         tags = tags,
     )

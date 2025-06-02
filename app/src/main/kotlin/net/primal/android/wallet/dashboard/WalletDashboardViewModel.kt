@@ -30,6 +30,12 @@ import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SatsPurchase
 import net.primal.android.wallet.transactions.list.TransactionListItemDataUi
 import net.primal.core.networking.nwc.NwcClientFactory
+import net.primal.core.networking.nwc.NwcResult
+import net.primal.core.networking.nwc.nip47.ListTransactionsParams
+import net.primal.core.networking.nwc.nip47.LookupInvoiceParams
+import net.primal.core.networking.nwc.nip47.MakeInvoiceParams
+import net.primal.core.networking.nwc.nip47.PayInvoiceParams
+import net.primal.core.networking.nwc.nip47.PayKeysendParams
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.domain.common.exception.NetworkException
@@ -122,7 +128,62 @@ class WalletDashboardViewModel @Inject constructor(
                 activeAccountStore.activeUserAccount.collect {
                     it.nostrWallet?.let { nwc ->
                         val nwcClient = NwcClientFactory.createNwcApiClient(nwcData = nwc)
-                        nwcClient.getBalance()
+
+                        // Get Balance
+                        when (val res = nwcClient.getBalance()) {
+                            is NwcResult.Success -> Timber.tag("NWC").i("Balance (sats): ${res.result.balance / 1_000}")
+                            is NwcResult.Failure -> Timber.tag("NWC").e(res.error, "getBalance failed")
+                        }
+
+                        // Get Info
+                        when (val res = nwcClient.getInfo()) {
+                            is NwcResult.Success -> Timber.tag("NWC").i("Info: ${res.result}")
+                            is NwcResult.Failure -> Timber.tag("NWC").e(res.error, "getInfo failed")
+                        }
+
+                        // List Transactions
+                        when (val res = nwcClient.listTransactions(ListTransactionsParams(
+                            unpaid = false,
+                        ))) {
+                            is NwcResult.Success -> Timber.tag("NWC").i("Transactions: ${res.result.transactions}")
+                            is NwcResult.Failure -> Timber.tag("NWC").e(res.error, "listTransactions failed")
+                        }
+
+                        // Make Invoice
+                        val makeInvoiceParams = MakeInvoiceParams(amount = 10_000, description = "Test invoice") // 10 sats in msats
+                        val makeInvoiceResult = nwcClient.makeInvoice(makeInvoiceParams)
+
+                        when (makeInvoiceResult) {
+                            is NwcResult.Success -> {
+                                Timber.tag("NWC").i("Invoice created: ${makeInvoiceResult.result.invoice}")
+
+                                val lookupParams = LookupInvoiceParams(invoice = makeInvoiceResult.result.invoice)
+                                when (val res = nwcClient.lookupInvoice(lookupParams)) {
+                                    is NwcResult.Success -> Timber.tag("NWC").i("Lookup result: ${res.result}")
+                                    is NwcResult.Failure -> Timber.tag("NWC").e(res.error, "lookupInvoice failed")
+                                }
+                            }
+
+                            is NwcResult.Failure -> {
+                                Timber.tag("NWC").e(makeInvoiceResult.error, "makeInvoice failed")
+                            }
+                        }
+
+//                        val invoiceToPay = "lnbc..." // replace with a real test invoice
+//                        val payParams = PayInvoiceParams(invoice = invoiceToPay)
+//                        when (val res = nwcClient.payInvoice(payParams)) {
+//                            is NwcResult.Success -> Timber.tag("NWC").i("Payment success. Preimage: ${res.result.preimage}")
+//                            is NwcResult.Failure -> Timber.tag("NWC").e(res.error, "payInvoice failed")
+//                        }
+
+//                        val keysendParams = PayKeysendParams(
+//                            pubkey = "npub...", // recipient's pubkey
+//                            amount = 1_000, // 1 sat in msats
+//                        )
+//                        when (val res = nwcClient.payKeysend(keysendParams)) {
+//                            is NwcResult.Success -> Timber.tag("NWC").i("Keysend success. Preimage: ${res.result.preimage}")
+//                            is NwcResult.Failure -> Timber.tag("NWC").e(res.error, "payKeysend failed")
+//                        }
                     }
                 }
 //                walletRepository.fetchWalletBalance(userId = activeUserId)

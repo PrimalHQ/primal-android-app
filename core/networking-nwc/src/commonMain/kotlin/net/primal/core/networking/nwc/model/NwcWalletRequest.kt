@@ -7,8 +7,3 @@ data class NwcWalletRequest<T>(
     val method: String,
     val params: T,
 )
-
-@Serializable
-data class PayInvoiceRequest(
-    val invoice: String,
-)
