@@ -36,8 +36,4 @@ interface WalletDashboardContract {
         data object DismissError : UiEvent()
         data object EnablePrimalWallet : UiEvent()
     }
-
-    companion object {
-        const val MSATS_IN_SATS = 1_000
-    }
 }

@@ -36,6 +36,7 @@ import net.primal.core.networking.nwc.nip47.LookupInvoiceParams
 import net.primal.core.networking.nwc.nip47.MakeInvoiceParams
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.MSATS_IN_SATS
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
@@ -130,7 +131,7 @@ class WalletDashboardViewModel @Inject constructor(
                         // Get Balance
                         when (val res = nwcClient.getBalance()) {
                             is NwcResult.Success -> Timber.tag("NWC")
-                                .i("Balance (sats): ${res.result.balance / WalletDashboardContract.MSATS_IN_SATS}")
+                                .i("Balance (sats): ${res.result.balance / MSATS_IN_SATS}")
                             is NwcResult.Failure -> Timber.tag("NWC").e(res.error, "getBalance failed")
                         }
 
