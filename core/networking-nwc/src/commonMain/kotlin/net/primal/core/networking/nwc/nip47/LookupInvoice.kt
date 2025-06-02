@@ -7,13 +7,7 @@ import kotlinx.serialization.Serializable
 data class LookupInvoiceParams(
     val invoice: String? = null,
     @SerialName("payment_hash") val paymentHash: String? = null,
-) {
-    init {
-        require(invoice != null || paymentHash != null) {
-            "Either invoice or payment_hash must be provided for lookup_invoice."
-        }
-    }
-}
+)
 
 @Serializable
 data class LookupInvoiceResponsePayload(
