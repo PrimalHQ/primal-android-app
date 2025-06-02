@@ -419,10 +419,6 @@
     <string name="premium_leaderboard_error_loading">Unable to load leaderboard.\nPlease try again.</string>
 
     <string name="feed_reposted_suffix">reposted</string>
-    <plurals name="feed_reposted_suffix">
-        <item quantity="one">and %d other reposted</item>
-        <item quantity="other">and %d others reposted</item>
-    </plurals>
     <string name="feed_see_more">See more…</string>
 
     <string name="timestamp_since_just_now">now</string>
