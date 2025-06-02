@@ -1,5 +1,6 @@
 package net.primal.core.networking.nwc.nip47
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -11,4 +12,5 @@ data class PayInvoiceParams(
 @Serializable
 data class PayInvoiceResponsePayload(
     val preimage: String? = null,
+    @SerialName("fees_paid") val feesPaid: Long? = null,
 )

@@ -20,4 +20,5 @@ data class PayKeysendParams(
 @Serializable
 data class PayKeysendResponsePayload(
     val preimage: String? = null,
+    @SerialName("fees_paid") val feesPaid: Long? = null,
 )
