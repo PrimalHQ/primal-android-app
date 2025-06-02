@@ -129,7 +129,8 @@ class WalletDashboardViewModel @Inject constructor(
 
                         // Get Balance
                         when (val res = nwcClient.getBalance()) {
-                            is NwcResult.Success -> Timber.tag("NWC").i("Balance (sats): ${res.result.balance / 1_000}")
+                            is NwcResult.Success -> Timber.tag("NWC")
+                                .i("Balance (sats): ${res.result.balance / WalletDashboardContract.MSATS_IN_SATS}")
                             is NwcResult.Failure -> Timber.tag("NWC").e(res.error, "getBalance failed")
                         }
 
@@ -170,7 +171,8 @@ class WalletDashboardViewModel @Inject constructor(
 //                                val invoiceToPay = makeInvoiceResult.result.invoice
 //                                val payParams = PayInvoiceParams(invoice = invoiceToPay)
 //                                when (val res = nwcClient.payInvoice(payParams)) {
-//                                    is NwcResult.Success -> Timber.tag("NWC").i("Payment success. Preimage: ${res.result.preimage}")
+//                                    is NwcResult.Success -> Timber.tag("NWC")
+//                                        .i("Payment success. Preimage: ${res.result.preimage}")
 //                                    is NwcResult.Failure -> Timber.tag("NWC").e(res.error, "payInvoice failed")
 //                                }
                             }
@@ -185,7 +187,8 @@ class WalletDashboardViewModel @Inject constructor(
 //                            amount = 1_000, // 1 sat in msats
 //                        )
 //                        when (val res = nwcClient.payKeysend(keysendParams)) {
-//                            is NwcResult.Success -> Timber.tag("NWC").i("Keysend success. Preimage: ${res.result.preimage}")
+//                            is NwcResult.Success -> Timber.tag("NWC")
+//                                .i("Keysend success. Preimage: ${res.result.preimage}")
 //                            is NwcResult.Failure -> Timber.tag("NWC").e(res.error, "payKeysend failed")
 //                        }
                     }
