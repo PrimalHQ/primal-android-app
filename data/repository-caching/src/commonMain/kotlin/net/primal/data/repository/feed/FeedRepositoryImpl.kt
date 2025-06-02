@@ -5,8 +5,6 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
-import androidx.paging.filter
-import androidx.paging.flatMap
 import androidx.paging.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
@@ -55,21 +53,7 @@ internal class FeedRepositoryImpl(
                     allowMutedThreads = allowMutedThreads,
                 ).feedQuery(),
             )
-        }.flow.map {
-            val seen = linkedMapOf<String, MutableList<FeedPostDO>>()
-            it.map { feedPostPO ->
-                val post = feedPostPO.mapAsFeedPostDO()
-
-                val group = seen.getOrPut(post.eventId) { mutableListOf() }
-                group.add(post)
-
-                post
-            }.replaceItems {
-                seen.map { (_, list) ->
-                    list.reduce(::mergePosts)
-                }
-            }
-        }
+        }.flow.map { it.map { feedPostPO -> feedPostPO.mapAsFeedPostDO() } }
     }
 
     override suspend fun findNewestPosts(
@@ -241,19 +225,4 @@ internal class FeedRepositoryImpl(
                 allowMutedThreads = allowMutedThreads,
             )
         }
-
-    private inline fun <T : Any, R : Any> PagingData<T>.replaceItems(
-        crossinline replacer: () -> List<R>,
-    ): PagingData<R> {
-        var take = true
-
-        return this.filter { take.also { take = false } }
-            .flatMap { replacer() }
-    }
-
-    private fun mergePosts(a: FeedPostDO, b: FeedPostDO): FeedPostDO {
-        return a.copy(
-            reposts = a.reposts + b.reposts,
-        )
-    }
 }
