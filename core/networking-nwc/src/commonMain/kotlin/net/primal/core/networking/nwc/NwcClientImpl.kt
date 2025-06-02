@@ -32,6 +32,7 @@ import net.primal.core.networking.sockets.NostrIncomingMessage
 import net.primal.core.networking.sockets.NostrSocketClientFactory
 import net.primal.core.networking.sockets.filterBySubscriptionId
 import net.primal.core.networking.sockets.toPrimalSubscriptionId
+import net.primal.core.utils.MSATS_IN_SATS
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEvent
@@ -131,7 +132,7 @@ internal class NwcClientImpl(
         val invoice = nwcZapHelper.fetchInvoiceOrThrow(
             zapPayRequest = zapPayRequest,
             zapEvent = data.userZapRequestEvent,
-            satoshiAmountInMilliSats = data.zapAmountInSats * 1000.toULong(),
+            satoshiAmountInMilliSats = data.zapAmountInSats * MSATS_IN_SATS.toULong(),
             comment = data.zapComment,
         )
 
