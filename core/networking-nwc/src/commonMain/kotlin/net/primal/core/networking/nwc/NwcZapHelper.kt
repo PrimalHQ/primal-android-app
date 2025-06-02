@@ -26,7 +26,7 @@ internal class NwcZapHelper(
     private val dispatcherProvider: DispatcherProvider,
     private val httpClient: HttpClient,
 ) {
-    suspend fun fetchZapPayRequest(lnUrl: String): LightningPayRequest {
+    private suspend fun fetchZapPayRequest(lnUrl: String): LightningPayRequest {
         val bodyString = withContext(dispatcherProvider.io()) {
             httpClient.get(lnUrl) {
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
@@ -48,7 +48,7 @@ internal class NwcZapHelper(
         return result.getOrNull() ?: throw ZapFailureException(cause = result.exceptionOrNull())
     }
 
-    suspend fun fetchInvoice(
+    private suspend fun fetchInvoice(
         request: LightningPayRequest,
         zapEvent: NostrEvent,
         satoshiAmountInMilliSats: ULong,
