@@ -34,8 +34,6 @@ import net.primal.core.networking.nwc.NwcResult
 import net.primal.core.networking.nwc.nip47.ListTransactionsParams
 import net.primal.core.networking.nwc.nip47.LookupInvoiceParams
 import net.primal.core.networking.nwc.nip47.MakeInvoiceParams
-import net.primal.core.networking.nwc.nip47.PayInvoiceParams
-import net.primal.core.networking.nwc.nip47.PayKeysendParams
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.domain.common.exception.NetworkException
@@ -142,15 +140,22 @@ class WalletDashboardViewModel @Inject constructor(
                         }
 
                         // List Transactions
-                        when (val res = nwcClient.listTransactions(ListTransactionsParams(
-                            unpaid = false,
-                        ))) {
+                        when (
+                            val res = nwcClient.listTransactions(
+                                ListTransactionsParams(
+                                    unpaid = false,
+                                ),
+                            )
+                        ) {
                             is NwcResult.Success -> Timber.tag("NWC").i("Transactions: ${res.result.transactions}")
                             is NwcResult.Failure -> Timber.tag("NWC").e(res.error, "listTransactions failed")
                         }
 
                         // Make Invoice
-                        val makeInvoiceParams = MakeInvoiceParams(amount = 10_000, description = "Test invoice") // 10 sats in msats
+                        val makeInvoiceParams = MakeInvoiceParams(
+                            amount = 10_000,
+                            description = "Test invoice",
+                        ) // 10 sats in msats
                         val makeInvoiceResult = nwcClient.makeInvoice(makeInvoiceParams)
 
                         when (makeInvoiceResult) {
@@ -162,19 +167,18 @@ class WalletDashboardViewModel @Inject constructor(
                                     is NwcResult.Success -> Timber.tag("NWC").i("Lookup result: ${res.result}")
                                     is NwcResult.Failure -> Timber.tag("NWC").e(res.error, "lookupInvoice failed")
                                 }
+//                                val invoiceToPay = makeInvoiceResult.result.invoice
+//                                val payParams = PayInvoiceParams(invoice = invoiceToPay)
+//                                when (val res = nwcClient.payInvoice(payParams)) {
+//                                    is NwcResult.Success -> Timber.tag("NWC").i("Payment success. Preimage: ${res.result.preimage}")
+//                                    is NwcResult.Failure -> Timber.tag("NWC").e(res.error, "payInvoice failed")
+//                                }
                             }
 
                             is NwcResult.Failure -> {
                                 Timber.tag("NWC").e(makeInvoiceResult.error, "makeInvoice failed")
                             }
                         }
-
-//                        val invoiceToPay = "lnbc..." // replace with a real test invoice
-//                        val payParams = PayInvoiceParams(invoice = invoiceToPay)
-//                        when (val res = nwcClient.payInvoice(payParams)) {
-//                            is NwcResult.Success -> Timber.tag("NWC").i("Payment success. Preimage: ${res.result.preimage}")
-//                            is NwcResult.Failure -> Timber.tag("NWC").e(res.error, "payInvoice failed")
-//                        }
 
 //                        val keysendParams = PayKeysendParams(
 //                            pubkey = "npub...", // recipient's pubkey

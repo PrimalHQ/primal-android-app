@@ -1,6 +1,6 @@
 package net.primal.core.networking.nwc
 
-import net.primal.core.networking.nwc.nip47.GetBalanceResponse
+import net.primal.core.networking.nwc.nip47.GetBalanceResponsePayload
 import net.primal.core.networking.nwc.nip47.GetInfoResponsePayload
 import net.primal.core.networking.nwc.nip47.ListTransactionsParams
 import net.primal.core.networking.nwc.nip47.ListTransactionsResponsePayload
@@ -15,9 +15,11 @@ import net.primal.core.networking.nwc.nip47.PayKeysendResponsePayload
 
 interface NwcApi {
 
-    suspend fun getBalance(): NwcResult<GetBalanceResponse>
+    suspend fun getBalance(): NwcResult<GetBalanceResponsePayload>
 
-    suspend fun listTransactions(params: ListTransactionsParams = ListTransactionsParams()): NwcResult<ListTransactionsResponsePayload>
+    suspend fun listTransactions(
+        params: ListTransactionsParams = ListTransactionsParams(),
+    ): NwcResult<ListTransactionsResponsePayload>
 
     suspend fun makeInvoice(params: MakeInvoiceParams): NwcResult<MakeInvoiceResponsePayload>
 
@@ -32,5 +34,4 @@ interface NwcApi {
     suspend fun multiPayInvoice(params: List<PayInvoiceParams>): NwcResult<List<PayInvoiceResponsePayload>>
 
     suspend fun multiPayKeysend(params: List<PayKeysendParams>): NwcResult<List<PayKeysendResponsePayload>>
-
 }

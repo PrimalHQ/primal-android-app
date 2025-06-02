@@ -14,7 +14,7 @@ import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import net.primal.core.networking.nwc.model.NostrWalletConnect
 import net.primal.core.networking.nwc.model.NwcWalletRequest
-import net.primal.core.networking.nwc.nip47.GetBalanceResponse
+import net.primal.core.networking.nwc.nip47.GetBalanceResponsePayload
 import net.primal.core.networking.nwc.nip47.GetInfoResponsePayload
 import net.primal.core.networking.nwc.nip47.ListTransactionsParams
 import net.primal.core.networking.nwc.nip47.ListTransactionsResponsePayload
@@ -148,7 +148,7 @@ internal class NwcClientImpl(
         }
     }
 
-    override suspend fun getBalance(): NwcResult<GetBalanceResponse> =
+    override suspend fun getBalance(): NwcResult<GetBalanceResponsePayload> =
         sendNwcRequest(method = NwcMethod.GetBalance.value, params = buildJsonObject {})
 
     override suspend fun listTransactions(params: ListTransactionsParams): NwcResult<ListTransactionsResponsePayload> =

@@ -19,5 +19,5 @@ data class PayKeysendParams(
 
 @Serializable
 data class PayKeysendResponsePayload(
-    val preimage: String,
+    val preimage: String? = null,
 )

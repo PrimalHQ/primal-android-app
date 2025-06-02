@@ -10,5 +10,5 @@ data class PayInvoiceParams(
 
 @Serializable
 data class PayInvoiceResponsePayload(
-    val preimage: String,
+    val preimage: String? = null,
 )

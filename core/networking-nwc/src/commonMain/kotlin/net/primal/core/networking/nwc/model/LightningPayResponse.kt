@@ -7,8 +7,7 @@ import net.primal.core.networking.nwc.nip47.PayInvoiceParams
 data class LightningPayResponse(
     val pr: String,
 ) {
-    fun toNwcPayInvoiceParams(): PayInvoiceParams =
-        PayInvoiceParams(invoice = this.pr)
+    fun toNwcPayInvoiceParams(): PayInvoiceParams = PayInvoiceParams(invoice = this.pr)
 
     fun toWalletPayRequest(): NwcWalletRequest<PayInvoiceParams> =
         NwcWalletRequest(

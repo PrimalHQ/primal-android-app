@@ -22,7 +22,7 @@ data class LookupInvoiceResponsePayload(
     @SerialName("description_hash") val descriptionHash: String? = null,
     val description: String? = null,
     val preimage: String? = null,
-    @SerialName("payment_hash") val paymentHash: String,
+    @SerialName("payment_hash") val paymentHash: String? = null,
     val amount: Long,
     val fees_paid: Long? = null,
     @SerialName("created_at") val createdAt: Long,
