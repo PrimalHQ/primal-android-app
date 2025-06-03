@@ -44,14 +44,14 @@ kotlin {
 
                 // Cryptography
 //                implementation(libs.lightning.kmp)
-                implementation(libs.bitcoin.kmp)
-                implementation(libs.secp256k1.kmp)
-                implementation(libs.korlibs.crypto)
+                api(libs.bitcoin.kmp)
+                api(libs.secp256k1.kmp)
+                api(libs.korlibs.crypto)
 
                 implementation(libs.ktor.io)
 
                 implementation(libs.napier)
-                implementation(libs.bignum)
+                api(libs.bignum)
             }
         }
 

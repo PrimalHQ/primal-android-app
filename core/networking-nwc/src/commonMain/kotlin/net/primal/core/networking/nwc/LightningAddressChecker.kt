@@ -1,18 +1,15 @@
-package net.primal.android.wallet.nwc
+package net.primal.core.networking.nwc
 
-import java.io.IOException
-import java.net.HttpURLConnection
-import javax.inject.Inject
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
 import kotlinx.coroutines.withContext
-import net.primal.android.wallet.api.parseAsLNUrlOrNull
+import kotlinx.io.IOException
 import net.primal.core.utils.coroutines.DispatcherProvider
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.internal.closeQuietly
+import net.primal.domain.nostr.utils.parseAsLNUrlOrNull
 
-class LightningAddressChecker @Inject constructor(
+class LightningAddressChecker(
     private val dispatcherProvider: DispatcherProvider,
-    private val okHttpClient: OkHttpClient,
+    private val httpClient: HttpClient = NwcClientFactory.nwcHttpClient,
 ) {
 
     private fun String.parseAsLnUrlOrThrow(): String {
@@ -22,14 +19,18 @@ class LightningAddressChecker @Inject constructor(
 
     suspend fun validateLightningAddress(lud16: String) {
         val lnUrl = lud16.parseAsLnUrlOrThrow()
-        val lnUrlCall = okHttpClient.newCall(Request.Builder().url(lnUrl).build())
+
         try {
-            val lnUrlResponse = withContext(dispatcherProvider.io()) { lnUrlCall.execute() }
-            lnUrlResponse.closeQuietly()
-            if (lnUrlResponse.code != HttpURLConnection.HTTP_OK) {
+            val response = withContext(dispatcherProvider.io()) {
+                httpClient.get(lnUrl)
+            }
+
+            if (response.status.value != 200) {
                 throw InvalidLud16Exception(lud16 = lud16)
             }
         } catch (error: IOException) {
+            throw InvalidLud16Exception(cause = error, lud16 = lud16)
+        } catch (error: Throwable) {
             throw InvalidLud16Exception(cause = error, lud16 = lud16)
         }
     }
@@ -38,4 +39,4 @@ class LightningAddressChecker @Inject constructor(
 class InvalidLud16Exception(
     override val cause: Throwable? = null,
     val lud16: String,
-) : RuntimeException()
+) : RuntimeException("Invalid LUD-16 address: $lud16", cause)

@@ -1,4 +1,4 @@
-package net.primal.android.user.domain
+package net.primal.core.networking.nwc.model
 
 import kotlinx.serialization.Serializable
 

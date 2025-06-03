@@ -27,6 +27,7 @@ include(":core:app-config")
 include(":core:networking-http")
 include(":core:networking-primal")
 include(":core:networking-upload")
+include(":core:networking-nwc")
 
 include(":data:local-caching")
 include(":data:remote-caching")

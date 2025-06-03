@@ -4,7 +4,6 @@ import android.content.ContentResolver
 import fr.acinq.secp256k1.Hex
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -19,11 +18,8 @@ import net.primal.android.networking.UserAgentProvider
 import net.primal.android.signer.AmberSignResult
 import net.primal.android.signer.signEventWithAmber
 import net.primal.android.user.credentials.CredentialsStore
-import net.primal.android.user.domain.NostrWalletConnect
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.toZapTag
-import net.primal.android.wallet.nwc.model.NwcWalletRequest
-import net.primal.android.wallet.nwc.model.PayInvoiceRequest
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.settings.model.AppSettingsDescription
@@ -40,7 +36,6 @@ import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.cryptography.signOrThrow
-import net.primal.domain.nostr.cryptography.utils.CryptoUtils
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import net.primal.domain.nostr.cryptography.utils.toNpub
 import net.primal.domain.nostr.zaps.ZapTarget
@@ -197,31 +192,6 @@ class NostrNotary @Inject constructor(
                 tags = target.toTags() + listOf(relays.toZapTag()),
             ),
         )
-    }
-
-    @OptIn(ExperimentalEncodingApi::class)
-    fun signWalletInvoiceRequestNostrEvent(
-        request: NwcWalletRequest<PayInvoiceRequest>,
-        nwc: NostrWalletConnect,
-    ): SignResult {
-        val tags = listOf(nwc.pubkey.asPubkeyTag())
-        val content = NostrNotaryJson.encodeToString(request)
-        val encryptedMessage = CryptoUtils.encrypt(
-            msg = content,
-            privateKey = Hex.decode(nwc.keypair.privateKey),
-            pubKey = Hex.decode(nwc.pubkey),
-        )
-
-        return runCatching {
-            SignResult.Signed(
-                NostrUnsignedEvent(
-                    pubKey = nwc.keypair.pubkey,
-                    kind = NostrEventKind.WalletRequest.value,
-                    content = encryptedMessage,
-                    tags = tags,
-                ).signOrThrow(hexPrivateKey = Hex.decode(nwc.keypair.privateKey)),
-            )
-        }.getOrElse { SignResult.Rejected(SignatureException(cause = it)) }
     }
 
     suspend fun signPrimalWalletOperationNostrEvent(userId: String, content: String): SignResult {

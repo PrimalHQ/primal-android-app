@@ -14,6 +14,7 @@
             <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/core/app-config" />
             <option value="$PROJECT_DIR$/core/networking-http" />
+            <option value="$PROJECT_DIR$/core/networking-nwc" />
             <option value="$PROJECT_DIR$/core/networking-primal" />
             <option value="$PROJECT_DIR$/core/networking-upload" />
             <option value="$PROJECT_DIR$/core/utils" />
