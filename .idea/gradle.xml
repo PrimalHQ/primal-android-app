@@ -26,6 +26,7 @@
             <option value="$PROJECT_DIR$/domain/nostr" />
             <option value="$PROJECT_DIR$/domain/primal" />
             <option value="$PROJECT_DIR$/domain/primal-wallet" />
+            <option value="$PROJECT_DIR$/paging-runtime-ios" />
             <option value="$PROJECT_DIR$/shared" />
           </set>
         </option>

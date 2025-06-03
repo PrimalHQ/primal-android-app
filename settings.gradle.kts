@@ -38,3 +38,4 @@ include(":domain:primal")
 include(":domain:primal-wallet")
 
 include(":shared")
+include(":paging-runtime-ios")

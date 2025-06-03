@@ -33,7 +33,11 @@ kotlin {
             xcfFramework.add(this)
             export(project(":domain:nostr"))
             export(project(":domain:primal"))
+            export(project(":core:networking-primal"))
+            export(project(":core:networking-upload"))
+            export(project(":core:networking-nwc"))
             export(project(":data:repository-caching"))
+            export(project(":paging-runtime-ios"))
         }
     }
 
@@ -44,7 +48,11 @@ kotlin {
                 // Internal
                 api(project(":domain:nostr"))
                 api(project(":domain:primal"))
+                api(project(":core:networking-primal"))
+                api(project(":core:networking-upload"))
+                api(project(":core:networking-nwc"))
                 api(project(":data:repository-caching"))
+                api(project(":paging-runtime-ios"))
 
                 // Core
                 implementation(libs.kotlinx.coroutines.core)
