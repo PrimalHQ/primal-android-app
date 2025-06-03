@@ -35,6 +35,12 @@ fun String.detectUrls(): List<String> {
         when (this.getOrNull(matchResult.range.first - 1)) {
             '(' -> url = url.trimEnd(')')
             '[' -> url = url.trimEnd(']')
+            '{' -> url = url.trimEnd('}')
+            '"' -> url = url.trimEnd('"')
+        }
+
+        if (trailingTldWithParenRegex.containsMatchIn(url)) {
+            url = url.dropLast(1)
         }
 
         url
@@ -118,6 +124,9 @@ fun String.extractExtensionFromUrl(): String {
 }
 
 private val tldExtractionRegex = Regex("(?:https?://)?(?:www\\.)?([\\w\\d\\-]+\\.[\\w\\d\\-.]+)")
+
+// Matches a TLD followed by one unwanted closing character at the end of the string
+private val trailingTldWithParenRegex = Regex("""\.[a-zA-Z]{2,63}[)\]}"]$""")
 
 fun String.extractTLD(): String? {
     val matchResult = tldExtractionRegex.find(this)
