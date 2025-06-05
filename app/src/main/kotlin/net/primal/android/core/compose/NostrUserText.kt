@@ -58,6 +58,7 @@ fun NostrUserText(
     internetIdentifier: String?,
     modifier: Modifier = Modifier,
     displayNameColor: Color = AppTheme.colorScheme.onSurface,
+    displayNameFontWeight: FontWeight = FontWeight.Bold,
     fontSize: TextUnit = TextUnit.Unspecified,
     style: TextStyle = LocalTextStyle.current,
     autoResizeToFit: Boolean = false,
@@ -90,7 +91,7 @@ fun NostrUserText(
                 spanStyle = SpanStyle(
                     color = displayNameColor,
                     fontStyle = style.fontStyle,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = displayNameFontWeight,
                 ),
             ),
         )
