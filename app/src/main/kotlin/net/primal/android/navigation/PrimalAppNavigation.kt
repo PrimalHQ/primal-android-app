@@ -272,8 +272,13 @@ fun NavController.navigateToMediaItem(mediaUrl: String) {
 fun NavController.navigateToExploreFeed(
     feedSpec: String,
     renderType: ExploreFeedContract.RenderType = ExploreFeedContract.RenderType.List,
+    feedTitle: String? = null,
+    feedDescription: String? = null,
 ) = navigate(
-    route = "explore/note?$EXPLORE_FEED_SPEC=${feedSpec.asBase64Encoded()}&$RENDER_TYPE=$renderType",
+    route = "explore/note?$EXPLORE_FEED_SPEC=${feedSpec.asBase64Encoded()}" +
+        "&$EXPLORE_FEED_TITLE=${feedTitle?.asBase64Encoded()}" +
+        "&$EXPLORE_FEED_DESCRIPTION=${feedDescription?.asBase64Encoded()}" +
+        "&$RENDER_TYPE=$renderType",
 )
 
 private fun NavController.navigateToBookmarks() = navigate(route = "bookmarks")
@@ -532,6 +537,8 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
             route = "explore/note?" +
                 "$EXPLORE_FEED_SPEC={$EXPLORE_FEED_SPEC}&" +
                 "$ADVANCED_SEARCH_FEED_SPEC={$ADVANCED_SEARCH_FEED_SPEC}&" +
+                "$EXPLORE_FEED_TITLE={$EXPLORE_FEED_TITLE}&" +
+                "$EXPLORE_FEED_DESCRIPTION={$EXPLORE_FEED_DESCRIPTION}&" +
                 "$RENDER_TYPE={$RENDER_TYPE}",
             arguments = listOf(
                 navArgument(EXPLORE_FEED_SPEC) {
@@ -539,6 +546,14 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
                     nullable = true
                 },
                 navArgument(ADVANCED_SEARCH_FEED_SPEC) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(EXPLORE_FEED_TITLE) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(EXPLORE_FEED_DESCRIPTION) {
                     type = NavType.StringType
                     nullable = true
                 },

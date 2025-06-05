@@ -89,6 +89,14 @@ const val EXPLORE_FEED_SPEC = "exploreFeedSpec"
 inline val SavedStateHandle.exploreFeedSpec: String?
     get() = get<String>(EXPLORE_FEED_SPEC)?.asBase64Decoded()?.ifEmpty { null }
 
+const val EXPLORE_FEED_TITLE = "exploreFeedTitle"
+inline val SavedStateHandle.exploreFeedTitle: String?
+    get() = get<String>(EXPLORE_FEED_TITLE)?.asBase64Decoded()?.ifEmpty { null }
+
+const val EXPLORE_FEED_DESCRIPTION = "exploreFeedDescription"
+inline val SavedStateHandle.exploreFeedDescription: String?
+    get() = get<String>(EXPLORE_FEED_DESCRIPTION)?.asBase64Decoded()?.ifEmpty { null }
+
 const val NOTE_EDITOR_ARGS = "preFillContent"
 
 const val MEDIA_URL = "mediaUrl"

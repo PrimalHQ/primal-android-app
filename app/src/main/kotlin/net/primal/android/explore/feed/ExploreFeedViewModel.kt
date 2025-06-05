@@ -18,7 +18,9 @@ import net.primal.android.explore.feed.ExploreFeedContract.UiEvent
 import net.primal.android.explore.feed.ExploreFeedContract.UiState
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
 import net.primal.android.navigation.advancedSearchFeedSpec
+import net.primal.android.navigation.exploreFeedDescription
 import net.primal.android.navigation.exploreFeedSpec
+import net.primal.android.navigation.exploreFeedTitle
 import net.primal.android.navigation.renderType
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.utils.coroutines.DispatcherProvider
@@ -44,6 +46,9 @@ class ExploreFeedViewModel @Inject constructor(
         ?: savedStateHandle.advancedSearchFeedSpec?.buildAdvancedSearchFeedSpec()
         ?: error("no feed spec provided.")
 
+    private val feedTitle = savedStateHandle.exploreFeedTitle
+    private val feedDescription = savedStateHandle.exploreFeedDescription
+
     private val renderType = ExploreFeedContract.RenderType.valueOf(savedStateHandle.renderType)
 
     private val _state = MutableStateFlow(
@@ -51,6 +56,8 @@ class ExploreFeedViewModel @Inject constructor(
             feedSpec = feedSpec,
             feedSpecKind = feedSpec.resolveFeedSpecKind(),
             renderType = renderType,
+            feedTitle = feedTitle,
+            feedDescription = feedDescription,
         ),
     )
     val state = _state.asStateFlow()

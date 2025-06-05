@@ -7,6 +7,8 @@ interface ExploreFeedContract {
         val feedSpec: String,
         val feedSpecKind: FeedSpecKind?,
         val renderType: RenderType,
+        val feedTitle: String?,
+        val feedDescription: String?,
         val existsInUserFeeds: Boolean = false,
         val error: ExploreFeedError? = null,
     ) {
