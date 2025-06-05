@@ -628,6 +628,11 @@
     <string name="explore_feed_user_notes_feed_description">Latest notes by user follows</string>
     <string name="explore_feed_user_reads_feed_description">Latest articles by user follows</string>
 
+    <string name="follow_pack_unable_to_load">Unable to load this follow pack. Please try again.</string>
+    <string name="follow_pack_show_feed_button">Show Feed</string>
+    <string name="follow_pack_follow_all_button">Follow All</string>
+    <string name="follow_pack_created_by">Created by:</string>
+
     <string name="dvm_feed_created_by">Created by</string>
 
     <string name="bookmarks_title_notes">Note Bookmarks</string>

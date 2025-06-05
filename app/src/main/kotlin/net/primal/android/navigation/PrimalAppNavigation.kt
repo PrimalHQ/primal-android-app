@@ -62,6 +62,8 @@ import net.primal.android.explore.feed.ExploreFeedScreen
 import net.primal.android.explore.feed.ExploreFeedViewModel
 import net.primal.android.explore.home.ExploreHomeScreen
 import net.primal.android.explore.home.ExploreHomeViewModel
+import net.primal.android.explore.home.followpack.FollowPackScreen
+import net.primal.android.explore.home.followpack.FollowPackViewModel
 import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.explore.search.ui.SearchScope
 import net.primal.android.explore.search.ui.SearchScreen
@@ -219,6 +221,9 @@ fun NavController.navigateToExplore() =
         route = "explore",
         navOptions = topLevelNavOptions,
     )
+
+fun NavController.navigateToFollowPack(profileId: String, followPackId: String) =
+    navigate(route = "explore/followPack/$profileId/$followPackId")
 
 fun NavController.navigateToRedeemCode(promoCode: String? = null) =
     navigate(route = "redeemCode?$PROMO_CODE=$promoCode")
@@ -519,6 +524,21 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
             deepLinks = listOf(
                 navDeepLink {
                     uriPattern = "https://primal.net/explore"
+                },
+            ),
+        )
+
+        followPack(
+            route = "explore/followPack/{$PROFILE_ID}/{$FOLLOW_PACK_ID}",
+            navController = navController,
+            arguments = listOf(
+                navArgument(PROFILE_ID) {
+                    type = NavType.StringType
+                    nullable = false
+                },
+                navArgument(FOLLOW_PACK_ID) {
+                    type = NavType.StringType
+                    nullable = false
                 },
             ),
         )
@@ -1275,6 +1295,35 @@ private fun NavGraphBuilder.explore(
         onGoToWallet = { navController.navigateToWallet() },
         accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
         onNewPostClick = { navController.navigateToNoteEditor(null) },
+    )
+}
+
+private fun NavGraphBuilder.followPack(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) {
+    val viewModel = hiltViewModel<FollowPackViewModel>()
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
+    FollowPackScreen(
+        onShowFeedClick = { feed, title, description ->
+            navController.navigateToExploreFeed(
+                feedSpec = feed,
+                feedTitle = title,
+                feedDescription = description,
+            )
+        },
+        onProfileClick = { navController.navigateToProfile(profileId = it) },
+        onClose = { navController.navigateUp() },
+        viewModel = viewModel,
     )
 }
 
