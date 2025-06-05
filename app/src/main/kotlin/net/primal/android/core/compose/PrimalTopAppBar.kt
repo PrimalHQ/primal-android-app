@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.premium.legend.domain.LegendaryCustomization
@@ -44,6 +45,8 @@ import net.primal.domain.links.CdnImage
 fun PrimalTopAppBar(
     modifier: Modifier = Modifier,
     title: String = "",
+    titleMaxLines: Int = Int.MAX_VALUE,
+    titleOverflow: TextOverflow = TextOverflow.Clip,
     titleFontWeight: FontWeight? = null,
     subtitle: String? = null,
     titleTrailingIcon: ImageVector? = null,
@@ -130,6 +133,8 @@ fun PrimalTopAppBar(
                         textAlign = TextAlign.Center,
                         text = title,
                         color = textColor,
+                        maxLines = titleMaxLines,
+                        overflow = titleOverflow,
                         trailingIcon = if (title.isNotEmpty()) titleTrailingIcon else null,
                         trailingIconTintColor = textColor,
                         iconSize = 20.sp,
