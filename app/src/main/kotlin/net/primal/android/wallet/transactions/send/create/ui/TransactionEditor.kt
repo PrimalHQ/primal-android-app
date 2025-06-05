@@ -89,7 +89,7 @@ fun TransactionEditor(
 
     var noteRecipientText by remember { mutableStateOf(state.transaction.noteRecipient ?: "") }
     var noteSelfText by remember { mutableStateOf(state.transaction.noteSelf ?: "") }
-    var isNumericPadOn by remember { mutableStateOf(state.isNotInvoice()) }
+    var isNumericPadOn by remember { mutableStateOf(state.isNotInvoice() || state.isAmountZero()) }
     val sendPayment = {
         eventPublisher(
             CreateTransactionContract.UiEvent.SendTransaction(
@@ -131,7 +131,7 @@ fun TransactionEditor(
                 state = state,
                 keyboardVisible = keyboardVisible,
                 onAmountClick = {
-                    if (state.isNotInvoice()) {
+                    if (state.isNotInvoice() || state.isAmountZero()) {
                         isNumericPadOn = true
                     }
 
