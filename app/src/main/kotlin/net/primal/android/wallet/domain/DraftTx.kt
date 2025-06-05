@@ -21,4 +21,6 @@ data class DraftTx(
 ) {
     fun isLightningTx() = targetOnChainAddress == null
     fun isBtcTx() = targetOnChainAddress != null
+    fun isLnInvoiceAmountless() =
+        lnInvoice != null && (lnInvoiceData?.amountMilliSats == null || lnInvoiceData.amountMilliSats == 0)
 }

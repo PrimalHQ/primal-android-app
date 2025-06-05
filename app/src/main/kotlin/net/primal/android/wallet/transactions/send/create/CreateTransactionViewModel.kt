@@ -296,7 +296,9 @@ class CreateTransactionViewModel @Inject constructor(
                         targetPubKey = draftTransaction.targetUserId,
                         lnInvoice = draftTransaction.lnInvoice,
                         targetBtcAddress = draftTransaction.targetOnChainAddress,
-                        amountBtc = if (draftTransaction.lnInvoice == null) {
+                        amountBtc = if (draftTransaction.lnInvoice == null ||
+                            draftTransaction.isLnInvoiceAmountless()
+                        ) {
                             draftTransaction.amountSats.toULong().toBtc().formatAsString()
                         } else {
                             null
