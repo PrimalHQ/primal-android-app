@@ -45,10 +45,10 @@ import net.primal.android.R
 import net.primal.android.articles.feed.ui.FeedArticleListItem
 import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.core.compose.ListLoadingError
-import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PremiumFeedPaywall
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
+import net.primal.android.core.compose.handleRefreshLoadState
 import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
@@ -293,7 +293,7 @@ private fun ArticleFeedLazyColumn(
         }
 
         if (pagingItems.isEmpty()) {
-            handleRefreshLoadState(
+            handleRefreshLoadState<FeedArticleUi>(
                 pagingItems = pagingItems,
                 noContentText = noContentText,
                 noContentVerticalArrangement = noContentVerticalArrangement,
@@ -312,45 +312,6 @@ private fun ArticleFeedLazyColumn(
         if (pagingItems.isNotEmpty()) {
             item(contentType = "Footer") {
                 Spacer(modifier = Modifier.height(64.dp))
-            }
-        }
-    }
-}
-
-private fun LazyListScope.handleRefreshLoadState(
-    pagingItems: LazyPagingItems<FeedArticleUi>,
-    noContentText: String,
-    noContentVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
-    noContentPaddingValues: PaddingValues = PaddingValues(all = 0.dp),
-) {
-    when (val refreshLoadState = pagingItems.loadState.refresh) {
-        LoadState.Loading -> {
-            heightAdjustableLoadingLazyListPlaceholder()
-        }
-
-        is LoadState.NotLoading -> {
-            item(contentType = "NoContent") {
-                ListNoContent(
-                    modifier = Modifier.fillParentMaxSize(),
-                    noContentText = noContentText,
-                    onRefresh = { pagingItems.refresh() },
-                    verticalArrangement = noContentVerticalArrangement,
-                    contentPadding = noContentPaddingValues,
-                )
-            }
-        }
-
-        is LoadState.Error -> {
-            val error = refreshLoadState.error
-            Timber.w(error)
-            item(contentType = "RefreshError") {
-                ListNoContent(
-                    modifier = Modifier.fillParentMaxSize(),
-                    noContentText = stringResource(id = R.string.feed_error_loading),
-                    onRefresh = { pagingItems.refresh() },
-                    verticalArrangement = noContentVerticalArrangement,
-                    contentPadding = noContentPaddingValues,
-                )
             }
         }
     }
