@@ -23,7 +23,7 @@ import androidx.compose.runtime.remember
  */
 @Composable
 fun LazyListState.rememberIsItemVisible(key: Any?, fallback: Boolean): State<Boolean> {
-    return remember(this) {
+    return remember(this, key, fallback) {
         derivedStateOf {
             if (layoutInfo.visibleItemsInfo.isEmpty()) {
                 fallback

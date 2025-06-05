@@ -94,6 +94,7 @@ fun ExploreHomeScreen(
     onGoToWallet: (() -> Unit)? = null,
     noteCallbacks: NoteCallbacks,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
+    onFollowPackClick: (profileId: String, identifier: String) -> Unit,
     onNewPostClick: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -105,6 +106,7 @@ fun ExploreHomeScreen(
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         onSearchClick = onSearchClick,
         onAdvancedSearchClick = onAdvancedSearchClick,
+        onFollowPackClick = onFollowPackClick,
         noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
         accountSwitcherCallbacks = accountSwitcherCallbacks,
@@ -121,6 +123,7 @@ private fun ExploreHomeScreen(
     onDrawerQrCodeClick: () -> Unit,
     onSearchClick: () -> Unit,
     onAdvancedSearchClick: () -> Unit,
+    onFollowPackClick: (profileId: String, identifier: String) -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: (() -> Unit)? = null,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
@@ -171,14 +174,7 @@ private fun ExploreHomeScreen(
                             modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
                             paddingValues = paddingValues,
                             onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
-                            onUiError = { uiError: UiError ->
-                                uiScope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        message = uiError.resolveUiErrorMessage(context),
-                                        duration = SnackbarDuration.Short,
-                                    )
-                                }
-                            },
+                            onFollowPackClick = onFollowPackClick,
                         )
                     }
 
