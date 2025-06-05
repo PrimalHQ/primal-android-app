@@ -5,9 +5,13 @@ import kotlinx.serialization.json.float
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
+import net.primal.core.utils.serialization.CommonJsonImplicitNulls
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.explore.model.ExploreRequestBody
+import net.primal.data.remote.api.explore.model.FollowListsRequestBody
+import net.primal.data.remote.api.explore.model.FollowListsResponse
+import net.primal.data.remote.api.explore.model.FollowPackRequestBody
 import net.primal.data.remote.api.explore.model.SearchUsersRequestBody
 import net.primal.data.remote.api.explore.model.TopicScore
 import net.primal.data.remote.api.explore.model.TrendingPeopleResponse
@@ -40,6 +44,52 @@ internal class ExploreApiImpl(
             primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
             primalPremiumInfo = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
             blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
+        )
+    }
+
+    override suspend fun getFollowLists(body: FollowListsRequestBody): FollowListsResponse {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = net.primal.data.remote.PrimalVerb.FOLLOW_LISTS.id,
+                optionsJson = CommonJsonImplicitNulls.encodeToString(body),
+            ),
+        )
+
+        return FollowListsResponse(
+            pagingEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging)
+                ?.content?.decodeFromJsonStringOrNull(),
+            primalUserFollowersCounts = queryResult.findPrimalEvent(NostrEventKind.PrimalUserFollowersCounts),
+            metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
+            primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
+            primalPremiumInfo = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
+            primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
+            cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
+            blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
+            followListEvents = queryResult.filterNostrEvents(NostrEventKind.StarterPack),
+            primalUserScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
+        )
+    }
+
+    override suspend fun getFollowList(body: FollowPackRequestBody): FollowListsResponse {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = net.primal.data.remote.PrimalVerb.FOLLOW_LIST.id,
+                optionsJson = CommonJsonImplicitNulls.encodeToString(body),
+            ),
+        )
+
+        return FollowListsResponse(
+            pagingEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging)
+                ?.content?.decodeFromJsonStringOrNull(),
+            primalUserFollowersCounts = queryResult.findPrimalEvent(NostrEventKind.PrimalUserFollowersCounts),
+            metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
+            primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
+            primalPremiumInfo = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
+            primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
+            cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
+            blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
+            followListEvents = queryResult.filterNostrEvents(NostrEventKind.StarterPack),
+            primalUserScores = queryResult.findPrimalEvent(NostrEventKind.PrimalUserScores),
         )
     }
 

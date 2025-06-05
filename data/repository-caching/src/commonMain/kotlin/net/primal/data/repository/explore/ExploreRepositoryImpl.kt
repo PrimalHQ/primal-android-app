@@ -1,6 +1,13 @@
 package net.primal.data.repository.explore
 
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.PagingSource
+import androidx.paging.map
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
@@ -8,17 +15,22 @@ import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.data.local.dao.explore.FollowPack
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.explore.ExploreApi
 import net.primal.data.remote.api.explore.model.ExploreRequestBody
+import net.primal.data.remote.api.explore.model.FollowListsRequestBody
+import net.primal.data.remote.api.explore.model.FollowPackRequestBody
 import net.primal.data.remote.api.explore.model.SearchUsersRequestBody
 import net.primal.data.remote.api.explore.model.UsersResponse
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.flatMapNotNullAsLinkPreviewResource
 import net.primal.data.remote.mapper.flatMapNotNullAsVideoThumbnailsMap
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
+import net.primal.data.repository.explore.paging.FollowPackMediator
 import net.primal.data.repository.mappers.local.asExploreTrendingTopic
+import net.primal.data.repository.mappers.local.asFollowPackDO
 import net.primal.data.repository.mappers.local.asProfileDataDO
 import net.primal.data.repository.mappers.local.asProfileStatsPO
 import net.primal.data.repository.mappers.local.mapAsFeedPostDO
@@ -37,6 +49,7 @@ import net.primal.domain.common.UserProfileSearchItem
 import net.primal.domain.explore.ExplorePeopleData
 import net.primal.domain.explore.ExploreRepository
 import net.primal.domain.explore.ExploreZapNoteData
+import net.primal.domain.explore.FollowPack as FollowPackDO
 
 class ExploreRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
@@ -157,6 +170,46 @@ class ExploreRepositoryImpl(
             }
         }
 
+    override fun getFollowLists(): Flow<PagingData<FollowPackDO>> =
+        createFollowPacksPager {
+            database.followPacks().getFollowPacks()
+        }.flow.map { it.map { it.asFollowPackDO() } }
+
+    override suspend fun fetchFollowLists(
+        since: Long?,
+        until: Long?,
+        limit: Int,
+        offset: Int?,
+    ): List<FollowPackDO> =
+        withContext(dispatcherProvider.io()) {
+            val response = exploreApi.getFollowLists(
+                body = FollowListsRequestBody(
+                    since = since,
+                    until = until,
+                    limit = limit,
+                    offset = offset,
+                ),
+            )
+
+            response.processAndPersistFollowLists(database = database)
+        }
+
+    override suspend fun fetchFollowList(authorId: String, identifier: String): FollowPackDO? =
+        withContext(dispatcherProvider.io()) {
+            val response = exploreApi.getFollowList(
+                body = FollowPackRequestBody(
+                    authorId = authorId,
+                    identifier = identifier,
+                ),
+            )
+
+            response.processAndPersistFollowLists(database = database).firstOrNull()
+        }
+
+    override fun observeFollowList(authorId: String, identifier: String): Flow<FollowPackDO?> =
+        database.followPacks().observeFollowPack(authorId = authorId, identifier = identifier)
+            .map { it?.asFollowPackDO() }
+
     override fun observeTrendingTopics() =
         database.trendingTopics().allSortedByScore()
             .map { it.map { it.asExploreTrendingTopic() } }
@@ -216,4 +269,25 @@ class ExploreRepositoryImpl(
         queryRemoteUsers {
             exploreApi.getPopularUsers()
         }
+
+    @OptIn(ExperimentalPagingApi::class)
+    private fun createFollowPacksPager(pagingSourceFactory: () -> PagingSource<Int, FollowPack>) =
+        Pager(
+            config = PagingConfig(
+                pageSize = PAGE_SIZE,
+                prefetchDistance = PAGE_SIZE * 2,
+                initialLoadSize = PAGE_SIZE * 2,
+                enablePlaceholders = true,
+            ),
+            remoteMediator = FollowPackMediator(
+                exploreApi = exploreApi,
+                database = database,
+                dispatcherProvider = dispatcherProvider,
+            ),
+            pagingSourceFactory = pagingSourceFactory,
+        )
+
+    companion object {
+        private const val PAGE_SIZE = 25
+    }
 }

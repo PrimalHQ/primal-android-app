@@ -44,6 +44,8 @@ fun List<JsonArray>.findFirstPublishedAt() = firstOrNull { it.isPublishedAtTag()
 
 fun List<JsonArray>.findFirstIdentifier() = firstOrNull { it.isIdentifierTag() }?.getTagValueOrNull()
 
+fun List<JsonArray>.findFirstDescription() = firstOrNull { it.isDescriptionTag() }?.getTagValueOrNull()
+
 fun List<JsonArray>.findFirstAltDescription() = firstOrNull { it.isAltTag() }?.getTagValueOrNull()
 
 fun List<JsonArray>.findFirstReplaceableEventId() = firstOrNull { it.isATag() }?.getTagValueOrNull()

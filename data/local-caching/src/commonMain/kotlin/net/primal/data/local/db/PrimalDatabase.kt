@@ -18,6 +18,13 @@ import net.primal.data.local.dao.events.EventUserStats
 import net.primal.data.local.dao.events.EventUserStatsDao
 import net.primal.data.local.dao.events.EventZap
 import net.primal.data.local.dao.events.EventZapDao
+import net.primal.data.local.dao.explore.FollowPackDao
+import net.primal.data.local.dao.explore.FollowPackData
+import net.primal.data.local.dao.explore.FollowPackListCrossRef
+import net.primal.data.local.dao.explore.FollowPackListCrossRefDao
+import net.primal.data.local.dao.explore.FollowPackProfileCrossRef
+import net.primal.data.local.dao.explore.FollowPackRemoteKey
+import net.primal.data.local.dao.explore.FollowPackRemoteKeyDao
 import net.primal.data.local.dao.explore.TrendingTopic
 import net.primal.data.local.dao.explore.TrendingTopicDao
 import net.primal.data.local.dao.feeds.Feed
@@ -84,8 +91,12 @@ import net.primal.data.local.serialization.ProfileTypeConverters
         ArticleCommentCrossRef::class,
         ArticleFeedCrossRef::class,
         HighlightData::class,
+        FollowPackData::class,
+        FollowPackProfileCrossRef::class,
+        FollowPackListCrossRef::class,
+        FollowPackRemoteKey::class,
     ],
-    version = 9,
+    version = 10,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -127,6 +138,12 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun threadConversations(): ThreadConversationDao
 
     abstract fun trendingTopics(): TrendingTopicDao
+
+    abstract fun followPacks(): FollowPackDao
+
+    abstract fun followPacksConnections(): FollowPackListCrossRefDao
+
+    abstract fun followPackRemoteKeys(): FollowPackRemoteKeyDao
 
     abstract fun notifications(): NotificationDao
 

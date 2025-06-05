@@ -70,7 +70,7 @@ internal class UsersApiImpl(
     override suspend fun getUserFollowList(userId: String): UserContactsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = net.primal.data.remote.PrimalVerb.FOLLOW_LIST.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.CONTACT_LIST.id,
                 optionsJson = FollowListRequestBody(
                     pubkey = userId,
                     extendedResponse = false,
@@ -110,7 +110,7 @@ internal class UsersApiImpl(
     override suspend fun getUserFollowing(userId: String): UsersResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = net.primal.data.remote.PrimalVerb.FOLLOW_LIST.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.CONTACT_LIST.id,
                 optionsJson = UserRequestBody(pubkey = userId).encodeToJsonString(),
             ),
         )
