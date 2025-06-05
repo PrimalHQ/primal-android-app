@@ -82,7 +82,7 @@ fun ExploreFeedScreen(
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
 
-    val feedTitle = state.extractTitle()
+    val feedTitle = state.feedTitle ?: state.extractTitle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     var showSaveFeedBottomSheet by rememberSaveable { mutableStateOf(false) }
@@ -90,8 +90,8 @@ fun ExploreFeedScreen(
     if (showSaveFeedBottomSheet && state.feedSpecKind != null) {
         val addedToUserFeedsMessage = stringResource(id = R.string.app_added_to_user_feeds)
         SaveFeedBottomSheet(
-            initialTitle = state.feedSpec.resolveDefaultTitle(),
-            initialDescription = state.feedSpec.resolveDefaultDescription(),
+            initialTitle = state.feedTitle ?: state.feedSpec.resolveDefaultTitle(),
+            initialDescription = state.feedDescription ?: state.feedSpec.resolveDefaultDescription(),
             feedSpecKind = state.feedSpecKind,
             onAddToUserFeed = { title, description ->
                 eventPublisher(AddToUserFeeds(title = title, description = description))
