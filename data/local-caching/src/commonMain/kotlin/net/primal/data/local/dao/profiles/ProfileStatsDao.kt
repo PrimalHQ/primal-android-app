@@ -15,6 +15,15 @@ interface ProfileStatsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(data: List<ProfileStats>)
 
+    @Query(
+        """
+        INSERT OR REPLACE INTO ProfileStats(profileId, followers) VALUES (:profileId, :followers) 
+        ON CONFLICT(profileId) DO UPDATE
+            SET followers = :followers
+        """,
+    )
+    suspend fun updateFollowersCount(profileId: String, followers: Int)
+
     @Query("SELECT * FROM ProfileStats WHERE profileId = :profileId")
     fun observeProfileStats(profileId: String): Flow<ProfileStats?>
 

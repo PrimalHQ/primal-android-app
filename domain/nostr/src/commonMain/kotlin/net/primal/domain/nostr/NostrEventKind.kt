@@ -44,6 +44,7 @@ enum class NostrEventKind(val value: Int) {
     ApplicationSpecificData(value = 30_078),
     AppRecommendation(value = 31_989),
     AppHandler(value = 31_990),
+    StarterPack(value = 39_089),
 
     // TODO Primal Events should be decoupled from domain:nostr
 

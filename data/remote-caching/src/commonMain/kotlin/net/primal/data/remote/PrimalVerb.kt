@@ -1,7 +1,7 @@
 package net.primal.data.remote
 
 enum class PrimalVerb(val id: String) {
-    FOLLOW_LIST("contact_list"),
+    CONTACT_LIST("contact_list"),
     USER_INFOS("user_infos"),
     USER_PROFILE("user_profile"),
     USER_PROFILE_FOLLOWED_BY("user_profile_followed_by"),
@@ -42,6 +42,8 @@ enum class PrimalVerb(val id: String) {
     SET_APP_SUB_SETTINGS("set_app_subsettings"),
     EXPLORE_TOPICS("explore_topics"),
     EXPLORE_PEOPLE("explore_people"),
+    FOLLOW_LISTS("follow_lists"),
+    FOLLOW_LIST("follow_list"),
     EXPLORE_ZAPS("explore_zaps"),
     CLIENT_CONFIG("client_config"),
     MEDIA_MANAGEMENT_STATS("membership_media_management_stats"),
