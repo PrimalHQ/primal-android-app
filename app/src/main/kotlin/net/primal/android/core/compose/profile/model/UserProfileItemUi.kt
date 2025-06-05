@@ -4,6 +4,7 @@ import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.domain.common.UserProfileSearchItem
+import net.primal.domain.explore.FollowPackProfileData
 import net.primal.domain.links.CdnImage
 import net.primal.domain.profile.ProfileData as ProfileDataDO
 
@@ -29,6 +30,16 @@ fun UserProfileSearchItem.mapAsUserProfileUi() =
         followersCount = this.followersCount,
         score = this.score,
         legendaryCustomization = this.metadata.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
+    )
+
+fun FollowPackProfileData.mapAsUserProfileUi() =
+    UserProfileItemUi(
+        profileId = profileId,
+        displayName = displayName,
+        internetIdentifier = internetIdentifier,
+        avatarCdnImage = avatarCdnImage,
+        followersCount = followersCount,
+        legendaryCustomization = primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
     )
 
 fun ProfileDataDO.asUserProfileItemUi() =
