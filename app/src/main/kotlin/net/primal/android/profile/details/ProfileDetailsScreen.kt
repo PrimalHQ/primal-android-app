@@ -177,7 +177,7 @@ private fun ProfileDetailsScreen(
             onFollowApproved = {
                 eventPublisher(
                     ProfileDetailsContract.UiEvent.FollowAction(
-                        profileId = state.shouldApproveProfileAction.profileId,
+                        profileId = it.profileId,
                         forceUpdate = true,
                     ),
                 )
@@ -185,11 +185,12 @@ private fun ProfileDetailsScreen(
             onUnfollowApproved = {
                 eventPublisher(
                     ProfileDetailsContract.UiEvent.UnfollowAction(
-                        profileId = state.shouldApproveProfileAction.profileId,
+                        profileId = it.profileId,
                         forceUpdate = true,
                     ),
                 )
             },
+            onFollowAllApproved = {},
             onClose = { eventPublisher(ProfileDetailsContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
         )
     }

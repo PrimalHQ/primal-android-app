@@ -4,6 +4,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import net.primal.android.R
 import net.primal.android.theme.AppTheme
@@ -11,8 +12,9 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun ApproveFollowUnfollowProfileAlertDialog(
     profileApproval: ProfileApproval,
-    onFollowApproved: () -> Unit,
-    onUnfollowApproved: () -> Unit,
+    onFollowApproved: (ProfileApproval.Follow) -> Unit,
+    onUnfollowApproved: (ProfileApproval.Unfollow) -> Unit,
+    onFollowAllApproved: (ProfileApproval.FollowAll) -> Unit,
     onClose: () -> Unit,
 ) {
     val messages = when (profileApproval) {
@@ -31,6 +33,19 @@ fun ApproveFollowUnfollowProfileAlertDialog(
                 text = stringResource(id = R.string.context_confirm_unfollow_text),
                 positive = stringResource(id = R.string.context_confirm_unfollow_positive),
                 negative = stringResource(id = R.string.context_confirm_unfollow_negative),
+            )
+        }
+
+        is ProfileApproval.FollowAll -> {
+            ApprovalMessages(
+                title = stringResource(id = R.string.context_confirm_follow_all_title),
+                text = pluralStringResource(
+                    id = R.plurals.context_confirm_follow_all_text,
+                    profileApproval.profileIds.size,
+                    profileApproval.profileIds.size,
+                ),
+                positive = stringResource(id = R.string.context_confirm_follow_all_positive),
+                negative = stringResource(id = R.string.context_confirm_follow_all_negative),
             )
         }
     }
@@ -56,9 +71,12 @@ fun ApproveFollowUnfollowProfileAlertDialog(
         },
         confirmButton = {
             TextButton(
-                onClick = when (profileApproval) {
-                    is ProfileApproval.Follow -> onFollowApproved
-                    is ProfileApproval.Unfollow -> onUnfollowApproved
+                onClick = {
+                    when (profileApproval) {
+                        is ProfileApproval.Follow -> onFollowApproved(profileApproval)
+                        is ProfileApproval.Unfollow -> onUnfollowApproved(profileApproval)
+                        is ProfileApproval.FollowAll -> onFollowAllApproved(profileApproval)
+                    }
                 },
             ) {
                 Text(
@@ -76,7 +94,8 @@ private data class ApprovalMessages(
     val negative: String,
 )
 
-sealed class ProfileApproval(open val profileId: String) {
-    data class Follow(override val profileId: String) : ProfileApproval(profileId)
-    data class Unfollow(override val profileId: String) : ProfileApproval(profileId)
+sealed class ProfileApproval {
+    data class Follow(val profileId: String) : ProfileApproval()
+    data class Unfollow(val profileId: String) : ProfileApproval()
+    data class FollowAll(val profileIds: List<String>) : ProfileApproval()
 }

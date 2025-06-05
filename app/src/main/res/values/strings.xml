@@ -1011,6 +1011,18 @@
     <string name="context_confirm_delete_positive">Confirm</string>
     <string name="context_confirm_delete_negative">Dismiss</string>
 
+    <string name="context_confirm_follow_all_title">Saving first follows</string>
+    <plurals name="context_confirm_follow_all_text">
+        <item quantity="one">
+            This will result in following a total of one account. Do you wish to continue?
+        </item>
+        <item quantity="other">
+            This will result in following a total of $d accounts. Do you wish to continue?
+        </item>
+    </plurals>
+    <string name="context_confirm_follow_all_positive">Save follows</string>
+    <string name="context_confirm_follow_all_negative">No</string>
+
     <string name="context_confirm_follow_title">Saving first follow</string>
     <string name="context_confirm_follow_text">This will result in following a total of one account. Do you wish to continue?</string>
     <string name="context_confirm_follow_positive">Save follow</string>
