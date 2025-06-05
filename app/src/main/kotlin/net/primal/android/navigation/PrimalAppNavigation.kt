@@ -1292,6 +1292,7 @@ private fun NavGraphBuilder.explore(
         onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
         onAdvancedSearchClick = { navController.navigateToAdvancedSearch() },
         noteCallbacks = noteCallbacksHandler(navController),
+        onFollowPackClick = { profileId, identifier -> navController.navigateToFollowPack(profileId, identifier) },
         onGoToWallet = { navController.navigateToWallet() },
         accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
         onNewPostClick = { navController.navigateToNoteEditor(null) },
