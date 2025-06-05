@@ -27,6 +27,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
@@ -190,6 +191,8 @@ private fun ExploreFeedTopAppBar(
 ) {
     PrimalTopAppBar(
         title = title,
+        titleMaxLines = 2,
+        titleOverflow = TextOverflow.Ellipsis,
         navigationIcon = PrimalIcons.ArrowBack,
         onNavigationIconClick = onClose,
         navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
