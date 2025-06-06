@@ -233,7 +233,7 @@ dependencies {
     implementation(project(":core:networking-nwc"))
     implementation(project(":domain:nostr"))
     implementation(project(":domain:primal"))
-    implementation(project(":domain:primal-wallet"))
+    implementation(project(":domain:wallet"))
 
     implementation(project(":data:remote-caching"))
     implementation(project(":data:repository-caching"))

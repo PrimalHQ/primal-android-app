@@ -35,7 +35,7 @@ include(":data:repository-caching")
 
 include(":domain:nostr")
 include(":domain:primal")
-include(":domain:primal-wallet")
+include(":domain:wallet")
 
 include(":shared")
 include(":paging-runtime-ios")

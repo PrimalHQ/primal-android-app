@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
 }
 
-private val xcfName = "PrimalWalletDomain"
+private val xcfName = "WalletDomain"
 
 kotlin {
     // Android target
