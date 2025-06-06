@@ -43,7 +43,6 @@ jetpack-sqlite = "2.5.1"
 jetpack-webkit = "1.14.0"
 junit = "4.13.2"
 korlibs-crypto = "6.0.1"
-ktlint-wrapper-plugin = "12.3.0"
 kotest = "5.9.1"
 kotlin = "2.1.21"
 kotlinx-coroutines = "1.10.2"
@@ -51,7 +50,8 @@ kotlinx-datetime = "0.6.2"
 kotlinx-io = "0.7.0"
 kotlinx-serialization-json = "1.8.1"
 ksp = "2.1.21-2.0.1"
-ktlint_compose_rules = "0.4.22"
+ktlint-wrapper-plugin = "13.0.0-rc.1"
+ktlint-compose-rules = "0.4.22"
 ktor = "3.1.3"
 ktorfit = "2.5.2"
 markwon = "4.6.2"
@@ -228,7 +228,7 @@ timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 napier = { module = "io.github.aakira:napier", version.ref = "napier"}
 
 # Other libs
-ktlint_compose_rules = { module = "io.nlopez.compose.rules:ktlint", version.ref = "ktlint_compose_rules" }
+ktlint_compose_rules = { module = "io.nlopez.compose.rules:ktlint", version.ref = "ktlint-compose-rules" }
 qrcode-generator = { module = "com.github.alexzhirkevich:custom-qr-generator", version.ref = "qrcode-generator" }
 
 # Data storage libs
