@@ -10,9 +10,9 @@ import net.primal.android.user.domain.mapToRelayDO
 import net.primal.android.user.repository.RelayRepository
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.events.EventInteractionRepository
-import net.primal.domain.nostr.cryptography.utils.getOrThrow
-import net.primal.domain.nostr.zaps.ZapFailureException
-import net.primal.domain.nostr.zaps.ZapRequestException
+import net.primal.domain.nostr.cryptography.utils.getOrNull
+import net.primal.domain.nostr.zaps.ZapError
+import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
 
 class ZapHandler @Inject constructor(
@@ -23,7 +23,6 @@ class ZapHandler @Inject constructor(
     private val notary: NostrNotary,
 ) {
 
-    @Throws(ZapFailureException::class, ZapRequestException::class)
     suspend fun zap(
         userId: String,
         target: ZapTarget,
@@ -36,7 +35,7 @@ class ZapHandler @Inject constructor(
         val zapComment = comment ?: defaultZapOptions?.message ?: ""
         val zapAmountInSats = amountInSats
             ?: defaultZapOptions?.amount?.toULong()
-            ?: throw ZapRequestException(message = "Missing zap amount.")
+            ?: return@withContext ZapResult.Failure(error = ZapError.InvalidZap(message = "Missing zap amount."))
 
         val userRelays = relayRepository.findRelays(userId, RelayKind.UserRelay)
             .map { it.mapToRelayDO() }
@@ -47,7 +46,7 @@ class ZapHandler @Inject constructor(
             comment = zapComment,
             target = target,
             relays = userRelays,
-        ).getOrThrow(ZapFailureException(message = "Signing zap event failed."))
+        ).getOrNull() ?: return@withContext ZapResult.Failure(error = ZapError.FailedToSignEvent)
 
         eventInteractionRepository.zapEvent(
             userId = userId,

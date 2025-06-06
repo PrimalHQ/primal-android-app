@@ -20,13 +20,12 @@ import net.primal.core.utils.toLong
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.serialization.toNostrJsonObject
 import net.primal.domain.nostr.utils.LnInvoiceUtils
-import net.primal.domain.nostr.zaps.ZapFailureException
 
 internal class NwcZapHelper(
     private val dispatcherProvider: DispatcherProvider,
     private val httpClient: HttpClient,
 ) {
-    private suspend fun fetchZapPayRequest(lnUrl: String): LightningPayRequest {
+    suspend fun fetchZapPayRequest(lnUrl: String): LightningPayRequest {
         val bodyString = withContext(dispatcherProvider.io()) {
             httpClient.get(lnUrl) {
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
@@ -41,27 +40,20 @@ internal class NwcZapHelper(
             ?: throw IOException("Invalid body content.")
     }
 
-    suspend fun fetchZapPayRequestOrThrow(lnUrl: String): LightningPayRequest {
-        val result = runCatching {
-            fetchZapPayRequest(lnUrl)
-        }
-        return result.getOrNull() ?: throw ZapFailureException(cause = result.exceptionOrNull())
-    }
-
-    private suspend fun fetchInvoice(
-        request: LightningPayRequest,
+    suspend fun fetchInvoice(
+        zapPayRequest: LightningPayRequest,
         zapEvent: NostrEvent,
         satoshiAmountInMilliSats: ULong,
         comment: String = "",
     ): LightningPayResponse {
-        require(request.allowsNostr == true)
+        require(zapPayRequest.allowsNostr == true)
         val nostrJson = zapEvent.toNostrJsonObject().encodeToJsonString()
 
-        val rawUrl = URLBuilder(request.callback).apply {
+        val rawUrl = URLBuilder(zapPayRequest.callback).apply {
             parameters.append("nostr", nostrJson)
             parameters.append("amount", satoshiAmountInMilliSats.toString())
 
-            val maxComment = request.commentAllowed
+            val maxComment = zapPayRequest.commentAllowed
             if (maxComment != null && comment.isNotBlank()) {
                 parameters.append("comment", comment.take(maxComment))
             }
@@ -72,7 +64,7 @@ internal class NwcZapHelper(
         }
 
         val decoded = bodyString.decodeFromJsonStringOrNull<LightningPayResponse>()
-            ?: throw IOException("Invalid invoice response (bad JSON).")
+            ?: throw IOException("Invalid invoice response (bad JSON).\n$bodyString")
 
         val invoiceMsat = decoded.pr.extractInvoiceAmountInMilliSats()
         val requestedMsat = satoshiAmountInMilliSats.toLong()
@@ -81,24 +73,6 @@ internal class NwcZapHelper(
         }
 
         return decoded
-    }
-
-    suspend fun fetchInvoiceOrThrow(
-        zapPayRequest: LightningPayRequest,
-        zapEvent: NostrEvent,
-        satoshiAmountInMilliSats: ULong,
-        comment: String = "",
-    ): LightningPayResponse {
-        val result = runCatching {
-            this.fetchInvoice(
-                request = zapPayRequest,
-                zapEvent = zapEvent,
-                satoshiAmountInMilliSats = satoshiAmountInMilliSats,
-                comment = comment,
-            )
-        }
-
-        return result.getOrNull() ?: throw ZapFailureException(cause = result.exceptionOrNull())
     }
 
     private val thousandAsBigDecimal = BigDecimal.fromInt(1_000)

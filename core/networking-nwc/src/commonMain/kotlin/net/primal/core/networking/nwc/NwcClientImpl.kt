@@ -37,15 +37,14 @@ import net.primal.core.utils.serialization.CommonJson
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.utils.CryptoUtils
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import net.primal.domain.nostr.publisher.NostrEventPublisher
-import net.primal.domain.nostr.publisher.NostrPublishException
 import net.primal.domain.nostr.serialization.toNostrJsonObject
 import net.primal.domain.nostr.zaps.NostrZapper
-import net.primal.domain.nostr.zaps.ZapFailureException
+import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapRequestData
+import net.primal.domain.nostr.zaps.ZapResult
 
 internal class NwcClientImpl(
     private val nwcData: NostrWalletConnect,
@@ -126,28 +125,44 @@ internal class NwcClientImpl(
         }
     }
 
-    override suspend fun zap(data: ZapRequestData) {
-        val zapPayRequest = nwcZapHelper.fetchZapPayRequestOrThrow(data.lnUrlDecoded)
-
-        val invoice = nwcZapHelper.fetchInvoiceOrThrow(
-            zapPayRequest = zapPayRequest,
-            zapEvent = data.userZapRequestEvent,
-            satoshiAmountInMilliSats = data.zapAmountInSats * MSATS_IN_SATS.toULong(),
-            comment = data.zapComment,
-        )
-
-        try {
-            publishNostrEvent(
-                nostrEvent = signNwcRequestNostrEvent(
-                    nwc = nwcData,
-                    request = invoice.toWalletPayRequest(),
-                ).unwrapOrThrow(),
-            )
-        } catch (error: NostrPublishException) {
-            throw ZapFailureException(cause = error)
-        } catch (error: SignatureException) {
-            throw ZapFailureException(cause = error)
+    override suspend fun zap(data: ZapRequestData): ZapResult {
+        val zapPayRequest = runCatching {
+            nwcZapHelper.fetchZapPayRequest(data.lnUrlDecoded)
+        }.getOrElse {
+            Napier.e(it) { "FailedToFetchZapPayRequest." }
+            return ZapResult.Failure(error = ZapError.FailedToFetchZapPayRequest(cause = it))
         }
+
+        val invoice = runCatching {
+            nwcZapHelper.fetchInvoice(
+                zapPayRequest = zapPayRequest,
+                zapEvent = data.userZapRequestEvent,
+                satoshiAmountInMilliSats = data.zapAmountInSats * MSATS_IN_SATS.toULong(),
+                comment = data.zapComment,
+            )
+        }.getOrElse {
+            Napier.e(it) { "FailedToFetchZapInvoice." }
+            return ZapResult.Failure(error = ZapError.FailedToFetchZapInvoice(cause = it))
+        }
+
+        val nostrEvent = runCatching {
+            signNwcRequestNostrEvent(
+                nwc = nwcData,
+                request = invoice.toWalletPayRequest(),
+            ).unwrapOrThrow()
+        }.getOrElse {
+            Napier.e(it) { "FailedToSignEvent." }
+            return ZapResult.Failure(error = ZapError.FailedToSignEvent)
+        }
+
+        runCatching {
+            publishNostrEvent(nostrEvent)
+        }.getOrElse {
+            Napier.e(it) { "FailedToPublishEvent." }
+            return ZapResult.Failure(error = ZapError.FailedToPublishEvent)
+        }
+
+        return ZapResult.Success
     }
 
     override suspend fun getBalance(): NwcResult<GetBalanceResponsePayload> =

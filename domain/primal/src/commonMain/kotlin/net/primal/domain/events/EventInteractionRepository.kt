@@ -6,7 +6,7 @@ import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.publisher.NostrPublishException
-import net.primal.domain.nostr.zaps.ZapException
+import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.publisher.PrimalPublishResult
 
@@ -56,15 +56,11 @@ interface EventInteractionRepository {
         relayHint: String? = null,
     ): PrimalPublishResult
 
-    @Throws(
-        ZapException::class,
-        CancellationException::class,
-    )
     suspend fun zapEvent(
         userId: String,
         amountInSats: ULong,
         comment: String,
         target: ZapTarget,
         zapRequestEvent: NostrEvent,
-    )
+    ): ZapResult
 }

@@ -7,7 +7,7 @@ inline fun <reified T> Json.decodeFromStringOrNull(string: String?): T? {
 
     return try {
         decodeFromString(string)
-    } catch (error: IllegalArgumentException) {
+    } catch (_: Exception) {
         null
     }
 }

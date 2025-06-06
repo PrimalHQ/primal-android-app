@@ -23,8 +23,8 @@ import net.primal.domain.nostr.asReplaceableEventTag
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.publisher.MissingRelaysException
-import net.primal.domain.nostr.zaps.ZapFailureException
-import net.primal.domain.nostr.zaps.ZapRequestException
+import net.primal.domain.nostr.zaps.ZapError
+import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
 import timber.log.Timber
 
@@ -108,28 +108,33 @@ class DvmFeedListItemViewModel @Inject constructor(
                 return@launch
             }
 
-            try {
-                zapHandler.zap(
-                    userId = activeAccountStore.activeUserId(),
-                    comment = zapAction.zapDescription,
-                    amountInSats = zapAction.zapAmount,
-                    target = ZapTarget.ReplaceableEvent(
-                        kind = NostrEventKind.AppHandler.value,
-                        identifier = zapAction.dvmFeed.data.dvmId,
-                        eventId = zapAction.dvmFeed.data.eventId,
-                        eventAuthorId = zapAction.dvmFeed.data.dvmPubkey,
-                        eventAuthorLnUrlDecoded = dvmLnUrlDecoded,
-                    ),
-                )
-            } catch (error: ZapFailureException) {
-                setState { copy(error = UiError.FailedToPublishZapEvent(error)) }
-                Timber.w(error)
-            } catch (error: MissingRelaysException) {
-                setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
-                Timber.w(error)
-            } catch (error: ZapRequestException) {
-                setState { copy(error = UiError.InvalidZapRequest(error)) }
-                Timber.w(error)
+            val result = zapHandler.zap(
+                userId = activeAccountStore.activeUserId(),
+                comment = zapAction.zapDescription,
+                amountInSats = zapAction.zapAmount,
+                target = ZapTarget.ReplaceableEvent(
+                    kind = NostrEventKind.AppHandler.value,
+                    identifier = zapAction.dvmFeed.data.dvmId,
+                    eventId = zapAction.dvmFeed.data.eventId,
+                    eventAuthorId = zapAction.dvmFeed.data.dvmPubkey,
+                    eventAuthorLnUrlDecoded = dvmLnUrlDecoded,
+                ),
+            )
+
+            if (result is ZapResult.Failure) {
+                when (result.error) {
+                    is ZapError.InvalidZap, is ZapError.FailedToFetchZapPayRequest,
+                    is ZapError.FailedToFetchZapInvoice,
+                        -> setState { copy(error = UiError.InvalidZapRequest()) }
+
+                    ZapError.FailedToPublishEvent, ZapError.FailedToSignEvent -> {
+                        setState { copy(error = UiError.FailedToPublishZapEvent()) }
+                    }
+
+                    is ZapError.Unknown -> {
+                        setState { copy(error = UiError.GenericError()) }
+                    }
+                }
             }
         }
 }

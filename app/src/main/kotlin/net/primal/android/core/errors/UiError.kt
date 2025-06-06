@@ -7,9 +7,9 @@ sealed class UiError {
     data object NostrSignUnauthorized : UiError()
 
     data class MissingLightningAddress(val cause: Throwable) : UiError()
-    data class InvalidZapRequest(val cause: Throwable) : UiError()
+    data class InvalidZapRequest(val cause: Throwable? = null) : UiError()
 
-    data class FailedToPublishZapEvent(val cause: Throwable) : UiError()
+    data class FailedToPublishZapEvent(val cause: Throwable? = null) : UiError()
     data class FailedToPublishRepostEvent(val cause: Throwable) : UiError()
     data class FailedToPublishLikeEvent(val cause: Throwable) : UiError()
     data class FailedToPublishDeleteEvent(val cause: Throwable) : UiError()

@@ -51,8 +51,8 @@ import net.primal.domain.nostr.utils.isNote
 import net.primal.domain.nostr.utils.isNoteUri
 import net.primal.domain.nostr.utils.nostrUriToNoteId
 import net.primal.domain.nostr.utils.nostrUriToPubkey
-import net.primal.domain.nostr.zaps.ZapFailureException
-import net.primal.domain.nostr.zaps.ZapRequestException
+import net.primal.domain.nostr.zaps.ZapError
+import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.posts.FeedRepository
 import net.primal.domain.profile.ProfileRepository
@@ -254,28 +254,33 @@ class ArticleDetailsViewModel @Inject constructor(
                 return@launch
             }
 
-            try {
-                zapHandler.zap(
-                    userId = activeAccountStore.activeUserId(),
-                    comment = zapAction.zapDescription,
-                    amountInSats = zapAction.zapAmount,
-                    target = ZapTarget.ReplaceableEvent(
-                        kind = NostrEventKind.LongFormContent.value,
-                        identifier = article.articleId,
-                        eventId = article.eventId,
-                        eventAuthorId = article.authorId,
-                        eventAuthorLnUrlDecoded = lnUrlDecoded,
-                    ),
-                )
-            } catch (error: ZapFailureException) {
-                Timber.w(error)
-                setState { copy(error = UiError.FailedToPublishZapEvent(error)) }
-            } catch (error: MissingRelaysException) {
-                Timber.w(error)
-                setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
-            } catch (error: ZapRequestException) {
-                Timber.w(error)
-                setState { copy(error = UiError.InvalidZapRequest(error)) }
+            val result = zapHandler.zap(
+                userId = activeAccountStore.activeUserId(),
+                comment = zapAction.zapDescription,
+                amountInSats = zapAction.zapAmount,
+                target = ZapTarget.ReplaceableEvent(
+                    kind = NostrEventKind.LongFormContent.value,
+                    identifier = article.articleId,
+                    eventId = article.eventId,
+                    eventAuthorId = article.authorId,
+                    eventAuthorLnUrlDecoded = lnUrlDecoded,
+                ),
+            )
+
+            if (result is ZapResult.Failure) {
+                when (result.error) {
+                    is ZapError.InvalidZap, is ZapError.FailedToFetchZapPayRequest,
+                    is ZapError.FailedToFetchZapInvoice,
+                        -> setState { copy(error = UiError.InvalidZapRequest()) }
+
+                    ZapError.FailedToPublishEvent, ZapError.FailedToSignEvent -> {
+                        setState { copy(error = UiError.FailedToPublishZapEvent()) }
+                    }
+
+                    is ZapError.Unknown -> {
+                        setState { copy(error = UiError.GenericError()) }
+                    }
+                }
             }
         }
     }

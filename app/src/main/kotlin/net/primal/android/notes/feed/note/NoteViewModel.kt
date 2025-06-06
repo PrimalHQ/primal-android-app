@@ -14,6 +14,9 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.errors.UiError
+import net.primal.android.core.errors.UiError.FailedToPublishZapEvent
+import net.primal.android.core.errors.UiError.GenericError
+import net.primal.android.core.errors.UiError.InvalidZapRequest
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.notes.feed.note.NoteContract.SideEffect
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
@@ -32,8 +35,8 @@ import net.primal.domain.nostr.PublicBookmarksNotFoundException
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.publisher.MissingRelaysException
-import net.primal.domain.nostr.zaps.ZapFailureException
-import net.primal.domain.nostr.zaps.ZapRequestException
+import net.primal.domain.nostr.zaps.ZapError
+import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.posts.FeedRepository
 import net.primal.domain.profile.ProfileRepository
@@ -178,26 +181,31 @@ class NoteViewModel @AssistedInject constructor(
                 return@launch
             }
 
-            try {
-                zapHandler.zap(
-                    userId = activeAccountStore.activeUserId(),
-                    comment = zapAction.zapDescription,
-                    amountInSats = zapAction.zapAmount,
-                    target = ZapTarget.Event(
-                        eventId = zapAction.postId,
-                        eventAuthorId = zapAction.postAuthorId,
-                        eventAuthorLnUrlDecoded = lnUrlDecoded,
-                    ),
-                )
-            } catch (error: ZapFailureException) {
-                Timber.w(error)
-                setState { copy(error = UiError.FailedToPublishZapEvent(error)) }
-            } catch (error: MissingRelaysException) {
-                Timber.w(error)
-                setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
-            } catch (error: ZapRequestException) {
-                Timber.w(error)
-                setState { copy(error = UiError.InvalidZapRequest(error)) }
+            val result = zapHandler.zap(
+                userId = activeAccountStore.activeUserId(),
+                comment = zapAction.zapDescription,
+                amountInSats = zapAction.zapAmount,
+                target = ZapTarget.Event(
+                    eventId = zapAction.postId,
+                    eventAuthorId = zapAction.postAuthorId,
+                    eventAuthorLnUrlDecoded = lnUrlDecoded,
+                ),
+            )
+
+            if (result is ZapResult.Failure) {
+                when (result.error) {
+                    is ZapError.InvalidZap, is ZapError.FailedToFetchZapPayRequest,
+                    is ZapError.FailedToFetchZapInvoice,
+                        -> setState { copy(error = InvalidZapRequest()) }
+
+                    ZapError.FailedToPublishEvent, ZapError.FailedToSignEvent -> {
+                        setState { copy(error = FailedToPublishZapEvent()) }
+                    }
+
+                    is ZapError.Unknown -> {
+                        setState { copy(error = GenericError()) }
+                    }
+                }
             }
         }
 

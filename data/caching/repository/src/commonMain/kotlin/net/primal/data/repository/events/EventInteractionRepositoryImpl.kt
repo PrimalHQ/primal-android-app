@@ -16,9 +16,9 @@ import net.primal.domain.nostr.asReplaceableEventTag
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.publisher.NostrPublishException
 import net.primal.domain.nostr.zaps.NostrZapperFactory
-import net.primal.domain.nostr.zaps.ZapFailureException
+import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapRequestData
-import net.primal.domain.nostr.zaps.ZapRequestException
+import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.nostr.zaps.lnUrlDecoded
 import net.primal.domain.nostr.zaps.userId
@@ -135,7 +135,7 @@ class EventInteractionRepositoryImpl(
         comment: String,
         target: ZapTarget,
         zapRequestEvent: NostrEvent,
-    ) {
+    ): ZapResult {
         val targetLnUrlDecoded = target.lnUrlDecoded()
         val statsUpdater = target.buildPostStatsUpdaterIfApplicable(userId = userId)
 
@@ -144,24 +144,25 @@ class EventInteractionRepositoryImpl(
             zapComment = comment,
         )
 
-        try {
-            val nostrZapper = nostrZapperFactory.createOrNull(userId = userId)
-                ?: throw ZapRequestException(message = "Unable to create nostr zapper.")
+        val nostrZapper = nostrZapperFactory.createOrNull(userId = userId)
+            ?: return ZapResult.Failure(error = ZapError.Unknown())
 
-            nostrZapper.zap(
-                data = ZapRequestData(
-                    zapperUserId = userId,
-                    targetUserId = target.userId(),
-                    lnUrlDecoded = targetLnUrlDecoded,
-                    zapAmountInSats = amountInSats,
-                    zapComment = comment,
-                    userZapRequestEvent = zapRequestEvent,
-                ),
-            )
-        } catch (error: ZapFailureException) {
+        val result = nostrZapper.zap(
+            data = ZapRequestData(
+                zapperUserId = userId,
+                targetUserId = target.userId(),
+                lnUrlDecoded = targetLnUrlDecoded,
+                zapAmountInSats = amountInSats,
+                zapComment = comment,
+                userZapRequestEvent = zapRequestEvent,
+            ),
+        )
+
+        if (result is ZapResult.Failure) {
             statsUpdater?.revertStats()
-            throw error
         }
+
+        return result
     }
 
     private fun ZapTarget.buildPostStatsUpdaterIfApplicable(userId: String): EventStatsUpdater? =

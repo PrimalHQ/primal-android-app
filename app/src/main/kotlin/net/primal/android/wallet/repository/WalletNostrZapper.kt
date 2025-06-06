@@ -1,23 +1,23 @@
 package net.primal.android.wallet.repository
 
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import net.primal.android.wallet.api.model.WithdrawRequestBody
 import net.primal.android.wallet.domain.SubWallet
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
-import net.primal.domain.common.exception.NetworkException
-import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.utils.urlToLnUrlHrp
 import net.primal.domain.nostr.zaps.NostrZapper
-import net.primal.domain.nostr.zaps.ZapFailureException
+import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapRequestData
+import net.primal.domain.nostr.zaps.ZapResult
 
 class WalletNostrZapper @Inject constructor(
     private val walletRepository: WalletRepository,
 ) : NostrZapper {
 
-    override suspend fun zap(data: ZapRequestData) {
-        try {
+    override suspend fun zap(data: ZapRequestData): ZapResult {
+        return try {
             walletRepository.withdraw(
                 userId = data.zapperUserId,
                 body = WithdrawRequestBody(
@@ -30,10 +30,10 @@ class WalletNostrZapper @Inject constructor(
                     zapRequest = data.userZapRequestEvent,
                 ),
             )
-        } catch (error: SignatureException) {
-            throw ZapFailureException(cause = error)
-        } catch (error: NetworkException) {
-            throw ZapFailureException(cause = error)
+            ZapResult.Success
+        } catch (error: Exception) {
+            Napier.e(error) { "Failed to withdraw zap." }
+            ZapResult.Failure(error = ZapError.FailedToPublishEvent)
         }
     }
 }

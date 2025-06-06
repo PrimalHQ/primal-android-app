@@ -44,8 +44,8 @@ import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.nostr.utils.extractProfileId
 import net.primal.domain.nostr.utils.isValidHex
-import net.primal.domain.nostr.zaps.ZapFailureException
-import net.primal.domain.nostr.zaps.ZapRequestException
+import net.primal.domain.nostr.zaps.ZapError
+import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
@@ -163,26 +163,33 @@ class ProfileDetailsViewModel @Inject constructor(
             return@launch
         }
 
-        try {
-            zapHandler.zap(
-                userId = activeAccountStore.activeUserId(),
-                target = ZapTarget.Profile(
-                    profileId = profileId,
-                    profileLnUrlDecoded = profileLnUrlDecoded,
-                ),
-                amountInSats = zapAmount,
-                comment = zapDescription,
-            )
-            setEffect(ProfileDetailsContract.SideEffect.ProfileZapSent)
-        } catch (error: ZapFailureException) {
-            setState { copy(zapError = UiError.FailedToPublishZapEvent(error)) }
-            Timber.w(error)
-        } catch (error: MissingRelaysException) {
-            setState { copy(zapError = UiError.MissingRelaysConfiguration(error)) }
-            Timber.w(error)
-        } catch (error: ZapRequestException) {
-            setState { copy(zapError = UiError.InvalidZapRequest(error)) }
-            Timber.w(error)
+        val result = zapHandler.zap(
+            userId = activeAccountStore.activeUserId(),
+            target = ZapTarget.Profile(
+                profileId = profileId,
+                profileLnUrlDecoded = profileLnUrlDecoded,
+            ),
+            amountInSats = zapAmount,
+            comment = zapDescription,
+        )
+
+        when (result) {
+            ZapResult.Success -> setEffect(ProfileDetailsContract.SideEffect.ProfileZapSent)
+            is ZapResult.Failure -> {
+                when (result.error) {
+                    is ZapError.InvalidZap, is ZapError.FailedToFetchZapPayRequest,
+                    is ZapError.FailedToFetchZapInvoice,
+                        -> setState { copy(error = UiError.InvalidZapRequest()) }
+
+                    ZapError.FailedToPublishEvent, ZapError.FailedToSignEvent -> {
+                        setState { copy(error = UiError.FailedToPublishZapEvent()) }
+                    }
+
+                    is ZapError.Unknown -> {
+                        setState { copy(error = UiError.GenericError()) }
+                    }
+                }
+            }
         }
     }
 
