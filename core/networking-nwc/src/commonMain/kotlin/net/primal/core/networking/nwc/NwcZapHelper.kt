@@ -15,7 +15,6 @@ import net.primal.core.networking.nwc.model.LightningPayRequest
 import net.primal.core.networking.nwc.model.LightningPayResponse
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
-import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.core.utils.toLong
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.serialization.toNostrJsonObject
@@ -47,7 +46,7 @@ internal class NwcZapHelper(
         comment: String = "",
     ): LightningPayResponse {
         require(zapPayRequest.allowsNostr == true)
-        val nostrJson = zapEvent.toNostrJsonObject().encodeToJsonString()
+        val nostrJson = zapEvent.toNostrJsonObject().toString()
 
         val rawUrl = URLBuilder(zapPayRequest.callback).apply {
             parameters.append("nostr", nostrJson)
