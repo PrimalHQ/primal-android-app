@@ -234,9 +234,8 @@ dependencies {
     implementation(project(":domain:nostr"))
     implementation(project(":domain:primal"))
     implementation(project(":domain:wallet"))
-
-    implementation(project(":data:remote-caching"))
-    implementation(project(":data:repository-caching"))
+    implementation(project(":data:caching:remote"))
+    implementation(project(":data:caching:repository"))
 
     implementation(libs.bignum)
     implementation(libs.core.ktx)

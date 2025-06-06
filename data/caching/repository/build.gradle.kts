@@ -42,8 +42,8 @@ kotlin {
                 implementation(project(":domain:nostr"))
                 implementation(project(":domain:primal"))
 
-                implementation(project(":data:local-caching"))
-                implementation(project(":data:remote-caching"))
+                implementation(project(":data:caching:local"))
+                implementation(project(":data:caching:remote"))
 
                 // Core
                 implementation(libs.kotlinx.coroutines.core)

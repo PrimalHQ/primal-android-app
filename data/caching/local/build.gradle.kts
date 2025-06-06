@@ -40,9 +40,9 @@ kotlin {
                 // Internal
                 implementation(project(":core:utils"))
                 implementation(project(":core:networking-primal"))
-                implementation(project(":data:remote-caching"))
                 implementation(project(":domain:nostr"))
                 implementation(project(":domain:primal"))
+                implementation(project(":data:caching:remote"))
 
                 // Core
                 implementation(libs.kotlinx.coroutines.core)

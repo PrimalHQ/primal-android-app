@@ -19,9 +19,10 @@
             <option value="$PROJECT_DIR$/core/networking-upload" />
             <option value="$PROJECT_DIR$/core/utils" />
             <option value="$PROJECT_DIR$/data" />
-            <option value="$PROJECT_DIR$/data/local-caching" />
-            <option value="$PROJECT_DIR$/data/remote-caching" />
-            <option value="$PROJECT_DIR$/data/repository-caching" />
+            <option value="$PROJECT_DIR$/data/caching" />
+            <option value="$PROJECT_DIR$/data/caching/local" />
+            <option value="$PROJECT_DIR$/data/caching/remote" />
+            <option value="$PROJECT_DIR$/data/caching/repository" />
             <option value="$PROJECT_DIR$/domain" />
             <option value="$PROJECT_DIR$/domain/nostr" />
             <option value="$PROJECT_DIR$/domain/primal" />

@@ -29,9 +29,9 @@ include(":core:networking-primal")
 include(":core:networking-upload")
 include(":core:networking-nwc")
 
-include(":data:local-caching")
-include(":data:remote-caching")
-include(":data:repository-caching")
+include(":data:caching:local")
+include(":data:caching:remote")
+include(":data:caching:repository")
 
 include(":domain:nostr")
 include(":domain:primal")
