@@ -7,8 +7,7 @@ import net.primal.android.navigation.asUrlDecoded
 import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.core.utils.CurrencyConversionUtils.fromUsdToSats
 import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
-import org.bitcoinj.core.Address
-import org.bitcoinj.params.MainNetParams
+import org.bitcoinj.base.AddressParser
 
 fun String.isLnInvoice() = startsWith(prefix = "lnbc", ignoreCase = true)
 
@@ -31,7 +30,7 @@ fun String?.isBitcoinAddress(): Boolean {
     if (this == null) return false
 
     val result = runCatching {
-        Address.fromString(MainNetParams.get(), this)
+        AddressParser.getDefault().parseAddress(this)
     }
     return result.getOrNull() != null
 }
