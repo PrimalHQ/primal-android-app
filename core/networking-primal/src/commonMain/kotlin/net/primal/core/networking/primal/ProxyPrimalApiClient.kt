@@ -64,6 +64,10 @@ internal class ProxyPrimalApiClient(
                         clientInitialized.complete(true)
                     }
                 }
+
+                runCatching {
+                    socketClient.ensureSocketConnectionOrThrow()
+                }
             }
         }
 
