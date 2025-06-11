@@ -7,6 +7,8 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+private val xcfName = "PrimalDataCachingRepository"
+
 kotlin {
     // Android target
     androidLibrary {
@@ -16,10 +18,9 @@ kotlin {
     }
 
     // JVM Target
-//    jvm("desktop")
+    jvm("desktop")
 
     // iOS Target
-    val xcfName = "PrimalDataRepositoryCaching"
     val xcfFramework = XCFramework(xcfName)
     val iosTargets = listOf(iosX64(), iosArm64(), iosSimulatorArm64())
 
@@ -78,10 +79,10 @@ kotlin {
             }
         }
 
-//        val desktopMain by getting
-//        desktopMain.dependencies {
-//            // Add JVM-Desktop-specific dependencies here
-//        }
+        val desktopMain by getting
+        desktopMain.dependencies {
+            // Add JVM-Desktop-specific dependencies here
+        }
 
         commonTest {
             dependencies {
