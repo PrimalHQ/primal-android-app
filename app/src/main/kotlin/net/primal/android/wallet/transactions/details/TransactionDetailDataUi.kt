@@ -2,9 +2,9 @@ package net.primal.android.wallet.transactions.details
 
 import java.time.Instant
 import net.primal.android.premium.legend.domain.LegendaryCustomization
-import net.primal.android.wallet.domain.TxState
-import net.primal.android.wallet.domain.TxType
 import net.primal.domain.links.CdnImage
+import net.primal.wallet.domain.TxState
+import net.primal.wallet.domain.TxType
 
 data class TransactionDetailDataUi(
     val txId: String,

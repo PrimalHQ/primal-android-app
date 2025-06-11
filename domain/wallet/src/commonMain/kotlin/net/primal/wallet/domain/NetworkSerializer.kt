@@ -1,4 +1,4 @@
-package net.primal.android.wallet.domain.serializer
+package net.primal.wallet.domain
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -7,7 +7,6 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.jsonPrimitive
-import net.primal.android.wallet.domain.Network
 
 object NetworkSerializer : KSerializer<Network> {
 

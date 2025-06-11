@@ -2,9 +2,9 @@ package net.primal.android.nostr.model.primal.content
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import net.primal.android.wallet.domain.SubWallet
-import net.primal.android.wallet.domain.TxState
-import net.primal.android.wallet.domain.TxType
+import net.primal.wallet.domain.SubWallet
+import net.primal.wallet.domain.TxState
+import net.primal.wallet.domain.TxType
 
 @Serializable
 data class ContentWalletTransaction(

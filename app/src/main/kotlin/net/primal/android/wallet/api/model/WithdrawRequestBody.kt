@@ -2,8 +2,8 @@ package net.primal.android.wallet.api.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import net.primal.android.wallet.domain.SubWallet
 import net.primal.domain.nostr.NostrEvent
+import net.primal.wallet.domain.SubWallet
 
 @Serializable
 data class WithdrawRequestBody(

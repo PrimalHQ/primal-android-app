@@ -1,11 +1,11 @@
 package net.primal.android.wallet.transactions.receive
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import net.primal.android.wallet.domain.CurrencyMode
-import net.primal.android.wallet.domain.Network
 import net.primal.android.wallet.transactions.receive.model.NetworkDetails
 import net.primal.android.wallet.transactions.receive.model.PaymentDetails
 import net.primal.android.wallet.transactions.receive.tabs.ReceivePaymentTab
+import net.primal.wallet.domain.CurrencyMode
+import net.primal.wallet.domain.Network
 
 interface ReceivePaymentContract {
     data class UiState(

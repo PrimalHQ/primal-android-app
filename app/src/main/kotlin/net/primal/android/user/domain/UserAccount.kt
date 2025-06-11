@@ -3,13 +3,13 @@ package net.primal.android.user.domain
 import java.time.Instant
 import kotlinx.serialization.Serializable
 import net.primal.android.premium.domain.PremiumMembership
-import net.primal.android.wallet.domain.WalletSettings
-import net.primal.android.wallet.domain.WalletState
 import net.primal.core.networking.nwc.model.NostrWalletConnect
 import net.primal.domain.global.ContentAppSettings
 import net.primal.domain.links.CdnImage
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.premium.PrimalLegendProfile
+import net.primal.wallet.domain.WalletSettings
+import net.primal.wallet.domain.WalletState
 
 @Serializable
 data class UserAccount(

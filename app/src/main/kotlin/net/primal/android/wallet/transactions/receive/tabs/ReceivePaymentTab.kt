@@ -5,8 +5,8 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.WalletBitcoinPayment
 import net.primal.android.core.compose.icons.primaliconpack.WalletLightningPayment
 import net.primal.android.core.compose.icons.primaliconpack.WalletLightningPaymentFilled
-import net.primal.android.wallet.domain.Network
 import net.primal.android.wallet.ui.WalletTab
+import net.primal.wallet.domain.Network
 
 enum class ReceivePaymentTab(val data: WalletTab, val network: Network) {
     Lightning(

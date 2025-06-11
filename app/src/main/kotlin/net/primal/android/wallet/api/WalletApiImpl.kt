@@ -36,7 +36,6 @@ import net.primal.android.wallet.api.model.UserWalletInfoRequestBody
 import net.primal.android.wallet.api.model.WalletOperationVerb
 import net.primal.android.wallet.api.model.WalletUserInfoResponse
 import net.primal.android.wallet.api.model.WithdrawRequestBody
-import net.primal.android.wallet.domain.SubWallet
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.utils.serialization.CommonJson
@@ -48,6 +47,7 @@ import net.primal.domain.common.PrimalEvent
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
+import net.primal.wallet.domain.SubWallet
 import timber.log.Timber
 
 class WalletApiImpl @Inject constructor(
