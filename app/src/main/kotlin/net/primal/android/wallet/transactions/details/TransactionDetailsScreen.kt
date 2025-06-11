@@ -109,8 +109,6 @@ import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.note.ui.referencedArticleCardColors
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
-import net.primal.android.wallet.domain.TxState
-import net.primal.android.wallet.domain.TxType
 import net.primal.android.wallet.repository.isValidExchangeRate
 import net.primal.android.wallet.transactions.details.TransactionDetailsContract.UiState
 import net.primal.android.wallet.transactions.list.TransactionIcon
@@ -121,6 +119,8 @@ import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.CurrencyConversionUtils.toUsd
 import net.primal.core.utils.detectUrls
 import net.primal.domain.nostr.utils.parseNostrUris
+import net.primal.wallet.domain.TxState
+import net.primal.wallet.domain.TxType
 import timber.log.Timber
 
 private const val URL_ANNOTATION_TAG = "url"

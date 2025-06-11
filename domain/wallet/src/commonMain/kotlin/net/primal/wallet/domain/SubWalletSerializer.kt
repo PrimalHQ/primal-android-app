@@ -1,4 +1,4 @@
-package net.primal.android.wallet.domain.serializer
+package net.primal.wallet.domain.serializer
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -8,31 +8,29 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonPrimitive
-import net.primal.android.wallet.domain.WalletKycLevel
+import net.primal.wallet.domain.SubWallet
 
-object WalletKycLevelSerializer : KSerializer<WalletKycLevel> {
+object SubWalletSerializer : KSerializer<SubWallet> {
 
-    override val descriptor = PrimitiveSerialDescriptor("WalletKycLevelSerializer", PrimitiveKind.INT)
+    override val descriptor = PrimitiveSerialDescriptor("SubWalletSerializer", PrimitiveKind.INT)
 
-    override fun serialize(encoder: Encoder, value: WalletKycLevel) {
+    override fun serialize(encoder: Encoder, value: SubWallet) {
         encoder.encodeInt(value.id)
     }
 
-    override fun deserialize(decoder: Decoder): WalletKycLevel {
+    override fun deserialize(decoder: Decoder): SubWallet {
         return when (decoder) {
             is JsonDecoder -> {
                 val jsonElement = decoder.decodeJsonElement()
                 if (jsonElement.jsonPrimitive.isString) {
                     when (val value = jsonElement.jsonPrimitive.content) {
-                        "NONE" -> WalletKycLevel.None
-                        "EMAIL" -> WalletKycLevel.Email
-                        else -> throw IllegalArgumentException("Invalid WalletKycLevel value: $value")
+                        "ZAPPING" -> SubWallet.Open
+                        else -> throw IllegalArgumentException("Invalid SubWallet value: $value")
                     }
                 } else {
                     when (val value = jsonElement.jsonPrimitive.intOrNull) {
-                        0 -> WalletKycLevel.None
-                        2 -> WalletKycLevel.Email
-                        else -> throw IllegalArgumentException("Invalid WalletKycLevel value: $value")
+                        1 -> SubWallet.Open
+                        else -> throw IllegalArgumentException("Invalid SubWallet value: $value")
                     }
                 }
             }
