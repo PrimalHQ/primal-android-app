@@ -196,7 +196,7 @@ class NoteViewModel @AssistedInject constructor(
                 when (result.error) {
                     is ZapError.InvalidZap, is ZapError.FailedToFetchZapPayRequest,
                     is ZapError.FailedToFetchZapInvoice,
-                        -> setState { copy(error = InvalidZapRequest()) }
+                    -> setState { copy(error = InvalidZapRequest()) }
 
                     ZapError.FailedToPublishEvent, ZapError.FailedToSignEvent -> {
                         setState { copy(error = FailedToPublishZapEvent()) }

@@ -8,11 +8,10 @@ import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import net.primal.domain.nostr.NostrEvent
 
-
 /**
  * Converts a NostrEvent to a JsonObject.
- * 
- * Note: When converting the returned JsonObject to a string, use `toString()` 
+ *
+ * Note: When converting the returned JsonObject to a string, use `toString()`
  * instead of `encodeToString()` to ensure proper formatting and compatibility with iOS.
  */
 fun NostrEvent.toNostrJsonObject(): JsonObject {
