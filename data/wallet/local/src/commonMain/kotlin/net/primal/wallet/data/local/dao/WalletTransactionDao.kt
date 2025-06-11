@@ -1,4 +1,4 @@
-package net.primal.android.wallet.db
+package net.primal.wallet.data.local.dao
 
 import androidx.paging.PagingSource
 import androidx.room.Dao
@@ -11,7 +11,7 @@ import androidx.room.Transaction
 interface WalletTransactionDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun upsertAll(data: List<WalletTransactionData>)
+    suspend fun upsertAll(data: List<WalletTransactionData>)
 
     @Query(
         """
@@ -23,15 +23,15 @@ interface WalletTransactionDao {
     fun latestTransactionsPagedByUserId(userId: String): PagingSource<Int, WalletTransactionData>
 
     @Query("SELECT * FROM WalletTransactionData WHERE userId IS :userId ORDER BY updatedAt DESC LIMIT 1")
-    fun firstByUserId(userId: String): WalletTransactionData?
+    suspend fun firstByUserId(userId: String): WalletTransactionData?
 
     @Query("SELECT * FROM WalletTransactionData WHERE userId IS :userId ORDER BY updatedAt ASC LIMIT 1")
-    fun lastByUserId(userId: String): WalletTransactionData?
+    suspend fun lastByUserId(userId: String): WalletTransactionData?
 
     @Transaction
     @Query("SELECT * FROM WalletTransactionData WHERE id IS :txId")
-    fun findTransactionById(txId: String): WalletTransactionData?
+    suspend fun findTransactionById(txId: String): WalletTransactionData?
 
     @Query("DELETE FROM WalletTransactionData WHERE userId IS :userId")
-    fun deleteAllTransactionsByUserId(userId: String)
+    suspend fun deleteAllTransactionsByUserId(userId: String)
 }

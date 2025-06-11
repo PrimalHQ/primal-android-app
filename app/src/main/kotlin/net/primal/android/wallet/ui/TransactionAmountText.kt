@@ -13,10 +13,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
 import net.primal.android.wallet.dashboard.ui.FiatAmountTextFromUsd
-import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.repository.isValidExchangeRate
 import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
 import net.primal.core.utils.CurrencyConversionUtils.toSats
+import net.primal.wallet.domain.CurrencyMode
 
 @Composable
 fun TransactionAmountText(

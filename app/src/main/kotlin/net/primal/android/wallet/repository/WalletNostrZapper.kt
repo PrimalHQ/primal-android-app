@@ -3,7 +3,6 @@ package net.primal.android.wallet.repository
 import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import net.primal.android.wallet.api.model.WithdrawRequestBody
-import net.primal.android.wallet.domain.SubWallet
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.domain.nostr.cryptography.utils.urlToLnUrlHrp
@@ -11,6 +10,7 @@ import net.primal.domain.nostr.zaps.NostrZapper
 import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapRequestData
 import net.primal.domain.nostr.zaps.ZapResult
+import net.primal.wallet.domain.SubWallet
 
 class WalletNostrZapper @Inject constructor(
     private val walletRepository: WalletRepository,

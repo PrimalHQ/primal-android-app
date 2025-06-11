@@ -27,7 +27,6 @@ import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.domain.asUserAccountFromFollowListEvent
-import net.primal.android.wallet.domain.WalletSettings
 import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.BlossomException
 import net.primal.core.networking.blossom.UploadResult
@@ -45,6 +44,7 @@ import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.user.UserDataCleanupRepository
+import net.primal.wallet.domain.WalletSettings
 
 class UserRepository @Inject constructor(
     private val usersDatabase: UsersDatabase,
