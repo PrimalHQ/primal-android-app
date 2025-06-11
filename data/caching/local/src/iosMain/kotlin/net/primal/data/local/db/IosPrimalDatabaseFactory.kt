@@ -8,8 +8,9 @@ import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSUserDomainMask
 
-@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
-actual object PrimalDatabaseFactory {
+typealias PrimalDatabaseFactory = IosPrimalDatabaseFactory
+
+object IosPrimalDatabaseFactory {
 
     private val defaultDatabase: PrimalDatabase by lazy { createDatabase() }
 

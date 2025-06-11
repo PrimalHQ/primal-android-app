@@ -14,8 +14,7 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 import kotlin.random.Random
 
-@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
-actual object PlatformKeyStore {
+object AndroidPlatformKeyStore : PlatformKeyStore {
 
     private const val ANDROID_KEYSTORE = "AndroidKeyStore"
     private const val PREFS_NAME = "caching_database_preferences"
@@ -29,7 +28,7 @@ actual object PlatformKeyStore {
         this.appContext = appContext.applicationContext
     }
 
-    actual fun getOrCreateKey(): ByteArray {
+    override fun getOrCreateKey(): ByteArray {
         val prefs = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val encryptedKey = prefs.getString(ENCRYPTED_KEY, null)
         val encodedIv = prefs.getString(ENCRYPTED_IV, null)
@@ -107,3 +106,5 @@ actual object PlatformKeyStore {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.P &&
             packageManager.hasSystemFeature(PackageManager.FEATURE_STRONGBOX_KEYSTORE)
 }
+
+actual fun createPlatformKeyStore(): PlatformKeyStore = AndroidPlatformKeyStore

@@ -2,7 +2,7 @@ package net.primal.core.networking.blossom
 
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
-import net.primal.core.utils.coroutines.DispatcherProviderFactory
+import net.primal.core.utils.coroutines.IOSDispatcherProvider
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
@@ -19,7 +19,7 @@ class IosPrimalBlossomUploadService(
     private val uploadService by lazy {
         Napier.base(DebugAntilog())
         PrimalUploadService(
-            dispatchers = DispatcherProviderFactory.create(),
+            dispatchers = IOSDispatcherProvider(),
             blossomResolver = blossomResolver,
             signatureHandler = signatureHandler,
         )

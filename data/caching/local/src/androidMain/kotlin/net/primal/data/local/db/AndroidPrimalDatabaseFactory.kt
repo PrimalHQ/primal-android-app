@@ -5,8 +5,9 @@ import androidx.room.Room
 import androidx.sqlite.driver.AndroidSQLiteDriver
 import net.primal.core.utils.coroutines.AndroidDispatcherProvider
 
-@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
-actual object PrimalDatabaseFactory {
+typealias PrimalDatabaseFactory = AndroidPrimalDatabaseFactory
+
+object AndroidPrimalDatabaseFactory {
 
     private var defaultDatabase: PrimalDatabase? = null
 

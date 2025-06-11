@@ -5,7 +5,7 @@ import dev.whyoleg.cryptography.algorithms.AES
 
 internal object CryptoManager {
 
-    private val rawKey: ByteArray = PlatformKeyStore.getOrCreateKey()
+    private val rawKey: ByteArray = createPlatformKeyStore().getOrCreateKey()
 
     private val gcmKey by lazy {
         CryptographyProvider.Default

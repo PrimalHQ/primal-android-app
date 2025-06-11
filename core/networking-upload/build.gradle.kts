@@ -1,11 +1,9 @@
-import co.touchlab.skie.configuration.DefaultArgumentInterop
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
-    alias(libs.plugins.touchlab.skie)
 }
 
 private val xcfName = "BlossomUploader"
@@ -71,27 +69,5 @@ kotlin {
     // Opting in to the experimental @ObjCName annotation for native coroutines on iOS targets
     kotlin.sourceSets.all {
         languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
-    }
-}
-
-tasks.register("compileBlossomUploaderTargets") {
-    dependsOn("compileKotlinIosArm64", "compileAndroidMain")
-}
-
-skie {
-    build {
-        produceDistributableFramework()
-    }
-
-    features {
-        enableFlowCombineConvertorPreview = true
-
-        group {
-            DefaultArgumentInterop.Enabled(false)
-        }
-    }
-
-    analytics {
-        enabled.set(false)
     }
 }

@@ -37,5 +37,5 @@ include(":domain:nostr")
 include(":domain:primal")
 include(":domain:wallet")
 
-include(":shared")
 include(":paging-runtime-ios")
+include(":shared")

@@ -13,12 +13,12 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import net.primal.core.utils.coroutines.DispatcherProviderFactory
+import net.primal.core.utils.coroutines.createDispatcherProvider
 
 class IosPagingPresenter<T : Any>(
     pagingFlow: Flow<PagingData<T>>,
     scope: CoroutineScope,
-    dispatcher: CoroutineDispatcher = DispatcherProviderFactory.create().io(),
+    dispatcher: CoroutineDispatcher = createDispatcherProvider().io(),
 ) {
 
     private val presenter = object : PagingDataPresenter<T>(

@@ -1,6 +1,7 @@
 package net.primal.data.local.encryption
 
-@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
-actual object PlatformKeyStore {
-    actual fun getOrCreateKey(): ByteArray = throw NotImplementedError()
+object IosPlatformKeyStore : PlatformKeyStore {
+     override fun getOrCreateKey(): ByteArray = throw NotImplementedError()
 }
+
+actual fun createPlatformKeyStore(): PlatformKeyStore = IosPlatformKeyStore

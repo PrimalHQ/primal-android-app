@@ -1,7 +1,7 @@
 package net.primal.data.repository.factory
 
 import net.primal.core.networking.primal.PrimalApiClient
-import net.primal.core.utils.coroutines.DispatcherProviderFactory
+import net.primal.core.utils.coroutines.IOSDispatcherProvider
 import net.primal.data.local.db.PrimalDatabaseFactory
 import net.primal.data.remote.factory.PrimalApiServiceFactory
 import net.primal.data.repository.UserDataCleanupRepositoryImpl
@@ -42,9 +42,11 @@ import net.primal.domain.reads.ArticleRepository
 import net.primal.domain.reads.HighlightRepository
 import net.primal.domain.user.UserDataCleanupRepository
 
+typealias PrimalRepositoryFactory = IosRepositoryFactory
+
 object IosRepositoryFactory : RepositoryFactory {
 
-    private val dispatcherProvider = DispatcherProviderFactory.create()
+    private val dispatcherProvider = IOSDispatcherProvider()
 
     private val cachingDatabase by lazy { PrimalDatabaseFactory.getDefaultDatabase() }
 

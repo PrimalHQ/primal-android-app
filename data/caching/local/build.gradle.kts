@@ -20,7 +20,7 @@ kotlin {
     }
 
     // JVM Target
-//    jvm("desktop")
+    jvm("desktop")
 
     // iOS Target
     val xcfFramework = XCFramework(xcfName)
@@ -110,13 +110,13 @@ kotlin {
             }
         }
 
-//        val desktopMain by getting
-//        desktopMain.dependencies {
-//            // Add JVM-Desktop-specific dependencies here
-//
-//            // Room & SQLite
-//            implementation(libs.jetpack.sqlite.bundled.jvm)
-//        }
+        val desktopMain by getting
+        desktopMain.dependencies {
+            // Add JVM-Desktop-specific dependencies here
+
+            // Room & SQLite
+            implementation(libs.jetpack.sqlite.bundled.jvm)
+        }
 
         commonTest {
             dependencies {

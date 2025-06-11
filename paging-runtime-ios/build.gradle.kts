@@ -1,4 +1,3 @@
-import co.touchlab.skie.configuration.DefaultArgumentInterop
 import com.android.build.api.dsl.androidLibrary
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
@@ -61,22 +60,4 @@ kotlin {
 
 tasks.register("assembleXCFramework") {
     dependsOn("assemble${xcfName}ReleaseXCFramework")
-}
-
-skie {
-    build {
-        produceDistributableFramework()
-    }
-
-    features {
-        enableFlowCombineConvertorPreview = true
-
-        group {
-            DefaultArgumentInterop.Enabled(false)
-        }
-    }
-
-    analytics {
-        enabled.set(false)
-    }
 }

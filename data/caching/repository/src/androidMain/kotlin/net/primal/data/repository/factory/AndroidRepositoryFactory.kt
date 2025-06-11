@@ -3,10 +3,10 @@ package net.primal.data.repository.factory
 import android.content.Context
 import net.primal.core.config.store.AppConfigInitializer
 import net.primal.core.networking.primal.PrimalApiClient
-import net.primal.core.utils.coroutines.createDispatcherProvider
+import net.primal.core.utils.coroutines.AndroidDispatcherProvider
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.local.db.PrimalDatabaseFactory
-import net.primal.data.local.encryption.PlatformKeyStore
+import net.primal.data.local.encryption.AndroidPlatformKeyStore
 import net.primal.data.remote.factory.PrimalApiServiceFactory
 import net.primal.data.repository.UserDataCleanupRepositoryImpl
 import net.primal.data.repository.articles.ArticleRepositoryImpl
@@ -46,11 +46,13 @@ import net.primal.domain.reads.ArticleRepository
 import net.primal.domain.reads.HighlightRepository
 import net.primal.domain.user.UserDataCleanupRepository
 
+typealias PrimalRepositoryFactory = AndroidRepositoryFactory
+
 object AndroidRepositoryFactory : RepositoryFactory {
 
     private var appContext: Context? = null
 
-    private val dispatcherProvider = createDispatcherProvider()
+    private val dispatcherProvider = AndroidDispatcherProvider()
 
     private val cachingDatabase: PrimalDatabase by lazy {
         val appContext = appContext ?: error("You need to call init(ApplicationContext) first.")
@@ -59,7 +61,7 @@ object AndroidRepositoryFactory : RepositoryFactory {
 
     fun init(context: Context) {
         this.appContext = context.applicationContext
-        PlatformKeyStore.init(context)
+        AndroidPlatformKeyStore.init(context)
         AppConfigInitializer.init(context)
     }
 

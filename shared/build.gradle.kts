@@ -36,7 +36,7 @@ kotlin {
             export(project(":core:networking-primal"))
             export(project(":core:networking-upload"))
             export(project(":core:networking-nwc"))
-//            export(project(":data:repository-caching"))
+//            export(project(":data:caching:repository"))
 //            export(project(":paging-runtime-ios"))
         }
     }
@@ -51,7 +51,7 @@ kotlin {
                 api(project(":core:networking-primal"))
                 api(project(":core:networking-upload"))
                 api(project(":core:networking-nwc"))
-//                api(project(":data:repository-caching"))
+//                api(project(":data:caching:repository"))
 //                api(project(":paging-runtime-ios"))
 
                 // Core

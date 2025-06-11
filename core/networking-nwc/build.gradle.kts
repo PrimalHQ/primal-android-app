@@ -1,4 +1,3 @@
-import co.touchlab.skie.configuration.DefaultArgumentInterop
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
 plugins {
@@ -83,23 +82,5 @@ kotlin {
     // Opting in to the experimental @ObjCName annotation for native coroutines on iOS targets
     kotlin.sourceSets.all {
         languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
-    }
-}
-
-skie {
-    build {
-        produceDistributableFramework()
-    }
-
-    features {
-        enableFlowCombineConvertorPreview = true
-
-        group {
-            DefaultArgumentInterop.Enabled(false)
-        }
-    }
-
-    analytics {
-        enabled.set(false)
     }
 }
