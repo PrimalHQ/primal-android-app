@@ -31,6 +31,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import kotlin.time.Duration.Companion.milliseconds
@@ -259,6 +260,8 @@ private fun NoteFeedTopAppBar(
 
     PrimalTopAppBar(
         title = title,
+        titleMaxLines = 1,
+        titleOverflow = TextOverflow.Ellipsis,
         titleTrailingIcon = Icons.Default.ExpandMore,
         onTitleClick = {
             if (activeFeed != null) {

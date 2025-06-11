@@ -191,7 +191,7 @@ private fun ExploreFeedTopAppBar(
 ) {
     PrimalTopAppBar(
         title = title,
-        titleMaxLines = 2,
+        titleMaxLines = 1,
         titleOverflow = TextOverflow.Ellipsis,
         navigationIcon = PrimalIcons.ArrowBack,
         onNavigationIconClick = onClose,
