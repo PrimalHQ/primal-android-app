@@ -4,12 +4,12 @@ import javax.inject.Inject
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.domain.PrimalWallet
 import net.primal.android.user.domain.WalletPreference
-import net.primal.android.wallet.domain.WalletKycLevel
 import net.primal.android.wallet.repository.WalletNostrZapper
 import net.primal.core.networking.nwc.NwcClientFactory
 import net.primal.core.networking.nwc.model.NostrWalletConnect
 import net.primal.domain.nostr.zaps.NostrZapper
 import net.primal.domain.nostr.zaps.NostrZapperFactory
+import net.primal.wallet.domain.WalletKycLevel
 
 class NostrZapperFactoryImpl @Inject constructor(
     private val accountsStore: UserAccountsStore,

@@ -21,11 +21,11 @@ import net.primal.android.user.domain.isNwcUrl
 import net.primal.android.user.domain.parseNWCUrl
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.api.model.PrimalNwcConnectionInfo
-import net.primal.android.wallet.domain.WalletKycLevel
 import net.primal.android.wallet.repository.NwcWalletRepository
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.wallet.domain.WalletKycLevel
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = WalletSettingsViewModel.Factory::class)

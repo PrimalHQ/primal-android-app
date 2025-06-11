@@ -63,8 +63,6 @@ import net.primal.android.core.compose.icons.primaliconpack.WalletBitcoinPayment
 import net.primal.android.core.compose.isCompactOrLower
 import net.primal.android.core.compose.numericpad.PrimalNumericPad
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.domain.CurrencyMode
-import net.primal.android.wallet.domain.not
 import net.primal.android.wallet.numericPadContentTransformAnimation
 import net.primal.android.wallet.repository.isValidExchangeRate
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract
@@ -74,6 +72,8 @@ import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
 import net.primal.android.wallet.ui.TransactionAmountText
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.CurrencyConversionUtils.toSats
+import net.primal.wallet.domain.CurrencyMode
+import net.primal.wallet.domain.not
 
 @ExperimentalMaterial3Api
 @ExperimentalComposeUiApi

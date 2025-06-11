@@ -30,10 +30,10 @@ include(":core:networking-upload")
 include(":core:networking-nwc")
 
 include(":data:shared:local")
-
 include(":data:caching:local")
 include(":data:caching:remote")
 include(":data:caching:repository")
+include(":data:wallet:local")
 
 include(":domain:nostr")
 include(":domain:primal")

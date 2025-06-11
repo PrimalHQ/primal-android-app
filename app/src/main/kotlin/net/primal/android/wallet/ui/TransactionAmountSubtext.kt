@@ -16,9 +16,9 @@ import java.text.NumberFormat
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.WalletChangeCurrency
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.transactions.send.create.ui.formatSats
 import net.primal.android.wallet.transactions.send.create.ui.formatUsd
+import net.primal.wallet.domain.CurrencyMode
 
 @Composable
 fun TransactionAmountSubtext(

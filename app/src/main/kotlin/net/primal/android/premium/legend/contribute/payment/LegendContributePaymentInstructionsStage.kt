@@ -41,9 +41,9 @@ import net.primal.android.premium.legend.become.amount.NoPaymentInstructionsColu
 import net.primal.android.premium.legend.contribute.LegendContributeContract
 import net.primal.android.premium.legend.contribute.LegendContributeContract.UiState
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.domain.Network
 import net.primal.android.wallet.transactions.receive.QrCodeBox
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.wallet.domain.Network
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

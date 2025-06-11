@@ -25,12 +25,12 @@ import net.primal.android.wallet.api.model.OnChainAddressResponse
 import net.primal.android.wallet.api.model.ParsedLnInvoiceResponse
 import net.primal.android.wallet.api.model.ParsedLnUrlResponse
 import net.primal.android.wallet.api.model.WithdrawRequestBody
-import net.primal.android.wallet.db.WalletTransactionData
-import net.primal.android.wallet.domain.Network
-import net.primal.android.wallet.domain.SubWallet
-import net.primal.android.wallet.domain.WalletKycLevel
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.profile.ProfileRepository
+import net.primal.wallet.data.local.dao.WalletTransactionData
+import net.primal.wallet.domain.Network
+import net.primal.wallet.domain.SubWallet
+import net.primal.wallet.domain.WalletKycLevel
 
 @OptIn(ExperimentalPagingApi::class)
 class WalletRepository @Inject constructor(
@@ -74,7 +74,7 @@ class WalletRepository @Inject constructor(
                 ?: return@withContext null
 
             val profile = transaction.otherUserId
-                ?.let { profileRepository.findProfileDataOrNull(profileId = transaction.otherUserId) }
+                ?.let { profileRepository.findProfileDataOrNull(profileId = it) }
 
             TransactionProfileData(
                 transaction = transaction,

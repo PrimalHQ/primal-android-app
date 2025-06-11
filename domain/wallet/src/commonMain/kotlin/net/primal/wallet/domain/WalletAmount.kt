@@ -1,4 +1,4 @@
-package net.primal.android.wallet.domain
+package net.primal.wallet.domain
 
 import kotlinx.serialization.Serializable
 

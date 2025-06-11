@@ -4,7 +4,7 @@ import io.kotest.matchers.shouldBe
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.decodeFromJsonElement
-import net.primal.android.wallet.domain.SubWallet
+import net.primal.wallet.domain.SubWallet
 import org.junit.Test
 
 class SubWalletSerializerTest {

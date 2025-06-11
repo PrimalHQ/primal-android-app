@@ -19,9 +19,7 @@ import net.primal.android.scanner.analysis.WalletTextParser
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.api.model.MiningFeeTier
 import net.primal.android.wallet.api.model.WithdrawRequestBody
-import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.domain.DraftTxStatus
-import net.primal.android.wallet.domain.SubWallet
 import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract.UiEvent
@@ -39,6 +37,8 @@ import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.profile.ProfileData
 import net.primal.domain.profile.ProfileRepository
+import net.primal.wallet.domain.CurrencyMode
+import net.primal.wallet.domain.SubWallet
 import timber.log.Timber
 
 @HiltViewModel

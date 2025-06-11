@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.navigation.asUrlEncoded
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.wallet.domain.Network
 import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiEvent
@@ -21,6 +20,7 @@ import net.primal.android.wallet.transactions.receive.tabs.ReceivePaymentTab
 import net.primal.core.utils.getMaximumUsdAmount
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.wallet.domain.Network
 import timber.log.Timber
 
 @HiltViewModel

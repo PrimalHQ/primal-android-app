@@ -31,8 +31,8 @@ import net.primal.android.premium.legend.become.BecomeLegendBottomBarButton
 import net.primal.android.premium.legend.become.PremiumBecomeLegendContract
 import net.primal.android.premium.legend.become.PrimalLegendAmount
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.domain.Network
 import net.primal.android.wallet.transactions.receive.QrCodeBox
+import net.primal.wallet.domain.Network
 
 @ExperimentalMaterial3Api
 @Composable
