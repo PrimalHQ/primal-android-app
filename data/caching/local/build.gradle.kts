@@ -44,7 +44,6 @@ kotlin {
                 implementation(project(":domain:primal"))
 
                 api(project(":data:shared:local"))
-                implementation(project(":data:caching:remote"))
 
                 // Logging
                 implementation(libs.napier)
@@ -64,4 +63,16 @@ kotlin {
 
 room {
     schemaDirectory("$projectDir/schemas")
+}
+
+dependencies {
+    listOf(
+        "kspAndroid",
+        "kspDesktop",
+        "kspIosSimulatorArm64",
+        "kspIosX64",
+        "kspIosArm64",
+    ).forEach {
+        add(it, libs.room.compiler)
+    }
 }
