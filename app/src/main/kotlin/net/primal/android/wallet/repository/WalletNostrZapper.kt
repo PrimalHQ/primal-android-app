@@ -16,8 +16,8 @@ class WalletNostrZapper @Inject constructor(
     private val walletRepository: WalletRepository,
 ) : NostrZapper {
 
-    override suspend fun zap(data: ZapRequestData): ZapResult {
-        return try {
+    override suspend fun zap(data: ZapRequestData): ZapResult =
+        runCatching {
             walletRepository.withdraw(
                 userId = data.zapperUserId,
                 body = WithdrawRequestBody(
@@ -31,9 +31,8 @@ class WalletNostrZapper @Inject constructor(
                 ),
             )
             ZapResult.Success
-        } catch (error: Exception) {
+        }.getOrElse { error ->
             Napier.e(error) { "Failed to withdraw zap." }
             ZapResult.Failure(error = ZapError.FailedToPublishEvent)
         }
-    }
 }

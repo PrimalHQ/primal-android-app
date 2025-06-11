@@ -125,7 +125,7 @@ class DvmFeedListItemViewModel @Inject constructor(
                 when (result.error) {
                     is ZapError.InvalidZap, is ZapError.FailedToFetchZapPayRequest,
                     is ZapError.FailedToFetchZapInvoice,
-                        -> setState { copy(error = UiError.InvalidZapRequest()) }
+                    -> setState { copy(error = UiError.InvalidZapRequest()) }
 
                     ZapError.FailedToPublishEvent, ZapError.FailedToSignEvent -> {
                         setState { copy(error = UiError.FailedToPublishZapEvent()) }
