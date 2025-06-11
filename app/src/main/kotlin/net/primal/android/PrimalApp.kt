@@ -13,6 +13,7 @@ import net.primal.android.core.images.PrimalImageLoaderFactory
 import net.primal.android.core.utils.isGoogleBuild
 import net.primal.core.config.store.AppConfigInitializer
 import net.primal.data.repository.factory.PrimalRepositoryFactory
+import net.primal.wallet.data.repository.factory.WalletRepositoryFactory
 import timber.log.Timber
 
 @HiltAndroidApp
@@ -34,6 +35,7 @@ class PrimalApp : Application() {
         super.onCreate()
         AppConfigInitializer.init(this@PrimalApp)
         PrimalRepositoryFactory.init(this@PrimalApp)
+        WalletRepositoryFactory.init(this@PrimalApp)
 
         loggers.forEach {
             Timber.plant(it)
