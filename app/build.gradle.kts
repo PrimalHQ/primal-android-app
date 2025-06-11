@@ -242,11 +242,14 @@ dependencies {
     implementation(project(":core:networking-primal"))
     implementation(project(":core:networking-upload"))
     implementation(project(":core:networking-nwc"))
+
     implementation(project(":domain:nostr"))
     implementation(project(":domain:primal"))
     implementation(project(":domain:wallet"))
+
     implementation(project(":data:caching:remote"))
     implementation(project(":data:caching:repository"))
+    implementation(project(":data:wallet:local"))
 
     implementation(libs.bignum)
     implementation(libs.core.ktx)

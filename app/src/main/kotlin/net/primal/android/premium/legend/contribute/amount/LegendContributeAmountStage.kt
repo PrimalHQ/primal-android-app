@@ -27,9 +27,9 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.numericpad.PrimalNumericPad
 import net.primal.android.premium.legend.contribute.LegendContributeContract.UiState
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.domain.CurrencyMode
 import net.primal.android.wallet.ui.TransactionAmountText
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.wallet.domain.CurrencyMode
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

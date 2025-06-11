@@ -2,8 +2,8 @@ package net.primal.android.user.db
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import net.primal.android.wallet.db.WalletTransactionDao
-import net.primal.android.wallet.db.WalletTransactionData
+import net.primal.wallet.data.local.dao.WalletTransactionDao
+import net.primal.wallet.data.local.dao.WalletTransactionData
 
 @Database(
     entities = [

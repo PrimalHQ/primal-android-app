@@ -25,6 +25,8 @@
             <option value="$PROJECT_DIR$/data/caching/repository" />
             <option value="$PROJECT_DIR$/data/shared" />
             <option value="$PROJECT_DIR$/data/shared/local" />
+            <option value="$PROJECT_DIR$/data/wallet" />
+            <option value="$PROJECT_DIR$/data/wallet/local" />
             <option value="$PROJECT_DIR$/domain" />
             <option value="$PROJECT_DIR$/domain/nostr" />
             <option value="$PROJECT_DIR$/domain/primal" />

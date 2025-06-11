@@ -170,7 +170,7 @@ abstract class PrimalDatabase : RoomDatabase() {
 }
 
 // The Room compiler generates the `actual` implementations.
-@Suppress("KotlinNoActualForExpect", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+@Suppress("KotlinNoActualForExpect", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "RedundantSuppression")
 internal expect object AppDatabaseConstructor : RoomDatabaseConstructor<PrimalDatabase> {
     override fun initialize(): PrimalDatabase
 }

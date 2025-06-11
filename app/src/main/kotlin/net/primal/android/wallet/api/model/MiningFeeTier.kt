@@ -2,7 +2,7 @@ package net.primal.android.wallet.api.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import net.primal.android.wallet.domain.WalletAmount
+import net.primal.wallet.domain.WalletAmount
 
 @Serializable
 data class MiningFeeTier(

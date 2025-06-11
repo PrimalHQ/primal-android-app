@@ -1,7 +1,7 @@
 package net.primal.android.premium.legend.contribute
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import net.primal.android.wallet.domain.CurrencyMode
+import net.primal.wallet.domain.CurrencyMode
 
 interface LegendContributeContract {
 

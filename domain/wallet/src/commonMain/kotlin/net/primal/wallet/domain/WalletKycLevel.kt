@@ -1,7 +1,6 @@
-package net.primal.android.wallet.domain
+package net.primal.wallet.domain
 
 import kotlinx.serialization.Serializable
-import net.primal.android.wallet.domain.serializer.WalletKycLevelSerializer
 
 @Serializable(with = WalletKycLevelSerializer::class)
 enum class WalletKycLevel(val id: Int) {
