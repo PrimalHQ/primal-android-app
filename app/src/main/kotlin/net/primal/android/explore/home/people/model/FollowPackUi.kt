@@ -29,7 +29,8 @@ fun FollowPack.asFollowPackUi() =
         description = description,
         authorId = authorId,
         authorProfileData = authorProfileData?.mapAsUserProfileUi(),
-        highlightedProfiles = profiles.take(HIGHLIGHTED_PROFILES_COUNT)
+        highlightedProfiles = profiles.sortedByDescending { it.followersCount }
+            .take(HIGHLIGHTED_PROFILES_COUNT)
             .map { it.mapAsUserProfileUi() },
         profilesCount = this@asFollowPackUi.profilesCount,
         profiles = profiles.map { it.mapAsUserProfileUi() },

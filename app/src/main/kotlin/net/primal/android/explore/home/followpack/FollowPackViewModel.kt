@@ -96,7 +96,8 @@ class FollowPackViewModel @Inject constructor(
                     setState {
                         copy(
                             followPack = followPackUi?.copy(
-                                profiles = followPackUi.profiles.resolveIsFollowing(following = state.value.following),
+                                profiles = followPackUi.profiles.sortedByDescending { it.followersCount }
+                                    .resolveIsFollowing(following = state.value.following),
                             ),
                             feedSpec = observedFollowPack?.let {
                                 buildAdvancedSearchNotesFeedSpec(
