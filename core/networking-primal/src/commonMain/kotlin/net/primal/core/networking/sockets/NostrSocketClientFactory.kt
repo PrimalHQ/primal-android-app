@@ -2,7 +2,7 @@ package net.primal.core.networking.sockets
 
 import io.ktor.client.HttpClient
 import net.primal.core.networking.factory.defaultSocketsHttpClient
-import net.primal.core.utils.coroutines.DispatcherProviderFactory
+import net.primal.core.utils.coroutines.createDispatcherProvider
 
 object NostrSocketClientFactory {
 
@@ -14,7 +14,7 @@ object NostrSocketClientFactory {
         onSocketConnectionClosed: SocketConnectionClosedCallback? = null,
     ): NostrSocketClient {
         return NostrSocketClientImpl(
-            dispatcherProvider = DispatcherProviderFactory.create(),
+            dispatcherProvider = createDispatcherProvider(),
             httpClient = httpClient,
             wssUrl = wssUrl,
             incomingCompressionEnabled = incomingCompressionEnabled,

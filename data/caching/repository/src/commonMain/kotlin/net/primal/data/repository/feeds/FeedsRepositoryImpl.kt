@@ -3,9 +3,9 @@ package net.primal.data.repository.feeds
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import net.primal.core.utils.AppBuildHelper
 import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.createAppBuildHelper
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.local.dao.feeds.Feed
@@ -55,6 +55,8 @@ class FeedsRepositoryImpl(
     private val signatureHandler: NostrEventSignatureHandler,
 ) : FeedsRepository {
 
+    private val appBuildHelper = createAppBuildHelper()
+
     override fun observeAllFeeds(userId: String) =
         database.feeds().observeAllFeeds(ownerId = userId)
             .distinctUntilChanged()
@@ -90,7 +92,7 @@ class FeedsRepositoryImpl(
                 unsignedNostrEvent = NostrUnsignedEvent(
                     pubKey = userId,
                     kind = NostrEventKind.ApplicationSpecificData.value,
-                    tags = listOf("${AppBuildHelper.getAppName()} App".asIdentifierTag()),
+                    tags = listOf("${appBuildHelper.getAppName()} App".asIdentifierTag()),
                     content = ContentAppSubSettings<String>(key = specKind.settingsKey).encodeToJsonString(),
                 ),
             ).unwrapOrThrow()
@@ -159,7 +161,7 @@ class FeedsRepositoryImpl(
                 unsignedNostrEvent = NostrUnsignedEvent(
                     pubKey = userId,
                     kind = NostrEventKind.ApplicationSpecificData.value,
-                    tags = listOf("${AppBuildHelper.getAppName()} App".asIdentifierTag()),
+                    tags = listOf("${appBuildHelper.getAppName()} App".asIdentifierTag()),
                     content = ContentAppSubSettings(
                         key = specKind.settingsKey,
                         settings = feeds.map { it.asContentPrimalFeedData() },
@@ -184,7 +186,7 @@ class FeedsRepositoryImpl(
             unsignedNostrEvent = NostrUnsignedEvent(
                 pubKey = userId,
                 kind = NostrEventKind.ApplicationSpecificData.value,
-                tags = listOf("${AppBuildHelper.getAppName()} App".asIdentifierTag()),
+                tags = listOf("${appBuildHelper.getAppName()} App".asIdentifierTag()),
                 content = ContentAppSubSettings(
                     key = specKind.settingsKey,
                     settings = feeds.map { it.asContentPrimalFeedData() },

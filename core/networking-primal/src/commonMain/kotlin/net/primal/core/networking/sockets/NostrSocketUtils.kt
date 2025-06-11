@@ -1,6 +1,8 @@
 package net.primal.core.networking.sockets
 
 import kotlin.uuid.Uuid
-import net.primal.core.utils.AppBuildHelper
+import net.primal.core.utils.createAppBuildHelper
 
-fun Uuid.toPrimalSubscriptionId(): String = "${AppBuildHelper.getPlatformName()}-$this".lowercase()
+private val appBuildHelper = createAppBuildHelper()
+
+fun Uuid.toPrimalSubscriptionId(): String = "${appBuildHelper.getPlatformName()}-$this".lowercase()

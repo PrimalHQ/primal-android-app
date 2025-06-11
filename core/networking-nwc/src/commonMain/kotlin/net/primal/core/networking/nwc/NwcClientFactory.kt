@@ -2,7 +2,7 @@ package net.primal.core.networking.nwc
 
 import net.primal.core.networking.factory.HttpClientFactory
 import net.primal.core.networking.nwc.model.NostrWalletConnect
-import net.primal.core.utils.coroutines.DispatcherProviderFactory
+import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.domain.nostr.zaps.NostrZapper
 
 object NwcClientFactory {
@@ -13,7 +13,7 @@ object NwcClientFactory {
         NwcClientImpl(
             nwcData = nwcData,
             nwcZapHelper = NwcZapHelper(
-                dispatcherProvider = DispatcherProviderFactory.create(),
+                dispatcherProvider = createDispatcherProvider(),
                 httpClient = nwcHttpClient,
             ),
         )

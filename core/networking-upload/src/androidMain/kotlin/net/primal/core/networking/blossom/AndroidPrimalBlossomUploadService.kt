@@ -3,7 +3,7 @@ package net.primal.core.networking.blossom
 import android.content.ContentResolver
 import android.net.Uri
 import java.io.IOException
-import net.primal.core.utils.coroutines.DispatcherProviderFactory
+import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
@@ -19,7 +19,7 @@ class AndroidPrimalBlossomUploadService(
 
     private val uploadService by lazy {
         PrimalUploadService(
-            dispatchers = DispatcherProviderFactory.create(),
+            dispatchers = createDispatcherProvider(),
             blossomResolver = blossomResolver,
             signatureHandler = signatureHandler,
         )

@@ -7,3 +7,5 @@ class IOSDispatcherProvider : DispatcherProvider {
     override fun io(): CoroutineDispatcher = Dispatchers.Default
     override fun main(): CoroutineDispatcher = Dispatchers.Main
 }
+
+actual fun createDispatcherProvider(): DispatcherProvider = IOSDispatcherProvider()

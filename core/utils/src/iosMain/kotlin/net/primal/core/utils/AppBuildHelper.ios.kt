@@ -2,16 +2,20 @@ package net.primal.core.utils
 
 import platform.Foundation.NSBundle
 
-@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
-actual object AppBuildHelper {
+class IosAppBuildHelper : AppBuildHelper {
 
-    private const val UNKNOWN_VERSION = "unknown"
-
-    actual fun getAppVersion(): String {
-        return NSBundle.mainBundle.infoDictionary?.get("CFBundleShortVersionString") as? String ?: UNKNOWN_VERSION
+    private companion object {
+        private const val UNKNOWN_VERSION = "unknown"
     }
 
-    actual fun getAppName(): String = "Primal-iOS"
+    override fun getAppVersion(): String {
+        return NSBundle.mainBundle.infoDictionary?.get("CFBundleShortVersionString")
+            as? String ?: UNKNOWN_VERSION
+    }
 
-    actual fun getPlatformName(): String = "iOS"
+    override fun getAppName(): String = "Primal-iOS"
+
+    override fun getPlatformName(): String = "iOS"
 }
+
+actual fun createAppBuildHelper(): AppBuildHelper = IosAppBuildHelper()

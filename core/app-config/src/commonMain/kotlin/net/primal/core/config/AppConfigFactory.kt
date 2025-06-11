@@ -7,7 +7,7 @@ import net.primal.core.config.api.createWellKnownApi
 import net.primal.core.config.store.AppConfigDataStore
 import net.primal.core.config.store.createAppConfigDataStorePersistence
 import net.primal.core.networking.factory.HttpClientFactory
-import net.primal.core.utils.coroutines.DispatcherProviderFactory
+import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.domain.global.AppConfig
 
 private const val CONFIG_CACHE_API = "wss://cache1.primal.net/v1"
@@ -22,7 +22,7 @@ internal val DEFAULT_APP_CONFIG = AppConfig(
 
 object AppConfigFactory {
 
-    private val dispatcherProvider by lazy { DispatcherProviderFactory.create() }
+    private val dispatcherProvider by lazy { createDispatcherProvider() }
 
     private val httpClient = HttpClientFactory.createHttpClientWithDefaultConfig()
 

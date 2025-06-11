@@ -6,7 +6,7 @@ import net.primal.core.config.AppConfigFactory
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.ProxyPrimalApiClient
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.core.utils.coroutines.DispatcherProviderFactory
+import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.domain.global.PrimalServerType
 
 internal val defaultSocketsHttpClient by lazy {
@@ -27,7 +27,7 @@ object PrimalApiClientFactory {
 
     fun create(serverType: PrimalServerType): PrimalApiClient {
         return create(
-            dispatcherProvider = DispatcherProviderFactory.create(),
+            dispatcherProvider = createDispatcherProvider(),
             httpClient = defaultSocketsHttpClient,
             serverType = serverType,
         )
