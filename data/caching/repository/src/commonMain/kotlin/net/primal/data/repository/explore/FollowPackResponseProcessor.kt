@@ -4,7 +4,6 @@ import net.primal.core.utils.asMapByKey
 import net.primal.data.local.dao.explore.FollowPackData
 import net.primal.data.local.dao.explore.FollowPackProfileCrossRef
 import net.primal.data.local.db.PrimalDatabase
-import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.explore.model.FollowListsResponse
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
@@ -27,6 +26,7 @@ import net.primal.domain.nostr.findFirstImage
 import net.primal.domain.nostr.findFirstTitle
 import net.primal.domain.nostr.getTagValueOrNull
 import net.primal.domain.nostr.isPubKeyTag
+import net.primal.shared.data.local.db.withTransaction
 
 internal suspend fun FollowListsResponse.processAndPersistFollowLists(database: PrimalDatabase): List<FollowPack> {
     val primalUserNames = primalUserNames.parseAndMapPrimalUserNames()

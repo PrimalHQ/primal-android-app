@@ -2,11 +2,11 @@ package net.primal.data.repository.mappers.remote
 
 import net.primal.core.utils.detectUrls
 import net.primal.data.local.dao.messages.DirectMessageData
-import net.primal.data.local.encryption.EncryptableString
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.findFirstProfileId
 import net.primal.domain.nostr.utils.parseHashtags
 import net.primal.domain.nostr.utils.parseNostrUris
+import net.primal.shared.data.local.encryption.EncryptableString
 
 fun List<NostrEvent>.mapAsMessageDataPO(
     userId: String,

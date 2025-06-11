@@ -15,7 +15,6 @@ import kotlinx.coroutines.withContext
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.reads.Article as ArticlePO
 import net.primal.data.local.db.PrimalDatabase
-import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.articles.ArticlesApi
 import net.primal.data.remote.api.articles.model.ArticleDetailsRequestBody
 import net.primal.data.remote.api.articles.model.ArticleHighlightsRequestBody
@@ -28,6 +27,7 @@ import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.posts.FeedPost
 import net.primal.domain.reads.Article as ArticleDO
 import net.primal.domain.reads.ArticleRepository
+import net.primal.shared.data.local.db.withTransaction
 
 class ArticleRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,

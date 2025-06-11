@@ -8,7 +8,6 @@ import kotlinx.serialization.json.jsonPrimitive
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.bookmarks.PublicBookmark as PublicBookmarkPO
 import net.primal.data.local.db.PrimalDatabase
-import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.domain.bookmarks.BookmarkType
 import net.primal.domain.bookmarks.PublicBookmarksRepository
@@ -17,6 +16,7 @@ import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.PublicBookmarksNotFoundException
 import net.primal.domain.publisher.PrimalPublisher
+import net.primal.shared.data.local.db.withTransaction
 
 class PublicBookmarksRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,

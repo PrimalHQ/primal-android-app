@@ -60,10 +60,10 @@ import net.primal.data.local.dao.threads.ArticleCommentCrossRef
 import net.primal.data.local.dao.threads.NoteConversationCrossRef
 import net.primal.data.local.dao.threads.ThreadConversationDao
 import net.primal.data.local.serialization.CdnTypeConverters
-import net.primal.data.local.serialization.JsonTypeConverters
-import net.primal.data.local.serialization.ListsTypeConverters
 import net.primal.data.local.serialization.NostrReferenceTypeConverters
 import net.primal.data.local.serialization.ProfileTypeConverters
+import net.primal.shared.data.local.serialization.JsonTypeConverters
+import net.primal.shared.data.local.serialization.ListsTypeConverters
 
 @Database(
     entities = [

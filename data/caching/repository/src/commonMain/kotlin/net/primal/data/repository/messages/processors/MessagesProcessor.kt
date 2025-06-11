@@ -3,7 +3,6 @@ package net.primal.data.repository.messages.processors
 import io.github.aakira.napier.Napier
 import net.primal.data.local.dao.messages.DirectMessageData
 import net.primal.data.local.db.PrimalDatabase
-import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.feed.FeedApi
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
@@ -26,6 +25,7 @@ import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.nostr.utils.extractNoteId
 import net.primal.domain.nostr.utils.extractProfileId
 import net.primal.domain.nostr.utils.isNostrUri
+import net.primal.shared.data.local.db.withTransaction
 
 internal class MessagesProcessor(
     private val database: PrimalDatabase,

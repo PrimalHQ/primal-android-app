@@ -6,7 +6,7 @@ import net.primal.data.local.dao.events.EventStats
 import net.primal.data.local.dao.events.EventUserStats
 import net.primal.data.local.dao.events.EventZap
 import net.primal.data.local.db.PrimalDatabase
-import net.primal.data.local.db.withTransaction
+import net.primal.shared.data.local.db.withTransaction
 
 internal class EventStatsUpdater(
     val eventId: String,

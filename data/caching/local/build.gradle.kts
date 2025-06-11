@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
 plugins {
@@ -9,7 +8,7 @@ plugins {
     alias(libs.plugins.jetpack.room)
 }
 
-private val xcfName = "PrimalDataLocalCaching"
+private val xcfName = "PrimalDataCachingLocal"
 
 kotlin {
     // Android target
@@ -40,116 +39,29 @@ kotlin {
                 // Internal
                 implementation(project(":core:utils"))
                 implementation(project(":core:networking-primal"))
+
                 implementation(project(":domain:nostr"))
                 implementation(project(":domain:primal"))
+
+                api(project(":data:shared:local"))
                 implementation(project(":data:caching:remote"))
-
-                // Core
-                implementation(libs.kotlinx.coroutines.core)
-                implementation(libs.kotlinx.datetime)
-
-                // Cryptography
-                implementation(libs.whyoleg.cryptography.core)
-
-                // Room
-                api(libs.room.runtime)
-                implementation(libs.room.paging)
-                implementation(libs.jetpack.sqlite.framework)
-
-                // Serialization
-                implementation(libs.kotlinx.serialization.json)
-                implementation(libs.kotlinx.io)
 
                 // Logging
                 implementation(libs.napier)
-
-                // Interop
-                implementation(libs.skie.configuration.annotations)
             }
-        }
-
-        androidMain {
-            dependencies {
-                // Coroutines
-                implementation(libs.kotlinx.coroutines.android)
-                implementation(libs.core.ktx)
-
-                // Cryptography
-                implementation(libs.whyoleg.cryptography.provider.jdk)
-                implementation(libs.androidx.security.crypto)
-
-                // Room
-                api(libs.room.runtime.android)
-                implementation(libs.jetpack.sqlite.framework.android)
-            }
-        }
-
-        iosMain {
-            dependencies {
-                // Cryptography
-                implementation(libs.whyoleg.cryptography.provider.apple)
-            }
-        }
-
-        val iosArm64Main by getting {
-            dependencies {
-                // SQLite
-                implementation(libs.jetpack.sqlite.framework.iosarm64)
-            }
-        }
-        val iosSimulatorArm64Main by getting {
-            dependencies {
-                // SQLite
-                implementation(libs.jetpack.sqlite.framework.iossimulatorarm64)
-            }
-        }
-        val iosX64Main by getting {
-            dependencies {
-                // SQLite
-                implementation(libs.jetpack.sqlite.framework.iosx64)
-            }
-        }
-
-        val desktopMain by getting
-        desktopMain.dependencies {
-            // Add JVM-Desktop-specific dependencies here
-
-            // Room & SQLite
-            implementation(libs.jetpack.sqlite.bundled.jvm)
         }
 
         commonTest {
             dependencies {
-                implementation(libs.junit)
+                implementation(libs.kotlin.test)
                 implementation(libs.kotest.assertions.core)
                 implementation(libs.kotest.assertions.json)
                 implementation(libs.kotlinx.coroutines.test)
             }
         }
     }
-
-    // This tells the Kotlin/Native compiler to link against the system SQLite library
-    // and ensures that NativeSQLiteDriver (used on iOS targets) can find libsqlite3 at
-    // runtime without missing symbols.
-    targets.withType<KotlinNativeTarget> {
-        binaries.all {
-            linkerOpts("-lsqlite3")
-        }
-    }
 }
 
 room {
     schemaDirectory("$projectDir/schemas")
-}
-
-dependencies {
-    listOf(
-        "kspAndroid",
-//        "kspDesktop",
-        "kspIosSimulatorArm64",
-        "kspIosX64",
-        "kspIosArm64",
-    ).forEach {
-        add(it, libs.room.compiler)
-    }
 }

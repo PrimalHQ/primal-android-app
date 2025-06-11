@@ -10,7 +10,6 @@ import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.local.dao.feeds.Feed
 import net.primal.data.local.db.PrimalDatabase
-import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.feeds.FeedsApi
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
@@ -46,6 +45,7 @@ import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import net.primal.domain.nostr.findFirstIdentifier
 import net.primal.domain.nostr.utils.parseAsLNUrlOrNull
+import net.primal.shared.data.local.db.withTransaction
 
 // TODO Consider splitting the repository into smaller ones
 class FeedsRepositoryImpl(

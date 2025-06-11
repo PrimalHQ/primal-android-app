@@ -13,7 +13,6 @@ import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.events.EventZap as EventZapPO
 import net.primal.data.local.db.PrimalDatabase
-import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.events.EventStatsApi
 import net.primal.data.remote.api.events.model.EventActionsRequestBody
 import net.primal.data.remote.api.events.model.EventZapsRequestBody
@@ -33,6 +32,7 @@ import net.primal.data.repository.mappers.remote.takeContentAsPrimalUserScoresOr
 import net.primal.domain.events.EventRepository
 import net.primal.domain.events.EventZap as EventZapDO
 import net.primal.domain.events.NostrEventAction
+import net.primal.shared.data.local.db.withTransaction
 
 class EventRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,

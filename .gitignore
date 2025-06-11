@@ -27,6 +27,7 @@
 /core/build
 /data/build
 /data/caching/build
+/data/shared/build
 /domain/build
 /domain/common/build
 /shared/build

@@ -7,6 +7,7 @@ import kotlin.test.Test
 import kotlinx.serialization.json.JsonArray
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.shared.data.local.serialization.ListsTypeConverters
 
 class ListsTypeConvertersTest {
 

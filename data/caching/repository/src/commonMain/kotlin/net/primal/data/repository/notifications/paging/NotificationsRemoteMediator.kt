@@ -12,7 +12,6 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notifications.Notification
 import net.primal.data.local.dao.notifications.NotificationData
 import net.primal.data.local.db.PrimalDatabase
-import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.remote.api.notifications.NotificationsApi
 import net.primal.data.remote.api.notifications.model.NotificationsRequestBody
@@ -20,6 +19,7 @@ import net.primal.data.repository.feed.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.remote.mapNotNullAsNotificationPO
 import net.primal.data.repository.mappers.remote.mapNotNullAsProfileStatsPO
 import net.primal.domain.common.exception.NetworkException
+import net.primal.shared.data.local.db.withTransaction
 
 @ExperimentalPagingApi
 class NotificationsRemoteMediator(

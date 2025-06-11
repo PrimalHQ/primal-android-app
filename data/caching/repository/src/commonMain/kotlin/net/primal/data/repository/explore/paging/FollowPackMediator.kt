@@ -15,7 +15,6 @@ import net.primal.data.local.dao.explore.FollowPack as FollowPackPO
 import net.primal.data.local.dao.explore.FollowPackListCrossRef
 import net.primal.data.local.dao.explore.FollowPackRemoteKey
 import net.primal.data.local.db.PrimalDatabase
-import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.explore.ExploreApi
 import net.primal.data.remote.api.explore.model.FollowListsRequestBody
 import net.primal.data.remote.api.explore.model.FollowListsResponse
@@ -24,6 +23,7 @@ import net.primal.data.repository.explore.processAndPersistFollowLists
 import net.primal.data.repository.mappers.remote.orderByPagingIfNotNull
 import net.primal.domain.common.ContentPrimalPaging
 import net.primal.domain.common.exception.NetworkException
+import net.primal.shared.data.local.db.withTransaction
 
 @ExperimentalPagingApi
 internal class FollowPackMediator(

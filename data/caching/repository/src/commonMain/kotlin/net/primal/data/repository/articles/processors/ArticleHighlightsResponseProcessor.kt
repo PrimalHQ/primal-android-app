@@ -2,7 +2,6 @@ package net.primal.data.repository.articles.processors
 
 import net.primal.data.local.dao.events.eventRelayHintsUpserter
 import net.primal.data.local.db.PrimalDatabase
-import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.articles.model.ArticleHighlightsResponse
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
@@ -15,6 +14,7 @@ import net.primal.data.repository.mappers.remote.mapNotNullAsHighlightComments
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
+import net.primal.shared.data.local.db.withTransaction
 
 suspend fun ArticleHighlightsResponse.persistToDatabaseAsTransaction(database: PrimalDatabase) {
     val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource()

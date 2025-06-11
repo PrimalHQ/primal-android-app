@@ -17,7 +17,6 @@ import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.explore.FollowPack
 import net.primal.data.local.db.PrimalDatabase
-import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.explore.ExploreApi
 import net.primal.data.remote.api.explore.model.ExploreRequestBody
 import net.primal.data.remote.api.explore.model.FollowListsRequestBody
@@ -50,6 +49,7 @@ import net.primal.domain.explore.ExplorePeopleData
 import net.primal.domain.explore.ExploreRepository
 import net.primal.domain.explore.ExploreZapNoteData
 import net.primal.domain.explore.FollowPack as FollowPackDO
+import net.primal.shared.data.local.db.withTransaction
 
 class ExploreRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,

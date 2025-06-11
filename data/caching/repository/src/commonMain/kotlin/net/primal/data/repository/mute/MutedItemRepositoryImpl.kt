@@ -7,7 +7,6 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.mutes.MutedItemData
 import net.primal.data.local.dao.mutes.MutedItemType
 import net.primal.data.local.db.PrimalDatabase
-import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.settings.SettingsApi
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
@@ -29,6 +28,7 @@ import net.primal.domain.nostr.isHashtagTag
 import net.primal.domain.nostr.isPubKeyTag
 import net.primal.domain.nostr.isWordTag
 import net.primal.domain.publisher.PrimalPublisher
+import net.primal.shared.data.local.db.withTransaction
 
 class MutedItemRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,

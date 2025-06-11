@@ -5,8 +5,6 @@ import net.primal.core.config.store.AppConfigInitializer
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.utils.coroutines.AndroidDispatcherProvider
 import net.primal.data.local.db.PrimalDatabase
-import net.primal.data.local.db.PrimalDatabaseFactory
-import net.primal.data.local.encryption.AndroidPlatformKeyStore
 import net.primal.data.remote.factory.PrimalApiServiceFactory
 import net.primal.data.repository.UserDataCleanupRepositoryImpl
 import net.primal.data.repository.articles.ArticleRepositoryImpl
@@ -45,6 +43,8 @@ import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.reads.ArticleRepository
 import net.primal.domain.reads.HighlightRepository
 import net.primal.domain.user.UserDataCleanupRepository
+import net.primal.shared.data.local.db.LocalDatabaseFactory
+import net.primal.shared.data.local.encryption.AndroidPlatformKeyStore
 
 typealias PrimalRepositoryFactory = AndroidRepositoryFactory
 
@@ -56,7 +56,10 @@ object AndroidRepositoryFactory : RepositoryFactory {
 
     private val cachingDatabase: PrimalDatabase by lazy {
         val appContext = appContext ?: error("You need to call init(ApplicationContext) first.")
-        PrimalDatabaseFactory.getDefaultDatabase(appContext)
+        LocalDatabaseFactory.createDatabase<PrimalDatabase>(
+            context = appContext,
+            databaseName = "primal_database.db",
+        )
     }
 
     fun init(context: Context) {

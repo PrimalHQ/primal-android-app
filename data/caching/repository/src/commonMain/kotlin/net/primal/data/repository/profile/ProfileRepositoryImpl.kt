@@ -7,7 +7,6 @@ import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.db.PrimalDatabase
-import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.explore.model.UsersResponse
 import net.primal.data.remote.api.users.UserWellKnownApi
 import net.primal.data.remote.api.users.UsersApi
@@ -33,6 +32,7 @@ import net.primal.domain.profile.ProfileData
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.profile.ProfileStats
 import net.primal.domain.publisher.PrimalPublisher
+import net.primal.shared.data.local.db.withTransaction
 
 class ProfileRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,

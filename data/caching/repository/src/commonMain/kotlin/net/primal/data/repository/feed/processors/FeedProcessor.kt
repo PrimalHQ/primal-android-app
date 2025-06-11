@@ -4,13 +4,13 @@ import kotlinx.datetime.Clock
 import net.primal.data.local.dao.notes.FeedPostDataCrossRef
 import net.primal.data.local.dao.notes.FeedPostRemoteKey
 import net.primal.data.local.db.PrimalDatabase
-import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.repository.mappers.remote.asFeedResponse
 import net.primal.data.repository.mappers.remote.orderByPagingIfNotNull
 import net.primal.domain.common.ContentPrimalPaging
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.posts.FeedPageSnapshot
+import net.primal.shared.data.local.db.withTransaction
 
 internal class FeedProcessor(
     val feedSpec: String,

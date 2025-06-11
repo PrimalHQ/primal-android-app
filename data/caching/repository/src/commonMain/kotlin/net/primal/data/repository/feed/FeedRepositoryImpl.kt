@@ -13,7 +13,6 @@ import kotlinx.coroutines.withContext
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notes.FeedPost as FeedPostPO
 import net.primal.data.local.db.PrimalDatabase
-import net.primal.data.local.db.withTransaction
 import net.primal.data.local.queries.ChronologicalFeedWithRepostsQueryBuilder
 import net.primal.data.local.queries.ExploreFeedQueryBuilder
 import net.primal.data.local.queries.FeedQueryBuilder
@@ -33,6 +32,7 @@ import net.primal.domain.posts.FeedPageSnapshot
 import net.primal.domain.posts.FeedPost as FeedPostDO
 import net.primal.domain.posts.FeedRepository
 import net.primal.domain.posts.FeedRepository.Companion.DEFAULT_PAGE_SIZE
+import net.primal.shared.data.local.db.withTransaction
 
 internal class FeedRepositoryImpl(
     private val feedApi: FeedApi,

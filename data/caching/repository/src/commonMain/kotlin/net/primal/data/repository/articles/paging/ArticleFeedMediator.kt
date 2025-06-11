@@ -16,7 +16,6 @@ import net.primal.data.local.dao.notes.FeedPostRemoteKey
 import net.primal.data.local.dao.reads.Article as ArticlePO
 import net.primal.data.local.dao.reads.ArticleFeedCrossRef
 import net.primal.data.local.db.PrimalDatabase
-import net.primal.data.local.db.withTransaction
 import net.primal.data.remote.api.articles.ArticlesApi
 import net.primal.data.remote.api.articles.model.ArticleFeedRequestBody
 import net.primal.data.remote.api.articles.model.ArticleResponse
@@ -25,6 +24,7 @@ import net.primal.data.repository.mappers.remote.mapNotNullAsArticleDataPO
 import net.primal.data.repository.mappers.remote.orderByPagingIfNotNull
 import net.primal.domain.common.ContentPrimalPaging
 import net.primal.domain.common.exception.NetworkException
+import net.primal.shared.data.local.db.withTransaction
 
 @ExperimentalPagingApi
 internal class ArticleFeedMediator(
