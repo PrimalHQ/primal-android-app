@@ -35,7 +35,7 @@ kotlin {
             export(project(":domain:primal"))
             export(project(":core:networking-primal"))
             export(project(":core:networking-upload"))
-            export(project(":core:networking-nwc"))
+            export(project(":data:wallet:remote-nwc"))
 //            export(project(":data:caching:repository"))
 //            export(project(":paging-runtime-ios"))
         }
@@ -50,7 +50,7 @@ kotlin {
                 api(project(":domain:primal"))
                 api(project(":core:networking-primal"))
                 api(project(":core:networking-upload"))
-                api(project(":core:networking-nwc"))
+                api(project(":data:wallet:remote-nwc"))
 //                api(project(":data:caching:repository"))
 //                api(project(":paging-runtime-ios"))
 

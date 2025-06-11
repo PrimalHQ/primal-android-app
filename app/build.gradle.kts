@@ -67,6 +67,10 @@ tasks.named("preBuild").configure {
     dependsOn("generateReleaseProperties")
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 android {
     namespace = "net.primal.android"
     compileSdk = 35
@@ -79,10 +83,6 @@ android {
         versionName = appVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        ksp {
-            arg("room.schemaLocation", "$projectDir/schemas")
-        }
 
         buildConfigField(
             type = "String",
@@ -230,7 +230,6 @@ dependencies {
     implementation(project(":core:app-config"))
     implementation(project(":core:networking-primal"))
     implementation(project(":core:networking-upload"))
-    implementation(project(":core:networking-nwc"))
 
     implementation(project(":domain:nostr"))
     implementation(project(":domain:primal"))
@@ -238,7 +237,11 @@ dependencies {
 
     implementation(project(":data:caching:remote"))
     implementation(project(":data:caching:repository"))
+
     implementation(project(":data:wallet:local"))
+    implementation(project(":data:wallet:remote-primal"))
+    implementation(project(":data:wallet:remote-nwc"))
+    implementation(project(":data:wallet:repository"))
 
     implementation(libs.bignum)
     implementation(libs.core.ktx)

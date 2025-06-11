@@ -4,11 +4,10 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.ktorfit)
+    alias(libs.plugins.touchlab.skie)
 }
 
-private val xcfName = "PrimalDataCachingRemote"
+private val xcfName = "PrimalDataWalletRemoteNwc"
 
 kotlin {
     // Android target
@@ -36,34 +35,26 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                // Internal
                 implementation(project(":core:utils"))
+                implementation(project(":domain:primal"))
                 implementation(project(":core:networking-http"))
                 implementation(project(":core:networking-primal"))
                 implementation(project(":domain:nostr"))
-                implementation(project(":domain:primal"))
 
-                // Core
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.datetime)
 
-                // Serialization
-                implementation(libs.kotlinx.serialization.json)
-                implementation(libs.kotlinx.io)
-
-                // Ktorfit
-                implementation(libs.ktorfit.light)
-                implementation(libs.ktorfit.converters.response)
-                implementation(libs.ktorfit.converters.call)
-
-                // Logging
+                implementation(libs.okio)
                 implementation(libs.napier)
+
+                // Interop
+                implementation(libs.skie.configuration.annotations)
             }
         }
 
         androidMain {
             dependencies {
-                // Coroutines
+                // Kotlin
                 implementation(libs.kotlinx.coroutines.android)
             }
         }
@@ -73,18 +64,18 @@ kotlin {
             }
         }
 
-        val desktopMain by getting
-        desktopMain.dependencies {
-            // Add JVM-Desktop-specific dependencies here
-        }
-
         commonTest {
             dependencies {
-                implementation(libs.junit)
+                implementation(libs.kotlin.test)
                 implementation(libs.kotest.assertions.core)
                 implementation(libs.kotest.assertions.json)
                 implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.ktor.client.mock)
             }
+        }
+
+        val desktopMain by getting
+        desktopMain.dependencies {
         }
     }
 
