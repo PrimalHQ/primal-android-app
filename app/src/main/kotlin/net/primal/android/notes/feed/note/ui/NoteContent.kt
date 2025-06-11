@@ -259,12 +259,19 @@ fun NoteContent(
         }
 
         if (data.uris.isNotEmpty()) {
+            val existingNostrUris = data.nostrUris
+                .filter { it.type == EventUriNostrType.Note }
+                .map { it.uri }
+                .toSet()
+
             NoteAttachments(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = if (contentText.isEmpty()) 4.dp else 6.dp)
                     .heightIn(min = 0.dp, max = 500.dp),
-                eventUris = data.uris,
+                eventUris = data.uris.filterNot { uriItem ->
+                    uriItem.url.substringAfterLast("/") in existingNostrUris
+                },
                 blossoms = data.blossoms,
                 expanded = expanded,
                 onUrlClick = { url ->
