@@ -1,4 +1,4 @@
-package net.primal.android.wallet.domain
+package net.primal.wallet.domain
 
 enum class CurrencyMode {
     FIAT,

@@ -90,9 +90,6 @@ import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
-import net.primal.android.wallet.domain.CurrencyMode
-import net.primal.android.wallet.domain.Network
-import net.primal.android.wallet.domain.not
 import net.primal.android.wallet.repository.isValidExchangeRate
 import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiState
 import net.primal.android.wallet.transactions.receive.model.NetworkDetails
@@ -107,6 +104,9 @@ import net.primal.core.utils.CurrencyConversionUtils.fromUsdToSats
 import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.CurrencyConversionUtils.toSats
+import net.primal.wallet.domain.CurrencyMode
+import net.primal.wallet.domain.Network
+import net.primal.wallet.domain.not
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable

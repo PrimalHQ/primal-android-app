@@ -11,13 +11,13 @@ import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.db.UsersDatabase
 import net.primal.android.wallet.api.WalletApi
 import net.primal.android.wallet.api.model.TransactionsRequestBody
-import net.primal.android.wallet.db.WalletTransactionData
-import net.primal.android.wallet.domain.SubWallet
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.profile.ProfileRepository
+import net.primal.wallet.data.local.dao.WalletTransactionData
+import net.primal.wallet.domain.SubWallet
 import timber.log.Timber
 
 @ExperimentalPagingApi
