@@ -45,6 +45,7 @@ import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.domain.common.util.isPrimalIdentifier
 import net.primal.domain.links.EventUriNostrType
 import net.primal.domain.links.ReferencedNote
 import net.primal.domain.links.ReferencedUser
@@ -259,12 +260,26 @@ fun NoteContent(
         }
 
         if (data.uris.isNotEmpty()) {
+            val existingNostrUris = remember(data.nostrUris) {
+                data.nostrUris
+                    .filter { it.type == EventUriNostrType.Note || it.type == EventUriNostrType.Article }
+                    .map { it.uri }
+                    .toSet()
+            }
+
+            val filteredEventUris = remember(data.uris, existingNostrUris) {
+                data.uris.filterNot { uriItem ->
+                    uriItem.url.isPrimalIdentifier() &&
+                        uriItem.url.substringAfterLast("/") in existingNostrUris
+                }
+            }
+
             NoteAttachments(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = if (contentText.isEmpty()) 4.dp else 6.dp)
                     .heightIn(min = 0.dp, max = 500.dp),
-                eventUris = data.uris,
+                eventUris = filteredEventUris,
                 blossoms = data.blossoms,
                 expanded = expanded,
                 onUrlClick = { url ->
