@@ -26,10 +26,6 @@ import net.primal.android.notifications.domain.NotificationsSummary
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.Badges
 import net.primal.android.user.repository.UserRepository
-import net.primal.android.wallet.api.model.BalanceRequestBody
-import net.primal.android.wallet.api.model.BalanceResponse
-import net.primal.android.wallet.api.model.LastUpdatedAtResponse
-import net.primal.android.wallet.api.model.WalletRequestBody
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.primal.PrimalSocketSubscription
@@ -39,7 +35,11 @@ import net.primal.data.remote.api.notifications.model.PubkeyRequestBody
 import net.primal.domain.common.PrimalEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
-import net.primal.wallet.domain.SubWallet
+import net.primal.domain.wallet.SubWallet
+import net.primal.wallet.data.remote.model.BalanceRequestBody
+import net.primal.wallet.data.remote.model.BalanceResponse
+import net.primal.wallet.data.remote.model.LastUpdatedAtResponse
+import net.primal.wallet.data.remote.model.WalletRequestBody
 
 @Singleton
 class SubscriptionsManager @Inject constructor(

@@ -7,6 +7,7 @@ import net.primal.android.navigation.asUrlDecoded
 import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.core.utils.CurrencyConversionUtils.fromUsdToSats
 import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
+import net.primal.domain.wallet.BitcoinPaymentInstruction
 import org.bitcoinj.base.AddressParser
 
 fun String.isLnInvoice() = startsWith(prefix = "lnbc", ignoreCase = true)

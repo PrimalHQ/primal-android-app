@@ -13,13 +13,13 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.InAppPurchaseException
 import net.primal.android.wallet.store.domain.SatsPurchaseQuote
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyContract.SideEffect
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyContract.UiEvent
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyContract.UiState
+import net.primal.domain.billing.BillingRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
@@ -28,7 +28,7 @@ import timber.log.Timber
 class InAppPurchaseBuyViewModel @Inject constructor(
     private val primalBillingClient: PrimalBillingClient,
     private val activeAccountStore: ActiveAccountStore,
-    private val walletRepository: WalletRepository,
+    private val billingRepository: BillingRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -66,7 +66,7 @@ class InAppPurchaseBuyViewModel @Inject constructor(
                 try {
                     val previousQuote = _state.value.quote
                     val localCurrency = Currency.getInstance(inAppProduct.priceCurrencyCode)
-                    val response = walletRepository.getInAppPurchaseMinSatsQuote(
+                    val response = billingRepository.getInAppPurchaseMinSatsQuote(
                         userId = activeAccountStore.activeUserId(),
                         region = localCurrency.currencyCode,
                         productId = inAppProduct.productId,

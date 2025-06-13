@@ -2,6 +2,7 @@ package net.primal.android.wallet.transactions.receive
 
 import android.graphics.drawable.Drawable
 import androidx.activity.compose.BackHandler
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -104,9 +105,9 @@ import net.primal.core.utils.CurrencyConversionUtils.fromUsdToSats
 import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.CurrencyConversionUtils.toSats
-import net.primal.wallet.domain.CurrencyMode
-import net.primal.wallet.domain.Network
-import net.primal.wallet.domain.not
+import net.primal.domain.wallet.CurrencyMode
+import net.primal.domain.wallet.Network
+import net.primal.domain.wallet.not
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -471,7 +472,8 @@ fun rememberQrCodeDrawable(text: String, network: Network): Drawable {
             padding = .125f
 
             logo {
-                drawable = context.getDrawable(
+                drawable = AppCompatResources.getDrawable(
+                    context,
                     when (network) {
                         Network.Lightning -> R.drawable.qr_center_lightning
                         Network.Bitcoin -> R.drawable.qr_center_bitcoin

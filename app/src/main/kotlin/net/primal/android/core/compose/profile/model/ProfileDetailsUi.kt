@@ -5,8 +5,8 @@ import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.profile.details.ui.model.PremiumProfileDataUi
 import net.primal.domain.links.CdnImage
+import net.primal.domain.membership.PrimalPremiumInfo
 import net.primal.domain.nostr.utils.asEllipsizedNpub
-import net.primal.domain.premium.PrimalPremiumInfo
 import net.primal.domain.profile.ProfileData as ProfileDataDO
 
 data class ProfileDetailsUi(

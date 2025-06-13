@@ -1,7 +1,7 @@
 package net.primal.domain.links
 
 import kotlinx.serialization.Serializable
-import net.primal.domain.premium.PrimalLegendProfile
+import net.primal.domain.membership.PrimalLegendProfile
 
 @Serializable
 data class ReferencedZap(

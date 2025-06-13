@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import net.primal.android.wallet.repository.isValidExchangeRate
-import net.primal.wallet.domain.CurrencyMode
+import net.primal.domain.wallet.CurrencyMode
 
 @Composable
 fun WalletDashboard(

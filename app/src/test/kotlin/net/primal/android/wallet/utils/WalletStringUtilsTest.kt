@@ -2,6 +2,7 @@ package net.primal.android.wallet.utils
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.kotest.matchers.shouldBe
+import net.primal.domain.wallet.BitcoinPaymentInstruction
 import org.junit.Test
 import org.junit.runner.RunWith
 

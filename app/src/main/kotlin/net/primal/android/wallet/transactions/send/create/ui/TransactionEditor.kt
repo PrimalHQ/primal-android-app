@@ -72,8 +72,8 @@ import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
 import net.primal.android.wallet.ui.TransactionAmountText
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.CurrencyConversionUtils.toSats
-import net.primal.wallet.domain.CurrencyMode
-import net.primal.wallet.domain.not
+import net.primal.domain.wallet.CurrencyMode
+import net.primal.domain.wallet.not
 
 @ExperimentalMaterial3Api
 @ExperimentalComposeUiApi
@@ -530,7 +530,7 @@ private fun LightningNoteToRecipientTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp),
-            text = noteRecipientText.ifEmpty { state.transaction.lnInvoiceData?.description ?: "" },
+            text = noteRecipientText.ifEmpty { state.transaction.lnInvoiceDescription ?: "" },
             textAlign = TextAlign.Center,
             color = AppTheme.colorScheme.onSurface,
             style = AppTheme.typography.bodyLarge,

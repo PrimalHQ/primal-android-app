@@ -2,7 +2,7 @@ package net.primal.data.local.dao.events
 
 import androidx.room.Entity
 import net.primal.domain.links.CdnImage
-import net.primal.domain.premium.PrimalLegendProfile
+import net.primal.domain.membership.PrimalLegendProfile
 
 @Entity(
     primaryKeys = [

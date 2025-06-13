@@ -1,7 +1,7 @@
 package net.primal.domain.posts
 
 import net.primal.domain.links.CdnImage
-import net.primal.domain.premium.PrimalLegendProfile
+import net.primal.domain.membership.PrimalLegendProfile
 
 data class FeedPostAuthor(
     val authorId: String,

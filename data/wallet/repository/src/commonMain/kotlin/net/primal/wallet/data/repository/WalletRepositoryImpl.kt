@@ -1,10 +1,181 @@
 package net.primal.wallet.data.repository
 
-import net.primal.core.networking.primal.PrimalApiClient
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.PagingSource
+import androidx.paging.map
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
+import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.profile.ProfileRepository
+import net.primal.domain.wallet.LnInvoiceCreateResult
+import net.primal.domain.wallet.LnInvoiceParseResult
+import net.primal.domain.wallet.LnUrlParseResult
+import net.primal.domain.wallet.Network
+import net.primal.domain.wallet.OnChainAddressResult
+import net.primal.domain.wallet.SubWallet
+import net.primal.domain.wallet.TransactionWithProfile
+import net.primal.domain.wallet.WalletPayParams
+import net.primal.domain.wallet.WalletRepository
+import net.primal.domain.wallet.WalletType
+import net.primal.shared.data.local.db.withTransaction
+import net.primal.wallet.data.local.dao.WalletBalance
+import net.primal.wallet.data.local.dao.WalletTransactionData
 import net.primal.wallet.data.local.db.WalletDatabase
-import net.primal.wallet.domain.WalletRepository
+import net.primal.wallet.data.remote.api.PrimalWalletApi
+import net.primal.wallet.data.remote.model.DepositRequestBody
+import net.primal.wallet.data.repository.mappers.local.asWalletTransactionDO
+import net.primal.wallet.data.repository.mappers.local.toWithdrawRequestDTO
+import net.primal.wallet.data.repository.mappers.remote.asLightingInvoiceResultDO
+import net.primal.wallet.data.repository.transactions.WalletTransactionsMediator
 
+@OptIn(ExperimentalPagingApi::class)
 internal class WalletRepositoryImpl(
-    private val database: WalletDatabase,
-    private val walletPrimalApiClient: PrimalApiClient,
-) : WalletRepository
+    private val dispatcherProvider: DispatcherProvider,
+    private val primalWalletApi: PrimalWalletApi,
+    private val walletDatabase: WalletDatabase,
+    private val profileRepository: ProfileRepository,
+) : WalletRepository {
+
+    override fun latestTransactions(userId: String): Flow<PagingData<TransactionWithProfile>> {
+        return createTransactionsPager(userId) {
+            walletDatabase.walletTransactions().latestTransactionsPagedByUserId(userId = userId)
+        }.flow.map {
+            it.map { txData ->
+                val otherProfile = txData.otherUserId?.let { profileId ->
+                    profileRepository.findProfileDataOrNull(profileId)
+                }
+                TransactionWithProfile(
+                    transaction = txData.asWalletTransactionDO(),
+                    otherProfileData = otherProfile,
+                )
+            }
+        }
+    }
+
+    override suspend fun findTransactionByIdOrNull(txId: String): TransactionWithProfile? =
+        withContext(dispatcherProvider.io()) {
+            val transaction = walletDatabase.walletTransactions().findTransactionById(txId = txId)
+                ?: return@withContext null
+
+            val profile = transaction.otherUserId
+                ?.let { profileRepository.findProfileDataOrNull(profileId = it) }
+
+            TransactionWithProfile(
+                transaction = transaction.asWalletTransactionDO(),
+                otherProfileData = profile,
+            )
+        }
+
+    override suspend fun pay(params: WalletPayParams) {
+        withContext(dispatcherProvider.io()) {
+            primalWalletApi.withdraw(
+                userId = params.userId,
+                body = params.toWithdrawRequestDTO(),
+            )
+        }
+    }
+
+    override suspend fun createLightningInvoice(
+        userId: String,
+        amountInBtc: String?,
+        comment: String?,
+    ): LnInvoiceCreateResult {
+        return withContext(dispatcherProvider.io()) {
+            val response = primalWalletApi.createLightningInvoice(
+                userId = userId,
+                body = DepositRequestBody(
+                    subWallet = SubWallet.Open,
+                    amountBtc = amountInBtc,
+                    description = comment,
+                ),
+            )
+            response.asLightingInvoiceResultDO()
+        }
+    }
+
+    override suspend fun createOnChainAddress(userId: String): OnChainAddressResult {
+        return withContext(dispatcherProvider.io()) {
+            val response = primalWalletApi.createOnChainAddress(
+                userId = userId,
+                body = DepositRequestBody(subWallet = SubWallet.Open, network = Network.Bitcoin),
+            )
+            OnChainAddressResult(address = response.onChainAddress)
+        }
+    }
+
+    override suspend fun fetchWalletBalance(userId: String) {
+        withContext(dispatcherProvider.io()) {
+            val response = primalWalletApi.getBalance(userId = userId)
+            walletDatabase.withTransaction {
+                val walletInfo = walletDatabase.wallet().findWalletInfo(userId = userId, type = WalletType.PRIMAL)
+                    ?: error("Trying to fetch balance, but wallet was not created.")
+
+                walletDatabase.wallet().upsertWalletBalance(
+                    WalletBalance(
+                        walletId = walletInfo.localId,
+                        lastUpdatedAt = Clock.System.now().epochSeconds,
+                        balanceInBtc = response.amount,
+                        maxBalanceInBtc = response.maxAmount,
+                    ),
+                )
+            }
+        }
+    }
+
+    override suspend fun parseLnUrl(userId: String, lnurl: String): LnUrlParseResult {
+        return withContext(dispatcherProvider.io()) {
+            val response = primalWalletApi.parseLnUrl(userId = userId, lnurl = lnurl)
+            LnUrlParseResult(
+                minSendable = response.minSendable,
+                maxSendable = response.maxSendable,
+                description = response.description,
+                targetPubkey = response.targetPubkey,
+                targetLud16 = response.targetLud16,
+            )
+        }
+    }
+
+    override suspend fun parseLnInvoice(userId: String, lnbc: String): LnInvoiceParseResult {
+        return withContext(dispatcherProvider.io()) {
+            val response = primalWalletApi.parseLnInvoice(userId = userId, lnbc = lnbc)
+            LnInvoiceParseResult(
+                userId = response.userId,
+                comment = response.comment,
+                amountMilliSats = response.lnInvoiceData.amountMilliSats,
+                description = response.lnInvoiceData.description,
+                date = response.lnInvoiceData.date,
+                expiry = response.lnInvoiceData.expiry,
+            )
+        }
+    }
+
+    override suspend fun deleteAllTransactions(userId: String) =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.walletTransactions().deleteAllTransactionsByUserId(userId = userId)
+        }
+
+    private fun createTransactionsPager(
+        userId: String,
+        pagingSourceFactory: () -> PagingSource<Int, WalletTransactionData>,
+    ) = Pager(
+        config = PagingConfig(
+            pageSize = 50,
+            prefetchDistance = 100,
+            initialLoadSize = 200,
+            enablePlaceholders = true,
+        ),
+        remoteMediator = WalletTransactionsMediator(
+            userId = userId,
+            dispatcherProvider = dispatcherProvider,
+            walletDatabase = walletDatabase,
+            primalWalletApi = primalWalletApi,
+            profileRepository = profileRepository,
+        ),
+        pagingSourceFactory = pagingSourceFactory,
+    )
+}

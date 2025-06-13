@@ -17,11 +17,7 @@ import net.primal.android.navigation.lnbc
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.scanner.analysis.WalletTextParser
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.wallet.api.model.MiningFeeTier
-import net.primal.android.wallet.api.model.WithdrawRequestBody
-import net.primal.android.wallet.domain.DraftTxStatus
 import net.primal.android.wallet.repository.ExchangeRateHandler
-import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract.UiEvent
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract.UiState
 import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
@@ -37,8 +33,13 @@ import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.profile.ProfileData
 import net.primal.domain.profile.ProfileRepository
-import net.primal.wallet.domain.CurrencyMode
-import net.primal.wallet.domain.SubWallet
+import net.primal.domain.rates.fees.OnChainTransactionFeeTier
+import net.primal.domain.rates.fees.TransactionFeeRepository
+import net.primal.domain.wallet.CurrencyMode
+import net.primal.domain.wallet.DraftTxStatus
+import net.primal.domain.wallet.SubWallet
+import net.primal.domain.wallet.WalletPayParams
+import net.primal.domain.wallet.WalletRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -47,6 +48,7 @@ class CreateTransactionViewModel @Inject constructor(
     private val dispatchers: DispatcherProvider,
     private val activeUserStore: ActiveAccountStore,
     private val profileRepository: ProfileRepository,
+    private val transactionFeeRepository: TransactionFeeRepository,
     private val walletRepository: WalletRepository,
     private val walletTextParser: WalletTextParser,
     private val exchangeRateHandler: ExchangeRateHandler,
@@ -191,7 +193,7 @@ class CreateTransactionViewModel @Inject constructor(
             val activeUserId = activeUserStore.activeUserId()
             try {
                 withContext(dispatchers.io()) {
-                    val tiers = walletRepository.fetchMiningFees(
+                    val tiers = transactionFeeRepository.fetchMiningFees(
                         userId = activeUserId,
                         onChainAddress = btcAddress,
                         amountInBtc = amountInSats.toBtc().formatAsString(),
@@ -221,13 +223,13 @@ class CreateTransactionViewModel @Inject constructor(
         }
     }
 
-    private fun MiningFeeTier.asMiningFeeUi(): MiningFeeUi {
+    private fun OnChainTransactionFeeTier.asMiningFeeUi(): MiningFeeUi {
         return MiningFeeUi(
-            id = this.id,
+            id = this.tierId,
             label = this.label,
-            confirmationEstimateInMin = this.estimatedDeliveryDurationInMin,
-            feeInBtc = this.estimatedFee.amount,
-            minAmountInBtc = this.minimumAmount?.amount,
+            confirmationEstimateInMin = this.confirmationEstimationInMin,
+            feeInBtc = this.txFeeInBtc,
+            minAmountInBtc = this.minAmountInBtc,
         )
     }
 
@@ -287,9 +289,9 @@ class CreateTransactionViewModel @Inject constructor(
                 val activeUserId = activeUserStore.activeUserId()
                 val miningFeeTier = uiState.selectedFeeTierIndex?.let { uiState.miningFeeTiers.getOrNull(it) }
                 val draftTransaction = uiState.transaction
-                walletRepository.withdraw(
-                    userId = activeUserId,
-                    body = WithdrawRequestBody(
+                walletRepository.pay(
+                    params = WalletPayParams(
+                        userId = activeUserId,
                         subWallet = SubWallet.Open,
                         targetLud16 = draftTransaction.targetLud16,
                         targetLnUrl = draftTransaction.targetLnUrl,

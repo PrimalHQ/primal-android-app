@@ -2,8 +2,83 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "b5c42a862436fd46e9004d70f1638598",
+    "identityHash": "b761591bf23d02e2422fcd911f888a72",
     "entities": [
+      {
+        "tableName": "WalletInfo",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `userId` TEXT NOT NULL, `lightningAddress` TEXT NOT NULL, `type` TEXT NOT NULL, `kycLevel` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "localId",
+            "columnName": "localId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userId",
+            "columnName": "userId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lightningAddress",
+            "columnName": "lightningAddress",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kycLevel",
+            "columnName": "kycLevel",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "localId"
+          ]
+        }
+      },
+      {
+        "tableName": "WalletBalance",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`walletId` INTEGER NOT NULL, `lastUpdatedAt` INTEGER, `balanceInBtc` TEXT, `maxBalanceInBtc` TEXT, PRIMARY KEY(`walletId`))",
+        "fields": [
+          {
+            "fieldPath": "walletId",
+            "columnName": "walletId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastUpdatedAt",
+            "columnName": "lastUpdatedAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "balanceInBtc",
+            "columnName": "balanceInBtc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "maxBalanceInBtc",
+            "columnName": "maxBalanceInBtc",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "walletId"
+          ]
+        }
+      },
       {
         "tableName": "WalletTransactionData",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `walletLightningAddress` TEXT NOT NULL, `type` TEXT NOT NULL, `state` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, `completedAt` INTEGER, `amountInBtc` REAL NOT NULL, `amountInUsd` REAL, `isZap` INTEGER NOT NULL, `isStorePurchase` INTEGER NOT NULL, `userId` TEXT NOT NULL, `userSubWallet` TEXT NOT NULL, `userLightningAddress` TEXT, `otherUserId` TEXT, `otherLightningAddress` TEXT, `note` TEXT, `invoice` TEXT, `totalFeeInBtc` TEXT, `exchangeRate` TEXT, `onChainAddress` TEXT, `onChainTxId` TEXT, `zapNoteId` TEXT, `zapNoteAuthorId` TEXT, `zappedByUserId` TEXT, PRIMARY KEY(`id`))",
@@ -151,11 +226,35 @@
             "id"
           ]
         }
+      },
+      {
+        "tableName": "WalletSettings",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`walletId` INTEGER NOT NULL, `spamThresholdAmountInSats` INTEGER NOT NULL, PRIMARY KEY(`walletId`))",
+        "fields": [
+          {
+            "fieldPath": "walletId",
+            "columnName": "walletId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spamThresholdAmountInSats",
+            "columnName": "spamThresholdAmountInSats",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "walletId"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b5c42a862436fd46e9004d70f1638598')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b761591bf23d02e2422fcd911f888a72')"
     ]
   }
 }

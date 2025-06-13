@@ -4,7 +4,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.domain.common.exception.NetworkException
-import net.primal.domain.premium.OGLeaderboardEntry
+import net.primal.domain.membership.OGLeaderboardEntry
 
 class PremiumLeaderboardPagingSource(
     private val premiumRepository: PremiumRepository,

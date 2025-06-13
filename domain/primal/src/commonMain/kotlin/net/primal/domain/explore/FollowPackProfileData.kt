@@ -1,7 +1,7 @@
 package net.primal.domain.explore
 
 import net.primal.domain.links.CdnImage
-import net.primal.domain.premium.PrimalPremiumInfo
+import net.primal.domain.membership.PrimalPremiumInfo
 
 data class FollowPackProfileData(
     val profileId: String,

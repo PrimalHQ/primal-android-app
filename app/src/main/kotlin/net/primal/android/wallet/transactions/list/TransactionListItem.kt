@@ -67,9 +67,9 @@ import net.primal.core.utils.CurrencyConversionUtils.toUsd
 import net.primal.core.utils.toFloat
 import net.primal.core.utils.toLong
 import net.primal.domain.links.CdnImage
-import net.primal.wallet.domain.CurrencyMode
-import net.primal.wallet.domain.TxState
-import net.primal.wallet.domain.TxType
+import net.primal.domain.wallet.CurrencyMode
+import net.primal.domain.wallet.TxState
+import net.primal.domain.wallet.TxType
 
 @Composable
 fun TransactionListItem(

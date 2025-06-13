@@ -4,7 +4,7 @@ import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.WalletPreference
 import net.primal.core.utils.CurrencyConversionUtils.toSats
-import net.primal.wallet.domain.WalletKycLevel
+import net.primal.domain.wallet.WalletKycLevel
 
 fun UserAccount.hasWallet() = hasNwcWallet() || hasPrimalWallet()
 
