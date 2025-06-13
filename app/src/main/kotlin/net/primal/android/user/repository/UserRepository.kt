@@ -344,7 +344,7 @@ class UserRepository @Inject constructor(
     }
 
     @Throws(FollowListNotFound::class, NostrPublishException::class, SignatureException::class)
-    private suspend fun updateFollowList(
+    suspend fun updateFollowList(
         userId: String,
         forceUpdate: Boolean,
         reducer: Set<String>.() -> Set<String>,
