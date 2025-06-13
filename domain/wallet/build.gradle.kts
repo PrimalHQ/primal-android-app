@@ -36,12 +36,17 @@ kotlin {
             dependencies {
                 // Internal
                 implementation(project(":core:utils"))
-                api(project(":domain:nostr"))
+
+                implementation(project(":domain:nostr"))
+                implementation(project(":domain:primal"))
 
                 // Kotlin
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.kotlinx.serialization.json)
+
+                // Paging (for PagingData entity in repositories)
+                implementation(libs.paging.common)
             }
         }
 

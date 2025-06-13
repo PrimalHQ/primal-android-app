@@ -1,10 +1,10 @@
 package net.primal.android.wallet.activation
 
 import net.primal.android.core.errors.UiError
-import net.primal.android.wallet.activation.domain.WalletActivationData
-import net.primal.android.wallet.activation.domain.WalletActivationStatus
-import net.primal.android.wallet.activation.regions.Country
-import net.primal.android.wallet.activation.regions.State
+import net.primal.domain.account.Country
+import net.primal.domain.account.State
+import net.primal.domain.account.WalletActivationData
+import net.primal.domain.account.WalletActivationStatus
 
 interface WalletActivationContract {
     data class UiState(

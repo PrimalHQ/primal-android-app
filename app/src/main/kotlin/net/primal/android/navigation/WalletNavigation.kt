@@ -15,7 +15,6 @@ import net.primal.android.wallet.activation.WalletActivationViewModel
 import net.primal.android.wallet.activation.ui.WalletActivationScreen
 import net.primal.android.wallet.dashboard.WalletDashboardScreen
 import net.primal.android.wallet.dashboard.WalletDashboardViewModel
-import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.transactions.details.TransactionDetailsScreen
 import net.primal.android.wallet.transactions.details.TransactionDetailsViewModel
 import net.primal.android.wallet.transactions.receive.ReceivePaymentScreen
@@ -26,6 +25,7 @@ import net.primal.android.wallet.transactions.send.prepare.SendPaymentScreen
 import net.primal.android.wallet.transactions.send.prepare.SendPaymentViewModel
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
 import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.domain.wallet.DraftTx
 
 private fun NavController.navigateToWalletActivation() = navigate(route = "walletActivation")
 

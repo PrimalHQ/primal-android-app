@@ -23,18 +23,17 @@ import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.activation.WalletActivationContract.UiEvent
 import net.primal.android.wallet.activation.WalletActivationContract.UiState
-import net.primal.android.wallet.activation.domain.WalletActivationData
-import net.primal.android.wallet.activation.domain.WalletActivationStatus
-import net.primal.android.wallet.activation.regions.Country
-import net.primal.android.wallet.activation.regions.Region
-import net.primal.android.wallet.activation.regions.Regions
-import net.primal.android.wallet.activation.regions.State
-import net.primal.android.wallet.activation.regions.WalletRegionJson
-import net.primal.android.wallet.api.model.GetActivationCodeRequestBody
-import net.primal.android.wallet.api.model.WalletActivationDetails
-import net.primal.android.wallet.repository.WalletRepository
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.domain.account.Country
+import net.primal.domain.account.Region
+import net.primal.domain.account.Regions
+import net.primal.domain.account.State
+import net.primal.domain.account.WalletAccountRepository
+import net.primal.domain.account.WalletActivationData
+import net.primal.domain.account.WalletActivationParams
+import net.primal.domain.account.WalletActivationStatus
+import net.primal.domain.account.WalletRegionJson
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.publisher.MissingRelaysException
@@ -45,7 +44,7 @@ class WalletActivationViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val coroutineDispatcher: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
-    private val walletRepository: WalletRepository,
+    private val walletAccountRepository: WalletAccountRepository,
     private val userRepository: UserRepository,
 ) : ViewModel() {
 
@@ -133,19 +132,19 @@ class WalletActivationViewModel @Inject constructor(
             setState { copy(working = true) }
             try {
                 val userId = activeAccountStore.activeUserId()
-                checkNotNull(data.dateOfBirth)
-                checkNotNull(data.country)
-                walletRepository.requestActivationCodeToEmail(
-                    userId = userId,
-                    body = GetActivationCodeRequestBody(
-                        userDetails = WalletActivationDetails(
-                            firstName = data.firstName,
-                            lastName = data.lastName,
-                            email = data.email,
-                            dateOfBirth = data.dateOfBirth.formatDateOfBirth(),
-                            country = data.country.code,
-                            state = data.state?.code ?: "",
-                        ),
+                val dateOfBirth = data.dateOfBirth
+                val country = data.country
+                checkNotNull(dateOfBirth)
+                checkNotNull(country)
+                walletAccountRepository.requestActivationCodeToEmail(
+                    params = WalletActivationParams(
+                        userId = userId,
+                        firstName = data.firstName,
+                        lastName = data.lastName,
+                        email = data.email,
+                        dateOfBirth = dateOfBirth.formatDateOfBirth(),
+                        country = country.code,
+                        state = data.state?.code ?: "",
                     ),
                 )
                 setState { copy(status = WalletActivationStatus.PendingOtpVerification) }
@@ -171,9 +170,9 @@ class WalletActivationViewModel @Inject constructor(
             try {
                 val userId = activeAccountStore.activeUserId()
                 val lightningAddress = withContext(coroutineDispatcher.io()) {
-                    val lightningAddress = walletRepository.activateWallet(userId, code)
-                    walletRepository.fetchUserWalletInfoAndUpdateUserAccount(userId)
-                    lightningAddress
+                    val response = walletAccountRepository.activateWallet(userId, code)
+                    walletAccountRepository.fetchWalletAccountInfo(userId)
+                    response.lightningAddress
                 }
 
                 val activeUser = activeAccountStore.activeUserAccount()
@@ -196,7 +195,7 @@ class WalletActivationViewModel @Inject constructor(
 
                 try {
                     promoCode?.let {
-                        walletRepository.redeemPromoCode(
+                        walletAccountRepository.redeemPromoCode(
                             userId = activeAccountStore.activeUserId(),
                             code = promoCode,
                         )

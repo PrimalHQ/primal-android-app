@@ -33,13 +33,13 @@ import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTabNostr
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTabScan
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTabText
 import net.primal.android.wallet.ui.WalletTabsBar
 import net.primal.android.wallet.ui.WalletTabsHeight
+import net.primal.domain.wallet.DraftTx
 
 @Composable
 fun SendPaymentScreen(

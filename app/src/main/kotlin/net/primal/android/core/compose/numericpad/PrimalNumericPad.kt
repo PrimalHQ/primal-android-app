@@ -31,7 +31,7 @@ import net.primal.android.core.compose.numericpad.PrimalNumericPadContract.UiEve
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
 import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
-import net.primal.wallet.domain.CurrencyMode
+import net.primal.domain.wallet.CurrencyMode
 
 private val PadButtonMargin = 16.dp
 
