@@ -49,11 +49,13 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.premium.buying.PremiumBuyingContract
+import net.primal.android.premium.buying.home.PRO_ORANGE
 import net.primal.android.premium.ui.PremiumPrimalNameTable
 import net.primal.android.premium.ui.toGetSubscriptionString
 import net.primal.android.premium.ui.toPricingString
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.store.domain.SubscriptionProduct
+import net.primal.android.wallet.store.domain.SubscriptionTier
 
 @ExperimentalMaterial3Api
 @Composable
@@ -155,16 +157,21 @@ fun PremiumPurchaseStage(
 
             MoreInfoPromoCodeRow(
                 modifier = Modifier.padding(vertical = 8.dp),
+                subscriptionTier = state.subscriptionTier,
                 onLearnMoreClick = onLearnMoreClick,
                 onPromoCodeClick = { promoCodeBottomSheetVisibility = true },
             )
+
+            val currentSubscriptions = remember(state.subscriptions, state.subscriptionTier) {
+                state.subscriptions.filter { it.tier == state.subscriptionTier }
+            }
 
             if (activity != null) {
                 BuyPremiumButtons(
                     modifier = Modifier.padding(horizontal = 12.dp),
                     loading = state.loading,
                     hasActiveSubscription = state.hasActiveSubscription,
-                    subscriptions = state.subscriptions,
+                    subscriptions = currentSubscriptions,
                     onBuySubscription = { subscription ->
                         eventPublisher(
                             PremiumBuyingContract.UiEvent.RequestPurchase(
@@ -176,8 +183,9 @@ fun PremiumPurchaseStage(
                     onRestoreSubscription = {
                         eventPublisher(PremiumBuyingContract.UiEvent.RestoreSubscription)
                     },
+                    subscriptionTier = state.subscriptionTier,
                 )
-                TOSNotice()
+                TOSNotice(subscriptionTier = state.subscriptionTier)
             }
         }
     }
@@ -187,9 +195,20 @@ fun PremiumPurchaseStage(
 @Composable
 private fun MoreInfoPromoCodeRow(
     modifier: Modifier = Modifier,
+    subscriptionTier: SubscriptionTier,
     onLearnMoreClick: () -> Unit,
     onPromoCodeClick: () -> Unit,
 ) {
+    val isPremium = subscriptionTier == SubscriptionTier.PREMIUM
+    val learnAboutText = stringResource(
+        if (isPremium) {
+            R.string.subscription_learn_about_premium
+        } else {
+            R.string.subscription_learn_about_pro
+        },
+    )
+    val color = if (isPremium) AppTheme.colorScheme.primary else PRO_ORANGE
+
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -197,8 +216,8 @@ private fun MoreInfoPromoCodeRow(
     ) {
         Text(
             modifier = Modifier.clickable { onLearnMoreClick() },
-            text = stringResource(id = R.string.premium_purchase_learn_more),
-            color = AppTheme.colorScheme.secondary,
+            text = learnAboutText,
+            color = color,
             style = AppTheme.typography.bodyMedium,
         )
 //        VerticalDivider(
@@ -223,6 +242,7 @@ fun BuyPremiumButtons(
     subscriptions: List<SubscriptionProduct>,
     onBuySubscription: (SubscriptionProduct) -> Unit,
     onRestoreSubscription: () -> Unit,
+    subscriptionTier: SubscriptionTier,
 ) {
     Column(
         modifier = modifier,
@@ -282,6 +302,7 @@ fun BuyPremiumButtons(
                         BuyPremiumButton(
                             startText = it.toGetSubscriptionString(),
                             endText = it.toPricingString(),
+                            subscriptionTier = subscriptionTier,
                             onClick = { onBuySubscription(it) },
                         )
                     }
@@ -295,6 +316,7 @@ fun BuyPremiumButtons(
 fun BuyPremiumButton(
     startText: String,
     endText: String,
+    subscriptionTier: SubscriptionTier,
     onClick: () -> Unit,
 ) {
     PrimalFilledButton(
@@ -302,6 +324,11 @@ fun BuyPremiumButton(
         height = 64.dp,
         shape = RoundedCornerShape(percent = 100),
         onClick = onClick,
+        containerColor = if (subscriptionTier == SubscriptionTier.PREMIUM) {
+            AppTheme.colorScheme.primary
+        } else {
+            PRO_ORANGE
+        },
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -325,7 +352,7 @@ fun BuyPremiumButton(
 }
 
 @Composable
-private fun TOSNotice() {
+private fun TOSNotice(subscriptionTier: SubscriptionTier) {
     Text(
         text = buildAnnotatedString {
             withStyle(
@@ -339,7 +366,11 @@ private fun TOSNotice() {
             withLink(link = LinkAnnotation.Url("https://primal.net/terms")) {
                 withStyle(
                     style = SpanStyle(
-                        color = AppTheme.colorScheme.secondary,
+                        color = if (subscriptionTier == SubscriptionTier.PREMIUM) {
+                            AppTheme.colorScheme.secondary
+                        } else {
+                            PRO_ORANGE
+                        },
                         fontSize = 14.sp,
                     ),
                 ) {
