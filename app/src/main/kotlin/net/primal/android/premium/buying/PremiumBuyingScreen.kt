@@ -88,21 +88,17 @@ private fun PremiumBuyingScreen(
                         onClose = screenCallbacks.onClose,
                         onLearnMoreClick = {
                             eventPublisher(
-                                PremiumBuyingContract.UiEvent.SetSubscriptionTier(it),
+                                PremiumBuyingContract.UiEvent.SetSubscriptionTier(subscriptionTier = it),
                             )
                             screenCallbacks.onMoreInfoClick()
                         },
-                        onPurchasePremium = {
+                        onPurchaseSubscription = {
                             eventPublisher(
-                                PremiumBuyingContract.UiEvent.MoveToPremiumStage(
-                                    PremiumBuyingContract.PremiumStage.FindPrimalName,
-                                ),
+                                PremiumBuyingContract.UiEvent.SetSubscriptionTier(subscriptionTier = it),
                             )
-                        },
-                        onPurchasePro = {
                             eventPublisher(
                                 PremiumBuyingContract.UiEvent.MoveToPremiumStage(
-                                    PremiumBuyingContract.PremiumStage.FindPrimalName,
+                                    stage = PremiumBuyingContract.PremiumStage.FindPrimalName,
                                 ),
                             )
                         },

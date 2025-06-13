@@ -75,8 +75,7 @@ fun SubscriptionBuyingHomeStage(
     subscriptions: List<SubscriptionProduct>,
     onClose: () -> Unit,
     onLearnMoreClick: (SubscriptionTier) -> Unit,
-    onPurchasePremium: () -> Unit,
-    onPurchasePro: () -> Unit,
+    onPurchaseSubscription: (SubscriptionTier) -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -116,8 +115,7 @@ fun SubscriptionBuyingHomeStage(
             SubscriptionOfferSelector(
                 loading = loading,
                 subscriptions = subscriptions,
-                onPurchasePremium = onPurchasePremium,
-                onPurchasePro = onPurchasePro,
+                onPurchaseSubscription = onPurchaseSubscription,
                 onLearnMoreClick = onLearnMoreClick,
             )
 
@@ -130,8 +128,7 @@ fun SubscriptionBuyingHomeStage(
 private fun SubscriptionOfferSelector(
     loading: Boolean,
     subscriptions: List<SubscriptionProduct>,
-    onPurchasePremium: () -> Unit,
-    onPurchasePro: () -> Unit,
+    onPurchaseSubscription: (SubscriptionTier) -> Unit,
     onLearnMoreClick: (SubscriptionTier) -> Unit,
 ) {
     val pagerState = rememberPagerState(initialPage = 0, pageCount = { 2 })
@@ -141,8 +138,7 @@ private fun SubscriptionOfferSelector(
             pagerState = pagerState,
             loading = loading,
             subscriptions = subscriptions,
-            onPurchasePremium = onPurchasePremium,
-            onPurchasePro = onPurchasePro,
+            onPurchaseSubscription = onPurchaseSubscription,
         )
         OfferPagerIndicators(pagerState = pagerState)
         LearnMoreLink(
@@ -158,8 +154,7 @@ private fun OfferPager(
     pagerState: PagerState,
     subscriptions: List<SubscriptionProduct>,
     loading: Boolean,
-    onPurchasePremium: () -> Unit,
-    onPurchasePro: () -> Unit,
+    onPurchaseSubscription: (SubscriptionTier) -> Unit,
 ) {
     val pageSize = 300.dp
 
@@ -238,9 +233,8 @@ private fun OfferPager(
                         stringResource(R.string.subscription_primal_premium_perk_1gb_max_file_size),
                     ),
                     buttonText = stringResource(R.string.subscription_primal_buy_premium),
-                    onBuyOfferClick = onPurchasePremium,
+                    onBuyOfferClick = { onPurchaseSubscription(SubscriptionTier.PREMIUM) },
                     badgeText = premiumBadgeText,
-
                 )
                 1 -> OfferCard(
                     titleSuffix = stringResource(R.string.subscription_primal_pro_title),
@@ -260,7 +254,7 @@ private fun OfferPager(
                     ),
                     hideFirstBullet = true,
                     buttonText = stringResource(R.string.subscription_primal_buy_pro),
-                    onBuyOfferClick = onPurchasePro,
+                    onBuyOfferClick = { onPurchaseSubscription(SubscriptionTier.PRO) },
                     buttonColor = PRO_ORANGE,
                     badgeText = proBadgeText,
                 )
