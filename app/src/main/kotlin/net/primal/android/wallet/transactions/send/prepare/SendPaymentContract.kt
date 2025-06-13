@@ -1,8 +1,8 @@
 package net.primal.android.wallet.transactions.send.prepare
 
 import net.primal.android.scanner.domain.QrCodeResult
-import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
+import net.primal.domain.wallet.DraftTx
 
 interface SendPaymentContract {
     data class UiState(

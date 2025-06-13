@@ -6,11 +6,11 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import net.primal.android.networking.di.PrimalWalletApiClient
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.android.wallet.api.NwcPrimalWalletApi
-import net.primal.android.wallet.api.NwcPrimalWalletApiImpl
-import net.primal.android.wallet.api.WalletApi
-import net.primal.android.wallet.api.WalletApiImpl
 import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.wallet.data.remote.api.PrimalWalletApi
+import net.primal.wallet.data.remote.api.PrimalWalletApiImpl
+import net.primal.wallet.data.remote.api.PrimalWalletNwcApi
+import net.primal.wallet.data.remote.api.PrimalWalletNwcApiImpl
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -20,19 +20,19 @@ object WalletApiModule {
     fun provideWalletApi(
         @PrimalWalletApiClient primalApiClient: PrimalApiClient,
         nostrNotary: NostrNotary,
-    ): WalletApi =
-        WalletApiImpl(
+    ): PrimalWalletApi =
+        PrimalWalletApiImpl(
             primalApiClient = primalApiClient,
-            nostrNotary = nostrNotary,
+            signatureHandler = nostrNotary,
         )
 
     @Provides
     fun provideNwcPrimalWalletApi(
         @PrimalWalletApiClient primalApiClient: PrimalApiClient,
         nostrNotary: NostrNotary,
-    ): NwcPrimalWalletApi =
-        NwcPrimalWalletApiImpl(
+    ): PrimalWalletNwcApi =
+        PrimalWalletNwcApiImpl(
             primalApiClient = primalApiClient,
-            nostrNotary = nostrNotary,
+            signatureHandler = nostrNotary,
         )
 }

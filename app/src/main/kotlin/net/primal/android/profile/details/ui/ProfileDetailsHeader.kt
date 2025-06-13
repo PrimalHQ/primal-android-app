@@ -59,9 +59,9 @@ import net.primal.android.profile.details.ui.model.shouldShowPremiumBadge
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.theme.AppTheme
 import net.primal.android.user.domain.WalletPreference
-import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.utils.isLightningAddress
 import net.primal.domain.nostr.utils.asEllipsizedNpub
+import net.primal.domain.wallet.DraftTx
 
 @Composable
 fun ProfileHeaderDetails(
