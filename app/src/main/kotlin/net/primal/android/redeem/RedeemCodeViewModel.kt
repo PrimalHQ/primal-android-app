@@ -23,18 +23,18 @@ import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.UserAccount
-import net.primal.android.wallet.api.model.PromoCodeDetailsResponse
-import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.zaps.hasPrimalWallet
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
+import net.primal.domain.account.PromoCodeDetails
+import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.common.exception.NetworkException
 import timber.log.Timber
 
 @HiltViewModel
 class RedeemCodeViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val walletRepository: WalletRepository,
+    private val walletAccountRepository: WalletAccountRepository,
     private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
 
@@ -126,7 +126,7 @@ class RedeemCodeViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(loading = true, error = null) }
             try {
-                walletRepository.redeemPromoCode(userId = activeAccountStore.activeUserId(), code = promoCode)
+                walletAccountRepository.redeemPromoCode(userId = activeAccountStore.activeUserId(), code = promoCode)
                 setEffect(SideEffect.PromoCodeApplied)
             } catch (error: NetworkException) {
                 Timber.w(error)
@@ -147,7 +147,7 @@ class RedeemCodeViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(loading = true, error = null, showErrorBadge = false) }
             try {
-                val response = walletRepository.getPromoCodeDetails(code = code)
+                val response = walletAccountRepository.getPromoCodeDetails(code = code)
 
                 setState {
                     copy(
@@ -171,9 +171,11 @@ class RedeemCodeViewModel @Inject constructor(
             }
         }
 
-    private fun PromoCodeDetailsResponse.toBenefitsList() =
+    private fun PromoCodeDetails.toBenefitsList() =
         listOfNotNull(
-            this.preloadedBtc?.toSats()?.let { RedeemCodeContract.PromoCodeBenefit.WalletBalance(sats = it) },
+            this.preloadedBtc?.toSats()?.let {
+                RedeemCodeContract.PromoCodeBenefit.WalletBalance(sats = it)
+            },
         )
 
     private fun List<RedeemCodeStage>.popStage() =

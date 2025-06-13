@@ -2,9 +2,9 @@ package net.primal.wallet.data.local.dao
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import net.primal.wallet.domain.SubWallet
-import net.primal.wallet.domain.TxState
-import net.primal.wallet.domain.TxType
+import net.primal.domain.wallet.SubWallet
+import net.primal.domain.wallet.TxState
+import net.primal.domain.wallet.TxType
 
 @Entity
 data class WalletTransactionData(

@@ -42,6 +42,7 @@ kotlin {
                 implementation(project(":core:networking-primal"))
                 implementation(project(":domain:nostr"))
                 implementation(project(":domain:primal"))
+                implementation(project(":domain:wallet"))
 
                 // Core
                 implementation(libs.kotlinx.coroutines.core)

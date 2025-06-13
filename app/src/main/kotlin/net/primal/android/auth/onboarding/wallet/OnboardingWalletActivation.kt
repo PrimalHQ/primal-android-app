@@ -62,13 +62,13 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.activation.WalletActivationContract
 import net.primal.android.wallet.activation.WalletActivationViewModel
-import net.primal.android.wallet.activation.domain.WalletActivationStatus
 import net.primal.android.wallet.activation.ui.WalletActivationDialogErrorHandler
 import net.primal.android.wallet.activation.ui.WalletActivationForm
 import net.primal.android.wallet.activation.ui.WalletActivationScreenContent
 import net.primal.android.wallet.activation.ui.WalletOtpVerification
 import net.primal.android.wallet.activation.ui.isOtpCodeValid
 import net.primal.android.wallet.walletSuccessContentColor
+import net.primal.domain.account.WalletActivationStatus
 
 @Composable
 fun OnboardingWalletActivation(

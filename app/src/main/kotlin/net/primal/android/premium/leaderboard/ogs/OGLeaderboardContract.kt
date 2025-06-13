@@ -2,7 +2,7 @@ package net.primal.android.premium.leaderboard.ogs
 
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
-import net.primal.domain.premium.OGLeaderboardEntry
+import net.primal.domain.membership.OGLeaderboardEntry
 
 interface OGLeaderboardContract {
     data class UiState(

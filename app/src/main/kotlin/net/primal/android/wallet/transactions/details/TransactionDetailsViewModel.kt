@@ -21,14 +21,14 @@ import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.repository.ExchangeRateHandler
-import net.primal.android.wallet.repository.TransactionProfileData
-import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.details.TransactionDetailsContract.UiState
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.posts.FeedRepository
 import net.primal.domain.reads.ArticleRepository
+import net.primal.domain.wallet.TransactionWithProfile
+import net.primal.domain.wallet.WalletRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -134,7 +134,7 @@ class TransactionDetailsViewModel @Inject constructor(
             )
         }
 
-    private fun TransactionProfileData.mapAsTransactionDataUi() =
+    private fun TransactionWithProfile.mapAsTransactionDataUi() =
         TransactionDetailDataUi(
             txId = this.transaction.id,
             txType = this.transaction.type,

@@ -5,8 +5,8 @@ import net.primal.data.local.dao.profiles.ProfileStats
 import net.primal.data.remote.api.explore.model.NewUserFollowStats
 import net.primal.data.remote.model.ContentUserProfileStats
 import net.primal.domain.common.PrimalEvent
-import net.primal.domain.premium.ContentProfilePremiumInfo
-import net.primal.domain.premium.PrimalLegendProfile
+import net.primal.domain.membership.ContentProfilePremiumInfo
+import net.primal.domain.membership.PrimalLegendProfile
 
 fun List<PrimalEvent>.mapNotNullAsProfileStatsPO() = mapNotNull { it.asProfileStatsPO() }
 

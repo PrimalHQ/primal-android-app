@@ -7,6 +7,9 @@ import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.local.dao.profiles.ProfileData
 import net.primal.domain.links.CdnImage
 import net.primal.domain.links.CdnResource
+import net.primal.domain.membership.ContentProfilePremiumInfo
+import net.primal.domain.membership.PrimalLegendProfile
+import net.primal.domain.membership.PrimalPremiumInfo
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.serialization.toNostrJsonObject
@@ -14,9 +17,6 @@ import net.primal.domain.nostr.utils.decodeLNUrlOrNull
 import net.primal.domain.nostr.utils.parseAsLNUrlOrNull
 import net.primal.domain.nostr.utils.parseHashtags
 import net.primal.domain.nostr.utils.parseNostrUris
-import net.primal.domain.premium.ContentProfilePremiumInfo
-import net.primal.domain.premium.PrimalLegendProfile
-import net.primal.domain.premium.PrimalPremiumInfo
 
 fun List<NostrEvent>.mapAsProfileDataPO(
     cdnResources: List<CdnResource>,

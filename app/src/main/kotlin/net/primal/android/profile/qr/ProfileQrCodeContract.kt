@@ -2,7 +2,7 @@ package net.primal.android.profile.qr
 
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.scanner.domain.QrCodeResult
-import net.primal.android.wallet.domain.DraftTx
+import net.primal.domain.wallet.DraftTx
 
 interface ProfileQrCodeContract {
     data class UiState(

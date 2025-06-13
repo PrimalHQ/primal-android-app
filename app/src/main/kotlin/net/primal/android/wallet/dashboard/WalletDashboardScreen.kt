@@ -66,8 +66,8 @@ import net.primal.android.wallet.dashboard.ui.WalletDashboard
 import net.primal.android.wallet.dashboard.ui.WalletDashboardLite
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyBottomSheet
 import net.primal.android.wallet.transactions.list.TransactionsLazyColumn
-import net.primal.wallet.domain.CurrencyMode
-import net.primal.wallet.domain.WalletKycLevel
+import net.primal.domain.wallet.CurrencyMode
+import net.primal.domain.wallet.WalletKycLevel
 
 @Composable
 fun WalletDashboardScreen(

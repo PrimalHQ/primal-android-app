@@ -3,7 +3,7 @@ package net.primal.data.local.dao.profiles
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import net.primal.domain.links.CdnImage
-import net.primal.domain.premium.PrimalPremiumInfo
+import net.primal.domain.membership.PrimalPremiumInfo
 
 @Entity
 data class ProfileData(

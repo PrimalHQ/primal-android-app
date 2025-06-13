@@ -119,8 +119,8 @@ import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.CurrencyConversionUtils.toUsd
 import net.primal.core.utils.detectUrls
 import net.primal.domain.nostr.utils.parseNostrUris
-import net.primal.wallet.domain.TxState
-import net.primal.wallet.domain.TxType
+import net.primal.domain.wallet.TxState
+import net.primal.domain.wallet.TxType
 import timber.log.Timber
 
 private const val URL_ANNOTATION_TAG = "url"
