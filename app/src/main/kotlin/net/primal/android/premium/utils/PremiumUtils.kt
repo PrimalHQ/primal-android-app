@@ -4,6 +4,7 @@ package net.primal.android.premium.utils
 
 import net.primal.android.premium.domain.PremiumMembership
 import net.primal.android.user.domain.UserAccount
+import net.primal.android.wallet.store.domain.SubscriptionTier
 
 fun String?.isPremiumTier() = this == "premium"
 fun String?.isPremiumFreeTier() = this == "free"
@@ -19,3 +20,6 @@ fun String?.isOriginWeb() = this?.lowercase() == "web"
 
 fun PremiumMembership.hasPremiumMembership() = !this.isExpired()
 fun UserAccount.hasPremiumMembership() = this.premiumMembership?.hasPremiumMembership() == true
+
+fun SubscriptionTier?.isPremiumTier() = this == SubscriptionTier.PREMIUM
+fun SubscriptionTier?.isProTier() = this == SubscriptionTier.PRO

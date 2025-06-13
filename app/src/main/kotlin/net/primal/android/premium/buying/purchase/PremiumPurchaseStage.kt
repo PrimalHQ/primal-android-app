@@ -38,6 +38,7 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.time.Year
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.NostrUserText
@@ -50,9 +51,14 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.premium.buying.PremiumBuyingContract
 import net.primal.android.premium.buying.home.PRO_ORANGE
+import net.primal.android.premium.legend.domain.LegendaryCustomization
+import net.primal.android.premium.legend.domain.LegendaryStyle
+import net.primal.android.premium.ui.PremiumBadge
 import net.primal.android.premium.ui.PremiumPrimalNameTable
 import net.primal.android.premium.ui.toGetSubscriptionString
 import net.primal.android.premium.ui.toPricingString
+import net.primal.android.premium.utils.isPremiumTier
+import net.primal.android.premium.utils.isProTier
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.store.domain.SubscriptionProduct
 import net.primal.android.wallet.store.domain.SubscriptionTier
@@ -123,15 +129,39 @@ fun PremiumPurchaseStage(
                 UniversalAvatarThumbnail(
                     avatarCdnImage = state.profile.avatarCdnImage,
                     avatarSize = 80.dp,
-                    legendaryCustomization = state.profile.premiumDetails?.legendaryCustomization,
+                    legendaryCustomization = if (state.subscriptionTier.isProTier()) {
+                        LegendaryCustomization(
+                            avatarGlow = true,
+                            legendaryStyle = LegendaryStyle.GOLD,
+                        )
+                    } else {
+                        state.profile.premiumDetails?.legendaryCustomization
+                    },
                 )
                 NostrUserText(
                     displayName = state.primalName,
                     internetIdentifier = "${state.primalName}@primal.net",
                     internetIdentifierBadgeSize = 24.dp,
                     fontSize = 20.sp,
-                    legendaryCustomization = state.profile.premiumDetails?.legendaryCustomization,
+                    legendaryCustomization = if (state.subscriptionTier.isProTier()) {
+                        LegendaryCustomization(
+                            customBadge = true,
+                            legendaryStyle = LegendaryStyle.GOLD,
+                        )
+                    } else {
+                        state.profile.premiumDetails?.legendaryCustomization
+                    },
                 )
+
+                if (state.subscriptionTier.isProTier()) {
+                    PremiumBadge(
+                        firstCohort = "Legend",
+                        secondCohort = Year.now().value.toString(),
+                        membershipExpired = false,
+                        legendaryStyle = LegendaryStyle.GOLD,
+                    )
+                }
+
                 if (!state.isExtendingPremium) {
                     Text(
                         modifier = Modifier.padding(horizontal = 12.dp),
@@ -199,15 +229,14 @@ private fun MoreInfoPromoCodeRow(
     onLearnMoreClick: () -> Unit,
     onPromoCodeClick: () -> Unit,
 ) {
-    val isPremium = subscriptionTier == SubscriptionTier.PREMIUM
     val learnAboutText = stringResource(
-        if (isPremium) {
+        if (subscriptionTier.isPremiumTier()) {
             R.string.subscription_learn_about_premium
         } else {
             R.string.subscription_learn_about_pro
         },
     )
-    val color = if (isPremium) AppTheme.colorScheme.primary else PRO_ORANGE
+    val color = if (subscriptionTier.isPremiumTier()) AppTheme.colorScheme.primary else PRO_ORANGE
 
     Row(
         modifier = modifier,
@@ -324,7 +353,7 @@ fun BuyPremiumButton(
         height = 64.dp,
         shape = RoundedCornerShape(percent = 100),
         onClick = onClick,
-        containerColor = if (subscriptionTier == SubscriptionTier.PREMIUM) {
+        containerColor = if (subscriptionTier.isPremiumTier()) {
             AppTheme.colorScheme.primary
         } else {
             PRO_ORANGE
@@ -366,7 +395,7 @@ private fun TOSNotice(subscriptionTier: SubscriptionTier) {
             withLink(link = LinkAnnotation.Url("https://primal.net/terms")) {
                 withStyle(
                     style = SpanStyle(
-                        color = if (subscriptionTier == SubscriptionTier.PREMIUM) {
+                        color = if (subscriptionTier.isPremiumTier()) {
                             AppTheme.colorScheme.secondary
                         } else {
                             PRO_ORANGE
