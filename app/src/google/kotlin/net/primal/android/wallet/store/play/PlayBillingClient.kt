@@ -157,12 +157,18 @@ class PlayBillingClient @Inject constructor(
     }
 
     private suspend fun queryAllSubscriptionDetails(): List<ProductDetails> {
-        val monthlyResponse = billingClient.queryProductDetails(premiumMonthlyProductDetailsParams)
-        val yearlyResponse = billingClient.queryProductDetails(premiumYearlyProductDetailsParams)
-        return listOfNotNull(
-            monthlyResponse.productDetailsList?.firstOrNull(),
-            yearlyResponse.productDetailsList?.firstOrNull(),
-        )
+        val queryProducts = QueryProductDetailsParams.newBuilder()
+            .setProductList(
+                playSubscriptionIds.map { productId ->
+                    QueryProductDetailsParams.Product.newBuilder()
+                        .setProductId(productId)
+                        .setProductType(BillingClient.ProductType.SUBS)
+                        .build()
+                },
+            )
+            .build()
+
+        return billingClient.queryProductDetails(queryProducts).productDetailsList ?: emptyList()
     }
 
     override suspend fun querySubscriptionProducts(): List<SubscriptionProduct> {
@@ -317,9 +323,7 @@ class PlayBillingClient @Inject constructor(
             playSubscriptionJson = this.originalJson,
         )
 
-    private fun String?.isSubscriptionProductId(): Boolean {
-        return this == PREMIUM_MONTHLY_PRODUCT_ID || this == PREMIUM_YEARLY_PRODUCT_ID
-    }
+    private fun String?.isSubscriptionProductId(): Boolean = this in playSubscriptionIds
 
     companion object {
         private const val MIN_SATS_PRODUCT_ID = "minsats"
@@ -335,27 +339,15 @@ class PlayBillingClient @Inject constructor(
             .build()
 
         private const val PREMIUM_MONTHLY_PRODUCT_ID = "monthly_premium"
-        private val premiumMonthlyProductDetailsParams = QueryProductDetailsParams.newBuilder()
-            .setProductList(
-                listOf(
-                    QueryProductDetailsParams.Product.newBuilder()
-                        .setProductId(PREMIUM_MONTHLY_PRODUCT_ID)
-                        .setProductType(BillingClient.ProductType.SUBS)
-                        .build(),
-                ),
-            )
-            .build()
-
         private const val PREMIUM_YEARLY_PRODUCT_ID = "yearly_premium"
-        private val premiumYearlyProductDetailsParams = QueryProductDetailsParams.newBuilder()
-            .setProductList(
-                listOf(
-                    QueryProductDetailsParams.Product.newBuilder()
-                        .setProductId(PREMIUM_YEARLY_PRODUCT_ID)
-                        .setProductType(BillingClient.ProductType.SUBS)
-                        .build(),
-                ),
-            )
-            .build()
+        private const val PRO_MONTHLY_PRODUCT_ID = "monthly_pro"
+        private const val PRO_YEARLY_PRODUCT_ID = "yearly_pro"
+
+        private val playSubscriptionIds = listOf(
+            PREMIUM_MONTHLY_PRODUCT_ID,
+            PREMIUM_YEARLY_PRODUCT_ID,
+            PRO_MONTHLY_PRODUCT_ID,
+            PRO_YEARLY_PRODUCT_ID,
+        )
     }
 }
