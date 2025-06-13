@@ -74,8 +74,7 @@ fun SubscriptionBuyingHomeStage(
     isPremiumBadgeOrigin: Boolean,
     subscriptions: List<SubscriptionProduct>,
     onClose: () -> Unit,
-    onLearnMoreAboutPremiumClick: () -> Unit,
-    onLearnMoreAboutProClick: () -> Unit,
+    onLearnMoreClick: (SubscriptionTier) -> Unit,
     onPurchasePremium: () -> Unit,
     onPurchasePro: () -> Unit,
 ) {
@@ -119,8 +118,7 @@ fun SubscriptionBuyingHomeStage(
                 subscriptions = subscriptions,
                 onPurchasePremium = onPurchasePremium,
                 onPurchasePro = onPurchasePro,
-                onLearnMoreAboutPremiumClick = onLearnMoreAboutPremiumClick,
-                onLearnMoreAboutProClick = onLearnMoreAboutProClick,
+                onLearnMoreClick = onLearnMoreClick,
             )
 
             TOSNotice()
@@ -134,8 +132,7 @@ private fun SubscriptionOfferSelector(
     subscriptions: List<SubscriptionProduct>,
     onPurchasePremium: () -> Unit,
     onPurchasePro: () -> Unit,
-    onLearnMoreAboutPremiumClick: () -> Unit,
-    onLearnMoreAboutProClick: () -> Unit,
+    onLearnMoreClick: (SubscriptionTier) -> Unit,
 ) {
     val pagerState = rememberPagerState(initialPage = 0, pageCount = { 2 })
 
@@ -150,8 +147,7 @@ private fun SubscriptionOfferSelector(
         OfferPagerIndicators(pagerState = pagerState)
         LearnMoreLink(
             pagerState = pagerState,
-            onPremiumClick = onLearnMoreAboutPremiumClick,
-            onProClick = onLearnMoreAboutProClick,
+            onLearnMoreClick = onLearnMoreClick,
         )
     }
 }
@@ -300,11 +296,7 @@ private fun OfferPagerIndicators(pagerState: PagerState) {
 }
 
 @Composable
-private fun LearnMoreLink(
-    pagerState: PagerState,
-    onPremiumClick: () -> Unit,
-    onProClick: () -> Unit,
-) {
+private fun LearnMoreLink(pagerState: PagerState, onLearnMoreClick: (SubscriptionTier) -> Unit) {
     val isPremium = pagerState.currentPage == 0
     val learnAboutText = stringResource(
         if (isPremium) {
@@ -314,13 +306,18 @@ private fun LearnMoreLink(
         },
     )
     val color = if (isPremium) AppTheme.colorScheme.primary else PRO_ORANGE
-    val onLearnAboutClick = if (isPremium) onPremiumClick else onProClick
 
     Text(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 12.dp, top = 4.dp)
-            .clickable { onLearnAboutClick() },
+            .clickable {
+                if (isPremium) {
+                    onLearnMoreClick(SubscriptionTier.PREMIUM)
+                } else {
+                    onLearnMoreClick(SubscriptionTier.PRO)
+                }
+            },
         text = learnAboutText,
         fontSize = 18.sp,
         lineHeight = 32.sp,
@@ -606,10 +603,7 @@ private fun DescriptionSection(showFirstWithoutCheckmark: Boolean = false, bulle
     }
 }
 
-private fun calculateDiscountPercent(
-    monthly: SubscriptionProduct?,
-    yearly: SubscriptionProduct?
-): Int? {
+private fun calculateDiscountPercent(monthly: SubscriptionProduct?, yearly: SubscriptionProduct?): Int? {
     val monthlyMicros = monthly?.takeIf { it.billingPeriod == SubscriptionBillingPeriod.Monthly }?.priceAmountMicros
     val yearlyMicros = yearly?.takeIf { it.billingPeriod == SubscriptionBillingPeriod.Yearly }?.priceAmountMicros
 

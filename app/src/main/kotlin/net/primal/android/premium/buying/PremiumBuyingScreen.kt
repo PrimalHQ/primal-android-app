@@ -86,8 +86,12 @@ private fun PremiumBuyingScreen(
                         isPremiumBadgeOrigin = state.isPremiumBadgeOrigin,
                         subscriptions = state.subscriptions,
                         onClose = screenCallbacks.onClose,
-                        onLearnMoreAboutPremiumClick = screenCallbacks.onMoreInfoClick,
-                        onLearnMoreAboutProClick = screenCallbacks.onMoreInfoClick,
+                        onLearnMoreClick = {
+                            eventPublisher(
+                                PremiumBuyingContract.UiEvent.SetSubscriptionTier(it),
+                            )
+                            screenCallbacks.onMoreInfoClick()
+                        },
                         onPurchasePremium = {
                             eventPublisher(
                                 PremiumBuyingContract.UiEvent.MoveToPremiumStage(
