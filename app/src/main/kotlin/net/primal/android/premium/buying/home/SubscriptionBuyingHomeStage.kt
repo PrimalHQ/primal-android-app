@@ -70,6 +70,7 @@ internal val PRO_ORANGE = Color(0xFFE47C00)
 @ExperimentalMaterial3Api
 @Composable
 fun SubscriptionBuyingHomeStage(
+    initialSubscriptionTier: SubscriptionTier,
     loading: Boolean,
     isPremiumBadgeOrigin: Boolean,
     subscriptions: List<SubscriptionProduct>,
@@ -113,6 +114,7 @@ fun SubscriptionBuyingHomeStage(
             PrimalSubscriptionTitle()
 
             SubscriptionOfferSelector(
+                initialSubscriptionTier = initialSubscriptionTier,
                 loading = loading,
                 subscriptions = subscriptions,
                 onPurchaseSubscription = onPurchaseSubscription,
@@ -126,12 +128,16 @@ fun SubscriptionBuyingHomeStage(
 
 @Composable
 private fun SubscriptionOfferSelector(
+    initialSubscriptionTier: SubscriptionTier,
     loading: Boolean,
     subscriptions: List<SubscriptionProduct>,
     onPurchaseSubscription: (SubscriptionTier) -> Unit,
     onLearnMoreClick: (SubscriptionTier) -> Unit,
 ) {
-    val pagerState = rememberPagerState(initialPage = 0, pageCount = { 2 })
+    val pagerState = rememberPagerState(
+        initialPage = initialSubscriptionTier.ordinal,
+        pageCount = { 2 },
+    )
 
     Column {
         OfferPager(

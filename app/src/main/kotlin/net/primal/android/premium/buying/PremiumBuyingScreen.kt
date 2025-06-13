@@ -82,6 +82,7 @@ private fun PremiumBuyingScreen(
             when (stage) {
                 PremiumBuyingContract.PremiumStage.Home -> {
                     SubscriptionBuyingHomeStage(
+                        initialSubscriptionTier = state.subscriptionTier,
                         loading = state.loading,
                         isPremiumBadgeOrigin = state.isPremiumBadgeOrigin,
                         subscriptions = state.subscriptions,

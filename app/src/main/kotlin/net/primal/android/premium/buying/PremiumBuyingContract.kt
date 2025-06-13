@@ -14,7 +14,7 @@ interface PremiumBuyingContract {
 
         val subscriptions: List<SubscriptionProduct> = emptyList(),
         val stage: PremiumStage = PremiumStage.Home,
-        val subscriptionTier: SubscriptionTier? = null,
+        val subscriptionTier: SubscriptionTier = SubscriptionTier.PREMIUM,
         val primalName: String? = null,
         val hasActiveSubscription: Boolean = false,
 
