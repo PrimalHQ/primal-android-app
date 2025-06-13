@@ -57,6 +57,8 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Check
 import net.primal.android.core.compose.icons.primaliconpack.PrimalPremium
 import net.primal.android.premium.ui.toPricingString
+import net.primal.android.premium.utils.isPremiumTier
+import net.primal.android.premium.utils.isProTier
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.store.domain.SubscriptionBillingPeriod
 import net.primal.android.wallet.store.domain.SubscriptionProduct
@@ -169,10 +171,10 @@ private fun OfferPager(
             .coerceAtLeast(0)
 
         val premiumSubscription = remember(subscriptions) {
-            subscriptions.filter { it.tier == SubscriptionTier.PREMIUM }
+            subscriptions.filter { it.tier.isPremiumTier() }
         }
         val proSubscriptions = remember(subscriptions) {
-            subscriptions.filter { it.tier == SubscriptionTier.PRO }
+            subscriptions.filter { it.tier.isProTier() }
         }
 
         val premiumMonthly = remember(premiumSubscription) {

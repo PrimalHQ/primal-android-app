@@ -37,6 +37,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.premium.buying.home.PRO_ORANGE
 import net.primal.android.premium.ui.PremiumPrimalNameTable
+import net.primal.android.premium.utils.isPremiumTier
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.store.domain.SubscriptionTier
 
@@ -156,7 +157,7 @@ private fun PrimalNameSearchButton(subscriptionTier: SubscriptionTier, onClick: 
             .navigationBarsPadding()
             .padding(32.dp),
         onClick = onClick,
-        containerColor = if (subscriptionTier == SubscriptionTier.PREMIUM) {
+        containerColor = if (subscriptionTier.isPremiumTier()) {
             AppTheme.colorScheme.primary
         } else {
             PRO_ORANGE
