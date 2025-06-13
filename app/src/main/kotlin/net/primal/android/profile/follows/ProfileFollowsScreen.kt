@@ -25,11 +25,11 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.core.compose.profile.approvals.ApproveFollowUnfollowProfileAlertDialog
+import net.primal.android.core.compose.profile.approvals.FollowsApprovalAlertDialog
+import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.explore.search.ui.FollowUnfollowVisibility
 import net.primal.android.explore.search.ui.UserProfileListItem
 import net.primal.android.profile.domain.ProfileFollowsType
-import net.primal.android.profile.follows.ProfileFollowsContract.UiState.FollowsError
 
 @Composable
 fun ProfileFollowsScreen(
@@ -59,15 +59,9 @@ private fun ProfileFollowsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     SnackbarErrorHandler(
-        error = state.error,
+        error = state.uiError,
         snackbarHostState = snackbarHostState,
-        errorMessageResolver = {
-            when (it) {
-                is FollowsError.FailedToFollowUser -> context.getString(R.string.app_error_unable_to_follow_profile)
-                is FollowsError.FailedToUnfollowUser -> context.getString(R.string.app_error_unable_to_unfollow_profile)
-                is FollowsError.MissingRelaysConfiguration -> context.getString(R.string.app_missing_relays_config)
-            }
-        },
+        errorMessageResolver = { it.resolveUiErrorMessage(context = context) },
         onErrorDismiss = { eventPublisher(ProfileFollowsContract.UiEvent.DismissError) },
     )
 
@@ -108,25 +102,11 @@ private fun ProfileFollowsContent(
     onProfileClick: (String) -> Unit,
 ) {
     if (state.shouldApproveProfileAction != null) {
-        ApproveFollowUnfollowProfileAlertDialog(
-            profileApproval = state.shouldApproveProfileAction,
-            onFollowApproved = {
-                eventPublisher(
-                    ProfileFollowsContract.UiEvent.FollowProfile(
-                        profileId = it.profileId,
-                        forceUpdate = true,
-                    ),
-                )
+        FollowsApprovalAlertDialog(
+            followsApproval = state.shouldApproveProfileAction,
+            onFollowsActionsApproved = {
+                eventPublisher(ProfileFollowsContract.UiEvent.ApproveFollowsActions(it.actions))
             },
-            onUnfollowApproved = {
-                eventPublisher(
-                    ProfileFollowsContract.UiEvent.UnfollowProfile(
-                        profileId = it.profileId,
-                        forceUpdate = true,
-                    ),
-                )
-            },
-            onFollowAllApproved = {},
             onClose = { eventPublisher(ProfileFollowsContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
         )
     }
@@ -135,22 +115,8 @@ private fun ProfileFollowsContent(
         paddingValues = paddingValues,
         state = state,
         onProfileClick = onProfileClick,
-        onFollowProfileClick = {
-            eventPublisher(
-                ProfileFollowsContract.UiEvent.FollowProfile(
-                    profileId = it,
-                    forceUpdate = false,
-                ),
-            )
-        },
-        onUnfollowProfileClick = {
-            eventPublisher(
-                ProfileFollowsContract.UiEvent.UnfollowProfile(
-                    profileId = it,
-                    forceUpdate = false,
-                ),
-            )
-        },
+        onFollowProfileClick = { eventPublisher(ProfileFollowsContract.UiEvent.FollowProfile(profileId = it)) },
+        onUnfollowProfileClick = { eventPublisher(ProfileFollowsContract.UiEvent.UnfollowProfile(profileId = it)) },
         onRefreshClick = { eventPublisher(ProfileFollowsContract.UiEvent.ReloadData) },
     )
 }

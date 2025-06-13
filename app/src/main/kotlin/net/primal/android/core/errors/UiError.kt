@@ -14,8 +14,7 @@ sealed class UiError {
     data class FailedToPublishLikeEvent(val cause: Throwable) : UiError()
     data class FailedToPublishDeleteEvent(val cause: Throwable) : UiError()
 
-    data class FailedToFollowUser(val cause: Throwable) : UiError()
-    data class FailedToUnfollowUser(val cause: Throwable) : UiError()
+    data class FailedToUpdateFollowList(val cause: Throwable) : UiError()
     data class FailedToMuteUser(val cause: Throwable) : UiError()
     data class FailedToUnmuteUser(val cause: Throwable) : UiError()
 

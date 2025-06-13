@@ -48,7 +48,7 @@ import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.core.compose.profile.approvals.ApproveFollowUnfollowProfileAlertDialog
+import net.primal.android.core.compose.profile.approvals.FollowsApprovalAlertDialog
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
 import net.primal.android.core.compose.rememberIsItemVisible
 import net.primal.android.core.errors.resolveUiErrorMessage
@@ -102,12 +102,12 @@ private fun FollowPackScreen(
         onErrorDismiss = { eventPublisher(UiEvent.DismissError) },
     )
 
-    if (state.shouldApproveProfileAction != null) {
-        ApproveFollowUnfollowProfileAlertDialog(
-            profileApproval = state.shouldApproveProfileAction,
-            onFollowApproved = { eventPublisher(UiEvent.FollowUser(userId = it.profileId, forceUpdate = true)) },
-            onUnfollowApproved = { eventPublisher(UiEvent.UnfollowUser(userId = it.profileId, forceUpdate = true)) },
-            onFollowAllApproved = { eventPublisher(UiEvent.FollowAll(userIds = it.profileIds, forceUpdate = true)) },
+    if (state.shouldApproveFollowsAction != null) {
+        FollowsApprovalAlertDialog(
+            followsApproval = state.shouldApproveFollowsAction,
+            onFollowsActionsApproved = {
+                eventPublisher(UiEvent.ApproveFollowsActions(state.shouldApproveFollowsAction.actions))
+            },
             onClose = { eventPublisher(UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
         )
     }
@@ -136,12 +136,7 @@ private fun FollowPackScreen(
                     },
                     isFollowAllEnabled = state.followPack.profiles.any { !state.following.contains(it.profileId) },
                     onFollowAllClick = {
-                        eventPublisher(
-                            UiEvent.FollowAll(
-                                userIds = state.followPack.profiles.map { it.profileId },
-                                forceUpdate = false,
-                            ),
-                        )
+                        eventPublisher(UiEvent.FollowAll(userIds = state.followPack.profiles.map { it.profileId }))
                     },
                 )
                 followPackProfiles(
@@ -149,9 +144,9 @@ private fun FollowPackScreen(
                     profiles = state.followPack.profiles,
                     onFollowUnfollowClick = { profileId, following ->
                         if (following) {
-                            eventPublisher(UiEvent.UnfollowUser(userId = profileId, forceUpdate = false))
+                            eventPublisher(UiEvent.UnfollowUser(userId = profileId))
                         } else {
-                            eventPublisher(UiEvent.FollowUser(userId = profileId, forceUpdate = false))
+                            eventPublisher(UiEvent.FollowUser(userId = profileId))
                         }
                     },
                 )
