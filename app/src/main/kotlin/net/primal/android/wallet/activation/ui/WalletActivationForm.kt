@@ -61,10 +61,9 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.android.wallet.activation.domain.WalletActivationData
-import net.primal.android.wallet.activation.regions.Country
-import net.primal.android.wallet.activation.regions.RegionSelectionBottomSheet
-import net.primal.android.wallet.activation.regions.State
+import net.primal.domain.account.Country
+import net.primal.domain.account.State
+import net.primal.domain.account.WalletActivationData
 
 @ExperimentalMaterial3Api
 @Composable

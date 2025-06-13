@@ -10,7 +10,7 @@ import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
-import net.primal.android.wallet.repository.WalletRepository
+import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
@@ -19,7 +19,7 @@ class UserDataUpdater @AssistedInject constructor(
     @Assisted val userId: String,
     private val settingsRepository: SettingsRepository,
     private val userRepository: UserRepository,
-    private val walletRepository: WalletRepository,
+    private val walletAccountRepository: WalletAccountRepository,
     private val relayRepository: RelayRepository,
     private val bookmarksRepository: PublicBookmarksRepository,
     private val premiumRepository: PremiumRepository,
@@ -59,7 +59,7 @@ class UserDataUpdater @AssistedInject constructor(
         runCatching { relayRepository.fetchAndUpdateUserRelays(userId = userId) }
         runCatching { userRepository.fetchAndUpdateUserAccount(userId = userId) }
         runCatching { bookmarksRepository.fetchAndPersistBookmarks(userId = userId) }
-        runCatching { walletRepository.fetchUserWalletInfoAndUpdateUserAccount(userId = userId) }
+        runCatching { walletAccountRepository.fetchWalletAccountInfo(userId = userId) }
         runCatching { pushNotificationsTokenUpdater.updateTokenForAllUsers() }
         runCatching { mutedItemRepository.fetchAndPersistMuteList(userId = userId) }
     }

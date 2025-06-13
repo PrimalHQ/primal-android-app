@@ -16,7 +16,7 @@ import net.primal.android.wallet.dashboard.ui.FiatAmountTextFromUsd
 import net.primal.android.wallet.repository.isValidExchangeRate
 import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
 import net.primal.core.utils.CurrencyConversionUtils.toSats
-import net.primal.wallet.domain.CurrencyMode
+import net.primal.domain.wallet.CurrencyMode
 
 @Composable
 fun TransactionAmountText(

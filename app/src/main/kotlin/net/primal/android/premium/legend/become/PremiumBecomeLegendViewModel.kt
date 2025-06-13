@@ -20,17 +20,17 @@ import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.UiSt
 import net.primal.android.premium.legend.subscription.PurchaseMonitor
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.utils.parseBitcoinPaymentInstructions
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.rates.exchange.ExchangeRateRepository
 import timber.log.Timber
 
 @HiltViewModel
 class PremiumBecomeLegendViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val activeAccountStore: ActiveAccountStore,
-    private val walletRepository: WalletRepository,
+    private val exchangeRateRepository: ExchangeRateRepository,
     private val premiumRepository: PremiumRepository,
     private val purchaseMonitor: PurchaseMonitor,
 ) : ViewModel() {
@@ -127,7 +127,7 @@ class PremiumBecomeLegendViewModel @Inject constructor(
     private fun fetchExchangeRate() {
         viewModelScope.launch {
             try {
-                val btcRate = walletRepository.getExchangeRate(
+                val btcRate = exchangeRateRepository.getExchangeRate(
                     userId = activeAccountStore.activeUserId(),
                 )
                 setState {

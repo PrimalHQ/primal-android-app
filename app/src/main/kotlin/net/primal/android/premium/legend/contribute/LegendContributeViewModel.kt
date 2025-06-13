@@ -17,9 +17,7 @@ import net.primal.android.premium.legend.contribute.LegendContributeContract.UiS
 import net.primal.android.premium.legend.subscription.PurchaseMonitor
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.wallet.api.model.WithdrawRequestBody
 import net.primal.android.wallet.repository.ExchangeRateHandler
-import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.utils.parseBitcoinPaymentInstructions
 import net.primal.android.wallet.utils.parseLightningPaymentInstructions
 import net.primal.android.wallet.utils.parseSatsToUsd
@@ -28,9 +26,12 @@ import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.core.utils.getMaximumUsdAmount
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
-import net.primal.wallet.domain.CurrencyMode
-import net.primal.wallet.domain.SubWallet
-import net.primal.wallet.domain.not
+import net.primal.domain.rates.fees.TransactionFeeRepository
+import net.primal.domain.wallet.CurrencyMode
+import net.primal.domain.wallet.SubWallet
+import net.primal.domain.wallet.WalletPayParams
+import net.primal.domain.wallet.WalletRepository
+import net.primal.domain.wallet.not
 import timber.log.Timber
 
 @HiltViewModel
@@ -39,6 +40,7 @@ class LegendContributeViewModel @Inject constructor(
     private val exchangeRateHandler: ExchangeRateHandler,
     private val premiumRepository: PremiumRepository,
     private val walletRepository: WalletRepository,
+    private val transactionFeeRepository: TransactionFeeRepository,
     private val purchaseMonitor: PurchaseMonitor,
 ) : ViewModel() {
 
@@ -221,19 +223,19 @@ class LegendContributeViewModel @Inject constructor(
         val amountBtc = instructions?.amount
 
         if (targetBtcAddress != null && amountBtc != null) {
-            val defaultMiningFee = walletRepository.fetchDefaultMiningFee(
+            val defaultMiningFee = transactionFeeRepository.fetchDefaultMiningFee(
                 userId = activeUserId,
                 onChainAddress = targetBtcAddress,
                 amountInBtc = amountBtc,
             )
 
-            walletRepository.withdraw(
-                userId = activeUserId,
-                body = WithdrawRequestBody(
+            walletRepository.pay(
+                params = WalletPayParams(
+                    userId = activeUserId,
                     subWallet = SubWallet.Open,
                     targetBtcAddress = targetBtcAddress,
                     amountBtc = amountBtc,
-                    onChainTier = defaultMiningFee?.id,
+                    onChainTier = defaultMiningFee?.tierId,
                 ),
             )
         }
@@ -241,9 +243,9 @@ class LegendContributeViewModel @Inject constructor(
 
     private suspend fun executeLightningPayment() {
         if (state.value.lightningInvoice != null) {
-            walletRepository.withdraw(
-                userId = activeAccountStore.activeUserId(),
-                body = WithdrawRequestBody(
+            walletRepository.pay(
+                params = WalletPayParams(
+                    userId = activeAccountStore.activeUserId(),
                     subWallet = SubWallet.Open,
                     lnInvoice = state.value.lightningInvoice,
                 ),
