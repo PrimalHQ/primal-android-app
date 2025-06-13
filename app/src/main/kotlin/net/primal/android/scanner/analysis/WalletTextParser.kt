@@ -3,9 +3,6 @@ package net.primal.android.scanner.analysis
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import net.primal.android.navigation.asUrlDecoded
-import net.primal.android.wallet.api.parseAsLNUrlOrNull
-import net.primal.android.wallet.domain.DraftTx
-import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.utils.isBitcoinAddress
 import net.primal.android.wallet.utils.isBitcoinUri
 import net.primal.android.wallet.utils.isLightningAddress
@@ -16,6 +13,9 @@ import net.primal.android.wallet.utils.parseBitcoinPaymentInstructions
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.nostr.cryptography.utils.urlToLnUrlHrp
+import net.primal.domain.wallet.DraftTx
+import net.primal.domain.wallet.WalletRepository
+import net.primal.wallet.data.remote.parseAsLNUrlOrNull
 
 class WalletTextParser @Inject constructor(
     private val dispatchers: DispatcherProvider,
@@ -74,8 +74,9 @@ class WalletTextParser @Inject constructor(
         return DraftTx(
             targetUserId = response.userId,
             lnInvoice = text,
-            lnInvoiceData = response.lnInvoiceData,
-            amountSats = (response.lnInvoiceData.amountMilliSats / 1000).toString(),
+            lnInvoiceAmountMilliSats = response.amountMilliSats,
+            lnInvoiceDescription = response.description,
+            amountSats = ((response.amountMilliSats ?: 0) / 1000).toString(),
             noteRecipient = response.comment.asUrlDecoded(),
         )
     }

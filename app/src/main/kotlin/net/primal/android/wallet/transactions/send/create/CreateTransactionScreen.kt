@@ -17,11 +17,11 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.domain.DraftTxStatus
 import net.primal.android.wallet.transactions.send.create.ui.TransactionEditor
 import net.primal.android.wallet.transactions.send.create.ui.TransactionFailed
 import net.primal.android.wallet.transactions.send.create.ui.TransactionSending
 import net.primal.android.wallet.transactions.send.create.ui.TransactionSuccess
+import net.primal.domain.wallet.DraftTxStatus
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -91,7 +91,7 @@ fun CreateTransactionScreen(
                         receiver = state.profileLightningAddress
                             ?: state.transaction.targetLud16
                             ?: state.transaction.targetLnUrl?.ellipsizeLnUrl()
-                            ?: state.transaction.lnInvoiceData?.description
+                            ?: state.transaction.lnInvoiceDescription
                             ?: state.transaction.targetOnChainAddress?.ellipsizeOnChainAddress(),
                     )
                 }
@@ -103,7 +103,7 @@ fun CreateTransactionScreen(
                         receiver = state.profileLightningAddress
                             ?: state.transaction.targetLud16
                             ?: state.transaction.targetLnUrl?.ellipsizeLnUrl()
-                            ?: state.transaction.lnInvoiceData?.description
+                            ?: state.transaction.lnInvoiceDescription
                             ?: state.transaction.targetOnChainAddress?.ellipsizeOnChainAddress(),
                         onDoneClick = onClose,
                     )

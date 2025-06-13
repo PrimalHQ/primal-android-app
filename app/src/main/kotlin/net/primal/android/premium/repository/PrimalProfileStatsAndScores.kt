@@ -2,8 +2,8 @@ package net.primal.android.premium.repository
 
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.common.PrimalEvent
-import net.primal.domain.premium.ContentProfilePremiumInfo
-import net.primal.domain.premium.PrimalLegendProfile
+import net.primal.domain.membership.ContentProfilePremiumInfo
+import net.primal.domain.membership.PrimalLegendProfile
 
 fun List<PrimalEvent>.parseAndFoldPrimalUserNames() =
     map { it.parseAndMapPrimalUserNames() }.fold(emptyMap<String, String>()) { acc, curr -> acc + curr }

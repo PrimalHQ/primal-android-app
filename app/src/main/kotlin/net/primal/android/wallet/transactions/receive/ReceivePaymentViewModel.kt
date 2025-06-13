@@ -12,7 +12,6 @@ import kotlinx.coroutines.launch
 import net.primal.android.navigation.asUrlEncoded
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.repository.ExchangeRateHandler
-import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiEvent
 import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiState
 import net.primal.android.wallet.transactions.receive.model.PaymentDetails
@@ -20,7 +19,8 @@ import net.primal.android.wallet.transactions.receive.tabs.ReceivePaymentTab
 import net.primal.core.utils.getMaximumUsdAmount
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
-import net.primal.wallet.domain.Network
+import net.primal.domain.wallet.Network
+import net.primal.domain.wallet.WalletRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -59,6 +59,7 @@ class ReceivePaymentViewModel @Inject constructor(
                         amountInUsd = it.amountInUsd,
                         comment = it.comment,
                     )
+
                     UiEvent.DismissError -> setState { copy(error = null) }
                     is UiEvent.ChangeNetwork -> changeNetwork(network = it.network)
                 }
@@ -107,10 +108,8 @@ class ReceivePaymentViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(loading = true) }
             try {
-                val response = walletRepository.generateOnChainAddress(userId = activeAccountStore.activeUserId())
-                setState {
-                    copy(bitcoinNetworkDetails = this.bitcoinNetworkDetails.copy(address = response.onChainAddress))
-                }
+                val response = walletRepository.createOnChainAddress(userId = activeAccountStore.activeUserId())
+                setState { copy(bitcoinNetworkDetails = this.bitcoinNetworkDetails.copy(address = response.address)) }
             } catch (error: SignatureException) {
                 Timber.w(error)
             } catch (error: NetworkException) {
@@ -142,7 +141,7 @@ class ReceivePaymentViewModel @Inject constructor(
                         comment = comment,
                     ),
                     lightningNetworkDetails = this.lightningNetworkDetails.copy(
-                        invoice = response.lnInvoice,
+                        invoice = response.invoice,
                     ),
                     bitcoinNetworkDetails = this.bitcoinNetworkDetails.copy(
                         invoice = "bitcoin:${this.bitcoinNetworkDetails.address}?amount=$amountInBtc".let {

@@ -3,7 +3,7 @@ package net.primal.android.premium.leaderboard.legend.ui.model
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.domain.links.CdnImage
-import net.primal.domain.premium.LeaderboardLegendEntry
+import net.primal.domain.membership.LeaderboardLegendEntry
 
 data class LeaderboardUiLegend(
     val userId: String,

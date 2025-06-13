@@ -20,7 +20,6 @@ import net.primal.android.scanner.analysis.WalletTextParser
 import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.transactions.send.prepare.SendPaymentContract.SideEffect
 import net.primal.android.wallet.transactions.send.prepare.SendPaymentContract.UiEvent
 import net.primal.android.wallet.transactions.send.prepare.SendPaymentContract.UiState
@@ -30,6 +29,7 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.profile.ProfileRepository
+import net.primal.domain.wallet.DraftTx
 import timber.log.Timber
 
 @HiltViewModel
