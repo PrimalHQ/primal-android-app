@@ -174,8 +174,8 @@
     <string name="subscription_learn_about_premium">Learn about Primal Premium</string>
     <string name="subscription_learn_about_pro">Learn about Primal Pro</string>
     <string name="subscription_price_per_month"> /month</string>
-    <string name="subscription_billed_annually">USD$%1$s billed annually</string>
-    <string name="subscription_save_10_percent">Save 10%</string>
+    <string name="subscription_billed_annually">%1$s billed annually</string>
+    <string name="subscription_save_percent">Save %1$d%%</string>
     <string name="subscription_tos_title">By proceeding you accept our</string>
     <string name="subscription_tos_subtitle">Terms of Service and Privacy Policy</string>
 
