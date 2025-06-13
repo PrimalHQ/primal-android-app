@@ -1,7 +1,7 @@
 package net.primal.android.user.domain
 
 import kotlinx.serialization.Serializable
-import net.primal.wallet.domain.WalletKycLevel
+import net.primal.domain.wallet.WalletKycLevel
 
 @Serializable
 data class PrimalWallet(

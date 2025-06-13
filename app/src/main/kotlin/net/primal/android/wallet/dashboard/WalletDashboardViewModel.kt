@@ -24,15 +24,16 @@ import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState
 import net.primal.android.wallet.repository.ExchangeRateHandler
-import net.primal.android.wallet.repository.TransactionProfileData
-import net.primal.android.wallet.repository.WalletRepository
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SatsPurchase
 import net.primal.android.wallet.transactions.list.TransactionListItemDataUi
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
+import net.primal.domain.billing.BillingRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.wallet.TransactionWithProfile
+import net.primal.domain.wallet.WalletRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -41,6 +42,7 @@ class WalletDashboardViewModel @Inject constructor(
     private val walletRepository: WalletRepository,
     private val userRepository: UserRepository,
     private val primalBillingClient: PrimalBillingClient,
+    private val billingRepository: BillingRepository,
     private val subscriptionsManager: SubscriptionsManager,
     private val exchangeRateHandler: ExchangeRateHandler,
 ) : ViewModel() {
@@ -50,7 +52,7 @@ class WalletDashboardViewModel @Inject constructor(
     private val _state = MutableStateFlow(
         value = UiState(
             transactions = walletRepository
-                .getLatestTransactions(userId = activeUserId)
+                .latestTransactions(userId = activeUserId)
                 .mapAsPagingDataOfTransactionUi(),
             isNpubLogin = userRepository.isNpubLogin(userId = activeUserId),
         ),
@@ -152,7 +154,7 @@ class WalletDashboardViewModel @Inject constructor(
     private fun confirmPurchase(purchase: SatsPurchase) =
         viewModelScope.launch {
             try {
-                walletRepository.confirmInAppPurchase(
+                billingRepository.confirmInAppPurchase(
                     userId = activeAccountStore.activeUserId(),
                     quoteId = purchase.quote.quoteId,
                     purchaseToken = purchase.purchaseToken,
@@ -174,10 +176,10 @@ class WalletDashboardViewModel @Inject constructor(
         setState { copy(error = error) }
     }
 
-    private fun Flow<PagingData<TransactionProfileData>>.mapAsPagingDataOfTransactionUi() =
+    private fun Flow<PagingData<TransactionWithProfile>>.mapAsPagingDataOfTransactionUi() =
         map { pagingData -> pagingData.map { it.mapAsTransactionDataUi() } }
 
-    private fun TransactionProfileData.mapAsTransactionDataUi() =
+    private fun TransactionWithProfile.mapAsTransactionDataUi() =
         TransactionListItemDataUi(
             txId = this.transaction.id,
             txType = this.transaction.type,

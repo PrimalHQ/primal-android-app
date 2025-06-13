@@ -44,7 +44,8 @@ import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.user.UserDataCleanupRepository
-import net.primal.wallet.domain.WalletSettings
+import net.primal.domain.wallet.WalletRepository
+import net.primal.domain.wallet.WalletSettings
 
 class UserRepository @Inject constructor(
     private val usersDatabase: UsersDatabase,
@@ -58,6 +59,7 @@ class UserRepository @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val userDataCleanupRepository: UserDataCleanupRepository,
     private val cachingImportRepository: CachingImportRepository,
+    private val walletRepository: WalletRepository,
 ) {
     suspend fun setActiveAccount(userId: String) =
         withContext(dispatchers.io()) {
@@ -118,9 +120,9 @@ class UserRepository @Inject constructor(
     suspend fun clearAllUserRelatedData(userId: String) =
         withContext(dispatchers.io()) {
             userDataCleanupRepository.clearUserData(userId)
+            walletRepository.deleteAllTransactions(userId)
             usersDatabase.withTransaction {
                 usersDatabase.userProfileInteractions().deleteAllByOwnerId(ownerId = userId)
-                usersDatabase.walletTransactions().deleteAllTransactionsByUserId(userId = userId)
                 usersDatabase.relays().deleteAll(userId = userId)
             }
         }

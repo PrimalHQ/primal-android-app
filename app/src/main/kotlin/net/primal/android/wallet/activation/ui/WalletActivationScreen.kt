@@ -68,13 +68,13 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.activation.WalletActivationContract
 import net.primal.android.wallet.activation.WalletActivationContract.UiEvent
 import net.primal.android.wallet.activation.WalletActivationViewModel
-import net.primal.android.wallet.activation.domain.WalletActivationData
-import net.primal.android.wallet.activation.domain.WalletActivationStatus
-import net.primal.android.wallet.activation.regions.Country
-import net.primal.android.wallet.activation.regions.State
 import net.primal.android.wallet.walletSuccessColor
 import net.primal.android.wallet.walletSuccessContentColor
 import net.primal.android.wallet.walletSuccessDimColor
+import net.primal.domain.account.Country
+import net.primal.domain.account.State
+import net.primal.domain.account.WalletActivationData
+import net.primal.domain.account.WalletActivationStatus
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable

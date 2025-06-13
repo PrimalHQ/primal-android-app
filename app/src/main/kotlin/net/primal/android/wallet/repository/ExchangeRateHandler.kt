@@ -7,11 +7,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.rates.exchange.ExchangeRateRepository
 import timber.log.Timber
 
 @Singleton
 class ExchangeRateHandler @Inject constructor(
-    private val walletRepository: WalletRepository,
+    private val exchangeRateRepository: ExchangeRateRepository,
 ) {
 
     private val _state = MutableStateFlow(value = 0.00)
@@ -20,7 +21,7 @@ class ExchangeRateHandler @Inject constructor(
 
     suspend fun updateExchangeRate(userId: String) {
         try {
-            val btcRate = walletRepository.getExchangeRate(userId = userId)
+            val btcRate = exchangeRateRepository.getExchangeRate(userId = userId)
             setState { btcRate }
         } catch (error: SignatureException) {
             Timber.e(error)

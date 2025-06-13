@@ -4,10 +4,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavBackStackEntry
 import net.primal.android.explore.asearch.AdvancedSearchContract
 import net.primal.android.explore.search.ui.SearchScope
-import net.primal.android.wallet.domain.DraftTx
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.nostr.ReactionType
+import net.primal.domain.wallet.DraftTx
 
 const val NOTE_ID = "noteId"
 inline val SavedStateHandle.noteIdOrThrow: String

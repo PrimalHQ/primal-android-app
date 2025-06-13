@@ -4,7 +4,7 @@ import io.kotest.matchers.shouldBe
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.decodeFromJsonElement
-import net.primal.wallet.domain.WalletKycLevel
+import net.primal.domain.wallet.WalletKycLevel
 import org.junit.Test
 
 class WalletKycLevelSerializerTest {
