@@ -110,6 +110,7 @@ private fun PremiumBuyingScreen(
                     PremiumPrimalNameStage(
                         titleText = stringResource(id = R.string.premium_primal_name_title),
                         initialName = state.primalName,
+                        subscriptionTier = state.subscriptionTier,
                         onBack = {
                             eventPublisher(
                                 PremiumBuyingContract.UiEvent.MoveToPremiumStage(
