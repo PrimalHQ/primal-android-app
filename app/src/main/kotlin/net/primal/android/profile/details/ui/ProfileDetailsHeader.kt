@@ -115,12 +115,12 @@ fun ProfileHeaderDetails(
         },
         onFollow = {
             state.profileId?.let {
-                eventPublisher(ProfileDetailsContract.UiEvent.FollowAction(profileId = it, forceUpdate = false))
+                eventPublisher(ProfileDetailsContract.UiEvent.FollowAction(profileId = it))
             }
         },
         onUnfollow = {
             state.profileId?.let {
-                eventPublisher(ProfileDetailsContract.UiEvent.UnfollowAction(profileId = it, forceUpdate = false))
+                eventPublisher(ProfileDetailsContract.UiEvent.UnfollowAction(profileId = it))
             }
         },
         onDrawerQrCodeClick = { state.profileId?.let { callbacks.onDrawerQrCodeClick(it) } },

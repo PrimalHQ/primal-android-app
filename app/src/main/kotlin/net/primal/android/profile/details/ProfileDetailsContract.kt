@@ -1,12 +1,13 @@
 package net.primal.android.profile.details
 
-import net.primal.android.core.compose.profile.approvals.ProfileApproval
+import net.primal.android.core.compose.profile.approvals.FollowsApproval
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.core.errors.UiError
 import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.profile.domain.ProfileFeedSpec
 import net.primal.android.profile.domain.ProfileFollowsType
+import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.android.wallet.domain.DraftTx
 import net.primal.domain.nostr.ReportType
 import net.primal.domain.nostr.utils.asEllipsizedNpub
@@ -32,7 +33,7 @@ interface ProfileDetailsContract {
             ProfileFeedSpec.AuthoredMedia,
         ),
         val error: UiError? = null,
-        val shouldApproveProfileAction: ProfileApproval? = null,
+        val shouldApproveProfileAction: FollowsApproval? = null,
         val zapError: UiError? = null,
         val zappingState: ZappingState = ZappingState(),
     ) {
@@ -60,8 +61,9 @@ interface ProfileDetailsContract {
             val zapAmount: ULong? = null,
         ) : UiEvent()
 
-        data class FollowAction(val profileId: String, val forceUpdate: Boolean) : UiEvent()
-        data class UnfollowAction(val profileId: String, val forceUpdate: Boolean) : UiEvent()
+        data class FollowAction(val profileId: String) : UiEvent()
+        data class UnfollowAction(val profileId: String) : UiEvent()
+        data class ApproveFollowsActions(val actions: List<ProfileFollowsHandler.Action>) : UiEvent()
         data class RemoveProfileFeedAction(val profileId: String) : UiEvent()
         data class MuteAction(val profileId: String) : UiEvent()
         data class UnmuteAction(val profileId: String) : UiEvent()

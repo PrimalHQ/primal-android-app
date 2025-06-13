@@ -311,39 +311,6 @@ class UserRepository @Inject constructor(
     }
 
     @Throws(FollowListNotFound::class, NostrPublishException::class, SignatureException::class)
-    suspend fun followAll(
-        userId: String,
-        followedUserIds: List<String>,
-        forceUpdate: Boolean,
-    ) {
-        updateFollowList(userId = userId, forceUpdate = forceUpdate) {
-            this + followedUserIds
-        }
-    }
-
-    @Throws(FollowListNotFound::class, NostrPublishException::class, SignatureException::class)
-    suspend fun follow(
-        userId: String,
-        followedUserId: String,
-        forceUpdate: Boolean,
-    ) {
-        updateFollowList(userId = userId, forceUpdate = forceUpdate) {
-            toMutableSet().apply { add(followedUserId) }
-        }
-    }
-
-    @Throws(FollowListNotFound::class, NostrPublishException::class, SignatureException::class)
-    suspend fun unfollow(
-        userId: String,
-        unfollowedUserId: String,
-        forceUpdate: Boolean,
-    ) {
-        updateFollowList(userId = userId, forceUpdate = forceUpdate) {
-            toMutableSet().apply { remove(unfollowedUserId) }
-        }
-    }
-
-    @Throws(FollowListNotFound::class, NostrPublishException::class, SignatureException::class)
     suspend fun updateFollowList(
         userId: String,
         forceUpdate: Boolean,

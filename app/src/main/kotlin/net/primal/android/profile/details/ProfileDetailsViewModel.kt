@@ -16,10 +16,11 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.core.compose.profile.approvals.ProfileApproval
+import net.primal.android.core.compose.profile.approvals.FollowsApproval
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileStatsUi
 import net.primal.android.core.errors.UiError
+import net.primal.android.core.errors.asSignatureUiError
 import net.primal.android.navigation.primalName
 import net.primal.android.navigation.profileId
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -27,6 +28,7 @@ import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
@@ -60,6 +62,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val mutedItemRepository: MutedItemRepository,
     private val zapHandler: ZapHandler,
+    private val profileFollowsHandler: ProfileFollowsHandler,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -78,6 +81,7 @@ class ProfileDetailsViewModel @Inject constructor(
     init {
         observeEvents()
         observeActiveAccount()
+        observeFollowsResults()
         resolveProfileId()
     }
 
@@ -127,8 +131,9 @@ class ProfileDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect { event ->
                 when (event) {
-                    is UiEvent.FollowAction -> follow(event)
-                    is UiEvent.UnfollowAction -> unfollow(event)
+                    is UiEvent.FollowAction -> follow(event.profileId)
+                    is UiEvent.UnfollowAction -> unfollow(event.profileId)
+                    is UiEvent.ApproveFollowsActions -> approveFollowsActions(event.actions)
                     is UiEvent.AddProfileFeedAction -> addProfileFeed(event)
                     is UiEvent.RemoveProfileFeedAction -> removeProfileFeed(event)
                     is UiEvent.MuteAction -> mute(event)
@@ -370,80 +375,56 @@ class ProfileDetailsViewModel @Inject constructor(
             copy(isProfileFollowed = false, shouldApproveProfileAction = null)
         }
 
-    private fun follow(followAction: UiEvent.FollowAction) =
+    private fun approveFollowsActions(actions: List<ProfileFollowsHandler.Action>) =
         viewModelScope.launch {
-            updateStateProfileAsFollowedAndClearApprovalFlag()
-            try {
-                userRepository.follow(
-                    userId = activeAccountStore.activeUserId(),
-                    followedUserId = followAction.profileId,
-                    forceUpdate = followAction.forceUpdate,
+            setState {
+                copy(
+                    shouldApproveProfileAction = null,
+                    isProfileFollowed = actions.firstOrNull() is ProfileFollowsHandler.Action.Follow,
                 )
-            } catch (error: NetworkException) {
-                Timber.w(error)
-                updateStateProfileAsUnfollowedAndClearApprovalFlag()
-                setErrorState(error = UiError.FailedToFollowUser(error))
-            } catch (error: SigningKeyNotFoundException) {
-                Timber.w(error)
-                updateStateProfileAsUnfollowedAndClearApprovalFlag()
-                setErrorState(error = UiError.MissingPrivateKey)
-            } catch (error: SigningRejectedException) {
-                Timber.w(error)
-                updateStateProfileAsUnfollowedAndClearApprovalFlag()
-                setErrorState(error = UiError.NostrSignUnauthorized)
-            } catch (error: NostrPublishException) {
-                Timber.w(error)
-                updateStateProfileAsUnfollowedAndClearApprovalFlag()
-                setErrorState(error = UiError.FailedToFollowUser(error))
-            } catch (error: MissingRelaysException) {
-                Timber.w(error)
-                updateStateProfileAsUnfollowedAndClearApprovalFlag()
-                setErrorState(error = UiError.MissingRelaysConfiguration(error))
-            } catch (error: UserRepository.FollowListNotFound) {
-                Timber.w(error)
-                updateStateProfileAsUnfollowedAndClearApprovalFlag()
-                setState {
-                    copy(shouldApproveProfileAction = ProfileApproval.Follow(profileId = followAction.profileId))
-                }
             }
+            profileFollowsHandler.forceUpdateList(actions = actions)
         }
 
-    private fun unfollow(unfollowAction: UiEvent.UnfollowAction) =
+    private fun follow(profileId: String) =
+        viewModelScope.launch {
+            updateStateProfileAsFollowedAndClearApprovalFlag()
+            profileFollowsHandler.follow(userId = activeAccountStore.activeUserId(), profileId = profileId)
+        }
+
+    private fun unfollow(profileId: String) =
         viewModelScope.launch {
             updateStateProfileAsUnfollowedAndClearApprovalFlag()
-            try {
-                userRepository.unfollow(
-                    userId = activeAccountStore.activeUserId(),
-                    unfollowedUserId = unfollowAction.profileId,
-                    forceUpdate = unfollowAction.forceUpdate,
-                )
-            } catch (error: NetworkException) {
-                Timber.w(error)
-                updateStateProfileAsFollowedAndClearApprovalFlag()
-                setErrorState(error = UiError.FailedToUnfollowUser(error))
-            } catch (error: SigningKeyNotFoundException) {
-                Timber.w(error)
-                updateStateProfileAsFollowedAndClearApprovalFlag()
-                setErrorState(error = UiError.MissingPrivateKey)
-            } catch (error: SigningRejectedException) {
-                Timber.w(error)
-                updateStateProfileAsFollowedAndClearApprovalFlag()
-                setErrorState(error = UiError.NostrSignUnauthorized)
-            } catch (error: NostrPublishException) {
-                Timber.w(error)
-                updateStateProfileAsFollowedAndClearApprovalFlag()
-                setErrorState(error = UiError.FailedToUnfollowUser(error))
-            } catch (error: MissingRelaysException) {
-                Timber.w(error)
-                updateStateProfileAsFollowedAndClearApprovalFlag()
-                setErrorState(error = UiError.MissingRelaysConfiguration(error))
-            } catch (error: UserRepository.FollowListNotFound) {
-                Timber.w(error)
-                updateStateProfileAsFollowedAndClearApprovalFlag()
-                setState {
-                    copy(
-                        shouldApproveProfileAction = ProfileApproval.Unfollow(profileId = unfollowAction.profileId),
-                    )
+            profileFollowsHandler.unfollow(userId = activeAccountStore.activeUserId(), profileId = profileId)
+        }
+
+    private fun observeFollowsResults() =
+        viewModelScope.launch {
+            profileFollowsHandler.observeResults().collect {
+                when (it) {
+                    is ProfileFollowsHandler.FollowResult.Error -> {
+                        setState { copy(isProfileFollowed = !isProfileFollowed) }
+
+                        when (it.error) {
+                            is NetworkException, is NostrPublishException -> {
+                                setState { copy(error = UiError.FailedToUpdateFollowList(cause = it.error)) }
+                            }
+
+                            is SigningRejectedException, is SigningKeyNotFoundException -> {
+                                setState { copy(error = UiError.SignatureError(it.error.asSignatureUiError())) }
+                            }
+
+                            is MissingRelaysException -> {
+                                setState { copy(error = UiError.MissingRelaysConfiguration(cause = it.error)) }
+                            }
+
+                            is UserRepository.FollowListNotFound -> {
+                                setState { copy(shouldApproveProfileAction = FollowsApproval(it.actions)) }
+                            }
+                        }
+                    }
+
+                    ProfileFollowsHandler.FollowResult.Success -> Unit
                 }
             }
         }
