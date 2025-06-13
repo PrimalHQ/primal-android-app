@@ -5,9 +5,15 @@ data class SubscriptionProduct(
     val priceAmountMicros: Long,
     val priceCurrencyCode: String,
     val billingPeriod: SubscriptionBillingPeriod,
+    val tier: SubscriptionTier,
 )
 
 enum class SubscriptionBillingPeriod {
     Monthly,
     Yearly,
+}
+
+enum class SubscriptionTier {
+    PREMIUM,
+    PRO,
 }

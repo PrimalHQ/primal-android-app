@@ -34,6 +34,7 @@ import net.primal.android.wallet.store.domain.SatsPurchaseQuote
 import net.primal.android.wallet.store.domain.SubscriptionBillingPeriod
 import net.primal.android.wallet.store.domain.SubscriptionProduct
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
+import net.primal.android.wallet.store.domain.SubscriptionTier
 import net.primal.core.utils.coroutines.DispatcherProvider
 import timber.log.Timber
 
@@ -186,6 +187,13 @@ class PlayBillingClient @Inject constructor(
                     SubscriptionBillingPeriod.Monthly
                 } else {
                     SubscriptionBillingPeriod.Yearly
+                },
+                tier = if (it.productId.contains("premium")) {
+                    SubscriptionTier.PREMIUM
+                } else if (it.productId.contains("pro")) {
+                    SubscriptionTier.PRO
+                } else {
+                    error("New tier added? Please implement tier resolving.")
                 },
             )
         }
