@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import net.primal.android.R
 import net.primal.android.core.compose.SnackbarErrorHandler
-import net.primal.android.premium.buying.home.PremiumBuyingHomeStage
+import net.primal.android.premium.buying.home.SubscriptionBuyingHomeStage
 import net.primal.android.premium.buying.name.PremiumPrimalNameStage
 import net.primal.android.premium.buying.purchase.PremiumPurchaseStage
 import net.primal.android.premium.buying.success.PremiumBuyingSuccessStage
@@ -81,13 +81,21 @@ private fun PremiumBuyingScreen(
         ) { stage ->
             when (stage) {
                 PremiumBuyingContract.PremiumStage.Home -> {
-                    PremiumBuyingHomeStage(
+                    SubscriptionBuyingHomeStage(
                         loading = state.loading,
                         isPremiumBadgeOrigin = state.isPremiumBadgeOrigin,
                         subscriptions = state.subscriptions,
                         onClose = screenCallbacks.onClose,
-                        onLearnMoreClick = screenCallbacks.onMoreInfoClick,
-                        onFindPrimalName = {
+                        onLearnMoreAboutPremiumClick = screenCallbacks.onMoreInfoClick,
+                        onLearnMoreAboutProClick = screenCallbacks.onMoreInfoClick,
+                        onPurchasePremium = {
+                            eventPublisher(
+                                PremiumBuyingContract.UiEvent.MoveToPremiumStage(
+                                    PremiumBuyingContract.PremiumStage.FindPrimalName,
+                                ),
+                            )
+                        },
+                        onPurchasePro = {
                             eventPublisher(
                                 PremiumBuyingContract.UiEvent.MoveToPremiumStage(
                                     PremiumBuyingContract.PremiumStage.FindPrimalName,
