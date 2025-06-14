@@ -183,14 +183,14 @@ class PlayBillingClient @Inject constructor(
                 productId = it.productId,
                 priceCurrencyCode = it.priceCurrencyCode,
                 priceAmountMicros = it.priceAmountMicros,
-                billingPeriod = if (it.productId.contains("monthly")) {
+                billingPeriod = if (it.productId.contains("monthly", ignoreCase = true)) {
                     SubscriptionBillingPeriod.Monthly
                 } else {
                     SubscriptionBillingPeriod.Yearly
                 },
-                tier = if (it.productId.contains("premium")) {
+                tier = if (it.productId.contains("premium", ignoreCase = true)) {
                     SubscriptionTier.PREMIUM
-                } else if (it.productId.contains("pro")) {
+                } else if (it.productId.contains("pro", ignoreCase = true)) {
                     SubscriptionTier.PRO
                 } else {
                     error("New tier added? Please implement tier resolving.")
