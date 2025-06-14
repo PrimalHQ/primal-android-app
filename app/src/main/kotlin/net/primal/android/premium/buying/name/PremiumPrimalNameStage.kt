@@ -35,8 +35,11 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.premium.buying.home.PRO_ORANGE
 import net.primal.android.premium.ui.PremiumPrimalNameTable
+import net.primal.android.premium.utils.isPremiumTier
 import net.primal.android.theme.AppTheme
+import net.primal.android.wallet.store.domain.SubscriptionTier
 
 @ExperimentalMaterial3Api
 @Composable
@@ -45,6 +48,7 @@ fun PremiumPrimalNameStage(
     onBack: () -> Unit,
     onPrimalNameAvailable: (String) -> Unit,
     initialName: String? = null,
+    subscriptionTier: SubscriptionTier = SubscriptionTier.PREMIUM,
     snackbarHostState: SnackbarHostState? = null,
 ) {
     val viewModel = hiltViewModel<PremiumPrimalNameViewModel>()
@@ -52,6 +56,7 @@ fun PremiumPrimalNameStage(
 
     PremiumPrimalNameStage(
         titleText = titleText,
+        subscriptionTier = subscriptionTier,
         onBack = onBack,
         onPrimalNameAvailable = onPrimalNameAvailable,
         eventPublisher = viewModel::setEvent,
@@ -65,6 +70,7 @@ fun PremiumPrimalNameStage(
 @Composable
 private fun PremiumPrimalNameStage(
     titleText: String,
+    subscriptionTier: SubscriptionTier,
     onBack: () -> Unit,
     state: PremiumPrimalNameContract.UiState,
     onPrimalNameAvailable: (String) -> Unit,
@@ -94,21 +100,10 @@ private fun PremiumPrimalNameStage(
             )
         },
         bottomBar = {
-            PrimalFilledButton(
-                modifier = Modifier
-                    .imePadding()
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(32.dp),
+            PrimalNameSearchButton(
+                subscriptionTier = subscriptionTier,
                 onClick = { eventPublisher(PremiumPrimalNameContract.UiEvent.CheckPrimalName(primalName.text)) },
-            ) {
-                Text(
-                    text = stringResource(id = R.string.premium_primal_name_search_button),
-                    style = AppTheme.typography.bodyLarge,
-                    color = Color.White,
-                    fontWeight = FontWeight.SemiBold,
-                )
-            }
+            )
         },
         snackbarHost = {
             snackbarHostState?.let {
@@ -150,5 +145,29 @@ private fun PremiumPrimalNameStage(
                 primalName = primalName.text,
             )
         }
+    }
+}
+
+@Composable
+private fun PrimalNameSearchButton(subscriptionTier: SubscriptionTier, onClick: () -> Unit) {
+    PrimalFilledButton(
+        modifier = Modifier
+            .imePadding()
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .padding(32.dp),
+        onClick = onClick,
+        containerColor = if (subscriptionTier.isPremiumTier()) {
+            AppTheme.colorScheme.primary
+        } else {
+            PRO_ORANGE
+        },
+    ) {
+        Text(
+            text = stringResource(id = R.string.premium_primal_name_search_button),
+            style = AppTheme.typography.bodyLarge,
+            color = Color.White,
+            fontWeight = FontWeight.SemiBold,
+        )
     }
 }

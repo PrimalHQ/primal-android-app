@@ -139,6 +139,7 @@ class PremiumBuyingViewModel @Inject constructor(
                     is UiEvent.RequestPurchase -> launchBillingFlow(it)
                     UiEvent.RestoreSubscription -> restorePurchase()
                     UiEvent.DismissError -> setState { copy(error = null) }
+                    is UiEvent.SetSubscriptionTier -> setState { copy(subscriptionTier = it.subscriptionTier) }
                 }
             }
         }

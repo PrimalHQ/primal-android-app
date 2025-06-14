@@ -38,6 +38,7 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.time.Year
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.NostrUserText
@@ -49,11 +50,18 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.premium.buying.PremiumBuyingContract
+import net.primal.android.premium.buying.home.PRO_ORANGE
+import net.primal.android.premium.legend.domain.LegendaryCustomization
+import net.primal.android.premium.legend.domain.LegendaryStyle
+import net.primal.android.premium.ui.PremiumBadge
 import net.primal.android.premium.ui.PremiumPrimalNameTable
 import net.primal.android.premium.ui.toGetSubscriptionString
 import net.primal.android.premium.ui.toPricingString
+import net.primal.android.premium.utils.isPremiumTier
+import net.primal.android.premium.utils.isProTier
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.store.domain.SubscriptionProduct
+import net.primal.android.wallet.store.domain.SubscriptionTier
 
 @ExperimentalMaterial3Api
 @Composable
@@ -121,15 +129,39 @@ fun PremiumPurchaseStage(
                 UniversalAvatarThumbnail(
                     avatarCdnImage = state.profile.avatarCdnImage,
                     avatarSize = 80.dp,
-                    legendaryCustomization = state.profile.premiumDetails?.legendaryCustomization,
+                    legendaryCustomization = if (state.subscriptionTier.isProTier()) {
+                        LegendaryCustomization(
+                            avatarGlow = true,
+                            legendaryStyle = LegendaryStyle.GOLD,
+                        )
+                    } else {
+                        state.profile.premiumDetails?.legendaryCustomization
+                    },
                 )
                 NostrUserText(
                     displayName = state.primalName,
                     internetIdentifier = "${state.primalName}@primal.net",
                     internetIdentifierBadgeSize = 24.dp,
                     fontSize = 20.sp,
-                    legendaryCustomization = state.profile.premiumDetails?.legendaryCustomization,
+                    legendaryCustomization = if (state.subscriptionTier.isProTier()) {
+                        LegendaryCustomization(
+                            customBadge = true,
+                            legendaryStyle = LegendaryStyle.GOLD,
+                        )
+                    } else {
+                        state.profile.premiumDetails?.legendaryCustomization
+                    },
                 )
+
+                if (state.subscriptionTier.isProTier()) {
+                    PremiumBadge(
+                        firstCohort = "Legend",
+                        secondCohort = Year.now().value.toString(),
+                        membershipExpired = false,
+                        legendaryStyle = LegendaryStyle.GOLD,
+                    )
+                }
+
                 if (!state.isExtendingPremium) {
                     Text(
                         modifier = Modifier.padding(horizontal = 12.dp),
@@ -155,16 +187,21 @@ fun PremiumPurchaseStage(
 
             MoreInfoPromoCodeRow(
                 modifier = Modifier.padding(vertical = 8.dp),
+                subscriptionTier = state.subscriptionTier,
                 onLearnMoreClick = onLearnMoreClick,
                 onPromoCodeClick = { promoCodeBottomSheetVisibility = true },
             )
+
+            val currentSubscriptions = remember(state.subscriptions, state.subscriptionTier) {
+                state.subscriptions.filter { it.tier == state.subscriptionTier }
+            }
 
             if (activity != null) {
                 BuyPremiumButtons(
                     modifier = Modifier.padding(horizontal = 12.dp),
                     loading = state.loading,
                     hasActiveSubscription = state.hasActiveSubscription,
-                    subscriptions = state.subscriptions,
+                    subscriptions = currentSubscriptions,
                     onBuySubscription = { subscription ->
                         eventPublisher(
                             PremiumBuyingContract.UiEvent.RequestPurchase(
@@ -176,8 +213,9 @@ fun PremiumPurchaseStage(
                     onRestoreSubscription = {
                         eventPublisher(PremiumBuyingContract.UiEvent.RestoreSubscription)
                     },
+                    subscriptionTier = state.subscriptionTier,
                 )
-                TOSNotice()
+                TOSNotice(subscriptionTier = state.subscriptionTier)
             }
         }
     }
@@ -187,9 +225,19 @@ fun PremiumPurchaseStage(
 @Composable
 private fun MoreInfoPromoCodeRow(
     modifier: Modifier = Modifier,
+    subscriptionTier: SubscriptionTier,
     onLearnMoreClick: () -> Unit,
     onPromoCodeClick: () -> Unit,
 ) {
+    val learnAboutText = stringResource(
+        if (subscriptionTier.isPremiumTier()) {
+            R.string.subscription_learn_about_premium
+        } else {
+            R.string.subscription_learn_about_pro
+        },
+    )
+    val color = if (subscriptionTier.isPremiumTier()) AppTheme.colorScheme.primary else PRO_ORANGE
+
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -197,8 +245,8 @@ private fun MoreInfoPromoCodeRow(
     ) {
         Text(
             modifier = Modifier.clickable { onLearnMoreClick() },
-            text = stringResource(id = R.string.premium_purchase_learn_more),
-            color = AppTheme.colorScheme.secondary,
+            text = learnAboutText,
+            color = color,
             style = AppTheme.typography.bodyMedium,
         )
 //        VerticalDivider(
@@ -223,6 +271,7 @@ fun BuyPremiumButtons(
     subscriptions: List<SubscriptionProduct>,
     onBuySubscription: (SubscriptionProduct) -> Unit,
     onRestoreSubscription: () -> Unit,
+    subscriptionTier: SubscriptionTier,
 ) {
     Column(
         modifier = modifier,
@@ -282,6 +331,7 @@ fun BuyPremiumButtons(
                         BuyPremiumButton(
                             startText = it.toGetSubscriptionString(),
                             endText = it.toPricingString(),
+                            subscriptionTier = subscriptionTier,
                             onClick = { onBuySubscription(it) },
                         )
                     }
@@ -295,6 +345,7 @@ fun BuyPremiumButtons(
 fun BuyPremiumButton(
     startText: String,
     endText: String,
+    subscriptionTier: SubscriptionTier,
     onClick: () -> Unit,
 ) {
     PrimalFilledButton(
@@ -302,6 +353,11 @@ fun BuyPremiumButton(
         height = 64.dp,
         shape = RoundedCornerShape(percent = 100),
         onClick = onClick,
+        containerColor = if (subscriptionTier.isPremiumTier()) {
+            AppTheme.colorScheme.primary
+        } else {
+            PRO_ORANGE
+        },
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -325,7 +381,7 @@ fun BuyPremiumButton(
 }
 
 @Composable
-private fun TOSNotice() {
+private fun TOSNotice(subscriptionTier: SubscriptionTier) {
     Text(
         text = buildAnnotatedString {
             withStyle(
@@ -339,7 +395,11 @@ private fun TOSNotice() {
             withLink(link = LinkAnnotation.Url("https://primal.net/terms")) {
                 withStyle(
                     style = SpanStyle(
-                        color = AppTheme.colorScheme.secondary,
+                        color = if (subscriptionTier.isPremiumTier()) {
+                            AppTheme.colorScheme.secondary
+                        } else {
+                            PRO_ORANGE
+                        },
                         fontSize = 14.sp,
                     ),
                 ) {
