@@ -176,7 +176,9 @@
     <string name="subscription_billed_annually">%1$s billed annually</string>
     <string name="subscription_save_percent">Save %1$d%%</string>
     <string name="subscription_tos_title">By proceeding you accept our</string>
-    <string name="subscription_tos_subtitle">Terms of Service and Privacy Policy</string>
+    <string name="subscription_tos">Terms of Service</string>
+    <string name="subscription_and">and</string>
+    <string name="subscription_pp">Privacy Policy</string>
 
     <string name="premium_primal_og_title">Primal OG</string>
     <string name="premium_primal_og_description">The Primal OG tier was created to recognize those users who signed up to Primal Premium in the first year.</string>
@@ -210,8 +212,12 @@
     <string name="premium_primal_name_vip_profile">VIP profile</string>
     <string name="premium_primal_name_not_set_value">[not set]</string>
 
+    <string name="premium_buying_home_primal_pro">Primal Pro</string>
+    <string name="premium_buying_home_primal_pro_description">Upgrade to the highest level of visibility,\\n features and recognition across the network,\\n and get access to professional tools.</string>
+
     <string name="premium_purchase_title">Congrats!</string>
     <string name="premium_purchase_primal_name_available">Your Primal Name is available!</string>
+    <string name="premium_purchase_your_legend_status">Your Legend Status is one click away</string>
     <string name="premium_purchase_learn_more">Learn about Premium</string>
     <string name="premium_purchase_promo_code">Have a promo code?</string>
     <string name="premium_purchase_get_annual_plan">Get Annual Plan</string>

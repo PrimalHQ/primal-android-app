@@ -84,6 +84,7 @@ private fun PremiumBuyingScreen(
                     PremiumBuyingHomeStage(
                         subscriptionTier = state.subscriptionTier,
                         loading = state.loading,
+                        isUpgradingToPrimalPro = state.isUpgradingToPro,
                         isPremiumBadgeOrigin = state.isPremiumBadgeOrigin,
                         subscriptions = state.subscriptions,
                         onClose = screenCallbacks.onClose,
@@ -95,11 +96,19 @@ private fun PremiumBuyingScreen(
                             eventPublisher(
                                 PremiumBuyingContract.UiEvent.SetSubscriptionTier(subscriptionTier = it),
                             )
-                            eventPublisher(
-                                PremiumBuyingContract.UiEvent.MoveToPremiumStage(
-                                    stage = PremiumBuyingContract.PremiumStage.FindPrimalName,
-                                ),
-                            )
+                            if (state.isUpgradingToPro) {
+                                eventPublisher(
+                                    PremiumBuyingContract.UiEvent.MoveToPremiumStage(
+                                        stage = PremiumBuyingContract.PremiumStage.Purchase,
+                                    ),
+                                )
+                            } else {
+                                eventPublisher(
+                                    PremiumBuyingContract.UiEvent.MoveToPremiumStage(
+                                        stage = PremiumBuyingContract.PremiumStage.FindPrimalName,
+                                    ),
+                                )
+                            }
                         },
                     )
                 }

@@ -9,6 +9,7 @@ import net.primal.android.wallet.store.domain.SubscriptionTier
 interface PremiumBuyingContract {
     data class UiState(
         val loading: Boolean = true,
+        val isUpgradingToPro: Boolean = false,
         val isExtendingPremium: Boolean = false,
         val isPremiumBadgeOrigin: Boolean = false,
 

@@ -165,7 +165,11 @@ fun PremiumPurchaseStage(
                 if (!state.isExtendingPremium) {
                     Text(
                         modifier = Modifier.padding(horizontal = 12.dp),
-                        text = stringResource(id = R.string.premium_purchase_primal_name_available),
+                        text = if (state.isUpgradingToPro) {
+                            stringResource(id = R.string.premium_purchase_your_legend_status)
+                        } else {
+                            stringResource(id = R.string.premium_purchase_primal_name_available)
+                        },
                         style = AppTheme.typography.bodyLarge,
                         color = AppTheme.extraColorScheme.successBright,
                     )
