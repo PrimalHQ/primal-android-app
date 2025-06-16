@@ -30,6 +30,7 @@ import net.primal.android.thread.articles.details.ArticleDetailsContract.UiState
 import net.primal.android.thread.articles.details.ui.mapAsArticleDetailsUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
+import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
@@ -68,7 +69,7 @@ class ArticleDetailsViewModel @Inject constructor(
     private val feedRepository: FeedRepository,
     private val highlightRepository: HighlightRepository,
     private val profileRepository: ProfileRepository,
-    private val userRepository: UserRepository,
+    private val profileFollowsHandler: ProfileFollowsHandler,
     private val eventInteractionRepository: EventInteractionRepository,
     private val zapHandler: ZapHandler,
 ) : ViewModel() {
@@ -86,6 +87,7 @@ class ArticleDetailsViewModel @Inject constructor(
 
     init {
         observeEvents()
+        observeFollowsResults()
         resolveNaddrAndInit()
     }
 
@@ -349,62 +351,43 @@ class ArticleDetailsViewModel @Inject constructor(
         setState { copy(isAuthorFollowed = !isAuthorFollowed) }
 
         viewModelScope.launch {
-            val followUnfollowResult = runCatching {
-                if (isAuthorFollowed) {
-                    userRepository.unfollow(
-                        userId = activeAccountStore.activeUserId(),
-                        unfollowedUserId = article.authorId,
-                        forceUpdate = false,
-                    )
-                } else {
-                    userRepository.follow(
-                        userId = activeAccountStore.activeUserId(),
-                        followedUserId = article.authorId,
-                        forceUpdate = false,
-                    )
-                }
-            }
-
-            if (followUnfollowResult.isFailure) {
-                followUnfollowResult.exceptionOrNull()?.let { error ->
-                    when (error) {
-                        is NetworkException, is UserRepository.FollowListNotFound,
-                        is NostrPublishException,
-                        -> {
-                            Timber.e(error)
-                            setState {
-                                copy(
-                                    isAuthorFollowed = isAuthorFollowed,
-                                    error = if (isAuthorFollowed) {
-                                        UiError.FailedToUnfollowUser(cause = error)
-                                    } else {
-                                        UiError.FailedToFollowUser(cause = error)
-                                    },
-                                )
-                            }
-                        }
-
-                        is SigningRejectedException -> {
-                            Timber.e(error)
-                            setState {
-                                copy(
-                                    isAuthorFollowed = isAuthorFollowed,
-                                    error = UiError.NostrSignUnauthorized,
-                                )
-                            }
-                        }
-
-                        is SigningKeyNotFoundException -> {
-                            Timber.e(error)
-                            setState { copy(isAuthorFollowed = isAuthorFollowed, error = UiError.MissingPrivateKey) }
-                        }
-
-                        else -> throw error
-                    }
-                }
+            if (isAuthorFollowed) {
+                profileFollowsHandler.unfollow(
+                    userId = activeAccountStore.activeUserId(),
+                    profileId = article.authorId,
+                )
+            } else {
+                profileFollowsHandler.follow(
+                    userId = activeAccountStore.activeUserId(),
+                    profileId = article.authorId,
+                )
             }
         }
     }
+
+    private fun observeFollowsResults() =
+        viewModelScope.launch {
+            profileFollowsHandler.observeResults().collect {
+                when (it) {
+                    is ProfileFollowsHandler.ActionResult.Error -> {
+                        Timber.e(it.error)
+                        setState { copy(isAuthorFollowed = !isAuthorFollowed) }
+
+                        when (it.error) {
+                            is NetworkException, is UserRepository.FollowListNotFound,
+                            is NostrPublishException,
+                            -> setState { copy(error = UiError.FailedToUpdateFollowList(it.error)) }
+
+                            is SigningRejectedException -> setState { copy(error = UiError.NostrSignUnauthorized) }
+
+                            is SigningKeyNotFoundException -> setState { copy(error = UiError.MissingPrivateKey) }
+                        }
+                    }
+
+                    ProfileFollowsHandler.ActionResult.Success -> Unit
+                }
+            }
+        }
 
     private fun publishNewHighlight(event: UiEvent.PublishHighlight) {
         val naddr = state.value.naddr
