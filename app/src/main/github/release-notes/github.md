@@ -10,6 +10,8 @@
 - Added prefix when copying note and article ids (#483)
 - Added "via [nostr-app]" on article details (#488)
 - Improve wallet settings (#496)
+- Added batch support for follows and unfollows (#516)
+- Added support for buying Primal Pro subscriptions 
 
 ## Fixes
 - Display the amount for presets instead of leaving empty field (#476)
@@ -27,3 +29,4 @@
 - Add cutting off nested notes in feeds on level 3 and below (#499)
 - Fixed TLD trimming issues and add more tests (#502)
 - Fixed issue where bookmarked comments appear as articles
+- Fixed feed title to 1 line with ellipsis overflow in Explore Feed (#513)
