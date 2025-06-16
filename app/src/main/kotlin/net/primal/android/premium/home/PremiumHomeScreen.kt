@@ -2,6 +2,7 @@ package net.primal.android.premium.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -257,7 +258,12 @@ private fun PremiumHomeContent(
 @Composable
 private fun UpgradeToPrimalProNotice(onUpgradeToProClick: () -> Unit) {
     Text(
-        modifier = Modifier.clickable(onClick = onUpgradeToProClick),
+        modifier = Modifier
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onUpgradeToProClick,
+            ),
         text = buildAnnotatedString {
             appendLine(stringResource(id = R.string.premium_home_primal_pro_want_to))
             append(stringResource(id = R.string.premium_home_primal_pro_check_out))
