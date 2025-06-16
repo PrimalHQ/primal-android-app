@@ -69,6 +69,9 @@ internal val PREMIUM_TINT_LIGHT = Color(0xFF222222)
 internal val PREMIUM_PINK = Color(0xFFCA077C)
 internal val PRO_ORANGE = Color(0xFFE47C00)
 
+private const val PAGE_PREMIUM = 0
+private const val PAGE_PRO = 1
+
 @ExperimentalMaterial3Api
 @Composable
 fun PremiumBuyingHomeStage(
@@ -220,7 +223,7 @@ private fun OfferPager(
             contentPadding = PaddingValues(horizontal = horizontalPadding),
         ) { page ->
             when (page) {
-                0 -> OfferCard(
+                PAGE_PREMIUM -> OfferCard(
                     titleSuffix = stringResource(R.string.subscription_primal_premium_title),
                     titleColor = PREMIUM_PINK,
                     priceText = if (loading) "---" else premiumMonthly?.toPricingString() ?: "---",
@@ -243,7 +246,7 @@ private fun OfferPager(
                     onBuyOfferClick = { onPurchaseSubscription(SubscriptionTier.PREMIUM) },
                     badgeText = premiumBadgeText,
                 )
-                1 -> OfferCard(
+                PAGE_PRO -> OfferCard(
                     titleSuffix = stringResource(R.string.subscription_primal_pro_title),
                     titleColor = PRO_ORANGE,
                     priceText = if (loading) "---" else proMonthly?.toPricingString() ?: "---",
