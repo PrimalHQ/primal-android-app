@@ -304,7 +304,7 @@ class UserRepository @Inject constructor(
         }
     }
 
-    suspend fun updateBuyPremiumTimestamp(userId: String) {
+    suspend fun updateUpgradeDotTimestamp(userId: String) {
         accountsStore.getAndUpdateAccount(userId = userId) {
             copy(lastBuyPremiumTimestampInMillis = Clock.System.now().toEpochMilliseconds())
         }

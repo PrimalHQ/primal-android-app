@@ -42,6 +42,7 @@ class PremiumHomeViewModel @Inject constructor(
         observeActiveAccount()
         observeProfile()
         fetchShouldShowSupport()
+        markPremiumHomeOpened()
     }
 
     private fun observeEvents() {
@@ -82,6 +83,12 @@ class PremiumHomeViewModel @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    private fun markPremiumHomeOpened() {
+        viewModelScope.launch {
+            userRepository.updateUpgradeDotTimestamp(userId = activeAccountStore.activeUserId())
         }
     }
 

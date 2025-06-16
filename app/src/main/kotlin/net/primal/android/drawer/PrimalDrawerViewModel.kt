@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
+import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.theme.active.ActiveThemeStore
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -72,7 +73,8 @@ class PrimalDrawerViewModel @Inject constructor(
                             userId = it.pubkey,
                             hasPremium = it.premiumMembership != null,
                         ),
-                        showPremiumBadge = it.premiumMembership == null && it.hasNotSeenPremiumInTheLast(7.days),
+                        showPremiumBadge = !it.premiumMembership.isPrimalLegendTier() &&
+                            it.hasNotSeenPremiumInTheLast(7.days),
                     )
                 }
             }

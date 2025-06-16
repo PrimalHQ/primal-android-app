@@ -81,7 +81,7 @@ class PremiumBuyingViewModel @Inject constructor(
 
     private fun markPremiumBuyingOpened() {
         viewModelScope.launch {
-            userRepository.updateBuyPremiumTimestamp(userId = activeAccountStore.activeUserId())
+            userRepository.updateUpgradeDotTimestamp(userId = activeAccountStore.activeUserId())
         }
     }
 
