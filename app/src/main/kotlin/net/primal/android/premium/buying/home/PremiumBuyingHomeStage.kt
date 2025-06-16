@@ -512,9 +512,7 @@ private fun OfferPrice(priceText: String) {
     Row(
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp)
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Text(
             text = priceText,
