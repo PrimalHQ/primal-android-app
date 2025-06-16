@@ -37,68 +37,48 @@ fun FeaturesTabContent(modifier: Modifier = Modifier, contentPadding: PaddingVal
     val features = listOf(
         Feature(
             featureText = stringResource(id = R.string.premium_more_info_features_table_first_row),
-            free = true,
             premium = true,
+            pro = true,
         ),
         Feature(
             featureText = stringResource(id = R.string.premium_more_info_features_table_second_row),
-            free = true,
             premium = true,
+            pro = true,
         ),
         Feature(
             featureText = stringResource(id = R.string.premium_more_info_features_table_third_row),
-            free = true,
             premium = true,
+            pro = true,
         ),
         Feature(
             featureText = stringResource(id = R.string.premium_more_info_features_table_fourth_row),
-            free = "1 Gb",
-            premium = "10 Gb",
+            premium = true,
+            pro = true,
         ),
         Feature(
             featureText = stringResource(id = R.string.premium_more_info_features_table_fifth_row),
-            free = "100mb",
-            premium = "1 Gb",
+            premium = true,
+            pro = true,
         ),
         Feature(
             featureText = stringResource(id = R.string.premium_more_info_features_table_sixth_row),
-            free = false,
-            premium = true,
+            premium = "10 GB",
+            pro = "100 GB",
         ),
         Feature(
             featureText = stringResource(id = R.string.premium_more_info_features_table_seventh_row),
-            free = false,
-            premium = true,
+            premium = "1 GB",
+            pro = "10 GB",
         ),
         Feature(
             featureText = stringResource(id = R.string.premium_more_info_features_table_eighth_row),
-            free = false,
-            premium = true,
+            premium = false,
+            pro = true,
         ),
         Feature(
             featureText = stringResource(id = R.string.premium_more_info_features_table_ninth_row),
-            free = false,
-            premium = true,
-        ),
-        Feature(
-            featureText = stringResource(id = R.string.premium_more_info_features_table_tenth_row),
-            free = false,
-            premium = true,
-        ),
-        Feature(
-            featureText = stringResource(id = R.string.premium_more_info_features_table_eleventh_row),
-            free = false,
-            premium = true,
-        ),
-        Feature(
-            featureText = stringResource(id = R.string.premium_more_info_features_table_twelfth_row),
-            free = false,
-            premium = true,
-        ),
-        Feature(
-            featureText = stringResource(id = R.string.premium_more_info_features_table_thirteenth_row),
-            free = false,
-            premium = true,
+            premium = false,
+            pro = true,
         ),
     )
 
@@ -112,8 +92,8 @@ fun FeaturesTabContent(modifier: Modifier = Modifier, contentPadding: PaddingVal
             FeatureStringRow(
                 modifier = Modifier.clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp)),
                 featureText = stringResource(id = R.string.premium_more_info_features_table_header_feature),
-                free = stringResource(id = R.string.premium_more_info_features_table_header_free),
                 premium = stringResource(id = R.string.premium_more_info_features_table_header_premium),
+                pro = stringResource(id = R.string.premium_more_info_features_table_header_pro),
                 isHeaderRow = true,
             )
         }
@@ -138,8 +118,8 @@ fun FeaturesTabContent(modifier: Modifier = Modifier, contentPadding: PaddingVal
 private fun FeatureStringRow(
     modifier: Modifier = Modifier,
     featureText: String,
-    free: String,
     premium: String,
+    pro: String,
     isHeaderRow: Boolean = false,
 ) {
     Row(
@@ -155,8 +135,8 @@ private fun FeatureStringRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         FeatureText(featureText = featureText, isHeaderRow = isHeaderRow)
-        OfferText(text = free, isHeaderRow = isHeaderRow)
         OfferText(text = premium, isHeaderRow = isHeaderRow)
+        OfferText(text = pro, isHeaderRow = isHeaderRow)
     }
 }
 
@@ -203,8 +183,8 @@ private fun RowScope.OfferText(text: String, isHeaderRow: Boolean = false) {
 private fun FeatureBooleanRow(
     modifier: Modifier = Modifier,
     featureText: String,
-    free: Boolean,
     premium: Boolean,
+    pro: Boolean,
 ) {
     Row(
         modifier = modifier
@@ -213,8 +193,8 @@ private fun FeatureBooleanRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         FeatureText(featureText = featureText)
-        OfferIcon(value = free)
         OfferIcon(value = premium)
+        OfferIcon(value = pro)
     }
 }
 
@@ -241,29 +221,29 @@ private fun RowScope.OfferIcon(value: Boolean) {
 @Composable
 private fun <T : Any> Feature<T>.ToFeatureRow(modifier: Modifier = Modifier) =
     when {
-        this.free is String && this.premium is String ->
+        this.premium is String && this.pro is String ->
             FeatureStringRow(
                 modifier = modifier,
                 featureText = this.featureText,
-                free = this.free,
                 premium = this.premium,
+                pro = this.pro,
             )
 
-        this.free is Boolean && this.premium is Boolean ->
+        this.premium is Boolean && this.pro is Boolean ->
             FeatureBooleanRow(
                 modifier = modifier,
                 featureText = this.featureText,
-                free = this.free,
                 premium = this.premium,
+                pro = this.pro,
             )
 
         else -> throw NotImplementedException(
-            "don't know how to handle types ${this.free::class} and ${this.premium::class}",
+            "don't know how to handle types ${this.premium::class} and ${this.pro::class}",
         )
     }
 
 data class Feature<T : Any>(
     val featureText: String,
-    val free: T,
+    val pro: T,
     val premium: T,
 )

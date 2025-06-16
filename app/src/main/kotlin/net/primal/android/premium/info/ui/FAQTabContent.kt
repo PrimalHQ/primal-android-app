@@ -62,6 +62,10 @@ fun FAQTabContent(modifier: Modifier = Modifier, contentPadding: PaddingValues) 
             stringResource(id = R.string.premium_more_info_faq_twelfth_question),
             stringResource(id = R.string.premium_more_info_faq_twelfth_answer),
         ),
+        Pair(
+            stringResource(id = R.string.premium_more_info_faq_thirteenth_question),
+            stringResource(id = R.string.premium_more_info_faq_thirteenth_answer),
+        ),
     )
     LazyColumn(
         contentPadding = contentPadding,

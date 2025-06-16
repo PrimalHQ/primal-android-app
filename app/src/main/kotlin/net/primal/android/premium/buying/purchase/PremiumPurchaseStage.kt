@@ -68,7 +68,7 @@ import net.primal.android.wallet.store.domain.SubscriptionTier
 fun PremiumPurchaseStage(
     state: PremiumBuyingContract.UiState,
     onBack: () -> Unit,
-    onLearnMoreClick: () -> Unit,
+    onLearnMoreClick: (SubscriptionTier) -> Unit,
     eventPublisher: (PremiumBuyingContract.UiEvent) -> Unit,
 ) {
     val uiScope = rememberCoroutineScope()
@@ -226,7 +226,7 @@ fun PremiumPurchaseStage(
 private fun MoreInfoPromoCodeRow(
     modifier: Modifier = Modifier,
     subscriptionTier: SubscriptionTier,
-    onLearnMoreClick: () -> Unit,
+    onLearnMoreClick: (SubscriptionTier) -> Unit,
     onPromoCodeClick: () -> Unit,
 ) {
     val learnAboutText = stringResource(
@@ -244,7 +244,15 @@ private fun MoreInfoPromoCodeRow(
         horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
     ) {
         Text(
-            modifier = Modifier.clickable { onLearnMoreClick() },
+            modifier = Modifier.clickable {
+                onLearnMoreClick(
+                    if (subscriptionTier.isPremiumTier()) {
+                        SubscriptionTier.PREMIUM
+                    } else {
+                        SubscriptionTier.PRO
+                    },
+                )
+            },
             text = learnAboutText,
             color = color,
             style = AppTheme.typography.bodyMedium,

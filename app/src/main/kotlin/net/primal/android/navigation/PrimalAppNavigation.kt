@@ -86,7 +86,7 @@ import net.primal.android.premium.card.PremiumCardScreen
 import net.primal.android.premium.card.PremiumCardViewModel
 import net.primal.android.premium.home.PremiumHomeScreen
 import net.primal.android.premium.home.PremiumHomeViewModel
-import net.primal.android.premium.info.PREMIUM_MORE_INFO_FAQ_TAB_INDEX
+import net.primal.android.premium.info.MORE_INFO_FAQ_TAB_INDEX
 import net.primal.android.premium.info.PremiumMoreInfoScreen
 import net.primal.android.premium.leaderboard.legend.LegendLeaderboardScreen
 import net.primal.android.premium.leaderboard.legend.LegendLeaderboardViewModel
@@ -1455,7 +1455,7 @@ private fun NavGraphBuilder.premiumBuying(
         viewModel = viewModel,
         screenCallbacks = PremiumBuyingContract.ScreenCallbacks(
             onClose = { navController.navigateUp() },
-            onMoreInfoClick = { navController.navigateToPremiumMoreInfo() },
+            onMoreInfoClick = { tier -> navController.navigateToPremiumMoreInfo(tier.ordinal) },
             onPremiumPurchased = {
                 navController.popBackStack()
                 navController.navigateToPremiumHome()
@@ -1683,7 +1683,7 @@ private fun NavGraphBuilder.premiumManage(route: String, navController: NavContr
 
         PremiumManageScreen(
             viewModel = viewModel,
-            onFAQClick = { navController.navigateToPremiumMoreInfo(tabIndex = PREMIUM_MORE_INFO_FAQ_TAB_INDEX) },
+            onFAQClick = { navController.navigateToPremiumMoreInfo(tabIndex = MORE_INFO_FAQ_TAB_INDEX) },
             onClose = { navController.navigateUp() },
             onDestination = {
                 when (it) {
