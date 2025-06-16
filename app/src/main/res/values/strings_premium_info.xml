@@ -2,6 +2,7 @@
     <string name="premium_more_info_title">Primal Premium</string>
     <string name="premium_more_info_close_button">Close</string>
     <string name="premium_more_info_why_premium">Become a Nostr power user and help shape the future! Open protocols like Nostr give us the opportunity to regain control over our online lives.\n\nAt Primal, we don’t rely on advertising. We don’t monetize user data. Our users are our customers. Our sole focus is to make the best possible product for our users. We open source all our work to help the Nostr ecosystem flourish. By signing up for Primal Premium, you are enabling us to continue building for Nostr.\n\nBe the change you want to see in the world. If you don’t want to be the product, consider being the customer.</string>
+    <string name="premium_more_info_why_pro">Primal Pro is the highest user tier at Primal, designed for content creators and teams. Pro users get access to Primal Studio and gain Legend status on Primal:</string>
     <string name="premium_more_info_faq_first_question">How do I get support?</string>
     <string name="premium_more_info_faq_first_answer">Simply email us at support@primal.net and include your Primal Name in the message. Support requests from Premium and Pro users are prioritized and typically handled on the same business day.</string>
     <string name="premium_more_info_faq_second_question">Can I change my Primal Name?</string>
@@ -29,7 +30,14 @@
     <string name="premium_more_info_faq_thirteenth_question">I’d like to support Primal. Can I do more?</string>
     <string name="premium_more_info_faq_thirteenth_answer">At Primal, we don’t rely on advertising. We don’t monetize user data. We open source all our work to help the Nostr ecosystem flourish. If you wish to help us continue doing this work, you can purchase a Premium or Pro subscription, or simply leave a 5-star review in the app store. Thank you from the entire Primal Team! 🙏❤️</string>
 
+    <string name="premium_more_info_pro_feature_primal_studio_title">Primal Studio</string>
+    <string name="premium_more_info_pro_feature_primal_studio">A professional publishing suite for Nostr. Includes authoring tools, media management, smart scheduling, content imports, team collaboration, and content analytics. Available at:</string>
+    <string name="premium_more_info_pro_feature_primal_studio_url">studio.primal.net</string>
+    <string name="premium_more_info_pro_feature_legend_status_title">Legend Status</string>
+    <string name="premium_more_info_pro_feature_legend_status">Customizable Legend avatar ring, Legend profile badge and banner, along with the highest level of features, visibility and recognition on Primal.</string>
+
     <string name="premium_more_info_premium">Premium</string>
+    <string name="premium_more_info_pro">Pro</string>
     <string name="premium_more_info_features">Features</string>
     <string name="premium_more_info_faq">FAQ</string>
 

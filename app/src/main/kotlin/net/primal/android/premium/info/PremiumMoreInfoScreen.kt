@@ -28,20 +28,22 @@ import net.primal.android.premium.info.ui.FAQTabContent
 import net.primal.android.premium.info.ui.FeaturesTabContent
 import net.primal.android.premium.info.ui.MoreInfoTabs
 import net.primal.android.premium.info.ui.PremiumTabContent
+import net.primal.android.premium.info.ui.ProTabContent
 import net.primal.android.theme.AppTheme
 
-internal const val MORE_INFO_TAB_COUNT = 3
+internal const val MORE_INFO_TAB_COUNT = 4
 
-const val PREMIUM_MORE_INFO_WHY_TAB_INDEX = 0
-const val PREMIUM_MORE_INFO_FEATURES_TAB_INDEX = 1
-const val PREMIUM_MORE_INFO_FAQ_TAB_INDEX = 2
+const val PREMIUM_MORE_INFO_WHY_PREMIUM_TAB_INDEX = 0
+const val PREMIUM_MORE_INFO_WHY_PRO_TAB_INDEX = 1
+const val PREMIUM_MORE_INFO_FEATURES_TAB_INDEX = 2
+const val PREMIUM_MORE_INFO_FAQ_TAB_INDEX = 3
 
-private val tabsRange = PREMIUM_MORE_INFO_WHY_TAB_INDEX..PREMIUM_MORE_INFO_FAQ_TAB_INDEX
+private val tabsRange = PREMIUM_MORE_INFO_WHY_PREMIUM_TAB_INDEX..PREMIUM_MORE_INFO_FAQ_TAB_INDEX
 
 @Composable
-fun PremiumMoreInfoScreen(initialTabIndex: Int = PREMIUM_MORE_INFO_WHY_TAB_INDEX, onClose: () -> Unit) {
+fun PremiumMoreInfoScreen(initialTabIndex: Int = PREMIUM_MORE_INFO_WHY_PREMIUM_TAB_INDEX, onClose: () -> Unit) {
     val pagerState = rememberPagerState(
-        initialPage = if (initialTabIndex in tabsRange) initialTabIndex else PREMIUM_MORE_INFO_WHY_TAB_INDEX,
+        initialPage = if (initialTabIndex in tabsRange) initialTabIndex else PREMIUM_MORE_INFO_WHY_PREMIUM_TAB_INDEX,
         pageCount = { MORE_INFO_TAB_COUNT },
     )
 
@@ -80,8 +82,18 @@ fun PremiumMoreInfoScreen(initialTabIndex: Int = PREMIUM_MORE_INFO_WHY_TAB_INDEX
             modifier = Modifier.background(AppTheme.colorScheme.surfaceVariant),
         ) { currentPage ->
             when (currentPage) {
-                PREMIUM_MORE_INFO_WHY_TAB_INDEX -> {
+                PREMIUM_MORE_INFO_WHY_PREMIUM_TAB_INDEX -> {
                     PremiumTabContent(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .padding(horizontal = 20.dp)
+                            .padding(top = 20.dp),
+                    )
+                }
+
+                PREMIUM_MORE_INFO_WHY_PRO_TAB_INDEX -> {
+                    ProTabContent(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues)
@@ -125,7 +137,14 @@ private fun MoreInfoTopAppBar(pagerState: PagerState, onClose: () -> Unit) {
             MoreInfoTabs(
                 modifier = Modifier.padding(top = 8.dp),
                 selectedTabIndex = pagerState.currentPage,
-                onWhyPremiumTabClick = { uiScope.launch { pagerState.scrollToPage(PREMIUM_MORE_INFO_WHY_TAB_INDEX) } },
+                onWhyPremiumTabClick = {
+                    uiScope.launch {
+                        pagerState.scrollToPage(
+                            PREMIUM_MORE_INFO_WHY_PREMIUM_TAB_INDEX,
+                        )
+                    }
+                },
+                onWhyProTabClick = { uiScope.launch { pagerState.scrollToPage(PREMIUM_MORE_INFO_WHY_PRO_TAB_INDEX) } },
                 onFeaturesTabClick = {
                     uiScope.launch {
                         pagerState.scrollToPage(
