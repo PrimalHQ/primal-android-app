@@ -47,6 +47,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.LocalPrimalTheme
@@ -120,7 +121,7 @@ fun PremiumBuyingHomeStage(
             PrimalSubscriptionTitle()
 
             SubscriptionOfferSelector(
-                initialSubscriptionTier = subscriptionTier,
+                subscriptionTier = subscriptionTier,
                 loading = loading,
                 subscriptions = subscriptions,
                 onPurchaseSubscription = onPurchaseSubscription,
@@ -134,14 +135,14 @@ fun PremiumBuyingHomeStage(
 
 @Composable
 private fun SubscriptionOfferSelector(
-    initialSubscriptionTier: SubscriptionTier,
+    subscriptionTier: SubscriptionTier,
     loading: Boolean,
     subscriptions: List<SubscriptionProduct>,
     onPurchaseSubscription: (SubscriptionTier) -> Unit,
     onLearnMoreClick: (SubscriptionTier) -> Unit,
 ) {
     val pagerState = rememberPagerState(
-        initialPage = initialSubscriptionTier.ordinal,
+        initialPage = subscriptionTier.ordinal,
         pageCount = { 2 },
     )
 
@@ -503,20 +504,17 @@ private fun OfferTitle(titleSuffix: String, titleColor: Color) {
     }
 }
 
+@Suppress("MagicNumber")
 @Composable
 private fun OfferPrice(priceText: String) {
-    val priceFontSize = when (priceText.length) {
-        in 0..6 -> 44.sp
-        7 -> 42.sp
-        8 -> 36.sp
-        9 -> 32.sp
-        else -> 28.sp
-    }
+    val priceFontSize = calculatePriceFontSize(priceText)
 
     Row(
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp)
     ) {
         Text(
             text = priceText,
@@ -534,6 +532,18 @@ private fun OfferPrice(priceText: String) {
             color = AppTheme.colorScheme.onSurface,
             maxLines = 1,
         )
+    }
+}
+
+@Suppress("MagicNumber")
+@Composable
+private fun calculatePriceFontSize(priceText: String): TextUnit {
+    return when (priceText.length) {
+        in 0..6 -> 44.sp
+        7 -> 42.sp
+        8 -> 36.sp
+        9 -> 32.sp
+        else -> 28.sp
     }
 }
 
