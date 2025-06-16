@@ -1,5 +1,6 @@
 package net.primal.android.premium.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +23,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -274,22 +278,25 @@ private fun BottomBarButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
+    val legendaryBrush = if (
+        legendaryCustomization?.legendaryStyle != null &&
+        legendaryCustomization.legendaryStyle != LegendaryStyle.NO_CUSTOMIZATION
+    ) {
+        legendaryCustomization.legendaryStyle.primaryBrush
+    } else {
+        Brush.linearGradient(listOf(AppTheme.colorScheme.tertiary, AppTheme.colorScheme.tertiary))
+    }
+
     Box(
         modifier = modifier
             .navigationBarsPadding()
-            .padding(36.dp),
+            .padding(36.dp)
+            .clip(AppTheme.shapes.extraLarge)
+            .background(legendaryBrush),
     ) {
-        legendaryCustomization
         PrimalFilledButton(
             modifier = Modifier.fillMaxWidth(),
-            containerColor = if (legendaryCustomization != null &&
-                legendaryCustomization.legendaryStyle != LegendaryStyle.NO_CUSTOMIZATION &&
-                legendaryCustomization.legendaryStyle != null
-            ) {
-                AppTheme.colorScheme.primary
-            } else {
-                AppTheme.colorScheme.primary
-            },
+            containerColor = Color.Transparent,
             onClick = onClick,
         ) {
             Text(
