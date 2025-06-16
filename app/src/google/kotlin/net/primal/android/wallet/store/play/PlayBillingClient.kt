@@ -272,7 +272,11 @@ class PlayBillingClient @Inject constructor(
     }
 
     @Throws(BillingNotAvailable::class)
-    override suspend fun launchSubscriptionBillingFlow(subscriptionProduct: SubscriptionProduct, activity: Activity) {
+    override suspend fun launchSubscriptionBillingFlow(
+        activity: Activity,
+        subscriptionProduct: SubscriptionProduct,
+        existingSubscription: SubscriptionPurchase?,
+    ) {
         val initialized = ensureBillingClientInitialized()
         if (!initialized) throw BillingNotAvailable()
 

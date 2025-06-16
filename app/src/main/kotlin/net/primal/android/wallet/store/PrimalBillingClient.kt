@@ -22,5 +22,9 @@ interface PrimalBillingClient {
 
     suspend fun launchMinSatsBillingFlow(quote: SatsPurchaseQuote, activity: Activity)
 
-    suspend fun launchSubscriptionBillingFlow(subscriptionProduct: SubscriptionProduct, activity: Activity)
+    suspend fun launchSubscriptionBillingFlow(
+        activity: Activity,
+        subscriptionProduct: SubscriptionProduct,
+        existingSubscription: SubscriptionPurchase? = null,
+    )
 }
