@@ -44,6 +44,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -504,21 +505,34 @@ private fun OfferTitle(titleSuffix: String, titleColor: Color) {
 
 @Composable
 private fun OfferPrice(priceText: String) {
-    Row(verticalAlignment = Alignment.Bottom) {
+    val priceFontSize = when (priceText.length) {
+        in 0..6 -> 44.sp
+        7 -> 42.sp
+        8 -> 36.sp
+        9 -> 32.sp
+        else -> 28.sp
+    }
+
+    Row(
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
         Text(
             text = priceText,
-            fontSize = 44.sp,
-            lineHeight = 44.sp,
+            fontSize = priceFontSize,
             fontWeight = FontWeight.Bold,
             color = AppTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
-        Spacer(modifier = Modifier.width(4.dp))
         Text(
             text = stringResource(R.string.subscription_price_per_month),
             fontSize = 20.sp,
             lineHeight = 26.sp,
             fontWeight = FontWeight.Normal,
             color = AppTheme.colorScheme.onSurface,
+            maxLines = 1,
         )
     }
 }
