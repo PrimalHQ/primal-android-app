@@ -290,9 +290,20 @@ class PlayBillingClient @Inject constructor(
                 .build(),
         )
 
-        val billingFlowParams = BillingFlowParams.newBuilder()
+        val billingFlowParamsBuilder = BillingFlowParams.newBuilder()
             .setProductDetailsParamsList(subscriptionParamsList)
-            .build()
+
+        if (existingSubscription != null && existingSubscription.productId != subscriptionProduct.productId) {
+            val updateParams = BillingFlowParams.SubscriptionUpdateParams.newBuilder()
+                .setOldPurchaseToken(existingSubscription.purchaseToken)
+                .setSubscriptionReplacementMode(
+                    BillingFlowParams.SubscriptionUpdateParams.ReplacementMode.WITH_TIME_PRORATION,
+                )
+                .build()
+            billingFlowParamsBuilder.setSubscriptionUpdateParams(updateParams)
+        }
+
+        val billingFlowParams = billingFlowParamsBuilder.build()
 
         billingClient.launchBillingFlow(activity, billingFlowParams)
     }
