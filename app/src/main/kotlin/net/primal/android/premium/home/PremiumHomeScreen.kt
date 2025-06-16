@@ -166,6 +166,7 @@ private fun PremiumHomeScreen(
     }
 }
 
+@Suppress("UnusedParameter")
 @Composable
 private fun PremiumHomeContent(
     modifier: Modifier,
@@ -379,6 +380,7 @@ private fun SupportUsNoticePremium(onSupportPrimal: () -> Unit) {
     }
 }
 
+@Suppress("UnusedPrivateMember")
 @Composable
 private fun SupportUsNoticeLegend(
     visible: Boolean,
