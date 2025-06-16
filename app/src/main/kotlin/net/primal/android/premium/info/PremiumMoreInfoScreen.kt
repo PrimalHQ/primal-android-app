@@ -1,27 +1,21 @@
 package net.primal.android.premium.info
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopAppBar
-import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.premium.info.ui.FAQTabContent
@@ -53,28 +47,6 @@ fun PremiumMoreInfoScreen(initialTabIndex: Int = MORE_INFO_WHY_PREMIUM_TAB_INDEX
                 pagerState = pagerState,
                 onClose = onClose,
             )
-        },
-        bottomBar = {
-            Box(
-                modifier = Modifier
-                    .background(AppTheme.colorScheme.surfaceVariant)
-                    .fillMaxWidth(),
-            ) {
-                PrimalFilledButton(
-                    modifier = Modifier
-                        .padding(vertical = 24.dp, horizontal = 36.dp)
-                        .navigationBarsPadding()
-                        .fillMaxWidth(),
-                    onClick = onClose,
-                    containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                    contentColor = AppTheme.colorScheme.onBackground,
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.premium_more_info_close_button),
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-            }
         },
     ) { paddingValues ->
         HorizontalPager(
