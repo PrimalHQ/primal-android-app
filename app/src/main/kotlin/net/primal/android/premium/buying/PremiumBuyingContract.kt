@@ -57,7 +57,7 @@ interface PremiumBuyingContract {
 
     data class ScreenCallbacks(
         val onClose: () -> Unit,
-        val onMoreInfoClick: (subscriptionTierIndex: Int) -> Unit,
+        val onMoreInfoClick: (subscriptionTier: SubscriptionTier) -> Unit,
         val onPremiumPurchased: () -> Unit,
     )
 }
