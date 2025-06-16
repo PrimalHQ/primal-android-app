@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.Year
@@ -339,11 +340,14 @@ fun BuyPremiumButtons(
                 }
 
                 else -> {
+                    val minFontSize = subscriptions.minOf { it.toPricingString().resolveFontSize().value }.sp
+
                     subscriptions.forEach {
                         BuyPremiumButton(
                             startText = it.toGetSubscriptionString(),
                             endText = it.toPricingString(),
                             subscriptionTier = subscriptionTier,
+                            fontSize = minFontSize,
                             onClick = { onBuySubscription(it) },
                         )
                     }
@@ -358,6 +362,7 @@ fun BuyPremiumButton(
     startText: String,
     endText: String,
     subscriptionTier: SubscriptionTier,
+    fontSize: TextUnit,
     onClick: () -> Unit,
 ) {
     PrimalFilledButton(
@@ -377,20 +382,31 @@ fun BuyPremiumButton(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
+                modifier = Modifier.padding(end = 6.dp),
                 text = startText,
                 style = AppTheme.typography.bodyLarge,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 20.sp,
+                fontSize = fontSize,
+                maxLines = 1,
             )
             Text(
                 text = endText,
                 style = AppTheme.typography.bodyLarge,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 20.sp,
+                fontSize = fontSize,
+                maxLines = 1,
             )
         }
     }
 }
+
+@Suppress("MagicNumber")
+private fun String.resolveFontSize() =
+    when (this.length) {
+        in 0..10 -> 20.sp
+        in 11..16 -> 18.sp
+        else -> 14.sp
+    }
 
 @Composable
 private fun TOSNotice(subscriptionTier: SubscriptionTier) {
