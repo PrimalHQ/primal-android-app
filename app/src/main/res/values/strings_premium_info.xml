@@ -1,4 +1,7 @@
 <resources>
+    <string name="faq_more_info_title">Premium &amp; Pro FAQ</string>
+    <string name="feature_more_info_title">Premium &amp; Pro Features</string>
+    <string name="pro_more_info_title">Primal Pro</string>
     <string name="premium_more_info_title">Primal Premium</string>
     <string name="premium_more_info_close_button">Close</string>
     <string name="premium_more_info_why_premium">Become a Nostr power user and help shape the future! Open protocols like Nostr give us the opportunity to regain control over our online lives.\n\nAt Primal, we don’t rely on advertising. We don’t monetize user data. Our users are our customers. Our sole focus is to make the best possible product for our users. We open source all our work to help the Nostr ecosystem flourish. By signing up for Primal Premium, you are enabling us to continue building for Nostr.\n\nBe the change you want to see in the world. If you don’t want to be the product, consider being the customer.</string>

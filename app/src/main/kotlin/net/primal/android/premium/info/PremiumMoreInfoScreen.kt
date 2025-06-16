@@ -33,17 +33,17 @@ import net.primal.android.theme.AppTheme
 
 internal const val MORE_INFO_TAB_COUNT = 4
 
-const val PREMIUM_MORE_INFO_WHY_PREMIUM_TAB_INDEX = 0
-const val PREMIUM_MORE_INFO_WHY_PRO_TAB_INDEX = 1
-const val PREMIUM_MORE_INFO_FEATURES_TAB_INDEX = 2
-const val PREMIUM_MORE_INFO_FAQ_TAB_INDEX = 3
+const val MORE_INFO_WHY_PREMIUM_TAB_INDEX = 0
+const val MORE_INFO_WHY_PRO_TAB_INDEX = 1
+const val MORE_INFO_FEATURES_TAB_INDEX = 2
+const val MORE_INFO_FAQ_TAB_INDEX = 3
 
-private val tabsRange = PREMIUM_MORE_INFO_WHY_PREMIUM_TAB_INDEX..PREMIUM_MORE_INFO_FAQ_TAB_INDEX
+private val tabsRange = MORE_INFO_WHY_PREMIUM_TAB_INDEX..MORE_INFO_FAQ_TAB_INDEX
 
 @Composable
-fun PremiumMoreInfoScreen(initialTabIndex: Int = PREMIUM_MORE_INFO_WHY_PREMIUM_TAB_INDEX, onClose: () -> Unit) {
+fun PremiumMoreInfoScreen(initialTabIndex: Int = MORE_INFO_WHY_PREMIUM_TAB_INDEX, onClose: () -> Unit) {
     val pagerState = rememberPagerState(
-        initialPage = if (initialTabIndex in tabsRange) initialTabIndex else PREMIUM_MORE_INFO_WHY_PREMIUM_TAB_INDEX,
+        initialPage = if (initialTabIndex in tabsRange) initialTabIndex else MORE_INFO_WHY_PREMIUM_TAB_INDEX,
         pageCount = { MORE_INFO_TAB_COUNT },
     )
 
@@ -82,7 +82,7 @@ fun PremiumMoreInfoScreen(initialTabIndex: Int = PREMIUM_MORE_INFO_WHY_PREMIUM_T
             modifier = Modifier.background(AppTheme.colorScheme.surfaceVariant),
         ) { currentPage ->
             when (currentPage) {
-                PREMIUM_MORE_INFO_WHY_PREMIUM_TAB_INDEX -> {
+                MORE_INFO_WHY_PREMIUM_TAB_INDEX -> {
                     PremiumTabContent(
                         modifier = Modifier
                             .fillMaxSize()
@@ -92,7 +92,7 @@ fun PremiumMoreInfoScreen(initialTabIndex: Int = PREMIUM_MORE_INFO_WHY_PREMIUM_T
                     )
                 }
 
-                PREMIUM_MORE_INFO_WHY_PRO_TAB_INDEX -> {
+                MORE_INFO_WHY_PRO_TAB_INDEX -> {
                     ProTabContent(
                         modifier = Modifier
                             .fillMaxSize()
@@ -102,7 +102,7 @@ fun PremiumMoreInfoScreen(initialTabIndex: Int = PREMIUM_MORE_INFO_WHY_PREMIUM_T
                     )
                 }
 
-                PREMIUM_MORE_INFO_FEATURES_TAB_INDEX -> {
+                MORE_INFO_FEATURES_TAB_INDEX -> {
                     FeaturesTabContent(
                         modifier = Modifier
                             .fillMaxSize()
@@ -111,7 +111,7 @@ fun PremiumMoreInfoScreen(initialTabIndex: Int = PREMIUM_MORE_INFO_WHY_PREMIUM_T
                     )
                 }
 
-                PREMIUM_MORE_INFO_FAQ_TAB_INDEX -> {
+                MORE_INFO_FAQ_TAB_INDEX -> {
                     FAQTabContent(
                         modifier = Modifier
                             .fillMaxSize()
@@ -129,7 +129,7 @@ fun PremiumMoreInfoScreen(initialTabIndex: Int = PREMIUM_MORE_INFO_WHY_PREMIUM_T
 private fun MoreInfoTopAppBar(pagerState: PagerState, onClose: () -> Unit) {
     val uiScope = rememberCoroutineScope()
     PrimalTopAppBar(
-        title = stringResource(id = R.string.premium_more_info_title),
+        title = resolveTopBarTitle(pagerState.currentPage),
         navigationIcon = PrimalIcons.ArrowBack,
         onNavigationIconClick = onClose,
         showDivider = true,
@@ -140,20 +140,31 @@ private fun MoreInfoTopAppBar(pagerState: PagerState, onClose: () -> Unit) {
                 onWhyPremiumTabClick = {
                     uiScope.launch {
                         pagerState.scrollToPage(
-                            PREMIUM_MORE_INFO_WHY_PREMIUM_TAB_INDEX,
+                            MORE_INFO_WHY_PREMIUM_TAB_INDEX,
                         )
                     }
                 },
-                onWhyProTabClick = { uiScope.launch { pagerState.scrollToPage(PREMIUM_MORE_INFO_WHY_PRO_TAB_INDEX) } },
+                onWhyProTabClick = { uiScope.launch { pagerState.scrollToPage(MORE_INFO_WHY_PRO_TAB_INDEX) } },
                 onFeaturesTabClick = {
                     uiScope.launch {
                         pagerState.scrollToPage(
-                            PREMIUM_MORE_INFO_FEATURES_TAB_INDEX,
+                            MORE_INFO_FEATURES_TAB_INDEX,
                         )
                     }
                 },
-                onFAQTabClick = { uiScope.launch { pagerState.scrollToPage(PREMIUM_MORE_INFO_FAQ_TAB_INDEX) } },
+                onFAQTabClick = { uiScope.launch { pagerState.scrollToPage(MORE_INFO_FAQ_TAB_INDEX) } },
             )
         },
     )
+}
+
+@Composable
+private fun resolveTopBarTitle(currentPage: Int): String {
+    return when (currentPage) {
+        MORE_INFO_WHY_PREMIUM_TAB_INDEX -> stringResource(R.string.premium_more_info_title)
+        MORE_INFO_WHY_PRO_TAB_INDEX -> stringResource(R.string.pro_more_info_title)
+        MORE_INFO_FEATURES_TAB_INDEX -> stringResource(R.string.feature_more_info_title)
+        MORE_INFO_FAQ_TAB_INDEX -> stringResource(R.string.faq_more_info_title)
+        else -> stringResource(R.string.premium_more_info_title)
+    }
 }

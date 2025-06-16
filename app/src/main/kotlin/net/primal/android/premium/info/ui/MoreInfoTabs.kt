@@ -12,10 +12,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalSingleTab
-import net.primal.android.premium.info.PREMIUM_MORE_INFO_FAQ_TAB_INDEX
-import net.primal.android.premium.info.PREMIUM_MORE_INFO_FEATURES_TAB_INDEX
-import net.primal.android.premium.info.PREMIUM_MORE_INFO_WHY_PREMIUM_TAB_INDEX
-import net.primal.android.premium.info.PREMIUM_MORE_INFO_WHY_PRO_TAB_INDEX
+import net.primal.android.premium.info.MORE_INFO_FAQ_TAB_INDEX
+import net.primal.android.premium.info.MORE_INFO_FEATURES_TAB_INDEX
+import net.primal.android.premium.info.MORE_INFO_WHY_PREMIUM_TAB_INDEX
+import net.primal.android.premium.info.MORE_INFO_WHY_PRO_TAB_INDEX
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -46,25 +46,25 @@ fun MoreInfoTabs(
         divider = {},
     ) {
         PrimalSingleTab(
-            selected = selectedTabIndex == PREMIUM_MORE_INFO_WHY_PREMIUM_TAB_INDEX,
+            selected = selectedTabIndex == MORE_INFO_WHY_PREMIUM_TAB_INDEX,
             text = stringResource(id = R.string.premium_more_info_premium).uppercase(),
             onClick = onWhyPremiumTabClick,
             textStyle = AppTheme.typography.bodyMedium,
         )
         PrimalSingleTab(
-            selected = selectedTabIndex == PREMIUM_MORE_INFO_WHY_PRO_TAB_INDEX,
+            selected = selectedTabIndex == MORE_INFO_WHY_PRO_TAB_INDEX,
             text = stringResource(id = R.string.premium_more_info_pro).uppercase(),
             onClick = onWhyProTabClick,
             textStyle = AppTheme.typography.bodyMedium,
         )
         PrimalSingleTab(
-            selected = selectedTabIndex == PREMIUM_MORE_INFO_FEATURES_TAB_INDEX,
+            selected = selectedTabIndex == MORE_INFO_FEATURES_TAB_INDEX,
             text = stringResource(id = R.string.premium_more_info_features).uppercase(),
             onClick = onFeaturesTabClick,
             textStyle = AppTheme.typography.bodyMedium,
         )
         PrimalSingleTab(
-            selected = selectedTabIndex == PREMIUM_MORE_INFO_FAQ_TAB_INDEX,
+            selected = selectedTabIndex == MORE_INFO_FAQ_TAB_INDEX,
             text = stringResource(id = R.string.premium_more_info_faq),
             onClick = onFAQTabClick,
             textStyle = AppTheme.typography.bodyMedium,
