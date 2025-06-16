@@ -23,7 +23,6 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -31,7 +30,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,25 +46,21 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopAppBar
-import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.core.compose.icons.primaliconpack.Check
 import net.primal.android.core.compose.icons.primaliconpack.PrimalPremium
-import net.primal.android.premium.ui.toPricingString
+import net.primal.android.premium.buying.ui.PrimalPremiumOfferCard
+import net.primal.android.premium.buying.ui.PrimalProOfferCard
 import net.primal.android.premium.utils.isPremiumTier
 import net.primal.android.premium.utils.isProTier
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.store.domain.SubscriptionBillingPeriod
 import net.primal.android.wallet.store.domain.SubscriptionProduct
 import net.primal.android.wallet.store.domain.SubscriptionTier
 
@@ -79,12 +77,20 @@ private const val PAGE_PRO = 1
 fun PremiumBuyingHomeStage(
     subscriptionTier: SubscriptionTier,
     loading: Boolean,
+    isUpgradingToPrimalPro: Boolean,
     isPremiumBadgeOrigin: Boolean,
     subscriptions: List<SubscriptionProduct>,
     onClose: () -> Unit,
     onLearnMoreClick: (SubscriptionTier) -> Unit,
     onPurchaseSubscription: (SubscriptionTier) -> Unit,
 ) {
+    val premiumSubscriptions = remember(subscriptions) {
+        subscriptions.filter { it.tier.isPremiumTier() }
+    }
+    val proSubscriptions = remember(subscriptions) {
+        subscriptions.filter { it.tier.isProTier() }
+    }
+
     Scaffold(
         topBar = {
             PrimalTopAppBar(
@@ -103,6 +109,7 @@ fun PremiumBuyingHomeStage(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .padding(bottom = 24.dp)
                 .verticalScroll(state = rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -118,15 +125,41 @@ fun PremiumBuyingHomeStage(
                 )
             }
 
-            PrimalSubscriptionTitle()
+            if (isUpgradingToPrimalPro) {
+                UpgradeToPrimalProTitle()
 
-            SubscriptionOfferSelector(
-                subscriptionTier = subscriptionTier,
-                loading = loading,
-                subscriptions = subscriptions,
-                onPurchaseSubscription = onPurchaseSubscription,
-                onLearnMoreClick = onLearnMoreClick,
-            )
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(bottom = 24.dp)
+                        .padding(horizontal = 32.dp)
+                        .fillMaxSize(),
+                ) {
+                    PrimalProOfferCard(
+                        loading = loading,
+                        proSubscriptions = proSubscriptions,
+                        onPurchaseSubscription = onPurchaseSubscription,
+                        paddingValues = PaddingValues(24.dp),
+                        autoSizePrice = true,
+                        priceFontSizeResolved = {},
+                    )
+                }
+                LearnMoreLink(
+                    isPremium = false,
+                    onLearnMoreClick = onLearnMoreClick,
+                )
+            } else {
+                PrimalSubscriptionTitle()
+
+                SubscriptionOfferSelector(
+                    subscriptionTier = subscriptionTier,
+                    loading = loading,
+                    proSubscriptions = proSubscriptions,
+                    premiumSubscriptions = premiumSubscriptions,
+                    onPurchaseSubscription = onPurchaseSubscription,
+                    onLearnMoreClick = onLearnMoreClick,
+                )
+            }
 
             TOSNotice()
         }
@@ -137,7 +170,8 @@ fun PremiumBuyingHomeStage(
 private fun SubscriptionOfferSelector(
     subscriptionTier: SubscriptionTier,
     loading: Boolean,
-    subscriptions: List<SubscriptionProduct>,
+    premiumSubscriptions: List<SubscriptionProduct>,
+    proSubscriptions: List<SubscriptionProduct>,
     onPurchaseSubscription: (SubscriptionTier) -> Unit,
     onLearnMoreClick: (SubscriptionTier) -> Unit,
 ) {
@@ -150,12 +184,13 @@ private fun SubscriptionOfferSelector(
         OfferPager(
             pagerState = pagerState,
             loading = loading,
-            subscriptions = subscriptions,
+            premiumSubscriptions = premiumSubscriptions,
+            proSubscriptions = proSubscriptions,
             onPurchaseSubscription = onPurchaseSubscription,
         )
         OfferPagerIndicators(pagerState = pagerState)
         LearnMoreLink(
-            pagerState = pagerState,
+            isPremium = pagerState.currentPage == 0,
             onLearnMoreClick = onLearnMoreClick,
         )
     }
@@ -165,58 +200,16 @@ private fun SubscriptionOfferSelector(
 @Composable
 private fun OfferPager(
     pagerState: PagerState,
-    subscriptions: List<SubscriptionProduct>,
+    premiumSubscriptions: List<SubscriptionProduct>,
+    proSubscriptions: List<SubscriptionProduct>,
     loading: Boolean,
     onPurchaseSubscription: (SubscriptionTier) -> Unit,
 ) {
     val pageSize = 300.dp
+    var minFontSize by remember { mutableStateOf(44.sp) }
 
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val horizontalPadding = ((maxWidth - pageSize) / 2).coerceAtLeast(0.dp)
-
-        val premiumSubscription = remember(subscriptions) {
-            subscriptions.filter { it.tier.isPremiumTier() }
-        }
-        val proSubscriptions = remember(subscriptions) {
-            subscriptions.filter { it.tier.isProTier() }
-        }
-
-        val premiumMonthly = remember(premiumSubscription) {
-            premiumSubscription.find { it.billingPeriod == SubscriptionBillingPeriod.Monthly }
-        }
-        val premiumYearly = remember(premiumSubscription) {
-            premiumSubscription.find { it.billingPeriod == SubscriptionBillingPeriod.Yearly }
-        }
-
-        val proMonthly = remember(proSubscriptions) {
-            proSubscriptions.find { it.billingPeriod == SubscriptionBillingPeriod.Monthly }
-        }
-        val proYearly = remember(proSubscriptions) {
-            proSubscriptions.find { it.billingPeriod == SubscriptionBillingPeriod.Yearly }
-        }
-
-        val premiumDiscountPercent = remember(premiumMonthly, premiumYearly) {
-            calculateDiscountPercent(premiumMonthly, premiumYearly)
-        }
-        val proDiscountPercent = remember(proMonthly, proYearly) {
-            calculateDiscountPercent(proMonthly, proYearly)
-        }
-
-        val premiumBadgeText = if (!loading) {
-            premiumDiscountPercent?.let {
-                stringResource(R.string.subscription_save_percent, it)
-            }
-        } else {
-            null
-        }
-
-        val proBadgeText = if (!loading) {
-            proDiscountPercent?.let {
-                stringResource(R.string.subscription_save_percent, it)
-            }
-        } else {
-            null
-        }
 
         HorizontalPager(
             state = pagerState,
@@ -225,50 +218,27 @@ private fun OfferPager(
             contentPadding = PaddingValues(horizontal = horizontalPadding),
         ) { page ->
             when (page) {
-                PAGE_PREMIUM -> OfferCard(
-                    titleSuffix = stringResource(R.string.subscription_primal_premium_title),
-                    titleColor = PREMIUM_PINK,
-                    priceText = if (loading) "---" else premiumMonthly?.toPricingString() ?: "---",
-                    billingText = stringResource(
-                        R.string.subscription_billed_annually,
-                        if (loading) "---" else premiumYearly?.toPricingString() ?: "---",
-                    ),
-
-                    badgeColor = PREMIUM_PINK,
-                    descriptionItems = listOf(
-                        stringResource(R.string.subscription_primal_premium_perk_verified_nostr_address),
-                        stringResource(R.string.subscription_primal_premium_perk_custom_lightning_address),
-                        stringResource(R.string.subscription_primal_premium_perk_vip_profile),
-                        stringResource(R.string.subscription_primal_premium_perk_advanced_nostr_search),
-                        stringResource(R.string.subscription_primal_premium_perk_paid_relay),
-                        stringResource(R.string.subscription_primal_premium_perk_10gb_media_storage),
-                        stringResource(R.string.subscription_primal_premium_perk_1gb_max_file_size),
-                    ),
-                    buttonText = stringResource(R.string.subscription_primal_buy_premium),
-                    onBuyOfferClick = { onPurchaseSubscription(SubscriptionTier.PREMIUM) },
-                    badgeText = premiumBadgeText,
+                PAGE_PREMIUM -> PrimalPremiumOfferCard(
+                    modifier = Modifier
+                        .height(430.dp)
+                        .width(300.dp),
+                    loading = loading,
+                    premiumSubscriptions = premiumSubscriptions,
+                    onPurchaseSubscription = onPurchaseSubscription,
+                    priceFontSize = minFontSize,
+                    paddingValues = PaddingValues(16.dp),
                 )
-                PAGE_PRO -> OfferCard(
-                    titleSuffix = stringResource(R.string.subscription_primal_pro_title),
-                    titleColor = PRO_ORANGE,
-                    priceText = if (loading) "---" else proMonthly?.toPricingString() ?: "---",
-                    billingText = stringResource(
-                        R.string.subscription_billed_annually,
-                        if (loading) "---" else proYearly?.toPricingString() ?: "---",
-                    ),
-                    badgeColor = PRO_ORANGE,
-                    descriptionItems = listOf(
-                        stringResource(R.string.subscription_primal_pro_perk_everything_in_premium),
-                        stringResource(R.string.subscription_primal_pro_perk_studio),
-                        stringResource(R.string.subscription_primal_pro_perk_legend_status),
-                        stringResource(R.string.subscription_primal_pro_perk_100gb_storage),
-                        stringResource(R.string.subscription_primal_pro_perk_10gb_max_file),
-                    ),
-                    hideFirstBullet = true,
-                    buttonText = stringResource(R.string.subscription_primal_buy_pro),
-                    onBuyOfferClick = { onPurchaseSubscription(SubscriptionTier.PRO) },
-                    buttonColor = PRO_ORANGE,
-                    badgeText = proBadgeText,
+
+                PAGE_PRO -> PrimalProOfferCard(
+                    modifier = Modifier
+                        .height(430.dp)
+                        .width(300.dp),
+                    loading = loading,
+                    proSubscriptions = proSubscriptions,
+                    autoSizePrice = true,
+                    priceFontSizeResolved = { minFontSize = it },
+                    onPurchaseSubscription = onPurchaseSubscription,
+                    paddingValues = PaddingValues(16.dp),
                 )
             }
         }
@@ -302,8 +272,7 @@ private fun OfferPagerIndicators(pagerState: PagerState) {
 }
 
 @Composable
-private fun LearnMoreLink(pagerState: PagerState, onLearnMoreClick: (SubscriptionTier) -> Unit) {
-    val isPremium = pagerState.currentPage == 0
+private fun LearnMoreLink(isPremium: Boolean, onLearnMoreClick: (SubscriptionTier) -> Unit) {
     val learnAboutText = stringResource(
         if (isPremium) {
             R.string.subscription_learn_about_premium
@@ -343,20 +312,59 @@ private fun TOSNotice() {
                 fontSize = 15.sp,
             )
             withStyle(style = textStyle) {
-                append(stringResource(id = R.string.subscription_tos_title))
+                appendLine(stringResource(id = R.string.subscription_tos_title))
             }
             withLink(link = LinkAnnotation.Url("https://primal.net/terms")) {
                 withStyle(
-                    style = textStyle.copy(textDecoration = TextDecoration.Underline),
+                    style = textStyle.copy(
+                        textDecoration = TextDecoration.Underline,
+                        fontWeight = FontWeight.Bold,
+                    ),
                 ) {
-                    append("\n")
-                    append(stringResource(id = R.string.subscription_tos_subtitle))
+                    append(stringResource(id = R.string.subscription_tos))
+                }
+                withStyle(textStyle) {
+                    append(" " + stringResource(id = R.string.subscription_and) + " ")
+                }
+                withStyle(
+                    style = textStyle.copy(
+                        textDecoration = TextDecoration.Underline,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                ) {
+                    append(stringResource(id = R.string.subscription_pp))
                 }
             }
         },
         textAlign = TextAlign.Center,
         lineHeight = 22.sp,
     )
+}
+
+@Composable
+fun UpgradeToPrimalProTitle(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.padding(bottom = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = stringResource(id = R.string.premium_buying_home_primal_pro),
+            fontSize = 36.sp,
+            lineHeight = 40.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            color = AppTheme.colorScheme.onSurface,
+        )
+
+        Text(
+            text = stringResource(id = R.string.premium_buying_home_primal_pro_description),
+            fontSize = 15.sp,
+            lineHeight = 24.sp,
+            fontWeight = FontWeight.Normal,
+            textAlign = TextAlign.Center,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+        )
+    }
 }
 
 @Composable
@@ -421,232 +429,3 @@ fun PrimalPremiumLogoHeader(modifier: Modifier = Modifier) {
         )
     }
 }
-
-@Composable
-private fun OfferCard(
-    modifier: Modifier = Modifier,
-    titleSuffix: String,
-    titleColor: Color,
-    priceText: String,
-    billingText: String,
-    badgeColor: Color,
-    descriptionItems: List<String>,
-    hideFirstBullet: Boolean = false,
-    buttonText: String,
-    onBuyOfferClick: () -> Unit,
-    badgeText: String?,
-    buttonColor: Color = AppTheme.colorScheme.primary,
-) {
-    Column(
-        modifier = modifier
-            .height(430.dp)
-            .width(300.dp)
-            .clip(AppTheme.shapes.medium)
-            .background(AppTheme.extraColorScheme.surfaceVariantAlt3)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Column {
-            OfferTitle(
-                titleSuffix = titleSuffix,
-                titleColor = titleColor,
-            )
-            Spacer(Modifier.height(16.dp))
-
-            OfferPrice(priceText = priceText)
-            Spacer(Modifier.height(4.dp))
-
-            BillingInfo(
-                billingText = billingText,
-                badgeColor = badgeColor,
-                badgeText = badgeText,
-            )
-            Spacer(Modifier.height(16.dp))
-
-            DescriptionSection(
-                bulletPoints = descriptionItems,
-                showFirstWithoutCheckmark = hideFirstBullet,
-            )
-        }
-
-        PrimalFilledButton(
-            modifier = Modifier.fillMaxWidth(),
-            height = 48.dp,
-            containerColor = buttonColor,
-            onClick = onBuyOfferClick,
-        ) {
-            Text(
-                text = buttonText,
-                style = AppTheme.typography.bodyLarge,
-                fontWeight = FontWeight.SemiBold,
-            )
-        }
-    }
-}
-
-@Composable
-private fun OfferTitle(titleSuffix: String, titleColor: Color) {
-    Row {
-        Text(
-            text = "Primal",
-            fontSize = 24.sp,
-            lineHeight = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = AppTheme.colorScheme.onSurface,
-        )
-        Text(
-            text = " $titleSuffix",
-            fontSize = 24.sp,
-            lineHeight = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = titleColor,
-        )
-    }
-}
-
-@Suppress("MagicNumber")
-@Composable
-private fun OfferPrice(priceText: String) {
-    val priceFontSize = calculatePriceFontSize(priceText)
-
-    Row(
-        verticalAlignment = Alignment.Bottom,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Text(
-            text = priceText,
-            fontSize = priceFontSize,
-            fontWeight = FontWeight.Bold,
-            color = AppTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Text(
-            text = stringResource(R.string.subscription_price_per_month),
-            fontSize = 20.sp,
-            lineHeight = 26.sp,
-            fontWeight = FontWeight.Normal,
-            color = AppTheme.colorScheme.onSurface,
-            maxLines = 1,
-        )
-    }
-}
-
-@Suppress("MagicNumber")
-@Composable
-private fun calculatePriceFontSize(priceText: String): TextUnit {
-    return when (priceText.length) {
-        in 0..6 -> 44.sp
-        7 -> 42.sp
-        8 -> 36.sp
-        9 -> 32.sp
-        else -> 28.sp
-    }
-}
-
-private const val BadgeCornerRadiusPercent = 50
-
-@Composable
-private fun BillingInfo(
-    billingText: String,
-    badgeColor: Color,
-    badgeText: String?,
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = billingText,
-            fontSize = 15.sp,
-            lineHeight = 20.sp,
-            fontWeight = FontWeight.Normal,
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-        )
-        Spacer(Modifier.width(4.dp))
-
-        if (badgeText != null) {
-            Box(
-                modifier = Modifier
-                    .background(
-                        color = badgeColor.copy(alpha = 0.4f),
-                        shape = RoundedCornerShape(BadgeCornerRadiusPercent),
-                    )
-                    .padding(horizontal = 6.dp, vertical = 2.dp),
-            ) {
-                Text(
-                    text = badgeText,
-                    color = Color.White,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 13.sp,
-                    lineHeight = 20.sp,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun DescriptionSection(showFirstWithoutCheckmark: Boolean = false, bulletPoints: List<String>) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        horizontalAlignment = Alignment.Start,
-    ) {
-        if (showFirstWithoutCheckmark) {
-            Text(
-                text = bulletPoints[0],
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                fontSize = 16.sp,
-                lineHeight = 20.sp,
-            )
-            bulletPoints.drop(1)
-        }
-        if (showFirstWithoutCheckmark) {
-            bulletPoints.drop(1)
-        } else {
-            bulletPoints
-        }.onEach {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Icon(
-                    modifier = Modifier.size(10.dp),
-                    imageVector = PrimalIcons.Check,
-                    contentDescription = null,
-                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = it,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                    fontSize = 16.sp,
-                    lineHeight = 20.sp,
-                )
-            }
-        }
-    }
-}
-
-private fun calculateDiscountPercent(monthly: SubscriptionProduct?, yearly: SubscriptionProduct?): Int? {
-    val monthlyMicros = monthly?.takeIf { it.billingPeriod == SubscriptionBillingPeriod.Monthly }?.priceAmountMicros
-    val yearlyMicros = yearly?.takeIf { it.billingPeriod == SubscriptionBillingPeriod.Yearly }?.priceAmountMicros
-
-    if (monthlyMicros == null || yearlyMicros == null) return null
-
-    val monthlyPrice = monthlyMicros / MICROS_IN_UNIT
-    val yearlyPrice = yearlyMicros / MICROS_IN_UNIT
-
-    val discount = if (monthlyPrice > 0.0 && yearlyPrice > 0.0) {
-        ((1 - yearlyPrice / (monthlyPrice * MONTHS_IN_YEAR)) * PERCENT_CONVERSION).toInt()
-    } else {
-        null
-    }
-
-    return discount?.takeIf { it > 0 }
-}
-
-private const val MICROS_IN_UNIT = 1_000_000.0
-private const val MONTHS_IN_YEAR = 12
-private const val PERCENT_CONVERSION = 100

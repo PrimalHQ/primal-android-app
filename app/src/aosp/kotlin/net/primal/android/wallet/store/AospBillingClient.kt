@@ -28,6 +28,6 @@ class AospBillingClient : PrimalBillingClient {
     override suspend fun launchSubscriptionBillingFlow(
         activity: Activity,
         subscriptionProduct: SubscriptionProduct,
-        existingSubscription: SubscriptionPurchase?
+        existingSubscription: SubscriptionPurchase?,
     ) = Unit
 }

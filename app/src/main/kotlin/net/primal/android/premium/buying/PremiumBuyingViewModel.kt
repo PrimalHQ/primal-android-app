@@ -19,6 +19,7 @@ import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.navigation.FROM_ORIGIN_PREMIUM_BADGE
 import net.primal.android.navigation.buyingPremiumFromOrigin
 import net.primal.android.navigation.extendExistingPremiumName
+import net.primal.android.navigation.upgradeToPrimalPro
 import net.primal.android.premium.buying.PremiumBuyingContract.PremiumStage
 import net.primal.android.premium.buying.PremiumBuyingContract.SideEffect
 import net.primal.android.premium.buying.PremiumBuyingContract.UiEvent
@@ -46,11 +47,13 @@ class PremiumBuyingViewModel @Inject constructor(
     private val userRepository: UserRepository,
 ) : ViewModel() {
 
+    private val isUpgradingToPrimalPro = savedStateHandle.upgradeToPrimalPro
     private var purchase: SubscriptionPurchase? = null
 
     private val _state = MutableStateFlow(
         UiState(
             isExtendingPremium = savedStateHandle.extendExistingPremiumName != null,
+            isUpgradingToPro = isUpgradingToPrimalPro,
             isPremiumBadgeOrigin = savedStateHandle.buyingPremiumFromOrigin == FROM_ORIGIN_PREMIUM_BADGE,
             primalName = savedStateHandle.extendExistingPremiumName,
             stage = if (savedStateHandle.extendExistingPremiumName != null) {
@@ -87,13 +90,20 @@ class PremiumBuyingViewModel @Inject constructor(
 
     private fun checkMembershipStatus() =
         viewModelScope.launch {
-            if (activeAccountStore.activeUserAccount().hasPremiumMembership()) {
-                setEffect(SideEffect.NavigateToPremiumHome)
+            val activeAccount = activeAccountStore.activeUserAccount()
+            if (activeAccount.hasPremiumMembership()) {
+                setState { copy(primalName = activeAccount.premiumMembership?.premiumName) }
+                if (!isUpgradingToPrimalPro) {
+                    setEffect(SideEffect.NavigateToPremiumHome)
+                }
             } else {
                 try {
-                    premiumRepository.fetchMembershipStatus(userId = activeAccountStore.activeUserId())?.let {
+                    premiumRepository.fetchMembershipStatus(userId = activeAccount.pubkey)?.let {
                         if (it.hasPremiumMembership()) {
-                            setEffect(SideEffect.NavigateToPremiumHome)
+                            setState { copy(primalName = it.premiumName) }
+                            if (!isUpgradingToPrimalPro) {
+                                setEffect(SideEffect.NavigateToPremiumHome)
+                            }
                         }
                     }
                 } catch (error: NetworkException) {
@@ -198,6 +208,7 @@ class PremiumBuyingViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 primalBillingClient.launchSubscriptionBillingFlow(
+                    existingSubscription = purchase,
                     subscriptionProduct = event.subscriptionProduct,
                     activity = event.activity,
                 )

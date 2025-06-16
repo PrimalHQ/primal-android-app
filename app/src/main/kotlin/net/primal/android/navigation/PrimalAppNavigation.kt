@@ -296,6 +296,9 @@ fun NavController.navigateToPremiumBuying(fromOrigin: String? = null) {
     }
 }
 
+private fun NavController.navigateToUpgradeToPrimalPro() =
+    navigate(route = "premium/buying?$UPGRADE_TO_PRIMAL_PRO=true")
+
 private fun NavController.navigateToPremiumExtendSubscription(primalName: String) =
     navigate(route = "premium/buying?$EXTEND_EXISTING_PREMIUM_NAME=$primalName")
 
@@ -631,9 +634,14 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
         premiumBuying(
             route = "premium/buying" +
                 "?$EXTEND_EXISTING_PREMIUM_NAME={$EXTEND_EXISTING_PREMIUM_NAME}" +
+                "&$UPGRADE_TO_PRIMAL_PRO={$UPGRADE_TO_PRIMAL_PRO}" +
                 "&$FROM_ORIGIN={$FROM_ORIGIN}",
             arguments = listOf(
                 navArgument(EXTEND_EXISTING_PREMIUM_NAME) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(UPGRADE_TO_PRIMAL_PRO) {
                     type = NavType.StringType
                     nullable = true
                 },
@@ -1484,6 +1492,7 @@ private fun NavGraphBuilder.premiumHome(route: String, navController: NavControl
             onManagePremium = { navController.navigateToPremiumManage() },
             onLegendCardClick = { navController.navigateToPremiumCard(profileId = it) },
             onSupportPrimal = { navController.navigateToPremiumSupportPrimal() },
+            onUpgradeToProClick = { navController.navigateToUpgradeToPrimalPro() },
             onContributePrimal = { navController.navigateToLegendContributePrimal() },
         )
     }
