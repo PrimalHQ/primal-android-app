@@ -107,7 +107,11 @@ private fun PremiumHomeScreen(
     Scaffold(
         topBar = {
             PrimalTopAppBar(
-                title = stringResource(id = R.string.premium_home_member_title),
+                title = if (state.membership.isPrimalLegendTier()) {
+                    stringResource(id = R.string.premium_home_member_pro_title)
+                } else {
+                    stringResource(id = R.string.premium_home_member_premium_title)
+                },
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = onClose,
                 showDivider = false,
@@ -117,13 +121,19 @@ private fun PremiumHomeScreen(
             if (state.membership?.isExpired() == true) {
                 BottomBarButton(
                     text = stringResource(id = R.string.premium_home_renew_subscription),
+                    legendaryCustomization = state.avatarLegendaryCustomization,
                     onClick = {
                         onRenewSubscription(state.membership.premiumName)
                     },
                 )
             } else {
                 BottomBarButton(
-                    text = stringResource(id = R.string.premium_home_premium_button),
+                    text = if (state.membership.isPrimalLegendTier()) {
+                        stringResource(id = R.string.premium_home_pro_button)
+                    } else {
+                        stringResource(id = R.string.premium_home_premium_button)
+                    },
+                    legendaryCustomization = state.avatarLegendaryCustomization,
                     onClick = onManagePremium,
                 )
             }
@@ -260,6 +270,7 @@ private fun PremiumAvatarHeader(
 @Composable
 private fun BottomBarButton(
     text: String,
+    legendaryCustomization: LegendaryCustomization?,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
@@ -268,8 +279,17 @@ private fun BottomBarButton(
             .navigationBarsPadding()
             .padding(36.dp),
     ) {
+        legendaryCustomization
         PrimalFilledButton(
             modifier = Modifier.fillMaxWidth(),
+            containerColor = if (legendaryCustomization != null &&
+                legendaryCustomization.legendaryStyle != LegendaryStyle.NO_CUSTOMIZATION &&
+                legendaryCustomization.legendaryStyle != null
+            ) {
+                AppTheme.colorScheme.primary
+            } else {
+                AppTheme.colorScheme.primary
+            },
             onClick = onClick,
         ) {
             Text(

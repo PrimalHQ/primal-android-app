@@ -209,9 +209,11 @@
     <string name="premium_promo_code_apply_button">Apply Promo Code</string>
     <string name="premium_promo_code_cancel_button">Cancel</string>
 
-    <string name="premium_home_member_title">Premium</string>
+    <string name="premium_home_member_premium_title">Premium</string>
+    <string name="premium_home_member_pro_title">Pro</string>
     <string name="premium_home_member_early_primal_user">Hey there! You are an early Primal user who interacted with our team, so we gave you 6 months of Primal Premium for free. ♥\uFE0F\uD83E\uDEC2</string>
     <string name="premium_home_premium_button">Manage Premium</string>
+    <string name="premium_home_pro_button">Manage Pro</string>
     <string name="premium_home_renew_subscription">Renew Subscription</string>
     <string name="premium_home_extend_subscription">Extend Subscription</string>
     <string name="premium_home_enjoying_primal">Are you enjoying Primal?</string>
@@ -327,14 +329,14 @@
 
     <string name="premium_order_history_title">Manage Subscription</string>
     <string name="premium_order_history_header">Order history</string>
-    <string name="premium_order_history_premium_valid_until">Primal Premium valid until:</string>
+    <string name="premium_order_history_premium_valid_until">Primal Pro valid until:</string>
     <string name="premium_order_history_premium_valid_forever">Forever</string>
     <string name="premium_order_history_premium_hint_legend">You Legend</string>
     <string name="premium_order_history_premium_hint_renews_app_store">Renews via App Store</string>
     <string name="premium_order_history_premium_hint_renews_play_store">Renews via Play Store</string>
     <string name="premium_order_history_premium_hint_does_not_renews">Does not renew</string>
     <string name="premium_order_history_premium_expired">Expired</string>
-    <string name="premium_order_history_cancel_subscription_button">Cancel Premium Subscription</string>
+    <string name="premium_order_history_cancel_subscription_button">Cancel Subscription</string>
     <string name="premium_order_history_enable_renewal_button">Enable Renewal</string>
     <string name="premium_order_history_extend_subscription_button">Extend Subscription</string>
     <string name="premium_order_history_renews_subscription_button">Renew Subscription</string>
