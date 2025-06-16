@@ -39,19 +39,15 @@
     <string name="premium_more_info_faq">FAQ</string>
 
     <string name="premium_more_info_features_table_header_feature">Feature</string>
-    <string name="premium_more_info_features_table_header_free">Free</string>
+    <string name="premium_more_info_features_table_header_pro">Pro</string>
     <string name="premium_more_info_features_table_header_premium">Premium</string>
-    <string name="premium_more_info_features_table_first_row">Apps for Web, iOS, Android</string>
-    <string name="premium_more_info_features_table_second_row">Built-in bitcoin lightning wallet</string>
-    <string name="premium_more_info_features_table_third_row">Global Nostr text and user search</string>
-    <string name="premium_more_info_features_table_fourth_row">Media storage capacity</string>
-    <string name="premium_more_info_features_table_fifth_row">Media maximum file size</string>
-    <string name="premium_more_info_features_table_sixth_row">Verified Nostr Address</string>
-    <string name="premium_more_info_features_table_seventh_row">Custom Lightning Address</string>
-    <string name="premium_more_info_features_table_eighth_row">VIP Profile on primal.net</string>
-    <string name="premium_more_info_features_table_ninth_row">Advanced Nostr search</string>
-    <string name="premium_more_info_features_table_tenth_row">Premium paid relay</string>
-    <string name="premium_more_info_features_table_eleventh_row">Nostr contact list backup</string>
-    <string name="premium_more_info_features_table_twelfth_row">Nostr account content backup</string>
-    <string name="premium_more_info_features_table_thirteenth_row">Much more to come!</string>
+    <string name="premium_more_info_features_table_first_row">Verified Nostr Address</string>
+    <string name="premium_more_info_features_table_second_row">Custom Lightning Address</string>
+    <string name="premium_more_info_features_table_third_row">VIP Profile on primal.net</string>
+    <string name="premium_more_info_features_table_fourth_row">Advanced Nostr search</string>
+    <string name="premium_more_info_features_table_fifth_row">Premium paid relay</string>
+    <string name="premium_more_info_features_table_sixth_row">Media storage capacity</string>
+    <string name="premium_more_info_features_table_seventh_row">Media maximum file size</string>
+    <string name="premium_more_info_features_table_eighth_row">Primal Studio</string>
+    <string name="premium_more_info_features_table_ninth_row">Legend Status on Primal</string>
 </resources>
