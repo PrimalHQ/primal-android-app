@@ -72,7 +72,7 @@ internal val PRO_ORANGE = Color(0xFFE47C00)
 @ExperimentalMaterial3Api
 @Composable
 fun PremiumBuyingHomeStage(
-    initialSubscriptionTier: SubscriptionTier,
+    subscriptionTier: SubscriptionTier,
     loading: Boolean,
     isPremiumBadgeOrigin: Boolean,
     subscriptions: List<SubscriptionProduct>,
@@ -116,7 +116,7 @@ fun PremiumBuyingHomeStage(
             PrimalSubscriptionTitle()
 
             SubscriptionOfferSelector(
-                initialSubscriptionTier = initialSubscriptionTier,
+                initialSubscriptionTier = subscriptionTier,
                 loading = loading,
                 subscriptions = subscriptions,
                 onPurchaseSubscription = onPurchaseSubscription,
