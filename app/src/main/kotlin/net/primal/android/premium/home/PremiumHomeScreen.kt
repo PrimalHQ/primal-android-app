@@ -44,6 +44,7 @@ import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.premium.buying.home.PRO_ORANGE
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.premium.ui.PremiumBadge
@@ -62,6 +63,7 @@ fun PremiumHomeScreen(
     onRenewSubscription: (primalName: String) -> Unit,
     onManagePremium: () -> Unit,
     onSupportPrimal: () -> Unit,
+    onUpgradeToProClick: () -> Unit,
     onLegendCardClick: (String) -> Unit,
     onContributePrimal: () -> Unit,
 ) {
@@ -80,6 +82,7 @@ fun PremiumHomeScreen(
         onRenewSubscription = onRenewSubscription,
         onManagePremium = onManagePremium,
         onSupportPrimal = onSupportPrimal,
+        onUpgradeToProClick = onUpgradeToProClick,
         onLegendCardClick = onLegendCardClick,
         onContributePrimal = onContributePrimal,
         eventPublisher = viewModel::setEvent,
@@ -94,6 +97,7 @@ private fun PremiumHomeScreen(
     onRenewSubscription: (primalName: String) -> Unit,
     onManagePremium: () -> Unit,
     onSupportPrimal: () -> Unit,
+    onUpgradeToProClick: () -> Unit,
     onLegendCardClick: (String) -> Unit,
     onContributePrimal: () -> Unit,
     eventPublisher: (PremiumHomeContract.UiEvent) -> Unit,
@@ -157,6 +161,7 @@ private fun PremiumHomeScreen(
             onLegendCardClick = onLegendCardClick,
             onContributePrimal = onContributePrimal,
             onSupportPrimal = onSupportPrimal,
+            onUpgradeToProClick = onUpgradeToProClick,
         )
     }
 }
@@ -169,6 +174,7 @@ private fun PremiumHomeContent(
     onLegendCardClick: (String) -> Unit,
     onContributePrimal: () -> Unit,
     onSupportPrimal: () -> Unit,
+    onUpgradeToProClick: () -> Unit,
 ) {
     Column(
         modifier = modifier,
@@ -191,7 +197,6 @@ private fun PremiumHomeContent(
                 membershipExpired = state.membership.isExpired(),
                 legendaryStyle = state.avatarLegendaryCustomization?.legendaryStyle
                     ?: LegendaryStyle.NO_CUSTOMIZATION,
-
             )
 
             if (state.membership.isPremiumFreeTier()) {
@@ -225,6 +230,10 @@ private fun PremiumHomeContent(
                     )
                 }
 
+                !state.membership.isPrimalLegendTier() -> {
+                    UpgradeToPrimalProNotice(onUpgradeToProClick = onUpgradeToProClick)
+                }
+
                 else -> {
                     if (state.showSupportUsNotice) {
                         if (state.membership.isPrimalLegendTier()) {
@@ -243,6 +252,25 @@ private fun PremiumHomeContent(
             }
         }
     }
+}
+
+@Composable
+private fun UpgradeToPrimalProNotice(onUpgradeToProClick: () -> Unit) {
+    Text(
+        modifier = Modifier.clickable(onClick = onUpgradeToProClick),
+        text = buildAnnotatedString {
+            appendLine(stringResource(id = R.string.premium_home_primal_pro_want_to))
+            append(stringResource(id = R.string.premium_home_primal_pro_check_out))
+            append(" ")
+            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = PRO_ORANGE)) {
+                append(stringResource(id = R.string.premium_home_primal_pro))
+            }
+            append(".")
+        },
+        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+        style = AppTheme.typography.bodyMedium,
+        textAlign = TextAlign.Center,
+    )
 }
 
 @Composable
