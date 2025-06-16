@@ -27,7 +27,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.premium.info.ui.FAQTabContent
 import net.primal.android.premium.info.ui.FeaturesTabContent
 import net.primal.android.premium.info.ui.MoreInfoTabs
-import net.primal.android.premium.info.ui.WhyPremiumTabContent
+import net.primal.android.premium.info.ui.PremiumTabContent
 import net.primal.android.theme.AppTheme
 
 internal const val MORE_INFO_TAB_COUNT = 3
@@ -81,7 +81,7 @@ fun PremiumMoreInfoScreen(initialTabIndex: Int = PREMIUM_MORE_INFO_WHY_TAB_INDEX
         ) { currentPage ->
             when (currentPage) {
                 PREMIUM_MORE_INFO_WHY_TAB_INDEX -> {
-                    WhyPremiumTabContent(
+                    PremiumTabContent(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues)

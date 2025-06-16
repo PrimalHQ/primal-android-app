@@ -45,7 +45,7 @@ fun MoreInfoTabs(
     ) {
         PrimalSingleTab(
             selected = selectedTabIndex == PREMIUM_MORE_INFO_WHY_TAB_INDEX,
-            text = stringResource(id = R.string.premium_more_info_why_premium).uppercase(),
+            text = stringResource(id = R.string.premium_more_info_premium).uppercase(),
             onClick = onWhyPremiumTabClick,
             textStyle = AppTheme.typography.bodyMedium,
         )
