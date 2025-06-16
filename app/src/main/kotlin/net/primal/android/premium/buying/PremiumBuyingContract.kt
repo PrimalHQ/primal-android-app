@@ -4,6 +4,7 @@ import android.app.Activity
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.premium.domain.MembershipError
 import net.primal.android.wallet.store.domain.SubscriptionProduct
+import net.primal.android.wallet.store.domain.SubscriptionTier
 
 interface PremiumBuyingContract {
     data class UiState(
@@ -13,6 +14,7 @@ interface PremiumBuyingContract {
 
         val subscriptions: List<SubscriptionProduct> = emptyList(),
         val stage: PremiumStage = PremiumStage.Home,
+        val subscriptionTier: SubscriptionTier = SubscriptionTier.PREMIUM,
         val primalName: String? = null,
         val hasActiveSubscription: Boolean = false,
 
@@ -26,6 +28,8 @@ interface PremiumBuyingContract {
     sealed class UiEvent {
         data class MoveToPremiumStage(val stage: PremiumStage) : UiEvent()
         data class SetPrimalName(val primalName: String) : UiEvent()
+
+        data class SetSubscriptionTier(val subscriptionTier: SubscriptionTier) : UiEvent()
 
         data class ApplyPromoCode(val promoCode: String) : UiEvent()
         data object ClearPromoCodeValidity : UiEvent()

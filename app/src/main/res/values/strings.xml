@@ -151,6 +151,33 @@
     <string name="account_switcher_create_new_account">Create a new account</string>
     <string name="account_switcher_add_existing_account">Add an existing account</string>
 
+    <string name="subscription_primal_title_primary">Primal</string>
+    <string name="subscription_primal_title_secondary">Premium and Pro</string>
+    <string name="subscription_primal_subtitle">Upgrade your Primal experience today.</string>
+    <string name="subscription_primal_premium_title">Premium</string>
+    <string name="subscription_primal_buy_premium">Buy Premium</string>
+    <string name="subscription_primal_premium_perk_verified_nostr_address">Verified Nostr Address</string>
+    <string name="subscription_primal_premium_perk_custom_lightning_address">Custom Lightning Address</string>
+    <string name="subscription_primal_premium_perk_vip_profile">VIP profile on primal.net</string>
+    <string name="subscription_primal_premium_perk_advanced_nostr_search">Advanced Nostr search</string>
+    <string name="subscription_primal_premium_perk_paid_relay">Premium paid relay</string>
+    <string name="subscription_primal_premium_perk_10gb_media_storage">10GB media storage</string>
+    <string name="subscription_primal_premium_perk_1gb_max_file_size">1GB max file size</string>
+    <string name="subscription_primal_pro_title">Pro</string>
+    <string name="subscription_primal_buy_pro">Buy Pro</string>
+    <string name="subscription_primal_pro_perk_everything_in_premium">Everything in Premium, and</string>
+    <string name="subscription_primal_pro_perk_studio">Primal Studio</string>
+    <string name="subscription_primal_pro_perk_legend_status">Legend Status on Primal</string>
+    <string name="subscription_primal_pro_perk_100gb_storage">100GB media storage</string>
+    <string name="subscription_primal_pro_perk_10gb_max_file">10GB max file size</string>
+    <string name="subscription_learn_about_premium">Learn about Primal Premium</string>
+    <string name="subscription_learn_about_pro">Learn about Primal Pro</string>
+    <string name="subscription_price_per_month"> /month</string>
+    <string name="subscription_billed_annually">%1$s billed annually</string>
+    <string name="subscription_save_percent">Save %1$d%%</string>
+    <string name="subscription_tos_title">By proceeding you accept our</string>
+    <string name="subscription_tos_subtitle">Terms of Service and Privacy Policy</string>
+
     <string name="premium_primal_og_title">Primal OG</string>
     <string name="premium_primal_og_description">The Primal OG tier was created to recognize those users who signed up to Primal Premium in the first year.</string>
     <string name="premium_subscribe_to_get">Subscribe to Primal Premium to get:</string>

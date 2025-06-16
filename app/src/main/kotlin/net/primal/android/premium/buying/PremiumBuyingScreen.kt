@@ -82,15 +82,24 @@ private fun PremiumBuyingScreen(
             when (stage) {
                 PremiumBuyingContract.PremiumStage.Home -> {
                     PremiumBuyingHomeStage(
+                        subscriptionTier = state.subscriptionTier,
                         loading = state.loading,
                         isPremiumBadgeOrigin = state.isPremiumBadgeOrigin,
                         subscriptions = state.subscriptions,
                         onClose = screenCallbacks.onClose,
-                        onLearnMoreClick = screenCallbacks.onMoreInfoClick,
-                        onFindPrimalName = {
+                        onLearnMoreClick = {
+                            eventPublisher(
+                                PremiumBuyingContract.UiEvent.SetSubscriptionTier(subscriptionTier = it),
+                            )
+                            screenCallbacks.onMoreInfoClick()
+                        },
+                        onPurchaseSubscription = {
+                            eventPublisher(
+                                PremiumBuyingContract.UiEvent.SetSubscriptionTier(subscriptionTier = it),
+                            )
                             eventPublisher(
                                 PremiumBuyingContract.UiEvent.MoveToPremiumStage(
-                                    PremiumBuyingContract.PremiumStage.FindPrimalName,
+                                    stage = PremiumBuyingContract.PremiumStage.FindPrimalName,
                                 ),
                             )
                         },
@@ -101,6 +110,7 @@ private fun PremiumBuyingScreen(
                     PremiumPrimalNameStage(
                         titleText = stringResource(id = R.string.premium_primal_name_title),
                         initialName = state.primalName,
+                        subscriptionTier = state.subscriptionTier,
                         onBack = {
                             eventPublisher(
                                 PremiumBuyingContract.UiEvent.MoveToPremiumStage(
