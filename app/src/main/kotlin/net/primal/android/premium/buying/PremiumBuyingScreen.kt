@@ -91,7 +91,7 @@ private fun PremiumBuyingScreen(
                             eventPublisher(
                                 PremiumBuyingContract.UiEvent.SetSubscriptionTier(subscriptionTier = it),
                             )
-                            screenCallbacks.onMoreInfoClick()
+                            screenCallbacks.onMoreInfoClick(it.ordinal)
                         },
                         onPurchaseSubscription = {
                             eventPublisher(
@@ -146,7 +146,7 @@ private fun PremiumBuyingScreen(
                                 )
                             }
                         },
-                        onLearnMoreClick = screenCallbacks.onMoreInfoClick,
+                        onLearnMoreClick = { screenCallbacks.onMoreInfoClick(it.ordinal) },
                     )
                 }
 

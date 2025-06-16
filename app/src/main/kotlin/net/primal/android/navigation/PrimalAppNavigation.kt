@@ -1455,7 +1455,7 @@ private fun NavGraphBuilder.premiumBuying(
         viewModel = viewModel,
         screenCallbacks = PremiumBuyingContract.ScreenCallbacks(
             onClose = { navController.navigateUp() },
-            onMoreInfoClick = { navController.navigateToPremiumMoreInfo() },
+            onMoreInfoClick = { navController.navigateToPremiumMoreInfo(it) },
             onPremiumPurchased = {
                 navController.popBackStack()
                 navController.navigateToPremiumHome()
