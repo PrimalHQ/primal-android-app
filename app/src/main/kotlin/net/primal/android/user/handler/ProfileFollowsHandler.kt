@@ -11,7 +11,6 @@ import net.primal.android.core.utils.batchOnInactivity
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.utils.coroutines.DispatcherProvider
 
-@OptIn(FlowPreview::class)
 class ProfileFollowsHandler @Inject constructor(
     private val userRepository: UserRepository,
     dispatcherProvider: DispatcherProvider,
@@ -22,8 +21,8 @@ class ProfileFollowsHandler @Inject constructor(
     private val actions = MutableSharedFlow<Action>()
     private fun setAction(action: Action) = scope.launch { actions.emit(action) }
 
-    private val results = MutableSharedFlow<FollowResult>()
-    private fun setResult(result: FollowResult) = scope.launch { results.emit(result) }
+    private val results = MutableSharedFlow<ActionResult>()
+    private fun setResult(result: ActionResult) = scope.launch { results.emit(result) }
 
     init {
         observeActions()
@@ -45,7 +44,7 @@ class ProfileFollowsHandler @Inject constructor(
 
     fun observeResults() = results.distinctUntilChanged()
 
-    @FlowPreview
+    @OptIn(FlowPreview::class)
     private fun observeActions() =
         scope.launch {
             actions.batchOnInactivity(inactivityTimeout = ACTIONS_DELAY)
@@ -64,9 +63,9 @@ class ProfileFollowsHandler @Inject constructor(
                 forceUpdate = forceUpdate,
             )
         }.onFailure { error ->
-            setResult(result = FollowResult.Error(actions = actions, error = error))
+            setResult(result = ActionResult.Error(actions = actions, error = error))
         }.onSuccess {
-            setResult(FollowResult.Success)
+            setResult(ActionResult.Success)
         }
     }
 
@@ -93,8 +92,8 @@ class ProfileFollowsHandler @Inject constructor(
             }
     }
 
-    sealed class FollowResult {
-        data class Error(val actions: List<Action>, val error: Throwable?) : FollowResult()
-        data object Success : FollowResult()
+    sealed class ActionResult {
+        data class Error(val actions: List<Action>, val error: Throwable?) : ActionResult()
+        data object Success : ActionResult()
     }
 }

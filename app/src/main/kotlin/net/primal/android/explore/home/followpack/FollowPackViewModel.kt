@@ -172,7 +172,7 @@ class FollowPackViewModel @Inject constructor(
             profileFollowsHandler.observeResults()
                 .collect { result ->
                     when (result) {
-                        is ProfileFollowsHandler.FollowResult.Error -> {
+                        is ProfileFollowsHandler.ActionResult.Error -> {
                             setState {
                                 val following = following
                                     .foldActions(actions = result.actions.map { it.flip() }.reversed())
@@ -209,7 +209,7 @@ class FollowPackViewModel @Inject constructor(
                             }
                         }
 
-                        ProfileFollowsHandler.FollowResult.Success -> Unit
+                        ProfileFollowsHandler.ActionResult.Success -> Unit
                     }
                 }
         }

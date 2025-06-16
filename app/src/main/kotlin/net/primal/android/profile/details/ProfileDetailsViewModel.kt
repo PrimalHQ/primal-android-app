@@ -402,7 +402,7 @@ class ProfileDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             profileFollowsHandler.observeResults().collect {
                 when (it) {
-                    is ProfileFollowsHandler.FollowResult.Error -> {
+                    is ProfileFollowsHandler.ActionResult.Error -> {
                         setState { copy(isProfileFollowed = !isProfileFollowed) }
 
                         when (it.error) {
@@ -424,7 +424,7 @@ class ProfileDetailsViewModel @Inject constructor(
                         }
                     }
 
-                    ProfileFollowsHandler.FollowResult.Success -> Unit
+                    ProfileFollowsHandler.ActionResult.Success -> Unit
                 }
             }
         }

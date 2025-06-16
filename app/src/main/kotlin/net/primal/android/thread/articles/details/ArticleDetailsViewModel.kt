@@ -369,7 +369,7 @@ class ArticleDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             profileFollowsHandler.observeResults().collect {
                 when (it) {
-                    is ProfileFollowsHandler.FollowResult.Error -> {
+                    is ProfileFollowsHandler.ActionResult.Error -> {
                         Timber.e(it.error)
                         setState { copy(isAuthorFollowed = !isAuthorFollowed) }
 
@@ -384,7 +384,7 @@ class ArticleDetailsViewModel @Inject constructor(
                         }
                     }
 
-                    ProfileFollowsHandler.FollowResult.Success -> Unit
+                    ProfileFollowsHandler.ActionResult.Success -> Unit
                 }
             }
         }

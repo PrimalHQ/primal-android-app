@@ -169,7 +169,7 @@ class ProfileFollowsViewModel @Inject constructor(
         viewModelScope.launch {
             profileFollowsHandler.observeResults().collect {
                 when (it) {
-                    is ProfileFollowsHandler.FollowResult.Error -> {
+                    is ProfileFollowsHandler.ActionResult.Error -> {
                         Timber.w(it.error)
                         updateStateProfileUnfollowAndClearApprovalFlag(profileId)
                         when (it.error) {
@@ -187,7 +187,7 @@ class ProfileFollowsViewModel @Inject constructor(
                         }
                     }
 
-                    ProfileFollowsHandler.FollowResult.Success -> Unit
+                    ProfileFollowsHandler.ActionResult.Success -> Unit
                 }
             }
         }
