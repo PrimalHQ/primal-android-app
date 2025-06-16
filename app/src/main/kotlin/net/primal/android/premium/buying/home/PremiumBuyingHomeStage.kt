@@ -167,8 +167,7 @@ private fun OfferPager(
     val pageSize = 300.dp
 
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val horizontalPadding = (maxWidth - pageSize) / 2
-            .coerceAtLeast(0)
+        val horizontalPadding = ((maxWidth - pageSize) / 2).coerceAtLeast(0.dp)
 
         val premiumSubscription = remember(subscriptions) {
             subscriptions.filter { it.tier.isPremiumTier() }
