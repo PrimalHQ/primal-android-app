@@ -54,7 +54,6 @@ import net.primal.android.premium.ui.toHumanReadableString
 import net.primal.android.premium.utils.isPremiumFreeTier
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.theme.AppTheme
-import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.domain.links.CdnImage
 
 @Composable
@@ -237,13 +236,7 @@ private fun PremiumHomeContent(
 
                 else -> {
                     if (state.showSupportUsNotice) {
-                        if (state.membership.isPrimalLegendTier()) {
-                            SupportUsNoticeLegend(
-                                visible = state.membership.donatedBtc != null,
-                                donatedSats = state.membership.donatedBtc?.toSats()?.toLong() ?: 0L,
-                                onContributePrimal = onContributePrimal,
-                            )
-                        } else {
+                        if (!state.membership.isPrimalLegendTier()) {
                             SupportUsNoticePremium(
                                 onSupportPrimal = onSupportPrimal,
                             )
