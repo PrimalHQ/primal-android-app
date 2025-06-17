@@ -174,7 +174,7 @@ private fun PremiumBuyingScreen(
                     PremiumBuyingSuccessStage(
                         modifier = Modifier.fillMaxSize(),
                         onDoneClick = {
-                            if (state.isExtendingPremium) {
+                            if (state.isExtendingPremium || state.isUpgradingToPro) {
                                 screenCallbacks.onClose()
                             } else {
                                 screenCallbacks.onPremiumPurchased()
@@ -231,7 +231,7 @@ private fun PremiumBuyingBackHandler(
             }
 
             PremiumBuyingContract.PremiumStage.Success -> {
-                if (isExtendingPremium) {
+                if (isExtendingPremium || isUpgradingToPro) {
                     screenCallbacks.onClose()
                 } else {
                     screenCallbacks.onPremiumPurchased()
