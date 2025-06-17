@@ -361,10 +361,10 @@ class PlayBillingClient @Inject constructor(
             )
             .build()
 
-        private const val PREMIUM_MONTHLY_PRODUCT_ID = "monthly_premium"
-        private const val PREMIUM_YEARLY_PRODUCT_ID = "yearly_premium"
-        private const val PRO_MONTHLY_PRODUCT_ID = "monthly_pro"
-        private const val PRO_YEARLY_PRODUCT_ID = "yearly_pro"
+        const val PREMIUM_MONTHLY_PRODUCT_ID = "monthly_premium"
+        const val PREMIUM_YEARLY_PRODUCT_ID = "yearly_premium"
+        const val PRO_MONTHLY_PRODUCT_ID = "monthly_pro"
+        const val PRO_YEARLY_PRODUCT_ID = "yearly_pro"
 
         private val playSubscriptionIds = listOf(
             PREMIUM_MONTHLY_PRODUCT_ID,

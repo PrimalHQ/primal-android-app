@@ -205,7 +205,7 @@ fun PremiumPurchaseStage(
                 BuyPremiumButtons(
                     modifier = Modifier.padding(horizontal = 12.dp),
                     loading = state.loading,
-                    hasActiveSubscription = state.hasActiveSubscription,
+                    activeSubscriptionProductId = state.activeSubscriptionProductId,
                     subscriptions = currentSubscriptions,
                     onBuySubscription = { subscription ->
                         eventPublisher(
@@ -219,6 +219,7 @@ fun PremiumPurchaseStage(
                         eventPublisher(PremiumBuyingContract.UiEvent.RestoreSubscription)
                     },
                     subscriptionTier = state.subscriptionTier,
+                    isUpgradingToPro = state.isUpgradingToPro,
                 )
                 TOSNotice(subscriptionTier = state.subscriptionTier)
             }
@@ -279,7 +280,8 @@ private fun MoreInfoPromoCodeRow(
 @Composable
 fun BuyPremiumButtons(
     modifier: Modifier,
-    hasActiveSubscription: Boolean,
+    activeSubscriptionProductId: String?,
+    isUpgradingToPro: Boolean,
     loading: Boolean,
     subscriptions: List<SubscriptionProduct>,
     onBuySubscription: (SubscriptionProduct) -> Unit,
@@ -291,7 +293,7 @@ fun BuyPremiumButtons(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        if (hasActiveSubscription) {
+        if (activeSubscriptionProductId != null && !isUpgradingToPro) {
             Text(
                 modifier = Modifier.padding(horizontal = 32.dp),
                 text = stringResource(R.string.premium_purchase_restore_subscription_explanation),

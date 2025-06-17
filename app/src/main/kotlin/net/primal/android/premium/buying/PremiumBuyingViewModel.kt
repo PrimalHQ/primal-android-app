@@ -134,7 +134,7 @@ class PremiumBuyingViewModel @Inject constructor(
         viewModelScope.launch {
             val purchases = primalBillingClient.queryActiveSubscriptions()
             purchase = purchases.firstOrNull()
-            setState { copy(hasActiveSubscription = purchase != null) }
+            setState { copy(activeSubscriptionProductId = purchase?.productId) }
         }
     }
 
@@ -185,7 +185,7 @@ class PremiumBuyingViewModel @Inject constructor(
                         this@PremiumBuyingViewModel.purchase = purchase
                         setState {
                             copy(
-                                hasActiveSubscription = true,
+                                activeSubscriptionProductId = purchase.productId,
                                 error = MembershipError.FailedToProcessSubscriptionPurchase(cause = error),
                             )
                         }
