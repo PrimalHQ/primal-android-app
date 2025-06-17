@@ -205,7 +205,7 @@ fun PremiumPurchaseStage(
                 BuyPremiumButtons(
                     modifier = Modifier.padding(horizontal = 12.dp),
                     loading = state.loading,
-                    hasActiveSubscriptionProductId = state.hasActiveSubscriptionProductId,
+                    activeSubscriptionProductId = state.activeSubscriptionProductId,
                     subscriptions = currentSubscriptions,
                     onBuySubscription = { subscription ->
                         eventPublisher(
@@ -280,7 +280,7 @@ private fun MoreInfoPromoCodeRow(
 @Composable
 fun BuyPremiumButtons(
     modifier: Modifier,
-    hasActiveSubscriptionProductId: String?,
+    activeSubscriptionProductId: String?,
     isUpgradingToPro: Boolean,
     loading: Boolean,
     subscriptions: List<SubscriptionProduct>,
@@ -293,7 +293,7 @@ fun BuyPremiumButtons(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        if (hasActiveSubscriptionProductId != null && !isUpgradingToPro) {
+        if (activeSubscriptionProductId != null && !isUpgradingToPro) {
             Text(
                 modifier = Modifier.padding(horizontal = 32.dp),
                 text = stringResource(R.string.premium_purchase_restore_subscription_explanation),

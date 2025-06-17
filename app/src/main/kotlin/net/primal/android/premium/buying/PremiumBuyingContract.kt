@@ -17,7 +17,7 @@ interface PremiumBuyingContract {
         val stage: PremiumStage = PremiumStage.Home,
         val subscriptionTier: SubscriptionTier = SubscriptionTier.PREMIUM,
         val primalName: String? = null,
-        val hasActiveSubscriptionProductId: String? = null,
+        val activeSubscriptionProductId: String? = null,
 
         val profile: ProfileDetailsUi? = null,
         val promoCodeValidity: Boolean? = null,
