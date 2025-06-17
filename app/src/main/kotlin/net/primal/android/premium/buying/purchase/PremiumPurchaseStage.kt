@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -34,6 +35,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
@@ -338,7 +340,6 @@ fun BuyPremiumButtons(
                         }
                     }
                 }
-
                 else -> {
                     val minFontSize = subscriptions.minOf { it.toPricingString().resolveFontSize().value }.sp
 
@@ -382,14 +383,18 @@ fun BuyPremiumButton(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                modifier = Modifier.padding(end = 6.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 6.dp),
                 text = startText,
                 style = AppTheme.typography.bodyLarge,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = fontSize,
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
             Text(
+                modifier = Modifier.wrapContentWidth(unbounded = true),
                 text = endText,
                 style = AppTheme.typography.bodyLarge,
                 fontWeight = FontWeight.SemiBold,
@@ -403,9 +408,9 @@ fun BuyPremiumButton(
 @Suppress("MagicNumber")
 private fun String.resolveFontSize() =
     when (this.length) {
-        in 0..10 -> 20.sp
-        in 11..16 -> 18.sp
-        else -> 14.sp
+        in 0..10 -> 19.sp
+        in 11..16 -> 17.sp
+        else -> 13.sp
     }
 
 @Composable

@@ -19,4 +19,13 @@ fun Dp.detectUiDensityModeFromMaxHeight(): UiDensityMode {
     }
 }
 
+fun Dp.detectUiDensityModeFromMaxWidth(): UiDensityMode {
+    return when {
+        this >= 360.dp -> UiDensityMode.Normal
+        this in 320.dp..359.dp -> UiDensityMode.Comfortable
+        this in 280.dp..319.dp -> UiDensityMode.Compact
+        else -> UiDensityMode.Unsupported
+    }
+}
+
 fun UiDensityMode?.isCompactOrLower() = this == UiDensityMode.Compact || this == UiDensityMode.Unsupported
