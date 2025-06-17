@@ -143,14 +143,24 @@ private fun PremiumBuyingScreen(
                         state = state,
                         eventPublisher = eventPublisher,
                         onBack = {
-                            if (state.isExtendingPremium) {
-                                screenCallbacks.onClose()
-                            } else {
-                                eventPublisher(
-                                    PremiumBuyingContract.UiEvent.MoveToPremiumStage(
-                                        PremiumBuyingContract.PremiumStage.FindPrimalName,
-                                    ),
-                                )
+                            when {
+                                state.isExtendingPremium -> {
+                                    screenCallbacks.onClose()
+                                }
+                                state.isUpgradingToPro -> {
+                                    eventPublisher(
+                                        PremiumBuyingContract.UiEvent.MoveToPremiumStage(
+                                            PremiumBuyingContract.PremiumStage.Home,
+                                        ),
+                                    )
+                                }
+                                else -> {
+                                    eventPublisher(
+                                        PremiumBuyingContract.UiEvent.MoveToPremiumStage(
+                                            PremiumBuyingContract.PremiumStage.FindPrimalName,
+                                        ),
+                                    )
+                                }
                             }
                         },
                         onLearnMoreClick = { tier -> screenCallbacks.onMoreInfoClick(tier) },
