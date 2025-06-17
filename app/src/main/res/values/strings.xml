@@ -213,7 +213,7 @@
     <string name="premium_primal_name_not_set_value">[not set]</string>
 
     <string name="premium_buying_home_primal_pro">Primal Pro</string>
-    <string name="premium_buying_home_primal_pro_description">Upgrade to the highest level of visibility,\\n features and recognition across the network,\\n and get access to professional tools.</string>
+    <string name="premium_buying_home_primal_pro_description">Upgrade to the highest level of visibility,\n features and recognition across the network,\n and get access to professional tools.</string>
 
     <string name="premium_purchase_title">Congrats!</string>
     <string name="premium_purchase_primal_name_available">Your Primal Name is available!</string>
