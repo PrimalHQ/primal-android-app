@@ -42,11 +42,15 @@ internal class FollowPackMediator(
 
         return latestRemoteKey?.let {
             if (it.cachedAt.isTimestampOlderThan(duration = INITIALIZE_CACHE_EXPIRY)) {
+                clearKeysAndConnections()
                 InitializeAction.LAUNCH_INITIAL_REFRESH
             } else {
                 InitializeAction.SKIP_INITIAL_REFRESH
             }
-        } ?: InitializeAction.LAUNCH_INITIAL_REFRESH
+        } ?: run {
+            clearKeysAndConnections()
+            InitializeAction.LAUNCH_INITIAL_REFRESH
+        }
     }
 
     override suspend fun load(loadType: LoadType, state: PagingState<Int, FollowPackPO>): MediatorResult {
@@ -148,6 +152,12 @@ internal class FollowPackMediator(
         lastRequests[loadType] = request to Clock.System.now().epochSeconds
         return response
     }
+
+    private suspend fun clearKeysAndConnections() =
+        withContext(dispatcherProvider.io()) {
+            database.followPackRemoteKeys().deleteAll()
+            database.followPacksConnections().deleteConnections()
+        }
 
     private suspend fun findLastRemoteKey(state: PagingState<Int, FollowPackPO>): FollowPackRemoteKey? {
         val lastItemATag = state.lastItemOrNull()?.data?.aTag
