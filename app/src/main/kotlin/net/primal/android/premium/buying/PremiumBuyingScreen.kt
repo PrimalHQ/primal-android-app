@@ -58,6 +58,7 @@ private fun PremiumBuyingScreen(
     PremiumBuyingBackHandler(
         stage = state.stage,
         isExtendingPremium = state.isExtendingPremium,
+        isUpgradingToPro = state.isUpgradingToPro,
         eventPublisher = eventPublisher,
         screenCallbacks = screenCallbacks,
     )
@@ -147,6 +148,7 @@ private fun PremiumBuyingScreen(
                                 state.isExtendingPremium -> {
                                     screenCallbacks.onClose()
                                 }
+
                                 state.isUpgradingToPro -> {
                                     eventPublisher(
                                         PremiumBuyingContract.UiEvent.MoveToPremiumStage(
@@ -154,6 +156,7 @@ private fun PremiumBuyingScreen(
                                         ),
                                     )
                                 }
+
                                 else -> {
                                     eventPublisher(
                                         PremiumBuyingContract.UiEvent.MoveToPremiumStage(
@@ -193,6 +196,7 @@ private fun PremiumBuyingScreen(
 private fun PremiumBuyingBackHandler(
     stage: PremiumBuyingContract.PremiumStage,
     isExtendingPremium: Boolean,
+    isUpgradingToPro: Boolean,
     eventPublisher: (PremiumBuyingContract.UiEvent) -> Unit,
     screenCallbacks: PremiumBuyingContract.ScreenCallbacks,
 ) {
@@ -211,6 +215,12 @@ private fun PremiumBuyingBackHandler(
             PremiumBuyingContract.PremiumStage.Purchase -> {
                 if (isExtendingPremium) {
                     screenCallbacks.onClose()
+                } else if (isUpgradingToPro) {
+                    eventPublisher(
+                        PremiumBuyingContract.UiEvent.MoveToPremiumStage(
+                            PremiumBuyingContract.PremiumStage.Home,
+                        ),
+                    )
                 } else {
                     eventPublisher(
                         PremiumBuyingContract.UiEvent.MoveToPremiumStage(
