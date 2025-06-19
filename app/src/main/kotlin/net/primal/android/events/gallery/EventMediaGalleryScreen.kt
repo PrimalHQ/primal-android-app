@@ -43,7 +43,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -58,10 +57,11 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
-import androidx.media3.common.Player.Listener
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.DefaultLoadControl
+import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.ui.PlayerView
 import coil3.imageLoader
 import coil3.memory.MemoryCache
@@ -93,12 +93,46 @@ import net.primal.android.core.utils.copyText
 import net.primal.android.theme.AppTheme
 import net.primal.domain.links.EventUriType
 
+const val MAX_VIDEO_WIDTH = 1280
+const val MAX_VIDEO_HEIGHT = 720
+
+@androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun EventMediaGalleryScreen(viewModel: EventMediaGalleryViewModel, onClose: () -> Unit) {
     val uiState = viewModel.state.collectAsState()
 
     val uiScope = rememberCoroutineScope()
     val context = LocalContext.current
+
+    val exoPlayer = remember {
+        val trackSelector = DefaultTrackSelector(context).apply {
+            parameters = DefaultTrackSelector.Parameters.Builder()
+                .setMaxVideoSize(MAX_VIDEO_WIDTH, MAX_VIDEO_HEIGHT)
+                .build()
+        }
+
+        val renderersFactory = DefaultRenderersFactory(context)
+            .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF)
+
+        ExoPlayer.Builder(context)
+            .setTrackSelector(trackSelector)
+            .setLoadControl(DefaultLoadControl.Builder().build())
+            .setRenderersFactory(renderersFactory)
+            .build()
+    }
+
+    DisposableLifecycleObserverEffect(key1 = exoPlayer) { event ->
+        when (event) {
+            Lifecycle.Event.ON_PAUSE -> exoPlayer.pause()
+            Lifecycle.Event.ON_RESUME -> exoPlayer.play()
+            else -> {}
+        }
+    }
+
+    DisposableEffect(exoPlayer) {
+        onDispose { exoPlayer.release() }
+    }
+
     LaunchedEffect(viewModel) {
         viewModel.effects.collect {
             when (it) {
@@ -118,6 +152,7 @@ fun EventMediaGalleryScreen(viewModel: EventMediaGalleryViewModel, onClose: () -
         state = uiState.value,
         onClose = onClose,
         eventPublisher = { viewModel.setEvent(it) },
+        exoPlayer = exoPlayer,
     )
 }
 
@@ -127,6 +162,7 @@ fun EventMediaGalleryScreen(viewModel: EventMediaGalleryViewModel, onClose: () -
 private fun EventMediaGalleryScreen(
     state: EventMediaGalleryContract.UiState,
     onClose: () -> Unit,
+    exoPlayer: ExoPlayer,
     eventPublisher: (EventMediaGalleryContract.UiEvent) -> Unit,
 ) {
     val imageAttachments = state.attachments
@@ -185,6 +221,7 @@ private fun EventMediaGalleryScreen(
                 pagerIndicatorContainerColor = containerColor,
                 onCurrentlyVisibleBitmap = { mediaItemBitmap = it },
                 toggleImmersiveMode = { immersiveMode?.toggle() },
+                exoPlayer = exoPlayer,
             )
         },
         snackbarHost = {
@@ -251,8 +288,29 @@ private fun MediaGalleryContent(
     imageAttachments: List<EventUriUi>,
     pagerIndicatorContainerColor: Color,
     toggleImmersiveMode: () -> Unit,
+    exoPlayer: ExoPlayer,
     onCurrentlyVisibleBitmap: ((Bitmap?) -> Unit)? = null,
 ) {
+    LaunchedEffect(pagerState.currentPage, imageAttachments) {
+        if (imageAttachments.isEmpty()) return@LaunchedEffect
+
+        val attachment = imageAttachments[pagerState.currentPage]
+        exoPlayer.stop()
+        exoPlayer.clearMediaItems()
+
+        if (attachment.type == EventUriType.Video) {
+            val url = attachment.variants?.firstOrNull()?.mediaUrl ?: attachment.url
+            exoPlayer.setMediaItem(MediaItem.fromUri(url))
+            exoPlayer.repeatMode = ExoPlayer.REPEAT_MODE_ALL
+            exoPlayer.playWhenReady = true
+
+            exoPlayer.prepare()
+            if (initialPositionMs > 0L) {
+                exoPlayer.seekTo(initialPositionMs)
+            }
+        }
+    }
+
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
@@ -263,9 +321,9 @@ private fun MediaGalleryContent(
                 imageAttachments = imageAttachments,
                 pagerState = pagerState,
                 initialIndex = initialAttachmentIndex,
-                initialPositionMs = initialPositionMs,
                 onCurrentlyVisibleBitmap = onCurrentlyVisibleBitmap,
                 toggleImmersiveMode = toggleImmersiveMode,
+                exoPlayer = exoPlayer,
             )
         }
 
@@ -408,7 +466,7 @@ private fun AttachmentsHorizontalPager(
     toggleImmersiveMode: () -> Unit,
     modifier: Modifier = Modifier,
     initialIndex: Int = 0,
-    initialPositionMs: Long = 0,
+    exoPlayer: ExoPlayer,
     onCurrentlyVisibleBitmap: ((Bitmap?) -> Unit)? = null,
 ) {
     HorizontalPager(
@@ -438,9 +496,8 @@ private fun AttachmentsHorizontalPager(
                         modifier = Modifier
                             .fillMaxSize()
                             .navigationBarsPadding(),
-                        positionMs = initialPositionMs,
-                        attachment = attachment,
                         isPageVisible = pagerState.currentPage == index,
+                        exoPlayer = exoPlayer,
                     )
                 }
 
@@ -535,66 +592,29 @@ private fun AttachmentLoadingError() {
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun VideoScreen(
-    positionMs: Long,
-    attachment: EventUriUi,
     isPageVisible: Boolean,
+    exoPlayer: ExoPlayer,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
+    if (isPageVisible) KeepScreenOn()
 
-    val exoPlayer = remember { ExoPlayer.Builder(context).build() }
-    val mediaUrl = attachment.variants?.firstOrNull()?.mediaUrl ?: attachment.url
-    val mediaSource = MediaItem.fromUri(mediaUrl)
-    var playerState by remember { mutableIntStateOf(Player.STATE_IDLE) }
-
-    KeepScreenOn()
-
-    LaunchedEffect(mediaSource) {
-        exoPlayer.addListener(
-            object : Listener {
-                override fun onPlaybackStateChanged(playbackState: Int) {
-                    playerState = playbackState
-                }
-            },
-        )
-        exoPlayer.setMediaItem(mediaSource)
-        exoPlayer.prepare()
-        exoPlayer.seekTo(positionMs)
-        exoPlayer.playWhenReady = true
-        exoPlayer.repeatMode = ExoPlayer.REPEAT_MODE_ALL
-        exoPlayer.volume = 1.0f
-    }
-
-    LaunchedEffect(isPageVisible) {
-        if (!isPageVisible) {
-            exoPlayer.pause()
-        }
-    }
-
-    DisposableLifecycleObserverEffect(mediaSource) {
-        if (it == Lifecycle.Event.ON_PAUSE) {
-            exoPlayer.pause()
-        }
-    }
-
-    DisposableEffect(mediaSource) {
-        onDispose { exoPlayer.release() }
-    }
-
-    Box(
+    AndroidView(
         modifier = modifier,
-        contentAlignment = Alignment.Center,
-    ) {
-        AndroidView(
-            factory = {
-                PlayerView(it).apply {
-                    setShowNextButton(false)
-                    setShowPreviousButton(false)
-                    controllerShowTimeoutMs = 1.seconds.inWholeMilliseconds.toInt()
-                    useController = true
-                    player = exoPlayer
-                }
-            },
-        )
-    }
+        factory = { ctx ->
+            PlayerView(ctx).apply {
+                setShutterBackgroundColor(android.graphics.Color.TRANSPARENT)
+                useController = true
+                controllerShowTimeoutMs = 1.seconds.inWholeMilliseconds.toInt()
+                setShowNextButton(false)
+                setShowPreviousButton(false)
+            }
+        },
+        update = {
+            if (isPageVisible) {
+                it.player = exoPlayer
+            } else {
+                it.player = null
+            }
+        },
+    )
 }
