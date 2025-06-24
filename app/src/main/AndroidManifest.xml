@@ -6,16 +6,13 @@
     <uses-permission android:name="android.permission.READ_CLIPBOARD" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
-
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32"
         tools:node="remove" />
-
     <uses-permission
         android:name="android.permission.READ_PHONE_STATE"
         tools:node="remove" />
@@ -27,7 +24,9 @@
     <queries>
         <intent>
             <action android:name="android.intent.action.VIEW" />
+
             <category android:name="android.intent.category.BROWSABLE" />
+
             <data android:scheme="nostrsigner" />
         </intent>
     </queries>
@@ -45,17 +44,19 @@
         android:usesCleartextTraffic="true"
         tools:replace="android:allowBackup"
         tools:targetApi="33">
+        <profileable
+            android:shell="true"
+            tools:targetApi="29" />
 
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
             <intent-filter
                 android:autoVerify="true"
                 android:label="Primal Home">
@@ -67,7 +68,6 @@
                 <data android:scheme="https" />
                 <data android:host="primal.net" />
             </intent-filter>
-
             <intent-filter
                 android:autoVerify="true"
                 android:label="Primal Home">
@@ -81,7 +81,6 @@
                     android:pathPrefix="/home"
                     android:scheme="https" />
             </intent-filter>
-
             <intent-filter
                 android:autoVerify="true"
                 android:label="Primal Reads">
@@ -95,7 +94,6 @@
                     android:pathPrefix="/reads"
                     android:scheme="https" />
             </intent-filter>
-
             <intent-filter
                 android:autoVerify="true"
                 android:label="Primal Notifications">
@@ -109,7 +107,6 @@
                     android:pathPrefix="/notifications"
                     android:scheme="https" />
             </intent-filter>
-
             <intent-filter
                 android:autoVerify="true"
                 android:label="Primal Explore">
@@ -123,7 +120,6 @@
                     android:pathPrefix="/explore"
                     android:scheme="https" />
             </intent-filter>
-
             <intent-filter
                 android:autoVerify="true"
                 android:label="Primal DMs">
@@ -137,7 +133,6 @@
                     android:pathPrefix="/dms"
                     android:scheme="https" />
             </intent-filter>
-
             <intent-filter
                 android:autoVerify="true"
                 android:label="Primal Bookmarks">
@@ -151,7 +146,6 @@
                     android:pathPrefix="/bookmarks"
                     android:scheme="https" />
             </intent-filter>
-
             <intent-filter
                 android:autoVerify="true"
                 android:label="Primal Premium">
@@ -165,7 +159,6 @@
                     android:pathPrefix="/premium"
                     android:scheme="https" />
             </intent-filter>
-
             <intent-filter
                 android:autoVerify="true"
                 android:label="Primal Legends">
@@ -179,7 +172,6 @@
                     android:pathPrefix="/legends"
                     android:scheme="https" />
             </intent-filter>
-
             <intent-filter
                 android:autoVerify="true"
                 android:label="Primal Note">
@@ -193,7 +185,6 @@
                     android:pathPrefix="/e/"
                     android:scheme="https" />
             </intent-filter>
-
             <intent-filter
                 android:autoVerify="true"
                 android:label="Primal Article">
@@ -207,7 +198,6 @@
                     android:pathPrefix="/a/"
                     android:scheme="https" />
             </intent-filter>
-
             <intent-filter
                 android:autoVerify="true"
                 android:label="Primal Article">
@@ -221,7 +211,6 @@
                     android:pathPrefix="/.+/.+"
                     android:scheme="https" />
             </intent-filter>
-
             <intent-filter
                 android:autoVerify="true"
                 android:label="Primal Profile">
@@ -235,7 +224,6 @@
                     android:pathPrefix="/p/"
                     android:scheme="https" />
             </intent-filter>
-
             <intent-filter
                 android:autoVerify="true"
                 android:label="Primal Profile">
@@ -249,7 +237,6 @@
                     android:pathPrefix="/.+"
                     android:scheme="https" />
             </intent-filter>
-
             <intent-filter
                 android:autoVerify="true"
                 android:label="Advanced Search">
@@ -263,7 +250,6 @@
                     android:pathPrefix="/search/"
                     android:scheme="https" />
             </intent-filter>
-
             <intent-filter android:label="Wallet Connect">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -273,7 +259,6 @@
                 <data android:scheme="nostr+walletconnect" />
                 <data android:scheme="nostrwalletconnect" />
             </intent-filter>
-
             <intent-filter android:label="Primal Wallet Connect">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -284,7 +269,6 @@
                 <data android:scheme="nostrnwc+primal" />
                 <data android:host="connect" />
             </intent-filter>
-
             <intent-filter android:label="Share in a Note">
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
@@ -305,7 +289,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
-
     </application>
 
 </manifest>

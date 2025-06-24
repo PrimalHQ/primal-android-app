@@ -78,6 +78,8 @@ timber = "5.0.1"
 url-detector = "0.1.23"
 whyoleg-cryptography-kotlin = "0.4.0"
 zoomimage-compose-coil3 = "1.3.0"
+uiautomator = "2.3.0"
+benchmark-macro-junit4 = "1.4.0-rc01"
 
 [libraries]
 # Core libs
@@ -286,6 +288,8 @@ kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.
 kotest-assertions-json = { module = "io.kotest:kotest-assertions-json", version.ref = "kotest" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+androidx-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
+androidx-benchmark-macro-junit4 = { group = "androidx.benchmark", name = "benchmark-macro-junit4", version.ref = "benchmark-macro-junit4" }
 
 [bundles]
 hilt = ["hilt-android", "navigation-hilt"]
@@ -307,3 +311,4 @@ jetpack-room = { id = "androidx.room", version.ref = "jetpack-room" }
 ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit" }
 touchlab-skie = { id = "co.touchlab.skie", version.ref = "skie" }
 google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
+android-test = { id = "com.android.test", version.ref = "agp" }
