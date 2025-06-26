@@ -32,6 +32,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -47,20 +48,25 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toDrawable
 import androidx.lifecycle.Lifecycle
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.DefaultLoadControl
-import androidx.media3.exoplayer.DefaultRenderersFactory
+import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.ui.PlayerView
 import coil3.imageLoader
@@ -72,6 +78,7 @@ import coil3.request.crossfade
 import coil3.toBitmap
 import com.github.panpf.zoomimage.CoilZoomAsyncImage
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
@@ -90,6 +97,7 @@ import net.primal.android.core.compose.immersive.rememberImmersiveModeState
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.utils.copyBitmapToClipboard
 import net.primal.android.core.utils.copyText
+import net.primal.android.core.video.VideoCache
 import net.primal.android.theme.AppTheme
 import net.primal.domain.links.EventUriType
 
@@ -100,39 +108,35 @@ const val MAX_VIDEO_HEIGHT = 720
 @Composable
 fun EventMediaGalleryScreen(viewModel: EventMediaGalleryViewModel, onClose: () -> Unit) {
     val uiState = viewModel.state.collectAsState()
-
-    val uiScope = rememberCoroutineScope()
     val context = LocalContext.current
 
     val exoPlayer = remember {
+        val cache = VideoCache.getInstance(context)
+        val cacheDataSourceFactory = CacheDataSource.Factory()
+            .setCache(cache)
+            .setUpstreamDataSourceFactory(DefaultHttpDataSource.Factory())
+            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+
+        val mediaSourceFactory = DefaultMediaSourceFactory(context)
+            .setDataSourceFactory(cacheDataSourceFactory)
+
         val trackSelector = DefaultTrackSelector(context).apply {
             parameters = DefaultTrackSelector.Parameters.Builder()
                 .setMaxVideoSize(MAX_VIDEO_WIDTH, MAX_VIDEO_HEIGHT)
                 .build()
         }
 
-        val renderersFactory = DefaultRenderersFactory(context)
-            .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF)
-
         ExoPlayer.Builder(context)
             .setTrackSelector(trackSelector)
-            .setLoadControl(DefaultLoadControl.Builder().build())
-            .setRenderersFactory(renderersFactory)
+            .setMediaSourceFactory(mediaSourceFactory)
             .build()
     }
 
-    DisposableLifecycleObserverEffect(key1 = exoPlayer) { event ->
-        when (event) {
-            Lifecycle.Event.ON_PAUSE -> exoPlayer.pause()
-            Lifecycle.Event.ON_RESUME -> exoPlayer.play()
-            else -> {}
-        }
-    }
-
-    DisposableEffect(exoPlayer) {
+    DisposableEffect(Unit) {
         onDispose { exoPlayer.release() }
     }
 
+    val uiScope = rememberCoroutineScope()
     LaunchedEffect(viewModel) {
         viewModel.effects.collect {
             when (it) {
@@ -196,12 +200,8 @@ private fun EventMediaGalleryScreen(
         topBar = {
             AnimatedVisibility(
                 visible = immersiveMode?.isImmersive != true,
-                enter = slideInVertically(
-                    initialOffsetY = { -it },
-                ) + fadeIn(),
-                exit = slideOutVertically(
-                    targetOffsetY = { -it },
-                ) + fadeOut(),
+                enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
+                exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut(),
             ) {
                 MediaGalleryTopAppBar(
                     onClose = onClose,
@@ -216,7 +216,6 @@ private fun EventMediaGalleryScreen(
             MediaGalleryContent(
                 pagerState = pagerState,
                 initialAttachmentIndex = state.initialAttachmentIndex,
-                initialPositionMs = state.initialPositionMs,
                 imageAttachments = imageAttachments,
                 pagerIndicatorContainerColor = containerColor,
                 onCurrentlyVisibleBitmap = { mediaItemBitmap = it },
@@ -279,36 +278,35 @@ private fun MediaGalleryTopAppBar(
     )
 }
 
-@ExperimentalFoundationApi
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MediaGalleryContent(
     pagerState: PagerState,
     initialAttachmentIndex: Int,
-    initialPositionMs: Long,
     imageAttachments: List<EventUriUi>,
     pagerIndicatorContainerColor: Color,
     toggleImmersiveMode: () -> Unit,
     exoPlayer: ExoPlayer,
     onCurrentlyVisibleBitmap: ((Bitmap?) -> Unit)? = null,
 ) {
-    LaunchedEffect(pagerState.currentPage, imageAttachments) {
-        if (imageAttachments.isEmpty()) return@LaunchedEffect
+    LaunchedEffect(pagerState, imageAttachments) {
+        snapshotFlow { pagerState.currentPage }
+            .distinctUntilChanged()
+            .collect { page ->
+                if (exoPlayer.isPlaying || exoPlayer.isLoading) {
+                    exoPlayer.stop()
+                }
+                exoPlayer.clearMediaItems()
 
-        val attachment = imageAttachments[pagerState.currentPage]
-        exoPlayer.stop()
-        exoPlayer.clearMediaItems()
-
-        if (attachment.type == EventUriType.Video) {
-            val url = attachment.variants?.firstOrNull()?.mediaUrl ?: attachment.url
-            exoPlayer.setMediaItem(MediaItem.fromUri(url))
-            exoPlayer.repeatMode = ExoPlayer.REPEAT_MODE_ALL
-            exoPlayer.playWhenReady = true
-
-            exoPlayer.prepare()
-            if (initialPositionMs > 0L) {
-                exoPlayer.seekTo(initialPositionMs)
+                val newAttachment = imageAttachments.getOrNull(page)
+                if (newAttachment?.type == EventUriType.Video) {
+                    val url = newAttachment.variants?.firstOrNull()?.mediaUrl ?: newAttachment.url
+                    exoPlayer.setMediaItem(MediaItem.fromUri(url))
+                    exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
+                    exoPlayer.prepare()
+                    exoPlayer.playWhenReady = true
+                }
             }
-        }
     }
 
     Box(
@@ -472,7 +470,7 @@ private fun AttachmentsHorizontalPager(
     HorizontalPager(
         modifier = modifier,
         state = pagerState,
-        beyondViewportPageCount = 1,
+        beyondViewportPageCount = 0,
         flingBehavior = PagerDefaults.flingBehavior(
             state = pagerState,
             snapAnimationSpec = spring(stiffness = Spring.StiffnessLow),
@@ -490,7 +488,6 @@ private fun AttachmentsHorizontalPager(
                         toggleImmersiveMode = toggleImmersiveMode,
                     )
                 }
-
                 EventUriType.Video -> {
                     VideoScreen(
                         modifier = Modifier
@@ -498,10 +495,10 @@ private fun AttachmentsHorizontalPager(
                             .navigationBarsPadding(),
                         isPageVisible = pagerState.currentPage == index,
                         exoPlayer = exoPlayer,
+                        thumbnailUrl = attachment.thumbnailUrl,
                     )
                 }
-
-                else -> Unit // Not supported
+                else -> Unit
             }
         }
     }
@@ -520,10 +517,8 @@ private fun ImageScreen(
     modifier: Modifier = Modifier,
 ) {
     var loadedBitmap by remember { mutableStateOf<Bitmap?>(null) }
-
     var error by remember { mutableStateOf<ErrorResult?>(null) }
     val imageLoader = LocalContext.current.imageLoader
-
     val memoryCache = imageLoader.memoryCache
 
     val keys = attachment.variants.orEmpty()
@@ -540,7 +535,6 @@ private fun ImageScreen(
                 error = null
                 loadedBitmap = result.image.toBitmap()
             }
-
             override fun onError(request: ImageRequest, result: ErrorResult) {
                 error = result
                 loadedBitmap = highestResMirrorImage?.toBitmap()
@@ -594,27 +588,71 @@ private fun AttachmentLoadingError() {
 fun VideoScreen(
     isPageVisible: Boolean,
     exoPlayer: ExoPlayer,
+    thumbnailUrl: String?,
     modifier: Modifier = Modifier,
 ) {
     if (isPageVisible) KeepScreenOn()
 
-    AndroidView(
-        modifier = modifier,
-        factory = { ctx ->
-            PlayerView(ctx).apply {
-                setShutterBackgroundColor(android.graphics.Color.TRANSPARENT)
-                useController = true
-                controllerShowTimeoutMs = 1.seconds.inWholeMilliseconds.toInt()
-                setShowNextButton(false)
-                setShowPreviousButton(false)
+    var thumbnail by remember { mutableStateOf<Bitmap?>(null) }
+    val context = LocalContext.current
+    LaunchedEffect(thumbnailUrl) {
+        thumbnail = null
+        if (thumbnailUrl == null) return@LaunchedEffect
+
+        val request = ImageRequest.Builder(context)
+            .data(thumbnailUrl)
+            .target { thumbnail = it.toBitmap() }
+            .build()
+        context.imageLoader.enqueue(request)
+    }
+
+    var isBuffering by remember { mutableStateOf(false) }
+
+    DisposableEffect(exoPlayer) {
+        val listener = object : Player.Listener {
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                isBuffering = playbackState == Player.STATE_BUFFERING
             }
-        },
-        update = {
-            if (isPageVisible) {
-                it.player = exoPlayer
-            } else {
-                it.player = null
-            }
-        },
-    )
+        }
+        exoPlayer.addListener(listener)
+        onDispose { exoPlayer.removeListener(listener) }
+    }
+
+    DisposableLifecycleObserverEffect(key1 = exoPlayer) { event ->
+        when (event) {
+            Lifecycle.Event.ON_PAUSE -> exoPlayer.pause()
+            Lifecycle.Event.ON_RESUME -> if (isPageVisible) exoPlayer.play()
+            else -> {}
+        }
+    }
+
+    Box(modifier = modifier) {
+        AndroidView(
+            modifier = Modifier.fillMaxSize(),
+            factory = { ctx ->
+                PlayerView(ctx).apply {
+                    setShutterBackgroundColor(Color.Transparent.toArgb())
+                    useController = true
+                    controllerShowTimeoutMs = 1.seconds.inWholeMilliseconds.toInt()
+                    setShowNextButton(false)
+                    setShowPreviousButton(false)
+                }
+            },
+            update = { playerView ->
+                if (isPageVisible) {
+                    playerView.player = exoPlayer
+                    playerView.defaultArtwork = thumbnail?.toDrawable(playerView.context.resources)
+                } else {
+                    playerView.player = null
+                }
+            },
+        )
+
+        if (isPageVisible && isBuffering) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center),
+                color = Color.White,
+            )
+        }
+    }
 }
