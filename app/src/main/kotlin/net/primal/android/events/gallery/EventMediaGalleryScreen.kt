@@ -172,7 +172,7 @@ private fun EventMediaGalleryScreen(
                     containerColor = containerColor,
                     eventPublisher = eventPublisher,
                     mediaItemBitmap = mediaItemBitmap,
-                    getCurrentImage = ::currentImage,
+                    getCurrentImage = { currentImage() },
                 )
             }
         },
