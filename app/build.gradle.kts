@@ -148,6 +148,12 @@ android {
                 signingConfigs.getByName("debug")
             }
         }
+        create("benchmark") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
+            isDebuggable = false
+        }
     }
 
     flavorDimensions.addAll(
@@ -171,6 +177,11 @@ android {
         }
 
         named("altRelease") {
+            java.srcDirs("src/release/kotlin")
+            res.srcDirs("src/release/res")
+        }
+
+        named("benchmark") {
             java.srcDirs("src/release/kotlin")
             res.srcDirs("src/release/res")
         }

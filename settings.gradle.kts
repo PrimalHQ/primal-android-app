@@ -1,5 +1,7 @@
 import java.net.URI
 
+include(":macrobenchmark")
+
 pluginManagement {
     repositories {
         gradlePluginPortal()

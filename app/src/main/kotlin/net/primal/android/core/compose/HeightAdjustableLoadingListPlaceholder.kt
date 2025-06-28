@@ -16,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import net.primal.android.LocalPrimalTheme
@@ -40,6 +41,7 @@ fun HeightAdjustableLoadingLazyListPlaceholder(
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
+            .testTag("lazyListPlaceholder")
             .clipToBounds()
             .padding(16.dp)
             .padding(contentPaddingValues),
