@@ -128,6 +128,7 @@ private fun MultipleImageGallery(
                             mediaEventUri = media,
                             blossoms = blossoms,
                             imageSizeDp = imageSizeDp,
+                            allowAutoPlay = false,
                             onClick = { positionMs ->
                                 onMediaClick(
                                     MediaClickEvent(
@@ -191,6 +192,7 @@ private fun ThreeImageGallery(
             mediaEventUri = mediaEventUris[0],
             blossoms = blossoms,
             imageSizeDp = imageSizeDp,
+            allowAutoPlay = false,
             onClick = { positionMs ->
                 onMediaClick(
                     MediaClickEvent(
@@ -232,6 +234,7 @@ private fun ThreeImageGallery(
                     mediaEventUri = attachment,
                     blossoms = blossoms,
                     imageSizeDp = imageSizeDp,
+                    allowAutoPlay = false,
                     onClick = { positionMs ->
                         onMediaClick(
                             MediaClickEvent(
@@ -285,6 +288,7 @@ private fun TwoImageGallery(
                 mediaEventUri = attachment,
                 blossoms = blossoms,
                 imageSizeDp = imageSizeDp,
+                allowAutoPlay = false,
                 onClick = { positionMs ->
                     onMediaClick(
                         MediaClickEvent(
@@ -315,6 +319,7 @@ private fun SingleImageGallery(
         mediaEventUri = mediaEventUri,
         blossoms = blossoms,
         imageSizeDp = imageSizeDp,
+        allowAutoPlay = true,
         onClick = { positionMs ->
             onMediaClick(
                 MediaClickEvent(
@@ -335,6 +340,7 @@ private fun NoteMediaAttachment(
     imageSizeDp: DpSize,
     onClick: (positionMs: Long) -> Unit,
     modifier: Modifier = Modifier,
+    allowAutoPlay: Boolean,
 ) {
     BoxWithConstraints(
         modifier = modifier,
@@ -348,6 +354,7 @@ private fun NoteMediaAttachment(
                     modifier = Modifier
                         .width(imageSizeDp.width)
                         .height(imageSizeDp.height),
+                    allowAutoPlay = allowAutoPlay,
                 )
             }
 

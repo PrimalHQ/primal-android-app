@@ -50,14 +50,25 @@ fun NoteAttachmentVideoPreview(
     eventUri: EventUriUi,
     onVideoClick: (positionMs: Long) -> Unit,
     modifier: Modifier = Modifier,
+    allowAutoPlay: Boolean,
 ) {
-    val autoPlay = LocalContentDisplaySettings.current.autoPlayVideos ==
+    val userPrefersAutoPlay = LocalContentDisplaySettings.current.autoPlayVideos ==
         ContentDisplaySettings.AUTO_PLAY_VIDEO_ALWAYS
 
-    if (autoPlay) {
-        AutoPlayVideo(eventUri, onVideoClick, modifier)
+    val shouldAutoPlay = userPrefersAutoPlay && allowAutoPlay
+
+    if (shouldAutoPlay) {
+        AutoPlayVideo(
+            eventUri = eventUri,
+            onVideoClick = onVideoClick,
+            modifier = modifier,
+        )
     } else {
-        VideoThumbnailImagePreview(eventUri, { onVideoClick(0) }, modifier)
+        VideoThumbnailImagePreview(
+            eventUri = eventUri,
+            onClick = { onVideoClick(0) },
+            modifier = modifier,
+        )
     }
 }
 
@@ -70,7 +81,7 @@ private fun AutoPlayVideo(
 ) {
     val context = LocalContext.current
 
-    val cacheDataSourceFactory = remember(context) {
+    val cacheDataSourceFactory = remember {
         CacheDataSource.Factory()
             .setCache(VideoCache.getInstance(context))
             .setUpstreamDataSourceFactory(DefaultHttpDataSource.Factory())
@@ -83,7 +94,7 @@ private fun AutoPlayVideo(
     }
 
     var isMuted by remember { mutableStateOf(true) }
-    var isBuffering by remember { mutableStateOf(false) }
+    var isBuffering by remember { mutableStateOf(true) }
 
     LaunchedEffect(eventUri.url) {
         val mediaUrl = eventUri.variants?.firstOrNull()?.mediaUrl ?: eventUri.url
@@ -94,10 +105,10 @@ private fun AutoPlayVideo(
         exoPlayer.prepare()
     }
 
-    DisposableEffect(exoPlayer) {
+    DisposableEffect(Unit) {
         val listener = object : Player.Listener {
-            override fun onPlaybackStateChanged(state: Int) {
-                isBuffering = state == Player.STATE_BUFFERING
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                isBuffering = playbackState == Player.STATE_BUFFERING
             }
         }
         exoPlayer.addListener(listener)
@@ -109,7 +120,7 @@ private fun AutoPlayVideo(
 
     Box(
         modifier = modifier.clip(AppTheme.shapes.medium),
-        contentAlignment = Alignment.BottomEnd,
+        contentAlignment = Alignment.Center,
     ) {
         AndroidView(
             modifier = Modifier
@@ -119,6 +130,7 @@ private fun AutoPlayVideo(
                 PlayerView(ctx).apply {
                     player = exoPlayer
                     useController = false
+                    resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM
                 }
             },
         )
@@ -131,6 +143,7 @@ private fun AutoPlayVideo(
 
         AudioButton(
             modifier = Modifier
+                .align(Alignment.BottomEnd)
                 .padding(8.dp)
                 .size(32.dp),
             imageVector = if (isMuted) PrimalIcons.Unmute else PrimalIcons.Mute,
@@ -176,28 +189,14 @@ private fun VideoThumbnailImagePreview(
     ) {
         SubcomposeAsyncImage(
             model = eventUri.thumbnailUrl ?: mediaUrl,
+            modifier = Modifier.fillMaxSize(),
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            loading = { PrimalLoadingSpinner(size = 24.dp) },
-            error = {
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .background(AppTheme.extraColorScheme.surfaceVariantAlt3),
-                )
-            },
+            loading = { PrimalLoadingSpinner(size = 48.dp) },
+            error = { NoteVideoThumbnailErrorImage() },
         )
 
-        Icon(
-            imageVector = PrimalIcons.Play,
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier
-                .size(64.dp)
-                .background(Color.Black.copy(alpha = 0.42f), CircleShape)
-                .padding(start = 6.dp)
-                .clickable { onClick() },
-        )
+        PlayButton(onClick = onClick)
     }
 }
 
@@ -208,7 +207,7 @@ fun PlayButton(loading: Boolean = false, onClick: (() -> Unit)? = null) {
             .size(64.dp)
             .background(color = Color.Black.copy(alpha = 0.42f), shape = CircleShape)
             .clip(CircleShape)
-            .clickable(enabled = onClick != null, onClick = { onClick?.invoke() }),
+            .clickable(enabled = onClick != null && !loading, onClick = { onClick?.invoke() }),
         contentAlignment = Alignment.Center,
     ) {
         if (loading) {
@@ -226,4 +225,13 @@ fun PlayButton(loading: Boolean = false, onClick: (() -> Unit)? = null) {
             )
         }
     }
+}
+
+@Composable
+fun NoteVideoThumbnailErrorImage() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = AppTheme.extraColorScheme.surfaceVariantAlt3),
+    )
 }
