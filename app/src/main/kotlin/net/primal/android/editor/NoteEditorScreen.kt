@@ -66,6 +66,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.*
+import kotlinx.coroutines.android.awaitFrame
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.FeedArticleListItem
 import net.primal.android.articles.feed.ui.FeedArticleUi
@@ -214,11 +215,6 @@ private fun NoteEditorBox(
     contentPadding: PaddingValues,
     noteCallbacks: NoteCallbacks,
 ) {
-    val focusRequester = remember { FocusRequester() }
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
-
     val editorListState = rememberLazyListState()
     var noteEditorMaxHeightPx by remember { mutableIntStateOf(0) }
     var replyNoteHeightPx by remember { mutableIntStateOf(0) }
@@ -265,7 +261,6 @@ private fun NoteEditorBox(
                     state = state,
                     replyingToPaddingTop = replyingToPaddingTop,
                     outlineColor = AppTheme.colorScheme.outline,
-                    focusRequester = focusRequester,
                     eventPublisher = eventPublisher,
                     onReplyToNoticeHeightChanged = { replyingToNoticeHeightPx = it },
                     onReplyNoteHeightChanged = { replyNoteHeightPx = it },
@@ -492,12 +487,17 @@ private fun NoteEditor(
     state: NoteEditorContract.UiState,
     replyingToPaddingTop: Dp,
     outlineColor: Color,
-    focusRequester: FocusRequester,
     onReplyNoteHeightChanged: (Int) -> Unit,
     onReplyToNoticeHeightChanged: (Int) -> Unit,
     eventPublisher: (UiEvent) -> Unit,
 ) {
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(focusRequester) {
+        awaitFrame()
+        focusRequester.requestFocus()
+    }
     val clipboardManager = LocalClipboardManager.current
+
     Column {
         if (state.isReply && state.replyToNote != null && !state.isQuoting) {
             ReplyingToText(
