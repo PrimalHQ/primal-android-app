@@ -101,6 +101,7 @@ import net.primal.android.core.utils.copyText
 import net.primal.android.core.video.VideoCache
 import net.primal.android.theme.AppTheme
 import net.primal.domain.links.EventUriType
+import timber.log.Timber
 
 const val MAX_VIDEO_WIDTH = 1280
 const val MAX_VIDEO_HEIGHT = 720
@@ -333,6 +334,10 @@ private fun MediaGalleryContent(
             exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
             exoPlayer.prepare()
             exoPlayer.playWhenReady = false
+
+            if (initialPositionMs > 0) {
+                exoPlayer.seekTo(startVideoIndex, initialPositionMs)
+            }
         }
     }
 
