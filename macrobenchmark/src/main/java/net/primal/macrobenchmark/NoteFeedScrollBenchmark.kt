@@ -12,6 +12,7 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Direction
 import androidx.test.uiautomator.StaleObjectException
 import androidx.test.uiautomator.Until
+import net.primal.android.macrobenchmark.BuildConfig
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

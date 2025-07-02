@@ -15,7 +15,7 @@ val configProperties by lazy {
 }
 
 android {
-    namespace = "net.primal.macrobenchmark"
+    namespace = "net.primal.android.macrobenchmark"
     compileSdk = 36
 
     kotlin {
@@ -29,7 +29,7 @@ android {
         buildConfigField(
             type = "String",
             name = "BENCHMARK_NSEC",
-            value = "\"${configProperties?.getProperty("localStorage.benchmarkNsec", "")}\"",
+            value = "\"${configProperties?.getProperty("benchmark.nsec", "")}\"",
         )
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
