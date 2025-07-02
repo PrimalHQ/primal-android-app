@@ -41,3 +41,5 @@ include(":domain:wallet")
 
 include(":paging-runtime-ios")
 include(":shared")
+
+include(":macrobenchmark")

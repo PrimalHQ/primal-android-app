@@ -33,8 +33,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -127,6 +130,7 @@ fun LoginScreen(
 
     BackHandler(enabled = state.loading) { }
     ColumnWithBackground(
+        modifier = Modifier.semantics { testTagsAsResourceId = true },
         backgroundPainter = painterResource(id = R.drawable.onboarding_spot2),
     ) { size ->
         val uiMode = size.height.detectUiDensityModeFromMaxHeight()
@@ -221,6 +225,13 @@ fun LoginContent(
                     else -> stringResource(id = R.string.login_button_paste_new_key)
                 },
                 modifier = Modifier
+                    .run {
+                        if (state.isValidKey) {
+                            this.testTag("loginSignInButton")
+                        } else {
+                            this
+                        }
+                    }
                     .fillMaxWidth()
                     .height(56.dp)
                     .align(alignment = Alignment.CenterHorizontally),
