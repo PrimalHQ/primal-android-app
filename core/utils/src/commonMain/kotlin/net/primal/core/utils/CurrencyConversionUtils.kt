@@ -1,6 +1,7 @@
 package net.primal.core.utils
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.DecimalMode
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 
 @Suppress("TooManyFunctions")
@@ -40,7 +41,7 @@ object CurrencyConversionUtils {
 
     fun BigDecimal.fromUsdToSats(exchangeBtcUsdRate: Double?): ULong {
         val rate = exchangeBtcUsdRate ?: 0.0
-        val btcAmount = divide(rate.toBigDecimal())
+        val btcAmount = divide(rate.toBigDecimal(decimalMode = DecimalMode.US_CURRENCY))
         return btcAmount.toSats()
     }
 

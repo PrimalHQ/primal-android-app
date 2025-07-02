@@ -115,6 +115,7 @@ private fun ReadsScreen(
 
     PrimalDrawerScaffold(
         drawerState = drawerState,
+        drawerOpenGestureEnabled = false,
         activeDestination = PrimalTopLevelDestination.Reads,
         onActiveDestinationClick = {
             shouldAnimateScrollToTop = true

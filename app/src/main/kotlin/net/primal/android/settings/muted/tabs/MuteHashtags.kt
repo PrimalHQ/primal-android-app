@@ -73,7 +73,7 @@ fun MuteHashtags(
             value = newMutedHashtag,
             onValueChange = {
                 eventPublisher(
-                    MutedSettingsContract.UiEvent.UpdateNewMutedHashtag(newMutedHashtag),
+                    MutedSettingsContract.UiEvent.UpdateNewMutedHashtag(it),
                 )
             },
             sending = false,

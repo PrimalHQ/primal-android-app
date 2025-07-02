@@ -15,8 +15,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,6 +42,7 @@ fun WelcomeScreen(
     onRedeemCodeClick: () -> Unit,
 ) {
     ColumnWithBackground(
+        modifier = Modifier.semantics { testTagsAsResourceId = true },
         backgroundPainter = painterResource(id = R.drawable.onboarding_spot1),
     ) { size ->
         val uiMode = size.height.detectUiDensityModeFromMaxHeight()
@@ -80,6 +84,7 @@ fun WelcomeScreen(
             )
 
             OnboardingButton(
+                modifier = Modifier.testTag("welcomeSignInButton"),
                 text = stringResource(id = R.string.welcome_sign_in_button_title),
                 onClick = onSignInClick,
             )
