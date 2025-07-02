@@ -80,10 +80,6 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        ksp {
-            arg("room.schemaLocation", "$projectDir/schemas")
-        }
-
         buildConfigField(
             type = "String",
             name = "LOCAL_STORAGE_KEY_ALIAS",
@@ -99,6 +95,10 @@ android {
                 "false"
             },
         )
+    }
+
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
     }
 
     signingConfigs {
