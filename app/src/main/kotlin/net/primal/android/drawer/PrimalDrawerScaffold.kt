@@ -60,6 +60,7 @@ fun PrimalDrawerScaffold(
     floatingNewDataHost: @Composable () -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
     snackbarHost: @Composable () -> Unit = {},
+    drawerOpenGestureEnabled: Boolean = true,
     focusModeEnabled: Boolean = true,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
@@ -86,6 +87,7 @@ fun PrimalDrawerScaffold(
     ModalNavigationDrawer(
         modifier = modifier,
         drawerState = drawerState,
+        gesturesEnabled = drawerOpenGestureEnabled || drawerState.isOpen,
         drawerContent = {
             PrimalDrawer(
                 drawerState = drawerState,

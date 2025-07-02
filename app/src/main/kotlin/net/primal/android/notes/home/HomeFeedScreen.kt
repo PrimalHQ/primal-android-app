@@ -142,6 +142,7 @@ fun HomeFeedScreen(
 
     PrimalDrawerScaffold(
         drawerState = drawerState,
+        drawerOpenGestureEnabled = false,
         activeDestination = PrimalTopLevelDestination.Home,
         onActiveDestinationClick = {
             shouldAnimateScrollToTop = true
