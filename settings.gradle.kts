@@ -1,7 +1,5 @@
 import java.net.URI
 
-include(":macrobenchmark")
-
 pluginManagement {
     repositories {
         gradlePluginPortal()
@@ -43,3 +41,5 @@ include(":domain:wallet")
 
 include(":paging-runtime-ios")
 include(":shared")
+
+include(":macrobenchmark")
