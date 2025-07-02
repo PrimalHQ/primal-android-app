@@ -68,7 +68,6 @@ import coil3.memory.MemoryCache
 import coil3.request.ErrorResult
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
-import coil3.request.crossfade
 import coil3.toBitmap
 import com.github.panpf.zoomimage.CoilZoomAsyncImage
 import kotlin.time.Duration.Companion.seconds
@@ -172,7 +171,7 @@ private fun EventMediaGalleryScreen(
                     containerColor = containerColor,
                     eventPublisher = eventPublisher,
                     mediaItemBitmap = mediaItemBitmap,
-                    getCurrentImage = ::currentImage,
+                    getCurrentImage = { currentImage() },
                 )
             }
         },
@@ -507,7 +506,6 @@ private fun ImageScreen(
             .error(highestResMirrorImage)
             .fallback(highestResMirrorImage)
             .listener(loadingImageListener)
-            .crossfade(durationMillis = 300)
             .build(),
         contentDescription = null,
     )
