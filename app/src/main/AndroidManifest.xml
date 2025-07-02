@@ -44,9 +44,6 @@
         android:usesCleartextTraffic="true"
         tools:replace="android:allowBackup"
         tools:targetApi="33">
-        <profileable
-            android:shell="true"
-            tools:targetApi="29" />
 
         <activity
             android:name=".MainActivity"
