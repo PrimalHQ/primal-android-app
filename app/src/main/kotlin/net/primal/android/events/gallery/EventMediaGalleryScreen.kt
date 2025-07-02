@@ -507,7 +507,6 @@ private fun ImageScreen(
             .error(highestResMirrorImage)
             .fallback(highestResMirrorImage)
             .listener(loadingImageListener)
-            .crossfade(durationMillis = 300)
             .build(),
         contentDescription = null,
     )
