@@ -2,7 +2,6 @@ package net.primal.android.events.gallery
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
@@ -63,11 +62,7 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.datasource.DefaultHttpDataSource
-import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
-import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.ui.PlayerView
 import coil3.imageLoader
 import coil3.memory.MemoryCache
@@ -80,6 +75,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import net.primal.android.LocalPrimalVideoPlayerManager
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.HorizontalPagerIndicator
@@ -97,26 +93,13 @@ import net.primal.android.core.compose.immersive.rememberImmersiveModeState
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.utils.copyBitmapToClipboard
 import net.primal.android.core.utils.copyText
-import net.primal.android.core.video.VideoCache
 import net.primal.android.theme.AppTheme
 import net.primal.domain.links.EventUriType
-import timber.log.Timber
 
-const val MAX_VIDEO_WIDTH = 1280
-const val MAX_VIDEO_HEIGHT = 720
-
-@androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun EventMediaGalleryScreen(viewModel: EventMediaGalleryViewModel, onClose: () -> Unit) {
     val uiState = viewModel.state.collectAsState()
     val context = LocalContext.current
-
-    val exoPlayer = rememberPrimalExoPlayer(context)
-    DisposableEffect(exoPlayer) {
-        onDispose {
-            exoPlayer.release()
-        }
-    }
 
     val uiScope = rememberCoroutineScope()
     LaunchedEffect(viewModel) {
@@ -138,34 +121,8 @@ fun EventMediaGalleryScreen(viewModel: EventMediaGalleryViewModel, onClose: () -
         state = uiState.value,
         onClose = onClose,
         eventPublisher = { viewModel.setEvent(it) },
-        exoPlayer = exoPlayer,
     )
 }
-
-@androidx.annotation.OptIn(UnstableApi::class)
-@Composable
-private fun rememberPrimalExoPlayer(context: Context): ExoPlayer =
-    remember {
-        val cache = VideoCache.getInstance(context)
-        val cacheDataSourceFactory = CacheDataSource.Factory()
-            .setCache(cache)
-            .setUpstreamDataSourceFactory(DefaultHttpDataSource.Factory())
-            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
-
-        val mediaSourceFactory = DefaultMediaSourceFactory(context)
-            .setDataSourceFactory(cacheDataSourceFactory)
-
-        val trackSelector = DefaultTrackSelector(context).apply {
-            parameters = DefaultTrackSelector.Parameters.Builder()
-                .setMaxVideoSize(MAX_VIDEO_WIDTH, MAX_VIDEO_HEIGHT)
-                .build()
-        }
-
-        ExoPlayer.Builder(context)
-            .setTrackSelector(trackSelector)
-            .setMediaSourceFactory(mediaSourceFactory)
-            .build()
-    }
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -173,7 +130,6 @@ private fun rememberPrimalExoPlayer(context: Context): ExoPlayer =
 private fun EventMediaGalleryScreen(
     state: EventMediaGalleryContract.UiState,
     onClose: () -> Unit,
-    exoPlayer: ExoPlayer,
     eventPublisher: (EventMediaGalleryContract.UiEvent) -> Unit,
 ) {
     val imageAttachments = state.attachments
@@ -231,7 +187,6 @@ private fun EventMediaGalleryScreen(
                 pagerIndicatorContainerColor = containerColor,
                 onCurrentlyVisibleBitmap = { mediaItemBitmap = it },
                 toggleImmersiveMode = { immersiveMode?.toggle() },
-                exoPlayer = exoPlayer,
             )
         },
         snackbarHost = {
@@ -298,7 +253,6 @@ private fun MediaGalleryContent(
     imageAttachments: List<EventUriUi>,
     pagerIndicatorContainerColor: Color,
     toggleImmersiveMode: () -> Unit,
-    exoPlayer: ExoPlayer,
     onCurrentlyVisibleBitmap: ((Bitmap?) -> Unit)? = null,
 ) {
     val videoAttachments = remember(imageAttachments) {
@@ -311,7 +265,14 @@ private fun MediaGalleryContent(
         }.toMap()
     }
 
+    val videoPlayerManager = LocalPrimalVideoPlayerManager.current
     var pagerSettled by remember { mutableStateOf(false) }
+    val exoPlayer = remember { videoPlayerManager.getOrCreateExoPlayer() }
+    DisposableEffect(exoPlayer) {
+        onDispose {
+            videoPlayerManager.releasePlayer()
+        }
+    }
 
     LaunchedEffect(videoAttachments) {
         if (videoAttachments.isNotEmpty()) {
@@ -555,6 +516,7 @@ private fun AttachmentsHorizontalPager(
                         toggleImmersiveMode = toggleImmersiveMode,
                     )
                 }
+
                 EventUriType.Video -> {
                     VideoScreen(
                         modifier = Modifier
@@ -565,6 +527,7 @@ private fun AttachmentsHorizontalPager(
                         isPageVisible = pagerState.currentPage == index,
                     )
                 }
+
                 else -> Unit
             }
         }
