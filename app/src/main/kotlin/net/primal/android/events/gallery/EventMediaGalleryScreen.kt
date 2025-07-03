@@ -132,16 +132,15 @@ private fun EventMediaGalleryScreen(
     onClose: () -> Unit,
     eventPublisher: (EventMediaGalleryContract.UiEvent) -> Unit,
 ) {
-    val imageAttachments = state.attachments
     val pagerState = rememberPagerState(
         initialPage = state.initialAttachmentIndex,
-        pageCount = { imageAttachments.size },
+        pageCount = { state.attachments.size },
     )
     var mediaItemBitmap by remember { mutableStateOf<Bitmap?>(null) }
     val window = LocalActivity.current?.window
     val immersiveMode = window?.let { rememberImmersiveModeState(window = window) }
 
-    fun currentImage() = imageAttachments.getOrNull(pagerState.currentPage)
+    fun currentImage() = state.attachments.getOrNull(pagerState.currentPage)
 
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -183,7 +182,7 @@ private fun EventMediaGalleryScreen(
                 pagerState = pagerState,
                 initialAttachmentIndex = state.initialAttachmentIndex,
                 initialPositionMs = state.initialPositionMs,
-                imageAttachments = imageAttachments,
+                attachments = state.attachments,
                 pagerIndicatorContainerColor = containerColor,
                 onCurrentlyVisibleBitmap = { mediaItemBitmap = it },
                 toggleImmersiveMode = { immersiveMode?.toggle() },
@@ -250,17 +249,17 @@ private fun MediaGalleryContent(
     pagerState: PagerState,
     initialAttachmentIndex: Int,
     initialPositionMs: Long,
-    imageAttachments: List<EventUriUi>,
+    attachments: List<EventUriUi>,
     pagerIndicatorContainerColor: Color,
     toggleImmersiveMode: () -> Unit,
     onCurrentlyVisibleBitmap: ((Bitmap?) -> Unit)? = null,
 ) {
-    val videoAttachments = remember(imageAttachments) {
-        imageAttachments.filter { it.type == EventUriType.Video }
+    val videoAttachments = remember(attachments) {
+        attachments.filter { it.type == EventUriType.Video }
     }
 
-    val videoUrlToIndexMap = remember(imageAttachments) {
-        imageAttachments.mapIndexedNotNull { index, eventUriUi ->
+    val videoUrlToIndexMap = remember(attachments) {
+        attachments.mapIndexedNotNull { index, eventUriUi ->
             if (eventUriUi.type == EventUriType.Video) eventUriUi.url to index else null
         }.toMap()
     }
@@ -283,7 +282,7 @@ private fun MediaGalleryContent(
                     .build()
             }
 
-            val initialAttachment = imageAttachments.getOrNull(initialAttachmentIndex)
+            val initialAttachment = attachments.getOrNull(initialAttachmentIndex)
             val startVideoIndex = if (initialAttachment?.type == EventUriType.Video) {
                 videoAttachments.indexOf(initialAttachment).coerceAtLeast(0)
             } else {
@@ -304,7 +303,7 @@ private fun MediaGalleryContent(
     LaunchedEffect(pagerState, exoPlayer, videoAttachments, videoUrlToIndexMap) {
         launch {
             snapshotFlow { pagerState.currentPage }.distinctUntilChanged().collect { page ->
-                val attachment = imageAttachments.getOrNull(page)
+                val attachment = attachments.getOrNull(page)
                 if (attachment?.type == EventUriType.Video) {
                     val videoIndex = videoAttachments.indexOf(attachment)
                     if (videoIndex != -1 && exoPlayer.currentMediaItemIndex != videoIndex) {
@@ -336,10 +335,10 @@ private fun MediaGalleryContent(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        if (imageAttachments.isNotEmpty()) {
+        if (attachments.isNotEmpty()) {
             AttachmentsHorizontalPager(
                 modifier = Modifier.fillMaxSize(),
-                imageAttachments = imageAttachments,
+                attachments = attachments,
                 pagerState = pagerState,
                 onCurrentlyVisibleBitmap = onCurrentlyVisibleBitmap,
                 toggleImmersiveMode = toggleImmersiveMode,
@@ -349,7 +348,7 @@ private fun MediaGalleryContent(
             )
         }
 
-        if (imageAttachments.size > 1) {
+        if (attachments.size > 1) {
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -359,7 +358,7 @@ private fun MediaGalleryContent(
             ) {
                 HorizontalPagerIndicator(
                     modifier = Modifier.height(32.dp),
-                    pagesCount = imageAttachments.size,
+                    pagesCount = attachments.size,
                     currentPage = pagerState.currentPage,
                 )
             }
@@ -488,7 +487,7 @@ private fun MediaCopyMenuItem(onMediaCopyClick: () -> Unit) {
 @Composable
 private fun AttachmentsHorizontalPager(
     pagerState: PagerState,
-    imageAttachments: List<EventUriUi>,
+    attachments: List<EventUriUi>,
     toggleImmersiveMode: () -> Unit,
     exoPlayer: ExoPlayer,
     modifier: Modifier = Modifier,
@@ -505,7 +504,7 @@ private fun AttachmentsHorizontalPager(
             snapAnimationSpec = spring(stiffness = 500f),
         ),
     ) { index ->
-        val attachment = imageAttachments[index]
+        val attachment = attachments[index]
         Box(modifier = Modifier.fillMaxSize()) {
             when (attachment.type) {
                 EventUriType.Image -> {
