@@ -89,6 +89,7 @@ import net.primal.android.core.compose.immersive.rememberImmersiveModeState
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.utils.copyBitmapToClipboard
 import net.primal.android.core.utils.copyText
+import net.primal.android.core.video.rememberPrimalExoPlayer
 import net.primal.android.theme.AppTheme
 import net.primal.domain.links.EventUriType
 
@@ -180,7 +181,7 @@ private fun EventMediaGalleryScreen(
                 pagerState = pagerState,
                 initialAttachmentIndex = state.initialAttachmentIndex,
                 initialPositionMs = state.initialPositionMs,
-                imageAttachments = imageAttachments,
+                attachments = imageAttachments,
                 pagerIndicatorContainerColor = containerColor,
                 onCurrentlyVisibleBitmap = { mediaItemBitmap = it },
                 toggleImmersiveMode = { immersiveMode?.toggle() },
@@ -247,7 +248,7 @@ private fun MediaGalleryContent(
     pagerState: PagerState,
     initialAttachmentIndex: Int,
     initialPositionMs: Long,
-    imageAttachments: List<EventUriUi>,
+    attachments: List<EventUriUi>,
     pagerIndicatorContainerColor: Color,
     toggleImmersiveMode: () -> Unit,
     onCurrentlyVisibleBitmap: ((Bitmap?) -> Unit)? = null,
@@ -256,10 +257,10 @@ private fun MediaGalleryContent(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        if (imageAttachments.isNotEmpty()) {
+        if (attachments.isNotEmpty()) {
             AttachmentsHorizontalPager(
                 modifier = Modifier.fillMaxSize(),
-                imageAttachments = imageAttachments,
+                attachments = attachments,
                 pagerState = pagerState,
                 initialIndex = initialAttachmentIndex,
                 initialPositionMs = initialPositionMs,
@@ -268,7 +269,7 @@ private fun MediaGalleryContent(
             )
         }
 
-        if (imageAttachments.size > 1) {
+        if (attachments.size > 1) {
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -278,7 +279,7 @@ private fun MediaGalleryContent(
             ) {
                 HorizontalPagerIndicator(
                     modifier = Modifier.height(32.dp),
-                    pagesCount = imageAttachments.size,
+                    pagesCount = attachments.size,
                     currentPage = pagerState.currentPage,
                 )
             }
@@ -403,7 +404,7 @@ private fun MediaCopyMenuItem(onMediaCopyClick: () -> Unit) {
 @Composable
 private fun AttachmentsHorizontalPager(
     pagerState: PagerState,
-    imageAttachments: List<EventUriUi>,
+    attachments: List<EventUriUi>,
     toggleImmersiveMode: () -> Unit,
     modifier: Modifier = Modifier,
     initialIndex: Int = 0,
@@ -413,20 +414,20 @@ private fun AttachmentsHorizontalPager(
     HorizontalPager(
         modifier = modifier,
         state = pagerState,
-        beyondViewportPageCount = 1,
+        beyondViewportPageCount = 0,
         flingBehavior = PagerDefaults.flingBehavior(
             state = pagerState,
             snapAnimationSpec = spring(stiffness = Spring.StiffnessLow),
         ),
     ) { index ->
-        val attachment = imageAttachments[index]
+        val attachment = attachments[index]
         Box(modifier = Modifier.fillMaxSize()) {
             when (attachment.type) {
                 EventUriType.Image -> {
                     ImageScreen(
                         modifier = Modifier.fillMaxSize(),
                         attachment = attachment,
-                        currentImage = imageAttachments.getOrNull(pagerState.currentPage),
+                        currentImage = attachments.getOrNull(pagerState.currentPage),
                         onImageBitmapLoaded = { onCurrentlyVisibleBitmap?.invoke(it) },
                         toggleImmersiveMode = toggleImmersiveMode,
                     )
@@ -538,9 +539,7 @@ fun VideoScreen(
     isPageVisible: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-
-    val exoPlayer = remember { ExoPlayer.Builder(context).build() }
+    val exoPlayer = rememberPrimalExoPlayer()
     val mediaUrl = attachment.variants?.firstOrNull()?.mediaUrl ?: attachment.url
     val mediaSource = MediaItem.fromUri(mediaUrl)
     var playerState by remember { mutableIntStateOf(Player.STATE_IDLE) }
