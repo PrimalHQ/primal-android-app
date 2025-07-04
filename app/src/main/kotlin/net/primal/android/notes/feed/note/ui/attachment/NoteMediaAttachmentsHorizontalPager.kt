@@ -338,9 +338,9 @@ private fun NoteMediaAttachment(
     mediaEventUri: EventUriUi,
     blossoms: List<String>,
     imageSizeDp: DpSize,
+    allowAutoPlay: Boolean,
     onClick: (positionMs: Long) -> Unit,
     modifier: Modifier = Modifier,
-    allowAutoPlay: Boolean,
 ) {
     BoxWithConstraints(
         modifier = modifier,
@@ -349,24 +349,24 @@ private fun NoteMediaAttachment(
         when (mediaEventUri.type) {
             EventUriType.Video -> {
                 NoteAttachmentVideoPreview(
-                    eventUri = mediaEventUri,
-                    onVideoClick = { positionMs -> onClick(positionMs) },
                     modifier = Modifier
                         .width(imageSizeDp.width)
                         .height(imageSizeDp.height),
+                    eventUri = mediaEventUri,
+                    onVideoClick = { positionMs -> onClick(positionMs) },
                     allowAutoPlay = allowAutoPlay,
                 )
             }
 
             else -> {
                 NoteAttachmentImagePreview(
-                    attachment = mediaEventUri,
-                    blossoms = blossoms,
-                    maxWidth = this.maxWidth,
                     modifier = Modifier
                         .width(imageSizeDp.width)
                         .height(imageSizeDp.height)
                         .clickable { onClick(0L) },
+                    attachment = mediaEventUri,
+                    blossoms = blossoms,
+                    maxWidth = this.maxWidth,
                 )
             }
         }
