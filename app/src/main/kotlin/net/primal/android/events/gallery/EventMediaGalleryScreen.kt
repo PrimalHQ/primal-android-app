@@ -74,7 +74,6 @@ import coil3.toBitmap
 import com.github.panpf.zoomimage.CoilZoomAsyncImage
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
@@ -258,18 +257,9 @@ private fun MediaGalleryContent(
     toggleImmersiveMode: () -> Unit,
     onCurrentlyVisibleBitmap: ((Bitmap?) -> Unit)? = null,
 ) {
-    val videoAttachments = remember(attachments) {
-        attachments.filter { it.type == EventUriType.Video }
-    }
-
-    val videoUrlToIndexMap = remember(attachments) {
-        attachments.mapIndexedNotNull { index, eventUriUi ->
-            if (eventUriUi.type == EventUriType.Video) eventUriUi.url to index else null
-        }.toMap()
-    }
-
     val context = LocalContext.current
-    var pagerSettled by remember { mutableStateOf(false) }
+    val videoAttachments = remember(attachments) { attachments.filter { it.type == EventUriType.Video } }
+
     var exoPlayer by remember { mutableStateOf<ExoPlayer?>(null) }
     LifecycleStartEffect(Unit) {
         exoPlayer = initializePlayer(context = context)
@@ -279,7 +269,7 @@ private fun MediaGalleryContent(
         }
     }
 
-    LaunchedEffect(videoAttachments) {
+    LaunchedEffect(exoPlayer, videoAttachments) {
         exoPlayer?.let { exoPlayer ->
             if (videoAttachments.isNotEmpty()) {
                 val videoMediaItems = videoAttachments.map {
@@ -308,7 +298,7 @@ private fun MediaGalleryContent(
         }
     }
 
-    LaunchedEffect(pagerState, exoPlayer, videoAttachments) {
+    LaunchedEffect(exoPlayer, pagerState, videoAttachments) {
         exoPlayer?.let { exoPlayer ->
             snapshotFlow { pagerState.currentPage }.distinctUntilChanged().collect { page ->
                 val attachment = attachments.getOrNull(page)
@@ -322,22 +312,6 @@ private fun MediaGalleryContent(
                     exoPlayer.pause()
                 }
             }
-        }
-    }
-
-    LaunchedEffect(pagerState, exoPlayer, videoAttachments, videoUrlToIndexMap) {
-        exoPlayer?.let { exoPlayer ->
-            snapshotFlow { exoPlayer.currentMediaItemIndex }
-                .distinctUntilChanged()
-                .filter { exoPlayer.playbackState != Player.STATE_IDLE && videoAttachments.isNotEmpty() }
-                .collect { videoIndex ->
-                    if (!pagerSettled) return@collect
-                    val videoUrl = videoAttachments.getOrNull(videoIndex)?.url
-                    val pagerIndex = videoUrl?.let { videoUrlToIndexMap[it] }
-                    if (pagerIndex != null && pagerState.currentPage != pagerIndex) {
-                        pagerState.animateScrollToPage(pagerIndex)
-                    }
-                }
         }
     }
 
