@@ -7,7 +7,6 @@ import coil3.decode.BitmapFactoryDecoder
 import coil3.disk.DiskCache
 import coil3.gif.AnimatedImageDecoder
 import coil3.gif.GifDecoder
-import coil3.video.VideoFrameDecoder
 import okio.Path.Companion.toOkioPath
 
 object AvatarCoilImageLoader {
@@ -36,9 +35,6 @@ object AvatarCoilImageLoader {
                 } else {
                     add(GifDecoder.Factory())
                 }
-
-                // Video frames
-                add(VideoFrameDecoder.Factory())
             }
             .build()
 

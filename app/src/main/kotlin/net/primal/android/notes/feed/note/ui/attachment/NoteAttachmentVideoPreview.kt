@@ -181,14 +181,12 @@ private fun VideoThumbnailImagePreview(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val mediaUrl = eventUri.variants?.firstOrNull()?.mediaUrl ?: eventUri.url
-
     Box(
         modifier = modifier.clip(AppTheme.shapes.medium),
         contentAlignment = Alignment.Center,
     ) {
         SubcomposeAsyncImage(
-            model = eventUri.thumbnailUrl ?: mediaUrl,
+            model = eventUri.thumbnailUrl,
             modifier = Modifier.fillMaxSize(),
             contentDescription = null,
             contentScale = ContentScale.Crop,

@@ -52,10 +52,10 @@ class PrimalVideoPlayerManager @Inject constructor(
                         .setBufferDurationsMs(
                             15000, // Min buffer (15s)
                             30000, // Max buffer (30s) - reduced from default
-                            1500,  // Buffer for playback
-                            5000   // Buffer for rebuffer
+                            1500, // Buffer for playback
+                            5000, // Buffer for rebuffer
                         )
-                        .build()
+                        .build(),
                 )
                 .build().also { player ->
                     _exoPlayer = player
