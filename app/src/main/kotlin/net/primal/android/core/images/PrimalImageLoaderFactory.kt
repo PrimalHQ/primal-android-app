@@ -7,7 +7,6 @@ import coil3.SingletonImageLoader
 import coil3.disk.DiskCache
 import coil3.gif.AnimatedImageDecoder
 import coil3.gif.GifDecoder
-import coil3.video.VideoFrameDecoder
 import javax.inject.Inject
 import javax.inject.Singleton
 import okio.Path.Companion.toOkioPath
@@ -27,9 +26,6 @@ class PrimalImageLoaderFactory @Inject constructor() : SingletonImageLoader.Fact
                 } else {
                     add(GifDecoder.Factory())
                 }
-
-                // Video frames
-                add(VideoFrameDecoder.Factory())
             }
             .diskCache {
                 DiskCache.Builder()
