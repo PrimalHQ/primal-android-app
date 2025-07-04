@@ -10,6 +10,7 @@ import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -39,7 +40,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -51,13 +51,12 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -89,7 +88,6 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteLink
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyRawData
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.immersive.rememberImmersiveModeState
-import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.utils.copyBitmapToClipboard
 import net.primal.android.core.utils.copyText
 import net.primal.android.core.video.initializePlayer
@@ -487,7 +485,7 @@ private fun AttachmentsHorizontalPager(
         beyondViewportPageCount = 0,
         flingBehavior = PagerDefaults.flingBehavior(
             state = pagerState,
-            snapAnimationSpec = spring(stiffness = 500f),
+            snapAnimationSpec = spring(stiffness = Spring.StiffnessLow),
         ),
     ) { index ->
         val attachment = attachments[index]
@@ -603,12 +601,12 @@ fun VideoScreen(
     positionMs: Long,
     modifier: Modifier = Modifier,
 ) {
+    var isBuffering by remember { mutableStateOf(false) }
     if (isPageVisible) {
         KeepScreenOn()
     }
-    var isBuffering by remember { mutableStateOf(false) }
 
-    DisposableEffect(exoPlayer, isPageVisible) {
+    LifecycleStartEffect(exoPlayer, isPageVisible) {
         val listener = object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 if (isPageVisible) {
@@ -618,41 +616,40 @@ fun VideoScreen(
         }
         exoPlayer.addListener(listener)
         exoPlayer.seekTo(positionMs)
-        onDispose { exoPlayer.removeListener(listener) }
-    }
-
-    DisposableLifecycleObserverEffect(key1 = exoPlayer) { event ->
-        when (event) {
-            Lifecycle.Event.ON_PAUSE -> exoPlayer.pause()
-            Lifecycle.Event.ON_RESUME -> if (isPageVisible) exoPlayer.play()
-            else -> {}
+        onStopOrDispose {
+            exoPlayer.removeListener(listener)
         }
     }
 
-    val playerView = remember {
-        mutableStateOf<PlayerView?>(null)
+    LifecycleResumeEffect(exoPlayer, isPageVisible) {
+        if (isPageVisible) exoPlayer.play()
+        onPauseOrDispose {
+            exoPlayer.pause()
+        }
     }
+
+    var playerView by remember { mutableStateOf<PlayerView?>(null) }
 
     LaunchedEffect(exoPlayer, isPageVisible) {
         if (isPageVisible) {
-            playerView.value?.player = exoPlayer
+            playerView?.player = exoPlayer
         } else {
-            playerView.value?.player = null
+            playerView?.player = null
         }
     }
 
     Box(modifier = modifier) {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
-            factory = { ctx ->
-                PlayerView(ctx).apply {
+            factory = { context ->
+                PlayerView(context).apply {
                     useController = true
-                    setShutterBackgroundColor(Color.Black.toArgb())
                     controllerShowTimeoutMs = 1.seconds.inWholeMilliseconds.toInt()
+//                    setShutterBackgroundColor(Color.Black.toArgb())
                     setShowNextButton(false)
                     setShowPreviousButton(false)
                 }.also {
-                    playerView.value = it
+                    playerView = it
                 }
             },
         )
