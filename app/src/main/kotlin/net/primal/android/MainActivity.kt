@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.connectionindicator.ConnectionIndicatorOverlay
-import net.primal.android.core.video.PrimalVideoPlayerManager
 import net.primal.android.navigation.PrimalAppNavigation
 import net.primal.android.navigation.splash.SplashViewModel
 import net.primal.android.nostr.notary.NostrNotary
@@ -56,9 +55,6 @@ class MainActivity : FragmentActivity() {
 
     @Inject
     lateinit var qrCodeResultDecoder: QrCodeResultDecoder
-
-    @Inject
-    lateinit var videoPlayerManager: PrimalVideoPlayerManager
 
     private lateinit var primalTheme: PrimalTheme
 
@@ -109,7 +105,6 @@ class MainActivity : FragmentActivity() {
                     LocalRippleConfiguration provides primalRippleConfiguration,
                     LocalContentDisplaySettings provides contentDisplaySettings.value,
                     LocalQrCodeDecoder provides qrCodeResultDecoder,
-                    LocalPrimalVideoPlayerManager provides videoPlayerManager,
                 ) {
                     ApplyEdgeToEdge()
 
@@ -154,18 +149,10 @@ class MainActivity : FragmentActivity() {
     }
 }
 
-val LocalPrimalTheme = compositionLocalOf<PrimalTheme> {
-    error("No PrimalTheme provided.")
-}
+val LocalPrimalTheme = compositionLocalOf<PrimalTheme> { error("No PrimalTheme provided.") }
 
 val LocalContentDisplaySettings = compositionLocalOf<ContentDisplaySettings> {
     error("No ContentDisplay settins provided.")
 }
 
-val LocalQrCodeDecoder = compositionLocalOf<QrCodeResultDecoder> {
-    error("No QrCodeResultDecoder provided.")
-}
-
-val LocalPrimalVideoPlayerManager = compositionLocalOf<PrimalVideoPlayerManager> {
-    error("No PrimalVideoPlayerManager provided.")
-}
+val LocalQrCodeDecoder = compositionLocalOf<QrCodeResultDecoder> { error("No QrCodeResultDecoder provided.") }

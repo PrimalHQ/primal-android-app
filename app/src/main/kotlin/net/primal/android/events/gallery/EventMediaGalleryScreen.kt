@@ -75,7 +75,6 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
-import net.primal.android.LocalPrimalVideoPlayerManager
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.HorizontalPagerIndicator
@@ -93,6 +92,7 @@ import net.primal.android.core.compose.immersive.rememberImmersiveModeState
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.utils.copyBitmapToClipboard
 import net.primal.android.core.utils.copyText
+import net.primal.android.core.video.rememberPrimalExoPlayer
 import net.primal.android.theme.AppTheme
 import net.primal.domain.links.EventUriType
 
@@ -264,12 +264,11 @@ private fun MediaGalleryContent(
         }.toMap()
     }
 
-    val videoPlayerManager = LocalPrimalVideoPlayerManager.current
     var pagerSettled by remember { mutableStateOf(false) }
-    val exoPlayer = remember { videoPlayerManager.getOrCreateExoPlayer() }
+    val exoPlayer = rememberPrimalExoPlayer()
     DisposableEffect(exoPlayer) {
         onDispose {
-            videoPlayerManager.releasePlayer()
+            exoPlayer.release()
         }
     }
 
