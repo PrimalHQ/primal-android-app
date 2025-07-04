@@ -18,14 +18,16 @@ fun CdnResourceVariant?.calculateImageSize(
 
     val variantWidth = (width / density).toInt()
     val variantHeight = (height / density).toInt()
+
+    val heightByAspectRation = ((maxWidth * variantHeight) / variantWidth)
+
     return DpSize(
         width = when {
             else -> maxWidth.dp
         },
         height = when {
             variantHeight == 0 -> maxWidth.dp
-            variantHeight > maxHeight -> maxHeight.dp
-            else -> ((maxWidth * variantHeight) / variantWidth).dp
+            else -> minOf(heightByAspectRation, maxHeight).dp
         },
     )
 }

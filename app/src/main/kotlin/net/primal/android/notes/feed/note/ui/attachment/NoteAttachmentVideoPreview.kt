@@ -22,16 +22,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.datasource.DefaultHttpDataSource
-import androidx.media3.datasource.cache.CacheDataSource
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.ui.PlayerView
 import coil3.compose.SubcomposeAsyncImage
 import net.primal.android.LocalContentDisplaySettings
@@ -41,7 +36,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Mute
 import net.primal.android.core.compose.icons.primaliconpack.Play
 import net.primal.android.core.compose.icons.primaliconpack.Unmute
-import net.primal.android.core.video.VideoCache
+import net.primal.android.core.video.rememberPrimalExoPlayer
 import net.primal.android.theme.AppTheme
 import net.primal.android.user.domain.ContentDisplaySettings
 
@@ -79,19 +74,7 @@ private fun AutoPlayVideo(
     onVideoClick: (positionMs: Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-
-    val cacheDataSourceFactory = remember {
-        CacheDataSource.Factory()
-            .setCache(VideoCache.getInstance(context))
-            .setUpstreamDataSourceFactory(DefaultHttpDataSource.Factory())
-    }
-
-    val exoPlayer = remember(context) {
-        ExoPlayer.Builder(context)
-            .setMediaSourceFactory(DefaultMediaSourceFactory(cacheDataSourceFactory))
-            .build()
-    }
+    val exoPlayer = rememberPrimalExoPlayer()
 
     var isMuted by remember { mutableStateOf(true) }
     var isBuffering by remember { mutableStateOf(true) }

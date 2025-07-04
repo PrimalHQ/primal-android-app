@@ -10,8 +10,10 @@ import java.io.File
 
 @UnstableApi
 object VideoCache {
+
     @Volatile
     private var instance: Cache? = null
+
     private const val CACHE_SIZE_BYTES = 500L * 1024 * 1024
 
     fun getInstance(context: Context): Cache {
