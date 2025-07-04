@@ -1,4 +1,1 @@
-- Follow Packs in Explore.
-- "Unable to connect" indicator.
-- Revamped gallery screen & GIF support.
 - Various minor improvements and stability fixes.
