@@ -1,6 +1,8 @@
 package net.primal.android.drawer
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
@@ -80,6 +82,12 @@ fun PrimalDrawerScaffold(
         }
     }
 
+    val isBottomBarVisible by remember {
+        derivedStateOf {
+            bottomBarInitialHeight.isZeroOrNavigationBarFullHeight() || bottomBarRealHeight > 0.dp
+        }
+    }
+
     val focusModeOn by remember(topAppBarState) {
         derivedStateOf { topAppBarState.collapsedFraction > 0.5f }
     }
@@ -127,27 +135,33 @@ fun PrimalDrawerScaffold(
                     }
                 },
                 bottomBar = {
-                    PrimalNavigationBarLightningBolt(
-                        modifier = if (bottomBarInitialHeight.isZeroOrNavigationBarFullHeight()) {
-                            bottomBarMeasureHeightModifier
-                        } else {
-                            Modifier
-                        }
-                            .offset {
-                                IntOffset(
-                                    x = 0.dp.roundToPx(),
-                                    y = if (bottomBarInitialHeight > 0.dp) {
-                                        bottomBarInitialHeight - bottomBarRealHeight
-                                    } else {
-                                        0.dp
-                                    }.roundToPx(),
-                                )
-                            },
-                        activeDestination = activeDestination,
-                        onTopLevelDestinationChanged = onPrimaryDestinationChanged,
-                        onActiveDestinationClick = onActiveDestinationClick,
-                        badges = badges,
-                    )
+                    AnimatedVisibility(
+                        visible = isBottomBarVisible,
+                        enter = EnterTransition.None,
+                        exit = ExitTransition.None,
+                    ) {
+                        PrimalNavigationBarLightningBolt(
+                            modifier = if (bottomBarInitialHeight.isZeroOrNavigationBarFullHeight()) {
+                                bottomBarMeasureHeightModifier
+                            } else {
+                                Modifier
+                            }
+                                .offset {
+                                    IntOffset(
+                                        x = 0.dp.roundToPx(),
+                                        y = if (bottomBarInitialHeight > 0.dp) {
+                                            bottomBarInitialHeight - bottomBarRealHeight
+                                        } else {
+                                            0.dp
+                                        }.roundToPx(),
+                                    )
+                                },
+                            activeDestination = activeDestination,
+                            onTopLevelDestinationChanged = onPrimaryDestinationChanged,
+                            onActiveDestinationClick = onActiveDestinationClick,
+                            badges = badges,
+                        )
+                    }
                 },
                 floatingActionButton = {
                     AnimatedVisibility(
