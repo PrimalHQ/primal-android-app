@@ -220,8 +220,10 @@ coil-network = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = 
 telephoto-zoomable-image = { module = "me.saket.telephoto:zoomable-image", version.ref = "telephoto" }
 telephoto-zoomable-image-coil = { module = "me.saket.telephoto:zoomable-image-coil", version.ref = "telephoto" }
 telephoto-zoomable-peek-overlay = { module = "me.saket.telephoto:zoomable-peek-overlay", version.ref = "telephoto" }
-media3-exoplayer-core = { module = "androidx.media3:media3-exoplayer", version.ref = "media3-exoplayer" }
+media3-decoder = { module = "androidx.media3:media3-decoder", version.ref = "media3-exoplayer" }
 media3-exoplayer-ui = { module = "androidx.media3:media3-ui", version.ref = "media3-exoplayer" }
+media3-exoplayer-ui-compose = { module = "androidx.media3:media3-ui-compose", version.ref = "media3-exoplayer" }
+media3-exoplayer-core = { module = "androidx.media3:media3-exoplayer", version.ref = "media3-exoplayer" }
 zoomimage-compose-coil3 = { module = "io.github.panpf.zoomimage:zoomimage-compose-coil3", version.ref = "zoomimage-compose-coil3" }
 
 # Loggers
