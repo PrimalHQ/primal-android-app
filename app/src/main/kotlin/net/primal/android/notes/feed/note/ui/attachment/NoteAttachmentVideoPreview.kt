@@ -44,11 +44,15 @@ import net.primal.android.user.domain.ContentDisplaySettings
 fun NoteAttachmentVideoPreview(
     eventUri: EventUriUi,
     onVideoClick: (positionMs: Long) -> Unit,
+    allowAutoPlay: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val autoPlay = LocalContentDisplaySettings.current.autoPlayVideos == ContentDisplaySettings.AUTO_PLAY_VIDEO_ALWAYS
+    val userPrefersAutoPlay = LocalContentDisplaySettings.current.autoPlayVideos ==
+        ContentDisplaySettings.AUTO_PLAY_VIDEO_ALWAYS
 
-    if (autoPlay) {
+    val shouldAutoPlay = userPrefersAutoPlay && allowAutoPlay
+
+    if (shouldAutoPlay) {
         AutoPlayVideo(
             modifier = modifier,
             eventUri = eventUri,

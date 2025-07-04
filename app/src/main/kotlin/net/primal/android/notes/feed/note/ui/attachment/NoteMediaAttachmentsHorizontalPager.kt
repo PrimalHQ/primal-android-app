@@ -128,6 +128,7 @@ private fun MultipleImageGallery(
                             mediaEventUri = media,
                             blossoms = blossoms,
                             imageSizeDp = imageSizeDp,
+                            allowAutoPlay = false,
                             onClick = { positionMs ->
                                 onMediaClick(
                                     MediaClickEvent(
@@ -191,6 +192,7 @@ private fun ThreeImageGallery(
             mediaEventUri = mediaEventUris[0],
             blossoms = blossoms,
             imageSizeDp = imageSizeDp,
+            allowAutoPlay = false,
             onClick = { positionMs ->
                 onMediaClick(
                     MediaClickEvent(
@@ -232,6 +234,7 @@ private fun ThreeImageGallery(
                     mediaEventUri = attachment,
                     blossoms = blossoms,
                     imageSizeDp = imageSizeDp,
+                    allowAutoPlay = false,
                     onClick = { positionMs ->
                         onMediaClick(
                             MediaClickEvent(
@@ -285,6 +288,7 @@ private fun TwoImageGallery(
                 mediaEventUri = attachment,
                 blossoms = blossoms,
                 imageSizeDp = imageSizeDp,
+                allowAutoPlay = false,
                 onClick = { positionMs ->
                     onMediaClick(
                         MediaClickEvent(
@@ -315,6 +319,7 @@ private fun SingleImageGallery(
         mediaEventUri = mediaEventUri,
         blossoms = blossoms,
         imageSizeDp = imageSizeDp,
+        allowAutoPlay = true,
         onClick = { positionMs ->
             onMediaClick(
                 MediaClickEvent(
@@ -333,6 +338,7 @@ private fun NoteMediaAttachment(
     mediaEventUri: EventUriUi,
     blossoms: List<String>,
     imageSizeDp: DpSize,
+    allowAutoPlay: Boolean,
     onClick: (positionMs: Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -343,23 +349,24 @@ private fun NoteMediaAttachment(
         when (mediaEventUri.type) {
             EventUriType.Video -> {
                 NoteAttachmentVideoPreview(
-                    eventUri = mediaEventUri,
-                    onVideoClick = { positionMs -> onClick(positionMs) },
                     modifier = Modifier
                         .width(imageSizeDp.width)
                         .height(imageSizeDp.height),
+                    eventUri = mediaEventUri,
+                    onVideoClick = { positionMs -> onClick(positionMs) },
+                    allowAutoPlay = allowAutoPlay,
                 )
             }
 
             else -> {
                 NoteAttachmentImagePreview(
-                    attachment = mediaEventUri,
-                    blossoms = blossoms,
-                    maxWidth = this.maxWidth,
                     modifier = Modifier
                         .width(imageSizeDp.width)
                         .height(imageSizeDp.height)
                         .clickable { onClick(0L) },
+                    attachment = mediaEventUri,
+                    blossoms = blossoms,
+                    maxWidth = this.maxWidth,
                 )
             }
         }
