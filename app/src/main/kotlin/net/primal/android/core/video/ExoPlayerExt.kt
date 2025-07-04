@@ -1,6 +1,6 @@
 package net.primal.android.core.video
 
-import androidx.annotation.OptIn
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -8,6 +8,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
+import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
@@ -30,43 +31,51 @@ private object PlaybackConstants {
     const val BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MSEC = 5_000
 }
 
-@OptIn(UnstableApi::class)
+@UnstableApi
 @Composable
 fun rememberPrimalExoPlayer(): ExoPlayer {
     val context = LocalContext.current
-    return remember {
-        val cache = VideoCache.getInstance(context)
-        val cacheDataSourceFactory = CacheDataSource.Factory()
-            .setCache(cache)
-            .setUpstreamDataSourceFactory(DefaultHttpDataSource.Factory())
-            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+    return remember { initializePlayer(context) }
+}
 
-        val mediaSourceFactory = DefaultMediaSourceFactory(context)
-            .setDataSourceFactory(cacheDataSourceFactory)
+@UnstableApi
+fun initializePlayer(context: Context): ExoPlayer {
+    val cache = VideoCache.getInstance(context)
+    val cacheDataSourceFactory = CacheDataSource.Factory()
+        .setCache(cache)
+        .setUpstreamDataSourceFactory(DefaultHttpDataSource.Factory())
+        .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
 
-        val trackSelector = DefaultTrackSelector(context).apply {
-            parameters = DefaultTrackSelector.Parameters.Builder()
-                .setMaxVideoSize(MAX_VIDEO_WIDTH, MAX_VIDEO_HEIGHT)
-                .setMaxVideoBitrate(MAX_BITRATE)
-                .setForceLowestBitrate(false)
-                .setForceHighestSupportedBitrate(false)
-                .build()
-        }
+    val mediaSourceFactory = DefaultMediaSourceFactory(context)
+        .setDataSourceFactory(cacheDataSourceFactory)
 
-        ExoPlayer.Builder(context)
-            .setMediaSourceFactory(mediaSourceFactory)
-            .setTrackSelector(trackSelector)
-            .setLoadControl(
-                DefaultLoadControl.Builder()
-                    .setPrioritizeTimeOverSizeThresholds(true)
-                    .setBufferDurationsMs(
-                        MIN_BUFFER_MSEC,
-                        MAX_BUFFER_MSEC,
-                        BUFFER_FOR_PLAYBACK_MSEC,
-                        BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MSEC,
-                    )
-                    .build(),
-            )
+    val trackSelector = DefaultTrackSelector(context).apply {
+        parameters = DefaultTrackSelector.Parameters.Builder()
+            .setMaxVideoSize(MAX_VIDEO_WIDTH, MAX_VIDEO_HEIGHT)
+            .setMaxVideoBitrate(MAX_BITRATE)
+            .setForceLowestBitrate(false)
+            .setForceHighestSupportedBitrate(false)
             .build()
     }
+
+    val renderersFactory = DefaultRenderersFactory(context).apply {
+        setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
+    }
+
+    return ExoPlayer.Builder(context)
+        .setMediaSourceFactory(mediaSourceFactory)
+        .setTrackSelector(trackSelector)
+        .setRenderersFactory(renderersFactory)
+        .setLoadControl(
+            DefaultLoadControl.Builder()
+                .setPrioritizeTimeOverSizeThresholds(true)
+                .setBufferDurationsMs(
+                    MIN_BUFFER_MSEC,
+                    MAX_BUFFER_MSEC,
+                    BUFFER_FOR_PLAYBACK_MSEC,
+                    BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MSEC,
+                )
+                .build(),
+        )
+        .build()
 }
