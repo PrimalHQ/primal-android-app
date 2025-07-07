@@ -102,7 +102,7 @@ private fun AutoPlayVideo(
     }
 
     Box(
-        modifier = modifier.clip(AppTheme.shapes.medium),
+        modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
         AndroidView(
@@ -165,7 +165,7 @@ private fun VideoThumbnailImagePreview(
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier.clip(AppTheme.shapes.medium),
+        modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
         SubcomposeAsyncImage(
