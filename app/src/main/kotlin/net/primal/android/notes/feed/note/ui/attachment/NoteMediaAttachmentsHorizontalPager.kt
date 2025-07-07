@@ -43,6 +43,7 @@ fun NoteMediaAttachmentsHorizontalPager(
     modifier: Modifier = Modifier,
     onMediaClick: (MediaClickEvent) -> Unit,
     blossoms: List<String>,
+    couldAutoPlay: Boolean,
     mediaEventUris: List<EventUriUi> = emptyList(),
 ) {
     BoxWithConstraints(modifier = modifier) {
@@ -55,6 +56,7 @@ fun NoteMediaAttachmentsHorizontalPager(
                     mediaEventUris = mediaEventUris,
                     blossoms = blossoms,
                     imageSizeDp = imageSizeDp,
+                    couldAutoPlay = couldAutoPlay,
                     onMediaClick = onMediaClick,
                 )
             }
@@ -129,6 +131,7 @@ private fun MultipleImageGallery(
                             blossoms = blossoms,
                             imageSizeDp = imageSizeDp,
                             allowAutoPlay = false,
+                            couldAutoPlay = false,
                             onClick = { positionMs ->
                                 onMediaClick(
                                     MediaClickEvent(
@@ -193,6 +196,7 @@ private fun ThreeImageGallery(
             blossoms = blossoms,
             imageSizeDp = imageSizeDp,
             allowAutoPlay = false,
+            couldAutoPlay = false,
             onClick = { positionMs ->
                 onMediaClick(
                     MediaClickEvent(
@@ -235,6 +239,7 @@ private fun ThreeImageGallery(
                     blossoms = blossoms,
                     imageSizeDp = imageSizeDp,
                     allowAutoPlay = false,
+                    couldAutoPlay = false,
                     onClick = { positionMs ->
                         onMediaClick(
                             MediaClickEvent(
@@ -289,6 +294,7 @@ private fun TwoImageGallery(
                 blossoms = blossoms,
                 imageSizeDp = imageSizeDp,
                 allowAutoPlay = false,
+                couldAutoPlay = false,
                 onClick = { positionMs ->
                     onMediaClick(
                         MediaClickEvent(
@@ -309,6 +315,7 @@ private fun SingleImageGallery(
     mediaEventUris: List<EventUriUi>,
     blossoms: List<String>,
     imageSizeDp: DpSize,
+    couldAutoPlay: Boolean,
     onMediaClick: (MediaClickEvent) -> Unit,
 ) {
     val mediaEventUri = mediaEventUris.first()
@@ -320,6 +327,7 @@ private fun SingleImageGallery(
         blossoms = blossoms,
         imageSizeDp = imageSizeDp,
         allowAutoPlay = true,
+        couldAutoPlay = couldAutoPlay,
         onClick = { positionMs ->
             onMediaClick(
                 MediaClickEvent(
@@ -339,6 +347,7 @@ private fun NoteMediaAttachment(
     blossoms: List<String>,
     imageSizeDp: DpSize,
     allowAutoPlay: Boolean,
+    couldAutoPlay: Boolean,
     onClick: (positionMs: Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -355,6 +364,7 @@ private fun NoteMediaAttachment(
                     eventUri = mediaEventUri,
                     onVideoClick = { positionMs -> onClick(positionMs) },
                     allowAutoPlay = allowAutoPlay,
+                    couldAutoPlay = couldAutoPlay,
                 )
             }
 
