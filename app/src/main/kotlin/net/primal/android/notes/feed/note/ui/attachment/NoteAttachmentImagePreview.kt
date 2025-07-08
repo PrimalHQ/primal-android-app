@@ -21,6 +21,7 @@ import io.github.fornewid.placeholder.foundation.fade
 import io.github.fornewid.placeholder.material3.placeholder
 import me.saket.telephoto.zoomable.rememberZoomablePeekOverlayState
 import me.saket.telephoto.zoomable.zoomablePeekOverlay
+import net.primal.android.core.compose.PrimalAsyncImage
 import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.events.ui.findNearestOrNull
 import net.primal.android.theme.AppTheme
@@ -49,13 +50,11 @@ fun NoteAttachmentImagePreview(
     val currentUrl = imageUrls.getOrNull(currentUrlIndex)
 
     if (currentUrl != null) {
-        SubcomposeAsyncImage(
+        PrimalAsyncImage(
             model = currentUrl,
             imageLoader = LocalContext.current.imageLoader,
             modifier = modifier.zoomablePeekOverlay(state = rememberZoomablePeekOverlayState()),
-            contentDescription = null,
             contentScale = ContentScale.Crop,
-            loading = { NoteImageLoadingPlaceholder() },
             error = { currentUrlIndex += 1 },
         )
     } else {
